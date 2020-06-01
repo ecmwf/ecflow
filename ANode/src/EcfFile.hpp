@@ -141,8 +141,8 @@ private:
  	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
  	bool extractManual(const std::vector< std::string >& lines, std::vector< std::string >& theManualLines, std::string& errormsg) const;
- 	void removeCommentAndManual();
- 	void remove_nopp_end_tokens();
+
+ 	void remove_comment_manual_and_noop_tokens();
 
  	static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
  	static void dump_expanded_script_file(const std::vector<std::string>& lines); // for DEBUG

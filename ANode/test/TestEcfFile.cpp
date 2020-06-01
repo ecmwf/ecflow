@@ -1462,4 +1462,57 @@ BOOST_AUTO_TEST_CASE( test_include_with_variable_not_defined )
    basic_test_template("test_include_with_variable_not_defined",ecf_file,expected_job_file_contents,""/*ecf_micro*/,false/*expect failure*/);
 }
 
+BOOST_AUTO_TEST_CASE( test_nopp_preserves_contents )
+{
+   string ecf_file;
+   ecf_file += "%include <simple_head.h>\n";
+   ecf_file += "#body\n";
+   ecf_file += "%nopp\n";
+   ecf_file += "%comment\n";
+   ecf_file += "--comment\n";
+   ecf_file += "%end\n";
+   ecf_file += "%manual\n";
+   ecf_file += "--manual\n";
+   ecf_file += "%end\n";
+   ecf_file += "%end\n";
+   ecf_file += "%include <simple_tail.h>\n";
+
+   std::string expected_job_file_contents = "#head.h\n#body\n%comment\n--comment\n%end\n%manual\n--manual\n%end\n#tail.h";
+
+   basic_test_template("test_nopp_preserves_contents",ecf_file,expected_job_file_contents);
+}
+
+BOOST_AUTO_TEST_CASE( test_nopp_preserves_contents2 )
+{
+   string ecf_file;
+   ecf_file += "%include <simple_head.h>\n";
+   ecf_file += "#body\n";
+   ecf_file += "%nopp\n";
+   ecf_file += "%ecfmicro @\n";
+   ecf_file += "%end\n";
+   ecf_file += "%include <simple_tail.h>\n";
+
+   std::string expected_job_file_contents = "#head.h\n#body\n%ecfmicro @\n#tail.h";
+
+   basic_test_template("test_nopp_preserves_contents2",ecf_file,expected_job_file_contents);
+}
+
+BOOST_AUTO_TEST_CASE( test_comment_and_manual_removal )
+{
+   string ecf_file;
+   ecf_file += "%include <simple_head.h>\n";
+   ecf_file += "#body\n";
+   ecf_file += "%comment\n";
+   ecf_file += "--comment\n";
+   ecf_file += "%end\n";
+   ecf_file += "%manual\n";
+   ecf_file += "--manual\n";
+   ecf_file += "%end\n";
+   ecf_file += "%include <simple_tail.h>\n";
+
+   std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+
+   basic_test_template("test_comment_and_manual_removal",ecf_file,expected_job_file_contents);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

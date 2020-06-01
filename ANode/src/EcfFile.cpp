@@ -233,10 +233,10 @@ void EcfFile::pre_process_user_file(std::vector<std::string>& user_edit_file, st
       throw std::runtime_error("EcfFile::pre_process: Failed to pre_process user edit file " + data.error_msg());
    }
 
+   remove_comment_manual_and_noop_tokens();
+
    JobsParam dummy;
    variableSubstitution(dummy);
-   removeCommentAndManual();
-   remove_nopp_end_tokens();
 
    vector_to_string(jobLines_,pre_processed_file);
 }
@@ -370,8 +370,7 @@ const std::string& EcfFile::create_job( JobsParam& jobsParam)
       doCreateUsrFile();
    }
 
-   removeCommentAndManual();
-   remove_nopp_end_tokens();
+   remove_comment_manual_and_noop_tokens();
 
    return doCreateJobFile(jobsParam/* this is only past in for profiling */); // create job on disk
 }
@@ -871,7 +870,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
       // First look for a user variable of name ECF_JOB, otherwise look for
       // the generated variable, hence this should never fail.
       // *This* assumes that:
-      //   a/ if the user has overiden ECF_JOB then it has been specified at the task level
+      //   a/ if the user has overridden ECF_JOB then it has been specified at the task level
       //      Otherwise findParentVariableValue will find the generated ECF_JOB on the task
       //   b/ The value of the user variable has a valid directory paths and job file name
       //   c/ The user will lose the try number.
@@ -1039,163 +1038,134 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
    return true;
 }
 
-
-void EcfFile::removeCommentAndManual()
+void EcfFile::remove_comment_manual_and_noop_tokens()
 {
-   // get the cached ECF_MICRO variable, typically its one char.
-   string ecfMicro = ecfMicroCache_;
+	// preserve *all* lines between %noop and %end
+    // remove all line between %comment and %end | %manual and %end, *provided* they are not embedded in %noop/%end
+	// remove tokens %noop,%end,%ecfmicro and only remove %comment,%manual if they not embedded in %noop/%end
 
-   // We need a stack to properly implement nopp. This is required since we need to pair
-   // the %end, with nopp. i.e need to handle
-   // %nopp
-   // %comment
-   // %end      // this is paired with comment
-   // %end      // This is paired with nopp
-   const int NOPP = 0;
-   const int COMMENT = 1;
-   const int MANUAL = 2;
-   bool nopp = false;
-   bool erase = false;
-   std::vector<int> pp_stack;
+	// get the cached ECF_MICRO variable, typically its one char.
+	string ecfMicro = ecfMicroCache_;
 
-   for(auto i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
+	// We need a stack to properly implement nopp. This is required since we need to pair
+	// the %end, with nopp. i.e need to handle
+	// %nopp       // delete this line
+	// %comment    // preserve
+	// -- comment  // preserve
+	// %end        // preserve , this is paired with comment
+	// blah %blah% // preserve, i.e. don't preprocess
+	// %end        // delete this line, This is paired with nopp
+	//
+	// For the following
+	// %comment    // delete this line
+	// -- comment  // delete this line
+	// %end        // delete this line
 
-       // take into account micro char during  removal of comment/manual
-       string::size_type ecfmicro_pos = (*i).find(ecfMicro);
-       if (ecfmicro_pos == 0) {
+	const int NOPP = 0;
+	const int COMMENT = 1;
+	const int MANUAL = 2;
+	std::vector<int> pp_stack;
+	bool nopp = false;
+	bool manual_erase = false;
+	bool comment_erase = false;
 
-          // We can not remove comments/manuals between %nopp/%end
-          if ((*i).find(T_MANUAL)  == 1) {
-             pp_stack.push_back(MANUAL);
-             if (nopp) continue;
+	for(auto i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
 
-             // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i-- );  // remove  %manual
-             if (erase) {
-                std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded manuals are not allowed in " << script_path_or_cmd_;
-                throw std::runtime_error( ss.str() );
-             }
-             erase = true;
-             continue;
-          }
+		string::size_type ecfmicro_pos = (*i).find(ecfMicro);
+		if ( ecfmicro_pos == 0) {
+			if ((*i).find(T_MANUAL) == 1) {
+				if (manual_erase) {
+					std::stringstream ss; ss << "EcfFile::remove_comment_manual_and_noop_tokens: Embedded manuals are not allowed in " << script_path_or_cmd_;
+					throw std::runtime_error( ss.str() );
+				}
 
-          if ((*i).find(T_COMMENT) == 1) {
-             pp_stack.push_back(COMMENT);
-             if (nopp) continue;
+				pp_stack.push_back(MANUAL);
+	            if (nopp) continue;      // preserve
+				jobLines_.erase( i-- );  // remove  %manual
+				manual_erase = true;
+				continue;
+			}
+			if ((*i).find(T_COMMENT) == 1) {
+				if (comment_erase) {
+					std::stringstream ss; ss << "EcfFile::remove_comment_manual_and_noop_tokens: Embedded comments are not allowed in " << script_path_or_cmd_;
+					throw std::runtime_error( ss.str() );
+				}
 
-             // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i-- ); // remove %comment
-             if (erase) {
-                std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded comments are not allowed in " << script_path_or_cmd_;
-                throw std::runtime_error( ss.str() );
-             }
-             erase = true;
-             continue;
-          }
+				pp_stack.push_back(COMMENT);
+	            if (nopp) continue;     // preserve
+				jobLines_.erase( i-- ); // remove %comment
+				comment_erase = true;
+				continue;
+			}
+			if ((*i).find(T_NOOP) == 1) {
+				if (nopp) {
+					std::stringstream ss; ss << "Embedded nopp are not allowed " << script_path_or_cmd_;
+					throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed " + ss.str());
+				}
 
-          if ((*i).find(T_NOOP) == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
+				pp_stack.push_back(NOPP); nopp = true;
+				jobLines_.erase( i-- );      // remove %nopp
+				continue;
+			}
+			if ((*i).find(T_END) == 1) {
+				if (pp_stack.empty()) throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed unpaired %end");
+				int last_directive = pp_stack.back(); pp_stack.pop_back();
+				if (last_directive == NOPP) {
+					nopp = false;
+					jobLines_.erase( i-- );        // remove %end associated with %nopp
+					continue;
+				}
+				else if (last_directive == MANUAL) {
+					manual_erase = false;
+		            if (nopp) continue;     // preserve
+					jobLines_.erase( i-- ); // remove %end associated with %manual
+					continue;
+				}
+				else if (last_directive == COMMENT) {
+					comment_erase = false;
+		            if (nopp) continue;      // preserve
+					jobLines_.erase( i-- );  // remove %end associated with %comment
+					continue;
+				}
+				throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed unpaired %end does not match noop,comment or manual");
+			}
+			if (!nopp && (*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
 
-          if ((*i).find(T_END) == 1) {
-             if (pp_stack.empty()) throw std::runtime_error("EcfFile::removeCommentAndManual: failed  unpaired %end");
-             int last_directive = pp_stack.back(); pp_stack.pop_back();
-             if (last_directive == NOPP) nopp = false;
-             else {
-//                cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-                if (erase) {
-                   jobLines_.erase( i-- ); // remove %end associated with %comment and %manual
-                   erase = false;
-                }
-             }
-             continue;
-          }
+				std::string error_msg;
+				if (!extract_ecfmicro((*i),ecfMicro,error_msg)) {
+					throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed : " + error_msg);
+				}
+				jobLines_.erase( i-- );                // remove %ecfmicro &
+				continue;
+			}
+		}
 
-          if (!nopp && (*i).find(T_ECFMICRO) == 1) {
-             // override ecfMicro char
-             std::string error_msg;
-             if (!extract_ecfmicro((*i),ecfMicro,error_msg)) {
-                throw std::runtime_error("EcfFile::get_used_variables: failed : " + error_msg);
-             }
-          }
-       }
-       if ( nopp ) continue;
+		// *** For noop we only remove the tokens(%noop,%end) *NOT* the lines between. noop means no pre-processing, keep the lines as is.
+		if (nopp) continue;
 
-       //  remove all line between %comment and %end | %manual and %end
-       if (erase) {
-          jobLines_.erase( i-- );
-       }
-   }
+		if (manual_erase || comment_erase) {
+		    // remove all line between %comment and %end | %manual and %end
+			jobLines_.erase( i-- );
+		}
+	}
 
-   if (erase) {
-      std::stringstream ss;
-      ss << "Unterminated comment/manual. Matching 'end' is missing, in " << script_path_or_cmd_;
-      throw std::runtime_error("EcfFile::removeCommentAndManual: failed " + ss.str());
-   }
+	if (nopp) {
+		std::stringstream ss;
+		ss << "Unterminated nopp. Matching 'end' is missing, in " << script_path_or_cmd_;
+		throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed " + ss.str());
+	}
+	if (manual_erase) {
+		std::stringstream ss;
+		ss << "Unterminated manual. Matching 'end' is missing, in " << script_path_or_cmd_;
+		throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed " + ss.str());
+	}
+	if (comment_erase) {
+		std::stringstream ss;
+		ss << "Unterminated comment. Matching 'end' is missing, in " << script_path_or_cmd_;
+		throw std::runtime_error("EcfFile::remove_comment_manual_and_noop_tokens: failed " + ss.str());
+	}
 }
 
-void EcfFile::remove_nopp_end_tokens()
-{
-   // get the cached ECF_MICRO variable, typically its one char.
-   string ecfMicro = ecfMicroCache_;
-
-   // We need a stack to properly implement nopp. This is required since we need to pair
-   // the %end, with nopp. i.e need to handle
-   // %nopp
-   // %comment
-   // %end      // this is paired with comment **** this should stay ****
-   // %end      // This is paired with nopp    **** this should be deleted ****
-   const int NOPP = 0;
-   const int COMMENT = 1;
-   const int MANUAL = 2;
-   std::vector<int> pp_stack;
-   bool nopp = false;
-   bool erase = false;
-
-   for(auto i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
-
-      string::size_type ecfmicro_pos = (*i).find(ecfMicro);
-      if ( ecfmicro_pos == 0) {
-
-          if ((*i).find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
-          if ((*i).find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
-          if ((*i).find(T_END) == 1) {
-             if (pp_stack.empty()) throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed  unpaired %end");
-             int last_directive = pp_stack.back(); pp_stack.pop_back();
-             if (last_directive == NOPP) {
-                nopp = false;
-                jobLines_.erase( i-- );        // remove %end associated with %nopp
-                erase = false;
-             }
-             continue;
-          }
-          if ((*i).find(T_NOOP) == 1) {
-             pp_stack.push_back(NOPP); nopp = true;
-             jobLines_.erase( i-- );      // remove %nopp
-              if (erase) {
-                 std::stringstream ss; ss << "Embedded nopp are not allowed " << script_path_or_cmd_;
-                 throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
-              }
-              erase = true;
-              continue;
-          }
-          if (!nopp && (*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
-
-             // override ecfMicro char
-             std::string error_msg;
-             if (!extract_ecfmicro((*i),ecfMicro,error_msg)) {
-                throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed : " + error_msg);
-             }
-             jobLines_.erase( i-- );      // remove %ecfmicro &                    // remove %ecfmicro &
-             continue;
-          }
-      }
-   }
-
-   if (erase) {
-      std::stringstream ss;
-      ss << "Unterminated nopp. Matching 'end' is missing, in " << script_path_or_cmd_;
-      throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
-   }
-}
 
 int EcfFile::countEcfMicro(const std::string& line, const std::string& ecfMicro)
 {
