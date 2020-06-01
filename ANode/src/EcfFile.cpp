@@ -1234,12 +1234,11 @@ PreProcessor::~PreProcessor()= default;
 
 bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
 {
+   // preProcess is called recursively, i.e for processing includes
    // Uses a Depth first traversal
-   size_t script_lines_size = script_lines.size();
-   for(size_t i=0; i < script_lines_size; ++i) {
-      const std::string& script_line = script_lines[i];
-      jobLines_.push_back(script_line);    // copy line, C++11 use std::move()
-      preProcess_line(script_line);
+   for(auto& line: script_lines) {
+      jobLines_.emplace_back(std::move(line));    
+      preProcess_line(jobLines_.back());
       if (!error_msg_.empty()) return false;
    }
 
@@ -1260,19 +1259,17 @@ void PreProcessor::preProcess_line(const std::string& script_line)
    string::size_type ecfmicro_pos = script_line.find(ecf_micro_);
    if (ecfmicro_pos == string::npos) return;
 
-   if (!nopp_ && !comment_ && !manual_) {
-      // For variable substitution '%' can occur anywhere on the line.
-      // Check for Mismatched micro i.e %FRED or %FRED%%
-      if (ecfmicro_pos != 0) {
-         int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
-         if (ecfMicroCount % 2 != 0 ) {
-            std::stringstream ss;
-            ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << script_line << "' in " << ecfile_->script_path_or_cmd_;
-            error_msg_ += ss.str();
-            ecfile_->dump_expanded_script_file(jobLines_);
-            return;
-         }
-      }
+   // Check for Mismatched micro i.e %FRED or %FRED%%
+   if (ecfmicro_pos != 0 && !nopp_ && !comment_ && !manual_) {
+	   // For variable substitution '%' can occur anywhere on the line.
+	   int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
+	   if (ecfMicroCount % 2 != 0 ) {
+		   std::stringstream ss;
+		   ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << script_line << "' in " << ecfile_->script_path_or_cmd_;
+		   error_msg_ += ss.str();
+		   ecfile_->dump_expanded_script_file(jobLines_);
+		   return;
+	   }
    }
 
    // %ecfmicro,%manual,%comment,%end,%include,%includenopp,%includeonce it must be the very *first* character
