@@ -1238,7 +1238,7 @@ bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
    // Uses a Depth first traversal
    for(auto& line: script_lines) {
       jobLines_.emplace_back(std::move(line));    
-      preProcess_line(jobLines_.back());
+      preProcess_line();
       if (!error_msg_.empty()) return false;
    }
 
@@ -1252,8 +1252,10 @@ bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
    return true;
 }
 
-void PreProcessor::preProcess_line(const std::string& script_line)
+void PreProcessor::preProcess_line()
 {
+	const std::string& script_line = jobLines_.back();
+
    // For variable substitution % can occur anywhere on the line, for pre -processing of
    // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
    string::size_type ecfmicro_pos = script_line.find(ecf_micro_);
@@ -1357,79 +1359,83 @@ void PreProcessor::preProcess_line(const std::string& script_line)
    }
 
    // we only end up here if we have includes
-   preProcess_includes(script_line);
+   preProcess_includes();
 }
 
-void PreProcessor::preProcess_includes(const std::string& script_line)
+void PreProcessor::preProcess_includes()
 {
-   // =================================================================================
-   // order is *IMPORTANT*, hence search for includenopp, includeonce, include
-   // Otherwise string::find() of include will match includenopp and includeonce
-   // =================================================================================
-   bool fnd_include = false;
-   bool fnd_includeonce = false;
-   bool fnd_includenopp = (script_line.find(T_INCLUDENOPP) == 1);
-   if (!fnd_includenopp) {
-      fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
-      if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
-   }
-   if (!fnd_include && !fnd_includenopp && !fnd_includeonce) {
-      if (script_line.find("include") == 1) error_msg_ += ", unrecognised or miss-spelled include at: '" + script_line + "'";
-      return;
-   }
+   std::string includedFile;
+   bool fnd_includenopp= false;
+   {
+	   // Take note: when we call jobLines_.pop_back() below, script_line will be invalidated
+	   const std::string& script_line = jobLines_.back();
 
+	   // =================================================================================
+	   // order is *IMPORTANT*, hence search for includenopp, includeonce, include
+	   // Otherwise string::find() of include will match includenopp and includeonce
+	   // =================================================================================
+       bool fnd_includeonce = false;
+	   bool fnd_include = false;
+	   fnd_includenopp = (script_line.find(T_INCLUDENOPP) == 1);
+	   if (!fnd_includenopp) {
+		   fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
+		   if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
+	   }
+	   if (!fnd_include && !fnd_includenopp && !fnd_includeonce) {
+		   if (script_line.find("include") == 1) error_msg_ += ", unrecognised or miss-spelled include at: '" + script_line + "'";
+		   return;
+	   }
 
-   std::string the_include_token;
-   if (!Str::get_token(script_line,1,the_include_token)) {
-      error_msg_+= "Could not extract include token at : " + script_line;
-      return;
-   }
+	   std::string the_include_token;
+	   if (!Str::get_token(script_line,1,the_include_token)) {
+		   error_msg_+= "Could not extract include token at : " + script_line;
+		   return;
+	   }
 
 #ifdef DEBUG_PRE_PROCESS_INCLUDES
-   // Output the includes for debug purposes. Will appear in preProcess.ecf
-   // Note: Will interfere with diff
-   jobLines_.push_back("========== include of " + the_include_token  + " ===========================");
+	   // Output the includes for debug purposes. Will appear in preProcess.ecf
+	   // Note: Will interfere with diff
+	   jobLines_.push_back("========== include of " + the_include_token  + " ===========================");
 #endif
 
-   std::string includedFile = getIncludedFilePath(the_include_token, script_line);
-   if (!error_msg_.empty()) return;
+	   includedFile = getIncludedFilePath(the_include_token, script_line);
+	   if (!error_msg_.empty()) return;
 
 
-   // remove %include from the job lines, since were going to expand or ignore it.
-   // **** input script_line life_time is tied, jobLines_.back(), hence jobLines_.pop_back() will invalidate script_lines
-   // **** Hence don't use script_line after this point.
-   jobLines_.pop_back();
+	   // remove %include from the job lines, since were going to expand or ignore it.
+	   // **** input script_line life_time is tied, jobLines_.back(), hence jobLines_.pop_back() will invalidate script_lines
+	   // **** Hence don't use script_line after this point.
+	   jobLines_.pop_back();
 
 
-   // handle %includeonce
-   if (fnd_includeonce) {
-      if (std::find(include_once_set_.begin(),include_once_set_.end(),includedFile) != include_once_set_.end() ) {
-         return; // Already processed once ignore
-      }
-      include_once_set_.push_back(includedFile);
+	   // handle %includeonce
+	   if (fnd_includeonce) {
+		   if (std::find(include_once_set_.begin(),include_once_set_.end(),includedFile) != include_once_set_.end() ) {
+			   return; // Already processed once ignore
+		   }
+		   include_once_set_.push_back(includedFile);
+	   }
    }
 
 #ifdef DEBUG_PRE_PROCESS
    cout << "EcfFile::preProcess processing " << includedFile  << "\n";
 #endif
 
-
    // Check for recursive includes. some includes like %include <endt.h>
    // are included many times, but the include is not recursive.
    // To get round this will use a simple count.
    // replace map with vector
    bool fnd = false;
-   size_t globalIncludedFileSet_size = globalIncludedFileSet_.size();
-   for(size_t i = 0; i < globalIncludedFileSet_size; ++i) {
-      if (globalIncludedFileSet_[i].first == includedFile) {
+   for(auto& p:  globalIncludedFileSet_) {
+      if (p.first == includedFile) {
          fnd = true;
-         if ( globalIncludedFileSet_[i].second > 100) {
+         if ( p.second > 100) {
             std::stringstream ss;
             ss << "Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
             error_msg_ += ss.str();
             return;
          }
-         globalIncludedFileSet_[i].second++;
+         p.second++;
          break;
       }
    }

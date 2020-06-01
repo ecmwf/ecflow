@@ -193,8 +193,8 @@ private:
    // include pre-processing on the included file.
    // Note: include directives _in_ manual/comment should he handled.
    //       only include directives in %nopp/%end are ignored
-   void preProcess_line(const std::string& script_line );
-   void preProcess_includes(const std::string& script_line);
+   void preProcess_line();
+   void preProcess_includes();
    std::string getIncludedFilePath( const std::string& include, const std::string& line);
 
 private:
