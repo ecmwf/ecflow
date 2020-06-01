@@ -115,13 +115,10 @@ bool ServerState::compare(const ServerState& rhs) const
       if (Ecf::debug_equality()) {
          std::cout << "ServerState::compare user_variables_ != rhs.user_variables_\n";
          std::cout << "user_variables_:\n";
-         for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=user_variables_.end(); ++i) {
-            std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
-         }
+         for(const auto& u: user_variables_)     std::cout << "   " << u.name() << " " << u.theValue() << "\n";
+
          std::cout << "rhs.user_variables_:\n";
-         for(std::vector<Variable>::const_iterator i = rhs.user_variables_.begin(); i!=rhs.user_variables_.end(); ++i) {
-            std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
-         }
+         for(const auto& u: rhs.user_variables_) std::cout << "   " << u.name() << " " << u.theValue() << "\n";
       }
 #endif
       return false;
@@ -133,13 +130,10 @@ bool ServerState::compare(const ServerState& rhs) const
       if (Ecf::debug_equality()) {
          std::cout << "ServerState::compare server_variables_ != rhs.server_variables_\n";
          std::cout << "server_variables_:\n";
-         for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=server_variables_.end(); ++i) {
-            std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
-         }
+         for(const auto& s: server_variables_)     std::cout << "   " << s.name() << " " << s.theValue() << "\n";
+
          std::cout << "rhs.server_variables_:\n";
-         for(std::vector<Variable>::const_iterator i = rhs.server_variables_.begin(); i!=rhs.server_variables_.end(); ++i) {
-            std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
-         }
+         for(const auto& s: rhs.server_variables_) std::cout << "   " << s.name() << " " << s.theValue() << "\n";
       }
 #endif
       return false;
@@ -160,19 +154,15 @@ void ServerState::sort_variables()
 // server variable can NOT be modified or deleted, only overridden
 void ServerState::add_or_update_server_variables( const NameValueVec& env)
 {
-   // n2 could use map to speed things up.
-   NameValueVec::const_iterator i;
-   auto theEnd = env.end();
-   for(i = env.begin(); i!=theEnd; ++i) {
-      add_or_update_server_variable((*i).first, (*i).second);
+   for(const auto& p: env) {
+      add_or_update_server_variable(p.first, p.second);
    }
 }
 void ServerState::add_or_update_server_variable( const std::string& name, const std::string& value)
 {
-   auto var_end = server_variables_.end();
-   for(auto i = server_variables_.begin(); i!=var_end; ++i) {
-      if ((*i).name() == name) {
-         (*i).set_value( value );
+   for(auto& s: server_variables_) {
+      if (s.name() == name) {
+         s.set_value( value );
 //         std::cout << "   Server Variables: Updating " << name << "   " << value << "\n";
          return;
       }
@@ -201,28 +191,23 @@ void ServerState::delete_server_variable( const std::string& var)
 
 void ServerState::add_or_update_user_variables( const NameValueVec& env)
 {
-   // n2 could use map to speed things up.
-   NameValueVec::const_iterator i;
-   auto theEnd = env.end();
-   for(i = env.begin(); i!=theEnd; ++i) {
-      add_or_update_user_variables((*i).first, (*i).second);
+   for(const auto& p: env) {
+      add_or_update_user_variables(p.first, p.second);
    }
 }
 
 void ServerState::add_or_update_user_variables( const std::vector<Variable>& env)
 {
-   auto var_end = env.end();
-   for(auto i = env.begin(); i!=var_end; ++i) {
-      add_or_update_user_variables( (*i).name(), (*i).theValue());
+   for(const auto& v : env) {
+      add_or_update_user_variables(v.name(),v.theValue());
    }
 }
 
 void ServerState::add_or_update_user_variables( const std::string& name, const std::string& value)
 {
-   auto var_end = user_variables_.end();
-   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
-      if ((*i).name() == name) {
-         (*i).set_value( value );
+   for(auto& u: user_variables_) {
+      if (u.name() == name) {
+         u.set_value( value );
          variable_state_change_no_ = Ecf::incr_state_change_no();
 //         std::cout << "   ServerState::add_or_update_user_variables: Updating " << name << "   " << value << "\n";
          return;
@@ -255,10 +240,9 @@ void ServerState::delete_user_variable( const std::string& var)
 
 bool ServerState::find_user_variable(const std::string& name,std::string& value) const
 {
-   auto user_var_end = user_variables_.end();
-   for(auto i = user_variables_.begin(); i!=user_var_end; ++i) {
-      if ((*i).name() == name) {
-         value = (*i).theValue();
+   for(const auto& u: user_variables_) {
+      if (u.name() == name) {
+         value = u.theValue();
          return true;
       }
    }
@@ -267,24 +251,20 @@ bool ServerState::find_user_variable(const std::string& name,std::string& value)
 
 const std::string& ServerState::find_variable(const std::string& theVarName) const
 {
-   // SEARCH USER variables FIRST
-   auto user_var_end = user_variables_.end();
-   for(auto i = user_variables_.begin(); i!=user_var_end; ++i) {
-      if ((*i).name() == theVarName) {
-//			cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
- 			return (*i).theValue();
+	// SEARCH USER variables FIRST
+	for(const auto& u: user_variables_) {
+		if (u.name() == theVarName) {
+			return u.theValue();
 		}
 	}
 
-   // NOW search server variables
-   auto ser_var_end = server_variables_.end();
-   for(auto i = server_variables_.begin(); i!=ser_var_end; ++i) {
-      if ((*i).name() == theVarName) {
-//       cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
-         LOG_ASSERT(!(*i).theValue().empty(),"");
-         return (*i).theValue();
-      }
-   }
+	// NOW search server variables
+	for(const auto& s: server_variables_ ) {
+		if (s.name() == theVarName) {
+			LOG_ASSERT(!s.theValue().empty(),"");
+			return s.theValue();
+		}
+	}
 
 //	cerr << "FAILED to FIND '" << theVarName << "'\n";
 	return Str::EMPTY();
@@ -293,21 +273,19 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
 const Variable& ServerState::findVariable(const std::string& name) const
 {
    // SEARCH USER variables FIRST
-   auto var_end = user_variables_.end();
-   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
-      if ((*i).name() == name) {
-         // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
-         return (*i);
+   for(const auto& u: user_variables_) {
+      if (u.name() == name) {
+         // if (u.theValue().empty() )  std::cout << u.name() << " has a empty value\n";
+         return u;
       }
    }
 
    // NOW search server variables
-   auto ser_var_end = server_variables_.end();
-   for(auto i = server_variables_.begin(); i!=ser_var_end; ++i) {
-      if ((*i).name() == name) {
-         LOG_ASSERT(!(*i).theValue().empty(),"");
-         // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
-         return (*i);
+   for(const auto& s: server_variables_) {
+      if (s.name() == name) {
+         LOG_ASSERT(!s.theValue().empty(),"");
+         // if (s.theValue().empty() )  std::cout << s.name() << " has a empty value\n";
+         return s;
       }
    }
 
@@ -318,15 +296,13 @@ const Variable& ServerState::findVariable(const std::string& name) const
 bool ServerState::variable_exists(const std::string& name) const
 {
    // SEARCH USER variables FIRST
-   auto var_end = user_variables_.end();
-   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
-      if ((*i).name() == name) return true;
+   for(const auto& u: user_variables_) {
+      if (u.name() == name) return true;
    }
 
    // NOW search server variables
-   auto ser_var_end = server_variables_.end();
-   for(auto i = server_variables_.begin(); i!=ser_var_end; ++i) {
-      if ((*i).name() == name) return true;
+   for(const auto& s: server_variables_) {
+      if (s.name() == name) return true;
    }
 
    return false;
