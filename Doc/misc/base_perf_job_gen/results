@@ -62,3 +62,25 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
          1,055,192      LLC-load-misses           #    1.21% of all LL-cache hits     ( +-  5.56% )  (37.50%)
 
        2.647587094 seconds time elapsed                                          ( +-  2.27% )
+       
+perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+ Performance counter stats for 'Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
+
+       2569.686692      task-clock (msec)         #    0.997 CPUs utilized            ( +-  0.99% )
+                71      context-switches          #    0.028 K/sec                    ( +- 21.34% )
+                 0      cpu-migrations            #    0.000 K/sec                    ( +- 66.67% )
+             9,658      page-faults               #    0.004 M/sec                    ( +-  0.00% )
+     9,868,102,965      cycles                    #    3.840 GHz                      ( +-  1.04% )  (49.95%)
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
+    12,801,757,236      instructions              #    1.30  insns per cycle          ( +-  0.08% )  (62.50%)
+     3,210,290,124      branches                  # 1249.292 M/sec                    ( +-  0.05% )  (62.52%)
+       122,763,538      branch-misses             #    3.82% of all branches          ( +-  0.23% )  (62.58%)
+     3,061,292,518      L1-dcache-loads           # 1191.310 M/sec                    ( +-  0.09% )  (62.24%)
+       274,899,137      L1-dcache-load-misses     #    8.98% of all L1-dcache hits    ( +-  0.31% )  (24.99%)
+        88,426,942      LLC-loads                 #   34.412 M/sec                    ( +-  0.98% )  (25.02%)
+           998,813      LLC-load-misses           #    1.13% of all LL-cache hits     ( +-  4.56% )  (37.47%)
+
+       2.576901973 seconds time elapsed                                          ( +-  0.97% )
+      
+       
