@@ -1378,8 +1378,6 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
       return;
    }
 
-   // remove %include from the job lines, since were going to expand or ignore it.
-   jobLines_.pop_back();
 
    std::string the_include_token;
    if (!Str::get_token(script_line,1,the_include_token)) {
@@ -1395,6 +1393,13 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
 
    std::string includedFile = getIncludedFilePath(the_include_token, script_line);
    if (!error_msg_.empty()) return;
+
+
+   // remove %include from the job lines, since were going to expand or ignore it.
+   // **** input script_line life_time is tied, jobLines_.back(), hence jobLines_.pop_back() will invalidate script_lines
+   // **** Hence don't use script_line after this point.
+   jobLines_.pop_back();
+
 
    // handle %includeonce
    if (fnd_includeonce) {
