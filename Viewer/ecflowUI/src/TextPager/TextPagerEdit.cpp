@@ -743,7 +743,7 @@ QRect TextPagerEdit::cursorRect(const TextPagerCursor &textCursor) const
         //if line is empty line.cursorToX() crashes. A qt bug?
         if(line.isValid()) {
         	qreal x = line.cursorToX(offset);
-        	return {x, line.y(), d->cursorWidth, line.height()};
+        	return { static_cast<int>(x), static_cast<int>(line.y()), d->cursorWidth, static_cast<int>(line.height()) };
         }
     }
     return {};
