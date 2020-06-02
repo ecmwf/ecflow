@@ -97,13 +97,6 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
-   elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
-   elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
-   elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
-   elif [[ "$1" = sys_install ]] ; then sys_install=$1 ;
-   elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
-   elif [[ "$1" = log ]]   ; then log_arg=$1 ;
-   elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = clang_tidy ]] ; then 
       clang_tidy_arg=$1 ;
       shift
@@ -112,6 +105,13 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break      
+   elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
+   elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
+   elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
+   elif [[ "$1" = sys_install ]] ; then sys_install=$1 ;
+   elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
+   elif [[ "$1" = log ]]   ; then log_arg=$1 ;
+   elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
    elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
@@ -298,16 +298,23 @@ if [[ $sys_install = sys_install ]] ; then
 fi
 
 # =======================================================================================
-# Change directory
+# Change directory to build directory
 #
 workspace=$(pwd)/..
 
-if [[ $clean_arg = clean ]] ; then
-	rm -rf ../bdir5/$mode_arg/ecflow
+build_dir_root=../bdir
+
+# separate build dir for clang tidy, so we can check fixes
+if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
+    build_dir_root=../bdir_clang
 fi
 
-mkdir -p ../bdir5/$mode_arg/ecflow
-cd ../bdir5/$mode_arg/ecflow
+if [[ $clean_arg = clean ]] ; then
+	rm -rf $build_dir_root/$mode_arg/ecflow
+fi
+
+mkdir -p $build_dir_root/$mode_arg/ecflow
+cd $build_dir_root/$mode_arg/ecflow
 
 # =============================================================================================
 # ctest
