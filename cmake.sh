@@ -64,6 +64,7 @@ test_arg=
 test_safe_arg=
 clang_arg=
 clang_tidy_arg=
+clang_tidy_args=
 intel_arg=
 tsan_arg=
 mode_arg=release
@@ -103,7 +104,14 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
-   elif [[ "$1" = clang_tidy ]] ; then clang_tidy_arg=$1 ;
+   elif [[ "$1" = clang_tidy ]] ; then 
+      clang_tidy_arg=$1 ;
+      shift
+      while [[ "$#" != 0 ]] ; do
+         clang_tidy_args="$clang_tidy_args $1"
+         shift
+      done
+      break      
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
    elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
@@ -425,8 +433,10 @@ $ecbuild $source_dir \
 # export PATH=/tmp/$USER/opt/qt5/bin:$PATH
 
 if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
-    python $WK/build_scripts/run-clang-tidy.py
+    python $WK/build_scripts/run-clang-tidy.py $clang_tidy_args
+    exit 0
 fi
+
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
 	$make_arg 

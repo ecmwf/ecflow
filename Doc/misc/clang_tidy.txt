@@ -1,0 +1,81 @@
+Clang Tidy
+  Here at ECMWF we have many projects built with legacy c++. A lot of this code base was written using older c++98/03 compilers. With GNU 6.3.0 and clang 6.0 the default has now shifted to use C++14.
+  C++11 added a significant amount of new C++ language features which  still aren’t used to their full extent. While C++11 is now several years old already. The challenge now is how do you refactor the old code base to use the latest features.
+  To do this manually can be daunting, to do it correctly even more challenging.
+  Clang-Tidy is a clang-based C++ linter tool which provides a shell executable called clang-tidy as the main entry point.
+  The clang-tidy is developed by clang community. It can can be used to lint your c++ code, but also to refactor it. This refactoring transforms your code to use c++11 features. ( Note: The clang-tidy linter is available  for use with metabuilder)
+  Additionally new fix/refactor are added over time. So its worthwhile periodically checking the latest offering.
+
+
+Introduction
+  To run clang tidy on a individual file we would call:
+  module unload gnu
+  module load clang/9.0.1
+  clang-tidy my_test.cpp -- -I/my/includes -DMY_DEFINES ...
+
+  This will produce warnings/notes in the same way that the compiler would.
+  To find the list of available refactoring option we can use:
+
+module unload gnu
+module load clang/9.0.1
+clang-tidy --list-checks -checks='*' | grep "modernize"
+    modernize-avoid-bind
+    modernize-deprecated-headers
+    modernize-loop-convert
+    modernize-make-shared
+    modernize-make-unique
+    modernize-pass-by-value
+    modernize-raw-string-literal
+    modernize-redundant-void-arg
+    modernize-replace-auto-ptr
+    modernize-replace-random-shuffle
+    modernize-return-braced-init-list
+    modernize-shrink-to-fit
+    modernize-unary-static-assert
+    modernize-use-auto
+    modernize-use-bool-literals
+    modernize-use-default-member-init
+    modernize-use-emplace
+    modernize-use-equals-default
+    modernize-use-equals-delete
+    modernize-use-noexcept
+    modernize-use-nullptr
+    modernize-use-override
+    modernize-use-transparent-functors
+    modernize-use-using
+    
+To refactor the code we would use  -fix.  Here we use 'modernize-use-override' to add the c++11 override feature
+clang-tidy -checks='modernize-use-override' -fix my_test.cpp -- -std=c++11
+However to individually list each source file  is not feasible for a large code base.
+
+Apply clang-tidy to a project
+- To refactor the whole project, we need to create a compiler command database which lists all the files, with the correct includes. 
+  This can be done very simply using CMAKE. Just add the following CMAKE variable to your build step
+
+  cd <my-project>
+  mkdir build
+  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+  This will produce a file called compile_commands.json
+
+- Next we need download a python script that will be used drive the refactoring and take advantage of compiler database to refactor the whole project. The python file is called run-clang-tidy.py. It is highly recommended to use run-clang-tidy.py to run clang-tidy on a whole project, since it’ll run the tool multiple times in parallel and makes sure concurrent executions don’t interfere with each other (e.g. by avoiding modifying a shared header in parallel and in turn generating broken code)
+
+- Once we have the script and the json file we can check and fix the whole project using:
+  module unload gnu
+  module load clang/9.0.1
+  cd my_build_dir
+ 
+  # The parameter -header-filter=’.*’ makes sure clang-tidy actually refactors code in the headers being consumed in the translation unit
+  # The parameter checks=’-*,…’ makes sure all default checks are disabled.
+  run-clang-tidy.py -header-filter='.*' -checks='-*,modernize-use-override' -fix
+
+  Not all checkers of clang-tidy actually carry fix-its, but the ones starting with modernize all do.
+  You can use fix-its from multiple checkers at the same time 
+  run-clang-tidy.py -header-filter='.*' -checks='-*,modernize-use-override,modernize-use-auto' -fix -j8     # run 8 tidy instances in parallel
+  Note that the fixes are only applied in once run-clang-tidy has finished. The script will only record the changes to-be-performed and applies them all at once at the end.
+
+Issues/advice
+  Clang-tidy has been used to successfully convert ecflow 5.0.0 to use  C++11 features.
+  There is a mechanism to refactor all the change in one go, but I avoid this so that I could see the effect of each change. Also to recompile and run my tests to check for any regressions.
+  The only problematic refactor was:  modernize-use-default-member-init    this did the bulk of the work, but the resulting fix did not compile. So I had to manually fix the changes.
+  I also did not apply  modernize-pass-by-value, since this requires careful evaluation dependent on use case.
+  If you use third party C++ libs , then clang tidy will refactor those headers as well, so make sure these files are read only.

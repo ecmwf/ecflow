@@ -9,22 +9,28 @@
 #
 #===------------------------------------------------------------------------===#
 # FIXME: Integrate with clang-tidy-diff.py
+# NOTE: Original in: https://github.com/llvm-mirror/clang-tools-extra/blob/master/clang-tidy/tool/run-clang-tidy.py
 
 """
 Parallel clang-tidy runner
 ==========================
+
 Runs clang-tidy over all files in a compilation database. Requires clang-tidy
 and clang-apply-replacements in $PATH.
+
 Example invocations.
 - Run clang-tidy on all files in the current working directory with a default
   set of checks and show warnings in the cpp files and all project headers.
     run-clang-tidy.py $PWD
+
 - Fix all header guards.
     run-clang-tidy.py -fix -checks=-*,llvm-header-guard
+
 - Fix all header guards included from clang-tidy and header guards
   for clang-tidy headers.
     run-clang-tidy.py -fix -checks=-*,llvm-header-guard extra/clang-tidy \
                       -header-filter=extra/clang-tidy
+
 Compilation database setup:
 http://clang.llvm.org/docs/HowToSetupToolingForLLVM.html
 """
@@ -306,5 +312,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-
-  
