@@ -246,7 +246,7 @@ QModelIndex TimelineInfoModel::index( int row, int column, const QModelIndex & p
 {
     if(!hasData() || row < 0 || column < 0)
     {
-        return QModelIndex();
+        return {};
     }
 
     //When parent is the root this index refers to a node or server
@@ -370,7 +370,7 @@ void TimelineInfoWidget::createSummary()
 
     s+="<table width=\'100%\'>";
 
-    s+="<tr><td class=\'title\' align=\'center\' colspan=\'2\' bgcolor=\'"  + QColor(238,238,238).name() +
+    s+=R"(<tr><td class='title' align='center' colspan='2' bgcolor=')"  + QColor(238,238,238).name() +
             "\'><b>Statistics for the whole log period</b></td></tr>";
 
     createSummary(s,VNState::find("active"));
@@ -398,7 +398,7 @@ void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
     if(num <=0)
         return;
 
-    txt+="<tr><td class=\'title\' bgcolor=\'" + state->colour().name() + "\' align=\'center\' colspan=\'2\' >" +
+    txt+=R"(<tr><td class='title' bgcolor=')" + state->colour().name() + R"(' align='center' colspan='2' >)" +
             Viewer::formatText(state->label(),state->fontColour()) + "</td></tr>";
 
     txt+=Viewer::formatTableRow("Number",QString::number(num),true);
@@ -414,7 +414,7 @@ void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
         QBuffer buffer(&byteArray);
         pix.save(&buffer, "PNG");
 
-        txt+="<tr><td align=\'center\' colspan=\'2\'><img src=\"data:image/png;base64," +
+        txt+=R"(<tr><td align='center' colspan='2'><img src="data:image/png;base64,)" +
             byteArray.toBase64() + "\"/></td></tr>";
     }
 }

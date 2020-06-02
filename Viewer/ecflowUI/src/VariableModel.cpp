@@ -306,7 +306,7 @@ QModelIndex VariableModel::parent(const QModelIndex &child) const
 
 	int level=indexToLevel(child);
 	if(level == 1)
-			return QModelIndex();
+			return {};
 	else if(level == 2)
 	{
 		int id=child.internalId();

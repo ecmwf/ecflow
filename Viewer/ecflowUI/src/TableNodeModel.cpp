@@ -389,7 +389,7 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
 
     VNode* node=a->parent();
     if(!node)
-        return QModelIndex();
+        return {};
 
     int row=0;
     if((row=data_->position(node)) != -1)

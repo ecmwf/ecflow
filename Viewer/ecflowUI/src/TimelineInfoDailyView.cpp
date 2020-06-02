@@ -166,7 +166,7 @@ QModelIndex TimelineInfoDailyModel::index( int row, int column, const QModelInde
 {
     if(!hasData() || row < 0 || column < 0)
     {
-        return QModelIndex();
+        return {};
     }
 
     //When parent is the root this index refers to a node or server
