@@ -284,7 +284,7 @@ void MenuHandler::refreshCustomMenuCommands()
         menu->clearFixedList();
 
         // create the 'compulsary' menu items
-        MenuItem *item1 = new MenuItem("Manage commands...");
+        auto *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
         menu->addItemToFixedList(item1);
         item1->setEnabledCondition(&trueCond_);
@@ -293,7 +293,7 @@ void MenuHandler::refreshCustomMenuCommands()
         item1->setIcon("configure.svg");
 
         // Saved commands
-        MenuItem *item2 = new MenuItem("-");
+        auto *item2 = new MenuItem("-");
         menu->addItemToFixedList(item2);
         item2->setEnabledCondition(&trueCond_);
         item2->setVisibleCondition(&trueCond_);
@@ -319,13 +319,13 @@ void MenuHandler::refreshCustomMenuCommands()
 
 
         // Recently executed commands
-        MenuItem *item3 = new MenuItem("-");
+        auto *item3 = new MenuItem("-");
         menu->addItemToFixedList(item3);
         item3->setEnabledCondition(&trueCond_);
         item3->setVisibleCondition(&trueCond_);
         item3->setQuestionCondition(&falseCond_);
 
-        MenuItem *item4 = new MenuItem("Recent");
+        auto *item4 = new MenuItem("Recent");
         menu->addItemToFixedList(item4);
         item4->setEnabledCondition(&falseCond_);
         item4->setVisibleCondition(&trueCond_);
@@ -601,7 +601,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     // NOTE that ActionHandler.cpp ensures that we cannot have a mix of attr and non-attr nodes
     if (nodes[0]->isAttribute() && nodes.size() > 1)
     {
-        QAction *noAction = new QAction("No action for multiple attributes", parent);
+        auto *noAction = new QAction("No action for multiple attributes", parent);
         noAction->setEnabled(false);
         qmenu->addAction(noAction);
         return qmenu;
@@ -778,7 +778,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	nodeLabel->setAlignment(Qt::AlignHCenter);
 	nodeLabel->setObjectName("nodeLabel");
 
-	QWidget* titleW=new QWidget(qmenu);
+	auto* titleW=new QWidget(qmenu);
 	auto *titleLayout=new QVBoxLayout(titleW);
 	titleLayout->setContentsMargins(2,2,2,2);
 	titleLayout->addWidget(nodeLabel);
@@ -891,7 +891,7 @@ QAction* MenuItem::createAction(QWidget* parent)
 QShortcut* MenuItem::createShortcut(QWidget* parent, const std::string& view)
 {
     if (!shortcut_.empty() && isValidView(view)) {
-        QShortcut* sc = new QShortcut(QString::fromStdString(shortcut_), parent);
+        auto* sc = new QShortcut(QString::fromStdString(shortcut_), parent);
         sc->setContext(Qt::WidgetShortcut);
         sc->setProperty("id", id_);
         return sc;

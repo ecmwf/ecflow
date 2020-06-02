@@ -600,7 +600,7 @@ FontPropertyLine::FontPropertyLine(VProperty* guiProp,bool addLabel,QWidget * pa
 	sizeSpin_->setRange(1,200);
 	hb->addWidget(sizeSpin_);
 
-	QLabel *sizeLabel=new QLabel("pt",parent);
+	auto *sizeLabel=new QLabel("pt",parent);
 	hb->addWidget(sizeLabel);
 
 	lName_=new QLabel(parent);

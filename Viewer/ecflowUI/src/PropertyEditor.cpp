@@ -275,7 +275,7 @@ void PropertyEditor::addGroup(VProperty* vProp,QVBoxLayout * layout,QWidget *par
    if(vProp->name() != "group")
       return;
    
-   QGroupBox *groupBox = new QGroupBox(vProp->param("title"),parent);
+   auto *groupBox = new QGroupBox(vProp->param("title"),parent);
    groupBox->setObjectName("editorGroupBox");
    auto *grid=new QGridLayout();
    grid->setColumnStretch(1,1);
@@ -298,7 +298,7 @@ void PropertyEditor::addGrid(VProperty* vProp,QVBoxLayout *layout,QWidget *paren
     if(vProp->name() != "grid")
         return;
         
-    QGroupBox *groupBox = new QGroupBox(vProp->param("title"),parent);
+    auto *groupBox = new QGroupBox(vProp->param("title"),parent);
     groupBox->setObjectName("editorGroupBox");
     auto* grid=new QGridLayout();
     groupBox->setLayout(grid);
@@ -317,7 +317,7 @@ void PropertyEditor::addGrid(VProperty* vProp,QVBoxLayout *layout,QWidget *paren
          }
          
          h+="   ";
-         QLabel* hLabel=new QLabel(h,groupBox);
+         auto* hLabel=new QLabel(h,groupBox);
          grid->addWidget(hLabel,0,i,Qt::AlignHCenter);
     }    
 
@@ -335,9 +335,9 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid,QWidget *pare
     {
     	if(vProp->name() == "note")
     	{
-    		 QLabel *empty=new QLabel(" ",parent);
+    		 auto *empty=new QLabel(" ",parent);
     		 grid->addWidget(empty,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
-    		 QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + vProp->value().toString(),parent);
+    		 auto *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + vProp->value().toString(),parent);
     		 grid->addWidget(label,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
     	}
     	return;
@@ -345,7 +345,7 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid,QWidget *pare
 
     int row=grid->rowCount();
     QString labelText=vProp->param("label");
-    QLabel* label=new QLabel(labelText,parent);
+    auto* label=new QLabel(labelText,parent);
     grid->addWidget(label,row,0);
 
     int col=1;
@@ -527,7 +527,7 @@ void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
     if(vProp->name() != "tab")
         return;
 
-    QWidget *w=new QWidget(tab);
+    auto *w=new QWidget(tab);
     auto* vb=new QVBoxLayout();
     w->setLayout(vb);
     
@@ -558,7 +558,7 @@ void PropertyEditor::addNote(VProperty* vProp,QVBoxLayout* layout,QWidget *paren
     txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
 
     layout->addSpacing(5);
-    QLabel *label=new QLabel("<i>Note:</i> " + txt,parent);
+    auto *label=new QLabel("<i>Note:</i> " + txt,parent);
     layout->addWidget(label);
 }
 
@@ -578,7 +578,7 @@ void PropertyEditor::addNote(VProperty* vProp,QGridLayout* layout,QWidget *paren
     //fr->setFrameShape(QFrame::HLine);
     //layout->addWidget(fr,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 
-    QLabel *label=new QLabel("<table><tr><td><b>&nbsp;&nbsp;&nbsp;</b></td><td><i>Note:</i> " + txt + "</td></tr></table>",parent);
+    auto *label=new QLabel("<table><tr><td><b>&nbsp;&nbsp;&nbsp;</b></td><td><i>Note:</i> " + txt + "</td></tr></table>",parent);
     label->setWordWrap(true);
     layout->addWidget(label,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 }

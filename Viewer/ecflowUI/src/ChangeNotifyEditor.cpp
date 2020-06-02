@@ -104,7 +104,7 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 
 	model_->add(label,propLst);
 
-	QWidget* w=new QWidget(this);
+	auto* w=new QWidget(this);
 	auto* vb=new QVBoxLayout();
 	vb->setContentsMargins(0,5,0,5);
 	w->setLayout(vb);

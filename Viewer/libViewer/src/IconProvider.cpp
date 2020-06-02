@@ -107,7 +107,7 @@ int IconProvider::add(QString path,QString name)
 	auto it=icons_.find(name);
 	if(it == icons_.end())
 	{
-		IconItem *p=new IconItem(path);
+		auto *p=new IconItem(path);
 		icons_[name]=p;
 		iconsById_[p->id()]=p;
 		return p->id();

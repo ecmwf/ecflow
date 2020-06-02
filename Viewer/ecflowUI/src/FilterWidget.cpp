@@ -153,7 +153,7 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 
 void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
 {
-	QLabel* titleLabel=new QLabel(title,menu_);
+	auto* titleLabel=new QLabel(title,menu_);
 	QFont f=menu_->font();
 	f.setBold(true);
 	titleLabel->setFont(f);
@@ -174,7 +174,7 @@ void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
 	QString titleQss="QLabel {padding: " + QString::number(titlePadding) + "px;}";
 	titleLabel->setStyleSheet(titleQss);
 
-	QWidget *w=new QWidget(menu_);
+	auto *w=new QWidget(menu_);
 	auto *vb=new QVBoxLayout(w);
 	vb->setContentsMargins(2,topMargin,2,2);
 	//vb->addSpacing(2);

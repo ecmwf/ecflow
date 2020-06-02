@@ -117,7 +117,7 @@ void TabWidget::slotContextMenu(const QPoint& pos) {
         return;
 
     QList<QAction*> lst;
-    QAction *closeAc=new QAction(QPixmap(":/viewer/close.svg"),"&Close tab",this);
+    auto *closeAc=new QAction(QPixmap(":/viewer/close.svg"),"&Close tab",this);
     lst << closeAc;
 
     if(QAction *ac=QMenu::exec(lst,mapToGlobal(pos),closeAc,this))

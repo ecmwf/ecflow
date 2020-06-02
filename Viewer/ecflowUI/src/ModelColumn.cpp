@@ -66,7 +66,7 @@ void ModelColumn::loadItem(VProperty *p)
 
 void ModelColumn::loadExtraItem(QString name,QString label)
 {
-    ModelColumnItem* obj=new ModelColumnItem(name.toStdString(),true);
+    auto* obj=new ModelColumnItem(name.toStdString(),true);
     obj->label_=label;
     obj->tooltip_=obj->label_;
     //obj->icon_=p->param("icon");
@@ -87,7 +87,7 @@ void ModelColumn::loadExtraItem(QString name,QString label)
 
 void ModelColumn::loadDiagItem(QString name,QString label)
 {
-    ModelColumnItem* obj=new ModelColumnItem(name.toStdString(),true);
+    auto* obj=new ModelColumnItem(name.toStdString(),true);
     obj->label_=label;
     obj->tooltip_=obj->label_;
     //obj->icon_=p->param("icon");

@@ -46,7 +46,7 @@ NodePanel::~NodePanel()
 
 Dashboard *NodePanel::addWidget(QString id)
 {
-  	Dashboard  *nw=new Dashboard("",this);
+  	auto  *nw=new Dashboard("",this);
 
     QString name("");
   	QPixmap pix;
