@@ -52,16 +52,15 @@ NodeContainer::NodeContainer() = default;
 
 void NodeContainer::copy(const NodeContainer& rhs)
 {
-   size_t theSize = rhs.nodes_.size();
-   for(size_t s = 0; s < theSize; s++) {
-      Task* task = rhs.nodes_[s]->isTask();
+   for(const auto& r_n : rhs.nodes_) {
+      Task* task = r_n->isTask();
       if ( task ) {
          task_ptr task_copy = std::make_shared<Task>( *task );
          task_copy->set_parent(this);
          nodes_.push_back(task_copy);
       }
       else {
-         Family* family = rhs.nodes_[s]->isFamily();
+         Family* family = r_n->isFamily();
          assert(family);
          family_ptr family_copy = std::make_shared<Family>( *family );
          family_copy->set_parent(this);
@@ -99,8 +98,7 @@ bool NodeContainer::check_defaults() const
 void NodeContainer::accept(ecf::NodeTreeVisitor& v)
 {
 	v.visitNodeContainer(this);
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   { nodes_[t]->accept(v); }
+	for(const auto& n: nodes_) { n->accept(v); }
 }
 
 void NodeContainer::acceptVisitTraversor(ecf::NodeTreeVisitor& v)
@@ -112,16 +110,14 @@ void NodeContainer::begin()
 {
    restore_on_begin_or_requeue();
 	Node::begin();
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++)   { nodes_[t]->begin(); }
+ 	for(const auto& n: nodes_)   { n->begin(); }
  	handle_defstatus_propagation();
 }
 
 void NodeContainer::reset()
 {
    Node::reset();
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   { nodes_[t]->reset(); }
+   for(const auto& n: nodes_) { n->reset(); }
 }
 
 void NodeContainer::requeue(Requeue_args& args)
@@ -149,9 +145,8 @@ void NodeContainer::requeue(Requeue_args& args)
                             true /* reset relative duration */,
                             args.log_state_changes_);
 
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++) {
- 	   nodes_[t]->requeue(largs);
+ 	for(const auto& n: nodes_) {
+ 	   n->requeue(largs);
  	}
 
    handle_defstatus_propagation();
@@ -160,18 +155,16 @@ void NodeContainer::requeue(Requeue_args& args)
 void NodeContainer::requeue_time_attrs()
 {
    Node::requeue_time_attrs();
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {
-      nodes_[t]->requeue_time_attrs();
+   for(const auto& n: nodes_) {
+      n->requeue_time_attrs();
    }
 }
 
 void NodeContainer::reset_late_event_meters()
 {
    Node::reset_late_event_meters();
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {
-      nodes_[t]->reset_late_event_meters();
+   for(const auto& n: nodes_) {
+      n->reset_late_event_meters();
    }
 }
 
@@ -194,27 +187,24 @@ void NodeContainer::handle_defstatus_propagation()
 
 bool NodeContainer::run(JobsParam& jobsParam, bool force)
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)     { (void) nodes_[t]->run(jobsParam,force); }
+	for(const auto& n: nodes_) { (void) n->run(jobsParam,force); }
 	return jobsParam.getErrorMsg().empty();
 }
 
 void NodeContainer::kill(const std::string& /* zombie_pid, only valid for single task */)
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {     nodes_[t]->kill(); }
+	for(const auto& n: nodes_) { n->kill(); }
 }
 
 void NodeContainer::status()
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {
+	for(const auto& n: nodes_)   {
 	   // Avoid exception for top down case, if Task is not active or submitted
 	   // Allows status cmd to run over more Tasks, without early exit, when some tasks are not active/sumitted
-	   if (nodes_[t]->isTask() && ( nodes_[t]->state() != NState::ACTIVE && nodes_[t]->state() != NState::SUBMITTED)) {
+	   if (n->isTask() && ( n->state() != NState::ACTIVE && n->state() != NState::SUBMITTED)) {
 	      continue;
 	   }
-	   nodes_[t]->status();
+	   n->status();
 	}
 }
 
@@ -222,9 +212,8 @@ bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool htm
 {
    bool why_found = Node::why(theReasonWhy,html_tags);
    if (!why_found) {
-      size_t node_vec_size = nodes_.size();
-      for(size_t t = 0; t < node_vec_size; t++)   {
-         if (nodes_[t]->top_down_why(theReasonWhy,html_tags)) {
+      for(const auto& n: nodes_)   {
+         if (n->top_down_why(theReasonWhy,html_tags)) {
             why_found = true;
          }
       }
@@ -242,8 +231,8 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    else if (order_state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
       std::vector<std::string> order_vec; order_vec.reserve(nodes_.size());
-      size_t node_vec_size = nodes_.size();
-      for(size_t i =0; i < node_vec_size; i++)  order_vec.push_back( nodes_[i]->name());
+
+      for(const auto& n: nodes_)  order_vec.push_back( n->name() );
       comp->add( std::make_shared<OrderMemento>( order_vec ) );
    }
 
@@ -268,11 +257,10 @@ void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::As
    }
 
    std::vector<node_ptr> vec; vec.reserve(nodes_.size());
-   size_t node_vec_size = nodes_.size();
    for(const auto & i : order) {
-      for(size_t t = 0; t < node_vec_size; t++) {
-          if (i == nodes_[t]->name()) {
-             vec.push_back(nodes_[t]);
+      for(const auto& n: nodes_) {
+          if (i == n->name()) {
+             vec.push_back(n);
              break;
           }
        }
@@ -296,9 +284,8 @@ void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf:
 
    // setup child parent pointers
    nodes_ = memento->children_;
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   {
-      nodes_[t]->set_parent(this);
+   for(auto& n: nodes_) {
+      n->set_parent(this);
    }
 }
 
@@ -312,8 +299,7 @@ void NodeContainer::collateChanges(DefsDelta& changes) const
    }
 
 	// Traversal to children
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++)   { nodes_[t]->collateChanges(changes); }
+ 	for(const auto& n: nodes_) { n->collateChanges(changes); }
 }
 
 void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
@@ -326,7 +312,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
  					node_ptr node = (*i);
 					nodes_.erase(i);
 					nodes_.insert(nodes_.begin(),node);
-               order_state_change_no_ = Ecf::incr_state_change_no();
+                    order_state_change_no_ = Ecf::incr_state_change_no();
 					return;
  				}
 			}
@@ -338,7 +324,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
  					node_ptr node = (*i);
 					nodes_.erase(i);
 					nodes_.push_back(node);
-               order_state_change_no_ = Ecf::incr_state_change_no();
+                    order_state_change_no_ = Ecf::incr_state_change_no();
 					return;
  				}
 			}
@@ -347,13 +333,13 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 		case NOrder::ALPHA:  {
 			std::sort(nodes_.begin(),nodes_.end(),
 			          [](const node_ptr& a,const node_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
-         order_state_change_no_ = Ecf::incr_state_change_no();
+            order_state_change_no_ = Ecf::incr_state_change_no();
 			break;
 		}
 		case NOrder::ORDER:  {
 			std::sort(nodes_.begin(),nodes_.end(),
                    [](const node_ptr& a,const node_ptr& b){ return Str::caseInsGreater(a->name(),b->name());});
-         order_state_change_no_ = Ecf::incr_state_change_no();
+            order_state_change_no_ = Ecf::incr_state_change_no();
 			break;
 		}
 		case NOrder::UP:  {
@@ -364,7 +350,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 						nodes_.erase(nodes_.begin()+t);
 						t--;
 						nodes_.insert(nodes_.begin()+t,node);
-                  order_state_change_no_ = Ecf::incr_state_change_no();
+                        order_state_change_no_ = Ecf::incr_state_change_no();
 				    }
 					return;
  				}
@@ -410,7 +396,7 @@ void NodeContainer::move_peer(Node* src, Node* dest)
 boost::posix_time::time_duration NodeContainer::sum_runtime()
 {
    boost::posix_time::time_duration rt;
-   for(node_ptr node : nodes_) rt += node->sum_runtime();
+   for(const auto& n: nodes_) rt += n->sum_runtime();
    set_runtime(rt);
    return rt;
 }
@@ -441,9 +427,8 @@ bool NodeContainer::calendarChanged(
 	   overridden_late.override_with(late_.get());
 	}
 
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {
-      (void)nodes_[t]->calendarChanged(c,cal_args,&overridden_late,holding_parent_day_or_date);
+   for(const auto& n: nodes_) {
+      (void)n->calendarChanged(c,cal_args,&overridden_late,holding_parent_day_or_date);
    }
    return false;
 }
@@ -451,16 +436,14 @@ bool NodeContainer::calendarChanged(
 bool NodeContainer::hasAutoCancel() const
 {
 	if (Node::hasAutoCancel()) return true;
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++)     { if (nodes_[t]->hasAutoCancel()) return true; }
+ 	for(const auto& n: nodes_) { if (n->hasAutoCancel()) return true; }
 	return false;
 }
 
 void NodeContainer::invalidate_trigger_references() const
 {
    Node::invalidate_trigger_references();
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {  nodes_[t]->invalidate_trigger_references(); }
+   for(const auto& n: nodes_) { n->invalidate_trigger_references(); }
 }
 
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
@@ -492,8 +475,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
       return false;
    }
 
-	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++) {
+ 	for(const auto& n: nodes_) {
  		// Note: we don't bomb out early here. Since a later child could be free. i.e f1/ty or t4
  		// child t1 holding
  		// child t2 holding
@@ -502,7 +484,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
  		//   child ty free
  		// child t3 holding
  		// child t4 free
-  		(void) nodes_[t]->resolveDependencies(jobsParam) ;
+  		(void) n->resolveDependencies(jobsParam) ;
  	}
 
  	return true;
@@ -817,10 +799,9 @@ void NodeContainer::match_closest_children(const std::vector<std::string>& pathT
 		// i.e if we have a suite like /a/b/c/d/e
 		//     and a path like         /a/b/c/d/e/f/g
 		// In this we will match with e but it not valid since its not the last index
-		size_t task_vec_size = nodes_.size();
-		for(size_t t = 0; t < task_vec_size; t++) {
-			if (nodes_[t]->name() == pathToNode[indexIntoPathNode]) {
-				closest_matching_node = nodes_[t];
+		for(const auto& n: nodes_) {
+			if (n->name() == pathToNode[indexIntoPathNode]) {
+				closest_matching_node = n;
 				return;
 			}
 		}
@@ -828,9 +809,8 @@ void NodeContainer::match_closest_children(const std::vector<std::string>& pathT
 	else {
 		// Path to node is of the form "/family/task" or "/family/family/task"
 		// Path to node is of the form "/suite/task" or "/suite/family/task"
-		size_t family_vec_size = nodes_.size();
-		for(size_t f = 0; f < family_vec_size; f++) {
-			Family* family = nodes_[f]->isFamily();
+		for(const auto& n: nodes_) {
+			Family* family = n->isFamily();
 			if (family) {
 				node_ptr matching_node;
 				family->find_closest_matching_node(pathToNode, indexIntoPathNode,matching_node);
@@ -845,10 +825,9 @@ void NodeContainer::match_closest_children(const std::vector<std::string>& pathT
 
 node_ptr NodeContainer::find_by_name(const std::string& name) const
 {
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {
-      if (nodes_[t]->name() == name) {
-         return nodes_[t];
+   for(const auto& n: nodes_) {
+      if (n->name() == name) {
+         return n;
       }
    }
    return node_ptr();
@@ -856,10 +835,9 @@ node_ptr NodeContainer::find_by_name(const std::string& name) const
 
 family_ptr NodeContainer::findFamily(const std::string& familyName) const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t f = 0; f < node_vec_size; f++) {
- 		if (nodes_[f]->name() == familyName && nodes_[f]->isFamily()) {
-	 		return std::dynamic_pointer_cast<Family>(nodes_[f]);
+	for(const auto& n: nodes_) {
+ 		if (n->name() == familyName && n->isFamily()) {
+	 		return std::dynamic_pointer_cast<Family>(n);
  		}
 	}
 	return family_ptr();
@@ -867,10 +845,9 @@ family_ptr NodeContainer::findFamily(const std::string& familyName) const
 
 task_ptr NodeContainer::findTask(const std::string& taskName) const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++) {
- 		if (nodes_[t]->name() == taskName && nodes_[t]->isTask()) {
-	 		return std::dynamic_pointer_cast<Task>(nodes_[t]);
+	for(const auto& n: nodes_) {
+ 		if (n->name() == taskName && n->isTask()) {
+	 		return std::dynamic_pointer_cast<Task>(n);
  		}
 	}
 	return task_ptr();
@@ -878,34 +855,30 @@ task_ptr NodeContainer::findTask(const std::string& taskName) const
 
 bool NodeContainer::hasTimeDependencies() const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)  { if (nodes_[t]->hasTimeDependencies()) return true;}
+	for(const auto& n: nodes_)  { if (n->hasTimeDependencies()) return true;}
  	return false;
 }
 
 void NodeContainer::immediateChildren(std::vector<node_ptr>& theChildren) const
 {
-	size_t task_vec_size = nodes_.size();
-	theChildren.reserve( theChildren.size() + task_vec_size);
-	for(size_t t = 0; t < task_vec_size; t++) {
- 		theChildren.push_back( nodes_[t] );
+	theChildren.reserve( theChildren.size() + nodes_.size());
+	for(const auto& n: nodes_) {
+ 		theChildren.push_back( n );
 	}
 }
 
 void NodeContainer::allChildren(std::vector<node_ptr>& vec) const
 {
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t f = 0; f < node_vec_size; f++) {
-		vec.push_back(nodes_[f]);
-		nodes_[f]->allChildren(vec); // for task does nothing
+ 	for(const auto& n: nodes_) {
+		vec.push_back(n);
+		n->allChildren(vec); // for task does nothing
 	}
 }
 
 void NodeContainer::getAllFamilies(std::vector<Family*>& vec) const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t f = 0; f < node_vec_size; f++) {
-		Family* family =  nodes_[f]->isFamily();
+	for(const auto& n: nodes_) {
+		Family* family =  n->isFamily();
 		if ( family ) {
 			vec.push_back(family);
 			family->getAllFamilies(vec);
@@ -915,67 +888,59 @@ void NodeContainer::getAllFamilies(std::vector<Family*>& vec) const
 
 void NodeContainer::getAllNodes(std::vector<Node*>& vec) const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++) {
-	   vec.push_back(nodes_[t].get());
-	   nodes_[t]->getAllNodes(vec);
+	for(const auto& n: nodes_) {
+	   vec.push_back(n.get());
+	   n->getAllNodes(vec);
 	}
 }
 
 void NodeContainer::getAllTasks(std::vector<Task*>& tasks) const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {
-	   nodes_[t]->getAllTasks(tasks);
+	for(const auto& n: nodes_) {
+	   n->getAllTasks(tasks);
 	}
 }
 
 void NodeContainer::getAllSubmittables(std::vector<Submittable*>& tasks) const
 {
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   {
-      nodes_[t]->getAllSubmittables(tasks);
+   for(const auto& n: nodes_) {
+      n->getAllSubmittables(tasks);
    }
 }
 
 void NodeContainer::get_all_active_submittables(std::vector<Submittable*>& tasks) const
 {
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   {
-      nodes_[t]->get_all_active_submittables(tasks);
+   for(const auto& n: nodes_) {
+      n->get_all_active_submittables(tasks);
    }
 }
 
 void NodeContainer::get_all_tasks(std::vector<task_ptr>& tasks) const
 {
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   {
-      nodes_[t]->get_all_tasks(tasks);
+   for(const auto& n: nodes_) {
+      n->get_all_tasks(tasks);
    }
 }
 
 void NodeContainer::get_all_nodes(std::vector<node_ptr>& nodes) const
 {
    nodes.push_back(non_const_this());
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   {
-      nodes_[t]->get_all_nodes(nodes);
+   for(const auto& n: nodes_) {
+      n->get_all_nodes(nodes);
    }
 }
 
 void NodeContainer::get_all_aliases(std::vector<alias_ptr>& aliases) const
 {
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++)   {
-      nodes_[t]->get_all_aliases(aliases);
+   for(const auto& n: nodes_) {
+      n->get_all_aliases(aliases);
    }
 }
 
 void NodeContainer::getAllAstNodes(std::set<Node*>& vec) const
 {
 	Node::getAllAstNodes(vec);
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++)     { nodes_[t]->getAllAstNodes(vec); }
+ 	for(const auto& n: nodes_) { n->getAllAstNodes(vec); }
 }
 
 bool NodeContainer::check(std::string& errorMsg, std::string& warningMsg) const
@@ -983,9 +948,8 @@ bool NodeContainer::check(std::string& errorMsg, std::string& warningMsg) const
 	Node::check(errorMsg, warningMsg);
 
 	// recursive to handle hierarchical families
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++) {
- 		nodes_[t]->check(errorMsg,warningMsg);
+	for(const auto& n: nodes_) {
+ 		n->check(errorMsg,warningMsg);
       // if (!errorMsg.empty()) break;
   	}
 
@@ -994,11 +958,10 @@ bool NodeContainer::check(std::string& errorMsg, std::string& warningMsg) const
 
 std::vector<task_ptr> NodeContainer::taskVec() const
 {
- 	size_t node_vec_size = nodes_.size();
-	std::vector<task_ptr> vec; vec.reserve(node_vec_size);
-	for(size_t t = 0; t < node_vec_size; t++)   {
- 		if (nodes_[t]->isTask()) {
- 			vec.push_back( std::dynamic_pointer_cast<Task>(nodes_[t]) );
+	std::vector<task_ptr> vec; vec.reserve(nodes_.size());
+	for(const auto& n: nodes_) {
+ 		if (n->isTask()) {
+ 			vec.push_back( std::dynamic_pointer_cast<Task>(n) );
 		}
 	}
 	return vec;
@@ -1007,10 +970,9 @@ std::vector<task_ptr> NodeContainer::taskVec() const
 std::vector<family_ptr> NodeContainer::familyVec() const
 {
 	std::vector<family_ptr> vec;
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {
- 		if (nodes_[t]->isFamily()) {
- 			vec.push_back( std::dynamic_pointer_cast<Family>(nodes_[t]) );
+	for(const auto& n: nodes_) {
+ 		if (n->isFamily()) {
+ 			vec.push_back( std::dynamic_pointer_cast<Family>(n) );
 		}
 	}
 	return vec;
@@ -1089,13 +1051,12 @@ bool NodeContainer::checkInvariants(std::string& errorMsg) const
 {
    if (!Node::checkInvariants(errorMsg)) return false;
 
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {
-      if (nodes_[t]->parent() != this) {
+   for(const auto& n: nodes_) {
+      if (n->parent() != this) {
          errorMsg += "NodeContainer::checkInvariants family/task parent() not correct";
          return false;
       }
-      if (!nodes_[t]->checkInvariants(errorMsg)) {
+      if (!n->checkInvariants(errorMsg)) {
          return false;
       }
    }
@@ -1105,22 +1066,19 @@ bool NodeContainer::checkInvariants(std::string& errorMsg) const
 void NodeContainer::verification(std::string& errorMsg) const
 {
  	Node::verification(errorMsg);
- 	size_t node_vec_size = nodes_.size();
- 	for(size_t t = 0; t < node_vec_size; t++)  { nodes_[t]->verification(errorMsg); }
+ 	for(const auto& n: nodes_) { n->verification(errorMsg); }
 }
 
 void NodeContainer::setRepeatToLastValueHierarchically()
 {
 	setRepeatToLastValue();
- 	size_t node_vec_size = nodes_.size();
-  	for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->setRepeatToLastValueHierarchically(); }
+  	for(const auto& n: nodes_) { n->setRepeatToLastValueHierarchically(); }
 }
 
 void NodeContainer::setStateOnlyHierarchically(NState::State s,bool force)
 {
 	setStateOnly(s,force);
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->setStateOnlyHierarchically(s,force); }
+	for(const auto& n: nodes_) { n->setStateOnlyHierarchically(s,force); }
 }
 
 void NodeContainer::set_state_hierarchically(NState::State s, bool force)
@@ -1136,8 +1094,7 @@ void NodeContainer::set_state_hierarchically(NState::State s, bool force)
 void NodeContainer::update_limits()
 {
    /// Only tasks can affect the limits, hence no point calling locally
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->update_limits(); }
+   for(const auto& n: nodes_) { n->update_limits(); }
 }
 
 
@@ -1205,8 +1162,7 @@ void NodeContainer::archive()
    flag().clear(ecf::Flag::RESTORED);
 
    // delete the child nodes, set parent to null first.
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->set_parent(nullptr); }
+   for(auto& n: nodes_) { n->set_parent(nullptr); }
    nodes_.clear();
 
    std::vector<node_ptr>().swap(nodes_);                    // reclaim vector memory
@@ -1218,9 +1174,8 @@ void NodeContainer::archive()
 void NodeContainer::swap(NodeContainer& rhs)
 {
    std::swap(nodes_,rhs.nodes_);
-   size_t theSize = nodes_.size();
-   for(size_t s = 0; s < theSize; s++) {
-      nodes_[s]->set_parent(this);
+   for(auto& n: nodes_) {
+      n->set_parent(this);
    }
 }
 
@@ -1286,8 +1241,7 @@ void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive,const st
 {
    Node::sort_attributes(attr,recursive,no_sort);
    if (recursive) {
-      size_t node_vec_size = nodes_.size();
-      for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->sort_attributes(attr,recursive,no_sort); }
+      for(const auto& n: nodes_) { n->sort_attributes(attr,recursive,no_sort); }
    }
 }
 
@@ -1299,8 +1253,8 @@ bool NodeContainer::doDeleteChild(Node* child)
  		if ( (*t).get() == child) {
  		   child->set_parent(nullptr); // must set to NULL, allow it to be re-added to different parent
   			nodes_.erase(t);
-         add_remove_state_change_no_ = Ecf::incr_state_change_no();
-         set_most_significant_state_up_node_tree();
+            add_remove_state_change_no_ = Ecf::incr_state_change_no();
+            set_most_significant_state_up_node_tree();
   			return true;
  		}
 		if ((*t)->doDeleteChild(child)) {
@@ -1314,16 +1268,14 @@ bool NodeContainer::doDeleteChild(Node* child)
 void NodeContainer::check_job_creation( job_creation_ctrl_ptr jobCtrl) {
 
 	if (defStatus() != DState::COMPLETE) {
-	 	size_t node_vec_size = nodes_.size();
-		for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->check_job_creation( jobCtrl ); }
+		for(const auto& n: nodes_) { n->check_job_creation( jobCtrl ); }
  	}
 }
 
 void NodeContainer::generate_scripts( const std::map<std::string,std::string>& override) const
 {
-   size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {
-      nodes_[t]->generate_scripts( override );
+   for(const auto& n: nodes_) {
+      n->generate_scripts( override );
    }
 }
 
@@ -1337,9 +1289,8 @@ void NodeContainer::serialize(Archive & ar, std::uint32_t const version )
 
    // Setup the parent pointers. Since they are not serialised
    if (Archive::is_loading::value) {
-      size_t vec_size = nodes_.size();
-      for(size_t i = 0; i < vec_size; i++) {
-         nodes_[i]->set_parent(this);
+      for(auto& n: nodes_) {
+         n->set_parent(this);
       }
    }
 }
