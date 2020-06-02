@@ -579,7 +579,7 @@ void PathsCmd::create(   Cmd_ptr& cmd,
    else if (api_ == PathsCmd::EDIT_HISTORY) {
 
       if (paths.empty()) {
-         if (options.size() == 1 && options[0] == "clear") paths.push_back("clear");
+         if (options.size() == 1 && options[0] == "clear") paths.emplace_back("clear");
          else {
             std::stringstream ss;
             ss << theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n";
