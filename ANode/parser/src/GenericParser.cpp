@@ -13,6 +13,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
+
 #include "GenericParser.hpp"
 #include "Node.hpp"
 #include "GenericAttr.hpp"
