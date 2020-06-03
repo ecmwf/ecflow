@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <cassert>
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>

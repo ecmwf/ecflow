@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <stdexcept>
 #include "LogData.hpp"
 
 #include "File_r.hpp"

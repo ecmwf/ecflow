@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "RepeatParser.hpp"
 #include "Extract.hpp"
 #include "Str.hpp"

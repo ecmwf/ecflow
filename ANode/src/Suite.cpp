@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 

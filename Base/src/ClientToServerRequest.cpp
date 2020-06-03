@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include "ClientToServerRequest.hpp"
 
 using namespace std;

@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include "TimeSeries.hpp"
 

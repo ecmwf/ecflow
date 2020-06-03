@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
 #include "Node.hpp"

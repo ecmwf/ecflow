@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <sstream>
 #include <sys/stat.h>
 #include <cerrno>

@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "LimitParser.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"

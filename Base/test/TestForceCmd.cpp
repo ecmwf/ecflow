@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "ClientToServerCmd.hpp"

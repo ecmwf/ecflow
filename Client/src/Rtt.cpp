@@ -12,6 +12,7 @@
 //
 // Description : Simple singleton implementation of log
 //============================================================================
+#include <stdexcept>
 #include <vector>
 #include <iostream>
 

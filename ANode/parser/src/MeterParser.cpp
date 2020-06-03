@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include "MeterParser.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"

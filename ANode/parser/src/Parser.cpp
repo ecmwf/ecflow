@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "Parser.hpp"
 #include "DefsStructureParser.hpp"
 #include "Stl.hpp"

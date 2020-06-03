@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <limits>
 #include <cassert>
 #include <sstream>

@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "TodayParser.hpp"
 #include "TodayAttr.hpp"
 #include "Node.hpp"

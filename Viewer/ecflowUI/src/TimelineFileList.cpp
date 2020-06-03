@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //=============================================================================
 
+#include <stdexcept>
 #include "TimelineFileList.hpp"
 
 #include <vector>

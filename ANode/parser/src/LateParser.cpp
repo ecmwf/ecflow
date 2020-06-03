@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "LateParser.hpp"
 #include "LateAttr.hpp"
 #include "DefsStructureParser.hpp"

@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "TimeParser.hpp"
 #include "TimeSeries.hpp"
 #include "Node.hpp"

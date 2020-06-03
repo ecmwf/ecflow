@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <stdexcept>
 #include "LogLoadWidget.hpp"
 
 #include "File_r.hpp"

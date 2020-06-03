@@ -8,6 +8,7 @@
 //
 //=============================================================
 
+#include <stdexcept>
 #include "TimelineData.hpp"
 
 #include "File_r.hpp"

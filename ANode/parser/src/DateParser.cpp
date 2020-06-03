@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "DefsStructureParser.hpp"
 #include "DateParser.hpp"
 #include "Node.hpp"

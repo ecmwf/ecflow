@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "../../ANode/parser/src/QueueParser.hpp"
 
 #include "QueueAttr.hpp"

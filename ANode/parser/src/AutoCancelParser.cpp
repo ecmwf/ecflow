@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "AutoCancelParser.hpp"
 #include "AutoCancelAttr.hpp"
 #include "TimeSeries.hpp"

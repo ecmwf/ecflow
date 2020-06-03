@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <stdexcept>
 #include "LogLoadData.hpp"
 
 #include "File_r.hpp"

@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <sstream>
 
 #include "TodayAttr.hpp"

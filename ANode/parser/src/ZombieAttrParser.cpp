@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "ZombieAttrParser.hpp"
 #include "Node.hpp"
 #include "ZombieAttr.hpp"

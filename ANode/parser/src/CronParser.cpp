@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include "CronParser.hpp"
 #include "Node.hpp"
 #include "DefsStructureParser.hpp"

@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "DefsParser.hpp"
 #include "ExternParser.hpp"
 #include "AutoCancelParser.hpp"
