@@ -1516,4 +1516,20 @@ BOOST_AUTO_TEST_CASE( test_comment_and_manual_removal )
    basic_test_template("test_comment_and_manual_removal",ecf_file,expected_job_file_contents);
 }
 
+BOOST_AUTO_TEST_CASE( test_unterminated_manual )
+{
+   string ecf_file;
+   ecf_file += "%include <simple_head.h>\n";
+   ecf_file += "#body\n";
+   ecf_file += "%comment\n";
+   ecf_file += "--comment\n";
+   ecf_file += "%end\n";
+   ecf_file += "%manual\n";
+   ecf_file += "%include <simple_tail.h>\n";
+
+   std::string expected_job_file_contents = "#head.h\n#body%manual\n#tail.h";
+
+   basic_test_template("test_unterminated_manual",ecf_file,expected_job_file_contents,"",false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

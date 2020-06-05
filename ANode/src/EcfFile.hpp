@@ -183,13 +183,14 @@ private:
   PreProcessor(const PreProcessor&) = delete;
   const PreProcessor& operator=(const PreProcessor&) = delete;
 public:
-   explicit PreProcessor(EcfFile*);
+   explicit PreProcessor(EcfFile*, const char* error_context);
    ~PreProcessor();
 
-   bool preProcess(std::vector<std::string>& script_lines );
-   const std::string& error_msg() const { return error_msg_;}
+   void preProcess(std::vector<std::string>& script_lines );
 
 private:
+   std::string error_context() const;
+
    // include pre-processing on the included file.
    // Note: include directives _in_ manual/comment should he handled.
    //       only include directives in %nopp/%end are ignored
@@ -199,6 +200,7 @@ private:
 
 private:
    EcfFile* ecfile_;
+   const char* error_context_;
 
    std::string pp_nopp_;
    std::string pp_comment_;
@@ -210,7 +212,6 @@ private:
 
    std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
    std::vector<std::string> include_once_set_;
-   std::string error_msg_;
 
    bool nopp_{false};
    bool comment_{false};

@@ -128,11 +128,8 @@ void EcfFile::manual(std::string& theManual)
    }
 
    // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
-   PreProcessor data(this);
-   if (!data.preProcess(lines)) {
-      std::stringstream ss; ss << "EcfFile::manual: For node " << node_->debugNodePath() << ", failed to pre-process file " << script_path_or_cmd_ << " : " << data.error_msg();
-      throw std::runtime_error(ss.str());
-   }
+   PreProcessor data(this,"EcfFile::manual:");
+   data.preProcess(lines);
 
    // perform variable sub's but don't error if failure
    try {
@@ -229,10 +226,8 @@ void EcfFile::script(std::string& theScript) const
 void EcfFile::pre_process_user_file(std::vector<std::string>& user_edit_file, std::string& pre_processed_file)
 {
    // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
-   PreProcessor data(this);
-   if (!data.preProcess(user_edit_file)) {
-      throw std::runtime_error("EcfFile::pre_process: Failed to pre_process user edit file " + data.error_msg());
-   }
+   PreProcessor data(this,"EcfFile::pre_process_user_file");
+   data.preProcess(user_edit_file);
 
    remove_comment_manual_and_noop_tokens();
 
@@ -254,10 +249,8 @@ void EcfFile::pre_process(std::string& pre_processed_file)
    }
 
    // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
-   PreProcessor data(this);
-   if (!data.preProcess(lines)) {
-      throw std::runtime_error("EcfFile::pre_process: Failed to pre_process  " + data.error_msg());
-   }
+   PreProcessor data(this,"EcfFile::pre_process");
+   data.preProcess(lines);
 
    /// Find Used variables, *after* all %includes expanded, can throw std::runtime_error
    get_used_variables(pre_processed_file);
@@ -279,10 +272,8 @@ void EcfFile::edit_used_variables(std::string& return_script_with_used_variables
    vector_to_string(lines,script);
 
    // expand all %includes
-   PreProcessor data(this);
-   if (!data.preProcess(lines)) {
-      throw std::runtime_error("EcfFile::edit_used_variables: PreProcess script failed  " + data.error_msg());
-   }
+   PreProcessor data(this,"EcfFile::edit_used_variables");
+   data.preProcess(lines);
 
    /// Find Used variables, *after* all %includes expanded, Can throw std::runtime_error
    get_used_variables(return_script_with_used_variables);
@@ -325,10 +316,8 @@ const std::string& EcfFile::create_job( JobsParam& jobsParam)
 
       // expand all %includes this will expand %includenopp by enclosing in %nopp %end
 
-      PreProcessor data(this);
-      if (!data.preProcess(lines)) {
-         throw std::runtime_error("EcfFile::create_job: pre process failed " + data.error_msg());
-      }
+      PreProcessor data(this,"EcfFile::create_job");
+      data.preProcess(lines);
    }
 
 #ifdef DEBUG_PRE_PROCESS_OUTPUT
@@ -1216,8 +1205,9 @@ const std::string& EcfFile::get_extn() const
 
 // =======================================================================================
 
-PreProcessor::PreProcessor(EcfFile* ecfile)
+PreProcessor::PreProcessor(EcfFile* ecfile,const char* error_context)
 : ecfile_(ecfile),
+  error_context_(error_context),
   ecf_micro_(ecfile->ecfMicroCache_),
   jobLines_(ecfile->jobLines_)
 {
@@ -1233,24 +1223,21 @@ PreProcessor::PreProcessor(EcfFile* ecfile)
 
 PreProcessor::~PreProcessor()= default;
 
-bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
+void PreProcessor::preProcess(std::vector<std::string>& script_lines )
 {
+	bool ignore_end_check = false;
+	if (manual_ || comment_) ignore_end_check = true; // %include inside a %manual || %comment, ignore end check in preProcess
+
    // preProcess is called recursively, i.e for processing includes
    // Uses a Depth first traversal
    for(auto& line: script_lines) {
       jobLines_.emplace_back(std::move(line));    
       preProcess_line();
-      if (!error_msg_.empty()) return false;
    }
 
-   if (nopp_) {
-      std::stringstream ss; ss << "Unterminated nopp, matching 'end' is missing for " << ecfile_->script_path_or_cmd_;
-      error_msg_ += ss.str();
-      ecfile_->dump_expanded_script_file(jobLines_);
-      return false;
-   }
-
-   return true;
+   if (nopp_) throw std::runtime_error( error_context() + "Unterminated nopp, matching 'end' is missing");
+   if (comment_ && !ignore_end_check) throw std::runtime_error( error_context() + "Unterminated comment, matching 'end' is missing");
+   if (manual_ && !ignore_end_check)  throw std::runtime_error( error_context() + "Unterminated manual, matching 'end' is missing");
 }
 
 void PreProcessor::preProcess_line()
@@ -1267,11 +1254,10 @@ void PreProcessor::preProcess_line()
 	   // For variable substitution '%' can occur anywhere on the line.
 	   int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
 	   if (ecfMicroCount % 2 != 0 ) {
-		   std::stringstream ss;
-		   ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << script_line << "' in " << ecfile_->script_path_or_cmd_;
-		   error_msg_ += ss.str();
 		   ecfile_->dump_expanded_script_file(jobLines_);
-		   return;
+		   std::stringstream ss;
+		   ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  at : " << script_line ;
+		   throw std::runtime_error( error_context() + ss.str());
 	   }
    }
 
@@ -1283,28 +1269,25 @@ void PreProcessor::preProcess_line()
 #endif
    if (script_line.find(pp_manual_) == 0) {
       if (comment_ || manual_) {
-         std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
          ecfile_->dump_expanded_script_file(jobLines_);
-         return;
+         std::stringstream ss; ss << "Embedded comments/manuals not supported : '" << script_line << "'";
+		 throw std::runtime_error( error_context() + ss.str());
       }
       manual_ = true ; return;
    }
    if (script_line.find(pp_comment_) == 0) {
       if (comment_ || manual_) {
-         std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_line << "' at " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
          ecfile_->dump_expanded_script_file(jobLines_);
-         return;
+         std::stringstream ss; ss << "Embedded comments/manuals not supported : '" << script_line << "'";
+		 throw std::runtime_error( error_context() + ss.str());
       }
       comment_ = true ; return;
    }
    if (script_line.find(pp_nopp_) == 0) {
       if (nopp_) {
-         std::stringstream ss; ss << "Embedded nopp not supported '" << script_line << "' in " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
          ecfile_->dump_expanded_script_file(jobLines_);
-         return;
+         std::stringstream ss; ss << "Embedded nopp not supported : '" << script_line << "'";
+		 throw std::runtime_error( error_context() + ss.str());
       }
       nopp_ = true ; return;
    }
@@ -1312,11 +1295,11 @@ void PreProcessor::preProcess_line()
       if (comment_) { comment_ = false; return;}
       if (manual_)  { manual_ = false;  return;}
       if (nopp_)    { nopp_ = false;    return;}
-      std::stringstream ss;
-      ss << pp_end_ << " found with no matching %comment | %manual | %nopp at '" << script_line << "' at path " << ecfile_->script_path_or_cmd_;
-      error_msg_ += ss.str();
+
       ecfile_->dump_expanded_script_file(jobLines_);
-      return;
+      std::stringstream ss;
+      ss << pp_end_ << " found with no matching %comment | %manual | %nopp  : '" << script_line << "'" ;
+	  throw std::runtime_error( error_context() + ss.str());
    }
    if (nopp_) return;
 
@@ -1327,8 +1310,9 @@ void PreProcessor::preProcess_line()
    if (script_line.find(T_ECFMICRO) == 1) {    // %ecfmicro #
 
       // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
-      if (!ecfile_->extract_ecfmicro(script_line,ecf_micro_,error_msg_)) {
-         return;
+	  std::string err;
+      if (!ecfile_->extract_ecfmicro(script_line,ecf_micro_,err)) {
+    	 throw std::runtime_error( error_context() + err);
       }
 
       pp_nopp_ = ecf_micro_;    pp_nopp_    += T_NOOP;
@@ -1340,10 +1324,7 @@ void PreProcessor::preProcess_line()
    }
    else {
       if (script_line.find("ecf_micro") == 1) {    //  Mistyped ecfmicro
-         std::stringstream ss;
-         ss << "Replace with 'ecf_micro' with 'ecfmicro' at line: " << script_line << "\nin file:" << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
-         return;
+    	 throw std::runtime_error( error_context() + "Replace with 'ecf_micro' with 'ecfmicro' at line: '" + script_line + "'");
       }
    }
 
@@ -1354,7 +1335,7 @@ void PreProcessor::preProcess_line()
    if (!Str::get_token(script_line,1,the_include_token)) {
       int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
       if (ecfMicroCount % 2 != 0 ) {
-         error_msg_ += "unrecognised pre-processing directive at: '" + script_line + "'";
+     	 throw std::runtime_error( error_context() + " unrecognised pre-processing directive at: '" + script_line + "'");
       }
       return;
    }
@@ -1383,14 +1364,15 @@ void PreProcessor::preProcess_includes()
 		   if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
 	   }
 	   if (!fnd_include && !fnd_includenopp && !fnd_includeonce) {
-		   if (script_line.find("include") == 1) error_msg_ += ", unrecognised or miss-spelled include at: '" + script_line + "'";
+		   if (script_line.find("include") == 1) {
+		       throw std::runtime_error( error_context() + ", unrecognised or miss-spelled include at: '" + script_line + "'" );
+		   }
 		   return;
 	   }
 
 	   std::string the_include_token;
 	   if (!Str::get_token(script_line,1,the_include_token)) {
-		   error_msg_+= "Could not extract include token at : " + script_line;
-		   return;
+	       throw std::runtime_error( error_context() + "Could not extract include token at : " + script_line );
 	   }
 
 #ifdef DEBUG_PRE_PROCESS_INCLUDES
@@ -1400,7 +1382,6 @@ void PreProcessor::preProcess_includes()
 #endif
 
 	   includedFile = getIncludedFilePath(the_include_token, script_line);
-	   if (!error_msg_.empty()) return;
 
 
 	   // remove %include from the job lines, since were going to expand or ignore it.
@@ -1432,9 +1413,8 @@ void PreProcessor::preProcess_includes()
          fnd = true;
          if ( p.second > 100) {
             std::stringstream ss;
-            ss << "Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
-            error_msg_ += ss.str();
-            return;
+            ss << " Recursive include of file " << includedFile << " for " << ecfile_->script_path_or_cmd_;
+ 	        throw std::runtime_error( error_context() + ss.str() );
          }
          p.second++;
          break;
@@ -1447,10 +1427,14 @@ void PreProcessor::preProcess_includes()
 
    std::vector<std::string> include_lines;
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_NOOP);
-   if (!ecfile_->open_script_file(includedFile, EcfFile::INCLUDE, include_lines, error_msg_))  return;
+   std::string err;
+   if (!ecfile_->open_script_file(includedFile, EcfFile::INCLUDE, include_lines, err)) {
+       throw std::runtime_error( error_context() + err );
+   }
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_END);
 
-   (void)preProcess(include_lines);
+
+   preProcess(include_lines);
 }
 
 std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,const std::string& line)
@@ -1478,9 +1462,8 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
       int ecfMicroCount = EcfFile::countEcfMicro( includedFile, ecf_micro_ );
       if (ecfMicroCount % 2 != 0 ) {
          std::stringstream ss;
-         ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << line << "' in " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
-         return string();
+         ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ") at : " << line ;
+         throw std::runtime_error( error_context() + ss.str() );
       }
       NameValueMap user_edit_variables;
       ecfile_->node_->variable_substitution(includedFile,user_edit_variables,ecf_micro_[0]);
@@ -1495,7 +1478,6 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
    }
 
    Node* node = ecfile_->node_;
-   std::stringstream ss;
    if ( includedFile[0] == '<' ) {
       // %include <filename> can be one of:
       //    o When ECF_INCLUDE is a single path -> path1/filename
@@ -1536,9 +1518,9 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
       ecf_include.clear();
       node->findParentVariableValue( Str::ECF_HOME() , ecf_include );
       if (ecf_include.empty()) {
-         ss << "ECF_INCLUDE/ECF_HOME not specified, for task " << node->absNodePath() << " at " << line;
-         error_msg_ += ss.str();
-         return string();
+    	 std::stringstream ss;
+         ss << "ECF_INCLUDE/ECF_HOME not specified, at : " << line;
+         throw std::runtime_error( error_context() + ss.str() );
       }
 
       ecf_include += '/';
@@ -1575,26 +1557,26 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
       // include contents of %ECF_HOME%/%SUITE%/%FAMILY%/filename
       node->findParentUserVariableValue( Str::ECF_HOME() , path);
       if ( path.empty() ) {
-         ss << "ECF_HOME not specified, for task " << node->absNodePath() << " at " << line;
-         error_msg_ += ss.str();
-         return string();
+    	 std::stringstream ss;
+         ss << "ECF_HOME not specified, at : " << line;
+         throw std::runtime_error( error_context() + ss.str() );
       }
       path += '/';
       std::string suite;
       node->findParentVariableValue( "SUITE" , suite);   // SUITE is a generated variable
       if ( suite.empty() ) {
-         ss << "SUITE not specified, for task " << node->absNodePath() << " at " << line;
-         error_msg_ += ss.str();
-         return string();
+     	 std::stringstream ss;
+         ss << "SUITE not specified, at : " << line;
+         throw std::runtime_error( error_context() + ss.str() );
       }
       path += suite;
       path += '/';
       std::string family;
       node->findParentVariableValue( "FAMILY" , family); // FAMILY is a generated variable
       if ( family.empty() ) {
-         ss << "FAMILY not specified, for task " << node->absNodePath() << " at " << line;
-         error_msg_ += ss.str();
-         return string();
+      	 std::stringstream ss;
+         ss << "FAMILY not specified, at : " << line;
+         throw std::runtime_error( error_context() + ss.str() );
       }
       path += family;
       path += '/';
@@ -1606,6 +1588,18 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
    // include file name as is, from current working directory
    return includedFile;
 }
+
+std::string PreProcessor::error_context() const
+{
+	std::string ret(error_context_);
+	ret += ": Failed preprocessing : ";
+	ret += ecfile_->node_->debugNodePath();
+	ret += " : path/cmd(" ;
+	ret += ecfile_->script_path_or_cmd_;
+	ret += ")\n: ";
+    return ret;
+}
+
 
 bool EcfFile::file_exists(const std::string& ecf_include) const
 {
