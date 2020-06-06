@@ -25,7 +25,7 @@ if __name__ == "__main__":
     version = sys.version_info;
     if (sys.version_info < (2, 7)):
         print("This test only run with python version 2.7 or greater, but found : " + str(version))
-        exit(0)
+        sys.exit(0)
     
     # Add with context manager, in our case this only provides ability to indent
     with Defs() as defs:
