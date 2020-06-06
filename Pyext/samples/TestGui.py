@@ -1507,7 +1507,7 @@ if __name__ == "__main__":
     if ARGS.ecflow_client != "":
         if not os.path.exists(ARGS.ecflow_client):
             print("Could not find ecflow_client on path ",ARGS.ecflow_client)
-            exit(1)
+            sys.exit(1)
      
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
