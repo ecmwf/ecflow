@@ -990,37 +990,6 @@ class Tester(object) :
             assert not task_flag.is_set( flg ),"expected flag %r NOT to be set" % task_flag.type_to_string(flg)
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
-    def test_client_flag_migrated(self):
-        # ENABLE for ecflow 4.5.0
-        return
-        test = sys._getframe().f_code.co_name # returns function name
-        self.log_msg(test)
-        
-        defs = self.create_defs(test)   
-        s1 = "/" + test  
-       
-        self.ci_.load(defs)   
-        self.sync_local()
-     
-        suite = defs.find_suite(test)
-        node_vec = suite.get_all_nodes()
-        assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-     
-        self.ci_.alter(s1,"set_flag","migrated")   
-        self.sync_local()
-        suite = defs.find_suite(test)
-        node_vec = suite.get_all_nodes()
-        assert len(node_vec) == 1, "Expected 1 nodes, but found " + str(len(node_vec))
-     
-        self.ci_.checkpt()  # checkpoint after setting flag migrated, need to prove nodes still persisted
-         
-        self.ci_.alter(s1,"clear_flag","migrated")   
-        self.sync_local()
-        suite = defs.find_suite(test)
-        node_vec = suite.get_all_nodes()
-        assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-        self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
-     
     def test_client_force(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
@@ -1453,7 +1422,6 @@ class Tester(object) :
         self.test_client_alter_delete() 
         self.test_client_alter_change() 
         self.test_client_alter_flag() 
-        self.test_client_flag_migrated() 
        
         self.test_client_force()             
         self.test_client_replace(False)             

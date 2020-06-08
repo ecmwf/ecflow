@@ -501,7 +501,7 @@ const char* AlterCmd::desc() {
          "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
          "       For set_flag and clear_flag:\n"
          "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
-         "           statuscmd_failed | killcmd_failed | no_script | killed | status | migrated | late | message | \n"
+         "           statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | \n"
          "           complete | queue_limit | task_waiting | locked | zombie | archived | restored |\n"
          "           threshold | log_error | checkpt_error]\n"
          "       For sort:\n"
@@ -1314,7 +1314,7 @@ ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const
 void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const
 {
 	// options[0] = set_flag | clear_flag
-	// options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | migrated | late | message | complete | queue_limit | task_waiting | locked | zombie ]
+	// options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | late | message | complete | queue_limit | task_waiting | locked | zombie ]
 
 	Flag::Type theFlagType = get_flag_type(options[1]);
 	cmd = std::make_shared<AlterCmd>(paths,theFlagType, flag);
