@@ -27,7 +27,7 @@ conflunce_base_url = "https://software-test.ecmwf.int/wiki"
 confluence = rest.Confluence(conflunce_base_url,"deploy","deploy2013")
 page_id = confluence.get_page_id("ECFLOW","Releases") 
 if page_id == None:
-    exit(1)
+    sys.exit(1)
 
 attachment = confluence.get_attachment_id(page_id,ARGS.file)
 if attachment != None:
