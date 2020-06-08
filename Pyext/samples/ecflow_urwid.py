@@ -213,13 +213,13 @@ def get_name(item, full=False, parent=None, keys=None):
     # ext = ' %c [%s]' % (kinds[type(item)], get_status(item))
     ext = decorate(item)
     if type(item) in (ecflow.Defs, ):
-        return "defs" + ext + " - %s " % time.time()
+        return "defs" + str(ext) + " - %s " % time.time()
 
     if type(item) in (ecflow.Client, ):
         return "%s@%s" % (item.get_host(), item.get_port()) + \
                " - %s " % time.time()
     if full:
-        return "%s" % item.name() + ext
+        return "%s" % item.name() + str(ext)
     return item.name()
 
 
