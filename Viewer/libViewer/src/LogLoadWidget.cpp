@@ -1463,8 +1463,8 @@ void LogRequestView::removeChartById(QString id)
     if(ChartView* chartView=viewIds_.value(id,NULL))
     {
         viewLayout_->removeWidget(chartView);
-        delete chartView;
         views_.removeOne(chartView);
+        delete chartView;
     }
 
 }
