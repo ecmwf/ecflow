@@ -88,7 +88,7 @@ def translate(name, value=None):
                 else: rc = STATCMD + " %s" % rc
             return rc
 
-    if ECF_MODE == "ecflow" and name in DICT_SMS_ECF.keys():
+    if ECF_MODE == "ecflow" and name in DICT_SMS_ECF:
         if name in ('SMSCMD', 'SMSKILL', 'SMSSTATUSCMD', 'SMSHOME'):
             value2 = value.replace('SMS', 'ECF_')
             value  = value2.replace(smssubmit, ecfsubmit)
@@ -97,7 +97,7 @@ def translate(name, value=None):
             value  = value2.replace(smssubmit, ecfsubmit)
         transl = DICT_SMS_ECF[name]
 
-    elif ECF_MODE == "sms"  and name in DICT_ECF_SMS.keys():
+    elif ECF_MODE == "sms"  and name in DICT_ECF_SMS:
         if name in  ('ECF_CMD_CMD', 'ECF_KILL_CMD', 'ECF_STATUS_CMD'):
             value2 = value.replace('ECF_', 'SMS')  
         transl = DICT_ECF_SMS[name]
