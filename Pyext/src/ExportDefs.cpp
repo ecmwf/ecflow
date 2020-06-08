@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+// file deepcode ignore CppConstantBinaryExpression: <comment the reason here>
 #include <stdexcept>
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
