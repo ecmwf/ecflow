@@ -28,12 +28,12 @@ namespace po = boost::program_options;
 std::ostream& ZombieCmd::print(std::ostream& os) const
 {
 	switch (user_action_) {
-      case User::FOB:    return user_cmd(os,CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_))); break;
-      case User::FAIL:   return user_cmd(os,CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_))); break;
-      case User::ADOPT:  return user_cmd(os,CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_))); break;
-      case User::REMOVE: return user_cmd(os,CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_))); break;
-      case User::BLOCK:  return user_cmd(os,CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_))); break;
-      case User::KILL:   return user_cmd(os,CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_))); break;
+      case User::FOB:    return user_cmd(os,CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_)));
+      case User::FAIL:   return user_cmd(os,CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_)));
+      case User::ADOPT:  return user_cmd(os,CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_)));
+      case User::REMOVE: return user_cmd(os,CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_)));
+      case User::BLOCK:  return user_cmd(os,CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_)));
+      case User::KILL:   return user_cmd(os,CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_)));
       default: break;
  	}
 	return os;
