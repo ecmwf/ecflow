@@ -106,67 +106,61 @@ void CheckPtSaver::terminate()
 
 bool CheckPtSaver::explicitSave(bool from_server) const
 {
-   bool ret = true;
-	if ( server_->defs_ ) {
+	bool ret = true;
 
-		try {
+	try {
 #ifdef DEBUG_CHECKPT
-			std::cout << "      CheckPtSaver::explicitSave() Saving checkpt file " << serverEnv_->checkPtFilename() << "\n";
+		std::cout << "      CheckPtSaver::explicitSave() Saving checkpt file " << serverEnv_->checkPtFilename() << "\n";
 #endif
-			// Time how long we take to checkpt, Help to recognise *SLOW* disk, which can *AFFECT* server performance
-			DurationTimer durationTimer;
+		// Time how long we take to checkpt, Help to recognise *SLOW* disk, which can *AFFECT* server performance
+		DurationTimer durationTimer;
 
-			// Backup checkpoint file if it exists & is non zero
-			// Avoid an empty file as a backup file, could results from a full file system
-			// i.e move ecf_checkpt_file --> ecf_backup_checkpt_file
-			fs::path checkPtFile(serverEnv_->checkPtFilename());
-			if (fs::exists(checkPtFile) && fs::file_size(checkPtFile) != 0) {
+		// Backup checkpoint file if it exists & is non zero
+		// Avoid an empty file as a backup file, could results from a full file system
+		// i.e move ecf_checkpt_file --> ecf_backup_checkpt_file
+		fs::path checkPtFile(serverEnv_->checkPtFilename());
+		if (fs::exists(checkPtFile) && fs::file_size(checkPtFile) != 0) {
 
-				fs::path oldCheckPtFile(serverEnv_->oldCheckPtFilename());
-				fs::remove(oldCheckPtFile);
-				fs::rename( checkPtFile, oldCheckPtFile );
-			}
-
-			// write to ecf_checkpt_file, if file system is full this could result in an empty file. ?
-			server_->defs_->save_as_checkpt(serverEnv_->checkPtFilename());
-
-			state_change_no_ = Ecf::state_change_no();    // For periodic update only save checkPt if it has changed
-			modify_change_no_ = Ecf::modify_change_no();  // For periodic update only save checkPt if it has changed
-
-         if (from_server) {
-            // Create new time stamp otherwise we end up using the time stamp from the last command
-            if (Log::instance()) Log::instance()->cache_time_stamp();
-            std::string msg = Str::SVR_CMD(); msg += CtsApi::checkPtDefsArg();
-            std::stringstream ss; ss << msg << " in " << durationTimer.duration() << " seconds";
-            log(Log::MSG,ss.str());
-         }
-
-         /// If Save take longer than checkpt_save_time_alarm, then set a flag on server
-         /// So that user can be aware of it.
-         if (static_cast<size_t>(durationTimer.duration()) > server_->serverEnv_.checkpt_save_time_alarm() ) {
-            server_->defs_->flag().set(ecf::Flag::LATE);
-            std::stringstream ss;
-            ss << "Check pt save time(" << durationTimer.duration() << ") is greater than alarm time("
-               << server_->serverEnv_.checkpt_save_time_alarm() << "). Excessive save times can interfere with scheduling!";
-            log(Log::WAR,ss.str());
-         }
-#ifdef DEBUG_CHECKPT
-			std::cout << " backup and save took " <<  durationTimer.duration() << " seconds\n";
-#endif
+			fs::path oldCheckPtFile(serverEnv_->oldCheckPtFilename());
+			fs::remove(oldCheckPtFile);
+			fs::rename( checkPtFile, oldCheckPtFile );
 		}
-		catch (std::exception& e) {
-	 		ret = false;
-         std::string msg =  "Could not save checkPoint file! "; msg += e.what();
-         server_->defs_->flag().set(ecf::Flag::CHECKPT_ERROR);
-         server_->defs()->set_server().add_or_update_user_variables("ECF_CHECKPT_ERROR",msg);
-	 		LOG(Log::ERR,msg);
-	 	}
-	}
-	else {
+
+		// write to ecf_checkpt_file, if file system is full this could result in an empty file. ?
+		server_->defs_->save_as_checkpt(serverEnv_->checkPtFilename());
+
+		state_change_no_ = Ecf::state_change_no();    // For periodic update only save checkPt if it has changed
+		modify_change_no_ = Ecf::modify_change_no();  // For periodic update only save checkPt if it has changed
+
+		if (from_server) {
+			// Create new time stamp otherwise we end up using the time stamp from the last command
+			if (Log::instance()) Log::instance()->cache_time_stamp();
+			std::string msg = Str::SVR_CMD(); msg += CtsApi::checkPtDefsArg();
+			std::stringstream ss; ss << msg << " in " << durationTimer.duration() << " seconds";
+			log(Log::MSG,ss.str());
+		}
+
+		/// If Save take longer than checkpt_save_time_alarm, then set a flag on server
+		/// So that user can be aware of it.
+		if (static_cast<size_t>(durationTimer.duration()) > server_->serverEnv_.checkpt_save_time_alarm() ) {
+			server_->defs_->flag().set(ecf::Flag::LATE);
+			std::stringstream ss;
+			ss << "Check pt save time(" << durationTimer.duration() << ") is greater than alarm time("
+					<< server_->serverEnv_.checkpt_save_time_alarm() << "). Excessive save times can interfere with scheduling!";
+			log(Log::WAR,ss.str());
+		}
 #ifdef DEBUG_CHECKPT
-		std::cout << "      CheckPtSaver::explicitSave() Node tree not loaded, can not save check pt file\n";
+		std::cout << " backup and save took " <<  durationTimer.duration() << " seconds\n";
 #endif
 	}
+	catch (std::exception& e) {
+		ret = false;
+		std::string msg =  "Could not save checkPoint file! "; msg += e.what();
+		server_->defs_->flag().set(ecf::Flag::CHECKPT_ERROR);
+		server_->defs()->set_server().add_or_update_user_variables("ECF_CHECKPT_ERROR",msg);
+		LOG(Log::ERR,msg);
+	}
+
 	return ret;
 }
 
