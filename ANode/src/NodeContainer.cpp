@@ -552,7 +552,9 @@ bool NodeContainer::addChild( const node_ptr& child, size_t position)
 			return true;
 		}
 	}
-	catch  ( std::runtime_error &e) {}
+	catch  ( std::runtime_error &e) {
+		return false; // Duplicate names, or trying to add a Suite?
+	}
 
 	// Duplicate names, or trying to add a Suite?
 	return false;
