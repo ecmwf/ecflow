@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+# file deepcode ignore replace~exit~sys.exit: not used any more kept for reference
 import os
 import ecflow  
 import sys
