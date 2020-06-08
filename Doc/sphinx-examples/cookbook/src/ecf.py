@@ -2,6 +2,7 @@
 # This software is provided under the ECMWF standard software license agreement.
 """ a layer over raw ecflow api """
 
+# file deepcode ignore PythonConstantBinaryExpression: <comment the reason here>
 import unittest
 
 from ecflow import JobCreationCtrl as JobCreationCtrl
