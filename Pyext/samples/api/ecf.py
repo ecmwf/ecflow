@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 # This software is provided under the ECMWF standard software license agreement.
+# file deepcode ignore PythonConstantBinaryExpression: legacy
 """ a layer over raw ecflow api
 
 use 'export ECF_DEBUG_LEVEL=10' to remove warning message related to
