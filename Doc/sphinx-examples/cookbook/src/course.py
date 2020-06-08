@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """ suite builder example for 2013 ecFlow course """
+# file deepcode ignore missing~close~open: legacy ignore
 import sys, os
 sys.path.append('/home/ma/emos/def/ecflow')
 
