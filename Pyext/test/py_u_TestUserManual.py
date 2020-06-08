@@ -67,27 +67,6 @@ if __name__ == "__main__":
     elif var in ( "b", "bb", "bb" ) :    print("it is a kind of b ")
     else :                               print("it is something else ")
    
-# ==========================================================================
-
-    task = Task("task")
-    the_time = 0
-    if the_time == 0 :
-        task.add_today(17, 30)
-        task.add_variable("ANTIME", str(the_time))
-    elif the_time == 6 :
-        task.add_today(17, 30)
-        task.add_variable("ANTIME", str(the_time))
-    elif the_time == 12 :
-        task.add_today(19, 15)
-        task.add_variable("ANTIME", str(the_time))
-    elif the_time == 18 :
-        task.add_time(1, 30)
-        task.add_variable("ANTIME", str(the_time))
-    elif the_time == 24 :
-        task.add_time(3, 0)
-        task.add_variable("ANTIME", "0")
-        task.add_variable("DELTA_DAY", "1")
-        task.add_variable("EXPVER", "0002")
               
 # ====================================================================================
 
