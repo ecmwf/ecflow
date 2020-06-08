@@ -692,7 +692,7 @@ class FuseEcflow(LoggingMixIn, Operations):
     def server_cmd(self, ext, run=1):
         if not ext:
             return ""
-        elif not ext in cmds.keys():
+        elif not ext in cmds:
             print("#WAR: server cmd: what?", ext)
             return ""
         elif ext in ("log", ):
