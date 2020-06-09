@@ -49,13 +49,14 @@ def get_root_source_dir():
             #print "   searching for " + file
             if os.path.exists(file):
                 # determine path by looking into this file:
-                for line in open(file):
-                    ## Source directory: /tmp/ma0/workspace/ecflow/Acore
-                    if line.find("Source directory"):
-                        tokens = line.split()
-                        if len(tokens) == 4:
-                            #print "   returning root_source_dir:", tokens[3]
-                            return tokens[3]
+                with open(file) as fp:
+                    for line in fp:
+                        ## Source directory: /tmp/ma0/workspace/ecflow/Acore
+                        if line.find("Source directory"):
+                            tokens = line.split()
+                            if len(tokens) == 4:
+                                #print "   returning root_source_dir:", tokens[3]
+                                return tokens[3]
                 raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
             else:
                 raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
