@@ -11,6 +11,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+# file deepcode ignore change_to_is: <comment the reason here>
 
 # =============================================================================
 # Code for testing *any* definition
