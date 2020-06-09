@@ -154,16 +154,16 @@ def ignore(): pass
 ignored = ( "action", "owner", "text", "migrate", "automigrate", "autorestore")
 def sms2ecf(orig, dest):
    import re
-   fop = open(dest, 'w')
-   with open(orig, 'r') as source:
-        try:
-            for line in source:
-                for key in ignored:
-                    if " %s " % key in line: 
-                        continue                
-                print(line, file=fop)
-        except:
-            print("oops")
+   with open(dest, 'w') as fop:
+       with open(orig, 'r') as source:
+            try:
+                for line in source:
+                    for key in ignored:
+                        if " %s " % key in line: 
+                            continue                
+                    print(line, file=fop)
+            except:
+                print("oops")
 
 def load(name, host="localhost", port=31415):
     import ecflow as ec
