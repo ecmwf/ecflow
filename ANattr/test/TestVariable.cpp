@@ -88,14 +88,15 @@ BOOST_AUTO_TEST_CASE( test_variable_value )
    }
 
    // make sure time is convertible to an integer
-   char smstime[255];
+   constexpr int buff_size = 255;
+   char smstime[buff_size];
    for(int h = 0; h < 24; h++) {
       for(int m=1; m < 60; m++ ) {
-         int output_written = sprintf(smstime,"%02d%02d", h,m);
+         int output_written = snprintf(smstime,buff_size,"%02d%02d", h,m);
          BOOST_CHECK_MESSAGE(output_written == 4," expected size 4 but found " << output_written);
          Variable var("name","");
          var.set_value( smstime);
-         int value = atoi(smstime);
+         int value = stoi(string(smstime));
          BOOST_CHECK_MESSAGE(var.value() == value,"expected " << value << " but found " << var.value());
       }
    }

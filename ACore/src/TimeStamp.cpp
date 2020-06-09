@@ -29,10 +29,11 @@ std::string TimeStamp::now()
 
 void TimeStamp::now(std::string& time_stamp)
 {
-   char t_fmt[255];
-   time_t stamp = std::time( nullptr);
+   constexpr int buff_size = 255;
+   char t_fmt[buff_size];
+   time_t stamp = std::time(nullptr);
    struct tm *tod = localtime(&stamp);
-   sprintf(t_fmt, "[%02d:%02d:%02d %d.%d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
+   snprintf(t_fmt,buff_size, "[%02d:%02d:%02d %d.%d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
            tod->tm_mday, tod->tm_mon + 1, tod->tm_year + 1900);
 
    time_stamp = t_fmt;
@@ -40,11 +41,11 @@ void TimeStamp::now(std::string& time_stamp)
 
 void TimeStamp::now_in_brief(std::string& time_stamp)
 {
-
-   char t_fmt[255];
+   constexpr int buff_size = 255;
+   char t_fmt[buff_size];
    time_t stamp = time( nullptr);
    struct tm *tod = localtime(&stamp);
-   sprintf(t_fmt, "[%02d:%02d:%02d %d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
+   snprintf(t_fmt,buff_size, "[%02d:%02d:%02d %d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
            tod->tm_mday, tod->tm_mon + 1);
 
    time_stamp = t_fmt;

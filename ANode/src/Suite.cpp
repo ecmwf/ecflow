@@ -791,12 +791,13 @@ void SuiteGenVariables::update_generated_variables() const
    int hours = time_of_day.hours();
    int minutes = time_of_day.minutes();
 
-   char smstime[255];
-   sprintf(smstime,"%02d%02d", hours,minutes);
-   genvar_time_.set_value( smstime );
+   constexpr int buff_size = 255;
+   char buffer[buff_size];
+   snprintf(buffer,buff_size,"%02d%02d", hours,minutes);
+   genvar_time_.set_value( buffer );
 
-   sprintf(smstime,"%02d:%02d", hours,minutes );
-   genvar_ecf_time_.set_value( smstime );
+   snprintf(buffer,buff_size,"%02d:%02d", hours,minutes );
+   genvar_ecf_time_.set_value( buffer );
 
    //cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";
    //cout << "genvar_ecf_time_ = " << genvar_ecf_time_.theValue() << "\n";
@@ -816,9 +817,8 @@ void SuiteGenVariables::update_generated_variables() const
       //cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
       //cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
 
-      char ddmmyyyyBuffer[255];
-      sprintf(ddmmyyyyBuffer,"%02d.%02d.%04d", suite_->cal_.day_of_month(), suite_->cal_.month(), suite_->cal_.year());
-      genvar_date_.set_value( ddmmyyyyBuffer );
+      snprintf(buffer,buff_size,"%02d.%02d.%04d", suite_->cal_.day_of_month(), suite_->cal_.month(), suite_->cal_.year());
+      genvar_date_.set_value( buffer );
       //cout << "genvar_date_ = " << genvar_date_.theValue() << "\n";
 
       char *day_name[]= { const_cast<char*>("sunday"),   const_cast<char*>("monday"),
@@ -828,14 +828,12 @@ void SuiteGenVariables::update_generated_variables() const
       genvar_day_.set_value( day_name[suite_->cal_.day_of_week()]  );
       //cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
-      char dd[255];
-      sprintf(dd,"%02d",suite_->cal_.day_of_month());
-      genvar_dd_.set_value( dd  );
+      snprintf(buffer,buff_size,"%02d",suite_->cal_.day_of_month());
+      genvar_dd_.set_value( buffer  );
       //cout << "genvar_dd_ = " << genvar_dd_.theValue() << "\n";
 
-      char mm[255];
-      sprintf(mm,"%02d",suite_->cal_.month());
-      genvar_mm_.set_value( mm  );
+      snprintf(buffer,buff_size,"%02d",suite_->cal_.month());
+      genvar_mm_.set_value( buffer  );
       //cout << "genvar_mm_ = " << genvar_mm_.theValue() << "\n";
 
       char *month_name[]
@@ -847,14 +845,12 @@ void SuiteGenVariables::update_generated_variables() const
       genvar_month_.set_value( month_name[suite_->cal_.month()-1]  );
       //cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 
-      char smsdate[255];
-      sprintf(smsdate,"%04d%02d%02d", suite_->cal_.year(), suite_->cal_.month() , suite_->cal_.day_of_month());
-      genvar_ecf_date_.set_value( smsdate );
+      snprintf(buffer,buff_size,"%04d%02d%02d", suite_->cal_.year(), suite_->cal_.month() , suite_->cal_.day_of_month());
+      genvar_ecf_date_.set_value( buffer );
       //cout << "genvar_ecf_date_ = " << genvar_ecf_date_.theValue() << "\n";
 
-      char smsclock[255];
-      sprintf(smsclock,"%s:%s:%d:%d", day_name[suite_->cal_.day_of_week()], month_name[suite_->cal_.month()-1],suite_->cal_.day_of_week(),suite_->cal_.day_of_year());
-      genvar_ecf_clock_.set_value( smsclock );
+      snprintf(buffer,buff_size,"%s:%s:%d:%d", day_name[suite_->cal_.day_of_week()], month_name[suite_->cal_.month()-1],suite_->cal_.day_of_week(),suite_->cal_.day_of_year());
+      genvar_ecf_clock_.set_value( buffer );
       //cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
 
 
