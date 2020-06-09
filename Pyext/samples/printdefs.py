@@ -12,7 +12,8 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 import ecflow
-import argparse # for argument parsing     
+import argparse # for argument parsing  
+import sys   
 
 class Indentor:
     """This class manages indentation, 
@@ -168,7 +169,7 @@ if __name__ == "__main__":
         defs = CL.get_defs()
         if defs == None :
             print("No definition found, exiting...")
-            exit(0) 
+            sys.exit(0) 
             
         # print defs;
         defs_traverser = DefsTraverser(defs)

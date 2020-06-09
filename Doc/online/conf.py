@@ -90,7 +90,7 @@ WK="../.."
 # Hence added check
 if not os.path.exists("../../Pyext/ecflow/ecflow.so"):
     print "\necflow extension not built: ecflow.so missing from directory ../../Pyext/ecflow"
-    exit(1)
+    sys.exit(1)
     
 sys.path.insert(0,os.getcwd() + "/../../Pyext/ecflow")   
 #sys.path.insert(0,os.getcwd() + "/../../Pyext")   

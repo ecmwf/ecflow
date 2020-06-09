@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 import ecflow
 import time
+import sys
 
 def monitor_critical_task(ci, path_to_task):
     
@@ -13,13 +14,13 @@ def monitor_critical_task(ci, path_to_task):
         # check to see if definition exists in the server
         defs = ci.get_defs()
         if defs == None :
-            exit(0) # return
+            sys.exit(0) # return
             
         # find the task we are interested in  
         critical_task = defs.find_abs_node(path_to_task)
         if critical_task == None:
             # No such task
-            exit(0) # return
+            sys.exit(0) # return
              
         # Check to see if task was aborted, if it was email me the job output
         if critical_task.get_state() == ecflow.State.aborted:
@@ -27,7 +28,7 @@ def monitor_critical_task(ci, path_to_task):
             # Get the job output
             the_aborted_task_output = ci.get_file(path_to_task,'jobout')  
             # email(the_aborted_task_output)
-            exit(0)
+            sys.exit(0)
                 
 try:
     # Create the client. This will read the default environment variables

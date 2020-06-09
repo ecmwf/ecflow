@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
 import ecflow
+import sys
 
 try:
     # Create the client
@@ -14,7 +15,7 @@ try:
     
     if defs == None :
         print "The server has no definition"
-        exit(1)
+        sys.exit(1)
     
     # get the tasks, *alternatively* could use defs.get_all_nodes()  
     # to include suites, families and tasks.
