@@ -66,7 +66,10 @@ BOOST_AUTO_TEST_CASE( test_init_add_variable )
       suite->add_variable("COMPLETE_DEL_VARIABLES","--remove NAME1 NAME2");
       family_ptr fam = suite->add_family("family" );
       fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
-      task_ptr t1 = fam->add_task( "t1" );  t1->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      task_ptr t1 = fam->add_task( "t1" );
+      t1->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      t1->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()));
+
       task_ptr t2 = fam->add_task( "t2" );
       t2->add_trigger("t1 == active and ./t1:NAME1 == 1 and ./t1:NAME2 == 2");
       t2->addVerify( VerifyAttr(NState::COMPLETE,1) );
