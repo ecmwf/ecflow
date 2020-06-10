@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# file deepcode ignore SSHHostKeyVerificationDisabled: <comment the reason here>
 from __future__ import print_function
 import os
 import sys

@@ -98,7 +98,7 @@ if __name__ == "__main__":
     print ARGS    
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
-    if os.getenv("WK") != None:
+    if os.getenv("WK") is not None:
         ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
         if ARGS.verbose:
             print "Workspace is defined" 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     if ARGS.verbose: 
         print "add variables required for script generation, for all suites\n"
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
-    if os.getenv("WK") != None: 
+    if os.getenv("WK") is not None: 
         DEFS.add_variable("ECF_CLIENT_EXE_PATH", os.getenv("WK") + "/Client/bin/gcc\-4.8/debug/ecflow_client")
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
     DEFS.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")

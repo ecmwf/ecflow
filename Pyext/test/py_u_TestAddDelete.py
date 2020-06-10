@@ -557,9 +557,9 @@ if __name__ == "__main__":
     #===========================================================================
     print("test add autoCancel")
     t1 = ecflow.Task("t1")
-    assert t1.get_autocancel() == None, " Expected no autocancel"
+    assert t1.get_autocancel() is None, " Expected no autocancel"
     t1.add_autocancel(3)                       # 3 days
-    assert t1.get_autocancel() != None, " Expected autocancel"
+    assert t1.get_autocancel() is not None, " Expected autocancel"
     print(str(t1.get_autocancel()))
 
     t3 = ecflow.Task("t3")
@@ -579,9 +579,9 @@ if __name__ == "__main__":
     #===========================================================================
     print("test add autoarchive")
     f1 = ecflow.Family("f1")
-    assert f1.get_autoarchive() == None, " Expected no autoarchive"
+    assert f1.get_autoarchive() is None, " Expected no autoarchive"
     f1.add_autoarchive(3)                       # 3 days
-    assert f1.get_autoarchive() != None, " Expected autoarchive"
+    assert f1.get_autoarchive() is not None, " Expected autoarchive"
     print(str(f1.get_autoarchive()))
 
     f3 = ecflow.Family("f3")
@@ -601,21 +601,21 @@ if __name__ == "__main__":
     #===========================================================================
     print("test add autorestore")
     t1 = ecflow.Task("f1")
-    assert t1.get_autorestore() == None, " Expected no autorestore"
+    assert t1.get_autorestore() is None, " Expected no autorestore"
     t1.add_autorestore(["/s1/f2"])                       
-    assert t1.get_autorestore() != None, " Expected autorestore"
+    assert t1.get_autorestore() is not None, " Expected autorestore"
     print(str(t1.get_autorestore()))
 
     f5 = ecflow.Family("f5")
-    assert f5.get_autorestore() == None, " Expected no autorestore"
+    assert f5.get_autorestore() is None, " Expected no autorestore"
     f5.add_autorestore(["/s1/f2","/s2","/s3"])                       
-    assert f5.get_autorestore() != None, " Expected autorestore"
+    assert f5.get_autorestore() is not None, " Expected autorestore"
     print(str(f5.get_autoarchive()))
     
     f6 = ecflow.Family("f6")
-    assert f6.get_autorestore() == None, " Expected no autorestore"
+    assert f6.get_autorestore() is None, " Expected no autorestore"
     f6.add_autorestore(ecflow.Autorestore(["/s1/f2","/s2","/s3"]))                       
-    assert f6.get_autorestore() != None, " Expected autorestore"
+    assert f6.get_autorestore() is not None, " Expected autorestore"
     print(str(f6.get_autoarchive()))
     
     #===========================================================================
@@ -671,10 +671,10 @@ if __name__ == "__main__":
     print("# get clock")
     print("#===========================================================================")
     s0 = ecflow.Suite("s0")
-    assert s0.get_clock() == None, "Expected no clock"
+    assert s0.get_clock() is None, "Expected no clock"
     
     s0.add_clock(ecflow.Clock(1, 1, 2010, False))
-    assert s0.get_clock() != None, "Expected clock"
+    assert s0.get_clock() is not None, "Expected clock"
 
     #===========================================================================
     # end clock, used in simulator only, not persisted
@@ -693,10 +693,10 @@ if __name__ == "__main__":
     print("# get end clock")
     print("#===========================================================================")
     s0 = ecflow.Suite("s0")
-    assert s0.get_end_clock() == None, "Expected no end clock"
+    assert s0.get_end_clock() is None, "Expected no end clock"
     
     s0.add_end_clock(ecflow.Clock(1, 1, 2010, False))
-    assert s0.get_end_clock() != None, "Expected end clock"
+    assert s0.get_end_clock() is not None, "Expected end clock"
     #===========================================================================
     # Add zombie. Note we can *NOT* add two zombie attributes of the same ZombieType
     #===========================================================================

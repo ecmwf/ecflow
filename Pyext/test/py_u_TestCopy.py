@@ -442,11 +442,11 @@ if __name__ == "__main__":
     #===========================================================================
     print("test add autoCancel")
     t1 = ecflow.Task("t1")
-    assert t1.get_autocancel() == None, " Expected no autocancel"
+    assert t1.get_autocancel() is None, " Expected no autocancel"
     t1.add_autocancel(3)  # 3 days
     
     task_copy = copy.copy(t1)
-    assert task_copy.get_autocancel() != None, " Expected autocancel"
+    assert task_copy.get_autocancel() is not None, " Expected autocancel"
     print(str(task_copy.get_autocancel()))
 
     #===========================================================================
@@ -458,7 +458,7 @@ if __name__ == "__main__":
     late.complete(ecflow.TimeSlot(20, 10), True)
     task.add_late(late)
     task_copy = copy.copy(task)
-    assert task_copy.get_late() != None, " Expected late"
+    assert task_copy.get_late() is not None, " Expected late"
     
     #===========================================================================
     # add defstatus, last one set takes effect
@@ -473,11 +473,11 @@ if __name__ == "__main__":
     clock = ecflow.Clock(1, 1, 2010, False)     # day,month, year, hybrid
     clock.set_gain(1, 10, True)                 # True means positive gain
     suite = ecflow.Suite("suite")
-    assert suite.get_clock() == None, "Expected no clock"
+    assert suite.get_clock() is None, "Expected no clock"
     suite.add_clock(clock)
     
     suite_copy = copy.copy(suite)
-    assert suite_copy.get_clock() != None, "expected clock"
+    assert suite_copy.get_clock() is not None, "expected clock"
     
     #===========================================================================
     # Add zombie. Note we can *NOT* add two zombie attributes of the same ZombieType

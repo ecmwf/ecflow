@@ -128,7 +128,7 @@ class Test_dunder_add(unittest.TestCase):
                     Date(1,1,0) + Date(28,2,1960) + Autocancel(3) 
                     
         t1 = defs.find_abs_node("/s1/t1")
-        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertTrue(t1 is not None, "Can't find t1")
         self.assertEqual(len(defs.s1),1, "Expected 1 nodes but found " + str(len(defs.s1)))
         self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables but found " + str(len(list(t1.variables))))
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
@@ -423,7 +423,7 @@ class TestAddAll(unittest.TestCase):
             )
         )
         t1 = defs.find_abs_node("/s1/t1")
-        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertTrue(t1 is not None, "Can't find t1")
         self.assertEqual(len(defs.s1),6, "Expected 6 nodes but found " + str(len(defs.s1)))
         self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables")
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
@@ -470,7 +470,7 @@ class TestAddAll(unittest.TestCase):
         )
         print(defs)
         t1 = defs.find_abs_node("/s1/t1")
-        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertTrue(t1 is not None, "Can't find t1")
         self.assertEqual(len(defs.s1),6, "Expected 6 nodes but found " + str(len(defs.s1)))
         self.assertEqual(len(list(t1.variables)), 8, "expected 8 variables")
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")
@@ -530,7 +530,7 @@ class TestIAdd(unittest.TestCase):
                     Date(1,1,0),Date(28,2,1960),
                     Autocancel(3)
                 ]
-        self.assertTrue(t1 != None, "Can't find t1")
+        self.assertTrue(t1 is not None, "Can't find t1")
         self.assertEqual(len(list(defs.suites)), 2, "expected 7 suites")
         self.assertEqual(len(list(t1.variables)), 7, "expected 7 variables")
         self.assertEqual(len(list(t1.limits)), 2, "expected 2 limits")

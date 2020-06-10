@@ -171,8 +171,8 @@ if __name__ == "__main__":
  
           
     # Test find      
-    assert defs.find_suite("s1") != None, "Expected to find suite of name s1"
-    assert defs.find_suite("sffff1") == None, "Should not be able to find suite of name sfffff1"
+    assert defs.find_suite("s1") is not None, "Expected to find suite of name s1"
+    assert defs.find_suite("sffff1") is None, "Should not be able to find suite of name sfffff1"
         
     # save the defs file as a check point file and restore it again
     checkpt_file = "py_u_TestDefs.check"

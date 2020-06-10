@@ -410,7 +410,7 @@ class SerialTask(object):
         fam = Family(name).add(
             Variables(MODE= name),
             Task("to_ecflow"))
-        if self.prev != None:
+        if self.prev is not None:
             fam.add(Trigger("./%s eq complete" % self.prev))
         self.prev = name
         return fam
