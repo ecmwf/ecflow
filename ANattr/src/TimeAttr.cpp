@@ -25,7 +25,7 @@
 #include "Ecf.hpp"
 #include "Str.hpp"
 #include "Serialization.hpp"
-#include "log.hpp"
+#include "Log.hpp"
 
 namespace ecf {
 
