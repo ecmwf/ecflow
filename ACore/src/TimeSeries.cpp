@@ -27,7 +27,7 @@
 #include "Ecf.hpp"
 #endif
 
-//#define DEBUG_TIME_SERIES 1
+#define DEBUG_TIME_SERIES 1
 //#define DEBUG_TIME_SERIES_IS_FREE 1
 #ifdef DEBUG_TIME_SERIES_IS_FREE
 #include "Indentor.hpp"
@@ -112,9 +112,9 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
 
  	compute_last_time_slot();
 
-#ifdef DEBUG_TIME_SERIES
-	cout << "TimeSeries::TimeSeries "  << dump() << "\n";
-#endif
+//#ifdef DEBUG_TIME_SERIES
+//	cout << "TimeSeries::TimeSeries "  << dump() << "\n";
+//#endif
 }
 
 bool TimeSeries::operator<(const TimeSeries& rhs) const
@@ -155,7 +155,7 @@ bool TimeSeries::resetRelativeDuration()
 	   return true;
 	}
 #ifdef DEBUG_TIME_SERIES
-	cout << "TimeSeries::resetRelativeDuration "  << dump() << "\n";
+	LOG(Log::DBG,"TimeSeries::resetRelativeDuration "  << dump());
 #endif
 	return false;
 }
@@ -203,8 +203,8 @@ void TimeSeries::reset(const ecf::Calendar& c)
    }
 
 #ifdef DEBUG_TIME_SERIES
-	LogToCout toCoutAsWell;
-	LOG(Log::DBG,"      TimeSeries::reset   "  << dump());
+//	LogToCout toCoutAsWell;
+	LOG(Log::DBG,"TimeSeries::reset   "  << dump());
 #endif
 }
 
@@ -240,7 +240,7 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		if (current_time >= start_.duration() ) {
 			isValid_ = false; // time has expired
 #ifdef DEBUG_TIME_SERIES
-	 	 	LOG(Log::DBG,"      TimeSeries::increment (duration(c) >= start_.duration() ) "  << toString() << " duration=" << to_simple_string(duration(c)));
+	 	 	LOG(Log::DBG,"TimeSeries::requeue HOLDING TIME EXPIRED (duration(c) >= start_.duration() ) "  << dump() << " duration=" << to_simple_string(duration(c)));
 #endif
 		}
 		return;
@@ -266,16 +266,13 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		time_duration value = nextTimeSlot_.duration();
 		value += incr_.duration();
 		nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
-#ifdef DEBUG_TIME_SERIES
- 	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
-#endif
 	}
 
  	if (nextTimeSlot_ > finish_) {
 		isValid_ = false;              // time has expired
 	   suiteTimeAtReque_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
- 	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
+ 	 	LOG(Log::DBG,"TimeSeries::requeue  HOLDING TIME EXPIRED (nextTimeSlot_ > finish_) "  << dump());
 #endif
  	}
 }
@@ -395,7 +392,7 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 	}
 
 #ifdef DEBUG_TIME_SERIES
-	LOG(Log::DBG,"TimeSeries::matches HOLDING (nextTimeSlot_td > endDuration)  " << dump() << " HOLDING at " << to_simple_string(relative_or_real_td));
+	LOG(Log::DBG,"TimeSeries::match_duration_with_time_series HOLDING (nextTimeSlot_td > endDuration)  " << dump() << " HOLDING at " << to_simple_string(relative_or_real_td));
 #endif
  	return false;
 }
@@ -431,6 +428,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    if (!isValid_) {
       // time has expired, hence can no longer re-queues, i.e no future time dependency
 	   //cout << " TimeSeries::checkForRequeue " << calendar.suite_time_str() << "  HOLDING\n";
+	  log(Log::DBG,"TimeSeries::checkForRequeue HOLDING !isValid_  " + dump());
       return false;
    }
 
@@ -445,6 +443,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       // value past the end, and force node state to be stuck in state queue.
       if ( nextTimeSlot_ > finish_ ) {
    	    //cout << " TimeSeries::checkForRequeue ( nextTimeSlot_ > finish_ )    HOLDING\n";
+#ifdef DEBUG_TIME_SERIES
+   	     log(Log::DBG,"TimeSeries::checkForRequeue HOLDING  ( nextTimeSlot_ > finish_ )  " + dump());
+#endif
          return false;
       }
 
@@ -460,6 +461,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
          else {
             // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
             //cout << " TimeSeries::checkForRequeue day changed ===================================================== HOLDING\n";
+#ifdef DEBUG_TIME_SERIES
+       	     log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING  suiteTimeNow < suiteTimeAtReque_  " + dump());
+#endif
             return false;
          }
       }
@@ -476,6 +480,10 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
     		  return true;
     	  }
       }
+
+#ifdef DEBUG_TIME_SERIES
+      log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING calendar_duration < start_ || calendar_duration >= lastTimeSlot_)  " + dump());
+#endif
       return false;
    }
 
@@ -488,6 +496,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // We have a single time slot, *OR* multiple with same time slot
    if (the_min == the_max) {
 	   //cout << " TimeSeries::checkForRequeue (the_min == the_max) HOLDING \n";
+#ifdef DEBUG_TIME_SERIES
+	  log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING  the_min == the_max  " + dump());
+#endif
       return false;
    }
 
@@ -508,7 +519,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    }
 
    //cout << " TimeSeries::checkForRequeue calendar duration " << to_simple_string(calendar_duration) << " not in range " <<  to_simple_string(the_min.duration())  << "-" <<  to_simple_string(the_max.duration()) << "  HOLDING \n";
-
+#ifdef DEBUG_TIME_SERIES
+   log(Log::DBG,"TimeSeries::checkForRequeue HOLDING multiple slots not in range " + dump());
+#endif
    return false;
 }
 
