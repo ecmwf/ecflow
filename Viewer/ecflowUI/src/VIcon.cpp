@@ -480,8 +480,13 @@ bool VTimeIcon::show(VNode *n)
 		return false;
 
 	node_ptr node=n->node();
+    if(!node) return false;
 
-	return node->time_today_cron_is_free();
+    bool b = node->time_today_cron_is_free();
+    return !b &&
+        (node->timeVec().size() > 0 ||
+         node->todayVec().size() > 0 ||
+         node->crons().size() > 0);
 }
 
 
@@ -495,17 +500,10 @@ bool VTimeFreeIcon::show(VNode *n)
     if(!n || n->isServer())
         return false;
 
-    if(timeIcon.show(n))
-        return false;
-
     node_ptr node=n->node();
-    if(node->timeVec().size() > 0 ||
-       node->todayVec().size() > 0 ||
-       node->crons().size() > 0)
-    {
-        return true;
-    }
-    return false;
+    if(!node) return false;
+
+    return node->time_today_cron_is_free();
 }
 
 //==========================================================
