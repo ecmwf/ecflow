@@ -74,7 +74,7 @@ std::string TodayAttr::dump() const
     	else           ss << "(holding) ";
     }
 
- 	ss << ts_.toString();
+ 	ss << ts_.dump();
 
  	return ss.str();
 }
