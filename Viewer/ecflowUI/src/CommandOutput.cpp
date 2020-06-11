@@ -11,6 +11,7 @@
 #include "CommandOutput.hpp"
 
 #include "CommandOutputDialog.hpp"
+#include "VConfig.hpp"
 
 CommandOutputHandler* CommandOutputHandler::instance_=nullptr;
 
@@ -98,12 +99,10 @@ QColor CommandOutput::statusColour() const
 //===============================================
 
 CommandOutputHandler::CommandOutputHandler(QObject* parent) :
-    QObject(parent),
-    maxNum_(25),
-    maxOutputSize_(1000000),
-    maxErrorSize_(30000)
+    QObject(parent)
 {
-
+    showDialogStdOutProp_ = VConfig::instance()->find("view.shellCommand.showPopupOnStdOut");
+    showDialogStdErrProp_ = VConfig::instance()->find("view.shellCommand.showPopupOnStdErr");
 }
 
 CommandOutputHandler* CommandOutputHandler::instance()
@@ -171,12 +170,22 @@ void CommandOutputHandler::failed(CommandOutput_ptr item)
     {
         item->setStatus(CommandOutput::FailedStatus);
         Q_EMIT itemStatusChanged(item);
+        bool showStdErr = (showDialogStdErrProp_)?(showDialogStdErrProp_->value().toBool()):true;
+        if (showStdErr) {
+            CommandOutputDialog::showDialog();
+        }
     }
 }
 
-CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDateTime runTime)
+CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDateTime runTime, CreateContext context)
 {
-    CommandOutputDialog::showDialog();
+    bool showStdOut = (showDialogStdOutProp_)?(showDialogStdOutProp_->value().toBool()):true;
+    bool showStdErr = (showDialogStdErrProp_)?(showDialogStdErrProp_->value().toBool()):true;
+
+    if( (showStdOut && context == StdOutContext) ||
+        (showStdErr && context == StdErrContext) ) {
+        CommandOutputDialog::showDialog();
+    }
     CommandOutput_ptr item=
             CommandOutput_ptr(new CommandOutput(cmd,cmdDef,runTime));
     Q_EMIT itemAddBegin();

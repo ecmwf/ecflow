@@ -108,18 +108,15 @@ void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     if(!item_)
     {
-        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
+        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_, CommandOutputHandler::NormalContext);
     }
+    Q_ASSERT(item_);
+    if(exitCode == 0 && exitStatus == QProcess::NormalExit)
+        CommandOutputHandler::instance()->finished(item_);
+    else
+        CommandOutputHandler::instance()->failed(item_);
 
-    if(item_)
-    {
-        if(exitCode == 0 && exitStatus == QProcess::NormalExit)
-            CommandOutputHandler::instance()->finished(item_);
-        else
-            CommandOutputHandler::instance()->failed(item_);
-    }
     deleteLater();
-
 }
 
 void ShellCommand::slotStdOutput()
@@ -129,7 +126,7 @@ void ShellCommand::slotStdOutput()
 
     if(!item_)
     {
-        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
+        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_, CommandOutputHandler::StdOutContext);
     }
     Q_ASSERT(item_);
     if(item_->isEnabled())
@@ -143,7 +140,7 @@ void ShellCommand::slotStdError()
 {
     if(!item_)
     {
-        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
+        item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_, CommandOutputHandler::StdErrContext);
     }
     Q_ASSERT(item_);
     if(item_->isEnabled())
