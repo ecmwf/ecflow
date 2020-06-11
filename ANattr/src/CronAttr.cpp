@@ -204,13 +204,14 @@ bool CronAttr::structureEquals(const CronAttr& rhs) const
 
 void CronAttr::calendarChanged( const ecf::Calendar& c )
 {
-   if ( free_ ) {
-      return;
-   }
-
+   // ensure this called first , since we need always update for relative duration ECFLOW-1648
    // This assumes that calendarChanged will set TimeSeries::isValid = true, at day change
    if (timeSeries_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
+   }
+
+   if ( free_ ) {
+      return;
    }
 
    // Once a cron is free, it stays free until re-queue
