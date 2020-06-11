@@ -25,6 +25,7 @@
 #include "Ecf.hpp"
 #include "Str.hpp"
 #include "Serialization.hpp"
+#include "log.hpp"
 
 namespace ecf {
 
@@ -46,6 +47,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
    if (ts_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
    }
+   log(Log::DBG,"TimeAttr::calendarChanged(1) " + dump());
 
    if ( free_ ) {
       return;
@@ -55,6 +57,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
    if (isFree(c)) {
       setFree();
    }
+   log(Log::DBG,"TimeAttr::calendarChanged(2) " + dump());
 }
 
 void TimeAttr::resetRelativeDuration()
@@ -93,7 +96,7 @@ std::string TimeAttr::dump() const
 	ss << "time ";
 
     if (free_) ss << "(free) ";
-    else           ss << "(holding) ";
+    else       ss << "(holding) ";
 
  	ss << ts_.dump();
 
