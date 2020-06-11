@@ -17,6 +17,8 @@
 #include <QObject>
 #include <QVector>
 
+#include "VProperty.hpp"
+
 #include <memory>
 
 class CommandOutput;
@@ -62,6 +64,7 @@ class CommandOutputHandler : public QObject
 {
     Q_OBJECT
 public:
+    enum CreateContext {NormalContext, StdOutContext, StdErrContext};
     static CommandOutputHandler* instance();
 
     void appendOutput(CommandOutput_ptr,QString);
@@ -69,7 +72,7 @@ public:
     void finished(CommandOutput_ptr);
     void failed(CommandOutput_ptr);
 
-    CommandOutput_ptr addItem(QString cmd,QString cmdDef,QDateTime runTime);
+    CommandOutput_ptr addItem(QString cmd,QString cmdDef,QDateTime runTime, CreateContext context);
     QVector<CommandOutput_ptr> items() const {return items_;}
     int itemCount() const {return items_.count();}
     int indexOfItem(CommandOutput_ptr) const;
@@ -85,14 +88,16 @@ Q_SIGNALS:
     void itemsReloaded();
 
 protected:
-    CommandOutputHandler(QObject*);
+    CommandOutputHandler(QObject* parent);
     void checkItems();
 
     static CommandOutputHandler* instance_;
-    int maxNum_;
-    int maxOutputSize_;
-    int maxErrorSize_;
+    int maxNum_{25};
+    int maxOutputSize_{1000000};
+    int maxErrorSize_{30000};
     QVector<CommandOutput_ptr> items_;
+    VProperty* showDialogStdOutProp_ {nullptr};
+    VProperty* showDialogStdErrProp_ {nullptr};
 };
 
 

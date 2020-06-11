@@ -355,6 +355,16 @@
                  "values" : "hhmm/hhmmss",
                  "values_label" : "23:59/23:59:59"
               }
+        },
+        "shellCommand" : {
+            "showPopupOnStdOut" : {
+                "label" : "Show popup when stdout is generated",
+                "default" : "true"
+            },
+            "showPopupOnStdErr" : {
+                "label" : "Show popup when stderr is generated",
+                "default" : "true"
+            }
         }
     },
     
