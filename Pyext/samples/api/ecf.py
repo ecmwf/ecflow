@@ -224,7 +224,7 @@ class CWN(object):
             CWN.__CWN.append(item)
         elif item is None:
             pass
-        elif item.real == None:
+        elif item.real is None:
             pass
         elif CWN.is_empty():
             raise DefError("#ERR: no node!")

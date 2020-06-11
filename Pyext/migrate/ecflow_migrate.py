@@ -413,7 +413,7 @@ if __name__ == "__main__":
         else:
             assert False, "un-handled option"
     
-    if defs_file == None:
+    if defs_file is None:
         print("Please enter path to the defs file i.e ecflow_migrate --d ./defs_file.def")
         sys.exit(1)
         

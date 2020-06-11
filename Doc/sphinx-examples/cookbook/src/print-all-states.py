@@ -13,7 +13,7 @@ try:
     # access the definition retrieved from the server
     defs = ci.get_defs()
     
-    if defs == None :
+    if defs is None :
         print "The server has no definition"
         sys.exit(1)
     

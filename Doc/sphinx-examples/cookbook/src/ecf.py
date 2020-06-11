@@ -202,7 +202,7 @@ class Trigger(Attribute):
 
         if type(expr) == list:
             for index, name in enumerate(expr):
-                if name == None: 
+                if name is None: 
                     continue
                 pre = ""
 
@@ -765,7 +765,7 @@ class Node(Root): # from where Task and Family derive
 
     def meter(self, name, start, end, threshold=None):
         """ add meter attribute"""
-        if threshold == None:
+        if threshold is None:
             threshold = end
         self.add_meter(name, start, end, threshold)
         return self

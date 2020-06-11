@@ -167,7 +167,7 @@ if __name__ == "__main__":
         
         # check to see if definition exists in the server
         defs = CL.get_defs()
-        if defs == None :
+        if defs is None :
             print("No definition found, exiting...")
             sys.exit(0) 
             

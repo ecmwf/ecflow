@@ -13,12 +13,12 @@ def monitor_critical_task(ci, path_to_task):
         
         # check to see if definition exists in the server
         defs = ci.get_defs()
-        if defs == None :
+        if defs is None :
             sys.exit(0) # return
             
         # find the task we are interested in  
         critical_task = defs.find_abs_node(path_to_task)
-        if critical_task == None:
+        if critical_task is None:
             # No such task
             sys.exit(0) # return
              

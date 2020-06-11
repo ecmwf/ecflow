@@ -46,7 +46,7 @@ if __name__ == "__main__":
         
         # check to see if definition exists in the server
         defs = CL.get_defs()
-        if defs == None :
+        if defs is None :
             print("No definition found, exiting...")
             sys.exit(0) 
             
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             for var in defs.user_variables:    print("edit " + var.name() + " '" + var.value() + "'")
         else:
             node = defs.find_abs_node(ARGS.path)
-            if node == None:  
+            if node is None:  
                 print("No node found at path " + ARGS.path)
             else:
                 for var in node.variables:     print("edit " + var.name() + " '" + var.value() + "'")

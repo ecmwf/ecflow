@@ -678,12 +678,6 @@ bool TimeSeries::checkInvariants(std::string& errormsg) const
 		cout <<  errormsg << "  " << toString() << "\n";
 		return false;
 	}
-	if (relativeToSuiteStart_  && relativeDuration_.hours() > 99) {
-		errormsg += "TimeSeries::checkInvariants. Max relative duration is 99 hours & 59 minutes";
-		cout <<  errormsg << "  " << toString() << "\n";
-		return false;
-	}
-
 
 	if (!relativeToSuiteStart_ && relativeDuration_.total_seconds() > 0) {
 		errormsg += "TimeSeries::checkInvariants Can only have RelativeDuration if relativeToSuiteStart_ flag is set";

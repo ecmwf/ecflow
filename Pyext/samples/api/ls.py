@@ -213,8 +213,8 @@ class Ls(object):
         found = False
         if 0:  # not parsed.force:
             try:
-                fid = open(filename, "r")
-                found = True
+                with open(filename, "r") as fid:
+                    found = True
             except:
                 pass
         if found:

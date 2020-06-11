@@ -74,7 +74,7 @@ std::string TodayAttr::dump() const
     	else           ss << "(holding) ";
     }
 
- 	ss << ts_.toString();
+ 	ss << ts_.dump();
 
  	return ss.str();
 }
@@ -111,12 +111,13 @@ void TodayAttr::clearFree() {
 
 void TodayAttr::calendarChanged( const ecf::Calendar& c )
 {
-   if ( free_ ) {
-      return;
-   }
-
+   // ensure this called first , since we need always update for relative duration ECFLOW-1648
    if (ts_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
+   }
+
+   if ( free_ ) {
+      return;
    }
 
    // For a time series, we rely on the re queue to reset makeFree

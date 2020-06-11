@@ -45,7 +45,7 @@ if __name__ == "__main__":
         
         # check to see if definition exists in the server
         defs = CL.get_defs()
-        if defs == None :
+        if defs is None :
             print("No definition found, exiting...")
             sys.exit(0) 
          
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
 #        # requires ecflow >= 4.0.8
 #         suite = defs.find_suite(ARGS.suite)
-#         if suite != None:
+#         if suite is not None:
 #             paths_list = []
 #             node_vec = suite.get_all_nodes()
 #             for node in node_vec:
