@@ -27,7 +27,7 @@
 #include "Ecf.hpp"
 #endif
 
-#define DEBUG_TIME_SERIES 1
+//#define DEBUG_TIME_SERIES 1
 //#define DEBUG_TIME_SERIES_IS_FREE 1
 #ifdef DEBUG_TIME_SERIES_IS_FREE
 #include "Indentor.hpp"
@@ -155,7 +155,7 @@ bool TimeSeries::resetRelativeDuration()
 	   return true;
 	}
 #ifdef DEBUG_TIME_SERIES
-	LOG(Log::DBG,"TimeSeries::resetRelativeDuration "  << dump());
+	log(Log::DBG,"TimeSeries::resetRelativeDuration " + dump());
 #endif
 	return false;
 }
@@ -204,7 +204,7 @@ void TimeSeries::reset(const ecf::Calendar& c)
 
 #ifdef DEBUG_TIME_SERIES
 //	LogToCout toCoutAsWell;
-	LOG(Log::DBG,"TimeSeries::reset   "  << dump());
+	log(Log::DBG,"TimeSeries::reset   " + dump());
 #endif
 }
 
@@ -272,7 +272,7 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		isValid_ = false;              // time has expired
 	   suiteTimeAtReque_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
- 	 	LOG(Log::DBG,"TimeSeries::requeue  HOLDING TIME EXPIRED (nextTimeSlot_ > finish_) "  << dump());
+ 	 	log(Log::DBG,"TimeSeries::requeue  HOLDING TIME EXPIRED (nextTimeSlot_ > finish_) " + dump());
 #endif
  	}
 }
@@ -322,7 +322,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 	if (!isValid_) {
 	   // time has expired, hence time is not free
 #ifdef DEBUG_TIME_SERIES_IS_FREE
-   	 	LOG(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING "  << dump());
+   	 	log(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING " + dump());
 #endif
 		return false;
 	}
@@ -427,8 +427,10 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
 
    if (!isValid_) {
       // time has expired, hence can no longer re-queues, i.e no future time dependency
+#ifdef DEBUG_TIME_SERIES
 	   //cout << " TimeSeries::checkForRequeue " << calendar.suite_time_str() << "  HOLDING\n";
 	  log(Log::DBG,"TimeSeries::checkForRequeue HOLDING !isValid_  " + dump());
+#endif
       return false;
    }
 
@@ -442,9 +444,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       // If the current value is greater that finish, then returning true would increment
       // value past the end, and force node state to be stuck in state queue.
       if ( nextTimeSlot_ > finish_ ) {
-   	    //cout << " TimeSeries::checkForRequeue ( nextTimeSlot_ > finish_ )    HOLDING\n";
 #ifdef DEBUG_TIME_SERIES
-   	     log(Log::DBG,"TimeSeries::checkForRequeue HOLDING  ( nextTimeSlot_ > finish_ )  " + dump());
+   	    //cout << " TimeSeries::checkForRequeue ( nextTimeSlot_ > finish_ )    HOLDING\n";
+   	    log(Log::DBG,"TimeSeries::checkForRequeue HOLDING  ( nextTimeSlot_ > finish_ )  " + dump());
 #endif
          return false;
       }
@@ -460,8 +462,8 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
          }
          else {
             // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
-            //cout << " TimeSeries::checkForRequeue day changed ===================================================== HOLDING\n";
 #ifdef DEBUG_TIME_SERIES
+            //cout << " TimeSeries::checkForRequeue day changed ===================================================== HOLDING\n";
        	     log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING  suiteTimeNow < suiteTimeAtReque_  " + dump());
 #endif
             return false;

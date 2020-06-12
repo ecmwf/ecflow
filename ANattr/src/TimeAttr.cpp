@@ -47,7 +47,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
    if (ts_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
    }
-   log(Log::DBG,"TimeAttr::calendarChanged(1) " + dump());
+//   log(Log::DBG,"TimeAttr::calendarChanged(1) " + dump()); // ECFLOW-1648
 
    if ( free_ ) {
       return;
@@ -57,7 +57,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
    if (isFree(c)) {
       setFree();
    }
-   log(Log::DBG,"TimeAttr::calendarChanged(2) " + dump());
+//   log(Log::DBG,"TimeAttr::calendarChanged(2) " + dump()); // ECFLOW-1648
 }
 
 void TimeAttr::resetRelativeDuration()
