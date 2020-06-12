@@ -399,12 +399,20 @@ static const char* get_kill_desc() {
 }
 const char*  get_status_desc(){
    return
-            "Shows the status of a job associated with a task.\n"
+            "Shows the status of a job associated with a task, in %ECF_JOB%.stat file\n"
             "If a family or suite is selected, will invoke status command hierarchically.\n"
             "Status uses the ECF_STATUS_CMD variable. After variable substitution it is invoked as a command.\n"
             "The command should be written in such a way that the output is written to %ECF_JOB%.stat\n"
             "This will allow the output of status command to be shown by the --file command\n"
             "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\n"
+		    "If the process id can not be found on the remote system, then the status command can also\n"
+		    "arrange for the task to be aborted\n"
+		    "The status command can fail for the following reasons:\n"
+		    " - ECF_STATUS_CMD not found\n"
+		    " - variable substitution fails\n"
+		    " - state is active but it can't find process id, i.e. ECF_RID\n"
+		    " - the status command does not exit cleanly\n"
+		    "When this happens a flag is set, STATUSCMD_FAILED, which is visible in the GUI\n"
             "Usage::\n"
             "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat\n"
             "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
