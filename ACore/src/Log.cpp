@@ -125,10 +125,7 @@ void Log::cache_time_stamp()
 
 const std::string& Log::get_cached_time_stamp() const
 {
-   if (!logImpl_)  {
-      return Str::EMPTY();
-   }
-   return logImpl_->get_cached_time_stamp();
+   return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
 }
 
 void Log::flush()
