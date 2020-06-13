@@ -37,6 +37,7 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 BOOST_AUTO_TEST_CASE( test_requeue_with_suspend )
 {
    cout << "Base:: ...test_requeue_with_suspend\n";
+   TestLog test_log("test_requeue_with_suspend.log"); // will create log file, and destroy log and remove file at end of scope
 
    defs_ptr the_defs = Defs::create();
    suite_ptr s1 = the_defs->add_suite( "s1" ) ;
@@ -78,6 +79,7 @@ BOOST_AUTO_TEST_CASE( test_requeue_with_suspend )
 BOOST_AUTO_TEST_CASE( test_requeue_family_clears_children_SUP_909 )
 {
    cout << "Base:: ...test_requeue_family_clears_children_SUP_909\n";
+   TestLog test_log("test_requeue_family_clears_children_SUP_909.log"); // will create log file, and destroy log and remove file at end of scope
 
    //   suite s1
    //    family f1
@@ -118,6 +120,7 @@ BOOST_AUTO_TEST_CASE( test_requeue_family_clears_children_SUP_909 )
 BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_clears_children )
 {
    cout << "Base:: ...test_repeat_based_requeue_clears_children\n";
+   TestLog test_log("test_repeat_based_requeue_clears_children.log"); // will create log file, and destroy log and remove file at end of scope
 
    //   suite s1
    //    repeat day 1
@@ -157,6 +160,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_clears_children )
 BOOST_AUTO_TEST_CASE( test_ecflow_359 )
 {
    cout << "Base:: ...test_ECFLOW-359\n";
+   TestLog test_log("test_ecflow_359.log"); // will create log file, and destroy log and remove file at end of scope
 
    //   suite s1
    //     family f1
@@ -211,6 +215,8 @@ BOOST_AUTO_TEST_CASE( test_ecflow_359 )
 BOOST_AUTO_TEST_CASE( test_ecflow_428 )
 {
    cout << "Base:: ...test_ECFLOW-428\n";
+   TestLog test_log("test_ecflow_428.log"); // will create log file, and destroy log and remove file at end of scope
+
    //   suite s1
    //     family f1
    //       family f2
@@ -256,6 +262,7 @@ BOOST_AUTO_TEST_CASE( test_ecflow_428 )
 BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_resets_relative_duration )
 {
    cout << "Base:: ...test_repeat_based_requeue_resets_relative_duration\n";
+   TestLog test_log("test_repeat_based_requeue_resets_relative_duration.log"); // will create log file, and destroy log and remove file at end of scope
 
    //   suite ecflow_1182
    //    family f
@@ -303,6 +310,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_resets_relative_duration )
 BOOST_AUTO_TEST_CASE( test_reque_with_repeat_and_defstatus_complete )
 {
    cout << "Base:: ...test_reque_with_repeat_and_defstatus_complete\n";
+
    // This will test that when we have a family with a repeat AND defstatus complete
    // We ONLY log the state change complete in the log file when re-queuing
 

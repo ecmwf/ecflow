@@ -35,6 +35,7 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 BOOST_AUTO_TEST_CASE( test_resolve_dependencies )
 {
 	cout << "Base:: ...test_resolve_dependencies\n";
+	TestLog test_log("test_resolve_dependencies.log"); // will create log file, and destroy log and remove file at end of scope
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Create the defs file

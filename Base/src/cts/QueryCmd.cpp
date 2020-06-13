@@ -188,15 +188,17 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().query_++;
 
+   Defs* defs = as->defs().get();
+
    if (path_to_attribute_ == "/") {
 	   if (query_type_ == "state") {
-	      return PreAllocatedReply::string_cmd( NState::toString(as->defs()->state()));
+	      return PreAllocatedReply::string_cmd( NState::toString(defs->state()));
 	   }
        std::stringstream ss; ss << "QueryCmd: The only valid query for the server is 'state', i.e. ecflow_client --query state /";
        throw std::runtime_error(ss.str());
    }
 
-   node_ptr node = find_node(as,path_to_attribute_);
+   node_ptr node = find_node(defs,path_to_attribute_);
 
    if (query_type_ == "event") {
       const Event& event = node->findEventByNameOrNumber(attribute_);

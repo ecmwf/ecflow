@@ -80,6 +80,7 @@ static void restore(NodeContainer* container)
 STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().plug_++;
+   Defs* defs = as->defs().get();
 
    Lock lock(user(),as);
    if (!lock.ok()) {
@@ -88,7 +89,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
       throw std::runtime_error( errorMsg ) ;
    }
 
-   node_ptr sourceNode = as->defs()->findAbsNode(source_);
+   node_ptr sourceNode = defs->findAbsNode(source_);
    if (!sourceNode.get()) throw std::runtime_error( "Plug command failed. Could not find source path " + source_  ) ;
 
    // Moving a node which is active, or submitted, will lead to zombie's. hence prevent
@@ -112,7 +113,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 
    // Check to see if dest node is on the same server
    std::string host,port,destPath;
-   node_ptr destNode =  as->defs()->findAbsNode(dest_);
+   node_ptr destNode =  defs->findAbsNode(dest_);
    if (!destNode.get()) {
 
       // Dest could still be on the same server. Extract host and port
@@ -130,7 +131,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
       if ((hostPortPair.first == host || host == "localhost") && hostPortPair.second == port) {
 
          // Matches local server, try to find dest node again.
-         destNode =  as->defs()->findAbsNode(destPath);
+         destNode =  defs->findAbsNode(destPath);
          if (!destNode) {
             std::string errorMsg = "Plug command failed. The destination path "; errorMsg += dest_;
             errorMsg += " does not exist on server "; errorMsg += hostPortPair.first;
@@ -190,7 +191,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
          sourceNode->remove();
 
          // Updated defs state
-         as->defs()->set_most_significant_state();
+         defs->set_most_significant_state();
 
          return PreAllocatedReply::ok_cmd();
       }
@@ -208,7 +209,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
    if (sourceNode->parent() == destNode->parent()) {
 	   Node* parent = sourceNode->parent();
 	   if (parent) parent->move_peer(sourceNode.get(), destNode.get());
-	   else    as->defs()->move_peer(sourceNode.get(), destNode.get());
+	   else    defs->move_peer(sourceNode.get(), destNode.get());
    }
    else {
 
@@ -231,7 +232,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
    add_node_for_edit_history(destNode);
 
    // Updated defs state
-   as->defs()->set_most_significant_state();
+   defs->set_most_significant_state();
 
    return PreAllocatedReply::ok_cmd();
 }
@@ -318,6 +319,8 @@ bool MoveCmd::check_source() const
 
 STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 {
+   Defs* defs = as->defs().get();
+
    Lock lock(user(),as);
    if (!lock.ok()) {
       std::string errorMsg = "Plug(Move) command failed. User "; errorMsg += as->lockedUser();
@@ -339,7 +342,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
    node_ptr destNode;
    if (!dest_.empty()) {
 
-      destNode = as->defs()->findAbsNode(dest_);
+      destNode = defs->findAbsNode(dest_);
       if (!destNode.get()) {
          std::string errorMsg = "Plug(Move) command failed. The destination path "; errorMsg += dest_;
          errorMsg += " does not exist on server";
@@ -386,12 +389,12 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       // The sourceSuite may be in a handle or pre-registered suite
       SuiteChanged suiteChanged(the_source_suite);
 
-      as->defs()->addSuite( the_source_suite ) ;
+      defs->addSuite( the_source_suite ) ;
 
       add_node_for_edit_history(the_source_suite);
    }
 
-   as->defs()->set_most_significant_state();
+   defs->set_most_significant_state();
 
    // Ownership for src_node has been passed on.
    return PreAllocatedReply::ok_cmd();

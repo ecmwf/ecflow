@@ -123,7 +123,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
       case CFileCmd::STAT:   as->update_stats().file_cmdout_++; break;
 	}
 
- 	node_ptr node = find_node(as,pathToNode_); // will throw if defs not defined, or node not found
+ 	node_ptr node = find_node(as->defs().get(),pathToNode_); // will throw if defs not defined, or node not found
 
 	std::string fileContents;
 	Submittable* submittable = node->isSubmittable();

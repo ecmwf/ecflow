@@ -58,11 +58,12 @@ STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().free_dep_++;
 
-   std::stringstream ss;
+    Defs* defs = as->defs().get();
+    std::stringstream ss;
 	size_t vec_size = paths_.size();
 	for(size_t i = 0; i < vec_size; i++) {
 
-	   node_ptr node = find_node_for_edit_no_throw(as,paths_[i]);
+	   node_ptr node = find_node_for_edit_no_throw(defs,paths_[i]);
       if (!node.get()) {
          ss << "FreeDepCmd: Could not find node at path " << paths_[i] << "\n";
          LOG(Log::ERR,"FreeDepCmd: Could not find node at path " << paths_[i]);

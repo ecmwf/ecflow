@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
 
    // Create a new log, file, we will look in here to see if job profiling is working
    // Hence this test relies on output to be flushed
-   Log::create(log_path);
+   TestLog test_log(log_path); // will create log file, and destroy log and remove file at end of scope
 
 
    // SET ECF_HOME, re-use exist test of directory and scripts
@@ -75,12 +75,6 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    BOOST_CHECK_MESSAGE(File::open(log_path,log_file_contents), "Could not open log file at " << log_path<< " (" << strerror(errno) << ")");
    BOOST_CHECK_MESSAGE(!log_file_contents.empty(),"log file is is empty ?");
    BOOST_CHECK_MESSAGE(log_file_contents.find("Exceeds ECF_TASK_THRESHOLD") != std::string::npos, "Exceeds ECF_TASK_THRESHOLD  not in profile");
-
-   // Remove the log file. Comment out for debugging
-   fs::remove(log_path);
-
-   // Explicitly destroy log. To keep valgrind happy
-   Log::destroy();
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();

@@ -174,6 +174,16 @@ private:
    unsigned int count_{0};
 };
 
+/// Utility class used for test, since server assumes log is always present
+class TestLog {
+public:
+	TestLog(const std::string& log_path);
+	~TestLog();
+private:
+	std::string log_path_;
+};
+
+
 /// Utility class used for debug. Enables log file messages to be written to standard out
 class LogToCout {
 public:

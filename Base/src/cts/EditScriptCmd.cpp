@@ -94,7 +94,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().edit_script_++;
 
-   node_ptr node = find_node_for_edit(as,path_to_node_); // will throw if defs not defined, or node not found
+   node_ptr node = find_node_for_edit(as->defs().get() ,path_to_node_); // will throw if defs not defined, or node not found
 	Submittable* submittable = node->isSubmittable();
 	if (!submittable)  throw std::runtime_error( "EditScriptCmd failed. Can not locate task or alias at path " + path_to_node_ ) ;
 

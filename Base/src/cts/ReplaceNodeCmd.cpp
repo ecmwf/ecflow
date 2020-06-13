@@ -101,8 +101,8 @@ bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().replace_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
+	Defs* defs = as->defs().get();
 
    std::string errMsg, warningMsg;
    defs_ptr client_defs = Defs::create();
@@ -113,19 +113,19 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
    }
 
    if (force_) {
-      node_ptr node = as->defs()->findAbsNode( pathToNode_);
+      node_ptr node = defs->findAbsNode( pathToNode_);
       as->zombie_ctrl().add_user_zombies( node.get(), CtsApi::replace_arg() );
    }
 
    // If we return a node_ptr then we have changed the data model, and therefore must flag node as changed.
    std::string errorMsg;
-   node_ptr client_node_to_add = as->defs()->replaceChild(pathToNode_, client_defs , createNodesAsNeeded_, force_, errorMsg);
+   node_ptr client_node_to_add = defs->replaceChild(pathToNode_, client_defs , createNodesAsNeeded_, force_, errorMsg);
    if (!client_node_to_add) {
       throw std::runtime_error(errorMsg);
    }
 
    // ECFLOW-835, flag node as changed, before check for trigger expressions.
-   add_node_for_edit_history(as,pathToNode_);
+   add_node_for_edit_history(defs,pathToNode_);
 
    // Although we have change the data model, Check if the trigger expressions are still valid.
    // Note:: trigger AST are not copied. If you use trigger in the test environment

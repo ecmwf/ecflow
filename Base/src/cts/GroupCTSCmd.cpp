@@ -250,10 +250,10 @@ void GroupCTSCmd::setup_user_authentification()
    }
 }
 
-void GroupCTSCmd::add_edit_history(AbstractServer* as) const
+void GroupCTSCmd::add_edit_history(Defs* defs) const
 {
    for(Cmd_ptr subCmd: cmdVec_)  {
-      subCmd->add_edit_history(as);
+      subCmd->add_edit_history(defs);
    }
 }
 

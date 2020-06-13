@@ -57,6 +57,8 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite)
 BOOST_AUTO_TEST_CASE( test_plug_cmd )
 {
 	cout << "Client:: ...test_plug_cmd" << endl;
+	TestLog test_log("test_plug_cmd.log"); // will create log file, and destroy log and remove file at end of scope
+
 	{
 	   Defs defs;
 	   get_defs(defs);
@@ -126,6 +128,8 @@ BOOST_AUTO_TEST_CASE( test_plug_cmd )
 BOOST_AUTO_TEST_CASE( test_plug_cmd_preserves_server_state )
 {
    cout << "Client:: ...test_plug_cmd_preserves_server_state" << endl;
+	TestLog test_log("test_plug_cmd_preserves_server_state.log"); // will create log file, and destroy log and remove file at end of scope
+
    {
       Defs defs;
       get_defs(defs);
@@ -165,6 +169,7 @@ BOOST_AUTO_TEST_CASE( test_plug_cmd_preserves_server_state )
 BOOST_AUTO_TEST_CASE( test_plug_cmd_with_handles )
 {
    cout << "Client:: ...test_plug_cmd_with_handles" << endl;
+	TestLog test_log("test_plug_cmd_with_handles.log"); // will create log file, and destroy log and remove file at end of scope
 
    Defs defs;
    get_defs(defs);

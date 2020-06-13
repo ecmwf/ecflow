@@ -49,11 +49,12 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const
 
 	as->update_stats().order_node_++;
 
-	node_ptr theNode = find_node_for_edit(as,absNodepath_);
+	Defs* defs = as->defs().get();
+	node_ptr theNode = find_node_for_edit(defs,absNodepath_);
 
 	Node* theParent = theNode->parent();
 	if ( theParent ) theParent->order(theNode.get(), option_);
-	else             as->defs()->order(theNode.get(), option_);
+	else             defs->order(theNode.get(), option_);
 
    return doJobSubmission( as );
 }

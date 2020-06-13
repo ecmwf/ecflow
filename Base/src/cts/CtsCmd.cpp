@@ -249,12 +249,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
       case CtsCmd::SUITES:           as->update_stats().suites_++; return PreAllocatedReply::suites_cmd( as ); break;
       case CtsCmd::DEBUG_SERVER_ON:  as->update_stats().debug_server_on_++;  as->debug_server_on(); break;
       case CtsCmd::DEBUG_SERVER_OFF: as->update_stats().debug_server_off_++; as->debug_server_off(); break;
-      case CtsCmd::SERVER_LOAD: {    as->update_stats().server_load_cmd_++;
-         if (Log::instance()) {
-            return PreAllocatedReply::server_load_cmd(  Log::instance()->path() );
-         }
-         break;
-      }
+      case CtsCmd::SERVER_LOAD: {    as->update_stats().server_load_cmd_++; return PreAllocatedReply::server_load_cmd(  Log::instance()->path() );}
       case CtsCmd::NO_CMD: assert(false); break;
       default: assert(false); break;
    }

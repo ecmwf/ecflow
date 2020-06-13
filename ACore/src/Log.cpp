@@ -319,6 +319,23 @@ LogFlusher::~LogFlusher()
    }
 }
 
+
+//======================================================================================================
+
+TestLog::TestLog(const std::string& log_path) : log_path_(log_path)
+{
+   Log::create(log_path);
+}
+
+TestLog::~TestLog() {
+
+	// Remove the log file. Comment out for debugging
+	fs::remove(log_path_);
+
+	// Explicitly destroy log. To keep valgrind happy
+	Log::destroy();
+}
+
 //======================================================================================================
 
 LogTimer::~LogTimer()

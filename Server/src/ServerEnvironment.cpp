@@ -365,8 +365,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
    theRetVec.emplace_back(Str::ECF_HOST(), serverHost_ );
 
 	theRetVec.emplace_back(Str::ECF_HOME(), ecfHome_ );
-	if (Log::instance()) theRetVec.emplace_back(std::string("ECF_LOG"), Log::instance()->path() );
-	else                 theRetVec.emplace_back(std::string("ECF_LOG"), std::string() );
+	theRetVec.emplace_back(std::string("ECF_LOG"), Log::instance()->path() );
 	theRetVec.emplace_back(std::string("ECF_CHECK"), ecf_checkpt_file_ );
 	theRetVec.emplace_back(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_ );
    theRetVec.emplace_back(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_) );
@@ -672,8 +671,7 @@ std::string ServerEnvironment::dump() const
 {
    std::stringstream ss;
    ss << "ECF_HOME = '" << ecfHome_ << "'\n";
-   if (Log::instance()) ss << "ECF_LOG = '" << Log::instance()->path() << "'\n";
-   else                 ss << "ECF_LOG = ''\n";
+   ss << "ECF_LOG = '" << Log::instance()->path() << "'\n";
    ss << "ECF_PORT = '" << serverPort_ << "'\n";
    ss << "ECF_CHECK = '" << ecf_checkpt_file_ << "'\n";
    ss << "ECF_CHECKOLD = '" << ecf_backup_checkpt_file_ << "'\n";

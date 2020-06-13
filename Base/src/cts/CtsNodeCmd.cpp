@@ -137,6 +137,8 @@ int CtsNodeCmd::timeout() const
 
 STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
 {
+	Defs* defs = as->defs().get();
+
    switch (api_) {
 
       case CtsNodeCmd::GET:
@@ -149,7 +151,7 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
             return PreAllocatedReply::defs_cmd(as,(api_ == MIGRATE)); // if true, save edit history
          }
          // however request for a particular node, thats not there, treated as an error
-         node_ptr theNodeToReturn = find_node(as,absNodePath_);
+         node_ptr theNodeToReturn = find_node(defs,absNodePath_);
          return PreAllocatedReply::node_cmd(as,theNodeToReturn);
       }
 
@@ -157,7 +159,7 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().node_check_job_gen_only_++;
          job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
          jobCtrl->set_node_path(absNodePath_);
-         as->defs()->check_job_creation(jobCtrl);
+         defs->check_job_creation(jobCtrl);
          if (! jobCtrl->get_error_msg().empty() ) {
             throw std::runtime_error( jobCtrl->get_error_msg() ) ;
          }
@@ -175,7 +177,7 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
             }
 
             // Generate jobs for the given node, downwards
-            node_ptr theNode = find_node_for_edit(as,absNodePath_);
+            node_ptr theNode = find_node_for_edit(defs,absNodePath_);
             Jobs jobs(theNode.get());
             jobs.generate();
          }

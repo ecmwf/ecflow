@@ -301,8 +301,10 @@ void AlterCmd::print(std::string& os, const std::string& path) const
 
 STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 {
+	Defs* defs = as->defs().get();
+
    if ( del_attr_type_ == AlterCmd::DEL_VARIABLE) {
-      as->defs()->set_server().delete_user_variable(name_);
+      defs->set_server().delete_user_variable(name_);
    }
    else if ( change_attr_type_ == AlterCmd::VARIABLE  || add_attr_type_ == AlterCmd::ADD_VARIABLE) {
 
@@ -311,16 +313,16 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
          std::stringstream ss; ss << "AlterCmd:: Can not add or change read only server variable " << name_;
          throw std::runtime_error(ss.str());
       }
-      as->defs()->set_server().add_or_update_user_variables(name_,value_);
+      defs->set_server().add_or_update_user_variables(name_,value_);
    }
 
    // Update defs flag state
    if (flag_type_ != Flag::NOT_SET) {
-      if (flag_) as->defs()->flag().set(flag_type_);
+      if (flag_) defs->flag().set(flag_type_);
       else       {
-         as->defs()->flag().clear(flag_type_);
-         if (flag_type_ == Flag::LOG_ERROR) as->defs()->set_server().delete_user_variable("ECF_LOG_ERROR");
-         if (flag_type_ == Flag::CHECKPT_ERROR) as->defs()->set_server().delete_user_variable("ECF_CHECKPT_ERROR");
+         defs->flag().clear(flag_type_);
+         if (flag_type_ == Flag::LOG_ERROR) defs->set_server().delete_user_variable("ECF_LOG_ERROR");
+         if (flag_type_ == Flag::CHECKPT_ERROR) defs->set_server().delete_user_variable("ECF_CHECKPT_ERROR");
       }
    }
 
@@ -328,7 +330,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 	ecf::Attr::Type attr = Attr::to_attr(name_);
 	if ( attr != ecf::Attr::UNKNOWN) {
 	   bool recursive = (value_ == "recursive") ? true: false;
-	   as->defs()->sort_attributes(attr,recursive);
+	   defs->sort_attributes(attr,recursive);
 	}
 
 	return doJobSubmission( as );
@@ -338,6 +340,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().alter_cmd_++;
+   Defs* defs = as->defs().get();
 
    std::stringstream ss;
    size_t vec_size = paths_.size();
@@ -348,7 +351,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          return alter_server_state(as);
       }
 
-      node_ptr node = find_node_for_edit_no_throw(as,paths_[i]);
+      node_ptr node = find_node_for_edit_no_throw(defs,paths_[i]);
       if (!node.get()) {
          ss << "AlterCmd: Could not find node at path " << paths_[i] << "\n";
          LOG(Log::ERR,"AlterCmd: Failed: Could not find node at path " << paths_[i]);

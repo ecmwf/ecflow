@@ -408,6 +408,8 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
 {
 	// To DEBUG: enable the defines in Memento.hpp
 	cout << "Base:: ...test_ssync_cmd\n";
+	TestLog test_log("test_ssync_cmd.log"); // will create log file, and destroy log and remove file at end of scope
+
    test_sync_scaffold(update_repeat,"update_repeat");
    test_sync_scaffold(delete_some_attributes,"delete_some_attributes");
    test_sync_scaffold(delete_time_attributes,"delete_time_attributes");

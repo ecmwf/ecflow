@@ -23,6 +23,7 @@
 #include "Str.hpp"
 #include "SuiteChanged.hpp"
 #include "Extract.hpp"
+#include "Defs.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -100,28 +101,33 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  		throw std::runtime_error( ss.str() ) ;
  	}
 
+   use_EditHistoryMgr_ = false; // will add edit history ourselves. Quicker than EditHistoryMgr when we have > 200000 paths
+
+   Defs* defs = as->defs().get();
    string the_path;
    string the_event;
    std::stringstream error_ss;
- 	size_t vec_size = paths_.size();
- 	for(size_t i = 0; i < vec_size; i++) {
+   for(const auto& path: paths_) {
 
- 	   the_path = paths_[i];
+ 	   the_path = path;
  	   the_event.clear();
  	   if ( is_event_state ) {
- 	      Extract::pathAndName(paths_[i],the_path, the_event);
+ 	      Extract::pathAndName(path,the_path, the_event);
  	      if ( the_path.empty() || the_event.empty() ) {
  	         error_ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e --force=/path/to_task:event_name set\n";
  	         continue;
  	      }
  	   }
 
- 	   node_ptr node = find_node_for_edit_no_throw(as,the_path);
+       node_ptr node = defs->findAbsNode(the_path);
  	   if (!node.get()) {
  	      error_ss << "ForceCmd: Could not find node at path " << the_path << "\n";
  	      continue;
  	   }
+
  	   SuiteChangedPtr changed(node.get()); // Cater for suites in handles
+       node->flag().set(ecf::Flag::MESSAGE);
+       add_edit_history(defs,the_path);
 
  	   if (is_node_state) {
  	      /// We want this to have side effects. i.e bubble up state and re-queue if complete and has repeat's

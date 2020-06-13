@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite)
 BOOST_AUTO_TEST_CASE( test_node_tree_lifecycle )
 {
 	cout << "Client:: ...test_node_tree_lifecycle" << endl;
+	TestLog test_log("test_node_tree_lifecycle.log"); // will create log file, and destroy log and remove file at end of scope
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 

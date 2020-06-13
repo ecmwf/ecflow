@@ -151,7 +151,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 {
    // LogTimer timer(" PathsCmd::doHandleRequest");
 
-   defs_ptr defs = as->defs();
+   Defs* defs = as->defs().get();
    std::stringstream ss;
    switch (api_) {
 
@@ -169,7 +169,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             SuiteChangedPtr changed(theNode.get());
             theNode->suspend();
             theNode->flag().set(ecf::Flag::MESSAGE);
-            add_edit_history(as,path);
+            add_edit_history(defs,path);
             assert(isWrite()); // should only add edit history for write-able commands
          }
          break;
@@ -190,7 +190,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             SuiteChangedPtr changed(theNode.get());
             theNode->resume();
             theNode->flag().set(ecf::Flag::MESSAGE);
-            add_edit_history(as,path);
+            add_edit_history(defs,path);
             assert(isWrite()); // should only add edit history for write-able commands
 
             as->increment_job_generation_count(); // in case we throw below
@@ -201,7 +201,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       case PathsCmd::KILL: {
          as->update_stats().node_kill_++;
          for(const auto& path: paths_) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,path);
+            node_ptr theNode = find_node_for_edit_no_throw(defs,path);
             if (!theNode.get()) {
                ss << "PathsCmd:Kill: Could not find node at path '" << path << "'\n";
                LOG(Log::ERR,"Kill: Could not find node at path " << path);
@@ -218,7 +218,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().node_edit_history_++;
          if (paths_.empty()) throw std::runtime_error( "No paths/options specified for edit history") ;
          if (paths_.size() == 1 && paths_[0] == "clear") {
-            as->defs()->clear_edit_history();
+            defs->clear_edit_history();
             break;
          }
          // Only first path used
@@ -265,7 +265,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             SuiteChanged1 changed(the_container->suite());
 
             the_container->flag().set(ecf::Flag::MESSAGE);
-            add_edit_history(as,the_container->absNodePath());
+            add_edit_history(defs,the_container->absNodePath());
             assert(isWrite()); // should only add edit history for write-able commands
 
             the_container->archive();  // this can throw std::runtime_error
@@ -277,7 +277,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().node_restore_++;
          if (paths_.empty()) throw std::runtime_error( "No paths specified for restore");
          for(const auto& path: paths_) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,path);
+            node_ptr theNode = find_node_for_edit_no_throw(defs,path);
             if (!theNode.get()) {
                ss << "PathsCmd:RESTORE: Could not find node at path '" << path << "'\n";
                LOG(Log::ERR,"RESTORE: Could not find node at path " << path);
@@ -295,7 +295,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       case PathsCmd::STATUS: {
          as->update_stats().node_status_++;
          for(const auto& path: paths_) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,path);
+            node_ptr theNode = find_node_for_edit_no_throw(defs,path);
             if (!theNode.get()) {
                ss << "PathsCmd:Status: Could not find node at path '" << path << "'\n";
                LOG(Log::ERR,"Status: Could not find node at path " << path);

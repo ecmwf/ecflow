@@ -134,7 +134,7 @@ bool CheckPtSaver::explicitSave(bool from_server) const
 
 		if (from_server) {
 			// Create new time stamp otherwise we end up using the time stamp from the last command
-			if (Log::instance()) Log::instance()->cache_time_stamp();
+			Log::instance()->cache_time_stamp();
 			std::string msg = Str::SVR_CMD(); msg += CtsApi::checkPtDefsArg();
 			std::stringstream ss; ss << msg << " in " << durationTimer.duration() << " seconds";
 			log(Log::MSG,ss.str());

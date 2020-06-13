@@ -53,13 +53,13 @@ void RunNodeCmd::print(std::string& os, const std::string& path) const
 STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().run_node_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
-   std::stringstream ss;
+    Defs* defs = as->defs().get();
+    std::stringstream ss;
 	size_t vec_size = paths_.size();
 	for(size_t i = 0; i < vec_size; i++) {
-	   node_ptr node = find_node_for_edit_no_throw(as,paths_[i]);
+	   node_ptr node = find_node_for_edit_no_throw(defs,paths_[i]);
 	   if (!node.get()) {
          ss << "RunNodeCmd: Could not find node at path " << paths_[i] << "\n";
 	      LOG(Log::ERR,"RunNodeCmd: Could not find node at path " << paths_[i]);
@@ -92,7 +92,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   if (force_) as->zombie_ctrl().add_user_zombies(node.get(),CtsApi::runArg());
 
 	   // Avoid re-running the task again on the same time slot
-      node->miss_next_time_slot();
+       node->miss_next_time_slot();
 
 	   if (!node->run(jobsParam, force_)) {
          LOG(Log::ERR,"RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());

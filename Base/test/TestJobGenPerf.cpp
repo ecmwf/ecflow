@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
 
    // Create a new log, file, place after begin to avoid queued state
-   Log::create(log_path);
+   TestLog test_log(log_path); // will create log file, and destroy log and remove file at end of scope
 
    // This controls the log output when job generation > submitJobsInterval
    JobProfiler::set_task_threshold(100); // 100ms where 1000ms is one second
@@ -185,6 +185,5 @@ int main(int argc, char* argv[])
 	   }
    }
 
-   fs::remove(log_path);
    return 0;
 }

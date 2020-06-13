@@ -31,6 +31,8 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 BOOST_AUTO_TEST_CASE( test_query_cmd )
 {
    cout << "Base:: ...test_query_cmd\n";
+   TestLog test_log("test_query_cmd.log"); // will create log file, and destroy log and remove file at end of scope
+
    // Create the defs file.
    // suite suite
    //    limit limit_x 12

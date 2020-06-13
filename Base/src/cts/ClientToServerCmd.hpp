@@ -125,7 +125,7 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
-   virtual void add_edit_history(AbstractServer*) const;
+   virtual void add_edit_history(Defs*) const;
 
    // used by group_cmd to postfix syncCmd on all user commands that modify defs
    virtual void set_client_handle(int client_handle) {} // used by group_cmd
@@ -162,24 +162,24 @@ protected:
    static void dumpVecArgs(const char* argOption, const std::vector<std::string>& args);
 
    /// Find the node otherwise throw std:::runtime_error
-   node_ptr find_node(AbstractServer* as, const std::string& absNodepath) const;
+   node_ptr find_node(Defs*, const std::string& absNodepath) const;
 
    /// Find The node for edit, otherwise throw std:::runtime_error
    /// Will add the node edit history collection
-   node_ptr find_node_for_edit(AbstractServer* as, const std::string& absNodepath) const;
+   node_ptr find_node_for_edit(Defs*, const std::string& absNodepath) const;
 
    /// Find The node for edit, otherwise return a NULL pointer
    /// Will add the node edit history collection
-   node_ptr find_node_for_edit_no_throw(AbstractServer* as, const std::string& absNodepath) const;
+   node_ptr find_node_for_edit_no_throw(Defs*, const std::string& absNodepath) const;
 
    /// finds the associated node and adds to edit history nodes
-   void add_node_for_edit_history(AbstractServer* as, const std::string& absNodepath) const;
+   void add_node_for_edit_history(Defs* as, const std::string& absNodepath) const;
    void add_node_for_edit_history(node_ptr) const;
    void add_node_path_for_edit_history(const std::string& absNodepath) const;
 
 
-   void add_edit_history(AbstractServer*,const std::string& path) const;
-   void add_delete_edit_history(AbstractServer*,const std::string& path) const;
+   void add_edit_history(Defs*,const std::string& path) const;
+   void add_delete_edit_history(Defs*,const std::string& path) const;
 
 
    mutable bool use_EditHistoryMgr_{true}; // sometime quicker to add edit history in command, than using EditHistoryMgr
@@ -2107,7 +2107,7 @@ public:
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const override;
 
-   void add_edit_history(AbstractServer*) const override;
+   void add_edit_history(Defs*) const override;
 
 private:
    static const char* arg();  // used for argument parsing

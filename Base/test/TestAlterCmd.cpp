@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
 
 #include "ClientToServerCmd.hpp"
 #include "TestHelper.hpp"
@@ -29,6 +30,7 @@
 
 using namespace std;
 using namespace ecf;
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
@@ -74,6 +76,12 @@ private:
    unsigned int initial_state_change_no_;
 };
 
+BOOST_AUTO_TEST_CASE( test_add_log5 )
+{
+	// create once for all test below, then remove at the end
+	Log::create("test_add_log5.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
 
 BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
 {
@@ -1049,6 +1057,13 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_destroy_log5 )
+{
+	Log::destroy();
+	fs::remove("test_add_log5.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
