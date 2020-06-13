@@ -39,7 +39,7 @@ EditHistoryMgr::~EditHistoryMgr()
    if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no()) {
 
       // Ignore child commands for edit history, where only interested in user commands
-      if (!cts_cmd_->task_cmd() && as_->defs()) {
+      if (!cts_cmd_->task_cmd()) {
 
          // *ONLY* record edit history to commands that change the data model
          // Otherwise we will end up making a data model change for read only commands
