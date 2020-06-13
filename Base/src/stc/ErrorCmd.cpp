@@ -42,7 +42,13 @@ void ErrorCmd::init( const std::string& errorMsg)
 	ecf::log(Log::ERR,error_msg_); // will automatically add end of line
 }
 
-std::ostream& ErrorCmd::print(std::ostream& os) const { return os << "cmd:Error [ " << error_msg_ << " ]";}
+std::string ErrorCmd::print() const {
+	std::string os;
+	os += "cmd:Error [ ";
+	os += error_msg_;
+	os += " ]";
+	return os;
+}
 
 bool ErrorCmd::equals(ServerToClientCmd* rhs) const
 {
@@ -53,11 +59,11 @@ bool ErrorCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 {
 	if (debug) std::cout << "  ErrorCmd::handle_server_response " << error_msg_ << "\n";
 
-	std::stringstream ss;
-	ss << "Error: request( "; cts_cmd->print_short(ss); ss << " ) failed!  Server reply: " <<  error_msg_ << "\n";
-	server_reply.set_error_msg( server_reply.get_error_msg() + ss.str());  // append in-case multiple errors from group cmd
+	std::string ss;
+	ss += "Error: request( ";  ss += cts_cmd->print_short(); ss += " ) failed!  Server reply: "; ss +=  error_msg_; ss += "\n";
+	server_reply.set_error_msg( server_reply.get_error_msg() + ss);  // append in-case multiple errors from group cmd
 	return false;
 }
 
-std::ostream& operator<<(std::ostream& os, const ErrorCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ErrorCmd& c) { os << c.print(); return os; }
 

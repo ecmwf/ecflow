@@ -35,62 +35,66 @@ PathsCmd::PathsCmd(Api api,const std::string& absNodePath, bool force)
    if (!absNodePath.empty()) paths_.push_back(absNodePath);
 }
 
-std::ostream& PathsCmd::print(std::ostream& os) const
+void PathsCmd::print(std::string& os) const
 {
-   return my_print(os,paths_);
+   my_print(os,paths_);
 }
 
-std::ostream& PathsCmd::print_short(std::ostream& os) const
+std::string PathsCmd::print_short() const
 {
    std::vector<std::string> paths;
    if (!paths_.empty()) paths.emplace_back(paths_[0]);
+
+   std::string os;
    my_print_only(os,paths);
-   if (paths_.size() > 1) os << " : truncated : " << paths_.size() -1 << " paths *not* shown";
+   if (paths_.size() > 1) {
+	   os += " : truncated : ";
+	   os += boost::lexical_cast<std::string>(paths_.size() -1);
+	   os += " paths *not* shown";
+   }
    return os;
 }
 
-std::ostream& PathsCmd::print_only(std::ostream& os) const
+void PathsCmd::print_only(std::string& os) const
 {
-   return my_print_only(os,paths_);
+   my_print_only(os,paths_);
 }
 
-std::ostream& PathsCmd::print(std::ostream& os, const std::string& path) const
+void PathsCmd::print(std::string& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
-   return my_print(os,paths);
+   my_print(os,paths);
 }
 
-std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>& paths) const
+void PathsCmd::my_print(std::string& os,const std::vector<std::string>& paths) const
 {
    switch (api_) {
-      case PathsCmd::SUSPEND:            return user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths))); break;
-      case PathsCmd::RESUME:             return user_cmd(os,CtsApi::to_string(CtsApi::resume(paths))); break;
-      case PathsCmd::KILL:               return user_cmd(os,CtsApi::to_string(CtsApi::kill(paths))); break;
-      case PathsCmd::STATUS:             return user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
-      case PathsCmd::CHECK:              return user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
-      case PathsCmd::EDIT_HISTORY:       return user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
-      case PathsCmd::ARCHIVE:            return user_cmd(os,CtsApi::to_string(CtsApi::archive(paths,force_))); break;
-      case PathsCmd::RESTORE:            return user_cmd(os,CtsApi::to_string(CtsApi::restore(paths))); break;
+      case PathsCmd::SUSPEND:            user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths))); break;
+      case PathsCmd::RESUME:             user_cmd(os,CtsApi::to_string(CtsApi::resume(paths))); break;
+      case PathsCmd::KILL:               user_cmd(os,CtsApi::to_string(CtsApi::kill(paths))); break;
+      case PathsCmd::STATUS:             user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
+      case PathsCmd::CHECK:              user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
+      case PathsCmd::EDIT_HISTORY:       user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
+      case PathsCmd::ARCHIVE:            user_cmd(os,CtsApi::to_string(CtsApi::archive(paths,force_))); break;
+      case PathsCmd::RESTORE:            user_cmd(os,CtsApi::to_string(CtsApi::restore(paths))); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
    }
-   return os;
 }
-std::ostream& PathsCmd::my_print_only(std::ostream& os,const std::vector<std::string>& paths) const
+void PathsCmd::my_print_only(std::string& os,const std::vector<std::string>& paths) const
 {
    switch (api_) {
-      case PathsCmd::SUSPEND:            os << CtsApi::to_string(CtsApi::suspend(paths)); break;
-      case PathsCmd::RESUME:             os << CtsApi::to_string(CtsApi::resume(paths)); break;
-      case PathsCmd::KILL:               os << CtsApi::to_string(CtsApi::kill(paths)); break;
-      case PathsCmd::STATUS:             os << CtsApi::to_string(CtsApi::status(paths)); break;
-      case PathsCmd::CHECK:              os << CtsApi::to_string(CtsApi::check(paths)); break;
-      case PathsCmd::EDIT_HISTORY:       os << CtsApi::to_string(CtsApi::edit_history(paths)); break;
-      case PathsCmd::ARCHIVE:            os << CtsApi::to_string(CtsApi::archive(paths,force_)); break;
-      case PathsCmd::RESTORE:            os << CtsApi::to_string(CtsApi::restore(paths)); break;
+      case PathsCmd::SUSPEND:            os += CtsApi::to_string(CtsApi::suspend(paths)); break;
+      case PathsCmd::RESUME:             os += CtsApi::to_string(CtsApi::resume(paths)); break;
+      case PathsCmd::KILL:               os += CtsApi::to_string(CtsApi::kill(paths)); break;
+      case PathsCmd::STATUS:             os += CtsApi::to_string(CtsApi::status(paths)); break;
+      case PathsCmd::CHECK:              os += CtsApi::to_string(CtsApi::check(paths)); break;
+      case PathsCmd::EDIT_HISTORY:       os += CtsApi::to_string(CtsApi::edit_history(paths)); break;
+      case PathsCmd::ARCHIVE:            os += CtsApi::to_string(CtsApi::archive(paths,force_)); break;
+      case PathsCmd::RESTORE:            os += CtsApi::to_string(CtsApi::restore(paths)); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
    }
-   return os;
 }
 
 
@@ -601,4 +605,4 @@ void PathsCmd::create(   Cmd_ptr& cmd,
    cmd = std::make_shared<PathsCmd>( api_ , paths, force);
 }
 
-std::ostream& operator<<(std::ostream& os, const PathsCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const PathsCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

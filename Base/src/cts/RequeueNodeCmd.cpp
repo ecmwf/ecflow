@@ -47,19 +47,18 @@ static std::string to_string(RequeueNodeCmd::Option option) {
    return string();
 }
 
-std::ostream& RequeueNodeCmd::print(std::ostream& os) const
+void RequeueNodeCmd::print(std::string& os) const
 {
- 	return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_))));
+ 	user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_))));
 }
-std::ostream& RequeueNodeCmd::print_only(std::ostream& os) const
+void RequeueNodeCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_)));return os;
+   os += CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_)));
 }
 
-std::ostream& RequeueNodeCmd::print(std::ostream& os, const std::string& path) const
+void RequeueNodeCmd::print(std::string& os, const std::string& path) const
 {
-   std::vector<std::string> paths(1,path);
-   return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths,to_string(option_))));
+   user_cmd(os,CtsApi::to_string(CtsApi::requeue(std::vector<std::string>(1,path),to_string(option_))));
 }
 
 STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
@@ -240,4 +239,4 @@ void RequeueNodeCmd::create( 	Cmd_ptr& cmd,
  	cmd = std::make_shared<RequeueNodeCmd>(paths,option);
 }
 
-std::ostream& operator<<(std::ostream& os, const RequeueNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const RequeueNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

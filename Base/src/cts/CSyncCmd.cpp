@@ -25,35 +25,34 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-std::ostream& CSyncCmd::print(std::ostream& os) const
+void CSyncCmd::print(std::string& os) const
 {
    /// Note: Be careful how the *debug* output is interpreted, since the:
    /// client_handle_  > 0  state/modify numbers will be for a set of registered suites,
    /// client_handle_ == 0  state/modify numbers is global i.e. for all suites.
-   std::stringstream ss;
    switch (api_) {
-      case CSyncCmd::NEWS:      ss << CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
-      case CSyncCmd::SYNC:      ss << CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
-      case CSyncCmd::SYNC_FULL: ss << CtsApi::sync_full(client_handle_); break;
-      case CSyncCmd::SYNC_CLOCK:ss << CtsApi::to_string(CtsApi::sync_clock(client_handle_,client_state_change_no_,client_modify_change_no_));break;
+      case CSyncCmd::NEWS:      user_cmd(os,CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_))); break;
+      case CSyncCmd::SYNC:      user_cmd(os,CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_))); break;
+      case CSyncCmd::SYNC_FULL: user_cmd(os,CtsApi::sync_full(client_handle_)); break;
+      case CSyncCmd::SYNC_CLOCK:user_cmd(os,CtsApi::to_string(CtsApi::sync_clock(client_handle_,client_state_change_no_,client_modify_change_no_)));break;
    }
-   return user_cmd(os,ss.str());
 }
 
-std::ostream& CSyncCmd::print_short(std::ostream& os) const
+std::string CSyncCmd::print_short() const
 {
-   return print_only(os);
-}
-
-std::ostream& CSyncCmd::print_only(std::ostream& os) const
-{
-   switch (api_) {
-      case CSyncCmd::NEWS:      os << CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
-      case CSyncCmd::SYNC:      os << CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
-      case CSyncCmd::SYNC_FULL: os << CtsApi::sync_full(client_handle_); break;
-      case CSyncCmd::SYNC_CLOCK:os << CtsApi::to_string(CtsApi::sync_clock(client_handle_,client_state_change_no_,client_modify_change_no_));break;
-   }
+   std::string os;
+   print_only(os);
    return os;
+}
+
+void CSyncCmd::print_only(std::string& os) const
+{
+   switch (api_) {
+      case CSyncCmd::NEWS:      os += CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
+      case CSyncCmd::SYNC:      os += CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
+      case CSyncCmd::SYNC_FULL: os += CtsApi::sync_full(client_handle_); break;
+      case CSyncCmd::SYNC_CLOCK:os += CtsApi::to_string(CtsApi::sync_clock(client_handle_,client_state_change_no_,client_modify_change_no_));break;
+   }
 }
 
 bool CSyncCmd::equals(ClientToServerCmd* rhs) const
@@ -93,9 +92,9 @@ void CSyncCmd::do_log(AbstractServer* as) const
 
       /// Log without adding a new line, to the log file
       /// The SNewsCmd will append additional debug and then add new line
-      std::stringstream ss;
-      print(ss);                                   // Populate the stream with command details:
-      if (!log_no_newline(Log::MSG,ss.str())) {    // log command without adding newline
+      std::string ss;
+      print(ss);                             // Populate the stream with command details:
+      if (!log_no_newline(Log::MSG,ss)) {    // log command without adding newline
          // problems with opening or writing to log file, warn users, ECFLOW-536
          as->defs()->flag().set(ecf::Flag::LOG_ERROR);
          if (Log::instance()) {
@@ -201,4 +200,4 @@ void CSyncCmd::create( 	Cmd_ptr& cmd,
    cmd = std::make_shared<CSyncCmd>(client_handle); // FULL_SYNC
 }
 
-std::ostream& operator<<(std::ostream& os, const CSyncCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const CSyncCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

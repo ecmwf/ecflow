@@ -53,9 +53,9 @@ EditHistoryMgr::~EditHistoryMgr()
             // i.e set late flag( when saving takes more the 30 seconds) *OR* Flag::CHECKPT_ERROR | Flag::LOG_ERROR
             //       even though its read only command. In which case is_mutable() should return true.
             if (!cts_cmd_->is_mutable()) {
-               std::stringstream ss;
+               std::string ss;
                cts_cmd_->print(ss);
-               cout << "cmd " << ss.str() << " should return true from isWrite() ******************\n";
+               cout << "cmd " << ss << " should return true from isWrite() ******************\n";
                cout << "Read only command is making data changes to defs ?????\n";
                cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() " << Ecf::modify_change_no() << "\n";
                cout << "state_change_no_       " << state_change_no_       << " modify_change_no_       " << modify_change_no_ << "\n";

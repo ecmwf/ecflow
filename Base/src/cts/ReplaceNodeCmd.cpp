@@ -143,17 +143,17 @@ bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
    return do_authenticate(as,cmd,pathToNode_);
 }
 
-std::ostream& ReplaceNodeCmd::print(std::ostream& os) const
+void ReplaceNodeCmd::print(std::string& os) const
 {
    std::string path_to_client_defs = path_to_defs_;
    if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
-	return user_cmd(os,CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)));
 }
-std::ostream& ReplaceNodeCmd::print_only(std::ostream& os) const
+void ReplaceNodeCmd::print_only(std::string& os) const
 {
    std::string path_to_client_defs = path_to_defs_;
    if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
-   os << CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)); return os;
+   os += CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_));
 }
 
 const char* ReplaceNodeCmd::arg()  { return CtsApi::replace_arg();}
@@ -216,4 +216,4 @@ void ReplaceNodeCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<ReplaceNodeCmd>(pathToNode,createNodesAsNeeded, pathToDefsFile,force);
 }
 
-std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

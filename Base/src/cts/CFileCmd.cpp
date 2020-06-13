@@ -102,13 +102,13 @@ bool CFileCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& CFileCmd::print(std::ostream& os) const
+void CFileCmd::print(std::string& os) const
 {
-	return user_cmd(os,CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))));
+	user_cmd(os,CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))));
 }
-std::ostream& CFileCmd::print_only(std::ostream& os) const
+void CFileCmd::print_only(std::string& os) const
 {
-    os << CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))); return os;
+    os += CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_)));
 }
 
 STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
@@ -323,5 +323,5 @@ void CFileCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<CFileCmd>(pathToNode, file_type, max_lines);
 }
 
-std::ostream& operator<<(std::ostream& os, const CFileCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const CFileCmd& c) { std::string ret; c.print(ret); os << ret; return os;}
 

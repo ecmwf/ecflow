@@ -27,9 +27,9 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 
-std::ostream& GroupSTCCmd::print(std::ostream& os) const
+std::string GroupSTCCmd::print() const
 {
- 	return os << "cmd:GroupSTCCmd";
+ 	return "cmd:GroupSTCCmd";
 }
 
 bool GroupSTCCmd::equals(ServerToClientCmd* rhs) const
@@ -156,4 +156,4 @@ std::string GroupSTCCmd::error() const
    return ret;
 }
 
-std::ostream& operator<<(std::ostream& os, const GroupSTCCmd& c)   { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const GroupSTCCmd& c) { os << c.print(); return os; }

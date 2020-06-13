@@ -29,13 +29,13 @@ bool ShowCmd::equals(ClientToServerCmd* rhs) const
 	return (dynamic_cast<ShowCmd*>(rhs)) ?  UserCmd::equals(rhs) : false;
 }
 
-std::ostream& ShowCmd::print(std::ostream& os) const
+void ShowCmd::print(std::string& os) const
 {
-	return user_cmd(os,"show");
+	user_cmd(os,"show");
 }
-std::ostream& ShowCmd::print_only(std::ostream& os) const
+void ShowCmd::print_only(std::string& os) const
 {
-   os << "show"; return os;
+   os += "show";
 }
 
 
@@ -104,4 +104,4 @@ void ShowCmd::create( 	Cmd_ptr& cmd,
  	cmd = std::make_shared<ShowCmd>( style );
 }
 
-std::ostream& operator<<(std::ostream& os, const ShowCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ShowCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

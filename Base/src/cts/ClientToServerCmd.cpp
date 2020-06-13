@@ -100,9 +100,9 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
 
 void ClientToServerCmd::do_log(AbstractServer* as) const
 {
-   std::stringstream ss;
-   print(ss);                        // Populate the stream with command details:
-   if (!log(Log::MSG,ss.str())) {    // will automatically add end of line
+   std::string ss;
+   print(ss);                  // Populate the stream with command details:
+   if (!log(Log::MSG,ss)) {    // will automatically add end of line
       // problems with opening or writing to log file, warn users, ECFLOW-536
       as->defs()->flag().set(ecf::Flag::LOG_ERROR);
       if (Log::instance()) {
@@ -223,21 +223,21 @@ void ClientToServerCmd::add_edit_history(AbstractServer* as,const std::string& p
    // See: Client/bin/gcc-4.8/release/perf_test_large_defs
 
    // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
-   std::stringstream ss;
-   ss << "MSG:";
-   if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
+   std::string ss("MSG:");
+   if (Log::instance()) ss += Log::instance()->get_cached_time_stamp();
+
    print(ss,path); // custom print
-   as->defs()->add_edit_history(path,ss.str());
+   as->defs()->add_edit_history(path,ss);
 }
 
 void ClientToServerCmd::add_delete_edit_history(AbstractServer* as,const std::string& path) const
 {
    // History is added to Str::ROOT_PATH(), but the path must show deleted node path
-   std::stringstream ss;
-   ss << "MSG:";
-   if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
+   std::string ss("MSG:");
+   if (Log::instance()) ss += Log::instance()->get_cached_time_stamp();
+
    print(ss,path); // custom print
-   as->defs()->add_edit_history(Str::ROOT_PATH(),ss.str());
+   as->defs()->add_edit_history(Str::ROOT_PATH(),ss);
 }
 
 CEREAL_REGISTER_TYPE(ServerVersionCmd);

@@ -31,7 +31,7 @@ public:
    void init(ecf::Child::ZombieType zt) { zombie_type_ = zt; } // server context
    ecf::Child::ZombieType zombie_type() const { return zombie_type_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override; // client context
 

@@ -40,10 +40,9 @@ bool SStatsCmd::equals(ServerToClientCmd* rhs) const
 	return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SStatsCmd::print(std::ostream& os) const
+std::string SStatsCmd::print() const
 {
-	os << "cmd:SStatsCmd ";
-	return os;
+	return "cmd:SStatsCmd ";
 }
 
 bool SStatsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts_cmd*/, bool debug ) const
@@ -54,4 +53,4 @@ bool SStatsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SStatsCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SStatsCmd& c) { os << c.print(); return os; }

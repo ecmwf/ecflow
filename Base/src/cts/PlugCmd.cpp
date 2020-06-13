@@ -45,13 +45,14 @@ bool PlugCmd::equals(ClientToServerCmd* rhs) const
    return UserCmd::equals(rhs);
 }
 
-std::ostream& PlugCmd::print(std::ostream& os) const
+void PlugCmd::print(std::string& os) const
 {
-   return user_cmd(os,CtsApi::to_string(CtsApi::plug(source_,dest_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::plug(source_,dest_)));
 }
-std::ostream& PlugCmd::print_only(std::ostream& os) const
+
+void PlugCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::plug(source_,dest_));return os;
+   os += CtsApi::to_string(CtsApi::plug(source_,dest_));
 }
 
 /// Class to manage locking: Only unlock if acquired the lock,
@@ -302,11 +303,11 @@ bool MoveCmd::equals(ClientToServerCmd* rhs) const
    return UserCmd::equals(rhs);
 }
 
-std::ostream& MoveCmd::print(std::ostream& os) const
+void MoveCmd::print(std::string& os) const
 {
-   std::stringstream ss;
-   ss << "Plug(Move) source(" << src_host_ << ":" << src_port_ << ":" << src_path_ << ") destination(" << dest_ << ")";
-   return user_cmd(os,ss.str());
+   std::string ss;
+   ss += "Plug(Move) source("; ss += src_host_; ss += ":"; ss += src_port_; ss += ":"; ss += src_path_; ss += ") destination("; ss += dest_; ss += ")";
+   user_cmd(os,ss);
 }
 
 bool MoveCmd::check_source() const
@@ -408,5 +409,5 @@ void MoveCmd::create(Cmd_ptr&, boost::program_options::variables_map&, AbstractC
    assert(false);
 }
 
-std::ostream& operator<<(std::ostream& os, const PlugCmd& c) { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const MoveCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const PlugCmd& c) { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const MoveCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

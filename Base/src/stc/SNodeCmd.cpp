@@ -54,14 +54,15 @@ bool SNodeCmd::equals(ServerToClientCmd* rhs) const
    return true;
 }
 
-std::ostream& SNodeCmd::print(std::ostream& os) const
+std::string SNodeCmd::print() const
 {
-   os << "cmd:SNodeCmd [ ";
+   std::string os;
+   os += "cmd:SNodeCmd [ ";
    std::string error_msg;
    node_ptr node = get_node_ptr(error_msg);
-   if (node.get()) os << node->absNodePath();
-   else       os << "node == NULL";
-   os << " ]";
+   if (node.get()) os += node->absNodePath();
+   else            os +="node == NULL";
+   os += " ]";
    return os;
 }
 
@@ -73,11 +74,12 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
    std::string error_msg;
    node_ptr node = get_node_ptr(error_msg);
    if ( !node.get() ) {
-      std::stringstream ss;
-      ss << "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request ";
-      cts_cmd->print_short(ss); ss << " failed.\n";
-      ss << error_msg;
-      throw std::runtime_error(ss.str());
+      std::string ss;
+      ss += "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request ";
+      ss += cts_cmd->print_short();
+      ss += " failed.\n";
+      ss += error_msg;
+      throw std::runtime_error(ss);
    }
 
    if (server_reply.cli() && !cts_cmd->group_cmd()) {
@@ -112,4 +114,4 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
    return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SNodeCmd& c) { os << c.print(); return os; }

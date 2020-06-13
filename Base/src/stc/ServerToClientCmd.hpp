@@ -29,7 +29,7 @@ public:
 
 	virtual void cleanup() {}    /// After the command has run this function can be used to reclaim memory
 
-	virtual std::ostream& print(std::ostream& os) const = 0;
+	virtual std::string print() const = 0;
 	virtual bool equals(ServerToClientCmd*) const { return true;}
 
 	virtual const std::string& get_string() const;             /// Used by group command, can return any string, including file contents

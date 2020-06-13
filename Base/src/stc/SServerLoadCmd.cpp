@@ -29,9 +29,12 @@ bool SServerLoadCmd::equals(ServerToClientCmd* rhs) const
    return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SServerLoadCmd::print(std::ostream& os) const
+std::string SServerLoadCmd::print() const
 {
-   os << "cmd:SServerLoadCmd [ " << log_file_path_ << " ]";
+	std::string os;
+	os += "cmd:SServerLoadCmd [ ";
+	os += log_file_path_;
+	os += " ]";
    return os;
 }
 
@@ -43,4 +46,4 @@ bool SServerLoadCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr 
    return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SServerLoadCmd& c)      { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SServerLoadCmd& c) { os << c.print(); return os; }

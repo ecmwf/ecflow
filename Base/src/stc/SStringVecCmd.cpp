@@ -29,10 +29,9 @@ bool SStringVecCmd::equals(ServerToClientCmd* rhs) const
    return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SStringVecCmd::print(std::ostream& os) const
+std::string SStringVecCmd::print() const
 {
-   os << "cmd:SStringVecCmd ";
-   return os;
+   return "cmd:SStringVecCmd ";
 }
 
 bool SStringVecCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
@@ -47,4 +46,4 @@ bool SStringVecCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr c
    return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SStringVecCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SStringVecCmd& c) { os << c.print(); return os; }

@@ -66,14 +66,14 @@ static std::vector<std::string> valid_edit_types() {
 }
 
 
-std::ostream& EditScriptCmd::print(std::ostream& os) const
+void EditScriptCmd::print(std::string& os) const
 {
-	return user_cmd(os,CtsApi::to_string(CtsApi::edit_script(path_to_node_,to_string(edit_type()),"",alias_,run_)));
+	user_cmd(os,CtsApi::to_string(CtsApi::edit_script(path_to_node_,to_string(edit_type()),"",alias_,run_)));
 }
 
-std::ostream& EditScriptCmd::print_only(std::ostream& os) const
+void EditScriptCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::edit_script(path_to_node_,to_string(edit_type()),"",alias_,run_)); return os;
+   os += CtsApi::to_string(CtsApi::edit_script(path_to_node_,to_string(edit_type()),"",alias_,run_));
 }
 
 bool EditScriptCmd::isWrite() const
@@ -417,4 +417,4 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 	throw std::runtime_error(ss.str());
 }
 
-std::ostream& operator<<(std::ostream& os, const EditScriptCmd& c)       { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const EditScriptCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

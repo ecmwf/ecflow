@@ -25,13 +25,13 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-std::ostream& CheckPtCmd::print(std::ostream& os) const
+void CheckPtCmd::print(std::string& os) const
 {
-   return user_cmd(os,CtsApi::checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_));
+   user_cmd(os,CtsApi::checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_));
 }
-std::ostream& CheckPtCmd::print_only(std::ostream& os) const
+void CheckPtCmd::print_only(std::string& os) const
 {
-   os << CtsApi::checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_); return os;
+   os += CtsApi::checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_);
 }
 
 bool CheckPtCmd::equals(ClientToServerCmd* rhs) const
@@ -216,4 +216,4 @@ void CheckPtCmd::create(    Cmd_ptr& cmd,
    cmd = std::make_shared<CheckPtCmd>(m,check_pt_interval,check_pt_save_time_alarm);
 }
 
-std::ostream& operator<<(std::ostream& os, const CheckPtCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const CheckPtCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

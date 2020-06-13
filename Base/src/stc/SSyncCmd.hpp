@@ -46,7 +46,7 @@ public:
 
    SSyncCmd() : ServerToClientCmd(), incremental_changes_(0) {}
 
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
 
    // Client side functions:

@@ -36,18 +36,17 @@ bool RunNodeCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& RunNodeCmd::print(std::ostream& os) const
+void RunNodeCmd::print(std::string& os) const
 {
- 	return user_cmd(os,CtsApi::to_string(CtsApi::run(paths_,force_)));
+ 	user_cmd(os,CtsApi::to_string(CtsApi::run(paths_,force_)));
 }
-std::ostream& RunNodeCmd::print_only(std::ostream& os) const
+void RunNodeCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::run(paths_,force_)); return os;
+   os += CtsApi::to_string(CtsApi::run(paths_,force_));
 }
-std::ostream& RunNodeCmd::print(std::ostream& os, const std::string& path) const
+void RunNodeCmd::print(std::string& os, const std::string& path) const
 {
-   std::vector<std::string> paths(1,path);
-   return user_cmd(os,CtsApi::to_string(CtsApi::run(paths,force_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::run(std::vector<std::string>(1,path) ,force_)));
 }
 
 
@@ -177,4 +176,4 @@ void RunNodeCmd::create( 	Cmd_ptr& cmd,
  	cmd = std::make_shared<RunNodeCmd>(paths,force);
 }
 
-std::ostream& operator<<(std::ostream& os, const RunNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const RunNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

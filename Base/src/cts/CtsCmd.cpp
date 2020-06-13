@@ -30,58 +30,56 @@ namespace po = boost::program_options;
 
 // *IMPORTANT*: STATS_RESET was introduced in release 4.0.5
 
-std::ostream& CtsCmd::print(std::ostream& os) const
+void CtsCmd::print(std::string& os) const
 {
    switch (api_) {
-      case CtsCmd::GET_ZOMBIES:                return user_cmd(os,CtsApi::zombieGet()); break;
-      case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:  return user_cmd(os,CtsApi::restoreDefsFromCheckPt()); break;
-      case CtsCmd::RESTART_SERVER:             return user_cmd(os,CtsApi::restartServer()); break;
-      case CtsCmd::SHUTDOWN_SERVER:            return user_cmd(os,CtsApi::shutdownServer()); break;
-      case CtsCmd::HALT_SERVER:                return user_cmd(os,CtsApi::haltServer()); break;
-      case CtsCmd::TERMINATE_SERVER:           return user_cmd(os,CtsApi::terminateServer()); break;
-      case CtsCmd::RELOAD_WHITE_LIST_FILE:     return user_cmd(os,CtsApi::reloadwsfile()); break;
-      case CtsCmd::RELOAD_PASSWD_FILE:         return user_cmd(os,CtsApi::reloadpasswdfile()); break;
-      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:  return user_cmd(os,CtsApi::reloadcustompasswdfile()); break;
-      case CtsCmd::FORCE_DEP_EVAL:             return user_cmd(os,CtsApi::forceDependencyEval()); break;
-      case CtsCmd::PING:                       return user_cmd(os,CtsApi::pingServer()); break;
-      case CtsCmd::STATS:                      return user_cmd(os,CtsApi::stats()); break;
-      case CtsCmd::STATS_SERVER:               return user_cmd(os,CtsApi::stats_server()); break;
-      case CtsCmd::STATS_RESET:                return user_cmd(os,CtsApi::stats_reset()); break;
-      case CtsCmd::SUITES:                     return user_cmd(os,CtsApi::suites()); break;
-      case CtsCmd::DEBUG_SERVER_ON:            return user_cmd(os,CtsApi::debug_server_on()); break;
-      case CtsCmd::DEBUG_SERVER_OFF:           return user_cmd(os,CtsApi::debug_server_off()); break;
-      case CtsCmd::SERVER_LOAD:                return user_cmd(os,CtsApi::server_load("")); break;
-      case CtsCmd::NO_CMD:                     assert(false); os << "CtsCmdCtsCmd::NO_CMD  !!!!"; break;
-      default: assert(false); os << "CtsCmd did not match api_ !!!!"; break;
+      case CtsCmd::GET_ZOMBIES:                 user_cmd(os,CtsApi::zombieGet()); break;
+      case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:   user_cmd(os,CtsApi::restoreDefsFromCheckPt()); break;
+      case CtsCmd::RESTART_SERVER:              user_cmd(os,CtsApi::restartServer()); break;
+      case CtsCmd::SHUTDOWN_SERVER:             user_cmd(os,CtsApi::shutdownServer()); break;
+      case CtsCmd::HALT_SERVER:                 user_cmd(os,CtsApi::haltServer()); break;
+      case CtsCmd::TERMINATE_SERVER:            user_cmd(os,CtsApi::terminateServer()); break;
+      case CtsCmd::RELOAD_WHITE_LIST_FILE:      user_cmd(os,CtsApi::reloadwsfile()); break;
+      case CtsCmd::RELOAD_PASSWD_FILE:          user_cmd(os,CtsApi::reloadpasswdfile()); break;
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:   user_cmd(os,CtsApi::reloadcustompasswdfile()); break;
+      case CtsCmd::FORCE_DEP_EVAL:              user_cmd(os,CtsApi::forceDependencyEval()); break;
+      case CtsCmd::PING:                        user_cmd(os,CtsApi::pingServer()); break;
+      case CtsCmd::STATS:                       user_cmd(os,CtsApi::stats()); break;
+      case CtsCmd::STATS_SERVER:                user_cmd(os,CtsApi::stats_server()); break;
+      case CtsCmd::STATS_RESET:                 user_cmd(os,CtsApi::stats_reset()); break;
+      case CtsCmd::SUITES:                      user_cmd(os,CtsApi::suites()); break;
+      case CtsCmd::DEBUG_SERVER_ON:             user_cmd(os,CtsApi::debug_server_on()); break;
+      case CtsCmd::DEBUG_SERVER_OFF:            user_cmd(os,CtsApi::debug_server_off()); break;
+      case CtsCmd::SERVER_LOAD:                 user_cmd(os,CtsApi::server_load("")); break;
+      case CtsCmd::NO_CMD:                      assert(false); os += "CtsCmdCtsCmd::NO_CMD  !!!!"; break;
+      default: assert(false); os += "CtsCmd did not match api_ !!!!"; break;
    }
-   return os;
 }
 
-std::ostream& CtsCmd::print_only(std::ostream& os) const
+void CtsCmd::print_only(std::string& os) const
 {
    switch (api_) {
-      case CtsCmd::GET_ZOMBIES:                os << CtsApi::zombieGet(); break;
-      case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:  os << CtsApi::restoreDefsFromCheckPt(); break;
-      case CtsCmd::RESTART_SERVER:             os << CtsApi::restartServer(); break;
-      case CtsCmd::SHUTDOWN_SERVER:            os << CtsApi::shutdownServer(); break;
-      case CtsCmd::HALT_SERVER:                os << CtsApi::haltServer(); break;
-      case CtsCmd::TERMINATE_SERVER:           os << CtsApi::terminateServer(); break;
-      case CtsCmd::RELOAD_WHITE_LIST_FILE:     os << CtsApi::reloadwsfile(); break;
-      case CtsCmd::RELOAD_PASSWD_FILE:         os << CtsApi::reloadpasswdfile(); break;
-      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:  os << CtsApi::reloadcustompasswdfile(); break;
-      case CtsCmd::FORCE_DEP_EVAL:             os << CtsApi::forceDependencyEval(); break;
-      case CtsCmd::PING:                       os << CtsApi::pingServer(); break;
-      case CtsCmd::STATS:                      os << CtsApi::stats(); break;
-      case CtsCmd::STATS_SERVER:               os << CtsApi::stats_server(); break;
-      case CtsCmd::STATS_RESET:                os << CtsApi::stats_reset(); break;
-      case CtsCmd::SUITES:                     os << CtsApi::suites(); break;
-      case CtsCmd::DEBUG_SERVER_ON:            os << CtsApi::debug_server_on(); break;
-      case CtsCmd::DEBUG_SERVER_OFF:           os << CtsApi::debug_server_off(); break;
-      case CtsCmd::SERVER_LOAD:                os << CtsApi::server_load(""); break;
-      case CtsCmd::NO_CMD:      assert(false); os << "CtsCmdCtsCmd::NO_CMD  !!!!"; break;
-      default: assert(false); os << "CtsCmd did not match api_ !!!!"; break;
+      case CtsCmd::GET_ZOMBIES:                os += CtsApi::zombieGet(); break;
+      case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:  os += CtsApi::restoreDefsFromCheckPt(); break;
+      case CtsCmd::RESTART_SERVER:             os += CtsApi::restartServer(); break;
+      case CtsCmd::SHUTDOWN_SERVER:            os += CtsApi::shutdownServer(); break;
+      case CtsCmd::HALT_SERVER:                os += CtsApi::haltServer(); break;
+      case CtsCmd::TERMINATE_SERVER:           os += CtsApi::terminateServer(); break;
+      case CtsCmd::RELOAD_WHITE_LIST_FILE:     os += CtsApi::reloadwsfile(); break;
+      case CtsCmd::RELOAD_PASSWD_FILE:         os += CtsApi::reloadpasswdfile(); break;
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:  os += CtsApi::reloadcustompasswdfile(); break;
+      case CtsCmd::FORCE_DEP_EVAL:             os += CtsApi::forceDependencyEval(); break;
+      case CtsCmd::PING:                       os += CtsApi::pingServer(); break;
+      case CtsCmd::STATS:                      os += CtsApi::stats(); break;
+      case CtsCmd::STATS_SERVER:               os += CtsApi::stats_server(); break;
+      case CtsCmd::STATS_RESET:                os += CtsApi::stats_reset(); break;
+      case CtsCmd::SUITES:                     os += CtsApi::suites(); break;
+      case CtsCmd::DEBUG_SERVER_ON:            os += CtsApi::debug_server_on(); break;
+      case CtsCmd::DEBUG_SERVER_OFF:           os += CtsApi::debug_server_off(); break;
+      case CtsCmd::SERVER_LOAD:                os += CtsApi::server_load(""); break;
+      case CtsCmd::NO_CMD:                     assert(false); os += "CtsCmdCtsCmd::NO_CMD  !!!!"; break;
+      default: assert(false);                  os += "CtsCmd did not match api_ !!!!"; break;
    }
-   return os;
 }
 
 bool CtsCmd::equals(ClientToServerCmd* rhs) const
@@ -561,4 +559,4 @@ void CtsCmd::create( 	Cmd_ptr& cmd,
    cmd = std::make_shared<CtsCmd>( api_ );
 }
 
-std::ostream& operator<<(std::ostream& os, const CtsCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const CtsCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

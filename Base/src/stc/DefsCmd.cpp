@@ -53,10 +53,9 @@ bool DefsCmd::equals(ServerToClientCmd* rhs) const
 	return true;
 }
 
-std::ostream& DefsCmd::print(std::ostream& os) const
+std::string DefsCmd::print() const
 {
-	os << "cmd:DefsCmd [ defs ]";
-	return os;
+	return  "cmd:DefsCmd [ defs ]";
 }
 
 // Called in client
@@ -91,4 +90,4 @@ bool DefsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd
 }
 
 
-std::ostream& operator<<(std::ostream& os, const DefsCmd& c)       { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const DefsCmd& c) { os << c.print(); return os; }

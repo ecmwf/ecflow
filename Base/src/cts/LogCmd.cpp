@@ -51,29 +51,27 @@ LogCmd::LogCmd(const std::string& path)
    boost::algorithm::trim(new_path_);
 }
 
-std::ostream& LogCmd::print(std::ostream& os) const
+void LogCmd::print(std::string& os) const
 {
     switch (api_) {
-      case LogCmd::GET:   return user_cmd(os,CtsApi::to_string(CtsApi::getLog(get_last_n_lines_)));  break;
-      case LogCmd::CLEAR: return user_cmd(os,CtsApi::clearLog()); break;
-      case LogCmd::FLUSH: return user_cmd(os,CtsApi::flushLog()); break;
-      case LogCmd::NEW:   return user_cmd(os,CtsApi::to_string(CtsApi::new_log(new_path_)));  break;
-      case LogCmd::PATH:  return user_cmd(os,CtsApi::get_log_path()); break;
+      case LogCmd::GET:   user_cmd(os,CtsApi::to_string(CtsApi::getLog(get_last_n_lines_)));  break;
+      case LogCmd::CLEAR: user_cmd(os,CtsApi::clearLog()); break;
+      case LogCmd::FLUSH: user_cmd(os,CtsApi::flushLog()); break;
+      case LogCmd::NEW:   user_cmd(os,CtsApi::to_string(CtsApi::new_log(new_path_)));  break;
+      case LogCmd::PATH:  user_cmd(os,CtsApi::get_log_path()); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
-   return os;
 }
-std::ostream& LogCmd::print_only(std::ostream& os) const
+void LogCmd::print_only(std::string& os) const
 {
     switch (api_) {
-      case LogCmd::GET:   os << CtsApi::to_string(CtsApi::getLog(get_last_n_lines_));  break;
-      case LogCmd::CLEAR: os << CtsApi::clearLog(); break;
-      case LogCmd::FLUSH: os << CtsApi::flushLog(); break;
-      case LogCmd::NEW:   os << CtsApi::to_string(CtsApi::new_log(new_path_));  break;
-      case LogCmd::PATH:  os << CtsApi::get_log_path(); break;
+      case LogCmd::GET:   os += CtsApi::to_string(CtsApi::getLog(get_last_n_lines_));  break;
+      case LogCmd::CLEAR: os += CtsApi::clearLog(); break;
+      case LogCmd::FLUSH: os += CtsApi::flushLog(); break;
+      case LogCmd::NEW:   os += CtsApi::to_string(CtsApi::new_log(new_path_));  break;
+      case LogCmd::PATH:  os += CtsApi::get_log_path(); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
-   return os;
 }
 
 bool LogCmd::equals(ClientToServerCmd* rhs) const
@@ -263,4 +261,4 @@ void LogCmd::create( 	Cmd_ptr& cmd,
    throw std::runtime_error( ss.str() );
 }
 
-std::ostream& operator<<(std::ostream& os, const LogCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const LogCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

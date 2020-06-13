@@ -38,40 +38,39 @@ bool CtsNodeCmd::why_cmd( std::string& nodePath) const
    return false;
 }
 
-std::ostream& CtsNodeCmd::print(std::ostream& os) const
+void CtsNodeCmd::print(std::string& os) const
 {
    switch (api_) {
       case CtsNodeCmd::GET: {
-         std::stringstream ss;
-         ss << CtsApi::get(absNodePath_);
+         user_cmd(os,CtsApi::get(absNodePath_));
 #ifdef DEBUG
+         std::stringstream ss;
          if (Ecf::server()) ss << " [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]";
+         os += ss.str();
 #endif
-         return user_cmd(os,ss.str());
+         break;
       }
-      case CtsNodeCmd::GET_STATE:          return user_cmd(os,CtsApi::get_state(absNodePath_)); break;
-      case CtsNodeCmd::MIGRATE:            return user_cmd(os,CtsApi::migrate(absNodePath_)); break;
-      case CtsNodeCmd::JOB_GEN:            return user_cmd(os,CtsApi::job_gen(absNodePath_)); break;
-      case CtsNodeCmd::CHECK_JOB_GEN_ONLY: return user_cmd(os,CtsApi::checkJobGenOnly(absNodePath_)); break;
-      case CtsNodeCmd::WHY:                return user_cmd(os,CtsApi::why(absNodePath_)); break;
-      case CtsNodeCmd::NO_CMD:       break;
+      case CtsNodeCmd::GET_STATE:          user_cmd(os,CtsApi::get_state(absNodePath_)); break;
+      case CtsNodeCmd::MIGRATE:            user_cmd(os,CtsApi::migrate(absNodePath_)); break;
+      case CtsNodeCmd::JOB_GEN:            user_cmd(os,CtsApi::job_gen(absNodePath_)); break;
+      case CtsNodeCmd::WHY:                user_cmd(os,CtsApi::why(absNodePath_)); break;
+      case CtsNodeCmd::CHECK_JOB_GEN_ONLY: user_cmd(os,CtsApi::checkJobGenOnly(absNodePath_)); break;
+      case CtsNodeCmd::NO_CMD:             break;
       default: throw std::runtime_error("CtsNodeCmd::print: Unrecognised command");break;
    }
-   return os;
 }
-std::ostream& CtsNodeCmd::print_only(std::ostream& os) const
+void CtsNodeCmd::print_only(std::string& os) const
 {
    switch (api_) {
-      case CtsNodeCmd::GET:                os << CtsApi::get(absNodePath_); break;
-      case CtsNodeCmd::GET_STATE:          os << CtsApi::get_state(absNodePath_); break;
-      case CtsNodeCmd::MIGRATE:            os << CtsApi::migrate(absNodePath_); break;
-      case CtsNodeCmd::JOB_GEN:            os << CtsApi::job_gen(absNodePath_); break;
-      case CtsNodeCmd::CHECK_JOB_GEN_ONLY: os << CtsApi::checkJobGenOnly(absNodePath_); break;
-      case CtsNodeCmd::WHY:                os << CtsApi::why(absNodePath_); break;
+      case CtsNodeCmd::GET:                os += CtsApi::get(absNodePath_); break;
+      case CtsNodeCmd::GET_STATE:          os += CtsApi::get_state(absNodePath_); break;
+      case CtsNodeCmd::MIGRATE:            os += CtsApi::migrate(absNodePath_); break;
+      case CtsNodeCmd::JOB_GEN:            os += CtsApi::job_gen(absNodePath_); break;
+      case CtsNodeCmd::CHECK_JOB_GEN_ONLY: os += CtsApi::checkJobGenOnly(absNodePath_); break;
+      case CtsNodeCmd::WHY:                os += CtsApi::why(absNodePath_); break;
       case CtsNodeCmd::NO_CMD:             break;
       default: throw std::runtime_error("CtsNodeCmd::print_only : Unrecognised command");break;
    }
-   return os;
 }
 
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const
@@ -330,4 +329,4 @@ void CtsNodeCmd::create(   Cmd_ptr& cmd,
    cmd = std::make_shared<CtsNodeCmd>( api_ , absNodePath);
 }
 
-std::ostream& operator<<(std::ostream& os, const CtsNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const CtsNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

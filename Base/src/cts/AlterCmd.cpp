@@ -276,27 +276,26 @@ void AlterCmd::alter_and_attr_type(std::string& alter_type,std::string& attr_typ
     }
 }
 
-std::ostream& AlterCmd::print_only(std::ostream& os) const
+void AlterCmd::print_only(std::string& os) const
 {
    std::string alter_type,attr_type;
    alter_and_attr_type(alter_type, attr_type);
-   if (paths_.empty()) os << CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1," "),alter_type,attr_type,name_,value_));
-   else                os << CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,paths_[0]),alter_type,attr_type,name_,value_));
-   return os;
+   if (paths_.empty()) os += CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1," "),alter_type,attr_type,name_,value_));
+   else                os += CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,paths_[0]),alter_type,attr_type,name_,value_));
 }
 
-std::ostream& AlterCmd::print(std::ostream& os) const
+void AlterCmd::print(std::string& os) const
 {
    std::string alter_type,attr_type;
    alter_and_attr_type(alter_type, attr_type);
-   return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
 }
 
-std::ostream& AlterCmd::print(std::ostream& os, const std::string& path) const
+void AlterCmd::print(std::string& os, const std::string& path) const
 {
    std::string alter_type,attr_type;
    alter_and_attr_type(alter_type, attr_type);
-   return user_cmd(os,CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,path),alter_type,attr_type,name_,value_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,path),alter_type,attr_type,name_,value_)));
 }
 
 
@@ -1408,4 +1407,4 @@ AlterCmd::AlterCmd(const std::vector<std::string>& paths,
 }
 
 
-std::ostream& operator<<(std::ostream& os, const AlterCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const AlterCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

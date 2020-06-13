@@ -237,10 +237,11 @@ bool SNewsCmd::equals(ServerToClientCmd* rhs) const
 	return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SNewsCmd::print(std::ostream& os) const
+std::string SNewsCmd::print() const
 {
-	os << "cmd:SNewsCmd [ " << news_ << " ] ";
- 	return os;
+	std::stringstream ss;
+	ss <<  "cmd:SNewsCmd [ " << news_ << " ] ";
+ 	return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const SNewsCmd& c)  { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SNewsCmd& c) { os << c.print(); return os; }

@@ -26,13 +26,13 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-std::ostream& ServerVersionCmd::print(std::ostream& os) const
+void ServerVersionCmd::print(std::string& os) const
 {
-   return user_cmd(os,CtsApi::server_version());
+   user_cmd(os,CtsApi::server_version());
 }
-std::ostream& ServerVersionCmd::print_only(std::ostream& os) const
+void ServerVersionCmd::print_only(std::string& os) const
 {
-   os << CtsApi::server_version();return os;
+   os += CtsApi::server_version();
 }
 
 bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const
@@ -81,4 +81,4 @@ void ServerVersionCmd::create(    Cmd_ptr& cmd,
    cmd = std::make_shared<ServerVersionCmd>();
 }
 
-std::ostream& operator<<(std::ostream& os, const ServerVersionCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ServerVersionCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

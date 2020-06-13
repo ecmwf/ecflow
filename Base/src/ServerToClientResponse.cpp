@@ -29,21 +29,22 @@ bool ServerToClientResponse::handle_server_response( ServerReply& r, Cmd_ptr cts
  	}
 
     /// ClientToServerRequest::handleRequest returned a NULL pointer stc_cmd_.
-	std::stringstream ss;
-	ss << "ServerToClientResponse::handle_server_response: ";
+	std::string ss;
+	ss += "ServerToClientResponse::handle_server_response: ";
 	if (cts_cmd.get()) {
-		ss << "Client request ";
-		cts_cmd->print_short(ss);
-		ss << " failed. ";
+		ss += "Client request ";
+		ss += cts_cmd->print_short();
+		ss += " failed. ";
 	}
-	ss << "Server replied with a NULL message\n";
- 	throw std::runtime_error(ss.str());
+	ss += "Server replied with a NULL message\n";
+ 	throw std::runtime_error(ss);
 }
 
 std::ostream& ServerToClientResponse::print( std::ostream& os ) const
 {
 	if (stc_cmd_.get()) {
-		return stc_cmd_->print(os);
+		os << stc_cmd_->print();
+		return os;
 	}
 	return os << "NULL ServerToClientResponse";
 }

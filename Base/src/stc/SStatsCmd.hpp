@@ -33,7 +33,7 @@ public:
 
 	void init(AbstractServer* as);
 
-	std::ostream& print(std::ostream& os) const override;
+	std::string print() const override;
 	bool equals(ServerToClientCmd*) const override;
 	bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 

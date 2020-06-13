@@ -13,6 +13,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <stdexcept>
+#include <boost/lexical_cast.hpp>
+
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -40,42 +42,46 @@ bool ForceCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& ForceCmd::print(std::ostream& os) const
+void ForceCmd::print(std::string& os) const
 {
-   return user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
 
-std::ostream& ForceCmd::print_short(std::ostream& os) const
+std::string ForceCmd::print_short() const
 {
    std::vector<std::string> paths;
    if (!paths_.empty()) paths.emplace_back(paths_[0]);
 
+   std::string os;
    my_print_only(os,paths);
 
-   if (paths_.size() > 1) os << " : truncated : " << paths_.size()-1 << " paths *not* shown";
+   if (paths_.size() > 1) {
+	   os += " : truncated : ";
+	   os += boost::lexical_cast<std::string>(paths_.size()-1);
+	   os += " paths *not* shown";
+   }
    return os;
 }
 
-std::ostream& ForceCmd::print_only(std::ostream& os) const
+void ForceCmd::print_only(std::string& os) const
 {
-   return my_print_only(os,paths_);
+   my_print_only(os,paths_);
 }
 
-std::ostream& ForceCmd::print(std::ostream& os, const std::string& path) const
+void ForceCmd::print(std::string& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
-   return my_print(os,paths);
+   my_print(os,paths);
 }
 
-std::ostream& ForceCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
+void ForceCmd::my_print(std::string& os, const std::vector<std::string>& paths) const
 {
-   return user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
 
-std::ostream& ForceCmd::my_print_only(std::ostream& os, const std::vector<std::string>& paths) const
+void ForceCmd::my_print_only(std::string& os, const std::vector<std::string>& paths) const
 {
-   os << CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_));
-   return os;
+   os += CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_));
 }
 
 
@@ -282,4 +288,4 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<ForceCmd>(paths, stateOrEvent, recursive, setRepeatToLastValue);
 }
 
-std::ostream& operator<<(std::ostream& os, const ForceCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ForceCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

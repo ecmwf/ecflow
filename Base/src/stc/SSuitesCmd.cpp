@@ -48,10 +48,9 @@ bool SSuitesCmd::equals(ServerToClientCmd* rhs) const
  	return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SSuitesCmd::print(std::ostream& os) const
+std::string SSuitesCmd::print() const
 {
-	os << "cmd:SSuitesCmd ";
-	return os;
+	return "cmd:SSuitesCmd ";
 }
 
 bool SSuitesCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
@@ -87,4 +86,4 @@ bool SSuitesCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SSuitesCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SSuitesCmd& c) { os << c.print(); return os; }

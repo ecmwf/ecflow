@@ -25,31 +25,29 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-std::ostream& ZombieCmd::print(std::ostream& os) const
+void ZombieCmd::print(std::string& os) const
 {
 	switch (user_action_) {
-      case User::FOB:    return user_cmd(os,CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_)));
-      case User::FAIL:   return user_cmd(os,CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_)));
-      case User::ADOPT:  return user_cmd(os,CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_)));
-      case User::REMOVE: return user_cmd(os,CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_)));
-      case User::BLOCK:  return user_cmd(os,CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_)));
-      case User::KILL:   return user_cmd(os,CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_)));
+      case User::FOB:    user_cmd(os,CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_))); break;
+      case User::FAIL:   user_cmd(os,CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_))); break;
+      case User::ADOPT:  user_cmd(os,CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_))); break;
+      case User::REMOVE: user_cmd(os,CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_))); break;
+      case User::BLOCK:  user_cmd(os,CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_))); break;
+      case User::KILL:   user_cmd(os,CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_))); break;
       default: break;
  	}
-	return os;
 }
-std::ostream& ZombieCmd::print_only(std::ostream& os) const
+void ZombieCmd::print_only(std::string& os) const
 {
    switch (user_action_) {
-      case User::FOB:    os << CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_)); break;
-      case User::FAIL:   os << CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_)); break;
-      case User::ADOPT:  os << CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_)); break;
-      case User::REMOVE: os << CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_)); break;
-      case User::BLOCK:  os << CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_)); break;
-      case User::KILL:   os << CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_)); break;
+      case User::FOB:    os += CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_)); break;
+      case User::FAIL:   os += CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_)); break;
+      case User::ADOPT:  os += CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_)); break;
+      case User::REMOVE: os += CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_)); break;
+      case User::BLOCK:  os += CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_)); break;
+      case User::KILL:   os += CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_)); break;
       default: break;
    }
-   return os;
 }
 
 bool ZombieCmd::equals(ClientToServerCmd* rhs) const
@@ -255,4 +253,4 @@ void ZombieCmd::create( Cmd_ptr& cmd,
 	cmd = std::make_shared<ZombieCmd>(user_action_, paths, process_or_remote_id, password );
 }
 
-std::ostream& operator<<(std::ostream& os, const ZombieCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ZombieCmd& c) { std::string ret; c.print(ret); os << ret; return os;}
