@@ -876,6 +876,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const
  	//     /suite/family
  	//     /suite/family/task
  	//     /suite/family/family/family/task
+	// This is 14% quicker than the previous algorithm, that split 'pathToNode' into a vector of strings first.
 	node_ptr ret;
 	bool first = false;
 	StringSplitter string_splitter(pathToNode, Str::PATH_SEPERATOR());
