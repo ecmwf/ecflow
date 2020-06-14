@@ -261,3 +261,10 @@ o <DONE>Dont created generated variables in the default constructors, creat on d
    /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   Download(Sync):1, 0, 0, 0, 0  
                                                             Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                             Download(FULL):1, 1, 1, 1, 1 Avg:1
+
+
+o <DONE> Defs::findAbsNode() new algorithm that avoids creating a vector of strings. new algo is 14% faster overall; has: 0fc72c945b6
+o <DONE> Avoid branching due to checking if Log::instance(). hash: 08103aa0e73
+         Avoid std::stringstream in Command logging/Node log .   hash: 5f3840815f6
+         Command interaction: approx %4.3 faster  for 3 changes above 
+                                                      
