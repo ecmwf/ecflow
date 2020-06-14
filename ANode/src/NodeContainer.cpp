@@ -721,6 +721,16 @@ node_ptr NodeContainer::findImmediateChild(const std::string& theName, size_t& c
 	return node_ptr();
 }
 
+node_ptr NodeContainer::find_immediate_child(const boost::string_view& name) const
+{
+	for(const auto& n: nodes_) {
+		if (name == n->name()) {
+			return n;
+		}
+	}
+	return node_ptr();
+}
+
 node_ptr NodeContainer::find_node_up_the_tree(const std::string& the_name) const
 {
    if (name() == the_name) {

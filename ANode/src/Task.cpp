@@ -310,6 +310,16 @@ node_ptr Task::findImmediateChild(const std::string& name, size_t& child_pos) co
     return node_ptr();
 }
 
+node_ptr Task::find_immediate_child(const boost::string_view& name) const
+{
+	for(const auto& n: aliases_) {
+		if (name == n->name()) {
+			return n;
+		}
+	}
+	return node_ptr();
+}
+
 void Task::reset()
 {
    if (aliases_.empty()) {

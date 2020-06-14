@@ -126,6 +126,7 @@ private:
 
    // Overridden to locate alias's
    node_ptr findImmediateChild(const std::string& name, size_t& child_pos) const override;
+   node_ptr find_immediate_child(const boost::string_view&) const override;
 
    friend class cereal::access;
    template<class Archive>

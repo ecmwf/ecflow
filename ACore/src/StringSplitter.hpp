@@ -53,6 +53,7 @@ public:
 
    boost::string_view next() const;
    bool finished() const;
+   bool last() const { return finished_;}
    void reset();
 
    /// The preferred splitter as it does not create strings

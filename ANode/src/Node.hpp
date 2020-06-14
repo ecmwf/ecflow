@@ -29,6 +29,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iosfwd>
 #include <limits>
+#include <boost/utility/string_view.hpp>
 
 #include "DState.hpp"
 #include "NOrder.hpp"
@@ -578,6 +579,7 @@ public:
    bool user_variable_exists(const std::string& name) const;
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
+   virtual node_ptr find_immediate_child(const boost::string_view&) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
    std::string find_parent_variable_sub_value(const std::string& name) const;
    const Variable& find_parent_variable(const std::string& name) const;

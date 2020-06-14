@@ -41,6 +41,7 @@
 #include "CalendarUpdateParams.hpp"
 #include "NodeStats.hpp"
 #include "move_peer.hpp"
+#include "StringSplitter.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -875,41 +876,75 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const
  	//     /suite/family
  	//     /suite/family/task
  	//     /suite/family/family/family/task
-
- 	std::vector<std::string> theNodeNames; theNodeNames.reserve(4);
- 	NodePath::split(pathToNode,theNodeNames);
-	if ( theNodeNames.empty() ) {
-		return node_ptr();
+	node_ptr ret;
+	bool first = false;
+	StringSplitter string_splitter(pathToNode, Str::PATH_SEPERATOR());
+	while (!string_splitter.finished()) {
+		boost::string_view path_token = string_splitter.next();
+		//std::cout << "path_token:'" << path_token << "'  last = " << string_splitter.last() << "\n";
+		if (!first) {
+			for(const auto& suite: suiteVec_) {
+				if (path_token == suite->name()) {
+					ret = suite;
+					if (string_splitter.last()) {
+						//cout << "finished returning " << ret->absNodePath() << " *last* suite found\n";
+						return ret;
+					}
+					break;
+				}
+			}
+			if (!ret) {
+				//cout << "finished returning suite not found\n";
+				return node_ptr();
+			}
+			first = true;
+		}
+		else {
+			//cout << "seraching from " << ret->absNodePath() << " for " << ref << "\n";
+			ret = ret->find_immediate_child(path_token);
+			if (ret) {
+				if (string_splitter.last()) {
+					//cout << "finished returning " << ret->absNodePath() << " *last* \n";
+					return ret;
+				}
+				continue;
+			}
+			//cout << "finished returning node not found\n";
+			return node_ptr();
+		}
 	}
+	//cout << "finished returning node not found, end of loop\n";
+	return node_ptr();
 
-
-	size_t child_pos = 0 ; // unused
-   size_t pathSize = theNodeNames.size();
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++)  {
-
-      size_t index = 0;
-      if (theNodeNames[index] == suiteVec_[s]->name()) {
-
-         node_ptr the_node = suiteVec_[s];
-         if (pathSize == 1) return the_node;
-         index++; // skip over suite,
-
-         while (index < pathSize) {
-            the_node = the_node->findImmediateChild(theNodeNames[index],child_pos);
-            if (the_node) {
-               if (index == pathSize - 1) return the_node;
-               index++;
-            }
-            else {
-               return node_ptr();
-            }
-         }
-         return node_ptr();
-      }
-	}
-
- 	return node_ptr();
+// OLD code, slower. Since we are creating a vector of strings
+//	std::vector<std::string> theNodeNames; theNodeNames.reserve(4);
+//	NodePath::split(pathToNode,theNodeNames);
+//	if ( theNodeNames.empty() ) {
+//		return node_ptr();
+//	}
+//	size_t child_pos = 0 ; // unused
+//	size_t pathSize = theNodeNames.size();
+//	size_t theSuiteVecSize = suiteVec_.size();
+//	for(size_t s = 0; s < theSuiteVecSize; s++)  {
+//		size_t index = 0;
+//		if (theNodeNames[index] == suiteVec_[s]->name()) {
+//			node_ptr the_node = suiteVec_[s];
+//			if (pathSize == 1) return the_node;
+//			index++; // skip over suite,
+//			while (index < pathSize) {
+//				the_node = the_node->findImmediateChild(theNodeNames[index],child_pos);
+//				if (the_node) {
+//					if (index == pathSize - 1) return the_node;
+//					index++;
+//				}
+//				else {
+//					return node_ptr();
+//				}
+//			}
+//			return node_ptr();
+//		}
+//	}
+//	return node_ptr();
 }
 
 node_ptr Defs::find_closest_matching_node(const std::string& pathToNode) const
