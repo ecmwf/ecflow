@@ -44,6 +44,7 @@ install_arg=
 asan_arg=
 msan_arg=
 ubsan_arg=
+xcode_arg=
 
 
 while [[ "$#" != 0 ]] ; do   
@@ -69,6 +70,7 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = asan ]]  ;   then asan_arg=$1 ;
    elif [[ "$1" = msan ]]  ;   then msan_arg=$1 ;
    elif [[ "$1" = ubsan ]]  ;  then ubsan_arg=$1 ;
+   elif [[ "$1" = xcode ]]  ;  then xcode_arg=$1 ;
    elif [[ "$1" = ctest ]] ;   then  
       ctest_arg=$1 ; 
       shift
@@ -153,7 +155,11 @@ if [[ "$msan_arg" = msan ]] ; then
    CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=memory"
    cmake_extra_options="$cmake_extra_options -DCMAKE_LINKER=/Library/Developer/CommandLineTools/usr/bin/clang"
 fi
+if [[ "$xcode_arg" = xcode ]] ; then
+   cmake_extra_options="$cmake_extra_options -GXcode"
+fi
 
+ 
 log_options=
 if [[ $log_arg = log ]] ; then
     log_options="-DECBUILD_LOG_LEVEL=DEBUG"
