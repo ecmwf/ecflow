@@ -128,10 +128,14 @@ private:
 		(void)system( theServerInvokePath.c_str() );
 
 		// Allow time for server process to kick in.
-      ClientInvoker theClient(ecf::Str::LOCALHOST(),port);
-      BOOST_REQUIRE_MESSAGE(theClient.wait_for_server_reply(),"InvokeServer::doStart: Server failed to start after 60 second on " << ecf::Str::LOCALHOST() << ":" << port);
-      server_started = true;
-      if (!msg.empty()) theClient.logMsg( msg );
+		ClientInvoker theClient(ecf::Str::LOCALHOST(),port);
+		if (theClient.wait_for_server_reply()) {
+			server_started = true;
+			if (!msg.empty()) theClient.logMsg( msg );
+		}
+		else {
+			server_started = false;
+		}
 	}
 
    static void doEnd( const std::string& host, const std::string& port, bool remove_checkpt_file_after_server_exit,bool remove_log_file_after_server_exit )
