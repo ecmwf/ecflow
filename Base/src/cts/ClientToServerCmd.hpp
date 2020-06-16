@@ -54,7 +54,8 @@ public:
    virtual void print_only(std::string& os ) const { return print(os); }
 
    /// Print with minimal information. Deals with errors report where cmd have thousands of paths. truncate to one path.
-   virtual std::string print_short() const { std::string ret; print(ret); return ret; }
+   /// This should *NOT* include trailing <user>@<host>
+   virtual std::string print_short() const { std::string ret; print_only(ret); return ret; }
 
    virtual bool equals(ClientToServerCmd* rhs) const;
 

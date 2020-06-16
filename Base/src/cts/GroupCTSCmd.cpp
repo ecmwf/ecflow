@@ -194,12 +194,9 @@ std::string GroupCTSCmd::print_short() const
    size_t the_size = cmdVec_.size();
    for(size_t i = 0; i < the_size; i++) {
       if (i != 0) ret += "; ";
-      ret += cmdVec_[i]->print_short(); // limit number of paths shown
+      ret += cmdVec_[i]->print_short(); // limit number of paths shown and avoid overhead of user@host for each child command
    }
-
-   std::string os;
-   user_cmd(os,CtsApi::group(ret));
-   return os;
+   return CtsApi::group(ret);
 }
 
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const
