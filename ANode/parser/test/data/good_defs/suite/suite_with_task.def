@@ -1,5 +1,24 @@
 suite suite_with_task
-	task a
-	task b
-	task c
+   task a
+   task b
+   task c
+   task 1
+   task 2
+   task 3
+   task 4
+   task 5
+   task 6
+   task 7
+   task 9
+   task 10
+   task 11
+   task 20
+   task 21
+   task 30
+   task 100
+   task 101
+   task 200
+   task 400
+   task 1001
+   task 2001
 endsuite

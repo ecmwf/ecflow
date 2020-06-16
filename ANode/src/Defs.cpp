@@ -1484,7 +1484,17 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ALPHA:  {
  			std::sort(suiteVec_.begin(),suiteVec_.end(),
- 			          [](const suite_ptr& a, const suite_ptr& b) { return Str::caseInsLess(a->name(),b->name());});
+ 			          [](const suite_ptr& a, const suite_ptr& b)
+					  {
+						 try {
+								int a_as_int = boost::lexical_cast< int >( a->name() );
+								int b_as_int = boost::lexical_cast< int >( b->name() );
+								return a_as_int < b_as_int;
+						 }
+						 catch ( boost::bad_lexical_cast&) {}
+
+				         return Str::caseInsLess(a->name(),b->name());
+			          });
             order_state_change_no_ = Ecf::incr_state_change_no();
             client_suite_mgr_.update_suite_order();
 			break;

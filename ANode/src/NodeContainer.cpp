@@ -329,11 +329,21 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 					return;
  				}
 			}
-         throw std::runtime_error("NodeContainer::order BOTTOM, immediate child not found");
+            throw std::runtime_error("NodeContainer::order BOTTOM, immediate child not found");
 		}
 		case NOrder::ALPHA:  {
 			std::sort(nodes_.begin(),nodes_.end(),
-			          [](const node_ptr& a,const node_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
+			          [](const node_ptr& a,const node_ptr& b)
+					  {
+						 try {
+								int a_as_int = boost::lexical_cast< int >( a->name() );
+								int b_as_int = boost::lexical_cast< int >( b->name() );
+								return a_as_int < b_as_int;
+						 }
+						 catch ( boost::bad_lexical_cast&) {}
+
+				         return Str::caseInsLess(a->name(),b->name());
+			          });
             order_state_change_no_ = Ecf::incr_state_change_no();
 			break;
 		}
