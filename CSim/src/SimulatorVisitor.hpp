@@ -28,7 +28,7 @@ class Task;
 
 namespace ecf {
 
-class SimulatorVisitor : public NodeTreeVisitor {
+class SimulatorVisitor final : public NodeTreeVisitor {
 public:
    explicit SimulatorVisitor(const std::string& defs_filename);
 

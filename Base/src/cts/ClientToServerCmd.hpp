@@ -268,7 +268,7 @@ private:
    }
 };
 
-class InitCmd : public TaskCmd {
+class InitCmd final : public TaskCmd {
 public:
    InitCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -308,7 +308,7 @@ private:
    }
 };
 
-class CompleteCmd : public TaskCmd {
+class CompleteCmd final : public TaskCmd {
 public:
    CompleteCmd(const std::string& pathToTask,
                const std::string& jobsPassword,
@@ -349,7 +349,7 @@ private:
 
 /// A child command that evaluates a expression. If the expression is false.
 /// Then client invoker will block.
-class CtsWaitCmd : public TaskCmd {
+class CtsWaitCmd final : public TaskCmd {
 public:
    CtsWaitCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -387,7 +387,7 @@ private:
    }
 };
 
-class AbortCmd : public TaskCmd {
+class AbortCmd final : public TaskCmd {
 public:
    AbortCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -424,7 +424,7 @@ private:
    }
 };
 
-class EventCmd : public TaskCmd {
+class EventCmd final : public TaskCmd {
 public:
    EventCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -466,7 +466,7 @@ private:
    }
 };
 
-class MeterCmd : public TaskCmd {
+class MeterCmd final : public TaskCmd {
 public:
    MeterCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -510,7 +510,7 @@ private:
 };
 
 
-class LabelCmd : public TaskCmd {
+class LabelCmd final : public TaskCmd {
 public:
    LabelCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -554,7 +554,7 @@ private:
 };
 
 class QueueAttr;
-class QueueCmd : public TaskCmd {
+class QueueCmd final : public TaskCmd {
 public:
    QueueCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -664,7 +664,7 @@ private:
 // This Command should NEVER be changed
 // This will allow new client to ask OLD server about its version
 // ========================================================================
-class ServerVersionCmd : public UserCmd {
+class ServerVersionCmd final : public UserCmd {
 public:
    ServerVersionCmd()= default;
 
@@ -699,7 +699,7 @@ private:
 // *** IMPORTANT: For any new commands, must be added to the end, for each major release
 // *** - STATS_RESET was introduced in release 4.0.5
 // =========================================================================
-class CtsCmd : public UserCmd {
+class CtsCmd final : public UserCmd {
 public:
    enum Api { NO_CMD, RESTORE_DEFS_FROM_CHECKPT,
       RESTART_SERVER, SHUTDOWN_SERVER, HALT_SERVER, TERMINATE_SERVER,
@@ -749,7 +749,7 @@ private:
    }
 };
 
-class CheckPtCmd : public UserCmd {
+class CheckPtCmd final : public UserCmd {
 public:
    CheckPtCmd(ecf::CheckPt::Mode m, int interval,int checkpt_save_time_alarm)
    :  mode_(m), check_pt_interval_(interval),check_pt_save_time_alarm_(checkpt_save_time_alarm) {}
@@ -793,7 +793,7 @@ private:
 // Client---(CSyncCmd::SYNC)--------->Server-----(SSyncCmd)--->client:
 // Client---(CSyncCmd::SYNC_CLOCK)--->Server-----(SSyncCmd)--->client:
 // Client---(CSyncCmd::NEWS)--------->Server-----(SNewsCmd)--->client:
-class CSyncCmd : public UserCmd {
+class CSyncCmd final : public UserCmd {
 public:
    enum Api { NEWS, SYNC, SYNC_FULL, SYNC_CLOCK};
 
@@ -850,7 +850,7 @@ private:
    }
 };
 
-class ClientHandleCmd : public UserCmd {
+class ClientHandleCmd final : public UserCmd {
 public:
    enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD , SUITES };
 
@@ -942,7 +942,7 @@ private:
 // This is used in *testing* only, so that we can compare/test/verify
 // job generation with the old version.
 // if absNodepath is empty we will generate jobs for all tasks
-class CtsNodeCmd : public UserCmd {
+class CtsNodeCmd final : public UserCmd {
 public:
    enum Api { NO_CMD, JOB_GEN, CHECK_JOB_GEN_ONLY, GET, WHY, GET_STATE, MIGRATE };
    CtsNodeCmd(Api a, const std::string& absNodePath) : api_(a),absNodePath_(absNodePath) {}
@@ -988,7 +988,7 @@ private:
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
-class DeleteCmd : public UserCmd {
+class DeleteCmd final : public UserCmd {
 public:
    explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false)
       : group_cmd_(nullptr),paths_(paths),force_(force){}
@@ -1038,7 +1038,7 @@ private:
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
-class PathsCmd : public UserCmd {
+class PathsCmd final : public UserCmd {
 public:
    enum Api { NO_CMD, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
 
@@ -1096,7 +1096,7 @@ private:
 /// Client---(LogCmd)---->Server-----(SStringCmd)--->client:
 /// When doHandleRequest is called in the server it will return SStringCmd
 /// The SStringCmd is used to transport the log file contents to the client
-class LogCmd : public UserCmd {
+class LogCmd final : public UserCmd {
 public:
    enum LogApi { GET, CLEAR, FLUSH, NEW , PATH };
    explicit LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
@@ -1139,7 +1139,7 @@ private:
 };
 
 /// Simply writes the message to the log file
-class LogMessageCmd : public UserCmd {
+class LogMessageCmd final : public UserCmd {
 public:
    explicit LogMessageCmd(const std::string& msg) : msg_(msg) {}
    LogMessageCmd() = default;
@@ -1173,7 +1173,7 @@ private:
 
 
 // class Begin:  if suiteName is empty we will begin all suites
-class BeginCmd : public UserCmd {
+class BeginCmd final : public UserCmd {
 public:
    explicit BeginCmd(const std::string& suiteName, bool force = false);
    BeginCmd()= default;
@@ -1213,7 +1213,7 @@ private:
    }
 };
 
-class ZombieCmd : public UserCmd {
+class ZombieCmd final : public UserCmd {
 public:
    ZombieCmd(ecf::User::Action uc, const std::vector<std::string>& paths, const std::string& process_id, const std::string& password)
    : user_action_(uc), process_id_(process_id), password_(password),paths_(paths) {}
@@ -1254,7 +1254,7 @@ private:
    }
 };
 
-class RequeueNodeCmd : public UserCmd {
+class RequeueNodeCmd final : public UserCmd {
 public:
    enum Option { NO_OPTION, ABORT, FORCE };
 
@@ -1302,7 +1302,7 @@ private:
    }
 };
 
-class OrderNodeCmd : public UserCmd {
+class OrderNodeCmd final : public UserCmd {
 public:
    OrderNodeCmd(const std::string& absNodepath, NOrder::Order op)
    : absNodepath_(absNodepath), option_(op) {}
@@ -1344,7 +1344,7 @@ private:
 
 
 // The absNodepath must be provided
-class RunNodeCmd : public UserCmd {
+class RunNodeCmd final : public UserCmd {
 public:
    RunNodeCmd(const std::string& absNodepath, bool force, bool test = false)
    : paths_(std::vector<std::string>(1,absNodepath)), force_(force), test_(test) {}
@@ -1395,7 +1395,7 @@ private:
 // Does Nothing in the server, however allows client code to display the
 // returned Defs in different showStyles
 // This class has no need for persistence, i.e client side only
-class ShowCmd : public UserCmd {
+class ShowCmd final : public UserCmd {
 public:
    explicit ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS) : style_(s) {}
 
@@ -1435,7 +1435,7 @@ private:
 // Will *load* the suites, into the server.
 // Additionally the server will try to resolve extern's. The extern are references
 // to Node, events, meters, limits, variables defined on another suite.
-class LoadDefsCmd : public UserCmd {
+class LoadDefsCmd final : public UserCmd {
 public:
    explicit LoadDefsCmd(const defs_ptr& defs, bool force = false);
    explicit LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
@@ -1480,7 +1480,7 @@ private:
    }
 };
 
-class ReplaceNodeCmd : public UserCmd {
+class ReplaceNodeCmd final : public UserCmd {
 public:
    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force );
    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force);
@@ -1538,7 +1538,7 @@ private:
 // setRepeatToLastValue set, only make sense when used with recursive.
 // stateOrEvent, string is one of:
 // < unknown | suspended | complete | queued | submitted | active | aborted | clear | set >
-class ForceCmd : public UserCmd {
+class ForceCmd final : public UserCmd {
 public:
    ForceCmd(const std::vector<std::string>& paths,
             const std::string& stateOrEvent,
@@ -1602,7 +1602,7 @@ private:
 };
 
 // Free Dependencies
-class FreeDepCmd : public UserCmd {
+class FreeDepCmd final : public UserCmd {
 public:
    explicit FreeDepCmd(const std::vector<std::string>& paths,
             bool trigger = true,
@@ -1668,7 +1668,7 @@ private:
    }
 };
 
-class AlterCmd : public UserCmd {
+class AlterCmd final : public UserCmd {
 public:
    enum Delete_attr_type  { DEL_VARIABLE, DEL_TIME, DEL_TODAY, DEL_DATE, DEL_DAY,
       DEL_CRON, DEL_EVENT, DEL_METER, DEL_LABEL,
@@ -1801,7 +1801,7 @@ private:
 // Paired with SStringCmd
 // Client---(CFileCmd)---->Server-----(SStringCmd)--->client:
 //================================================================================
-class CFileCmd : public UserCmd {
+class CFileCmd final : public UserCmd {
 public:
    enum File_t { ECF, JOB, JOBOUT, MANUAL, KILL, STAT };
    CFileCmd(const std::string& pathToNode, File_t file, size_t max_lines)
@@ -1853,7 +1853,7 @@ private:
 // Paired with SStringCmd
 // Client---(EditScriptCmd)---->Server-----(SStringCmd)--->client:
 //================================================================================
-class EditScriptCmd : public UserCmd {
+class EditScriptCmd final : public UserCmd {
 public:
    enum EditType { EDIT, PREPROCESS, SUBMIT,  PREPROCESS_USER_FILE, SUBMIT_USER_FILE  };
    EditScriptCmd(const std::string& path_to_node,EditType et) // EDIT or PREPROCESS
@@ -1927,7 +1927,7 @@ private:
    }
 };
 
-class PlugCmd : public UserCmd {
+class PlugCmd final : public UserCmd {
 public:
    PlugCmd(const std::string& source, const std::string& dest) : source_(source), dest_(dest) {}
    PlugCmd() = default;
@@ -1968,7 +1968,7 @@ private:
    }
 };
 
-class MoveCmd : public UserCmd {
+class MoveCmd final : public UserCmd {
 public:
    MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src, const std::string& dest);
    MoveCmd();
@@ -2017,7 +2017,7 @@ private:
    }
 };
 
-class QueryCmd : public UserCmd {
+class QueryCmd final : public UserCmd {
 public:
    QueryCmd(const std::string& query_type,
             const std::string& path_to_attribute,
@@ -2077,7 +2077,7 @@ private:
 // all the results are returned back to the client, HOWEVER when client calls
 // Cmd::defs() | Cmd::get_string() only the first data is returned.
 //
-class GroupCTSCmd : public UserCmd {
+class GroupCTSCmd final : public UserCmd {
 public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
    explicit GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}

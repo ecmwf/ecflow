@@ -18,7 +18,7 @@
 #include "ServerToClientCmd.hpp"
 
 ///================================================================================
-class SStringVecCmd : public ServerToClientCmd {
+class SStringVecCmd final : public ServerToClientCmd {
 public:
    explicit SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
    SStringVecCmd() : ServerToClientCmd() {}

@@ -23,7 +23,7 @@ class AbstractServer;
 // Paired with CtsNodeCmd(GET)
 // Client---CtsNodeCmd(GET)---->Server-----(DefsCmd | SNodeCmd)--->client:
 //================================================================================
-class DefsCmd : public ServerToClientCmd {
+class DefsCmd final : public ServerToClientCmd {
 public:
    explicit DefsCmd(AbstractServer* as, bool save_edit_history = false);
 	DefsCmd()= default;

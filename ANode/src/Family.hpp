@@ -19,7 +19,7 @@
 #include "NodeContainer.hpp"
 class FamGenVariables;
 
-class Family : public NodeContainer {
+class Family final : public NodeContainer {
 public:
    explicit Family( const std::string& name,bool check = true ) : NodeContainer(name,check) {}
    Family()= default;

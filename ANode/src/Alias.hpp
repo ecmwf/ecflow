@@ -16,7 +16,7 @@
 //============================================================================
 #include "Submittable.hpp"
 
-class Alias : public Submittable {
+class Alias final : public Submittable {
 public:
    explicit Alias(const std::string& name,bool check = true);
    Alias();

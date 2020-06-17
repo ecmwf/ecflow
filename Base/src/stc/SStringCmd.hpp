@@ -27,7 +27,7 @@
 /// LogCmd: The log file Can be potentially very large
 ///     Only really valid if the out bound request was a LogCmd(LogCmd::GET)
 ///================================================================================
-class SStringCmd : public ServerToClientCmd {
+class SStringCmd final : public ServerToClientCmd {
 public:
    explicit SStringCmd(const std::string& s) : str_(s) {}
    SStringCmd() : ServerToClientCmd() {}

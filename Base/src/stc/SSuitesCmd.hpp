@@ -22,7 +22,7 @@ class AbstractServer;
 // Paired with CtsCmd(SUITES)
 // Client---(CtsCmd(SUITES))---->Server-----(SSuitesCmd)--->client:
 //================================================================================
-class SSuitesCmd : public ServerToClientCmd {
+class SSuitesCmd final : public ServerToClientCmd {
 public:
    explicit SSuitesCmd(AbstractServer* as );
    SSuitesCmd() : ServerToClientCmd() {}

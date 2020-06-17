@@ -26,7 +26,7 @@
 #include "ServerToClientCmd.hpp"
 class AbstractServer;
 
-class SNewsCmd : public ServerToClientCmd {
+class SNewsCmd final : public ServerToClientCmd {
 public:
    // The constructor is *called* in the server.
    SNewsCmd(unsigned int client_handle, // a reference to a set of suites used by client

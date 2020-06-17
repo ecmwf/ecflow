@@ -21,7 +21,7 @@
 /// Paired with CtsCmd::SERVER_LOAD
 /// Client---(CtsCmd::SERVER_LOAD)---->Server-----(SServerLoadCmd)--->client:
 ///================================================================================
-class SServerLoadCmd : public ServerToClientCmd {
+class SServerLoadCmd final : public ServerToClientCmd {
 public:
    explicit SServerLoadCmd(const std::string& log_file_path) : log_file_path_(log_file_path) {}
    SServerLoadCmd() : ServerToClientCmd() {}

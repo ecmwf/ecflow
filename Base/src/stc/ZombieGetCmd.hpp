@@ -23,7 +23,7 @@ class AbstractServer;
 // Paired with CtsCmd(GET_ZOMBIES)
 // Client---CtsCmd(GET_ZOMBIES)---->Server-----(ZombieGetCmd)--->client:
 //================================================================================
-class ZombieGetCmd : public ServerToClientCmd {
+class ZombieGetCmd final : public ServerToClientCmd {
 public:
    explicit ZombieGetCmd(AbstractServer*);
 	ZombieGetCmd() : ServerToClientCmd() {}

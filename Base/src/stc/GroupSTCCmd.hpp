@@ -17,7 +17,7 @@
 
 #include "ServerToClientCmd.hpp"
 
-class GroupSTCCmd : public ServerToClientCmd {
+class GroupSTCCmd final : public ServerToClientCmd {
 public:
 	GroupSTCCmd() : ServerToClientCmd() {}
 

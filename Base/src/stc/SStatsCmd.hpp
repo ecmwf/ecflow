@@ -26,7 +26,7 @@ class AbstractServer;
 // ****** see ECFLOW-880, we use CtsCmd(STATS) to return server stats as a string
 // ****** this allows the format to change in the server(with out affecting protocol)
 //================================================================================
-class SStatsCmd : public ServerToClientCmd {
+class SStatsCmd final : public ServerToClientCmd {
 public:
    explicit SStatsCmd(AbstractServer* as );
 	SStatsCmd() : ServerToClientCmd() {}

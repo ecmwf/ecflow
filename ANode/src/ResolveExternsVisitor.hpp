@@ -22,7 +22,7 @@ class Ast;
 
 namespace ecf {
 
-class ResolveExternsVisitor : public NodeTreeVisitor {
+class ResolveExternsVisitor final : public NodeTreeVisitor {
 public:
    explicit ResolveExternsVisitor(Defs*);
 

@@ -16,7 +16,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "ServerToClientCmd.hpp"
 
-class SClientHandleCmd : public ServerToClientCmd {
+class SClientHandleCmd final : public ServerToClientCmd {
 public:
    explicit SClientHandleCmd(int handle) : handle_(handle) {}
 	SClientHandleCmd() : ServerToClientCmd(){}

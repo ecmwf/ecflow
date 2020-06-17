@@ -16,7 +16,7 @@
 //============================================================================
 #include "Submittable.hpp"
 
-class Task : public Submittable {
+class Task final : public Submittable {
 public:
    explicit Task( const std::string& name, bool check = true ) : Submittable(name,check) {}
    Task()= default;

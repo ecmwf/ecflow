@@ -22,7 +22,7 @@ class AbstractServer;
 // Paired with CtsNodeCmd(Get)
 // Client---CtsNodeCmd(GET)---->Server-----(SNodeCmd | SNodeCmd)--->client:
 //================================================================================
-class SNodeCmd : public ServerToClientCmd {
+class SNodeCmd final : public ServerToClientCmd {
 public:
    SNodeCmd(AbstractServer* as,node_ptr node);
    SNodeCmd() = default;

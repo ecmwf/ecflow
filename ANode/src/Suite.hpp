@@ -22,7 +22,7 @@
 class SuiteGenVariables;
 namespace ecf { class CalendarUpdateParams;  } // forward declare
 
-class Suite : public NodeContainer {
+class Suite final : public NodeContainer {
 public:
    explicit Suite( const std::string& name,bool check = true) : NodeContainer(name,check) {}
    Suite()= default;

@@ -21,7 +21,7 @@
 // Originally we had separate commands. However this lead
 // TOC overflow on the AIX. Hence in order to minimise global
 // symbols due to use of boost serialisation, will use a single command
-class StcCmd : public ServerToClientCmd {
+class StcCmd final : public ServerToClientCmd {
 public:
    enum Api { OK,
       BLOCK_CLIENT_SERVER_HALTED,

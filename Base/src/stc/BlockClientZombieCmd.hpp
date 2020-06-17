@@ -23,7 +23,7 @@
 // For the moment we simply block for zombie, but the client
 // in the future could do different things depending on the zombie type
 //
-class BlockClientZombieCmd : public ServerToClientCmd {
+class BlockClientZombieCmd final : public ServerToClientCmd {
 public:
    explicit BlockClientZombieCmd(ecf::Child::ZombieType zt) :  zombie_type_(zt) {}
    BlockClientZombieCmd() = default;
