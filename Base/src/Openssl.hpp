@@ -17,6 +17,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <ostream>
+#include <memory>
 #include <boost/asio/ssl.hpp>
 #include <string>
 
@@ -37,7 +38,7 @@ public:
    /// An SSL server with the SSLv23 method can understand any of the SSLv2, SSLv3, and TLSv1 hello messages.
    /// However, the SSL client using the SSLv23 method cannot establish connection with the SSL server
    ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
-   Openssl() : ssl_context_(boost::asio::ssl::context::sslv23){}
+   Openssl() {}
 
    const std::string& ssl() const { return ssl_;}
    bool enabled() const { return !ssl_.empty();}
@@ -50,7 +51,7 @@ public:
    void init_for_server();
    void init_for_client();
 
-   boost::asio::ssl::context& context() { return ssl_context_;}
+   boost::asio::ssl::context& context();
 
    static const char* ssl_info();
    void print(std::ostream &os) const { os << ssl_;}
@@ -69,7 +70,7 @@ private:
 
 private:
    std::string ssl_;                       // Non empty if ssl has been enabled
-   boost::asio::ssl::context ssl_context_;
+   std::unique_ptr<boost::asio::ssl::context> ssl_context_; // create on demand, otherwise non-ssl context takes a hit.
    bool init_for_client_{false};
 };
 
