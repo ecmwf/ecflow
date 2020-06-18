@@ -117,25 +117,26 @@ void Openssl::init_for_server()
 {
 //   std::cout << " Openssl::init_for_server  host :" << host_ << "@" << port_ << "\n";
 //   std::cout << " Openssl::init_for_server ssl_:'" << ssl_ << "'\n";
+	if (enabled()) {
+		check_server_certificates();
 
-   check_server_certificates();
-
-   ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
-   ssl_context_->set_options(
-            boost::asio::ssl::context::default_workarounds
-            | boost::asio::ssl::context::no_sslv2
-            | boost::asio::ssl::context::single_dh_use);
-   // this must be done before loading any keys. as below
-   ssl_context_->set_password_callback(boost::bind(&Openssl::get_password, this));
-   ssl_context_->use_certificate_chain_file( crt() );
-   ssl_context_->use_private_key_file( key(), boost::asio::ssl::context::pem);
-   ssl_context_->use_tmp_dh_file( pem() );
+		ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
+		ssl_context_->set_options(
+				boost::asio::ssl::context::default_workarounds
+				| boost::asio::ssl::context::no_sslv2
+				| boost::asio::ssl::context::single_dh_use);
+		// this must be done before loading any keys. as below
+		ssl_context_->set_password_callback(boost::bind(&Openssl::get_password, this));
+		ssl_context_->use_certificate_chain_file( crt() );
+		ssl_context_->use_private_key_file( key(), boost::asio::ssl::context::pem);
+		ssl_context_->use_tmp_dh_file( pem() );
+	}
 }
 
 void Openssl::init_for_client()
 {
 //   std::cout << " Openssl::init_for_client host :" << host_ << "@" << port_ << "\n";
-   if (!init_for_client_) {
+   if (!init_for_client_ && enabled()) {
       init_for_client_ = true;
 
       ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
