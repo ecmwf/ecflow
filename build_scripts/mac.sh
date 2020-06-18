@@ -176,11 +176,11 @@ if [[ $test_arg = test ]] ; then
    test_options="-DENABLE_ALL_TESTS=ON"
 fi
 
-bdir_root=${HOME}/git/bdir
+bdir_root=${HOME}/git/ecflow/bdir
 
 if [[ "$xcode_arg" = xcode ]] ; then
    cmake_extra_options="$cmake_extra_options -GXcode"
-   bdir_root=${HOME}/git/xcode
+   bdir_root=${HOME}/git/ecflow/bdir_xcode
 fi
 
 bdir=${bdir_root}/$mode_arg/$compiler
