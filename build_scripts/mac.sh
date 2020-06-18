@@ -155,11 +155,7 @@ if [[ "$msan_arg" = msan ]] ; then
    CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=memory"
    cmake_extra_options="$cmake_extra_options -DCMAKE_LINKER=/Library/Developer/CommandLineTools/usr/bin/clang"
 fi
-if [[ "$xcode_arg" = xcode ]] ; then
-   cmake_extra_options="$cmake_extra_options -GXcode"
-fi
 
- 
 log_options=
 if [[ $log_arg = log ]] ; then
     log_options="-DECBUILD_LOG_LEVEL=DEBUG"
@@ -180,9 +176,17 @@ if [[ $test_arg = test ]] ; then
    test_options="-DENABLE_ALL_TESTS=ON"
 fi
 
-bdir=${HOME}/git/bdir/ecflow/$mode_arg/$compiler
+bdir_root=${HOME}/git/bdir
+
+if [[ "$xcode_arg" = xcode ]] ; then
+   cmake_extra_options="$cmake_extra_options -GXcode"
+   bdir_root=${HOME}/git/xcode
+fi
+
+bdir=${bdir_root}/$mode_arg/$compiler
+
 if [[ $clean_arg = clean ]] ; then
-   rm -rf ${HOME}/git/bdir
+   rm -rf ${bdir_root}
 fi
 mkdir -p $bdir
 cd $bdir
