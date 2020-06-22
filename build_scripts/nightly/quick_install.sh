@@ -46,6 +46,7 @@ fi
 
 #export ECF_DEBUG_CLIENT=1
 #export ECF_SSL=`hostname`.4141 # use server specfic <host>.<port>.*** certificates
+#export ECF_SSL=1               # use non server specfic  certificates
 
 
 # =======================================================================
