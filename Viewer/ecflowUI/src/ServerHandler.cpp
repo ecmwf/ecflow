@@ -113,8 +113,10 @@ ServerHandler::~ServerHandler()
     Q_ASSERT(client_ == nullptr);
 }
 
-void ServerHandler::logout()
+void ServerHandler::logoutAndDelete()
 {
+    activity_ = DeleteActivity;
+
     //Save settings
     saveConf();
 
@@ -128,8 +130,9 @@ void ServerHandler::logout()
         queueLoggedOut = comQueue_->logout();
     }
 
-    //ComQueue will delete itself - it will delete the ComThread as well
+    //ComQueue will delete itself - it will delete the client and the ComThread as well
     comQueue_ = nullptr;
+    client_ = nullptr;
 
     //Remove itself from the server vector
     auto it=std::find(servers_.begin(),servers_.end(),this);
@@ -141,28 +144,27 @@ void ServerHandler::logout()
     delete suiteFilter_;
     delete conf_;
 
-    //The safest is to delete the client in the end
     if(queueLoggedOut) {
-        if (client_) {
-            delete client_;
-            client_ = nullptr;
-        }
         deleteLater();
     }
 }
 
+
 void ServerHandler::queueLoggedOut()
 {
     //at this point both the queue and the thread are being deleted
-    if (client_) {
-        delete client_;
-        client_ = nullptr;
+    assert(client_ == nullptr);
+    assert(comQueue_ == nullptr);
+    assert(activity_ == DeleteActivity || activity_ == ClientRecreateActivity);
+    if (activity_ == DeleteActivity) {
+        deleteLater();
+    } else if(activity_ == ClientRecreateActivity) {
+        createClient(false);
     }
-    deleteLater();
 }
 
 // called from the constructor with init=true
-// must be called after deleteClient() with init=false
+// must be called from/after recreateClient() with init=false
 void ServerHandler::createClient(bool init)
 {
     assert(client_ == nullptr);
@@ -271,8 +273,10 @@ void ServerHandler::createClient(bool init)
     }
 }
 
-void ServerHandler::deleteClient()
+void ServerHandler::recreateClient()
 {
+    activity_= ClientRecreateActivity;
+
     if(client_) {
         //Save settings
         saveConf();
@@ -289,21 +293,24 @@ void ServerHandler::deleteClient()
 
         connectState_->state(ConnectState::Disconnected);
         connectState_->errorMessage("");
-        setActivity(NoActivity);
+        //setActivity(NoActivity);
 
         broadcast(&ServerObserver::notifyServerConnectState);
     }
 
     //The queue must be deleted before the client, since the thread might
     //be running a job on the client!!
-    if (comQueue_)
-        delete comQueue_;
+    bool queueLoggedOut = true;
+    if (comQueue_) {
+        queueLoggedOut = comQueue_->logout();
+    }
 
-    if(client_)
-        delete client_;
-
+    //ComQueue will delete itself - it will delete the client and the ComThread as well
     comQueue_ = nullptr;
     client_ = nullptr;
+
+    if (queueLoggedOut)
+        createClient(false);
 }
 
 void ServerHandler::setSsl(bool ssl)
@@ -313,8 +320,7 @@ void ServerHandler::setSsl(bool ssl)
 
         if (connectState_->state() != ConnectState::VersionIncompatible &&
             connectState_->state() != ConnectState::FailedClient) {
-            deleteClient();
-            createClient(false);
+            recreateClient();
         }
     }
 }
@@ -326,8 +332,7 @@ void ServerHandler::setUser(const std::string& user)
 
         if (client_ && connectState_->state() != ConnectState::VersionIncompatible &&
             connectState_->state() != ConnectState::FailedClient) {
-            deleteClient();
-            createClient(false);
+            recreateClient();
         }
     }
 }
@@ -556,7 +561,7 @@ void ServerHandler::removeServer(ServerHandler* server)
 	{
 		ServerHandler *s=*it;
 		servers_.erase(it);
-        s->logout();
+        s->logoutAndDelete();
 	}
 }
 

@@ -654,6 +654,7 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 	taskIsBeingFailed_=false;
 }
 
+// Only called from the ServerHandler on delete or recreating the client!!!
 bool ServerComQueue::logout() {
     state_=DisabledState;
 
@@ -682,6 +683,10 @@ bool ServerComQueue::logout() {
                 QTimer::singleShot(5000, this, SLOT(slotLogoutCheck()));
             }
         } else {
+            if (client_) {
+                delete client_;
+                client_=nullptr;
+            }
             deleteLater();
             return true;
         }
@@ -704,6 +709,10 @@ bool ServerComQueue::logout() {
             }
         } else {
             deleteLater();
+            if (client_) {
+                delete client_;
+                client_=nullptr;
+            }
             return true;
         }
     }
@@ -756,6 +765,10 @@ void ServerComQueue::slotLogoutDone()
         comThread_ = nullptr;
     }
     // notify the server that the queue and the thread is being deleted
+    if (client_) {
+        delete client_;
+        client_ = nullptr;
+    }
     server_->queueLoggedOut();
     deleteLater();
 }
