@@ -67,32 +67,31 @@ run strace
 
 + perf stat -r 10 bin/ecflow_client --port 1025 --sync_full 0
 
- Performance counter stats for 'bin/ecflow_client --port 1025 --sync_full 0' (10 runs):
+ Performance counter stats for 'bin/ecflow_client --port 1024 --sync_full 0' (10 runs):
 
-       1588.132686      task-clock (msec)         #    0.752 CPUs utilized            ( +-  0.26% )
-               714      context-switches          #    0.449 K/sec                    ( +-  6.38% )
-                 1      cpu-migrations            #    0.001 K/sec                    ( +- 25.93% )
-           144,029      page-faults               #    0.091 M/sec                    ( +-  0.16% )
-     6,148,911,982      cycles                    #    3.872 GHz                      ( +-  0.28% )
+       1582.882858      task-clock (msec)         #    0.759 CPUs utilized            ( +-  0.19% )
+               708      context-switches          #    0.448 K/sec                    ( +-  6.46% )
+                 0      cpu-migrations            #    0.000 K/sec                    ( +-100.00% )
+           144,579      page-faults               #    0.091 M/sec                    ( +-  0.10% )
+     6,136,194,514      cycles                    #    3.877 GHz                      ( +-  0.19% )
    <not supported>      stalled-cycles-frontend  
    <not supported>      stalled-cycles-backend   
-    11,911,363,358      instructions              #    1.94  insns per cycle          ( +-  0.01% )
-     3,149,508,236      branches                  # 1983.152 M/sec                    ( +-  0.01% )
-        11,719,060      branch-misses             #    0.37% of all branches          ( +-  0.76% )
+    11,860,551,515      instructions              #    1.93  insns per cycle          ( +-  0.00% )
+     3,128,227,586      branches                  # 1976.285 M/sec                    ( +-  0.00% )
+        11,492,365      branch-misses             #    0.37% of all branches          ( +-  0.23% )
 
-       2.111203115 seconds time elapsed                                          ( +-  1.23% )
-
-
+       2.086499514 seconds time elapsed                                          ( +-  0.41% )
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
-real  0m0.89s
-user  0m0.79s
+real  0m0.88s
+user  0m0.78s
 sys   0m0.09s
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
-real  0m1.41s
-user  0m1.25s
+real  0m1.39s
+user  0m1.23s
 sys   0m0.15s
+
 
 + ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
  Parsing Node tree & AST creation time parse(1) = 0.799s wall, (0.720s user + 0.070s system = 0.790s) CPU (98.9%)
