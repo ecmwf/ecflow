@@ -50,8 +50,8 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
    if (!days_.empty()) {
 	   // The day attribute, is matched with the corresponding *date* under requeue.
 	   // HOWEVER, when re-queueing due to a *TIME* dependency we MUST keep the current date on the day attribute
-	   // ADDITIONALLY WE use days_copy_ to remove days which have *EXPIRED*(i.e failed for check for re-queue), thus avoiding is_free()
-	   // OTHERWISE when we have multiple days, even he days which have expired are considered for running the task.
+	   // ADDITIONALLY WE use expired_ to remove days which have *EXPIRED*(i.e failed for check for re-queue), thus avoiding is_free()
+	   // OTHERWISE when we have multiple days, even the days which have expired are considered for running the task.
 	   switch(rt) {
 	   case Requeue_args::FULL: {
 #ifdef DEBUG_DAY
