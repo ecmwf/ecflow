@@ -20,6 +20,8 @@ show_error_and_exit() {
    echo ""
    echo "   debug          - make a DEBUG build"
    echo "   make           - run make after cmake"
+   echo "   test           - enable all tests"
+   echo "   xcode          - enable xcode project"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
    echo "   no_gui         - Don't build the gui"
