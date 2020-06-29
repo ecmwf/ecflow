@@ -695,12 +695,11 @@ void Defs::write_state(std::string& os) const
    if (state_change_no_ != 0)    { os += " state_change:"; os += boost::lexical_cast<std::string>(state_change_no_);}
    if (modify_change_no_ != 0)   { os += " modify_change:"; os += boost::lexical_cast<std::string>(modify_change_no_);}
    if (server().get_state() != ServerState::default_state()){ os += " server_state:"; os += SState::to_string(server().get_state());}
+
+   // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
+   os += " cal_count:"; os += boost::lexical_cast<std::string>(updateCalendarCount_);
    os += "\n";
 
-   if (!PrintStyle::defsStyle()) {
-      // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
-      os += "# updateCalendarCount_ "; os += boost::lexical_cast<std::string>(updateCalendarCount_); os += "\n";
-   }
 
    // This read by the DefsParser
    const std::vector<Variable>& server_user_variables = server().user_variables();
@@ -775,6 +774,10 @@ void Defs::read_state(const std::string& line,const std::vector<std::string>& li
          if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
          if (!SState::isValid(token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
          set_server().set_state(SState::toState(token));
+      }
+      else if (line_token_i.find("cal_count:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid cal_count specified : " + line );
+         updateCalendarCount_ = Extract::theInt(token,"Defs::read_state: invalid cal_count specified : " + line);
       }
    }
 }
