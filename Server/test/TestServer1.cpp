@@ -85,76 +85,107 @@ public:
 };
 
 
+void test_the_server(const std::string& port)
+{
+	   std::string server_port = "--port=" + port;
+	   int argc = 3;
+	   char* argv[] = { const_cast<char*>("ServerEnvironment"),
+	                    const_cast<char*>(server_port.c_str()),
+	                    const_cast<char*>("--ecfinterval=12")
+	                  };
+
+
+	   ServerEnvironment server_environment(argc, argv);  // This can throw ServerEnvironmentException
+	   std::string errorMsg;
+	   BOOST_CHECK_MESSAGE(server_environment.valid(errorMsg),errorMsg);
+
+	   {
+	      boost::asio::io_service io_service;
+	      TestServer theServer(io_service, server_environment ); // This can throw exception, bind address in use.
+
+	      BOOST_REQUIRE_MESSAGE(theServer.defs(),"Expected defs to be created");
+
+	      const std::vector<Variable>& server_variables = theServer.defs()->server().server_variables();
+	      BOOST_REQUIRE_MESSAGE(!server_variables.empty(),"Expected defs to be updated with the server variables");
+
+	      //for(size_t i = 0; i < server_variables.size(); ++i)  cout << server_variables[i].dump() << "\n";
+	      const std::string& ecf_port = theServer.defs()->server().find_variable("ECF_PORT");
+	      BOOST_REQUIRE_MESSAGE(ecf_port == port,"Expected port " << port << " but found " << ecf_port << " defs server variables, should be in sync with server");
+
+
+	      const std::string& interval = theServer.defs()->server().find_variable("ECF_INTERVAL");
+	      BOOST_REQUIRE_MESSAGE(interval == "12","Expected interval 12 but found " << interval << " defs server variables, should be in sync with server");
+	      BOOST_REQUIRE_MESSAGE(theServer.poll_interval() == 12,"Expected poll interval 12 but found " << theServer.poll_interval());
+
+
+	      BOOST_REQUIRE_MESSAGE(theServer.state() == SState::HALTED,"Expected halted at server start but found " << SState::to_string(theServer.state()));
+	      theServer.halted(); BOOST_REQUIRE_MESSAGE(theServer.state() == SState::HALTED,"Expected halted ");
+	      theServer.shutdown(); BOOST_REQUIRE_MESSAGE(theServer.state() == SState::SHUTDOWN,"Expected shutdown ");
+	      theServer.restart(); BOOST_REQUIRE_MESSAGE(theServer.state() == SState::RUNNING,"Expected shutdown ");
+
+
+	      BOOST_REQUIRE_MESSAGE(theServer.lock("fred"),"Expected to lock user fred");
+	      BOOST_REQUIRE_MESSAGE(theServer.state() == SState::SHUTDOWN,"Locking should shutdown server");
+	      BOOST_REQUIRE_MESSAGE(theServer.lockedUser() == "fred","Expected locked user 'fred' but found " << theServer.lockedUser());
+	      theServer.unlock();
+	      BOOST_REQUIRE_MESSAGE(theServer.lockedUser().empty(),"Expected no locked user but found " << theServer.lockedUser());
+	      BOOST_REQUIRE_MESSAGE(theServer.state() == SState::RUNNING,"Expected unlock to restart server ");
+	   }
+}
+
 BOOST_AUTO_TEST_CASE( test_server )
 {
-   cout << "Server:: ...test_server\n";
+	cout << "Server:: ...test_server\n";
 
-   // Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
-   // Hence the lock file is not always sufficient.
-   // ECF_FREE_PORT should be unique among  gnu,clang,intel, etc
-   std::string the_port1 = "3144" ;
-   char* test_ecf_port = getenv("ECF_FREE_PORT");  // from metabuilder, allow parallel tests
-   if ( test_ecf_port ) the_port1 = test_ecf_port;
-   cout << "Find free port to start server, starting with port " << the_port1 << "\n";
+	// Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
+	// Hence the lock file is not always sufficient.
+	// ECF_FREE_PORT should be unique among  gnu,clang,intel, etc
+	std::string the_port1 = "3144" ;
+	char* test_ecf_port = getenv("ECF_FREE_PORT");  // from metabuilder, allow parallel tests
+	if ( test_ecf_port ) the_port1 = test_ecf_port;
+	cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
 
-   auto the_port = boost::lexical_cast<int>(the_port1);
-   while (!EcfPortLock::is_free(the_port)) the_port++;
-   std::string port = boost::lexical_cast<std::string>(the_port);
-   EcfPortLock::create(port);
-   cout << "Found free port: " << port << "\n";
+	auto the_port = boost::lexical_cast<int>(the_port1);
+	while (!EcfPortLock::is_free(the_port)) the_port++;
+	std::string port = boost::lexical_cast<std::string>(the_port);
+	EcfPortLock::create(port);
+	cout << "  Found free port: " << port << " ";
 
-   std::string server_port = "--port=" + port;
-   int argc = 3;
-   char* argv[] = { const_cast<char*>("ServerEnvironment"),
-                    const_cast<char*>(server_port.c_str()),
-                    const_cast<char*>("--ecfinterval=12")
-                  };
+	Host h;
+	int count = 0;
+	while(1) {
+		try {
+			test_the_server(port);
+			cout << "\n";
+			break;
+		}
+		catch(...) {
+			count++;
 
+			// cleanup
+			fs::remove(h.ecf_log_file(port));
+			EcfPortLock::remove(port);
 
-   ServerEnvironment server_environment(argc, argv);  // This can throw ServerEnvironmentException
-   std::string errorMsg;
-   BOOST_CHECK_MESSAGE(server_environment.valid(errorMsg),errorMsg);
+			cout << " : port " << port << " is used, trying next port\n";
 
-   {
-      boost::asio::io_service io_service;
-      TestServer theServer(io_service, server_environment ); // This can throw exception, bind address in use.
+			the_port = boost::lexical_cast<int>(port);
+			the_port++;
 
-      BOOST_REQUIRE_MESSAGE(theServer.defs(),"Expected defs to be created");
+			while (!EcfPortLock::is_free(the_port)) the_port++;
+			port = boost::lexical_cast<std::string>(the_port);
+			EcfPortLock::create(port);
+			cout << "  Found free port: " << port << "\n";
 
-      const std::vector<Variable>& server_variables = theServer.defs()->server().server_variables();
-      BOOST_REQUIRE_MESSAGE(!server_variables.empty(),"Expected defs to be updated with the server variables");
+			BOOST_REQUIRE_MESSAGE( count < 20, "Could not find new port after 20 attempts");
+		}
+	}
 
-      //for(size_t i = 0; i < server_variables.size(); ++i)  cout << server_variables[i].dump() << "\n";
-      const std::string& ecf_port = theServer.defs()->server().find_variable("ECF_PORT");
-      BOOST_REQUIRE_MESSAGE(ecf_port == port,"Expected port " << port << " but found " << ecf_port << " defs server variables, should be in sync with server");
+	// cleanup
+	fs::remove(h.ecf_log_file(port));
+	EcfPortLock::remove(port);
 
-
-      const std::string& interval = theServer.defs()->server().find_variable("ECF_INTERVAL");
-      BOOST_REQUIRE_MESSAGE(interval == "12","Expected interval 12 but found " << interval << " defs server variables, should be in sync with server");
-      BOOST_REQUIRE_MESSAGE(theServer.poll_interval() == 12,"Expected poll interval 12 but found " << theServer.poll_interval());
-
-
-      BOOST_REQUIRE_MESSAGE(theServer.state() == SState::HALTED,"Expected halted at server start but found " << SState::to_string(theServer.state()));
-      theServer.halted(); BOOST_REQUIRE_MESSAGE(theServer.state() == SState::HALTED,"Expected halted ");
-      theServer.shutdown(); BOOST_REQUIRE_MESSAGE(theServer.state() == SState::SHUTDOWN,"Expected shutdown ");
-      theServer.restart(); BOOST_REQUIRE_MESSAGE(theServer.state() == SState::RUNNING,"Expected shutdown ");
-
-
-      BOOST_REQUIRE_MESSAGE(theServer.lock("fred"),"Expected to lock user fred");
-      BOOST_REQUIRE_MESSAGE(theServer.state() == SState::SHUTDOWN,"Locking should shutdown server");
-      BOOST_REQUIRE_MESSAGE(theServer.lockedUser() == "fred","Expected locked user 'fred' but found " << theServer.lockedUser());
-      theServer.unlock();
-      BOOST_REQUIRE_MESSAGE(theServer.lockedUser().empty(),"Expected no locked user but found " << theServer.lockedUser());
-      BOOST_REQUIRE_MESSAGE(theServer.state() == SState::RUNNING,"Expected unlock to restart server ");
-   }
-
-   // cleanup
-   Host h;
-   fs::remove(h.ecf_log_file(port));
-   EcfPortLock::remove(port);
-
-   /// Destroy Log singleton to avoid valgrind from complaining
-   Log::destroy();
+	/// Destroy Log singleton to avoid valgrind from complaining
+	Log::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
