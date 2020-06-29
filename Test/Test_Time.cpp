@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
       suite_ptr suite = theDefs.add_suite("test_time_relative_time_series");
       ClockAttr clockAttr(Calendar::second_clock_time(),false);
       suite->addClock( clockAttr );
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-2));
 
       family_ptr fam = suite->add_family("family");
       task_ptr task = fam->add_task("t");
