@@ -177,6 +177,7 @@ bool BaseServer::restore_from_checkpt(const std::string& filename,bool& failed)
 
       try {
          defs_->restore(filename);                      // this can throw
+         defs_->handle_migration();                     // handle any migration of checkpt file.
          update_defs_server_state();                    // works on def_
          LOG(Log::MSG, "Loading of *DEFS* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
 

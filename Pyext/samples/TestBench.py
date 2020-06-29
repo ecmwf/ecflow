@@ -87,7 +87,11 @@ def delete_variables_affecting_job_generation(node):
         node.delete_variable("ECF_STATUS_CMD")    
     var = node.find_variable("ECF_OUT")
     if not var.empty() :  
-        node.delete_variable("ECF_OUT")    
+        node.delete_variable("ECF_OUT")
+    var = node.find_variable("ECF_MICRO")
+    if not var.empty() :  
+        node.delete_variable("ECF_MICRO")   # generation depend on % 
+         
       
 def traverse_container(node_container):
     """Recursively traverse definition node hierarchy and delete

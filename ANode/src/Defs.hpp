@@ -56,6 +56,12 @@ public:
    void print(std::string&) const;
    std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
 
+   /// Handle migration of checkpoint 4->5, and 5.0-5.4.0 -> 5.5
+   /// This essentially update date data member of the Day attribute
+   /// Can be removed when ecflow 5 is used everywhere.
+   void handle_migration();
+
+
    /// State related functions:
    /// Defs acts like the root node.
    void set_state(NState::State);

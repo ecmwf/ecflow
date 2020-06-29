@@ -376,6 +376,12 @@ void Node::reset()
    for(auto & limit : limits_) { limit->reset(); }
 }
 
+void Node::handle_migration(const ecf::Calendar& c)
+{
+	// called when defs created by reading from a file on disk. i.e checkpoint
+	// handle any migration
+	for(auto & day : days_) { day.handle_migration(c); }
+}
 
 void Node::requeue_time_attrs()
 {

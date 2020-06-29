@@ -121,6 +121,12 @@ void NodeContainer::reset()
    for(const auto& n: nodes_) { n->reset(); }
 }
 
+void NodeContainer::handle_migration(const ecf::Calendar& c)
+{
+   Node::handle_migration(c);
+   for(const auto& n: nodes_) { n->handle_migration(c); }
+}
+
 void NodeContainer::requeue(Requeue_args& args)
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);

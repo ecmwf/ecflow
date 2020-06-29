@@ -59,6 +59,8 @@ BOOST_AUTO_TEST_CASE( test_reset_after_job_generation_checking )
       MyDefsFixture theDefsFixture;
       Defs copy = Defs(theDefsFixture.defsfile_);
 
+      BOOST_REQUIRE_MESSAGE( copy == theDefsFixture.defsfile_, "Expected defs to be equal");
+
       // After check_job_creation, the defs SHOULD be reset. see ECFLOW-1203
       job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
       theDefsFixture.defsfile_.check_job_creation( jobCtrl );

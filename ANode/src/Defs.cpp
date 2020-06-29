@@ -127,6 +127,15 @@ Defs::~Defs()
    ExprDuplicate reclaim_cloned_ast_memory;
 }
 
+void Defs::handle_migration()
+{
+   // Fix up any migration issues
+   for(const auto& s : suiteVec_) {
+      s->handle_migration(s->calendar());
+   }
+}
+
+
 ///// State relation functions: ==================================================
 NState::State Defs::state() const
 {

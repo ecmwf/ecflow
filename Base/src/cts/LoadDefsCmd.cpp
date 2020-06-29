@@ -31,6 +31,7 @@ LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
  : force_(force)
 {
    if (defs) {
+	  defs->handle_migration();
       defs->save_as_string(defs_,PrintStyle::NET);
    }
 }
@@ -50,6 +51,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
    std::string errMsg, warningMsg;
    if (defs->restore(defs_filename_, errMsg , warningMsg) ) {
 
+	  defs->handle_migration();
       defs->set_server().add_or_update_user_variables( client_env ); // use in test environment
 
       if (print) {

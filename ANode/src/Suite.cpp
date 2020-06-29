@@ -186,6 +186,13 @@ void Suite::reset()
    NodeContainer::reset();
 }
 
+void Suite::handle_migration(const ecf::Calendar& c)
+{
+   // called when defs is read in from a file. i.e checkpoint
+
+   NodeContainer::handle_migration(c);
+}
+
 void Suite::reset_begin() {
    SuiteChanged1 changed(this);
    reset_begin_only();

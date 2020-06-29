@@ -15,6 +15,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "TodayAttr.hpp"
 #include "TimeAttr.hpp"
@@ -35,6 +36,7 @@
 #include "SerializationTest.hpp"
 #include "TimeSlot.hpp"
 #include "File.hpp"
+#include "cereal_boost_time.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -201,8 +203,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
 
 // The following test shows that CEREAL ignores new data members it does not recognise.
 // This allows new data members, which will be ignored by the old client.
-// OLD server to NEW Client(GUI), will not be a problem, since the the new data member is conditional.
-// In ecflow 5.4.0 we added a new data member to the DayAttribute class.
+// OLD server to NEW Client(GUI), will not be a problem, since the the new data members are conditional.
+// In ecflow 5.4.0/5.5.0 we added a new data members to the DayAttribute class.
 // This test shows that when NEW SERVER send DayAttr to OLD Client(GUI), this new data member is ignored.
 namespace version_old {
 class DayAttr {
@@ -234,18 +236,22 @@ public:
 	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
 	DayAttr() = default;
 	explicit DayAttr(Day_t day) : day_(day) {}
-  	bool operator==(const DayAttr& rhs) const { return day_ == rhs.day_ && expired_ == rhs.expired() && free_ == rhs.free();}
+  	bool operator==(const DayAttr& rhs) const {
+  		return day_ == rhs.day_ && expired_ == rhs.expired() && free_ == rhs.free() && date_ == rhs.date_ ;}
 
 	DayAttr::Day_t day() const { return day_;}
 	bool expired() const { return expired_;}
 	bool free() const { return free_;}
+	boost::gregorian::date date() const { return date_;}
 
 	void set_free()    { free_ = true;}
 	void set_expired() { expired_ = true;}
+	void set_date(boost::gregorian::date date) { date_ = std::move(date);}
 private:
 	DayAttr::Day_t day_{DayAttr::SUNDAY};
 	bool           free_{false};
-	bool           expired_{false};
+	bool           expired_{false};  // new data member 5.4.0
+	boost::gregorian::date date_;    // new data member 5.5.0
 
 	friend class cereal::access;
 	template<class Archive>
@@ -253,6 +259,7 @@ private:
 		ar( CEREAL_NVP(day_));
 		CEREAL_OPTIONAL_NVP(ar, free_,    [this](){return free_;});     // conditionally save
 		CEREAL_OPTIONAL_NVP(ar, expired_, [this](){return expired_;});  // conditionally save
+		CEREAL_OPTIONAL_NVP(ar, date_,    [this](){return !date_.is_special();}); // conditionally save, new to ecflow 5.5.0,
 	}
 };
 }
@@ -286,6 +293,12 @@ BOOST_AUTO_TEST_CASE( test_day_migration )
 
 	   version_new_data_member::DayAttr def_free_and_expired; def_free_and_expired.set_expired(); def_free_and_expired.set_free();
 	   ecf::save("test_day_migration_free_and_expired",def_free_and_expired);
+
+	   version_new_data_member::DayAttr def_free_expired_date;
+	   def_free_expired_date.set_expired();
+	   def_free_expired_date.set_free();
+	   def_free_expired_date.set_date(boost::gregorian::date(2020,06,28));  // sunday
+	   ecf::save("test_day_migration_free_expired_date",def_free_expired_date);
    }
    {
 	   version_old::DayAttr def = version_old::DayAttr();
@@ -304,6 +317,10 @@ BOOST_AUTO_TEST_CASE( test_day_migration )
 	   version_old::DayAttr def_free_and_expired = version_old::DayAttr();
 	   ecf::restore("test_day_migration_free_and_expired",def_free_and_expired);
 	   BOOST_CHECK_MESSAGE(def_free_and_expired == cdef_free,"No expired,But free should be set,Should be the same");
+
+	   version_old::DayAttr def_free_expired_date = version_old::DayAttr();
+	   ecf::restore("test_day_migration_free_expired_date",def_free_expired_date);
+	   BOOST_CHECK_MESSAGE(def_free_and_expired == cdef_free,"No expired,No date,But free should be set,Should be the same");
    }
 
    // remove the generated filea, comment out to debug.
@@ -312,6 +329,7 @@ BOOST_AUTO_TEST_CASE( test_day_migration )
    boost::filesystem::remove("test_day_migration_free");
    boost::filesystem::remove("test_day_migration_expired");
    boost::filesystem::remove("test_day_migration_free_and_expired");
+   boost::filesystem::remove("test_day_migration_free_expired_date");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

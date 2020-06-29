@@ -22,6 +22,9 @@
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
 #include "Serialization.hpp"
+#include "cereal_boost_time.hpp"
+#include "Extract.hpp"
+
 
 using namespace std;
 using namespace ecf;
@@ -102,11 +105,22 @@ void DayAttr::reset()
 {
    expired_ = false;
    free_ = false;
+   date_ = boost::gregorian::date();
    state_change_no_ = Ecf::incr_state_change_no();
    
 #ifdef DEBUG_DAYS
    cout << " DayAttr::reset :" << dump() << "\n";
 #endif
+}
+
+void DayAttr::handle_migration(const ecf::Calendar& c)
+{
+	// <TODO> temp once in Bologna, and when ecflow4 no longer used.
+	if (date_.is_special()) {
+		if (!c.is_special()) {
+			date_ = matching_date(c);  
+		}
+	}
 }
 
 void DayAttr::reset(const ecf::Calendar& c)
@@ -226,7 +240,17 @@ void DayAttr::check_for_expiration(const ecf::Calendar& c)
 	// This function is called when a Node has COMPLETED. Avoid running again on same day date <= calendar, expire the date
 	// Note: time attribute, they get handled before. i.e allowing multiple re-queues on the same date
 	// This function *MUST* be called before checkForRequeue.
-	assert(!date_.is_special());
+
+	if (date_.is_special()) {
+		// migration 4->5, or 5->5 from checkpoint
+		date_ = matching_date(c); 
+	}
+
+	if (day_ == c.day_of_week() ) {
+		set_expired();
+        return;
+	}
+
 	if (date_ <= c.date()) {
 		set_expired();
 	}
@@ -272,7 +296,8 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	theReasonWhy += " is day dependent ( next run on ";
 	theReasonWhy += theDay(day_);
 	theReasonWhy += " ";
-	theReasonWhy += to_simple_string(next_matching_date(c));
+	if (date_.is_special()) theReasonWhy += to_simple_string(next_matching_date(c));
+	else                    theReasonWhy += to_simple_string(date_);
 	theReasonWhy += " the current day is ";
 	theReasonWhy += theDay(static_cast<DayAttr::Day_t>(c.day_of_week()));
 	theReasonWhy += " )";
@@ -295,8 +320,8 @@ void DayAttr::print(std::string& os) const
 			added_hash = true;
 		}
 
-		if (added_hash) { os += " "; os += to_simple_string(date_);}
-		else            { os += " # "; os += to_simple_string(date_);}
+		if (added_hash) { os += " date:"; os += to_simple_string(date_);}
+		else            { os += " # date:"; os += to_simple_string(date_);}
 	}
 	os += "\n";
 }
@@ -327,8 +352,30 @@ std::string DayAttr::dump() const
 bool DayAttr::operator==(const DayAttr& rhs) const
 {
 	if (free_ != rhs.free_) {
+#ifdef DEBUG
+		if (Ecf::debug_equality()) {
+			std::cout << "DayAttr::operator== free_ != rhs.free_   (free_:" << free_ << " rhs.free_:" << rhs.free_ << ") " << dump() << "\n";
+		}
+#endif
 		return false;
 	}
+	if (expired_ != rhs.expired_) {
+#ifdef DEBUG
+		if (Ecf::debug_equality()) {
+			std::cout << "DayAttr::operator== expired_ != rhs.expired_   (expired_:" << expired_ << " rhs.expired_:" << rhs.expired_ << ") " << dump() << "\n";
+		}
+#endif
+		return false;
+	}
+	if (date_ != rhs.date_) {
+#ifdef DEBUG
+		if (Ecf::debug_equality()) {
+			std::cout << "DayAttr::operator== date_ != rhs.date_   (date_:" << date_ << " rhs.date_:" << rhs.date_ << ") " << dump() << "\n";
+		}
+#endif
+		return false;
+	}
+
 	return structureEquals(rhs);
 }
 
@@ -353,19 +400,34 @@ DayAttr DayAttr::create( const std::vector<std::string>& lineTokens, bool read_s
 //      cout << "lineTokens[" << i << "] = '" << lineTokens[i] << "'\n";
 //   }
 
-   // day monday  # free expired
+   // day monday  # free expired date:****
    // day monday  # expired
    DayAttr day = DayAttr::create( lineTokens[1] );
 
    // state
    if (read_state) {
-      for(size_t i = 3; i < lineTokens.size(); i++) {
-          if (lineTokens[i] == "free")    day.setFree();
-          if (lineTokens[i] == "expired") day.set_expired();
-      }
+	  day.read_state(lineTokens);
    }
    return day;
 }
+
+void DayAttr::read_state(const std::vector<std::string>& lineTokens)
+{
+	std::string date;
+
+    for(size_t i = 3; i < lineTokens.size(); i++) {
+        if (lineTokens[i] == "free")         free_ = true;
+        else if (lineTokens[i] == "expired") expired_= true;
+        else if (lineTokens[i].find("date:") != std::string::npos ) {
+           if (!Extract::split_get_second(lineTokens[i],date)) throw std::runtime_error( "DayAttr::read_state failed: (date:)");
+           // when a date_ is special date = not-a-date-time\n"
+           if (date.find("not") == std::string::npos) {
+        	   date_ = from_simple_string(date);
+           }
+        }
+    }
+}
+
 
 DayAttr::Day_t DayAttr::getDay(const std::string& day)
 {
@@ -431,7 +493,8 @@ template<class Archive>
 void DayAttr::serialize(Archive & ar )
 {
    ar( CEREAL_NVP(day_));
-   CEREAL_OPTIONAL_NVP(ar, free_,    [this](){return free_;});     // conditionally save
-   CEREAL_OPTIONAL_NVP(ar, expired_, [this](){return expired_;});  // conditionally save, new to ecflow 5.4.0, should be ignored by old clients. see tests
+   CEREAL_OPTIONAL_NVP(ar, free_,   [this](){return free_;});     // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, expired_,[this](){return expired_;});  // conditionally save, new to ecflow 5.4.0, should be ignored by old clients. see tests
+   CEREAL_OPTIONAL_NVP(ar, date_,   [this](){return !date_.is_special();});  // conditionally save, new to ecflow 5.5.0, should be ignored by old clients. see tests
 }
 CEREAL_TEMPLATE_SPECIALIZE(DayAttr);

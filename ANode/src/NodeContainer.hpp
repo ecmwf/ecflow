@@ -36,6 +36,7 @@ public:
 	void begin() override;
 	void requeue(Requeue_args&) override;
    void requeue_time_attrs() override;
+   void handle_migration(const ecf::Calendar&) override;
    void reset_late_event_meters() override;
 	bool run(JobsParam& jobsParam, bool force) override;
 	void kill(const std::string& zombie_pid = "") override;

@@ -50,6 +50,7 @@ public:
    void accept(ecf::NodeTreeVisitor&) override;
    void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
    void reset() override;
+   void handle_migration(const ecf::Calendar&) override;
    void begin() override;
    void requeue(Requeue_args& args) override;
    bool begun() const { return begun_; }

@@ -128,6 +128,9 @@ public:
    virtual void order(Node*/*immediateChild*/, NOrder::Order) {}
    virtual void move_peer(Node* src, Node* dest) {}
 
+   /// called when definition is restored from a file/checkpoint
+   virtual void handle_migration(const ecf::Calendar&);
+
    /// reset all. Used after job generation.
    /// Unlike re-queue/begin, will reset time attributes. see ECFLOW-1204
    virtual void reset();
