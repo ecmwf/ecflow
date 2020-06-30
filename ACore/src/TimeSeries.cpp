@@ -27,7 +27,7 @@
 #include "Ecf.hpp"
 #endif
 
-#define DEBUG_TIME_SERIES 1
+//#define DEBUG_TIME_SERIES 1
 //#define DEBUG_TIME_SERIES_IS_FREE 1
 #ifdef DEBUG_TIME_SERIES_IS_FREE
 #include "Indentor.hpp"
@@ -188,9 +188,10 @@ void TimeSeries::reset(const ecf::Calendar& c)
  	time_duration current_time = duration(c);
    if (hasIncrement()) {
 
-      // only used when we have a series
-      suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
-      //cout << "TimeSeries::reset  suiteTimeAtReque_: " << suiteTimeAtReque_ << " =====================================================\n";
+      // only used when we have a series, and *NOT* relative. A relative time series does not care about midnight.
+	  if (!relativeToSuiteStart_) {
+		  suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+	  }
 
       while( current_time > nextTimeSlot_.duration()) {
          time_duration value = nextTimeSlot_.duration();
@@ -251,9 +252,10 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		return;
 	}
 
-	// only used when we have a series
-   suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
-//   cout << "TimeSeries::requeue suiteTimeAtReque_: " << suiteTimeAtReque_ << " =====================================================\n";
+	// Only used when we have a series, and NOT relative. A relative time series does not care about midnight
+	if (!relativeToSuiteStart_) {
+		suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+	}
 
 	// the nextTimeSlot_ needs to be set to a multiple of incr
 	// However the nextTimeSlot_ can not just be incremented by incr
@@ -459,8 +461,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
          return false;
       }
 
-      // ECFLOW-130 jobs that start before midnight and finish after midnight should not requeue
-      if (!suiteTimeAtReque_.isNULL()){
+      // ECFLOW-130 jobs that start before midnight and finish after midnight should not re-queue
+      // This should ONLY apply to non relative time series, since a relative time series does care about midnight
+      if (!relativeToSuiteStart_ && !suiteTimeAtReque_.isNULL()){
          TimeSlot suiteTimeNow(calendar.suiteTime().time_of_day());
          //cout << "TimeSeries::checkForRequeue suiteTimeNow = " << suiteTimeNow << " =====================================================\n";
          // we use >= specifically for unit test, to pass.
@@ -472,7 +475,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
             // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
 #ifdef DEBUG_TIME_SERIES
             //cout << " TimeSeries::checkForRequeue day changed ===================================================== HOLDING\n";
-       	     log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING  suiteTimeNow < suiteTimeAtReque_  " + dump());
+       	     log(Log::DBG,"TimeSeries::checkForRequeue HOLDING suiteTimeNow < suiteTimeAtReque_  " + dump());
 #endif
             return false;
          }
@@ -667,6 +670,7 @@ std::string TimeSeries::dump() const
 	ss << " nextTimeSlot_("     << nextTimeSlot_.toString() << ")";
 	ss << " relativeDuration_(" << to_simple_string(relativeDuration_) << ")";
  	ss << " lastTimeSlot_("     << to_simple_string(lastTimeSlot_) << ")";
+ 	ss << " suiteTimeAtReque_(" << suiteTimeAtReque_.toString() << ")";
  	return ss.str();
 }
 
