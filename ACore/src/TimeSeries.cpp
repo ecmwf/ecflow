@@ -27,7 +27,7 @@
 #include "Ecf.hpp"
 #endif
 
-//#define DEBUG_TIME_SERIES 1
+#define DEBUG_TIME_SERIES 1
 //#define DEBUG_TIME_SERIES_IS_FREE 1
 #ifdef DEBUG_TIME_SERIES_IS_FREE
 #include "Indentor.hpp"
@@ -152,6 +152,11 @@ bool TimeSeries::resetRelativeDuration()
 {
 	if ( relativeToSuiteStart_ ) {
 	   relativeDuration_ = time_duration(0,0,0,0);
+
+#ifdef DEBUG_TIME_SERIES
+	   log(Log::DBG,"TimeSeries::resetRelativeDuration " + dump());
+#endif
+
 	   return true;
 	}
 #ifdef DEBUG_TIME_SERIES
@@ -424,6 +429,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // The resolution is in minutes
    // *************************************************************************
    //cout << "TimeSeries::checkForRequeue " << calendar.suite_time_str() << " min: " << the_min << " max: " << the_max << " cmd_context(" << cmd_context << ") +++++++++++++++\n";
+#ifdef DEBUG_TIME_SERIES
+   log(Log::DBG,"TimeSeries::checkForRequeue: " + dump());
+#endif
 
    if (!isValid_) {
       // time has expired, hence can no longer re-queues, i.e no future time dependency
@@ -655,10 +663,10 @@ std::string TimeSeries::dump() const
 {
 	std::stringstream ss;
 	ss << toString();
-	ss << " isValid_(" << isValid_ << ")";
-	ss << " value(" << nextTimeSlot_.toString() << ")";
-	ss << " relativeDuration_(" <<  to_simple_string( relativeDuration_) << ")";
- 	ss << " lastTimeSlot_(" <<  to_simple_string(lastTimeSlot_) << ")";
+	ss << " isValid_("          << isValid_ << ")";
+	ss << " nextTimeSlot_("     << nextTimeSlot_.toString() << ")";
+	ss << " relativeDuration_(" << to_simple_string(relativeDuration_) << ")";
+ 	ss << " lastTimeSlot_("     << to_simple_string(lastTimeSlot_) << ")";
  	return ss.str();
 }
 
