@@ -1,21 +1,53 @@
 suite day
-   family familyName0
-   	  day tuesday
-      task taskName0
+   family f
+      task t1
    	  		day wednesday
-      task fred
-   	  		day thursday
+      task f2
+            day monday
+            day tuesday
+            day wednesday
+            day thursday
    	  		day friday
    	  		day saturday
    	  		day sunday
        endtask
    endfamily
+   family f2
+      repeat datelist YMD 20090331 20121212 20121212 20121213 20121214 20121215 
+      task t
+         day tuesday
+         time 13:00
+   endfamily
+   family f3
+      repeat date YMD 20090331 20121212 1  
+      task t
+         day wednesday
+         time 13:00
+   endfamily
+   family f4
+      repeat enumerated quotes "first" "second" "third" 
+      task t
+         day thursday
+         time 13:00
+   endfamily
+   family f5
+      repeat integer VARIABLE_XX 0 10 2  
+      task t
+         day friday
+         today 09:00
+   endfamily
+   family f6
+      repeat string VARIABLE str1 str2 str3 str4 str5 str6 str7
+      task t
+         day wednesday
+         today 09:00
+   endfamily
 endsuite
 
-suite day_s1; family familyName0 ; day tuesday
-      task taskName0
+suite day_s1; family f ; day tuesday
+      task t1
    	  		day wednesday
-      task fred
+      task t2
    	  		day thursday
    	  		day friday
    	  		day saturday
