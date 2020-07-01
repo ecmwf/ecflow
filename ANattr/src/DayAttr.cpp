@@ -133,7 +133,7 @@ void DayAttr::reset(const ecf::Calendar& c)
 #endif
 }
 
-void DayAttr::requeue()
+void DayAttr::requeue_time()
 {
 #ifdef DEBUG_DAYS
    cout << " DayAttr::requeue " << dump() << "\n";
@@ -142,7 +142,7 @@ void DayAttr::requeue()
 	if (expired_) {
 		// ********* TREAT this Day Attribute as deleted **********
 #ifdef DEBUG_DAYS
-   cout << " DayAttr::requeue " << dump() << " EXPIRED(do nothing) returning\n";
+   cout << " DayAttr::requeue_time " << dump() << " EXPIRED(do nothing) returning\n";
 #endif
 		return;
 	}
@@ -151,14 +151,23 @@ void DayAttr::requeue()
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void DayAttr::requeue(const ecf::Calendar& c)
+void DayAttr::requeue_manual(const ecf::Calendar& c)
 {
-	expired_ = false;
-	requeue();
-	date_ = next_matching_date(c);
-	
+   reset();
+	date_ = matching_date(c);
+
 #ifdef DEBUG_DAYS
-	cout << "  DayAttr::requeue(calendar) " << dump() << " calendar:" << c.suite_time_str() << "\n";
+	cout << "  DayAttr::requeue_manual(calendar) " << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
+}
+
+void DayAttr::requeue_repeat_increment(const ecf::Calendar& c)
+{
+   reset();
+   date_ = next_matching_date(c);
+
+#ifdef DEBUG_DAYS
+   cout << "  DayAttr::requeue_repeat_increment(calendar) " << dump() << " calendar:" << c.suite_time_str() << "\n";
 #endif
 }
 

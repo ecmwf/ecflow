@@ -44,21 +44,24 @@ public:
 	void reset();
 	void reset(const ecf::Calendar& c);
 
-	// called when we need a requed based on a time attribute. Should not clear expired flag.
-	void requeue();
+	// called when we need a reque based on a time attribute. Should *NOT* clear expired flag.
+	void requeue_time();
 
 	// called when re-queing because of:
 	//    - automatic re-queue due to repeat increment
 	//    - manual re-queue
-	// Clears expired flag, and sets day attribute to a next matching *FUTURE* day
-	void requeue(const ecf::Calendar& c);
+	// Clears expired flag, and sets day attribute to a next matching *FUTURE* day or current day
+   void requeue_manual(const ecf::Calendar& c);           // can match today if today is match day
+   void requeue_repeat_increment(const ecf::Calendar& c); // match *FUTURE* day
 
 	// Called after a node has completed, if calendar day corresponds to *THIS* day. *Expire* it
 	// This should be called just before: checkForRequeue.
 	// This day attribute should be treated as being deleted. returns false from
 	//  - isFree()          stops re-queue on expired day
 	//  - calendarChanged() stops clearing of free.
-	// Expired flag is RESET only by: void requeue(const ecf::Calendar& c);
+	// Expired flag is RESET only by: 
+	//    - void requeue_manual(const ecf::Calendar& c);
+	//    - void requeue_repeat_increment(const ecf::Calendar& c);
 	void check_for_expiration(const ecf::Calendar&);
 
 	// We must use a real date, using enum is not sufficient as in ecflow4

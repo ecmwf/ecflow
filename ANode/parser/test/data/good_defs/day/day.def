@@ -23,23 +23,24 @@ suite day
       task t
          day wednesday
          time 13:00
+         time 14:00
    endfamily
    family f4
       repeat enumerated quotes "first" "second" "third" 
       task t
-         day thursday
-         time 13:00
+         day tuesday
+         time 00:00 23:59 00:30
    endfamily
    family f5
       repeat integer VARIABLE_XX 0 10 2  
       task t
-         day friday
+         day tuesday
          today 09:00
    endfamily
    family f6
       repeat string VARIABLE str1 str2 str3 str4 str5 str6 str7
       task t
-         day wednesday
+         day tuesday
          today 09:00
    endfamily
 endsuite
