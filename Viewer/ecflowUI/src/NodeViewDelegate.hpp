@@ -242,6 +242,8 @@ protected:
 
     enum LabelType {DefaultLabel, ErrorLabel, WarningLabel, InfoLabel};
     QMap<LabelType, LabelStyle*> labelStyle_;
+
+    const QLatin1Char newlineChar_{'\n'};
 };
 
 #endif

@@ -46,8 +46,9 @@ public:
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
-
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static int countLineNum(const std::string& s);
+    static void getLines(const std::string& s, std::string& r, bool firstLine);
 };
 
 #endif // VLABEL_HPP

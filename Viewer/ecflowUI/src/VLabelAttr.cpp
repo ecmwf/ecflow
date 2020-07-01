@@ -50,24 +50,30 @@ QString VLabelAttrType::definition(QStringList d) const
 
 void VLabelAttrType::encode(const Label& label,QStringList& data,bool firstLine) const
 {
-    std::string val=label.new_value();
+    std::string r;
+    const std::string& val=label.new_value();
     if(val.empty() || val == " ")
     {
-        val=label.value();
+        VLabelAttr::getLines(label.value(), r, firstLine);
+    } else {
+        VLabelAttr::getLines(val, r, firstLine);
     }
 
-    if(firstLine)
-    {
-        std::size_t pos=val.find("\n");
-        if(pos != std::string::npos)
-        {            
-            val=val.substr(0,pos);
-        }
-    }
+
+//    if(firstLine)
+//    {
+//        static const char ch_break = '\n';
+        std::size_t pos=val.find('\n');
+//        if(pos != std::string::npos)
+//        {
+//            val=val.substr(0,pos);
+//        }
+//    }
 
     data << qName_ <<
                 QString::fromStdString(label.name()) <<
-                QString::fromStdString(val);
+                QString::fromStdString(r);
+
 }
 
 void VLabelAttrType::encode_empty(QStringList& data) const
@@ -91,15 +97,35 @@ int VLabelAttr::lineNum() const
     if(parent_->node_)
     {
         const std::vector<Label>&  v=parent_->node_->labels();
-        std::string val=v[index_].new_value();
+        const std::string& val=v[index_].new_value();
         if(val.empty() || val == " ")
         {
-            val=v[index_].value();
+            return countLineNum(v[index_].value());
+        } else {
+            return countLineNum(val);
         }
-        return std::count(val.begin(), val.end(), '\n')+1;
     }
 
     return 1;
+}
+
+int VLabelAttr::countLineNum(const std::string& s)
+{
+    static const char ch_break = '\n';
+    return std::count(s.begin(), s.end(), ch_break);
+}
+
+void VLabelAttr::getLines(const std::string& s, std::string& r, bool firstLine)
+{
+    static const char ch_break = '\n';
+    if(firstLine) {
+        std::size_t pos=s.find(ch_break);
+        if(pos != std::string::npos) {
+            r=s.substr(0,pos);
+            return;
+        }
+    }
+    r = s;
 }
 
 VAttributeType* VLabelAttr::type() const
