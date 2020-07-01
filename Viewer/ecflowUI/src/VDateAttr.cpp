@@ -12,6 +12,8 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
+#include "Str.hpp"
+#include "PrintStyle.hpp"
 #include "DateAttr.hpp"
 #include "DayAttr.hpp"
 
@@ -43,20 +45,28 @@ QString VDateAttrType::definition(QStringList d) const
     QString t;
     if(d.count() == dataCount_)
     {
-        t+=" " + d[NameIndex];
+        t=d[NameIndex];
     }
     return t;
 }
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name()) <<
+    PrintStyle(PrintStyle::MIGRATE);
+    std::string s;
+    d.print(s);
+    ecf::Str::removeTrailingBreakAndSimplify(s);
+    data << qName_ << QString::fromStdString(s) <<
         (d.isFree(calendar)?"1":"0");
 }
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name())<<
+    PrintStyle(PrintStyle::MIGRATE);
+    std::string s;
+    d.print(s);
+    ecf::Str::removeTrailingBreakAndSimplify(s);
+    data << qName_ << QString::fromStdString(s)<<
         (d.isFree(calendar)?"1":"0");
 }
 
@@ -113,17 +123,27 @@ std::string VDateAttr::strName() const
 {
     if(parent_->node_)
     {
+        PrintStyle(PrintStyle::MIGRATE);
+
         if(dataType_ == DateData)
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
-            if(index_ < static_cast<int>(v.size()))
-                return v[index_].name();
+            if(index_ < static_cast<int>(v.size())) {
+                std::string s;
+                v[index_].print(s);
+                ecf::Str::removeTrailingBreakAndSimplify(s);
+                return s;
+            }
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
-            if(index_ < static_cast<int>(v.size()))
-                return v[index_].name();
+            if(index_ < static_cast<int>(v.size())) {
+                std::string s;
+                v[index_].print(s);
+                ecf::Str::removeTrailingBreakAndSimplify(s);
+                return s;
+            }
         }
     }
     return std::string();
@@ -149,4 +169,3 @@ void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
-

@@ -8,6 +8,9 @@
 //
 //============================================================================
 
+#include "PrintStyle.hpp"
+#include "Str.hpp"
+
 #include "VTimeAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
@@ -40,26 +43,38 @@ QString VTimeAttrType::definition(QStringList d) const
     QString t;
     if(d.count() == dataCount_)
     {
-        t+=" " + d[NameIndex];
+        t=d[NameIndex];
     }
     return t;
 }
 
 void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name()) <<
+    PrintStyle(PrintStyle::MIGRATE);
+    std::string s;
+    d.print(s);
+    ecf::Str::removeTrailingBreakAndSimplify(s);
+    data << qName_ << QString::fromStdString(s) <<
             (d.isFree(calendar)?"1":"0");
 }
 
 void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TodayAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name()) <<
+    PrintStyle(PrintStyle::MIGRATE);
+    std::string s;
+    d.print(s);
+    ecf::Str::removeTrailingBreakAndSimplify(s);
+    data << qName_ << QString::fromStdString(s) <<
             (d.isFree(calendar)?"1":"0");
 }
 
 void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::CronAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name())<<
+    PrintStyle(PrintStyle::MIGRATE);
+    std::string s;
+    d.print(s);
+    ecf::Str::removeTrailingBreakAndSimplify(s);
+    data << qName_ << QString::fromStdString(s)<<
             (d.isFree(calendar)?"1":"0");
 }
 
@@ -129,23 +144,37 @@ std::string VTimeAttr::strName() const
 {
     if(parent_->node_)
     {
+        PrintStyle(PrintStyle::MIGRATE);
+
         if(dataType_ == TimeData)
         {
             const std::vector<ecf::TimeAttr>& v=parent_->node_->timeVec();
-            if(index_ < static_cast<int>(v.size()))
-                return v[index_].name();
+            if(index_ < static_cast<int>(v.size())) {
+                std::string s;
+                v[index_].print(s);
+                ecf::Str::removeTrailingBreakAndSimplify(s);
+                return s;
+            }
         }
         else if(dataType_ == TodayData)
         {
             const std::vector<ecf::TodayAttr>& v=parent_->node_->todayVec();
-            if(index_ < static_cast<int>(v.size()))
-                return v[index_].name();
+            if(index_ < static_cast<int>(v.size())) {
+                std::string s;
+                v[index_].print(s);
+                ecf::Str::removeTrailingBreakAndSimplify(s);
+                return s;
+            }
         }
         else if(dataType_ == CronData)
         {
             const std::vector<ecf::CronAttr>& v=parent_->node_->crons();
-            if(index_ < static_cast<int>(v.size()))
-                return v[index_].name();
+            if(index_ < static_cast<int>(v.size())) {
+                std::string s;
+                v[index_].print(s);
+                ecf::Str::removeTrailingBreakAndSimplify(s);
+                return s;
+            }
         }
     }
     return std::string();

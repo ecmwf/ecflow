@@ -479,4 +479,26 @@ std::string Str::dump_string_vec(const std::vector<std::string>& vec)
    return str;
 }
 
+void Str::removeTrailingBreakAndSimplify(std::string& s)
+{
+    static const char ch_break = '\n';
+    static const char ch_ws = ' ';
+    if (!s.empty()) {
+        std::size_t pos = s.find_first_not_of(ch_ws);
+        if (pos != std::string::npos) {
+            if (pos > 0) {
+                s = s.substr(pos);
+            }
+        } else {
+            s.clear();
+            return;
+        }
+
+        if (s[s.size()-1] == ch_break) {
+            s.pop_back();
+        }
+    }
+}
+
+
 }
