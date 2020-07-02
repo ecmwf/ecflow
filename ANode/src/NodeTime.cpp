@@ -554,21 +554,27 @@ bool Node::timeDependenciesFree() const
    for(const auto & day  : days_) { if (day.isFree(calendar)) {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
 
    if (!todays_.empty()) {
-      // : single Today: (single-time)   is free, if calendar time >= today_time
-      // : single Today: (range)         is free, if calendar time == (one of the time ranges)
-      // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+      // : single Today: (single-time)    is free, if calendar time >= today_time
+      // : single Today: (range)          is free, if calendar time == (one of the time ranges)
+      // : multi Today : (single | range) is free, if calendar time == (one of the time ranges | today_time)
+      // : multi Today : (single | range) is free, all are free
       if (todays_.size() == 1 ) {
          // Single Today Attribute: could be single slot or range
          if (todays_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
       }
       else {
          // Multiple Today Attributes, each could single, or range
+         size_t free_count = 0;
          for(const auto & today : todays_) {
             if (today.isFreeMultipleContext(calendar)) {if (noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            if (today.isFree(calendar)) free_count++;
+         }
+         if (free_count == todays_.size() ) {
+            if (noOfTimeDependencies == 1) return true;
+            oneTodayIsFree = true;
          }
       }
    }
-
 
    if ( oneDateIsFree || oneDayIsFree || oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
       if ( noOfTimeDependencies > 1 ) {
