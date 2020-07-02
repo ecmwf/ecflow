@@ -64,7 +64,7 @@ void LabelStyle::update()
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent)
 {
-    hoverPen_=QPen(QColor(201,201,201));
+	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
 	selectPen_=QPen(QColor(125,162,206));
 	selectBrush_=QBrush(QColor(193,220,252,110));
@@ -575,7 +575,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
                                         -attrBox_->bottomMargin-attrBox_->bottomPadding);
 
     int currentRight=contRect.x();
-    int lineBreakPos = val.indexOf(newlineChar_);
+	int multiCnt=val.count('\n');
 
 	QRect nameRect;
     QRect valRect,valRestRect;
@@ -586,7 +586,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
     QString valFirst,valRest;
     QString full;
 
-    if(lineBreakPos == -1)
+	if(multiCnt ==0 )
 	{
 		//The text rectangle
 		QFontMetrics fm(nameFont);
@@ -617,14 +617,17 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
         fm=QFontMetrics(valFont);
 
         //First row comes after the name rect!
-        valFirst= val.left(lineBreakPos);
+        QStringList valLst=val.split("\n");
+        Q_ASSERT(valLst.count() > 0);
+        valFirst=valLst[0];
 
         valRect=nameRect;
         valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
         valRect.setWidth(fm.width(valFirst));
 
         //The rest of the rows
-        valRest = val.mid(lineBreakPos+1);
+        valLst.takeFirst();
+        valRest=valLst.join("\n");
         QSize valSize=fm.size(0,valRest);
 
         valRestRect = QRect(nameRect.x(),
@@ -634,7 +637,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
         currentRight=qMax(valRect.x()+valRect.width(),
                      valRestRect.x() + valRestRect.width());
 
-        //val =  valFirst + " " + valRest;
+        val =  valFirst + " " + valRest;
 	}
 
 	//Define clipping
@@ -682,7 +685,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
     painter->setPen(fontPen);
     painter->setFont(valFont);
 
-    if(lineBreakPos == -1)
+    if(multiCnt ==0 )
         painter->drawText(attrBox_->adjustTextRect(valRect),Qt::AlignLeft | Qt::AlignVCenter,val);
     else
     {
@@ -702,11 +705,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 		painter->restore();
 	}
 
-    if (lineBreakPos == -1) {
-        size=QSize(totalWidth,labelHeight(1));
-    } else {
-        size=QSize(totalWidth,labelHeight(val.count(newlineChar_)+1));
-    }
+    size=QSize(totalWidth,labelHeight(multiCnt+1));
 }
 
 void NodeViewDelegate::labelSize(QStringList data,int& totalWidth,int& totalHeight) const
@@ -722,13 +721,12 @@ void NodeViewDelegate::labelSize(QStringList data,int& totalWidth,int& totalHeig
     int currentRight=attrBox_->leftMargin;
     int currentBottom=attrBox_->topMargin+attrBox_->topPadding;
 
-    int lineBreakPos = val.indexOf(newlineChar_);
+    int multiCnt=val.count('\n');
     QFont nameFont=attrFont_;
     nameFont.setBold(true);
     QFont valFont=attrFont_;
 
-    //Single line label
-    if(lineBreakPos == -1)
+    if(multiCnt ==0 )
     {
         //The text rectangle
         QFontMetrics fm(nameFont);
@@ -741,7 +739,7 @@ void NodeViewDelegate::labelSize(QStringList data,int& totalWidth,int& totalHeig
         int valWidth=fm.width(val);
         currentRight+=attrBox_->spacing+valWidth;
     }
-    // Multi line label
+
     else
     {
         //The text rectangle
@@ -755,10 +753,15 @@ void NodeViewDelegate::labelSize(QStringList data,int& totalWidth,int& totalHeig
         fm=QFontMetrics(valFont);
 
         //First row comes after the name rect!
-        currentRight+=attrBox_->spacing+fm.width(val.left(lineBreakPos));
+        QStringList valLst=val.split("\n");
+        Q_ASSERT(valLst.count() > 0);
+
+        currentRight+=attrBox_->spacing+fm.width(valLst[0]);
 
         //The rest of the rows
-        QSize valSize=fm.size(0,val.mid(lineBreakPos+1));
+        valLst.takeFirst();
+        QString valRest=valLst.join("\n");
+        QSize valSize=fm.size(0,valRest);
 
         currentRight=qMax(currentRight,startX+valSize.width());
         currentBottom+=2+valSize.height();
@@ -779,17 +782,12 @@ int NodeViewDelegate::labelHeight(int lineNum) const
     currentBottom+=attrBox_->height-attrBox_->topPadding-attrBox_->bottomPadding;
 
     //value rect
-    QString val;
-    for(int i=0; i < lineNum-1; i++) {
-        if ( i < lineNum-2) {
-            val += "1\n";
-        } else {
-            val += "1";
-        }
-    }
+    QStringList lst;
+    for(int i=0; i < lineNum-1; i++)
+        lst << "1";
 
     QFontMetrics fm(attrFont_);
-    QSize valSize=fm.size(0,val);
+    QSize valSize=fm.size(0,lst.join(QString("\n")));
     currentBottom+=2+valSize.height();
 
     return currentBottom+attrBox_->bottomPadding+attrBox_->bottomMargin;
