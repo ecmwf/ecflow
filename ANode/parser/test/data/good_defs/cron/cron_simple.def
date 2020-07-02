@@ -1,5 +1,4 @@
 suite cron_simple
-  
  task t1
       cron 00:00 17:59 00:01   
  task t2
