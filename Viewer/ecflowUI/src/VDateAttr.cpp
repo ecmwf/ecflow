@@ -52,7 +52,7 @@ QString VDateAttrType::definition(QStringList d) const
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data)
 {
-    PrintStyle(PrintStyle::MIGRATE);
+    PrintStyle style(PrintStyle::MIGRATE);
     std::string s;
     d.print(s);
     ecf::Str::removeTrailingBreakAndSimplify(s);
@@ -62,7 +62,7 @@ void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStr
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data)
 {
-    PrintStyle(PrintStyle::MIGRATE);
+    PrintStyle style(PrintStyle::MIGRATE);
     std::string s;
     d.print(s);
     ecf::Str::removeTrailingBreakAndSimplify(s);
@@ -123,7 +123,7 @@ std::string VDateAttr::strName() const
 {
     if(parent_->node_)
     {
-        PrintStyle(PrintStyle::MIGRATE);
+        PrintStyle style(PrintStyle::MIGRATE);
 
         if(dataType_ == DateData)
         {

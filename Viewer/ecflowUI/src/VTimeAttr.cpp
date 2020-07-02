@@ -50,7 +50,7 @@ QString VTimeAttrType::definition(QStringList d) const
 
 void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d,QStringList& data)
 {
-    PrintStyle(PrintStyle::MIGRATE);
+    PrintStyle style(PrintStyle::MIGRATE);
     std::string s;
     d.print(s);
     ecf::Str::removeTrailingBreakAndSimplify(s);
@@ -60,7 +60,7 @@ void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d
 
 void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TodayAttr& d,QStringList& data)
 {
-    PrintStyle(PrintStyle::MIGRATE);
+    PrintStyle style(PrintStyle::MIGRATE);
     std::string s;
     d.print(s);
     ecf::Str::removeTrailingBreakAndSimplify(s);
@@ -70,7 +70,7 @@ void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TodayAttr& 
 
 void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::CronAttr& d,QStringList& data)
 {
-    PrintStyle(PrintStyle::MIGRATE);
+    PrintStyle style(PrintStyle::MIGRATE);
     std::string s;
     d.print(s);
     ecf::Str::removeTrailingBreakAndSimplify(s);
@@ -144,7 +144,7 @@ std::string VTimeAttr::strName() const
 {
     if(parent_->node_)
     {
-        PrintStyle(PrintStyle::MIGRATE);
+        PrintStyle style(PrintStyle::MIGRATE);
 
         if(dataType_ == TimeData)
         {
