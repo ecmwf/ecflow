@@ -1099,6 +1099,9 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
             throw std::runtime_error( ss.str() );
          }
          value = options[3];
+         if (value.find("\\n") != std::string::npos) {
+            Str::replaceall(value,"\\n","\n");
+         }
       }
       name = options[2];
       break; }
