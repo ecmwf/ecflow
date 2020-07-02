@@ -902,6 +902,38 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
    }
 
+   // ================================ TIME ==================================================================
+   {
+      // test add time
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"+23:10")));
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 1, "expected 1 time   but found " <<  task->timeVec().size());
+
+      // test change time
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::TIME,"+23:10","10:10")));
+      BOOST_CHECK_MESSAGE( task->timeVec()[0].toString() == "time 10:10", "expected 'time 10:10' but found " << task->timeVec()[0].toString() );
+
+      // test delete time
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TIME)));
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 0, "expected 0 time but found " <<  task->timeVec().size());
+   }
+
+   // ================================ TODAY ==================================================================
+   {
+      // test add today
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"+10:10 23:00 00:01")));
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 1, "expected 1 today but found " <<  task->todayVec().size());
+
+      // test change today
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::TODAY,"+10:10 23:00 00:01","+10:10")));
+      BOOST_CHECK_MESSAGE( task->todayVec()[0].toString() == "today +10:10", "expected 'today +10:10' but found " << task->todayVec()[0].toString() );
+
+      // test delete today
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TODAY)));
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 0, "expected 0 time but found " <<  task->todayVec().size());
+   }
+
 
    // ================================ Generic ==================================================================
    // Can not add generic via Alter

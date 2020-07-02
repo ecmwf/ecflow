@@ -1168,6 +1168,9 @@ def test_client_alter_change(ci):
     task_t1.add_inlimit( "limit1",t1,2)
     task_t1.add_trigger( "t2 == active" )
     task_t1.add_complete( "t2 == complete" )
+    task_t1.add_time("00:31")
+    task_t1.add_today("00:30")
+
     late = Late()
     late.submitted(20, 10)
     late.active(20, 10)
@@ -1180,6 +1183,18 @@ def test_client_alter_change(ci):
     repeat_date.add_repeat( RepeatDate("date",20100111,20100115,2) )  # can't add cron and repeat at the same level
            
     ci.load(defs)   
+
+    ci.alter(t1,"change","time","00:31","10:10")   
+    ci.alter(t1,"change","today","00:30","10:10")   
+    sync_local(ci)
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    assert len(list(task_t1.times)) == 1 ,"Expected 1 time :\n" + str(ci.get_defs())
+    assert len(list(task_t1.todays)) == 1 ,"Expected 1 time :\n" + str(ci.get_defs())
+    for t in task_t1.times:
+        assert str(t) == "time 10:10"," expected 'time 10:10' but found:\n" + str(t)
+    for t in task_t1.todays:
+        assert str(t) == "today 10:10"," expected 'today 10:10' but found:\n" + str(t)
+
 
     ci.alter(t1,"change","late","-s +10:00")   
     sync_local(ci)

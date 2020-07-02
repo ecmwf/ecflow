@@ -249,3 +249,38 @@ void Node::changeLate(const ecf::LateAttr& late)
    late_ = std::make_unique<ecf::LateAttr>(late);
    state_change_no_ = Ecf::incr_state_change_no();
 }
+
+void Node::change_time(const std::string& old,const std::string& new_time)
+{
+   TimeAttr old_attr( TimeSeries::create(old) );      // can throw if parse fails
+   TimeAttr new_attr( TimeSeries::create(new_time) ); // can throw if parse fails
+
+   size_t theSize = times_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      // Dont use '==' since that compares additional state like free_
+      if (times_[i].structureEquals(old_attr)) {
+         times_[i] = new_attr;
+         state_change_no_ = Ecf::incr_state_change_no();
+         return;
+      }
+   }
+   throw std::runtime_error("Node::change_time : Can not find time attribute: ");
+}
+
+void Node::change_today(const std::string& old,const std::string& new_time)
+{
+   TodayAttr old_attr( TimeSeries::create(old) );      // can throw if parse fails
+   TodayAttr new_attr( TimeSeries::create(new_time) ); // can throw if parse fails
+
+   size_t theSize = todays_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      // Dont use '==' since that compares additional state like free_
+      if (todays_[i].structureEquals(old_attr)) {
+         todays_[i] = new_attr;
+         state_change_no_ = Ecf::incr_state_change_no();
+         return;
+      }
+   }
+   throw std::runtime_error("Node::change_today : Can not find today attribute: ");
+}
+

@@ -511,6 +511,8 @@ public:
    void changeLimitValue(const std::string& name,int value);
    void changeDefstatus(const std::string& state);
    void changeLate(const ecf::LateAttr&);
+   void change_time(const std::string&,const std::string&);
+   void change_today(const std::string&,const std::string&);
 
    bool set_meter(const std::string& name,int value); // does not throw if meter not found
    bool set_event(const std::string& name,bool value);  // does not throw if event not found

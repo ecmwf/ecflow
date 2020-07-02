@@ -189,6 +189,8 @@ static AlterCmd::Change_attr_type changeAttrType(const std::string& s)
    if (s == "limit_value") return AlterCmd::LIMIT_VAL;
    if (s == "defstatus") return AlterCmd::DEFSTATUS;
    if (s == "late") return AlterCmd::LATE;
+   if (s == "time") return AlterCmd::TIME;
+   if (s == "today") return AlterCmd::TODAY;
    return AlterCmd::CHANGE_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Change_attr_type c)
@@ -209,6 +211,8 @@ static std::string to_string(AlterCmd::Change_attr_type c)
    case AlterCmd::LIMIT_VAL:    return "limit_value"; break;
    case AlterCmd::DEFSTATUS:    return "defstatus";  break;
    case AlterCmd::LATE:         return "late";  break;
+   case AlterCmd::TIME:         return "time";  break;
+   case AlterCmd::TODAY:        return "today";  break;
    case AlterCmd::CHANGE_ATTR_ND: break;
    default: break;
    }
@@ -216,7 +220,7 @@ static std::string to_string(AlterCmd::Change_attr_type c)
 }
 static void validChangeAttr(std::vector<std::string>& vec)
 {
-   vec.reserve(16);
+   vec.reserve(18);
    vec.emplace_back("variable");
    vec.emplace_back("clock_type");
    vec.emplace_back("clock_gain");
@@ -233,6 +237,8 @@ static void validChangeAttr(std::vector<std::string>& vec)
    vec.emplace_back("defstatus");
    vec.emplace_back("free_password");
    vec.emplace_back("late");
+   vec.emplace_back("time");
+   vec.emplace_back("today");
 }
 
 //=======================================================================================
@@ -405,6 +411,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          case AlterCmd::LIMIT_VAL:   node->changeLimitValue(name_,value_); break; // value < limit max, & value must be convertible to an int
          case AlterCmd::DEFSTATUS:   node->changeDefstatus(name_);  break;        // must be a valid state
          case AlterCmd::LATE:        node->changeLate(LateAttr::create(name_)); break; // must be a valid late
+         case AlterCmd::TIME:        node->change_time(name_,value_); break;
+         case AlterCmd::TODAY:       node->change_today(name_,value_); break;
          case AlterCmd::CHANGE_ATTR_ND: break;
          default: break;
          }
@@ -496,7 +504,7 @@ const char* AlterCmd::desc() {
          "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
          "       For change:\n"
          "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-         "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
+         "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time | today ]\n"
          "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
          "         the change to take effect fully.\n"
          "       For add:\n"
@@ -1169,6 +1177,28 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
       value = options[3];
       break;}
 
+   case AlterCmd::TIME: {
+      if (options.size() != 4) {
+         ss << "AlterCmd: change: time: expected five arguments : change time old_time new_time <path_to_node>";
+         ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+         ss << dump_args(options,paths) << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      name = options[2];
+      value = options[3];
+      break;}
+
+   case AlterCmd::TODAY: {
+      if (options.size() != 4) {
+         ss << "AlterCmd: change: today: expected five arguments : change time old_today new_today <path_to_node>";
+         ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+         ss << dump_args(options,paths) << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      name = options[2];
+      value = options[3];
+      break;}
+
    case AlterCmd::DEFSTATUS: {
       if (options.size() != 3) {
          ss << "AlterCmd: change defstatus expected four args : change defstatus [ queued | complete | unknown | aborted | suspended ] <path_to_node>";
@@ -1246,6 +1276,17 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,const std
 
    case AlterCmd::LATE: {
       (void) LateAttr::create(name); // Check we can create the late
+      break; }
+
+
+   case AlterCmd::TIME: {
+      (void) TimeSeries::create(name);
+      (void) TimeSeries::create(value);
+      break; }
+
+   case AlterCmd::TODAY: {
+      (void) TimeSeries::create(name);
+      (void) TimeSeries::create(value);
       break; }
 
    case AlterCmd::TRIGGER: {
