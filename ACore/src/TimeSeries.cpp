@@ -765,6 +765,19 @@ void TimeSeries::write_state(std::string& ret,bool isFree) const
    }
 }
 
+void TimeSeries::write_state_for_gui(std::string& ret,bool isFree) const
+{
+   bool next_time_slot_changed = ( nextTimeSlot_ != start_);
+   bool relative_duration_changed = (!relativeDuration_.is_special() && relativeDuration_.total_seconds() != 0);
+   if (isFree || !isValid_ || next_time_slot_changed || relative_duration_changed) {
+      ret += " #";
+      if (isFree) ret += " free";
+      if (!isValid_) ret += " expired";
+      if (next_time_slot_changed) { ret += " nextTimeSlot/"; ret += nextTimeSlot_.toString(); }
+      if (relative_duration_changed) { ret += " relativeDuration/"; ret += to_simple_string(relativeDuration_); }
+   }
+}
+
 void TimeSeries::parse_state(size_t index,const std::vector<std::string>& lineTokens, ecf::TimeSeries& ts)
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have

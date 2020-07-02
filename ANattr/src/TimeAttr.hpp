@@ -99,7 +99,7 @@ public:
    //       reported by the Why command, & hence need to be synced.
  	unsigned int state_change_no() const { return state_change_no_; }
 
-   std::string name() const { return toString(); } /* ABO */
+   std::string name() const; // for display/gui
    std::string toString() const;
    void write(std::string&) const;
 	std::string dump() const;

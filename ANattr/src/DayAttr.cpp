@@ -335,6 +335,29 @@ void DayAttr::print(std::string& os) const
 	os += "\n";
 }
 
+std::string DayAttr::name() const
+{
+   // for display/gui only
+   std::string os;
+   write(os);
+   bool added_hash = false;
+   if (free_) {
+      os += " # free";
+      added_hash = true;
+   }
+   if (expired_) {
+      if (added_hash) os += " expired";
+      else            os += " # expired";
+      added_hash = true;
+   }
+
+   if (added_hash) { os += " ";   os += to_simple_string(date_);}
+   else            { os += " # "; os += to_simple_string(date_);}
+
+   return os;
+}
+
+
 std::string DayAttr::toString() const
 {
    std::string ret;

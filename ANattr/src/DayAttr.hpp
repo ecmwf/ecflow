@@ -86,7 +86,7 @@ public:
 	// The state_change_no is never reset. Must be incremented if it can affect equality
  	unsigned int state_change_no() const { return state_change_no_; }
 
-        std::string name() const { return toString(); } /* ABO */
+   std::string name() const; // for display/gui only
 	std::string toString() const;
 	std::string dump() const;
 

@@ -51,6 +51,14 @@ void TodayAttr::print(std::string& os) const
    os += "\n";
 }
 
+std::string TodayAttr::name() const
+{
+   std::string ret;
+   write(ret);
+   ts_.write_state_for_gui(ret,free_);
+   return ret;
+}
+
 std::string TodayAttr::toString() const
 {
    std::string ret;

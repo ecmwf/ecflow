@@ -117,6 +117,14 @@ void CronAttr::print(std::string& os) const
 	os += "\n";
 }
 
+std::string CronAttr::name() const
+{
+   std::string ret;
+   write(ret);
+   timeSeries_.write_state_for_gui(ret,free_);
+   return ret;
+}
+
 std::string CronAttr::toString() const
 {
 	std::string ret;

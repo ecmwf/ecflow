@@ -12,8 +12,6 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-#include "Str.hpp"
-#include "PrintStyle.hpp"
 #include "DateAttr.hpp"
 #include "DayAttr.hpp"
 
@@ -52,22 +50,12 @@ QString VDateAttrType::definition(QStringList d) const
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data)
 {
-    PrintStyle style(PrintStyle::MIGRATE);
-    std::string s;
-    d.print(s);
-    ecf::Str::removeTrailingBreakAndSimplify(s);
-    data << qName_ << QString::fromStdString(s) <<
-        (d.isFree(calendar)?"1":"0");
+    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar)?"1":"0");
 }
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data)
 {
-    PrintStyle style(PrintStyle::MIGRATE);
-    std::string s;
-    d.print(s);
-    ecf::Str::removeTrailingBreakAndSimplify(s);
-    data << qName_ << QString::fromStdString(s)<<
-        (d.isFree(calendar)?"1":"0");
+    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar)?"1":"0");
 }
 
 //=====================================================
@@ -123,26 +111,18 @@ std::string VDateAttr::strName() const
 {
     if(parent_->node_)
     {
-        PrintStyle style(PrintStyle::MIGRATE);
-
         if(dataType_ == DateData)
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
             if(index_ < static_cast<int>(v.size())) {
-                std::string s;
-                v[index_].print(s);
-                ecf::Str::removeTrailingBreakAndSimplify(s);
-                return s;
+                return v[index_].name();
             }
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
             if(index_ < static_cast<int>(v.size())) {
-                std::string s;
-                v[index_].print(s);
-                ecf::Str::removeTrailingBreakAndSimplify(s);
-                return s;
+                return v[index_].name();
             }
         }
     }

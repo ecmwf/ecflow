@@ -128,8 +128,6 @@ public:
 
    static std::string dump_string_vec(const std::vector<std::string>& vec);
 
-   static void removeTrailingBreakAndSimplify(std::string& s);
-
 	/// Only use strcmp if the first characters are the same
 	static int local_strcmp(const char* s, const char* t)
 	{

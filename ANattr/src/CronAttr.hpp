@@ -86,7 +86,7 @@ public:
    std::vector<int>::const_iterator months_begin() const { return months_.begin();}
    std::vector<int>::const_iterator months_end()   const { return months_.end();  }
 
-   std::string name() const { return toString(); } /* ABO */
+   std::string name() const; // for display/gui
    std::string toString() const;
    std::string dump() const;
 
