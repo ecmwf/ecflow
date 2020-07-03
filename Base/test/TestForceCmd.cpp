@@ -12,7 +12,9 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
+#include "boost/filesystem/operations.hpp"
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
@@ -24,6 +26,7 @@
 
 using namespace std;
 using namespace ecf;
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
@@ -40,9 +43,17 @@ static defs_ptr create_defs()
    return theDefs;
 }
 
+BOOST_AUTO_TEST_CASE( test_add_log2 )
+{
+	// create once for all test below, then remove at the end
+	Log::create("test_add_log2.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
+
 BOOST_AUTO_TEST_CASE( test_force_cmd )
 {
    cout << "Base:: ...test_force_cmd\n";
+
    defs_ptr the_defs = create_defs();
    the_defs->beginAll();
    node_ptr s1 = the_defs->findAbsNode("/s1");
@@ -917,4 +928,10 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_for_cron_on_family )
    System::destroy();
 }
 
+BOOST_AUTO_TEST_CASE( test_destroy_log2 )
+{
+	Log::destroy();
+	fs::remove("test_add_log2.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
 BOOST_AUTO_TEST_SUITE_END()

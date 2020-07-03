@@ -24,6 +24,7 @@ public:
 
    void print(std::string&) const;
    bool operator==(const QueueAttr& rhs) const;
+   bool operator<(const QueueAttr& rhs) const { return name_ < rhs.name();}
 
    /// Accessor
    const std::string& name() const { return name_;}

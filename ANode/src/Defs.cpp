@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <cassert>
 #include <limits>
 
@@ -40,6 +41,7 @@
 #include "CalendarUpdateParams.hpp"
 #include "NodeStats.hpp"
 #include "move_peer.hpp"
+#include "StringSplitter.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -124,6 +126,15 @@ Defs::~Defs()
    // Duplicate AST are held in a static map. Delete them, to avoid valgrind complaining
    ExprDuplicate reclaim_cloned_ast_memory;
 }
+
+void Defs::handle_migration()
+{
+   // Fix up any migration issues
+   for(const auto& s : suiteVec_) {
+      s->handle_migration(s->calendar());
+   }
+}
+
 
 ///// State relation functions: ==================================================
 NState::State Defs::state() const
@@ -574,7 +585,7 @@ void Defs::requeue()
    set_most_significant_state();
 }
 
-void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
+void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive,const std::vector<std::string>& no_sort)
 {
    if (attr == ecf::Attr::VARIABLE || attr == ecf::Attr::ALL) server_.sort_variables();
 
@@ -582,7 +593,7 @@ void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
       size_t theSuiteVecSize = suiteVec_.size();
       for(size_t s = 0; s < theSuiteVecSize; s++) {
          SuiteChanged changed(suiteVec_[s]);
-         suiteVec_[s]->sort_attributes(attr,recursive);
+         suiteVec_[s]->sort_attributes(attr,recursive,no_sort);
       }
    }
 }
@@ -684,12 +695,11 @@ void Defs::write_state(std::string& os) const
    if (state_change_no_ != 0)    { os += " state_change:"; os += boost::lexical_cast<std::string>(state_change_no_);}
    if (modify_change_no_ != 0)   { os += " modify_change:"; os += boost::lexical_cast<std::string>(modify_change_no_);}
    if (server().get_state() != ServerState::default_state()){ os += " server_state:"; os += SState::to_string(server().get_state());}
+
+   // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
+   os += " cal_count:"; os += boost::lexical_cast<std::string>(updateCalendarCount_);
    os += "\n";
 
-   if (!PrintStyle::defsStyle()) {
-      // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
-      os += "# updateCalendarCount_ "; os += boost::lexical_cast<std::string>(updateCalendarCount_); os += "\n";
-   }
 
    // This read by the DefsParser
    const std::vector<Variable>& server_user_variables = server().user_variables();
@@ -764,6 +774,10 @@ void Defs::read_state(const std::string& line,const std::vector<std::string>& li
          if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
          if (!SState::isValid(token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
          set_server().set_state(SState::toState(token));
+      }
+      else if (line_token_i.find("cal_count:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid cal_count specified : " + line );
+         updateCalendarCount_ = Extract::theInt(token,"Defs::read_state: invalid cal_count specified : " + line);
       }
    }
 }
@@ -874,41 +888,76 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const
  	//     /suite/family
  	//     /suite/family/task
  	//     /suite/family/family/family/task
-
- 	std::vector<std::string> theNodeNames; theNodeNames.reserve(4);
- 	NodePath::split(pathToNode,theNodeNames);
-	if ( theNodeNames.empty() ) {
-		return node_ptr();
+	// This is 14% quicker than the previous algorithm, that split 'pathToNode' into a vector of strings first.
+	node_ptr ret;
+	bool first = false;
+	StringSplitter string_splitter(pathToNode, Str::PATH_SEPERATOR());
+	while (!string_splitter.finished()) {
+		boost::string_view path_token = string_splitter.next();
+		//std::cout << "path_token:'" << path_token << "'  last = " << string_splitter.last() << "\n";
+		if (!first) {
+			for(const auto& suite: suiteVec_) {
+				if (path_token == suite->name()) {
+					ret = suite;
+					if (string_splitter.last()) {
+						//cout << "finished returning " << ret->absNodePath() << " *last* suite found\n";
+						return ret;
+					}
+					break;
+				}
+			}
+			if (!ret) {
+				//cout << "finished returning suite not found\n";
+				return node_ptr();
+			}
+			first = true;
+		}
+		else {
+			//cout << "seraching from " << ret->absNodePath() << " for " << ref << "\n";
+			ret = ret->find_immediate_child(path_token);
+			if (ret) {
+				if (string_splitter.last()) {
+					//cout << "finished returning " << ret->absNodePath() << " *last* \n";
+					return ret;
+				}
+				continue;
+			}
+			//cout << "finished returning node not found\n";
+			return node_ptr();
+		}
 	}
+	//cout << "finished returning node not found, end of loop\n";
+	return node_ptr();
 
-
-	size_t child_pos = 0 ; // unused
-   size_t pathSize = theNodeNames.size();
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++)  {
-
-      size_t index = 0;
-      if (theNodeNames[index] == suiteVec_[s]->name()) {
-
-         node_ptr the_node = suiteVec_[s];
-         if (pathSize == 1) return the_node;
-         index++; // skip over suite,
-
-         while (index < pathSize) {
-            the_node = the_node->findImmediateChild(theNodeNames[index],child_pos);
-            if (the_node) {
-               if (index == pathSize - 1) return the_node;
-               index++;
-            }
-            else {
-               return node_ptr();
-            }
-         }
-         return node_ptr();
-      }
-	}
-
- 	return node_ptr();
+// OLD code, slower. Since we are creating a vector of strings
+//	std::vector<std::string> theNodeNames; theNodeNames.reserve(4);
+//	NodePath::split(pathToNode,theNodeNames);
+//	if ( theNodeNames.empty() ) {
+//		return node_ptr();
+//	}
+//	size_t child_pos = 0 ; // unused
+//	size_t pathSize = theNodeNames.size();
+//	size_t theSuiteVecSize = suiteVec_.size();
+//	for(size_t s = 0; s < theSuiteVecSize; s++)  {
+//		size_t index = 0;
+//		if (theNodeNames[index] == suiteVec_[s]->name()) {
+//			node_ptr the_node = suiteVec_[s];
+//			if (pathSize == 1) return the_node;
+//			index++; // skip over suite,
+//			while (index < pathSize) {
+//				the_node = the_node->findImmediateChild(theNodeNames[index],child_pos);
+//				if (the_node) {
+//					if (index == pathSize - 1) return the_node;
+//					index++;
+//				}
+//				else {
+//					return node_ptr();
+//				}
+//			}
+//			return node_ptr();
+//		}
+//	}
+//	return node_ptr();
 }
 
 node_ptr Defs::find_closest_matching_node(const std::string& pathToNode) const
@@ -954,10 +1003,9 @@ bool Defs::find_extern( const std::string& pathToNode , const std::string& node_
 
 suite_ptr Defs::findSuite(const std::string& name) const
 {
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) {
-		if (suiteVec_[s]->name() == name) {
-			return suiteVec_[s];
+	for(const auto& s : suiteVec_) {
+		if (s->name() == name) {
+			return s;
 		}
  	}
 	return suite_ptr();
@@ -965,67 +1013,57 @@ suite_ptr Defs::findSuite(const std::string& name) const
 
 bool Defs::check(std::string& errorMsg,std::string& warningMsg) const
 {
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->check(errorMsg,warningMsg); }
+	for(const auto& s : suiteVec_) { s->check(errorMsg,warningMsg); }
 	return errorMsg.empty();
 }
 
 void Defs::getAllTasks(std::vector<Task*>& tasks) const
 {
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->getAllTasks(tasks);}
+	for(const auto& s : suiteVec_) { s->getAllTasks(tasks);}
 }
 
 void Defs::getAllSubmittables(std::vector<Submittable*>& tasks) const
 {
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->getAllSubmittables(tasks);}
+   for(const auto& s : suiteVec_) { s->getAllSubmittables(tasks);}
 }
 
 void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const
 {
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->get_all_active_submittables(tasks);}
+   for(const auto& s : suiteVec_) { s->get_all_active_submittables(tasks);}
 }
 
 void Defs::get_all_tasks(std::vector<task_ptr>& tasks) const
 {
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->get_all_tasks(tasks);}
+   for(const auto& s : suiteVec_) { s->get_all_tasks(tasks);}
 }
 
 void Defs::get_all_nodes(std::vector<node_ptr>& nodes) const
 {
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->get_all_nodes(nodes);}
+   for(const auto& s : suiteVec_) { s->get_all_nodes(nodes);}
 }
 
 void Defs::get_all_aliases(std::vector<alias_ptr>& aliases) const
 {
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->get_all_aliases(aliases);}
+   for(const auto& s : suiteVec_) { s->get_all_aliases(aliases);}
 }
 
 void Defs::getAllFamilies(std::vector<Family*>& vec) const
 {
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->getAllFamilies(vec);}
+	for(const auto& s : suiteVec_) { s->getAllFamilies(vec);}
 }
 
 void Defs::getAllNodes(std::vector<Node*>& vec) const
 {
-	size_t theSuiteVecSize = suiteVec_.size();
-   vec.reserve(vec.size() + theSuiteVecSize);
-	for(size_t s = 0; s < theSuiteVecSize; s++) {
-	   vec.push_back(suiteVec_[s].get());
-	   suiteVec_[s]->getAllNodes(vec);
+   vec.reserve(vec.size() + suiteVec_.size());
+	for(const auto& s : suiteVec_) {
+	   vec.push_back(s.get());
+	   s->getAllNodes(vec);
 	}
 }
 
 void Defs::getAllAstNodes(std::set<Node*>& theSet) const
 {
-	size_t theSuiteVecSize = suiteVec_.size();
-	for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->getAllAstNodes(theSet);}
+	for(const auto& s : suiteVec_) { s->getAllAstNodes(theSet);}
 }
 
 bool Defs::deleteChild(Node* nodeToBeDeleted)
@@ -1063,8 +1101,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
 
 void Defs::invalidate_trigger_references() const
 {
-   size_t theSuiteVecSize = suiteVec_.size();
-   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->invalidate_trigger_references();}
+   for(const auto& s : suiteVec_) { s->invalidate_trigger_references();}
 }
 
 node_ptr Defs::replaceChild(const std::string& path,
@@ -1361,29 +1398,28 @@ void Defs::clear()
 
 bool Defs::checkInvariants(std::string& errorMsg) const
 {
-	size_t vecSize = suiteVec_.size();
-	for(size_t s = 0; s < vecSize; s++) {
-		if (suiteVec_[s]->defs() != this) {
+	for(const auto& s : suiteVec_) {
+		if (s->defs() != this) {
 		   std::stringstream ss;
 		   ss << "Defs::checkInvariants suite->defs() function not correct. Child suite parent ptr not correct\n";
-		   ss << "For suite " << suiteVec_[s]->name();
+		   ss << "For suite " << s->name();
 			errorMsg += ss.str();
 			return false;
 		}
-      if (!suiteVec_[s]->isSuite() ) {
+      if (!s->isSuite() ) {
           std::stringstream ss;
-          ss << "Defs::checkInvariants suite isSuite() return NULL ? for suite " << suiteVec_[s]->name();
+          ss << "Defs::checkInvariants suite isSuite() return NULL ? for suite " << s->name();
           errorMsg += ss.str();
           return false;
       }
-		if (suiteVec_[s]->isSuite() != suiteVec_[s]->suite()) {
+		if (s->isSuite() != s->suite()) {
          std::stringstream ss;
-         ss << "Defs::checkInvariants  suiteVec_[s]->isSuite(" << suiteVec_[s]->isSuite() << ") != suiteVec_[s]->suite(" << suiteVec_[s]->suite() << ") ";
-         ss << "for suite " << suiteVec_[s]->name();
+         ss << "Defs::checkInvariants  s->isSuite(" << s->isSuite() << ") != s->suite(" << s->suite() << ") ";
+         ss << "for suite " << s->name();
          errorMsg += ss.str();
          return false;
 		}
-		if (!suiteVec_[s]->checkInvariants(errorMsg)) {
+		if (!s->checkInvariants(errorMsg)) {
 			return false;
 		}
  	}
@@ -1451,8 +1487,8 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 				if (s.get() == immediateChild) {
 					suiteVec_.erase(i);
 					suiteVec_.push_back(s);
-               order_state_change_no_ = Ecf::incr_state_change_no();
-               client_suite_mgr_.update_suite_order();
+                    order_state_change_no_ = Ecf::incr_state_change_no();
+                    client_suite_mgr_.update_suite_order();
 					return;
  				}
 			}
@@ -1460,16 +1496,26 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ALPHA:  {
  			std::sort(suiteVec_.begin(),suiteVec_.end(),
- 			          [](const suite_ptr& a, const suite_ptr& b) { return Str::caseInsLess(a->name(),b->name());});
-         order_state_change_no_ = Ecf::incr_state_change_no();
-         client_suite_mgr_.update_suite_order();
+ 			          [](const suite_ptr& a, const suite_ptr& b)
+					  {
+						 try {
+								int a_as_int = boost::lexical_cast< int >( a->name() );
+								int b_as_int = boost::lexical_cast< int >( b->name() );
+								return a_as_int < b_as_int;
+						 }
+						 catch ( boost::bad_lexical_cast&) {}
+
+				         return Str::caseInsLess(a->name(),b->name());
+			          });
+            order_state_change_no_ = Ecf::incr_state_change_no();
+            client_suite_mgr_.update_suite_order();
 			break;
 		}
 		case NOrder::ORDER:  {
 			std::sort(suiteVec_.begin(),suiteVec_.end(),
                    [](const suite_ptr& a, const suite_ptr& b) { return Str::caseInsGreater(a->name(),b->name());});
-         order_state_change_no_ = Ecf::incr_state_change_no();
-         client_suite_mgr_.update_suite_order();
+            order_state_change_no_ = Ecf::incr_state_change_no();
+            client_suite_mgr_.update_suite_order();
 			break;
 		}
 		case NOrder::UP:  {
@@ -1498,7 +1544,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		            suiteVec_.insert(suiteVec_.begin()+t,s);
 		            order_state_change_no_ = Ecf::incr_state_change_no();
 		         }
-               client_suite_mgr_.update_suite_order();
+                 client_suite_mgr_.update_suite_order();
 		         return;
 		      }
 		   }
@@ -1532,8 +1578,7 @@ void Defs::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) c
 {
    bool why_found = why(theReasonWhy,html_tags);
    if (!why_found) {
-      size_t theSuiteVecSize = suiteVec_.size();
-      for(size_t s = 0; s < theSuiteVecSize; s++) { (void)suiteVec_[s]->top_down_why(theReasonWhy,html_tags);}
+      for(const auto& s : suiteVec_) { (void)s->top_down_why(theReasonWhy,html_tags);}
    }
 }
 
@@ -1573,12 +1618,11 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
       // and here to avoid traversing down the hierarchy.
       // ******** We must trap all child changes under the suite. See class SuiteChanged
       // ******** otherwise some attribute sync's will be missed
-      size_t theSuiteVecSize = suiteVec_.size();
-      for(size_t s = 0; s < theSuiteVecSize; s++) {
+      for(const auto& s : suiteVec_) {
          //   *IF* node/attribute change no > client_state_change_no
          //   *THEN*
          //       Create a memento, and store in incremental_changes_
-         suiteVec_[s]->collateChanges(incremental_changes);
+         s->collateChanges(incremental_changes);
       }
    }
    else {

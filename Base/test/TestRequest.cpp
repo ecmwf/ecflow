@@ -311,12 +311,15 @@ static void test_persistence(const Defs& theFixtureDefs )
 BOOST_AUTO_TEST_CASE( test_all_request_persistence_text )
 {
    cout << "Base:: ...test_all_request_persistence_text\n";
+   TestLog test_log("test_all_request_persistence_text.log"); // will create log file, and destroy log and remove file at end of scope
+
    test_persistence( fixtureDefsFile());
 }
 
 BOOST_AUTO_TEST_CASE( test_request_authenticate )
 {
    cout << "Base:: ...test_request_authenticate\n";
+   TestLog test_log("test_request_authenticate.log"); // will create log file, and destroy log and remove file at end of scope
 
    // the path "suiteName0/familyName0/taskName0" must exist in the defsfile_ fixture
    Cmd_ptr cmd_ptr(new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1));

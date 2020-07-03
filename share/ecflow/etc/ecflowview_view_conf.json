@@ -332,9 +332,18 @@
                   "numAreaCurrent" : {
                     "label": "Line number area current line colour",
                     "default": "rgb(212,212,255)"
+                  },
+                  "showLineNumInTextFilter" : {
+                     "label": "Show number of resulting lines",
+                     "default": "false"
                   }
-          },
-
+         },
+        "infoPanel" : {
+             "showTabTitle" : {
+                "label": "Show tab titles",
+                "default": "true"
+             }
+        },
         "clock" : {
              "showClock" : {
                    "label" : "Show clock",
@@ -346,6 +355,16 @@
                  "values" : "hhmm/hhmmss",
                  "values_label" : "23:59/23:59:59"
               }
+        },
+        "shellCommand" : {
+            "showPopupOnStdOut" : {
+                "label" : "Show popup when stdout is generated",
+                "default" : "true"
+            },
+            "showPopupOnStdErr" : {
+                "label" : "Show popup when stderr is generated",
+                "default" : "true"
+            }
         }
     },
     

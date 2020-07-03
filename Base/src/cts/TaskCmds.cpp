@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -301,16 +302,20 @@ Submittable* TaskCmd::get_submittable(AbstractServer* as) const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::ostream& InitCmd::print(std::ostream& os) const
+void InitCmd::print(std::string& os) const
 {
-   os << Str::CHILD_CMD() << "init " << path_to_node();
+   os += Str::CHILD_CMD();
+   os += "init ";
+   os += path_to_node();
    if (!var_to_add_.empty()) {
-      os << " --add";
+      os += " --add";
       for(const auto& var_to_add: var_to_add_) {
-         os << " " << var_to_add.name() << "=" << var_to_add.theValue();
+         os += " ";
+         os += var_to_add.name();
+         os += "=";
+         os += var_to_add.theValue();
       }
    }
-   return os;
 }
 
 bool InitCmd::equals(ClientToServerCmd* rhs) const
@@ -415,16 +420,18 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::ostream& CompleteCmd::print(std::ostream& os) const
+void CompleteCmd::print(std::string& os) const
 {
-   os << Str::CHILD_CMD() << "complete " << path_to_node();
+   os += Str::CHILD_CMD();
+   os += "complete ";
+   os += path_to_node();
    if (!var_to_del_.empty()) {
-      os << " --remove";
+      os += " --remove";
       for(const auto& var_to_del: var_to_del_) {
-         os << " " << var_to_del;
+         os += " ";
+         os += var_to_del;
       }
    }
-   return os;
 }
 
 bool CompleteCmd::equals(ClientToServerCmd* rhs) const
@@ -523,9 +530,13 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
    static_cast<void>(Expression::parse(expression,"CtsWaitCmd:")); // will throw for errors
 }
 
-std::ostream& CtsWaitCmd::print(std::ostream& os) const
+void CtsWaitCmd::print(std::string& os) const
 {
-	return os << Str::CHILD_CMD() << "wait " << expression_ << " " << path_to_node();
+	os += Str::CHILD_CMD();
+	os += "wait ";
+	os += expression_;
+	os += " ";
+	os += path_to_node();
 }
 
 bool CtsWaitCmd::equals(ClientToServerCmd* rhs) const
@@ -623,9 +634,13 @@ AbortCmd::AbortCmd(const std::string& pathToTask,
    }
 }
 
-std::ostream& AbortCmd::print(std::ostream& os) const
+void AbortCmd::print(std::string& os) const
 {
-   return os << Str::CHILD_CMD() << "abort " << path_to_node() << "  " << reason_;
+   os += Str::CHILD_CMD();
+   os += "abort ";
+   os += path_to_node();
+   os += "  ";
+   os += reason_;
 }
 
 bool AbortCmd::equals(ClientToServerCmd* rhs) const
@@ -716,9 +731,15 @@ bool EventCmd::equals(ClientToServerCmd* rhs) const
   	return TaskCmd::equals(rhs);
 }
 
-std::ostream& EventCmd::print(std::ostream& os) const
+void EventCmd::print(std::string& os) const
 {
- 	return os << Str::CHILD_CMD() << "event " << name_ << " " << value_ << " " << path_to_node();
+ 	os += Str::CHILD_CMD();
+ 	os += "event ";
+ 	os += name_;
+ 	os += " ";
+ 	if (value_) os += "1 ";
+ 	else        os += "0 ";
+ 	os += path_to_node();
 }
 
 STC_Cmd_ptr EventCmd::doHandleRequest(AbstractServer* as) const
@@ -814,9 +835,15 @@ bool MeterCmd::equals(ClientToServerCmd* rhs) const
  	return TaskCmd::equals(rhs);
 }
 
-std::ostream& MeterCmd::print(std::ostream& os) const
+void MeterCmd::print(std::string& os) const
 {
-	return os << Str::CHILD_CMD() << "meter " << name_ << " " << value_ << " " << path_to_node();
+	os += Str::CHILD_CMD();
+	os += "meter ";
+	os += name_;
+	os += " ";
+	os += boost::lexical_cast<std::string>(value_);
+	os += " ";
+	os += path_to_node();
 }
 
 STC_Cmd_ptr MeterCmd::doHandleRequest(AbstractServer* as) const
@@ -930,9 +957,15 @@ bool LabelCmd::equals(ClientToServerCmd* rhs) const
   	return TaskCmd::equals(rhs);
 }
 
-std::ostream& LabelCmd::print(std::ostream& os) const
+void LabelCmd::print(std::string& os) const
 {
-	return os << Str::CHILD_CMD() << "label " << name_ << " '" << label_  << "' " << path_to_node();
+	os += Str::CHILD_CMD();
+	os += "label ";
+	os += name_;
+	os += " '";
+	os += label_;
+	os += "' ";
+	os += path_to_node();
 }
 
 STC_Cmd_ptr LabelCmd::doHandleRequest(AbstractServer* as) const
@@ -1034,11 +1067,25 @@ bool QueueCmd::equals(ClientToServerCmd* rhs) const
    return TaskCmd::equals(rhs);
 }
 
-std::ostream& QueueCmd::print(std::ostream& os) const
+void QueueCmd::print(std::string& os) const
 {
-   if (path_to_node_with_queue_.empty())
-      return os << Str::CHILD_CMD() << TaskApi::queue_arg() << " " << name_ << " " << action_ << " " << step_ << " " << path_to_node();
-   return os << Str::CHILD_CMD() << TaskApi::queue_arg() << " " << name_ << " " << action_ << " " << step_ << " " << path_to_node_with_queue_ << " " << path_to_node();
+	os += Str::CHILD_CMD();
+	os += TaskApi::queue_arg();
+	os += " ";
+	os += name_;
+	os += " ";
+	os += action_;
+	os += " ";
+	os += step_;
+	os += " ";
+	if (path_to_node_with_queue_.empty()) {
+		os += path_to_node();
+		return;
+	}
+
+	os += path_to_node_with_queue_;
+	os += " ";
+	os += path_to_node();
 }
 
 STC_Cmd_ptr QueueCmd::doHandleRequest(AbstractServer* as) const
@@ -1247,11 +1294,11 @@ void QueueCmd::create(  Cmd_ptr& cmd,
                                path_to_node_with_queue );
 }
 
-std::ostream& operator<<(std::ostream& os, const InitCmd& c)        { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const EventCmd& c)       { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const MeterCmd& c)       { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const LabelCmd& c)       { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const AbortCmd& c)       { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const CompleteCmd& c)    { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const CtsWaitCmd& c)     { return c.print(os); }
-std::ostream& operator<<(std::ostream& os, const QueueCmd& c)       { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const InitCmd& c)      { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const EventCmd& c)     { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const MeterCmd& c)     { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const LabelCmd& c)     { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const AbortCmd& c)     { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const CompleteCmd& c)  { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const CtsWaitCmd& c)   { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const QueueCmd& c)     { std::string ret; c.print(ret); os << ret; return os;}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
 import ecflow
+import sys
 
 class Indentor:
     """This class manages indentation, for use with context manager
@@ -127,9 +128,9 @@ try:
     # access the definition retrieved from the server
     server_defs = ci.get_defs()
     
-    if server_defs == None :
+    if server_defs is None :
         print "The server has no definition"
-        exit(1)
+        sys.exit(1)
     
     # Traverse server definition writing all state as comments.
     traverser = DefsTraverser(server_defs)

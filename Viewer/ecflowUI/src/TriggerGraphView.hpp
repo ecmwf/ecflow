@@ -109,7 +109,7 @@ public:
     QPainterPath shape() const override {return shapePath_;}
 
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     void addArrow(QPainterPath& pPath, double x1, double y1, double x2, double y2);
     void buildShape(QPolygonF pf);
 
@@ -140,7 +140,7 @@ Q_SIGNALS:
     void anchorClicked(const QUrl& link);
 
 protected:
-     void closeEvent(QCloseEvent * event);
+     void closeEvent(QCloseEvent * event) override;
      QString makeHtml(TriggerGraphEdgeItem*) const;
      void makeRow(QString label, VItem* t, QString& s) const;
      void makeModeRow(TriggerCollector::Mode mode, QString &s) const;

@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <iostream>
 #include <string>
 

@@ -87,6 +87,7 @@ list( APPEND u_tests
         u_TestTraversal     
         u_TestUserManual    
         u_TestWith         
+        u_sort         
 )
 foreach( test ${u_tests} )
 

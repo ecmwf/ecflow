@@ -35,7 +35,9 @@ void Analyser::run(Defs& theDefs)
 		std::string fileName = "defs.flat";
 
 		std::ofstream file(fileName.c_str());
-		file <<  visitor.report();
+		if (!file.is_open()) throw std::runtime_error("Analyser::run: Failed to open file \"" + fileName + "\"");
+
+		file << visitor.report();
 	}
 
 	// run depth first analysis
@@ -46,7 +48,9 @@ void Analyser::run(Defs& theDefs)
 		std::string fileName = "defs.depth";
 
 		std::ofstream file(fileName.c_str(),ios::out);
-		file <<  visitor.report();
+		if (!file.is_open()) throw std::runtime_error("Analyser::run: Failed to open file \"" + fileName + "\"");
+
+		file << visitor.report();
 		file.close();
 	}
 }

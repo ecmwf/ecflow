@@ -256,7 +256,7 @@ void Flag::set_flag(const std::string& flags)
    Str::split(flags,the_flags_vec,",");
 
    for(const auto & i : the_flags_vec) {
-      if (i == "migrated") continue; // 4.4.x release had migrated ignore. REMOVE when 5.0.0 is default
+	  if (i == "migrated") continue; // 4.4.x release had migrated ignore. REMOVE when 5.0.0 is default
 
       Flag::Type ft = string_to_flag_type(i);
       if (ft == Flag::NOT_SET) {

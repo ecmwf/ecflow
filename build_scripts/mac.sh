@@ -20,6 +20,8 @@ show_error_and_exit() {
    echo ""
    echo "   debug          - make a DEBUG build"
    echo "   make           - run make after cmake"
+   echo "   test           - enable all tests"
+   echo "   xcode          - enable xcode project"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
    echo "   no_gui         - Don't build the gui"
@@ -44,6 +46,7 @@ install_arg=
 asan_arg=
 msan_arg=
 ubsan_arg=
+xcode_arg=
 
 
 while [[ "$#" != 0 ]] ; do   
@@ -69,6 +72,7 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = asan ]]  ;   then asan_arg=$1 ;
    elif [[ "$1" = msan ]]  ;   then msan_arg=$1 ;
    elif [[ "$1" = ubsan ]]  ;  then ubsan_arg=$1 ;
+   elif [[ "$1" = xcode ]]  ;  then xcode_arg=$1 ;
    elif [[ "$1" = ctest ]] ;   then  
       ctest_arg=$1 ; 
       shift
@@ -174,9 +178,17 @@ if [[ $test_arg = test ]] ; then
    test_options="-DENABLE_ALL_TESTS=ON"
 fi
 
-bdir=${HOME}/git/bdir/ecflow/$mode_arg/$compiler
+bdir_root=${HOME}/git/ecflow/bdir
+
+if [[ "$xcode_arg" = xcode ]] ; then
+   cmake_extra_options="$cmake_extra_options -GXcode"
+   bdir_root=${HOME}/git/ecflow/bdir_xcode
+fi
+
+bdir=${bdir_root}/$mode_arg/$compiler
+
 if [[ $clean_arg = clean ]] ; then
-   rm -rf ${HOME}/git/bdir
+   rm -rf ${bdir_root}
 fi
 mkdir -p $bdir
 cd $bdir

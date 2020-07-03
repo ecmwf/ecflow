@@ -12,7 +12,8 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 import ecflow
-import argparse # for argument parsing     
+import argparse # for argument parsing  
+import sys   
 
 if __name__ == "__main__":
     
@@ -45,9 +46,9 @@ if __name__ == "__main__":
         
         # check to see if definition exists in the server
         defs = CL.get_defs()
-        if defs == None :
+        if defs is None :
             print("No definition found, exiting...")
-            exit(0) 
+            sys.exit(0) 
             
         # print defs;
         if ARGS.path == "/":
@@ -55,7 +56,7 @@ if __name__ == "__main__":
             for var in defs.user_variables:    print("edit " + var.name() + " '" + var.value() + "'")
         else:
             node = defs.find_abs_node(ARGS.path)
-            if node == None:  
+            if node is None:  
                 print("No node found at path " + ARGS.path)
             else:
                 for var in node.variables:     print("edit " + var.name() + " '" + var.value() + "'")

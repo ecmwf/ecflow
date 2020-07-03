@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <iostream>
 #include <cstdio>      /* tolower */
 
@@ -179,9 +180,13 @@ void UserCmd::prompt_for_confirmation(const std::string& prompt)
    }
 }
 
-std::ostream& UserCmd::user_cmd(std::ostream& os, const std::string& the_cmd) const
+void UserCmd::user_cmd(std::string& os, const std::string& the_cmd) const
 {
-   return os << the_cmd << " :" << user_<< "@" << hostname();
+	os += the_cmd;
+	os += " :";
+	os += user_;
+	os += '@';
+	os += hostname();
 }
 
 //#define DEBUG_ME 1

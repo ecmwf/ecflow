@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -100,8 +101,8 @@ bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().replace_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
+	Defs* defs = as->defs().get();
 
    std::string errMsg, warningMsg;
    defs_ptr client_defs = Defs::create();
@@ -112,19 +113,19 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
    }
 
    if (force_) {
-      node_ptr node = as->defs()->findAbsNode( pathToNode_);
+      node_ptr node = defs->findAbsNode( pathToNode_);
       as->zombie_ctrl().add_user_zombies( node.get(), CtsApi::replace_arg() );
    }
 
    // If we return a node_ptr then we have changed the data model, and therefore must flag node as changed.
    std::string errorMsg;
-   node_ptr client_node_to_add = as->defs()->replaceChild(pathToNode_, client_defs , createNodesAsNeeded_, force_, errorMsg);
+   node_ptr client_node_to_add = defs->replaceChild(pathToNode_, client_defs , createNodesAsNeeded_, force_, errorMsg);
    if (!client_node_to_add) {
       throw std::runtime_error(errorMsg);
    }
 
    // ECFLOW-835, flag node as changed, before check for trigger expressions.
-   add_node_for_edit_history(as,pathToNode_);
+   add_node_for_edit_history(defs,pathToNode_);
 
    // Although we have change the data model, Check if the trigger expressions are still valid.
    // Note:: trigger AST are not copied. If you use trigger in the test environment
@@ -142,17 +143,17 @@ bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
    return do_authenticate(as,cmd,pathToNode_);
 }
 
-std::ostream& ReplaceNodeCmd::print(std::ostream& os) const
+void ReplaceNodeCmd::print(std::string& os) const
 {
    std::string path_to_client_defs = path_to_defs_;
    if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
-	return user_cmd(os,CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)));
 }
-std::ostream& ReplaceNodeCmd::print_only(std::ostream& os) const
+void ReplaceNodeCmd::print_only(std::string& os) const
 {
    std::string path_to_client_defs = path_to_defs_;
    if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
-   os << CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)); return os;
+   os += CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_));
 }
 
 const char* ReplaceNodeCmd::arg()  { return CtsApi::replace_arg();}
@@ -215,4 +216,4 @@ void ReplaceNodeCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<ReplaceNodeCmd>(pathToNode,createNodesAsNeeded, pathToDefsFile,force);
 }
 
-std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

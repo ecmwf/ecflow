@@ -115,7 +115,7 @@ private:
 
 ///
 /// The date has no meaning in a physical sense, only used as a for loop over dates
-class RepeatDate : public RepeatBase {
+class RepeatDate final : public RepeatBase {
 public:
    RepeatDate( const std::string& variable, int start, int end, int delta = 1/* always in days*/);
    RepeatDate() = default;
@@ -135,6 +135,7 @@ public:
 
    void delta(int d) { delta_ = d;}
    bool operator==(const RepeatDate& rhs) const;
+   bool operator<(const RepeatDate& rhs) const { return name() < rhs.name();}
 
    RepeatDate* clone() const override { return new RepeatDate(name_, start_, end_, delta_, value_) ; }
    bool compare(RepeatBase*) const override;
@@ -184,7 +185,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version );
 };
 
-class RepeatDateList : public RepeatBase {
+class RepeatDateList final : public RepeatBase {
 public:
    RepeatDateList( const std::string& variable, const std::vector<int>&); // will throw for empty list
    RepeatDateList () = default;
@@ -194,6 +195,7 @@ public:
    void update_repeat_genvar() const override;
 
    bool operator==(const RepeatDateList& rhs) const;
+   bool operator<(const  RepeatDateList& rhs) const { return name() < rhs.name();}
 
    int start() const override;
    int end() const override;
@@ -247,12 +249,13 @@ private:
    void serialize(Archive & ar, std::uint32_t const version );
 };
 
-class RepeatInteger : public RepeatBase {
+class RepeatInteger final : public RepeatBase {
 public:
    RepeatInteger( const std::string& variable, int start, int end, int delta = 1);
    RepeatInteger();
 
    bool operator==(const RepeatInteger& rhs) const;
+   bool operator<(const  RepeatInteger& rhs) const { return name() < rhs.name();}
 
    int start() const override { return start_; }
    int end() const override   { return end_; }
@@ -301,12 +304,13 @@ private:
 // Note:: Difference between RepeatEnumerated and  RepeatString, is that
 // RepeatEnumerated::value() will return the value at the index if cast-able to integer,
 // whereas RepeatString::value() will always return the index.
-class RepeatEnumerated : public RepeatBase {
+class RepeatEnumerated final : public RepeatBase {
 public:
    RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums);
    RepeatEnumerated() = default;
 
    bool operator==(const RepeatEnumerated& rhs) const;
+   bool operator<(const  RepeatEnumerated& rhs) const { return name() < rhs.name();}
 
    int start() const override { return 0; }
    int end() const override;
@@ -351,13 +355,13 @@ private:
 };
 
 
-
-class RepeatString : public RepeatBase {
+class RepeatString final : public RepeatBase {
 public:
    RepeatString( const std::string& variable, const std::vector<std::string>& theEnums);
    RepeatString() = default;
 
    bool operator==(const RepeatString& rhs) const;
+   bool operator<(const  RepeatString& rhs) const { return name() < rhs.name();}
 
    int start() const override { return 0; }
    int end() const override;
@@ -420,12 +424,13 @@ private:
 /// RepeatDay do not really have a name: However we need maintain invariant that all NON-empty repeats
 /// have a name. Hence the name will be as day
 /// Note: this applies to the clone as well
-class RepeatDay : public RepeatBase {
+class RepeatDay final : public RepeatBase {
 public:
    RepeatDay( int step ) : RepeatBase("day"), step_(step) {}
    RepeatDay() : RepeatBase("day") {}
 
    bool operator==(const RepeatDay& rhs) const;
+   bool operator<(const  RepeatDay& rhs) const { return step_ < rhs.step();}
 
    int start() const override { return 0; }
    int end() const override   { return 0; }
@@ -485,6 +490,7 @@ public:
    Repeat& operator=(const Repeat& rhs);
    Repeat& operator=(Repeat&& rhs);
    bool operator==(const Repeat& rhs) const;
+   bool operator<(const Repeat& rhs) const { return name() < rhs.name();}
 
    bool empty() const { return (type_) ? false : true; }
    void clear() { type_.reset(nullptr); }

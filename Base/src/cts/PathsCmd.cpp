@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <algorithm>
 
 #include "ClientToServerCmd.hpp"
@@ -34,62 +35,66 @@ PathsCmd::PathsCmd(Api api,const std::string& absNodePath, bool force)
    if (!absNodePath.empty()) paths_.push_back(absNodePath);
 }
 
-std::ostream& PathsCmd::print(std::ostream& os) const
+void PathsCmd::print(std::string& os) const
 {
-   return my_print(os,paths_);
+   my_print(os,paths_);
 }
 
-std::ostream& PathsCmd::print_short(std::ostream& os) const
+std::string PathsCmd::print_short() const
 {
    std::vector<std::string> paths;
    if (!paths_.empty()) paths.emplace_back(paths_[0]);
+
+   std::string os;
    my_print_only(os,paths);
-   if (paths_.size() > 1) os << " : truncated : " << paths_.size() -1 << " paths *not* shown";
+   if (paths_.size() > 1) {
+	   os += " : truncated : ";
+	   os += boost::lexical_cast<std::string>(paths_.size() -1);
+	   os += " paths *not* shown";
+   }
    return os;
 }
 
-std::ostream& PathsCmd::print_only(std::ostream& os) const
+void PathsCmd::print_only(std::string& os) const
 {
-   return my_print_only(os,paths_);
+   my_print_only(os,paths_);
 }
 
-std::ostream& PathsCmd::print(std::ostream& os, const std::string& path) const
+void PathsCmd::print(std::string& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
-   return my_print(os,paths);
+   my_print(os,paths);
 }
 
-std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>& paths) const
+void PathsCmd::my_print(std::string& os,const std::vector<std::string>& paths) const
 {
    switch (api_) {
-      case PathsCmd::SUSPEND:            return user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths))); break;
-      case PathsCmd::RESUME:             return user_cmd(os,CtsApi::to_string(CtsApi::resume(paths))); break;
-      case PathsCmd::KILL:               return user_cmd(os,CtsApi::to_string(CtsApi::kill(paths))); break;
-      case PathsCmd::STATUS:             return user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
-      case PathsCmd::CHECK:              return user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
-      case PathsCmd::EDIT_HISTORY:       return user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
-      case PathsCmd::ARCHIVE:            return user_cmd(os,CtsApi::to_string(CtsApi::archive(paths,force_))); break;
-      case PathsCmd::RESTORE:            return user_cmd(os,CtsApi::to_string(CtsApi::restore(paths))); break;
+      case PathsCmd::SUSPEND:            user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths))); break;
+      case PathsCmd::RESUME:             user_cmd(os,CtsApi::to_string(CtsApi::resume(paths))); break;
+      case PathsCmd::KILL:               user_cmd(os,CtsApi::to_string(CtsApi::kill(paths))); break;
+      case PathsCmd::STATUS:             user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
+      case PathsCmd::CHECK:              user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
+      case PathsCmd::EDIT_HISTORY:       user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
+      case PathsCmd::ARCHIVE:            user_cmd(os,CtsApi::to_string(CtsApi::archive(paths,force_))); break;
+      case PathsCmd::RESTORE:            user_cmd(os,CtsApi::to_string(CtsApi::restore(paths))); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
    }
-   return os;
 }
-std::ostream& PathsCmd::my_print_only(std::ostream& os,const std::vector<std::string>& paths) const
+void PathsCmd::my_print_only(std::string& os,const std::vector<std::string>& paths) const
 {
    switch (api_) {
-      case PathsCmd::SUSPEND:            os << CtsApi::to_string(CtsApi::suspend(paths)); break;
-      case PathsCmd::RESUME:             os << CtsApi::to_string(CtsApi::resume(paths)); break;
-      case PathsCmd::KILL:               os << CtsApi::to_string(CtsApi::kill(paths)); break;
-      case PathsCmd::STATUS:             os << CtsApi::to_string(CtsApi::status(paths)); break;
-      case PathsCmd::CHECK:              os << CtsApi::to_string(CtsApi::check(paths)); break;
-      case PathsCmd::EDIT_HISTORY:       os << CtsApi::to_string(CtsApi::edit_history(paths)); break;
-      case PathsCmd::ARCHIVE:            os << CtsApi::to_string(CtsApi::archive(paths,force_)); break;
-      case PathsCmd::RESTORE:            os << CtsApi::to_string(CtsApi::restore(paths)); break;
+      case PathsCmd::SUSPEND:            os += CtsApi::to_string(CtsApi::suspend(paths)); break;
+      case PathsCmd::RESUME:             os += CtsApi::to_string(CtsApi::resume(paths)); break;
+      case PathsCmd::KILL:               os += CtsApi::to_string(CtsApi::kill(paths)); break;
+      case PathsCmd::STATUS:             os += CtsApi::to_string(CtsApi::status(paths)); break;
+      case PathsCmd::CHECK:              os += CtsApi::to_string(CtsApi::check(paths)); break;
+      case PathsCmd::EDIT_HISTORY:       os += CtsApi::to_string(CtsApi::edit_history(paths)); break;
+      case PathsCmd::ARCHIVE:            os += CtsApi::to_string(CtsApi::archive(paths,force_)); break;
+      case PathsCmd::RESTORE:            os += CtsApi::to_string(CtsApi::restore(paths)); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
    }
-   return os;
 }
 
 
@@ -146,7 +151,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 {
    // LogTimer timer(" PathsCmd::doHandleRequest");
 
-   defs_ptr defs = as->defs();
+   Defs* defs = as->defs().get();
    std::stringstream ss;
    switch (api_) {
 
@@ -154,18 +159,17 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          use_EditHistoryMgr_ = false; // will add edit history ourselves. Quicker than EditHistoryMgr when we have > 200000 paths
 
          as->update_stats().node_suspend_++;
-         size_t vec_size = paths_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = defs->findAbsNode(paths_[i]);
+         for(const auto& path: paths_) {
+            node_ptr theNode = defs->findAbsNode(path);
             if (!theNode.get()) {
-               ss << "PathsCmd:Suspend: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"Suspend: Could not find node at path " << paths_[i]);
+               ss << "PathsCmd:Suspend: Could not find node at path '" << path << "'\n";
+               LOG(Log::ERR,"Suspend: Could not find node at path " << path);
                continue;
             }
             SuiteChangedPtr changed(theNode.get());
             theNode->suspend();
             theNode->flag().set(ecf::Flag::MESSAGE);
-            add_edit_history(as,paths_[i]);
+            add_edit_history(defs,path);
             assert(isWrite()); // should only add edit history for write-able commands
          }
          break;
@@ -176,18 +180,17 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
          // At the end of resume, we need to traverse node tree, and do job submission
          as->update_stats().node_resume_++;
-         size_t vec_size = paths_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = defs->findAbsNode(paths_[i]);
+         for(const auto& path: paths_) {
+            node_ptr theNode = defs->findAbsNode(path);
             if (!theNode.get()) {
-               ss << "PathsCmd:Resume: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"Resume: Could not find path " << paths_[i]);
+               ss << "PathsCmd:Resume: Could not find node at path '" << path << "'\n";
+               LOG(Log::ERR,"Resume: Could not find path " << path);
                continue;
             }
             SuiteChangedPtr changed(theNode.get());
             theNode->resume();
             theNode->flag().set(ecf::Flag::MESSAGE);
-            add_edit_history(as,paths_[i]);
+            add_edit_history(defs,path);
             assert(isWrite()); // should only add edit history for write-able commands
 
             as->increment_job_generation_count(); // in case we throw below
@@ -197,12 +200,11 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::KILL: {
          as->update_stats().node_kill_++;
-         size_t vec_size = paths_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+         for(const auto& path: paths_) {
+            node_ptr theNode = find_node_for_edit_no_throw(defs,path);
             if (!theNode.get()) {
-               ss << "PathsCmd:Kill: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"Kill: Could not find node at path " << paths_[i]);
+               ss << "PathsCmd:Kill: Could not find node at path '" << path << "'\n";
+               LOG(Log::ERR,"Kill: Could not find node at path " << path);
                continue;
             }
             SuiteChanged0 changed(theNode);
@@ -216,7 +218,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().node_edit_history_++;
          if (paths_.empty()) throw std::runtime_error( "No paths/options specified for edit history") ;
          if (paths_.size() == 1 && paths_[0] == "clear") {
-            as->defs()->clear_edit_history();
+            defs->clear_edit_history();
             break;
          }
          // Only first path used
@@ -231,11 +233,11 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
          // make sure paths don't overlap, Should not find same path up the hierarchy, which is also in paths_
          std::vector<NodeContainer*> containers_to_archive; containers_to_archive.reserve(paths_.size());
-         for(size_t i = 0; i < paths_.size(); i++) {
-            node_ptr theNode = defs->findAbsNode(paths_[i]);
+         for(const auto& path: paths_) {
+            node_ptr theNode = defs->findAbsNode(path);
             if (!theNode.get()) {
-               ss << "PathsCmd:ARCHIVE: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"ARCHIVE: Could not find node at path " << paths_[i]);
+               ss << "PathsCmd:ARCHIVE: Could not find node at path '" << path << "'\n";
+               LOG(Log::ERR,"ARCHIVE: Could not find node at path " << path);
                continue;
             }
             NodeContainer* container = theNode->isNodeContainer();
@@ -263,7 +265,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             SuiteChanged1 changed(the_container->suite());
 
             the_container->flag().set(ecf::Flag::MESSAGE);
-            add_edit_history(as,the_container->absNodePath());
+            add_edit_history(defs,the_container->absNodePath());
             assert(isWrite()); // should only add edit history for write-able commands
 
             the_container->archive();  // this can throw std::runtime_error
@@ -274,12 +276,11 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       case PathsCmd::RESTORE: {
          as->update_stats().node_restore_++;
          if (paths_.empty()) throw std::runtime_error( "No paths specified for restore");
-         size_t vec_size = paths_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+         for(const auto& path: paths_) {
+            node_ptr theNode = find_node_for_edit_no_throw(defs,path);
             if (!theNode.get()) {
-               ss << "PathsCmd:RESTORE: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"RESTORE: Could not find node at path " << paths_[i]);
+               ss << "PathsCmd:RESTORE: Could not find node at path '" << path << "'\n";
+               LOG(Log::ERR,"RESTORE: Could not find node at path " << path);
                continue;
             }
             NodeContainer* container = theNode->isNodeContainer();
@@ -293,17 +294,16 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::STATUS: {
          as->update_stats().node_status_++;
-         size_t vec_size = paths_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+         for(const auto& path: paths_) {
+            node_ptr theNode = find_node_for_edit_no_throw(defs,path);
             if (!theNode.get()) {
-               ss << "PathsCmd:Status: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"Status: Could not find node at path " << paths_[i]);
+               ss << "PathsCmd:Status: Could not find node at path '" << path << "'\n";
+               LOG(Log::ERR,"Status: Could not find node at path " << path);
                continue;
             }
             if (!theNode->suite()->begun()) {
                std::stringstream mss;
-               mss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
+               mss << "Status failed. For " << path << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
                throw std::runtime_error( mss.str() ) ;
             }
             SuiteChangedPtr changed(theNode.get());
@@ -327,13 +327,12 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          }
          else {
             std::string acc_warning_msg;
-            size_t vec_size = paths_.size();
-            for(size_t i = 0; i < vec_size; i++) {
+            for(const auto& path: paths_) {
 
-               node_ptr theNodeToCheck = defs->findAbsNode(paths_[i]);
+               node_ptr theNodeToCheck = defs->findAbsNode(path);
                if (!theNodeToCheck.get()) {
-                  ss << "PathsCmd:Check: Could not find node at path '" << paths_[i] << "'\n";
-                  LOG(Log::ERR,"Check: Could not find node at path " << paths_[i]);
+                  ss << "PathsCmd:Check: Could not find node at path '" << path << "'\n";
+                  LOG(Log::ERR,"Check: Could not find node at path " << path);
                   continue;
                }
 
@@ -404,12 +403,20 @@ static const char* get_kill_desc() {
 }
 const char*  get_status_desc(){
    return
-            "Shows the status of a job associated with a task.\n"
+            "Shows the status of a job associated with a task, in %ECF_JOB%.stat file\n"
             "If a family or suite is selected, will invoke status command hierarchically.\n"
             "Status uses the ECF_STATUS_CMD variable. After variable substitution it is invoked as a command.\n"
             "The command should be written in such a way that the output is written to %ECF_JOB%.stat\n"
             "This will allow the output of status command to be shown by the --file command\n"
             "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\n"
+		    "If the process id can not be found on the remote system, then the status command can also\n"
+		    "arrange for the task to be aborted\n"
+		    "The status command can fail for the following reasons:\n"
+		    " - ECF_STATUS_CMD not found\n"
+		    " - variable substitution fails\n"
+		    " - state is active but it can't find process id, i.e. ECF_RID\n"
+		    " - the status command does not exit cleanly\n"
+		    "When this happens a flag is set, STATUSCMD_FAILED, which is visible in the GUI\n"
             "Usage::\n"
             "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat\n"
             "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
@@ -579,7 +586,7 @@ void PathsCmd::create(   Cmd_ptr& cmd,
    else if (api_ == PathsCmd::EDIT_HISTORY) {
 
       if (paths.empty()) {
-         if (options.size() == 1 && options[0] == "clear") paths.push_back("clear");
+         if (options.size() == 1 && options[0] == "clear") paths.emplace_back("clear");
          else {
             std::stringstream ss;
             ss << theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n";
@@ -598,4 +605,4 @@ void PathsCmd::create(   Cmd_ptr& cmd,
    cmd = std::make_shared<PathsCmd>( api_ , paths, force);
 }
 
-std::ostream& operator<<(std::ostream& os, const PathsCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const PathsCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

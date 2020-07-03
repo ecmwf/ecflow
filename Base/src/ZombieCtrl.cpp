@@ -12,6 +12,7 @@
 //
 // Description : manages the zombies
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ZombieCtrl.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"

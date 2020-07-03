@@ -40,39 +40,39 @@ if __name__ == "__main__":
  
     defs = create_defs()
     s1 = defs.find_suite("s1")
-    assert s1 != None, "expected find find suite s1"
+    assert s1 is not None, "expected find find suite s1"
     assert "s1" in defs, "expected find find suite s1"
 
     sx = defs.find_suite("sx")
-    assert sx == None, "expected not to find suite sx"
+    assert sx is None, "expected not to find suite sx"
     
     f1 = s1.find_family("f1")
-    assert f1 != None, "expected find find family f1"
+    assert f1 is not None, "expected find find family f1"
     f1 = s1.find_node("f1")
-    assert f1 != None, "expected find find family f1"
+    assert f1 is not None, "expected find find family f1"
 
     fx = s1.find_family("fx")
-    assert fx == None, "expected not to find family fx"
+    assert fx is None, "expected not to find family fx"
     fx = s1.find_node("fx")
-    assert fx == None, "expected not to find family fx"
+    assert fx is None, "expected not to find family fx"
 
     f2 = s1.find_family("f2")
-    assert f2 != None, "expected find find family f2"
+    assert f2 is not None, "expected find find family f2"
     f2 = s1.find_node("f2")
-    assert f2 != None, "expected find find family f2"
+    assert f2 is not None, "expected find find family f2"
     
     f2_t1 = f2.find_task("f2_t1")
-    assert f2_t1 != None, "Expected to find task"
+    assert f2_t1 is not None, "Expected to find task"
 
     f2_t2 = f2.find_task("f2_t2")
-    assert f2_t2 != None, "Expected to find task"
+    assert f2_t2 is not None, "Expected to find task"
     f2_t2 = f2.find_node("f2_t2")
-    assert f2_t2 != None, "Expected to find task"
+    assert f2_t2 is not None, "Expected to find task"
 
     f2_tx = f2.find_task("f2_tx")
-    assert f2_tx == None, "Expected not to find task"
+    assert f2_tx is None, "Expected not to find task"
     f2_tx = f2.find_node("f2_tx")
-    assert f2_tx == None, "Expected not to find task"
+    assert f2_tx is None, "Expected not to find task"
 
     tasks = defs.get_all_tasks()
     assert len(tasks) == 4, "Expected four tasks, but found " + str(len(tasks))
@@ -105,14 +105,14 @@ if __name__ == "__main__":
 
         if task.name() == "f1_t1":
             node = task.find_node_up_the_tree("f1")
-            assert node != None
+            assert node is not None
             assert node.get_abs_node_path() == "/s1/f1"
             
             node = task.find_node_up_the_tree("s1")
-            assert node != None
+            assert node is not None
             assert node.get_abs_node_path() == "/s1"
 
             node = task.find_node_up_the_tree("freddd")
-            assert node == None
+            assert node is None
             
     print("All Tests pass")

@@ -278,6 +278,16 @@
                         "prefix" : "view.clock",
                         "line" : "showClock",
                         "line" : "clockFormat"
+                    },
+                    "group" : {
+                        "title" : "Info panel",
+                        "prefix" : "view.infoPanel",
+                        "line" : "showTabTitle"
+                    },
+                    "group" : {
+                        "title" : "Text filter in Output tab",
+                        "prefix" : "view.textEdit",
+                        "line" : "showLineNumInTextFilter"
                     }
                 }
             }
@@ -376,6 +386,15 @@
                         "title" : "Node context menu:",
                         "prefix" : "menu.panel",
                         "line" : "visiblePanelActions"
+                    }
+               },
+               "tab" : {
+                    "label" : "Shell commands",
+                    "group" : {
+                        "title" : "Shell command from node context menu",
+                        "prefix" : "view.shellCommand",
+                        "line" : "showPopupOnStdOut",
+                        "line" : "showPopupOnStdErr"
                     }
                }
            }

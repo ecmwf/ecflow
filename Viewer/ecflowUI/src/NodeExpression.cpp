@@ -306,7 +306,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // node/server states
                 else if (DState::isValid(*i_) || VSState::find(*i_))
                 {
-                    StateNodeCondition *stateCond = new StateNodeCondition(QString::fromStdString(*i_));
+                    auto *stateCond = new StateNodeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(stateCond);
                     result = stateCond;
                     updatedOperands = true;
@@ -315,7 +315,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // node menu mode
                 else if (isMenuMode(*i_))
                 {
-                    NodeMenuModeCondition *userCond = new NodeMenuModeCondition(QString::fromStdString(*i_));
+                    auto *userCond = new NodeMenuModeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(userCond);
                     result = userCond;
                     updatedOperands = true;
@@ -324,7 +324,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // node has attribute
                 else if (isNodeHasAttribute(*i_))
                 {
-                    NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
+                    auto *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(attrCond);
                     result = attrCond;
                     updatedOperands = true;
@@ -332,7 +332,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // node flag
                 else if (isNodeFlag(*i_))
                 {
-                    NodeFlagCondition *flagCond = new NodeFlagCondition(QString::fromStdString(*i_));
+                    auto *flagCond = new NodeFlagCondition(QString::fromStdString(*i_));
                     operandStack.push_back(flagCond);
                     result = flagCond;
                     updatedOperands = true;
@@ -358,7 +358,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // node attribute state
                 else if (isAttributeState(*i_))
                 {
-                    AttributeStateCondition *attrStateCond = new AttributeStateCondition(QString::fromStdString(*i_));
+                    auto *attrStateCond = new AttributeStateCondition(QString::fromStdString(*i_));
                     operandStack.push_back(attrStateCond);
                     result = attrStateCond;
                     updatedOperands = true;
@@ -367,7 +367,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // env var
                 else if (isEnvVar(*i_))
                 {
-                    EnvVarCondition *envCond = new EnvVarCondition(QString::fromStdString(*i_));
+                    auto *envCond = new EnvVarCondition(QString::fromStdString(*i_));
                     operandStack.push_back(envCond);
                     result = envCond;
                     updatedOperands = true;
@@ -375,7 +375,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
 
                 else if (isWhatToSearchIn(*i_, attr))
                 {
-                    WhatToSearchInOperand *searchCond = new WhatToSearchInOperand(*i_, attr);
+                    auto *searchCond = new WhatToSearchInOperand(*i_, attr);
                     operandStack.push_back(searchCond);
                     result = searchCond;
                     updatedOperands = true;
@@ -384,7 +384,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // isoDate
                 else if (isIsoDate(*i_))
                 {
-                    IsoDateCondition *dateCond = new IsoDateCondition(QString::fromStdString(*i_));
+                    auto *dateCond = new IsoDateCondition(QString::fromStdString(*i_));
                     operandStack.push_back(dateCond);
                     result = dateCond;
                     updatedOperands = true;

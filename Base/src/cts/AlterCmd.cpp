@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -188,6 +189,8 @@ static AlterCmd::Change_attr_type changeAttrType(const std::string& s)
    if (s == "limit_value") return AlterCmd::LIMIT_VAL;
    if (s == "defstatus") return AlterCmd::DEFSTATUS;
    if (s == "late") return AlterCmd::LATE;
+   if (s == "time") return AlterCmd::TIME;
+   if (s == "today") return AlterCmd::TODAY;
    return AlterCmd::CHANGE_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Change_attr_type c)
@@ -208,6 +211,8 @@ static std::string to_string(AlterCmd::Change_attr_type c)
    case AlterCmd::LIMIT_VAL:    return "limit_value"; break;
    case AlterCmd::DEFSTATUS:    return "defstatus";  break;
    case AlterCmd::LATE:         return "late";  break;
+   case AlterCmd::TIME:         return "time";  break;
+   case AlterCmd::TODAY:        return "today";  break;
    case AlterCmd::CHANGE_ATTR_ND: break;
    default: break;
    }
@@ -215,7 +220,7 @@ static std::string to_string(AlterCmd::Change_attr_type c)
 }
 static void validChangeAttr(std::vector<std::string>& vec)
 {
-   vec.reserve(16);
+   vec.reserve(18);
    vec.emplace_back("variable");
    vec.emplace_back("clock_type");
    vec.emplace_back("clock_gain");
@@ -232,6 +237,8 @@ static void validChangeAttr(std::vector<std::string>& vec)
    vec.emplace_back("defstatus");
    vec.emplace_back("free_password");
    vec.emplace_back("late");
+   vec.emplace_back("time");
+   vec.emplace_back("today");
 }
 
 //=======================================================================================
@@ -275,34 +282,35 @@ void AlterCmd::alter_and_attr_type(std::string& alter_type,std::string& attr_typ
     }
 }
 
-std::ostream& AlterCmd::print_only(std::ostream& os) const
+void AlterCmd::print_only(std::string& os) const
 {
    std::string alter_type,attr_type;
    alter_and_attr_type(alter_type, attr_type);
-   if (paths_.empty()) os << CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1," "),alter_type,attr_type,name_,value_));
-   else                os << CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,paths_[0]),alter_type,attr_type,name_,value_));
-   return os;
+   if (paths_.empty()) os += CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1," "),alter_type,attr_type,name_,value_));
+   else                os += CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,paths_[0]),alter_type,attr_type,name_,value_));
 }
 
-std::ostream& AlterCmd::print(std::ostream& os) const
+void AlterCmd::print(std::string& os) const
 {
    std::string alter_type,attr_type;
    alter_and_attr_type(alter_type, attr_type);
-   return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
 }
 
-std::ostream& AlterCmd::print(std::ostream& os, const std::string& path) const
+void AlterCmd::print(std::string& os, const std::string& path) const
 {
    std::string alter_type,attr_type;
    alter_and_attr_type(alter_type, attr_type);
-   return user_cmd(os,CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,path),alter_type,attr_type,name_,value_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,path),alter_type,attr_type,name_,value_)));
 }
 
 
 STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 {
+	Defs* defs = as->defs().get();
+
    if ( del_attr_type_ == AlterCmd::DEL_VARIABLE) {
-      as->defs()->set_server().delete_user_variable(name_);
+      defs->set_server().delete_user_variable(name_);
    }
    else if ( change_attr_type_ == AlterCmd::VARIABLE  || add_attr_type_ == AlterCmd::ADD_VARIABLE) {
 
@@ -311,16 +319,16 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
          std::stringstream ss; ss << "AlterCmd:: Can not add or change read only server variable " << name_;
          throw std::runtime_error(ss.str());
       }
-      as->defs()->set_server().add_or_update_user_variables(name_,value_);
+      defs->set_server().add_or_update_user_variables(name_,value_);
    }
 
    // Update defs flag state
    if (flag_type_ != Flag::NOT_SET) {
-      if (flag_) as->defs()->flag().set(flag_type_);
+      if (flag_) defs->flag().set(flag_type_);
       else       {
-         as->defs()->flag().clear(flag_type_);
-         if (flag_type_ == Flag::LOG_ERROR) as->defs()->set_server().delete_user_variable("ECF_LOG_ERROR");
-         if (flag_type_ == Flag::CHECKPT_ERROR) as->defs()->set_server().delete_user_variable("ECF_CHECKPT_ERROR");
+         defs->flag().clear(flag_type_);
+         if (flag_type_ == Flag::LOG_ERROR) defs->set_server().delete_user_variable("ECF_LOG_ERROR");
+         if (flag_type_ == Flag::CHECKPT_ERROR) defs->set_server().delete_user_variable("ECF_CHECKPT_ERROR");
       }
    }
 
@@ -328,7 +336,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 	ecf::Attr::Type attr = Attr::to_attr(name_);
 	if ( attr != ecf::Attr::UNKNOWN) {
 	   bool recursive = (value_ == "recursive") ? true: false;
-	   as->defs()->sort_attributes(attr,recursive);
+	   defs->sort_attributes(attr,recursive);
 	}
 
 	return doJobSubmission( as );
@@ -338,6 +346,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().alter_cmd_++;
+   Defs* defs = as->defs().get();
 
    std::stringstream ss;
    size_t vec_size = paths_.size();
@@ -348,7 +357,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          return alter_server_state(as);
       }
 
-      node_ptr node = find_node_for_edit_no_throw(as,paths_[i]);
+      node_ptr node = find_node_for_edit_no_throw(defs,paths_[i]);
       if (!node.get()) {
          ss << "AlterCmd: Could not find node at path " << paths_[i] << "\n";
          LOG(Log::ERR,"AlterCmd: Failed: Could not find node at path " << paths_[i]);
@@ -402,6 +411,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          case AlterCmd::LIMIT_VAL:   node->changeLimitValue(name_,value_); break; // value < limit max, & value must be convertible to an int
          case AlterCmd::DEFSTATUS:   node->changeDefstatus(name_);  break;        // must be a valid state
          case AlterCmd::LATE:        node->changeLate(LateAttr::create(name_)); break; // must be a valid late
+         case AlterCmd::TIME:        node->change_time(name_,value_); break;
+         case AlterCmd::TODAY:       node->change_today(name_,value_); break;
          case AlterCmd::CHANGE_ATTR_ND: break;
          default: break;
          }
@@ -493,14 +504,14 @@ const char* AlterCmd::desc() {
          "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
          "       For change:\n"
          "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-         "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
+         "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time | today ]\n"
          "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
          "         the change to take effect fully.\n"
          "       For add:\n"
          "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
          "       For set_flag and clear_flag:\n"
          "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
-         "           statuscmd_failed | killcmd_failed | no_script | killed | status | migrated | late | message | \n"
+         "           statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | \n"
          "           complete | queue_limit | task_waiting | locked | zombie | archived | restored |\n"
          "           threshold | log_error | checkpt_error]\n"
          "       For sort:\n"
@@ -1096,6 +1107,9 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
             throw std::runtime_error( ss.str() );
          }
          value = options[3];
+         if (value.find("\\n") != std::string::npos) {
+            Str::replaceall(value,"\\n","\n");
+         }
       }
       name = options[2];
       break; }
@@ -1155,6 +1169,28 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
    case AlterCmd::LIMIT_VAL: {
       if (options.size() != 4) {
          ss << "AlterCmd: change: limit-value: expected five arguments : change limit_value <limit_name> <int> <path_to_node>";
+         ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+         ss << dump_args(options,paths) << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      name = options[2];
+      value = options[3];
+      break;}
+
+   case AlterCmd::TIME: {
+      if (options.size() != 4) {
+         ss << "AlterCmd: change: time: expected five arguments : change time old_time new_time <path_to_node>";
+         ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
+         ss << dump_args(options,paths) << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      name = options[2];
+      value = options[3];
+      break;}
+
+   case AlterCmd::TODAY: {
+      if (options.size() != 4) {
+         ss << "AlterCmd: change: today: expected five arguments : change time old_today new_today <path_to_node>";
          ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
          ss << dump_args(options,paths) << "\n";
          throw std::runtime_error( ss.str() );
@@ -1242,6 +1278,17 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,const std
       (void) LateAttr::create(name); // Check we can create the late
       break; }
 
+
+   case AlterCmd::TIME: {
+      (void) TimeSeries::create(name);
+      (void) TimeSeries::create(value);
+      break; }
+
+   case AlterCmd::TODAY: {
+      (void) TimeSeries::create(name);
+      (void) TimeSeries::create(value);
+      break; }
+
    case AlterCmd::TRIGGER: {
       std::string error_msg = "AlterCmd: change trigger:";
       std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
@@ -1313,7 +1360,7 @@ ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const
 void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const
 {
 	// options[0] = set_flag | clear_flag
-	// options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | migrated | late | message | complete | queue_limit | task_waiting | locked | zombie ]
+	// options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | late | message | complete | queue_limit | task_waiting | locked | zombie ]
 
 	Flag::Type theFlagType = get_flag_type(options[1]);
 	cmd = std::make_shared<AlterCmd>(paths,theFlagType, flag);
@@ -1407,4 +1454,4 @@ AlterCmd::AlterCmd(const std::vector<std::string>& paths,
 }
 
 
-std::ostream& operator<<(std::ostream& os, const AlterCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const AlterCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

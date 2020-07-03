@@ -12,6 +12,9 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
+#include <boost/lexical_cast.hpp>
+
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -20,6 +23,7 @@
 #include "Str.hpp"
 #include "SuiteChanged.hpp"
 #include "Extract.hpp"
+#include "Defs.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -39,42 +43,46 @@ bool ForceCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& ForceCmd::print(std::ostream& os) const
+void ForceCmd::print(std::string& os) const
 {
-   return user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
 
-std::ostream& ForceCmd::print_short(std::ostream& os) const
+std::string ForceCmd::print_short() const
 {
    std::vector<std::string> paths;
    if (!paths_.empty()) paths.emplace_back(paths_[0]);
 
+   std::string os;
    my_print_only(os,paths);
 
-   if (paths_.size() > 1) os << " : truncated : " << paths_.size()-1 << " paths *not* shown";
+   if (paths_.size() > 1) {
+	   os += " : truncated : ";
+	   os += boost::lexical_cast<std::string>(paths_.size()-1);
+	   os += " paths *not* shown";
+   }
    return os;
 }
 
-std::ostream& ForceCmd::print_only(std::ostream& os) const
+void ForceCmd::print_only(std::string& os) const
 {
-   return my_print_only(os,paths_);
+   my_print_only(os,paths_);
 }
 
-std::ostream& ForceCmd::print(std::ostream& os, const std::string& path) const
+void ForceCmd::print(std::string& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
-   return my_print(os,paths);
+   my_print(os,paths);
 }
 
-std::ostream& ForceCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
+void ForceCmd::my_print(std::string& os, const std::vector<std::string>& paths) const
 {
-   return user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
 
-std::ostream& ForceCmd::my_print_only(std::ostream& os, const std::vector<std::string>& paths) const
+void ForceCmd::my_print_only(std::string& os, const std::vector<std::string>& paths) const
 {
-   os << CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_));
-   return os;
+   os += CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_));
 }
 
 
@@ -93,28 +101,33 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  		throw std::runtime_error( ss.str() ) ;
  	}
 
+   use_EditHistoryMgr_ = false; // will add edit history ourselves. Quicker than EditHistoryMgr when we have > 200000 paths
+
+   Defs* defs = as->defs().get();
    string the_path;
    string the_event;
    std::stringstream error_ss;
- 	size_t vec_size = paths_.size();
- 	for(size_t i = 0; i < vec_size; i++) {
+   for(const auto& path: paths_) {
 
- 	   the_path = paths_[i];
+ 	   the_path = path;
  	   the_event.clear();
  	   if ( is_event_state ) {
- 	      Extract::pathAndName(paths_[i],the_path, the_event);
+ 	      Extract::pathAndName(path,the_path, the_event);
  	      if ( the_path.empty() || the_event.empty() ) {
  	         error_ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e --force=/path/to_task:event_name set\n";
  	         continue;
  	      }
  	   }
 
- 	   node_ptr node = find_node_for_edit_no_throw(as,the_path);
+       node_ptr node = defs->findAbsNode(the_path);
  	   if (!node.get()) {
  	      error_ss << "ForceCmd: Could not find node at path " << the_path << "\n";
  	      continue;
  	   }
+
  	   SuiteChangedPtr changed(node.get()); // Cater for suites in handles
+       node->flag().set(ecf::Flag::MESSAGE);
+       add_edit_history(defs,the_path);
 
  	   if (is_node_state) {
  	      /// We want this to have side effects. i.e bubble up state and re-queue if complete and has repeat's
@@ -281,4 +294,4 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<ForceCmd>(paths, stateOrEvent, recursive, setRepeatToLastValue);
 }
 
-std::ostream& operator<<(std::ostream& os, const ForceCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ForceCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

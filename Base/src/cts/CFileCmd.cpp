@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
 #include <sstream>
 #include "boost/filesystem/operations.hpp"
 #include <boost/lexical_cast.hpp>
@@ -101,13 +102,13 @@ bool CFileCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& CFileCmd::print(std::ostream& os) const
+void CFileCmd::print(std::string& os) const
 {
-	return user_cmd(os,CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))));
+	user_cmd(os,CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))));
 }
-std::ostream& CFileCmd::print_only(std::ostream& os) const
+void CFileCmd::print_only(std::string& os) const
 {
-    os << CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))); return os;
+    os += CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_)));
 }
 
 STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
@@ -122,7 +123,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
       case CFileCmd::STAT:   as->update_stats().file_cmdout_++; break;
 	}
 
- 	node_ptr node = find_node(as,pathToNode_); // will throw if defs not defined, or node not found
+ 	node_ptr node = find_node(as->defs().get(),pathToNode_); // will throw if defs not defined, or node not found
 
 	std::string fileContents;
 	Submittable* submittable = node->isSubmittable();
@@ -322,5 +323,5 @@ void CFileCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<CFileCmd>(pathToNode, file_type, max_lines);
 }
 
-std::ostream& operator<<(std::ostream& os, const CFileCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const CFileCmd& c) { std::string ret; c.print(ret); os << ret; return os;}
 

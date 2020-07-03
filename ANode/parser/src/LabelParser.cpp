@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "LabelParser.hpp"
 #include "Node.hpp"
 #include "DefsStructureParser.hpp"

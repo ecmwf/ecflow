@@ -40,7 +40,7 @@ QString VTimeAttrType::definition(QStringList d) const
     QString t;
     if(d.count() == dataCount_)
     {
-        t+=" " + d[NameIndex];
+        t=d[NameIndex];
     }
     return t;
 }
@@ -132,20 +132,23 @@ std::string VTimeAttr::strName() const
         if(dataType_ == TimeData)
         {
             const std::vector<ecf::TimeAttr>& v=parent_->node_->timeVec();
-            if(index_ < static_cast<int>(v.size()))
+            if(index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
+            }
         }
         else if(dataType_ == TodayData)
         {
             const std::vector<ecf::TodayAttr>& v=parent_->node_->todayVec();
-            if(index_ < static_cast<int>(v.size()))
+            if(index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
+            }
         }
         else if(dataType_ == CronData)
         {
             const std::vector<ecf::CronAttr>& v=parent_->node_->crons();
-            if(index_ < static_cast<int>(v.size()))
+            if(index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
+            }
         }
     }
     return std::string();

@@ -122,6 +122,7 @@ public:
 
    std::string state_to_string(bool isFree) const;
    void write_state(std::string&,bool free) const;
+   void write_state_for_gui(std::string&,bool free) const;
    std::string toString() const;
    void write(std::string&) const;
   	std::string dump() const;

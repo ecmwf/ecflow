@@ -23,7 +23,8 @@ void UIDebug::uiAssert(char const* expr, char const* file, long line, const std:
 
 std::string UIDebug::longToString(long num)
 {
-	char buf[64];
-	sprintf(buf, "%ld", num);
+	constexpr int buff_size = 64;
+	char buf[buff_size];
+	snprintf(buf,buff_size, "%ld", num);
 	return std::string(buf);
 }

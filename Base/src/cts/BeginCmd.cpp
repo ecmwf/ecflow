@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "CtsApi.hpp"
@@ -37,14 +38,14 @@ BeginCmd::BeginCmd(const std::string& suiteName, bool force)
    }
 }
 
-std::ostream& BeginCmd::print(std::ostream& os) const
+void BeginCmd::print(std::string& os) const
 {
-   return user_cmd(os,CtsApi::begin(suiteName_,force_));
+   user_cmd(os,CtsApi::begin(suiteName_,force_));
 }
 
-std::ostream& BeginCmd::print_only(std::ostream& os) const
+void BeginCmd::print_only(std::string& os) const
 {
-   os << CtsApi::begin(suiteName_,force_); return os;
+   os += CtsApi::begin(suiteName_,force_);
 }
 
 bool BeginCmd::equals(ClientToServerCmd* rhs) const
@@ -184,4 +185,4 @@ void BeginCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<BeginCmd>( suiteName, force );
 }
 
-std::ostream& operator<<(std::ostream& os, const BeginCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const BeginCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

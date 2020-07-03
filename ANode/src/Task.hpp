@@ -16,7 +16,7 @@
 //============================================================================
 #include "Submittable.hpp"
 
-class Task : public Submittable {
+class Task final : public Submittable {
 public:
    explicit Task( const std::string& name, bool check = true ) : Submittable(name,check) {}
    Task()= default;
@@ -126,6 +126,7 @@ private:
 
    // Overridden to locate alias's
    node_ptr findImmediateChild(const std::string& name, size_t& child_pos) const override;
+   node_ptr find_immediate_child(const boost::string_view&) const override;
 
    friend class cereal::access;
    template<class Archive>

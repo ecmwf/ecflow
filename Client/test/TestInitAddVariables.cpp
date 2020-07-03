@@ -30,6 +30,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite)
 BOOST_AUTO_TEST_CASE( test_init_add_variables )
 {
    cout << "Client:: ...test_init_add_variables " << endl;
+	TestLog test_log("test_init_add_variables.log"); // will create log file, and destroy log and remove file at end of scope
 
    Defs defs;
    suite_ptr suite = defs.add_suite("test_init_add_variables");

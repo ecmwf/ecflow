@@ -6,7 +6,7 @@ import sys
 version = sys.version_info;
 if  version[1] < 7 : 
     print "This example requires python version 2.7, but found : " + str(version)
-    exit(0)
+    sys.exit(0)
 
 print "Creating suite definition"  
 with ecflow.Defs() as defs: 

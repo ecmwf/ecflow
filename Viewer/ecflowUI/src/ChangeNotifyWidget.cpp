@@ -165,7 +165,7 @@ ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 	layout_->setContentsMargins(0,0,0,0);
 	layout_->setSpacing(0);
 
-    QLabel* label=new QLabel("<b>Notifications</b>: ",this);
+    auto* label=new QLabel("<b>Notifications</b>: ",this);
     label->setStyleSheet("QLabel{color: " + QColor(60,60,60).name() + ";}");
     //QFont f;
     //f.setBold(true);

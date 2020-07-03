@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <iostream>
 
 #include "ClientToServerCmd.hpp"
@@ -52,7 +53,7 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
    LogFlusher logFlusher;
 
    // Create the log time stamp once for a given request
-   if (Log::instance()) Log::instance()->cache_time_stamp();
+   Log::instance()->cache_time_stamp();
 
    // LOG the command, *BEFORE* invoking it. (i.e in case server hangs/crashes)
    // Allow override in the rare cases, where we want to output additional debug
@@ -99,14 +100,12 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
 
 void ClientToServerCmd::do_log(AbstractServer* as) const
 {
-   std::stringstream ss;
-   print(ss);                        // Populate the stream with command details:
-   if (!log(Log::MSG,ss.str())) {    // will automatically add end of line
+   std::string ss;
+   print(ss);                  // Populate the stream with command details:
+   if (!log(Log::MSG,ss)) {    // will automatically add end of line
       // problems with opening or writing to log file, warn users, ECFLOW-536
       as->defs()->flag().set(ecf::Flag::LOG_ERROR);
-      if (Log::instance()) {
-         as->defs()->set_server().add_or_update_user_variables("ECF_LOG_ERROR",Log::instance()->log_error());
-      }
+      as->defs()->set_server().add_or_update_user_variables("ECF_LOG_ERROR",Log::instance()->log_error());
    }
 }
 
@@ -126,9 +125,9 @@ STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
    return PreAllocatedReply::ok_cmd();
 }
 
-node_ptr ClientToServerCmd::find_node(AbstractServer* as, const std::string& absNodepath) const
+node_ptr ClientToServerCmd::find_node(Defs* defs, const std::string& absNodepath) const
 {
-   node_ptr theNode =  as->defs()->findAbsNode(absNodepath);
+   node_ptr theNode =  defs->findAbsNode(absNodepath);
    if ( !theNode.get() ) {
 
       std::string errorMsg = "Can not find node at path '";
@@ -145,23 +144,23 @@ void ClientToServerCmd::dumpVecArgs(const char* argOption, const std::vector<std
    for(size_t i= 0; i < args.size(); i++)  { cout << " args[" << i << "]='" << args[i] << "'";} cout << "\n";
 }
 
-node_ptr ClientToServerCmd::find_node_for_edit(AbstractServer* as, const std::string& absNodepath) const
+node_ptr ClientToServerCmd::find_node_for_edit(Defs* defs, const std::string& absNodepath) const
 {
-   node_ptr theNode = find_node(as, absNodepath);
+   node_ptr theNode = find_node(defs, absNodepath);
    add_node_for_edit_history(theNode);
    return theNode;
 }
 
-node_ptr ClientToServerCmd::find_node_for_edit_no_throw(AbstractServer* as, const std::string& absNodepath) const
+node_ptr ClientToServerCmd::find_node_for_edit_no_throw(Defs* defs, const std::string& absNodepath) const
 {
-   node_ptr theNode = as->defs()->findAbsNode(absNodepath);
+   node_ptr theNode = defs->findAbsNode(absNodepath);
    add_node_for_edit_history(theNode);
    return theNode;
 }
 
-void ClientToServerCmd::add_node_for_edit_history(AbstractServer* as,const std::string& absNodepath) const
+void ClientToServerCmd::add_node_for_edit_history(Defs* defs,const std::string& absNodepath) const
 {
-    add_node_for_edit_history(as->defs()->findAbsNode(absNodepath));
+    add_node_for_edit_history(defs->findAbsNode(absNodepath));
 }
 
 void ClientToServerCmd::add_node_for_edit_history(node_ptr the_node) const
@@ -174,7 +173,7 @@ void ClientToServerCmd::add_node_path_for_edit_history(const std::string& absNod
    edit_history_node_paths_.push_back(absNodepath);
 }
 
-void ClientToServerCmd::add_edit_history(AbstractServer* as) const
+void ClientToServerCmd::add_edit_history(Defs* defs) const
 {
    if (!use_EditHistoryMgr_) {
       return; // edit history will be added by the command
@@ -183,15 +182,15 @@ void ClientToServerCmd::add_edit_history(AbstractServer* as) const
    // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
    if (edit_history_nodes_.empty() && edit_history_node_paths_.empty()) {
 
-      as->defs()->flag().set(ecf::Flag::MESSAGE);
-      add_edit_history(as,Str::ROOT_PATH());
+      defs->flag().set(ecf::Flag::MESSAGE);
+      add_edit_history(defs,Str::ROOT_PATH());
    }
    else {
       // edit_history_node_paths_ is only populated by the delete command
       size_t the_size = edit_history_node_paths_.size();
-      if (the_size != 0) as->defs()->flag().set(ecf::Flag::MESSAGE);
+      if (the_size != 0) defs->flag().set(ecf::Flag::MESSAGE);
       for(size_t i = 0; i < the_size; i++) {
-         add_delete_edit_history(as,edit_history_node_paths_[i]);
+         add_delete_edit_history(defs,edit_history_node_paths_[i]);
       }
 
       the_size = edit_history_nodes_.size();
@@ -202,7 +201,7 @@ void ClientToServerCmd::add_edit_history(AbstractServer* as) const
             // Since we only get called if command can make state changes (isWrite() == true)
             SuiteChangedPtr suiteChanged(edited_node.get());
             edited_node->flag().set(ecf::Flag::MESSAGE);  // trap state change in suite for sync
-            add_edit_history(as,edited_node->absNodePath());
+            add_edit_history(defs,edited_node->absNodePath());
          }
       }
    }
@@ -211,7 +210,7 @@ void ClientToServerCmd::add_edit_history(AbstractServer* as) const
    edit_history_node_paths_.clear();
 }
 
-void ClientToServerCmd::add_edit_history(AbstractServer* as,const std::string& path) const
+void ClientToServerCmd::add_edit_history(Defs* defs,const std::string& path) const
 {
    // Note: if the cts_cmd_, had thousands of paths, calling  cts_cmd_->print(ss); will append those paths to the
    //       output, HUGE performance bottle neck, Since we are recording what command was applied to each node
@@ -222,21 +221,21 @@ void ClientToServerCmd::add_edit_history(AbstractServer* as,const std::string& p
    // See: Client/bin/gcc-4.8/release/perf_test_large_defs
 
    // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
-   std::stringstream ss;
-   ss << "MSG:";
-   if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
+   std::string ss("MSG:");
+   ss += Log::instance()->get_cached_time_stamp();
+
    print(ss,path); // custom print
-   as->defs()->add_edit_history(path,ss.str());
+   defs->add_edit_history(path,ss);
 }
 
-void ClientToServerCmd::add_delete_edit_history(AbstractServer* as,const std::string& path) const
+void ClientToServerCmd::add_delete_edit_history(Defs* defs,const std::string& path) const
 {
    // History is added to Str::ROOT_PATH(), but the path must show deleted node path
-   std::stringstream ss;
-   ss << "MSG:";
-   if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
+   std::string ss("MSG:");
+   ss += Log::instance()->get_cached_time_stamp();
+
    print(ss,path); // custom print
-   as->defs()->add_edit_history(Str::ROOT_PATH(),ss.str());
+   defs->add_edit_history(Str::ROOT_PATH(),ss);
 }
 
 CEREAL_REGISTER_TYPE(ServerVersionCmd);

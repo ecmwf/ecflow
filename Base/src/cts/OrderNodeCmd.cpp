@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -33,13 +34,13 @@ bool OrderNodeCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& OrderNodeCmd::print(std::ostream& os) const
+void OrderNodeCmd::print(std::string& os) const
 {
- 	return user_cmd(os,CtsApi::to_string(CtsApi::order(absNodepath_,NOrder::toString(option_))));
+ 	user_cmd(os,CtsApi::to_string(CtsApi::order(absNodepath_,NOrder::toString(option_))));
 }
-std::ostream& OrderNodeCmd::print_only(std::ostream& os) const
+void OrderNodeCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::order(absNodepath_,NOrder::toString(option_))); return os;
+   os += CtsApi::to_string(CtsApi::order(absNodepath_,NOrder::toString(option_)));
 }
 
 STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const
@@ -48,11 +49,12 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const
 
 	as->update_stats().order_node_++;
 
-	node_ptr theNode = find_node_for_edit(as,absNodepath_);
+	Defs* defs = as->defs().get();
+	node_ptr theNode = find_node_for_edit(defs,absNodepath_);
 
 	Node* theParent = theNode->parent();
 	if ( theParent ) theParent->order(theNode.get(), option_);
-	else             as->defs()->order(theNode.get(), option_);
+	else             defs->order(theNode.get(), option_);
 
    return doJobSubmission( as );
 }
@@ -119,5 +121,5 @@ void OrderNodeCmd::create( 	Cmd_ptr& cmd,
  	cmd = std::make_shared<OrderNodeCmd>( args[0],NOrder::toOrder(args[1]));
 }
 
-std::ostream& operator<<(std::ostream& os, const OrderNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const OrderNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}
 

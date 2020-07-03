@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include "LateAttr.hpp"
 #include "NState.hpp"
 #include "Indentor.hpp"

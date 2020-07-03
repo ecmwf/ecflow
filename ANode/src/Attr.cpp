@@ -20,29 +20,14 @@ namespace ecf {
 
 const char* Attr::to_string( Attr::Type s ) {
    switch ( s ) {
-      case Attr::EVENT:
-         return "event";
-         break;
-      case Attr::METER:
-         return "meter";
-         break;
-      case Attr::LABEL:
-         return "label";
-         break;
-      case Attr::LIMIT:
-         return "limit";
-         break;
-      case Attr::VARIABLE:
-         return "variable";
-         break;
-      case Attr::ALL:
-          return "all";
-          break;
-      case Attr::UNKNOWN:
-          return "unknown";
-          break;
-      default:
-         assert(false); break;
+      case Attr::EVENT:    return "event";
+      case Attr::METER:    return "meter";
+      case Attr::LABEL:    return "label";
+      case Attr::LIMIT:    return "limit";
+      case Attr::VARIABLE: return "variable";
+      case Attr::ALL:      return "all";
+      case Attr::UNKNOWN:  return "unknown";
+      default: assert(false); break;
    }
    assert(false);
    return nullptr;

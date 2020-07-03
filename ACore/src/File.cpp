@@ -13,6 +13,7 @@
 // Description : This class is used as a helper class
 //============================================================================
 
+#include <stdexcept>
 #include <fstream>
 
 #include "boost/filesystem.hpp"

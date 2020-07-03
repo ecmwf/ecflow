@@ -31,6 +31,7 @@ public:
 
    void print(std::string&) const;
    bool operator==(const AutoArchiveAttr& rhs) const;
+   bool operator<(const AutoArchiveAttr& rhs) const { return time_ < rhs.time();}
    bool isFree(const ecf::Calendar&, const boost::posix_time::time_duration& suiteDurationAtComplete) const;
 
    std::string toString() const;

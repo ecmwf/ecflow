@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "VerifyParser.hpp"
 #include "Node.hpp"
 #include "VerifyAttr.hpp"

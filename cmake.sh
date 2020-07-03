@@ -64,6 +64,7 @@ test_arg=
 test_safe_arg=
 clang_arg=
 clang_tidy_arg=
+clang_tidy_args=
 intel_arg=
 tsan_arg=
 mode_arg=release
@@ -96,6 +97,14 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
+   elif [[ "$1" = clang_tidy ]] ; then 
+      clang_tidy_arg=$1 ;
+      shift
+      while [[ "$#" != 0 ]] ; do
+         clang_tidy_args="$clang_tidy_args $1"
+         shift
+      done
+      break      
    elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
@@ -103,7 +112,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
-   elif [[ "$1" = clang_tidy ]] ; then clang_tidy_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
    elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
@@ -200,7 +208,7 @@ if [[ $ecbuild_arg != ecbuild ]] ; then
 fi
 module load python
 module load python3/3.6.8-01
-module load cmake/3.15.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+module load cmake/new   # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 
 
 # ==============================================================================================
@@ -290,16 +298,23 @@ if [[ $sys_install = sys_install ]] ; then
 fi
 
 # =======================================================================================
-# Change directory
+# Change directory to build directory
 #
 workspace=$(pwd)/..
 
-if [[ $clean_arg = clean ]] ; then
-	rm -rf ../bdir5/$mode_arg/ecflow
+build_dir_root=../bdir
+
+# separate build dir for clang tidy, so we can check fixes
+if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
+    build_dir_root=../bdir_clang
 fi
 
-mkdir -p ../bdir5/$mode_arg/ecflow
-cd ../bdir5/$mode_arg/ecflow
+if [[ $clean_arg = clean ]] ; then
+	rm -rf $build_dir_root/$mode_arg/ecflow
+fi
+
+mkdir -p $build_dir_root/$mode_arg/ecflow
+cd $build_dir_root/$mode_arg/ecflow
 
 # =============================================================================================
 # ctest
@@ -425,8 +440,10 @@ $ecbuild $source_dir \
 # export PATH=/tmp/$USER/opt/qt5/bin:$PATH
 
 if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
-    python $WK/build_scripts/run-clang-tidy.py
+    python $WK/build_scripts/run-clang-tidy.py $clang_tidy_args
+    exit 0
 fi
+
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
 	$make_arg 

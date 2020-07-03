@@ -34,7 +34,7 @@ class AbstractServer;
 //
 // This class make use of DefsCache as a performance optimisation.
 //================================================================================
-class SSyncCmd : public ServerToClientCmd {
+class SSyncCmd final : public ServerToClientCmd {
 public:
    // The constructor is *called* in the server.
    // This will collate the incremental changes made so far relative to the client_state_change_no.
@@ -46,7 +46,7 @@ public:
 
    SSyncCmd() : ServerToClientCmd(), incremental_changes_(0) {}
 
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
 
    // Client side functions:

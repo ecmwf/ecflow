@@ -25,6 +25,7 @@
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "JobProfiler.hpp"
+#include "Variable.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -155,7 +156,7 @@ int main(int argc, char* argv[])
 
 
    // Create a new log, file, place after begin to avoid queued state
-   Log::create(log_path);
+   TestLog test_log(log_path); // will create log file, and destroy log and remove file at end of scope
 
    // This controls the log output when job generation > submitJobsInterval
    JobProfiler::set_task_threshold(100); // 100ms where 1000ms is one second
@@ -166,23 +167,23 @@ int main(int argc, char* argv[])
    cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
    if ( jobParam.submitted().size() != tasks.size()) {
-      for(size_t i = 0; i < tasks.size(); i++) {
-         if (tasks[i]->state() != NState::SUBMITTED) {
-            cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
+	   for(size_t i = 0; i < tasks.size(); i++) {
+		   if (tasks[i]->state() != NState::SUBMITTED && tasks[i]->findVariable("ECF_DUMMY_TASK") == Variable::EMPTY()) {
+			   // We are NOT a dummy task
+			   cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
 
-            Node* parent = tasks[i]->parent();
-            while (parent) {
-               cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
-               parent = parent->parent();
-            }
+			   Node* parent = tasks[i]->parent();
+			   while (parent) {
+				   cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
+				   parent = parent->parent();
+			   }
 
-            std::vector<std::string> theReasonWhy;
-            tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
-            for(const auto & r : theReasonWhy) {  cout << "  Reason: " << r << "\n";}
-         }
-      }
+			   std::vector<std::string> theReasonWhy;
+			   tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
+			   for(const auto & r : theReasonWhy) {  cout << "  Reason: " << r << "\n";}
+		   }
+	   }
    }
 
-   fs::remove(log_path);
    return 0;
 }

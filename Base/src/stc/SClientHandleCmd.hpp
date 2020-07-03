@@ -16,13 +16,13 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "ServerToClientCmd.hpp"
 
-class SClientHandleCmd : public ServerToClientCmd {
+class SClientHandleCmd final : public ServerToClientCmd {
 public:
    explicit SClientHandleCmd(int handle) : handle_(handle) {}
 	SClientHandleCmd() : ServerToClientCmd(){}
 
 	void init(int handle) { handle_ = handle; }
-	std::ostream& print(std::ostream& os) const override { return os << "cmd:SClientHandleCmd [ " << handle_ << " ]";}
+	std::string print() const override;
 	bool equals(ServerToClientCmd*) const override;
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
 

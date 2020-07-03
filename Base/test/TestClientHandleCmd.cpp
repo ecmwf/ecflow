@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
 
 #include "ClientToServerCmd.hpp"
 #include "TestHelper.hpp"
@@ -20,11 +21,19 @@
 
 using namespace std;
 using namespace ecf;
+namespace fs = boost::filesystem;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
+
+BOOST_AUTO_TEST_CASE( test_add_log3 )
+{
+	// create once for all test below, then remove at the end
+	Log::create("test_add_log3.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
 
 BOOST_AUTO_TEST_CASE( test_client_handle_cmd_empty_server )
 {
@@ -288,4 +297,10 @@ BOOST_AUTO_TEST_CASE( test_client_handle_suite_ordering )
    BOOST_CHECK_MESSAGE(check_ordering(defs),"Ordering not preserved after adding a new suite");
 }
 
+BOOST_AUTO_TEST_CASE( test_destroy_log3 )
+{
+	Log::destroy();
+	fs::remove("test_add_log3.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
 BOOST_AUTO_TEST_SUITE_END()

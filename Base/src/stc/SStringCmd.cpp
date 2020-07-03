@@ -29,10 +29,9 @@ bool SStringCmd::equals(ServerToClientCmd* rhs) const
 	return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SStringCmd::print(std::ostream& os) const
+std::string SStringCmd::print() const
 {
-	os << "cmd:SStringCmd ";
-	return os;
+	return "cmd:SStringCmd ";
 }
 
 bool SStringCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
@@ -43,4 +42,4 @@ bool SStringCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SStringCmd& c)      { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SStringCmd& c)  { os << c.print(); return os; }

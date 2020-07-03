@@ -22,7 +22,7 @@
 #include "Openssl.hpp"
 #endif
 
-class ClientEnvironment : public AbstractClientEnv {
+class ClientEnvironment final : public AbstractClientEnv {
 public:
 	/// The constructor will load the environment
    explicit ClientEnvironment(bool gui);

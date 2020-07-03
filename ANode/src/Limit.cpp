@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "Limit.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"

@@ -57,6 +57,8 @@ public:
       }
       return true;
    }
+   bool operator<(const Label& rhs) const { return n_ < rhs.name();}
+
 
    std::string toString() const;
    std::string dump() const;
@@ -104,6 +106,7 @@ public:
 
    int number() const { return number_;}
    bool operator==(const Event& rhs) const;
+   bool operator<(const Event& rhs) const;
    bool compare(const Event& rhs) const; // two events the same if name/number the same, ignores state
    void set_value(bool b);  // updates state_change_no_
    bool usedInTrigger() const { return used_;}
@@ -163,6 +166,7 @@ public:
    unsigned int state_change_no() const { return state_change_no_; }
 
    bool operator==(const Meter& rhs) const;
+   bool operator<(const Meter& rhs) const { return n_ < rhs.name(); }
 
    bool usedInTrigger() const { return used_;}
    void usedInTrigger(bool b) { used_ = b;}

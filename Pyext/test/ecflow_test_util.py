@@ -249,7 +249,7 @@ class Server(object):
             self.lock_file.remove(self.the_port)
         
         # Do not clean up data, if an assert was raised. This allow debug
-        if exctype == None:
+        if exctype is None:
             if not debugging():
                 clean_up_server(str(self.the_port))
                 clean_up_data(str(self.the_port))

@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 # Name        :
 # Author      : Avi
@@ -49,13 +48,14 @@ def get_root_source_dir():
             #print "   searching for " + file
             if os.path.exists(file):
                 # determine path by looking into this file:
-                for line in open(file):
-                    ## Source directory: /tmp/ma0/workspace/ecflow/Acore
-                    if line.find("Source directory"):
-                        tokens = line.split()
-                        if len(tokens) == 4:
-                            #print "   returning root_source_dir:", tokens[3]
-                            return tokens[3]
+                with open(file) as fp:
+                    for line in fp:
+                        ## Source directory: /tmp/ma0/workspace/ecflow/Acore
+                        if line.find("Source directory"):
+                            tokens = line.split()
+                            if len(tokens) == 4:
+                                #print "   returning root_source_dir:", tokens[3]
+                                return tokens[3]
                 raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
             else:
                 raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
@@ -87,7 +87,11 @@ def delete_variables_affecting_job_generation(node):
         node.delete_variable("ECF_STATUS_CMD")    
     var = node.find_variable("ECF_OUT")
     if not var.empty() :  
-        node.delete_variable("ECF_OUT")    
+        node.delete_variable("ECF_OUT")
+    var = node.find_variable("ECF_MICRO")
+    if not var.empty() :  
+        node.delete_variable("ECF_MICRO")   # generation depend on % 
+         
       
 def traverse_container(node_container):
     """Recursively traverse definition node hierarchy and delete
@@ -175,7 +179,7 @@ if __name__ == "__main__":
         DEFS = ecflow.Defs(ARGS.defs_file)
     except RuntimeError as ex:
         print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
-        exit(1)
+        sys.exit(1)
     
     if ARGS.verbose: 
         print("remove test data associated with the DEFS, so we start fresh, Allows rerun")

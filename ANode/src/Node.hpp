@@ -29,6 +29,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iosfwd>
 #include <limits>
+#include <boost/utility/string_view.hpp>
 
 #include "DState.hpp"
 #include "NOrder.hpp"
@@ -60,6 +61,8 @@ protected:
    Node();
 public:
    Node& operator=(const Node&);
+   bool operator<(const Node& rhs) { return name() < rhs.name();}
+
    Node(const Node& rhs);
    virtual ~Node();
    virtual bool check_defaults() const;
@@ -124,6 +127,9 @@ public:
    /// Order the node using the second parameter
    virtual void order(Node*/*immediateChild*/, NOrder::Order) {}
    virtual void move_peer(Node* src, Node* dest) {}
+
+   /// called when definition is restored from a file/checkpoint
+   virtual void handle_migration(const ecf::Calendar&);
 
    /// reset all. Used after job generation.
    /// Unlike re-queue/begin, will reset time attributes. see ECFLOW-1204
@@ -455,7 +461,7 @@ public:
 
    // sort
    // expect one attr to be [ event | meter | label | limits | variable ]
-   virtual void sort_attributes( ecf::Attr::Type at, bool recursive);
+   virtual void sort_attributes(ecf::Attr::Type at,bool recursive = true,const std::vector<std::string>& no_sort = std::vector<std::string>());
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
@@ -505,6 +511,8 @@ public:
    void changeLimitValue(const std::string& name,int value);
    void changeDefstatus(const std::string& state);
    void changeLate(const ecf::LateAttr&);
+   void change_time(const std::string&,const std::string&);
+   void change_today(const std::string&,const std::string&);
 
    bool set_meter(const std::string& name,int value); // does not throw if meter not found
    bool set_event(const std::string& name,bool value);  // does not throw if event not found
@@ -576,6 +584,7 @@ public:
    bool user_variable_exists(const std::string& name) const;
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
+   virtual node_ptr find_immediate_child(const boost::string_view&) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
    std::string find_parent_variable_sub_value(const std::string& name) const;
    const Variable& find_parent_variable(const std::string& name) const;

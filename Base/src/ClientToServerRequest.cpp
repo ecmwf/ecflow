@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include "ClientToServerRequest.hpp"
 
 using namespace std;
@@ -28,7 +29,8 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const
 
 std::ostream& ClientToServerRequest::print( std::ostream& os ) const {
 	if (cmd_.get()) {
-		return cmd_->print_short(os); // avoid printing hundreds of paths in the commands
+		os << cmd_->print_short(); // avoid printing hundreds of paths in the command
+		return os;
 	}
 	return os << "NULL request";
 }

@@ -32,7 +32,7 @@ class TestConfluence(unittest.TestCase):
         space_key_list = [ "EMOS", "ECFLOW", "MAGP", "METV", "ECCUI", "ECC" ]
         for space_key in space_key_list:
             page_id = self.c.get_page_id(space_key,title) 
-            if page_id == None:
+            if page_id is None:
                 print("Could not find page id for space_key ",space_key," and title:",title)
             else:
                 print("space key:",space_key," page id:",page_id)
@@ -43,7 +43,7 @@ class TestConfluence(unittest.TestCase):
             page_id = self.c.get_page_id(space_key,title) 
             
             attachment = self.c.get_attachment_id(page_id,file)
-            if attachment != None:
+            if attachment is not None:
                 print("space key:",space_key," allready has an attachment for file ",file)
             else:
                 self.c.create_attachment(page_id,comment,file)

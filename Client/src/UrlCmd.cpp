@@ -15,6 +15,7 @@
 //               with it.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
 #include "UrlCmd.hpp"
 #include "Defs.hpp"
 #include "Node.hpp"

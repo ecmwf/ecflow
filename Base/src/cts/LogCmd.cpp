@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <boost/algorithm/string/trim.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -50,29 +51,27 @@ LogCmd::LogCmd(const std::string& path)
    boost::algorithm::trim(new_path_);
 }
 
-std::ostream& LogCmd::print(std::ostream& os) const
+void LogCmd::print(std::string& os) const
 {
     switch (api_) {
-      case LogCmd::GET:   return user_cmd(os,CtsApi::to_string(CtsApi::getLog(get_last_n_lines_)));  break;
-      case LogCmd::CLEAR: return user_cmd(os,CtsApi::clearLog()); break;
-      case LogCmd::FLUSH: return user_cmd(os,CtsApi::flushLog()); break;
-      case LogCmd::NEW:   return user_cmd(os,CtsApi::to_string(CtsApi::new_log(new_path_)));  break;
-      case LogCmd::PATH:  return user_cmd(os,CtsApi::get_log_path()); break;
+      case LogCmd::GET:   user_cmd(os,CtsApi::to_string(CtsApi::getLog(get_last_n_lines_)));  break;
+      case LogCmd::CLEAR: user_cmd(os,CtsApi::clearLog()); break;
+      case LogCmd::FLUSH: user_cmd(os,CtsApi::flushLog()); break;
+      case LogCmd::NEW:   user_cmd(os,CtsApi::to_string(CtsApi::new_log(new_path_)));  break;
+      case LogCmd::PATH:  user_cmd(os,CtsApi::get_log_path()); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
-   return os;
 }
-std::ostream& LogCmd::print_only(std::ostream& os) const
+void LogCmd::print_only(std::string& os) const
 {
     switch (api_) {
-      case LogCmd::GET:   os << CtsApi::to_string(CtsApi::getLog(get_last_n_lines_));  break;
-      case LogCmd::CLEAR: os << CtsApi::clearLog(); break;
-      case LogCmd::FLUSH: os << CtsApi::flushLog(); break;
-      case LogCmd::NEW:   os << CtsApi::to_string(CtsApi::new_log(new_path_));  break;
-      case LogCmd::PATH:  os << CtsApi::get_log_path(); break;
+      case LogCmd::GET:   os += CtsApi::to_string(CtsApi::getLog(get_last_n_lines_));  break;
+      case LogCmd::CLEAR: os += CtsApi::clearLog(); break;
+      case LogCmd::FLUSH: os += CtsApi::flushLog(); break;
+      case LogCmd::NEW:   os += CtsApi::to_string(CtsApi::new_log(new_path_));  break;
+      case LogCmd::PATH:  os += CtsApi::get_log_path(); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
-   return os;
 }
 
 bool LogCmd::equals(ClientToServerCmd* rhs) const
@@ -103,38 +102,36 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().log_cmd_++;
 
-	if (Log::instance()) {
-		switch (api_) {
-			case LogCmd::GET:   return PreAllocatedReply::string_cmd( Log::instance()->contents(get_last_n_lines_) ); break;
-			case LogCmd::CLEAR: Log::instance()->clear(); break;
-			case LogCmd::FLUSH: Log::instance()->flush(); break;
-         case LogCmd::NEW:   {
-            if (!new_path_.empty()) {
-               Log::instance()->new_path(new_path_); // will throw for errors
+	switch (api_) {
+	case LogCmd::GET:   return PreAllocatedReply::string_cmd( Log::instance()->contents(get_last_n_lines_) );
+	case LogCmd::CLEAR: Log::instance()->clear(); break;
+	case LogCmd::FLUSH: Log::instance()->flush(); break;
+	case LogCmd::NEW:   {
+		if (!new_path_.empty()) {
+			Log::instance()->new_path(new_path_); // will throw for errors
 
-               // *NOTE* calling --log=new <path> should be treated the *SAME* as editing ECF_LOG in the GUI
-               //        This is done adding it as a *USER* variable. This overloads the server variables
-               //        It also allows us to see the change in GUI. Note: Defs/server_variables are not synced
-               // ECFLOW-376
-               as->defs()->set_server().add_or_update_user_variables(Str::ECF_LOG(),Log::instance()->path());
-            }
-            else {
-               // User could have overridden ECF_LOG variable
-               // *FIRST* look at user variables, then look at *server* variables.
-               std::string log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
-
-               // ECFLOW-377 should remove leading/trailing spaces from path
-               boost::algorithm::trim(log_file_name);
-
-               Log::instance()->new_path(log_file_name);  // will throw for errors
-            }
-
-            as->stats().ECF_LOG_ = Log::instance()->path();  // do NOT update number of requests
-            break;
-         }
-         case LogCmd::PATH:  return PreAllocatedReply::string_cmd(  Log::instance()->path() ); break;
-		 default : throw std::runtime_error( "Unrecognised log api command,") ;
+			// *NOTE* calling --log=new <path> should be treated the *SAME* as editing ECF_LOG in the GUI
+			//        This is done adding it as a *USER* variable. This overloads the server variables
+			//        It also allows us to see the change in GUI. Note: Defs/server_variables are not synced
+			// ECFLOW-376
+			as->defs()->set_server().add_or_update_user_variables(Str::ECF_LOG(),Log::instance()->path());
 		}
+		else {
+			// User could have overridden ECF_LOG variable
+			// *FIRST* look at user variables, then look at *server* variables.
+			std::string log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+
+			// ECFLOW-377 should remove leading/trailing spaces from path
+			boost::algorithm::trim(log_file_name);
+
+			Log::instance()->new_path(log_file_name);  // will throw for errors
+		}
+
+		as->stats().ECF_LOG_ = Log::instance()->path();  // do NOT update number of requests
+		break;
+	}
+	case LogCmd::PATH:  return PreAllocatedReply::string_cmd(  Log::instance()->path() );
+	default : throw std::runtime_error( "Unrecognised log api command,") ;
 	}
 	return PreAllocatedReply::ok_cmd();
 }
@@ -262,4 +259,4 @@ void LogCmd::create( 	Cmd_ptr& cmd,
    throw std::runtime_error( ss.str() );
 }
 
-std::ostream& operator<<(std::ostream& os, const LogCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const LogCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

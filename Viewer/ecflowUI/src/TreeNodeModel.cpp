@@ -876,7 +876,7 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
 
     VNode* node=a->parent();
     if(!node)
-        return QModelIndex();
+        return {};
 
     VModelServer *mserver=data_->server(node->server());
     VTreeServer* server=mserver->treeServer();

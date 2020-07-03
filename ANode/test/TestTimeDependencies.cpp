@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE( test_time_day_combination_in_hierarchy )
    //  clock real 7.6.2015 # sunday
    //  family f1
    //    time 10:00
-   //    task t1      # task should run *ONCE*, Monday morning , the 10:00 has no effect
+   //    task t1      # task should run *TWICE*, Monday morning @00:00 and, at 10:00
    //      day monday
    Defs  defs;
    suite_ptr suite = defs.add_suite("s1");
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_time_day_combination_in_hierarchy )
 
       defs.updateCalendar(calUpdateParams);
    }
-   BOOST_CHECK_MESSAGE( submitted == 1 ,"Expected one submission but found " << submitted);
+   BOOST_CHECK_MESSAGE( submitted == 2 ,"Expected two submission but found " << submitted);
 }
 
 

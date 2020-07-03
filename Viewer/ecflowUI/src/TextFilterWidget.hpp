@@ -19,6 +19,7 @@
 #include "TextFilterHandler.hpp"
 
 class TextFilterCompleterModel;
+class VProperty;
 
 class TextFilterWidget : public QWidget, private Ui::TextFilterWidget
 {
@@ -35,6 +36,8 @@ public:
     void buildMenu(QToolButton *tb);
     void setExternalButtons(QToolButton* statusTb,QToolButton* optionTb);
     void setEnabledExternalButtons(bool);
+    void setNumberOfLines(int);
+    bool needNumberOfLines() const;
     QString filterText() const;
     bool isActive() const;
     bool isCaseSensitive() const;
@@ -80,6 +83,7 @@ private:
     TextFilterCompleterModel* completerModel_;
     QToolButton* statusTb_{nullptr};
     QToolButton* optionTb_{nullptr};
+    VProperty* showLineNumProp_{nullptr};
 };
 
 #endif // TEXTFILTERWIDGET_HPP

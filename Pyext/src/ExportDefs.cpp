@@ -12,6 +12,8 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+// file deepcode ignore CppConstantBinaryExpression: <comment the reason here>
+#include <stdexcept>
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 
@@ -140,14 +142,24 @@ defs_ptr add_variable_dict(defs_ptr self,const bp::dict& dict) {
 }
 void delete_variable(defs_ptr self,const std::string& name) { self->set_server().delete_user_variable(name);}
 
-void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recursive){
+void sort_attributes(defs_ptr self,ecf::Attr::Type attr) { self->sort_attributes(attr);}
+void sort_attributes1(defs_ptr self,ecf::Attr::Type attr, bool recurse) { self->sort_attributes(attr,recurse); }
+void sort_attributes2(defs_ptr self,ecf::Attr::Type attr, bool recurse,const bp::list& list){
+	std::vector<std::string> no_sort;
+	BoostPythonUtil::list_to_str_vec(list,no_sort);
+	self->sort_attributes(attr,recurse,no_sort);
+}
+
+void sort_attributes3(defs_ptr self,const std::string& attribute_name, bool recursive,const bp::list& list){
    std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
    ecf::Attr::Type attr = Attr::to_attr(attribute_name);
    if (attr == ecf::Attr::UNKNOWN) {
       std::stringstream ss;  ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
       throw std::runtime_error(ss.str());
    }
-   self->sort_attributes(attr,recursive);
+   std::vector<std::string> no_sort;
+   BoostPythonUtil::list_to_str_vec(list,no_sort);
+   self->sort_attributes(attr,recursive,no_sort);
 }
 
 // Support sized and Container protocol
@@ -257,7 +269,10 @@ void export_Defs()
 	.def("add_variable",          &add_variable_int)
 	.def("add_variable",          &add_variable_var)
 	.def("add_variable",          &add_variable_dict)
-	.def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+	.def("sort_attributes",       &sort_attributes)
+	.def("sort_attributes",       &sort_attributes1)
+	.def("sort_attributes",       &sort_attributes2)
+	.def("sort_attributes",       &sort_attributes3,( bp::arg("attribute_type"), bp::arg("recursive")=true, bp::arg("no_sort")=bp::list() ))
 	.def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
 	.def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
 	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding `suite`_")

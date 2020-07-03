@@ -27,13 +27,13 @@
 /// LogCmd: The log file Can be potentially very large
 ///     Only really valid if the out bound request was a LogCmd(LogCmd::GET)
 ///================================================================================
-class SStringCmd : public ServerToClientCmd {
+class SStringCmd final : public ServerToClientCmd {
 public:
    explicit SStringCmd(const std::string& s) : str_(s) {}
    SStringCmd() : ServerToClientCmd() {}
 
    void init(const std::string& s) { str_ = s;}
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    const std::string& get_string() const override { return str_;}
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;

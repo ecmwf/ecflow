@@ -12,6 +12,7 @@
 //
 // Description : Delegates argument parsing to the registered commands
 //============================================================================
+#include <stdexcept>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <iomanip>

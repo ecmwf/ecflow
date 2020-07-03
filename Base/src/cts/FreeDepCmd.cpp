@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -39,29 +40,30 @@ bool FreeDepCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& FreeDepCmd::print(std::ostream& os) const
+void FreeDepCmd::print(std::string& os) const
 {
-	return user_cmd(os,CtsApi::to_string(CtsApi::freeDep(paths_,trigger_,all_,date_,time_)));
+	user_cmd(os,CtsApi::to_string(CtsApi::freeDep(paths_,trigger_,all_,date_,time_)));
 }
-std::ostream& FreeDepCmd::print_only(std::ostream& os) const
+void FreeDepCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::freeDep(paths_,trigger_,all_,date_,time_)); return os;
+   os += CtsApi::to_string(CtsApi::freeDep(paths_,trigger_,all_,date_,time_));
 }
-std::ostream& FreeDepCmd::print(std::ostream& os, const std::string& path) const
+void FreeDepCmd::print(std::string& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
-	return user_cmd(os,CtsApi::to_string(CtsApi::freeDep(paths,trigger_,all_,date_,time_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::freeDep(paths,trigger_,all_,date_,time_)));
 }
 
 STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().free_dep_++;
 
-   std::stringstream ss;
+    Defs* defs = as->defs().get();
+    std::stringstream ss;
 	size_t vec_size = paths_.size();
 	for(size_t i = 0; i < vec_size; i++) {
 
-	   node_ptr node = find_node_for_edit_no_throw(as,paths_[i]);
+	   node_ptr node = find_node_for_edit_no_throw(defs,paths_[i]);
       if (!node.get()) {
          ss << "FreeDepCmd: Could not find node at path " << paths_[i] << "\n";
          LOG(Log::ERR,"FreeDepCmd: Could not find node at path " << paths_[i]);
@@ -160,4 +162,4 @@ void FreeDepCmd::create( 	Cmd_ptr& cmd,
 	cmd = std::make_shared<FreeDepCmd>(paths, trigger, all, date , time);
 }
 
-std::ostream& operator<<(std::ostream& os, const FreeDepCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const FreeDepCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

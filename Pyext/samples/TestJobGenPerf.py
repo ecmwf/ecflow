@@ -22,6 +22,7 @@
 # =============================================================================
 import ecflow
 import os       # for getenv
+import sys
 import shutil   # used to remove directory tree
 import argparse # for argument parsing     
 
@@ -89,9 +90,9 @@ if __name__ == "__main__":
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
     if not ARGS.ecf_home:
-        if os.getenv("WK") == None:
+        if os.getenv("WK") is None:
             print("No ecf_home specified. Please specify a writable directory")
-            exit(1)
+            sys.exit(1)
         ARGS.ecf_home = "/var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf/ECF_HOME"
         if ARGS.verbose:
             print("Workspace is defined") 
@@ -114,7 +115,7 @@ if __name__ == "__main__":
         DEFS = ecflow.Defs(ARGS.defs_file)
     except RuntimeError as ex:
         print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
-        exit(1)
+        sys.exit(1)
     
     if ARGS.verbose: 
         print("remove test data associated with the DEFS, so we start fresh, Allows rerun")

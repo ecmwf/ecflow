@@ -18,7 +18,7 @@
 #include "ServerToClientCmd.hpp"
 
 ///================================================================================
-class SStringVecCmd : public ServerToClientCmd {
+class SStringVecCmd final : public ServerToClientCmd {
 public:
    explicit SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
    SStringVecCmd() : ServerToClientCmd() {}
@@ -26,7 +26,7 @@ public:
    void init(const std::vector<std::string>& s) { vec_ = s;}
    const std::vector<std::string>& get_string_vec() const { return vec_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
    void cleanup() override { std::vector<std::string>().swap(vec_);} /// run in the server, after command send to client

@@ -122,7 +122,7 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
         //The item not yet exists
         else
         {
-            OutputCacheItem* item=new OutputCacheItem(id,file);
+            auto* item=new OutputCacheItem(id,file);
             items_[id]=item;
             item->attach();
 #ifdef _UI_OUTPUTCACHE_DEBUG

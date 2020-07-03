@@ -22,13 +22,13 @@ class AbstractServer;
 // Paired with CtsCmd(SUITES)
 // Client---(CtsCmd(SUITES))---->Server-----(SSuitesCmd)--->client:
 //================================================================================
-class SSuitesCmd : public ServerToClientCmd {
+class SSuitesCmd final : public ServerToClientCmd {
 public:
    explicit SSuitesCmd(AbstractServer* as );
    SSuitesCmd() : ServerToClientCmd() {}
 
    void init(AbstractServer* as);
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
    void cleanup() override { std::vector<std::string>().swap(suites_);} /// run in the server, after command send to client

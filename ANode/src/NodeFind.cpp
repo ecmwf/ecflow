@@ -156,10 +156,9 @@ bool Node::user_variable_exists(const std::string& name) const
 
 const Variable& Node::findVariable(const std::string& name) const
 {
-   size_t theSize = vars_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (vars_[i].name() == name) {
-         return vars_[i];
+   for(const auto& v: vars_) {
+      if (v.name() == name) {
+         return v;
       }
    }
    return Variable::EMPTY();
@@ -222,14 +221,13 @@ const Variable& Node::find_parent_variable(const std::string& name) const
 
 bool Node::findVariableValue( const std::string& name, std::string& returnedValue) const
 {
-   size_t theSize = vars_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (vars_[i].name() == name) {
-         returnedValue = vars_[i].theValue();
-         return true;
-      }
-   }
-   return false;
+	for(const auto& var: vars_) {
+		if (var.name() == name) {
+			returnedValue = var.theValue();
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Node::findGenVariableValue( const std::string& name, std::string& returnedValue) const
@@ -245,9 +243,8 @@ bool Node::findGenVariableValue( const std::string& name, std::string& returnedV
 
 bool Node::findLimit(const Limit& theLimit) const
 {
-   size_t theSize = limits_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (limits_[i]->name() == theLimit.name()) {
+   for(const auto& lim: limits_) {
+      if (lim->name() == theLimit.name()) {
          return true;
       }
    }
@@ -256,10 +253,9 @@ bool Node::findLimit(const Limit& theLimit) const
 
 limit_ptr Node::find_limit(const std::string& theName) const
 {
-   size_t theSize = limits_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (limits_[i]->name() == theName) {
-         return limits_[i];
+   for(const auto& lim: limits_) {
+      if (lim->name() == theName) {
+         return lim;
       }
    }
    return limit_ptr();
@@ -284,11 +280,10 @@ limit_ptr  Node::findLimitUpNodeTree(const std::string& name) const
 
 const Event& Node::findEvent(const Event& theEvent) const
 {
-   size_t theSize = events_.size();
-   for(size_t i = 0; i < theSize; i++) {
+   for(const auto& e: events_) {
       // compare ignores state like value_ and initial_value
-      if (events_[i].compare(theEvent)) {
-         return events_[i];
+      if (e.compare(theEvent)) {
+         return e;
       }
    }
    return Event::EMPTY();
@@ -296,10 +291,9 @@ const Event& Node::findEvent(const Event& theEvent) const
 
 const Event& Node::findEventByNumber(int number) const
 {
-   size_t theSize = events_.size();
-   for(size_t i = 0; i < theSize; i++)   {
-      if (events_[i].number() == number) {
-         return events_[i];
+   for(const auto& e: events_)   {
+      if (e.number() == number) {
+         return e;
       }
    }
    return Event::EMPTY();
@@ -307,10 +301,9 @@ const Event& Node::findEventByNumber(int number) const
 
 const Event& Node::findEventByName( const std::string& event_name) const
 {
-   size_t theSize = events_.size();
-   for(size_t i = 0; i < theSize; i++)   {
-      if (events_[i].name() == event_name) {
-         return events_[i];
+   for(const auto& e: events_)   {
+      if (e.name() == event_name) {
+         return e;
       }
    }
    return Event::EMPTY();
@@ -333,12 +326,12 @@ const Event& Node::findEventByNameOrNumber( const std::string& theName) const
    }
    return Event::EMPTY();
 }
+
 const Meter& Node::findMeter(const std::string& name) const
 {
-   size_t theSize = meters_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (meters_[i].name() == name) {
-         return meters_[i];
+   for(const auto& m: meters_) {
+      if (m.name() == name) {
+         return m;
       }
    }
    return Meter::EMPTY();
@@ -346,20 +339,18 @@ const Meter& Node::findMeter(const std::string& name) const
 
 Meter& Node::find_meter(const std::string& name)
 {
-   size_t theSize = meters_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (meters_[i].name() == name) {
-         return meters_[i];
-      }
-   }
+	for(auto& m: meters_) {
+		if (m.name() == name) {
+			return m;
+		}
+	}
    return const_cast<Meter&>(Meter::EMPTY());
 }
 
 bool Node::findLabel(const std::string& name) const
 {
-   size_t theSize = labels_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (labels_[i].name() == name) {
+   for(const auto& l: labels_) {
+      if (l.name() == name) {
          return true;
       }
    }
@@ -368,11 +359,10 @@ bool Node::findLabel(const std::string& name) const
 
 const Label& Node::find_label(const std::string& name) const
 {
-   size_t theSize = labels_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (labels_[i].name() == name) {
-          return labels_[i];
-      }
+   for(const auto& l: labels_) {
+	   if (l.name() == name) {
+		   return l;
+	   }
    }
    return Label::EMPTY();
 }

@@ -1125,7 +1125,7 @@ QTime NodeTimelineHeader::posToTime(QPoint pos) const
     QPoint rPos=realPos(pos);
 
     if(w <= 0 || rPos.x() < xp)
-        return QTime();
+        return {};
 
     double r=static_cast<double>(rPos.x()-xp)/static_cast<double>(w);
     if(r < 0 || r > 1)

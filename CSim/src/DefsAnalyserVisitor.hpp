@@ -23,7 +23,7 @@ class Node;
 
 namespace ecf {
 
-class DefsAnalyserVisitor : public NodeTreeVisitor {
+class DefsAnalyserVisitor final : public NodeTreeVisitor {
 public:
 	DefsAnalyserVisitor();
 	std::string report() const { return ss_.str();}

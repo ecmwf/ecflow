@@ -55,6 +55,8 @@ static defs_ptr create_defs()
 BOOST_AUTO_TEST_CASE( test_ECFLOW_189 )
 {
    cout << "Base:: ...test_ECFLOW_189\n";
+   TestLog test_log("test_ECFLOW_189.log"); // will create log file, and destroy log and remove file at end of scope
+
    defs_ptr the_defs = create_defs();
    the_defs->beginAll();
    node_ptr t1 = the_defs->findAbsNode("/s1/f1/t1");

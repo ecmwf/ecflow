@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <iostream>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
@@ -32,19 +33,15 @@ namespace po = boost::program_options;
 
 QueryCmd::~QueryCmd() = default;
 
-std::ostream& QueryCmd::print(std::ostream& os) const
+void QueryCmd::print(std::string& os) const
 {
    // path_to_task_ is only used in logging, so we know which task initiated the query, can be empty when invoked via cmd line
-   std::string the_query_cmd = CtsApi::to_string(CtsApi::query(query_type_,path_to_attribute_,attribute_));
-   the_query_cmd += path_to_task_;
-   return user_cmd(os,the_query_cmd );
+   user_cmd(os, CtsApi::to_string(CtsApi::query(query_type_,path_to_attribute_,attribute_)) + path_to_task_ );
 }
-std::ostream& QueryCmd::print_only(std::ostream& os) const
+void QueryCmd::print_only(std::string& os) const
 {
-   std::string the_query_cmd = CtsApi::to_string(CtsApi::query(query_type_,path_to_attribute_,attribute_));
-   the_query_cmd += path_to_task_;
-   os << the_query_cmd;
-   return os;
+   os += CtsApi::to_string(CtsApi::query(query_type_,path_to_attribute_,attribute_));
+   os += path_to_task_ ;
 }
 
 bool QueryCmd::equals(ClientToServerCmd* rhs) const
@@ -191,15 +188,17 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().query_++;
 
+   Defs* defs = as->defs().get();
+
    if (path_to_attribute_ == "/") {
 	   if (query_type_ == "state") {
-	      return PreAllocatedReply::string_cmd( NState::toString(as->defs()->state()));
+	      return PreAllocatedReply::string_cmd( NState::toString(defs->state()));
 	   }
        std::stringstream ss; ss << "QueryCmd: The only valid query for the server is 'state', i.e. ecflow_client --query state /";
        throw std::runtime_error(ss.str());
    }
 
-   node_ptr node = find_node(as,path_to_attribute_);
+   node_ptr node = find_node(defs,path_to_attribute_);
 
    if (query_type_ == "event") {
       const Event& event = node->findEventByNameOrNumber(attribute_);
@@ -285,4 +284,4 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    return PreAllocatedReply::ok_cmd();
 }
 
-std::ostream& operator<<(std::ostream& os, const QueryCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const QueryCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

@@ -12,9 +12,11 @@
 #include <QtGlobal>
 #include <QAction>
 #include <QClipboard>
+#include <QItemSelectionModel>
 
 #include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
+#include "UiLog.hpp"
 #include "VReply.hpp"
 
 #include "LogModel.hpp"
@@ -117,12 +119,28 @@ void MessageItemWidget::infoFailed(VReply* reply)
 
 void MessageItemWidget::on_actionCopyEntry__triggered()
 {
-   toClipboard(model_->entryText(treeView_->currentIndex()));
+    QString s;
+    QModelIndexList lst = treeView_->selectionModel()->selectedRows(2);
+    for(int i=0; i < lst.count(); i++) {
+        s += model_->entryText(lst[i]);
+        if (i != lst.count()-1) {
+            s += "\n";
+        }
+    }
+    toClipboard(s);
 }
 
 void MessageItemWidget::on_actionCopyRow__triggered()
 {
-   toClipboard(model_->fullText(treeView_->currentIndex()));
+    QString s;
+    QModelIndexList lst = treeView_->selectionModel()->selectedRows();
+    for(int i=0; i < lst.count(); i++) {
+        s += model_->fullText(lst[i]);
+        if (i != lst.count()-1) {
+            s += "\n";
+        }
+    }
+    toClipboard(s);
 }
 
 void MessageItemWidget::toClipboard(QString txt) const

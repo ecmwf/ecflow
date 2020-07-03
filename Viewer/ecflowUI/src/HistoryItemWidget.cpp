@@ -13,6 +13,7 @@
 #include <QAction>
 #include <QClipboard>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 
 #include "LogProvider.hpp"
 #include "LogModel.hpp"
@@ -185,12 +186,28 @@ void HistoryItemWidget::on_reloadTb__clicked(bool)
 
 void HistoryItemWidget::on_actionCopyEntry__triggered()
 {
-   toClipboard(model_->entryText(treeView_->currentIndex()));
+    QString s;
+    QModelIndexList lst = treeView_->selectionModel()->selectedRows(2);
+    for(int i=0; i < lst.count(); i++) {
+        s += model_->entryText(lst[i]);
+        if (i != lst.count()-1) {
+            s += "\n";
+        }
+    }
+    toClipboard(s);
 }
 
 void HistoryItemWidget::on_actionCopyRow__triggered()
 {
-   toClipboard(model_->fullText(treeView_->currentIndex()));
+    QString s;
+    QModelIndexList lst = treeView_->selectionModel()->selectedRows();
+    for(int i=0; i < lst.count(); i++) {
+        s += model_->fullText(lst[i]);
+        if (i != lst.count()-1) {
+            s += "\n";
+        }
+    }
+    toClipboard(s);
 }
 
 void HistoryItemWidget::toClipboard(QString txt) const

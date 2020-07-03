@@ -85,7 +85,7 @@ class Client(object):
      
     def __exit__(self,ex_type,value,tb):
         print ("   Client:__exit__: ex_type:" + str(ex_type) + " value:" + str(value) + "\n   traceback:" + str(tb))
-        if ex_type != None:
+        if ex_type is not None:
             print('Calling abort ' + self.at_time())
             self.ci.child_abort("Aborted with exception type " + str(ex_type) + ":" + str(value))
             return False

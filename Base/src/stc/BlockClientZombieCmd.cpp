@@ -15,19 +15,19 @@
 #include <iostream>
 #include "BlockClientZombieCmd.hpp"
 
-std::ostream& BlockClientZombieCmd::print(std::ostream& os) const
+std::string BlockClientZombieCmd::print() const
 {
    switch (zombie_type_) {
-      case ecf::Child::USER:           return os << "cmd:BlockClientZombieCmd: user"; break;
-      case ecf::Child::PATH:           return os << "cmd:BlockClientZombieCmd: path"; break;
-      case ecf::Child::ECF:            return os << "cmd:BlockClientZombieCmd: ecf"; break;
-      case ecf::Child::ECF_PID:        return os << "cmd:BlockClientZombieCmd: ecf_pid"; break;
-      case ecf::Child::ECF_PID_PASSWD: return os << "cmd:BlockClientZombieCmd: ecf_pid_passwd"; break;
-      case ecf::Child::ECF_PASSWD:     return os << "cmd:BlockClientZombieCmd: ecf_passwd"; break;
-      case ecf::Child::NOT_SET:        return os << "cmd:BlockClientZombieCmd: not_set"; break;
+      case ecf::Child::USER:           return "cmd:BlockClientZombieCmd: user";
+      case ecf::Child::PATH:           return "cmd:BlockClientZombieCmd: path";
+      case ecf::Child::ECF:            return "cmd:BlockClientZombieCmd: ecf";
+      case ecf::Child::ECF_PID:        return "cmd:BlockClientZombieCmd: ecf_pid";
+      case ecf::Child::ECF_PID_PASSWD: return "cmd:BlockClientZombieCmd: ecf_pid_passwd";
+      case ecf::Child::ECF_PASSWD:     return "cmd:BlockClientZombieCmd: ecf_passwd";
+      case ecf::Child::NOT_SET:        return "cmd:BlockClientZombieCmd: not_set";
    }
    assert(false); // unknown command
-   return os << "cmd:Unknown??";
+   return "cmd:Unknown??";
 }
 
 // Client context
@@ -46,4 +46,4 @@ bool BlockClientZombieCmd::equals(ServerToClientCmd* rhs) const
    return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& operator<<(std::ostream& os, const BlockClientZombieCmd& c)   { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const BlockClientZombieCmd& c) { os << c.print(); return os; }

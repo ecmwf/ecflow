@@ -71,10 +71,9 @@ bool SClientHandleSuitesCmd::equals(ServerToClientCmd* rhs) const
    return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SClientHandleSuitesCmd::print(std::ostream& os) const
+std::string SClientHandleSuitesCmd::print() const
 {
-   os << "cmd:SClientHandleSuitesCmd ";
-   return os;
+   return  "cmd:SClientHandleSuitesCmd ";
 }
 
 bool SClientHandleSuitesCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
@@ -116,4 +115,4 @@ bool SClientHandleSuitesCmd::handle_server_response( ServerReply& server_reply, 
    return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SClientHandleSuitesCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SClientHandleSuitesCmd& c) { os << c.print(); return os; }

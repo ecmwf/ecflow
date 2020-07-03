@@ -13,6 +13,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <iostream>
 #include <cstdlib>
 

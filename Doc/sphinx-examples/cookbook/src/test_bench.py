@@ -11,6 +11,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+# file deepcode ignore change_to_is: <comment the reason here>
 
 # =============================================================================
 # Code for testing *any* definition
@@ -24,6 +25,7 @@
 # =============================================================================
 import ecflow
 import os       # for getenv
+import sys
 import shutil   # used to remove directory tree
 import argparse # for argument parsing     
 
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     print ARGS    
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
-    if os.getenv("WK") != None:
+    if os.getenv("WK") is not None:
         ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
         if ARGS.verbose:
             print "Workspace is defined" 
@@ -109,7 +111,7 @@ if __name__ == "__main__":
         DEFS = ecflow.Defs(ARGS.defs_file)
     except RuntimeError as ex:
         print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
-        exit(1)
+        sys.exit(1)
     
     if ARGS.verbose: 
         print "remove test data associated with the DEFS, so we start fresh, Allows rerun"
@@ -127,7 +129,7 @@ if __name__ == "__main__":
     if ARGS.verbose: 
         print "add variables required for script generation, for all suites\n"
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
-    if os.getenv("WK") != None: 
+    if os.getenv("WK") is not None: 
         DEFS.add_variable("ECF_CLIENT_EXE_PATH", os.getenv("WK") + "/Client/bin/gcc\-4.8/debug/ecflow_client")
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
     DEFS.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")

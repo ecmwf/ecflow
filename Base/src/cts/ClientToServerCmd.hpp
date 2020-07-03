@@ -47,14 +47,15 @@ public:
    /// The EditHistoryMgr records what command was applied to each node. However when logging the
    /// the command we do not want logs all the paths, for each node.(performance bottleneck
    /// when dealing with thousands of paths)
-   virtual std::ostream& print(std::ostream& os) const = 0;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const { return print(os); }
+   virtual void print(std::string& os) const = 0;
+   virtual void print(std::string& os, const std::string& path) const { print(os); }
 
    /// Print the command without trailing <user>@<host>. Used by Group command, avoids duplicate user@host for each child command
-   virtual std::ostream& print_only(std::ostream& os ) const { return print(os); }
+   virtual void print_only(std::string& os ) const { return print(os); }
 
    /// Print with minimal information. Deals with errors report where cmd have thousands of paths. truncate to one path.
-   virtual std::ostream& print_short(std::ostream& os) const { return print(os); }
+   /// This should *NOT* include trailing <user>@<host>
+   virtual std::string print_short() const { std::string ret; print_only(ret); return ret; }
 
    virtual bool equals(ClientToServerCmd* rhs) const;
 
@@ -125,7 +126,7 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
-   virtual void add_edit_history(AbstractServer*) const;
+   virtual void add_edit_history(Defs*) const;
 
    // used by group_cmd to postfix syncCmd on all user commands that modify defs
    virtual void set_client_handle(int client_handle) {} // used by group_cmd
@@ -162,24 +163,24 @@ protected:
    static void dumpVecArgs(const char* argOption, const std::vector<std::string>& args);
 
    /// Find the node otherwise throw std:::runtime_error
-   node_ptr find_node(AbstractServer* as, const std::string& absNodepath) const;
+   node_ptr find_node(Defs*, const std::string& absNodepath) const;
 
    /// Find The node for edit, otherwise throw std:::runtime_error
    /// Will add the node edit history collection
-   node_ptr find_node_for_edit(AbstractServer* as, const std::string& absNodepath) const;
+   node_ptr find_node_for_edit(Defs*, const std::string& absNodepath) const;
 
    /// Find The node for edit, otherwise return a NULL pointer
    /// Will add the node edit history collection
-   node_ptr find_node_for_edit_no_throw(AbstractServer* as, const std::string& absNodepath) const;
+   node_ptr find_node_for_edit_no_throw(Defs*, const std::string& absNodepath) const;
 
    /// finds the associated node and adds to edit history nodes
-   void add_node_for_edit_history(AbstractServer* as, const std::string& absNodepath) const;
+   void add_node_for_edit_history(Defs* as, const std::string& absNodepath) const;
    void add_node_for_edit_history(node_ptr) const;
    void add_node_path_for_edit_history(const std::string& absNodepath) const;
 
 
-   void add_edit_history(AbstractServer*,const std::string& path) const;
-   void add_delete_edit_history(AbstractServer*,const std::string& path) const;
+   void add_edit_history(Defs*,const std::string& path) const;
+   void add_delete_edit_history(Defs*,const std::string& path) const;
 
 
    mutable bool use_EditHistoryMgr_{true}; // sometime quicker to add edit history in command, than using EditHistoryMgr
@@ -267,7 +268,7 @@ private:
    }
 };
 
-class InitCmd : public TaskCmd {
+class InitCmd final : public TaskCmd {
 public:
    InitCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -280,7 +281,7 @@ public:
 
    const std::vector<Variable>& variables_to_add() const { return var_to_add_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -307,7 +308,7 @@ private:
    }
 };
 
-class CompleteCmd : public TaskCmd {
+class CompleteCmd final : public TaskCmd {
 public:
    CompleteCmd(const std::string& pathToTask,
                const std::string& jobsPassword,
@@ -319,7 +320,7 @@ public:
 
    const std::vector<std::string>& variables_to_delete() const { return var_to_del_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -348,7 +349,7 @@ private:
 
 /// A child command that evaluates a expression. If the expression is false.
 /// Then client invoker will block.
-class CtsWaitCmd : public TaskCmd {
+class CtsWaitCmd final : public TaskCmd {
 public:
    CtsWaitCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -359,7 +360,7 @@ public:
 
    const std::string& expression() const { return expression_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -386,7 +387,7 @@ private:
    }
 };
 
-class AbortCmd : public TaskCmd {
+class AbortCmd final : public TaskCmd {
 public:
    AbortCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -397,7 +398,7 @@ public:
 
    const std::string& reason() const {return reason_; }
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -423,7 +424,7 @@ private:
    }
 };
 
-class EventCmd : public TaskCmd {
+class EventCmd final : public TaskCmd {
 public:
    EventCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -437,7 +438,7 @@ public:
    const std::string& name() const { return name_; }
    bool value() const { return value_; }
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -465,7 +466,7 @@ private:
    }
 };
 
-class MeterCmd : public TaskCmd {
+class MeterCmd final : public TaskCmd {
 public:
    MeterCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -479,7 +480,7 @@ public:
    const std::string& name() const { return name_; }
    int value() const { return value_; }
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -509,7 +510,7 @@ private:
 };
 
 
-class LabelCmd : public TaskCmd {
+class LabelCmd final : public TaskCmd {
 public:
    LabelCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -523,7 +524,7 @@ public:
    const std::string& name() const { return name_; }
    const std::string& label() const { return label_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -553,7 +554,7 @@ private:
 };
 
 class QueueAttr;
-class QueueCmd : public TaskCmd {
+class QueueCmd final : public TaskCmd {
 public:
    QueueCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
@@ -572,7 +573,7 @@ public:
    const std::string& step() const { return step_; }
    const std::string& path_to_node_with_queue() const { return path_to_node_with_queue_; }
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -632,7 +633,7 @@ protected:
    static void prompt_for_confirmation(const std::string& prompt);
 
    /// All user commands will be pre_fixed with "--" and post_fixed with :user@host
-   std::ostream& user_cmd(std::ostream& os, const std::string& the_cmd) const;
+   void user_cmd(std::string& os, const std::string& the_cmd) const;
 
 
    static int time_out_for_load_sync_and_get();
@@ -663,12 +664,12 @@ private:
 // This Command should NEVER be changed
 // This will allow new client to ask OLD server about its version
 // ========================================================================
-class ServerVersionCmd : public UserCmd {
+class ServerVersionCmd final : public UserCmd {
 public:
    ServerVersionCmd()= default;
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
    const char* theArg() const override;
    void addOption(boost::program_options::options_description& desc) const override;
@@ -698,7 +699,7 @@ private:
 // *** IMPORTANT: For any new commands, must be added to the end, for each major release
 // *** - STATS_RESET was introduced in release 4.0.5
 // =========================================================================
-class CtsCmd : public UserCmd {
+class CtsCmd final : public UserCmd {
 public:
    enum Api { NO_CMD, RESTORE_DEFS_FROM_CHECKPT,
       RESTART_SERVER, SHUTDOWN_SERVER, HALT_SERVER, TERMINATE_SERVER,
@@ -717,8 +718,8 @@ public:
 
    Api api() const { return api_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    bool isWrite() const override;
@@ -748,7 +749,7 @@ private:
    }
 };
 
-class CheckPtCmd : public UserCmd {
+class CheckPtCmd final : public UserCmd {
 public:
    CheckPtCmd(ecf::CheckPt::Mode m, int interval,int checkpt_save_time_alarm)
    :  mode_(m), check_pt_interval_(interval),check_pt_save_time_alarm_(checkpt_save_time_alarm) {}
@@ -758,8 +759,8 @@ public:
    int check_pt_interval() const { return check_pt_interval_;}
    int check_pt_save_time_alarm() const { return check_pt_save_time_alarm_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
    bool isWrite() const override;
    bool is_mutable() const override;
@@ -792,7 +793,7 @@ private:
 // Client---(CSyncCmd::SYNC)--------->Server-----(SSyncCmd)--->client:
 // Client---(CSyncCmd::SYNC_CLOCK)--->Server-----(SSyncCmd)--->client:
 // Client---(CSyncCmd::NEWS)--------->Server-----(SNewsCmd)--->client:
-class CSyncCmd : public UserCmd {
+class CSyncCmd final : public UserCmd {
 public:
    enum Api { NEWS, SYNC, SYNC_FULL, SYNC_CLOCK};
 
@@ -813,9 +814,9 @@ public:
    int client_handle() const { return client_handle_;}
 
    void set_client_handle(int client_handle) override { client_handle_ = client_handle;} // used by group_cmd
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_short(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   std::string print_short() const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
    int timeout() const override;
 
@@ -849,7 +850,7 @@ private:
    }
 };
 
-class ClientHandleCmd : public UserCmd {
+class ClientHandleCmd final : public UserCmd {
 public:
    enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD , SUITES };
 
@@ -889,8 +890,8 @@ public:
    const std::string& drop_user() const { return drop_user_;}
 
    bool cmd_updates_defs() const override;
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override;
@@ -941,7 +942,7 @@ private:
 // This is used in *testing* only, so that we can compare/test/verify
 // job generation with the old version.
 // if absNodepath is empty we will generate jobs for all tasks
-class CtsNodeCmd : public UserCmd {
+class CtsNodeCmd final : public UserCmd {
 public:
    enum Api { NO_CMD, JOB_GEN, CHECK_JOB_GEN_ONLY, GET, WHY, GET_STATE, MIGRATE };
    CtsNodeCmd(Api a, const std::string& absNodePath) : api_(a),absNodePath_(absNodePath) {}
@@ -951,8 +952,8 @@ public:
    Api api() const { return api_;}
    const std::string& absNodePath() const { return absNodePath_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    PrintStyle::Type_t show_style() const override;
@@ -987,7 +988,7 @@ private:
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
-class DeleteCmd : public UserCmd {
+class DeleteCmd final : public UserCmd {
 public:
    explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false)
       : group_cmd_(nullptr),paths_(paths),force_(force){}
@@ -997,9 +998,9 @@ public:
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
 
    bool equals(ClientToServerCmd*) const override;
    bool isWrite() const override { return true;}
@@ -1037,7 +1038,7 @@ private:
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
-class PathsCmd : public UserCmd {
+class PathsCmd final : public UserCmd {
 public:
    enum Api { NO_CMD, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
 
@@ -1052,10 +1053,10 @@ public:
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_short(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   void print(std::string&) const override;
+   std::string print_short() const override;
+   void print_only(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
 
    bool equals(ClientToServerCmd*) const override;
    bool isWrite() const override;
@@ -1070,8 +1071,8 @@ private:
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
 
-   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
-   std::ostream& my_print_only(std::ostream& os, const std::vector<std::string>& paths) const;
+   void my_print(std::string& os, const std::vector<std::string>& paths) const;
+   void my_print_only(std::string& os, const std::vector<std::string>& paths) const;
 
 private:
    Api api_{NO_CMD};
@@ -1095,7 +1096,7 @@ private:
 /// Client---(LogCmd)---->Server-----(SStringCmd)--->client:
 /// When doHandleRequest is called in the server it will return SStringCmd
 /// The SStringCmd is used to transport the log file contents to the client
-class LogCmd : public UserCmd {
+class LogCmd final : public UserCmd {
 public:
    enum LogApi { GET, CLEAR, FLUSH, NEW , PATH };
    explicit LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
@@ -1106,8 +1107,8 @@ public:
    int get_last_n_lines() const { return get_last_n_lines_;}
    const std::string& new_path() const { return new_path_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    bool isWrite() const override;
@@ -1138,15 +1139,15 @@ private:
 };
 
 /// Simply writes the message to the log file
-class LogMessageCmd : public UserCmd {
+class LogMessageCmd final : public UserCmd {
 public:
    explicit LogMessageCmd(const std::string& msg) : msg_(msg) {}
    LogMessageCmd() = default;
 
    const std::string& msg() const { return msg_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1172,7 +1173,7 @@ private:
 
 
 // class Begin:  if suiteName is empty we will begin all suites
-class BeginCmd : public UserCmd {
+class BeginCmd final : public UserCmd {
 public:
    explicit BeginCmd(const std::string& suiteName, bool force = false);
    BeginCmd()= default;
@@ -1183,8 +1184,8 @@ public:
    int timeout() const override { return 80; }
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1212,7 +1213,7 @@ private:
    }
 };
 
-class ZombieCmd : public UserCmd {
+class ZombieCmd final : public UserCmd {
 public:
    ZombieCmd(ecf::User::Action uc, const std::vector<std::string>& paths, const std::string& process_id, const std::string& password)
    : user_action_(uc), process_id_(process_id), password_(password),paths_(paths) {}
@@ -1222,8 +1223,8 @@ public:
    const std::string& process_or_remote_id() const { return process_id_;}
    const std::string& password() const { return password_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override;
@@ -1253,7 +1254,7 @@ private:
    }
 };
 
-class RequeueNodeCmd : public UserCmd {
+class RequeueNodeCmd final : public UserCmd {
 public:
    enum Option { NO_OPTION, ABORT, FORCE };
 
@@ -1269,9 +1270,9 @@ public:
    Option option() const { return option_;}
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1301,7 +1302,7 @@ private:
    }
 };
 
-class OrderNodeCmd : public UserCmd {
+class OrderNodeCmd final : public UserCmd {
 public:
    OrderNodeCmd(const std::string& absNodepath, NOrder::Order op)
    : absNodepath_(absNodepath), option_(op) {}
@@ -1311,8 +1312,8 @@ public:
    NOrder::Order option() const { return option_;}
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1343,7 +1344,7 @@ private:
 
 
 // The absNodepath must be provided
-class RunNodeCmd : public UserCmd {
+class RunNodeCmd final : public UserCmd {
 public:
    RunNodeCmd(const std::string& absNodepath, bool force, bool test = false)
    : paths_(std::vector<std::string>(1,absNodepath)), force_(force), test_(test) {}
@@ -1357,9 +1358,9 @@ public:
    bool force() const { return force_;}
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1394,7 +1395,7 @@ private:
 // Does Nothing in the server, however allows client code to display the
 // returned Defs in different showStyles
 // This class has no need for persistence, i.e client side only
-class ShowCmd : public UserCmd {
+class ShowCmd final : public UserCmd {
 public:
    explicit ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS) : style_(s) {}
 
@@ -1402,8 +1403,8 @@ public:
    bool show_cmd() const override { return true ;}
    PrintStyle::Type_t show_style() const override { return style_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1434,7 +1435,7 @@ private:
 // Will *load* the suites, into the server.
 // Additionally the server will try to resolve extern's. The extern are references
 // to Node, events, meters, limits, variables defined on another suite.
-class LoadDefsCmd : public UserCmd {
+class LoadDefsCmd final : public UserCmd {
 public:
    explicit LoadDefsCmd(const defs_ptr& defs, bool force = false);
    explicit LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
@@ -1447,8 +1448,8 @@ public:
 
    bool isWrite() const override { return true; }
    int timeout() const override { return time_out_for_load_sync_and_get(); }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1479,7 +1480,7 @@ private:
    }
 };
 
-class ReplaceNodeCmd : public UserCmd {
+class ReplaceNodeCmd final : public UserCmd {
 public:
    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force );
    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force);
@@ -1493,8 +1494,8 @@ public:
 
    bool isWrite() const override { return true; }
    int timeout() const override { return 300; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1537,7 +1538,7 @@ private:
 // setRepeatToLastValue set, only make sense when used with recursive.
 // stateOrEvent, string is one of:
 // < unknown | suspended | complete | queued | submitted | active | aborted | clear | set >
-class ForceCmd : public UserCmd {
+class ForceCmd final : public UserCmd {
 public:
    ForceCmd(const std::vector<std::string>& paths,
             const std::string& stateOrEvent,
@@ -1560,10 +1561,10 @@ public:
    bool setRepeatToLastValue() const { return setRepeatToLastValue_;}
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_short(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   void print(std::string&) const override;
+   std::string print_short() const override;
+   void print_only(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1579,8 +1580,8 @@ private:
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
-   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
-   std::ostream& my_print_only(std::ostream& os, const std::vector<std::string>& paths) const;
+   void my_print(std::string& os, const std::vector<std::string>& paths) const;
+   void my_print_only(std::string& os, const std::vector<std::string>& paths) const;
 
 private:
    std::vector<std::string> paths_;
@@ -1601,7 +1602,7 @@ private:
 };
 
 // Free Dependencies
-class FreeDepCmd : public UserCmd {
+class FreeDepCmd final : public UserCmd {
 public:
    explicit FreeDepCmd(const std::vector<std::string>& paths,
             bool trigger = true,
@@ -1629,9 +1630,9 @@ public:
    bool time() const    { return time_;}
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1667,7 +1668,7 @@ private:
    }
 };
 
-class AlterCmd : public UserCmd {
+class AlterCmd final : public UserCmd {
 public:
    enum Delete_attr_type  { DEL_VARIABLE, DEL_TIME, DEL_TODAY, DEL_DATE, DEL_DAY,
       DEL_CRON, DEL_EVENT, DEL_METER, DEL_LABEL,
@@ -1675,7 +1676,7 @@ public:
       DEL_INLIMIT, DEL_ZOMBIE, DELETE_ATTR_ND, DEL_LATE, DEL_QUEUE, DEL_GENERIC };
 
    enum Change_attr_type  { VARIABLE, CLOCK_TYPE, CLOCK_DATE, CLOCK_GAIN,  EVENT, METER, LABEL,
-      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE };
+      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE, TIME, TODAY };
 
    enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE, ADD_LIMIT, ADD_INLIMIT, ADD_LABEL };
 
@@ -1726,9 +1727,9 @@ public:
    bool flag() const { return flag_;}
 
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print(std::ostream& os, const std::string& path) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print(std::string& os, const std::string& path) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1745,7 +1746,7 @@ private:
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
-   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
+   void my_print(std::string& os, const std::vector<std::string>& paths) const;
 
    Add_attr_type get_add_attr_type(const std::string&) const;
    void createAdd(    Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
@@ -1800,7 +1801,7 @@ private:
 // Paired with SStringCmd
 // Client---(CFileCmd)---->Server-----(SStringCmd)--->client:
 //================================================================================
-class CFileCmd : public UserCmd {
+class CFileCmd final : public UserCmd {
 public:
    enum File_t { ECF, JOB, JOBOUT, MANUAL, KILL, STAT };
    CFileCmd(const std::string& pathToNode, File_t file, size_t max_lines)
@@ -1817,8 +1818,8 @@ public:
    static std::string toString(File_t);
 
    bool handleRequestIsTestable() const override { return false ;}
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1852,7 +1853,7 @@ private:
 // Paired with SStringCmd
 // Client---(EditScriptCmd)---->Server-----(SStringCmd)--->client:
 //================================================================================
-class EditScriptCmd : public UserCmd {
+class EditScriptCmd final : public UserCmd {
 public:
    enum EditType { EDIT, PREPROCESS, SUBMIT,  PREPROCESS_USER_FILE, SUBMIT_USER_FILE  };
    EditScriptCmd(const std::string& path_to_node,EditType et) // EDIT or PREPROCESS
@@ -1887,8 +1888,8 @@ public:
 
    bool handleRequestIsTestable() const override { return false ;}
    bool isWrite() const override;
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1926,7 +1927,7 @@ private:
    }
 };
 
-class PlugCmd : public UserCmd {
+class PlugCmd final : public UserCmd {
 public:
    PlugCmd(const std::string& source, const std::string& dest) : source_(source), dest_(dest) {}
    PlugCmd() = default;
@@ -1938,8 +1939,8 @@ public:
    int timeout() const override { return 120; }
    bool handleRequestIsTestable() const override { return false ;}
    bool isWrite() const override { return true; }
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1967,7 +1968,7 @@ private:
    }
 };
 
-class MoveCmd : public UserCmd {
+class MoveCmd final : public UserCmd {
 public:
    MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src, const std::string& dest);
    MoveCmd();
@@ -1980,7 +1981,7 @@ public:
    bool handleRequestIsTestable() const override { return false ;}
    bool isWrite() const override { return true; }
 
-   std::ostream& print(std::ostream& os) const override;
+   void print(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -2016,7 +2017,7 @@ private:
    }
 };
 
-class QueryCmd : public UserCmd {
+class QueryCmd final : public UserCmd {
 public:
    QueryCmd(const std::string& query_type,
             const std::string& path_to_attribute,
@@ -2031,8 +2032,8 @@ public:
    const std::string& attribute() const { return attribute_; }
    const std::string& path_to_task() const { return  path_to_task_;}
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_only(std::ostream& os) const override;
+   void print(std::string&) const override;
+   void print_only(std::string&) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -2076,7 +2077,7 @@ private:
 // all the results are returned back to the client, HOWEVER when client calls
 // Cmd::defs() | Cmd::get_string() only the first data is returned.
 //
-class GroupCTSCmd : public UserCmd {
+class GroupCTSCmd final : public UserCmd {
 public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
    explicit GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}
@@ -2094,8 +2095,8 @@ public:
 
    void set_client_handle(int client_handle) const; // used in group sync with client register
 
-   std::ostream& print(std::ostream& os) const override;
-   std::ostream& print_short(std::ostream& os) const override;
+   void print(std::string&) const override;
+   std::string print_short() const override;
    bool equals(ClientToServerCmd*) const override;
 
    void addChild(Cmd_ptr childCmd);
@@ -2107,7 +2108,7 @@ public:
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const override;
 
-   void add_edit_history(AbstractServer*) const override;
+   void add_edit_history(Defs*) const override;
 
 private:
    static const char* arg();  // used for argument parsing

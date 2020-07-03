@@ -12,6 +12,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+# file deepcode ignore MissingCloseOnSomePath: <comment the reason here>
 
 import sys, os, pwd, getopt
 sys.path.append('/home/ma/emos/def/o/def')
@@ -128,7 +129,7 @@ class Client(object):
      
     def __exit__(self,ex_type,value,tb):
       print "Client:__exit__: ex_type:" + str(ex_type) + " value:" + str(value) + "\\\n" + str(tb)
-      if ex_type != None:
+      if ex_type is not None:
          self.ci.child_abort("Aborted with exception type " + str(ex_type) + ":" + str(value))
          return False
       self.ci.child_complete()
@@ -639,7 +640,7 @@ esac
 
 def create_de():
     try:    os.stat(wdir + "/de")
-    except: os.mkdir(wdir + "/de")       
+    except: os.makedirs(wdir + "/de")       
     task = open(wdir + "/de/setup.ecf", 'w')
     print('''#!/bin/ksh
 %include <head.h>

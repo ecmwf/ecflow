@@ -12,6 +12,7 @@
 //
 // Description : Simple singleton implementation of log
 //============================================================================
+#include <stdexcept>
 #include <cassert>
 #include <vector>
 #include <iostream>
@@ -124,10 +125,7 @@ void Log::cache_time_stamp()
 
 const std::string& Log::get_cached_time_stamp() const
 {
-   if (!logImpl_)  {
-      return Str::EMPTY();
-   }
-   return logImpl_->get_cached_time_stamp();
+   return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
 }
 
 void Log::flush()
@@ -316,6 +314,23 @@ LogFlusher::~LogFlusher()
    if ( the_log ) {
       the_log->flush_only(); // flush without closing log file.
    }
+}
+
+
+//======================================================================================================
+
+TestLog::TestLog(const std::string& log_path) : log_path_(log_path)
+{
+   Log::create(log_path);
+}
+
+TestLog::~TestLog() {
+
+	// Remove the log file. Comment out for debugging
+	fs::remove(log_path_);
+
+	// Explicitly destroy log. To keep valgrind happy
+	Log::destroy();
 }
 
 //======================================================================================================

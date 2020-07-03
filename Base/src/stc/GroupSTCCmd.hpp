@@ -17,13 +17,13 @@
 
 #include "ServerToClientCmd.hpp"
 
-class GroupSTCCmd : public ServerToClientCmd {
+class GroupSTCCmd final : public ServerToClientCmd {
 public:
 	GroupSTCCmd() : ServerToClientCmd() {}
 
    void cleanup() override;    /// After the command has run this function can be used to reclaim memory
 
- 	std::ostream& print(std::ostream& os) const override;
+ 	std::string print() const override;
   	bool equals(ServerToClientCmd*) const override;
   	bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 

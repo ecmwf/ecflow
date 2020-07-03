@@ -9,9 +9,9 @@
 
 #include "Spline.hpp"
 
+#include <cassert>
 #include <cmath>
 #include <cstddef>
-#include "assert.h"
 
 Spline::Spline(const std::vector<double>& x,
               const std::vector<double>& y) : xp_(x), yp_(y)

@@ -509,6 +509,7 @@ static bool s0_update_repeat(defs_ptr defs) {
 BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
 {
    cout << "Base:: ...test_ssync_using_handle\n";
+   TestLog test_log("test_ssync_using_handle.log"); // will create log file, and destroy log and remove file at end of scope
 
    // =======================================================================================
    // Note: where we update Suite::modify_change_no()  we should *EXPECT* a full sync
@@ -587,6 +588,8 @@ BOOST_AUTO_TEST_CASE( test_ssync_full_sync_using_handle  )
    /// This is important since the NewsCmd must be in *SYNC* with SYNCCmd
 
    cout << "Base:: ...test_ssync_full_sync_using_handle\n";
+   TestLog test_log("test_ssync_full_sync_using_handle.log"); // will create log file, and destroy log and remove file at end of scope
+
    // Create the server defs with some changes, in state & modify numbers
    defs_ptr server_defs = create_the_server_defs();
 

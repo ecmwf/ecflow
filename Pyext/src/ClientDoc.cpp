@@ -995,7 +995,7 @@ const char* ClientDoc::alter(){
             "      string attr_type          : This varies according to the 'alter_type'. valid strings are:\n"
             "         add    : [ variable,time,today,date,day,label,zombie,late]\n"
             "         delete : [ variable,time,today,date,day,label,cron,event,meter,trigger,complete,repeat,limit,inlimit,limit_path,zombie,late]\n"
-            "         change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value,late]\n"
+            "         change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value,late,time,today]\n"
             "         set_flag and clear_flag:\n"
             "                  [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | statuscmd_failed | killcmd_failed |\n"
             "                    no_script | killed | status | late | message | complete | queue_limit | task_waiting | locked | zombie ]\n"

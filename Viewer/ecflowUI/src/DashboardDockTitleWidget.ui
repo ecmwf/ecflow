@@ -179,18 +179,6 @@
    </item>
    <item>
     <widget class="QToolButton" name="closeTb_">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16</width>
-       <height>16</height>
-      </size>
-     </property>
      <property name="toolTip">
       <string>Close panel</string>
      </property>
@@ -199,7 +187,7 @@
      </property>
      <property name="icon">
       <iconset resource="viewer.qrc">
-       <normaloff>:/viewer/images/dock_close.svg</normaloff>:/viewer/images/dock_close.svg</iconset>
+       <normaloff>:/viewer/dock_close.svg</normaloff>:/viewer/dock_close.svg</iconset>
      </property>
      <property name="iconSize">
       <size>

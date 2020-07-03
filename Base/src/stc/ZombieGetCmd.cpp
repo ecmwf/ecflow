@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
+#include <boost/lexical_cast.hpp>
 #include "ZombieGetCmd.hpp"
 #include "AbstractServer.hpp"
 
@@ -38,9 +39,12 @@ bool ZombieGetCmd::equals(ServerToClientCmd* rhs) const
 	return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& ZombieGetCmd::print(std::ostream& os) const
+std::string ZombieGetCmd::print() const
 {
-	os << "cmd:ZombieGetCmd [ " << zombies_.size() << " ]";
+	string os;
+	os += "cmd:ZombieGetCmd [ ";
+	os += boost::lexical_cast<std::string>(zombies_.size());
+	os += " ]";
 	return os;
 }
 
@@ -63,4 +67,4 @@ bool ZombieGetCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr ct
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const ZombieGetCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ZombieGetCmd& c) { os << c.print(); return os; }

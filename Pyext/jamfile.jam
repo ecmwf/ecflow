@@ -247,6 +247,7 @@ run-test test_defs_constructor : ecflow [ glob test/py_u_test_defs_constructor.p
 run-test test_cron             : ecflow [ glob test/py_u_test_cron.py ] ;
 run-test test_late             : ecflow [ glob test/py_u_test_late.py ] ;
 run-test test                  : ecflow [ glob test/py_u_test.py ] ;
+run-test sort                  : ecflow [ glob test/py_u_sort.py ] ;
 
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
@@ -255,7 +256,7 @@ alias test-all
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable  TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  test_collection 
-    test_add test_tutorial test_manual test_get_attr test_replace_node test_defs_constructor test_cron test_late test
+    test_add test_tutorial test_manual test_get_attr test_replace_node test_defs_constructor test_cron test_late test sort
     # test_embed test_embed_ecf 
     ;
    
@@ -265,7 +266,7 @@ explicit test-all
     TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
     TestDerivable TestMigrate TestRemove TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     TestClientApi TestPythonChildApi TestFlag TestCopy TestAutoAddExtern  test_collection 
-    test_add test_tutorial test_manual test_get_attr test_replace_node test_defs_constructor test_cron test_late test
+    test_add test_tutorial test_manual test_get_attr test_replace_node test_defs_constructor test_cron test_late test sort
     # test_embed test_embed_ecf 
     ;
  

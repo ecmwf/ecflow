@@ -1,0 +1,860 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="566" onload="init(evt)" viewBox="0 0 1200 566" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+	}
+
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom();
+			zoom(target);
+		}
+		else if (e.target.id == "unzoom") unzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+	}, false)
+
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+		return;
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		// Fit in full text width
+		if (/^ *$/.test(txt) || t.getSubStringLength(0, txt.length) < w)
+			return;
+
+		for (var x = txt.length - 2; x > 0; x--) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom() {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			update_text(el[i]);
+		}
+		search();
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) {
+				currentSearchTerm = term;
+				search();
+			}
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (currentSearchTerm === null) return;
+		var term = currentSearchTerm;
+
+		var re = new RegExp(term, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="566.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="549" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="549" > </text>
+<g id="frames">
+<g >
+<title>[unknown] (3 samples, 9.68%)</title><rect x="200.3" y="485" width="114.2" height="15.0" fill="rgb(206,135,49)" rx="2" ry="2" />
+<text  x="203.32" y="495.5" >[unknown]</text>
+</g>
+<g >
+<title>Node::variable_substitution (1 samples, 3.23%)</title><rect x="1037.7" y="261" width="38.1" height="15.0" fill="rgb(227,13,35)" rx="2" ry="2" />
+<text  x="1040.74" y="271.5" >Nod..</text>
+</g>
+<g >
+<title>Submittable::script_based_job_submission (17 samples, 54.84%)</title><rect x="428.7" y="309" width="647.1" height="15.0" fill="rgb(245,83,7)" rx="2" ry="2" />
+<text  x="431.71" y="319.5" >Submittable::script_based_job_submission</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_line (1 samples, 3.23%)</title><rect x="390.6" y="229" width="38.1" height="15.0" fill="rgb(226,195,38)" rx="2" ry="2" />
+<text  x="393.65" y="239.5" >Pre..</text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::basic_string (1 samples, 3.23%)</title><rect x="885.5" y="53" width="38.0" height="15.0" fill="rgb(223,91,34)" rx="2" ry="2" />
+<text  x="888.48" y="63.5" >std..</text>
+</g>
+<g >
+<title>std::__uninitialized_move_if_noexcept_a&lt;int*, int*, std::allocator&lt;int&gt; &gt; (1 samples, 3.23%)</title><rect x="352.6" y="165" width="38.0" height="15.0" fill="rgb(232,211,39)" rx="2" ry="2" />
+<text  x="355.58" y="175.5" >std..</text>
+</g>
+<g >
+<title>Submittable::submit_job_only (17 samples, 54.84%)</title><rect x="428.7" y="325" width="647.1" height="15.0" fill="rgb(245,95,42)" rx="2" ry="2" />
+<text  x="431.71" y="335.5" >Submittable::submit_job_only</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="325" width="190.3" height="15.0" fill="rgb(222,179,51)" rx="2" ry="2" />
+<text  x="13.00" y="335.5" >[unknown]</text>
+</g>
+<g >
+<title>NodeContainer::resolveDependencies (19 samples, 61.29%)</title><rect x="352.6" y="357" width="723.2" height="15.0" fill="rgb(253,49,27)" rx="2" ry="2" />
+<text  x="355.58" y="367.5" >NodeContainer::resolveDependencies</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_line (8 samples, 25.81%)</title><rect x="657.1" y="213" width="304.5" height="15.0" fill="rgb(225,209,5)" rx="2" ry="2" />
+<text  x="660.10" y="223.5" >PreProcessor::preProcess_line</text>
+</g>
+<g >
+<title>memchr (1 samples, 3.23%)</title><rect x="276.5" y="469" width="38.0" height="15.0" fill="rgb(251,3,22)" rx="2" ry="2" />
+<text  x="279.45" y="479.5" >mem..</text>
+</g>
+<g >
+<title>Family::resolveDependencies (1 samples, 3.23%)</title><rect x="352.6" y="309" width="38.0" height="15.0" fill="rgb(217,38,53)" rx="2" ry="2" />
+<text  x="355.58" y="319.5" >Fam..</text>
+</g>
+<g >
+<title>std::_Destroy&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; (1 samples, 3.23%)</title><rect x="923.5" y="165" width="38.1" height="15.0" fill="rgb(217,108,16)" rx="2" ry="2" />
+<text  x="926.55" y="175.5" >std..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess (8 samples, 25.81%)</title><rect x="657.1" y="229" width="304.5" height="15.0" fill="rgb(215,53,0)" rx="2" ry="2" />
+<text  x="660.10" y="239.5" >PreProcessor::preProcess</text>
+</g>
+<g >
+<title>std::__uninitialized_copy_a&lt;std::move_iterator&lt;int*&gt;, int*, int&gt; (1 samples, 3.23%)</title><rect x="352.6" y="149" width="38.0" height="15.0" fill="rgb(249,82,26)" rx="2" ry="2" />
+<text  x="355.58" y="159.5" >std..</text>
+</g>
+<g >
+<title>Task::resolveDependencies (1 samples, 3.23%)</title><rect x="390.6" y="309" width="38.1" height="15.0" fill="rgb(213,146,24)" rx="2" ry="2" />
+<text  x="393.65" y="319.5" >Tas..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_line (1 samples, 3.23%)</title><rect x="885.5" y="165" width="38.0" height="15.0" fill="rgb(239,64,54)" rx="2" ry="2" />
+<text  x="888.48" y="175.5" >Pre..</text>
+</g>
+<g >
+<title>SubGenVariables::findGenVariable (1 samples, 3.23%)</title><rect x="504.8" y="197" width="38.1" height="15.0" fill="rgb(254,107,5)" rx="2" ry="2" />
+<text  x="507.84" y="207.5" >Sub..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="485" width="190.3" height="15.0" fill="rgb(253,66,0)" rx="2" ry="2" />
+<text  x="13.00" y="495.5" >[unknown]</text>
+</g>
+<g >
+<title>std::_Destroy&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*&gt; (1 samples, 3.23%)</title><rect x="923.5" y="149" width="38.1" height="15.0" fill="rgb(235,86,20)" rx="2" ry="2" />
+<text  x="926.55" y="159.5" >std..</text>
+</g>
+<g >
+<title>std::__shared_ptr_access&lt;IncludeFileCache,  (1 samples, 3.23%)</title><rect x="771.3" y="165" width="38.1" height="15.0" fill="rgb(206,87,9)" rx="2" ry="2" />
+<text  x="774.29" y="175.5" >std..</text>
+</g>
+<g >
+<title>__memcmp_sse4_1 (1 samples, 3.23%)</title><rect x="733.2" y="133" width="38.1" height="15.0" fill="rgb(236,7,47)" rx="2" ry="2" />
+<text  x="736.23" y="143.5" >__m..</text>
+</g>
+<g >
+<title>std::vector&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt;::_M_erase_at_end (1 samples, 3.23%)</title><rect x="999.7" y="245" width="38.0" height="15.0" fill="rgb(219,225,14)" rx="2" ry="2" />
+<text  x="1002.68" y="255.5" >std..</text>
+</g>
+<g >
+<title>std::vector&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt;::~vector (1 samples, 3.23%)</title><rect x="923.5" y="181" width="38.1" height="15.0" fill="rgb(213,182,6)" rx="2" ry="2" />
+<text  x="926.55" y="191.5" >std..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="373" width="190.3" height="15.0" fill="rgb(227,125,2)" rx="2" ry="2" />
+<text  x="13.00" y="383.5" >[unknown]</text>
+</g>
+<g >
+<title>Family::resolveDependencies (19 samples, 61.29%)</title><rect x="352.6" y="373" width="723.2" height="15.0" fill="rgb(238,211,32)" rx="2" ry="2" />
+<text  x="355.58" y="383.5" >Family::resolveDependencies</text>
+</g>
+<g >
+<title>std::vector&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt;::end (1 samples, 3.23%)</title><rect x="466.8" y="261" width="38.0" height="15.0" fill="rgb(211,125,40)" rx="2" ry="2" />
+<text  x="469.77" y="271.5" >std..</text>
+</g>
+<g >
+<title>EcfFile::open_include_file (1 samples, 3.23%)</title><rect x="619.0" y="213" width="38.1" height="15.0" fill="rgb(213,65,0)" rx="2" ry="2" />
+<text  x="622.03" y="223.5" >Ecf..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="389" width="190.3" height="15.0" fill="rgb(251,215,41)" rx="2" ry="2" />
+<text  x="13.00" y="399.5" >[unknown]</text>
+</g>
+<g >
+<title>std::uninitialized_copy&lt;std::move_iterator&lt;int*&gt;, int*&gt; (1 samples, 3.23%)</title><rect x="352.6" y="133" width="38.0" height="15.0" fill="rgb(212,165,2)" rx="2" ry="2" />
+<text  x="355.58" y="143.5" >std..</text>
+</g>
+<g >
+<title>std::vector&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, bool&gt;, std::allocator&lt;std::pair&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, bool&gt; &gt; &gt;::operator[] (1 samples, 3.23%)</title><rect x="847.4" y="165" width="38.1" height="15.0" fill="rgb(254,196,3)" rx="2" ry="2" />
+<text  x="850.42" y="175.5" >std..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess (1 samples, 3.23%)</title><rect x="390.6" y="245" width="38.1" height="15.0" fill="rgb(251,64,31)" rx="2" ry="2" />
+<text  x="393.65" y="255.5" >Pre..</text>
+</g>
+<g >
+<title>[unknown] (1 samples, 3.23%)</title><rect x="162.3" y="309" width="38.0" height="15.0" fill="rgb(239,3,5)" rx="2" ry="2" />
+<text  x="165.26" y="319.5" >[un..</text>
+</g>
+<g >
+<title>std::vector&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt;::push_back (1 samples, 3.23%)</title><rect x="885.5" y="85" width="38.0" height="15.0" fill="rgb(230,10,3)" rx="2" ry="2" />
+<text  x="888.48" y="95.5" >std..</text>
+</g>
+<g >
+<title>Submittable::script_based_job_submission (1 samples, 3.23%)</title><rect x="390.6" y="277" width="38.1" height="15.0" fill="rgb(245,120,0)" rx="2" ry="2" />
+<text  x="393.65" y="287.5" >Sub..</text>
+</g>
+<g >
+<title>NodeContainer::resolveDependencies (1 samples, 3.23%)</title><rect x="352.6" y="293" width="38.0" height="15.0" fill="rgb(217,34,4)" rx="2" ry="2" />
+<text  x="355.58" y="303.5" >Nod..</text>
+</g>
+<g >
+<title>main (19 samples, 61.29%)</title><rect x="352.6" y="469" width="723.2" height="15.0" fill="rgb(243,124,28)" rx="2" ry="2" />
+<text  x="355.58" y="479.5" >main</text>
+</g>
+<g >
+<title>EcfFile::open_script_file (4 samples, 12.90%)</title><rect x="657.1" y="181" width="152.3" height="15.0" fill="rgb(222,133,10)" rx="2" ry="2" />
+<text  x="660.10" y="191.5" >EcfFile::open_scrip..</text>
+</g>
+<g >
+<title>Node::variableSubsitution (1 samples, 3.23%)</title><rect x="1037.7" y="277" width="38.1" height="15.0" fill="rgb(213,52,31)" rx="2" ry="2" />
+<text  x="1040.74" y="287.5" >Nod..</text>
+</g>
+<g >
+<title>Jobs::generate (19 samples, 61.29%)</title><rect x="352.6" y="453" width="723.2" height="15.0" fill="rgb(232,121,5)" rx="2" ry="2" />
+<text  x="355.58" y="463.5" >Jobs::generate</text>
+</g>
+<g >
+<title>IncludeFileCache::lines (1 samples, 3.23%)</title><rect x="885.5" y="101" width="38.0" height="15.0" fill="rgb(218,228,12)" rx="2" ry="2" />
+<text  x="888.48" y="111.5" >Inc..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="405" width="190.3" height="15.0" fill="rgb(239,229,19)" rx="2" ry="2" />
+<text  x="13.00" y="415.5" >[unknown]</text>
+</g>
+<g >
+<title>NodeContainer::resolveDependencies (2 samples, 6.45%)</title><rect x="352.6" y="325" width="76.1" height="15.0" fill="rgb(253,130,52)" rx="2" ry="2" />
+<text  x="355.58" y="335.5" >NodeCont..</text>
+</g>
+<g >
+<title>Submittable::script_based_job_submission (1 samples, 3.23%)</title><rect x="352.6" y="245" width="38.0" height="15.0" fill="rgb(221,60,30)" rx="2" ry="2" />
+<text  x="355.58" y="255.5" >Sub..</text>
+</g>
+<g >
+<title>Node::findVariableValue (2 samples, 6.45%)</title><rect x="542.9" y="229" width="76.1" height="15.0" fill="rgb(212,135,14)" rx="2" ry="2" />
+<text  x="545.90" y="239.5" >Node::fi..</text>
+</g>
+<g >
+<title>Submittable::createChildProcess (1 samples, 3.23%)</title><rect x="1037.7" y="293" width="38.1" height="15.0" fill="rgb(206,106,8)" rx="2" ry="2" />
+<text  x="1040.74" y="303.5" >Sub..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_includes (9 samples, 29.03%)</title><rect x="619.0" y="245" width="342.6" height="15.0" fill="rgb(239,133,43)" rx="2" ry="2" />
+<text  x="622.03" y="255.5" >PreProcessor::preProcess_includes</text>
+</g>
+<g >
+<title>EcfFile::create_job[abi:cxx11] (15 samples, 48.39%)</title><rect x="428.7" y="293" width="571.0" height="15.0" fill="rgb(226,125,42)" rx="2" ry="2" />
+<text  x="431.71" y="303.5" >EcfFile::create_job[abi:cxx11]</text>
+</g>
+<g >
+<title>std::operator==&lt;char&gt; (2 samples, 6.45%)</title><rect x="695.2" y="149" width="76.1" height="15.0" fill="rgb(247,74,47)" rx="2" ry="2" />
+<text  x="698.16" y="159.5" >std::ope..</text>
+</g>
+<g >
+<title>EcfFile::file_exists (1 samples, 3.23%)</title><rect x="809.4" y="165" width="38.0" height="15.0" fill="rgb(222,17,5)" rx="2" ry="2" />
+<text  x="812.35" y="175.5" >Ecf..</text>
+</g>
+<g >
+<title>EcfFile::operator= (1 samples, 3.23%)</title><rect x="999.7" y="277" width="38.0" height="15.0" fill="rgb(242,8,28)" rx="2" ry="2" />
+<text  x="1002.68" y="287.5" >Ecf..</text>
+</g>
+<g >
+<title>Node::findGenVariableValue (1 samples, 3.23%)</title><rect x="504.8" y="229" width="38.1" height="15.0" fill="rgb(235,33,19)" rx="2" ry="2" />
+<text  x="507.84" y="239.5" >Nod..</text>
+</g>
+<g >
+<title>JobsParam::set_ecf_file (1 samples, 3.23%)</title><rect x="999.7" y="293" width="38.0" height="15.0" fill="rgb(205,145,50)" rx="2" ry="2" />
+<text  x="1002.68" y="303.5" >Job..</text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::_M_replace (2 samples, 6.45%)</title><rect x="1113.9" y="485" width="76.1" height="15.0" fill="rgb(247,126,9)" rx="2" ry="2" />
+<text  x="1116.87" y="495.5" >std::__c..</text>
+</g>
+<g >
+<title>Submittable::submit_job_only (1 samples, 3.23%)</title><rect x="390.6" y="293" width="38.1" height="15.0" fill="rgb(235,78,34)" rx="2" ry="2" />
+<text  x="393.65" y="303.5" >Sub..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_includes (1 samples, 3.23%)</title><rect x="885.5" y="149" width="38.0" height="15.0" fill="rgb(238,99,21)" rx="2" ry="2" />
+<text  x="888.48" y="159.5" >Pre..</text>
+</g>
+<g >
+<title>std::copy&lt;std::move_iterator&lt;int*&gt;, int*&gt; (1 samples, 3.23%)</title><rect x="352.6" y="101" width="38.0" height="15.0" fill="rgb(247,98,53)" rx="2" ry="2" />
+<text  x="355.58" y="111.5" >std..</text>
+</g>
+<g >
+<title>std::_Destroy&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; (1 samples, 3.23%)</title><rect x="999.7" y="229" width="38.0" height="15.0" fill="rgb(231,69,35)" rx="2" ry="2" />
+<text  x="1002.68" y="239.5" >std..</text>
+</g>
+<g >
+<title>[unknown] (1 samples, 3.23%)</title><rect x="200.3" y="453" width="38.1" height="15.0" fill="rgb(248,58,10)" rx="2" ry="2" />
+<text  x="203.32" y="463.5" >[un..</text>
+</g>
+<g >
+<title>memchr (1 samples, 3.23%)</title><rect x="1075.8" y="485" width="38.1" height="15.0" fill="rgb(218,171,35)" rx="2" ry="2" />
+<text  x="1078.81" y="495.5" >mem..</text>
+</g>
+<g >
+<title>std::allocator_traits&lt;std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt;::construct&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;&gt; (1 samples, 3.23%)</title><rect x="885.5" y="69" width="38.0" height="15.0" fill="rgb(231,217,5)" rx="2" ry="2" />
+<text  x="888.48" y="79.5" >std..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="453" width="190.3" height="15.0" fill="rgb(239,176,26)" rx="2" ry="2" />
+<text  x="13.00" y="463.5" >[unknown]</text>
+</g>
+<g >
+<title>std::_Destroy_aux&lt;false&gt;::__destroy&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*&gt; (1 samples, 3.23%)</title><rect x="999.7" y="197" width="38.0" height="15.0" fill="rgb(234,100,40)" rx="2" ry="2" />
+<text  x="1002.68" y="207.5" >std..</text>
+</g>
+<g >
+<title>EcfFile::remove_nopp_end_tokens (2 samples, 6.45%)</title><rect x="428.7" y="277" width="76.1" height="15.0" fill="rgb(239,63,38)" rx="2" ry="2" />
+<text  x="431.71" y="287.5" >EcfFile:..</text>
+</g>
+<g >
+<title>EcfFile::open_script_file (1 samples, 3.23%)</title><rect x="885.5" y="133" width="38.0" height="15.0" fill="rgb(233,145,32)" rx="2" ry="2" />
+<text  x="888.48" y="143.5" >Ecf..</text>
+</g>
+<g >
+<title>EcfFile::open_include_file (3 samples, 9.68%)</title><rect x="657.1" y="165" width="114.2" height="15.0" fill="rgb(219,123,53)" rx="2" ry="2" />
+<text  x="660.10" y="175.5" >EcfFile::open_..</text>
+</g>
+<g >
+<title>all (31 samples, 100%)</title><rect x="10.0" y="517" width="1180.0" height="15.0" fill="rgb(251,114,42)" rx="2" ry="2" />
+<text  x="13.00" y="527.5" ></text>
+</g>
+<g >
+<title>Node::variable_substitution (3 samples, 9.68%)</title><rect x="504.8" y="261" width="114.2" height="15.0" fill="rgb(245,74,1)" rx="2" ry="2" />
+<text  x="507.84" y="271.5" >Node::variable..</text>
+</g>
+<g >
+<title>EcfFile::create_job[abi:cxx11] (1 samples, 3.23%)</title><rect x="352.6" y="229" width="38.0" height="15.0" fill="rgb(239,52,31)" rx="2" ry="2" />
+<text  x="355.58" y="239.5" >Ecf..</text>
+</g>
+<g >
+<title>__dynamic_cast (1 samples, 3.23%)</title><rect x="314.5" y="485" width="38.1" height="15.0" fill="rgb(248,84,9)" rx="2" ry="2" />
+<text  x="317.52" y="495.5" >__d..</text>
+</g>
+<g >
+<title>[unknown] (1 samples, 3.23%)</title><rect x="200.3" y="437" width="38.1" height="15.0" fill="rgb(227,77,5)" rx="2" ry="2" />
+<text  x="203.32" y="447.5" >[un..</text>
+</g>
+<g >
+<title>_ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE4sizeEv@plt (1 samples, 3.23%)</title><rect x="657.1" y="149" width="38.1" height="15.0" fill="rgb(239,204,17)" rx="2" ry="2" />
+<text  x="660.10" y="159.5" >_ZN..</text>
+</g>
+<g >
+<title>Node::findVariableValue (1 samples, 3.23%)</title><rect x="390.6" y="165" width="38.1" height="15.0" fill="rgb(243,37,19)" rx="2" ry="2" />
+<text  x="393.65" y="175.5" >Nod..</text>
+</g>
+<g >
+<title>_ZdlPv@plt (1 samples, 3.23%)</title><rect x="923.5" y="117" width="38.1" height="15.0" fill="rgb(236,165,14)" rx="2" ry="2" />
+<text  x="926.55" y="127.5" >_Zd..</text>
+</g>
+<g >
+<title>std::vector&lt;int, std::allocator&lt;int&gt; &gt;::_M_realloc_insert&lt;int const&amp;&gt; (1 samples, 3.23%)</title><rect x="352.6" y="181" width="38.0" height="15.0" fill="rgb(251,133,47)" rx="2" ry="2" />
+<text  x="355.58" y="191.5" >std..</text>
+</g>
+<g >
+<title>std::__niter_base&lt;int*&gt; (1 samples, 3.23%)</title><rect x="352.6" y="85" width="38.0" height="15.0" fill="rgb(244,162,8)" rx="2" ry="2" />
+<text  x="355.58" y="95.5" >std..</text>
+</g>
+<g >
+<title>EcfFile::create_job[abi:cxx11] (1 samples, 3.23%)</title><rect x="390.6" y="261" width="38.1" height="15.0" fill="rgb(245,101,33)" rx="2" ry="2" />
+<text  x="393.65" y="271.5" >Ecf..</text>
+</g>
+<g >
+<title>Submittable::findGenVariable (1 samples, 3.23%)</title><rect x="504.8" y="213" width="38.1" height="15.0" fill="rgb(212,210,5)" rx="2" ry="2" />
+<text  x="507.84" y="223.5" >Sub..</text>
+</g>
+<g >
+<title>std::vector&lt;int, std::allocator&lt;int&gt; &gt;::push_back (1 samples, 3.23%)</title><rect x="352.6" y="197" width="38.0" height="15.0" fill="rgb(209,50,27)" rx="2" ry="2" />
+<text  x="355.58" y="207.5" >std..</text>
+</g>
+<g >
+<title>EcfFile::open_script_file (1 samples, 3.23%)</title><rect x="619.0" y="229" width="38.1" height="15.0" fill="rgb(252,167,39)" rx="2" ry="2" />
+<text  x="622.03" y="239.5" >Ecf..</text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::~basic_string (1 samples, 3.23%)</title><rect x="999.7" y="181" width="38.0" height="15.0" fill="rgb(253,138,16)" rx="2" ry="2" />
+<text  x="1002.68" y="191.5" >std..</text>
+</g>
+<g >
+<title>std::__uninitialized_copy&lt;true&gt;::__uninit_copy&lt;std::move_iterator&lt;int*&gt;, int*&gt; (1 samples, 3.23%)</title><rect x="352.6" y="117" width="38.0" height="15.0" fill="rgb(213,20,19)" rx="2" ry="2" />
+<text  x="355.58" y="127.5" >std..</text>
+</g>
+<g >
+<title>__GI___libc_write (1 samples, 3.23%)</title><rect x="200.3" y="469" width="38.1" height="15.0" fill="rgb(216,183,47)" rx="2" ry="2" />
+<text  x="203.32" y="479.5" >__G..</text>
+</g>
+<g >
+<title>NodeContainer::resolveDependencies (19 samples, 61.29%)</title><rect x="352.6" y="389" width="723.2" height="15.0" fill="rgb(222,87,4)" rx="2" ry="2" />
+<text  x="355.58" y="399.5" >NodeContainer::resolveDependencies</text>
+</g>
+<g >
+<title>perf (5 samples, 16.13%)</title><rect x="10.0" y="501" width="190.3" height="15.0" fill="rgb(249,64,49)" rx="2" ry="2" />
+<text  x="13.00" y="511.5" >perf</text>
+</g>
+<g >
+<title>Task::resolveDependencies (1 samples, 3.23%)</title><rect x="352.6" y="277" width="38.0" height="15.0" fill="rgb(212,228,48)" rx="2" ry="2" />
+<text  x="355.58" y="287.5" >Tas..</text>
+</g>
+<g >
+<title>Suite::resolveDependencies (19 samples, 61.29%)</title><rect x="352.6" y="437" width="723.2" height="15.0" fill="rgb(231,204,39)" rx="2" ry="2" />
+<text  x="355.58" y="447.5" >Suite::resolveDependencies</text>
+</g>
+<g >
+<title>__libc_start_main (19 samples, 61.29%)</title><rect x="352.6" y="485" width="723.2" height="15.0" fill="rgb(208,91,37)" rx="2" ry="2" />
+<text  x="355.58" y="495.5" >__libc_start_main</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="421" width="190.3" height="15.0" fill="rgb(229,199,52)" rx="2" ry="2" />
+<text  x="13.00" y="431.5" >[unknown]</text>
+</g>
+<g >
+<title>Family::resolveDependencies (2 samples, 6.45%)</title><rect x="352.6" y="341" width="76.1" height="15.0" fill="rgb(229,24,7)" rx="2" ry="2" />
+<text  x="355.58" y="351.5" >Family::..</text>
+</g>
+<g >
+<title>std::_Destroy_aux&lt;false&gt;::__destroy&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*&gt; (1 samples, 3.23%)</title><rect x="923.5" y="133" width="38.1" height="15.0" fill="rgb(235,192,13)" rx="2" ry="2" />
+<text  x="926.55" y="143.5" >std..</text>
+</g>
+<g >
+<title>Node::findParentUserVariableValue (1 samples, 3.23%)</title><rect x="390.6" y="181" width="38.1" height="15.0" fill="rgb(254,157,9)" rx="2" ry="2" />
+<text  x="393.65" y="191.5" >Nod..</text>
+</g>
+<g >
+<title>std::char_traits&lt;char&gt;::compare (1 samples, 3.23%)</title><rect x="504.8" y="181" width="38.1" height="15.0" fill="rgb(241,75,2)" rx="2" ry="2" />
+<text  x="507.84" y="191.5" >std..</text>
+</g>
+<g >
+<title>Task::resolveDependencies (17 samples, 54.84%)</title><rect x="428.7" y="341" width="647.1" height="15.0" fill="rgb(218,219,51)" rx="2" ry="2" />
+<text  x="431.71" y="351.5" >Task::resolveDependencies</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="357" width="190.3" height="15.0" fill="rgb(205,195,31)" rx="2" ry="2" />
+<text  x="13.00" y="367.5" >[unknown]</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_includes (8 samples, 25.81%)</title><rect x="657.1" y="197" width="304.5" height="15.0" fill="rgb(224,172,50)" rx="2" ry="2" />
+<text  x="660.10" y="207.5" >PreProcessor::preProcess_includes</text>
+</g>
+<g >
+<title>perf_job_gen (26 samples, 83.87%)</title><rect x="200.3" y="501" width="989.7" height="15.0" fill="rgb(217,145,12)" rx="2" ry="2" />
+<text  x="203.32" y="511.5" >perf_job_gen</text>
+</g>
+<g >
+<title>NodeContainer::resolveDependencies (19 samples, 61.29%)</title><rect x="352.6" y="421" width="723.2" height="15.0" fill="rgb(253,66,53)" rx="2" ry="2" />
+<text  x="355.58" y="431.5" >NodeContainer::resolveDependencies</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="469" width="190.3" height="15.0" fill="rgb(235,112,10)" rx="2" ry="2" />
+<text  x="13.00" y="479.5" >[unknown]</text>
+</g>
+<g >
+<title>EcfFile::open_include_file (1 samples, 3.23%)</title><rect x="885.5" y="117" width="38.0" height="15.0" fill="rgb(250,204,47)" rx="2" ry="2" />
+<text  x="888.48" y="127.5" >Ecf..</text>
+</g>
+<g >
+<title>std::vector&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt;::resize (1 samples, 3.23%)</title><rect x="999.7" y="261" width="38.0" height="15.0" fill="rgb(245,28,54)" rx="2" ry="2" />
+<text  x="1002.68" y="271.5" >std..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess (9 samples, 29.03%)</title><rect x="619.0" y="277" width="342.6" height="15.0" fill="rgb(223,60,18)" rx="2" ry="2" />
+<text  x="622.03" y="287.5" >PreProcessor::preProcess</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_line (9 samples, 29.03%)</title><rect x="619.0" y="261" width="342.6" height="15.0" fill="rgb(232,220,28)" rx="2" ry="2" />
+<text  x="622.03" y="271.5" >PreProcessor::preProcess_line</text>
+</g>
+<g >
+<title>Node::findParentVariableValue (3 samples, 9.68%)</title><rect x="504.8" y="245" width="114.2" height="15.0" fill="rgb(214,77,10)" rx="2" ry="2" />
+<text  x="507.84" y="255.5" >Node::findPare..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="341" width="190.3" height="15.0" fill="rgb(237,192,45)" rx="2" ry="2" />
+<text  x="13.00" y="351.5" >[unknown]</text>
+</g>
+<g >
+<title>PreProcessor::getIncludedFilePath (2 samples, 6.45%)</title><rect x="809.4" y="181" width="76.1" height="15.0" fill="rgb(223,83,9)" rx="2" ry="2" />
+<text  x="812.35" y="191.5" >PreProce..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess (1 samples, 3.23%)</title><rect x="885.5" y="181" width="38.0" height="15.0" fill="rgb(223,186,30)" rx="2" ry="2" />
+<text  x="888.48" y="191.5" >Pre..</text>
+</g>
+<g >
+<title>_int_malloc (1 samples, 3.23%)</title><rect x="238.4" y="469" width="38.1" height="15.0" fill="rgb(237,62,50)" rx="2" ry="2" />
+<text  x="241.39" y="479.5" >_in..</text>
+</g>
+<g >
+<title>std::vector&lt;Variable, std::allocator&lt;Variable&gt; &gt;::operator[] (1 samples, 3.23%)</title><rect x="581.0" y="213" width="38.0" height="15.0" fill="rgb(213,35,51)" rx="2" ry="2" />
+<text  x="583.97" y="223.5" >std..</text>
+</g>
+<g >
+<title>std::_Destroy&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*&gt; (1 samples, 3.23%)</title><rect x="999.7" y="213" width="38.0" height="15.0" fill="rgb(254,46,38)" rx="2" ry="2" />
+<text  x="1002.68" y="223.5" >std..</text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::_M_construct&lt;char*&gt; (1 samples, 3.23%)</title><rect x="885.5" y="37" width="38.0" height="15.0" fill="rgb(251,183,25)" rx="2" ry="2" />
+<text  x="888.48" y="47.5" >std..</text>
+</g>
+<g >
+<title>Family::resolveDependencies (19 samples, 61.29%)</title><rect x="352.6" y="405" width="723.2" height="15.0" fill="rgb(252,53,19)" rx="2" ry="2" />
+<text  x="355.58" y="415.5" >Family::resolveDependencies</text>
+</g>
+<g >
+<title>_ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE4findERKS4_m@plt (1 samples, 3.23%)</title><rect x="961.6" y="277" width="38.1" height="15.0" fill="rgb(244,49,28)" rx="2" ry="2" />
+<text  x="964.61" y="287.5" >_ZN..</text>
+</g>
+<g >
+<title>PreProcessor::getIncludedFilePath (1 samples, 3.23%)</title><rect x="390.6" y="197" width="38.1" height="15.0" fill="rgb(238,150,39)" rx="2" ry="2" />
+<text  x="393.65" y="207.5" >Pre..</text>
+</g>
+<g >
+<title>PreProcessor::preProcess_includes (1 samples, 3.23%)</title><rect x="390.6" y="213" width="38.1" height="15.0" fill="rgb(249,93,3)" rx="2" ry="2" />
+<text  x="393.65" y="223.5" >Pre..</text>
+</g>
+<g >
+<title>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::size (1 samples, 3.23%)</title><rect x="809.4" y="149" width="38.0" height="15.0" fill="rgb(209,153,13)" rx="2" ry="2" />
+<text  x="812.35" y="159.5" >std..</text>
+</g>
+<g >
+<title>Submittable::submit_job_only (1 samples, 3.23%)</title><rect x="352.6" y="261" width="38.0" height="15.0" fill="rgb(236,109,18)" rx="2" ry="2" />
+<text  x="355.58" y="271.5" >Sub..</text>
+</g>
+<g >
+<title>EcfFile::variableSubstitution (3 samples, 9.68%)</title><rect x="504.8" y="277" width="114.2" height="15.0" fill="rgb(225,18,24)" rx="2" ry="2" />
+<text  x="507.84" y="287.5" >EcfFile::varia..</text>
+</g>
+<g >
+<title>[unknown] (5 samples, 16.13%)</title><rect x="10.0" y="437" width="190.3" height="15.0" fill="rgb(222,180,17)" rx="2" ry="2" />
+<text  x="13.00" y="447.5" >[unknown]</text>
+</g>
+<g >
+<title>__gnu_cxx::__normal_iterator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;*, std::vector&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;, std::allocator&lt;std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; &gt; &gt; &gt;::operator* (1 samples, 3.23%)</title><rect x="428.7" y="261" width="38.1" height="15.0" fill="rgb(226,168,54)" rx="2" ry="2" />
+<text  x="431.71" y="271.5" >__g..</text>
+</g>
+<g >
+<title>EcfFile::variableSubstitution (1 samples, 3.23%)</title><rect x="352.6" y="213" width="38.0" height="15.0" fill="rgb(230,210,49)" rx="2" ry="2" />
+<text  x="355.58" y="223.5" >Ecf..</text>
+</g>
+</g>
+</svg>

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """ suite builder example for 2013 ecFlow course """
+# file deepcode ignore missing~close~open: legacy ignore
 import sys, os
 sys.path.append('/home/ma/emos/def/ecflow')
 
@@ -409,7 +410,7 @@ class SerialTask(object):
         fam = Family(name).add(
             Variables(MODE= name),
             Task("to_ecflow"))
-        if self.prev != None:
+        if self.prev is not None:
             fam.add(Trigger("./%s eq complete" % self.prev))
         self.prev = name
         return fam

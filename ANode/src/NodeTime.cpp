@@ -50,28 +50,28 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
    if (!days_.empty()) {
 	   // The day attribute, is matched with the corresponding *date* under requeue.
 	   // HOWEVER, when re-queueing due to a *TIME* dependency we MUST keep the current date on the day attribute
-	   // ADDITIONALLY WE use days_copy_ to remove days which have *EXPIRED*(i.e failed for check for re-queue), thus avoiding is_free()
-	   // OTHERWISE when we have multiple days, even he days which have expired are considered for running the task.
+	   // ADDITIONALLY WE use expired_ to remove days which have *EXPIRED*(i.e failed for check for re-queue), thus avoiding is_free()
+	   // OTHERWISE when we have multiple days, even the days which have expired are considered for running the task.
 	   switch(rt) {
 	   case Requeue_args::FULL: {
 #ifdef DEBUG_DAY
 	       cout << " Node::do_requeue_time_attrs  Requeue_args::FULL \n";
 #endif
-		   for(auto & day : days_) {  day.requeue(calendar); }
+		   for(auto & day : days_) {  day.requeue_manual(calendar); }
 		   break;
 	   }
 	   case Requeue_args::REPEAT_INCREMENT: {
 #ifdef DEBUG_DAY
 	       cout << " Node::do_requeue_time_attrs  Requeue_args::REPEAT_INCREMENT \n";
 #endif
-		   for(auto & day : days_) {  day.requeue(calendar); }
+		   for(auto & day : days_) {  day.requeue_repeat_increment(calendar); }
 		   break;
 	   }
 	   case Requeue_args::TIME: {
 #ifdef DEBUG_DAY
 	       cout << " Node::do_requeue_time_attrs  Requeue_args::TIME \n";
 #endif
-		   for(auto & day : days_) {  day.requeue(); }
+		   for(auto & day : days_) {  day.requeue_time(); }
 		   break;
 	   }
 	   }
@@ -223,25 +223,6 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
    return false;
 }
 
-bool Node::holding_day_or_date(const ecf::Calendar& c) const
-{
-   if (days_.empty() && dates_.empty()) return false;
-
-   bool at_least_one_day_free = false;
-   for(auto & day : days_){
-      if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
-   }
-
-   bool at_least_one_date_free = false;
-   for(auto & date : dates_) {
-      if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
-   }
-
-   if (at_least_one_day_free || at_least_one_date_free ) {
-      return false;
-   }
-   return true;
-}
 
 void Node::markHybridTimeDependentsAsComplete()
 {
@@ -288,8 +269,9 @@ void Node::markHybridTimeDependentsAsComplete()
 //#include "Log.hpp"
 bool Node::testTimeDependenciesForRequeue()
 {
-   /// This function is called as a part of handling state change.
-   // Check for re-queue required for all time related attributes
+   // This function is called as a part of handling state change.
+   // We only get here if the Node has *COMPLETED* ( either automatically, or manually i.e force complete)
+   // We are now determining if the node should be re-queued due to time dependency in the *FUTURE*
    const Calendar& calendar = suite()->calendar();
 
 #ifdef DEBUG_REQUEUE
@@ -353,15 +335,23 @@ bool Node::testTimeDependenciesForRequeue()
       }
    }
 
-   // If any day matches calendar day, then expire it, so we don't run again on that day.
-   // Must be done BEFORE checkForRequeue
-   //   task t1
-   //      time 09:00    # time attribute get considered before day/date, allowing multiple re-queues on the same day
-   //      time 10:00    #
-   //      day saturday  # After time expiration, day must be expired
-   //      day sunday
    for(DayAttr& day : days_ ) {
-		day.check_for_expiration(calendar);
+		if (cmd_context) {
+		   // In the command context,i.e. force complete or task runs and completes, then expire the day. *EVEN* if we the day is in the future:
+		   // why?: The user has taken control, *TYPICALLY* the day is under a repeat, by expiring, we allow the repeat to increment
+		   //       before *only* if the day matched under the command context, we got this behaviour. i.e with check_for_expiration
+		   day.set_expired();
+		}
+		else {
+		   // If any day matches calendar day or is in the past, then expire it, so we don't run again on that day.
+		   // Must be done BEFORE checkForRequeue
+		   //   task t1
+		   //      time 09:00    # time attribute get considered before day/date, allowing multiple re-queues on the same day
+		   //      time 10:00    #
+		   //      day saturday  # After time expiration, day must be expired
+		   //      day sunday
+		   day.check_for_expiration(calendar);
+		}
    }
    for(const DayAttr& day : days_ ) {
 	   if (day.checkForRequeue(calendar)) {
@@ -514,17 +504,43 @@ bool Node::has_time_dependencies() const
 }
 
 
+bool Node::holding_day_or_date(const ecf::Calendar& c) const
+{
+   if (days_.empty() && dates_.empty()) return false;
+
+   bool at_least_one_day_free = false;
+   for(auto & day : days_){
+      if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
+   }
+
+   bool at_least_one_date_free = false;
+   for(auto & date : dates_) {
+      if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
+   }
+
+   if (at_least_one_day_free || at_least_one_date_free ) {
+      return false;
+   }
+   return true;
+}
+
 bool Node::timeDependenciesFree() const
 {
    int noOfTimeDependencies = 0;
    if (!times_.empty())  noOfTimeDependencies++;
    if (!todays_.empty()) noOfTimeDependencies++;
-   if (!dates_.empty())    noOfTimeDependencies++;
-   if (!days_.empty())     noOfTimeDependencies++;
-   if (!crons_.empty())    noOfTimeDependencies++;
+   if (!dates_.empty())  noOfTimeDependencies++;
+   if (!days_.empty())   noOfTimeDependencies++;
+   if (!crons_.empty())  noOfTimeDependencies++;
 
    // if no time dependencies we are free
    if (noOfTimeDependencies == 0) return true;
+
+   // if we have a holding day/date don't consider other time attributes
+   const Calendar& calendar = suite()->calendar();
+   if (holding_day_or_date(calendar)) {
+	   return false;
+   }
 
    bool oneDateIsFree = false;
    bool oneDayIsFree = false;
@@ -532,28 +548,33 @@ bool Node::timeDependenciesFree() const
    bool oneTimeIsFree = false;
    bool oneCronIsFree = false;
 
-   const Calendar& calendar = suite()->calendar();
    for(const auto & time : times_){ if (time.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
    for(const auto & cron : crons_){ if (cron.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
    for(const auto & date : dates_){ if (date.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
    for(const auto & day  : days_) { if (day.isFree(calendar)) {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
 
    if (!todays_.empty()) {
-      // : single Today: (single-time)   is free, if calendar time >= today_time
-      // : single Today: (range)         is free, if calendar time == (one of the time ranges)
-      // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+      // : single Today: (single-time)    is free, if calendar time >= today_time
+      // : single Today: (range)          is free, if calendar time == (one of the time ranges)
+      // : multi Today : (single | range) is free, if calendar time == (one of the time ranges | today_time)
+      // : multi Today : (single | range) is free, all are free
       if (todays_.size() == 1 ) {
          // Single Today Attribute: could be single slot or range
          if (todays_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
       }
       else {
          // Multiple Today Attributes, each could single, or range
+         size_t free_count = 0;
          for(const auto & today : todays_) {
             if (today.isFreeMultipleContext(calendar)) {if (noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            if (today.isFree(calendar)) free_count++;
+         }
+         if (free_count == todays_.size() ) {
+            if (noOfTimeDependencies == 1) return true;
+            oneTodayIsFree = true;
          }
       }
    }
-
 
    if ( oneDateIsFree || oneDayIsFree || oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
       if ( noOfTimeDependencies > 1 ) {

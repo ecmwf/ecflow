@@ -199,6 +199,8 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
 BOOST_AUTO_TEST_CASE( test_ssync_cmd_test_order  )
 {
    cout << "Base:: ...test_ssync_cmd_test_order\n";
+   TestLog test_log("test_ssync_cmd_test_order.log"); // will create log file, and destroy log and remove file at end of scope
+
    test_sync_scaffold(reorder_suites, 0 /* test equality */, false /* expect full_sync */, 0);
    test_sync_scaffold(reorder_family, 0 /* test equality */, false /* expect full_sync */, 0);
    test_sync_scaffold(reorder_task,   0 /* test equality */, false /* expect full_sync */, 0);

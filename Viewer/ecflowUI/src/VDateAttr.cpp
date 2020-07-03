@@ -43,21 +43,19 @@ QString VDateAttrType::definition(QStringList d) const
     QString t;
     if(d.count() == dataCount_)
     {
-        t+=" " + d[NameIndex];
+        t=d[NameIndex];
     }
     return t;
 }
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name()) <<
-        (d.isFree(calendar)?"1":"0");
+    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar)?"1":"0");
 }
 
 void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name())<<
-        (d.isFree(calendar)?"1":"0");
+    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar)?"1":"0");
 }
 
 //=====================================================
@@ -116,14 +114,16 @@ std::string VDateAttr::strName() const
         if(dataType_ == DateData)
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
-            if(index_ < static_cast<int>(v.size()))
+            if(index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
+            }
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
-            if(index_ < static_cast<int>(v.size()))
+            if(index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
+            }
         }
     }
     return std::string();
@@ -149,4 +149,3 @@ void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         }
     }
 }
-

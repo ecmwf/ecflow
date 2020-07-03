@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <stdexcept>
 #include "InfoProvider.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"

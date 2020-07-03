@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include "TimeSeries.hpp"
 
@@ -111,9 +112,9 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
 
  	compute_last_time_slot();
 
-#ifdef DEBUG_TIME_SERIES
-	cout << "TimeSeries::TimeSeries "  << dump() << "\n";
-#endif
+//#ifdef DEBUG_TIME_SERIES
+//	cout << "TimeSeries::TimeSeries "  << dump() << "\n";
+//#endif
 }
 
 bool TimeSeries::operator<(const TimeSeries& rhs) const
@@ -151,10 +152,15 @@ bool TimeSeries::resetRelativeDuration()
 {
 	if ( relativeToSuiteStart_ ) {
 	   relativeDuration_ = time_duration(0,0,0,0);
+
+#ifdef DEBUG_TIME_SERIES
+	   log(Log::DBG,"TimeSeries::resetRelativeDuration " + dump());
+#endif
+
 	   return true;
 	}
 #ifdef DEBUG_TIME_SERIES
-	cout << "TimeSeries::resetRelativeDuration "  << dump() << "\n";
+	log(Log::DBG,"TimeSeries::resetRelativeDuration " + dump());
 #endif
 	return false;
 }
@@ -182,9 +188,10 @@ void TimeSeries::reset(const ecf::Calendar& c)
  	time_duration current_time = duration(c);
    if (hasIncrement()) {
 
-      // only used when we have a series
-      suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
-      //cout << "TimeSeries::reset  suiteTimeAtReque_: " << suiteTimeAtReque_ << " =====================================================\n";
+      // only used when we have a series, and *NOT* relative. A relative time series does not care about midnight.
+	  if (!relativeToSuiteStart_) {
+		  suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+	  }
 
       while( current_time > nextTimeSlot_.duration()) {
          time_duration value = nextTimeSlot_.duration();
@@ -202,8 +209,8 @@ void TimeSeries::reset(const ecf::Calendar& c)
    }
 
 #ifdef DEBUG_TIME_SERIES
-	LogToCout toCoutAsWell;
-	LOG(Log::DBG,"      TimeSeries::reset   "  << dump());
+//	LogToCout toCoutAsWell;
+	log(Log::DBG,"TimeSeries::reset   " + dump());
 #endif
 }
 
@@ -239,15 +246,16 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		if (current_time >= start_.duration() ) {
 			isValid_ = false; // time has expired
 #ifdef DEBUG_TIME_SERIES
-	 	 	LOG(Log::DBG,"      TimeSeries::increment (duration(c) >= start_.duration() ) "  << toString() << " duration=" << to_simple_string(duration(c)));
+	 	 	LOG(Log::DBG,"TimeSeries::requeue HOLDING TIME EXPIRED (duration(c) >= start_.duration() ) "  << dump() << " duration=" << to_simple_string(duration(c)));
 #endif
 		}
 		return;
 	}
 
-	// only used when we have a series
-   suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
-//   cout << "TimeSeries::requeue suiteTimeAtReque_: " << suiteTimeAtReque_ << " =====================================================\n";
+	// Only used when we have a series, and NOT relative. A relative time series does not care about midnight
+	if (!relativeToSuiteStart_) {
+		suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+	}
 
 	// the nextTimeSlot_ needs to be set to a multiple of incr
 	// However the nextTimeSlot_ can not just be incremented by incr
@@ -265,16 +273,13 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		time_duration value = nextTimeSlot_.duration();
 		value += incr_.duration();
 		nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
-#ifdef DEBUG_TIME_SERIES
- 	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
-#endif
 	}
 
  	if (nextTimeSlot_ > finish_) {
 		isValid_ = false;              // time has expired
 	   suiteTimeAtReque_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
- 	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
+ 	 	log(Log::DBG,"TimeSeries::requeue  HOLDING TIME EXPIRED (nextTimeSlot_ > finish_) " + dump());
 #endif
  	}
 }
@@ -324,7 +329,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 	if (!isValid_) {
 	   // time has expired, hence time is not free
 #ifdef DEBUG_TIME_SERIES_IS_FREE
-   	 	LOG(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING "  << dump());
+   	 	log(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING " + dump());
 #endif
 		return false;
 	}
@@ -394,7 +399,7 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 	}
 
 #ifdef DEBUG_TIME_SERIES
-	LOG(Log::DBG,"TimeSeries::matches HOLDING (nextTimeSlot_td > endDuration)  " << dump() << " HOLDING at " << to_simple_string(relative_or_real_td));
+	LOG(Log::DBG,"TimeSeries::match_duration_with_time_series HOLDING (nextTimeSlot_td > endDuration)  " << dump() << " HOLDING at " << to_simple_string(relative_or_real_td));
 #endif
  	return false;
 }
@@ -426,10 +431,16 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // The resolution is in minutes
    // *************************************************************************
    //cout << "TimeSeries::checkForRequeue " << calendar.suite_time_str() << " min: " << the_min << " max: " << the_max << " cmd_context(" << cmd_context << ") +++++++++++++++\n";
+#ifdef DEBUG_TIME_SERIES
+   log(Log::DBG,"TimeSeries::checkForRequeue: " + dump());
+#endif
 
    if (!isValid_) {
       // time has expired, hence can no longer re-queues, i.e no future time dependency
+#ifdef DEBUG_TIME_SERIES
 	   //cout << " TimeSeries::checkForRequeue " << calendar.suite_time_str() << "  HOLDING\n";
+	  log(Log::DBG,"TimeSeries::checkForRequeue HOLDING !isValid_  " + dump());
+#endif
       return false;
    }
 
@@ -443,12 +454,16 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       // If the current value is greater that finish, then returning true would increment
       // value past the end, and force node state to be stuck in state queue.
       if ( nextTimeSlot_ > finish_ ) {
+#ifdef DEBUG_TIME_SERIES
    	    //cout << " TimeSeries::checkForRequeue ( nextTimeSlot_ > finish_ )    HOLDING\n";
+   	    log(Log::DBG,"TimeSeries::checkForRequeue HOLDING  ( nextTimeSlot_ > finish_ )  " + dump());
+#endif
          return false;
       }
 
-      // ECFLOW-130 jobs that start before midnight and finish after midnight should not requeue
-      if (!suiteTimeAtReque_.isNULL()){
+      // ECFLOW-130 jobs that start before midnight and finish after midnight should not re-queue
+      // This should ONLY apply to non relative time series, since a relative time series does care about midnight
+      if (!relativeToSuiteStart_ && !suiteTimeAtReque_.isNULL()){
          TimeSlot suiteTimeNow(calendar.suiteTime().time_of_day());
          //cout << "TimeSeries::checkForRequeue suiteTimeNow = " << suiteTimeNow << " =====================================================\n";
          // we use >= specifically for unit test, to pass.
@@ -458,7 +473,10 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
          }
          else {
             // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
+#ifdef DEBUG_TIME_SERIES
             //cout << " TimeSeries::checkForRequeue day changed ===================================================== HOLDING\n";
+       	     log(Log::DBG,"TimeSeries::checkForRequeue HOLDING suiteTimeNow < suiteTimeAtReque_  " + dump());
+#endif
             return false;
          }
       }
@@ -475,6 +493,10 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
     		  return true;
     	  }
       }
+
+#ifdef DEBUG_TIME_SERIES
+      log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING calendar_duration < start_ || calendar_duration >= lastTimeSlot_)  " + dump());
+#endif
       return false;
    }
 
@@ -487,6 +509,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // We have a single time slot, *OR* multiple with same time slot
    if (the_min == the_max) {
 	   //cout << " TimeSeries::checkForRequeue (the_min == the_max) HOLDING \n";
+#ifdef DEBUG_TIME_SERIES
+	  log(Log::DBG,"TimeSeries::checkForRequeue  HOLDING  the_min == the_max  " + dump());
+#endif
       return false;
    }
 
@@ -507,7 +532,9 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    }
 
    //cout << " TimeSeries::checkForRequeue calendar duration " << to_simple_string(calendar_duration) << " not in range " <<  to_simple_string(the_min.duration())  << "-" <<  to_simple_string(the_max.duration()) << "  HOLDING \n";
-
+#ifdef DEBUG_TIME_SERIES
+   log(Log::DBG,"TimeSeries::checkForRequeue HOLDING multiple slots not in range " + dump());
+#endif
    return false;
 }
 
@@ -639,10 +666,11 @@ std::string TimeSeries::dump() const
 {
 	std::stringstream ss;
 	ss << toString();
-	ss << " isValid_(" << isValid_ << ")";
-	ss << " value(" << nextTimeSlot_.toString() << ")";
-	ss << " relativeDuration_(" <<  to_simple_string( relativeDuration_) << ")";
- 	ss << " lastTimeSlot_(" <<  to_simple_string(lastTimeSlot_) << ")";
+	ss << " isValid_("          << isValid_ << ")";
+	ss << " nextTimeSlot_("     << nextTimeSlot_.toString() << ")";
+	ss << " relativeDuration_(" << to_simple_string(relativeDuration_) << ")";
+ 	ss << " lastTimeSlot_("     << to_simple_string(lastTimeSlot_) << ")";
+ 	ss << " suiteTimeAtReque_(" << suiteTimeAtReque_.toString() << ")";
  	return ss.str();
 }
 
@@ -677,12 +705,6 @@ bool TimeSeries::checkInvariants(std::string& errormsg) const
 		cout <<  errormsg << "  " << toString() << "\n";
 		return false;
 	}
-	if (relativeToSuiteStart_  && relativeDuration_.hours() > 99) {
-		errormsg += "TimeSeries::checkInvariants. Max relative duration is 99 hours & 59 minutes";
-		cout <<  errormsg << "  " << toString() << "\n";
-		return false;
-	}
-
 
 	if (!relativeToSuiteStart_ && relativeDuration_.total_seconds() > 0) {
 		errormsg += "TimeSeries::checkInvariants Can only have RelativeDuration if relativeToSuiteStart_ flag is set";
@@ -738,6 +760,19 @@ void TimeSeries::write_state(std::string& ret,bool isFree) const
       ret += " #";
       if (isFree) ret += " free";
       if (!isValid_) ret += " isValid:false";
+      if (next_time_slot_changed) { ret += " nextTimeSlot/"; ret += nextTimeSlot_.toString(); }
+      if (relative_duration_changed) { ret += " relativeDuration/"; ret += to_simple_string(relativeDuration_); }
+   }
+}
+
+void TimeSeries::write_state_for_gui(std::string& ret,bool isFree) const
+{
+   bool next_time_slot_changed = ( nextTimeSlot_ != start_);
+   bool relative_duration_changed = (!relativeDuration_.is_special() && relativeDuration_.total_seconds() != 0);
+   if (isFree || !isValid_ || next_time_slot_changed || relative_duration_changed) {
+      ret += " #";
+      if (isFree) ret += " free";
+      if (!isValid_) ret += " expired";
       if (next_time_slot_changed) { ret += " nextTimeSlot/"; ret += nextTimeSlot_.toString(); }
       if (relative_duration_changed) { ret += " relativeDuration/"; ret += to_simple_string(relativeDuration_); }
    }

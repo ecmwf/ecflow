@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# file deepcode ignore SSHHostKeyVerificationDisabled: <comment the reason here>
 from __future__ import print_function
 import os
 import sys
@@ -144,7 +145,7 @@ cmds = {  # "log": "--log=get",
 
 ECF_EXTN = "sms"
 ECF_EXTN = "ecf"
-exts = {key: None for key in cmds.keys()}
+exts = {key: None for key in cmds}
 task_exts = {
     ECF_EXTN: "script",
     "man": "manual",
@@ -188,7 +189,7 @@ def list_dir(node):
                         10: "task",
                         32: "alias", }
             if sms_type[item.type] == "task":
-                res.extend([".%s" % key for key in task_exts.keys()])
+                res.extend([".%s" % key for key in task_exts])
             name = item.name
             state = ".%s" % sms_status[item.status][:3]
             if state == ".sus":
@@ -201,7 +202,7 @@ def list_dir(node):
             #     item = item.next
     else:
         if isinstance(item, ecflow.Task):
-            res.extend([".%s" % key for key in task_exts.keys()])
+            res.extend([".%s" % key for key in task_exts])
         for deco in item.meters:
             res.extend([".meter.%s.%s" % (deco.name(), deco.value())])
         for deco in item.events:
@@ -541,7 +542,7 @@ def set_att(fpath, dct, att=('st_size', ), dft=FILESIZE, ext="job"):
             print(fpath, key, dct[key])
 
     elif ".old" not in fpath:
-        for key in olds.keys():
+        for key in olds:
             if key in fpath:
                 return set_att(fpath.replace(key, olds[key]),
                                dct, att, dft, ext)
@@ -692,7 +693,7 @@ class FuseEcflow(LoggingMixIn, Operations):
     def server_cmd(self, ext, run=1):
         if not ext:
             return ""
-        elif not ext in cmds.keys():
+        elif not ext in cmds:
             print("#WAR: server cmd: what?", ext)
             return ""
         elif ext in ("log", ):
@@ -794,13 +795,13 @@ class FuseEcflow(LoggingMixIn, Operations):
                         fname = fname.replace(".job", '.')
 
                     elif ".job0" in fname:
-                        for key in olds.keys():
+                        for key in olds:
                             if key in fname:
                                 fname = fname.replace(key, olds[key]).replace(
                                     ".job0", '.job1')
 
                     elif ext == "pout":
-                        for key in olds.keys():
+                        for key in olds:
                             if key in fname:
                                 fname.replace(key, olds[key])
                                 break
@@ -809,14 +810,14 @@ class FuseEcflow(LoggingMixIn, Operations):
                     elif ext == "SUB":
                         if "job0" in fname:
                             fname.replace("job0", "job1")
-                            for key in olds.keys():
+                            for key in olds:
                                 if key in fname:
                                     fname.replace(key, olds[key])
                                     break
                         fname += ".SUB"
 
                     elif ext == "pjob":
-                        for key in olds.keys():
+                        for key in olds:
                             if key in fname:
                                 fname.replace(key, olds[key])
                                 break
@@ -888,7 +889,7 @@ class FuseEcflow(LoggingMixIn, Operations):
             res = "%s" % list_att(node)
             return trunc(res, size, offset)
 
-        elif ext and not ext in exts.keys():
+        elif ext and not ext in exts:
             print("#WAR: read what?", ext)
             return "-empty-"
 
@@ -1029,7 +1030,7 @@ class FuseEcflow(LoggingMixIn, Operations):
         ext = None
         if "." in path:
             path, ext = path.split(".")
-        if ext and not ext in exts.keys():
+        if ext and not ext in exts:
             if DEBUG:
                 print("#readdir: what?", ext)
             return ["/"]
@@ -1061,7 +1062,7 @@ class FuseEcflow(LoggingMixIn, Operations):
             else:
                 res = ['.', '..', nick + "." + 'att',
                        "ecflow_client.exe", "README"]
-                res += [nick + ".%s" % key for key in cmds.keys()
+                res += [nick + ".%s" % key for key in cmds
                         if key != "why"]
                 res += [nick + '.%s' % (node.get_server_state())]
                 for s in node.suites:

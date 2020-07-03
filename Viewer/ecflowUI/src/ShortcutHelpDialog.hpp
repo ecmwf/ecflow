@@ -30,7 +30,7 @@ public Q_SLOTS:
 
 protected:
     void loadText(QString txt);
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     void writeSettings();
     void readSettings();
 

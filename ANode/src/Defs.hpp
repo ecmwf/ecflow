@@ -56,6 +56,12 @@ public:
    void print(std::string&) const;
    std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
 
+   /// Handle migration of checkpoint 4->5, and 5.0-5.4.0 -> 5.5
+   /// This essentially update date data member of the Day attribute
+   /// Can be removed when ecflow 5 is used everywhere.
+   void handle_migration();
+
+
    /// State related functions:
    /// Defs acts like the root node.
    void set_state(NState::State);
@@ -176,7 +182,8 @@ public:
 
    /// recursively sort the attributes
    // expect one attr to be [ event | meter | label | limits | variable ]
-   void sort_attributes(ecf::Attr::Type attr, bool recursive = true);
+   // if recursive is true, ignore nodes on no_sort list
+   void sort_attributes(ecf::Attr::Type attr, bool recursive = true, const std::vector<std::string>& no_sort = std::vector<std::string>());
 
    /// This function is called when ALL definition has been parsed successfully
    /// Client Side:: The client side has externs, hence any references to node paths

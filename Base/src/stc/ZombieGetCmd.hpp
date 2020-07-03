@@ -23,14 +23,14 @@ class AbstractServer;
 // Paired with CtsCmd(GET_ZOMBIES)
 // Client---CtsCmd(GET_ZOMBIES)---->Server-----(ZombieGetCmd)--->client:
 //================================================================================
-class ZombieGetCmd : public ServerToClientCmd {
+class ZombieGetCmd final : public ServerToClientCmd {
 public:
    explicit ZombieGetCmd(AbstractServer*);
 	ZombieGetCmd() : ServerToClientCmd() {}
 
 	void init(AbstractServer*);
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
-  	std::ostream& print(std::ostream& os) const override;
+  	std::string print() const override;
 	bool equals(ServerToClientCmd*) const override;
    void cleanup() override { std::vector<Zombie>().swap(zombies_);} /// run in the server, after command send to client
 

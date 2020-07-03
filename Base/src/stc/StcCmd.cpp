@@ -16,19 +16,19 @@
 #include "StcCmd.hpp"
 #include "ClientToServerCmd.hpp"
 
-std::ostream& StcCmd::print(std::ostream& os) const
+std::string StcCmd::print() const
 {
    switch (api_) {
-      case StcCmd::OK:                          return os << "cmd:Ok"; break;
-      case StcCmd::BLOCK_CLIENT_SERVER_HALTED:  return os << "cmd:Server_halted"; break;
-      case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return os << "cmd:Wait"; break;
-      case StcCmd::DELETE_ALL:                  return os << "cmd:delete_all"; break;
-      case StcCmd::END_OF_FILE:                 return os << "cmd:end_of_file"; break;
-      case StcCmd::INVALID_ARGUMENT:            return os << "cmd:Invalid_argument"; break;
+      case StcCmd::OK:                          return "cmd:Ok";
+      case StcCmd::BLOCK_CLIENT_SERVER_HALTED:  return "cmd:Server_halted";
+      case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return "cmd:Wait";
+      case StcCmd::DELETE_ALL:                  return "cmd:delete_all";
+      case StcCmd::END_OF_FILE:                 return "cmd:end_of_file";
+      case StcCmd::INVALID_ARGUMENT:            return "cmd:Invalid_argument";
       default: assert(false); break;
    }
 	assert(false); // unknown command
-	return os << "cmd:Unknown??";
+	return "cmd:Unknown??";
 }
 
 // Client context
@@ -62,9 +62,9 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
       case StcCmd::END_OF_FILE: {
          if (debug) std::cout << "  StcCmd::handle_server_response END_OF_FILE\n";
          server_reply.set_eof(); // requires further work, by ClientInvoker
-         std::stringstream ss;
-         ss << "Error: request( "; cts_cmd->print_short(ss); ss << " ) failed! Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)\n";
-         server_reply.set_error_msg(ss.str());
+         std::string ss;
+         ss += "Error: request( "; ss += cts_cmd->print_short(); ss += " ) failed! Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)\n";
+         server_reply.set_error_msg(ss);
          break;
       }
 		case StcCmd::INVALID_ARGUMENT: {
@@ -72,9 +72,9 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 			// This keeps compatibility with 4 servers
 			if (debug) std::cout << "  StcCmd::handle_server_response INVALID_ARGUMENT\n";
 			server_reply.set_invalid_argument();// requires further work, by ClientInvoker
-			std::stringstream ss;
-			ss << "Error: request( "; cts_cmd->print_short(ss); ss << " ) failed! Server replied with: invalid_argument(Could not decode client protocol)\n";
-			server_reply.set_error_msg(ss.str());
+			std::string ss;
+			ss += "Error: request( "; ss += cts_cmd->print_short(); ss += " ) failed! Server replied with: invalid_argument(Could not decode client protocol)\n";
+			server_reply.set_error_msg(ss);
 			break;
  		}
 		default: assert(false); break;
@@ -90,4 +90,4 @@ bool StcCmd::equals(ServerToClientCmd* rhs) const
 	return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& operator<<(std::ostream& os, const StcCmd& c)   { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const StcCmd& c) { os << c.print(); return os; }

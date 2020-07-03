@@ -10,6 +10,7 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <iostream>
 
 #include "boost/filesystem/operations.hpp"
@@ -57,6 +58,8 @@ BOOST_AUTO_TEST_CASE( test_reset_after_job_generation_checking )
       // test reset with a full definition
       MyDefsFixture theDefsFixture;
       Defs copy = Defs(theDefsFixture.defsfile_);
+
+      BOOST_REQUIRE_MESSAGE( copy == theDefsFixture.defsfile_, "Expected defs to be equal");
 
       // After check_job_creation, the defs SHOULD be reset. see ECFLOW-1203
       job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();

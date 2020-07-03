@@ -28,6 +28,7 @@ public:
 
    bool ok() const { return (fp_) ? true : false; }
    std::streamoff pos() { return fp_.tellg();}
+   //  deepcode ignore MissingOpenCheckOnFile: check called externally
    void setPos(std::streamoff pos) { fp_.seekg(pos,fp_.beg);}
    bool good() const { return fp_.good(); }
    void getline(std::string& line) { std::getline(fp_,line); }

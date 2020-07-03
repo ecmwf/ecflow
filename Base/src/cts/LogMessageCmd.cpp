@@ -25,13 +25,13 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-std::ostream& LogMessageCmd::print(std::ostream& os) const
+void LogMessageCmd::print(std::string& os) const
 {
-	return user_cmd(os,CtsApi::logMsg(msg_));
+	user_cmd(os,CtsApi::logMsg(msg_));
 }
-std::ostream& LogMessageCmd::print_only(std::ostream& os) const
+void LogMessageCmd::print_only(std::string& os) const
 {
-   os << CtsApi::logMsg(msg_);  return os;
+   os += CtsApi::logMsg(msg_);
 }
 
 bool LogMessageCmd::equals(ClientToServerCmd* rhs) const
@@ -72,4 +72,4 @@ void LogMessageCmd::create( Cmd_ptr& cmd,
 	cmd = std::make_shared<LogMessageCmd>( msg );
 }
 
-std::ostream& operator<<(std::ostream& os, const LogMessageCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const LogMessageCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

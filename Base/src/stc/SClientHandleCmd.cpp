@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <iostream>
+#include <boost/lexical_cast.hpp>
 #include "SClientHandleCmd.hpp"
 
 using namespace ecf;
@@ -24,6 +25,15 @@ bool SClientHandleCmd::equals(ServerToClientCmd* rhs) const
 	return (dynamic_cast<SClientHandleCmd*>(rhs)) ? ServerToClientCmd::equals(rhs) : false;
 }
 
+std::string SClientHandleCmd::print() const
+{
+	string os;
+	os += "cmd:SClientHandleCmd [ ";
+	os += boost::lexical_cast<string>(handle_);
+	os += " ]";
+	return os;
+}
+
 bool SClientHandleCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
 	if (debug) cout << "  SClientHandleCmd::handle_server_response handle_ = " << handle_ << "\n";
@@ -31,4 +41,4 @@ bool SClientHandleCmd::handle_server_response( ServerReply& server_reply, Cmd_pt
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const SClientHandleCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SClientHandleCmd& c){ os << c.print(); return os; }

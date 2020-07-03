@@ -132,6 +132,30 @@ BOOST_AUTO_TEST_CASE( test_day_parsing ) {
 
       BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
    }
+   {
+	   Calendar calendar;
+	   calendar.init(ptime(date(2020,6,26), minutes(0)), Calendar::REAL); // friday
+
+	   DayAttr day(calendar.date());
+
+	   DayAttr parsed_day = print_and_parse_attr(day);
+	   BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
+   }
+   {
+	   Calendar c;
+	   c.init(ptime(date(2020,6,26), minutes(0)), Calendar::REAL); // friday
+
+	   boost::gregorian::date_duration one_day(1);
+	   boost::gregorian::date next_day = c.date();  // todays date
+
+	   for(int i=0; i<7; i++) {
+		   next_day += one_day;
+
+		   DayAttr day(next_day);
+		   DayAttr parsed_day = print_and_parse_attr(day);
+		   BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
+	   }
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -23,7 +23,7 @@ class AbstractServer;
 // Paired with CtsNodeCmd(GET)
 // Client---CtsNodeCmd(GET)---->Server-----(DefsCmd | SNodeCmd)--->client:
 //================================================================================
-class DefsCmd : public ServerToClientCmd {
+class DefsCmd final : public ServerToClientCmd {
 public:
    explicit DefsCmd(AbstractServer* as, bool save_edit_history = false);
 	DefsCmd()= default;
@@ -31,7 +31,7 @@ public:
 	void init(AbstractServer* as, bool save_edit_history);
 
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
-  	std::ostream& print(std::ostream& os) const override;
+  	std::string print() const override;
 	bool equals(ServerToClientCmd*) const override;
    void cleanup() override { std::string().swap(full_server_defs_as_string_); } /// run in the server, after command send to client
 

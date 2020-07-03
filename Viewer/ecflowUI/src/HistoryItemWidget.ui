@@ -102,7 +102,7 @@
    <item>
     <widget class="TreeView" name="treeView_">
      <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
+      <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
      <property name="rootIsDecorated">
       <bool>false</bool>

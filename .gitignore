@@ -20,6 +20,8 @@ ecflow_*.includes
 # cmake
 ecbuild/
 build/
+bdir/
+bdir_xcode
 
 # ecflow 
 Pyext/setup.py

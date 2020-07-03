@@ -302,30 +302,28 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
 	//       There seems to be greater stability in terms of testing as it allows
 	//       process to complete, before the calendar is incremented.
 	// *****************************************************************************
-	if ( server_->defs_ ) {
 
-		// This functions gets called every 60 seconds or so, update calendar && time
-		// dependent variables in case any jobs depend on them. By default the calendar
-		// update interval is the same as submitJobsInterval for non-real calendars,
-		// however for testing both real/non-real calendars the calendar increment can be
-		// changed to speed up calendar. This is done by setting the calendar increment
-		// on the suite(i.e in the defs file)  which will the _override_ this setting.
-		//
-		// Additionally by passing in the flag running_, it allow suites which want to
-		// stop the calendar updates, when the server is stopped to do so.
-		// For real time calendars we make one system call here, instead of many times in each suite
-		//
-		// In the case where defs/node tree is suspended updateCalendar will continue
-		// to mark those time dep' are free, as free. This information is then used
-		// during the resume
+	// This functions gets called every 60 seconds or so, update calendar && time
+	// dependent variables in case any jobs depend on them. By default the calendar
+	// update interval is the same as submitJobsInterval for non-real calendars,
+	// however for testing both real/non-real calendars the calendar increment can be
+	// changed to speed up calendar. This is done by setting the calendar increment
+	// on the suite(i.e in the defs file)  which will the _override_ this setting.
+	//
+	// Additionally by passing in the flag running_, it allow suites which want to
+	// stop the calendar updates, when the server is stopped to do so.
+	// For real time calendars we make one system call here, instead of many times in each suite
+	//
+	// In the case where defs/node tree is suspended updateCalendar will continue
+	// to mark those time dep' are free, as free. This information is then used
+	// during the resume
 #ifdef DEBUG_TRAVERSER
-		++count_;
+	++count_;
 #endif
-		CalendarUpdateParams calParams(time_now, interval_/* calendar increment */, running_ );
-		server_->defs_->updateCalendar( calParams );
+	CalendarUpdateParams calParams(time_now, interval_/* calendar increment */, running_ );
+	server_->defs_->updateCalendar( calParams );
 
-		traverse_node_tree_and_job_generate(time_now, false /* not in command context */);
-	}
+	traverse_node_tree_and_job_generate(time_now, false /* not in command context */);
 }
 
 void NodeTreeTraverser::traverse_node_tree_and_job_generate(
@@ -338,7 +336,7 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(
 	// increment_job_generation_count()
 	// **************************************************************************************
 
-	if ( running_ && server_->defs_) {
+	if ( running_) {
 #ifdef DEBUG_JOB_SUBMISSION
 		jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
 #endif

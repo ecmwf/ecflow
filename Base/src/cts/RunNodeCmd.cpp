@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -35,31 +36,30 @@ bool RunNodeCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
-std::ostream& RunNodeCmd::print(std::ostream& os) const
+void RunNodeCmd::print(std::string& os) const
 {
- 	return user_cmd(os,CtsApi::to_string(CtsApi::run(paths_,force_)));
+ 	user_cmd(os,CtsApi::to_string(CtsApi::run(paths_,force_)));
 }
-std::ostream& RunNodeCmd::print_only(std::ostream& os) const
+void RunNodeCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::run(paths_,force_)); return os;
+   os += CtsApi::to_string(CtsApi::run(paths_,force_));
 }
-std::ostream& RunNodeCmd::print(std::ostream& os, const std::string& path) const
+void RunNodeCmd::print(std::string& os, const std::string& path) const
 {
-   std::vector<std::string> paths(1,path);
-   return user_cmd(os,CtsApi::to_string(CtsApi::run(paths,force_)));
+   user_cmd(os,CtsApi::to_string(CtsApi::run(std::vector<std::string>(1,path) ,force_)));
 }
 
 
 STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().run_node_++;
-
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
-   std::stringstream ss;
+    Defs* defs = as->defs().get();
+    std::stringstream ss;
 	size_t vec_size = paths_.size();
 	for(size_t i = 0; i < vec_size; i++) {
-	   node_ptr node = find_node_for_edit_no_throw(as,paths_[i]);
+	   node_ptr node = find_node_for_edit_no_throw(defs,paths_[i]);
 	   if (!node.get()) {
          ss << "RunNodeCmd: Could not find node at path " << paths_[i] << "\n";
 	      LOG(Log::ERR,"RunNodeCmd: Could not find node at path " << paths_[i]);
@@ -92,7 +92,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   if (force_) as->zombie_ctrl().add_user_zombies(node.get(),CtsApi::runArg());
 
 	   // Avoid re-running the task again on the same time slot
-      node->miss_next_time_slot();
+       node->miss_next_time_slot();
 
 	   if (!node->run(jobsParam, force_)) {
          LOG(Log::ERR,"RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());
@@ -176,4 +176,4 @@ void RunNodeCmd::create( 	Cmd_ptr& cmd,
  	cmd = std::make_shared<RunNodeCmd>(paths,force);
 }
 
-std::ostream& operator<<(std::ostream& os, const RunNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const RunNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

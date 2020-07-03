@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <sstream>
 #include "DefsStatusParser.hpp"
 #include "DState.hpp"

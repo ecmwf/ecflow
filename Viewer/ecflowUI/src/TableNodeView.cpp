@@ -321,7 +321,7 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 
 void TableNodeView::slotCommandShortcut()
 {
-    if (QShortcut* sc = static_cast<QShortcut*>(QObject::sender())) {
+    if (auto* sc = static_cast<QShortcut*>(QObject::sender())) {
         QModelIndexList indexLst=selectedList();
         std::vector<VInfo_ptr> nodeLst;
         for(int i=0; i < indexLst.count(); i++)

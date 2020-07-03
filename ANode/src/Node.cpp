@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <cassert>
 
 #include "Defs.hpp"
@@ -375,6 +376,12 @@ void Node::reset()
    for(auto & limit : limits_) { limit->reset(); }
 }
 
+void Node::handle_migration(const ecf::Calendar& c)
+{
+	// called when defs created by reading from a file on disk. i.e checkpoint
+	// handle any migration
+	for(auto & day : days_) { day.handle_migration(c); }
+}
 
 void Node::requeue_time_attrs()
 {
@@ -637,13 +644,6 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 
    // A node that is archived should not allow any change of state.
    if (get_flag().is_set(ecf::Flag::ARCHIVED)) return false;
-
-
-   // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
-   if (late_ && isSubmittable()) {
-      // since the suite() traverse up the tree, only call when have a late attribute
-      checkForLateness(suite()->calendar());
-   }
 
    if (isSuspended()) {
 #ifdef DEBUG_DEPENDENCIES
@@ -2476,8 +2476,19 @@ bool Node::is_observed(AbstractObserver* obs) const
    return false;
 }
 
-void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
+void Node::sort_attributes(ecf::Attr::Type attr, bool recursive,const std::vector<std::string>& no_sort)
 {
+  // cout << "Node::sort_attributes " << absNodePath() << "  " << attr << " recursive " << recursive << " no_sort.size() " << no_sort.size() << "\n";
+
+   if (recursive && !no_sort.empty()) {
+	   std::string path = absNodePath();
+	   for(const auto& p: no_sort) {
+		   // cout << " no_sort: " << p << "\n";
+		   if (p == path) {
+			   return;
+		   }
+	   }
+   }
    auto caseInsen = [](const auto& a, const auto& b){ return Str::caseInsLess(a.name(),b.name());};
 
    state_change_no_ = Ecf::incr_state_change_no();

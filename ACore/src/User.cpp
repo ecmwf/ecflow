@@ -49,12 +49,12 @@ User::Action User::user_action( const std::string& s)
 std::string User::to_string(User::Action uc)
 {
    switch (uc) {
-      case User::FOB:  return "fob"; break;
-      case User::FAIL: return "fail"; break;
-      case User::ADOPT: return "adopt"; break;
-      case User::REMOVE: return "remove"; break;
-      case User::BLOCK: return "block"; break;
-      case User::KILL: return "kill"; break;
+      case User::FOB:  return "fob";
+      case User::FAIL: return "fail";
+      case User::ADOPT: return "adopt";
+      case User::REMOVE: return "remove";
+      case User::BLOCK: return "block";
+      case User::KILL: return "kill";
    }
    assert(false);
    return std::string();

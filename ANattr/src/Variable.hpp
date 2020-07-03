@@ -46,6 +46,7 @@ public:
    std::string& value_by_ref() { return v_;}
 
    bool operator==(const Variable& rhs) const;
+   bool operator<(const Variable& rhs) const { return n_ < rhs.name();}
    std::string toString() const;
    std::string dump() const;
 

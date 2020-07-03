@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -30,6 +31,7 @@ LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
  : force_(force)
 {
    if (defs) {
+	  defs->handle_migration();
       defs->save_as_string(defs_,PrintStyle::NET);
    }
 }
@@ -49,6 +51,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
    std::string errMsg, warningMsg;
    if (defs->restore(defs_filename_, errMsg , warningMsg) ) {
 
+	  defs->handle_migration();
       defs->set_server().add_or_update_user_variables( client_env ); // use in test environment
 
       if (print) {
@@ -109,20 +112,22 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const
 	return PreAllocatedReply::ok_cmd();
 }
 
-std::ostream& LoadDefsCmd::print(std::ostream& os) const
+void LoadDefsCmd::print(std::string& os) const
 {
    /// If defs_filename_ is empty, the Defs was a in memory defs.
    if (defs_filename_.empty()) {
-      return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/)));
+      user_cmd(os,CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/)));
+      return;
    }
-   return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)));
+   user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)));
 }
-std::ostream& LoadDefsCmd::print_only(std::ostream& os) const
+void LoadDefsCmd::print_only(std::string& os) const
 {
    if (defs_filename_.empty()) {
-      os << CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/)); return os;
+      os += CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/));
+      return;
    }
-   os << CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)); return os;
+   os += CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/));
 }
 
 const char* LoadDefsCmd::arg()  { return CtsApi::loadDefsArg();}
@@ -188,4 +193,4 @@ Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename,bool force,bool che
    return load_cmd;
 }
 
-std::ostream& operator<<(std::ostream& os, const LoadDefsCmd& c)  { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const LoadDefsCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

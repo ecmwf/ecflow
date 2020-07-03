@@ -18,14 +18,14 @@
 
 std::string NOrder::toString(NOrder::Order s) {
 	switch (s) {
-		case NOrder::TOP:     return "top"; break;
-		case NOrder::BOTTOM:  return "bottom"; break;
- 		case NOrder::ALPHA:   return "alpha"; break;
-		case NOrder::ORDER:   return "order"; break;
-		case NOrder::UP:      return "up"; break;
-      case NOrder::DOWN:    return "down"; break;
-      case NOrder::RUNTIME: return "runtime"; break;
-		default: assert(false); break;
+	case NOrder::TOP:     return "top";
+	case NOrder::BOTTOM:  return "bottom";
+	case NOrder::ALPHA:   return "alpha";
+	case NOrder::ORDER:   return "order";
+	case NOrder::UP:      return "up";
+	case NOrder::DOWN:    return "down";
+	case NOrder::RUNTIME: return "runtime";
+	default: assert(false); break;
 	}
 	assert(false);
 	return std::string();

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 # This software is provided under the ECMWF standard software license agreement.
+# file deepcode ignore PythonConstantBinaryExpression: legacy
 """ a layer over raw ecflow api
 
 use 'export ECF_DEBUG_LEVEL=10' to remove warning message related to
@@ -223,7 +224,7 @@ class CWN(object):
             CWN.__CWN.append(item)
         elif item is None:
             pass
-        elif item.real == None:
+        elif item.real is None:
             pass
         elif CWN.is_empty():
             raise DefError("#ERR: no node!")

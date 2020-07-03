@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <stdexcept>
 #include <iostream>
 #include <memory>
 
@@ -176,30 +177,26 @@ bool GroupCTSCmd::why_cmd( std::string& nodePath) const
  	return false;
 }
 
-std::ostream& GroupCTSCmd::print(std::ostream& os) const
+void GroupCTSCmd::print(std::string& os) const
 {
-   std::stringstream ss;
+   std::string ret;
    size_t the_size = cmdVec_.size();
 	for(size_t i = 0; i < the_size; i++) {
-	   if (i != 0) ss << "; ";
- 		cmdVec_[i]->print_only(ss); //  avoid overhead of user@host for each child command
+	   if (i != 0) ret += "; ";
+ 		cmdVec_[i]->print_only(ret); //  avoid overhead of user@host for each child command
  	}
-	if (cli_) return user_cmd(os,CtsApi::group(ss.str()));
-	os << ss.str() << " :" << user() << '@' << hostname();
-	return os;
+	user_cmd(os,CtsApi::group(ret));
 }
 
-std::ostream& GroupCTSCmd::print_short(std::ostream& os) const
+std::string GroupCTSCmd::print_short() const
 {
-   std::stringstream ss;
+   std::string ret;
    size_t the_size = cmdVec_.size();
    for(size_t i = 0; i < the_size; i++) {
-      if (i != 0) ss << "; ";
-      cmdVec_[i]->print_short(ss); // limit number of paths shown
+      if (i != 0) ret += "; ";
+      ret += cmdVec_[i]->print_short(); // limit number of paths shown and avoid overhead of user@host for each child command
    }
-   if (cli_) return user_cmd(os,CtsApi::group(ss.str()));
-   os << ss.str() << " :" << user() << '@' << hostname();
-   return os;
+   return CtsApi::group(ret);
 }
 
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const
@@ -250,10 +247,10 @@ void GroupCTSCmd::setup_user_authentification()
    }
 }
 
-void GroupCTSCmd::add_edit_history(AbstractServer* as) const
+void GroupCTSCmd::add_edit_history(Defs* defs) const
 {
    for(Cmd_ptr subCmd: cmdVec_)  {
-      subCmd->add_edit_history(as);
+      subCmd->add_edit_history(defs);
    }
 }
 
@@ -273,14 +270,15 @@ bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const
  		if (!cmdVec_[i]->authenticate(as,errorMsg)) {
 
  		   // Log authentication failure:
- 		   std::stringstream ss;
- 		   ss << "GroupCTSCmd::authenticate failed: for ";
+ 		   std::string ss;
+ 		   ss += "GroupCTSCmd::authenticate failed: for ";
  		   cmdVec_[i]->print(ss);
- 		   ss << errorMsg;
- 		   log(Log::ERR,ss.str());    // will automatically add end of line
+ 		   std::stringstream stream; stream << errorMsg;
+ 		   ss += stream.str();
+ 		   log(Log::ERR,ss);    // will automatically add end of line
 
 #ifdef	DEBUG_GROUP_CMD
- 			std::cout << "GroupCTSCmd::authenticate failed for "; cmdVec_[i]->print(std::cout); std::cout << errorMsg << "\n";
+ 			std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
 #endif
  			return false;
  		}
@@ -313,7 +311,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
    size_t cmd_vec_size = cmdVec_.size();
    for(size_t i = 0; i < cmd_vec_size; i++) {
 #ifdef DEBUG_GROUP_CMD
-      std::cout << "  GroupCTSCmd::doHandleRequest calling "; cmdVec_[i]->print(std::cout);  // std::cout << "\n";
+      std::cout << "  GroupCTSCmd::doHandleRequest calling "; string ret; cmdVec_[i]->print(ret); cout << ret << "\n"; // std::cout << "\n";
 #endif
       // Let child know about Group command.
       // Only used by ClientHandleCmd and DeleteCmd to transfer client_handle to the sync cmd, in *this* group
@@ -378,4 +376,4 @@ void GroupCTSCmd::create( 	Cmd_ptr& cmd,
    cmd = std::make_shared<GroupCTSCmd>(cmdSeries,clientEnv);
 }
 
-std::ostream& operator<<(std::ostream& os, const GroupCTSCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const GroupCTSCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

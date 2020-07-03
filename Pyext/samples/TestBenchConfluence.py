@@ -115,7 +115,7 @@ if __name__ == "__main__":
         DEFS = ecflow.Defs(ARGS.defs_file)
     except RuntimeError as ex:
         print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
-        exit(1)
+        sys.exit(1)
     
     if ARGS.verbose: 
         print("remove test data associated with the DEFS, so we start fresh, Allows rerun")

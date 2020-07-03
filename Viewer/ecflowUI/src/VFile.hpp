@@ -57,6 +57,7 @@ public:
     void setLog(const std::vector<std::string>& log) {log_=log;}
     void addToLog(const std::string& s) {log_.push_back(s);}
     const std::vector<std::string>& log() const {return log_;}
+    int numberOfLines() const;
 
     bool write(const char *buf,size_t len,std::string& err);
     bool write(const std::string& buf,std::string& err);
@@ -68,8 +69,6 @@ public:
 	static VFile_ptr create(const std::string& path,bool deleteFile= true);
 	static VFile_ptr create(bool deleteFile= true);
     static VFile_ptr createTmpFile(bool deleteFile= true);
-
-    //static std::string tmpName();
 
 protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);

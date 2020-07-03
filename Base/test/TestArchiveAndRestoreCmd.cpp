@@ -32,6 +32,14 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
+BOOST_AUTO_TEST_CASE( test_add_log4 )
+{
+	// create once for all test below, then remove at the end
+	Log::create("test_add_log4.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
+
+
 BOOST_AUTO_TEST_CASE( test_archive_and_restore_suite )
 {
    cout << "Base:: ...test_archive_and_restore_suite\n";
@@ -294,6 +302,13 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_errors )
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_destroy_log4 )
+{
+	Log::destroy();
+	fs::remove("test_add_log4.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

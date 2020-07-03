@@ -141,8 +141,8 @@ private:
  	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
  	bool extractManual(const std::vector< std::string >& lines, std::vector< std::string >& theManualLines, std::string& errormsg) const;
- 	void removeCommentAndManual();
- 	void remove_nopp_end_tokens();
+
+ 	void remove_comment_manual_and_noop_tokens();
 
  	static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
  	static void dump_expanded_script_file(const std::vector<std::string>& lines); // for DEBUG
@@ -183,22 +183,24 @@ private:
   PreProcessor(const PreProcessor&) = delete;
   const PreProcessor& operator=(const PreProcessor&) = delete;
 public:
-   explicit PreProcessor(EcfFile*);
+   explicit PreProcessor(EcfFile*, const char* error_context);
    ~PreProcessor();
 
-   bool preProcess(std::vector<std::string>& script_lines );
-   const std::string& error_msg() const { return error_msg_;}
+   void preProcess(std::vector<std::string>& script_lines );
 
 private:
+   std::string error_context() const;
+
    // include pre-processing on the included file.
    // Note: include directives _in_ manual/comment should he handled.
    //       only include directives in %nopp/%end are ignored
-   void preProcess_line(const std::string& script_line );
-   void preProcess_includes(const std::string& script_line);
+   void preProcess_line();
+   void preProcess_includes();
    std::string getIncludedFilePath( const std::string& include, const std::string& line);
 
 private:
    EcfFile* ecfile_;
+   const char* error_context_;
 
    std::string pp_nopp_;
    std::string pp_comment_;
@@ -210,7 +212,6 @@ private:
 
    std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
    std::vector<std::string> include_once_set_;
-   std::string error_msg_;
 
    bool nopp_{false};
    bool comment_{false};

@@ -22,7 +22,7 @@ class AbstractServer;
 // Paired with CtsNodeCmd(Get)
 // Client---CtsNodeCmd(GET)---->Server-----(SNodeCmd | SNodeCmd)--->client:
 //================================================================================
-class SNodeCmd : public ServerToClientCmd {
+class SNodeCmd final : public ServerToClientCmd {
 public:
    SNodeCmd(AbstractServer* as,node_ptr node);
    SNodeCmd() = default;
@@ -30,7 +30,7 @@ public:
    void init(AbstractServer* as, node_ptr node);
 
    bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    void cleanup() override { std::string().swap(the_node_str_);} /// run in the server, after command send to client
 

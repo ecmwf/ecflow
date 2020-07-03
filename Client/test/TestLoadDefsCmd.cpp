@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <string>
 #include <iostream>
 
@@ -44,6 +45,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 {
 	cout << "Client:: ...test_load_defs_cmd_handleRequest"<< endl;
+	TestLog test_log("test_load_defs_cmd_handleRequest.log"); // will create log file, and destroy log and remove file at end of scope
 
    std::string firstDef = File::test_data("Client/test/data/first.def","Client");
 

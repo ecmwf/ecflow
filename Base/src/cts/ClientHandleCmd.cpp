@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -33,41 +34,40 @@ namespace po = boost::program_options;
 ///       Instead we will use a simple flag to indicate that a FULL sync is required
 /// *****************************************************************************
 
-std::ostream& ClientHandleCmd::print(std::ostream& os) const
+void ClientHandleCmd::print(std::string& os) const
 {
 	switch (api_) {
-		case ClientHandleCmd::REGISTER: return user_cmd(os,CtsApi::to_string(CtsApi::ch_register(client_handle_,auto_add_new_suites_,suites_))); break;
-      case ClientHandleCmd::DROP:     return user_cmd(os,CtsApi::ch_drop(client_handle_)); break;
-      case ClientHandleCmd::DROP_USER:{
-         if (drop_user_.empty()) return user_cmd(os,CtsApi::ch_drop_user(user()));
-         return user_cmd(os,CtsApi::ch_drop_user(drop_user_));
-      }
-		case ClientHandleCmd::ADD:      return user_cmd(os,CtsApi::to_string(CtsApi::ch_add(client_handle_,suites_))); break;
-		case ClientHandleCmd::REMOVE:   return user_cmd(os,CtsApi::to_string(CtsApi::ch_remove(client_handle_,suites_))); break;
-      case ClientHandleCmd::AUTO_ADD: return user_cmd(os,CtsApi::to_string(CtsApi::ch_auto_add(client_handle_,auto_add_new_suites_))); break;
-      case ClientHandleCmd::SUITES:     return user_cmd(os,CtsApi::ch_suites()); break;
-		default: assert(false); break;
- 	}
-  	return os;
+	case ClientHandleCmd::REGISTER: user_cmd(os,CtsApi::to_string(CtsApi::ch_register(client_handle_,auto_add_new_suites_,suites_))); break;
+	case ClientHandleCmd::DROP:     user_cmd(os,CtsApi::ch_drop(client_handle_)); break;
+	case ClientHandleCmd::DROP_USER:{
+		if (drop_user_.empty()) user_cmd(os,CtsApi::ch_drop_user(user()));
+		else user_cmd(os,CtsApi::ch_drop_user(drop_user_));
+		break;
+	}
+	case ClientHandleCmd::ADD:      user_cmd(os,CtsApi::to_string(CtsApi::ch_add(client_handle_,suites_))); break;
+	case ClientHandleCmd::REMOVE:   user_cmd(os,CtsApi::to_string(CtsApi::ch_remove(client_handle_,suites_))); break;
+	case ClientHandleCmd::AUTO_ADD: user_cmd(os,CtsApi::to_string(CtsApi::ch_auto_add(client_handle_,auto_add_new_suites_))); break;
+	case ClientHandleCmd::SUITES:   user_cmd(os,CtsApi::ch_suites()); break;
+	default: assert(false); break;
+	}
 }
 
-std::ostream& ClientHandleCmd::print_only(std::ostream& os) const
+void ClientHandleCmd::print_only(std::string& os) const
 {
    switch (api_) {
-      case ClientHandleCmd::REGISTER: os << CtsApi::to_string(CtsApi::ch_register(client_handle_,auto_add_new_suites_,suites_)); break;
-      case ClientHandleCmd::DROP:     os << CtsApi::ch_drop(client_handle_); break;
+      case ClientHandleCmd::REGISTER: os += CtsApi::to_string(CtsApi::ch_register(client_handle_,auto_add_new_suites_,suites_)); break;
+      case ClientHandleCmd::DROP:     os += CtsApi::ch_drop(client_handle_); break;
       case ClientHandleCmd::DROP_USER:{
-         if (drop_user_.empty()) os << CtsApi::ch_drop_user(user());
-         else                    os << CtsApi::ch_drop_user(drop_user_);
+         if (drop_user_.empty()) os += CtsApi::ch_drop_user(user());
+         else                    os += CtsApi::ch_drop_user(drop_user_);
          break;
       }
-      case ClientHandleCmd::ADD:      os << CtsApi::to_string(CtsApi::ch_add(client_handle_,suites_)); break;
-      case ClientHandleCmd::REMOVE:   os << CtsApi::to_string(CtsApi::ch_remove(client_handle_,suites_)); break;
-      case ClientHandleCmd::AUTO_ADD: os << CtsApi::to_string(CtsApi::ch_auto_add(client_handle_,auto_add_new_suites_)); break;
-      case ClientHandleCmd::SUITES:   os << CtsApi::ch_suites(); break;
+      case ClientHandleCmd::ADD:      os += CtsApi::to_string(CtsApi::ch_add(client_handle_,suites_)); break;
+      case ClientHandleCmd::REMOVE:   os += CtsApi::to_string(CtsApi::ch_remove(client_handle_,suites_)); break;
+      case ClientHandleCmd::AUTO_ADD: os += CtsApi::to_string(CtsApi::ch_auto_add(client_handle_,auto_add_new_suites_)); break;
+      case ClientHandleCmd::SUITES:   os += CtsApi::ch_suites(); break;
       default: assert(false); break;
    }
-   return os;
 }
 
 
@@ -394,4 +394,4 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
  	}
 }
 
-std::ostream& operator<<(std::ostream& os, const ClientHandleCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const ClientHandleCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

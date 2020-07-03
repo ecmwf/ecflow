@@ -1144,7 +1144,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 
         for(int i=0; i < node->numOfChildren(); i++)
 		{
-			QAction *ac=new QAction(node->childAt(i)->name(),this);
+			auto *ac=new QAction(node->childAt(i)->name(),this);
 			ac->setData(i);
 			acLst << ac;
 		}

@@ -46,7 +46,7 @@ namespace cereal
   }
 
   // ===================================================================================
-  // Handle boost::posix_time::ptime   boost::posix_time::ptime
+  // Handle boost::posix_time::ptime
   template <class Archive,
             traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
   void save( Archive & ar,  boost::posix_time::ptime const & d )
@@ -62,6 +62,25 @@ namespace cereal
      std::string value;
      ar( value );
      d = boost::posix_time::time_from_string(value);
+  }
+
+  // ===================================================================================
+  // Handle boost::gregorian::date
+  template <class Archive,
+            traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+  void save( Archive & ar,  boost::gregorian::date const & d )
+  {
+      ar( cereal::make_nvp("date", to_simple_string(d) ) );
+  }
+
+  //! Loading for std::map<std::string, std::string> for text based archives
+  template <class Archive,
+            traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+            void load( Archive & ar, boost::gregorian::date  & d )
+  {
+     std::string value;
+     ar( value );
+     d = boost::gregorian::from_simple_string(value);
   }
 
 } // namespace cereal

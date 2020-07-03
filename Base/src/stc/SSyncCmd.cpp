@@ -253,10 +253,9 @@ bool SSyncCmd::equals(ServerToClientCmd* rhs) const
    return ServerToClientCmd::equals(rhs);
 }
 
-std::ostream& SSyncCmd::print(std::ostream& os) const
+std::string SSyncCmd::print() const
 {
-   os << "cmd:SSyncCmd";
-   return os;
+   return "cmd:SSyncCmd";
 }
 
 bool SSyncCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts_cmd*/, bool debug ) const
@@ -350,5 +349,5 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
    return false;
 }
 
-std::ostream& operator<<(std::ostream& os, const SSyncCmd& c)  { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const SSyncCmd& c) { os << c.print(); return os; }
 

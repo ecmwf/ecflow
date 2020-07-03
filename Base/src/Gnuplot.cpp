@@ -12,6 +12,7 @@
 //
 // Description : Encompasses functionality for plotting server load
 //============================================================================
+#include <stdexcept>
 #include <cassert>
 #include <vector>
 #include <iostream>

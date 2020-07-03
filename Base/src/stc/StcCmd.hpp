@@ -21,7 +21,7 @@
 // Originally we had separate commands. However this lead
 // TOC overflow on the AIX. Hence in order to minimise global
 // symbols due to use of boost serialisation, will use a single command
-class StcCmd : public ServerToClientCmd {
+class StcCmd final : public ServerToClientCmd {
 public:
    enum Api { OK,
       BLOCK_CLIENT_SERVER_HALTED,
@@ -36,7 +36,7 @@ public:
    void init(Api a) { api_ = a;}
    Api api() const { return api_;}
 
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 

@@ -312,8 +312,10 @@ void SessionHandler::setTemporarySessionIfReqested()
 		if (sp)
 		{
 			// create a session name, likely to be unique - if it already exists in the list, then use that
-			char sessName[1024];
-			sprintf(sessName, "temporary_%s_%s_%d", sh, sp, getpid());
+			constexpr int buff_size = 1024;
+
+			char sessName[buff_size];
+			snprintf(sessName,buff_size, "temporary_%s_%s_%d", sh, sp, getpid());
 			std::string sname(sessName);
 			SessionItem *si = instance()->add(sname);
 			if (!si)
@@ -330,8 +332,8 @@ void SessionHandler::setTemporarySessionIfReqested()
 			instance()->createSessionDirWithTemplate(sname, templateName);
 
 			// construct an alias for this server
-			char calias[1024];
-			sprintf(calias, "%s:%s", sh, sp);
+			char calias[buff_size];
+			snprintf(calias,buff_size, "%s:%s", sh, sp);
 			std::string alias(calias);
 			si->temporaryServerAlias(alias);
 

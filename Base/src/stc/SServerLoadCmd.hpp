@@ -21,14 +21,14 @@
 /// Paired with CtsCmd::SERVER_LOAD
 /// Client---(CtsCmd::SERVER_LOAD)---->Server-----(SServerLoadCmd)--->client:
 ///================================================================================
-class SServerLoadCmd : public ServerToClientCmd {
+class SServerLoadCmd final : public ServerToClientCmd {
 public:
    explicit SServerLoadCmd(const std::string& log_file_path) : log_file_path_(log_file_path) {}
    SServerLoadCmd() : ServerToClientCmd() {}
 
    void init(const std::string& s) { log_file_path_ = s;}
    const std::string& log_file_path() const { return log_file_path_; }
-   std::ostream& print(std::ostream& os) const override;
+   std::string print() const override;
    bool equals(ServerToClientCmd*) const override;
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
    void cleanup() override { std::string().swap(log_file_path_);} /// run in the server, after command send to client

@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <stdexcept>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>

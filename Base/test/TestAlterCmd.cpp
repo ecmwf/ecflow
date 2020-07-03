@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
 
 #include "ClientToServerCmd.hpp"
 #include "TestHelper.hpp"
@@ -29,6 +30,7 @@
 
 using namespace std;
 using namespace ecf;
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
@@ -74,6 +76,12 @@ private:
    unsigned int initial_state_change_no_;
 };
 
+BOOST_AUTO_TEST_CASE( test_add_log5 )
+{
+	// create once for all test below, then remove at the end
+	Log::create("test_add_log5.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
 
 BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
 {
@@ -894,6 +902,38 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( !s->get_late(), "expected late to be deleted");
    }
 
+   // ================================ TIME ==================================================================
+   {
+      // test add time
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"+23:10")));
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 1, "expected 1 time   but found " <<  task->timeVec().size());
+
+      // test change time
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::TIME,"+23:10","10:10")));
+      BOOST_CHECK_MESSAGE( task->timeVec()[0].toString() == "time 10:10", "expected 'time 10:10' but found " << task->timeVec()[0].toString() );
+
+      // test delete time
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TIME)));
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 0, "expected 0 time but found " <<  task->timeVec().size());
+   }
+
+   // ================================ TODAY ==================================================================
+   {
+      // test add today
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"+10:10 23:00 00:01")));
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 1, "expected 1 today but found " <<  task->todayVec().size());
+
+      // test change today
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::TODAY,"+10:10 23:00 00:01","+10:10")));
+      BOOST_CHECK_MESSAGE( task->todayVec()[0].toString() == "today +10:10", "expected 'today +10:10' but found " << task->todayVec()[0].toString() );
+
+      // test delete today
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TODAY)));
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 0, "expected 0 time but found " <<  task->todayVec().size());
+   }
+
 
    // ================================ Generic ==================================================================
    // Can not add generic via Alter
@@ -1049,6 +1089,13 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_errors )
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_destroy_log5 )
+{
+	Log::destroy();
+	fs::remove("test_add_log5.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -12,10 +12,12 @@
 //
 // Description :
 //============================================================================
+#include <stdexcept>
 #include <string>
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -30,8 +32,18 @@
 
 using namespace std;
 using namespace ecf;
+namespace fs = boost::filesystem;
+
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
+
+BOOST_AUTO_TEST_CASE( test_add_log )
+{
+	// create once for all test below, then remove at the end
+	Log::create("test_add_log.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
+}
+
 
 BOOST_AUTO_TEST_CASE( test_add_limit )
 {
@@ -1077,6 +1089,13 @@ BOOST_AUTO_TEST_CASE( test_inlimit_submission_only )
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_destroy_log )
+{
+	Log::destroy();
+	fs::remove("test_add_log.log");
+	BOOST_CHECK_MESSAGE( true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -37,6 +37,7 @@ struct B
 };
  */
 
+#include <type_traits> // for std::enable_if_t
 #include <cereal/details/traits.hpp>
 #include <cereal/cereal.hpp>
 

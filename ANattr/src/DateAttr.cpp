@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <ostream>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -226,6 +227,16 @@ void DateAttr::print(std::string& os) const
 	   }
 	}
 	os += "\n";
+}
+
+std::string DateAttr::name() const
+{
+    std::string os;
+    write(os);
+    if (free_) {
+        os += " # free";
+    }
+    return os;
 }
 
 std::string DateAttr::toString() const

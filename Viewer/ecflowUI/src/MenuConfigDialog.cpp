@@ -31,7 +31,7 @@ MenuConfigDialog::MenuConfigDialog(QWidget *parent) : QDialog(parent)
 		Menu *menu = new Menu("UserTemp");
 		MenuHandler::addMenu(menu);
 
-		MenuItem *item = new MenuItem("UserTemp");
+		auto *item = new MenuItem("UserTemp");
 		item->setAsSubMenu();
 		item->setCommand("NoCommand");
 

@@ -68,7 +68,7 @@ def wait_for_suite_to_complete(ci,suite_name):
         count += 1
         ci.sync_local() # get the changes, synced with local defs
         suite = ci.get_defs().find_suite(suite_name)
-        assert suite != None, " Expected to find suite " + suite_name + ":\n" + str(ci.get_defs())
+        assert suite is not None, " Expected to find suite " + suite_name + ":\n" + str(ci.get_defs())
         if suite.get_state() == State.complete:
             break;
         if suite.get_state() == State.aborted:

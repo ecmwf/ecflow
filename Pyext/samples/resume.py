@@ -13,6 +13,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 import ecflow
 import argparse # for argument parsing     
+import sys
 
 if __name__ == "__main__":
     
@@ -44,9 +45,9 @@ if __name__ == "__main__":
         
         # check to see if definition exists in the server
         defs = CL.get_defs()
-        if defs == None :
+        if defs is None :
             print("No definition found, exiting...")
-            exit(0) 
+            sys.exit(0) 
          
         paths_list = []
         node_vec = defs.get_all_nodes()
@@ -64,7 +65,7 @@ if __name__ == "__main__":
 
 #        # requires ecflow >= 4.0.8
 #         suite = defs.find_suite(ARGS.suite)
-#         if suite != None:
+#         if suite is not None:
 #             paths_list = []
 #             node_vec = suite.get_all_nodes()
 #             for node in node_vec:

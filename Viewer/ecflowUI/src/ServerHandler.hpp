@@ -52,7 +52,7 @@ class ServerHandler : public QObject
     friend class CommandHandler;
   
 public:
-	enum Activity {NoActivity,LoadActivity,RescanActivity};
+    enum Activity {NoActivity,LoadActivity,RescanActivity,DeleteActivity,ClientRecreateActivity};
     enum Compatibility {Compatible, Incompatible, CanBeCompatible};
 
 	const std::string& name() const {return name_;}
@@ -137,7 +137,7 @@ protected:
     ServerHandler(const std::string& name,const std::string& host,const std::string&  port,
                   const std::string& user, bool ssl);
 	~ServerHandler() override;
-    void logout();
+    void logoutAndDelete();
     void queueLoggedOut();
 
     //Only friend classes can access it. Practically it means we
@@ -184,7 +184,7 @@ private Q_SLOTS:
 
 private:
     void createClient(bool init);
-    void deleteClient();
+    void recreateClient();
     void refreshInternal();
     void resetFinished();
 	void resetFailed(const std::string& errMsg);

@@ -32,6 +32,7 @@
 #include "TextFilterWidget.hpp"
 #include "UserMessage.hpp"
 #include "UiLog.hpp"
+#include "VFile.hpp"
 
 int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
@@ -544,7 +545,11 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
     if(proc.exitStatus() == QProcess::NormalExit && errStr.isEmpty())
     {
         oriFile_=file_;
-        textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));        
+        bool empty = fTarget->isEmpty();
+        textFilter_->setStatus(empty?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));
+        if (textFilter_->needNumberOfLines() && !empty) {
+           textFilter_->setNumberOfLines(fTarget->numberOfLines());
+        }
         loadFilteredFile(fTarget);
     }
     else

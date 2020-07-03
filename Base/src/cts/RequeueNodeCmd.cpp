@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -46,19 +47,18 @@ static std::string to_string(RequeueNodeCmd::Option option) {
    return string();
 }
 
-std::ostream& RequeueNodeCmd::print(std::ostream& os) const
+void RequeueNodeCmd::print(std::string& os) const
 {
- 	return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_))));
+ 	user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_))));
 }
-std::ostream& RequeueNodeCmd::print_only(std::ostream& os) const
+void RequeueNodeCmd::print_only(std::string& os) const
 {
-   os << CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_)));return os;
+   os += CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_)));
 }
 
-std::ostream& RequeueNodeCmd::print(std::ostream& os, const std::string& path) const
+void RequeueNodeCmd::print(std::string& os, const std::string& path) const
 {
-   std::vector<std::string> paths(1,path);
-   return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths,to_string(option_))));
+   user_cmd(os,CtsApi::to_string(CtsApi::requeue(std::vector<std::string>(1,path),to_string(option_))));
 }
 
 STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
@@ -68,17 +68,18 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 
 	// The clear_suspended_in_child_nodes *only* incremented for child nodes.
 	// Hence we only clear suspended for child nodes.
-   Node::Requeue_args args(Node::Requeue_args::FULL,
+    Node::Requeue_args args(Node::Requeue_args::FULL,
 		                   true /* reset repeats */,
                            0    /* clear_suspended_in_child_nodes */,
                            true /* reset_next_time_slot */,
                            true /* reset relative duration */);
 
-   std::stringstream ss;
+    Defs* defs = as->defs().get();
+    std::stringstream ss;
 	size_t vec_size = paths_.size();
 	for(size_t i = 0; i < vec_size; i++) {
 
-	   node_ptr theNodeToRequeue = find_node_for_edit_no_throw(as,paths_[i]);
+	   node_ptr theNodeToRequeue = find_node_for_edit_no_throw(defs,paths_[i]);
       if (!theNodeToRequeue.get()) {
          ss << "RequeueNodeCmd: Could not find node at path " << paths_[i] << "\n";
          LOG(Log::ERR,"RequeueNodeCmd: Could not find node at path " << paths_[i]);
@@ -239,4 +240,4 @@ void RequeueNodeCmd::create( 	Cmd_ptr& cmd,
  	cmd = std::make_shared<RequeueNodeCmd>(paths,option);
 }
 
-std::ostream& operator<<(std::ostream& os, const RequeueNodeCmd& c) { return c.print(os); }
+std::ostream& operator<<(std::ostream& os, const RequeueNodeCmd& c) { std::string ret; c.print(ret); os << ret; return os;}

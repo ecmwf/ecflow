@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include <sstream>
 
 #include "TimeAttr.hpp"
@@ -24,6 +25,7 @@
 #include "Ecf.hpp"
 #include "Str.hpp"
 #include "Serialization.hpp"
+#include "Log.hpp"
 
 namespace ecf {
 
@@ -41,18 +43,21 @@ TimeAttr::TimeAttr(const std::string& str)
 
 void TimeAttr::calendarChanged( const ecf::Calendar& c )
 {
-   if ( free_ ) {
-      return;
-   }
-
+   // ensure this called first , since we need always update for relative duration. ECFLOW-1648
    if (ts_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
+   }
+//   log(Log::DBG,"TimeAttr::calendarChanged(1) " + dump()); // ECFLOW-1648
+
+   if ( free_ ) {
+      return;
    }
 
    // For a time series, we rely on the re queue to reset makeFree
    if (isFree(c)) {
       setFree();
    }
+//   log(Log::DBG,"TimeAttr::calendarChanged(2) " + dump()); // ECFLOW-1648
 }
 
 void TimeAttr::resetRelativeDuration()
@@ -70,6 +75,14 @@ void TimeAttr::print(std::string& os) const
       ts_.write_state(os,free_);
    }
    os += "\n";
+}
+
+std::string TimeAttr::name() const
+{
+   std::string ret;
+   write(ret);
+   ts_.write_state_for_gui(ret,free_);
+   return ret;
 }
 
 std::string TimeAttr::toString() const
@@ -91,7 +104,7 @@ std::string TimeAttr::dump() const
 	ss << "time ";
 
     if (free_) ss << "(free) ";
-    else           ss << "(holding) ";
+    else       ss << "(holding) ";
 
  	ss << ts_.dump();
 

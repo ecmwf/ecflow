@@ -35,7 +35,6 @@ Q_OBJECT
 
 public:
     ServerComQueue(ServerHandler *server,ClientInvoker* client);
-	~ServerComQueue() override;
 
     bool logout();
 
@@ -67,6 +66,7 @@ protected Q_SLOTS:
     void slotLogoutDone();
 
 protected:
+    ~ServerComQueue() override;
     void createThread();
     void stopTimer();
     void startCurrentTask();

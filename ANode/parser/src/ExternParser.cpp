@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <stdexcept>
 #include "ExternParser.hpp"
 #include "Defs.hpp"
 

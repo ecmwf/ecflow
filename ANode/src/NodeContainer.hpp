@@ -36,6 +36,7 @@ public:
 	void begin() override;
 	void requeue(Requeue_args&) override;
    void requeue_time_attrs() override;
+   void handle_migration(const ecf::Calendar&) override;
    void reset_late_event_meters() override;
 	bool run(JobsParam& jobsParam, bool force) override;
 	void kill(const std::string& zombie_pid = "") override;
@@ -64,6 +65,7 @@ public:
  	void allChildren(std::vector<node_ptr>&) const override;
  
  	node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const override;
+    node_ptr find_immediate_child(const boost::string_view&) const override;
    node_ptr find_node_up_the_tree(const std::string& name) const override;
 
 	node_ptr find_relative_node(const std::vector<std::string>& pathToNode) override;
@@ -106,7 +108,7 @@ public:
 	void setStateOnlyHierarchically(NState::State s,bool force = false) override;
 	void set_state_hierarchically(NState::State s, bool force) override;
    void update_limits() override;
-   void sort_attributes(ecf::Attr::Type attr,bool recursive) override;
+   void sort_attributes(ecf::Attr::Type attr,bool recursive = true,const std::vector<std::string>& no_sort = std::vector<std::string>()) override;
 
    void archive();
    void restore();

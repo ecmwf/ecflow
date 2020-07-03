@@ -113,7 +113,7 @@ class Tester(object) :
         self.log_msg(test)
         self.ci_.load(self.create_defs(test))  
         self.sync_local()  
-        assert self.ci_.get_defs().find_suite(test) != None, "Expected to find suite of name " + test + ":\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_suite(test) is not None, "Expected to find suite of name " + test + ":\n" + str(self.ci_.get_defs())
         
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
         self.sync_local()  
@@ -161,7 +161,7 @@ class Tester(object) :
         self.log_msg(test)
         self.ci_.load(self.create_defs(test))  
         self.sync_local() 
-        assert self.ci_.get_defs().find_suite(test) != None, "Expected to find suite of name " + test + ":\n" + str(self.ci_.get_defs())              
+        assert self.ci_.get_defs().find_suite(test) is not None, "Expected to find suite of name " + test + ":\n" + str(self.ci_.get_defs())              
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
     def test_client_load_from_disk(self):            
@@ -175,7 +175,7 @@ class Tester(object) :
             
         # check load worked
         self.sync_local() 
-        assert self.ci_.get_defs().find_suite(test) != None, "Expected to find suite of name " + test + ":\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_suite(test) is not None, "Expected to find suite of name " + test + ":\n" + str(self.ci_.get_defs())
         os.remove(defs_file)
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
@@ -227,7 +227,7 @@ class Tester(object) :
         self.ci_.restore_from_checkpt()
         
         self.sync_local() 
-        assert self.ci_.get_defs().find_suite(test) != None, "Expected to find suite " + test + " after restore from checkpt:\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_suite(test) is not None, "Expected to find suite " + test + " after restore from checkpt:\n" + str(self.ci_.get_defs())
     
         os.remove(self.checkpt_file_path())
         self.ci_.restart_server()   
@@ -290,7 +290,7 @@ class Tester(object) :
             count += 1
             self.sync_local(0) # get the changes, synced with local defs
             suite = self.ci_.get_defs().find_suite(test)
-            assert suite != None, "Expected to find suite " + test + ":\n" + str(self.ci_.get_defs())
+            assert suite is not None, "Expected to find suite " + test + ":\n" + str(self.ci_.get_defs())
             if suite.get_state() == State.complete:
                 break;
             time.sleep(3)
@@ -313,7 +313,7 @@ class Tester(object) :
             count += 1
             self.sync_local(0) # get the changes, synced with local defs
             suite = self.ci_.get_defs().find_suite(test)
-            assert suite != None, "Expected to find suite " + tests + ":\n" + str(self.ci_.get_defs())
+            assert suite is not None, "Expected to find suite " + tests + ":\n" + str(self.ci_.get_defs())
             if suite.get_state() == State.complete:
                 break;
             time.sleep(3)
@@ -630,7 +630,7 @@ class Tester(object) :
             if self.ci_.news_local():
                 self.sync_local(0) # get the changes, synced with local defs
                 suite = self.ci_.get_defs().find_suite(test)
-                assert suite != None, "Expected to find suite"
+                assert suite is not None, "Expected to find suite"
                 if suite.get_state() == State.complete:
                     break;
             time.sleep(3)
@@ -714,13 +714,13 @@ class Tester(object) :
         task_t1.add_trigger( "t2 == active" )
         task_t1.add_complete( "t2 == complete" )
         
-        assert task_t1.get_late() == None, "expected no late" 
+        assert task_t1.get_late() is None, "expected no late" 
         late = Late()
         late.submitted(20, 10)
         late.active(20, 10)
         late.complete(20, 10, True)
         task_t1.add_late(late)
-        assert task_t1.get_late() != None, "expected late" 
+        assert task_t1.get_late() is not None, "expected late" 
         
         t2 = "/" + test + "/f1/t2"
         task_t2 = defs.find_abs_node(t2)
@@ -827,21 +827,21 @@ class Tester(object) :
         self.ci_.alter(t1,"delete","late")   
         self.sync_local()
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
-        assert task_t1.get_late() == None, "expected no late after delete" 
+        assert task_t1.get_late() is None, "expected no late after delete" 
     
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
-        assert task_t1.get_trigger() != None, "Expected trigger:\n" + str(self.ci_.get_defs())
+        assert task_t1.get_trigger() is not None, "Expected trigger:\n" + str(self.ci_.get_defs())
         self.ci_.alter(t1,"delete","trigger")   
         self.sync_local()
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
-        assert task_t1.get_trigger() == None, "Expected trigger to be deleted:\n" + str(self.ci_.get_defs())
+        assert task_t1.get_trigger() is None, "Expected trigger to be deleted:\n" + str(self.ci_.get_defs())
     
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
-        assert task_t1.get_complete() != None, "Expected complete:\n" + str(self.ci_.get_defs())
+        assert task_t1.get_complete() is not None, "Expected complete:\n" + str(self.ci_.get_defs())
         self.ci_.alter(t1,"delete","complete")   
         self.sync_local()
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
-        assert task_t1.get_complete() == None, "Expected complete to be deleted:\n" + str(self.ci_.get_defs())
+        assert task_t1.get_complete() is None, "Expected complete to be deleted:\n" + str(self.ci_.get_defs())
     
         self.ci_.alter(t2,"delete","repeat")   
         self.sync_local()
@@ -937,14 +937,14 @@ class Tester(object) :
         self.sync_local()
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
         limit = task_t1.find_limit("limit")
-        assert limit != None, "Expected to find limit"
+        assert limit is not None, "Expected to find limit"
         assert limit.limit() == 2, "Expected alter of limit_max to be 2 but found " + str(limit.limit())
     
         self.ci_.alter(t1,"change","limit_value","limit", "2")   
         self.sync_local()
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
         limit = task_t1.find_limit("limit")
-        assert limit != None, "Expected to find limit"
+        assert limit is not None, "Expected to find limit"
         assert limit.value() == 2, "Expected alter of limit_value to be 2 but found " + str(limit.value())
     
         self.ci_.alter(t1,"change","label","label","new-value")   
@@ -990,37 +990,6 @@ class Tester(object) :
             assert not task_flag.is_set( flg ),"expected flag %r NOT to be set" % task_flag.type_to_string(flg)
         self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
     
-    def test_client_flag_migrated(self):
-        # ENABLE for ecflow 4.5.0
-        return
-        test = sys._getframe().f_code.co_name # returns function name
-        self.log_msg(test)
-        
-        defs = self.create_defs(test)   
-        s1 = "/" + test  
-       
-        self.ci_.load(defs)   
-        self.sync_local()
-     
-        suite = defs.find_suite(test)
-        node_vec = suite.get_all_nodes()
-        assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-     
-        self.ci_.alter(s1,"set_flag","migrated")   
-        self.sync_local()
-        suite = defs.find_suite(test)
-        node_vec = suite.get_all_nodes()
-        assert len(node_vec) == 1, "Expected 1 nodes, but found " + str(len(node_vec))
-     
-        self.ci_.checkpt()  # checkpoint after setting flag migrated, need to prove nodes still persisted
-         
-        self.ci_.alter(s1,"clear_flag","migrated")   
-        self.sync_local()
-        suite = defs.find_suite(test)
-        node_vec = suite.get_all_nodes()
-        assert len(node_vec) == 4, "Expected 4 nodes, but found " + str(len(node_vec))
-        self.ci_.suspend("/" + test  ) # stop  downstream test from re-starting this
-     
     def test_client_force(self):
         test = sys._getframe().f_code.co_name # returns function name
         self.log_msg(test)
@@ -1030,7 +999,7 @@ class Tester(object) :
         t1 = path_list[0]      
         for path in path_list:
             task = defs.find_abs_node(path)
-            assert task != None, "Expected to find task at path " + path
+            assert task is not None, "Expected to find task at path " + path
             task.add_event("event")
     
         self.ci_.load(defs)   
@@ -1122,11 +1091,11 @@ class Tester(object) :
         
         self.ci_.replace("/" + test + "/f2",client_def,True,False)  # True means create parents as needed, False means don't bypass checks/zombies
         self.sync_local()  
-        assert self.ci_.get_defs().find_abs_node("/" + test + "/f2/t1") != None, "Expected to find task /" + test + "/f2/t1\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_abs_node("/" + test + "/f2/t1") is not None, "Expected to find task /" + test + "/f2/t1\n" + str(self.ci_.get_defs())
     
         # Example of using replace to *REMOVE* node hierarchy to an existing suite, could have used delete
-        assert self.ci_.get_defs().find_abs_node("/" + test + "/f1/t1") != None, "Expected to find task /" + test + "/f1/t1\n" + str(self.ci_.get_defs())
-        assert self.ci_.get_defs().find_abs_node("/" + test + "/f2/t1") != None, "Expected to find task /" + test + "/f2/t1\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_abs_node("/" + test + "/f1/t1") is not None, "Expected to find task /" + test + "/f1/t1\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_abs_node("/" + test + "/f2/t1") is not None, "Expected to find task /" + test + "/f2/t1\n" + str(self.ci_.get_defs())
         client_def = Defs()
         client_def.add_suite(test)    # should only have the suite
         if on_disk:
@@ -1135,8 +1104,8 @@ class Tester(object) :
     
         self.ci_.replace("/" + test,client_def)   
         self.sync_local()  
-        assert self.ci_.get_defs().find_abs_node("/" + test + "/f1/t1") == None, "Expected NOT to find task /" + test + "/f1/t1\n" + str(self.ci_.get_defs())
-        assert self.ci_.get_defs().find_abs_node("/" + test + "/f2/t1") == None, "Expected NOT to find task /" + test + "/f2/t1\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_abs_node("/" + test + "/f1/t1") is None, "Expected NOT to find task /" + test + "/f1/t1\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_abs_node("/" + test + "/f2/t1") is None, "Expected NOT to find task /" + test + "/f2/t1\n" + str(self.ci_.get_defs())
     
         #===============================================================================
         # Example of using replace to add a *NEW* suite
@@ -1150,7 +1119,7 @@ class Tester(object) :
         self.ci_.replace("/" + test2,client_def,True,False)  # True means create parents as needed, False means don't bypass checks/zombies
         self.sync_local()  
         suite = self.ci_.get_defs().find_suite(test2)
-        assert suite != None ,"Expected to find suite :" + test2 + "\n" + str(self.ci_.get_defs())
+        assert suite is not None ,"Expected to find suite :" + test2 + "\n" + str(self.ci_.get_defs())
                
         # replace added suite s2 with a new s2 which has a task, 
         # s2 must exist on the client defs
@@ -1163,7 +1132,7 @@ class Tester(object) :
         self.ci_.replace("/" + test2,client_def) 
         self.sync_local()  
             
-        assert self.ci_.get_defs().find_abs_node("/" + test2 + "/t1") != None, "Expected to find task /" + test2 + "/t1\n" + str(self.ci_.get_defs())
+        assert self.ci_.get_defs().find_abs_node("/" + test2 + "/t1") is not None, "Expected to find task /" + test2 + "/t1\n" + str(self.ci_.get_defs())
         if on_disk:
             os.remove(client_def)
     
@@ -1274,7 +1243,7 @@ class Tester(object) :
         self.sync_local();
         for task in task_vec:
             node = self.ci_.get_defs().find_abs_node(task.get_abs_node_path()) 
-            assert node != None , "Expected to find task " + task.get_abs_node_path()  + ":\n"  + str(self.ci_.get_defs()) 
+            assert node is not None , "Expected to find task " + task.get_abs_node_path()  + ":\n"  + str(self.ci_.get_defs()) 
     
         for task in task_vec:
             self.ci_.delete(task.get_abs_node_path())
@@ -1282,7 +1251,7 @@ class Tester(object) :
         self.sync_local();
         for task in task_vec:
             node = self.ci_.get_defs().find_abs_node(task.get_abs_node_path()) 
-            assert node == None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(self.ci_.get_defs())   
+            assert node is None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(self.ci_.get_defs())   
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this
         
     def test_client_delete_node_multiple_paths(self): 
@@ -1302,14 +1271,14 @@ class Tester(object) :
         self.sync_local();
         for task in task_vec:
             node = self.ci_.get_defs().find_abs_node(task.get_abs_node_path()) 
-            assert node != None , "Expected to find task " + task.get_abs_node_path()  + ":\n"  + str(self.ci_.get_defs()) 
+            assert node is not None , "Expected to find task " + task.get_abs_node_path()  + ":\n"  + str(self.ci_.get_defs()) 
     
         self.ci_.delete(paths)
     
         self.sync_local();
         for task in task_vec:
             node = self.ci_.get_defs().find_abs_node(task.get_abs_node_path()) 
-            assert node == None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(self.ci_.get_defs())   
+            assert node is None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(self.ci_.get_defs())   
         self.ci_.suspend("/" + test  )  # stop  downstream test from re-starting this    
     
     def test_client_check_defstatus(self):            
@@ -1332,8 +1301,8 @@ class Tester(object) :
         #print self.ci_.get_defs();
         task_t1 = self.ci_.get_defs().find_abs_node(t1)
         task_t2 = self.ci_.get_defs().find_abs_node(t2)
-        assert task_t1 != None,"Could not find t1"
-        assert task_t2 != None,"Could not find t2"
+        assert task_t1 is not None,"Could not find t1"
+        assert task_t2 is not None,"Could not find t2"
       
         assert task_t1.get_state() == State.queued, "Expected state queued but found " + str(task_t1.get_state())
         assert task_t2.get_state() == State.queued, "Expected state queued " + str(task_t2.get_state())
@@ -1359,8 +1328,8 @@ class Tester(object) :
         #print self.ci_.get_defs();
         task_t1 = self.ci_.get_defs().find_abs_node("/" + test + "/f1/t1")
         task_t2 = self.ci_.get_defs().find_abs_node("/" + test + "/f1/t2")
-        assert task_t1 != None,"Could not find /" + test + "/f1/t1"
-        assert task_t2 != None,"Could not find /" + test + "/f1/t2"
+        assert task_t1 is not None,"Could not find /" + test + "/f1/t1"
+        assert task_t2 is not None,"Could not find /" + test + "/f1/t2"
       
         assert task_t1.get_state() == State.queued, "Expected state queued but found " + str(task_t1.get_state())
         assert task_t2.get_state() == State.queued, "Expected state queued but found " + str(task_t2.get_state())
@@ -1453,7 +1422,6 @@ class Tester(object) :
         self.test_client_alter_delete() 
         self.test_client_alter_change() 
         self.test_client_alter_flag() 
-        self.test_client_flag_migrated() 
        
         self.test_client_force()             
         self.test_client_replace(False)             
@@ -1507,7 +1475,7 @@ if __name__ == "__main__":
     if ARGS.ecflow_client != "":
         if not os.path.exists(ARGS.ecflow_client):
             print("Could not find ecflow_client on path ",ARGS.ecflow_client)
-            exit(1)
+            sys.exit(1)
      
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)

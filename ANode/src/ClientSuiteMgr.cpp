@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdexcept>
 #include <algorithm> // for sort, remove_if
 #include <sstream>   // for std::stringstream
 

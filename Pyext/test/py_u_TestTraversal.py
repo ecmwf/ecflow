@@ -18,7 +18,7 @@
 
 import ecflow
 import ecflow_test_util as Test
-import os,fnmatch
+import os,fnmatch,sys
             
 class Indentor:
     """This class manages indentation, for use with context manager
@@ -166,7 +166,7 @@ def check_traversal(path_to_def):
         traversed_def = ecflow.Defs( file_name )
     except RuntimeError as e: 
         print("Could not parse file " + file_name + "\n" + str(e))
-        exit(1)
+        sys.exit(1)
          
     # compare the two defs
     ecflow.Ecf.set_debug_equality(True)

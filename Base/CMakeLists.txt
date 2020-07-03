@@ -124,3 +124,13 @@ ecbuild_add_test( TARGET       u_base
                   INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_aparser
                   )
+
+                  
+if (ENABLE_ALL_TESTS)
+   ecbuild_add_test( TARGET  perf_job_gen 
+                     SOURCES      test/TestJobGenPerf.cpp
+                     LIBS         base nodeattr node core pthread                                    
+                     INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
+                  )
+endif()
+                  

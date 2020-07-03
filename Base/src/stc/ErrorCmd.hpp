@@ -16,13 +16,13 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "ServerToClientCmd.hpp"
 
-class ErrorCmd : public ServerToClientCmd {
+class ErrorCmd final : public ServerToClientCmd {
 public:
    explicit ErrorCmd(const std::string& errorMsg);
 	ErrorCmd() : ServerToClientCmd() {}
 
 	void init( const std::string& errorMsg);
-	std::ostream& print(std::ostream& os) const override;
+	std::string print() const override;
 	bool equals(ServerToClientCmd*) const override;
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
 
