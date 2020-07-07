@@ -117,6 +117,8 @@ void ServerHandler::logoutAndDelete()
 {
     activity_ = DeleteActivity;
 
+    stopRefreshTimer();
+
     //Save settings
     saveConf();
 
@@ -277,6 +279,8 @@ void ServerHandler::recreateClient()
 {
     activity_= ClientRecreateActivity;
 
+    stopRefreshTimer();
+
     if(client_) {
         //Save settings
         saveConf();
@@ -345,6 +349,11 @@ bool ServerHandler::isDisabled() const
        connectState_->state() == ConnectState::SslCertificateError ||
        connectState_->state() == ConnectState::SslCertificateError ||
        compatibility_ == Incompatible);
+}
+
+bool ServerHandler::isInLogout() const
+{
+    return (activity() == DeleteActivity || activity() == ClientRecreateActivity);
 }
 
 //-----------------------------------------------
@@ -433,6 +442,11 @@ void ServerHandler::updateRefreshTimer()
 {
     UiLogS(this).dbg() << "ServerHandler::updateRefreshTimer -->";
 
+    if (isInLogout()) {
+        stopRefreshTimer();
+        return;
+    }
+
     if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
         stopRefreshTimer();
@@ -464,6 +478,11 @@ void ServerHandler::updateRefreshTimer()
 
 void ServerHandler::driftRefreshTimer()
 {
+    if (isInLogout()) {
+        stopRefreshTimer();
+        return;
+    }
+
     if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
         return;
@@ -514,6 +533,10 @@ void ServerHandler::driftRefreshTimer()
 //returns true if the current total (drifted) period is within the maximum allowed
 bool ServerHandler::checkRefreshTimerDrift() const
 {
+    if (isInLogout()) {
+        return true;
+    }
+
     if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
         return true;
@@ -805,6 +828,12 @@ void ServerHandler::refreshInternal()
 //called after a user command was issued
 void ServerHandler::refresh()
 {
+    if (isInLogout()) {
+        stopRefreshTimer();
+        return;
+    }
+
+
     if(isDisabled())
         return;
 
@@ -826,6 +855,11 @@ void ServerHandler::refresh()
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
+    if (isInLogout()) {
+        stopRefreshTimer();
+        return;
+    }
+
     UiLogS(this).dbg() << "Auto refreshing server";
     refreshInternal();
 
@@ -1472,6 +1506,7 @@ void ServerHandler::incompatibleServer(const std::string& version)
     compatibility_=Incompatible;
     stopRefreshTimer();
     comQueue_->disable();
+    setActivity(NoActivity);
 
     connectState_->state(ConnectState::VersionIncompatible);
     connectState_->errorMessage("Server version = " +
