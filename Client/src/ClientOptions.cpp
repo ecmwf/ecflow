@@ -182,7 +182,7 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
          std::string str = argv[i];
          for(size_t s=0; s < str.size(); s++) {
             if (static_cast<int>(str[s]) < 0 || static_cast<int>(str[s]) > 127) {
-               ss << "\nUnrecognised character not in range 0-127 " << std::dec << "dec(" << static_cast<int>(str[s]) << ") char:" << str[s];
+               ss << "\nUnrecognised character not in ASCII range(0-127) " << std::dec << "dec(" << static_cast<int>(str[s]) << ") char:" << str[s];
                ss << " found at index " << s << " for string '" << str << "'\n";
                if ( static_cast<int>(str[s]) == -30) ss << "check for bad hyphen/minus";
                throw std::runtime_error(ss.str());
