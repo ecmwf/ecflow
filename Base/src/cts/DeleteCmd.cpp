@@ -65,7 +65,6 @@ const char* DeleteCmd::theArg() const
 STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().node_delete_++;
-   std::stringstream ss;
 
    if ( paths_.empty() ) {
       if (!force_) check_for_active_or_submitted_tasks(as,nullptr);
@@ -79,31 +78,32 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const
       return PreAllocatedReply::delete_all_cmd();
    }
    else {
+      std::stringstream ss;
+      Defs* defs = as->defs().get();
 
-      size_t vec_size = paths_.size();
-      for(size_t i = 0; i < vec_size; i++) {
+      for(const auto& path: paths_) {
 
-         node_ptr theNodeToDelete =  as->defs()->findAbsNode(paths_[i]);
+         node_ptr theNodeToDelete =  defs->findAbsNode(path);
          if (!theNodeToDelete.get()) {
-            ss << "DeleteCmd:Delete: Could not find node at path '" << paths_[i] << "'\n";
+            ss << "DeleteCmd:Delete: Could not find node at path '" << path << "'\n";
             continue;
          }
          // since node is to be deleted, we need to record the paths.
-         add_node_path_for_edit_history(paths_[i]);
+         add_node_path_for_edit_history(path);
 
          if (!force_) check_for_active_or_submitted_tasks(as,theNodeToDelete.get());
          else         as->zombie_ctrl().add_user_zombies(theNodeToDelete.get(),CtsApi::delete_node_arg());
 
-         if (!as->defs()->deleteChild( theNodeToDelete.get() )) {
+         if (!defs->deleteChild( theNodeToDelete.get() )) {
             std::string errorMsg = "Delete: Can not delete node " + theNodeToDelete->debugNodePath();
             throw std::runtime_error( errorMsg ) ;
          }
       }
-   }
 
-   std::string error_msg = ss.str();
-   if (!error_msg.empty()) {
-      throw std::runtime_error( error_msg ) ;
+      std::string error_msg = ss.str();
+      if (!error_msg.empty()) {
+         throw std::runtime_error( error_msg ) ;
+      }
    }
 
    return PreAllocatedReply::ok_cmd();
