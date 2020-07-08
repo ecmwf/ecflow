@@ -11,6 +11,7 @@
 #define TRIGGERGRAPHLAYOUTBUILDER_HPP
 
 #include <vector>
+#include <cstddef>
 
 class TriggerGraphLayoutNode;
 
@@ -24,7 +25,7 @@ struct GraphLayoutNode
     bool hasParents() const {return parents_.size() > 0;}
     bool hasChildren() const {return children_.size() > 0;}
     int indexOfParent(int v) const {
-        for(size_t i=0; i < parents_.size(); i++) {
+        for(std::size_t i=0; i < parents_.size(); i++) {
             if (parents_[i] == v)
                 return static_cast<int>(i);
         }
@@ -32,7 +33,7 @@ struct GraphLayoutNode
     }
 
     int indexOfChild(int v) const {
-        for(size_t i=0; i < children_.size(); i++) {
+        for(std::size_t i=0; i < children_.size(); i++) {
             if (children_[i] == v)
                 return static_cast<int>(i);
         }
