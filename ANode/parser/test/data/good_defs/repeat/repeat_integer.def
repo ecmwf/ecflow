@@ -1,5 +1,4 @@
 suite repeate_integer3
- 
-    repeat integer VARIABLE3_XZ 0 10 #comment
+  repeat integer VARIABLE3_XZ 0 10 #comment
   task t1
 endsuite

@@ -15,4 +15,8 @@ suite autoarchive
     autoarchive 0      # archive immediately after complete
     task t1
  endfamily
+ family f5
+    autoarchive 00:01  #  archive after 1 minute, same as archive 0
+    task t1
+ endfamily
 endsuite

@@ -1,6 +1,6 @@
 suite label_spaces
-   family familyName
-      task taskName
+   family f
+      task t
       
       	label foo ""
       	

@@ -1,19 +1,19 @@
 suite defstatus
    defstatus suspended
-   family familyName0
+   family f
       defstatus complete
-      task taskName0
-  		 edit VAR2 value2
-      	 defstatus complete  # TODO defstatus ordering, if edit,event,meter first it wont parse
+      task t
+  		  edit VAR2 value2
+        defstatus complete  # TODO defstatus ordering, if edit,event,meter first it wont parse
    endfamily
 endsuite
 
 suite defstatus_s1;
    defstatus suspended
-   family familyName0
+   family f
       defstatus complete
-      task taskName0
-  		 edit VAR2 value2
-      	 defstatus complete  # TODO defstatus ordering, if edit,event,meter first it wont parse
+      task t
+  		  edit VAR2 value2
+        defstatus complete  # TODO defstatus ordering, if edit,event,meter first it wont parse
    endfamily
 endsuite

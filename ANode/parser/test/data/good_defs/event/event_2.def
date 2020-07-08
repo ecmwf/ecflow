@@ -1,6 +1,6 @@
 suite event_2
-   family familyName0
-      task taskName0
+   family f
+      task t
          event 0 
          event 1
     endfamily

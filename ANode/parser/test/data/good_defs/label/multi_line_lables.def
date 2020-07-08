@@ -7,4 +7,5 @@ suite label_multi_line
    label warning2 "value"
    label note2 "value\\nvalue" #\\n should be converted to new line
    label info2 "value\\nvalue  \\nfred fred2\\n" # \\n should be converted to new line
+   task t
 endsuite

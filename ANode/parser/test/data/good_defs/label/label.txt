@@ -1,16 +1,17 @@
 suite label
-   family familyName
-      task taskName
+   family f
+      task t
       	label foo ""
     endfamily
 endsuite
 
 suite label_s1
-   family familyName
-      task taskName ; label foo ""
+   family f
+      task t ; label foo ""
     endfamily
 endsuite
 
 suite label_s3
    label foo ""
+   task t
 endsuite

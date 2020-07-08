@@ -1,7 +1,7 @@
 suite task_spaces
-   family familyName0
+   family f
    
-      task taskName0
+      task t
       
       task fred
       

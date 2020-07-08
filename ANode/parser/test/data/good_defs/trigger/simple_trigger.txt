@@ -1,5 +1,5 @@
 suite trigger_simple
-    family familyName1
+    family f
 		task a             
          	event eventName 
     	task b             

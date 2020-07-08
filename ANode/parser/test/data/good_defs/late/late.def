@@ -1,5 +1,5 @@
 suite late
-   family familyName
+   family f
       task t1
       		late -s +00:15 -a 20:00 -c +02:00
       task t2

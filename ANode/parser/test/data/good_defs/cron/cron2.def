@@ -1,3 +1,4 @@
 suite cron2
  cron -w 0,1,2 -d 1,20,24 -m 5,6,7,8 10:00 20:00 01:00  #  
+ task t
 endsuite
