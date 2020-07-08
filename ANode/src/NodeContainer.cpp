@@ -1157,6 +1157,8 @@ void NodeContainer::archive()
 {
    if (nodes_.empty()) return; // nothing to archive
 
+   SuiteChanged1 changed(suite());
+
    // make a clone of this node DEEP COPY
    node_ptr this_clone = clone();
 
