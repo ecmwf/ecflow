@@ -14,6 +14,7 @@
 // Description :
 //============================================================================
 #include <fstream>
+#include <cstdlib>  // getenv
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -316,6 +317,19 @@ void time_load_and_downloads(
 
 BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
 {
+   if (getenv("ECF_SSL")) {
+      load_threshold_ms  = 5000;     // 4500;
+      begin_threshold_ms = 800;      // 400;
+      sync_full_threshold_s = 3.6;   // 2.6;
+      full_threshold_s = 3.8;        // 2.8;
+      suspend_threshold_s = 4.5;     // 3.5;
+      resume_threshold_s = 4.5;      // 3.5;
+      force_threshold_s = 10.5;      // 8.5;
+      check_pt_threshold_s = 1.5;    // 1.0;
+      client_cmds_threshold_s = 12;  // 8.5;
+   }
+
+
    if (fs::exists("/var/tmp/ma0/BIG_DEFS")) {
       /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
       InvokeServer invokeServer("Client:: ...test_perf_for_large_defs:",SCPort::next());
