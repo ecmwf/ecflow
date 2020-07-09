@@ -1,14 +1,16 @@
 suite today
-   family familyName0
-   		today 15:00
-   		today 00:00 23:59 00:30
-        today 00:00 06:59 00:30
+   family f
+   	today 15:00
+   	today 00:00 23:59 00:30
+      today 00:00 06:59 00:30
+      task t
    endfamily
 endsuite
 
 suite today_s1
-   family familyName0
-   		today 15:00 ; today 00:00 23:59 00:30
-        today 00:00 06:59 00:30
+   family f
+   	today 15:00 ; today 00:00 23:59 00:30
+      today 00:00 06:59 00:30
+      task t
    endfamily
 endsuite

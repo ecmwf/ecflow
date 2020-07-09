@@ -773,8 +773,8 @@ void TimeSeries::write_state_for_gui(std::string& ret,bool isFree) const
       ret += " #";
       if (isFree) ret += " free";
       if (!isValid_) ret += " expired";
-      if (next_time_slot_changed) { ret += " nextTimeSlot/"; ret += nextTimeSlot_.toString(); }
-      if (relative_duration_changed) { ret += " relativeDuration/"; ret += to_simple_string(relativeDuration_); }
+      if (next_time_slot_changed) { ret += " nextTimeSlot=";   ret += nextTimeSlot_.toString(); }
+      if (relative_duration_changed) { ret += " relDuration="; ret += to_simple_string(relativeDuration_); }
    }
 }
 

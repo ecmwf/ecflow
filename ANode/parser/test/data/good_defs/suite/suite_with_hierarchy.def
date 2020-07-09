@@ -1,20 +1,20 @@
 suite suite_hier
-	task t1
-	task t2
-	task t3
+	task 4
+	task 1
+	task 2
+	task 3
 	family f1
-		task f1_t1
-		task f1_t2
+		task 1
+		task 2
 	endfamily
-	task t4
 endsuite
 suite suite_hier_s1
-	task t1
-	task t2
-	task t3
+	task 4
+	task 1
+	task 2
+	task 3
 	family f1
 		task f1_t1
 		task f1_t2
 	endfamily
-	task t4
 endsuite

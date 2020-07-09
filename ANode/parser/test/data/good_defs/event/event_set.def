@@ -8,6 +8,6 @@ suite event_set
      endfamily
 endsuite
 
-suite event_set_s2;family familyName0 ; task taskName0 ; event 0 set ;event name set;event 1 eventName set
+suite event_set_s2;family f ; task t ; event 0 set ;event name set;event 1 eventName set
          event 2 eventNamea set; endfamily
 endsuite

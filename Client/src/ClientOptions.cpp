@@ -13,9 +13,11 @@
 // Description : Delegates argument parsing to the registered commands
 //============================================================================
 #include <stdexcept>
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <iomanip>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
 
 #include "ClientOptions.hpp"
 #include "ClientEnvironment.hpp"
@@ -32,6 +34,7 @@ namespace po = boost::program_options;
 
 static const char* client_env_description();
 static const char* client_task_env_description();
+static std::string print_variable_map(const boost::program_options::variables_map& vm);
 
 
 ClientOptions::ClientOptions()
@@ -70,6 +73,18 @@ ClientOptions::~ClientOptions()
 
 Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) const
 {
+   // We expect two hyphen/minus, However sometime we get a weird/rogue kind of hyphen
+   // This rogue hyphen can mess up the parsing.
+   // # ecflow_client ––group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 2 of them
+   // # ecflow_client –-group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 1 of them, i.e. first
+   // # ecflow_client --group="halt=yes; check_pt; terminate=yes"  // *GOOD*
+   //
+   //   dec:  -30 ffffffe2 37777777742 \342
+   //   hex: -128 ffffff80 37777777600 \200
+   //   oct: -109 ffffff93 37777777623 \223
+   //
+   // The correct hyphen has:
+   //   dec:45 hex:2D oct:55 -
    if (env->debug()) {
       cout <<  "  ClientOptions::parse argc=" << argc;
       for(int i = 0; i < argc; i++) { cout << "  arg" << i << "=" << argv[i];}
@@ -158,8 +173,22 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
       }
 
       std::stringstream ss;
+      ss << print_variable_map(vm) << "\n";
       ss << "ClientOptions::parse: Arguments did not match any commands.\n";
-      ss << "  argc=" << argc << "\n"; for(int i = 0; i < argc; i++) { ss << "  arg" << i << "=" << argv[i];}
+      ss << "  argc=" << argc << "\n";
+      for(int i = 0; i < argc; i++) {
+         ss << "  arg" << i << "=" << argv[i];
+
+         std::string str = argv[i];
+         for(size_t s=0; s < str.size(); s++) {
+            if (static_cast<int>(str[s]) < 0 || static_cast<int>(str[s]) > 127) {
+               ss << "\nUnrecognised character not in ASCII range(0-127) " << std::dec << "dec(" << static_cast<int>(str[s]) << ") char:" << str[s];
+               ss << " found at index " << s << " for string '" << str << "'\n";
+               if ( static_cast<int>(str[s]) == -30) ss << "check for bad hyphen/minus";
+               throw std::runtime_error(ss.str());
+            }
+         }
+      }
       ss << "\nUse --help to see all the available commands\n";
       throw std::runtime_error(ss.str());
    }
@@ -348,3 +377,57 @@ const char* client_task_env_description()
             ;
 }
 
+
+static std::string print_variable_map(const boost::program_options::variables_map& vm) {
+   std::stringstream ss; ss << "boost::program_options::variables_map:    vm.size() " << vm.size() << "\n";
+    for (po::variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
+        std::cout << "> " << it->first;
+        if (((boost::any)it->second.value()).empty())            ss << "(empty)";
+        if (vm[it->first].defaulted() || it->second.defaulted()) ss << "(default)";
+
+        ss << "=";
+
+        bool is_char;
+        try {
+            boost::any_cast<const char *>(it->second.value());
+            is_char = true;
+        } catch (const boost::bad_any_cast &) {
+            is_char = false;
+        }
+        bool is_str;
+        try {
+            boost::any_cast<std::string>(it->second.value());
+            is_str = true;
+        } catch (const boost::bad_any_cast &) {
+            is_str = false;
+        }
+
+        if (((boost::any)it->second.value()).type() == typeid(int)) {
+            ss << vm[it->first].as<int>() << std::endl;
+        } else if (((boost::any)it->second.value()).type() == typeid(bool)) {
+            ss << vm[it->first].as<bool>() << std::endl;
+        } else if (((boost::any)it->second.value()).type() == typeid(double)) {
+            ss << vm[it->first].as<double>() << std::endl;
+        } else if (is_char) {
+            ss << vm[it->first].as<const char * >() << std::endl;
+        } else if (is_str) {
+            std::string temp = vm[it->first].as<std::string>();
+            if (temp.size()) {
+                ss << temp << std::endl;
+            } else {
+                ss << "true" << std::endl;
+            }
+        } else { // Assumes that the only remainder is vector<string>
+            try {
+                std::vector<std::string> vect = vm[it->first].as<std::vector<std::string> >();
+                size_t i = 0;
+                for (std::vector<std::string>::iterator oit=vect.begin(); oit != vect.end(); oit++, ++i) {
+                    ss << "\r> " << it->first << "[" << i << "]=" << (*oit) << std::endl;
+                }
+            } catch (const boost::bad_any_cast &) {
+                ss << "UnknownType(" << ((boost::any)it->second.value()).type().name() << ")" << std::endl;
+            }
+        }
+    }
+    return ss.str();
+}

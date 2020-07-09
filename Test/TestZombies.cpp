@@ -183,7 +183,7 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
    while (1) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-      if (zombies.size() == no_of_zombies) {
+      if (zombies.size() >= no_of_zombies) {
          if (ecf_debug_enabled) {
             std::cout <<  Zombie::pretty_print( zombies , 3);
             std::cout << "     Found " << no_of_zombies << " zombies. returning after " << assertTimer.duration() << "s\n";
@@ -272,7 +272,19 @@ static void check_expected_no_of_zombies(size_t expected)
    BOOST_CHECK_MESSAGE(zombies.size() == expected ,"*error* Expected " << expected << " zombies but got " << zombies.size());
    if ( zombies.size() != expected) {
       std::cout << Zombie::pretty_print( zombies, 6);
-      return;
+   }
+}
+
+static void check_expected_no_of_zombies_range(size_t min_expected, size_t max_expected)
+{
+   if (ecf_debug_enabled) cout << "   check_expected_no_of_zombies_range: min:" << min_expected  << " max:" << max_expected << "\n";
+   TestFixture::client().zombieGet();
+   std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
+
+   bool in_range = (zombies.size() >= min_expected && zombies.size() <= max_expected);
+   BOOST_CHECK_MESSAGE(in_range,"*error* Expected range(" <<  min_expected << "-" << max_expected << ") zombies but got " << zombies.size());
+   if ( !in_range) {
+      std::cout << Zombie::pretty_print( zombies, 6);
    }
 }
 
@@ -442,10 +454,19 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
    waitForTaskStates(SINGLE,NState::SUBMITTED,NState::ACTIVE, timeout);
 
    // ******************************************************************************
-   // IMPORTANT: Since 4.0.5, if Job generation takes to long i.e >= next poll
-   //            then it will TIMEOUT. Hence we may no get the number of zombies
-   //            that we expected
+   // IMPORTANT: If Job generation takes to long i.e >= next poll then it will TIMEOUT.
+   //            Hence use the number of submitted/active tasks, as the expected number of zombies.
+   //            This must be done before creating zombies by changing state.
    // *******************************************************************************
+   size_t number_submitted_or_active = 0;
+   TestFixture::client().sync_local();
+   defs_ptr defs = TestFixture::client().defs();
+   vector<Task*> tasks; defs->getAllTasks(tasks);
+   for(const auto& task: tasks) {
+      if (task->state() == NState::SUBMITTED || task->state() == NState::ACTIVE) number_submitted_or_active++;
+   }
+   if (ecf_debug_enabled) std::cout << "   found " << number_submitted_or_active << " in submitted or active state\n";
+
 
    if (create_zombies_with == "delete") {
       if (ecf_debug_enabled) std::cout << "   create USER zombies by deleting all the nodes in the server\n";
@@ -504,12 +525,8 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       BOOST_REQUIRE_MESSAGE(false,"*error* Create zombies via " << create_zombies_with << " unrecognised");
    }
 
-   /// Wait for all task zombies
-   vector<Task*> tasks;
-   theDefs.getAllTasks(tasks);
-
    /// When jobs try to communicate with server via child commands they will block the Child commands
-   if (waitForZombieCreation(tasks.size(),timeout)) {
+   if (waitForZombieCreation(number_submitted_or_active,timeout)) {
 
       /// Check we have zombies and they are of type USER
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
@@ -580,8 +597,8 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
    // User zombies will be converted to path zombies by the server
    create_and_start_test("test_path_zombie_creation","delete"); // create zombie via delete
 
-   // expect NUM_OF_TASKS zombies, ie because we have NUM_OF_TASKS tasks
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   // The job generation can timeout, hence we may not have submitted the full number of tasks & hence expected zombies can vary
+   check_expected_no_of_zombies_range(1,NUM_OF_TASKS);
 
    // The server will automatically change existing zombie to be of type PATH
    // when no task nodes exists

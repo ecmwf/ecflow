@@ -1,5 +1,18 @@
 suite family_simple
-   family familyName0
+   family 3
+     task 3
+     task 1
+     task 2
+   endfamily
+   family 2
+     task 3
+     task 1
+     task 2
+   endfamily
+   family 1
+     task 3
+     task 1
+     task 2
    endfamily
 endsuite
 

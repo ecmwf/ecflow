@@ -70,6 +70,7 @@ public:
 	bool communicating() {return communicating_;}
     bool isEnabled() const {return !isDisabled();}
     bool isDisabled() const;
+    bool isInLogout() const;
 
 	bool readFromDisk() const;
     QString uidForServerLogTransfer() const;

@@ -1,6 +1,4 @@
 suite repeate_integer
-   
-    repeat integer VARIABLE_XX 0 10 2 # comment
+  repeat integer VARIABLE_XX 0 10 2 # comment
   task t1
-  
 endsuite

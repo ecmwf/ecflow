@@ -1,5 +1,5 @@
 suite task1
-   family familyName0
+   family f
       task t1
       task t2
       task t4
@@ -9,7 +9,7 @@ suite task1
 endsuite
 
 suite task1_s1
-   family familyName0
+   family f
       task t1 ; task t2 ;task t4 ; task t5
       endtask
    endfamily

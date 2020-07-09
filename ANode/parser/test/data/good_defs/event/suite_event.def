@@ -5,4 +5,5 @@ suite event_suite
    event name
    event 1 eventName
    event 2 eventNamea
+   task t
 endsuite

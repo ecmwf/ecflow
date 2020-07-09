@@ -1,5 +1,5 @@
  suite trigger_extension
-  family familyName
+  family f
   	    task b
   	    task c
    		task a

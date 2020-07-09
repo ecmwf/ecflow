@@ -7,7 +7,7 @@ endsuite
 
 suite repeat_enumerated2
    
-     repeat enumerated quotes 'first' 'second' "third"  # sdsdsd 
+ repeat enumerated quotes 'first' 'second' "third"  # sdsdsd 
   task t1
    
 endsuite

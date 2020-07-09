@@ -15,7 +15,6 @@ defs_state MIGRATE
 # i.e for tasks EDACLASS:"od" would be an illegal variable name
 # ===============================================================================
 suite alias
-
   task t1
     alias alias0
     
