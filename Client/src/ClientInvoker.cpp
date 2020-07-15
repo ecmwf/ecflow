@@ -327,7 +327,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                server_reply_.clear_for_invoke(cli());
 
                if (!cts_cmd->setup_user_authentification( clientEnv_ )) {
-                  server_reply_.set_error_msg( "Invalid user or password" );
+                  server_reply_.set_error_msg( "Invalid custom user(ECF_USER || --user <user>) or authentication failed for ECF_CUSTOM_PASSWD | ECF_PASSWD" );
                   return 1;
                }
 
