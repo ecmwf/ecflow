@@ -36,13 +36,14 @@ void DefsCmd::init(AbstractServer* as,bool save_edit_history)
 {
    /// Return the current value of the state change no. So the that
    /// the next call to get the SSYncCmd , we need only return what's changed
-   as->defs()->set_state_change_no( Ecf::state_change_no() );
-   as->defs()->set_modify_change_no( Ecf::modify_change_no() );
-   as->defs()->save_edit_history(save_edit_history);
+   Defs* server_defs = as->defs().get();
+   server_defs->set_state_change_no( Ecf::state_change_no() );
+   server_defs->set_modify_change_no( Ecf::modify_change_no() );
+   server_defs->save_edit_history(save_edit_history);
 
    // The CACHE is only updated if state/modify numbers change, hence does not take into account suite CLOCK
    // However DefsCmd should always return the most up to date server contents.
-   DefsCache::update_cache( as->defs() );
+   DefsCache::update_cache( server_defs );
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const
