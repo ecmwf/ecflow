@@ -15,7 +15,6 @@
 #include "AbstractServer.hpp"
 #include "Defs.hpp"
 #include "Ecf.hpp"
-//#include "Log.hpp"
 
 using namespace std;
 using namespace boost;
@@ -33,10 +32,6 @@ EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd* c,AbstractServer* a)
 
 EditHistoryMgr::~EditHistoryMgr()
 {
-   //LogTimer timer(" EditHistoryMgr::~EditHistoryMgr()");
-
-	Defs* defs = as_->defs().get();
-
    // check if state changed
    if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no()) {
 
@@ -47,7 +42,7 @@ EditHistoryMgr::~EditHistoryMgr()
          // Otherwise we will end up making a data model change for read only commands
          // If there has been a change in defs state then the command must return true from isWrite
          if (cts_cmd_->isWrite()) {
-            cts_cmd_->add_edit_history(defs);
+            cts_cmd_->add_edit_history( as_->defs().get() );
          }
          else {
             // Read only command, that is making data model changes, oops ?
