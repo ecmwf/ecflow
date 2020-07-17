@@ -186,12 +186,14 @@ void SSyncCmd::init(
 
 void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
 {
+   Defs* server_defs = as->defs().get();
+
    if ( 0 == client_handle ) {
       // Have already checked for no defs.
-      as->defs()->set_state_change_no( Ecf::state_change_no() );
-      as->defs()->set_modify_change_no( Ecf::modify_change_no() );
+      server_defs->set_state_change_no( Ecf::state_change_no() );
+      server_defs->set_modify_change_no( Ecf::modify_change_no() );
 
-      DefsCache::update_cache_if_state_changed(as->defs());
+      DefsCache::update_cache_if_state_changed(server_defs);
       full_defs_ = true;
 #ifdef DEBUG_SERVER_SYNC
       cout << ": *no handle* returning FULL defs(*cached* string, size(" << DefsCache::full_server_defs_as_string_.size() << "))" << endl;
@@ -220,9 +222,9 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
    // **** An alternative would be to clone the entire suites, since this can have
    // **** hundreds of tasks. It would be very expensive.
    // **** This means that server_defs_ will fail invarint_checking before serialisation
-   defs_ptr the_server_defs = as->defs()->client_suite_mgr().create_defs( client_handle, as->defs() );
-   if ( the_server_defs.get() == as->defs().get()) {
-      DefsCache::update_cache_if_state_changed(as->defs());
+   defs_ptr the_server_defs = server_defs->client_suite_mgr().create_defs( client_handle, as->defs() );
+   if ( the_server_defs.get() == server_defs) {
+      DefsCache::update_cache_if_state_changed(server_defs);
       full_defs_ = true;
 #ifdef DEBUG_SERVER_SYNC
       cout << ": The handle has *ALL* the suites: return the FULL defs(*cached* string, size(" << DefsCache::full_server_defs_as_string_.size() << "))";

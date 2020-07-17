@@ -48,8 +48,8 @@
 class DefsCache : private boost::noncopyable {
 public:
    // Server side
-   static void update_cache_if_state_changed(defs_ptr defs);
-   static void update_cache( defs_ptr defs );
+   static void update_cache_if_state_changed(Defs* defs);
+   static void update_cache( Defs* defs );
 
    // Client side
    static defs_ptr restore_defs_from_string(const std::string&);

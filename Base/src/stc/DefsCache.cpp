@@ -34,7 +34,7 @@ std::string DefsCache::full_server_defs_as_string_ = "";
 unsigned int DefsCache::state_change_no_ = 0;
 unsigned int DefsCache::modify_change_no_= 0;
 
-void DefsCache::update_cache_if_state_changed(defs_ptr defs)
+void DefsCache::update_cache_if_state_changed(Defs* defs)
 {
    // See if there was a state change *OR* if cache is empty
    if (state_change_no_ != Ecf::state_change_no() ||
@@ -51,7 +51,7 @@ void DefsCache::update_cache_if_state_changed(defs_ptr defs)
 #endif
 }
 
-void DefsCache::update_cache(defs_ptr defs )
+void DefsCache::update_cache(Defs* defs )
 {
 #ifdef DEBUG_SERVER_SYNC
        cout << ": *updating* cache";
