@@ -418,8 +418,6 @@ void ServerComThread::reset()
     //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
-    // reset client handle + defs
-    ci_->reset();
 
     if(hasSuiteFilter_)
     {
@@ -427,8 +425,8 @@ void ServerComThread::reset()
         {
             UiLog(serverName_).dbg() << " register suites=" << filteredSuites_;
 
-            //This will add a new handle to the client
-            ci_->ch_register(autoAddNewSuites_, filteredSuites_);  // will drop handle in server and auto_sync if enabled
+            // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and defs to the client
+            ci_->ch1_register(autoAddNewSuites_, filteredSuites_);
         }
         //If the suite filter is empty
         else
@@ -438,13 +436,18 @@ void ServerComThread::reset()
             //to achive the our goal: for an empty suite filter no suites are retrieved.
             UiLog(serverName_).dbg() << " register empty suite list";
 
+
+            // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and defs to the client
             std::vector<std::string> fsl;
             fsl.push_back(SuiteFilter::dummySuite());
-            ci_->ch_register(autoAddNewSuites_, fsl);   // will drop handle in server, and auto_sync if enabled
+            ci_->ch1_register(autoAddNewSuites_, fsl);
         }
     }
     else
     {
+        // reset client handle + defs
+        ci_->reset();
+
         UiLog(serverName_).dbg() << " sync begin";
         ci_->sync_local();
         //if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
