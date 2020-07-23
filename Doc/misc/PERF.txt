@@ -50,6 +50,13 @@ Use of perf:  http://www.brendangregg.com/perf.html
   
   # Show system call overhead,as a summary.
   strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+  strace -e trace=open Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def  # show what files opened
+  
+  # track library calls. It intercepts and records the dynamic library calls which are called 
+  # by the executed process and the signals which are received by that process.  
+  # It can also intercept and print the system calls executed by the program
+  ltrace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+  ltrace -S -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
   
   # Show page faults, data and instruction cache misses use:
   perf stat -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
@@ -61,6 +68,10 @@ Use of perf:  http://www.brendangregg.com/perf.html
   perf record -g Base/bin/gcc-7.3.0/debug/perf_job_gen ./metabuilder.def
   perf report --sort comm,dso  # high level overview
   
+  # show report to stdout, adjust sampling, avoid high number
+  perf record -F 99 -g Base/bin/gcc-7.3.0/debug/perf_job_gen ./metabuilder.def
+  perf report -n --stdio
+
   # for a graphical display, you can use flame graphs. This *ONLY* works properly with debug builds
   # and you must use -g (collect stack traces)
   # http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
