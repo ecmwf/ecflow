@@ -46,8 +46,8 @@ if __name__ == "__main__":
         
         # check to see if definition exists in the server
         defs = CL.get_defs()
-        if defs is None :
-            print("No definition found, exiting...")
+        if len(defs) == 0 :
+            print("No suites found, exiting...")
             sys.exit(0) 
             
         # print defs;
