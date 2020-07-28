@@ -215,7 +215,7 @@ class Client(object):
         # Label.update()
         self.client.sync_local()
         defs = self.client.get_defs()
-        if defs is None:
+        if len(defs) == 0:
             print("# %s-%: empty content" % (self.host, self.port))
         # Label.update()
         for suite in defs.suites:
