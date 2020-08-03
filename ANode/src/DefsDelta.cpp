@@ -36,7 +36,7 @@ void DefsDelta::init(unsigned int client_state_change_no,bool sync_suite_clock)
 	compound_mementos_.clear();
 }
 
-bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const
+bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes,int client_handle) const
 {
    // ****************************************************
    // On the client side
@@ -64,7 +64,9 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
       }
 	}
 	catch ( std::exception& e) {
-		throw std::runtime_error("Could not apply incremental server changes to client defs, because: " + string(e.what()));
+	   std::stringstream ss;
+	   ss << "Could not apply incremental server changes to client defs( with client handle: " << client_handle << "), because: " << e.what();
+		throw std::runtime_error(ss.str());
 	}
 
 	// For each compound memento, we should have a changed node.(for use with python interface)
