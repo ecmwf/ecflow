@@ -61,7 +61,7 @@ public:
 	/// Applies the mementos to the client defs and record all changed nodes.
    /// Can raise std::runtime_error.
  	/// Note:: updating state_change_no() on the *client side*  has *no effect*
-	bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const;
+	bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes, int client_handle) const;
 
 
 	/// =========================================================================
