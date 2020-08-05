@@ -222,7 +222,7 @@ void ClientSuiteMgr::max_change_no(
        }
     }
     std::stringstream ss;
-    ss << "ClientSuiteMgr::max_change_no: handle(" << client_handle << ") does not exist in server. Handle dropped or Server may have died? Please re-register suites";
+    ss << "ClientSuiteMgr::max_change_no: handle(" << client_handle << ") does not exist in server. Handle dropped or Server may have died? Please refresh GUI/re-register suites";
     throw std::runtime_error(ss.str());
 }
 
