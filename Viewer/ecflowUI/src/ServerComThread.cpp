@@ -668,8 +668,17 @@ void ServerComThread::blockingLogout()
 
     UiLog(serverName_).dbg() << " LOGOUT";
     detach();
-    if(ci_->client_handle() > 0)
-    {
-        ci_->ch1_drop();
+    ci_->set_auto_sync(false);
+    try {
+        if(ci_->client_handle() > 0) {
+            ci_->ch1_drop();
+        }
+    }
+    catch(std::exception& e) {
+        std::string errMsg = "Error during logout!";
+        if(e.what()) {
+            errMsg += " " +  std::string(e.what());
+        }
+        UiLog(serverName_).err() << errMsg;
     }
 }
