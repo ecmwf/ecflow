@@ -58,7 +58,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="resComboLabel">
        <property name="text">
         <string>Plot resolution:</string>
        </property>

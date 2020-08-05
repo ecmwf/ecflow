@@ -177,19 +177,20 @@ void LogLoadWidget::updateInfoLabel()
          Viewer::formatBoldText(" Host: ",col) + host_ +
          Viewer::formatBoldText(" Port: ",col) + port_;
 
+    if (viewHandler_->data() && viewHandler_->data()->size() >0) {
+        QDateTime startDt=viewHandler_->data()->startTime();
+        QDateTime endDt=viewHandler_->data()->endTime();
+        txt+=Viewer::formatBoldText(" Full period: ",col) +
+                startDt.toString("yyyy-MM-dd hh:mm:ss") + Viewer::formatBoldText(" to ",col) +
+                endDt.toString("yyyy-MM-dd hh:mm:ss");
 
-    QDateTime startDt=viewHandler_->data()->startTime();
-    QDateTime endDt=viewHandler_->data()->endTime();
-    txt+=Viewer::formatBoldText(" Full period: ",col) +
-            startDt.toString("yyyy-MM-dd hh:mm:ss") + Viewer::formatBoldText(" to ",col) +
-            endDt.toString("yyyy-MM-dd hh:mm:ss");
-
-    int maxNum=viewHandler_->data()->maxNumOfRows();
-    int num=viewHandler_->data()->numOfRows();
-    if(maxNum != 0 && num == abs(maxNum))
-    {
-        txt+=Viewer::formatBoldText(" Log entries: ",col) +
-           "last " + QString::number(abs(maxNum)) + " rows read (maximum reached)";
+        int maxNum=viewHandler_->data()->maxNumOfRows();
+        int num=viewHandler_->data()->numOfRows();
+        if(maxNum != 0 && num == abs(maxNum))
+        {
+            txt+=Viewer::formatBoldText(" Log entries: ",col) +
+               "last " + QString::number(abs(maxNum)) + " rows read (maximum reached)";
+        }
     }
 
     ui_->logInfoLabel->setText(txt);
@@ -203,6 +204,9 @@ void LogLoadWidget::setAllVisible(bool b)
     ui_->viewTab->setVisible(b);
     ui_->logView->setVisible(b);
     ui_->timeWidget->setVisible(b);
+    ui_->showFullTb->setVisible(b);
+    ui_->resComboLabel->setVisible(b);
+    ui_->resCombo->setVisible(b);
 }
 
 void LogLoadWidget::slotReload()
@@ -1167,6 +1171,7 @@ void LogRequestViewHandler::clear()
     {
         views_[i]->clear();
     }
+    data_->clear();
 }
 
 void LogRequestViewHandler::load(const std::string& logFile,int numOfRows)
