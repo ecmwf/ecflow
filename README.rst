@@ -1,4 +1,4 @@
-**ECFLOW**
+**ecFlow**
 ==========
 
 .. contents:: Table of Contents
