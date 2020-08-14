@@ -8,9 +8,9 @@ ecbuild_add_library( TARGET    ecflow3
                      NOINSTALL
                      TYPE      MODULE
                      SOURCES   ${srcs}
-                     INCLUDES  ${Boost_INCLUDE_DIRS}
-                               ${Python3_INCLUDE_DIRS}
                     )
+target_include_directories(ecflow3 PRIVATE ${Boost_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS} ) 
+
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    # using regular Clang or AppleClang

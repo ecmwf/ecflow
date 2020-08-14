@@ -48,10 +48,9 @@ ecbuild_declare_project()
 # =========================================================================================
 
 ecbuild_info( "CMAKE_INSTALL_PREFIX     : ${CMAKE_INSTALL_PREFIX}" )
-ecbuild_info( "ECFLOW_RELEASE           : ${ECFLOW_RELEASE}" )
-ecbuild_info( "ECFLOW_MAJOR             : ${ECFLOW_MAJOR}" )
-ecbuild_info( "ECFLOW_MINOR             : ${ECFLOW_MINOR}" )
-ecbuild_info( "ECFLOW_VERSION           : ${ECFLOW_VERSION_STR}" )
+ecbuild_info( "ecflow_BINARY_DIR        : ${ecflow_BINARY_DIR}" )
+ecbuild_info( "ecflow_SOURCE_DIR        : ${ecflow_SOURCE_DIR}" )
+
 
 # =========================================================================================
 # Options , be aware of caching, when modifying on the command line. 
@@ -194,7 +193,6 @@ include_directories( ${CMAKE_SOURCE_DIR}/cereal/include )
 
 message( STATUS "====================================================================================================================" )
 message( STATUS "BOOST" )
-message( STATUS "====================================================================================================================" )
 # this can help in some situations:
 set (_CMAKE_PREFIX_PATH_BACKUP ${CMAKE_PREFIX_PATH}) # make a backup of CMAKE_PREFIX_PATH
 foreach(BOOST_PATH_TO_SEARCH ${BOOST_PATH} ${BOOST_ROOT} $ENV{BOOST_ROOT})
@@ -249,17 +247,17 @@ endif()
 # See: https://stackoverflow.com/questions/13653361/another-undefined-reference-error-when-linking-boost-libraries
 message( STATUS "====================================================================================================================" )
 message( STATUS "LIB RT  needed by some test, boost_timer->boost_chrono-> -lrt" )
-message( STATUS "====================================================================================================================" )
 find_library(LIBRT rt)                                                                                                                                                                                                                                                                                        
 if(LIBRT)
     message( STATUS "LIB RT FOUND" )
 else()
-    message( STATUS "LIB RT NOTFOUND" )
+    # set to empty string to avoid lots of conditional around ecbuild_add_test
+    message( STATUS "LIB RT NOTFOUND -> LIBRT set to empty string for ecbuild_add_test" )
+    set(LIBRT "")
 endif()
 
 message( STATUS "====================================================================================================================" )
 message( STATUS "SSL" )
-message( STATUS "====================================================================================================================" )
 if (ENABLE_SSL)
     find_package(OpenSSL REQUIRED)
     if (OPENSSL_FOUND)

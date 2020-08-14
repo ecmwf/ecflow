@@ -27,16 +27,16 @@ ecbuild_add_library( TARGET libserver
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     base node nodeattr core
-                              pthread
-                     INCLUDES src
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                              ../Base/src
-                              ../Base/src/cts
-                              ../Base/src/stc
                      )
+target_link_libraries(libserver base node nodeattr core pthread )
+target_include_directories(libserver PRIVATE src
+                                             ../ACore/src 
+                                             ../ANattr/src
+                                             ../ANode/src
+                                             ../Base/src
+                                             ../Base/src/cts
+                                             ../Base/src/stc 
+)
 
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
@@ -77,7 +77,7 @@ SET_TARGET_PROPERTIES(ecflow_server PROPERTIES
 ecbuild_add_test( TARGET       u_server
                   SOURCES      test/TestServerEnvironment.cpp 
                                test/TestServer1.cpp
-                  INCLUDES     ${Boost_INCLUDE_DIRS}
+                  INCLUDES     src ${Boost_INCLUDE_DIRS}
                   LIBS         libserver ${OPENSSL_LIBRARIES}
                                ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   TEST_DEPENDS u_base

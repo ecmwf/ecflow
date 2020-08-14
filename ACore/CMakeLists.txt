@@ -25,10 +25,10 @@ ecbuild_add_library( TARGET core
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     INCLUDES src
-                              ${Boost_INCLUDE_DIRS}
-                              ${CMAKE_BINARY_DIR} 
                     )
+target_include_directories(core PUBLIC src
+                                       ${Boost_INCLUDE_DIRS}
+                                       ${CMAKE_BINARY_DIR} )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
@@ -50,7 +50,8 @@ endif()
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 ecbuild_add_test( TARGET   u_acore 
                   SOURCES  ${test_srcs}
-                  INCLUDES ${Boost_INCLUDE_DIRS}
+                  INCLUDES src ${Boost_INCLUDE_DIRS}
                   LIBS     core ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                            ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
                 )
+                
