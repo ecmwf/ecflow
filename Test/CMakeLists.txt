@@ -10,19 +10,21 @@ ecbuild_add_library( TARGET   libharness
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     libclient base node nodeattr core  
-                     INCLUDES src
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                              ../ANode/test
-                              ../Base/src
-                              ../Base/src/cts
-                              ../Base/src/stc
-                              ../Base/test
-                              ../Client/src
-                              ../Client/test
                     )
+
+target_link_libraries(libharness libclient base node nodeattr core )
+target_include_directories(libharness PUBLIC src
+                                              ../ACore/src 
+                                              ../ANattr/src
+                                              ../ANode/src
+                                              ../ANode/test
+                                              ../Base/src
+                                              ../Base/src/cts
+                                              ../Base/src/stc
+                                              ../Base/test
+                                              ../Client/src
+                                              ../Client/test 
+)
 
 # =================================================================
 # test

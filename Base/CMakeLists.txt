@@ -79,18 +79,18 @@ ecbuild_add_library( TARGET   base
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     node nodeattr core
-                     INCLUDES src
+                     )
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
+target_link_libraries(base node nodeattr core ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
+target_include_directories(base PUBLIC src
                               ../ACore/src
                               ../ANattr/src
                               ../ANode/src
                               ../Base/src
                               ../Base/src/cts
-                              ../Base/src/stc
-                     )
+                              ../Base/src/stc )
 
-# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(base ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
 
 list( APPEND test_srcs
    test/TestAlterCmd.cpp

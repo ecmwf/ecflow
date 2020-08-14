@@ -18,16 +18,18 @@ ecbuild_add_library( TARGET libclient
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     base node nodeattr core 
-                              pthread
-                     INCLUDES src
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                              ../Base/src
-                              ../Base/src/cts
-                              ../Base/src/stc
                 )
+                
+target_link_libraries(libclient base node nodeattr core  pthread)
+target_include_directories(libclient PUBLIC src
+                                             ../ACore/src 
+                                             ../ANattr/src
+                                             ../ANode/src
+                                             ../Base/src
+                                             ../Base/src/cts
+                                             ../Base/src/stc  )
+                
+                
 
 # ========================================================================
 # EXE ecflow_client, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty

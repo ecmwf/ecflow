@@ -10,13 +10,15 @@ ecbuild_add_library( TARGET   libsimu
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     node nodeattr core    
-                     INCLUDES src
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                              ../Base/src
                     )
+
+target_link_libraries(libsimu node nodeattr core)
+target_include_directories(libsimu PUBLIC src
+                                           ../ACore/src 
+                                           ../ANattr/src
+                                           ../ANode/src
+                                           ../Base/src
+)
 
 
 list( APPEND test_srcs

@@ -72,8 +72,11 @@ ecbuild_add_library( TARGET viewer
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs} ${LIBVIEWER_MOC} ${LIBVIEWER_RES} ${LIBVIEWER_FORMS_HEADERS}
-                     INCLUDES .
-                              ../../../ACore/src
-                              ${Boost_INCLUDE_DIRS}
-                              ${CMAKE_CURRENT_BINARY_DIR}
                     )
+target_include_directories( viewer PRIVATE  .
+                                            ../../../ACore/src
+                                            ${Boost_INCLUDE_DIRS}
+                                            ${CMAKE_CURRENT_BINARY_DIR}
+) 
+
+                    

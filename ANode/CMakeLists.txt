@@ -9,12 +9,13 @@ ecbuild_add_library( TARGET   node
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs} ${parser_src}
-                     LIBS     nodeattr core
-                     INCLUDES ../ACore/src 
-                              ../ANattr/src
-                              src
-                              parser/src
                     )
+target_link_libraries(node PRIVATE nodeattr core)
+target_include_directories(node PUBLIC ../ACore/src 
+                                       ../ANattr/src 
+                                       src 
+                                       parser/src)
+
 
 add_subdirectory( parser )
 
