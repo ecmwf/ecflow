@@ -27,6 +27,8 @@ if(Boost_FOUND)
     message( STATUS " Boost_PYTHON36_LIBRARY_RELEASE    : [${Boost_PYTHON36_LIBRARY_RELEASE}]" )
     message( STATUS " Boost_PYTHON37_LIBRARY            : [${Boost_PYTHON37_LIBRARY}]" )
     message( STATUS " Boost_PYTHON37_LIBRARY_RELEASE    : [${Boost_PYTHON37_LIBRARY_RELEASE}]" )
+    message( STATUS " Boost_PYTHON38_LIBRARY            : [${Boost_PYTHON38_LIBRARY}]" )
+    message( STATUS " Boost_PYTHON38_LIBRARY_RELEASE    : [${Boost_PYTHON38_LIBRARY_RELEASE}]" )
 endif()
 
 if (ENABLE_SSL)
