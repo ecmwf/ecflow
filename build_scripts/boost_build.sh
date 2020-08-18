@@ -311,7 +311,7 @@ EOF
       echo "constant PYTHON3_VERSION : $python_dot_version ;"                            >> $SITE_CONFIG_LOCATION
       
       ./b2 --with-python --clean     
-      ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
+      ./b2 --debug-configuration toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
    fi
 
    which python
@@ -323,7 +323,7 @@ EOF
       echo '}'                                                                           >> $SITE_CONFIG_LOCATION
                                                                             
       ./b2 --with-python --clean     
-      ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
+      ./b2  --debug-configuration toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
    fi
    
    rm $python_file
