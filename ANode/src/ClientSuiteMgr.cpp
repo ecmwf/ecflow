@@ -69,7 +69,7 @@ void ClientSuiteMgr::remove_client_suite(unsigned int client_handle)
                        clientSuites_.end());
 
    if ( before == clientSuites_.size()) {
-      std::stringstream ss; ss << "ClientSuiteMgr::remove_registered_suite: handle(" << client_handle << ") does not exist";
+      std::stringstream ss; ss << "ClientSuiteMgr::remove_client_suite: handle(" << client_handle << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
       throw std::runtime_error(ss.str());
    }
 #ifdef DEBUG_HANDLE
@@ -87,7 +87,7 @@ void ClientSuiteMgr::remove_client_suites(const std::string& user_to_drop)
                        clientSuites_.end());
 
    if ( before == clientSuites_.size()) {
-      std::stringstream ss; ss << "ClientSuiteMgr::remove_registered_suites: user(" << user_to_drop << ") has no registered handles";
+      std::stringstream ss; ss << "ClientSuiteMgr::remove_client_suites: user(" << user_to_drop << ") has no registered handles. User dropped? Please refresh GUI/re-register suites";
       throw std::runtime_error(ss.str());
    }
 
@@ -111,7 +111,7 @@ void ClientSuiteMgr::add_suites(unsigned int client_handle, const std::vector<st
  			return;
 		}
 	}
-	std::stringstream ss; ss << "ClientSuiteMgr::add_suites: handle(" << client_handle << ") does not exist";
+	std::stringstream ss; ss << "ClientSuiteMgr::add_suites: handle(" << client_handle << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
 	throw std::runtime_error(ss.str());
 }
 
@@ -130,7 +130,7 @@ void ClientSuiteMgr::remove_suites(unsigned int client_handle, const std::vector
  			return;
 		}
 	}
-	std::stringstream ss; ss << "ClientSuiteMgr::remove_suites: handle(" << client_handle << ") does not exist";
+	std::stringstream ss; ss << "ClientSuiteMgr::remove_suites: handle(" << client_handle << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
 	throw std::runtime_error(ss.str());
 }
 
@@ -148,7 +148,7 @@ void ClientSuiteMgr::auto_add_new_suites(unsigned int client_handle, bool auto_a
  			return;
 		}
 	}
-	std::stringstream ss; ss << "ClientSuiteMgr::auto_add_new_suites: handle(" << client_handle << ") does not exist";
+	std::stringstream ss; ss << "ClientSuiteMgr::auto_add_new_suites: handle(" << client_handle << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
 	throw std::runtime_error(ss.str());
 }
 
