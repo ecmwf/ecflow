@@ -166,9 +166,6 @@ EOF
   exit 0 || :
 fi
 
-servers=$HOME/.ecflowrc/servers
-localh=$(uname -n)
-
 # =========================================================================
 # Update host, ecflow_site.sh is configured from CMAKE at install time
 # =========================================================================
@@ -176,19 +173,7 @@ if [ -f ${ECFLOW_DIR:=/usr/local}/bin/ecflow_site.sh ] ; then
   source ${ECFLOW_DIR}/bin/ecflow_site.sh
 fi
 
-# ==================================================================================
-# create one line in servers file so that viewer shows this server among servers list
-#
-case $host in
-$localh )
-  grep "^$localh" $servers || echo "$localh $localh $ECF_PORT" >> $servers
 
-  servers_ui=$HOME/.ecflow_ui/servers.txt
-  if [ -f $server_ui ] ; then 
-    grep "^$localh" $servers_ui || echo "$localh,$localh,$ECF_PORT,0,0" >> $servers_ui
-  fi
-;;
-esac
 date -u
 
 # ======================================================================================
