@@ -436,7 +436,6 @@ void ServerComThread::reset()
             //to achive the our goal: for an empty suite filter no suites are retrieved.
             UiLog(serverName_).dbg() << " register empty suite list";
 
-
             // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and defs to the client
             std::vector<std::string> fsl;
             fsl.push_back(SuiteFilter::dummySuite());
@@ -445,13 +444,15 @@ void ServerComThread::reset()
     }
     else
     {
-        // reset client handle + defs
-        ci_->reset();
-
-        UiLog(serverName_).dbg() << " sync begin";
-        ci_->sync_local();
-        //if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
-        UiLog(serverName_).dbg() << " sync end";
+        UiLog(serverName_).dbg() << " drop handle";
+        ci_->ch1_drop();
+        //if there was a handle to drop sync is done automatically
+        if (!ci_->server_reply().full_sync()) {
+           ci_->reset();
+           UiLog(serverName_).dbg() << " sync begin";
+           ci_->sync_local();
+           UiLog(serverName_).dbg() << " sync end";
+        }
     }
 
     //Attach the nodes to the observer
