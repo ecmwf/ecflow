@@ -232,15 +232,15 @@ static void remove_stale_zombies()
 
 static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int max_time_to_wait)
 {
-   if (ecf_debug_enabled)  cout << "\n   wait_for_zombies_of_type " << Child::to_string(zt) << "\n";
+   if (ecf_debug_enabled)  cout << "\n   wait_for_zombies_of_type: " << Child::to_string(zt) << " no_of_tasks:" << no_of_tasks << " max_time_to_wait:" << max_time_to_wait << "s\n";
 
-   int no_of_zombies = 0;
    std::vector<Zombie> zombies;
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "*error* zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       zombies = TestFixture::client().server_reply().zombies();
-      for(const Zombie& z: zombies) { if (z.type() == zt )  no_of_zombies++; }
+      int no_of_zombies = 0;
+      for(const Zombie& z: zombies) { if (z.type() == zt ) no_of_zombies++; }
       if (no_of_zombies >= no_of_tasks) break;
 
       // make sure test does not take too long.
@@ -250,8 +250,10 @@ static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int 
                             << no_of_tasks << " " << Child::to_string(zt) << " zombies, but found " << no_of_zombies
                             << "\nTest taking longer than time constraint of " << assertTimer.timeConstraint()
                             << "\n"
-                            << Zombie::pretty_print( zombies , 6) << "\n... breaking out\n";
-         break;
+                            << Zombie::pretty_print( zombies , 6) << "\n"
+                            << dump_task_status() << "\n"
+                            << "... breaking out\n";
+         return;
       }
       sleep(1);
    }
