@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <cerrno>
 #include <memory>
+#include <sys/wait.h> // for waitpid
 
 #include "boost/filesystem/operations.hpp"
 #include <boost/algorithm/string/trim.hpp>
@@ -551,7 +552,7 @@ bool EcfFile::do_popen(const std::string& the_cmd, EcfFile::Type type, std::vect
    FILE *fp = popen(the_cmd.c_str(),"r");
    if (!fp) {
       std::stringstream ss;
-      ss  << "Could not open " <<  fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " (" << strerror(errno) << ") ";
+      ss  << "EcfFile::do_popen:: Could not open " << fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " (" << strerror(errno) << ") ";
       errormsg += ss.str();
       return false;
    }
@@ -564,7 +565,34 @@ bool EcfFile::do_popen(const std::string& the_cmd, EcfFile::Type type, std::vect
          the_line.erase(the_line.begin() + the_line.size()-1);
       }
    }
-   pclose(fp);
+   int status = pclose(fp);
+   if (status == -1) {
+      std::stringstream ss;
+      ss  << "EcfFile::do_popen: error on pclose for " << fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " (" << strerror(errno) << ") ";
+      errormsg += ss.str();
+      return false;
+   }
+
+   if (WIFEXITED(status)) {
+      // *Normal* termination via exit
+      if ( WEXITSTATUS( status )) {
+         std::stringstream ss;
+         ss  << "EcfFile::do_popen: non-zero exit : " << fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " (" << strerror(errno) << ") ";
+         errormsg += ss.str();
+         return false;
+      }
+      else {
+         // exit(0) child terminated normally
+         return true;
+      }
+   }
+   if ( WIFSIGNALED( status )) {
+      std::stringstream ss;
+      ss  << "EcfFile::do_popen: child process terminated by a signal  : " << fileType(type) << " via cmd " << the_cmd << " for task " << node_->absNodePath() << " (" << strerror(errno) << ") ";
+      errormsg += ss.str();
+      return false;
+   }
+
    return true;
 }
 
