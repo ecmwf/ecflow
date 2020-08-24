@@ -118,27 +118,41 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
    // Get full defs, so that next sync_local does incremental update
    BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
    std::stringstream ss;
-   ss << "\n Start time"
-      << "\n sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
+   ss << "\nStart time"
+      << "\n  sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
 
    for(size_t i=0; i < 3; i++) {
       //cout << "\n loop:" << i << " sleeping for " << TestFixture::job_submission_interval() << "s\n";
-      sleep(TestFixture::job_submission_interval());
+
+      // Occasionally we get a random failure.
+      // It is suspected that BETWEEN the two calls below, one off
+      //    Suite::updateCalendar() or Suite::resolveDependencies() is called in the server:
+      // Unfortunately the data required to confirm this is not available on the client side: i.e.
+      //  - Defs::updateCalendarCount_ not persisted with incremental clk sync
+      //  - Suite::calendar_change_no_
+      // To minimise this, avoid sleep that is same as job submission interval
+
+      sleep(TestFixture::job_submission_interval()+1); // expect 1 minute increment in suite_time.
+
+      ss << "loop:" << i << "\n";
 
       BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local(true/*sync suite clock*/) == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
       boost::posix_time::ptime sync_clock_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
-      //cout << " sync_clock: suite time: " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
+      ss << "   Sync clock suite time:" << to_simple_string(sync_clock_suiteTime)
+         << " full_sync(" << TestFixture::client().server_reply().full_sync() << ")"
+         << " in_sync(" << TestFixture::client().server_reply().in_sync() << ")\n";
 
       // suiteVec is now invalidated
       BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
       boost::posix_time::ptime sync_full_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
-      //cout << " sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
+      ss << "   Sync full suite time :" << to_simple_string(sync_full_suiteTime)
+         << " full_sync(" << TestFixture::client().server_reply().full_sync() << ")"
+         << " in_sync(" << TestFixture::client().server_reply().in_sync() << ")\n";
+
 
       BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,
                   ss.str() <<
-                  "\nloop:" << i << " waited for " << TestFixture::job_submission_interval() << "s"
-                  "\nSync clock suite time:" << to_simple_string(sync_clock_suiteTime) <<
-                  "\nSync full suite time :" << to_simple_string(sync_full_suiteTime) <<
+                  "\nloop:" << i << " waited for " << TestFixture::job_submission_interval() << "s for each loop"
                   "\n" << TestFixture::client().defs());
    }
 
