@@ -14,7 +14,6 @@
 //============================================================================
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "boost/bind.hpp"
 
 #include "CheckPtSaver.hpp"
 #include "BaseServer.hpp"
@@ -84,7 +83,7 @@ void CheckPtSaver::start()
 	if (firstTime_) {
 	   firstTime_ = false;
 	   timer_.expires_from_now(  boost::posix_time::seconds( serverEnv_->checkPtInterval() ) );
-	   timer_.async_wait( server_->io_service_.wrap( boost::bind( &CheckPtSaver::periodicSaveCheckPt,this,boost::asio::placeholders::error ) ) );
+	   timer_.async_wait( server_->io_service_.wrap( [this](const boost::system::error_code& error) { periodicSaveCheckPt(error);}  ));
 	}
 }
 
@@ -191,7 +190,7 @@ void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error )
 
  	/// Appears that expires_from_now is more accurate then expires_at
 	timer_.expires_from_now(  boost::posix_time::seconds( serverEnv_->checkPtInterval() ) );
-   timer_.async_wait( server_->io_service_.wrap( boost::bind( &CheckPtSaver::periodicSaveCheckPt,this,boost::asio::placeholders::error ) ) );
+   timer_.async_wait( server_->io_service_.wrap( [this](const boost::system::error_code& error) { periodicSaveCheckPt(error);}  ) );
 }
 
 

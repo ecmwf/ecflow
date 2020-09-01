@@ -13,8 +13,6 @@
 // Description :
 //============================================================================
 
-#include "boost/bind.hpp"
-
 #include "ServerEnvironment.hpp"
 #include "NodeTreeTraverser.hpp"
 #include "BaseServer.hpp"
@@ -271,7 +269,7 @@ void NodeTreeTraverser::start_timer()
 {
 	/// Appears that expires_from_now is more accurate then expires_at i.e timer_.expires_at( timer_.expires_at() + boost::posix_time::seconds( poll_at ) );
 	timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
-	timer_.async_wait( server_->io_service_.wrap( boost::bind( &NodeTreeTraverser::traverse,this,boost::asio::placeholders::error ) ) );
+   timer_.async_wait( server_->io_service_.wrap( [this](const boost::system::error_code& error) { traverse(error);}  ) );
 }
 
 void NodeTreeTraverser::traverse(const boost::system::error_code& error )
