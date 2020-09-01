@@ -191,7 +191,10 @@ void SslClient::start_handshake()
    deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
    connection_.socket().async_handshake(boost::asio::ssl::stream_base::client,
-        boost::bind(&SslClient::handle_handshake, this, boost::asio::placeholders::error));
+                                        [this](const boost::system::error_code& e)
+                                        {
+                                             handle_handshake(e);
+                                        } );
 }
 
 void SslClient::handle_handshake( const boost::system::error_code& e )
