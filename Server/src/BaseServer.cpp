@@ -54,6 +54,10 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
    if (serverEnv_.debug()) cout << "-->Server::server starting server on port "
                                 << serverEnv.port()
                                 << endl;
+
+   // Must be set before checkpt file is loaded.
+   defs_->ecf_prune_node_log(serverEnv.ecf_prune_node_log());
+
    LogFlusher logFlusher;
 
    // Register to handle the signals.

@@ -127,6 +127,12 @@ public:
 	/// time series can get a skew.
 	int submitJobsInterval() const { return submitJobsInterval_;}
 
+	/// Returns ECF_PRUNE_NODE_LOG as an integer representing days
+	/// Node log/edit history older than this is pruned when loading the checkpoint file
+	/// Default value is 30 days. To alter change config file or set an environment variable.
+	/// A value of 0, means no pruning. i.e keep old edit history .
+	int ecf_prune_node_log() const { return ecf_prune_node_log_;}
+
 	/// returns server variables, as vector of pairs.
 	/// Some of these variables hold environment variables
 	/// Note:: additional variable are created for use by clients, i.e like
@@ -193,6 +199,7 @@ private:
 	int  checkPtInterval_;
 	int  checkpt_save_time_alarm_;
 	int  submitJobsInterval_;
+	int  ecf_prune_node_log_;
    bool jobGeneration_;   // used in debug/test mode only
 	bool debug_;
    bool help_option_;
