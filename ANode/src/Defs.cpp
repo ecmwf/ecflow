@@ -788,14 +788,48 @@ void Defs::read_history(const std::string& line,const std::vector<std::string>& 
    // history <node_path> \bmsg1\bmsg2
    // The message can contain spaces,
    // Multiple spaces will be lost !!
+   // Edit history older than ecf_prune_node_log_ days, will be pruned.
    if ( lineTokens.size() < 2 ) throw std::runtime_error( "Defs::read_history: Invalid history " + line );
 
    DefsHistoryParser parser;
    parser.parse(line);
 
    const std::vector<std::string>& parsed_messages = parser.parsed_messages();
-   for(const auto & parsed_message : parsed_messages) {
-      add_edit_history(lineTokens[1],parsed_message);
+   if (ecf_prune_node_log_ == 0) {
+      for(const auto & parsed_message : parsed_messages) {
+         add_edit_history(lineTokens[1],parsed_message);
+      }
+   }
+   else {
+      std::vector<std::string> vec;
+      date todays_date_in_utc = day_clock::universal_day();
+
+      for(const auto & parsed_message : parsed_messages) {
+         // extract the date, expecting MSG:[HH:MM:SS D.M.YYYY]
+         if (parsed_message.find("MSG:[") == 0) {
+
+            size_t space_pos = parsed_message.find(" ");
+            size_t close_p = parsed_message.find("]");
+            std::string date = parsed_message.substr(space_pos+1,close_p-space_pos-1);
+            vec.clear();
+            Str::split(date,vec,".");
+            if (vec.size() == 3) {
+               try {
+                  int day = boost::lexical_cast<int>(vec[0]);
+                  int month = boost::lexical_cast<int>(vec[1]);
+                  int year = boost::lexical_cast<int>(vec[2]);
+
+                  boost::gregorian::date node_log_date(year,month,day);
+                  boost::gregorian::date_duration duration = todays_date_in_utc - node_log_date;
+                  if (duration.days() > ecf_prune_node_log_) {
+                     continue;
+                  }
+               }
+               catch( ... ) {}
+            }
+         }
+         add_edit_history(lineTokens[1],parsed_message);
+      }
    }
 }
 

@@ -329,6 +329,9 @@ public:
    bool compare_change_no(const Defs&) const;
 
    std::string stats() const; // dump out definition stats
+
+   void ecf_prune_node_log(int v) { ecf_prune_node_log_ = v;}
+
 private:
    void do_generate_scripts( const std::map<std::string,std::string>& override) const;
    void write_state(std::string&) const;
@@ -361,6 +364,7 @@ private:
    unsigned int   modify_change_no_{0};       // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int   updateCalendarCount_{0};
    unsigned int   order_state_change_no_{0};  // *NOT* persisted
+   unsigned int   ecf_prune_node_log_{0};     // *NOT* persisted, only used on the server side
    NState         state_;                     // state & change_no, i,e attribute changed
    ServerState    server_;
    std::vector<suite_ptr> suiteVec_;

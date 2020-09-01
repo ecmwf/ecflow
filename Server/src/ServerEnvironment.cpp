@@ -66,6 +66,7 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   checkPtInterval_(0),
   checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
   submitJobsInterval_(defaultSubmitJobsInterval),
+  ecf_prune_node_log_(0),
   jobGeneration_(true),
   debug_(false),
   help_option_(false),
@@ -86,6 +87,7 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   checkPtInterval_(0),
   checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
   submitJobsInterval_(defaultSubmitJobsInterval),
+  ecf_prune_node_log_(0),
   jobGeneration_(true),
   debug_(false),
   help_option_(false),
@@ -252,6 +254,12 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
   		errorMsg = ss.str();
 		return false;
 	}
+   if ( ecf_prune_node_log_ < 0) {
+      ss << "ECF_PRUNE_NODE_LOG not set correctly. Please set in Server/server_environment.cfg\n";
+      ss << "or via environment variable of same name. It must be in the range [1-356] \n";
+      errorMsg = ss.str();
+      return false;
+   }
 	if (ecf_checkpt_file_.empty()) {
  		ss << "No checkpoint file name specified. Please set in Server/server_environment.cfg or\n";
 		ss << "set the environment variable ECF_CHECK\n";
@@ -547,6 +555,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
          ("ECF_PASSWD",    po::value<std::string>(&ecf_passwd_file_)->default_value(Str::ECF_PASSWD()), "Path name to passwd file")
          ("ECF_CUSTOM_PASSWD",po::value<std::string>(&ecf_passwd_custom_file_)->default_value(Str::ECF_CUSTOM_PASSWD()), "Path name to custom passwd file, for user who don't use login name")
          ("ECF_TASK_THRESHOLD",po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),"The defaults thresholds when profiling job generation")
+         ("ECF_PRUNE_NODE_LOG",po::value<int>(&ecf_prune_node_log_)->default_value(30),"Node log, older than 180 days automatically pruned when checkpoint file loaded")
          ;
 
       ifstream ifs(path_to_config_file.c_str());
@@ -623,6 +632,16 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
    char* custom_passwd = getenv("ECF_CUSTOM_PASSWD");
    if (custom_passwd) ecf_passwd_custom_file_ = custom_passwd;
 
+   char* ecf_prune_node_log = getenv("ECF_PRUNE_NODE_LOG");
+   if (ecf_prune_node_log) {
+      try { ecf_prune_node_log_ = boost::lexical_cast<int>(ecf_prune_node_log); }
+      catch ( boost::bad_lexical_cast& e) {
+         std::stringstream ss;
+         ss << "ServerEnviroment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an integer, But found: " << ecf_prune_node_log;
+         throw ServerEnvironmentException(ss.str());
+      }
+   }
+
 	if (getenv("ECF_DEBUG_SERVER")) {
 		debug_ = true; // can also be enabled via --debug option
 	}
@@ -686,6 +705,7 @@ std::string ServerEnvironment::dump() const
    ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
    ss << "ECF_URL = '" << url_ << "'\n";
    ss << "ECF_MICRO = '" << ecf_micro_ << "'\n";
+   ss << "ECF_PRUNE_NODE_LOG = '" << ecf_prune_node_log_ << "'\n";
    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";

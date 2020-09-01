@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace ecf;
+using namespace boost::gregorian;
 
 // ********************************************************************
 // These test are used to check that MIGRATE is equivalent to check pt
@@ -403,9 +404,100 @@ BOOST_AUTO_TEST_CASE( test_state_edit_history )
    defs.add_edit_history(suite2->absNodePath(),"request1 with single spaces");
    defs.add_edit_history(suite2->absNodePath(),"request2 with double  spaces");
    defs.add_edit_history(suite2->absNodePath(),"request3_with_no_spaces!|?<>$%^&*()_{}:@<>?");
-   //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+//   PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
    BOOST_REQUIRE_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Edit history failed: " << helper.errorMsg());
 }
+
+
+static std::string dump_edit_history(const std::unordered_map<std::string, std::vector<std::string> >& edit_history)
+{
+   std::stringstream ss;
+   for(const auto& i : edit_history) {
+      ss << "node: " << i.first << "\n";
+      for(const auto& h : i.second) {
+         ss << "  " << h << "\n";
+      }
+   }
+   return ss.str();
+}
+
+BOOST_AUTO_TEST_CASE( test_state_edit_history_pruning )
+{
+   cout << "AParser:: ...test_state_edit_history_pruning\n";
+   Defs defs;
+   suite_ptr suite = defs.add_suite("s1");
+   defs.add_edit_history(suite->absNodePath(),"MSG:[07:36:05 10.3.2016] --requeue force /s1  :maj");
+   defs.add_edit_history(suite->absNodePath(),"MSG:[09:15:33 26.8.2016] --run /s1  :mab");
+   defs.add_edit_history(suite->absNodePath(),"MSG:[06:45:18 26.8.2017] --force=queued /s1  :ma0");
+   suite_ptr suite2 = defs.add_suite("s2");
+   defs.add_edit_history(suite2->absNodePath(),"MSG:[19:13:44 21.6.2016] --suspend /s2  :ma");
+   defs.add_edit_history(suite2->absNodePath(),"MSG:[11:28:12 6.10.2016] --requeue abort /s2  :ma");
+   defs.add_edit_history(suite2->absNodePath(),"MSG:[09:15:33 26.8.2016] --run /s2  :mab");
+//   PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+//   cout << dump_edit_history(defs.get_edit_history()) << "\n";
+
+   std::string tmpFilename = "test_state_edit_history_pruning.def";
+   defs.save_as_checkpt(tmpFilename);
+
+   {
+      // If any edit history is older than 1 day, then prune
+      Defs reloaded_defs;
+      reloaded_defs.ecf_prune_node_log(1);
+
+      std::string errorMsg, warningMsg;
+      BOOST_REQUIRE_MESSAGE( reloaded_defs.restore(tmpFilename,errorMsg,warningMsg), "RE-PARSE failed for " << tmpFilename);
+
+      const std::unordered_map<std::string, std::vector<std::string> >& edit_history =  reloaded_defs.get_edit_history();
+      BOOST_REQUIRE_MESSAGE( edit_history.empty() , "Expected no edit history after pruning, but found:\n" << dump_edit_history(edit_history) );
+   }
+
+   std::remove(tmpFilename.c_str());
+}
+
+BOOST_AUTO_TEST_CASE( test_state_edit_history_pruning2 )
+{
+   cout << "AParser:: ...test_state_edit_history_pruning2\n";
+
+   // Create edit history for today, this should not be affected by pruning
+   date todays_date_in_utc = day_clock::universal_day();
+   std::string history = "MSG:[07:36:05 ";
+   history += boost::lexical_cast<string>(todays_date_in_utc.day());
+   history += ".";
+   history += boost::lexical_cast<string>(todays_date_in_utc.month());
+   history += ".";
+   history += boost::lexical_cast<string>(todays_date_in_utc.year());
+   history += "] --requeue force /s1  :maj";
+
+
+
+   Defs defs;
+   suite_ptr suite = defs.add_suite("s1");
+   defs.add_edit_history(suite->absNodePath(),history);
+   defs.add_edit_history(suite->absNodePath(),history);
+   defs.add_edit_history(suite->absNodePath(),history);
+//   PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+   cout << dump_edit_history(defs.get_edit_history()) << "\n";
+
+   std::string tmpFilename = "test_state_edit_history_pruning2.def";
+   defs.save_as_checkpt(tmpFilename);
+
+   {
+      // Since the history is todays it should be preserved, and not affected by pruning
+      Defs reloaded_defs;
+      reloaded_defs.ecf_prune_node_log(1);
+
+      std::string errorMsg, warningMsg;
+      BOOST_REQUIRE_MESSAGE( reloaded_defs.restore(tmpFilename,errorMsg,warningMsg), "RE-PARSE failed for " << tmpFilename);
+
+      const std::unordered_map<std::string, std::vector<std::string> >& edit_history =  reloaded_defs.get_edit_history();
+      cout << dump_edit_history(defs.get_edit_history()) << "\n";
+
+      BOOST_REQUIRE_MESSAGE(!edit_history.empty() , "Expected edit history but found none");
+   }
+
+   std::remove(tmpFilename.c_str());
+}
+
 
 BOOST_AUTO_TEST_CASE( test_server_state )
 {
