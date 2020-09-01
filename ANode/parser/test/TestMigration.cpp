@@ -476,7 +476,7 @@ BOOST_AUTO_TEST_CASE( test_state_edit_history_pruning2 )
    defs.add_edit_history(suite->absNodePath(),history);
    defs.add_edit_history(suite->absNodePath(),history);
 //   PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-   cout << dump_edit_history(defs.get_edit_history()) << "\n";
+//   cout << dump_edit_history(defs.get_edit_history()) << "\n";
 
    std::string tmpFilename = "test_state_edit_history_pruning2.def";
    defs.save_as_checkpt(tmpFilename);
@@ -490,7 +490,7 @@ BOOST_AUTO_TEST_CASE( test_state_edit_history_pruning2 )
       BOOST_REQUIRE_MESSAGE( reloaded_defs.restore(tmpFilename,errorMsg,warningMsg), "RE-PARSE failed for " << tmpFilename);
 
       const std::unordered_map<std::string, std::vector<std::string> >& edit_history =  reloaded_defs.get_edit_history();
-      cout << dump_edit_history(defs.get_edit_history()) << "\n";
+//      cout << dump_edit_history(defs.get_edit_history()) << "\n";
 
       BOOST_REQUIRE_MESSAGE(!edit_history.empty() , "Expected edit history but found none");
    }
