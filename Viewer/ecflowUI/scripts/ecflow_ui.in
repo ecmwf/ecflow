@@ -317,7 +317,7 @@ fi
 confDir=${ECFLOWUI_CONFIG_DIR:=${confDirDefault}}
 #We are extra careful an delete the files in a loop instead of using exec for find
 if [[ -d $confDir ]] ; then
-    for fn in $(find $confDir -type f -cmin +0.05 -name *.lock) ; do
+    for fn in $(find $confDir -type f -mmin +1 -name "*.lock") ; do
         if [[ $fn == *.lock ]] ; then
             echo "Remove lock file: ${fn}"
             rm -f $fn
