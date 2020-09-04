@@ -39,7 +39,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,0,0,0">
      <property name="spacing">
       <number>4</number>
      </property>
@@ -76,11 +76,25 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="../../ecflowUI/src/viewer.qrc">
+        <iconset resource="viewer.qrc">
          <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="logModeCombo"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="loadFileTb">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/open_file.svg</normaloff>:/viewer/open_file.svg</iconset>
        </property>
       </widget>
      </item>
@@ -253,7 +267,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="../../ecflowUI/src/viewer.qrc">
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
@@ -276,19 +290,19 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LogView</class>
-   <extends>QTreeView</extends>
-   <header>LogView.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>MessageLabel</class>
    <extends>QWidget</extends>
    <header>MessageLabel.hpp</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>LogView</class>
+   <extends>QTreeView</extends>
+   <header>LogView.hpp</header>
+  </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../ecflowUI/src/viewer.qrc"/>
+  <include location="viewer.qrc"/>
  </resources>
  <connections/>
 </ui>

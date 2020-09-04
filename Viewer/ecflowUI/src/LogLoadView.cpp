@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,19 +9,24 @@
 //============================================================================
 
 #include <stdexcept>
-#include "LogLoadWidget.hpp"
+#include "LogLoadView.hpp"
 
 #include "File_r.hpp"
 #include "File.hpp"
+#include "FileInfoLabel.hpp"
 #include "LogModel.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
+#include "ViewerUtil.hpp"
+#include "VFileInfo.hpp"
+#include "VFileTransfer.hpp"
 
 #include <QtGlobal>
 #include <QDateTime>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -37,279 +42,11 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
-#include "ui_LogLoadWidget.h"
-
 //=======================================================
 //
-// LogLoadWidget
+// LogLoadRequestSortModel
 //
 //=======================================================
-
-LogLoadWidget::LogLoadWidget(QWidget *parent) :
-    ui_(new Ui::LogLoadWidget),
-    numOfRows_(0)
-{
-    ui_->setupUi(this);
-
-    //message label
-    ui_->messageLabel->hide();
-
-    //Chart views
-    viewHandler_=new LogRequestViewHandler(this);
-    for(int i=0; i < viewHandler_->tabItems().count(); i++)
-    {
-        ui_->viewTab->addTab(viewHandler_->tabItems()[i]," h");
-    }
-
-    ui_->viewTab->setTabText(0,tr("Total charts"));
-    ui_->viewTab->setTabText(1,tr("Other charts"));
-    ui_->viewTab->setTabText(2,tr("Tables"));
-
-    ui_->viewTab->setCurrentIndex(0);
-
-    //Cornerbutton for tab
-    //QWidget *cornerW=new QWidget(this);
-    //QHBoxLayout *cornerHb=new QHBoxLayout(cornerW);
-    //cornerHb->setContentsMargins(0,0,0,0);
-
-    //QToolButton* showFullTb=new QToolButton(this);
-    //showFullTb->setText(tr("Full period"));
-    //cornerHb->addWidget(showFullTb);
-
-    connect(ui_->showFullTb,SIGNAL(clicked()),
-            viewHandler_,SLOT(showFullRange()));
-
-    //Temporal resolution combo box
-    //resCombo_=new QComboBox(this);
-    ui_->resCombo->addItem("seconds",0);
-    ui_->resCombo->addItem("minutes",1);
-    ui_->resCombo->addItem("hours",2);
-
-    connect(ui_->resCombo,SIGNAL(currentIndexChanged(int)),
-            this,SLOT(resolutionChanged(int)));
-
-    //cornerHb->addWidget(new QLabel("Resolution:",this));
-    //cornerHb->addWidget(ui_->resCombo_);
-
-    //ui_->viewTab->setCornerWidget(cornerW);
-
-
-    //Log contents
-    logModel_=new LogModel(this);
-
-    ui_->logView->setProperty("log","1");
-    ui_->logView->setProperty("log","1");
-    ui_->logView->setRootIsDecorated(false);
-    ui_->logView->setLogModel(logModel_);
-    ui_->logView->setUniformRowHeights(true);
-    ui_->logView->setAlternatingRowColors(false);
-    ui_->logView->setItemDelegate(new LogDelegate(this));
-    ui_->logView->setContextMenuPolicy(Qt::ActionsContextMenu);
-
-    //make the horizontal scrollbar work
-    ui_->logView->header()->setStretchLastSection(false);
-    ui_->logView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-
-    //Define context menu
-    //ui_->logView->addAction(actionCopyEntry_);
-    //ui_->logView->addAction(actionCopyRow_);
-
-    //Connect the views to the log model
-    connect(viewHandler_,SIGNAL(timeRangeChanged(qint64,qint64)),
-            logModel_,SLOT(setPeriod(qint64,qint64)));
-
-    connect(viewHandler_,SIGNAL(timeRangeChanged(qint64,qint64)),
-            this,SLOT(periodChanged(qint64,qint64)));
-
-    connect(viewHandler_, SIGNAL(timeRangeHighlighted(qint64,qint64,qint64)),
-            logModel_,SLOT(setHighlightPeriod(qint64,qint64,qint64)));
-
-    connect(viewHandler_,SIGNAL(timeRangeReset()),
-            logModel_,SLOT(resetPeriod()));
-
-    connect(viewHandler_,SIGNAL(timeRangeReset()),
-            this,SLOT(periodWasReset()));
-
-    //logInfo label
-    ui_->logInfoLabel->setProperty("fileInfo","1");
-    ui_->logInfoLabel->setWordWrap(true);
-    ui_->logInfoLabel->setMargin(2);
-    ui_->logInfoLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    ui_->logInfoLabel->setAutoFillBackground(true);
-    ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
-    ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
-
-
-    connect(ui_->reloadTb,SIGNAL(clicked()),
-            this,SLOT(slotReload()));
-
-    //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
-}
-
-LogLoadWidget::~LogLoadWidget()
-{
-}
-
-void LogLoadWidget::clear()
-{
-    ui_->messageLabel->clear();
-    ui_->messageLabel->hide();
-
-    ui_->logInfoLabel->setText(QString());
-    viewHandler_->clear();
-
-    logModel_->clearData();
-    logFile_.clear();
-    serverName_.clear();
-    host_.clear();
-    port_.clear();
-    ui_->startTe->clear();
-    ui_->endTe->clear();
-
-    setAllVisible(false);
-}
-
-void LogLoadWidget::updateInfoLabel()
-{
-    QColor col(39,49,101);
-    QString txt=Viewer::formatBoldText("Log file: ",col) + logFile_;
-    txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-         Viewer::formatBoldText(" Host: ",col) + host_ +
-         Viewer::formatBoldText(" Port: ",col) + port_;
-
-    if (viewHandler_->data() && viewHandler_->data()->size() >0) {
-        QDateTime startDt=viewHandler_->data()->startTime();
-        QDateTime endDt=viewHandler_->data()->endTime();
-        txt+=Viewer::formatBoldText(" Full period: ",col) +
-                startDt.toString("yyyy-MM-dd hh:mm:ss") + Viewer::formatBoldText(" to ",col) +
-                endDt.toString("yyyy-MM-dd hh:mm:ss");
-
-        int maxNum=viewHandler_->data()->maxNumOfRows();
-        int num=viewHandler_->data()->numOfRows();
-        if(maxNum != 0 && num == abs(maxNum))
-        {
-            txt+=Viewer::formatBoldText(" Log entries: ",col) +
-               "last " + QString::number(abs(maxNum)) + " rows read (maximum reached)";
-        }
-    }
-
-    ui_->logInfoLabel->setText(txt);
-
-    //TODO: we need a better implementation
-    ui_->timeWidget->hide();
-}
-
-void LogLoadWidget::setAllVisible(bool b)
-{
-    ui_->viewTab->setVisible(b);
-    ui_->logView->setVisible(b);
-    ui_->timeWidget->setVisible(b);
-    ui_->showFullTb->setVisible(b);
-    ui_->resComboLabel->setVisible(b);
-    ui_->resCombo->setVisible(b);
-}
-
-void LogLoadWidget::slotReload()
-{
-    if(!serverName_.isEmpty() && numOfRows_ != 0)
-    {
-        load(serverName_, host_, port_, logFile_,numOfRows_);
-    }
-}
-
-void LogLoadWidget::load(QString logFile,int numOfRows)
-{
-    load("","","",logFile,numOfRows);
-}
-
-void LogLoadWidget::load(QString serverName, QString host, QString port, QString logFile,int numOfRows)
-{
-    clear();
-
-    serverName_=serverName;
-    host_=host;
-    port_=port;
-    logFile_=logFile;
-    numOfRows_=numOfRows;
-
-    updateInfoLabel();
-
-    QFileInfo fInfo(logFile);
-    if(!fInfo.exists())
-    {
-        ui_->messageLabel->showError("The specified log file does not exist!");
-        return;
-    }
-
-    if(!fInfo.isReadable())
-    {
-        ui_->messageLabel->showError("The specified log file is not readable!");
-        return;
-    }
-
-    if(!fInfo.isFile())
-    {
-        ui_->messageLabel->showError("The specified log file is not a file!");
-        return;
-    }
-
-    setAllVisible(true);
-
-    try
-    {
-        viewHandler_->load(logFile_.toStdString(),numOfRows);
-    }
-    catch(std::runtime_error e)
-    {
-        ui_->messageLabel->showError(e.what());
-        setAllVisible(false);
-    }
-
-    logModel_->loadFromFile(logFile_.toStdString(),viewHandler_->data()->startPos());
-
-    QDateTime startTime=viewHandler_->data()->startTime();
-    QDateTime endTime=viewHandler_->data()->endTime();
-    ui_->startTe->setMinimumDateTime(startTime);
-    ui_->startTe->setMaximumDateTime(endTime);
-    ui_->startTe->setDateTime(startTime);
-    ui_->endTe->setMinimumDateTime(startTime);
-    ui_->endTe->setMaximumDateTime(endTime);
-    ui_->endTe->setDateTime(endTime);
-
-    updateInfoLabel();
-}
-
-void LogLoadWidget::periodChanged(qint64 start,qint64 end)
-{
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start,Qt::UTC);
-    QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end,Qt::UTC);
-#else
-    QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start).toUTC();
-    QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end).toUTC();
-#endif
-    ui_->startTe->setDateTime(startDt);
-    ui_->endTe->setDateTime(endDt);
-}
-
-void LogLoadWidget::periodWasReset()
-{
-    QDateTime startDt=viewHandler_->data()->startTime();
-    QDateTime endDt=viewHandler_->data()->endTime();
-    ui_->startTe->setDateTime(startDt);
-    ui_->endTe->setDateTime(endDt);
-}
-
-void LogLoadWidget::resolutionChanged(int)
-{
-    int idx=ui_->resCombo->currentIndex();
-    if(idx == 0)
-        viewHandler_->setResolution(LogLoadData::SecondResolution);
-    else if(idx == 1)
-        viewHandler_->setResolution(LogLoadData::MinuteResolution);
-    else if(idx == 2)
-        viewHandler_->setResolution(LogLoadData::HourResolution);
-}
 
 LogLoadRequestSortModel::LogLoadRequestSortModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
@@ -954,11 +691,11 @@ void ChartView::adjustTimeAxis(qint64 periodInMs)
     if(period < 60*60)
     {
         format="hh:mm:ss";
-    }   
+    }
     else if(period < 2*24*3600)
     {
         format="hh:mm";
-    }   
+    }
     else
     {
         format="dd MMM";
@@ -1045,7 +782,7 @@ LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) :
     buildTableTab(parent);
 
     for(int i=0; i < views_.count(); i++)
-    {      
+    {
         connect(views_[i],SIGNAL(zoomHappened(QRectF)),
                 this,SLOT(slotZoomHappened(QRectF)));
 
@@ -1249,7 +986,7 @@ void LogRequestViewHandler::addRemoveUid(int idx, bool st)
 void LogRequestViewHandler::slotZoomHappened(QRectF r)
 {
     if(LogRequestView* senderView=static_cast<LogRequestView*>(sender()))
-    {       
+    {
         Q_FOREACH(LogRequestView* v,views_)
         {
             if(v != senderView)
@@ -1585,7 +1322,7 @@ QColor LogRequestView::seriesColour(QChart* chart,QString id)
 }
 
 void LogRequestView::clear()
-{   
+{
     clearCharts();
 
     if(suiteCtl_.model_)
@@ -2620,7 +2357,7 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx)
             QString title="cmd: " + data_->subReqName(cmdIdx);
 
             QLineSeries* series=new QLineSeries();
-            series->setName(suiteSeriesId(suiteIdx));           
+            series->setName(suiteSeriesId(suiteIdx));
             data_->getSuiteSubReq(suiteIdx,cmdIdx,*series);
             build(views_[i],series,title,maxVal_);
         }
@@ -2701,8 +2438,8 @@ void LogSuiteCmdRequestView::buildScanTable(QString& txt,int idx)
             name="all commands";
         }
         else
-        {           
-            Q_ASSERT(cmdIdx >= 0);          
+        {
+            Q_ASSERT(cmdIdx >= 0);
             name="cmd: " + data_->subReqName(cmdIdx);
         }
 
@@ -3496,7 +3233,7 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
     {
         val << total.subReq()[i].periodStat().sumTotal_;
         data_.rowLabels_ << QString::fromStdString(total.subReq()[i].name_);
-    }  
+    }
     data_.vals_[0] =val;
     data_.dataIndex_[0]=-1;
 

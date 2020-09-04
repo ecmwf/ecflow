@@ -478,6 +478,23 @@ set(viewer_wrap_ui_files
     ZombieItemWidget.ui
 )
 
+if(ECFLOW_LOGVIEW)
+    list(APPEND viewer_srcs LogLoadWidget.cpp LogLoadView.cpp)
+    list(APPEND viewer_moc_files LogLoadWidget.hpp LogLoadView.hpp)
+endif()
+
+#set(wrap_ui_files
+#    LogLoadWidget.ui
+#    )
+
+if(ECFLOW_LOGVIEW)
+    set(viewer_wrap_ui_files
+        LogLoadWidget.ui
+        )
+endif()
+
+
+
 if(ECFLOW_QT5)
   QT5_WRAP_CPP(VIEWER_MOC ${viewer_moc_files} )
   QT5_ADD_RESOURCES (VIEWER_RES viewer.qrc)

@@ -37,11 +37,13 @@ public:
 protected:
     void updateState(const ChangeFlags&) override;
     void serverSyncFinished() override;
+    void connectStateChanged() override;
 
 private:
     void load();
 #ifdef ECFLOW_LOGVIEW
     LogLoadWidget* w_;
+    bool delayedLoad_{false};
 #else
     MessageLabel* w_;
 #endif

@@ -21,6 +21,7 @@
 
 #include "MessageLabel.hpp"
 #include "ServerHandler.hpp"
+#include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
@@ -92,16 +93,48 @@ void ServerLoadItemWidget::load()
     {
         ServerHandler *sh=info_->server();
         Q_ASSERT(sh);
-        QString logFile;
-        if(VServer* vs=sh->vRoot())
-        {
-            logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
 
-            w_->load(QString::fromStdString(sh->name()),
+        if(sh->activity() == ServerHandler::LoadActivity)
+        {
+            delayedLoad_=true;
+        }
+        else
+        {
+            if(VServer* vs=sh->vRoot())
+            {
+                QString logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
+                if(!logFile.isEmpty())
+                {
+                    std::vector<std::string> suites;
+                    if(SuiteFilter* sf=sh->suiteFilter())
+                    {
+                        if(sf->isEnabled())
+                            suites=sh->suiteFilter()->filter();
+                    }
+
+                    //last 100 MB are read
+                    w_->initLoad(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
-                         logFile,-50000); //last 50000 rows are read
+                         logFile, suites, sh->uidForServerLogTransfer(),
+                         sh->maxSizeForTimelineData(),
+                         info_->nodePath(), detached_);//last 100 MB are read*/
+
+                    delayedLoad_=false;
+
+                }
+            }
         }
+//        QString logFile;
+//        if(VServer* vs=sh->vRoot())
+//        {
+//            logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
+
+//            w_->load(QString::fromStdString(sh->name()),
+//                         QString::fromStdString(sh->host()),
+//                         QString::fromStdString(sh->port()),
+//                         logFile,-50000); //last 50000 rows are read
+//        }
     }
 #endif
 }
@@ -110,13 +143,9 @@ void ServerLoadItemWidget::clearContents()
 {
 #ifdef ECFLOW_LOGVIEW
     w_->clear();
+    delayedLoad_=false;
 #endif
     InfoPanelItem::clear();
-}
-
-//We are independent of the server's state
-void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
-{
 }
 
 bool ServerLoadItemWidget::hasSameContents(VInfo_ptr info)
@@ -131,6 +160,57 @@ bool ServerLoadItemWidget::hasSameContents(VInfo_ptr info)
 //We are independent of the server's state
 void ServerLoadItemWidget::serverSyncFinished()
 {
+#ifdef ECFLOW_LOGVIEW
+    if(delayedLoad_)
+        load();
+#endif
+}
+
+void ServerLoadItemWidget::connectStateChanged()
+{
+    if(frozen_)
+        return;
+#ifdef ECFLOW_LOGVIEW
+    if(delayedLoad_)
+        load();
+#endif
+}
+
+
+//We are independent of the server's state
+void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+#ifdef ECFLOW_LOGVIEW
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            //reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                //reloadTb_->setEnabled(true);
+                if(delayedLoad_)
+                    load();
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
+
+    if(flags.isSet(DetachedChanged))
+    {
+        w_->setDetached(detached_);
+//        if(!detached_ && info_)
+//            w_->selectPathInView(info_->nodePath());
+    }
+#endif
 }
 
 static InfoPanelItemMaker<ServerLoadItemWidget> maker1("server_load");
