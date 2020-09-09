@@ -42,6 +42,7 @@ exe u_anode : [ glob test/*.cpp : test/TestSingleExprParse.cpp
            /site-config//boost_timer
            /site-config//boost_chrono
            /site-config//boost_test
+           #/site-config//boost_system
          : <variant>debug:<define>DEBUG
 	      ;
 	     
@@ -55,6 +56,7 @@ exe u_anode_stest : test/TestSingleExprParse.cpp
            /site-config//boost_timer
            /site-config//boost_chrono
            /site-config//boost_test
+           #/site-config//boost_system
          : <variant>debug:<define>DEBUG
  	     ;
 
@@ -67,6 +69,7 @@ exe u_test_system : test/TestSystemStandalone.cpp
            /site-config//boost_timer
            /site-config//boost_chrono
            /site-config//boost_test
+           #/site-config//boost_system
          : <variant>debug:<define>DEBUG
          ;
 

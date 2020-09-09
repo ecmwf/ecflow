@@ -57,6 +57,7 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /site-config//boost_timer
            /site-config//boost_chrono
            /site-config//boost_test
+           #/site-config//boost_system
            pthread
          : <include>../ANode/test
            <library>/site-config//openssl_libs 
@@ -74,6 +75,7 @@ exe perf_job_gen : test/TestJobGenPerf.cpp
            base
            /site-config//boost_filesystem
            /site-config//boost_datetime
+           #/site-config//boost_system
          : <include>../ANode/test 
            <variant>debug:<define>DEBUG
         ;
