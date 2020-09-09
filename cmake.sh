@@ -45,6 +45,7 @@ show_error_and_exit() {
    echo "   no_gui         - Don't build the gui"
    echo "   no_ssl         - build without using openssl"
    echo "   log            - enable debug output"
+   echo "   boost          - use environment variable BOOST_ROOT=$BOOST_ROOT"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
@@ -78,6 +79,7 @@ asan_arg=
 msan_arg=
 ubsan_arg=
 iwyu_arg=
+boost_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -106,6 +108,7 @@ while [[ "$#" != 0 ]] ; do
       done
       break      
    elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
+   elif [[ "$1" = boost ]] ;   then boost_arg=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
    elif [[ "$1" = sys_install ]] ; then sys_install=$1 ;
@@ -264,7 +267,11 @@ fi
 #
 # This must be done after change of compiler/environment
 # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
-module load boost/1.71.0     # comment to use local BOOST_ROOT
+if [[ $boost_arg = boost ]] ; then
+    echo "Using environment variable BOOST_ROOT=$BOOST_ROOT"
+else
+    module load boost/1.71.0      
+fi
 
 
 # ====================================================================================

@@ -220,12 +220,12 @@ set(Boost_DETAILED_FAILURE_MSG ON)
 set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a, https://gitlab.kitware.com/cmake/cmake/issues/18908
 #set(Boost_DEBUG                ON) # Set to ON to enable debug output from FindBoost
 
-set(ECFLOW_BOOST_VERSION "1.68.0")
+set(ECFLOW_BOOST_VERSION "1.66.0")
 
 # need upfront to get a hold of Boost_VERSION_STRING
 find_package( Boost ${ECFLOW_BOOST_VERSION} ) 
 
-# Need timer for boost::time::cpu_timer this needs boost:crono, which need librt These are used in the test only
+# Need timer for boost::time::cpu_timer this needs boost:chrono, which need librt These are used in the test only
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
     find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
 else()
