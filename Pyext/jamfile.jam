@@ -143,6 +143,7 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_filesystem
     /site-config//boost_program_options
     /site-config//boost_datetime
+    #/site-config//boost_system
     /site-config//boost_python
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
