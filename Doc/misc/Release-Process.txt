@@ -36,23 +36,23 @@ Process
    <Inform Daniel>
    
 0/ Build release: Two approaches, both use meta-builder: 
-    1/ git flow release start  5.5.1 
-       git_tag=release/5.5.1
+    1/ git flow release start  5.5.2 
+       git_tag=release/5.5.2
        Use this approach when multiple people working on the release.
       *Push* branch onto stash, otherwise we can not pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
        
-    2/ git flow release start  5.5.1
-       git flow release finish 5.5.1  
+    2/ git flow release start  5.5.2
+       git flow release finish 5.5.2  
        git push --tags
-       git_tag=5.5.1
+       git_tag=5.5.2
        When single person making release
  
-0/ Update ECFLOW_GIT_BRANCH to "5.5.1" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/5.5.1)
+0/ Update ECFLOW_GIT_BRANCH to "5.5.2" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/5.5.2)
    Then use the meta builder to build/install.
    Note: if used 
-     > git flow release start 5.5.1        # -> it will create a branch release/5.5.1
+     > git flow release start 5.5.2        # -> it will create a branch release/5.5.2
 
 0/ For a PREPIFS release change file:
      /usr/local/apps/ecflow/.modulerc
