@@ -53,9 +53,6 @@ ecbuild_add_test( TARGET   u_acore
                   INCLUDES src ${Boost_INCLUDE_DIRS}
                   LIBS     core ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                            ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
+                  DEFINITIONS ${BOOST_TEST_DYN_LINK}
                 )
                 
-if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-   target_compile_definitions(u_acore PUBLIC BOOST_TEST_DYN_LINK)
-endif()
-

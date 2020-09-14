@@ -102,56 +102,48 @@ endif()
               
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 # boost_timer -> boost_chrono -> librt
-ecbuild_add_test( TARGET    s_client
-                  SOURCES   ${test_srcs}
-                  LIBS      libclient ${OPENSSL_LIBRARIES}
-                            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
-                            ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
-                  INCLUDES  ../ANode/test
-                            ../Base/test 
-                            ${Boost_INCLUDE_DIRS}
+ecbuild_add_test( TARGET       s_client
+                  SOURCES      ${test_srcs}
+                  LIBS         libclient ${OPENSSL_LIBRARIES}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
+                  INCLUDES     ../ANode/test
+                               ../Base/test 
+                               ${Boost_INCLUDE_DIRS}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_base
                  )
 
-if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-   target_compile_definitions(s_client PUBLIC BOOST_TEST_DYN_LINK)
-endif()
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# 
 	# Simple stand alone test
 	#
 	# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
-	ecbuild_add_test( TARGET   perf_test_large_defs 
-                      SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
-                      LIBS     libclient ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                      INCLUDES ../ANode/test
-                               ../Base/test 
-                               ${Boost_INCLUDE_DIRS}
+	ecbuild_add_test( TARGET        perf_test_large_defs 
+                      SOURCES      test/TestSinglePerf.cpp test/SCPort.cpp
+                      LIBS         libclient ${OPENSSL_LIBRARIES}
+                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                      INCLUDES     ../ANode/test
+                                   ../Base/test 
+                                   ${Boost_INCLUDE_DIRS}
+                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                 )
  
-   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-      target_compile_definitions(perf_test_large_defs PUBLIC BOOST_TEST_DYN_LINK)
-   endif()
-              
 	# 
 	# test migration
 	#
 	ecbuild_add_test( TARGET m_test_migration
-                      SOURCES  test/TestMigration.cpp test/SCPort.cpp
-                      LIBS     libclient ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                      INCLUDES ../ANode/test
-                               ../Base/test 
-                               ${Boost_INCLUDE_DIRS}
+                      SOURCES      test/TestMigration.cpp test/SCPort.cpp
+                      LIBS         libclient ${OPENSSL_LIBRARIES}
+                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                      INCLUDES     ../ANode/test
+                                   ../Base/test 
+                                   ${Boost_INCLUDE_DIRS}
+                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                     )
-                    
-   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-      target_compile_definitions(m_test_migration PUBLIC BOOST_TEST_DYN_LINK)
-   endif()
 endif()
 
 # ===================================================================

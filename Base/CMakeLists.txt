@@ -122,22 +122,17 @@ ecbuild_add_test( TARGET       u_base
                   LIBS         base pthread ${OPENSSL_LIBRARIES}
                                ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_aparser
                   )
-if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-   target_compile_definitions(u_base PUBLIC BOOST_TEST_DYN_LINK)
-endif()
-
 
                   
 if (ENABLE_ALL_TESTS)
-   ecbuild_add_test( TARGET  perf_job_gen 
+   ecbuild_add_test( TARGET       perf_job_gen 
                      SOURCES      test/TestJobGenPerf.cpp
                      LIBS         base nodeattr node core pthread                                    
                      INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
+                     DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   )
-   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-      target_compile_definitions(perf_job_gen PUBLIC BOOST_TEST_DYN_LINK)
-   endif()
 endif()
                   

@@ -80,12 +80,9 @@ ecbuild_add_test( TARGET       u_server
                   INCLUDES     src ${Boost_INCLUDE_DIRS}
                   LIBS         libserver ${OPENSSL_LIBRARIES}
                                ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_base
               )
-              
-if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
-   target_compile_definitions(u_server PUBLIC BOOST_TEST_DYN_LINK)
-endif()
 
 # ===================================================================
 # install

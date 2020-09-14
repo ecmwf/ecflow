@@ -206,6 +206,10 @@ endforeach()
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
 if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
+    ecbuild_info( "Using STATIC boost libraries : ${BOOST_TEST_DYN_LINK}" )
+else()
+    set(BOOST_TEST_DYN_LINK "BOOST_TEST_DYN_LINK")
+    ecbuild_info( "Using SHARED boost libraries setting : ${BOOST_TEST_DYN_LINK}" )
 endif()
 
 # By default cmake assume boost was built with cmake. Hence looks for package config file BoostConfig.cmake/boost-config.cmake
@@ -232,7 +236,7 @@ else()
     # for boost version 1.69 or greater Boost.System is now header-only.
     find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
 endif()
-#ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
+ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
 # =======================================================================================
