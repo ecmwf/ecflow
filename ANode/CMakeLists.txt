@@ -80,6 +80,10 @@ ecbuild_add_test(TARGET  u_anode
                  TEST_DEPENDS u_anattr
                  )
 
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(u_anode PUBLIC BOOST_TEST_DYN_LINK)
+endif()
+
 if (ENABLE_ALL_TESTS)
 	list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
 	ecbuild_add_test( TARGET       u_anode_stest
@@ -88,6 +92,10 @@ if (ENABLE_ALL_TESTS)
                       LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                       TEST_DEPENDS u_anattr
                     )
+                    
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(u_anode_stest PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 endif()
 
 

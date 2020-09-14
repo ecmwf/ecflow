@@ -15,9 +15,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#ifdef ECF_SHARED_BOOST_LIBS
-#define BOOST_TEST_DYN_LINK
-#endif
 #include <boost/test/unit_test.hpp>
 
 #include "TodayAttr.hpp"

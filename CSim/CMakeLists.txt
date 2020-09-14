@@ -42,6 +42,11 @@ ecbuild_add_test( TARGET   c_csim
                   INCLUDES ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_base
                  )
+                 
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(c_csim PUBLIC BOOST_TEST_DYN_LINK)
+endif()
+
 
 if (ENABLE_ALL_TESTS)
 
@@ -53,5 +58,9 @@ if (ENABLE_ALL_TESTS)
                       INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                  )
+                 
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(c_csim_single PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 endif()
               

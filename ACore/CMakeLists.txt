@@ -55,3 +55,7 @@ ecbuild_add_test( TARGET   u_acore
                            ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
                 )
                 
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(u_acore PUBLIC BOOST_TEST_DYN_LINK)
+endif()
+

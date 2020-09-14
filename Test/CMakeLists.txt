@@ -66,9 +66,13 @@ if (ENABLE_ALL_TESTS)
 	                  INCLUDES ${Boost_INCLUDE_DIRS}
 	                  LIBS     libharness ${OPENSSL_LIBRARIES}
 	                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-	                  TEST_DEPENDS s_client
+	                  TEST_DEPENDS s_test
 	                )
-	
+	if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(u_server PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
+   
+   
 	ecbuild_add_test( TARGET  s_test_zombies
 	                  SOURCES   ./TestZombies.cpp
 	                  INCLUDES  ${Boost_INCLUDE_DIRS}
@@ -77,6 +81,10 @@ if (ENABLE_ALL_TESTS)
 	                  TEST_DEPENDS s_test
 	                )
 	
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(s_test_zombies PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
+   
 	# This test runs forever, hence not suitable for unit test.                          
 	#ecbuild_add_test( TARGET  singletest
 	#                  SOURCES   ./TestSingle.cpp

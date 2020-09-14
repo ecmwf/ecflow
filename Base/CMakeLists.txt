@@ -124,6 +124,10 @@ ecbuild_add_test( TARGET       u_base
                   INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_aparser
                   )
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(u_base PUBLIC BOOST_TEST_DYN_LINK)
+endif()
+
 
                   
 if (ENABLE_ALL_TESTS)
@@ -132,5 +136,8 @@ if (ENABLE_ALL_TESTS)
                      LIBS         base nodeattr node core pthread                                    
                      INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                   )
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(perf_job_gen PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 endif()
                   

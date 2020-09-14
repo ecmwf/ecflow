@@ -24,3 +24,7 @@ ecbuild_add_test( TARGET       u_anattr
                   LIBS         nodeattr ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   TEST_DEPENDS u_acore
                  )
+
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(u_anattr PUBLIC BOOST_TEST_DYN_LINK)
+endif()

@@ -17,9 +17,6 @@
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
-#ifdef ECF_SHARED_BOOST_LIBS
-#define BOOST_TEST_DYN_LINK
-#endif
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/lexical_cast.hpp>

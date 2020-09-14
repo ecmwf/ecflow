@@ -11,23 +11,19 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include "ExprParser.hpp"
-#include "ExprAst.hpp"
-#include "ExprDuplicate.hpp"
-
-#ifdef ECF_SHARED_BOOST_LIBS
-#define BOOST_TEST_DYN_LINK
-#endif
-#include <boost/test/unit_test.hpp>
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/conversion.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
-
 #include <string>
 #include <map>
 #include <iostream>
 #include <fstream>
+
+#include <boost/test/unit_test.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/conversion.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+
+#include "ExprParser.hpp"
+#include "ExprAst.hpp"
+#include "ExprDuplicate.hpp"
 using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;

@@ -27,6 +27,9 @@ ecbuild_add_test( TARGET       u_aparser
                                ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_anode
                 )
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(u_aparser PUBLIC BOOST_TEST_DYN_LINK)
+endif()
 
 
 if (ENABLE_ALL_TESTS)
@@ -46,6 +49,9 @@ if (ENABLE_ALL_TESTS)
                                ../src        # ANode/src
                                ${Boost_INCLUDE_DIRS}
                     )
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(perf_aparser PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 
 	#
 	# Timer for arbitary defs file,  
@@ -64,6 +70,9 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS} 
                     )
 
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(perf_aparser_timer PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 
 	#
 	# Tests parser for a single defs file.  
@@ -80,4 +89,7 @@ if (ENABLE_ALL_TESTS)
                                ../test       # ANode/test
                                ${Boost_INCLUDE_DIRS} 
                    )
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(perf_aparser_only PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 endif()

@@ -15,8 +15,16 @@
 /// Use this class to test single simulation of definition file that we want to add
 /// to Test Simulator. This is a separate exe
 //============================================================================
-#include "Simulator.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
 
+#include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include "Simulator.hpp"
 #include "File.hpp"
 #include "Log.hpp"
 #include "Defs.hpp"
@@ -25,18 +33,6 @@
 #include "Task.hpp"
 #include "TestUtil.hpp"
 #include "System.hpp"
-
-#ifdef ECF_SHARED_BOOST_LIBS
-#define BOOST_TEST_DYN_LINK
-#endif
-#include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
 
 using namespace std;
 using namespace ecf;

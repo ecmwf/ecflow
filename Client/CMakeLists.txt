@@ -113,6 +113,9 @@ ecbuild_add_test( TARGET    s_client
                   TEST_DEPENDS u_base
                  )
 
+if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+   target_compile_definitions(s_client PUBLIC BOOST_TEST_DYN_LINK)
+endif()
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# 
@@ -128,7 +131,11 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
                                ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                 )
-               
+ 
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(perf_test_large_defs PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
+              
 	# 
 	# test migration
 	#
@@ -141,6 +148,10 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
                                ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                     )
+                    
+   if ( NOT ENABLE_STATIC_BOOST_LIBS ) 
+      target_compile_definitions(m_test_migration PUBLIC BOOST_TEST_DYN_LINK)
+   endif()
 endif()
 
 # ===================================================================
