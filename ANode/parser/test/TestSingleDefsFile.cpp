@@ -18,6 +18,9 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef ECF_SHARED_BOOST_LIBS
+#define BOOST_TEST_DYN_LINK
+#endif
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/timer/timer.hpp>

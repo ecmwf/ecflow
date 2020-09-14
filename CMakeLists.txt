@@ -206,6 +206,8 @@ endforeach()
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
 if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
+else()
+    add_definitions(-DECF_SHARED_BOOST_LIBS)
 endif()
 
 # By default cmake assume boost was built with cmake. Hence looks for package config file BoostConfig.cmake/boost-config.cmake

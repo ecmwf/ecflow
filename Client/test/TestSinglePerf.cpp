@@ -16,6 +16,9 @@
 #include <fstream>
 #include <cstdlib>  // getenv
 
+#ifdef ECF_SHARED_BOOST_LIBS
+#define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

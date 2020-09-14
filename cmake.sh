@@ -36,6 +36,7 @@ show_error_and_exit() {
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
+   echo "   shared         - build with shared boost libs"
    echo "   intel          - build with intel compiler"
    echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
    echo "   iwyu           - INCLUDE what you use"
@@ -60,6 +61,7 @@ ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
 make_arg=
+shared_arg=
 make_only_arg=
 test_arg=
 test_safe_arg=
@@ -108,6 +110,7 @@ while [[ "$#" != 0 ]] ; do
       done
       break      
    elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
+   elif [[ "$1" = shared ]] ;  then shared_arg=$1 ;
    elif [[ "$1" = boost ]] ;   then boost_arg=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
@@ -239,6 +242,12 @@ if [[ "$msan_arg" = msan ]] ; then
    CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins"
    CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=memory" # -fPIE -pie"
 fi
+
+
+if [[ "$shared_arg" = shared ]] ; then
+   cmake_extra_options="$cmake_extra_options -DENABLE_STATIC_BOOST_LIBS=OFF"
+fi
+
 
 if [[ "$ARCH" = cray ]] ; then
 

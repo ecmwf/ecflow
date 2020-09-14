@@ -15,6 +15,9 @@
 #include "ExprAst.hpp"
 #include "ExprDuplicate.hpp"
 
+#ifdef ECF_SHARED_BOOST_LIBS
+#define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/unit_test.hpp>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>

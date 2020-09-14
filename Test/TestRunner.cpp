@@ -14,6 +14,10 @@
 // Description :
 //============================================================================
 #include "TestFixture.hpp"
+
+#ifdef ECF_SHARED_BOOST_LIBS
+#define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/unit_test.hpp>
 
 // Global test fixture. Dues to boost deficiency this can't be accessed. hence
