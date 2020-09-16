@@ -67,7 +67,7 @@ if (ENABLE_ALL_TESTS)
 	                  LIBS         libharness ${OPENSSL_LIBRARIES}
 	                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-	                  TEST_DEPENDS s_test
+	                  TEST_DEPENDS s_client
 	                )
    
    
