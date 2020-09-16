@@ -29,7 +29,7 @@ project( ecflow LANGUAGES CXX VERSION 5.5.3 )
 
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-# ecbuild_info( "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
+ecbuild_info( "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
 
 include( ecbuild_system NO_POLICY_SCOPE )
 
