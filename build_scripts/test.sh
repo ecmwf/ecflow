@@ -31,7 +31,7 @@ while [ "$#" -ne 0 ] ; do
       mode=$1
    elif [ "$1" = safe ] ;   then safe=yes ;
    elif [ "$1" = ssl ] ;    then ssl=on ;
-   elif [ "$1" = shared ] ; then link= ;
+   elif [ "$1" = shared ] ; then link=shared ;
    else
       compiler_arg=$1
    fi
@@ -49,7 +49,7 @@ if [ ${link} = static ] ; then
    link_dir=/link-static
 fi
 
-echo "mode=$mode compiler=$compiler_arg safe=$safe ssl=$ssl link=$link_dir"
+echo "mode=$mode compiler=$compiler_arg safe=$safe ssl=$ssl link=$link link_dir=$link_dir"
 
 #======================================================================
 # remove python test, so that they are rerun
