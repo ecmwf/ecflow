@@ -26,6 +26,7 @@ using namespace QtCharts;
 
 class LogLoadData;
 class LogLoadDataItem;
+class LogConsumer;
 
 struct  LogLoadStatItem
 {
@@ -95,7 +96,6 @@ public:
 
     void clear();
     void init(size_t num);
-
     size_t size() const {return childReq_.size();}
 
     const LogLoadStatItem& periodStat() const {return periodStat_;}
@@ -143,14 +143,36 @@ class LogLoadDataStats
 
 };
 
+struct LogDataParseHelper {
+    //A collector total counts
+    LogReqCounter total{"total"};
+
+    //A collector for suite related data
+    std::vector<LogReqCounter> suite_vec;
+
+    //A collector for uid related data
+    std::vector<LogReqCounter> uid_vec;
+
+    std::vector<std::string> new_time_stamp;
+    std::vector<std::string> old_time_stamp;
+
+    std::map<std::string,size_t> uidCnt;
+};
+
 //The top level class for load/request statistics
-class LogLoadData
+class LogLoadData : public QObject
 {
+    Q_OBJECT
 public:
     enum TimeRes {SecondResolution, MinuteResolution, HourResolution};
+    enum LoadStatus {LoadNotTried,LoadFailed,LoadDone};
 
-    LogLoadData() : timeRes_(SecondResolution), fullStatComputed_(false), maxNumOfRows_(0), numOfRows_(0), startPos_(0)  {}
+    LogLoadData(QObject* parent=nullptr) : QObject(parent) {}
 
+    void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, LogConsumer*);
+    void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last, LogConsumer*);
+
+    QDateTime loadedAt() const {return loadedAt_;}
     void clear();
     const LogLoadDataItem& dataItem() const {return total_;}
     QStringList suiteNames() const {return suites_;}
@@ -160,7 +182,7 @@ public:
     const LogLoadDataItem& total() const {return total_;}
     TimeRes timeRes() const {return timeRes_;}
     void setTimeRes(TimeRes);
-    void loadLogFile(const std::string& logFile,int numOfRows=0);
+    //void loadLogFile(const std::string& logFile,int numOfRows=0);
 
     void getChildReq(QLineSeries& series);
     void getUserReq(QLineSeries& series);
@@ -187,11 +209,18 @@ public:
     QString subReqName(int idx) const;
     QString uidName(int idx) const;
     size_t subReqMax() const;
-    int maxNumOfRows() const {return maxNumOfRows_;}
     int numOfRows() const {return numOfRows_;}
     std::streamoff startPos() const { return startPos_;}
 
+    bool isFullRead() const {return fullRead_;}
+    LoadStatus loadStatus() const {return loadStatus_;}
+    void markAsLoadDone() {loadStatus_ = LoadDone;}
+
+Q_SIGNALS:
+    void loadProgress(size_t current,size_t total);
+
 private:
+    void loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi, LogConsumer*);
     std::streamoff getStartPos(const std::string& logFile, int numOfRows);
     void getSeries(QLineSeries& series,const LogRequestItem& item,int& maxVal);
     void getSeries(QLineSeries& series,const std::vector<int>& vals,int& maxVal);
@@ -208,18 +237,22 @@ private:
     bool extract_suite_path(const std::string& line,bool child_cmd,std::vector<LogReqCounter>& suite_vec,
                             size_t& column_index);
 
-    TimeRes timeRes_;
+    TimeRes timeRes_{SecondResolution};
     std::vector<qint64> time_; //times stored as msecs since the epoch
 
     LogLoadDataItem total_; //generic data item for all the suites
     std::vector<LogLoadDataItem> suiteData_; //suite-related data items
     std::vector<LogLoadDataItem> uidData_;
-    bool fullStatComputed_;
+    bool fullStatComputed_{false};
 
     QStringList suites_;
-    int maxNumOfRows_;
-    int numOfRows_;
-    std::streamoff startPos_;
+    QDateTime loadedAt_;
+    size_t maxReadSize_{0};
+    int numOfRows_{0};
+    bool fullRead_{false};
+    LoadStatus loadStatus_{LoadNotTried};
+    std::streamoff startPos_{0};
+    LogDataParseHelper parseHelper_;
 
 };
 

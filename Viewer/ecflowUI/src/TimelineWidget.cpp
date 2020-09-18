@@ -927,7 +927,6 @@ void TimelineWidget::loadArchive()
         {
             //logLoaded_=false;
             ui_->messageLabel->stopProgress();
-
             std::string errTxt(e.what());
 #if 0
 

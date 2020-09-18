@@ -2,6 +2,7 @@ set(srcs
     DirectoryHandler.cpp
     IconProvider.cpp
     LocalSocketServer.cpp
+    LogConsumer.hpp
     LogData.cpp    
     LogModel.cpp
     LogTruncator.cpp
@@ -33,6 +34,11 @@ set(moc_files
     LogView.hpp
     MessageLabel.hpp
 )
+
+if(ECFLOW_LOGVIEW)
+    list(APPEND moc_files LogLoadData.hpp)
+endif()
+
 
 #if(ECFLOW_LOGVIEW)
 #    list(APPEND moc_files LogLoadWidget.hpp)

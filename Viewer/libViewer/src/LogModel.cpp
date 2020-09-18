@@ -40,8 +40,26 @@ void LogModel::loadFromFile(const std::string& fileName,size_t startPos)
     data_.loadFromFile(fileName,startPos);
     endResetModel();
 
-    UiLog().dbg() << "first date: " << data_.date(0).toString("hh:mm:ss dd.M.yyyy");;
+    UiLog().dbg() << "first date: " << data_.date(0).toString("hh:mm:ss dd.M.yyyy");
 }
+
+void LogModel::beginLoadFromReader()
+{
+    beginResetModel();
+
+    filterPeriod_=false;
+    periodStart_=0;
+    periodEnd_=0;
+    highlightPeriod_=false;
+    highlightStart_=0;
+    highlightEnd_=0;
+}
+
+void LogModel::endLoadFromReader()
+{
+    endResetModel();
+}
+
 
 void LogModel::setData(const std::string& data)
 {

@@ -13,6 +13,7 @@
 
 #include "File_r.hpp"
 #include "File.hpp"
+#include "LogConsumer.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
 #include "UiLog.hpp"
@@ -410,15 +411,18 @@ void LogLoadDataItem::computeSubReqMax()
 
 void LogLoadData::clear()
 {
+    numOfRows_=0;
     time_.clear();
     total_.clear();
     suiteData_.clear();
     suites_.clear();
     uidData_.clear();
     fullStatComputed_=false;
-    maxNumOfRows_=0;
-    numOfRows_=0;
     startPos_=0;
+    maxReadSize_=0;
+    fullRead_=false;
+    loadStatus_=LoadNotTried;
+    loadedAt_=QDateTime();
 }
 
 QString LogLoadData::subReqName(int idx) const
@@ -962,107 +966,118 @@ void LogLoadData::computeStat(std::vector<LogLoadDataItem>& items,size_t startIn
     }
 }
 
-void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
+void LogLoadData::loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, LogConsumer* logConsumer)
 {
-   /// Will read the log file.
-   /// We will collate each request/cmd to the server made over a second.
-   /// There are two kinds of commands:
-   ///   o User Commands: these start with --
-   ///   o Child Command: these start with chd:
-   /// All child commands specify a path and hence suite, whereas for user commands this is optional
-   /// We will trap all use of paths, so that we can show which suites are contributing to the server load
-   /// This will be done for 4 suites
-   ///
-   /// Will convert: FROM:
-   ///   XXX:[HH:MM:SS D.M.YYYY] chd:init [+additional information]
-   ///   XXX:[HH:MM:SS D.M.YYYY] --begin  [+additional information]
-   /// -------------:
-
     //Clear all collected data
     clear();
 
-    maxNumOfRows_=numOfRows;
-    numOfRows_=0;
-    startPos_=getStartPos(logFile,numOfRows);
+    parseHelper_ = LogDataParseHelper();
 
-#if 0
-    if(numOfRows < 0)
+    maxReadSize_=maxReadSize;
+    if (maxReadSize_ < 0)
+        maxReadSize_=0;
+
+    fullRead_=false;
+    loadStatus_=LoadNotTried;
+    loadedAt_=QDateTime::currentDateTime();
+
+    loadLogFileCore(logFile,maxReadSize,suites, false, logConsumer);
+}
+
+void LogLoadData::loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last, LogConsumer* logConsumer)
+{
+    parseHelper_ = LogDataParseHelper();
+
+    //Clear all collected data
+    if(logFileIndex == 0)
     {
-        /// The log file can be massive > 50Mb
-        ecf::File_r log_file(logFile);
-        if( !log_file.ok() )
-            throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+        clear();
 
-        int maxNum=-numOfRows;
-        int cnt=0;
-        std::vector<std::streamoff> posVec(maxNum,0);
-        startPos_=0;
-        while(log_file.good())
-        {
-            std::streamoff currentPos=log_file.pos();
-
-            log_file.getline(line); // default delimiter is /n
-
-            /// We are only interested in Commands (i.e MSG:), and not state changes
-            if (line.empty())
-                continue;
-
-            if (line[0] != 'M')
-                continue;
-
-            std::string::size_type msg_pos = line.find("SG:");
-            if (msg_pos != 1)
-                continue;
-
-            bool child_cmd = false;
-            bool user_cmd = false;
-            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos)
-            {
-                child_cmd = true;
-            }
-            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos)
-            {
-                user_cmd = true;
-            }
-
-            if(!child_cmd && !user_cmd)
-                continue;
-
-            posVec[cnt % maxNum]=currentPos;
-            cnt++;
-        }
-
-        startPos_=posVec[cnt % maxNum];
-        //log_file.setPos(startPos_);
+        maxReadSize_=0;
+        fullRead_=true;
+        loadStatus_=LoadNotTried;
+        loadedAt_=QDateTime::currentDateTime();
     }
-#endif
+
+    loadLogFileCore(logFile,-1,suites, true, logConsumer);
+
+    if(last)
+    {
+        loadStatus_=LoadDone;
+    }
+}
+
+void LogLoadData::loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi,
+                                  LogConsumer* logConsumer)
+{
+    /// Will read the log file.
+    /// We will collate each request/cmd to the server made over a second.
+    /// There are two kinds of commands:
+    ///   o User Commands: these start with --
+    ///   o Child Command: these start with chd:
+    /// All child commands specify a path and hence suite, whereas for user commands this is optional
+    /// We will trap all use of paths, so that we can show which suites are contributing to the server load
+    /// This will be done for 4 suites
+    ///
+    /// Will convert: FROM:
+    ///   XXX:[HH:MM:SS D.M.YYYY] chd:init [+additional information]
+    ///   XXX:[HH:MM:SS D.M.YYYY] --begin  [+additional information]
+    /// -------------:
+
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
     {
-        UiLog().warn() << "LogLoadData::loadLogFile: Could not open log file " <<  logFile;
-        return;
+        loadStatus_=LoadFailed;
+        UiLog().warn() << "LogLoadData::loadLogFileCore: Could not open log file " << logFile ;
+        throw std::runtime_error("Could not open log file: " + logFile);
     }
 
-    //A collector total counts
-    LogReqCounter total("total");
+    fullRead_=true;
+    QFileInfo fInfo(QString::fromStdString(logFile));
+    size_t fSize=fInfo.size();
+    size_t progressChunk=fSize/200;
+    if(progressChunk==0) progressChunk=fSize;
+    size_t currentProgressChunk=0;
+    size_t percent=0;
 
-    //A collector for suite related data
-    std::vector<LogReqCounter> suite_vec;
+    if(fSize ==0)
+        return;
 
-    //A collector for uid related data
-    std::vector<LogReqCounter> uid_vec;
+    if(maxReadSize_ > 0)
+    {
+        if(fSize > maxReadSize_)
+        {
+            fullRead_=false;
+            progressChunk=maxReadSize_/200;
+            log_file.setPos(fSize - maxReadSize_);
+        }
+    }
 
-    std::vector<std::string> new_time_stamp;
-    std::vector<std::string> old_time_stamp;
-
-    std::map<std::string,size_t> uidCnt;
     std::string line;
+
+//    //A collector total counts
+//    LogReqCounter total("total");
+
+//    //A collector for suite related data
+//    std::vector<LogReqCounter> suite_vec;
+
+//    //A collector for uid related data
+//    std::vector<LogReqCounter> uid_vec;
+
+//    std::vector<std::string> new_time_stamp;
+//    std::vector<std::string> old_time_stamp;
+
+//    std::map<std::string,size_t> uidCnt;
 
     while ( log_file.good() )
     {
         log_file.getline( line); // default delimiter is /n
+
+        if (logConsumer) {
+            logConsumer->addLogLine(line);
+        }
 
         // The log file format we are interested is :
 
@@ -1098,27 +1113,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
         if(!child_cmd && !user_cmd)
             continue;
 
-#if 0
-        std::string uid;
-        if(user_cmd)
-        {
-            std::string::size_type uidStart = line.find(" :");
-            if ( uidStart != std::string::npos)
-            {
-                std::string::size_type uidEnd = line.find(" ",uidStart+2);
-                if(uidEnd != std::string::npos)
-                {
-                    uid=line.substr(uidStart+2,uidEnd-uidStart+1);
-                }
-                else
-                {
-                    uid = line.substr(uidStart+2);
-                }
-            }
-        }
-#endif
-
-        new_time_stamp.clear();
+        parseHelper_.new_time_stamp.clear();
         {
             /// MSG:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information] ---> HH:MM:SS D.M.YYYY
             /// EXTRACT the date
@@ -1140,8 +1135,8 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
-            ecf::Str::split(time_stamp, new_time_stamp);
-            if (new_time_stamp.size() != 2)
+            ecf::Str::split(time_stamp, parseHelper_.new_time_stamp);
+            if (parseHelper_.new_time_stamp.size() != 2)
                 continue;
 
          line.erase(0,first_closed_bracket+1);
@@ -1152,32 +1147,42 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 //      std::cout << line << "\n";
 //#endif
 
+
+        size_t current=log_file.pos();
+        if(current/progressChunk > currentProgressChunk)
+        {
+            currentProgressChunk=current/progressChunk;
+            percent=current/fSize;
+            if(percent <= 100)
+                Q_EMIT loadProgress(current,fSize);
+        }
+
       numOfRows_++;
 
-      if (old_time_stamp.empty())
+      if (parseHelper_.old_time_stamp.empty())
       {
-         total.add(child_cmd,line);
+         parseHelper_.total.add(child_cmd,line);
 
          // Extract path if any, to determine the suite most contributing to server load
          size_t column_index = 0;
-         bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+         bool suite_path_found = extract_suite_path(line,child_cmd,parseHelper_.suite_vec,column_index);
          if(user_cmd)
          {
-            extract_uid_data(line,uid_vec);
+            extract_uid_data(line,parseHelper_.uid_vec);
          }
          //if ( suite_path_found )
          //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
       }
-      else if (old_time_stamp[0] == new_time_stamp[0])
+      else if (parseHelper_.old_time_stamp[0] == parseHelper_.new_time_stamp[0])
       {
          // HH:MM:SS == HH:MM:SS
-         total.add(child_cmd,line);
+         parseHelper_.total.add(child_cmd,line);
 
          size_t column_index = 0;
-         bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+         bool suite_path_found = extract_suite_path(line,child_cmd, parseHelper_.suite_vec,column_index);
          if(user_cmd)
          {
-            extract_uid_data(line,uid_vec);
+            extract_uid_data(line,parseHelper_.uid_vec);
          }
          //if ( suite_path_found )
          //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
@@ -1193,60 +1198,347 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 
 
          plot_data_line_number++;
-         gnuplot_file << old_time_stamp[0] << " "
-                      << old_time_stamp[1] << " "
+         gnuplot_file << parseHelper_.old_time_stamp[0] << " "
+                      << parseHelper_.old_time_stamp[1] << " "
                       << (child_requests_per_second + user_request_per_second) << " "
                       << child_requests_per_second << " "
                       << user_request_per_second << " ";
-         for(size_t i = 0; i < suite_vec.size(); i++) { gnuplot_file << suite_vec[i].request_per_second_ << " ";}
+         for(size_t i = 0; i < parseHelper_.suite_vec.size(); i++) { gnuplot_file << parseHelper_.suite_vec[i].request_per_second_ << " ";}
          gnuplot_file << "\n";
 #endif
 
          //Add collected data to the storage objects
-         add(old_time_stamp,total,suite_vec,uid_vec);
+         add(parseHelper_.old_time_stamp,parseHelper_.total,parseHelper_.suite_vec,parseHelper_.uid_vec);
 
          // clear request per second
-         total.clear();
+         parseHelper_.total.clear();
 
-         for(size_t i= 0; i < suite_vec.size();i++)
+         for(size_t i= 0; i < parseHelper_.suite_vec.size();i++)
          {
-            suite_vec[i].clear();
+            parseHelper_.suite_vec[i].clear();
          }
-         for(size_t i= 0; i < uid_vec.size();i++)
+         for(size_t i= 0; i < parseHelper_.uid_vec.size();i++)
          {
-            uid_vec[i].clear();
+            parseHelper_.uid_vec[i].clear();
          }
 
          // start of *new* time
-         total.add(child_cmd,line); //?
+         parseHelper_.total.add(child_cmd,line); //?
 
          size_t column_index = 0;
-         bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+         bool suite_path_found = extract_suite_path(line,child_cmd,parseHelper_.suite_vec,column_index);
          //if ( suite_path_found )
          //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
          if(user_cmd)
          {
-            extract_uid_data(line,uid_vec);
+            extract_uid_data(line,parseHelper_.uid_vec);
          }
 
       }
 
-      old_time_stamp = new_time_stamp;
+      parseHelper_.old_time_stamp = parseHelper_.new_time_stamp;
    }
 
    //if (plot_data_line_number < 3) {
    //   throw std::runtime_error( "Gnuplot::prepare_for_gnuplot: Log file empty or not enough data for plot\n");
    //}
 
-   for(size_t i=0; i < suite_vec.size(); i++)
+   for(size_t i=0; i < parseHelper_.suite_vec.size(); i++)
    {
-       suites_ << QString::fromStdString(suite_vec[i].name_);
+       suites_ << QString::fromStdString(parseHelper_.suite_vec[i].name_);
    }
 
    computeInitialStat();
 
    UiLog().dbg() << "REQCNT " << REQCNT;
 }
+
+
+//void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
+//{
+//   /// Will read the log file.
+//   /// We will collate each request/cmd to the server made over a second.
+//   /// There are two kinds of commands:
+//   ///   o User Commands: these start with --
+//   ///   o Child Command: these start with chd:
+//   /// All child commands specify a path and hence suite, whereas for user commands this is optional
+//   /// We will trap all use of paths, so that we can show which suites are contributing to the server load
+//   /// This will be done for 4 suites
+//   ///
+//   /// Will convert: FROM:
+//   ///   XXX:[HH:MM:SS D.M.YYYY] chd:init [+additional information]
+//   ///   XXX:[HH:MM:SS D.M.YYYY] --begin  [+additional information]
+//   /// -------------:
+
+//    //Clear all collected data
+//    clear();
+
+//    maxNumOfRows_=numOfRows;
+//    numOfRows_=0;
+//    startPos_=getStartPos(logFile,numOfRows);
+
+//#if 0
+//    if(numOfRows < 0)
+//    {
+//        /// The log file can be massive > 50Mb
+//        ecf::File_r log_file(logFile);
+//        if( !log_file.ok() )
+//            throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+
+//        int maxNum=-numOfRows;
+//        int cnt=0;
+//        std::vector<std::streamoff> posVec(maxNum,0);
+//        startPos_=0;
+//        while(log_file.good())
+//        {
+//            std::streamoff currentPos=log_file.pos();
+
+//            log_file.getline(line); // default delimiter is /n
+
+//            /// We are only interested in Commands (i.e MSG:), and not state changes
+//            if (line.empty())
+//                continue;
+
+//            if (line[0] != 'M')
+//                continue;
+
+//            std::string::size_type msg_pos = line.find("SG:");
+//            if (msg_pos != 1)
+//                continue;
+
+//            bool child_cmd = false;
+//            bool user_cmd = false;
+//            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos)
+//            {
+//                child_cmd = true;
+//            }
+//            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos)
+//            {
+//                user_cmd = true;
+//            }
+
+//            if(!child_cmd && !user_cmd)
+//                continue;
+
+//            posVec[cnt % maxNum]=currentPos;
+//            cnt++;
+//        }
+
+//        startPos_=posVec[cnt % maxNum];
+//        //log_file.setPos(startPos_);
+//    }
+//#endif
+
+//    /// The log file can be massive > 50Mb
+//    ecf::File_r log_file(logFile);
+//    if( !log_file.ok() )
+//    {
+//        UiLog().warn() << "LogLoadData::loadLogFile: Could not open log file " <<  logFile;
+//        return;
+//    }
+
+//    //A collector total counts
+//    LogReqCounter total("total");
+
+//    //A collector for suite related data
+//    std::vector<LogReqCounter> suite_vec;
+
+//    //A collector for uid related data
+//    std::vector<LogReqCounter> uid_vec;
+
+//    std::vector<std::string> new_time_stamp;
+//    std::vector<std::string> old_time_stamp;
+
+//    std::map<std::string,size_t> uidCnt;
+//    std::string line;
+
+//    while ( log_file.good() )
+//    {
+//        log_file.getline( line); // default delimiter is /n
+
+//        // The log file format we are interested is :
+
+//        // MSG:[HH:MM:SS D.M.YYYY] chd:fullname [path +additional information]
+//        // MSG:[HH:MM:SS D.M.YYYY] --begin      [args | path(optional) ]    :<user>@<host>
+
+//        //Here is an example:
+//        // MSG:[13:53:56 4.10.2018] --run /test_client_run; --sync=0 1435 442 :user@host
+//        // MSG:[13:54:07 4.10.2018] --alter sort variable recursive /; --sync=0 1789 636 :user@host
+
+//        // We are only interested in Commands (i.e MSG:), and not state changes
+//        if (line.empty())
+//            continue;
+
+//        if (line[0] != 'M')
+//            continue;
+
+//        std::string::size_type msg_pos = line.find("MSG:");
+//        if (msg_pos != 0)
+//            continue;
+
+//        bool child_cmd = false;
+//        bool user_cmd = false;
+//        if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos)
+//        {
+//            child_cmd = true;
+//        }
+//        else if (line.find(ecf::Str::USER_CMD()) != std::string::npos)
+//        {
+//            user_cmd = true;
+//        }
+
+//        if(!child_cmd && !user_cmd)
+//            continue;
+
+//#if 0
+//        std::string uid;
+//        if(user_cmd)
+//        {
+//            std::string::size_type uidStart = line.find(" :");
+//            if ( uidStart != std::string::npos)
+//            {
+//                std::string::size_type uidEnd = line.find(" ",uidStart+2);
+//                if(uidEnd != std::string::npos)
+//                {
+//                    uid=line.substr(uidStart+2,uidEnd-uidStart+1);
+//                }
+//                else
+//                {
+//                    uid = line.substr(uidStart+2);
+//                }
+//            }
+//        }
+//#endif
+
+//        new_time_stamp.clear();
+//        {
+//            /// MSG:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information] ---> HH:MM:SS D.M.YYYY
+//            /// EXTRACT the date
+//            std::string::size_type first_open_bracket = line.find('[');
+//            if ( first_open_bracket == std::string::npos)
+//            {
+//                //std::cout << line << "\n";
+//                //assert(false);
+//                continue;
+//            }
+//            line.erase(0,first_open_bracket+1);
+
+//            std::string::size_type first_closed_bracket = line.find(']');
+//            if ( first_closed_bracket ==  std::string::npos)
+//            {
+//                //std::cout << line << "\n";
+//                //assert(false);
+//                continue;
+//            }
+//            std::string time_stamp = line.substr(0, first_closed_bracket);
+
+//            ecf::Str::split(time_stamp, new_time_stamp);
+//            if (new_time_stamp.size() != 2)
+//                continue;
+
+//         line.erase(0,first_closed_bracket+1);
+//      }
+
+//      // Should be just left with " chd:<child command> " or " --<user command>, since we have remove time stamp
+////#ifdef DEBUG
+////      std::cout << line << "\n";
+////#endif
+
+//      numOfRows_++;
+
+//      if (old_time_stamp.empty())
+//      {
+//         total.add(child_cmd,line);
+
+//         // Extract path if any, to determine the suite most contributing to server load
+//         size_t column_index = 0;
+//         bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+//         if(user_cmd)
+//         {
+//            extract_uid_data(line,uid_vec);
+//         }
+//         //if ( suite_path_found )
+//         //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
+//      }
+//      else if (old_time_stamp[0] == new_time_stamp[0])
+//      {
+//         // HH:MM:SS == HH:MM:SS
+//         total.add(child_cmd,line);
+
+//         size_t column_index = 0;
+//         bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+//         if(user_cmd)
+//         {
+//            extract_uid_data(line,uid_vec);
+//         }
+//         //if ( suite_path_found )
+//         //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
+//      }
+
+//      else {
+//         /// Start of *NEW* time,
+//         /// write the *OLD* time line should contain time date without []
+//         ///    1         2         3             4              5            6        7      8       9       10
+//         ///  HH:MM:SS D.M.YYYY total_request child_request  users_requests suite_0 suite_1 suite_2 suite_3 suite_n
+//#if 0
+//         //plot.add(old_time_stamp[0],old_time_stamp[1],child_requests_per_second, user_request_per_second,
+
+
+//         plot_data_line_number++;
+//         gnuplot_file << old_time_stamp[0] << " "
+//                      << old_time_stamp[1] << " "
+//                      << (child_requests_per_second + user_request_per_second) << " "
+//                      << child_requests_per_second << " "
+//                      << user_request_per_second << " ";
+//         for(size_t i = 0; i < suite_vec.size(); i++) { gnuplot_file << suite_vec[i].request_per_second_ << " ";}
+//         gnuplot_file << "\n";
+//#endif
+
+//         //Add collected data to the storage objects
+//         add(old_time_stamp,total,suite_vec,uid_vec);
+
+//         // clear request per second
+//         total.clear();
+
+//         for(size_t i= 0; i < suite_vec.size();i++)
+//         {
+//            suite_vec[i].clear();
+//         }
+//         for(size_t i= 0; i < uid_vec.size();i++)
+//         {
+//            uid_vec[i].clear();
+//         }
+
+//         // start of *new* time
+//         total.add(child_cmd,line); //?
+
+//         size_t column_index = 0;
+//         bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+//         //if ( suite_path_found )
+//         //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
+//         if(user_cmd)
+//         {
+//            extract_uid_data(line,uid_vec);
+//         }
+
+//      }
+
+//      old_time_stamp = new_time_stamp;
+//   }
+
+//   //if (plot_data_line_number < 3) {
+//   //   throw std::runtime_error( "Gnuplot::prepare_for_gnuplot: Log file empty or not enough data for plot\n");
+//   //}
+
+//   for(size_t i=0; i < suite_vec.size(); i++)
+//   {
+//       suites_ << QString::fromStdString(suite_vec[i].name_);
+//   }
+
+//   computeInitialStat();
+
+//   UiLog().dbg() << "REQCNT " << REQCNT;
+//}
 
 std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRows)
 {

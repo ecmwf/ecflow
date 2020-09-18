@@ -19,7 +19,6 @@
 #include <QGraphicsItem>
 #include <QMap>
 #include <QScrollArea>
-
 #include <QStringList>
 #include <QWidget>
 #include <QSortFilterProxyModel>
@@ -28,6 +27,7 @@ using namespace QtCharts;
 
 #include "LogLoadData.hpp"
 
+class LogConsumer;
 class LogLoadData;
 class LogLoadDataItem;
 class LogLoadSuiteModel;
@@ -36,7 +36,6 @@ class LogModel;
 class LogRequestView;
 class LogRequestViewHandler;
 class ServerLoadView;
-class VFileTransfer;
 class QSortFilterProxyModel;
 class QHBoxLayout;
 class QVBoxLayout;
@@ -205,7 +204,9 @@ public:
 
     LogLoadData* data() const {return data_;}
     void clear();
-    void load(const std::string& logFile,int numOfRows=0);
+    void load(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites,LogConsumer*);
+    void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,
+                          int logFileIndex, bool last,LogConsumer*);
     void setResolution(LogLoadData::TimeRes);
     QList<bool> suitePlotState() const {return suitePlotState_;}
     QList<bool> cmdPlotState() const {return cmdPlotState_;}
@@ -230,6 +231,7 @@ Q_SIGNALS:
     void timeRangeReset();
 
 protected:
+    void loadPostProc();
     void buildOtherTab(QWidget*);
     void buildTableTab(QWidget*);
 

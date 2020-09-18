@@ -105,7 +105,7 @@ void LogData::loadFromFile(const std::string& logFile,size_t startPos)
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
-        throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+        throw std::runtime_error("LogData::loadFromFile: Could not open log file " + logFile );
 
     log_file.setPos(startPos);
 
@@ -136,6 +136,11 @@ void LogData::loadFromText(const std::vector<std::string>& txtVec)
 {
     data_.clear();
     appendFromText(txtVec);
+}
+
+void LogData::addLogLine(const std::string& txt)
+{
+    appendFromText(txt);
 }
 
 void LogData::appendFromText(const std::string& txt)

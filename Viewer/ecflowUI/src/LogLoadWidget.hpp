@@ -118,7 +118,6 @@ private:
     LogMode logMode_{LatestMode};
     TimelineFileList archiveLogList_;
     QString currentNodePath_;
-    int numOfRows_;
 
     LogRequestViewHandler *viewHandler_;
     QMap<TabIndex,ServerLoadView*> views_;

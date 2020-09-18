@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include "LogConsumer.hpp"
+
 class LogDataItem
 {
     friend class LogData;
@@ -32,7 +34,7 @@ protected:
 };
 
 
-class LogData
+class LogData : public LogConsumer
 {
     friend class LogDataItem;
 
@@ -64,6 +66,8 @@ public:
     void loadFromText(const std::vector<std::string>& txtVec);
     void appendFromText(const std::string& txt);
     void appendFromText(const std::vector<std::string>& txtVec);
+
+    void addLogLine(const std::string&) override;
 
 protected:
     qint64 refTimeInMs_{0};

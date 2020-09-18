@@ -763,7 +763,7 @@ void ChartView::removeCallout()
 //=============================================
 
 LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) :
-    data_(0), lastScanIndex_(0)
+    data_(nullptr), lastScanIndex_(0)
 {
     //The data object - to read and store processed log data
     data_=new LogLoadData();
@@ -911,10 +911,22 @@ void LogRequestViewHandler::clear()
     data_->clear();
 }
 
-void LogRequestViewHandler::load(const std::string& logFile,int numOfRows)
+void LogRequestViewHandler::load(const std::string& logFile,size_t maxReadSize,
+                                 const std::vector<std::string>& suites, LogConsumer* logConsumer)
 {
-    data_->loadLogFile(logFile,numOfRows);
+    data_->loadLogFile(logFile, maxReadSize, suites,logConsumer);
+    loadPostProc();
+}
 
+void LogRequestViewHandler::loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,
+                                             int logFileIndex, bool last, LogConsumer* logConsumer)
+{
+    data_->loadMultiLogFile(logFile,suites,logFileIndex,last,logConsumer);
+    loadPostProc();
+}
+
+void LogRequestViewHandler::loadPostProc()
+{
     suitePlotState_.clear();
     for(size_t i=0; i < data_->suites().size(); i++)
         suitePlotState_ << false;
