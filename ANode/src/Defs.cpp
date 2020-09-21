@@ -129,12 +129,28 @@ Defs::~Defs()
 
 void Defs::handle_migration()
 {
-   // Fix up any migration issues
+   // Fix up any migration issues. Remove when in Bolgna, and ecflow4 no longer used
    for(const auto& s : suiteVec_) {
       s->handle_migration(s->calendar());
    }
-}
 
+   // remove any edit history that is no longer referenced. Ignore root, which will not be found
+   auto it = edit_history_.begin();
+   while ( it != edit_history_.end() ) {
+
+      if ((*it).first == Str::ROOT_PATH()) {
+         it++;
+         continue; // root path is defs, which is not a node, hence ignore
+      }
+
+      node_ptr node = findAbsNode((*it).first);
+      if( !node.get() ) {
+         it = edit_history_.erase(it);
+      }
+      else
+         it++;
+   }
+}
 
 ///// State relation functions: ==================================================
 NState::State Defs::state() const
@@ -1816,6 +1832,28 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
       }
    }
 }
+
+void Defs::remove_edit_history(Node* node)
+{
+   if (!node) return;
+
+   auto i = edit_history_.find(node->absNodePath());
+   if (i != edit_history_.end()) {
+      edit_history_.erase(i);
+   }
+
+   // When removing a node all its children also need to be removed.
+   std::vector<node_ptr> node_children;
+   node->get_all_nodes(node_children);
+   for(const auto & c : node_children) {
+
+      auto it = edit_history_.find(c->absNodePath());
+      if (it != edit_history_.end()) {
+         edit_history_.erase(it);
+      }
+   }
+}
+
 
 void Defs::clear_edit_history()
 {

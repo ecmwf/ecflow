@@ -286,6 +286,7 @@ public:
    const ecf::Flag& get_flag() const { return flag_;}
 
    void add_edit_history(const std::string& path, const std::string& request);
+   void remove_edit_history(Node*);
    void clear_edit_history();
    const std::vector<std::string>& get_edit_history(const std::string& path) const;
    const std::unordered_map<std::string, std::vector<std::string> >&  get_edit_history() const { return edit_history_;}
