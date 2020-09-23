@@ -39,7 +39,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0">
      <property name="spacing">
       <number>4</number>
      </property>
@@ -47,26 +47,6 @@
       <widget class="QLabel" name="logInfoLabel">
        <property name="text">
         <string>logInfoLabel</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="showLogTb">
-       <property name="toolTip">
-        <string>Show log</string>
-       </property>
-       <property name="text">
-        <string>Show log</string>
-       </property>
-       <property name="icon">
-        <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/show_log.svg</normaloff>:/viewer/show_log.svg</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="autoRaise">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -162,6 +142,33 @@
           <number>0</number>
          </property>
          <item>
+          <widget class="QToolButton" name="showLogTb">
+           <property name="toolTip">
+            <string>Show log</string>
+           </property>
+           <property name="text">
+            <string>Show log</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/show_log.svg</normaloff>:/viewer/show_log.svg</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="resComboLabel">
            <property name="text">
             <string>Plot resolution:</string>
@@ -172,7 +179,33 @@
           <widget class="QComboBox" name="resCombo"/>
          </item>
          <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>3</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="showFullTb">
+           <property name="toolTip">
+            <string>Show full period</string>
+           </property>
            <property name="text">
             <string>Full period</string>
            </property>

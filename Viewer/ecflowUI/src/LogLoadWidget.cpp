@@ -72,7 +72,6 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     connect(viewHandler_->data(),SIGNAL(loadProgress(size_t,size_t)),
             this,SLOT(slotLogLoadProgress(size_t,size_t)));
 
-
     ui_->viewTab->setTabText(0,tr("Total charts"));
     ui_->viewTab->setTabText(1,tr("Other charts"));
     ui_->viewTab->setTabText(2,tr("Tables"));
@@ -86,6 +85,13 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     ui_->viewTab->setCornerWidget(ui_->cornerW);
     ui_->cornerHolderW->setVisible(false);
 
+
+    ui_->timeLabel->setProperty("fileInfo","1");
+    ui_->timeLabel->setMargin(2);
+    ui_->timeLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+    ui_->timeLabel->setAutoFillBackground(true);
+//    ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
+    ui_->timeLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
     connect(ui_->showFullTb,SIGNAL(clicked()),
             viewHandler_,SLOT(showFullRange()));
@@ -877,8 +883,11 @@ void LogLoadWidget::periodWasReset()
 
 void LogLoadWidget::updateTimeLabel(QDateTime startDt, QDateTime endDt)
 {
-    QString txt = "start: " + startDt.toString("hh:mm:ss yyyy-MM-dd") +
-            " end: " + endDt.toString("hh:mm:ss yyyy-MM-dd");
+    QColor col(39,49,101);
+    QString txt = "start: " +
+            Viewer::formatBoldText(startDt.toString("hh:mm:ss yyyy-MM-dd"), col) +
+            " end: " +
+            Viewer::formatBoldText(endDt.toString("hh:mm:ss yyyy-MM-dd"), col);
     ui_->timeLabel->setText(txt);
 }
 
