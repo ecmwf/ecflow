@@ -922,7 +922,6 @@ void LogRequestViewHandler::loadMultiLogFile(const std::string& logFile,const st
                                              int logFileIndex, bool last, LogConsumer* logConsumer)
 {
     data_->loadMultiLogFile(logFile,suites,logFileIndex,last,logConsumer);
-    loadPostProc();
 }
 
 void LogRequestViewHandler::loadPostProc()
@@ -3260,6 +3259,8 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
         data_.dataIndex_[pos]=i;
         data_.colLabels_[pos] = QString::fromStdString(data[i].name());
 
+        UiLog().dbg() << i << " " << pos << "name=" << QString::fromStdString(data[i].name());
+
         val.clear();
         for(size_t j=0; j < data[i].subReq().size(); j++)
         {
@@ -3267,6 +3268,7 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
         }
 
         data_.vals_[pos] = val;
+        UiLog().dbg() << "  size=" << val.count();
     }
 
     endResetModel();

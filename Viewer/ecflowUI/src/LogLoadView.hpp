@@ -207,6 +207,7 @@ public:
     void load(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites,LogConsumer*);
     void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,
                           int logFileIndex, bool last,LogConsumer*);
+    void loadPostProc();
     void setResolution(LogLoadData::TimeRes);
     QList<bool> suitePlotState() const {return suitePlotState_;}
     QList<bool> cmdPlotState() const {return cmdPlotState_;}
@@ -231,7 +232,6 @@ Q_SIGNALS:
     void timeRangeReset();
 
 protected:
-    void loadPostProc();
     void buildOtherTab(QWidget*);
     void buildTableTab(QWidget*);
 

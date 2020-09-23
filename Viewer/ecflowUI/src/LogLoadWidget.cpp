@@ -79,14 +79,13 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
 
     ui_->viewTab->setCurrentIndex(0);
 
-    //Cornerbutton for tab
-    //QWidget *cornerW=new QWidget(this);
-    //QHBoxLayout *cornerHb=new QHBoxLayout(cornerW);
-    //cornerHb->setContentsMargins(0,0,0,0);
+    ui_->startTe->hide();
+    ui_->endTe->hide();
+    ui_->startLabel->hide();
+    ui_->endLabel->hide();
+    ui_->viewTab->setCornerWidget(ui_->cornerW);
+    ui_->cornerHolderW->setVisible(false);
 
-    //QToolButton* showFullTb=new QToolButton(this);
-    //showFullTb->setText(tr("Full period"));
-    //cornerHb->addWidget(showFullTb);
 
     connect(ui_->showFullTb,SIGNAL(clicked()),
             viewHandler_,SLOT(showFullRange()));
@@ -121,6 +120,11 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     //make the horizontal scrollbar work
     ui_->logView->header()->setStretchLastSection(false);
     ui_->logView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    ui_->showLogTb->setChecked(false);
+    ui_->logView->hide();
+    connect(ui_->showLogTb, SIGNAL(clicked(bool)),
+            this, SLOT(showLogView(bool)));
 
     //Define context menu
     //ui_->logView->addAction(actionCopyEntry_);
@@ -206,6 +210,7 @@ void LogLoadWidget::clear()
     tmpLogFile_.reset();
     ui_->startTe->clear();
     ui_->endTe->clear();
+    ui_->timeLabel->clear();
 
     ui_->logModeCombo->setCurrentIndex(0);
     logMode_ = LatestMode;
@@ -378,14 +383,25 @@ void LogLoadWidget::updateInfoLabel(bool showDetails)
     checkButtonState();
 }
 
+void LogLoadWidget::showLogView(bool b)
+{
+    if (b && ui_->resCombo->isVisible()) {
+        ui_->logView->setVisible(true);
+    } else {
+        ui_->logView->setVisible(false);
+    }
+}
+
+bool LogLoadWidget::shouldShowLog() const
+{
+    return ui_->showLogTb->isChecked();
+}
+
 void LogLoadWidget::setAllVisible(bool b)
 {
     ui_->viewTab->setVisible(b);
-    ui_->logView->setVisible(b);
-    ui_->timeWidget->setVisible(b);
-    ui_->showFullTb->setVisible(b);
-    ui_->resComboLabel->setVisible(b);
-    ui_->resCombo->setVisible(b);
+    ui_->logView->setVisible(b && shouldShowLog());
+    ui_->cornerW->setVisible(b);
 }
 
 void LogLoadWidget::slotLogMode(int)
@@ -605,6 +621,8 @@ void LogLoadWidget::loadArchive()
     QTime timer;
     timer.start();
 
+    logModel_->beginLoadFromReader();
+
     //std::vector<std::string> suites;
     for(int i=0; i < archiveLogList_.items().count(); i++)
     {
@@ -619,11 +637,10 @@ void LogLoadWidget::loadArchive()
 
         try
         {
-            logModel_->beginLoadFromReader();
             viewHandler_->loadMultiLogFile(archiveLogList_.items()[i].dataPath().toStdString(),suites_,
                                            i, (i == archiveLogList_.items().count()-1),
                                            logModel_->logData());
-            logModel_->endLoadFromReader();
+
             loadDone=true;
         }
 
@@ -649,6 +666,9 @@ void LogLoadWidget::loadArchive()
         //if(ui_->taskOnlyTb->isChecked())
         //    determineNodeTypes();
     }
+
+    logModel_->endLoadFromReader();
+    viewHandler_->loadPostProc();
 
     ui_->messageLabel->hide();
 
@@ -798,6 +818,7 @@ void LogLoadWidget::initFromData()
     ui_->endTe->setMinimumDateTime(startTime);
     ui_->endTe->setMaximumDateTime(endTime);
     ui_->endTe->setDateTime(endTime);
+    updateTimeLabel(startTime, endTime);
 
     //updateInfoLabel();
 }
@@ -842,6 +863,7 @@ void LogLoadWidget::periodChanged(qint64 start,qint64 end)
 #endif
     ui_->startTe->setDateTime(startDt);
     ui_->endTe->setDateTime(endDt);
+    updateTimeLabel(startDt, endDt);
 }
 
 void LogLoadWidget::periodWasReset()
@@ -850,7 +872,16 @@ void LogLoadWidget::periodWasReset()
     QDateTime endDt=viewHandler_->data()->endTime();
     ui_->startTe->setDateTime(startDt);
     ui_->endTe->setDateTime(endDt);
+    updateTimeLabel(startDt, endDt);
 }
+
+void LogLoadWidget::updateTimeLabel(QDateTime startDt, QDateTime endDt)
+{
+    QString txt = "start: " + startDt.toString("hh:mm:ss yyyy-MM-dd") +
+            " end: " + endDt.toString("hh:mm:ss yyyy-MM-dd");
+    ui_->timeLabel->setText(txt);
+}
+
 
 void LogLoadWidget::resolutionChanged(int)
 {

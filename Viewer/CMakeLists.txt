@@ -15,6 +15,3 @@ endif()
 
 add_subdirectory( libViewer)
 add_subdirectory( ecflowUI)
-#if (ECFLOW_LOGVIEW)
-#    add_subdirectory( logViewer )
-#endif()

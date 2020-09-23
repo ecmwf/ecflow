@@ -44,8 +44,11 @@ void LogReqCounter::clear()
     childReq_=0;
     userReq_=0;
 
-    for(std::vector<LogRequestItem>::iterator it=subReq_.begin(); it != subReq_.end(); ++it)
-        (*it).counter_=0;
+    for(auto &item: subReq_) {
+        item.counter_ = 0;
+    }
+//    for(std::vector<LogRequestItem>::iterator it=subReq_.begin(); it != subReq_.end(); ++it)
+//        (*it).counter_=0;
 }
 
 void LogReqCounter::add(bool childCmd,const std::string& line)
@@ -133,6 +136,10 @@ bool sortVecFunction(const std::pair<size_t,size_t>& a, const std::pair<size_t,s
 LogLoadDataItem::LogLoadDataItem(const std::string& name) :
    name_(name)
 {
+    if (name == "") {
+        int i=5;
+        i++;
+    }
     buildSubReq(subReq_);
 }
 
@@ -345,6 +352,11 @@ void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq,
         int idx=sortVec[i].first;
         subReq[idx].periodStat_.rank_=sortVec.size()-i-1;
         subReq[idx].periodStat_.percentage_=static_cast<float>(subReq[idx].periodStat_.sumTotal_*100)/static_cast<float>(sum);
+    }
+
+    if (subReq.size() >52) {
+        UiLog().dbg() << subReq[51].periodStat_.rank_;
+        UiLog().dbg() << subReq[52].periodStat_.rank_;
     }
 }
 
@@ -841,6 +853,10 @@ void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& t
     //---------------------------
     for(size_t i = uidData_.size(); i < uid_vec.size(); i++)
     {
+        if (uid_vec[i].name_.empty()) {
+            int gg=22;
+            gg++;
+        }
         uidData_.push_back(LogLoadDataItem(uid_vec[i].name_));
         uidData_.back().init(time_.size()-1);
     }
@@ -982,15 +998,20 @@ void LogLoadData::loadLogFile(const std::string& logFile,size_t maxReadSize,cons
     loadedAt_=QDateTime::currentDateTime();
 
     loadLogFileCore(logFile,maxReadSize,suites, false, logConsumer);
+
+    for(size_t i=0; i < parseHelper_.suite_vec.size(); i++)
+    {
+        suites_ << QString::fromStdString(parseHelper_.suite_vec[i].name_);
+    }
+    computeInitialStat();
 }
 
 void LogLoadData::loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last, LogConsumer* logConsumer)
 {
-    parseHelper_ = LogDataParseHelper();
-
     //Clear all collected data
     if(logFileIndex == 0)
     {
+        parseHelper_ = LogDataParseHelper();
         clear();
 
         maxReadSize_=0;
@@ -1004,6 +1025,12 @@ void LogLoadData::loadMultiLogFile(const std::string& logFile,const std::vector<
     if(last)
     {
         loadStatus_=LoadDone;
+        for(size_t i=0; i < parseHelper_.suite_vec.size(); i++)
+        {
+            suites_ << QString::fromStdString(parseHelper_.suite_vec[i].name_);
+        }
+        computeInitialStat();
+
     }
 }
 
@@ -1238,17 +1265,6 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,size_t maxReadSize,
 
       parseHelper_.old_time_stamp = parseHelper_.new_time_stamp;
    }
-
-   //if (plot_data_line_number < 3) {
-   //   throw std::runtime_error( "Gnuplot::prepare_for_gnuplot: Log file empty or not enough data for plot\n");
-   //}
-
-   for(size_t i=0; i < parseHelper_.suite_vec.size(); i++)
-   {
-       suites_ << QString::fromStdString(parseHelper_.suite_vec[i].name_);
-   }
-
-   computeInitialStat();
 
    UiLog().dbg() << "REQCNT " << REQCNT;
 }
