@@ -758,6 +758,30 @@ void Defs::write_state(std::string& os) const
    }
 }
 
+
+std::string Defs::dump_edit_history() const
+{
+   std::stringstream os;
+   for(const auto& i : edit_history_) {
+      os << "history "; os << i.first; os << "  "; // node path
+      const std::vector<std::string>& vec = i.second;                          // list of requests
+      for(const auto & c : vec) {
+
+         // We expect to output a single newline, hence if there are additional new lines
+         // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
+         if (c.find("\n") == std::string::npos) { os << " "; os << c;}
+         else {
+            std::string h = c;
+            Str::replaceall(h,"\n","\\n");
+            os << " "; os << h;
+         }
+      }
+      os << "\n";
+   }
+   return os.str();
+}
+
+
 void Defs::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
 {
 //   cout << "line = " << line << "\n";
@@ -1118,6 +1142,9 @@ void Defs::getAllAstNodes(std::set<Node*>& theSet) const
 
 bool Defs::deleteChild(Node* nodeToBeDeleted)
 {
+   // Find node and children of the node to be deleted and remove them from node history
+   remove_edit_history(nodeToBeDeleted);
+
   	Node* parent = nodeToBeDeleted->parent();
   	if (parent)  return parent->doDeleteChild(nodeToBeDeleted);
  	return doDeleteChild(nodeToBeDeleted);
@@ -1837,12 +1864,7 @@ void Defs::remove_edit_history(Node* node)
 {
    if (!node) return;
 
-   auto i = edit_history_.find(node->absNodePath());
-   if (i != edit_history_.end()) {
-      edit_history_.erase(i);
-   }
-
-   // When removing a node all its children also need to be removed.
+   // When removing a node *it* and all its children also need to be removed.
    std::vector<node_ptr> node_children;
    node->get_all_nodes(node_children);
    for(const auto & c : node_children) {
