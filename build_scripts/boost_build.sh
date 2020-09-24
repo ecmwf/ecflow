@@ -139,7 +139,8 @@ elif test_uname Darwin ; then
 
    cp $WK/build_scripts/site_config/site-config-Darwin.jam $SITE_CONFIG_LOCATION 
    tool_path="/usr/local/opt/gcc/bin/gcc-9"
-
+   CXXFLAGS=cxxflags="-fPIC -Wunused-function -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable -Wno-parentheses"
+   
 elif test_uname HP-UX ; then
 
   tool=acc
@@ -303,6 +304,10 @@ EOF
    if [ "$?" = "0" ] ; then
       
       python_version=$(python3 -c 'import sys;print(sys.version_info[0],sys.version_info[1],sep="")')
+      if [[ ${BOOST_NUMERIC_VERSION} -le 1670 ]] ; then
+         python_version=3
+      fi
+      
       python_dot_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
       echo 'if ! $(ECF_PYTHON2) {'                                                       >> $SITE_CONFIG_LOCATION
       echo "   lib boost_python : : <file>\$(BOOST_ROOT)/stage/lib/libboost_python${python_version}.a ;" >> $SITE_CONFIG_LOCATION
@@ -318,7 +323,12 @@ EOF
    if [ "$?" = "0" ] ; then
       export ECF_PYTHON2=1 # so that we use ' using python ......'
       echo 'if $(ECF_PYTHON2) {'                                                         >> $SITE_CONFIG_LOCATION
-      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;' >> $SITE_CONFIG_LOCATION
+      
+      if [[ ${BOOST_NUMERIC_VERSION} -le 1670 ]] ; then
+         echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python.a ;' >> $SITE_CONFIG_LOCATION
+      else
+         echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;' >> $SITE_CONFIG_LOCATION
+      fi
       python $python_file                                                                >> $SITE_CONFIG_LOCATION
       echo '}'                                                                           >> $SITE_CONFIG_LOCATION
                                                                             

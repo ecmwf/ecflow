@@ -63,6 +63,7 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /site-config//boost_filesystem
              /site-config//boost_program_options
              /site-config//boost_datetime
+             #/site-config//boost_system
 	         pthread
            : <variant>debug:<define>DEBUG
              <library>/site-config//openssl_libs 
@@ -84,6 +85,7 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
            /site-config//boost_datetime
            /site-config//boost_timer
            /site-config//boost_test
+           #/site-config//boost_system
            /site-config//boost_chrono
          : <include>../ANode/test
            <include>../Base/test
@@ -103,6 +105,7 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            /site-config//boost_datetime
            /site-config//boost_timer
            /site-config//boost_test
+           #/site-config//boost_system
            /site-config//boost_chrono
          : <include>../ANode/test
            <include>../Base/test
@@ -122,6 +125,7 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
            /site-config//boost_datetime
            /site-config//boost_timer
            /site-config//boost_test
+           #/site-config//boost_system
            /site-config//boost_chrono
          : <include>../ANode/test
            <include>../Base/test
