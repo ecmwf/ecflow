@@ -180,6 +180,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
     ChartCallout* callout_;
+    bool leftButtonPressed_{false};
 };
 
 class LogRequestView;

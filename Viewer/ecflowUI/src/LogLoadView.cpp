@@ -548,8 +548,12 @@ ChartView::ChartView(QChart *chart, QWidget *parent) :
 
 void ChartView::mousePressEvent(QMouseEvent *event)
 {
-    QChartView::mousePressEvent(event);
-    if(event->button() == Qt::RightButton)
+    leftButtonPressed_ = false;
+    if (event->button() == Qt::LeftButton) {
+        leftButtonPressed_ = true;
+        QChartView::mousePressEvent(event);
+    }
+    else if(event->button() == Qt::RightButton)
     {
        if(event->pos().x() <= chart()->plotArea().right() &&
           event->pos().x() >= chart()->plotArea().left())
@@ -566,7 +570,8 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)
 {
-    QChartView::mouseMoveEvent(event);
+    if (leftButtonPressed_)
+        QChartView::mouseMoveEvent(event);
 
     if(event->pos().x() <= chart()->plotArea().right() &&
        event->pos().x() >= chart()->plotArea().left())
@@ -580,36 +585,36 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 
 void ChartView::mouseReleaseEvent(QMouseEvent *event)
 {
-    QPointF oriLeft=chart()->mapToValue(chart()->plotArea().bottomLeft());
-    QPointF oriRight=chart()->mapToValue(chart()->plotArea().topRight());
+    if (leftButtonPressed_) {
+        QPointF oriLeft=chart()->mapToValue(chart()->plotArea().bottomLeft());
+        QPointF oriRight=chart()->mapToValue(chart()->plotArea().topRight());
 
-    //UiLog().dbg() << "  " << chart()->mapToValue(chart()->plotArea().bottomLeft());
+        //UiLog().dbg() << "  " << chart()->mapToValue(chart()->plotArea().bottomLeft());
 
-    QChartView::mouseReleaseEvent(event);
+        QChartView::mouseReleaseEvent(event);
 
-    //UiLog().dbg() << "   " << chart()->plotArea();
-    //UiLog().dbg() << "  " << chart()->mapToValue(chart()->plotArea().bottomLeft());
+        //UiLog().dbg() << "   " << chart()->plotArea();
+        //UiLog().dbg() << "  " << chart()->mapToValue(chart()->plotArea().bottomLeft());
 
-    QPointF newLeft=chart()->mapToValue(chart()->plotArea().bottomLeft());
-    QPointF newRight=chart()->mapToValue(chart()->plotArea().topRight());
+        QPointF newLeft=chart()->mapToValue(chart()->plotArea().bottomLeft());
+        QPointF newRight=chart()->mapToValue(chart()->plotArea().topRight());
 
-    if(newLeft != oriLeft || newRight != oriRight )
-    {
-        Q_EMIT chartZoomed(QRectF(newLeft,newRight));
-    }
+        if(newLeft != oriLeft || newRight != oriRight )
+        {
+            Q_EMIT chartZoomed(QRectF(newLeft,newRight));
+        }
 
-    qint64 period=newRight.x()-newLeft.x(); //in ms
-    adjustTimeAxis(period);
+        qint64 period=newRight.x()-newLeft.x(); //in ms
+        adjustTimeAxis(period);
+     }
+     leftButtonPressed_ = false;
 }
 
 void ChartView::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
     case Qt::Key_Plus:
-        chart()->zoomIn();
-        break;
     case Qt::Key_Minus:
-        chart()->zoomOut();
         break;
     case Qt::Key_Left:
         chart()->scroll(-10, 0);
@@ -1367,6 +1372,7 @@ void LogRequestView::clearCharts()
     Q_FOREACH(ChartView* v,views_)
     {
         Q_ASSERT(v->chart());
+        v->removeCallout();
         v->chart()->removeAllSeries();
 
         //We do it in this way to get rid of error message:
