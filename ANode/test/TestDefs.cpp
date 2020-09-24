@@ -79,4 +79,22 @@ BOOST_AUTO_TEST_CASE( test_defs_absorb_server_user_variables )
    BOOST_CHECK_MESSAGE(theDefs.server().user_variables().size() == 3,"Expected 3 server user variables");
 }
 
+BOOST_AUTO_TEST_CASE( test_ECFLOW_1684 )
+{
+   cout << "ANode:: ...test_ECFLOW_1684\n";
+
+   Defs defs;
+   defs.add_edit_history("/","request");
+   defs.add_edit_history("/a/made/up/path1","request");
+   defs.add_edit_history("/a/made/up/path1","request2");
+   defs.add_edit_history("/a/made/up/path2","request2");
+   defs.add_edit_history("/a/made/up/path3","request2");
+
+   BOOST_CHECK_MESSAGE(defs.get_edit_history().size() == 4, "Expected edit history of size 4 but found " << defs.get_edit_history().size());
+
+   // This should remove all edit history, where the history paths do not exist as nodes in a defs, BUT need to leave ROOT as is though.
+   defs.handle_migration();
+   BOOST_CHECK_MESSAGE(defs.get_edit_history().size() == 1, "Expected edit history of size 1 but found " << defs.get_edit_history().size());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

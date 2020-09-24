@@ -25,9 +25,9 @@ ecbuild_add_test( TARGET       u_aparser
                                ../test       # ANode/test
                                ../src        # ANode/src
                                ${Boost_INCLUDE_DIRS}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_anode
                 )
-
 
 if (ENABLE_ALL_TESTS)
 	#
@@ -45,6 +45,7 @@ if (ENABLE_ALL_TESTS)
                                ../test       # ANode/test
                                ../src        # ANode/src
                                ${Boost_INCLUDE_DIRS}
+                      DEFINITIONS ${BOOST_TEST_DYN_LINK}
                     )
 
 	#
@@ -62,8 +63,8 @@ if (ENABLE_ALL_TESTS)
                                ../src        # ANode/src
                                ../test       # ANode/test
                                ${Boost_INCLUDE_DIRS} 
+                      DEFINITIONS ${BOOST_TEST_DYN_LINK}
                     )
-
 
 	#
 	# Tests parser for a single defs file.  
@@ -79,5 +80,6 @@ if (ENABLE_ALL_TESTS)
                                ../src        # ANode/src
                                ../test       # ANode/test
                                ${Boost_INCLUDE_DIRS} 
+                      DEFINITIONS ${BOOST_TEST_DYN_LINK}
                    )
 endif()

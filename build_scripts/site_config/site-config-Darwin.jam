@@ -36,8 +36,6 @@ lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_timer           : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_timer.a ;
 lib boost_chrono          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.a ;
 
-
-# profile uses release libs
 lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system.a ;
 lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.a ;
 lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor.a ;
@@ -56,6 +54,30 @@ lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_timer           : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_timer.a ;
 lib boost_chrono          : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.a ;
 
+# libboost_test_exec_monitor is only build statically
+lib boost_system : :          <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_system.dylib ;
+lib boost_test   : :          <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.dylib ;
+lib boost_program_options : : <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_program_options.dylib ;
+lib boost_filesystem      : : <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem.dylib ;
+lib boost_datetime        : : <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.dylib ;
+lib boost_timer           : : <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_timer.dylib ;
+lib boost_chrono          : : <variant>debug <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.dylib ;
+
+lib boost_system : :          <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_system.dylib ;
+lib boost_test   : :          <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.dylib ;
+lib boost_program_options : : <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_program_options.dylib ;
+lib boost_filesystem      : : <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem.dylib ;
+lib boost_datetime        : : <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.dylib ;
+lib boost_timer           : : <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_timer.dylib ;
+lib boost_chrono          : : <variant>profile <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.dylib ;
+
+lib boost_system : :          <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_system.dylib ;
+lib boost_test   : :          <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.dylib ;
+lib boost_program_options : : <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_program_options.dylib ;
+lib boost_filesystem      : : <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem.dylib ;
+lib boost_datetime        : : <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.dylib ;
+lib boost_timer           : : <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_timer.dylib ;
+lib boost_chrono          : : <variant>release <link>shared <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.dylib ;
 
 # ===============================================================================
 # force all exe to link with crypt 

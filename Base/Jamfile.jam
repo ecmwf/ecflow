@@ -62,6 +62,7 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
          : <include>../ANode/test
            <library>/site-config//openssl_libs 
            <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK
 	     ;
 	     
 #

@@ -129,12 +129,28 @@ Defs::~Defs()
 
 void Defs::handle_migration()
 {
-   // Fix up any migration issues
+   // Fix up any migration issues. Remove when in Bolgna, and ecflow4 no longer used
    for(const auto& s : suiteVec_) {
       s->handle_migration(s->calendar());
    }
-}
 
+   // remove any edit history that is no longer referenced. Ignore root, which will not be found
+   auto it = edit_history_.begin();
+   while ( it != edit_history_.end() ) {
+
+      if ((*it).first == Str::ROOT_PATH()) {
+         it++;
+         continue; // root path is defs, which is not a node, hence ignore
+      }
+
+      node_ptr node = findAbsNode((*it).first);
+      if( !node.get() ) {
+         it = edit_history_.erase(it);
+      }
+      else
+         it++;
+   }
+}
 
 ///// State relation functions: ==================================================
 NState::State Defs::state() const
@@ -742,6 +758,30 @@ void Defs::write_state(std::string& os) const
    }
 }
 
+
+std::string Defs::dump_edit_history() const
+{
+   std::stringstream os;
+   for(const auto& i : edit_history_) {
+      os << "history "; os << i.first; os << "  "; // node path
+      const std::vector<std::string>& vec = i.second;                          // list of requests
+      for(const auto & c : vec) {
+
+         // We expect to output a single newline, hence if there are additional new lines
+         // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
+         if (c.find("\n") == std::string::npos) { os << " "; os << c;}
+         else {
+            std::string h = c;
+            Str::replaceall(h,"\n","\\n");
+            os << " "; os << h;
+         }
+      }
+      os << "\n";
+   }
+   return os.str();
+}
+
+
 void Defs::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
 {
 //   cout << "line = " << line << "\n";
@@ -1102,6 +1142,9 @@ void Defs::getAllAstNodes(std::set<Node*>& theSet) const
 
 bool Defs::deleteChild(Node* nodeToBeDeleted)
 {
+   // Find node and children of the node to be deleted and remove them from node history
+   remove_edit_history(nodeToBeDeleted);
+
   	Node* parent = nodeToBeDeleted->parent();
   	if (parent)  return parent->doDeleteChild(nodeToBeDeleted);
  	return doDeleteChild(nodeToBeDeleted);
@@ -1816,6 +1859,23 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
       }
    }
 }
+
+void Defs::remove_edit_history(Node* node)
+{
+   if (!node) return;
+
+   // When removing a node *it* and all its children also need to be removed.
+   std::vector<node_ptr> node_children;
+   node->get_all_nodes(node_children);
+   for(const auto & c : node_children) {
+
+      auto it = edit_history_.find(c->absNodePath());
+      if (it != edit_history_.end()) {
+         edit_history_.erase(it);
+      }
+   }
+}
+
 
 void Defs::clear_edit_history()
 {

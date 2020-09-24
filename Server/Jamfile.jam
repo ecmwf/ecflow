@@ -81,4 +81,5 @@ exe u_server : [ glob test/*.cpp ]
              /site-config//boost_chrono
            : <variant>debug:<define>DEBUG
              <library>/site-config//openssl_libs 
+             <link>shared:<define>BOOST_TEST_DYN_LINK
            ;

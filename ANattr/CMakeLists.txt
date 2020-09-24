@@ -22,5 +22,6 @@ ecbuild_add_test( TARGET       u_anattr
                   SOURCES      ${test_srcs}
                   INCLUDES     src ${Boost_INCLUDE_DIRS}
                   LIBS         nodeattr ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_acore
                  )

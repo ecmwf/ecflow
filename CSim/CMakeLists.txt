@@ -34,23 +34,25 @@ list( APPEND test_srcs
    test/TestToday.cpp
    test/TestAnalysis.cpp
 )
-ecbuild_add_test( TARGET   c_csim
-                  SOURCES  ${test_srcs}
-                  LIBS     libsimu        
-                           pthread 
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                  INCLUDES ../ANode/test ${Boost_INCLUDE_DIRS}
+ecbuild_add_test( TARGET       c_csim
+                  SOURCES      ${test_srcs}
+                  LIBS         libsimu        
+                               pthread 
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                  INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_base
                  )
+                 
 
 if (ENABLE_ALL_TESTS)
-
-	ecbuild_add_test( TARGET       c_csim_single
+	ecbuild_add_test( TARGET        c_csim_single
                       SOURCES      test/TestSingleSimulator.cpp test/TestUtil.cpp
                       LIBS         libsimu   
                                    pthread 
                                    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                       INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
+                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                  )
 endif()

@@ -104,18 +104,8 @@ if test_uname Linux ; then
       if [ $tool = gcc ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
-      		
-            # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  : not valid
-            # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
-            # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
-            # for boost 1.53 and > gcc 6.3 c++14  
-            compiler=$(gcc -dumpversion | sed 's/\.//g' )  # assume major.minor.patch
-            if [ "$compiler" -gt 430  ] ; then
-                CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs"
-       		fi
-       		if [ "$compiler" -gt 610  ] ; then
-       		   CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations"
-       		fi
+       		CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations"
+       		
   	  elif [ $tool = intel ] ; then
       		#module unload gnu
       		#module load intel/19.0.4
@@ -182,14 +172,14 @@ echo "using compiler $tool with release variants"
  
 if [[ ${BOOST_NUMERIC_VERSION} -le 1690 ]] ; then
    # boost system is header only from boost version 1.69, stub library built for compatibility
-   ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j4
+   ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-system variant=release -j4 -d2
 fi
-./b2 --debug-configuration --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time  variant=release -j4
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release -j4
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j4
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test   variant=release -j4
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-timer  variant=release -j4
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-chrono variant=release -j4
+./b2 --debug-configuration --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-date_time  variant=release -j4 -d2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-filesystem variant=release -j4 -d2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-program_options variant=release -j4 -d2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-test   variant=release -j4 -d2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-timer  variant=release -j4 -d2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static,shared  --layout=$layout --with-chrono variant=release -j4 -d2
 
 
 # Allow python to be disabled  

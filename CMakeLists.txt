@@ -22,14 +22,14 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
 
-# this will generate variables, see ACore/ecflow_version.h.in
-project( ecflow LANGUAGES CXX VERSION 5.5.3 )
-
-
-
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-# ecbuild_info( "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
+
+#find_package( ecbuild 3.4 REQUIRED ) # Before project() !!! <TODO>
+
+# this will generate variables, see ACore/ecflow_version.h.in
+project( ecflow LANGUAGES CXX VERSION 5.5.4 )
+
 
 include( ecbuild_system NO_POLICY_SCOPE )
 
@@ -47,6 +47,7 @@ ecbuild_declare_project()
 # The ecflow version config is done in ACore directory
 # =========================================================================================
 
+ecbuild_info( "CMAKE_MODULE_PATH        : ${CMAKE_MODULE_PATH}")
 ecbuild_info( "CMAKE_INSTALL_PREFIX     : ${CMAKE_INSTALL_PREFIX}" )
 ecbuild_info( "ecflow_BINARY_DIR        : ${ecflow_BINARY_DIR}" )
 ecbuild_info( "ecflow_SOURCE_DIR        : ${ecflow_SOURCE_DIR}" )
@@ -206,6 +207,10 @@ endforeach()
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
 if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
+    ecbuild_info( "Using STATIC boost libraries : ${BOOST_TEST_DYN_LINK}" )
+else()
+    set(BOOST_TEST_DYN_LINK "BOOST_TEST_DYN_LINK")
+    ecbuild_info( "Using SHARED boost libraries setting : ${BOOST_TEST_DYN_LINK}" )
 endif()
 
 # By default cmake assume boost was built with cmake. Hence looks for package config file BoostConfig.cmake/boost-config.cmake
@@ -232,7 +237,7 @@ else()
     # for boost version 1.69 or greater Boost.System is now header-only.
     find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
 endif()
-#ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
+ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
 # =======================================================================================

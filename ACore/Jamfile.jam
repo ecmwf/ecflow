@@ -42,6 +42,8 @@ exe u_acore : [ glob test/*.cpp ]
            /site-config//boost_timer
            /site-config//boost_chrono
            /site-config//boost_test
+           #/site-config//boost_test_monitor 
            #/site-config//boost_system
          :  <variant>debug:<define>DEBUG
-	     ;
+            <link>shared:<define>BOOST_TEST_DYN_LINK
+	      ;

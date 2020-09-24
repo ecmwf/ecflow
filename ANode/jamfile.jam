@@ -44,6 +44,7 @@ exe u_anode : [ glob test/*.cpp : test/TestSingleExprParse.cpp
            /site-config//boost_test
            #/site-config//boost_system
          : <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK
 	      ;
 	     
 	     
@@ -58,6 +59,7 @@ exe u_anode_stest : test/TestSingleExprParse.cpp
            /site-config//boost_test
            #/site-config//boost_system
          : <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK 
  	     ;
 
 exe u_test_system : test/TestSystemStandalone.cpp
@@ -71,6 +73,7 @@ exe u_test_system : test/TestSystemStandalone.cpp
            /site-config//boost_test
            #/site-config//boost_system
          : <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK
          ;
 
 build-project parser ;
