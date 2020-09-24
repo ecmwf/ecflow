@@ -144,7 +144,7 @@
          <item>
           <widget class="QToolButton" name="showLogTb">
            <property name="toolTip">
-            <string>Show log</string>
+            <string>Show log viewer</string>
            </property>
            <property name="text">
             <string>Show log</string>
@@ -163,6 +163,9 @@
          </item>
          <item>
           <widget class="Line" name="line_2">
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -196,6 +199,9 @@
          </item>
          <item>
           <widget class="Line" name="line">
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>

@@ -23,6 +23,7 @@
 #include "ViewerUtil.hpp"
 #include "VFileInfo.hpp"
 #include "VFileTransfer.hpp"
+#include "VSettings.hpp"
 
 #include <QtGlobal>
 #include <QDateTime>
@@ -548,7 +549,7 @@ ChartView::ChartView(QChart *chart, QWidget *parent) :
 void ChartView::mousePressEvent(QMouseEvent *event)
 {
     QChartView::mousePressEvent(event);
-    if(event->button() == Qt::MidButton)
+    if(event->button() == Qt::RightButton)
     {
        if(event->pos().x() <= chart()->plotArea().right() &&
           event->pos().x() >= chart()->plotArea().left())
@@ -1006,6 +1007,24 @@ void LogRequestViewHandler::slotZoomHappened(QRectF r)
     }
 }
 
+void LogRequestViewHandler::writeSettings(VComboSettings* vs)
+{
+    for(int i=0; i < views_.count(); i++) {
+        vs->beginGroup(std::to_string(i));
+        views_[i]->writeSettings(vs);
+        vs->endGroup();
+    }
+}
+
+void LogRequestViewHandler::readSettings(VComboSettings* vs)
+{
+    for(int i=0; i < views_.count(); i++) {
+        vs->beginGroup(std::to_string(i));
+        views_[i]->readSettings(vs);
+        vs->endGroup();
+    }
+}
+
 void LogRequestViewControlItem::adjustColumnWidth()
 {
     if(model_)
@@ -1014,6 +1033,7 @@ void LogRequestViewControlItem::adjustColumnWidth()
             tree_->resizeColumnToContents(i);
     }
 }
+
 
 //=============================================
 //
@@ -1070,32 +1090,28 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     setWidget(holder);
 
     //initial splitter size
-    QTimer::singleShot(1,this, SLOT(adjustSplitterSize()));
+//    QTimer::singleShot(1,this, SLOT(adjustSplitterSize()));
+
+    initSplitter();
 }
 
 LogRequestView::~LogRequestView()
 {
 }
 
-void LogRequestView::adjustSplitterSize()
+void LogRequestView::initSplitter()
 {
-    //initial splitter size
-    QFont font;
-    QFontMetrics fm(font);
-    int hSize=fm.width("AAAAAverylongsuitename");
-    QList<int> sizeLst=splitter_->sizes();
-    if(sizeLst.count()==2)
-    {
-        static int usableWidth = 0;
-
-        if(width() > hSize && usableWidth == 0)
-            usableWidth = width();
-
-        if(usableWidth > hSize)
-        {
-            sizeLst[1]=hSize;
-            sizeLst[0]=usableWidth-hSize;
-            splitter_->setSizes(sizeLst);
+    if (!splitterInited_ && width() > 100) {
+        splitterInited_ = true;
+        if (splitterSavedState_.isEmpty()) {
+            auto w = width();
+            Q_ASSERT(splitter_->count() == 2);
+            QList<int> sizes;
+            sizes << 900*1000/w;
+            sizes << w-sizes[0];
+            splitter_->setSizes(sizes);
+        } else {
+            splitter_->restoreState(splitterSavedState_);
         }
     }
 }
@@ -1396,6 +1412,8 @@ void LogRequestView::load()
 
     loadCore();
     loadSuites();
+
+    initSplitter();
 
     suiteCtl_.adjustColumnWidth();
     cmdCtl_.adjustColumnWidth();
@@ -1743,6 +1761,29 @@ void LogRequestView::buildEmptyScanRowSingleVal(QString &txt,QString name,QColor
     txt+="<tr>" + Viewer::formatTableTdBg(name,lineCol.lighter(150)) +
           Viewer::formatTableTdBg(" N/A",numBg) + "</tr>";
 }
+
+
+void LogRequestView::writeSettings(VComboSettings* vs)
+{
+//    int cbIdx=ui_->resCombo->currentIndex();
+//    if (cbIdx) {
+//        vs->put("plotResolution",
+//                ui_->resCombo->itemData(cbIdx).toString().toStdString());
+//    }
+    vs->putQs("splitter",splitter_->saveState());
+    //view_->writeSettings(vs);
+}
+
+void LogRequestView::readSettings(VComboSettings* vs)
+{
+    //sort mode
+//    QString resMode=QString::fromStdString(vs->get<std::string>("plotResolution", std::string()));
+//    ViewerUtil::initComboBoxByData(resMode,ui_->resCombo);
+
+    splitterSavedState_ = vs->getQs("splitter").toByteArray();
+    //view_->readSettings(vs);
+}
+
 
 
 //=============================================================================

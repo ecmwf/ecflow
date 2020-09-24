@@ -25,6 +25,7 @@
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
+#include "VSettings.hpp"
 
 ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 {
@@ -212,5 +213,20 @@ void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
     }
 #endif
 }
+
+void ServerLoadItemWidget::writeSettings(VComboSettings* vs)
+{
+    vs->beginGroup("serverload");
+    w_->writeSettings(vs);
+    vs->endGroup();
+}
+
+void ServerLoadItemWidget::readSettings(VComboSettings* vs)
+{
+    vs->beginGroup("serverload");
+    w_->readSettings(vs);
+    vs->endGroup();
+}
+
 
 static InfoPanelItemMaker<ServerLoadItemWidget> maker1("server_load");

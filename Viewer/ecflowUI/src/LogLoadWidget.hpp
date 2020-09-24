@@ -19,7 +19,7 @@
 #include <QGraphicsItem>
 #include <QMap>
 #include <QScrollArea>
-
+#include <QByteArray>
 #include <QStringList>
 #include <QWidget>
 #include <QSortFilterProxyModel>
@@ -38,6 +38,7 @@ class LogModel;
 class LogRequestView;
 class LogRequestViewHandler;
 class ServerLoadView;
+class VComboSettings;
 class VFileTransfer;
 class QSortFilterProxyModel;
 class QHBoxLayout;
@@ -54,6 +55,17 @@ class QLabel;
 namespace Ui {
     class LogLoadWidget;
 }
+
+struct LogLoadPrevState
+{
+    LogLoadPrevState() : valid(false), fullStart(false), fullEnd(false) {}
+    bool valid;
+    QDateTime startDt;
+    QDateTime endDt;
+    bool fullStart;
+    bool fullEnd;
+};
+
 
 //the main widget containing all components
 class LogLoadWidget : public QWidget
@@ -74,9 +86,8 @@ public:
     void setLogMode(LogMode logMode);
     void setDetached(bool);
 
-//    void load(QString logFile,int numOfRows=0);
-//    void load(QString serverName, QString host, QString port, QString logFile,int numOfRows=0);
-//    QString logFile() const {return logFile_;}
+    void writeSettings(VComboSettings* vs);
+    void readSettings(VComboSettings* vs);
 
 protected Q_SLOTS:
    void periodWasReset();
@@ -100,12 +111,12 @@ private:
     void loadCore(QString logFile);
     void initFromData();
     void setAllVisible(bool);
-    //void load();
     void updateInfoLabel(bool showDetails=true);
     void checkButtonState();
     void setMaxReadSize(int maxReadSizeInMb);
     bool shouldShowLog() const;
     void updateTimeLabel(QDateTime, QDateTime);
+    void initSplitter();
 
     enum TabIndex {TotalTab=0,SuiteTab=1,SubReqTab=2};
 
@@ -133,7 +144,7 @@ private:
     VFileTransfer* fileTransfer_{nullptr};
     QDateTime transferredAt_;
 
-    //TimelinePrevState prevState_;
+    LogLoadPrevState prevState_;
     bool detached_{false};
 };
 

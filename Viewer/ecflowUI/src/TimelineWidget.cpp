@@ -956,16 +956,6 @@ void TimelineWidget::loadArchive()
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
 
         ui_->messageLabel->stopProgress();
-        //ui_->messageLabel->hide();
-
-        //logLoaded_=true;
-        //setAllVisible(true);
-        //updateInfoLabel();
-        //updateFilterTriggerMode();
-
-        //determine node types if task filter is on
-        //if(ui_->taskOnlyTb->isChecked())
-        //    determineNodeTypes();
     }
 
     ui_->messageLabel->hide();

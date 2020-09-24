@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <QAbstractItemModel>
+#include <QByteArray>
 #include <QGraphicsItem>
 #include <QMap>
 #include <QScrollArea>
@@ -36,6 +37,7 @@ class LogModel;
 class LogRequestView;
 class LogRequestViewHandler;
 class ServerLoadView;
+class VComboSettings;
 class QSortFilterProxyModel;
 class QHBoxLayout;
 class QVBoxLayout;
@@ -213,6 +215,9 @@ public:
     QList<bool> cmdPlotState() const {return cmdPlotState_;}
     QList<bool> uidPlotState() const {return uidPlotState_;}
 
+    void writeSettings(VComboSettings* vs);
+    void readSettings(VComboSettings* vs);
+
 public Q_SLOTS:
     void showFullRange();
     void addRemoveSuite(int idx, bool st);
@@ -270,6 +275,9 @@ public:
     void changeResolution();
     virtual void adjustZoom(QRectF r);
 
+    void writeSettings(VComboSettings* vs);
+    void readSettings(VComboSettings* vs);
+
 Q_SIGNALS:
     void scanDataChanged(QString);
     void suitePlotStateChanged(int,bool,QColor);
@@ -287,7 +295,6 @@ public Q_SLOTS:
     virtual void addRemoveUid(int idx, bool st) {}
 
 protected Q_SLOTS:
-    void adjustSplitterSize();
     void slotZoom(QRectF);
     void adjustZoom();
     void scanPositionChanged(qreal);
@@ -333,6 +340,8 @@ protected:
     void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
     void buildEmptyScanRowSingleVal(QString &txt,QString name,QColor lineCol) const;
 
+    void initSplitter();
+
     LogRequestViewHandler* handler_;
     LogLoadData* data_;
     QList<ChartView*> views_;
@@ -352,6 +361,9 @@ protected:
 
     int maxVal_;
     int lastScanIndex_;
+
+    bool splitterInited_{false};
+    QByteArray splitterSavedState_;
 };
 
 class LogTotalRequestView : public LogRequestView

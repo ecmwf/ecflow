@@ -34,6 +34,9 @@ public:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
+    void readSettings(VComboSettings* vs);
+    void writeSettings(VComboSettings* vs);
+
 protected:
     void updateState(const ChangeFlags&) override;
     void serverSyncFinished() override;

@@ -624,7 +624,7 @@
                 },
 
                 "tab" : {
-                    "label"  : "Timeline",
+                    "label"  : "Server load and timeline",
                     "group" : {
                         "title" : "Options",
                         "prefix" : "server.files",

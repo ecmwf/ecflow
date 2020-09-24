@@ -27,6 +27,7 @@
 #include "ViewerUtil.hpp"
 #include "VFileInfo.hpp"
 #include "VFileTransfer.hpp"
+#include "VSettings.hpp"
 
 #include <QtGlobal>
 #include <QDateTime>
@@ -78,6 +79,8 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
 
     ui_->viewTab->setCurrentIndex(0);
 
+    // TODO: the  period selection widgets are yet to be fully implemented.
+    // At the moment, we just hide them and show the current period in a label.
     ui_->startTe->hide();
     ui_->endTe->hide();
     ui_->startLabel->hide();
@@ -85,31 +88,22 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     ui_->viewTab->setCornerWidget(ui_->cornerW);
     ui_->cornerHolderW->setVisible(false);
 
-
     ui_->timeLabel->setProperty("fileInfo","1");
     ui_->timeLabel->setMargin(2);
     ui_->timeLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
     ui_->timeLabel->setAutoFillBackground(true);
-//    ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->timeLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
     connect(ui_->showFullTb,SIGNAL(clicked()),
             viewHandler_,SLOT(showFullRange()));
 
     //Temporal resolution combo box
-    //resCombo_=new QComboBox(this);
     ui_->resCombo->addItem("seconds",0);
     ui_->resCombo->addItem("minutes",1);
     ui_->resCombo->addItem("hours",2);
 
     connect(ui_->resCombo,SIGNAL(currentIndexChanged(int)),
             this,SLOT(resolutionChanged(int)));
-
-    //cornerHb->addWidget(new QLabel("Resolution:",this));
-    //cornerHb->addWidget(ui_->resCombo_);
-
-    //ui_->viewTab->setCornerWidget(cornerW);
-
 
     //Log contents
     logModel_=new LogModel(this);
@@ -177,12 +171,28 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     connect(ui_->loadFileTb,SIGNAL(clicked()),
             this,SLOT(slotLoadCustomFile()));
 
-    //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
 }
 
 LogLoadWidget::~LogLoadWidget()
 {
 }
+
+//void LogLoadWidget::initSplitter()
+//{
+//    if (!splitterInited_ && width() > 100) {
+//        splitterInited_ = true;
+//        if (splitterSavedState_.isEmpty()) {
+//            auto w = width();
+//            Q_ASSERT(ui_->splitter->count() == 3);
+//            QList<int> sizes;
+//            sizes << 300*1000/w << 600*1000/w;
+//            sizes << w-(sizes[0]+sizes[1]);
+//            ui_->splitter->setSizes(sizes);
+//        } else {
+//            ui_->splitter->restoreState(splitterSavedState_);
+//        }
+//    }
+//}
 
 void LogLoadWidget::clear()
 {
@@ -198,8 +208,7 @@ void LogLoadWidget::clear()
 
     ui_->logInfoLabel->setText(QString());
 
-    //viewHandler_->clear();
-
+    viewHandler_->clear();
     logModel_->clearData();
     logFile_.clear();
     serverName_.clear();
@@ -214,8 +223,8 @@ void LogLoadWidget::clear()
 
     //prevState_.valid=false;
     tmpLogFile_.reset();
-    ui_->startTe->clear();
-    ui_->endTe->clear();
+//    ui_->startTe->clear();
+//    ui_->endTe->clear();
     ui_->timeLabel->clear();
 
     ui_->logModeCombo->setCurrentIndex(0);
@@ -243,8 +252,7 @@ void LogLoadWidget::clearData(bool usePrevState)
     ui_->logInfoLabel->setText(QString());
 
     viewHandler_->clear();
-//    model_->clearData();
-//    data_->clear();
+    logModel_->clearData();
 
     localLog_=true;
     logLoaded_=false;
@@ -253,19 +261,14 @@ void LogLoadWidget::clearData(bool usePrevState)
 
     if (!usePrevState)
     {
-        //ui_->pathFilterLe->clear();
-        //prevState_.valid=false;
-        //reset the view mode to timeline
-        //ui_->timelineViewTb->setChecked(true);
-        //ui_->startTe->clear();
-        //ui_->endTe->clear();
+        prevState_.valid=false;
+//        ui_->startTe->clear();
+//        ui_->endTe->clear();
+        ui_->timeLabel->clear();
     }
 
     tmpLogFile_.reset();
-
     setAllVisible(false);
-    //updateFilterTriggerMode();
-
     beingCleared_=false;
 }
 
@@ -549,11 +552,12 @@ void LogLoadWidget::loadLatest(bool usePrevState)
     //if it is a reload we remember the current period
     if(usePrevState)
     {
-//        prevState_.valid=true;
-//        prevState_.startDt=ui_->fromTimeEdit->dateTime();
-//        prevState_.endDt=ui_->toTimeEdit->dateTime();
-//        prevState_.fullStart=(prevState_.startDt == data_->qStartTime());
-//        prevState_.fullEnd=(prevState_.endDt == data_->qEndTime());
+        auto data = viewHandler_->data();
+        prevState_.valid=true;
+        prevState_.startDt=ui_->startTe->dateTime();
+        prevState_.endDt=ui_->endTe->dateTime();
+        prevState_.fullStart=(prevState_.startDt == data->startTime());
+        prevState_.fullEnd=(prevState_.endDt == data->endTime());
         clearData(true);
     }
     else
@@ -620,7 +624,7 @@ void LogLoadWidget::loadArchive()
 
     ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    ui_->messageLabel->showInfo("Loading timeline data from log file ...");
+    ui_->messageLabel->showInfo("Loading data from log file ...");
 
     bool loadDone=false;
 
@@ -635,7 +639,7 @@ void LogLoadWidget::loadArchive()
         if(!archiveLogList_.items()[i].loadable_)
             continue;
 
-        ui_->messageLabel->showInfo("Loading timeline data from log file [" +
+        ui_->messageLabel->showInfo("Loading data from log file [" +
                                     QString::number(i+1) + "/" + QString::number(archiveLogList_.items().count()) +
                                     "] ...");
 
@@ -661,16 +665,6 @@ void LogLoadWidget::loadArchive()
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
 
         ui_->messageLabel->stopProgress();
-        //ui_->messageLabel->hide();
-
-        //logLoaded_=true;
-        //setAllVisible(true);
-        //updateInfoLabel();
-        //updateFilterTriggerMode();
-
-        //determine node types if task filter is on
-        //if(ui_->taskOnlyTb->isChecked())
-        //    determineNodeTypes();
     }
 
     logModel_->endLoadFromReader();
@@ -683,14 +677,15 @@ void LogLoadWidget::loadArchive()
     if(!loadDone)
     {
         ui_->messageLabel->showError(QString::fromStdString("Could not parse any of the specified log files!"));
-        //data_->clear();
+        viewHandler_->clear();
+        logModel_->clearData();
         setAllVisible(false);
         updateInfoLabel();
         return;
     }
 
     logLoaded_=true;
-    //data_->markAsLoadDone();
+    viewHandler_->data()->markAsLoadDone();
     setAllVisible(true);
     updateInfoLabel();
 
@@ -718,7 +713,8 @@ void LogLoadWidget::slotFileTransferFailed(QString err)
         ui_->messageLabel->stopLoadLabel();
         logLoaded_=false;
         ui_->messageLabel->showError("Could not fetch log file from remote host! <br>" + err);
-        //data_->clear();
+        viewHandler_->clear();
+        logModel_->clearData();
         setAllVisible(false);
         updateInfoLabel();
     }
@@ -754,7 +750,7 @@ void LogLoadWidget::loadCore(QString logFile)
 {
     ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
     VFileInfo fInfo(logFile);
-    ui_->messageLabel->showInfo("Loading server load data from log file ... [size=" +
+    ui_->messageLabel->showInfo("Loading data from log file ... [size=" +
                                 fInfo.formatSize() + "]");
 
     QTime timer;
@@ -816,24 +812,46 @@ void LogLoadWidget::loadCore(QString logFile)
 
 void LogLoadWidget::initFromData()
 {
-    QDateTime startTime=viewHandler_->data()->startTime();
-    QDateTime endTime=viewHandler_->data()->endTime();
+    auto data = viewHandler_->data();
+    QDateTime startTime=data->startTime();
+    QDateTime endTime=data->endTime();
     ui_->startTe->setMinimumDateTime(startTime);
     ui_->startTe->setMaximumDateTime(endTime);
-    ui_->startTe->setDateTime(startTime);
+
+    //TODO: implement period initialisation based on prev state
+    bool usePrevState = false;
+
+    //try the set the previously used interval - for reload only
+    if(usePrevState && prevState_.valid)
+    {
+        if(prevState_.startDt <= data->startTime() || prevState_.fullStart)
+            ui_->startTe->setDateTime(data->startTime());
+        else if(prevState_.startDt < data->endTime())
+            ui_->startTe->setDateTime(prevState_.startDt);
+    }
+    else
+    {
+        ui_->startTe->setDateTime(data->startTime());
+    }
     ui_->endTe->setMinimumDateTime(startTime);
     ui_->endTe->setMaximumDateTime(endTime);
-    ui_->endTe->setDateTime(endTime);
+
+    if(usePrevState && prevState_.valid)
+    {
+        if(prevState_.endDt >= data->endTime() || prevState_.fullEnd)
+            ui_->endTe->setDateTime(data->endTime());
+        else if(prevState_.endDt > data->startTime())
+            ui_->endTe->setDateTime(prevState_.endDt);
+    }
+    else
+    {
+        ui_->endTe->setDateTime(data->endTime());
+    }
+
     updateTimeLabel(startTime, endTime);
 
-    //updateInfoLabel();
+    checkButtonState();
 }
-
-//void LogLoadWidget::clearData()
-//{
-//    viewHandler_->load(logFile_.toStdString(),numOfRows_);
-//    logModel_->loadFromFile(logFile_.toStdString(),viewHandler_->data()->startPos());
-//}
 
 void LogLoadWidget::setDetached(bool d)
 {
@@ -842,12 +860,13 @@ void LogLoadWidget::setDetached(bool d)
 
 void LogLoadWidget::checkButtonState()
 {
-//     bool fromStart=(ui_->fromTimeEdit->dateTime() == data_->qStartTime());
-//     bool toEnd=(ui_->toTimeEdit->dateTime() == data_->qEndTime());
+     auto data = viewHandler_->data();
+     bool fromStart=(ui_->startTe->dateTime() == data->startTime());
+     bool toEnd=(ui_->endTe->dateTime() == data->endTime());
 
 //     ui_->startTb->setEnabled(!fromStart);
 //     ui_->endTb->setEnabled(!toEnd);
-//     ui_->wholePeriodTb->setEnabled(!fromStart || !toEnd);
+     ui_->showFullTb->setEnabled(!fromStart || !toEnd);
 }
 
 void LogLoadWidget::setMaxReadSize(int maxReadSizeInMb)
@@ -879,6 +898,7 @@ void LogLoadWidget::periodWasReset()
     ui_->startTe->setDateTime(startDt);
     ui_->endTe->setDateTime(endDt);
     updateTimeLabel(startDt, endDt);
+    checkButtonState();
 }
 
 void LogLoadWidget::updateTimeLabel(QDateTime startDt, QDateTime endDt)
@@ -901,4 +921,25 @@ void LogLoadWidget::resolutionChanged(int)
         viewHandler_->setResolution(LogLoadData::MinuteResolution);
     else if(idx == 2)
         viewHandler_->setResolution(LogLoadData::HourResolution);
+}
+
+void LogLoadWidget::writeSettings(VComboSettings* vs)
+{
+//    int cbIdx=ui_->resCombo->currentIndex();
+//    if (cbIdx) {
+//        vs->put("plotResolution",
+//                ui_->resCombo->itemData(cbIdx).toString().toStdString());
+//    }
+//    vs->putQs("splitter",ui_->splitter->saveState());
+    viewHandler_->writeSettings(vs);
+}
+
+void LogLoadWidget::readSettings(VComboSettings* vs)
+{
+    //sort mode
+//    QString resMode=QString::fromStdString(vs->get<std::string>("plotResolution", std::string()));
+//    ViewerUtil::initComboBoxByData(resMode,ui_->resCombo);
+
+//    splitterSavedState_ = vs->getQs("splitter").toByteArray();
+    viewHandler_->readSettings(vs);
 }
