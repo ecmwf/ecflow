@@ -162,14 +162,20 @@
           </widget>
          </item>
          <item>
-          <widget class="Line" name="line_2">
-           <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-           </property>
+          <spacer name="horizontalSpacer_4">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Horizontal</enum>
            </property>
-          </widget>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>3</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item>
           <widget class="QLabel" name="resComboLabel">
@@ -196,16 +202,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="Line" name="line">
-           <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
          </item>
          <item>
           <widget class="QToolButton" name="showFullTb">

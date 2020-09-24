@@ -216,16 +216,20 @@ void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 
 void ServerLoadItemWidget::writeSettings(VComboSettings* vs)
 {
+#ifdef ECFLOW_LOGVIEW
     vs->beginGroup("serverload");
     w_->writeSettings(vs);
     vs->endGroup();
+#endif
 }
 
 void ServerLoadItemWidget::readSettings(VComboSettings* vs)
 {
+#ifdef ECFLOW_LOGVIEW
     vs->beginGroup("serverload");
     w_->readSettings(vs);
     vs->endGroup();
+#endif
 }
 
 
