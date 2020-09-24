@@ -45,19 +45,16 @@ Process
        
     2/ git flow release start  5.5.3
        git flow release finish 5.5.3  
+       git push  
        git push --tags
        git_tag=5.5.3
        When single person making release
  
-0/ Update ECFLOW_GIT_BRANCH to "5.5.3" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/5.5.3)
-   Then use the meta builder to build/install.
+0/ Update metabuilder/config.yaml master branch to "5.5.3"  
+   Then use the meta builder/master to build/install.
    Note: if used 
      > git flow release start 5.5.3        # -> it will create a branch release/5.5.3
 
-0/ For a PREPIFS release change file:
-     /usr/local/apps/ecflow/.modulerc
-   This file defines the mapping to symbol, i.e like default,new,old, prepifs
-   
 0/ Update Documentation
    
   - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
@@ -77,10 +74,8 @@ Process
    In both cases add a tag/label for "news". This make the newly added page
    appear in the top half of the latest news
 
-0/ Update release:
-   ** Go to "Tools->Attachments", then load the gzip file(i.e from $SCRATCH): 
-      Go to the bottom of the page *****
-   0 release: This uploads the release zip file: making it accessible to member states
+0/ Check attachments:
+   ** The eflow tar ball is automatically upload to confluence
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
    
    0 Beta releases :
@@ -110,8 +105,6 @@ AFTER the release
      
      Then check this file in, for the other platforms.
      
-0/ Reset metabuilder and ecflow git_tag, back to develop
-
 0/ record the performance statistics for the release. ( see Doc/misc/test_times )
 
 0/ ** Check the security level of Jira issues for the release.
