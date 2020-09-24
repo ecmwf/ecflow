@@ -65,6 +65,7 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
            /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK
            <library>/site-config//openssl_libs 
  	     ;
  	     
@@ -86,6 +87,7 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
            /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK
            <library>/site-config//openssl_libs 
         ;
 
@@ -107,5 +109,6 @@ exe singletest : [ glob TestSingle.cpp  ]
            /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
+           <link>shared:<define>BOOST_TEST_DYN_LINK
            <library>/site-config//openssl_libs 
  	     ;

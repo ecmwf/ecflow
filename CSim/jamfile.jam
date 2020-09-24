@@ -60,6 +60,7 @@ exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
              /site-config//boost_test
              #/site-config//boost_system
            : <variant>debug:<define>DEBUG
+             <link>shared:<define>BOOST_TEST_DYN_LINK
            ;
            
 #
@@ -78,4 +79,5 @@ exe c_csim_single : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
              /site-config//boost_test
              #/site-config//boost_system
            : <variant>debug:<define>DEBUG
+             <link>shared:<define>BOOST_TEST_DYN_LINK
            ;

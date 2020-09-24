@@ -77,6 +77,7 @@ ecbuild_add_test(TARGET  u_anode
                  SOURCES      ${test_srcs}
                  INCLUDES     ${Boost_INCLUDE_DIRS}
                  LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                 DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                  TEST_DEPENDS u_anattr
                  )
 
@@ -86,8 +87,7 @@ if (ENABLE_ALL_TESTS)
                       SOURCES      ${stest_srcs}
                       INCLUDES     ${Boost_INCLUDE_DIRS}
                       LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_anattr
                     )
 endif()
-
-

@@ -24,6 +24,7 @@ show_error_and_exit() {
    echo "   xcode          - enable xcode project"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
+   echo "   shared         - build with shared boost libs"
    echo "   no_gui         - Don't build the gui"
    echo "   no_ssl         - build without using openssl"
    echo "   log            - enable debug output"
@@ -36,6 +37,7 @@ mode_arg=release
 compiler=clang
 
 make_arg=
+shared_arg=
 test_arg=
 ctest_arg=
 no_gui_arg=
@@ -63,6 +65,7 @@ while [[ "$#" != 0 ]] ; do
       break
    elif [[ "$1" = clean ]] ;   then clean_arg=$1 ;
    elif [[ "$1" = install ]] ; then install_arg=$1 ;
+   elif [[ "$1" = shared ]] ;  then shared_arg=$1 ;
    elif [[ "$1" = gcc ]] ;     then compiler=$1 ;
    elif [[ "$1" = clang ]] ;   then compiler=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
@@ -156,6 +159,11 @@ if [[ "$msan_arg" = msan ]] ; then
    CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fno-omit-frame-pointer -fsanitize-memory-track-origins"
    CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=memory"
    cmake_extra_options="$cmake_extra_options -DCMAKE_LINKER=/Library/Developer/CommandLineTools/usr/bin/clang"
+fi
+
+
+if [[ "$shared_arg" = shared ]] ; then
+   cmake_extra_options="$cmake_extra_options -DENABLE_STATIC_BOOST_LIBS=OFF"
 fi
 
 log_options=

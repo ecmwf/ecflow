@@ -16,10 +16,12 @@ if [ "$#" -gt 4 ] ; then
    echo " arg1-mode    (optional) default = release  [ release | debug | profile ]"
    echo " arg2-compiler(optional) default = linux/gcc-$(gcc -dumpversion)"
    echo " arg3-safe    (optional) default = no  [ no | safe ] safe means only run deterministic tests"
+   echo " arg5-link    (optional) default = static [ static | shared ] use boost static/shared directory to reference tests"
    echo " arg5-ssl     (optional) default = off [ off | ssl ] ssl means test ssl version of ecflow"
    exit 1
 fi
 
+link=static
 mode=release
 compiler_arg=
 safe=no
@@ -27,8 +29,9 @@ ssl=off
 while [ "$#" -ne 0 ] ; do   
    if [ "$1" = debug -o "$1" = release -o "$1" = profile ] ; then
       mode=$1
-   elif [ "$1" = safe ] ; then safe=yes ;
-   elif [ "$1" = ssl ] ;  then ssl=on ;
+   elif [ "$1" = safe ] ;   then safe=yes ;
+   elif [ "$1" = ssl ] ;    then ssl=on ;
+   elif [ "$1" = shared ] ; then link=shared ;
    else
       compiler_arg=$1
    fi
@@ -41,8 +44,12 @@ if [ ${#mode} -eq 0 ] ; then
    exit 1
 fi
 
-echo "mode=$mode compiler=$compiler_arg safe=$safe ssl=$ssl"
-#exit 1;
+link_dir=
+if [ ${link} = static ] ; then
+   link_dir=/link-static
+fi
+
+echo "mode=$mode compiler=$compiler_arg safe=$safe ssl=$ssl link=$link link_dir=$link_dir"
 
 #======================================================================
 # remove python test, so that they are rerun
@@ -100,7 +107,7 @@ if test_uname Linux ; then
       compiler=$compiler_arg
    fi
 
-   exe_path=$compiler/$mode
+   exe_path=$compiler/${mode}${link_dir}
    
    if [ "$ssl" = on ] ; then
       exe_path="$exe_path/ssl-on"
@@ -123,7 +130,7 @@ if test_uname Linux ; then
    if [ "$safe" = no ] ; then
       # run python/C++ test
       cd Pyext
-      $BOOST_ROOT/b2 $TOOLSET $CXXFLAGS variant=$mode $OPEN_SSL test-all $TEST_OPTS
+      $BOOST_ROOT/b2 $TOOLSET "$CXXFLAGS" variant=$mode link=$link $OPEN_SSL test-all $TEST_OPTS
       cd ..
    fi
    
@@ -138,19 +145,19 @@ if test_uname Linux ; then
 elif test_uname Darwin ; then
 
    TOOLSET=
-   CXXFLAGS=
+   CXXFLAGS=cxxflags="-Wno-deprecated-declarations -Wno-maybe-uninitialized -fvisibility-inlines-hidden -fvisibility=hidden"
    compiler=gcc-$(/usr/local/opt/gcc/bin/gcc -dumpversion)
    
-   exe_path=$compiler/$mode
+   exe_path=$compiler/${mode}${link_dir}
    
    echo "*****************************************"
    echo "Testing: $exe_path"
    echo "*****************************************"
 
-   ACore/bin/$exe_path/u_acore      --log_level=message $TEST_OPTS
-   ANattr/bin/$exe_path/u_anattr    --log_level=message $TEST_OPTS
-   ANode/bin/$exe_path/u_anode      --log_level=message $TEST_OPTS
-   ANode/parser/bin/$exe_path/u_aparser  --log_level=message $TEST_OPTS
+   ACore/bin/$exe_path/u_acore          --log_level=message $TEST_OPTS
+   ANattr/bin/$exe_path/u_anattr        --log_level=message $TEST_OPTS
+   ANode/bin/$exe_path/u_anode          --log_level=message $TEST_OPTS
+   ANode/parser/bin/$exe_path/u_aparser --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
       ANode/parser/bin/$exe_path/perf_aparser --log_level=message $TEST_OPTS
    fi
@@ -159,7 +166,7 @@ elif test_uname Darwin ; then
    if [ "$safe" = no ] ; then
       # run python/C++ test
       cd Pyext
-      $BOOST_ROOT/b2 $TOOLSET $CXXFLAGS variant=$mode $OPEN_SSL test-all $TEST_OPTS
+      $BOOST_ROOT/b2 $TOOLSET "$CXXFLAGS" variant=$mode link=$link $OPEN_SSL test-all $TEST_OPTS
       cd ..
    fi
    

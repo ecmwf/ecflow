@@ -349,7 +349,7 @@ LogImpl::LogImpl(const std::string& filename)
 : file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
- 	   log_open_error_ = "LogImpl::LogImpl: Could not open log file '";
+ 	   log_open_error_ = "Could not open log file '";
  	   log_open_error_ += filename;
  	   log_open_error_ += "'. ";
  	   log_open_error_ += File::stream_error_condition(file_);

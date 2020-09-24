@@ -164,5 +164,70 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( test_delete_node_edit_history_ECFLOW_1684 )
+{
+   cout << "Base:: ...test_delete_node_edit_history_ECFLOW_1684\n";
+
+   // This test will ensure that if a suite/family node is deleted, we *remove* any *OLD* edit history associated
+   // with the node, AND and of its children
+
+   // Create log file for the commands to work. auto destroy at end of scope
+   TestLog test_log("test_delete_node_edit_history.log");
+
+   MyDefsFixture fixtureDef;
+   MockServer mockServer(&fixtureDef.defsfile_);
+
+   // suspend all suites and tasks, then check we have some edit history
+   {
+      size_t edit_history_root_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
+      size_t edit_history_before = fixtureDef.defsfile_.get_edit_history().size();
+      BOOST_CHECK_MESSAGE(edit_history_root_size_before == 0 ,"Expected edit_history_root_size_before == 0 but found " << edit_history_root_size_before);
+      BOOST_CHECK_MESSAGE(edit_history_before == 0 ,"Expected edit_history_before == 0 but found " << edit_history_before);
+
+      std::vector<Task*> task_vec;
+      fixtureDef.defsfile_.getAllTasks(task_vec);
+      BOOST_CHECK_MESSAGE( task_vec.size() > 0,"Expected > 0 tasks but found " << task_vec.size());
+      std::vector<std::string> paths; paths.reserve(task_vec.size());
+      for(Task* t: task_vec) { paths.push_back(t->absNodePath()); }
+      BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
+
+      std::vector<suite_ptr> suite_vec =  fixtureDef.defsfile_.suiteVec();
+      for(suite_ptr s: suite_vec) { paths.push_back(s->absNodePath());}
+
+      PathsCmd cmd(PathsCmd::SUSPEND,paths);
+      cmd.setup_user_authentification();
+      STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
+      BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to suspend tasks");
+      {
+         size_t edit_history_root_size_after = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
+         size_t edit_history_after = fixtureDef.defsfile_.get_edit_history().size();
+
+         BOOST_CHECK_MESSAGE(edit_history_root_size_after == 0 ,"Expected edit_history_root_size_after == 0 but found " << edit_history_root_size_after);
+         BOOST_CHECK_MESSAGE(edit_history_after == paths.size() ,"Expected edit_history_after to be same number of suspended tasks and suites(" << paths.size() << ") but found " << edit_history_after);
+       }
+   }
+
+   // Delete all Suites, this should delete edit history associated with suites and child tasks
+   {
+      std::vector<suite_ptr> vec =  fixtureDef.defsfile_.suiteVec();
+      BOOST_CHECK_MESSAGE( vec.size() > 0,"Expected > 0 Suites but found " << vec.size());
+      for(suite_ptr s: vec) {
+         std::string absNodePath = s->absNodePath();
+         DeleteCmd cmd(absNodePath);
+         cmd.setup_user_authentification();
+         STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
+         BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete suite at path " << absNodePath);
+      }
+      BOOST_REQUIRE_MESSAGE( fixtureDef.defsfile_.suiteVec().empty(),"Expected all Suites to be deleted but found " << fixtureDef.defsfile_.suiteVec().size());
+
+
+      size_t edit_history_root_size_after = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
+      size_t edit_history_after = fixtureDef.defsfile_.get_edit_history().size();
+
+      BOOST_CHECK_MESSAGE(edit_history_root_size_after == vec.size(),
+                "Expected edit_history size of root node to be same as number of deleted suites(" << vec.size() << ") but found " << edit_history_root_size_after);
+      BOOST_CHECK_MESSAGE(edit_history_after == 1 ,"Expected edit_history_after == 1 to *ONLY* have root node, but found " << edit_history_after << "\n" << fixtureDef.defsfile_.dump_edit_history());
+   }
+}
 BOOST_AUTO_TEST_SUITE_END()
 

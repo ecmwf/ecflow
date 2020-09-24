@@ -80,6 +80,7 @@ ecbuild_add_test( TARGET       u_server
                   INCLUDES     src ${Boost_INCLUDE_DIRS}
                   LIBS         libserver ${OPENSSL_LIBRARIES}
                                ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
+                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_base
               )
 
