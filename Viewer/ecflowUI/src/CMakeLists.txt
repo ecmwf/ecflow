@@ -488,7 +488,7 @@ endif()
 #    )
 
 if(ECFLOW_LOGVIEW)
-    set(viewer_wrap_ui_files
+    list(APPEND viewer_wrap_ui_files
         LogLoadWidget.ui
         )
 endif()
