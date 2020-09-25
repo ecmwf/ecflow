@@ -23,7 +23,6 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "System.hpp"             // kill singleton for valgrind
-//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
