@@ -1187,21 +1187,33 @@ void EcfFile::remove_comment_manual_and_noop_tokens()
 
 int EcfFile::countEcfMicro(const std::string& line, const std::string& ecfMicro)
 {
-   size_t end = line.size();
-   size_t comment_pos = line.find("#");
-   if (comment_pos != string::npos) {
-      // ignore ecfmicro character in comments
-      if ( comment_pos == 0 ){
-         return 0;
-      }
-      end = comment_pos;
+   // ignore ecfmicro character in comments
+   // However pay special attenstion to:
+   // var="%VAR: # fred%  # %fred
+   if (ecfMicro.empty()) {
+      return 0;
    }
 
-   /// Pound char could be more than one char ?
    int count = 0;
-   if ( !ecfMicro.empty()) {
-      const char theChar = ecfMicro[0];
-      for(size_t i = 0; i < end; ++i) {
+   const char theChar = ecfMicro[0];
+   size_t end = line.size();
+   size_t comment_pos = 0;
+   for(size_t i = 0; i < end; ++i) {
+      if (line[i] == theChar) {
+         count++;
+      }
+      if (line[i] == '#') {
+         if (i == 0) return 0; // very first character is comment
+         comment_pos = i;      // remember *last* comment pos
+      }
+   }
+
+   if (count % 2 != 0 && comment_pos != 0) {
+      // could have:
+      // var="%VAR: # fred%  # %fred
+      // discount trailing #
+      count = 0;
+      for(size_t i = 0; i < comment_pos; ++i) {
          if (line[i] == theChar) {
             count++;
          }
