@@ -106,7 +106,7 @@ void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 bool VGenVarAttr::isReadOnly(const std::string& varName)
 {
     static QStringList readOnlyVars=QStringList() <<
-                 "ECF_NODE" << "ECF_HOST" << "ECF_PORT" << "ECF_PID" <<
+                 "ECF_HOST" << "ECF_PORT" << "ECF_PID" <<
                  "ECF_VERSION" << "ECF_LISTS";
     return readOnlyVars.contains(QString::fromStdString(varName));
 }
