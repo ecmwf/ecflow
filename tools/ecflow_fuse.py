@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # file deepcode ignore SSHHostKeyVerificationDisabled: <comment the reason here>
 from __future__ import print_function
 import os
@@ -665,7 +665,7 @@ class FuseEcflow(LoggingMixIn, Operations):
         # print (self.defs)
 
     def get_node(self, path):
-        black = ("/ecflow_client", "/autorun", "/BDMV", "/AACS", "BDSVM", 
+        black = ("/ecflow_client", "/autorun", "/BDMV", "/AACS", "BDSVM",
                  "/RCS")
         for key in black:
             if path == key or key in path:
