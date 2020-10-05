@@ -230,12 +230,16 @@ set(ECFLOW_BOOST_VERSION "1.66.0")
 # need upfront to get a hold of Boost_VERSION_STRING
 find_package( Boost ${ECFLOW_BOOST_VERSION} ) 
 
+if(HAVE_TESTS)
+	list(APPEND _boost_testlibs unit_test_framework test_exec_monitor )
+endif()
+
 # Need timer for boost::time::cpu_timer this needs boost:chrono, which need librt These are used in the test only
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
-    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono ${_boost_testlibs} filesystem program_options date_time )
 else()
     # for boost version 1.69 or greater Boost.System is now header-only.
-    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono ${_boost_testlibs} filesystem program_options date_time )
 endif()
 ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
