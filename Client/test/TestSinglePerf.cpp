@@ -321,8 +321,8 @@ BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
       load_threshold_ms  = 5000;     // 4500;
       begin_threshold_ms = 800;      // 400;
       sync_full_threshold_s = 4.5;   // 2.6;
-      full_threshold_s = 3.8;        // 2.8;
-      suspend_threshold_s = 5.5;     // 3.5;
+      full_threshold_s = 4.5;        // 2.8;
+      suspend_threshold_s = 5.8;     // 3.5;
       resume_threshold_s = 6.5;      // 3.5;
       force_threshold_s = 15;        // 8.5;
       check_pt_threshold_s = 1.5;    // 1.0;
