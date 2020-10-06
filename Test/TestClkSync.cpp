@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
 
       BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,
                   ss.str() <<
-                  "\nloop:" << i << " waited for " << TestFixture::job_submission_interval() << "s for each loop"
+                  "\nloop:" << i << " waited for " << TestFixture::job_submission_interval()+1 << "s for each loop"
                   "\n" << TestFixture::client().defs());
    }
 
