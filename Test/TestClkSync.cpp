@@ -119,7 +119,8 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
    BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
    std::stringstream ss;
    ss << "\nStart time"
-      << "\n  sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
+      << "\n  sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString()
+      << " cal_count(" << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
    for(size_t i=0; i < 3; i++) {
       //cout << "\n loop:" << i << " sleeping for " << TestFixture::job_submission_interval() << "s\n";
@@ -147,7 +148,7 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
       boost::posix_time::ptime sync_full_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
       ss << "   Sync full suite time :" << to_simple_string(sync_full_suiteTime)
          << " full_sync(" << TestFixture::client().server_reply().full_sync() << ")"
-         << " in_sync(" << TestFixture::client().server_reply().in_sync() << ")\n";
+         << " in_sync(" << TestFixture::client().server_reply().in_sync() << ") cal_count(" << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
 
       BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,
