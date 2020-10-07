@@ -203,9 +203,7 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info)
 #ifdef _UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
-    //We cannot call it recursively
-    Q_ASSERT(setCurrentIsRunning_ == false);
-
+    //We cannot call it recursively.
     //While the current item  is being selected we do not allow
     //another setCurrent call to go through
     if(!info || setCurrentIsRunning_)
