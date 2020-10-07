@@ -318,7 +318,7 @@ void time_load_and_downloads(
 BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
 {
    if (getenv("ECF_SSL")) {
-      load_threshold_ms  = 5000;     // 4500;
+      load_threshold_ms  = 8000;     // 4500;
       begin_threshold_ms = 800;      // 400;
       sync_full_threshold_s = 4.5;   // 2.6;
       full_threshold_s = 4.5;        // 2.8;
