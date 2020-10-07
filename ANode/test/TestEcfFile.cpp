@@ -1532,4 +1532,18 @@ BOOST_AUTO_TEST_CASE( test_unterminated_manual )
    basic_test_template("test_unterminated_manual",ecf_file,expected_job_file_contents,"",false);
 }
 
+BOOST_AUTO_TEST_CASE( test_ecf_micro_with_comments_ECFLOW_1686 )
+{
+   string ecf_file;
+   ecf_file += "%include <simple_head.h>\n";
+   ecf_file += "var=%XXXX:2 # fred%\n";
+   ecf_file += "# %comment\n";
+   ecf_file += "var=%X:2 # CC% # comment\n";
+   ecf_file += "%include <simple_tail.h>\n";
+
+   std::string expected_job_file_contents = "#head.h\nvar=2 # fred\n# %comment\nvar=2 # CC # comment\n#tail.h";
+
+   basic_test_template("test_ecf_micro_with_comments_ECFLOW_1686",ecf_file,expected_job_file_contents);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,6 +21,7 @@ show_error_and_exit() {
    echo "   debug          - make a DEBUG build"
    echo "   make           - run make after cmake"
    echo "   test           - enable all tests"
+   echo "   no_test        - disable all tests"
    echo "   xcode          - enable xcode project"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
@@ -36,6 +37,7 @@ show_error_and_exit() {
 mode_arg=release
 compiler=clang
 
+no_test_arg=
 make_arg=
 shared_arg=
 test_arg=
@@ -75,6 +77,7 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = asan ]]  ;   then asan_arg=$1 ;
    elif [[ "$1" = msan ]]  ;   then msan_arg=$1 ;
    elif [[ "$1" = ubsan ]]  ;  then ubsan_arg=$1 ;
+   elif [[ "$1" = no_test ]]  ;  then no_test_arg=$1 ;
    elif [[ "$1" = xcode ]]  ;  then xcode_arg=$1 ;
    elif [[ "$1" = ctest ]] ;   then  
       ctest_arg=$1 ; 
@@ -164,6 +167,10 @@ fi
 
 if [[ "$shared_arg" = shared ]] ; then
    cmake_extra_options="$cmake_extra_options -DENABLE_STATIC_BOOST_LIBS=OFF"
+fi
+
+if [[ "$no_test_arg" = no_test ]] ; then
+   cmake_extra_options="$cmake_extra_options -DENABLE_TESTS=OFF"
 fi
 
 log_options=
