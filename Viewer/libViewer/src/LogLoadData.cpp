@@ -1704,7 +1704,7 @@ bool LogLoadData::extract_suite_path(
          size_t& column_index   // 0 based
          )
 {
-    // line should either
+    // line should be either
     //  chd:<childcommand> path
     //  --<user command)   path<optional> :<user>
     size_t forward_slash = line.find('/');
@@ -1753,6 +1753,14 @@ bool LogLoadData::extract_suite_path(
 
         if (!path.empty())
         {
+            if (path.find(":") != std::string::npos) {
+                std::vector<std::string> pathParts;
+                ecf::Str::split(path, pathParts, ":");
+                if (pathParts.size() > 1) {
+                    path = pathParts[0];
+                }
+            }
+
             std::vector<std::string> theNodeNames;
             theNodeNames.reserve(4);
             NodePath::split(path,theNodeNames);
