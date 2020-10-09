@@ -233,7 +233,9 @@ private:
     void computeInitialStat();
     void computeStat(std::vector<LogLoadDataItem>& items,size_t startIndex,size_t endIndex,bool fullPeriod);
 
-    bool extract_uid_data(const std::string& line,std::vector<LogReqCounter>& uid_vec);
+    void extract_uid(const std::string& line, std::string& uid);
+//    bool extract_uid_data(const std::string& line,std::vector<LogReqCounter>& uid_vec);
+    void extract_uid_data(const std::string& line,const std::string& uid, std::vector<LogReqCounter>& uid_vec);
     bool extract_suite_path(const std::string& line,bool child_cmd,std::vector<LogReqCounter>& suite_vec,
                             size_t& column_index);
 
