@@ -329,6 +329,37 @@ if (ENABLE_UI)
     add_subdirectory( share )
 endif()
 
+
+# =========================================================================================
+# DOXYGEN to use: make doxygen  -> ${CMAKE_CURRENT_BINARY_DIR}/Doc/doxygen/html/index.html
+# =========================================================================================
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+   ecbuild_info( "DOXYGEN_FOUND   - use 'make doxygen' first" )
+   
+   # exclude some dirs not related to documentation
+   set( DOXYGEN_EXCLUDE_PATTERNS */bin/* */bdir/* */Debug/*  */test/*  */Doc/* */doc/* */samples/* SCRATCH tools build_scripts cereal cereal-1.3.0 )
+  
+   set( DOXYGEN_SOURCE_BROWSER YES)
+   set( DOXYGEN_EXTRACT_PRIVATE YES)
+   set( DOXYGEN_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Doc/doxygen")
+    
+   # this target will only be built if specifically asked to.
+   # run "make doxygen" to create the doxygen documentation
+   doxygen_add_docs(
+      doxygen
+      ${PROJECT_SOURCE_DIR}
+      COMMENT "Generate documentation for ecFlow"
+   )
+   
+   # Add an install target to install the docs, *IF* the use has run 'make doxygen'
+   if (EXISTS ${DOXYGEN_OUTPUT_DIRECTORY})
+      install(DIRECTORY ${DOXYGEN_OUTPUT_DIRECTORY} DESTINATION ${CMAKE_INSTALL_DOCDIR})
+   endif()
+else ()
+  ecbuild_info("Doxygen need to be installed to generate the doxygen documentation")
+endif()
+
 # =========================================================================================
 # tar ball, by default ecbuild will tar everything apart from hard wired directory called 'build' 
 # hence we can tell it, what directories not to pack
@@ -336,14 +367,14 @@ endif()
 ecbuild_dont_pack( DIRS 
                     .settings
                     bamboo
-                   	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
-                   	ecbuild
+                    ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
+                    ecbuild
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
                     cereal-1.3.0
                     Debug
-                    Doc
+                    Doc/misc Doc/online Doc/sphinx-examples
 )
 
 # ignore eclipse files
