@@ -93,7 +93,8 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 			}
 			else
 			{
-				editor_->setTextCursor(cursor);  // mark the selection of the match
+                editor_->moveCursor(QTextCursor::End);
+                editor_->setTextCursor(cursor);  // mark the selection of the match
 			}
 		}
 
