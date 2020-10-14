@@ -534,6 +534,7 @@ void ChartCallout::updateGeometry()
     setPos(chart_->mapToPosition(anchor_) + QPoint(10, -30));
 }
 
+
 //=============================================
 //
 // ChartView
@@ -551,9 +552,14 @@ void ChartView::mousePressEvent(QMouseEvent *event)
     leftButtonPressed_ = false;
     if (event->button() == Qt::LeftButton) {
         leftButtonPressed_ = true;
+
+        if(!chart()->plotArea().contains(event->pos())) {
+            Q_EMIT removeCalloutRequested();
+        }
+
         QChartView::mousePressEvent(event);
     }
-    else if(event->button() == Qt::RightButton)
+    else if(event->button() == Qt::MidButton || event->button() == Qt::RightButton)
     {
        if(event->pos().x() <= chart()->plotArea().right() &&
           event->pos().x() >= chart()->plotArea().left())
@@ -1228,6 +1234,9 @@ QChart* LogRequestView::addChartById(QString id)
     connect(chartView,SIGNAL(positionClicked(qreal)),
             this,SLOT(scanPositionClicked(qreal)));
 
+    connect(chartView,SIGNAL(removeCalloutRequested()),
+            this,SLOT(removeCallout()));
+
     viewIds_[id]=chartView;
     return chart;
 }
@@ -1507,16 +1516,17 @@ void LogRequestView::showFullRange()
     Q_EMIT(timeRangeReset());
 }
 
+void LogRequestView::removeCallout()
+{
+    Q_FOREACH(ChartView* view,views_)
+        view->removeCallout();
+
+    Q_EMIT(timeRangeHighlighted(0,0,0));
+}
+
 void LogRequestView::scanPositionClicked(qreal pos)
 {
-    if(pos < 1)
-    {
-        Q_FOREACH(ChartView* view,views_)
-            view->removeCallout();
-
-        Q_EMIT(timeRangeHighlighted(0,0,0));
-    }
-    else
+    if (pos > 1)
     {
         qint64 t1(pos);
         qint64 t2=t1;

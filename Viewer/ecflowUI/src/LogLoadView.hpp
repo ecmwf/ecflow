@@ -172,6 +172,7 @@ Q_SIGNALS:
     void chartZoomed(QRectF);
     void positionChanged(qreal);
     void positionClicked(qreal);
+    void removeCalloutRequested();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -300,6 +301,7 @@ protected Q_SLOTS:
     void adjustZoom();
     void scanPositionChanged(qreal);
     void scanPositionClicked(qreal);
+    void removeCallout();
 
 protected:
     enum ControlType {SuiteType,CmdType,UidType};
