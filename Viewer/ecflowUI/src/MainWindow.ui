@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -96,7 +96,6 @@
     <addaction name="actionNotification"/>
     <addaction name="actionCommandOutput"/>
     <addaction name="separator"/>
-    <addaction name="actionServerLoadViewer"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
@@ -343,15 +342,6 @@
    </property>
    <property name="toolTip">
     <string>Start shell command output dialogue</string>
-   </property>
-  </action>
-  <action name="actionServerLoadViewer">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/monitor.svg</normaloff>:/viewer/monitor.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Server load (standalone app) ...</string>
    </property>
   </action>
   <action name="actionShortcutHelp">

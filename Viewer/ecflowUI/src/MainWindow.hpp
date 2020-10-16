@@ -101,7 +101,6 @@ protected Q_SLOTS:
 	void slotContentsChanged();
     void slotServerSyncNotify(bool);
     void slotEditServerSettings(ServerHandler* s);
-    void slotServerLoad();
 
 private:
     void init(MainWindow*);
