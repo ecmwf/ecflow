@@ -25,7 +25,7 @@ endif()
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
 
-#find_package( ecbuild 3.4 REQUIRED ) # Before project() !!! <TODO>
+# find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ) # Before project() !!!  <TODO>
 
 # this will generate variables, see ACore/ecflow_version.h.in
 project( ecflow LANGUAGES CXX VERSION 5.5.4 )
