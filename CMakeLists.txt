@@ -22,10 +22,7 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
 
-
-set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-
-# find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ) # Before project() !!!  <TODO>
+find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ) # Before project()  
 
 # this will generate variables, see ACore/ecflow_version.h.in
 project( ecflow LANGUAGES CXX VERSION 5.5.4 )
@@ -40,12 +37,6 @@ set (CMAKE_CXX_STANDARD 14)
 # local project
 
 ecbuild_declare_project()
-
-# =========================================================================================
-# VERSION  
-# Get the ecflow version specified in 'VERSION.cmake'. This is only accessible after ecbuild_declare_project()
-# The ecflow version config is done in ACore directory
-# =========================================================================================
 
 ecbuild_info( "CMAKE_MODULE_PATH        : ${CMAKE_MODULE_PATH}")
 ecbuild_info( "CMAKE_INSTALL_PREFIX     : ${CMAKE_INSTALL_PREFIX}" )
