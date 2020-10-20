@@ -286,6 +286,28 @@ BOOST_AUTO_TEST_CASE( test_cron_state_parsing )
       BOOST_CHECK_MESSAGE(parsed_cronAttr == expected,"Expected " << expected.dump() << " : " << expected.time().dump()
                           << " but found " << parsed_cronAttr.dump() << " : " << parsed_cronAttr.time().dump());
    }
+
+   {
+      // ECFLOW-1693
+      // Could not parse 'cron +00:00 23:59 00:01 # isValid:false nextTimeSlot/523:40' around line number 654
+      std::string line = "cron +00:00 23:59 00:01 # isValid:false nextTimeSlot/523:40";
+      std::vector<std::string> lineTokens;
+      Str::split(line,lineTokens);
+      bool parse_state = true;
+      CronAttr parsed_cronAttr;
+      CronAttr::parse( parsed_cronAttr,lineTokens, index, parse_state);
+
+      CronAttr expected;
+      TimeSlot start(0,0);
+      TimeSlot finish(23,59);
+      TimeSlot incr(0,1);
+      TimeSeries series(start,finish,incr,true);
+      series.set_next_time_slot(TimeSlot(523,40));
+      series.set_isValid(false); // to match isValid:false
+      expected.addTimeSeries(series);
+      BOOST_CHECK_MESSAGE(parsed_cronAttr == expected,"Expected " << expected.dump() << " : " << expected.time().dump()
+                          << " but found " << parsed_cronAttr.dump() << " : " << parsed_cronAttr.time().dump());
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_cron_once_free_stays_free)

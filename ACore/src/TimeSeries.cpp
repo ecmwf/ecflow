@@ -796,8 +796,8 @@ void TimeSeries::parse_state(size_t index,const std::vector<std::string>& lineTo
          if (lineTokens[i].find("nextTimeSlot") != std::string::npos) {
             std::string nextTimeSlot;
             if (Extract::split_get_second(lineTokens[i],nextTimeSlot,'/')) {
-               // Note: we do *not* check for valid time since nextTimeSlot, can be incremented past 24 hours, ie
-               // cron 00:00 18:00 06:00 # isValid:false nextTimeSlot/24:00
+               // Note: we do *not* check for valid time since nextTimeSlot, relative times can be incremented past 24 hours, i.e.
+               // cron +00:00 18:00 06:00 # isValid:false nextTimeSlot/523:00
                int startHour = -1;
                int startMin = -1;
                getTime( nextTimeSlot, startHour, startMin, false/*check_time*/);
@@ -890,7 +890,7 @@ bool TimeSeries::getTime(const std::string& time, int& hour, int& min,bool check
 
  	std::string theMin = time.substr(colonPos+1);
 
-	if (theHour.size() != 2) throw std::runtime_error("TimeSeries::getTime: Invalid hour :" + theHour);
+	if (check_time && theHour.size() != 2) throw std::runtime_error("TimeSeries::getTime: Invalid hour :" + theHour);
 	if (theMin.size()  != 2) throw std::runtime_error("TimeSeries::getTime: Invalid minute :" + theMin);
 
    hour = Extract::theInt(theHour,"TimeSeries::getTime: hour must be a integer : " + theHour);
