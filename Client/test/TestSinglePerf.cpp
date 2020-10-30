@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 // These thresholds are based on the largest definition in the tests.
 static int load_threshold_ms  = 4500;
-static int begin_threshold_ms = 400;
+static int begin_threshold_ms = 415;
 static double sync_full_threshold_s = 2.6;
 static double full_threshold_s = 2.8;
 static double suspend_threshold_s = 3.5;
