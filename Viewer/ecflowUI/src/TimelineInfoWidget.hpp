@@ -70,8 +70,9 @@ public:
     explicit TimelineInfoWidget(QWidget *parent=nullptr);
     ~TimelineInfoWidget() override {}
 
-    void clear() {}
+    void clear();
     void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
+    int itemIndex() const {return itemIndex_;}
 
 private:
     void createSummary();
@@ -92,6 +93,7 @@ private:
     int currentRow_;
     TimelineInfoModel* model_;
     int tlEndTime_;
+    int itemIndex_{-1};
 
 
     //TimelineInfoDailyModel* dailyModel_;

@@ -242,6 +242,7 @@ void TimelineWidget::clear()
     //viewHandler_->clear();
 
     model_->clearData();
+    view_->dataCleared();
     data_->clear();
     logFile_.clear();
     serverName_.clear();
@@ -295,6 +296,7 @@ void TimelineWidget::clearData(bool usePrevState)
     ui_->logInfoLabel->setText(QString());
 
     model_->clearData();
+    view_->dataCleared();
     data_->clear();
     typesDetermined_=false;
     treeOrderDetermined_=false;

@@ -806,11 +806,40 @@ void TimelineView::showDetails(const QModelIndex& indexClicked)
     if(!idx.isValid())
         return;
 
-    TimelineInfoDialog diag(this);
-    diag.infoW_->load("host","port",model_->tlModel()->data(),idx.row(),
-                      startDate_,endDate_);
+    if (!infoDialog_) {
+        infoDialog_ = new TimelineInfoDialog(this);
+        infoDialog_->setModal(false);
+    }
 
-    diag.exec();
+    if (idx.row() == infoDialog_->infoW_->itemIndex()) {
+        infoDialog_->raise();
+
+    } else {
+        infoDialog_->infoW_->load("host","port",model_->tlModel()->data(),idx.row(),
+                      startDate_,endDate_);
+    }
+
+    infoDialog_->show();
+}
+
+void TimelineView::updateDetails()
+{
+    if (infoDialog_ && infoDialog_->isVisible() && infoDialog_->infoW_->itemIndex() != -1) {
+        infoDialog_->infoW_->load("host","port",model_->tlModel()->data(),
+                                  infoDialog_->infoW_->itemIndex(), startDate_,endDate_);
+    }
+}
+
+void TimelineView::closeDetails()
+{
+    if (infoDialog_) {
+        infoDialog_->close();
+    }
+}
+
+void TimelineView::dataCleared()
+{
+    closeDetails();
 }
 
 void TimelineView::lookup(const QModelIndex &indexClicked)
@@ -894,6 +923,7 @@ void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
     endDate_=t2;
     delegate_->setPeriod(t1,t2);
     model_->tlModel()->setPeriod(t1,t2);
+    updateDetails();
     updateDurations();
     rerender();
     Q_EMIT periodSelected(t1,t2);
@@ -905,6 +935,7 @@ void TimelineView::setStartDate(QDateTime t)
     delegate_->setStartDate(t);
     model_->tlModel()->setStartDate(t);
     header_->setStartDate(t);
+    updateDetails();
     updateDurations();
     rerender();
 }
@@ -915,6 +946,7 @@ void TimelineView::setEndDate(QDateTime t)
     delegate_->setEndDate(t);
     model_->tlModel()->setEndDate(t);
     header_->setEndDate(t);
+    updateDetails();
     updateDurations();
     rerender();
 }
@@ -926,6 +958,7 @@ void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
     delegate_->setPeriod(t1,t2);
     model_->tlModel()->setPeriod(t1,t2);
     header_->setPeriod(t1,t2);
+    updateDetails();
     updateDurations();
     rerender();
 }

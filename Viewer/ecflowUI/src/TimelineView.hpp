@@ -30,6 +30,7 @@ class VSettings;
 
 class TimelineHeader;
 class TimelineDelegate;
+class TimelineInfoDialog;
 class MainTimelineHeader;
 
 class TimelineView : public QTreeView,public VPropertyObserver
@@ -43,6 +44,7 @@ public:
     enum ViewMode {TimelineMode,DurationMode};
     ViewMode viewMode() const {return viewMode_;}
 
+    void dataCleared();
     void rerender();
 
     VInfo_ptr currentSelection();
@@ -88,6 +90,8 @@ protected:
     void showDetails(const QModelIndex& indexClicked);
     void lookup(const QModelIndex&);
     void copyPath(const QModelIndex&);
+    void updateDetails();
+    void closeDetails();
     void updateDurations();
     int computeMaxDuration(QString);
 
@@ -103,6 +107,7 @@ protected:
     QDateTime startDate_;
     QDateTime endDate_;
     bool durationColumnWidthInitialised_;
+    TimelineInfoDialog* infoDialog_{nullptr};
 };
 
 
