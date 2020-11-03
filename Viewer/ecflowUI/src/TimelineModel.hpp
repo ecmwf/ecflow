@@ -52,6 +52,7 @@ public:
     void setPeriod(QDateTime t1,QDateTime t2);
     void setStartDate(QDateTime t);
     void setEndDate(QDateTime t);
+    void setUseMeanDuration(bool b) {useMeanDuration_ = b;}
 
 Q_SIGNALS:
     void periodChanged();
@@ -60,6 +61,7 @@ protected:
     TimelineData* data_;
     QDateTime startDate_;
     QDateTime endDate_;
+    bool useMeanDuration_{false};
 };
 
 class TimelineSortModel : public QSortFilterProxyModel
@@ -87,6 +89,7 @@ public:
     void setTaskFilter(bool);
     void setChangeFilterMode(ChangeFilterMode m);
     void setRootNodeFilter(QString);
+    void sortAgain();
     SortMode sortMode() const {return sortMode_;}
 
 protected Q_SLOTS:

@@ -131,11 +131,25 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     {
         if(index.column() ==  PathColumn)
             return static_cast<qint64>(data_->items()[row].sortIndex());
-        else if(index.column() == SubmittedDurationColumn)
-            return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
-        else if(index.column() == ActiveDurationColumn)
-            return data_->items()[row].firstActiveDuration(startDate_,endDate_,data_->endTime());
-
+        else if(index.column() == SubmittedDurationColumn) {
+            if (useMeanDuration_) {
+                float meanVal=0.;
+                int num =0;
+                data_->items()[row].meanSubmittedDuration(meanVal,num,data_->endTime());
+                return meanVal;
+            } else {
+                return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
+            }
+        } else if(index.column() == ActiveDurationColumn) {
+            if (useMeanDuration_) {
+                float meanVal=0.;
+                int num =0;
+                data_->items()[row].meanActiveDuration(meanVal,num,data_->endTime());
+                return meanVal;
+            } else {
+                return data_->items()[row].firstActiveDuration(startDate_,endDate_,data_->endTime());
+            }
+        }
         return QVariant();
     }
 
@@ -211,9 +225,17 @@ QVariant TimelineModel::headerData( const int section, const Qt::Orientation ori
         case TimelineColumn:
             return "";
         case SubmittedDurationColumn:
-            return tr("First submitted duration in period");
+            if (useMeanDuration_) {
+                return tr("Mean submitted duration");
+            } else {
+                return tr("First submitted duration in period");
+            }
         case ActiveDurationColumn:
-            return tr("First active duration in period");
+            if (useMeanDuration_) {
+                return tr("Mean active duration");
+            } else {
+                return tr("First active duration in period");
+            }
         default:
             return QVariant();
         }
@@ -291,6 +313,12 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
 
 TimelineSortModel::~TimelineSortModel()
 = default;
+
+void TimelineSortModel::sortAgain()
+{
+    invalidate();
+    Q_EMIT invalidateCalled();
+}
 
 void TimelineSortModel::slotPeriodChanged()
 {

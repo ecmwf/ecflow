@@ -89,6 +89,7 @@ protected Q_SLOTS:
    void slotCancelFileTransfer();
    void slotLoadCustomFile();
    void pathFilterMatchModeChanged(int newIndex);
+   void slotDurationViewMode(int);
 
 private:
     void clearData(bool usePrevState);
@@ -104,6 +105,7 @@ private:
     void determineNodeTypes();
     void determineTreeOrder();
     void setMaxReadSize(int maxReadSizeInMb);
+    void adjustWidgetsToViewMode();
 
     Ui::TimelineWidget* ui_;
     QString serverName_;

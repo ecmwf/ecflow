@@ -44,6 +44,8 @@ public:
     enum ViewMode {TimelineMode,DurationMode};
     ViewMode viewMode() const {return viewMode_;}
 
+    enum DurationViewMode {FirstDurationMode, MeanDurationMode};
+
     void dataCleared();
     void rerender();
 
@@ -54,6 +56,7 @@ public:
     void setPeriod(QDateTime t1,QDateTime t2);
     void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
     void setViewMode(ViewMode vm, bool force=false);
+    void setDurationViewMode(DurationViewMode mode);
 
     void notifyChange(VProperty* p) override;
 
@@ -108,6 +111,7 @@ protected:
     QDateTime endDate_;
     bool durationColumnWidthInitialised_;
     TimelineInfoDialog* infoDialog_{nullptr};
+    DurationViewMode durationViewMode_{FirstDurationMode};
 };
 
 
@@ -129,6 +133,7 @@ public:
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
     void setMaxDurations(int submittedDuration,int activeDuration);
+    void setUseMeanDuration(bool b) {useMeanDuration_ = b;}
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
@@ -139,6 +144,7 @@ protected:
     void renderSubmittedDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
     void renderActiveDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
     void renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect,int maxTextW) const;
+    void renderDuration(QPainter *painter, int val, int maxVal, QColor col, QRect rect,int maxTextW) const;
     void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
     int timeToPos(QRect r,unsigned int time) const;
     int getDurationMaxTextWidth(int duration) const;
@@ -156,6 +162,7 @@ protected:
     int activeMaxDuration_;
     int submittedMaxTextWidth_;
     int activeMaxTextWidth_;
+    bool useMeanDuration_{false};
 
 };
 
