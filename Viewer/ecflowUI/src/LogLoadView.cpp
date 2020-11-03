@@ -1070,6 +1070,8 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     mainLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
     splitter_=new QSplitter(this);
+    splitter_->setChildrenCollapsible(false);
+    splitter_->setOpaqueResize(true);
     mainLayout_->addWidget(splitter_);
 
     //views
@@ -1085,6 +1087,8 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     sideLayout_->setContentsMargins(0,0,0,0);
     sideLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
     splitter_->addWidget(w);
+
+
 
     scanLabel_=new QLabel(this);
     sideLayout_->addWidget(scanLabel_);
@@ -1103,7 +1107,7 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     //initial splitter size
 //    QTimer::singleShot(1,this, SLOT(adjustSplitterSize()));
 
-    initSplitter();
+    //initSplitter();
 }
 
 LogRequestView::~LogRequestView()
@@ -1112,7 +1116,7 @@ LogRequestView::~LogRequestView()
 
 void LogRequestView::initSplitter()
 {
-    if (!splitterInited_ && width() > 100) {
+    if (!splitterInited_) {
         splitterInited_ = true;
         if (splitterSavedState_.isEmpty()) {
             auto w = width();
