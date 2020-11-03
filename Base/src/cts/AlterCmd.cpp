@@ -532,7 +532,7 @@ const char* AlterCmd::desc() {
             "   ecflow_client --alter=add label name \"label_value\" /path/to/node\n"
             "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node\n"
             "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
-            "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /s1\n"
+            "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node\n"
             "   # zombie attributes have the following structure:\n"
             "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
             "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"\n"
