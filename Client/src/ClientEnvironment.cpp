@@ -28,6 +28,7 @@
 #include "TimeStamp.hpp"
 #include "Version.hpp"
 #include "PasswdFile.hpp"
+#include "Host.hpp"
 
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
@@ -371,28 +372,34 @@ const std::string& ClientEnvironment::get_custom_user_password(const std::string
 
 const std::string& ClientEnvironment::get_password(const char* env, const std::string& user) const
 {
-   //cout << "ClientEnvironment::get_user_password() env:" << env << " user:" << user << " passwd_(" << passwd_ << ")\n";
+   // cout << "ClientEnvironment::get_password() env:" << env << " user:" << user << " passwd_(" << passwd_ << ")\n";
    if (user.empty()) throw std::runtime_error("ClientEnvironment::get_user_password: No user specified");
    if (!passwd_.empty()) {
-      //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
+      //cout << "  ClientEnvironment::get_password() CACHED returning " << passwd_ << "\n";
       return passwd_;
    }
 
    char* file = getenv(env);
    if (file) {
       std::string user_passwd_file = file;
-      //cout << "  ClientEnvironment::get_user_password() ECF_CUSTOM_PASSWD " << user_passwd_file  << "\n";
+      //cout << "  ClientEnvironment::get_password() ECF_CUSTOM_PASSWD " << user_passwd_file  << "\n";
       if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
-         //cout << "  ClientEnvironment::get_user_password() LOADING password file\n";
+         //cout << "  ClientEnvironment::get_password() LOADING password file\n";
          PasswdFile passwd_file;
          std::string errorMsg;
          if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
             std::stringstream ss; ss << "Could not parse ECF_CUSTOM_PASSWD file. " << errorMsg;
             throw std::runtime_error(ss.str());
          }
-         //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
-         passwd_ = passwd_file.get_passwd(user, host(), port());
-         //cout << "  ClientEnvironment::get_user_password() returning " << passwd_ << "\n";
+         //std::cout << "ClientEnvironment::get_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
+         //std::cout << "ClientEnvironment::get_password() user(" << user << ")" << " host(" << host() << ") port(" << port() << ")\n";
+
+         passwd_ = passwd_file.get_passwd(user, host(), port()); // host() may return localhost.
+         if (passwd_.empty()) {
+            Host host;
+            passwd_ = passwd_file.get_passwd(user, host.name(), port());
+         }
+         //cout << "  ClientEnvironment::get_password() returning(" << passwd_ << ")\n";
          return passwd_;
       }
    }
