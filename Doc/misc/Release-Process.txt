@@ -36,25 +36,23 @@ Process
    <Inform Daniel>
    
 0/ Build release: Two approaches, both use meta-builder: 
-    1/ git flow release start  5.5.3 
-       git_tag=release/5.5.3
+    1/ git flow release start  5.5.4 
+       git_tag=release/5.5.4
        Use this approach when multiple people working on the release.
       *Push* branch onto stash, otherwise we can not pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
        
-    2/ git flow release start  5.5.3
-       git flow release finish 5.5.3  
+    2/ git flow release start  5.5.4
+       git flow release finish 5.5.4  
        git push  
        git push --tags
-       git_tag=5.5.3
+       git_tag=5.5.4
        When single person making release
  
-0/ Update metabuilder/config.yaml master branch to "5.5.3"  
+0/ Update metabuilder/config.yaml master branch to "5.5.4"  
    Then use the meta builder/master to build/install.
-   Note: if used 
-     > git flow release start 5.5.3        # -> it will create a branch release/5.5.3
-
+ 
 0/ Update Documentation
    
   - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
