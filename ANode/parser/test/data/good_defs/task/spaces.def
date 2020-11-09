@@ -2,6 +2,7 @@ suite task_spaces
    family f
    
       task t
+      task 001
       
       task fred
       
