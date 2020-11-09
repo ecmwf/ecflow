@@ -104,17 +104,10 @@ bool System::spawn(System::CmdType cmd_type,const std::string& cmdToSpawn,const 
    LOG( Log::DBG,"  System::spawn path(" << absPath << ") cmd(" << cmdToSpawn << ") cmd_type("<< cmd_type << ")\n");
 #endif
 
-	int rc   = 1; /* Not a zero          */
-	int tryi = 1; /* Currently hardcoded */
-
-	for (rc = 1; tryi && rc; tryi--) {
-		rc = sys(cmd_type,cmdToSpawn,absPath,errorMsg);
-		if ( rc ) sleep( 1 ); /* May be 2 many processes */
-	}
-
-	if ( rc ) {
+   std::string msg;
+	if ( sys(cmd_type,cmdToSpawn,absPath,msg) ) {
 		std::stringstream ss;
-		ss << "Child process creation failed for command " << cmdToSpawn;
+		ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
 		if ( !absPath.empty() ) ss << " at path(" << absPath << ")";
 		errorMsg = ss.str();
 #ifdef DEBUG_FORK
@@ -172,9 +165,7 @@ int System::sys(System::CmdType cmd_type,const std::string& cmdToSpawn,const std
 	}
 
 	if ( child_pid == -1 ) {
-		std::stringstream ss;
-		ss << "   ECF-PROCESS-SYS: FORK error for " << cmdToSpawn;
-		if (!absPath.empty()) ss << " and task " << absPath;
+		std::stringstream ss; ss << "fork() error(" <<  strerror(errno) << ")" ;
 		errorMsg = ss.str();
 		return 1;
 	}
