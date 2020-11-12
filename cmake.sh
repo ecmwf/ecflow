@@ -438,7 +438,7 @@ $ecbuild $source_dir \
             ${ssl_options} \
             ${log_options} \
             ${test_options} \
-            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.12.3/5.12/gcc_64/" 
+            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.7.0/5.7/gcc_64/" 
             
             
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.8-01/bin/python3 \
