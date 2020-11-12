@@ -4,13 +4,13 @@ extern /s4/f2
 
 suite autorestore
  family f1
-    autorestore ./f1 ./f2 ./f3 ./f4 # autorestore
-     task t1
-endfamily
+    autorestore ./f2 ./f3 ./f4 # autorestore
+    task t1
+ endfamily
  family f2
      autorestore /autorestore/f1 /autorestore/f3 /autorestore/f4 # autorestore
      task t1
-endfamily
+ endfamily
  family f3
     autorestore /autorestore/f1  # autorestore
     task t1
