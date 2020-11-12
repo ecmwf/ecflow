@@ -437,7 +437,9 @@ $ecbuild $source_dir \
             ${gui_options} \
             ${ssl_options} \
             ${log_options} \
-            ${test_options} # -DCMAKE_PREFIX_PATH="/tmp/$USER/opt/qt5/"
+            ${test_options} \
+            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.12.3/5.12/gcc_64/" 
+            
             
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.8-01/bin/python3 \
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python/2.7.12-01/bin/python \
@@ -446,7 +448,7 @@ $ecbuild $source_dir \
             #-DENABLE_PYTHON=OFF   \
             #-DENABLE_PYTHON_PTR_REGISTER=ON  \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
-            #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
+            #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.12.3/5.7/gcc_64/" \
             #-DENABLE_UI=ON        \  # ecflow_ui      
             #-DENABLE_ALL_TESTS=ON \
             #-DENABLE_SERVER=OFF   \
