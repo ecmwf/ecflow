@@ -464,16 +464,16 @@ if [[ "$make_arg" != "" ]] ; then
 	$make_arg 
 	# $make_arg VERBOSE=1
 	
-    # generate the server file locally, and install it. Otherwise list of server will not be complete set
-    echo $make_arg | grep -q "install"
+   # generate the server file locally, and install it. Otherwise list of server will not be complete set
+   echo $make_arg | grep -q "install"
 	if [[ $? -eq 0 ]] ; then
 		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
 
-   			/home/ma/emos/bin/ecflow_site_server_install.sh -g
+   		/home/ma/emos/bin/ecflow_site_server_install.sh -g -5
 
     		if [[ -f servers ]] ; then
         		mv servers $install_prefix/share/ecflow/.
-            fi
+         fi
 		fi
 	fi
 	exit 0
