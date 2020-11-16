@@ -111,7 +111,7 @@ lib pthread : : <file>/usr/lib64/libpthread.so ;
 # with static version of crypto, need to explicitly link against indirect dependencies.
 lib libssl    : : <file>/usr/lib64/libssl.so ;
 lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
-lib dl        : : <file>/usr/lib64/libdl.so;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
+lib dl        : : <file>/usr/lib64/libdl.so ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
 alias openssl_libs : libssl libcrypto dl ;
 
 # ==================== INSTALL =====================================================ß
