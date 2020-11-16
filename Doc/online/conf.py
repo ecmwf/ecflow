@@ -87,11 +87,11 @@ WK="../.."
 
 # If ecflow.so does not exist, then the ecflow python reference will NOT resolve. No warnings are given
 # Hence added check
-if not os.path.exists("../../../bdir/release/ecflow/Pyext/ecflow.so"):
+if not os.path.exists("../../../bdir/release/ecflow/Pyext/python3/ecflow.so"):
     print("\necflow extension not built: ecflow.so missing from directory ../../bdir/release/ecflow/Pyext/ecflow.so")
     sys.exit(1)
     
-sys.path.insert(0,os.getcwd() + "../../../bdir/release/ecflow/Pyext/ecflow.so")   
+sys.path.insert(0,os.getcwd() + "../../../bdir/release/ecflow/Pyext/python3/ecflow.so")   
 #sys.path.insert(0,os.getcwd() + "/../../Pyext")   
 #print "sys.path: " + str(sys.path)
 extensions = ['sphinx.ext.viewcode' , 'sphinx.ext.autodoc' ]
