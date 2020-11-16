@@ -1,25 +1,30 @@
 #include <pthread.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+#define NUM_THREADS  5
 
-/* function to be run as a thread always must have the same signature:
-   it has one void* parameter and returns void */
-void *threadfunction(void *arg)
+void *PrintHello(void *threadid)
 {
-  printf("Hello, World!\n"); /*printf() is specified as thread-safe as of C11*/
-  return 0;
+   long tid;
+   tid = (long)threadid;
+   printf("Hello World! It's me, thread #%ld!\n", tid);
+   pthread_exit(NULL);
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-  pthread_t thread;
-  int createerror = pthread_create(&thread, NULL, threadfunction, NULL);
-  /*creates a new thread with default attributes and NULL passed as the argument to the start routine*/
-  if (!createerror) /*check whether the thread creation was successful*/
-    {
-      pthread_join(thread, NULL); /*wait until the created thread terminates*/
-      return 0;
-    }
-  fprintf("%s\n", strerror(createerror), stderr);
-  return 1;
+   pthread_t threads[NUM_THREADS];
+   int rc;
+   long t;
+   for(t=0;t<NUM_THREADS;t++){
+     printf("In main: creating thread %ld\n", t);
+     rc = pthread_create(&threads[t], NULL, PrintHello, (void *)t);
+     if (rc){
+       printf("ERROR; return code from pthread_create() is %d\n", rc);
+       exit(-1);
+       }
+     }
+
+   /* Last thing that main() should do */
+   pthread_exit(NULL);
 }
