@@ -17,7 +17,7 @@ use-project theBase     : ../Base ;
 use-project theServer   : ../Server ;
 use-project theClient   : ../Client ;
 
-#lib pthread ;
+lib pthread : : <link>shared  ;
 
 #
 # Split into library, so that testing can use library, and hence same compiler option
@@ -49,7 +49,7 @@ lib libharness : [ glob src/*.cpp ]
 
 # Ignore TestSingle.cpp, used for standalone testing
 exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]  
-	        /site-config//pthread
+	        pthread
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
@@ -71,7 +71,7 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
  	     
 # Split because this was more error prone, Now stabilised all all platforms ?
 exe s_test_zombies : [ glob TestZombies.cpp  ]  
-           /site-config//pthread
+           pthread
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
@@ -93,7 +93,7 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
 
 # use for standalone testing
 exe singletest : [ glob TestSingle.cpp  ]  
-	        /site-config//pthread
+	        pthread
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
