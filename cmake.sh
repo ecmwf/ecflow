@@ -448,7 +448,6 @@ $ecbuild $source_dir \
             #-DENABLE_PYTHON=OFF   \
             #-DENABLE_PYTHON_PTR_REGISTER=ON  \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
-            #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.12.3/5.7/gcc_64/" \
             #-DENABLE_UI=ON        \  # ecflow_ui      
             #-DENABLE_ALL_TESTS=ON \
             #-DENABLE_SERVER=OFF   \
