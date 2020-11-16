@@ -44,7 +44,7 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
 # however if this is done, it will not link since, lpthread appears twice
 # on the link line
 #
-#lib pthread ;
+lib pthread ;
 
 exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /theCore//core
@@ -58,7 +58,7 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /site-config//boost_chrono
            /site-config//boost_test
            #/site-config//boost_system
-           /site-config//pthread
+           pthread
          : <include>../ANode/test
            <library>/site-config//openssl_libs 
            <variant>debug:<define>DEBUG
@@ -69,7 +69,7 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
 # Tests job generation performance, relies on python (Pyext/samples/TestJobGenPerf.py) to setup data
 #
 exe perf_job_gen : test/TestJobGenPerf.cpp   
-           /site-config//pthread
+           pthread
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node
