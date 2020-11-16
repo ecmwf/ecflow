@@ -57,13 +57,13 @@ Process
    
   - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
 
-  - Need automated way:
-    - Just need to update python API.
+  - Generate ecflow python API(only required when updating confluence)
+    - module load python3  # rely on user support to have installed sphinx, make expects sphinx-build on $PATH
     - cd $WK/Doc/online; make clean; make html
     
     Sometimes this crashes, Just re-build Pyext, and try again.
-       rm -rf Pyext/bin
-       bjam -j8
+    conf.py hard wired to look for ecflow.so under cmake parallel build dir( ../../../bdir/release/ecflow/Pyext/python3/)
+ 
  
 0/ Update WIKI:
    This announces the changes in the release
