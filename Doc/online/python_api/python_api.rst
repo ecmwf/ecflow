@@ -27,6 +27,8 @@ Suite Definition API
 - :py:class:`ecflow.Late`
 - :py:class:`ecflow.Limit`
 - :py:class:`ecflow.Meter`
+- :py:class:`ecflow.Queue`
+- :py:class:`ecflow.Generic`
 
 - :py:class:`ecflow.Node`
 - :py:class:`ecflow.Family`
@@ -74,6 +76,7 @@ Client Server API
 - :py:class:`ecflow.Client`
   
   * :py:class:`ecflow.Client.alter`
+  * :py:class:`ecflow.Client.archive`
   * :py:class:`ecflow.Client.begin_all_suites`
   * :py:class:`ecflow.Client.begin_suite`
   * :py:class:`ecflow.Client.ch_add`
@@ -111,9 +114,12 @@ Client Server API
   * :py:class:`ecflow.Client.ping`
   * :py:class:`ecflow.Client.plug`
   * :py:class:`ecflow.Client.reload_wl_file`
+  * :py:class:`ecflow.Client.reload_passwd_file`
+  * :py:class:`ecflow.Client.reload_custom_passwd_file`
   * :py:class:`ecflow.Client.replace`
   * :py:class:`ecflow.Client.requeue`
   * :py:class:`ecflow.Client.restart_server`
+  * :py:class:`ecflow.Client.restore`
   * :py:class:`ecflow.Client.restore_from_checkpt`
   * :py:class:`ecflow.Client.resume`
   * :py:class:`ecflow.Client.run`
@@ -127,6 +133,7 @@ Client Server API
   * :py:class:`ecflow.Client.suspend`
   * :py:class:`ecflow.Client.sync_local`
   * :py:class:`ecflow.Client.terminate_server`
+  * :py:class:`ecflow.Client.query`
   
 
 Common API
