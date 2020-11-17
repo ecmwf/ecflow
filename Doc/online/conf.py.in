@@ -52,14 +52,22 @@ WK="../.."
 #               Then we can document functions in __init__.py but *NOT* the extension ??
 #    
 
+python_version = "{0}.{1}".format(sys.version_info[0], sys.version_info[1])
+build_path     = "@CMAKE_BINARY_DIR@/Pyext/python3"
+install_path   = "@CMAKE_INSTALL_PREFIX@/lib/python" + python_version + "/site-packages/ecflow/"
+build_ecflow   = build_path + "./ecflow.so"
+install_ecflow = install_path + "./ecflow.so"
+
 # If ecflow.so does not exist, then the ecflow python reference will NOT resolve. No warnings are given
-# Hence added check
-if not os.path.exists("@PROJECT_BINARY_DIR@/Pyext/python3/ecflow.so"):
-    print("\necflow extension not built: ecflow.so missing from directory @PROJECT_BINARY_DIR@/Pyext/ecflow.so")
+# Will give preference to the build version over the installed version
+if not os.path.exists(build_ecflow) and not os.path.exists(install_ecflow):
+    print(f"\necflow extension not built: ecflow.so missing from *build* directory {build_path}")
+    print(f"ecflow extension not built: ecflow.so missing from *install* directory {install_path}")
     sys.exit(1)
     
-sys.path.insert(0,os.getcwd() + "@PROJECT_BINARY_DIR@/Pyext/python3/ecflow.so")   
-#print "sys.path: " + str(sys.path)
+sys.path.insert(0,build_path)   
+sys.path.insert(1,install_path)   
+print("sys.path: " + str(sys.path))
 extensions = ['sphinx.ext.viewcode' , 'sphinx.ext.autodoc' ]
 
 
