@@ -366,7 +366,7 @@ ecbuild_dont_pack( DIRS
                     build_scripts/nightly build_scripts/test_bench
                     cereal-1.3.0
                     Debug
-                    Doc/misc Doc/online Doc/sphinx-examples
+                    Doc/misc Doc/sphinx-examples
 )
 
 # ignore eclipse files
