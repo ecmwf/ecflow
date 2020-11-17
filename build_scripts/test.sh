@@ -146,7 +146,7 @@ elif test_uname Darwin ; then
 
    TOOLSET=
    CXXFLAGS=cxxflags="-Wno-deprecated-declarations -Wno-maybe-uninitialized -fvisibility-inlines-hidden -fvisibility=hidden"
-   compiler=gcc-$(/usr/local/opt/gcc/bin/gcc -dumpversion)
+   compiler=gcc-$(/usr/local/opt/gcc@9/bin/gcc-9 -dumpversion)
    
    exe_path=$compiler/${mode}${link_dir}
    
