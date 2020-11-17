@@ -14,7 +14,7 @@
 import sys, os
     
 def get_ecflow_version():
-    version = "5.6.0"
+    version = "@ecflow_VERSION@"
     ecflow_version = version.split(".")
     print("Extracted ecflow version '" + str(ecflow_version) )
     return ecflow_version
@@ -54,11 +54,11 @@ WK="../.."
 
 # If ecflow.so does not exist, then the ecflow python reference will NOT resolve. No warnings are given
 # Hence added check
-if not os.path.exists("/Users/avibahra/git/ecflow/bdir/release/clang/Pyext/python3/ecflow.so"):
-    print("\necflow extension not built: ecflow.so missing from directory /Users/avibahra/git/ecflow/bdir/release/clang/Pyext/ecflow.so")
+if not os.path.exists("@PROJECT_BINARY_DIR@/Pyext/python3/ecflow.so"):
+    print("\necflow extension not built: ecflow.so missing from directory @PROJECT_BINARY_DIR@/Pyext/ecflow.so")
     sys.exit(1)
     
-sys.path.insert(0,os.getcwd() + "/Users/avibahra/git/ecflow/bdir/release/clang/Pyext/python3/ecflow.so")   
+sys.path.insert(0,os.getcwd() + "@PROJECT_BINARY_DIR@/Pyext/python3/ecflow.so")   
 #print "sys.path: " + str(sys.path)
 extensions = ['sphinx.ext.viewcode' , 'sphinx.ext.autodoc' ]
 
