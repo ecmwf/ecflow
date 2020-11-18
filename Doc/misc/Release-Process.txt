@@ -62,7 +62,7 @@ Process
     - cd $WK/Doc/online; make clean; make html
     
     Sometimes this crashes, Just re-build Pyext, and try again.
-    conf.py hard wired to look for ecflow.so under cmake parallel build dir( ../../../bdir/release/ecflow/Pyext/python3/)
+    conf.py has been configured to look for ecflow.so in build otherwise install dir.
  
  
 0/ Update WIKI:
