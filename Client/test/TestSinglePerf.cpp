@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
       resume_threshold_s = 6.5;      // 3.5;
       force_threshold_s = 15;        // 8.5;
       check_pt_threshold_s = 1.5;    // 1.0;
-      client_cmds_threshold_s = 850; // 8.5;
+      client_cmds_threshold_s = 950; // 8.5;
    }
 
 
