@@ -92,7 +92,7 @@ Install from source
 * ecfFlow consists of two tar files i.e. ::
 
    - boost_1_71_0.tar.gz
-   - ecFlow-5.5.3-Source.tar.gz
+   - ecFlow-5.5.6-Source.tar.gz
 
 * Create a directory for the build
    .. code-block:: bash
@@ -105,18 +105,18 @@ Install from source
    .. code-block:: bash
 
     tar -zxf boost_1_71_0.tar.gz
-    tar -zxf ecFlow-5.5.3-Source.tar.gz
+    tar -zxf ecFlow-5.5.6-Source.tar.gz
 
 * You should have two directories created
    .. code-block:: bash
 
     - boost_1_71_0
-    - ecFlow-5.5.3-Source
+    - ecFlow-5.5.6-Source
 
 * Create two environment variables. These are used by some of scripts
    .. code-block:: bash
 
-    export WK=/tmp/ecflow_build/ecFlow-5.5.3-Source
+    export WK=/tmp/ecflow_build/ecFlow-5.5.6-Source
     export BOOST_ROOT=/tmp/ecflow_build/boost_1_71_0
 
 * ecflow uses bjam/b2 to build BOOST libraries and cmake to build ecflow
@@ -151,7 +151,7 @@ cmake
 * By default will install /usr/local, hence may require root access rights
    .. code-block:: bash
 
-    cd /tmp/ecflow_build/ecFlow-5.5.3-Source
+    cd /tmp/ecflow_build/ecFlow-5.5.6-Source
     mkdir build; cd build
     cmake ..  
     make -j2
@@ -161,7 +161,7 @@ cmake
 * Optionally you can specify install prefix directory
    .. code-block:: bash
 
-    cd /tmp/ecflow_build/ecFlow-5.5.3-Source
+    cd /tmp/ecflow_build/ecFlow-5.5.6-Source
     mkdir build; cd build
     cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
     make -j2
@@ -170,7 +170,7 @@ cmake
 * Optionally if you do *NOT* want to build the UI(ecflow_ui) or Python api
    .. code-block:: bash
 
-    cd /tmp/ecflow_build/ecFlow-5.5.3-Source
+    cd /tmp/ecflow_build/ecFlow-5.5.6-Source
     mkdir build; cd build
     cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DENABLE_UI=OFF \
@@ -181,7 +181,7 @@ cmake
 * Optionally if you did not export BOOST_ROOT you can specify on the command line
    .. code-block:: bash
 
-    cd /tmp/ecflow_build/ecFlow-5.5.3-Source
+    cd /tmp/ecflow_build/ecFlow-5.5.6-Source
     mkdir build; cd build
     cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Debug \
@@ -192,7 +192,7 @@ cmake
 * On some platforms(AIX) you may need to specify the c++ compiler
    .. code-block:: bash
 
-    cd /tmp/ecflow_build/ecFlow-5.5.3-Source
+    cd /tmp/ecflow_build/ecFlow-5.5.6-Source
     mkdir build; cd build
     cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
                 -DCMAKE_CXX_COMPILER=xlC_r"
@@ -206,6 +206,21 @@ cmake
      export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ECFLOW_PYTHON_INSTALL_DIR
 
+
+Python Api
+^^^^^^^^^^
+* The ecflow python API can be generated using sphinx. To do this ensure that *sphinx-build* is available on the path.
+
+* You have built ecflow using cmake, then please do the following
+   .. code-block:: bash
+
+    cd $WK
+    cd Doc/online
+    make clean
+    make html
+    
+* The documentation can then be viewed using yout browser. 
+  Just open the file $WK/Doc/online/_build/html/index.html
 
 .. License:
 
