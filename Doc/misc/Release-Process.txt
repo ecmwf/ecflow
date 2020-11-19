@@ -26,9 +26,11 @@ Process
 
 0/ Inform user support, allows user support to build/test rpm
    *Before* each release, make sure the ecflow tar file is
-   copied to $SCRATCH(done by the previous step) and inform Daniel. 
-   This will allow him to make rpm packages, build on other linux flavours.
-
+   copied to $SCRATCH(done by the previous step) and inform Daniel
+   
+   - ** Check the state of bamboo builds and fix.
+     These may well use different versions of cmake,boost,python,etc
+   
    This is important, so that release, used internally is in
    sync with release given to users. 
    
