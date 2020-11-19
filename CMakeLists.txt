@@ -330,7 +330,7 @@ if (DOXYGEN_FOUND)
    ecbuild_info( "DOXYGEN_FOUND   - use 'make doxygen' first" )
    
    # exclude some dirs not related to documentation
-   set( DOXYGEN_EXCLUDE_PATTERNS */bin/* */bdir/* */Debug/*  */test/*  */Doc/* */doc/* */samples/* SCRATCH tools build_scripts cereal cereal-1.3.0 )
+   set( DOXYGEN_EXCLUDE_PATTERNS */bin/* */bdir/* */Debug/*  */test/*  */Doc/* */doc/* */samples/* SCRATCH tools build_scripts cereal )
   
    set( DOXYGEN_SOURCE_BROWSER YES)
    set( DOXYGEN_EXTRACT_PRIVATE YES)
@@ -364,7 +364,6 @@ ecbuild_dont_pack( DIRS
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
-                    cereal-1.3.0
                     Debug
                     bdir
                     bdir_xcode

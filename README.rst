@@ -206,6 +206,10 @@ cmake
      export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ECFLOW_PYTHON_INSTALL_DIR
 
+Cereal
+^^^^^^
+* ecflow uses embedded CEREAL(version 1.3.0) for client/server communication via JSON
+
 
 Python Api
 ^^^^^^^^^^
