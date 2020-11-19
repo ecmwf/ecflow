@@ -366,6 +366,9 @@ ecbuild_dont_pack( DIRS
                     build_scripts/nightly build_scripts/test_bench
                     cereal-1.3.0
                     Debug
+                    bdir
+                    bdir_xcode
+                    bin
                     Doc/misc Doc/sphinx-examples
 )
 
