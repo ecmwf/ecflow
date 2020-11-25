@@ -49,6 +49,9 @@ public:
     QString entryText(const QModelIndex&) const;
     QString fullText(const QModelIndex&) const;
 
+    void beginLoadFromReader();
+    void endLoadFromReader();
+    LogData* logData() {return &data_;}
 
 public Q_SLOTS:
     void setPeriod(qint64,qint64);

@@ -211,6 +211,22 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["0 > 1"] = std::make_pair(AstGreaterThan::stype(),false);
    exprMap["10 > 1"] = std::make_pair(AstGreaterThan::stype(),true);
 
+   // Integer is distinct from task/family names that are integers, since nodes with integer
+   // names that occur in trigger/complete expression must have path ./0 ./1
+   exprMap["./12:eventname"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["./12:eventname == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["./12/b:eventname"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["/12/b:eventname"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["../12/b:eventname == set"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["../12/b:eventname == clear"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["../12/b:eventname != clear"] = std::make_pair(AstNotEqual::stype(),false);
+   exprMap["12:eventname == set"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["12:eventname != set"] = std::make_pair(AstNotEqual::stype(),true);
+   exprMap["12:eventname == clear"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["./12:eventname == set"] = std::make_pair(AstEqual::stype(),false);
+   exprMap["./12:eventname != set"] = std::make_pair(AstNotEqual::stype(),true);
+   exprMap["./12:eventname == clear"] = std::make_pair(AstEqual::stype(),true);
+
    exprMap["a:eventname"] = std::make_pair(AstEqual::stype(),false);
    exprMap["a:eventname == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap["./a/b:eventname"] = std::make_pair(AstEqual::stype(),false);

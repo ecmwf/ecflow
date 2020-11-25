@@ -314,25 +314,38 @@ void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOpt
     if(submittedMaxDuration_ <= 0)
         return;
 
-    int val=index.data().toInt();
-    if(val >= 0)
+//    int val=index.data().toInt();
+//    if(val >= 0)
+//    {
+    if(VNState* vn=VNState::find("submitted"))
     {
-        if(VNState* vn=VNState::find("submitted"))
-        {
-            float meanVal=-1;
-            int num=0;
+        if (useMeanDuration_) {
             QVariant va=index.data(TimelineModel::MeanDurationRole);
-            if(va.type() == QVariant::List)
-            {
-                QVariantList lst=va.toList();
-                if(lst.count() == 2)
-                {
-                    meanVal=lst[0].toFloat();
-                    num=lst[1].toInt();
-                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect,submittedMaxTextWidth_);
-                }
+            QVariantList lst=va.toList();
+            if(lst.count() == 2) {
+                float meanVal=lst[0].toFloat();
+                renderDuration(painter, meanVal, submittedMaxDuration_, vn->colour(),option.rect,submittedMaxTextWidth_);
             }
+        } else {
+            int val=index.data().toInt();
+            if(val >= 0)
+                renderDuration(painter, val, submittedMaxDuration_, vn->colour(),option.rect,submittedMaxTextWidth_);
         }
+
+//            float meanVal=-1;
+//            int num=0;
+//            QVariant va=index.data(TimelineModel::MeanDurationRole);
+//            if(va.type() == QVariant::List)
+//            {
+//                QVariantList lst=va.toList();
+//                if(lst.count() == 2)
+//                {
+//                    meanVal=lst[0].toFloat();
+//                    num=lst[1].toInt();
+//                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect,submittedMaxTextWidth_);
+//                }
+//            }
+//        }
     }
 }
 
@@ -341,26 +354,42 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
     if(activeMaxDuration_ <= 0)
         return;
 
-    int val=index.data().toInt();
-    if(val >= 0)
+    if(VNState* vn=VNState::find("active"))
     {
-        if(VNState* vn=VNState::find("active"))
-        {
-            float meanVal=-1;
-            int num=0;
+        if (useMeanDuration_) {
             QVariant va=index.data(TimelineModel::MeanDurationRole);
-            if(va.type() == QVariant::List)
-            {
-                QVariantList lst=va.toList();
-                if(lst.count() == 2)
-                {
-                    meanVal=lst[0].toFloat();
-                    num=lst[1].toInt();
-                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect,activeMaxTextWidth_);
-                }
+            QVariantList lst=va.toList();
+            if(lst.count() == 2) {
+                float meanVal=lst[0].toFloat();
+                renderDuration(painter, meanVal, activeMaxDuration_, vn->colour(),option.rect, activeMaxTextWidth_);
             }
+        } else {
+            int val=index.data().toInt();
+            if(val >= 0)
+                renderDuration(painter, val, activeMaxDuration_, vn->colour(),option.rect, activeMaxTextWidth_);
         }
     }
+
+//    int val=index.data().toInt();
+//    if(val >= 0)
+//    {
+//        if(VNState* vn=VNState::find("active"))
+//        {
+//            float meanVal=-1;
+//            int num=0;
+//            QVariant va=index.data(TimelineModel::MeanDurationRole);
+//            if(va.type() == QVariant::List)
+//            {
+//                QVariantList lst=va.toList();
+//                if(lst.count() == 2)
+//                {
+//                    meanVal=lst[0].toFloat();
+//                    num=lst[1].toInt();
+//                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect,activeMaxTextWidth_);
+//                }
+//            }
+//        }
+//    }
 
 }
 
@@ -369,12 +398,12 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
     QColor endCol;
     if(lighter)
     {
-        fillCol.light(130);
+        fillCol = fillCol.lighter(130);
         fillCol.setAlpha(110);
     }
     else
     {
-        fillCol.dark(110);
+        fillCol = fillCol.darker(110);
     }
 
     QBrush fillBrush(fillCol);
@@ -472,6 +501,59 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     {
         painter->setPen(QColor(100,100,100));
         painter->drawText(percentRect,percentText,Qt::AlignLeft | Qt::AlignVCenter);
+    }
+
+    if(setClipRect)
+    {
+        painter->restore();
+    }
+}
+
+void TimelineDelegate::renderDuration(QPainter *painter, int val, int maxVal, QColor col, QRect rect, int maxTextW) const
+{
+    if(maxTextW <=0)
+        return;
+
+    if(rect.width() <= maxTextW)
+       maxTextW=0;
+
+    int len=(static_cast<float>(val)/static_cast<float>(maxVal))*static_cast<float>(rect.width()-maxTextW);
+
+    //bar
+    QRect barRect(rect);
+    barRect.setWidth(len);
+    barRect.adjust(0,1,-1,-1);
+    int right=barRect.x()+barRect.width();
+
+    QString text;
+    QRect textRect;
+    QString percentText;
+    QRect percentRect;
+
+    if(maxTextW > 0)
+    {
+        text=ViewerUtil::formatDuration(val);
+        textRect=rect;
+        textRect.setX(right+5);
+        textRect.setWidth(fm_.width(text));
+        right=textRect.x()+textRect.width();
+    }
+
+    const bool setClipRect = right > rect.right();
+    if(setClipRect)
+    {
+        painter->save();
+        painter->setClipRect(rect.adjusted(0,0,0,-2));
+    }
+
+    //bar
+    painter->fillRect(barRect,col);
+
+    //value
+    if(!text.isEmpty())
+    {
+        painter->setPen(QColor(100,100,100));
+        painter->drawText(textRect,text,Qt::AlignLeft | Qt::AlignVCenter);
     }
 
     if(setClipRect)
@@ -806,11 +888,40 @@ void TimelineView::showDetails(const QModelIndex& indexClicked)
     if(!idx.isValid())
         return;
 
-    TimelineInfoDialog diag(this);
-    diag.infoW_->load("host","port",model_->tlModel()->data(),idx.row(),
-                      startDate_,endDate_);
+    if (!infoDialog_) {
+        infoDialog_ = new TimelineInfoDialog(this);
+        infoDialog_->setModal(false);
+    }
 
-    diag.exec();
+    if (idx.row() == infoDialog_->infoW_->itemIndex()) {
+        infoDialog_->raise();
+
+    } else {
+        infoDialog_->infoW_->load("host","port",model_->tlModel()->data(),idx.row(),
+                      startDate_,endDate_);
+    }
+
+    infoDialog_->show();
+}
+
+void TimelineView::updateDetails()
+{
+    if (infoDialog_ && infoDialog_->isVisible() && infoDialog_->infoW_->itemIndex() != -1) {
+        infoDialog_->infoW_->load("host","port",model_->tlModel()->data(),
+                                  infoDialog_->infoW_->itemIndex(), startDate_,endDate_);
+    }
+}
+
+void TimelineView::closeDetails()
+{
+    if (infoDialog_) {
+        infoDialog_->close();
+    }
+}
+
+void TimelineView::dataCleared()
+{
+    closeDetails();
 }
 
 void TimelineView::lookup(const QModelIndex &indexClicked)
@@ -894,6 +1005,7 @@ void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
     endDate_=t2;
     delegate_->setPeriod(t1,t2);
     model_->tlModel()->setPeriod(t1,t2);
+    updateDetails();
     updateDurations();
     rerender();
     Q_EMIT periodSelected(t1,t2);
@@ -905,6 +1017,7 @@ void TimelineView::setStartDate(QDateTime t)
     delegate_->setStartDate(t);
     model_->tlModel()->setStartDate(t);
     header_->setStartDate(t);
+    updateDetails();
     updateDurations();
     rerender();
 }
@@ -915,6 +1028,7 @@ void TimelineView::setEndDate(QDateTime t)
     delegate_->setEndDate(t);
     model_->tlModel()->setEndDate(t);
     header_->setEndDate(t);
+    updateDetails();
     updateDurations();
     rerender();
 }
@@ -926,8 +1040,21 @@ void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
     delegate_->setPeriod(t1,t2);
     model_->tlModel()->setPeriod(t1,t2);
     header_->setPeriod(t1,t2);
+    updateDetails();
     updateDurations();
     rerender();
+}
+
+void TimelineView::setDurationViewMode(DurationViewMode mode)
+{
+    durationViewMode_ = mode;
+    delegate_->setUseMeanDuration(durationViewMode_ == MeanDurationMode);
+    model_->tlModel()->setUseMeanDuration(durationViewMode_ == MeanDurationMode);
+    if (viewMode_ == DurationMode) {
+        updateDurations();
+        model_->sortAgain();
+        //rerender();
+    }
 }
 
 void TimelineView::updateDurations()
@@ -1018,8 +1145,17 @@ int TimelineView::computeMaxDuration(QString state)
 
     for(int i=0; i < model_->rowCount(); i++)
     {
+        int val = 0;
         QModelIndex idx=model_->index(i,col);
-        int val=model_->data(idx).toInt();
+        if(durationViewMode_ == FirstDurationMode) {
+            val=model_->data(idx).toInt();
+        } else {
+            QVariantList lst=model_->data(idx, TimelineModel::MeanDurationRole).toList();
+            if(lst.count() == 2) {
+                val=lst[0].toFloat();
+            }
+        }
+
         if(val > maxDuration)
         {
             maxDuration=val;

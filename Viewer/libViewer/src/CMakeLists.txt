@@ -2,6 +2,7 @@ set(srcs
     DirectoryHandler.cpp
     IconProvider.cpp
     LocalSocketServer.cpp
+    LogConsumer.hpp
     LogData.cpp    
     LogModel.cpp
     LogTruncator.cpp
@@ -15,7 +16,7 @@ set(srcs
     )
 
 if(ECFLOW_LOGVIEW)
-    list(APPEND srcs LogLoadData.cpp LogLoadWidget.cpp)
+    list(APPEND srcs LogLoadData.cpp)
 endif()
 
 if(ECFLOW_QT5)
@@ -35,18 +36,23 @@ set(moc_files
 )
 
 if(ECFLOW_LOGVIEW)
-    list(APPEND moc_files LogLoadWidget.hpp)
+    list(APPEND moc_files LogLoadData.hpp)
 endif()
 
-set(wrap_ui_files
-    LogLoadWidget.ui
-    )
 
-if(ECFLOW_LOGVIEW)
-    set(wrap_ui_files
-        LogLoadWidget.ui
-        )
-endif()
+#if(ECFLOW_LOGVIEW)
+#    list(APPEND moc_files LogLoadWidget.hpp)
+#endif()
+
+#set(wrap_ui_files
+#    LogLoadWidget.ui
+#    )
+
+#if(ECFLOW_LOGVIEW)
+#    set(wrap_ui_files
+#        LogLoadWidget.ui
+#        )
+#endif()
 
 
 if(ECFLOW_QT5)

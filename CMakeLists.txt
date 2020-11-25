@@ -22,13 +22,10 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
 
-
-set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-
-#find_package( ecbuild 3.4 REQUIRED ) # Before project() !!! <TODO>
+find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ) # Before project()  
 
 # this will generate variables, see ACore/ecflow_version.h.in
-project( ecflow LANGUAGES CXX VERSION 5.5.3 )
+project( ecflow LANGUAGES CXX VERSION 5.6.0 )
 
 
 include( ecbuild_system NO_POLICY_SCOPE )
@@ -40,12 +37,6 @@ set (CMAKE_CXX_STANDARD 14)
 # local project
 
 ecbuild_declare_project()
-
-# =========================================================================================
-# VERSION  
-# Get the ecflow version specified in 'VERSION.cmake'. This is only accessible after ecbuild_declare_project()
-# The ecflow version config is done in ACore directory
-# =========================================================================================
 
 ecbuild_info( "CMAKE_MODULE_PATH        : ${CMAKE_MODULE_PATH}")
 ecbuild_info( "CMAKE_INSTALL_PREFIX     : ${CMAKE_INSTALL_PREFIX}" )
@@ -161,6 +152,7 @@ ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
 ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
+ecbuild_info( "ENABLE_TESTS               : ${ENABLE_TESTS} *if* disabled no need for boost test libs" )
 ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries available" )
@@ -230,12 +222,17 @@ set(ECFLOW_BOOST_VERSION "1.66.0")
 # need upfront to get a hold of Boost_VERSION_STRING
 find_package( Boost ${ECFLOW_BOOST_VERSION} ) 
 
+# HAVE_TESTS is defined if ecbuild ENABLE_TESTS is set, (by default this is set)
+if(HAVE_TESTS)
+	list(APPEND _boost_testlibs unit_test_framework test_exec_monitor )
+endif()
+
 # Need timer for boost::time::cpu_timer this needs boost:chrono, which need librt These are used in the test only
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
-    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono ${_boost_testlibs} filesystem program_options date_time )
 else()
     # for boost version 1.69 or greater Boost.System is now header-only.
-    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono ${_boost_testlibs} filesystem program_options date_time )
 endif()
 ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
@@ -305,6 +302,7 @@ add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
 add_subdirectory( tools )
+add_subdirectory( Doc )
 
 if (ENABLE_SERVER)
     add_subdirectory( Server )
@@ -323,6 +321,37 @@ if (ENABLE_UI)
     add_subdirectory( share )
 endif()
 
+
+# =========================================================================================
+# DOXYGEN to use: make doxygen  -> ${CMAKE_CURRENT_BINARY_DIR}/Doc/doxygen/html/index.html
+# =========================================================================================
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+   ecbuild_info( "DOXYGEN_FOUND   - use 'make doxygen' first" )
+   
+   # exclude some dirs not related to documentation
+   set( DOXYGEN_EXCLUDE_PATTERNS */bin/* */bdir/* */Debug/*  */test/*  */Doc/* */doc/* */samples/* SCRATCH tools build_scripts cereal )
+  
+   set( DOXYGEN_SOURCE_BROWSER YES)
+   set( DOXYGEN_EXTRACT_PRIVATE YES)
+   set( DOXYGEN_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Doc/doxygen")
+    
+   # this target will only be built if specifically asked to.
+   # run "make doxygen" to create the doxygen documentation
+   doxygen_add_docs(
+      doxygen
+      ${PROJECT_SOURCE_DIR}
+      COMMENT "Generate documentation for ecFlow"
+   )
+   
+   # Add an install target to install the docs, *IF* the use has run 'make doxygen'
+   if (EXISTS ${DOXYGEN_OUTPUT_DIRECTORY})
+      install(DIRECTORY ${DOXYGEN_OUTPUT_DIRECTORY} DESTINATION ${CMAKE_INSTALL_DOCDIR})
+   endif()
+else ()
+  ecbuild_info("Doxygen need to be installed to generate the doxygen documentation")
+endif()
+
 # =========================================================================================
 # tar ball, by default ecbuild will tar everything apart from hard wired directory called 'build' 
 # hence we can tell it, what directories not to pack
@@ -330,14 +359,16 @@ endif()
 ecbuild_dont_pack( DIRS 
                     .settings
                     bamboo
-                   	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
-                   	ecbuild
+                    ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
+                    ecbuild
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
-                    cereal-1.3.0
                     Debug
-                    Doc
+                    bdir
+                    bdir_xcode
+                    bin
+                    Doc/misc Doc/sphinx-examples
 )
 
 # ignore eclipse files

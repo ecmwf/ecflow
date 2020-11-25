@@ -189,7 +189,6 @@ class Child(object):
     def __init__(self):
         import signal
         env = {"ECF_HOST": "$ECF_HOST:$",
-               "ECF_NODE": "$ECF_NODE:$",
                # check can be on a server, child on another
                "ECF_PASS": "$ECF_PASS$",
                "ECF_NAME": "$ECF_NAME$",
@@ -223,8 +222,6 @@ class Child(object):
         if len(MICRO) == 2:
             host = env["ECF_HOST"]
             print(host)
-            if host == "" or "%" in host:
-                host = env["ECF_NODE"]
             self.client.set_host_port(host, int(env["ECF_PORT"]))
             self.client.set_child_pid(os.getpid())
             self.client.set_child_path(env["ECF_NAME"])
@@ -233,8 +230,6 @@ class Child(object):
         else:
             host = "$ECF_HOST:$"
             print(host)
-            if not (host != "" and "%" not in host):
-                host = "$ECF_NODE:$"
             self.client.set_host_port(host, int("$ECF_PORT:0$"))
             self.client.set_child_pid(os.getpid())
             self.client.set_child_path("$ECF_NAME$")
@@ -403,8 +398,6 @@ $end
         if self.servers[-1] == "":
             del self.servers[-1]
         host = os.getenv("ECF_HOST", "$ECF_HOST:none$")
-        if MICRO[0] in host or host == "none":
-            host = os.getenv("ECF_NODE", "$ECF_NODE$")
         # if MICRO[0] in host: host = "localhost"
         port = os.getenv("ECF_PORT", "$ECF_PORT$")
         if MICRO[0] in port:
@@ -765,7 +758,8 @@ def replay(path, defs=None):
     miss = "@undef@"
     host = os.getenv("ECF_HOST", miss)
     if host == miss:
-        host = os.getenv("ECF_NODE", "localhost")
+        print("ECF_HOST not defined")
+        exit(1)
     port = os.getenv("ECF_PORT", 31415)
     client = ecf.Client(host, port)
     if defs is None:

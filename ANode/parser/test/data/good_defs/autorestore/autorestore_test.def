@@ -7,12 +7,14 @@ suite autorestore_test
     autoarchive 0      # archive immediately after complete, may have to wait 60 seconds
     task t1
  endfamily
-family frestore_from_family_now
+ family frestore_from_family_now
+    trigger ./farchive_now<flag>archived
     autorestore ./farchive_now       
     task t1
        edit SLEEP 60
  endfamily
-family frestore_from_task_now
+ family frestore_from_task_now
+    trigger ./frestore_from_family_now<flag>archived
     task t1
        edit SLEEP 60
        autorestore ../farchive2_now       

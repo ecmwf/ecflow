@@ -46,9 +46,9 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 // These thresholds are based on the largest definition in the tests.
 static int load_threshold_ms  = 4500;
-static int begin_threshold_ms = 400;
+static int begin_threshold_ms = 550;
 static double sync_full_threshold_s = 2.6;
-static double full_threshold_s = 2.8;
+static double full_threshold_s = 2.9;
 static double suspend_threshold_s = 3.5;
 static double resume_threshold_s = 3.5;
 static double force_threshold_s = 8.5;
@@ -318,15 +318,15 @@ void time_load_and_downloads(
 BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
 {
    if (getenv("ECF_SSL")) {
-      load_threshold_ms  = 5000;     // 4500;
+      load_threshold_ms  = 8000;     // 4500;
       begin_threshold_ms = 800;      // 400;
-      sync_full_threshold_s = 3.6;   // 2.6;
-      full_threshold_s = 3.8;        // 2.8;
-      suspend_threshold_s = 4.5;     // 3.5;
-      resume_threshold_s = 4.5;      // 3.5;
-      force_threshold_s = 10.5;      // 8.5;
+      sync_full_threshold_s = 4.5;   // 2.6;
+      full_threshold_s = 4.5;        // 2.8;
+      suspend_threshold_s = 5.8;     // 3.5;
+      resume_threshold_s = 6.5;      // 3.5;
+      force_threshold_s = 15;        // 8.5;
       check_pt_threshold_s = 1.5;    // 1.0;
-      client_cmds_threshold_s = 12;  // 8.5;
+      client_cmds_threshold_s = 950; // 8.5;
    }
 
 

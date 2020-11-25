@@ -33,7 +33,7 @@
                 "line" : "maxOutputFileLines"
              },
              "group" : {
-                "title" : "Timeline",
+                "title" : "Server load and timeline",
                 "prefix" : "server.files",
                 "line" : "uidForServerLogTransfer",
                 "note" : {

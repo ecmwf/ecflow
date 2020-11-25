@@ -20,7 +20,7 @@ use-project theBase      : ../Base ;
 # however if this is done, it will not link since, lpthread appears twice
 # on the link line
 #
-lib pthread ;
+lib pthread : : <link>shared  ;
 
 #
 # define DEBUG_CLIENT for additional debug
@@ -64,7 +64,7 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /site-config//boost_program_options
              /site-config//boost_datetime
              #/site-config//boost_system
-	         pthread
+	          pthread
            : <variant>debug:<define>DEBUG
              <library>/site-config//openssl_libs 
            ;
@@ -74,7 +74,7 @@ exe ecflow_client : [ glob src/*Main.cpp ]
 # linking with ClientMain.cpp
 #
 exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp ]
-	       pthread
+	        pthread
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node

@@ -142,7 +142,7 @@ if __name__ == "__main__":
         defs.check_job_creation(job_ctrl)
         print(job_ctrl.get_error_msg())
         print("removing directory tree " + job_ctrl.get_dir_for_job_creation())
-        shutil.rmtree(job_ctrl.get_dir_for_job_creation())     
+        shutil.rmtree(job_ctrl.get_dir_for_job_creation(),ignore_errors=True)     
         delete_jobs(task_vec,ecf_home)
     except RuntimeError as e:
         print("failed: " + str(e))  

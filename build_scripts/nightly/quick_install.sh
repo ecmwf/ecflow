@@ -43,7 +43,9 @@ else
    ECF_CLIENT_EXE_PATH=${install_prefix}/ecflow/${ECFLOW_VERSION}/bin/ecflow_client
 fi
 
-
+# =======================================================================
+# SSL
+# =======================================================================
 #export ECF_DEBUG_CLIENT=1
 #export ECF_SSL=`hostname`.4141 # use server specfic <host>.<port>.*** certificates
 #export ECF_SSL=1               # use non server specfic  certificates
@@ -85,9 +87,42 @@ cp -r $WK/build_scripts/nightly .
 cd nightly
 
 # =======================================================================
-# Start server. 
+# Clean start
 # =======================================================================
 rm -rf `hostname`.${ECF_PORT}.*
+
+# =======================================================================
+# CUSTOM USER, this needs a ECF_CUSTOM_PASSWD, used for client and server
+# =======================================================================
+test_custom_user=0
+if [[ $test_custom_user -eq 1 ]] ; then
+   export ECF_CUSTOM_PASSWD=$SCRATCH/nightly/$(hostname).${ECF_PORT}.ecf.custom_passwd
+   export ECF_USER=fred # custom user fred
+cat << EOF > ${ECF_CUSTOM_PASSWD}
+4.5.0  
+# <user> <host> <port> <passwd>
+$ECF_USER $(hostname) ${ECF_PORT} my_passwd
+EOF
+fi
+
+# =======================================================================
+# PASSWD access, file used for client and server
+# =======================================================================
+test_passwd_file=0
+if [[ $test_passwd_file == 1 ]] ; then
+   export ECF_PASSWD=$SCRATCH/nightly/$(hostname).${ECF_PORT}.ecf.passwd
+cat << EOF > ${ECF_PASSWD}
+4.5.0  
+# <user> <host> <port> <passwd>
+$USER $(hostname) ${ECF_PORT} my_passwd
+EOF
+fi
+
+
+# =======================================================================
+# Start server. 
+# =======================================================================
+#export ECF_TASK_THRESHOLD=1 # 1000 milliseconds = 1 second
 ecflow_server&
 
 # wait for server to start

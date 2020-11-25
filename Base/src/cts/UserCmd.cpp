@@ -149,7 +149,10 @@ bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
    if (!user_name.empty()) {
       cu_ = true;  // inform server side custom USER used, server will expect password in ECF_CUSTOM_PASSWD files
       const std::string& passwd = clientEnv.get_custom_user_password(user_name);
-      if (passwd.empty()) return false; // invalid user as password is empty, must have a password when user specified
+      if (passwd.empty()) {
+         // cout << "invalid user as password is empty, must have a password when user specified \n";
+         return false; // invalid user as password is empty, must have a password when user specified
+      }
 
       setup_user_authentification(user_name,passwd);
       return true;

@@ -319,6 +319,16 @@
        </spacer>
       </item>
       <item>
+       <widget class="QComboBox" name="durationViewModeCb"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="zoomInTb">
         <property name="text">
          <string/>

@@ -128,7 +128,9 @@ bool PasswdFile::check_at_least_one_user_with_host_and_port(const std::string& h
 
 std::string PasswdFile::get_passwd(const std::string& user, const std::string& host, const std::string& port)
 {
-   // cout << "PasswdFile::get_passwd user(" << user << ") host(" << host << ") port(" << port << ")\n";
+#ifdef DEBUG_ME
+   cout << "PasswdFile::get_passwd user(" << user << ") host(" << host << ") port(" << port << ")\n";
+#endif
    size_t vec_size = vec_.size();
    for (size_t i = 0; i < vec_size; i++) {
       if (vec_[i].user() == user && vec_[i].host() == host && vec_[i].port() == port) {
@@ -277,7 +279,7 @@ std::string PasswdFile::dump() const
    std::stringstream ss;
    int count = 1;
    for (const auto & i : vec_) {
-      ss << count << ": " << i.user() << " " << i.host() << ":" << i.port() << "\n";
+      ss << count << ": " << i.user() << " " << i.host() << " " << i.port() << "\n";
       count++;
    }
    return ss.str();

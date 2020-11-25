@@ -140,6 +140,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->taskOnlyTb->setChecked(false);
     ui_->showChangedTb->setChecked(true);
 
+    ui_->durationViewModeCb->addItem("First duration in period","first");
+    ui_->durationViewModeCb->addItem("Mean duration","mean");
+    ui_->durationViewModeCb->setCurrentIndex(0);
+
     ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-yyyy");
     ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-yyyy");
 
@@ -172,6 +176,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(ui_->sortCombo,SIGNAL(currentIndexChanged(int)),
             this,SLOT(slotSortMode(int)));
+
+    connect(ui_->durationViewModeCb,SIGNAL(currentIndexChanged(int)),
+            this,SLOT(slotDurationViewMode(int)));
 
     connect(sortGr,SIGNAL(buttonClicked(int)),
             this,SLOT(slotSortOrderChanged(int)));
@@ -217,6 +224,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     slotSortOrderChanged(0);
     slotTaskOnly(false);
     slotShowChanged(true);
+
+    adjustWidgetsToViewMode();
 }
 
 TimelineWidget::~TimelineWidget()
@@ -242,6 +251,7 @@ void TimelineWidget::clear()
     //viewHandler_->clear();
 
     model_->clearData();
+    view_->dataCleared();
     data_->clear();
     logFile_.clear();
     serverName_.clear();
@@ -295,6 +305,7 @@ void TimelineWidget::clearData(bool usePrevState)
     ui_->logInfoLabel->setText(QString());
 
     model_->clearData();
+    view_->dataCleared();
     data_->clear();
     typesDetermined_=false;
     treeOrderDetermined_=false;
@@ -502,17 +513,32 @@ void TimelineWidget::slotLogMode(int)
         setLogMode(ArchiveMode);
 }
 
+void TimelineWidget::adjustWidgetsToViewMode()
+{
+    bool st = true;
+    if (view_->viewMode() == TimelineView::DurationMode) {
+        st = false;
+    }
+
+    ui_->sortCombo->setVisible(st);
+    ui_->sortUpTb->setVisible(st);
+    ui_->sortDownTb->setVisible(st);
+    ui_->durationViewModeCb->setVisible(!st);
+
+    ui_->sortCombo->setEnabled(st);
+    ui_->sortUpTb->setEnabled(st);
+    ui_->sortDownTb->setEnabled(st);
+    ui_->durationViewModeCb->setEnabled(!st);
+}
+
 void TimelineWidget::slotViewMode(int)
 {
     bool timelineMode=ui_->timelineViewTb->isChecked();
 
     //timeline
-    if(timelineMode)
-    {
-        view_->setViewMode(TimelineView::TimelineMode);
-        ui_->sortCombo->setEnabled(true);
-        ui_->sortUpTb->setEnabled(true);
-        ui_->sortDownTb->setEnabled(true);
+    if(timelineMode) {
+        view_->setViewMode(TimelineView::TimelineMode);    
+        adjustWidgetsToViewMode();
 
         //reload filter
         slotShowChanged(ui_->showChangedTb->isChecked());
@@ -526,9 +552,7 @@ void TimelineWidget::slotViewMode(int)
     else
     {
         view_->setViewMode(TimelineView::DurationMode);
-        ui_->sortCombo->setEnabled(false);
-        ui_->sortUpTb->setEnabled(false);
-        ui_->sortDownTb->setEnabled(false);
+        adjustWidgetsToViewMode();
 
         //reload filter
         slotShowChanged(ui_->showChangedTb->isChecked());
@@ -536,7 +560,7 @@ void TimelineWidget::slotViewMode(int)
         //reload sort
         sortModel_->setSortMode(TimelineSortModel::QtSortMode);
         slotShowChanged(ui_->showChangedTb->isChecked());
-    }
+    }  
 }
 
 void TimelineWidget::slotSubTree(bool b)
@@ -651,6 +675,15 @@ void TimelineWidget::slotWholePeriod()
     ignoreTimeEdited_=false;
     view_->setPeriod(data_->qStartTime(),data_->qEndTime());
     checkButtonState();
+}
+
+void TimelineWidget::slotDurationViewMode(int)
+{
+    int idx=ui_->durationViewModeCb->currentIndex();
+    if(idx == 0)
+        view_->setDurationViewMode(TimelineView::FirstDurationMode);
+    else if (idx == 1)
+        view_->setDurationViewMode(TimelineView::MeanDurationMode);
 }
 
 void TimelineWidget::slotLookup(QString nodePath)
@@ -927,7 +960,6 @@ void TimelineWidget::loadArchive()
         {
             //logLoaded_=false;
             ui_->messageLabel->stopProgress();
-
             std::string errTxt(e.what());
 #if 0
 
@@ -957,16 +989,6 @@ void TimelineWidget::loadArchive()
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
 
         ui_->messageLabel->stopProgress();
-        //ui_->messageLabel->hide();
-
-        //logLoaded_=true;
-        //setAllVisible(true);
-        //updateInfoLabel();
-        //updateFilterTriggerMode();
-
-        //determine node types if task filter is on
-        //if(ui_->taskOnlyTb->isChecked())
-        //    determineNodeTypes();
     }
 
     ui_->messageLabel->hide();
@@ -1265,6 +1287,15 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
     vs->put("taskOnly",ui_->taskOnlyTb->isChecked());
     vs->put("showChanged",ui_->showChangedTb->isChecked());
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+        vs->put("durationViewMode", ui_->durationViewModeCb->currentData().toString().toStdString());
+#else
+        if(ui_->durationViewModeCb->currentIndex() >=0)
+        {
+            vs->put("durationViewMode", ui_->durationViewModeCb->itemData(ui_->durationViewModeCb->currentIndex()).toString().toStdString());
+        }
+#endif
+
     view_->writeSettings(vs);
 }
 
@@ -1297,6 +1328,9 @@ void TimelineWidget::readSettings(VComboSettings* vs)
     ui_->subTreeTb->setChecked(vs->get<bool>("subTree",false));
     ui_->showChangedTb->setChecked(vs->get<bool>("showChanged",true));
     ui_->taskOnlyTb->setChecked(vs->get<bool>("taskOnly",false));
+
+    QString dMode=QString::fromStdString(vs->get<std::string>("durationViewMode",std::string()));
+    ViewerUtil::initComboBoxByData(dMode, ui_->durationViewModeCb);
 
     view_->readSettings(vs);
 }

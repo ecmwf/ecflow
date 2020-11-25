@@ -18,7 +18,7 @@ use-project theNodeAttr : ../ANattr ;
 use-project theNode     : ../ANode ;  
 use-project theBase     : ../Base ;
 
-lib pthread ;
+lib pthread : : <link>shared  ;
 
 #
 # Split into library, so that testing can use library, and hence same compiler option
@@ -45,7 +45,7 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
               ;
                
 exe ecflow_server : [ glob src/*Main.cpp ]
-            pthread
+             pthread
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
@@ -66,7 +66,7 @@ exe ecflow_server : [ glob src/*Main.cpp ]
 # IMPORTANT: server *MUST* not link with client or include any of the client code
 #
 exe u_server : [ glob test/*.cpp ]
-            pthread
+             pthread
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node

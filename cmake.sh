@@ -437,7 +437,9 @@ $ecbuild $source_dir \
             ${gui_options} \
             ${ssl_options} \
             ${log_options} \
-            ${test_options} # -DCMAKE_PREFIX_PATH="/tmp/$USER/opt/qt5/"
+            ${test_options} \
+            -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.7.0/5.7/gcc_64/" 
+            
             
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.8-01/bin/python3 \
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python/2.7.12-01/bin/python \
@@ -446,7 +448,6 @@ $ecbuild $source_dir \
             #-DENABLE_PYTHON=OFF   \
             #-DENABLE_PYTHON_PTR_REGISTER=ON  \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
-            #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             #-DENABLE_UI=ON        \  # ecflow_ui      
             #-DENABLE_ALL_TESTS=ON \
             #-DENABLE_SERVER=OFF   \
@@ -464,16 +465,16 @@ if [[ "$make_arg" != "" ]] ; then
 	$make_arg 
 	# $make_arg VERBOSE=1
 	
-    # generate the server file locally, and install it. Otherwise list of server will not be complete set
-    echo $make_arg | grep -q "install"
+   # generate the server file locally, and install it. Otherwise list of server will not be complete set
+   echo $make_arg | grep -q "install"
 	if [[ $? -eq 0 ]] ; then
 		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
 
-   			/home/ma/emos/bin/ecflow_site_server_install.sh -g
+   		/home/ma/emos/bin/ecflow_site_server_install.sh -g -5
 
     		if [[ -f servers ]] ; then
         		mv servers $install_prefix/share/ecflow/.
-            fi
+         fi
 		fi
 	fi
 	exit 0

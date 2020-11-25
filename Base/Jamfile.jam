@@ -44,7 +44,7 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
 # however if this is done, it will not link since, lpthread appears twice
 # on the link line
 #
-lib pthread ;
+lib pthread : : <link>shared  ;
 
 exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /theCore//core

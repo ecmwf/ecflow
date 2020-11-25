@@ -23,7 +23,6 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "System.hpp"             // kill singleton for valgrind
-//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -98,13 +97,19 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
 
    {
       // Begin will set all states to queued and then start job submission placing
-      // any submiited jobs into the active state. Note server setup has disabled job generation
+      // any submitted jobs into the active state. Note server setup has disabled job generation
       BOOST_REQUIRE_MESSAGE(theClient.begin("suite1") == 0,CtsApi::begin("suite1") << " failed should return 0\n" << theClient.errorMsg());
-
       BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
       defs_ptr serverDefs =  theClient.defs();
       node_ptr node = serverDefs->findAbsNode(suite1_family1_a);
-      BOOST_REQUIRE_MESSAGE( node->state() == NState::ACTIVE, "Node expected NState::ACTIVE, but found to be " << NState::toString(node->state()));
+
+      // Occasionally we get a random failure here. I suspect this is because the job generation caused by the BeginCmd, is such that the
+      //     time_now >= next_poll_time_   //* next_poll_time_ should always be at the minute interval
+      // When this happens, we defer job generation for a second:  See NodeTreeTraverser::traverse_node_tree_and_job_generate: line 343
+      // Added time to confirm. If this the case, run test when not at/near minute interval
+      BOOST_REQUIRE_MESSAGE( node->state() == NState::ACTIVE,
+                            "Node expected NState::ACTIVE, but found to be " << NState::toString(node->state())
+                            << " time now:" << Calendar::second_clock_time());
    }
 
    //**********************************************************************

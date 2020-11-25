@@ -1,12 +1,15 @@
 suite autorestore2
  family f1
+    trigger ./f2<flag>archived and ./f3<flag>archived
     task t1
         autorestore ../f2 ../f3  # autorestore
  endfamily
  family f2
+    autoarchive 0
     task t1   
  endfamily
  family f3
+    autoarchive 0   
     task t1   
  endfamily
 endsuite

@@ -88,7 +88,7 @@ extra_link_args = []
 #   lib/python2.7/site-packages/ecflow/ecflow.so
 #                                     __init__.py               
 setup( name='ecflow', 
-       version='@ECFLOW_VERSION@', 
+       version='@ecflow_VERSION@', 
        author      = 'ECMWF',
        description = """ecflow Python interface""",
        packages = [ 'ecflow' ],

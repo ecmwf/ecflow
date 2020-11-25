@@ -321,13 +321,23 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
 
 }
 
+void TimelineInfoWidget::clear()
+{
+    host_.clear();
+    port_.clear();
+    itemIndex_ = -1;
+    model_->clearData();
+}
+
 void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, int itemIndex,QDateTime viewStartDate,
                               QDateTime viewEndDate)
 {
     Q_ASSERT(tlData);
+
     host_=host;
     port_=port;
     data_=tlData->items()[itemIndex];
+    itemIndex_ = itemIndex;
     tlEndTime_=tlData->endTime();
 
     QColor col(39,49,101);
@@ -512,6 +522,7 @@ TimelineInfoDialog::~TimelineInfoDialog()
 void TimelineInfoDialog::closeEvent(QCloseEvent * event)
 {
     event->accept();
+    infoW_->clear();
     writeSettings();
 }
 

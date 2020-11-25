@@ -135,13 +135,6 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     actionRefreshSelected->setEnabled(false);
     actionResetSelected->setEnabled(false);
 
-#ifdef ECFLOW_LOGVIEW
-    connect(actionServerLoadViewer,SIGNAL(triggered()),
-            this,SLOT(slotServerLoad()));
-#else
-    actionServerLoadViewer->setEnabled(false);
-#endif
-
     //--------------
     //Status bar
     //--------------
@@ -489,23 +482,6 @@ void MainWindow::slotEditServerSettings(ServerHandler* s)
 {
     VInfo_ptr info=VInfoServer::create(s);
     nodePanel_->openDialog(info,"server_settings");
-}
-
-void MainWindow::slotServerLoad()
-{
-#ifdef ECFLOW_LOGVIEW
-    ServerHandler* s=0;
-    QString serverName;
-    if(selection_)
-    {
-        s=selection_->server();
-        if(!logCom_)
-        {
-            logCom_ = new LogViewerCom();
-        }
-        logCom_->addToApp(s);
-    }
-#endif
 }
 
 //==============================================================

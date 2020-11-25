@@ -956,7 +956,7 @@ const char* ClientDoc::query(){
             " - limit     return value of the limit to standard out\n"
             " - limit_max return max value of the limit to standard out\n"
             " - variable  return value to standard out\n"
-            " - trigger   returns 'true' if the expression is true, otherwise 'false'\n::\n\n"
+            " - trigger   returns 'true' if the expression is true, otherwise 'false'\n\n::\n\n"
             "  string query(\n"
             "     string query_type        # [ event | meter | variable | trigger | limit | limit_max ]\n"
             "     string path_to_attribute # path to the attribute\n"
@@ -1509,7 +1509,7 @@ const char* ClientDoc::restore()
 {
    return
          "Restore archived nodes.\n"
-         "Usage::\n"
+         "Usage::\n\n"
          "   string restore(\n"
          "      list paths # List of paths.\n"
          "   )\n"

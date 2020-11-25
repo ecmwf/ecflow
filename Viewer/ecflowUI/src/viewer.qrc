@@ -126,6 +126,7 @@
     <file alias="select_all.svg">../images/select_all.svg</file>
     <file alias="server.svg">../images/server.svg</file>
     <file alias="server_log.svg">../images/server_log.svg</file>
+    <file alias="show_log.svg">../images/show_log.svg</file>
     <file alias="show_shadowed.svg">../images/show_shadowed.svg</file>
     <file alias="sort_down.svg">../images/sort_down.svg</file>
     <file alias="sort_up.svg">../images/sort_up.svg</file>
