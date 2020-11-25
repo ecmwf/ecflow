@@ -15,7 +15,7 @@
 
 #include "GlossaryDoc.hpp"
 
-const char* GlossaryDoc ::list(){
+const char* GlossaryDoc::list(){
    return
             "Create a empty Defs\n\n"
             ".. _active: glossary_\n"
@@ -64,7 +64,7 @@ const char* GlossaryDoc ::list(){
             ".. _variable: glossary_\n"
             ".. _zombie: glossary_\n"
             ".. _zombie type: glossary_\n"
-            ".. _glossary: https://software.ecmwf.int/wiki/display/ECFLOW/Glossary\n"
+            ".. _glossary: https://confluence.ecmwf.int/display/ECFLOW/Glossary\n"
             ;
 }
 
