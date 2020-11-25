@@ -24,6 +24,13 @@ Process
    git pull                     # make sure we use the latest
    ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
 
+0/ check python doc generation
+   requires that ecflow.so has been built
+   cd $WK                       # ecflow root directry
+   cd Doc/online
+   make clean; 
+   make html                    # fix any rst errors in python api
+
 0/ Inform user support, allows user support to build/test rpm
    *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH(done by the previous step) and inform Daniel
