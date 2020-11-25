@@ -17,19 +17,19 @@ Process
 ----------------------------------------------------------------------
 0/ *make sure ecbuild in cmake.sh matches the metabuilder*
 
-0/ Create the tarball using cmake, in the build directory with  
-   
-   cd $WK                       # ecflow root directry
-   rm -rf ../bdir               # *REMOVE* build tree
-   git pull                     # make sure we use the latest
-   ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
-
 0/ check python doc generation
    requires that ecflow.so has been built
    cd $WK                       # ecflow root directry
    cd Doc/online
    make clean; 
    make html                    # fix any rst errors in python api
+   
+0/ Create the tarball using cmake, in the build directory with  
+   
+   cd $WK                       # ecflow root directry
+   rm -rf ../bdir               # *REMOVE* build tree
+   git pull                     # make sure we use the latest
+   ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
 
 0/ Inform user support, allows user support to build/test rpm
    *Before* each release, make sure the ecflow tar file is
