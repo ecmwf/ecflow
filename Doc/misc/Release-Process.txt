@@ -28,7 +28,7 @@ Process
    
    cd $WK                       # ecflow root directry
    rm -rf ../bdir               # *REMOVE* build tree
-   git pull                     # make sure we use the latest
+   git pull --rebase            # make sure we use the latest
    ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
 
 0/ Inform user support, allows user support to build/test rpm
