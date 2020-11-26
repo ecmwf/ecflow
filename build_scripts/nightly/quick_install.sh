@@ -122,7 +122,7 @@ fi
 # =======================================================================
 # Start server. 
 # =======================================================================
-#export ECF_TASK_THRESHOLD=1 # 1000 milliseconds = 1 second
+export ECF_TASK_THRESHOLD=1 # 1000 milliseconds = 1 second
 ecflow_server&
 
 # wait for server to start
