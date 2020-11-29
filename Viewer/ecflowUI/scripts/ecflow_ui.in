@@ -375,8 +375,8 @@ exe=${EXE_DIR}/ecflow_ui.x
 
 if [ $ECFLOWUI_BT != "no" ]
 then
-    catchsegv $exe
+    catchsegv "$exe"
 else
-    ${exe}
+    "$exe"
 fi
 
