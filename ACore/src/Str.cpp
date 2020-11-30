@@ -168,7 +168,7 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 //   Time for boost::string_view 1000000            times = 0.769s wall, (0.770s user + 0.000s system = 0.770s) CPU (100.1%)
 //   Time for boost::string_view(2) 1000000         times = 0.688s wall, (0.690s user + 0.000s system = 0.690s) CPU (100.3%)
 //  ACore:: ...test_str_split_perf_with_file
-//   This test will split each line in file /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+//   This test will split each line in file ${ECF_TEST_DEFS_DIR}vsms2.31415.def
 //   Time for istreamstream 2001774                 times = 1.567s wall, (1.570s user + 0.000s system = 1.570s) CPU (100.2%)
 //   Time for std::getline 2001774                  times = 2.456s wall, (2.460s user + 0.000s system = 2.460s) CPU (100.2%)
 //   Time for boost::split 2001774                  times = 1.698s wall, (1.690s user + 0.000s system = 1.690s) CPU (99.5%)

@@ -4,7 +4,7 @@ eurydice{/var/tmp/ma0/workspace/ecflow}:10 --> Client/bin/gcc-6.3.0/release/perf
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3142)
 
-/var/tmp/ma0/BIG_DEFS/od.def  : file size 11081032
+${ECF_TEST_DEFS_DIR}/od.def  : file size 11081032
 Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
 
  Load:                1258ms
@@ -23,7 +23,7 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  Check pt:            113 103 105 106 105 105 119 123 106 106 : Avg:0.1091(sec)
  Delete:              95ms
 
-/var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
+${ECF_TEST_DEFS_DIR}/vsms2.31415.def  : file size 153539843
  Load:                7094ms
  Begin:               144ms
  Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 4858(ms)
@@ -40,7 +40,7 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  Check pt:            1124 1034 1042 2518 1055 1080 1024 1039 1031 1034 : Avg:1.1981(sec)
  Delete:              625ms
 
-/var/tmp/ma0/BIG_DEFS/3199.def  : file size 59631577
+${ECF_TEST_DEFS_DIR}/3199.def  : file size 59631577
  Load:                4563ms
  Begin:               395ms
  Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 3785(ms)
@@ -57,7 +57,7 @@ Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenc
  Check pt:            747 721 704 685 693 681 1381 711 751 711 : Avg:0.7785(sec)
  Delete:              743ms
 
-/var/tmp/ma0/BIG_DEFS/mega.def  : file size 6723372
+${ECF_TEST_DEFS_DIR}/mega.def  : file size 6723372
  Load:                800ms
  Begin:               51ms
  Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 760(ms)

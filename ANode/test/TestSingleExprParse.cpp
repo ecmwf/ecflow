@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 //{
 //   std::cout <<  "ANode:: ...test_expression_read_from_file\n";
 //
-//   std::string filename = "/var/tmp/ma0/BIG_DEFS/triggers.list";
+//   std::string filename = "${ECF_TEST_DEFS_DIR}/triggers.list";
 //   std::ifstream the_file(filename.c_str(),std::ios_base::in);
 //   BOOST_REQUIRE_MESSAGE(the_file,"file " << filename << "not found");
 //
