@@ -940,6 +940,9 @@ bool NodeFlagCondition::execute(VItem* item)
 
         else if(nodeFlagName_ == "is_statuscmd_failed")
             return vnode->isFlagSet(ecf::Flag::STATUSCMD_FAILED);
+
+        else if(nodeFlagName_ == "threshold")
+            return vnode->isFlagSet(ecf::Flag::THRESHOLD);
 	}
 
 	return false;
