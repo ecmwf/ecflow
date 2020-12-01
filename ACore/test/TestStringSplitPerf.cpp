@@ -221,7 +221,17 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
 //   Time for boost::string_view(2) 2001774 times = 0.752472
 
    // Now test performance of splitting with a big DEFS file
-   std::string path = "/var/tmp/ma0/BIG_DEFS/vsms2.31415.def";
+   char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR");
+   if (!ecf_test_defs_dir) {
+      std::cout << "Ingoring test, since directory defined by environment variable(ECF_TEST_DEFS_DIR) is missing";
+      return;
+   }
+   std::string path = std::string(ecf_test_defs_dir) + "/vsms2.31415.def";
+   if (!fs::exists(path)) {
+      std::cout << "Ingoring test, since file defined by environment variable(ECF_TEST_DEFS_DIR) " << path << " is missing";
+      return;
+   }
+
    std::vector<std::string> file_contents;
    if (File::splitFileIntoLines(path,file_contents,true/* ignore empty lines*/)) {
 
