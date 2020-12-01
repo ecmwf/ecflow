@@ -615,6 +615,13 @@
         },
         {
             "menu"           : "Special",
+            "name"           : "Clear threshold (=slow job creation) flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag threshold <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+        {
+            "menu"           : "Special",
             "name"           : "Clear log error flag",
             "visible_for"    : "server",
             "command"        : "ecflow_client --alter clear_flag log_error /",
