@@ -53,6 +53,14 @@ Process
        git push --tags
        git_tag=5.6.0
        When single person making release
+       
+    3/ Update github master branch
+       git checkout master
+       git remote add github git@github.com:ecmwf/ecflow.git
+       git pull github master
+       git push github
+       
+       if you dont have permssion to do this, then do it as user deploy
  
 0/ Update metabuilder/config.yaml master branch to "5.6.0"  
    Then use the meta builder/master to build/install.
