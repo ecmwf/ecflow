@@ -128,7 +128,7 @@ if test_uname Linux ; then
 elif test_uname Darwin ; then
 
    cp $WK/build_scripts/site_config/site-config-Darwin.jam $SITE_CONFIG_LOCATION 
-   tool_path="/usr/local/opt/gcc/bin/gcc-9"
+   tool_path="/usr/local/opt/gcc@10/bin/gcc-10"
    CXXFLAGS=cxxflags="-fPIC -Wunused-function -Wno-maybe-uninitialized -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable -Wno-parentheses"
    
 elif test_uname HP-UX ; then
@@ -152,12 +152,12 @@ fi
 # using toolset-name : version :invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
 #
-if [[ ! -e $HOME/user-config.jam ]] ; then
-   cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
-   echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
-   echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
-   echo "using $tool : : $tool_path : <cxxflags>-fPIC ;"                                              >> $HOME/user-config.jam
-fi
+rm $HOME/user-config.jam
+cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
+echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
+echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
+echo "using $tool : : $tool_path : <cxxflags>-fPIC ;"                                              >> $HOME/user-config.jam
+
 
 #
 # Note: if '--build-dir=./tmpBuildDir' is omitted, boost will build the libs in a directory:
