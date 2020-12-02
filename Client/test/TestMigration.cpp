@@ -111,7 +111,7 @@ BOOST_FIXTURE_TEST_CASE( test_migration,ArgsFixture )
       BOOST_REQUIRE_MESSAGE( error_cnt == 0, "Migration test failed " << error_cnt << " times " );
    }
    else {
-      std::cout << "Ignoring test, since directory '/var/tmp/ma0/ECFLOW_TEST/migration' not found\n";
+      std::cout << "Ignoring test, since directory " << argv[1] << " not found\n";
    }
 }
 
