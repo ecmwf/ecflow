@@ -27,6 +27,7 @@
 #include "Host.hpp"
 #include "JobsParam.hpp"
 #include "NodeTreeVisitor.hpp"
+#include "File.hpp"
 
 #include "Ecf.hpp"
 #include "NodeState.hpp"
@@ -1267,6 +1268,63 @@ void NodeContainer::restore()
    fs::remove(the_archive_path);                             // remove the file, could still throw
 }
 
+bool NodeContainer::has_archive() const
+{
+   if (get_flag().is_set(ecf::Flag::ARCHIVED)) return true;
+   for(auto& n: nodes_) {
+      if (n->has_archive()) return true;
+   }
+   return false;
+}
+
+void NodeContainer::remove_archived_files()
+{
+   /// Called during delete, remove all child archived files
+   if (!has_archive()) {
+      return;
+   }
+
+   std::string ecf_home;
+   if (!findParentUserVariableValue( Str::ECF_HOME(), ecf_home )) {
+      return;
+   }
+
+   // <host>.<port>.ECF_NAME.check
+   // for /ecflow =  Avis-MacBook-Pro.local.4040.:ecflow.check
+   std::string the_archive_path = archive_path();
+
+   // remove trailing '.check'
+   std::string::size_type check_pos = the_archive_path.rfind(".check");
+   if (check_pos == std::string::npos) {
+      // somethings gone wrong
+      return;
+   }
+   the_archive_path.erase(the_archive_path.begin() + check_pos, the_archive_path.end());
+
+
+   // Find *all* archived files in ECF_HOME
+   std::vector<boost::filesystem::path> archived_file_vec;
+   File::find_files_with_extn(ecf_home,".check",archived_file_vec);
+   if (archived_file_vec.empty()) return;
+
+   // if this nodes archive file is a prefix for any archived file, then it is child archived file and needs
+   // to be deleted. i.e if /ecflow is being deleted then:
+   // the_archive_path = Avis-MacBook-Pro.local.4040.:ecflow
+   // Hence if this matches as a prefix for any archive file, then it needs to be deleted.
+   //  Avis-MacBook-Pro.local.4040.:ecflow.check
+   //  Avis-MacBook-Pro.local.4040.:ecflow:darwin.check
+   //  Avis-MacBook-Pro.local.4040.:ecflow:darwin:apple_clang.check
+   //  Avis-MacBook-Pro.local.4040.:ecflow:darwin:gnu.10.check
+
+   for(const auto& file_path : archived_file_vec) {
+      std::string path = file_path.string();
+
+      if (path.find(the_archive_path) == 0) {
+         try { fs::remove(path); }
+         catch(...) {};
+      }
+   }
+}
 
 void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive,const std::vector<std::string>& no_sort)
 {
@@ -1278,20 +1336,27 @@ void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive,const st
 
 bool NodeContainer::doDeleteChild(Node* child)
 {
-	SuiteChanged1 changed(suite());
-	auto theTaskEnd = nodes_.end();
- 	for(auto t = nodes_.begin(); t!=theTaskEnd; ++t) {
- 		if ( (*t).get() == child) {
- 		   child->set_parent(nullptr); // must set to NULL, allow it to be re-added to different parent
-  			nodes_.erase(t);
-            add_remove_state_change_no_ = Ecf::incr_state_change_no();
-            set_most_significant_state_up_node_tree();
-  			return true;
- 		}
-		if ((*t)->doDeleteChild(child)) {
- 			return true;
- 		}
- 	}
+   SuiteChanged1 changed(suite());
+   auto theTaskEnd = nodes_.end();
+   for(auto t = nodes_.begin(); t!=theTaskEnd; ++t) {
+      if ( (*t).get() == child) {
+
+         // Remove any child archived file
+         Family* fam = (*t)->isFamily();
+         if (fam) {
+            fam->remove_archived_files();
+         }
+
+         child->set_parent(nullptr); // must set to NULL, allow it to be re-added to different parent
+         nodes_.erase(t);
+         add_remove_state_change_no_ = Ecf::incr_state_change_no();
+         set_most_significant_state_up_node_tree();
+         return true;
+      }
+      if ((*t)->doDeleteChild(child)) {
+         return true;
+      }
+   }
 
  	return false;
 }

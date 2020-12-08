@@ -110,8 +110,10 @@ public:
    void update_limits() override;
    void sort_attributes(ecf::Attr::Type attr,bool recursive = true,const std::vector<std::string>& no_sort = std::vector<std::string>()) override;
 
+   bool has_archive() const override;
    void archive();
    void restore();
+   void remove_archived_files(); // used in delete
    std::string archive_path() const; //can throw if ECF_HOME not defined
 
    boost::posix_time::time_duration sum_runtime() override;

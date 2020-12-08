@@ -1158,6 +1158,10 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
  	for(auto s = suiteVec_.begin(); s!=theSuiteEnd; ++s) {
  		if ( (*s).get() == nodeToBeDeleted) {
   		 	Ecf::incr_modify_change_no();
+
+  		 	// Remove any child archived file
+  		 	(*s)->remove_archived_files();
+
   		 	client_suite_mgr_.suite_deleted_in_defs(*s); // must be after Ecf::incr_modify_change_no();
   		 	(*s)->set_defs(nullptr); // Must be set to NULL, allows re-added to a different defs
   			suiteVec_.erase(s);

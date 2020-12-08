@@ -88,6 +88,13 @@ public:
 			std::vector<boost::filesystem::path>& paths_found   // placing path here if found
 	);
 
+   /// Find all files with given extension must include leading .
+   static void find_files_with_extn(
+         const boost::filesystem::path& dir_path,            // In this directory
+         const std::string&             extn,                // find files matching this extension
+         std::vector<boost::filesystem::path>& paths_found   // placing path here if found
+   );
+
 
 	/// recursively look for a file, given a starting directory and path token
 	/// Returns the first match found
