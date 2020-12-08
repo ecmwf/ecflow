@@ -5,10 +5,10 @@
 #                           Darwin - $(HOME)/install/ecflow/${ECFLOW_VERSION} 
 #   Linux Install using: cd $WK; ./cmake.sh make -j8 install
 #   mac   Install using: cd $WK; build_scripts/mac.sh make -j8 install
-# - metabuilder is at $WK/../metabuild
+# - metabuilder is at $WK/../metabuilder
 
 # Alter the command below to either
-# a/ use the system installed version, everywhere, avoid miss-match between different releases
+# a/ use the system installed version, everywhere, avoid mismatch between different releases
 # b/ Test the latest release, requires compatible client/server versions
 
 set -e # stop the shell on first error
@@ -48,8 +48,8 @@ fi
 # SSL
 # =======================================================================
 #export ECF_DEBUG_CLIENT=1
-#export ECF_SSL=`hostname`.${ECF_PORT} # use server specfic <host>.<port>.*** certificates
-#export ECF_SSL=1                      # use non server specfic  certificates
+#export ECF_SSL=`hostname`.${ECF_PORT} # use server specific <host>.<port>.*** certificates
+#export ECF_SSL=1                      # use non server specific  certificates
 
 
 # =======================================================================
