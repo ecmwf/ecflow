@@ -333,6 +333,7 @@ public:
    virtual NodeContainer* isNodeContainer() const { return nullptr;}
    virtual Family* isFamily() const { return nullptr;}
    virtual Suite* isSuite() const  { return nullptr;}
+   virtual bool has_archive() const { return false; }
 
    ///  returns the absolute node path
    std::string absNodePath() const;

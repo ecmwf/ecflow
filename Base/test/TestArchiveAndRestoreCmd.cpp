@@ -271,6 +271,47 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_overlap )
    BOOST_CHECK_MESSAGE(!f1->flag().is_set(ecf::Flag::RESTORED),"Family f1 should not have restored flag set");
 }
 
+BOOST_AUTO_TEST_CASE( test_archive_and_delete_suite )
+{
+   cout << "Base:: ...test_archive_and_delete_suite\n";
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_HOME ....
+   //  family f1
+   //     task t1
+   // Here we are archiving the family and then the suite
+   // We then delete the suite and check that both archived files are removed.
+
+   // We use Pid::unique_name, to allow multiple invocation of this test
+   Defs theDefs;
+   std::string ecf_home = File::test_data("Base/test","Base");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+   suite_ptr suite = theDefs.add_suite( Pid::unique_name("test_archive_and_delete_suite")  );
+   family_ptr family = suite->add_family( "f1" );
+   family->add_task("t1");
+   //cout << theDefs << "\n";
+
+   TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,family->absNodePath())));
+   BOOST_CHECK_MESSAGE(family->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not set on family");
+   BOOST_CHECK_MESSAGE(family->has_archive(),"Archived flag not set on family");
+   std::string family_archive_path = family->archive_path();
+   BOOST_CHECK_MESSAGE(fs::exists(family_archive_path),"Archive path" << family->archive_path() << " not created");
+   BOOST_CHECK_MESSAGE( family->nodeVec().empty(),"Children of family not removed after archive");
+
+   TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,suite->absNodePath())));
+   BOOST_CHECK_MESSAGE(suite->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not set on suite");
+   BOOST_CHECK_MESSAGE(suite->has_archive(),"Archived flag not set on family");
+   std::string suite_archive_path = suite->archive_path();
+   BOOST_CHECK_MESSAGE(fs::exists(suite_archive_path),"Archive path" << suite->archive_path() << " not created");
+   BOOST_CHECK_MESSAGE( suite->nodeVec().empty(),"Children of suite not removed after archive");
+
+   TestHelper::invokeRequest(&theDefs,Cmd_ptr( new DeleteCmd(suite->absNodePath())));
+   BOOST_CHECK_MESSAGE(!fs::exists(suite_archive_path), "Suite Archived file not removed after DeleteCmd");
+   BOOST_CHECK_MESSAGE(!fs::exists(family_archive_path),"Family Archived file not removed after DeleteCmd");
+}
+
+
 BOOST_AUTO_TEST_CASE( test_archive_and_restore_errors )
 {
    cout << "Base:: ...test_archive_and_restore_errors\n";
