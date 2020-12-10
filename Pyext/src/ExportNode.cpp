@@ -98,9 +98,9 @@ node_ptr add_autocancel(node_ptr self,int days )                         { self-
 node_ptr add_autocancel_1(node_ptr self,int hour, int min,bool relative) { self->addAutoCancel(ecf::AutoCancelAttr(hour,min,relative)); return self;}
 node_ptr add_autocancel_2(node_ptr self,const TimeSlot& ts,bool relative){ self->addAutoCancel(ecf::AutoCancelAttr(ts,relative)); return self;}
 node_ptr add_autocancel_3(node_ptr self, const ecf::AutoCancelAttr& attr){ self->addAutoCancel(attr); return self;}
-node_ptr add_autoarchive(node_ptr self,int days )                         { self->add_autoarchive(ecf::AutoArchiveAttr(days)); return self;}
-node_ptr add_autoarchive_1(node_ptr self,int hour, int min,bool relative) { self->add_autoarchive(ecf::AutoArchiveAttr(hour,min,relative)); return self;}
-node_ptr add_autoarchive_2(node_ptr self,const TimeSlot& ts,bool relative){ self->add_autoarchive(ecf::AutoArchiveAttr(ts,relative)); return self;}
+node_ptr add_autoarchive(node_ptr self,int days,bool idle)                { self->add_autoarchive(ecf::AutoArchiveAttr(days,idle)); return self;}
+node_ptr add_autoarchive_1(node_ptr self,int hour, int min,bool relative,bool idle) { self->add_autoarchive(ecf::AutoArchiveAttr(hour,min,relative,idle)); return self;}
+node_ptr add_autoarchive_2(node_ptr self,const TimeSlot& ts,bool relative,bool idle){ self->add_autoarchive(ecf::AutoArchiveAttr(ts,relative,idle)); return self;}
 node_ptr add_autoarchive_3(node_ptr self, const ecf::AutoArchiveAttr& attr){ self->add_autoarchive(attr); return self;}
 
 node_ptr add_zombie(node_ptr self, const ZombieAttr& attr){ self->addZombie(attr); return self;}
@@ -356,9 +356,9 @@ void export_Node()
    .def("add_autocancel",   &add_autocancel_1)
    .def("add_autocancel",   &add_autocancel_2)
    .def("add_autocancel",   &add_autocancel_3)
-   .def("add_autoarchive",  &add_autoarchive,            DefsDoc::add_autoarchive_doc())
-   .def("add_autoarchive",  &add_autoarchive_1)
-   .def("add_autoarchive",  &add_autoarchive_2)
+   .def("add_autoarchive",  &add_autoarchive,  (bp::arg("days"),bp::arg("idle")=false),DefsDoc::add_autoarchive_doc())
+   .def("add_autoarchive",  &add_autoarchive_1,(bp::arg("hour"),bp::arg("min"),bp::arg("relative"),bp::arg("idle")=false))
+   .def("add_autoarchive",  &add_autoarchive_2,(bp::arg("TimeSlot"),bp::arg("relative"),bp::arg("idle")=false))
    .def("add_autoarchive",  &add_autoarchive_3)
    .def("add_autorestore",  &add_autorestore,            DefsDoc::add_autorestore_doc())
    .def("add_autorestore",  &add_autorestore1)

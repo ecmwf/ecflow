@@ -259,7 +259,15 @@ BOOST_AUTO_TEST_CASE( test_AutoArchiveAttr_serialisation )
       doSaveAndRestore(fileName,saved);
    }
    {
-      AutoArchiveAttr saved( TimeSlot(12,10), true) ;
+      AutoArchiveAttr saved(100,true/*idle*/);
+      doSaveAndRestore(fileName,saved);
+   }
+   {
+      AutoArchiveAttr saved( TimeSlot(12,10), true, false/*idle*/) ;
+      doSaveAndRestore(fileName,saved);
+   }
+   {
+      AutoArchiveAttr saved( TimeSlot(12,10), true, true/*idle*/) ;
       doSaveAndRestore(fileName,saved);
    }
 }

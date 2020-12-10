@@ -2542,20 +2542,19 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const
 
 bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const
 {
-   if ( auto_archive_ && state() == NState::COMPLETE) {
-      if (!isSuspended() && auto_archive_->isFree(calendar,get_state().second)) {
-         if (!isParentSuspended()) {
+   if ( auto_archive_ && !isSuspended() && !isParentSuspended()) {
+      if (auto_archive_->isFree(calendar,get_state())) {
 
-            /// *Only* archive this node if we don't create zombies anywhere for our children
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for(Task* t: taskVec) {
-               if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
-                  return false;
-               }
+         /// *Only* archive this node if we don't create zombies anywhere for our children
+         /// The most significant state could be ABORTED in family, but we could still have active tasks.
+         vector<Task*> taskVec;
+         getAllTasks(taskVec);
+         for(Task* t: taskVec) {
+            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+               return false;
             }
-            return true;
          }
+         return true;
       }
    }
    return false;
