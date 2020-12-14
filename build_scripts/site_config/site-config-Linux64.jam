@@ -105,10 +105,10 @@ using testing ;
 # these functions are used by OpenSSL internally & thus -ldl is an
 # indirect dependency when using -lcrypto(on Linux) Because we linking
 # with static version of crypto, need to explicitly link against indirect dependencies.
-lib libssl ;
-lib libcrypto ;
+lib ssl ;
+lib crypto ;
 lib dl        : : <link>shared ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
-alias openssl_libs : libssl libcrypto dl ;
+alias openssl_libs : ssl crypto dl ;
 
 # ==================== INSTALL =====================================================ß
 constant ECFLOW_INSTALL_PREFIX : /usr/local/apps ; 
