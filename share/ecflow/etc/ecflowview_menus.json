@@ -770,6 +770,15 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Clear restored flag",
+            "visible_for"    : "(suite or family)",
+            "enabled_for"    : "is_restored",
+            "command"        : "ecflow_client --alter clear_flag restored <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "-"
         },
 
