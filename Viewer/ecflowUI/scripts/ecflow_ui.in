@@ -169,6 +169,16 @@ do
            shift
            ;;
 
+        -cmd)
+            ECFLOWUI_USER_START_CMD="$2" 
+            if [ "x${ECFLOWUI_USER_START_CMD}" == "x" ] ; then
+                echo "No command is specified for option -cmd!"
+                exit 1
+            fi 
+            echo "Starting ecFlowUI with user specified command: ${ECFLOWUI_USER_START_CMD}"
+            shift
+            ;;
+
         #Specify the location of the config dir
         -confd)
             export ECFLOWUI_CONFIG_DIR=$2
@@ -209,6 +219,7 @@ EcflowUI
     -log              : write log messages to standard output
     -s                : start via the session manager
     -ts <host> <port> : start a temporary session viewing the given server
+    -cmd <cmd>        : start the executable via the specified command
     -confd <dir>      : start with the specified configuraton directory
     -h                : print this help message
 HEND
@@ -381,8 +392,8 @@ exe=${EXE_DIR}/ecflow_ui.x
 
 if [ $ECFLOWUI_BT != "no" ]
 then
-    catchsegv "$exe"
+    catchsegv ${ECFLOWUI_USER_START_CMD} "$exe"
 else
-    "$exe"
+    ${ECFLOWUI_USER_START_CMD} "$exe"
 fi
 
