@@ -17,14 +17,21 @@
 # The wait should prevent this.
 wait
 
-# record shell time, see head.h
+# record time between init and complete see head.h
 %ecfmicro !
 finish_time=$(date +%s)
 !ecfmicro %
-echo "Job End: Time duration: $((finish_time - start_time)) secs."
+echo "Job End: Time duration: $((finish_time - start_time)) secs *BETWEEN* init and complete"
 
 # Notify ECF of a normal end
 %ECF_CLIENT_EXE_PATH% --complete %COMPLETE_DEL_VARIABLES:%
+
+%ecfmicro !
+job_finish_time=$(date +%s)
+!ecfmicro %
+echo "Job End: *COMPLETE*  took    : $((job_finish_time - finish_time)) secs"
+echo "Job End: *JOB* duration took : $((job_finish_time - job_start_time)) secs"
+
 trap 0                          # Remove all traps
 exit 0                          # End the shell
 
