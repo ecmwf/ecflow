@@ -883,6 +883,17 @@ task_ptr NodeContainer::findTask(const std::string& taskName) const
 	return task_ptr();
 }
 
+std::string NodeContainer::find_node_path(const std::string& type, const std::string& node_name) const
+{
+   for(const auto& n: nodes_) {
+      std::string res = n->find_node_path(type,node_name);
+      if (!res.empty()) {
+         return res;
+      }
+   }
+   return string();
+}
+
 bool NodeContainer::hasTimeDependencies() const
 {
 	for(const auto& n: nodes_)  { if (n->hasTimeDependencies()) return true;}

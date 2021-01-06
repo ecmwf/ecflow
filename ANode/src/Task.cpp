@@ -320,6 +320,16 @@ node_ptr Task::find_immediate_child(const boost::string_view& name) const
 	return node_ptr();
 }
 
+std::string Task::find_node_path(const std::string& type, const std::string& node_name) const
+{
+   if (Str::caseInsCompare(type,"task")) {
+      if (node_name == name()) {
+         return absNodePath();
+      }
+   }
+   return string();
+}
+
 void Task::reset()
 {
    if (aliases_.empty()) {

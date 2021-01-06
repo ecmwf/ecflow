@@ -1085,6 +1085,38 @@ suite_ptr Defs::findSuite(const std::string& name) const
 	return suite_ptr();
 }
 
+std::string Defs::find_node_path(const std::string& type, const std::string& name) const
+{
+   for(const auto& s : suiteVec_) {
+      std::string res = s->find_node_path(type,name);
+      if (!res.empty()) return res;
+   }
+   return string();
+}
+
+node_ptr Defs::find_node(const std::string& type,const std::string& pathToNode) const
+{
+   //std::cout << "Defs::find_node  type:" << type << " path: " << pathToNode << "\n";
+   node_ptr node_p = findAbsNode(pathToNode);
+   if (!node_p) {
+      //std::cout << " node not found\n";
+      return node_p;
+   }
+
+   if (Str::caseInsCompare(type,"task")) {
+      if (node_p->isTask()) return node_p;
+   }
+   if (Str::caseInsCompare(type,"family")) {
+      if (node_p->isFamily()) return node_p;
+   }
+   if (Str::caseInsCompare(type,"suite")) {
+      if (node_p->suite()) return node_p;
+   }
+   //std::cout << " node found but type missmatch\n";
+   return node_ptr();
+}
+
+
 bool Defs::check(std::string& errorMsg,std::string& warningMsg) const
 {
 	for(const auto& s : suiteVec_) { s->check(errorMsg,warningMsg); }

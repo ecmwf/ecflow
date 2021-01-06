@@ -183,6 +183,16 @@ void Family::gen_variables(std::vector<Variable>& vec) const
    NodeContainer::gen_variables(vec);
 }
 
+std::string Family::find_node_path(const std::string& type, const std::string& node_name) const
+{
+   if (Str::caseInsCompare(type,"family")) {
+      if (node_name == name()) {
+         return absNodePath();
+      }
+   }
+   return NodeContainer::find_node_path(type,node_name);
+}
+
 // ================================================================
 
 FamGenVariables::FamGenVariables(const Family* f)
