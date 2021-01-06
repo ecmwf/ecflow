@@ -25,7 +25,7 @@
 using namespace ecf;
 using namespace std;
 
-
+// The -i is the last token before the comments start.
 static bool has_idle_flag(std::vector<std::string>& lineTokens)
 {
    return (lineTokens.size() >= 3 && lineTokens[2] == "-i" );
