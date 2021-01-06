@@ -1105,14 +1105,18 @@ node_ptr Defs::find_node(const std::string& type,const std::string& pathToNode) 
 
    if (Str::caseInsCompare(type,"task")) {
       if (node_p->isTask()) return node_p;
+      return node_ptr();
    }
    if (Str::caseInsCompare(type,"family")) {
       if (node_p->isFamily()) return node_p;
+      return node_ptr();
    }
    if (Str::caseInsCompare(type,"suite")) {
       if (node_p->suite()) return node_p;
+      return node_ptr();
    }
-   //std::cout << " node found but type missmatch\n";
+
+   throw std::runtime_error("Defs::find_node: Node of type can't be found " + type);
    return node_ptr();
 }
 
