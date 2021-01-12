@@ -17,7 +17,19 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QListWidget" name="savedSessionsList_"/>
+      <widget class="QTreeWidget" name="savedSessionsList_">
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
