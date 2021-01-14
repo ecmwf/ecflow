@@ -130,7 +130,7 @@ bool NodeExpressionParser::isNodeFlag(const std::string &str) const
         str == "is_rerun" || str == "is_waiting" || str == "is_zombie" ||
         str == "is_archived" || str == "is_restored" ||
         str ==  "is_ecfcmd_failed" || str == "is_killed" || str == "is_killcmd_failed" ||
-        str == "is_statuscmd_failed")
+        str == "is_statuscmd_failed" || str == "threshold")
         return true;
 
     return false;
