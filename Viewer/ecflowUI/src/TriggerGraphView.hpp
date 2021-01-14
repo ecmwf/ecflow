@@ -217,16 +217,11 @@ public:
     void writeSettings(VComboSettings* vs);
 
 public Q_SLOTS:
-    //void slotSelectItem(const QModelIndex&);
-    //void slotDoubleClickItem(const QModelIndex&);
     void slotContextMenu(const QPoint &position);
     void slotCommandShortcut();
     void slotViewCommand(VInfo_ptr,QString);
     void setZoomLevel(int);
     void slotEdgeInfo(const QUrl& link);
-    //void slotRerender();
-    //void slotSizeHintChangedGlobal();
-    //void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected) override;
 
 Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
@@ -236,6 +231,7 @@ Q_SIGNALS:
 
 protected:
     void clearGraph(bool keepConfig=false);
+    void mouseDoubleClickEvent(QMouseEvent *e);
     void showEvent(QShowEvent*) override;
     void timerEvent(QTimerEvent *event) override;
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
