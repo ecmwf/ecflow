@@ -72,7 +72,7 @@ void AutoRestoreAttr::do_autorestore()
       if (!referenceNode.get()) {
          /// Could not find the references node
          std::stringstream ss;
-         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a path '" << i  << "' which can not be found\n";
+         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a path '" << i  << "' which cannot be found\n";
          log(Log::ERR,ss.str());
          continue;
       }
@@ -87,7 +87,7 @@ void AutoRestoreAttr::do_autorestore()
       }
       else {
          std::stringstream ss;
-         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a node '" << i  << "' which can not be restored. Only family and suite nodes can be restored";
+         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a node '" << i  << "' which cannot be restored. Only family and suite nodes can be restored";
          log(Log::ERR,ss.str());
       }
    }
@@ -112,7 +112,7 @@ void AutoRestoreAttr::check(std::string& errorMsg) const
          }
 
          std::stringstream ss;
-         ss << "Error: autorestore on node " << node_->debugType() << " references a path '" << i  << "' which can not be found\n";
+         ss << "Error: autorestore on node " << node_->debugType() << " references a path '" << i  << "' which cannot be found\n";
          errorMsg += ss.str();
          continue;
       }

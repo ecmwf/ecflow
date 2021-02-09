@@ -100,13 +100,13 @@ class TestMigrate318(unittest.TestCase):
    
     def test_task_abort_reason_bug(self):
         # In ecflow_client --migrate, we can get abort reason to span multiple line, hence messing up load
-        list_of_defs_lines = ["# 3.1.2","task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task can not be found:\n",
+        list_of_defs_lines = ["# 3.1.2","task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task cannot be found:\n",
                               "line2\n", "line3\n",">abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script\n" ]
            
         abort_migrator = ecflow_migrate.MigrateForTaskAbort(list_of_defs_lines)
         abort_migrator.migrate(318)
             
-        expected_output_lines = ["# 3.1.2","task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task can not be found: line2 line3 >abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script\n"]
+        expected_output_lines = ["# 3.1.2","task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task cannot be found: line2 line3 >abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script\n"]
         self.assertEqual(abort_migrator.output_lines(),expected_output_lines)
             
     def test_migrate_abort_file(self):

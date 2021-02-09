@@ -433,7 +433,7 @@ if __name__ == "__main__":
     # Do *NOT* delete attributes using iterator traversal
     # The iterators *are* bound to the c++ iterators hence if we delete
     # over the traversal, we can corrupt the vector, leading to undefined behavour.  
-    # Hence we **can not** delete more than once over a traversal
+    # Hence we **cannot** delete more than once over a traversal
     # Soln 1: take a copy
     # *****************************************************************************
     # task.add_today( Today( 0,10 ))

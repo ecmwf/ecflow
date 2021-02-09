@@ -9,7 +9,7 @@ import glob
 #   cd $WK; cd ecbuild/release/; sh -x ../../cmake.sh release; make ; make install
 #   calling 'sh -x ../../cmake.sh release' will generate setup.py from setup.py.in
 # Issues:
-#   Can not test cmake install, since it will always install to 
+#   Cannot test cmake install, since it will always install to 
 #     /usr/local/apps/python/current/lib/python2.7/site-packages/ecflow
 #
 # To test install manually, we can:

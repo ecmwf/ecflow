@@ -132,7 +132,7 @@ RepeatDate::RepeatDate( const std::string& variable,
 
    if (delta == 0) {
       std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-      throw std::runtime_error("Invalid Repeat date: the delta can not be zero" + ss.str());
+      throw std::runtime_error("Invalid Repeat date: the delta cannot be zero" + ss.str());
    }
 
    std::string theStart = boost::lexical_cast< std::string >(start);

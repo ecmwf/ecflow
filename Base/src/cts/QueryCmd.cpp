@@ -203,7 +203,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    if (query_type_ == "event") {
       const Event& event = node->findEventByNameOrNumber(attribute_);
       if (event.empty()) {
-         std::stringstream ss; ss << "QueryCmd: Can not find event " << attribute_ << " on node " << path_to_attribute_;
+         std::stringstream ss; ss << "QueryCmd: Cannot find event " << attribute_ << " on node " << path_to_attribute_;
          throw std::runtime_error(ss.str());
       }
       if (event.value()) return PreAllocatedReply::string_cmd( Event::SET());
@@ -213,7 +213,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    if (query_type_ == "meter") {
       const Meter& meter = node->findMeter(attribute_);
       if (meter.empty()) {
-         std::stringstream ss; ss << "QueryCmd: Can not find meter " << attribute_ << " on node " << path_to_attribute_;
+         std::stringstream ss; ss << "QueryCmd: Cannot find meter " << attribute_ << " on node " << path_to_attribute_;
          throw std::runtime_error(ss.str());
       }
       return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(meter.value()));
@@ -233,7 +233,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    if (query_type_ == "label") {
       const Label& label = node->find_label(attribute_);
       if (label.empty()) {
-         std::stringstream ss; ss << "QueryCmd: Can not find label " << attribute_ << " on node " << path_to_attribute_;
+         std::stringstream ss; ss << "QueryCmd: Cannot find label " << attribute_ << " on node " << path_to_attribute_;
          throw std::runtime_error(ss.str());
       }
       if (label.new_value().empty()) return PreAllocatedReply::string_cmd(label.value());
@@ -245,7 +245,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
       if (node->findParentVariableValue(attribute_,the_value)) {
          return PreAllocatedReply::string_cmd( the_value );
       }
-      std::stringstream ss; ss << "QueryCmd: Can not find variable, repeat or generated var' of name " << attribute_ << " on node " << path_to_attribute_ << " or its parents";
+      std::stringstream ss; ss << "QueryCmd: Cannot find variable, repeat or generated var' of name " << attribute_ << " on node " << path_to_attribute_ << " or its parents";
       throw std::runtime_error(ss.str());
    }
 
@@ -266,7 +266,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    if (query_type_ == "repeat") {
       const Repeat& repeat = node->repeat();
       if (repeat.empty()) {
-          std::stringstream ss; ss << "QueryCmd: Can not find repeat on node " << path_to_attribute_;
+          std::stringstream ss; ss << "QueryCmd: Cannot find repeat on node " << path_to_attribute_;
           throw std::runtime_error(ss.str());
       }
       if (attribute_.empty())   return PreAllocatedReply::string_cmd( repeat.valueAsString() );

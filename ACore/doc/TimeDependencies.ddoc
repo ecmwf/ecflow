@@ -195,7 +195,7 @@ o This tracks real time.
   This mimimize missed time slots, however when we have a time
   series it will result in missed time slots.
   i.e  time 00:00 20:00 00:10
-  If server server is suspended at 13:00 for 1 hour, then job can not be submitted
+  If server server is suspended at 13:00 for 1 hour, then job cannot be submitted
   when the server resumes at 14:00, only 1 job is submitted. 
   Also relative times will not be honoured.
   

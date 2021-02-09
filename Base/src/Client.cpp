@@ -291,7 +291,7 @@ void Client::handle_read( const boost::system::error_code& e )
 
 		// If we get back Invalid argument. It means server could *NOT* decode client message. Equally client could not decode server reply
 		//   - Could be boost version of client/server are incompatible
-		//   - 4 series ecflow can not talk to 5 series ecflow or vice versa
+		//   - 4 series ecflow cannot talk to 5 series ecflow or vice versa
 		// We treat this specially
 		if (e.value() == boost::asio::error::invalid_argument) {
 #ifdef DEBUG_CLIENT

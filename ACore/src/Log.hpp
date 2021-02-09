@@ -70,7 +70,7 @@ public:
    const std::string& get_cached_time_stamp() const;
 
    /// returns the contents of the log file, or the last n lines
-   /// Will throw an std::runtime_error if the log file can not be opened
+   /// Will throw an std::runtime_error if the log file cannot be opened
    /// Will close the file.
    static int get_last_n_lines_default() { return 100;}
    std::string contents(int get_last_n_lines);

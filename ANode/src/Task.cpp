@@ -532,7 +532,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
             }
          }
          catch ( boost::bad_lexical_cast& ) {
-            LOG(Log::ERR,"Variable ECF_TRIES must be convertible to an integer. Can not resubmit job for task:" << absNodePath());
+            LOG(Log::ERR,"Variable ECF_TRIES must be convertible to an integer. Cannot resubmit job for task:" << absNodePath());
             return false;
          }
       }
@@ -665,7 +665,7 @@ bool Task::addChild( const node_ptr&, size_t)
 bool Task::isAddChildOk( Node*, std::string& errorMsg) const
 {
    // Only used during PLUG: aliases can't be plugged.
-	errorMsg += "Can not add children to a task node.";
+	errorMsg += "Cannot add children to a task node.";
 	return false;
 }
 

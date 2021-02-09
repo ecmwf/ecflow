@@ -151,7 +151,7 @@ void ServerState::sort_variables()
 }
 
 
-// server variable can NOT be modified or deleted, only overridden
+// server variable CANNOT be modified or deleted, only overridden
 void ServerState::add_or_update_server_variables( const NameValueVec& env)
 {
    for(const auto& p: env) {

@@ -102,7 +102,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 
    if (sourceNode->isAlias()) {
        std::string errorMsg = "Plug command failed. The source node "; errorMsg += source_;
-       errorMsg += " is a Alias. Alias can not be moved";
+       errorMsg += " is a Alias. Alias cannot be moved";
        throw std::runtime_error( errorMsg ) ;
    }
 
@@ -374,7 +374,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       // pass ownership
       if (!thedestNode->addChild( src_node )) {
          // This should never fail !!!! else we have lost/ and leaked source node !!!!
-         throw std::runtime_error("Fatal error plug(move) command failed. can not addChild") ;
+         throw std::runtime_error("Fatal error plug(move) command failed. cannot addChild") ;
       }
 
       add_node_for_edit_history(destNode);

@@ -81,7 +81,7 @@
    suspended
       Is a :term:`node` state. A :term:`node` can be placed into the suspended state via a :term:`defstatus` or via :term:`ecflowview`
       
-      A suspended :term:`node` including any of its children can not take part in :term:`scheduling` until
+      A suspended :term:`node` including any of its children cannot take part in :term:`scheduling` until
       the node is resumed.
 
    shutdown
@@ -277,7 +277,7 @@
       
       They include :term:`trigger`, :term:`date`, :term:`day`, :term:`time`, :term:`today`, :term:`cron`, :term:`complete expression`, :term:`inlimit` and  :term:`limit`. 
       
-      A :term:`task` that is dependent can not be started as long as some dependency is holding it or any of its **parent** :term:`node` s.
+      A :term:`task` that is dependent cannot be started as long as some dependency is holding it or any of its **parent** :term:`node` s.
       
       The :term:`ecflow_server` will check the dependencies every minute, during normal :term:`scheduling` **and** when any
       :term:`child command` causes a state change in the :term:`suite definition`.
@@ -874,7 +874,7 @@
             
            These directives take part in :term:`variable substitution`.
            
-           If the micro characters are not paired (i.e uneven) then :term:`variable substitution` can not take place
+           If the micro characters are not paired (i.e uneven) then :term:`variable substitution` cannot take place
            hence an error message is issued. 
       
            ::
@@ -960,7 +960,7 @@
       There are several types of zombies:
       
          * path 
-            - The task path can not be found in the server, because node tree was deleted, 
+            - The task path cannot be found in the server, because node tree was deleted, 
               replaced,reload, server crashed or backup server does not have node tree. 
             - Jobs could have been created, via server :term:`scheduling` or by :term:`user commands` 
             
@@ -974,7 +974,7 @@
             
             - Server crashed ( or terminated and restarted) and the recovered :term:`check point` file is out of date.
             - A :term:`task` is repeatedly re-run, earlier copies will not be remembered.
-            - Job sent by another :term:`ecflow_server`, but which can not talk to the original :term:`ecflow_server`
+            - Job sent by another :term:`ecflow_server`, but which cannot talk to the original :term:`ecflow_server`
             - Network glitches/network down
       
       The type of the zombie is not fixed and may change.

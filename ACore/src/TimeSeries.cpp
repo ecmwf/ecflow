@@ -258,7 +258,7 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 	}
 
 	// the nextTimeSlot_ needs to be set to a multiple of incr
-	// However the nextTimeSlot_ can not just be incremented by incr
+	// However the nextTimeSlot_ cannot just be incremented by incr
 	// since we can't assume that a task completes within the given time slots
 	// *hence increments to NEXT TIME SLOT large than calendar time.
 	// time 10::00 20:00 01:00
@@ -500,7 +500,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       return false;
    }
 
-   // *** When we have a single time slots we can not make a decision, whether
+   // *** When we have a single time slots we cannot make a decision, whether
    // *** we should re-queue based on this attribute *alone*. (i.e when we have > 1 time/today attributes)
    // *** Hence we pass min and max time slots, over all the time bases attributes of the same kind.
    // *** In our case we only do this for Time and Today attributes.

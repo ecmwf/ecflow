@@ -96,7 +96,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 
    node_ptr node = find_node_for_edit(as->defs().get() ,path_to_node_); // will throw if defs not defined, or node not found
 	Submittable* submittable = node->isSubmittable();
-	if (!submittable)  throw std::runtime_error( "EditScriptCmd failed. Can not locate task or alias at path " + path_to_node_ ) ;
+	if (!submittable)  throw std::runtime_error( "EditScriptCmd failed. Cannot locate task or alias at path " + path_to_node_ ) ;
 
 	/// record any changes made to suite. Needed for incremental updates
    SuiteChangedPtr changed(node.get());

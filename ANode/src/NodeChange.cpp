@@ -264,7 +264,7 @@ void Node::change_time(const std::string& old,const std::string& new_time)
          return;
       }
    }
-   throw std::runtime_error("Node::change_time : Can not find time attribute: ");
+   throw std::runtime_error("Node::change_time : Cannot find time attribute: ");
 }
 
 void Node::change_today(const std::string& old,const std::string& new_time)
@@ -281,6 +281,6 @@ void Node::change_today(const std::string& old,const std::string& new_time)
          return;
       }
    }
-   throw std::runtime_error("Node::change_today : Can not find today attribute: ");
+   throw std::runtime_error("Node::change_today : Cannot find today attribute: ");
 }
 

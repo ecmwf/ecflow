@@ -103,7 +103,7 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const
 	      }
 	   }
 	   else {
-	      return PreAllocatedReply::error_cmd("ZombieCmd: process_or_remote_id and password can not be used when multiple paths are specified. Please specify a single path");
+	      return PreAllocatedReply::error_cmd("ZombieCmd: process_or_remote_id and password cannot be used when multiple paths are specified. Please specify a single path");
 	   }
 	}
 
@@ -182,7 +182,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 			desc.add_options()( CtsApi::zombieBlockArg(), po::value< vector<string> >()->multitoken(),
 			         "Locates the task in the servers list of zombies, and sets flags to block it.\n"
 			         "This is default behaviour of the child commands(init,abort,complete,wait,queue)\n"
-			         "when the server can not match the passwords. Each child commands will continue\n"
+			         "when the server cannot match the passwords. Each child commands will continue\n"
 			         "attempting to connect to the server for 24 hours, and will then return an error.\n"
 			         "The connection timeout can be configured with environment ECF_TIMEOUT\n"
 			         "  args = list of task paths, at least one expected\n"
@@ -229,7 +229,7 @@ void ZombieCmd::create( Cmd_ptr& cmd,
    }
    if ( paths.size() > 1 && !options.empty()) {
       std::stringstream ss;
-      ss << "ZombieCmd: process_or_remote_id and password can not be used when multiple paths are specified. Please specify a single path\n";
+      ss << "ZombieCmd: process_or_remote_id and password cannot be used when multiple paths are specified. Please specify a single path\n";
       throw std::runtime_error( ss.str() );
    }
    if (options.size() >= 3) {

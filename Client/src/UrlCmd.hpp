@@ -26,7 +26,7 @@ public:
 	/// Will throw std::runtime_error if defs or node path is not correct
 	UrlCmd(defs_ptr defs, const std::string& absNodePath );
 
-	/// Will throw std::runtime_error if url can not be formed
+	/// Will throw std::runtime_error if url cannot be formed
 	std::string getUrl() const;
 
 	/// Execute the url command

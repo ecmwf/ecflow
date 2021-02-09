@@ -93,7 +93,7 @@ EcfFile& EcfFile::operator=(const EcfFile& rhs)
 // Which will cause a state change.
 // If the script fails then it is up to the calling Task to set this flag
 // This class is also used to extract the scripts/manual, etc form
-// a read only command. hence this class can not make state changes
+// a read only command. hence this class cannot make state changes
 // ===================================================================================
 EcfFile::EcfFile( Node* t,
                   const std::string& pathToEcfFileOrCommand,
@@ -380,7 +380,7 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,const s
       string::size_type ecfmicro_pos = script_lines[i].find(Ecf::MICRO());
       if ( ecfmicro_pos == 0) {
 
-         // We can not do variable substitution between %nopp/%end
+         // We cannot do variable substitution between %nopp/%end
          if (script_lines[i].find(T_COMMENT) == 1)  { comment = true; continue;}
          if (script_lines[i].find(T_NOOP)    == 1)  { return;}
          if (script_lines[i].find(T_MANUAL)  == 1)  { return;}
@@ -698,7 +698,7 @@ void EcfFile::variableSubstitution(const JobsParam& jobsParam)
       string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
       if (ecfmicro_pos == 0) {
 
-         // We can not do variable substitution between %nopp/%end
+         // We cannot do variable substitution between %nopp/%end
          if (jobLines_[i].find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
          if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
          if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
@@ -829,7 +829,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
       string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
       if (ecfmicro_pos == 0) {
 
-         // We can not do variable substitution between %nopp/%end
+         // We cannot do variable substitution between %nopp/%end
          if (jobLines_[i].find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
          if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
          if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }

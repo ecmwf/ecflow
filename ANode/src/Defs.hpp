@@ -70,7 +70,7 @@ public:
    void set_most_significant_state();
 
    // The defs does not need suspend()/resume() as this is controlled by the server states
-   // The defs can not schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
+   // The defs cannot schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
    bool isSuspended() const { return (server().get_state() != SState::RUNNING); }
 
    /// Python based checking

@@ -154,13 +154,13 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      // The recursive option is *NOT* applicable to events, hence ignore. According to Axel !!!!
  	      if ( stateOrEvent_ == Event::SET() )  {
  	         if (!node->set_event(the_event)) {
- 	            error_ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")\n";
+ 	            error_ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") cannot find event(" << the_event << ")\n";
 	            continue;
  	         }
  	      }
  	      else if ( stateOrEvent_ == Event::CLEAR() ) {
  	         if (!node->clear_event(the_event)) {
- 	            error_ss << "ForceCmd: force clear: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")\n";
+ 	            error_ss << "ForceCmd: force clear: failed for node(" << node->absNodePath() << ") cannot find event(" << the_event << ")\n";
  	            continue;
  	         }
  	      }

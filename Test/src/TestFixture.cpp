@@ -100,7 +100,7 @@ void TestFixture::init(const std::string& project_test_dir)
 
 
    // ********************************************************
-   // Note: Global fixture Constructor can not use BOOST macro
+   // Note: Global fixture Constructor cannot use BOOST macro
    // ********************************************************
 
    // Let first see if we need do anything. If ECF_HOST is specified (ie the name
@@ -227,7 +227,7 @@ void TestFixture::init(const std::string& project_test_dir)
 
 TestFixture::~TestFixture()
 {
-	// Note: Global fixture Destructor can not use BOOST macro
+	// Note: Global fixture Destructor cannot use BOOST macro
   	std::cout << "TestFixture::~TestFixture() " << client().host() << ":" << client().port() << "\n";
 
    // destructors should not allow exception propagation

@@ -28,7 +28,7 @@ bool EventParser::doParse( const std::string& line,
 {
 	if ( lineTokens.size() < 2 ) throw std::runtime_error( "EventParser::doParse: Invalid event : " + line );
 
-   // Events added to suite/family can not be signaled by child command
+   // Events added to suite/family cannot be signaled by child command
    // However alter/force should allow events to set/cleared on Family/suite
 	if ( nodeStack().empty() ) {
 		throw std::runtime_error("EventParser::doParse: Could not add event as node stack is empty at line: " + line );

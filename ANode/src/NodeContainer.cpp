@@ -605,7 +605,7 @@ bool NodeContainer::isAddChildOk( Node* theChild, std::string& errorMsg) const
 
 	Suite* theSuite = theChild->isSuite();
 	if ( theSuite ) {
-		errorMsg += "Can not add a suite as child.";
+		errorMsg += "Cannot add a suite as child.";
 		return false;
 	}
 
@@ -1143,7 +1143,7 @@ std::string NodeContainer::archive_path() const
 {
    std::string the_archive_path;
    if (!findParentUserVariableValue( Str::ECF_HOME() , the_archive_path )) {
-      std::stringstream ss; ss << "NodeContainer::archive_path: can not find ECF_HOME from " << debugNodePath();
+      std::stringstream ss; ss << "NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath();
       throw std::runtime_error(ss.str());
    }
 

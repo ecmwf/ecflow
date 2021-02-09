@@ -136,7 +136,7 @@ const char* NodeAttrDoc::label_doc()
 {
    return
             "A `label`_ has a name and value and provides a way of displaying information in a GUI.\n\n"
-            "The value can be anything(ASCII) as it can not be used in triggers.\n"
+            "The value can be anything(ASCII) as it cannot be used in triggers.\n"
             "The value of the label is set to be the default value given in the definition\n"
             "when the `suite`_ is begun. This is useful in repeated suites: A task sets the label\n"
             "to be something.\n\n"

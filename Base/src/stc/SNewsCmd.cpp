@@ -121,7 +121,7 @@ void SNewsCmd::init(
 
 #if DEBUG_NEWS
       std::stringstream ss;
-      ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : Can not find handle(" << client_handle << ") :DO_FULL_SYNC]";
+      ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : Cannot find handle(" << client_handle << ") :DO_FULL_SYNC]";
       log_append(ss.str());
 #else
       log_append("");

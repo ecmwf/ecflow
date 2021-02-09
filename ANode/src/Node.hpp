@@ -466,7 +466,7 @@ public:
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
-   // Can throw std::runtime_error of the attribute can not be found
+   // Can throw std::runtime_error of the attribute cannot be found
    void deleteTime(const std::string& name );
    void delete_time( const ecf::TimeAttr&  );
    void deleteToday(const std::string& name);
