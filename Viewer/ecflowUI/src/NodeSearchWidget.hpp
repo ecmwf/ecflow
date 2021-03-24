@@ -40,12 +40,12 @@ public:
     void readSettings(const QSettings &settings);
 
 public Q_SLOTS:
+    void slotFind();
 	void slotStop();
 
 protected Q_SLOTS:
     void slotShowDefPanel(bool);
     void slotShowQueryPanel(bool);
-	void slotFind();
 	void slotClose();
 	void slotQueryStarted();
 	void slotQueryFinished();
