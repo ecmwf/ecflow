@@ -57,6 +57,7 @@ option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF )
 option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
 option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
+option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely linked" OFF  )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -151,6 +152,7 @@ endif()
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
+ecbuild_info( "ENABLE_PYTHON_UNDEF_LOOKUP : ${ENABLE_PYTHON_UNDEF_LOOKUP}" )
 ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_TESTS               : ${ENABLE_TESTS} *if* disabled no need for boost test libs" )
 ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
