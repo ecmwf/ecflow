@@ -36,7 +36,7 @@ class Defs;
 struct TestFixture {
 
 	// Constructor will invoke the server, destructor will kill the server
-	// Since this class is static, the constructor/destructor can not call
+	// Since this class is static, the constructor/destructor cannot call
 	// any of BOOST MACRO, since the unit test will not be there.
 	// When running across platforms will will assume server is already running
    explicit TestFixture(const std::string& project_test_dir /* Test or view */);

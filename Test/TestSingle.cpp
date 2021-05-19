@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_SUITE( TestSingleSuite  )
 
 BOOST_AUTO_TEST_CASE( test_stress )
 {
-   // at 4000 : limit reached os can not create more than 3946 process
+   // at 4000 : limit reached os cannot create more than 3946 process
    //   Job creation failed for task /test_stress/family/t3996 could not create child process
    int no_of_tasks_to_run = 250;
    int run_test_for_n_seconds = 240;

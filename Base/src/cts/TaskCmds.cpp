@@ -49,7 +49,7 @@ bool TaskCmd::equals(ClientToServerCmd* rhs) const
 // IMPORTANT: In the current SMS/ECF only the init child command, passes the
 // process_or_remote_id_, for *ALL* other child commands this is empty.
 // The Automated tests get round this via setting ECF_RID in the header/tail job includes
-// However since this may not be in .sms/.ecf files, we can not rely on it
+// However since this may not be in .sms/.ecf files, we cannot rely on it
 // Hence we need to be able to handle *EMPTY* process_or_remote_id_ for child commands
 //
 //  Task State | Child                      | Log | Explanation

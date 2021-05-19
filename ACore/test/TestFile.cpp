@@ -505,4 +505,24 @@ BOOST_AUTO_TEST_CASE( test_directory_traversal )
    BOOST_REQUIRE_MESSAGE(regular_file > 0, "Expected some files in directory" );
 }
 
+BOOST_AUTO_TEST_CASE( test_get_all_files_by_extension )
+{
+   cout << "ACore:: ...test_get_all_files_by_extension\n";
+   {
+      std::string rootPath = File::test_data("ACore/test/data/badPasswdFiles","ACore");
+      std::vector<boost::filesystem::path> vec;
+      File::find_files_with_extn(rootPath,".passwd",vec);
+      // for(auto& file: vec)  std::cout << file << "\n";
+      BOOST_REQUIRE_MESSAGE(vec.size() == 6 , "Expected 6 files in directory " <<  rootPath);
+   }
+   {
+      std::string rootPath = File::test_data("ACore/test/data/badWhiteListFiles","ACore");
+      std::vector<boost::filesystem::path> vec;
+      File::find_files_with_extn(rootPath,".lists",vec);
+      // for(auto& file: vec)  std::cout << file << "\n";
+      BOOST_REQUIRE_MESSAGE(vec.size() == 7 , "Expected 7 files in directory " <<  rootPath);
+   }
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

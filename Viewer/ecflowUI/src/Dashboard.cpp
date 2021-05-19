@@ -31,7 +31,7 @@
 #include <QLabel>
 #include <QDockWidget>
 #include <QToolButton>
-#include "NodeSearchDialog.hpp"
+#include "NodeSearchWindow.hpp"
 #include "NodeSearchWidget.hpp"
 
 int Dashboard::maxWidgetNum_=20;
@@ -254,7 +254,7 @@ void Dashboard::addSearchDialog()
 {
 	//It will delete itself on close!!
 	//The parent is 0, for the reason see the comment in addDialog()
-	auto* d=new NodeSearchDialog(nullptr);
+	auto* d=new NodeSearchWindow(nullptr);
 	d->queryWidget()->setServerFilter(serverFilter_);
 
     connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
@@ -274,7 +274,7 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 {
 	//It will delete itself on close!!
 	//The parent is 0, for the reason see the comment in addDialog()
-	auto* d=new NodeSearchDialog(nullptr);
+	auto* d=new NodeSearchWindow(nullptr);
 	d->queryWidget()->setServerFilter(serverFilter_);
 	d->queryWidget()->setRootNode(info);
 

@@ -121,7 +121,7 @@ public:
    const std::string& process_or_remote_id() const;
 
  	/// record each request its arguments and the round trip time to and from server
- 	/// If the file can not opened for create/append then an runtime error exception is thrown
+ 	/// If the file cannot opened for create/append then an runtime error exception is thrown
    void enable_logging(const std::string& log_file_name);
    void disable_logging();
 

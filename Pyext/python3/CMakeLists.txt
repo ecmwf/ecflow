@@ -3,6 +3,21 @@
 #   NOINSTALL this stops double install, the one in i.e lib/ecflow.so
 #             The other install is in python2.7/site-packages/ecflow.so
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
+
+# ENABLE_PYTHON_UNDEF_LOOKUP
+# on some systems (e.g. conda on macOS) the boost Python libraries seem to be too
+# closely linked with the exact version of the Python development libraries,
+# meaning that we get segfaults when we try to run a Python example. By removing
+# the Python libraries from the link line and adding -undefined dynamic_lookup
+# we can make our ecflow shared library more movable bewteen systems
+
+if (ENABLE_PYTHON_UNDEF_LOOKUP)
+   add_link_options(-undefined dynamic_lookup)
+   set(PY3_LIBRARIES "")
+else()
+   set(PY3_LIBRARIES ${Python3_LIBRARIES})
+endif()
+
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "../src/*.cpp" "../src/*.hpp" )
 ecbuild_add_library( TARGET    ecflow3
                      NOINSTALL
@@ -25,11 +40,11 @@ endif()
 # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
 if ( Boost_MINOR_VERSION GREATER 66 )
     target_link_libraries(ecflow3 libclient libsimu base node nodeattr core 
-                                  ${Python3_LIBRARIES} ${OPENSSL_LIBRARIES}
+                                  ${PY3_LIBRARIES} ${OPENSSL_LIBRARIES}
                                   ${Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_LIBRARY_RELEASE} )
 else()
     target_link_libraries(ecflow3 libclient libsimu base node nodeattr core 
-                                  ${Python3_LIBRARIES} ${OPENSSL_LIBRARIES}
+                                  ${PY3_LIBRARIES} ${OPENSSL_LIBRARIES}
                                   ${Boost_PYTHON3_LIBRARY_RELEASE} )
 endif()
 

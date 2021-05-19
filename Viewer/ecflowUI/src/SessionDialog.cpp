@@ -23,14 +23,16 @@ SessionDialog::SessionDialog(QWidget *parent) : QDialog(parent)
     //ui->setupUi(this);
     setupUi(this);
 
-    refreshListOfSavedSessions();
+    savedSessionsList_->setHeaderLabel("Sessions");
 
+    refreshListOfSavedSessions();
+    savedSessionsList_->sortItems(0, Qt::AscendingOrder);
 
     // what was saved last time?
     std::string lastSessionName = SessionHandler::instance()->lastSessionName();
     int index = SessionHandler::instance()->indexFromName(lastSessionName);
     if (index != -1)
-        savedSessionsList_->setCurrentRow(index);  // select this one in the table
+        savedSessionsList_->setCurrentItem(savedSessionsList_->topLevelItem(index));  // select this one in the table
 
 
     if (SessionHandler::instance()->loadLastSessionAtStartup())
@@ -68,25 +70,18 @@ void SessionDialog::refreshListOfSavedSessions()
 
 void SessionDialog::addSessionToTable(SessionItem *s)
 {
-	QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(s->name()));
-	//item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-	//item->setCheckState(Qt::Unchecked);
-	savedSessionsList_->addItem(item);
-/*
-	int lastRow = sessionsTable_->rowCount()-1;
-	sessionsTable_->insertRow(lastRow+1);
-
-	QTableWidgetItem *nameItem    = new QTableWidgetItem(QString::fromStdString(s->name()));
-	sessionsTable_->setItem(lastRow+1, 0, nameItem);
-*/
+    QStringList lst;
+    lst << QString::fromStdString(s->name());
+    auto *item = new QTreeWidgetItem(lst);
+    savedSessionsList_->addTopLevelItem(item);
 }
 
 
 std::string SessionDialog::selectedSessionName()
 {
-	QListWidgetItem *ci = savedSessionsList_->currentItem();
+    QTreeWidgetItem *ci = savedSessionsList_->currentItem();
 	if (ci)
-		return ci->text().toStdString();
+        return ci->text(0).toStdString();
 	else
 		return "";
 }
@@ -256,8 +251,3 @@ void SessionDialog::on_saveButton__clicked()
 	}*/
 }
 
-// called when the user clicks the Save button
-//void SaveSessionAsDialog::accept()
-//{
-//
-//}

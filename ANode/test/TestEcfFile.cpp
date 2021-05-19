@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_with_bad_ECF_MICRO )
    // Create the defs file corresponding to the text below
    //suite suite
    //  task t1
-   //     ECF_MICRO ""   # can not be empty if overridden
+   //     ECF_MICRO ""   # cannot be empty if overridden
    //  task t2
    //     ECF_MICRO "ss" # must be a single char
    //endsuite

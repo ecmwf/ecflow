@@ -146,11 +146,11 @@ bool BaseServer::load_check_pt_file_on_startup()
    }
 
    if (backup_checkpt_failed && !fs::exists(serverEnv_.checkPtFilename())) {
-      throw std::runtime_error("Can not start server, please handle the backup checkpoint file first");
+      throw std::runtime_error("Cannot start server, please handle the backup checkpoint file first");
    }
 
    if (checkpt_failed && !fs::exists(serverEnv_.oldCheckPtFilename())) {
-      throw std::runtime_error("Can not start server, please handle the checkpoint file first");
+      throw std::runtime_error("Cannot start server, please handle the checkpoint file first");
    }
    return false;
 }
@@ -300,12 +300,12 @@ void BaseServer::restore_defs_from_checkpt()
    if (serverEnv_.debug()) cout << "   BaseServer::restore_defs_from_checkpt()" << endl;
 
    if (serverState_ != SState::HALTED ) {
-      throw std::runtime_error( "Can not restore from checkpt the server must be halted first");
+      throw std::runtime_error( "Cannot restore from checkpt the server must be halted first");
    }
 
    if (!defs_->suiteVec().empty()) {
       // suites must be deleted manually first
-      throw std::runtime_error( "Can not restore from checkpt the server suites must be deleted first");
+      throw std::runtime_error( "Cannot restore from checkpt the server suites must be deleted first");
    }
 
    loadCheckPtFile();

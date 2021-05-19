@@ -130,7 +130,7 @@ bool NodeExpressionParser::isNodeFlag(const std::string &str) const
         str == "is_rerun" || str == "is_waiting" || str == "is_zombie" ||
         str == "is_archived" || str == "is_restored" ||
         str ==  "is_ecfcmd_failed" || str == "is_killed" || str == "is_killcmd_failed" ||
-        str == "is_statuscmd_failed")
+        str == "is_statuscmd_failed" || str == "no_script" || str == "threshold")
         return true;
 
     return false;
@@ -940,6 +940,12 @@ bool NodeFlagCondition::execute(VItem* item)
 
         else if(nodeFlagName_ == "is_statuscmd_failed")
             return vnode->isFlagSet(ecf::Flag::STATUSCMD_FAILED);
+
+        else if(nodeFlagName_ == "no_script")
+            return vnode->isFlagSet(ecf::Flag::NO_SCRIPT);
+
+        else if(nodeFlagName_ == "threshold")
+            return vnode->isFlagSet(ecf::Flag::THRESHOLD);
 	}
 
 	return false;

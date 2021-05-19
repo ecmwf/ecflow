@@ -433,7 +433,7 @@ if __name__ == "__main__":
     # Do *NOT* delete attributes using iterator traversal
     # The iterators *are* bound to the c++ iterators hence if we delete
     # over the traversal, we can corrupt the vector, leading to undefined behavour.  
-    # Hence we **can not** delete more than once over a traversal
+    # Hence we **cannot** delete more than once over a traversal
     # Soln 1: take a copy
     # *****************************************************************************
     # task.add_today( Today( 0,10 ))
@@ -583,18 +583,41 @@ if __name__ == "__main__":
     f1.add_autoarchive(3)                       # 3 days
     assert f1.get_autoarchive() is not None, " Expected autoarchive"
     print(str(f1.get_autoarchive()))
+ 
+    f2 = ecflow.Family("f2")
+    assert f2.get_autoarchive() is None, " Expected no autoarchive"
+    f2.add_autoarchive(3,True)                       # 3 days
+    assert f2.get_autoarchive() is not None, " Expected autoarchive"
+    print(str(f2.get_autoarchive()))
 
     f3 = ecflow.Family("f3")
     f3.add_autoarchive(20, 10, True)              # hour,minutes,relative
     print(str(f3.get_autoarchive()))
     
+    f3_1 = ecflow.Family("f3_1")
+    f3_1.add_autoarchive(20, 10, True,True)          # hour,minutes,relative,idle
+    print(str(f3_1.get_autoarchive()))
+
     f4 = ecflow.Family("f4")
     f4.add_autoarchive(ecflow.TimeSlot(10, 10), True)    # hour,minutes,relative
-    print(str(t4.get_autoarchive()))
+    print(str(f4.get_autoarchive()))
 
+    f4_1 = ecflow.Family("f4_1")
+    f4_1.add_autoarchive(ecflow.TimeSlot(10, 10), True,True)    # hour,minutes,relative,idle
+    print(str(f4_1.get_autoarchive()))
+
+    f4_2 = ecflow.Family("f4_2")
+    assert f4_2.get_autoarchive() is None, " Expected no autoarchive"
+    f4_2.add_autoarchive(ecflow.Autoarchive(10,True))    # Days,idle
+    assert f4_2.get_autoarchive() is not None, " Expected autoarchive"
+    print(str(f4_2.get_autoarchive()))
+
+    #===========================================================================
+    # autocancel
+    #===========================================================================
     f5 = ecflow.Family("f5")
     f5.add_autocancel(ecflow.Autocancel(1, 10, True))   # hour,minutes,relative
-    print(str(f5.get_autoarchive()))
+    print(str(f5.get_autocancel()))
     
     #===========================================================================
     # add autorestore

@@ -710,17 +710,18 @@ void export_NodeAttr()
 
 	class_<AutoArchiveAttr, std::shared_ptr<AutoArchiveAttr> >(
 			"Autoarchive",NodeAttrDoc::autoarchive_doc() ,
-			init<int,int,bool >()                             // hour, minute, relative
+			init<int,int,bool,bool>()                                 // hour, minute,relative,idle(true means queued,aborted,complete, false means completed only)
 	)
-		   .def( init<int>())                                        // days
-		   .def( init<TimeSlot, bool>())
+		   .def( init<int,bool>())                                   // days, idle
+		   .def( init<TimeSlot, bool,bool>())                        // TimeSlot,relative,idle
 		   .def(self == self )                                       // __eq__
 		   .def("__str__", &AutoArchiveAttr::toString)               // __str__
 		   .def("__copy__",copyObject<AutoArchiveAttr>)              // __copy__ uses copy constructor
 		   .def(self < self)                                         // __lt__
 		   .def("time",    &AutoArchiveAttr::time, return_value_policy<copy_const_reference>(), "returns archive time as a TimeSlot")
 		   .def("relative",&AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
-		   .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
+         .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
+         .def("idle",    &AutoArchiveAttr::idle,     "Returns a boolean true if archiving when idle, i.e queued,aborted,complete and time elapsed")
 		   ;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
 	boost::python::register_ptr_to_python< std::shared_ptr<AutoArchiveAttr> >(); // needed for mac and boost 1.6

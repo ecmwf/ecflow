@@ -398,6 +398,25 @@ void File::findAll(
 	}
 }
 
+void File::find_files_with_extn(
+      const boost::filesystem::path& dir_path,            // In this directory
+      const std::string&             extn,                // find files matching this extension
+      std::vector<boost::filesystem::path>& paths_found   // placing path here if found
+)
+{
+   if ( !fs::exists( dir_path ) ) {
+      return;
+   }
+   fs::directory_iterator end_itr; // default construction yields past-the-end
+   for (fs::directory_iterator itr( dir_path ); itr != end_itr; ++itr) {
+      if ( fs::is_directory( itr->status() ) ) continue;
+      else if ( itr->path().extension() == extn ) // see below
+      {
+         paths_found.push_back( itr->path() );
+      }
+   }
+}
+
 std::string File::findPath(
                   const boost::filesystem::path& dir_path,    // from this directory downwards
                   const std::string&             file_name,   // search for this name,

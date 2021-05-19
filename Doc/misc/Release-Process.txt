@@ -6,13 +6,13 @@ Process
 0/ **** DO ***NOT*** switch current link ****************
    **** User support will do this, during an arranged system session
    **** This is because we have member states, using it for their operations.
-   
-   **** If we have any scripts in production that are using 
+
+   **** If we have any scripts in production that are using
    ****    /usr/local/apps/ecflow/current
    **** These make break.
-   **** This is **very** important      
-   **** IDEALLY we need to educate member states *NOT* to use 
-   ****     /usr/local/apps/ecflow/current  
+   **** This is **very** important
+   **** IDEALLY we need to educate member states *NOT* to use
+   ****     /usr/local/apps/ecflow/current
 
 ----------------------------------------------------------------------
 0/ *make sure ecbuild in cmake.sh matches the metabuilder*
@@ -21,54 +21,54 @@ Process
    requires that ecflow.so has been built
    cd $WK                       # ecflow root directry
    cd Doc/online
-   make clean; 
+   make clean;
    make html                    # fix any rst errors in python api
-   
-0/ Create the tarball using cmake, in the build directory with  
-   
+
+0/ Create the tarball using cmake, in the build directory with
+
    cd $WK                       # ecflow root directry
    rm -rf ../bdir               # *REMOVE* build tree
    git pull --rebase            # make sure we use the latest
    ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
 
 0/ Inform user support, allows user support to build/test rpm
-   
+
    - ** Check the state of bamboo builds and fix.
      These may well use different versions of cmake,boost,python,etc
-      
+
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
-   
-0/ Build release: Two approaches, both use meta-builder: 
-    1/ git flow release start  5.6.0 
-       git_tag=release/5.6.0
+
+0/ Build release: Two approaches, both use meta-builder:
+    1/ git flow release start  5.7.0
+       git_tag=release/5.7.0
        Use this approach when multiple people working on the release.
-      *Push* branch onto stash, otherwise we can not pull, from the remote machines
+      *Push* branch onto stash, otherwise we cannot pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
-       
-    2/ git flow release start  5.6.0
-       git flow release finish 5.6.0  
-       git push  
+
+    2/ git flow release start  5.7.0
+       git flow release finish 5.7.0
+       git push
        git push --tags
-       git_tag=5.6.0
+       git_tag=5.7.0
        When single person making release
- 
-0/ Update metabuilder/config.yaml master branch to "5.6.0"  
+
+0/ Update metabuilder/config.yaml master branch to "5.7.0"
    Then use the meta builder/master to build/install.
- 
+
 0/ Update Documentation
-   
+
   - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
 
   - Generate ecflow python API(only required when updating confluence)
     - module load python3  # rely on user support to have installed sphinx, make expects sphinx-build on $PATH
     - cd $WK/Doc/online; make clean; make html
-    
+
     Sometimes this crashes, Just re-build Pyext, and try again.
     conf.py has been configured to look for ecflow.so in build otherwise install dir.
- 
- 
+
+
 0/ Update WIKI:
    This announces the changes in the release
    https://software.ecmwf.int/wiki/display/ECFLOW/Latest+news
@@ -79,38 +79,38 @@ Process
 0/ Check attachments:
    ** The eflow tar ball is automatically upload to confluence
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
-   
+
    0 Beta releases :
    https://software.ecmwf.int/wiki/display/ECFLOW/Pre-Releases
-   
-   Add a page with the title of the release. 
+
+   Add a page with the title of the release.
    In both cases add a tag/label for "news". This make the newly added page
    appear in the top half of the latest news
-   
+
 0/ Update tag 5new
     module load modulemgr
-    modulemgr -g module -m cca,ccb,cct,ecgb,leap42,lxc,lxg,lxop-dev,sappa,sappb,vsms1 -f -v tag ecflow 5.6.0 5new
-   
+    modulemgr -g module -m cca,ccb,cct,ecgb,leap42,lxc,lxg,lxop-dev,sappa,sappb,vsms1 -f -v tag ecflow 5.7.0 5new
+
 0/ Announce release
-   mail group:  ecflow_int@lists.ecmwf.int 
+   mail group:  ecflow_int@lists.ecmwf.int
    Use: ecflow/Doc/misc/Release-Anouncement.txt
-  
-  
-AFTER the release 
+
+
+AFTER the release
 =======================================================================================
    o increment the version number in $WK/CMakeLists.txt THEN, run:
-     sh -x $WK/cmake.sh  
-     
+     sh -x $WK/cmake.sh
+
      This will update the version number for $WK/ACore/src/ecflow_version.h
      This file is included in $WK/ACore/src/Version.cpp
      It will also update      $WK/Pyext/__init__.py
-     
+
      Then check this file in, for the other platforms.
-     
+
 0/ record the performance statistics for the release. ( see Doc/misc/test_times )
 
 0/ ** Check the security level of Jira issues for the release.
       If there is nothing sensitive, then set security level to None
-      
+
 0/ Update metabuilder server to use the latest server
 

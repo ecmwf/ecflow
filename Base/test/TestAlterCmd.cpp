@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
       {
          // test set and clear flags of the definition
-         // Note: we can not really test Flag::Message clear, since that act of clearing, sets the message
+         // Note: we cannot really test Flag::Message clear, since that act of clearing, sets the message
          std::vector<Flag::Type> flag_list = Flag::list();
          for(auto & i : flag_list) {
             // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
@@ -841,7 +841,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
    {
       // test set and clear flags
-      // Note: we can not really test Flag::Message clear, since that act of clearing, sets the message
+      // Note: we cannot really test Flag::Message clear, since that act of clearing, sets the message
       std::vector<Flag::Type> flag_list = Flag::list();
       for(auto & i : flag_list) {
          // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
@@ -936,7 +936,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
 
    // ================================ Generic ==================================================================
-   // Can not add generic via Alter
+   // Cannot add generic via Alter
    {
       s->add_generic(GenericAttr("a"));
       s->add_generic(GenericAttr("b"));

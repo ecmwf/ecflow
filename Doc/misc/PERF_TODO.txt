@@ -11,9 +11,9 @@ o AParser/perf_aparser_timer  $SCRATCH/3199.def::
  
 o Client/bin/gcc-4.2.1/release/perf_test_large_defs 
    A real client server test on the local machine.
-   Will delete,load,begin, sync, all the defs found in /var/tmp/ma0/BIG_DEFS/
+   Will delete,load,begin, sync, all the defs found in ${ECF_TEST_DEFS_DIR}/
    
-o ecrcp -r /var/tmp/ma0/BIG_DEFS/ %REMOTE_HOST%:$ROOT_DIR/$ECFLOW/BIG_DEFS
+o ecrcp -r ${ECF_TEST_DEFS_DIR}/ %REMOTE_HOST%:$ROOT_DIR/$ECFLOW/BIG_DEFS
 
 o test job processing
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
@@ -145,23 +145,23 @@ o Create a bench mark test suite that measures the costs of
          load into server       ~20s          ~15s           14.8s
          download from server   ~12.7s         ~8.7s          8.7s
  
-         /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 12, 13, 14, 14, 13 Avg: 13.2
-         /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 12, 12, 12, 13, 13 Avg: 12.4
-         /var/tmp/ma0/BIG_DEFS/mega.def Delete:42 Load:3 Download: 3, 2, 1, 1, 1 Avg: 1.6
-         /var/tmp/ma0/BIG_DEFS/mega.def Delete:47 Load:3 Download: 3, 2, 2, 1, 1 Avg: 1.8
+         ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:18 Download: 12, 13, 14, 14, 13 Avg: 13.2
+         ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:18 Download: 12, 12, 12, 13, 13 Avg: 12.4
+         ${ECF_TEST_DEFS_DIR}/mega.def Delete:42 Load:3 Download: 3, 2, 1, 1, 1 Avg: 1.6
+         ${ECF_TEST_DEFS_DIR}/mega.def Delete:47 Load:3 Download: 3, 2, 2, 1, 1 Avg: 1.8
   
          AParser/perf_aparser_timer  $SCRATCH/3199.def::
             Before Changes: 12.35,12.41,12.42,12.33,12.64   Avg: 12.43
 
 BEST* so far Client/test/TestPerfForLargeDefs::======================================================
 
-    bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def with PORTABLE_BINARY
+    bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def with PORTABLE_BINARY
     Parsing Node tree and AST creation time = 5.22 parse(1)
     Checkpt(PORTABLE_BINARY) and reload , time taken = 6.89 file_size(42000387)  result(1) msg()
     Total elapsed time = 12 seconds
     6.88 --> 7.98
 
-   oetzi{/tmp/ma0/workspace/ecflow/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
    Parsing Node tree and AST creation time = 4.59 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 7.85 file_size(55963684)  result(1) msg()
    Total elapsed time = 12 seconds
@@ -173,20 +173,20 @@ BEST* so far Client/test/TestPerfForLargeDefs::=================================
       oetzi{/tmp/ma0/workspace/ecflow}:352 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs
       Running 1 test case...
       Client:: ...test_perf_for_large_defs:   port(3142)
-      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
+      ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
                                                                Download(Sync-FULL):4, 4, 4, 4, 4 Avg:4  
                                                                Download(FULL):7, 8, 7, 9, 8      Avg:7.8
-      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:1 Begin:0   Download(Sync):2, 0, 0, 0, 0  
+      ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:1 Begin:0   Download(Sync):2, 0, 0, 0, 0  
                                                                Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                                Download(FULL):1, 1, 1, 1, 1      Avg:1
    opensuse113
       + Client/bin/gcc-4.5/release/perf_test_large_defs
       Running 1 test case...
       Client:: ...test_perf_for_large_defs:   port(3142)
-      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:10 Begin:2  Download(Sync):7, 0, 0, 0, 0  
+      ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:10 Begin:2  Download(Sync):7, 0, 0, 0, 0  
                                                                Download(Sync-FULL):3, 4, 4, 3, 3 Avg:3.4  
                                                                Download(FULL):7, 7, 7, 7, 7 Avg:7
-      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   Download(Sync):2, 0, 0, 0, 0  
+      ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0   Download(Sync):2, 0, 0, 0, 0  
                                                                Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                                Download(FULL):1, 1, 1, 1, 1 Avg:1
     
@@ -282,8 +282,8 @@ o <DONE> track_never on pointers
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 8, 9, 9, 9, 10 Avg: 9
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:14 Begin:3 Download: 8, 9, 9, 9, 10 Avg: 9
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
    ***** Small improvement BUT following warning shown, HENCE backed out **********************
    ***** The BOOST_CLASS_TRACKING(ChildAttrs,boost::serialization::track_never)
@@ -339,10 +339,10 @@ o <DONE> Make Repeat a ptr, rename RepeatBase to Repeat
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:17 Begin:3 Download: 9, 10, 10, 10, 11 Avg: 10.1
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:3 Begin:0 Download: 1, 2, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:17 Begin:3 Download: 9, 10, 10, 10, 11 Avg: 10.1
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:3 Begin:0 Download: 1, 2, 1, 1, 1 Avg: 1.2
 
-   oetzi{/tmp/ma0/workspace/ecflow/AParser}:431 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:431 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
    Parsing Node tree and AST creation time = 4.44 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = 10.1 file_size(60235654)  result(1) msg()
    Total elapsed time = 14 seconds        

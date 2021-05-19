@@ -47,10 +47,12 @@ void AutoArchiveAttr::write(std::string& ret) const
    ret += "autoarchive ";
    if (days_) {
       ret += boost::lexical_cast<std::string>(time_.hour()/24) ;
+      if (idle_) ret += " -i";
       return;
    }
    if (relative_) ret += "+";
    time_.print(ret);
+   if (idle_) ret += " -i";
 }
 
 
@@ -58,10 +60,14 @@ bool AutoArchiveAttr::operator==(const AutoArchiveAttr& rhs) const
 {
    if (relative_ != rhs.relative_) return false;
    if (days_ != rhs.days_) return false;
+   if (idle_ != rhs.idle_) return false;
    return time_.operator==(rhs.time_);
 }
 
-bool AutoArchiveAttr::isFree(const ecf::Calendar& calendar,const boost::posix_time::time_duration& suiteDurationAtComplete) const
+bool AutoArchiveAttr::isFree(
+     const ecf::Calendar& calendar,
+     const std::pair<NState,boost::posix_time::time_duration>& last_state_and_change_duration
+) const
 {
    //                                                               suiteTime()
    //  suiteDurationAtComplete        autoarchive time              calendar duration
@@ -73,10 +79,20 @@ bool AutoArchiveAttr::isFree(const ecf::Calendar& calendar,const boost::posix_ti
    //
    //
 
+   bool is_valid_state = false;
+   if (last_state_and_change_duration.first == NState::COMPLETE) is_valid_state = true;
+   if (idle_) {
+      if (last_state_and_change_duration.first == NState::QUEUED) is_valid_state = true;
+      if (last_state_and_change_duration.first == NState::ABORTED) is_valid_state = true;
+   }
+   if (!is_valid_state) {
+      return false;
+   }
+
    if ( relative_ ) {
-      time_duration timeElapsedAfterComplete = calendar.duration() - suiteDurationAtComplete;
-      LOG_ASSERT(!timeElapsedAfterComplete.is_negative(),"should always be positive or some things gone wrong");
-      if (timeElapsedAfterComplete >= time_.duration()) {
+      time_duration time_elapsed = calendar.duration() - last_state_and_change_duration.second;
+      LOG_ASSERT(!time_elapsed.is_negative(),"should always be positive or some things gone wrong");
+      if (time_elapsed >= time_.duration()) {
          return true;
       }
    }
@@ -101,6 +117,7 @@ void AutoArchiveAttr::serialize(Archive & ar, std::uint32_t const version )
    ar( CEREAL_NVP(time_));
    CEREAL_OPTIONAL_NVP(ar, relative_, [this](){return !relative_;}); // conditionally save
    CEREAL_OPTIONAL_NVP(ar, days_,     [this](){return days_; });     // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, idle_,     [this](){return idle_; });     // conditionally save
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(AutoArchiveAttr);
 

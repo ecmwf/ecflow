@@ -409,7 +409,7 @@ const char*  get_status_desc(){
             "The command should be written in such a way that the output is written to %ECF_JOB%.stat\n"
             "This will allow the output of status command to be shown by the --file command\n"
             "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\n"
-		    "If the process id can not be found on the remote system, then the status command can also\n"
+		    "If the process id cannot be found on the remote system, then the status command can also\n"
 		    "arrange for the task to be aborted\n"
 		    "The status command can fail for the following reasons:\n"
 		    " - ECF_STATUS_CMD not found\n"

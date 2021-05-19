@@ -77,7 +77,7 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 		///                                        # will return those suites with handle 1
 
 		// Print out the data that was received from server. as a part of get request.
-		// The server can not do a show, it MUST be done at the Client side
+		// The server cannot do a show, it MUST be done at the Client side
 		// The show request is only valid if the out bound request to the server
 		PrintStyle::Type_t style = cts_cmd->show_style();
 		if ( style != PrintStyle::NOTHING ) {

@@ -1372,6 +1372,17 @@ void TriggerGraphView::showEvent(QShowEvent* e)
     QGraphicsView::showEvent(e);
 }
 
+void TriggerGraphView::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    auto itemClicked = nodeItemAt(mapToScene(e->pos()));
+    if(itemClicked) {
+        VInfo_ptr info = VInfo::createFromItem(itemClicked->item());
+        if (info) {
+            Q_EMIT linkSelected(info);
+        }
+    }
+}
+
 void TriggerGraphView::writeSettings(VComboSettings* vs)
 {
     Q_ASSERT(edgeInfo_);

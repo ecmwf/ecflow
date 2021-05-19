@@ -64,9 +64,9 @@ BOOST_AUTO_TEST_CASE( test_default_constructor_persistence )
    fs::remove(file_name + "Defs.def" ); // Remove the file. Comment out for debugging
 }
 
-BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
+BOOST_AUTO_TEST_CASE( test_compare_cereal_and_defs_checkpt_file )
 {
-   cout << "ANode:: ...test_compare_boost_and_defs_checkpt_file\n";
+   cout << "ANode:: ...test_compare_cereal_and_defs_checkpt_file\n";
 
    std::string file_name = File::test_data("ANode/test/data/migration/","ANode");
 

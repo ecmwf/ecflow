@@ -59,7 +59,7 @@ public:
 // Delete functions: can throw std::runtime_error ===================================
 	// if name argument is empty, delete all attributes of that type
 	// if delete was successful return true, else return false.
-	// Can throw std::runtime_error if the attribute can not be found
+	// Can throw std::runtime_error if the attribute cannot be found
 	bool deleteInlimit(const std::string& name);
 
 // mementos functions:
@@ -105,7 +105,7 @@ public:
  	/// Check to see if inlimit's can reference their Limits
  	void check(std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const;
 
- 	/// Add externs where the inlimit reference to limits can not be resolved
+ 	/// Add externs where the inlimit reference to limits cannot be resolved
    void auto_add_inlimit_externs(Defs*) const;
 
  	/// Needed by python interface

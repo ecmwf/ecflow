@@ -373,7 +373,7 @@ void change_server_variable(defs_ptr defs) {
 void delete_server_variable(defs_ptr defs) {
    // Because the scaffold create client/server defs each time.
    // To test change/delete variables we modify the default set
-   // ***NOTE*** we can not delete server variables like ECF_TRIES, can only change them
+   // ***NOTE*** we cannot delete server variables like ECF_TRIES, can only change them
    // However we can delete user variables added to the server
    TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd("/",AlterCmd::DEL_VARIABLE,"MyDefsFixture_user_variable")));
 }

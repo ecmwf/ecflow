@@ -95,7 +95,7 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const
          else         as->zombie_ctrl().add_user_zombies(theNodeToDelete.get(),CtsApi::delete_node_arg());
 
          if (!defs->deleteChild( theNodeToDelete.get() )) {
-            std::string errorMsg = "Delete: Can not delete node " + theNodeToDelete->debugNodePath();
+            std::string errorMsg = "Delete: Cannot delete node " + theNodeToDelete->debugNodePath();
             throw std::runtime_error( errorMsg ) ;
          }
       }
@@ -131,8 +131,8 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as,Node* the
    }
    if (!activeVec.empty() || !submittedVec.empty()) {
       std::stringstream ss;
-      if (theNodeToDelete) ss << "Can not delete node " << theNodeToDelete->debugNodePath() << "\n";
-      else                 ss << "Can not delete all nodes.\n";
+      if (theNodeToDelete) ss << "Cannot delete node " << theNodeToDelete->debugNodePath() << "\n";
+      else                 ss << "Cannot delete all nodes.\n";
       if (!activeVec.empty() ) {
          ss << " There are " << activeVec.size() << " active tasks. First : " << activeVec.front()->absNodePath() << "\n";
       }

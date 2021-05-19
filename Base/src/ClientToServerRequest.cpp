@@ -24,7 +24,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const
 	}
 
 	/// means programming error somewhere
-  	throw std::runtime_error("ClientToServerRequest::handleRequest: Can not send a NULL request to the server !");
+  	throw std::runtime_error("ClientToServerRequest::handleRequest: Cannot send a NULL request to the server !");
 }
 
 std::ostream& ClientToServerRequest::print( std::ostream& os ) const {

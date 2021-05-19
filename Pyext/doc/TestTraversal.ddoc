@@ -1,6 +1,6 @@
 // The unit test TestTravesal has been written to be compatible
 // with python 2.5. It appears however than the python on
-// AIX and HPUX can not cope with the *WITH* statement
+// AIX and HPUX cannot cope with the *WITH* statement
 //
 // The example below uses the *WITH* statement
 

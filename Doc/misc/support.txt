@@ -88,7 +88,7 @@ o If there is a performance problem::
      find process id of server:
      >> fstack <process-id>  # use fstack to dump the back trace of where it is stuck
      
-   * can not connect, or server is dropping connection: ('Server::handle_read: End of file')
+   * cannot connect, or server is dropping connection: ('Server::handle_read: End of file')
      Use netcat: on some systems may it is called nc:
      
      server side:

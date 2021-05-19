@@ -1,10 +1,10 @@
  ======================================================================================
-Subject: New release of ecFlow(5.6.0) now available  
+Subject: New release of ecFlow(5.7.0) now available
 
-A new version of ecFlow(5.6.0) has been released:
+A new version of ecFlow(5.7.0) has been released:
 
 
-This release is accessible from: /usr/local/apps/ecflow/5.6.0
+This release is accessible from: /usr/local/apps/ecflow/5.7.0
 on the following platforms:
 
    o linux 11.3                (lxop-dev)
@@ -12,35 +12,35 @@ on the following platforms:
    o leap42                    (leap42)
    o linux cluster             (lxg/lxc)
    o virtual machines          (vsms1 -> operational and research VM are linked to this)
-   o cca/ccb/cct               (cray) 
- 
+   o cca/ccb/cct               (cray)
+
 The release includes the following changes:
 
 
 To use a specific version use the module functionality.
 This will setup the PATHS for client server and python extension
-Note: The GUI(ecflowview) is only available on linux  
+Note: The GUI(ecflowview) is only available on linux
 
    module avail ecflow
-   module unload ecflow 
-   module load ecflow/5.6.0
-      
+   module unload ecflow
+   module load ecflow/5.7.0
+
 The new GUI(ecflow_ui) is available from vsms1,ecgb,lxop-dev,lxc,leap42
-            
+
 Compatibility
 ========================================================================
 The client/Server from one release should not be mixed with another.
-To avoid this problem it is *highly* recommended that you use a 
+To avoid this problem it is *highly* recommended that you use a
 specific version:
 
-   module load ecflow/5.6.0
+   module load ecflow/5.7.0
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures
 that client version is in sync with the server i.e
 
    /usr/local/apps/ecflow/%ECF_VERSION%/bin/ecflow_client --complete
-   
+
 or:
 
   module load ecflow/%ECF_VERSION%
@@ -48,7 +48,7 @@ or:
 
 Please see:
    https://software.ecmwf.int/wiki/display/ECFLOW/Release+process
-  
+
 for further details.
 
 Documentation
@@ -61,6 +61,3 @@ The online documentation and tutorial are accessible from:
 Tar file
 ======================================================================
 A tar copy of this release has been placed in /scratch/ma/ma0
-
-   
- 

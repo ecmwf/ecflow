@@ -58,6 +58,8 @@ public:
 
    node_ptr find_node_up_the_tree(const std::string& name) const override;
 
+   std::string find_node_path(const std::string& type, const std::string& name) const override;
+
    /// Added for consistency, really used to find relative nodes, aliases should never, be in referenced nodes
    node_ptr find_relative_node(const std::vector<std::string>& pathToNode) override { return node_ptr();}
 

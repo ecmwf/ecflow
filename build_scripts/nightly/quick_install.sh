@@ -5,10 +5,10 @@
 #                           Darwin - $(HOME)/install/ecflow/${ECFLOW_VERSION} 
 #   Linux Install using: cd $WK; ./cmake.sh make -j8 install
 #   mac   Install using: cd $WK; build_scripts/mac.sh make -j8 install
-# - metabuilder is at $WK/../metabuild
+# - metabuilder is at $WK/../metabuilder
 
 # Alter the command below to either
-# a/ use the system installed version, everywhere, avoid miss-match between different releases
+# a/ use the system installed version, everywhere, avoid mismatch between different releases
 # b/ Test the latest release, requires compatible client/server versions
 
 set -e # stop the shell on first error
@@ -17,14 +17,15 @@ set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 cd $WK
-export ECF_PORT=4141
+export ECF_PORT=4041
 PYTHON=python3
 
 os_variant=$(uname -s)
 if [[ $os_variant = Darwin ]] ; then
+
    # we assume $PATH and $PYTHONPATH have been set to locate ecflow_client/ecflow.so
    ECF_HOST=localhost
-   
+   export ECF_PORT=4040
    ECF_CLIENT_EXE_PATH=$(which ecflow_client)
 
 else
@@ -47,8 +48,8 @@ fi
 # SSL
 # =======================================================================
 #export ECF_DEBUG_CLIENT=1
-#export ECF_SSL=`hostname`.4141 # use server specfic <host>.<port>.*** certificates
-#export ECF_SSL=1               # use non server specfic  certificates
+#export ECF_SSL=`hostname`.${ECF_PORT} # use server specific <host>.<port>.*** certificates
+#export ECF_SSL=1                      # use non server specific  certificates
 
 
 # =======================================================================
@@ -122,7 +123,7 @@ fi
 # =======================================================================
 # Start server. 
 # =======================================================================
-#export ECF_TASK_THRESHOLD=1 # 1000 milliseconds = 1 second
+#export ECF_TASK_THRESHOLD=1 # 1000 milliseconds = 1 second, enable to test slow job creation
 ecflow_server&
 
 # wait for server to start

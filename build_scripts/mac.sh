@@ -15,12 +15,13 @@
 
 # ====================================================================
 show_error_and_exit() {
-   echo "cmake.sh expects at least one argument"
-   echo " cmake.sh [ options] "
+   echo "mac.sh expects at least one argument"
+   echo " mac.sh [ options] "
    echo ""
    echo "   debug          - make a DEBUG build"
    echo "   make           - run make after cmake"
    echo "   test           - enable all tests"
+   echo "   gcc            - use gcc instead of clang(default)"
    echo "   no_test        - disable all tests"
    echo "   xcode          - enable xcode project"
    echo "   ctest          - all ctest -R <test> -V"
@@ -134,9 +135,15 @@ if [[ "$compiler" = clang ]] ; then
 else
    # brew install gcc
    # manually installed boost, built with brew gcc
-   cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=${HOME}/boost/boost_1_72_0"
-   cmake_extra_options="$cmake_extra_options -DCMAKE_C_COMPILER=/usr/local/opt/gcc/bin/gcc-9"
-   cmake_extra_options="$cmake_extra_options -DCMAKE_CXX_COMPILER=/usr/local/opt/gcc/bin/g++-9"
+   # If you get errors like:
+   #   dyld: Symbol not found: ___emutls_get_address
+   #   Referenced from: /usr/local/opt/gcc/lib/gcc/10/libstdc++.6.dylib
+   #   Expected in: /usr/lib/libSystem.B.dylib
+   # then try:
+   #   brew link --overwrite gcc
+   cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=${HOME}/boost/boost_1_73_0"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_C_COMPILER=/usr/local/opt/gcc@10/bin/gcc-10"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_CXX_COMPILER=/usr/local/opt/gcc@10/bin/g++-10"
 fi
 
 if [[ "$asan_arg" = asan ]] ; then

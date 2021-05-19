@@ -210,7 +210,7 @@ bool ZombieCtrl::handle_existing_zombie(
 
 
 	/// Update the process id, if it is empty on the existing zombie
-	/// *** NOTE**** can not update process id from task, as that could be an ID from a different JOB,
+	/// *** NOTE**** cannot update process id from task, as that could be an ID from a different JOB,
 	/// ************ Hence zombie matching resorts to path and password matching
 	const std::string& process_or_remote_id = task_cmd->process_or_remote_id();
 	if (theExistingZombie.process_or_remote_id().empty() && !process_or_remote_id.empty()) {

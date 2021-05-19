@@ -176,7 +176,7 @@ void Log::check_new_path(const std::string& new_path)
 
       if (!fs::exists(parent_path)) {
          std::stringstream ss;
-         ss << "Log::check_new_path: Can not create new log file, since the directory part " << parent_path << " does not exist\n";
+         ss << "Log::check_new_path: Cannot create new log file, since the directory part " << parent_path << " does not exist\n";
          throw std::runtime_error(ss.str());
       }
    }
@@ -184,7 +184,7 @@ void Log::check_new_path(const std::string& new_path)
    // Now check that path does not correspond to a directory, can't use that as the new log file location
    if (fs::is_directory(the_new_path)) {
       std::stringstream ss;
-      ss << "LogCmd::LogCmd: Can not create new log file, since the path correspond to a directory " << the_new_path << "\n";
+      ss << "LogCmd::LogCmd: Cannot create new log file, since the path correspond to a directory " << the_new_path << "\n";
       throw std::runtime_error(ss.str());
    }
 }

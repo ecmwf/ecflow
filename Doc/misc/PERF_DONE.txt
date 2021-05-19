@@ -80,8 +80,8 @@ o <DONE> Late, Remove shared ptr and replace with raw ptr
          After Changes:  12.26, 12.17, 13.32, 12.63, 12.79: Avg: 12.6   (saved ~0.4s)
 
    Client/test/TestPerfForLargeDefs.cpp (saved ~ 0.2 seconds)
-      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 11, 12, 13, 12, 13 Avg: 12.2
-      /var/tmp/ma0/BIG_DEFS/mega.def Delete:42 Load:2 Download: 3, 2, 1, 1, 1 Avg: 1.6
+      ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:18 Download: 11, 12, 13, 12, 13 Avg: 12.2
+      ${ECF_TEST_DEFS_DIR}/mega.def Delete:42 Load:2 Download: 3, 2, 1, 1, 1 Avg: 1.6
 
 
 o <DONE>Variable state change no 
@@ -89,8 +89,8 @@ o <DONE>Variable state change no
         However a change to a single variable will require copy all node variables
 
    Client/test/TestPerfForLargeDefs.cpp:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 11, 12, 12, 12, 13 Avg: 12
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:41 Load:2 Download: 2, 2, 1, 1, 1 Avg: 1.4
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:18 Download: 11, 12, 12, 12, 13 Avg: 12
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:41 Load:2 Download: 2, 2, 1, 1, 1 Avg: 1.4
    
    
 o <DONE>Move time base attributes into a separate class
@@ -98,15 +98,15 @@ o <DONE>Move time base attributes into a separate class
    
    Client:: ...test_perf_for_large_defs:   port(3142)
    Client/bin/gcc-4.2.1/release/perf_test_large_defs
-      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:16 Download: 10, 11, 11, 11, 12 Avg: 11
-      /var/tmp/ma0/BIG_DEFS/mega.def Delete:42 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
+      ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:16 Download: 10, 11, 11, 11, 12 Avg: 11
+      ${ECF_TEST_DEFS_DIR}/mega.def Delete:42 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
       
       
 o <DONE>: Fix issue of delete taking to long
 
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:16 Download: 10, 11, 11, 11, 12 Avg: 11
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:16 Download: 10, 11, 11, 11, 12 Avg: 11
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
 
 o <DONE> Take edit history out of node and place into Defs.
@@ -114,8 +114,8 @@ o <DONE> Take edit history out of node and place into Defs.
    Save of ~ 0.6 seconds
    
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Download: 10, 10, 10, 11, 11 Avg: 10.4
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:15 Download: 10, 10, 10, 11, 11 Avg: 10.4
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
 o <DONE> After begin, download times are much slower invetsigate
          Times are the same
@@ -128,27 +128,27 @@ o <DONE>Distinguish between checkpoint and client comms
 o <DONE>events meter, labels, use into child attributes
 
         Client:: ...test_perf_for_large_defs:   port(3142)
-         /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 9, 10, 10, 10, 10 Avg: 9.8
-         /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+         ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:14 Begin:3 Download: 9, 10, 10, 10, 10 Avg: 9.8
+         ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
-        oetzi{/tmp/ma0/workspace/ecflow/AParser}:483 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+        oetzi{/tmp/ma0/workspace/ecflow/AParser}:483 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
          Parsing Node tree and AST creation time = 5.13 parse(1)
          Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.63 file_size(58317543)  result(1) msg()
          Total elapsed time = 14 seconds
    
 0 <DONE>Node suspended, state is being persisted ???
 
-   oetzi{/tmp/ma0/workspace/ecflow}:520 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow}:520 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
    Parsing Node tree and AST creation time = 5.18 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.4 file_size(57675793)  result(1) msg()
    Total elapsed time = 14 seconds
 
 o <DONE> Move zombie & verify attr to a separate class , rarely used
 
-      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Begin:4 Download: 8, 9, 9, 9, 10 Avg: 9
-      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+      ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:15 Begin:4 Download: 8, 9, 9, 9, 10 Avg: 9
+      ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
-        oetzi{/tmp/ma0/workspace/ecflow/AParser}:538 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+        oetzi{/tmp/ma0/workspace/ecflow/AParser}:538 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
          Parsing Node tree and AST creation time = 5.34 parse(1)
          Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.09 file_size(56071732)  result(1) msg()
          Total elapsed time = 14 seconds
@@ -159,11 +159,11 @@ o <DONE> Removed shared ptrs form trigger and complete expressions
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Begin:3 Download: 8, 9, 9, 9, 9 Avg: 8.8
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:15 Begin:3 Download: 8, 9, 9, 9, 9 Avg: 8.8
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
    8.8->9.8
 
-   oetzi{/tmp/ma0/workspace/ecflow/AParser}:11 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:11 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
    Parsing Node tree and AST creation time = 4.44 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.7 file_size(56071728)  result(1) msg()
    Total elapsed time = 13 seconds
@@ -171,7 +171,7 @@ o <DONE> Removed shared ptrs form trigger and complete expressions
 
 o <DONE> Move: Generate suite generate variables, do not persist them.
  
-  oetzi{/tmp/ma0/workspace/ecflow/AParser}:782 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+  oetzi{/tmp/ma0/workspace/ecflow/AParser}:782 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
   Parsing Node tree and AST creation time = 4.4 parse(1)
   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.66 file_size(56069424)  result(1) msg()
   Total elapsed time = 13 seconds
@@ -181,12 +181,12 @@ o <DONE> Move: Generate suite generate variables, do not persist them.
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 8, 9, 9, 9, 9 Avg: 8.8
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:14 Begin:3 Download: 8, 9, 9, 9, 9 Avg: 8.8
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
 o <DONE>Calendar: Do not persist cache data
 
-   oetzi{/tmp/ma0/workspace/ecflow}:831 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow}:831 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
    Parsing Node tree and AST creation time = 4.38 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.65 file_size(56069114)  result(1) msg()
    Total elapsed time = 13 seconds
@@ -198,10 +198,10 @@ o <DONE> Track_never objects which are never serialised through pointers
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 7, 8, 8, 8, 8 Avg: 7.8
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:14 Begin:3 Download: 7, 8, 8, 8, 8 Avg: 7.8
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
-   oetzi{/tmp/ma0/workspace/ecflow/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer ${ECF_TEST_DEFS_DIR}/3199.def
    Parsing Node tree and AST creation time = 4.59 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 7.89 file_size(55963684)  result(1) msg()
    Total elapsed time = 12 seconds
@@ -244,10 +244,10 @@ o <DONE> Cache the de-serialisation in the server when returning the FULL defini
    oetzi{/tmp/ma0/workspace/ecflow}:555 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
    Running 1 test case...
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3  Download(Sync):9, 0, 0, 0, 0  
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:14 Begin:3  Download(Sync):9, 0, 0, 0, 0  
                                                             Download(Sync-FULL):5, 5, 4, 4, 4 Avg:4.4  
                                                             Download(FULL):8, 8, 9, 9, 9      Avg:8.6
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0  Download(Sync):2, 0, 0, 0, 0  
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0  Download(Sync):2, 0, 0, 0, 0  
                                                            Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                            Download(FULL):1, 1, 1, 1, 1      Avg:1
 
@@ -255,10 +255,10 @@ o <DONE>Dont created generated variables in the default constructors, creat on d
 
  
    Client:: ...test_perf_for_large_defs:   port(3142)
-   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
+   ${ECF_TEST_DEFS_DIR}/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
                                                             Download(Sync-FULL):4, 4, 4, 4, 4 Avg:4  
                                                             Download(FULL):8, 8, 8, 8, 8 Avg:8
-   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   Download(Sync):1, 0, 0, 0, 0  
+   ${ECF_TEST_DEFS_DIR}/mega.def Delete:0 Load:2 Begin:0   Download(Sync):1, 0, 0, 0, 0  
                                                             Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                             Download(FULL):1, 1, 1, 1, 1 Avg:1
 

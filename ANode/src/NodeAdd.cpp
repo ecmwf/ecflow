@@ -97,7 +97,7 @@ void Node::add_trigger_expression(const Expression& t)
 		ss << "to add large triggers use multiple calls to Node::add_part_trigger( PartExpression('t1 == complete') )";
  		throw std::runtime_error( ss.str() );
 	}
-	if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
+	if (isSuite())  throw std::runtime_error( "Cannot add trigger on a suite" );
 
   	t_expr_ = std::make_unique<Expression>(t);
    state_change_no_ = Ecf::incr_state_change_no();
@@ -111,7 +111,7 @@ void Node::add_complete_expression(const Expression& t)
 		ss << "to add large complete expressions use multiple calls to Node::add_part_complete( PartExpression('t1 == complete') )";
  		throw std::runtime_error( ss.str() );
 	}
-   if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
+   if (isSuite())  throw std::runtime_error( "Cannot add complete trigger on a suite" );
 
   	c_expr_ = std::make_unique<Expression>(t);
    state_change_no_ = Ecf::incr_state_change_no();
@@ -120,7 +120,7 @@ void Node::add_complete_expression(const Expression& t)
 void Node::py_add_trigger_expr(const std::vector<PartExpression>& vec)
 {
    if (t_expr_) {
-      if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
+      if (isSuite())  throw std::runtime_error( "Cannot add trigger on a suite" );
       t_expr_->add_expr(vec);
       state_change_no_ = Ecf::incr_state_change_no();
    }
@@ -134,7 +134,7 @@ void Node::py_add_trigger_expr(const std::vector<PartExpression>& vec)
 void Node::py_add_complete_expr( const std::vector<PartExpression>& vec )
 {
    if (c_expr_) {
-      if (isSuite())  throw std::runtime_error( "Can not add complete on a suite" );
+      if (isSuite())  throw std::runtime_error( "Cannot add complete on a suite" );
       c_expr_->add_expr(vec);
       state_change_no_ = Ecf::incr_state_change_no();
    }
@@ -147,7 +147,7 @@ void Node::py_add_complete_expr( const std::vector<PartExpression>& vec )
 
 void Node::add_part_trigger(const PartExpression& part)
 {
-   if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
+   if (isSuite())  throw std::runtime_error( "Cannot add trigger on a suite" );
 
 	if (!t_expr_) t_expr_ = std::make_unique<Expression>();
 	t_expr_->add( part );
@@ -155,7 +155,7 @@ void Node::add_part_trigger(const PartExpression& part)
 }
 void Node::add_part_complete(const PartExpression& part)
 {
-   if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
+   if (isSuite())  throw std::runtime_error( "Cannot add complete trigger on a suite" );
 
 	if (!c_expr_) c_expr_ = std::make_unique<Expression>();
 	c_expr_->add( part );
@@ -170,7 +170,7 @@ void Node::addTime(const ecf::TimeAttr& t)
 #endif
 
    if (isSuite()) {
-      throw std::runtime_error("Can not add time based dependency on a suite");
+      throw std::runtime_error("Cannot add time based dependency on a suite");
    }
 
    times_.push_back(t);
@@ -184,7 +184,7 @@ void Node::addToday(const ecf::TodayAttr& t)
 #endif
 
    if (isSuite()) {
-      throw std::runtime_error("Can not add time based dependency on a suite");
+      throw std::runtime_error("Cannot add time based dependency on a suite");
    }
 
    todays_.push_back(t);
@@ -199,7 +199,7 @@ void Node::addDate( const DateAttr& d)
 
 	// By disallowing what effect would if have on existing suites ?
    if (isSuite()) {
-      throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
+      throw std::runtime_error("Cannot add time based dependency on a suite"); // Added at 4.0.2
    }
 
    dates_.push_back( d );
@@ -214,7 +214,7 @@ void Node::addDay( const DayAttr& d)
 
    // By disallowing what effect would if have on existing suites ?
    if (isSuite()) {
-      throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
+      throw std::runtime_error("Cannot add time based dependency on a suite"); // Added at 4.0.2
    }
 
    days_.push_back( d );
@@ -356,7 +356,7 @@ void Node::addAutoCancel( const ecf::AutoCancelAttr& ac)
 {
    if (auto_archive_) {
        std::stringstream ss;
-       ss << "Node::addAutoCancel: Can not add autocancel and autoarchive on the same node " << debugNodePath();
+       ss << "Node::addAutoCancel: Cannot add autocancel and autoarchive on the same node " << debugNodePath();
        throw std::runtime_error( ss.str() );
     }
     if (auto_cancel_) {
@@ -372,7 +372,7 @@ void Node::add_autoarchive( const ecf::AutoArchiveAttr& aa)
 {
    if (auto_cancel_) {
       std::stringstream ss;
-      ss << "Node::add_autoarchive: Can not add autocancel and autoarchive on the same node " << debugNodePath();
+      ss << "Node::add_autoarchive: Cannot add autocancel and autoarchive on the same node " << debugNodePath();
       throw std::runtime_error( ss.str() );
    }
    if (auto_archive_) {

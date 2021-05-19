@@ -83,13 +83,13 @@ Current behaviour: Task/Job----> Server
 o Server halted:
   client cycles through the host file, if no host file, continues for 
   ECF_TIMEOUT/24hrs
-  If host file, exists, but we can not parse it, fails with 
+  If host file, exists, but we cannot parse it, fails with 
   an error message
 o If task paths don't match, those in the server, client interface 
   errors and returns immediately
 o if password match fails, client interface errors and 
   returns immediately  
-o If we can not connect to server(Network down, or server down), 
+o If we cannot connect to server(Network down, or server down), 
   Child commands, block for 24 hours
   Other commands non-blocking and terminate immediately
   
@@ -131,7 +131,7 @@ Typically zombie attribure should be added to the Suite/family
     
 zombie_type = [ user | ecf | path ]
           
-   o path: (ECF_NAME) can not be found in the server, because node 
+   o path: (ECF_NAME) cannot be found in the server, because node 
      tree was deleted,replaced,reload, server crashed or backup 
      server does not have node tree
    - Jobs could have been created, via 'ecf' or 'user' commands
@@ -154,7 +154,7 @@ zombie_type = [ user | ecf | path ]
    - Ecf Crashed ( or terminated and restarted) and the recovered 
      check pt file is out of date
    - Task repeatedly re-run ? Earlier copies will not be remembered.
-   - Task sent by another ECF server, but which can not talk to the 
+   - Task sent by another ECF server, but which cannot talk to the 
      original ECF server
    - Network glitches/network down.
         
@@ -194,7 +194,7 @@ Valid options
      For <path> zombie type the valid actions are:
         o  fail  | fob | delete | block(default)
               
-      A Node can have mutiple zombies but they can not have duplicate
+      A Node can have mutiple zombies but they cannot have duplicate
       zombie types.                    
  
 Example zombie construct:

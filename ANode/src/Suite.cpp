@@ -735,6 +735,14 @@ void Suite::gen_variables(std::vector<Variable>& vec) const
    suite_gen_variables_->gen_variables(vec);
 }
 
+std::string Suite::find_node_path(const std::string& type, const std::string& node_name) const
+{
+   if (Str::caseInsCompare(type,"suite") && node_name == name()) {
+      return absNodePath();
+   }
+   return NodeContainer::find_node_path(type,node_name);
+}
+
 // =======================================================================================
 
 // The false below is used as a dummy argument to call the Variable constructor that does not

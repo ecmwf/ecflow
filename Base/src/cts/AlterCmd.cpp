@@ -316,7 +316,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 
       // ECFLOW-380: Some variable should be read only
       if (name_ == Str::ECF_HOST() || name_ == Str::ECF_PORT() || name_ == "ECF_PID" || name_ == "ECF_VERSION" || name_ == "ECF_LISTS" ) {
-         std::stringstream ss; ss << "AlterCmd:: Can not add or change read only server variable " << name_;
+         std::stringstream ss; ss << "AlterCmd:: Cannot add or change read only server variable " << name_;
          throw std::runtime_error(ss.str());
       }
       defs->set_server().add_or_update_user_variables(name_,value_);
@@ -1087,7 +1087,7 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
    case AlterCmd::LABEL: {
       if (options.size() == 3 && paths.size() == 1) {
          // ECFLOW-648 allow label value to be empty
-         // HOWEVER , we can not cope multiple paths, and setting value to empty.
+         // HOWEVER , we cannot cope multiple paths, and setting value to empty.
          // since empty quotes are removed by boost program options, hence if we have a label value which is path, and multiple paths
          value.clear();
       }

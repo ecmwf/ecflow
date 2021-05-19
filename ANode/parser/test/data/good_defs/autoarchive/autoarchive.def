@@ -1,6 +1,6 @@
 suite autoarchive
  family f1
-    autoarchive +01:00 # archive one hour after complete
+    autoarchive +00:02  
     task t1
  endfamily
  family f2
@@ -8,7 +8,7 @@ suite autoarchive
     task t1
  endfamily
  family f3
-    autoarchive 10     # archive 10 days after complete
+    autoarchive 1     # archive 1 days after complete
     task t1
  endfamily
  family f4
@@ -16,7 +16,54 @@ suite autoarchive
     task t1
  endfamily
  family f5
-    autoarchive 00:01  #  archive after 1 minute, same as archive 0
+    autoarchive +00:01  #  archive after 1 minute, same as archive 0
     task t1
+ endfamily
+ family f5_1
+    defstatus aborted
+    autoarchive +00:01  
+    task t1
+ endfamily
+ family f5_2
+    autoarchive 0  
+    task t1
+      trigger 1== 0
+ endfamily
+  family f6
+    autoarchive +00:02 -i  
+    task t1
+ endfamily
+ family f7
+     autoarchive 01:00 -i  
+    task t1
+ endfamily
+ family f8
+    autoarchive 1 -i     
+    task t1
+ endfamily
+ family f9
+    autoarchive 0 -i     # archive immediately after complete,queued,abort
+    task t1
+ endfamily
+ family f10
+    autoarchive +00:01 -i #  archive after 1 minute, same as archive 0  ,queued,abort
+    task t1
+ endfamily
+ family f11
+    autoarchive +00:01 -i # archive after 1 minute, same as archive 0  ,queued,abort
+    task t1
+      trigger 1 == 0
+ endfamily
+ family f12
+    defstatus aborted
+    autoarchive 0 -i  
+    task t1
+       trigger 1 == 0
+ endfamily
+ family f13
+    defstatus aborted
+    autoarchive +00:01 -i 
+    task t1
+      trigger 1 == 0
  endfamily
 endsuite

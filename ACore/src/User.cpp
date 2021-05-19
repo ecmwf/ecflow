@@ -66,7 +66,7 @@ std::string User::login_name()
    if (the_user_name.empty()) {
 
       // Get the uid of the running process and use it to get a record from /etc/passwd */
-      // getuid() can not fail, but getpwuid can fail.
+      // getuid() cannot fail, but getpwuid can fail.
       errno = 0;
       uid_t real_user_id_of_process = getuid();
       struct passwd * thePassWord = getpwuid ( real_user_id_of_process );
