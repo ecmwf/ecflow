@@ -103,7 +103,7 @@ AFTER the release
 
      This will update the version number for $WK/ACore/src/ecflow_version.h
      This file is included in $WK/ACore/src/Version.cpp
-     It will also update      $WK/Pyext/__init__.py
+     It will also update      $WK/Pyext/ecflow/__init__.py
 
      Then check this file in, for the other platforms.
 
