@@ -94,6 +94,10 @@ Process
 0/ Announce release
    mail group:  ecflow_int@lists.ecmwf.int
    Use: ecflow/Doc/misc/Release-Anouncement.txt
+   
+   Also Daniel V Santoalla will send out an email to external users:
+   https://www.ecmwf.int/r/lists/info/ecflow-announce
+
 
 
 AFTER the release

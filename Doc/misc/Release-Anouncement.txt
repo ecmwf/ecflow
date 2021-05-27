@@ -16,6 +16,7 @@ on the following platforms:
 
 The release includes the following changes:
 
+   <FILL IN THIS SECTION>
 
 To use a specific version use the module functionality.
 This will setup the PATHS for client server and python extension
