@@ -7,7 +7,7 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
-set -x
+set -ex
 #set -u
 
 # Only uncomment for debugging this script
@@ -290,8 +290,7 @@ EOF
 
    echo "ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;"  >>  $SITE_CONFIG_LOCATION
    
-   which python3
-   if [ "$?" = "0" ] ; then
+   if which python3; then
       
       python_version=$(python3 -c 'import sys;print(sys.version_info[0],sys.version_info[1],sep="")')
       if [[ ${BOOST_NUMERIC_VERSION} -le 1670 ]] ; then
@@ -309,8 +308,7 @@ EOF
       ./b2 --debug-configuration toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
    fi
 
-   which python
-   if [ "$?" = "0" ] ; then
+   if which python; then
       export ECF_PYTHON2=1 # so that we use ' using python ......'
       echo 'if $(ECF_PYTHON2) {'                                                         >> $SITE_CONFIG_LOCATION
       
