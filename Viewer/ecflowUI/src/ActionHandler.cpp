@@ -119,7 +119,9 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
 #ifdef _UI_ACTIONHANDLER_DEBUG
         UiLog().dbg() << "ActionHandler::contextMenu --> item=" + item->name();
 #endif
-    	if(item->handler() == "info_panel")
+        UI_ASSERT(filteredNodes.size() > 0, "filteredNodes is empty");
+
+        if(item->handler() == "info_panel")
     	{
             Q_EMIT infoPanelCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
