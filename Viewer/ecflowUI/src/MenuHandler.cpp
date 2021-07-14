@@ -904,7 +904,7 @@ bool MenuItem::isValidFor(const std::vector<VInfo_ptr>& nodes, bool allowHidden)
     if(!allowHidden && hidden())
         return false;
 
-    if(nodes.size() > 1 && !multiSelect())
+    if(nodes.size() == 0 || (nodes.size() > 1 && !multiSelect()))
         return false;
 
     for (auto & node : nodes)
