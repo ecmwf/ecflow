@@ -271,8 +271,12 @@ void OutputDirProvider::fetchNext()
 bool OutputDirProvider::fetchDirViaOutputClient(VNode *n,const std::string& fileName)
 {
     std::string host, port;
-    if(n->logServer(host,port))
-    {
+
+    if(n->userLogServer(host,port)) {
+        outClient_=makeOutputClient(host,port);
+        outClient_->getDir(fileName);
+        return true;
+    } else if(n->logServer(host,port)) {
         outClient_=makeOutputClient(host,port);
         outClient_->getDir(fileName);
         return true;
