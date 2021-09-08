@@ -1911,7 +1911,7 @@ QString VServer::toolTip()
     auto userLogHost = server_->conf()->stringValue(VServerSettings::UserLogServerHost);
     auto userLogPort = server_->conf()->stringValue(VServerSettings::UserLogServerPort);
     if (!userLogHost.isEmpty() && !userLogPort.isEmpty()) {
-        txt+="<br><b>Custom logserver</b>: " + userLogHost + "@" + userLogPort + "<br>";
+        txt+="<br><b>Custom logserver</b>: " + userLogHost + "@" + userLogPort;
     }
 
 	return txt;
