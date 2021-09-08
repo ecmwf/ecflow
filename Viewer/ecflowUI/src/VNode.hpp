@@ -193,6 +193,7 @@ public:
     void statusChangeTime(QString&) const;
     unsigned int statusChangeTime() const;
 
+    bool userLogServer(std::string& host,std::string& port);
     bool logServer(std::string& host,std::string& port);
 
     void triggerExpr(std::string&,std::string&) const;

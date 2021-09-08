@@ -360,17 +360,28 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
     }
 
     //We did/could not use the cache
-    if(n->logServer(host,port))
-	{
-		//host=host + "baaad";
 
+    // Try the user defined logserver
+    bool logServerUsed = false;
+    if(n->userLogServer(host,port)) {
+
+        UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
+                             " port:" << port << " file: " << fileName;
+
+        owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from <b>user defined<b> log server <i>"
+                                  + host + "@" + port  +"</i>",0);
+        logServerUsed = true;
+
+    } else if (n->logServer(host,port)) {
         UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
                              " port:" << port << " file: " << fileName;
 
         //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
         //owner_->infoProgress(reply_);
         owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from log server <i>" + host + "@" + port  +"</i>",0);
+    }
 
+    if (logServerUsed) {
 		if(!outClient_)
 		{
 			outClient_=new OutputFileClient(host,port,this);

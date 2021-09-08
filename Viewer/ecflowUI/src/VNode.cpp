@@ -801,6 +801,18 @@ QColor  VNode::typeFontColour() const
     return VNState::toTypeColour(this);
 }
 
+bool VNode::userLogServer(std::string& host,std::string& port)
+{
+    if(ServerHandler* sh = server()) {
+        host = sh->conf()->stringValue(VServerSettings::UserLogServerHost).toStdString();
+        if (!host.empty()) {
+            port = sh->conf()->stringValue(VServerSettings::UserLogServerPort).toStdString();
+            return !port.empty();
+        }
+    }
+    return false;
+}
+
 bool VNode::logServer(std::string& host,std::string& port)
 {
 	if(!node_)
@@ -808,12 +820,6 @@ bool VNode::logServer(std::string& host,std::string& port)
 
 	host=findInheritedVariable("ECF_LOGHOST",true);
 	port=findInheritedVariable("ECF_LOGPORT");
-	//if(logHost.empty())
-	//{
-	//	logHost=findInheritedVariable("LOGHOST",true);
-	//	logPort=findInheritedVariable("LOGPORT");
-	//}
-
 	std::string micro=findInheritedVariable("ECF_MICRO");
 	if(!host.empty() && !port.empty() &&
 	  (micro.empty() || host.find(micro) ==  std::string::npos))
@@ -1900,8 +1906,14 @@ QString VServer::toolTip()
             if(!st->errorMessage().empty())
                 txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n","<br>");
         }
-
 	}
+
+    auto userLogHost = server_->conf()->stringValue(VServerSettings::UserLogServerHost);
+    auto userLogPort = server_->conf()->stringValue(VServerSettings::UserLogServerPort);
+    if (!userLogHost.isEmpty() && !userLogPort.isEmpty()) {
+        txt+="<br><b>Custom logserver</b>: " + userLogHost + "@" + userLogPort + "<br>";
+    }
+
 	return txt;
 }
 
