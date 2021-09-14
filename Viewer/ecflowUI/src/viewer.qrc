@@ -100,6 +100,7 @@
     <file alias="line_num.svg">../images/line_num.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="logo.svg">../images/logo.svg</file>
     <file alias="logo.png">../images/logo.png</file>
     <file alias="logo_small.png">../images/logo_small.png</file>
     <file alias="manage_server.svg">../images/manage_server.svg</file>

@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     //Init qt
     QApplication app(argc, argv);
 
-    app.setWindowIcon(QPixmap(":/viewer/logo_small.png"));
+    app.setWindowIcon(QPixmap(":/viewer/logo.svg"));
 
     QStringList styleLst=QStyleFactory::keys();
 
