@@ -381,6 +381,14 @@ ECFLOWUI_STARTTIME=$(date)
 ECFLOWUI_LOG_VIEWER=${EXE_DIR}/ecflow_ui_log.x
 
 #-----------------------------------------------------------
+# Set up environment on mac
+#-----------------------------------------------------------
+
+if [[  $(uname | tr '[:upper:]' '[:lower:]') == "darwin" ]]; then
+    export QT_MAC_WANTS_LAYER=1
+fi
+
+#-----------------------------------------------------------
 # Run the executable
 #-----------------------------------------------------------
 
