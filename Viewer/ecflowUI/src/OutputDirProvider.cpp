@@ -235,7 +235,7 @@ void OutputDirProvider::fetchNext()
     }
 
     //We try the output client, its asynchronous! Here we create an
-    //output client and ask to the fetch the dir asynchronously. The ouput client will call
+    //output client and ask to the fetch the dir asynchronously. The output client will call
     //slotOutputClientFinished() or slotOutputClientError() eventually!!
     if(task.fetchMode_ ==  OutputDirProviderTask::RemoteFetch)
     {
