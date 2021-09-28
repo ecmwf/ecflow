@@ -74,7 +74,7 @@ ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
 #  define FALSE 0
 #endif
 
-#define MAXLEN 1024                /* Maximum line lenght */
+#define MAXLEN 1024                /* Maximum line length */
 
 char *nameof(char *name) {
   char *s;

@@ -192,7 +192,7 @@ protected:
     int leftMargin_;
     int itemGap_;
     int connectorGap_;
-    int expandConnectorLenght_;
+    int expandConnectorLength_;
     QPointer<QItemSelectionModel> selectionModel_;
     QColor expectedBg_;
     QColor connectorColour_;

@@ -583,7 +583,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                 int lineX=item->right()+connectorGap_;
                 QPen oriPen=painter->pen();
                 painter->setPen(QPen(connectorColour_,1,Qt::DashLine));
-                painter->drawLine(lineX,lineY,lineX+expandConnectorLenght_,lineY);
+                painter->drawLine(lineX,lineY,lineX+expandConnectorLength_,lineY);
                 painter->setPen(oriPen);
             }
         }
@@ -1027,7 +1027,7 @@ int CompactView::itemAtRowCoordinate(int start,int count,int logicalXPos) const
         int left=viewItems_[i].x-1;
         int right=viewItems_[i].right()+2;
         if(!viewItems_[i].expanded && viewItems_[i].hasChildren)
-            right=viewItems_[i].right()+connectorGap_+expandConnectorLenght_+3;
+            right=viewItems_[i].right()+connectorGap_+expandConnectorLength_+3;
 
         if(left <= logicalXPos && right >= logicalXPos)
         {

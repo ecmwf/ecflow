@@ -242,7 +242,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
 #ifdef _UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   try elided text";
 #endif
-            //Try different elided text lenghts
+            //Try different elided text lengths
             for(int i=20; i >= 3; i--)
             {
                 QString t;
@@ -343,7 +343,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
         {
             int len=lastItem->textLen();
 
-            //Try different elided text lenghts
+            //Try different elided text lengths
             for(int i=30; i >= 3; i--)
             {
                 QString t;
