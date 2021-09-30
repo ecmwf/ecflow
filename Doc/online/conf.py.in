@@ -43,7 +43,7 @@ def get_ecflow_version():
 # ISSUES 1:
 #   It appears the sphinx expects the  shared lib to be named ecflow, and *NOT* _ecflow
 #   this shows that sphinx is *NOT* loading the the module as a package, i.e it does not load __init__.py
-#   Hence can not document class/functions __init__.py in this file
+#   Hence cannot document class/functions __init__.py in this file
 #
 #   ***NOTE***: if we use sys.path.insert(0,os.getcwd() + "/../../Pyext")
 #               Then we can document functions in __init__.py but *NOT* the extension ??

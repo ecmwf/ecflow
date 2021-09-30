@@ -133,7 +133,9 @@ void CommandOutputHandler::appendOutput(CommandOutput_ptr item,QString txt)
     {
         bool trimmed=false;
         item->appendOutput(txt,maxOutputSize_,trimmed);
-        CommandOutputDialog::showDialog();
+        if (needToShowStdOut()) {
+            CommandOutputDialog::showDialog();
+        }
         if(trimmed==false)
             Q_EMIT itemOutputAppend(item,txt);
         else
@@ -147,7 +149,9 @@ void CommandOutputHandler::appendError(CommandOutput_ptr item,QString txt)
     {
         bool trimmed=false;
         item->appendError(txt,maxErrorSize_,trimmed);
-        CommandOutputDialog::showDialog();
+        if (needToShowStdErr()) {
+            CommandOutputDialog::showDialog();
+        }
         if(trimmed==false)
             Q_EMIT itemErrorAppend(item,txt);
         else
@@ -170,8 +174,7 @@ void CommandOutputHandler::failed(CommandOutput_ptr item)
     {
         item->setStatus(CommandOutput::FailedStatus);
         Q_EMIT itemStatusChanged(item);
-        bool showStdErr = (showDialogStdErrProp_)?(showDialogStdErrProp_->value().toBool()):true;
-        if (showStdErr) {
+        if (needToShowStdErr()) {
             CommandOutputDialog::showDialog();
         }
     }
@@ -179,11 +182,8 @@ void CommandOutputHandler::failed(CommandOutput_ptr item)
 
 CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDateTime runTime, CreateContext context)
 {
-    bool showStdOut = (showDialogStdOutProp_)?(showDialogStdOutProp_->value().toBool()):true;
-    bool showStdErr = (showDialogStdErrProp_)?(showDialogStdErrProp_->value().toBool()):true;
-
-    if( (showStdOut && context == StdOutContext) ||
-        (showStdErr && context == StdErrContext) ) {
+    if( (needToShowStdOut() && context == StdOutContext) ||
+        (needToShowStdErr() && context == StdErrContext) ) {
         CommandOutputDialog::showDialog();
     }
     CommandOutput_ptr item=
@@ -205,4 +205,14 @@ void CommandOutputHandler::checkItems()
         item->setEnabled(false);
         items_.remove(0);
     }
+}
+
+bool CommandOutputHandler::needToShowStdOut()
+{
+     return (showDialogStdOutProp_)?(showDialogStdOutProp_->value().toBool()):true;
+}
+
+bool CommandOutputHandler::needToShowStdErr()
+{
+     return (showDialogStdErrProp_)?(showDialogStdErrProp_->value().toBool()):true;
 }

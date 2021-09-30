@@ -21,6 +21,11 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
+# record JOB time
+%ecfmicro !
+job_start_time=$(date +%s)
+!ecfmicro %
+
 # Defines the three variables that are needed for any
 # communication with ECF
 
@@ -29,6 +34,7 @@ export ECF_HOST=%ECF_HOST:%   # The hostname where the server is running
 export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
+#export ECF_DEBUG_CLIENT=1
 if [[ "%ECF_SSL:%" != "" ]] ; then
    export ECF_SSL=%ECF_SSL:%   # if server is SSL make sure client is
 fi
@@ -77,9 +83,16 @@ trap ERROR 0
 trap '{ echo "Killed by a signal"; ERROR ; }' 1 2 3 4 5 6 7 8 10 12 13 15
 
 %ADD_DELAY_BEFORE_INIT:% # ADD_DELAY_BEFORE_INIT is used by some tests, to slow things down on fast systems
+
+# record INIT time
+%ecfmicro !
+init_start_time=$(date +%s)
+!ecfmicro %
+
 %ECF_CLIENT_EXE_PATH% --init=$$ %INIT_ADD_VARIABLES:%
 
-# record shell time
+# record TIME between init and complete
 %ecfmicro !
 start_time=$(date +%s)
 !ecfmicro %
+echo "Job start: *INIT* took : $((start_time - init_start_time)) secs"

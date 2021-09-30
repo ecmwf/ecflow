@@ -90,6 +90,8 @@ Q_SIGNALS:
 protected:
     CommandOutputHandler(QObject* parent);
     void checkItems();
+    bool needToShowStdOut();
+    bool needToShowStdErr();
 
     static CommandOutputHandler* instance_;
     int maxNum_{25};

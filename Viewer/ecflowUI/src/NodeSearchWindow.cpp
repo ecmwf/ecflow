@@ -12,24 +12,23 @@
 #include <QDebug>
 #include <QSettings>
 
-#include "NodeSearchDialog.hpp"
+#include "NodeSearchWindow.hpp"
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
 #include "WidgetNameProvider.hpp"
 
-NodeSearchDialog::NodeSearchDialog(QWidget *parent) :
-    QDialog(parent)
+NodeSearchWindow::NodeSearchWindow(QWidget *parent) :
+     QMainWindow(parent)
 {
     setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);
 
-	QString wt=windowTitle();
-	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    QString wt=windowTitle() + "  -  " + QString::fromStdString(VConfig::instance()->appLongName());
 	setWindowTitle(wt);
 
     connect(queryWidget_,SIGNAL(closeClicked()),
-    		this,SLOT(accept()));
+            this,SLOT(closeIt()));
 
     //Read the qt settings
     readSettings();
@@ -37,43 +36,45 @@ NodeSearchDialog::NodeSearchDialog(QWidget *parent) :
     WidgetNameProvider::nameChildren(this);
 }
 
-NodeSearchDialog::~NodeSearchDialog()
+NodeSearchWindow::~NodeSearchWindow()
 = default;
 
-NodeSearchWidget* NodeSearchDialog::queryWidget() const
+NodeSearchWidget* NodeSearchWindow::queryWidget() const
 {
 	return queryWidget_;
 }
 
-void NodeSearchDialog::closeEvent(QCloseEvent * event)
+void NodeSearchWindow::closeEvent(QCloseEvent * event)
 {
 	queryWidget_->slotStop(); //The search thread might be running!!
 	event->accept();
 	writeSettings();
 }
 
-void NodeSearchDialog::accept()
+void NodeSearchWindow::keyReleaseEvent(QKeyEvent *event)
 {
-	writeSettings();
-    QDialog::accept();
+    if(event->key() == Qt::Key_Return)
+        queryWidget_->slotFind();
+    QMainWindow::keyReleaseEvent(event);
 }
 
-void NodeSearchDialog::reject()
+void NodeSearchWindow::closeIt()
 {
-	writeSettings();
-	QDialog::reject();
+    writeSettings();
+    close();
 }
 
-void NodeSearchDialog::slotOwnerDelete()
+void NodeSearchWindow::slotOwnerDelete()
 {
-	deleteLater();
+    close();
+    deleteLater();
 }
 
 //------------------------------------------
 // Settings read/write
 //------------------------------------------
 
-void NodeSearchDialog::writeSettings()
+void NodeSearchWindow::writeSettings()
 {
     SessionItem* cs=SessionHandler::instance()->current();
     Q_ASSERT(cs);
@@ -84,12 +85,12 @@ void NodeSearchDialog::writeSettings()
 	settings.clear();
 
 	settings.beginGroup("main");
-	settings.setValue("size",size());
+    settings.setValue("geometry",saveGeometry());
     queryWidget_->writeSettings(settings);
 	settings.endGroup();
 }
 
-void NodeSearchDialog::readSettings()
+void NodeSearchWindow::readSettings()
 {
     SessionItem* cs=SessionHandler::instance()->current();
     Q_ASSERT(cs);
@@ -97,22 +98,13 @@ void NodeSearchDialog::readSettings()
                        QSettings::NativeFormat);
 
 	settings.beginGroup("main");
-	if(settings.contains("size"))
-	{
-		resize(settings.value("size").toSize());
-	}
-	else
-	{
+    if(settings.contains("geometry")) {
+        restoreGeometry(settings.value("geometry").toByteArray());
+    }
+    else {
 	  	resize(QSize(550,540));
 	}
 
     queryWidget_->readSettings(settings);
-
-	/*if(settings.contains("current"))
-	{
-		int current=settings.value("current").toInt();
-		if(current >=0)
-			list_->setCurrentRow(current);
-	}*/
 	settings.endGroup();
 }

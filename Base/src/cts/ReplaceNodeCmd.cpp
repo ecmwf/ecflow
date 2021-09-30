@@ -44,7 +44,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
    node_ptr nodeToReplace = client_defs->findAbsNode( node_path );
    if (! nodeToReplace.get() ) {
       std::stringstream ss;
-      ss << "ReplaceNodeCmd::ReplaceNodeCmd: Can not replace child since path " << node_path;
+      ss << "ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path " << node_path;
       ss << ", does not exist in the client definition ";
       throw std::runtime_error( ss.str() );
    }
@@ -74,7 +74,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
    node_ptr nodeToReplace = client_defs ->findAbsNode( node_path );
    if (! nodeToReplace.get() ) {
       std::stringstream ss;
-      ss << "ReplaceNodeCmd::ReplaceNodeCmd: Can not replace child since path " << node_path;
+      ss << "ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path " << node_path;
       ss << ", does not exist in the client definition " << path_to_defs;
       throw std::runtime_error( ss.str() );
    }

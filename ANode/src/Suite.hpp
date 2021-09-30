@@ -58,6 +58,8 @@ public:
    void update_generated_variables() const override;
 
    const Variable& findGenVariable(const std::string& name) const override;
+   std::string find_node_path(const std::string& type, const std::string& name) const override;
+
    void gen_variables(std::vector<Variable>&) const override;
 
    void updateCalendar( const ecf::CalendarUpdateParams &,Node::Calendar_args&);

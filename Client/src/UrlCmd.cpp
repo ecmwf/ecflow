@@ -35,7 +35,7 @@ UrlCmd::UrlCmd(defs_ptr defs, const std::string& absNodePath)
 	if ( !node_ ) {
 		std::string errorMsg = "UrlCmd: The node path parameter '";
 		errorMsg += absNodePath;
-		errorMsg += "' can not be found.";
+		errorMsg += "' cannot be found.";
 		throw std::runtime_error(errorMsg);
  	}
 }

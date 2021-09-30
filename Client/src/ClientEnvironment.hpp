@@ -68,7 +68,7 @@ public:
 
 	/// When called will demand load the ecf host file, and read the hosts.
 	/// Will then iterate over the host, when the end is reached will start over
-	/// If host can not be opened or errors occur returns false;
+	/// If host cannot be opened or errors occur returns false;
 	bool get_next_host(std::string& errorMsg);
 
 	/// If server denies client communication and this flag is set, exit with an error

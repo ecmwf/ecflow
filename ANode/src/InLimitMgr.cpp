@@ -113,7 +113,7 @@ bool InLimitMgr::deleteInlimit(const std::string& name)
          }
       }
    }
-   throw std::runtime_error("InLimitMgr::deleteInlimit: Can not find inlimit: " + name);
+   throw std::runtime_error("InLimitMgr::deleteInlimit: Cannot find inlimit: " + name);
 }
 
 Limit* InLimitMgr::findLimitViaInLimit(const InLimit& theInLimit) const
@@ -417,7 +417,7 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit, std::string& errorMsg, 
 
          std::stringstream ss;
          ss << "Warning: ";
-         ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << ", which can not be found on the parent nodes\n";
+         ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << ", which cannot be found on the parent nodes\n";
          warningMsg += ss.str();
       }
       return referencedLimit; // this is empty/NULL
@@ -439,7 +439,7 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit, std::string& errorMsg, 
           }
 
           std::stringstream ss;
-          ss << "Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << ", which can not be found\n";
+          ss << "Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << ", which cannot be found\n";
           warningMsg += ss.str();
        }
        return limit_ptr();

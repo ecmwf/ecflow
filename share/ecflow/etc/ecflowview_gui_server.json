@@ -30,7 +30,9 @@
                 "prefix" : "server.files",
                 
                 "line" : "readFilesFromDisk",
-                "line" : "maxOutputFileLines"
+                "line" : "maxOutputFileLines",
+                "line" : "logServerHost",
+                "line" : "logServerPort"
              },
              "group" : {
                 "title" : "Server load and timeline",

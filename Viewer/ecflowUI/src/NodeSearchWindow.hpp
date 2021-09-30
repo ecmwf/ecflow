@@ -8,34 +8,34 @@
 //
 //============================================================================
 
-#ifndef NODESEARCHDIALOG_HPP_
-#define NODESEARCHDIALOG_HPP_
+#ifndef NODESEARCHWINDOW_HPP_
+#define NODESEARCHWINDOW_HPP_
 
-#include <QDialog>
+#include <QMainWindow>
 
 #include "ServerFilter.hpp"
 
-#include "ui_NodeSearchDialog.h"
+#include "ui_NodeSearchWindow.h"
 
 class ServerFilter;
 
-class NodeSearchDialog : public QDialog, protected Ui::NodeSearchDialog
+class NodeSearchWindow : public QMainWindow, protected Ui::NodeSearchWindow
 {
     Q_OBJECT
 
 public:
-    explicit NodeSearchDialog(QWidget *parent = nullptr);
-    ~NodeSearchDialog() override;
+    explicit NodeSearchWindow(QWidget *parent = nullptr);
+    ~NodeSearchWindow() override;
 
     NodeSearchWidget* queryWidget() const;
 
 protected Q_SLOTS:
-	void accept() override;
-    void reject() override;
+    void closeIt();
     void slotOwnerDelete();
 
 protected:
 	void closeEvent(QCloseEvent * event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
     void readSettings();

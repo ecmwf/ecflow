@@ -373,7 +373,7 @@ void export_Client()
    .def("set_child_init_add_vars",    &set_child_init_add_vars2,   ClientDoc::set_child_init_add_vars() )
    .def("set_child_complete_del_vars",&set_child_complete_del_vars,ClientDoc::set_child_complete_del_vars() )
 
-   .def("set_zombie_child_timeout",&ClientInvoker::set_zombie_child_timeout, "Set timeout for zombie child commands,that can not connect to server, default is 24 hours. The input is required to be in seconds")
+   .def("set_zombie_child_timeout",&ClientInvoker::set_zombie_child_timeout, "Set timeout for zombie child commands,that cannot connect to server, default is 24 hours. The input is required to be in seconds")
    .def("child_init",          &ClientInvoker::child_init,    "Child command,notify server job has started")
    .def("child_abort",         &ClientInvoker::child_abort,(bp::arg("reason")=""), "Child command,notify server job has aborted, can provide an optional reason")
    .def("child_event",         &ClientInvoker::child_event,(bp::arg("event_name"),bp::arg("value")=true),"Child command,notify server event occurred, requires the event name")
@@ -394,7 +394,7 @@ void export_Client()
 	         "\nExceptions:\n\n"
 	         "- raises RuntimeError if the definition is empty\n"
 	         "- raises RuntimeError if the node path is empty\n"
-	         "- raises RuntimeError if the node path can not be found in the definition\n"
+	         "- raises RuntimeError if the node path cannot be found in the definition\n"
 	         "\nUsage::\n\n"
 	         "   try:\n"
 	         "      ci = Client()\n"
@@ -419,7 +419,7 @@ void export_Client()
 	         "\nExceptions\n\n"
 	         "- raises RuntimeError if the definition is empty\n"
 	         "- raises RuntimeError if the node path is empty\n"
-	         "- raises RuntimeError if the node path can not be found in the definition\n"
+	         "- raises RuntimeError if the node path cannot be found in the definition\n"
 	         "- raises RuntimeError if ECF_URL_CMD not defined or if variable substitution fails\n"
 	         "\nUsage:\n"
 	         "Lets assume that the server has the following definition::\n\n"

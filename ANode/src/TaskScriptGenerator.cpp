@@ -91,7 +91,7 @@ void TaskScriptGenerator::generate(const std::map<std::string,std::string>& over
    // Note: task_->absNodePath() starts with /.
    std::string ecf_file_path = root_directory_for_ecf_files + task_->absNodePath() + task_->script_extension();
    if (fs::exists(ecf_file_path)) {
-      std::cout << "Can not generate. Script file " << ecf_file_path << " already exists\n";
+      std::cout << "Cannot generate. Script file " << ecf_file_path << " already exists\n";
       return;
    }
 

@@ -79,6 +79,19 @@
                 	"default": "15000",
                 	"min" : "0"	
                     },
+
+                "logServerHost" : {
+                    "label" : "Custom logserver host",
+                    "tooltip": "Takes precedence over the <b>ECF_LOGHOST</b> ecflow variable",
+                    "default" : ""
+                },
+
+                "logServerPort" : {
+                    "label" : "Custom logserver port",
+                    "tooltip": "Takes precedence over the <b>ECF_LOGPORT</b> ecflow variable.",
+                    "default" : ""
+                },
+
                 "uidForServerLogTransfer" : {
                     "label" : "Remote username to fetch server logs",
                      "default" : "$USER"

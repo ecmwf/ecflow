@@ -74,6 +74,9 @@ public:
    node_ptr find_by_name(const std::string& name) const;
 	family_ptr findFamily(const std::string& familyName) const;
 	task_ptr findTask(const std::string& taskName) const;
+
+   std::string find_node_path(const std::string& type, const std::string& name) const override;
+
 	void getAllFamilies(std::vector<Family*>&) const;
 	void getAllNodes(std::vector<Node*>&) const override;
    void getAllTasks(std::vector<Task*>&) const override;

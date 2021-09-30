@@ -108,37 +108,43 @@ void VProperty::setValue(const std::string& val)
 
 	bool changed=false;
 
-    if(isColour(val))
-    {
-        QColor col=toColour(val);
-		changed=(value_.value<QColor>() != col);
-		value_=col;
-    }
-    else if(isFont(val))
-    {
-    	QFont font=toFont(val);
-    	changed=(value_.value<QFont>() != font);
-    	value_=font;
-    }
+    if (type_ == VProperty::StringType) {
+        QString str = QString::fromStdString(val);
+        changed=(value_ != str);
+        value_=str;
+    } else {
+        if(isColour(val))
+        {
+            QColor col=toColour(val);
+            changed=(value_.value<QColor>() != col);
+            value_=col;
+        }
+        else if(isFont(val))
+        {
+            QFont font=toFont(val);
+            changed=(value_.value<QFont>() != font);
+            value_=font;
+        }
 
-    else if(isNumber(val))
-    {
-    	int num=toNumber(val);
-    	changed=(value_.toInt() != num);
-    	value_=num;
-    }
-    else if(isBool(val))
-    {
-    	bool b=toBool(val);
-    	changed=(value_.toBool() != b);
-    	value_=b;
-    }
-    //Sound or string
-    else
-    {
-    	QString str=QString::fromStdString(val);
-    	changed=(value_ != str);
-    	value_=str;
+        else if(isNumber(val))
+        {
+            int num=toNumber(val);
+            changed=(value_.toInt() != num);
+            value_=num;
+        }
+        else if(isBool(val))
+        {
+            bool b=toBool(val);
+            changed=(value_.toBool() != b);
+            value_=b;
+        }
+        //Sound or string
+        else
+        {
+            QString str=QString::fromStdString(val);
+            changed=(value_ != str);
+            value_=str;
+        }
     }
 
     if(!defaultValue_.isNull() &&
@@ -514,7 +520,10 @@ bool VProperty::isSound(const std::string& val)
 
 bool VProperty::isNumber(const std::string& val)
 {
-	QString str=QString::fromStdString(val);
+    if (val.empty()) {
+        return false;
+    }
+    QString str=QString::fromStdString(val);
 	QRegExp re("\\d*");
 	return (re.exactMatch(str));
 }

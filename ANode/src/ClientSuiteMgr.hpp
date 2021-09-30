@@ -47,7 +47,7 @@ public:
  	unsigned int create_client_suite(bool auto_add_new_suites, const std::vector<std::string>& suites, const std::string& user);
 
 
- 	/// These function can throw std::runtime_error if the handle can not be found
+ 	/// These function can throw std::runtime_error if the handle cannot be found
    void remove_client_suite(unsigned int client_handle);
    void remove_client_suites(const std::string& user_to_drop);
  	void add_suites(unsigned int client_handle, const std::vector<std::string>& suites);

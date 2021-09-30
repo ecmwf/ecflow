@@ -57,7 +57,7 @@ public:
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
-   // Can throw std::runtime_error of the attribute can not be found
+   // Can throw std::runtime_error of the attribute cannot be found
    void delete_zombie(const ecf::Child::ZombieType);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
    void delete_queue(const std::string& name); // empty string means delete all queue's

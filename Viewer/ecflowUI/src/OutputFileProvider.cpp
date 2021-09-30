@@ -170,7 +170,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     {
         if(n->isSubmitted())
             reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>), but \
-                  because the node status is <b>submitted</b> it may contain the ouput from a previous run!");
+                  because the node status is <b>submitted</b> it may contain the output from a previous run!");
         else
             reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
     }
@@ -209,7 +209,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     if(fetchFileViaOutputClient(n,fileName,useCache))
     {
         //If we are here we created an output client and asked it to the fetch the
-    	//file asynchronously. The ouput client will call slotOutputClientFinished() or
+    	//file asynchronously. The output client will call slotOutputClientFinished() or
     	//slotOutputClientError eventually!!
     	return;
     }
@@ -301,7 +301,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
         if(fetchFileViaOutputClient(n,fileName,useCache))
         {
             //If we are here we created an output client and asked it to the fetch the
-            //file asynchronously. The ouput client will call slotOutputClientFinished() or
+            //file asynchronously. The output client will call slotOutputClientFinished() or
             //slotOutputClientError eventually!!
             return;
         }
@@ -360,17 +360,28 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
     }
 
     //We did/could not use the cache
-    if(n->logServer(host,port))
-	{
-		//host=host + "baaad";
 
+    // Try the user defined logserver
+    bool logServerUsed = false;
+    if(n->userLogServer(host,port)) {
+
+        UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
+                             " port:" << port << " file: " << fileName;
+
+        owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from <b>user defined<b> log server <i>"
+                                  + host + "@" + port  +"</i>",0);
+        logServerUsed = true;
+
+    } else if (n->logServer(host,port)) {
         UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
                              " port:" << port << " file: " << fileName;
 
         //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
         //owner_->infoProgress(reply_);
         owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from log server <i>" + host + "@" + port  +"</i>",0);
+    }
 
+    if (logServerUsed) {
 		if(!outClient_)
 		{
 			outClient_=new OutputFileClient(host,port,this);

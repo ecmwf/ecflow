@@ -466,7 +466,7 @@ public:
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type
-   // Can throw std::runtime_error of the attribute can not be found
+   // Can throw std::runtime_error of the attribute cannot be found
    void deleteTime(const std::string& name );
    void delete_time( const ecf::TimeAttr&  );
    void deleteToday(const std::string& name);
@@ -586,6 +586,7 @@ public:
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    virtual node_ptr find_immediate_child(const boost::string_view&) const { return node_ptr();}
+   virtual std::string find_node_path(const std::string& type, const std::string& name) const { return std::string();}
    const Variable& findVariable(const std::string& name) const;
    std::string find_parent_variable_sub_value(const std::string& name) const;
    const Variable& find_parent_variable(const std::string& name) const;

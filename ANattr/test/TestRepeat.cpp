@@ -694,7 +694,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_errors )
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090900,20090920,1),std::runtime_error);  // invalid start day
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090020,1),std::runtime_error);  // invalid end month
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090900,1),std::runtime_error);  // invalid end day
-   BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090920,0),std::runtime_error);  // delta can not be zero
+   BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090920,0),std::runtime_error);  // delta cannot be zero
 
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090920,20090916,1),std::runtime_error);  //  start day > end day, and delta > 0
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090920,-1),std::runtime_error);  //  start day < end day, and delta < 0

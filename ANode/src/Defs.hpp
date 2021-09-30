@@ -70,7 +70,7 @@ public:
    void set_most_significant_state();
 
    // The defs does not need suspend()/resume() as this is controlled by the server states
-   // The defs can not schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
+   // The defs cannot schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
    bool isSuspended() const { return (server().get_state() != SState::RUNNING); }
 
    /// Python based checking
@@ -203,6 +203,9 @@ public:
    node_ptr findAbsNode(const std::string& pathToNode) const;
    bool find_extern( const std::string& pathToNode,const std::string& node_attr_name) const;
    suite_ptr findSuite(const std::string& name) const;
+   std::string find_node_path(const std::string& type, const std::string& name) const;
+   node_ptr find_node(const std::string& type,const std::string& pathToNode) const;
+
    const std::vector<suite_ptr>& suiteVec() const { return suiteVec_;}
 
    /// Given a path, /suite/family/task, find node which is the closest

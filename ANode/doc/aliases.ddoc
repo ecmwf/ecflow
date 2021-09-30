@@ -83,7 +83,7 @@ The following command will need updating to support aliases
    - alter ?
    - order ?
 
-An alias is not plug-able,i.e. an alias can not be moved between tasks.
+An alias is not plug-able,i.e. an alias cannot be moved between tasks.
 Since an alias has no trigger or time dependencies the why command
 will only report limit dependencies.
 

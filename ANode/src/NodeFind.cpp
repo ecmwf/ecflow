@@ -64,7 +64,7 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
       theValue = the_defs->server().find_variable(name);
       if ( !theValue.empty() ) return true;
    }
-   return false; // the variable can not be found
+   return false; // the variable cannot be found
 }
 
 bool Node::find_parent_gen_variable_value(const std::string& name, std::string& theValue) const
@@ -87,7 +87,7 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
        theValue = the_defs->server().find_variable(name);
        if ( !theValue.empty() ) return true;
     }
-    return false; // the variable can not be found
+    return false; // the variable cannot be found
 }
 
 bool Node::findParentUserVariableValue(const std::string& name, std::string& theValue) const
@@ -108,7 +108,7 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
       theValue = the_defs->server().find_variable(name);
       if ( !theValue.empty() ) return true;
    }
-   return false; // the variable can not be found
+   return false; // the variable cannot be found
 }
 
 const std::string& Node::find_parent_user_variable_value(const std::string& name) const

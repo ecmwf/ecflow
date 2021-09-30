@@ -468,7 +468,7 @@ suite_ptr Defs::removeSuite(suite_ptr s)
 		return s; // transfer ownership of suite
 	}
 
- 	// Something serious has gone wrong. Can not find the suite
+ 	// Something serious has gone wrong. Cannot find the suite
  	cout << "Defs::removeSuite: assert failure:  suite '" << s->name() << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
 	for(unsigned si = 0; si < suiteVec_.size(); ++si) { cout << si << " " << suiteVec_[si]->name() << "\n";}
  	LOG_ASSERT(false,"Defs::removeSuite the suite not found");
@@ -522,7 +522,7 @@ bool Defs::addChild( const node_ptr& child, size_t position)
 void Defs::add_extern(const std::string& ex )
 {
    if (ex.empty()) {
-      throw std::runtime_error("Defs::add_extern: Can not add empty extern");
+      throw std::runtime_error("Defs::add_extern: Cannot add empty extern");
    }
    externs_.insert(ex);
    //auto result = externs_.insert(ex);
@@ -729,7 +729,7 @@ void Defs::write_state(std::string& os) const
 
    // READ by Defs::read_history()
    // We need to define a separator for the message, will to allow it to be re-read
-   // This separator can not be :
+   // This separator cannot be :
    // ' ' space, used in the messages
    // %  Used in job submission
    // :  Used in time, and name (:ma0)
@@ -930,7 +930,7 @@ bool Defs::operator==(const Defs& rhs) const
    }
 
 	/// Note:: WE specifically exclude testing of externs.
-	/// Externs are not persisted, hence can not take part in comparison
+	/// Externs are not persisted, hence cannot take part in comparison
 	/// Externs only live on the client side.
 
 	if ( suiteVec_.size() != rhs.suiteVec_.size()) {
@@ -1085,6 +1085,42 @@ suite_ptr Defs::findSuite(const std::string& name) const
 	return suite_ptr();
 }
 
+std::string Defs::find_node_path(const std::string& type, const std::string& name) const
+{
+   for(const auto& s : suiteVec_) {
+      std::string res = s->find_node_path(type,name);
+      if (!res.empty()) return res;
+   }
+   return string();
+}
+
+node_ptr Defs::find_node(const std::string& type,const std::string& pathToNode) const
+{
+   //std::cout << "Defs::find_node  type:" << type << " path: " << pathToNode << "\n";
+   node_ptr node_p = findAbsNode(pathToNode);
+   if (!node_p) {
+      //std::cout << " node not found\n";
+      return node_p;
+   }
+
+   if (Str::caseInsCompare(type,"task")) {
+      if (node_p->isTask()) return node_p;
+      return node_ptr();
+   }
+   if (Str::caseInsCompare(type,"family")) {
+      if (node_p->isFamily()) return node_p;
+      return node_ptr();
+   }
+   if (Str::caseInsCompare(type,"suite")) {
+      if (node_p->suite()) return node_p;
+      return node_ptr();
+   }
+
+   throw std::runtime_error("Defs::find_node: Node of type can't be found " + type);
+   return node_ptr();
+}
+
+
 bool Defs::check(std::string& errorMsg,std::string& warningMsg) const
 {
 	for(const auto& s : suiteVec_) { s->check(errorMsg,warningMsg); }
@@ -1193,7 +1229,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 {
 	node_ptr clientNode =  clientDefs->findAbsNode( path );
 	if (! clientNode.get() ) {
-		errorMsg = "Can not replace node since path "; errorMsg += path;
+		errorMsg = "Cannot replace node since path "; errorMsg += path;
 		errorMsg += " does not exist on the client definition";
 		return node_ptr();
 	}
@@ -1207,7 +1243,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 		for(Task* t: taskVec) { if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED)  count++;}
 		if (count != 0) {
 			std::stringstream ss;
-			ss << "Can not replace node " << serverNode->debugNodePath() << " because it has " << count << " tasks which are active or submitted\n";
+			ss << "Cannot replace node " << serverNode->debugNodePath() << " because it has " << count << " tasks which are active or submitted\n";
 			ss << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n";
 			errorMsg = ss.str();
 			return node_ptr();
@@ -1218,7 +1254,7 @@ node_ptr Defs::replaceChild(const std::string& path,
  	if (!createNodesAsNeeded || serverNode.get()) {
 		// Then the child must exist in the server defs (i.e. this)
 		if (! serverNode.get() ) {
-			errorMsg = "Can not replace child since path "; errorMsg += path;
+			errorMsg = "Cannot replace child since path "; errorMsg += path;
 			errorMsg += " does not exist on the server definition. Please use <parent> option";
 			return node_ptr();
 		}
@@ -1296,7 +1332,7 @@ node_ptr Defs::replaceChild(const std::string& path,
  		return client_suite_to_add;
 	}
 	if (server_parent->isTask()) {
-       errorMsg = "Can not replace child '"; errorMsg += path;
+       errorMsg = "Cannot replace child '"; errorMsg += path;
        errorMsg += "' since path ("; errorMsg += server_parent->absNodePath() ;
        errorMsg += ") in the server is a task.";
        return node_ptr();
@@ -1912,7 +1948,7 @@ void Defs::notify_delete()
    }
 
    /// Check to make sure that the Observer called detach
-   /// We can not call detach ourselves, since the the client needs to
+   /// We cannot call detach ourselves, since the the client needs to
    /// call detach in the case where the graphical tree is destroyed by user
    /// In this case the Subject/Node is being deleted.
    assert(observers_.empty());

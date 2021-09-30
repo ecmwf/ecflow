@@ -741,7 +741,7 @@ bool Node::evaluateComplete() const
    if (theCompeteAst) {
       // *NOTE* if we have a non NULL complete ast, we must have complete expression
       // The freed state is stored on the expression ( i.e not on the ast)
-      // ISSUE: Complete expression can not be by-passed in the GUI
+      // ISSUE: Complete expression cannot be by-passed in the GUI
       if (c_expr_->isFree() || theCompeteAst->evaluate()) {
 
          // Note: if a task has been set complete, the use may decide to place into queued state( via GUI)
@@ -2421,7 +2421,7 @@ void Node::notify_delete()
    }
 
    /// Check to make sure that the Observer called detach
-   /// We can not call detach ourselves, since the the client needs to
+   /// We cannot call detach ourselves, since the the client needs to
    /// call detach in the case where the graphical tree is destroyed by user
    /// In this case the Subject/Node is being deleted.
    assert(observers_.empty());

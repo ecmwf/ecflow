@@ -41,7 +41,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     leftMargin_(4),
     itemGap_(12),
     connectorGap_(1),
-    expandConnectorLenght_(20),   
+    expandConnectorLength_(20),   
     connectorColour_(Qt::black),
     drawConnector_(true),
     indentation_(0),
@@ -50,7 +50,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     noSelectionOnMousePress_(false),
     autoScroll_(true)
 {  
-    expandConnectorLenght_=itemGap_-2*connectorGap_;
+    expandConnectorLength_=itemGap_-2*connectorGap_;
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 

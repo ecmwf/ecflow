@@ -19,11 +19,11 @@ const char* ClientDoc::class_client(){
    return
             "Class client provides an interface to communicate with the `ecflow_server`_.::\n\n"
             "   Client(\n"
-            "      string host, # The server name. Can not be empty.\n"
+            "      string host, # The server name. Cannot be empty.\n"
             "      string port  # The port on the server, must be unique to the server\n"
             "   )\n\n"
             "   Client(\n"
-            "      string host, # The server name. Can not be empty.\n"
+            "      string host, # The server name. Cannot be empty.\n"
             "      int port     # The port on the server, must be unique to the server\n"
             "   )\n\n"
             "   Client(\n"
@@ -59,11 +59,11 @@ const char* ClientDoc::set_host_port(){
             "Override the default(localhost and port 3141) and environment setting(ECF_HOST and ECF_PORT)\n\n"
             "and set it explicitly::\n\n"
             "   set_host_port(\n"
-            "      string host, # The server name. Can not be empty.\n"
+            "      string host, # The server name. Cannot be empty.\n"
             "      string port  # The port on the server, must be unique to the server\n"
             "   )\n\n"
             "   set_host_port(\n"
-            "      string host, # The server name. Can not be empty.\n"
+            "      string host, # The server name. Cannot be empty.\n"
             "      int port     # The port on the server, must be unique to the server\n"
             "   )\n\n"
             "   set_host_port(\n"
@@ -357,7 +357,7 @@ const char* ClientDoc::sync() {
             "   void sync_local();                     # The very first call, will get the full Defs.\n"
             "\n\n"
             "Exceptions:\n\n"
-            "- raise a RuntimeError if the delta change can not be applied.\n"
+            "- raise a RuntimeError if the delta change cannot be applied.\n"
             "- this could happen if the client Defs bears no resemblance to server Defs\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -1559,7 +1559,7 @@ const char* ClientDoc::set_child_try_no()
 
 const char* ClientDoc::set_child_timeout()
 {
-   return   "Set timeout if child can not connect to server, default is 24 hours. The input is required to be in seconds\n\n"
+   return   "Set timeout if child cannot connect to server, default is 24 hours. The input is required to be in seconds\n\n"
             "By default the environment variable  ECF_TIMEOUT is read to control how long child command should attempt to connect to the server\n"
             "This can be overridden for the python child api"
             ;

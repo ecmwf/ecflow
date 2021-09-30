@@ -235,7 +235,7 @@ void OutputDirProvider::fetchNext()
     }
 
     //We try the output client, its asynchronous! Here we create an
-    //output client and ask to the fetch the dir asynchronously. The ouput client will call
+    //output client and ask to the fetch the dir asynchronously. The output client will call
     //slotOutputClientFinished() or slotOutputClientError() eventually!!
     if(task.fetchMode_ ==  OutputDirProviderTask::RemoteFetch)
     {
@@ -271,8 +271,12 @@ void OutputDirProvider::fetchNext()
 bool OutputDirProvider::fetchDirViaOutputClient(VNode *n,const std::string& fileName)
 {
     std::string host, port;
-    if(n->logServer(host,port))
-    {
+
+    if(n->userLogServer(host,port)) {
+        outClient_=makeOutputClient(host,port);
+        outClient_->getDir(fileName);
+        return true;
+    } else if(n->logServer(host,port)) {
         outClient_=makeOutputClient(host,port);
         outClient_->getDir(fileName);
         return true;

@@ -539,7 +539,7 @@ def test_client_stats(ci):
 def test_client_stats_reset(ci):
     print_test(ci,"test_client_stats_reset")
     ci.stats_reset()   
-    ci.stats()  # should produce no ouput, where we measure requests
+    ci.stats()  # should produce no output, where we measure requests
             
 def test_client_debug_server_on_off(ci):
     print_test(ci,"test_client_debug_server_on_off")

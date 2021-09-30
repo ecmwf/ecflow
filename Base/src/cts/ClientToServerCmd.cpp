@@ -130,7 +130,7 @@ node_ptr ClientToServerCmd::find_node(Defs* defs, const std::string& absNodepath
    node_ptr theNode =  defs->findAbsNode(absNodepath);
    if ( !theNode.get() ) {
 
-      std::string errorMsg = "Can not find node at path '";
+      std::string errorMsg = "Cannot find node at path '";
       errorMsg += absNodepath;
       errorMsg += "' ";
       throw std::runtime_error( errorMsg) ;

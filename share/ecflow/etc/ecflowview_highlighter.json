@@ -230,7 +230,7 @@
               "bold"    : "true"
             }, 
              "flag" : {
-              "pattern" : "\\b(is_late|has_date|has_message|has_time|is_rerun|is_waiting|is_zombie)\\b",                       
+              "pattern" : "\\b(has_date|has_message|has_time|is_archived|is_ecfcmd_failed|is_killed|is_killcmd_failed|is_late|is_rerun|is_restored|is_statuscmd_failed|is_waiting|is_zombie|no_script|threshold)\\b",
               "colour"  : "rgb(102,43,130)",
               "bold"    : "true"
             }, 

@@ -1389,7 +1389,7 @@ void LogRequestView::clearCharts()
         v->chart()->removeAllSeries();
 
         //We do it in this way to get rid of error message:
-        //"Can not remove axis. Axis not found on the chart."
+        //"Cannot remove axis. Axis not found on the chart."
         if(v->chart()->axes(Qt::Horizontal).contains(v->chart()->axisX()))
             v->chart()->removeAxis(v->chart()->axisX());
 

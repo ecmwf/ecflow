@@ -7,14 +7,14 @@ suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
   clock real 
   calendar initTime:2013-Sep-10 12:37:03 suiteTime:2013-Sep-10 15:56:00 duration:03:18:57 initLocalTime:2013-Sep-10 12:37:03 lastTime:2013-Sep-10 15:56:00 calendarIncrement:00:01:00
   family family # state:aborted dur:02:18:57 flag:message
-    task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task can not be found:
+    task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task cannot be found:
    ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/task.sms) does not exist:
    Variable ECF_FETCH not defined:
    Variable ECF_FILES not defined:
    Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
 >abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script
       edit VARIABLE 'VALUE'
-    task rescue # passwd:Bs7hroqB abort<:   Script for /suite/family/rescue can not be found:
+    task rescue # passwd:Bs7hroqB abort<:   Script for /suite/family/rescue cannot be found:
    ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/rescue.sms) does not exist:
    Variable ECF_FETCH not defined:
    Variable ECF_FILES not defined:
@@ -23,7 +23,7 @@ suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
       late -s +00:05 -c 00:05
       complete task eq complete
       trigger task == aborted
-    task step # passwd:4N9cOzVA abort<:   Script for /suite/family/step can not be found:
+    task step # passwd:4N9cOzVA abort<:   Script for /suite/family/step cannot be found:
    ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/step.sms) does not exist:
    Variable ECF_FETCH not defined:
    Variable ECF_FILES not defined:
@@ -40,7 +40,7 @@ suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
         trigger 1==0
     endfamily
   endfamily
-  task household # passwd:31NZt9lV abort<:   Script for /suite/household can not be found:
+  task household # passwd:31NZt9lV abort<:   Script for /suite/household cannot be found:
    ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/household.sms) does not exist:
    Variable ECF_FETCH not defined:
    Variable ECF_FILES not defined:
@@ -70,7 +70,7 @@ suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
     endfamily
   endfamily
   family catchup2rt # state:aborted dur:03:18:57 flag:message suspended:1
-    task doer # passwd:OXQkmELW abort<:   Script for /suite/catchup2rt/doer can not be found:
+    task doer # passwd:OXQkmELW abort<:   Script for /suite/catchup2rt/doer cannot be found:
    ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/catchup2rt/doer.sms) does not exist:
    Variable ECF_FETCH not defined:
    Variable ECF_FILES not defined:

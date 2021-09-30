@@ -52,7 +52,7 @@ void Node::delete_time( const ecf::TimeAttr& attr )
          return;
       }
    }
-   throw std::runtime_error("Node::delete_time: Can not find time attribute: ");
+   throw std::runtime_error("Node::delete_time: Cannot find time attribute: ");
 }
 
 void Node::deleteToday(const std::string& name)
@@ -84,7 +84,7 @@ void Node::delete_today(const ecf::TodayAttr& attr)
          return;
       }
    }
-   throw std::runtime_error("Node::delete_today: Can not find today attribute: " + attr.toString());
+   throw std::runtime_error("Node::delete_today: Cannot find today attribute: " + attr.toString());
 }
 
 void Node::deleteDate(const std::string& name)
@@ -115,7 +115,7 @@ void Node::delete_date(const DateAttr& attr)
          return;
       }
    }
-   throw std::runtime_error("Node::delete_date: Can not find date attribute: " + attr.toString());
+   throw std::runtime_error("Node::delete_date: Cannot find date attribute: " + attr.toString());
 }
 
 void Node::deleteDay(const std::string& name)
@@ -146,7 +146,7 @@ void Node::delete_day(const DayAttr& attr)
           return;
        }
     }
-    throw std::runtime_error("Node::delete_day: Can not find day attribute: " + attr.toString());
+    throw std::runtime_error("Node::delete_day: Cannot find day attribute: " + attr.toString());
  }
 
 void Node::deleteCron(const std::string& name)
@@ -177,7 +177,7 @@ void Node::delete_cron(const ecf::CronAttr& attr)
          return ;
       }
    }
-   throw std::runtime_error("Node::delete_cron: Can not find cron attribute: " + attr.toString());
+   throw std::runtime_error("Node::delete_cron: Cannot find cron attribute: " + attr.toString());
 }
 
 
@@ -205,7 +205,7 @@ void Node::deleteVariable( const std::string& name)
 			return;
 		}
 	}
-	throw std::runtime_error("Node::deleteVariable: Can not find 'user' variable of name " + name);
+	throw std::runtime_error("Node::deleteVariable: Cannot find 'user' variable of name " + name);
 }
 
 void Node::delete_variable_no_error( const std::string& name)
@@ -253,7 +253,7 @@ void Node::deleteEvent(const std::string& name)
          return;
       }
    }
-	throw std::runtime_error("Node::deleteEvent: Can not find event: " + name);
+	throw std::runtime_error("Node::deleteEvent: Cannot find event: " + name);
 }
 
 void Node::deleteMeter(const std::string& name)
@@ -278,7 +278,7 @@ void Node::deleteMeter(const std::string& name)
          return;
       }
    }
-	throw std::runtime_error("Node::deleteMeter: Can not find meter: " + name);
+	throw std::runtime_error("Node::deleteMeter: Cannot find meter: " + name);
 }
 
 void Node::deleteLabel(const std::string& name)
@@ -303,7 +303,7 @@ void Node::deleteLabel(const std::string& name)
          return;
       }
    }
-	throw std::runtime_error("Node::deleteLabel: Can not find label: " + name);
+	throw std::runtime_error("Node::deleteLabel: Cannot find label: " + name);
 }
 
 void Node::delete_queue(const std::string& name)
@@ -312,7 +312,7 @@ void Node::delete_queue(const std::string& name)
       misc_attrs_->delete_queue(name);
       return;
    }
-   throw std::runtime_error("Node::delete_queue: Can not find queue: " + name);
+   throw std::runtime_error("Node::delete_queue: Cannot find queue: " + name);
 }
 
 void Node::delete_generic(const std::string& name)
@@ -321,7 +321,7 @@ void Node::delete_generic(const std::string& name)
       misc_attrs_->delete_generic(name);
       return;
    }
-   throw std::runtime_error("Node::delete_generic : Can not find generic: " + name);
+   throw std::runtime_error("Node::delete_generic : Cannot find generic: " + name);
 }
 
 void Node::deleteTrigger()
@@ -379,7 +379,7 @@ void Node::deleteLimit(const std::string& name)
 			return;
 		}
 	}
-	throw std::runtime_error("Node::deleteLimit: Can not find limit: " + name);
+	throw std::runtime_error("Node::deleteLimit: Cannot find limit: " + name);
 }
 
 void Node::delete_limit_path(const std::string& name,const std::string& path)
@@ -398,7 +398,7 @@ void Node::delete_limit_path(const std::string& name,const std::string& path)
          return;
       }
    }
-   throw std::runtime_error("Node::delete_limit_path: Can not find limit: " + name);
+   throw std::runtime_error("Node::delete_limit_path: Cannot find limit: " + name);
 }
 
 void Node::deleteInlimit(const std::string& name)

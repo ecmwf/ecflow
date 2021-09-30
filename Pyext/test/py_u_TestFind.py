@@ -34,11 +34,55 @@ def create_defs(name=""):
             )
     return defs;
 
+def test_ecflow_1213(defs):
+    s1 = defs.find_node_path("suite","s1")
+    assert s1 == "/s1"," expected to find suite s1"
+
+    f1 = defs.find_node_path("family","f1")
+    assert f1 == "/s1/f1"," expected to find family f1"
+  
+    f2 = defs.find_node_path("family","f2")
+    assert f2 == "/s1/f2"," expected to find family f2"
+
+    f1_t1 = defs.find_node_path("task","f1_t1")
+    f1_t2 = defs.find_node_path("task","f1_t2")
+    assert f1_t1 == "/s1/f1/f1_t1"," expected to find task f1_t1"
+    assert f1_t2 == "/s1/f1/f1_t2"," expected to find task f1_t2"
+    
+    f2_t1 = defs.find_node_path("task","f2_t1") 
+    f2_t2 = defs.find_node_path("task","f2_t2")
+    assert f2_t1 == "/s1/f2/f2_t1"," expected to find task f2_t1"
+    assert f2_t2 == "/s1/f2/f2_t2"," expected to find task f2_t2"
+    
+    # find_node
+    s1 = defs.find_node("suite","/s1")
+    assert s1 is not None and isinstance(s1, Suite), "expected find find suite s1"
+    
+    f1 = defs.find_node("family","/s1/f1")
+    assert f1 is not None and isinstance(f1, Family)," expected to find family f1"
+  
+    f2 = defs.find_node("family","/s1/f2")
+    assert f2 is not None and isinstance(f2, Family)," expected to find family f2"
+
+    f1_t1 = defs.find_node("task","/s1/f1/f1_t1")
+    f1_t2 = defs.find_node("task","/s1/f1/f1_t2")
+    assert f1_t1 is not None and isinstance(f1_t1, Task)," expected to find task f1_t1"
+    assert f1_t2 is not None and isinstance(f1_t2, Task)," expected to find task f1_t2"
+    
+    f2_t1 = defs.find_node("task","/s1/f2/f2_t1")
+    f2_t2 = defs.find_node("task","/s1/f2/f2_t2")
+    assert f2_t1 is not None and isinstance(f2_t1, Task)," expected to find task f2_t1"
+    assert f2_t2 is not None and isinstance(f2_t1, Task)," expected to find task f2_t2"
+
+
 if __name__ == "__main__":   
     
     Test.print_test_start(os.path.basename(__file__))
  
     defs = create_defs()
+    
+    test_ecflow_1213(defs)
+    
     s1 = defs.find_suite("s1")
     assert s1 is not None, "expected find find suite s1"
     assert "s1" in defs, "expected find find suite s1"

@@ -47,6 +47,8 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
 		parNames_[MaxOutputFileLines]="server.files.maxOutputFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
+        parNames_[UserLogServerHost]="server.files.logServerHost";
+        parNames_[UserLogServerPort]="server.files.logServerPort";
 
         parNames_[NodeMenuMode]="server.menu.nodeMenuMode";
         parNames_[NodeMenuModeForDefStatus]="server.menu.defStatusMenuModeControl";

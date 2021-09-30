@@ -182,7 +182,7 @@ void DirectoryHandler::init(const std::string& exeStr)
     {
         tmpDir_=std::string(h);
         boost::filesystem::path tmp(tmpDir_);
-        tmp /= "eclow_ui.tmp";
+        tmp /= "ecflow_ui.tmp";
         tmpDir_=tmp.string();
         if(!boost::filesystem::exists(tmp))
         {

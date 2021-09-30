@@ -123,7 +123,7 @@ size_t Alias::child_position(const Node*) const
 
 bool Alias::isAddChildOk( Node* alias, std::string& errorMsg) const
 {
-   errorMsg += "Can not add children to a Alias";
+   errorMsg += "Cannot add children to a Alias";
    return false;
 }
 

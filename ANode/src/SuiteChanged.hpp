@@ -21,7 +21,7 @@
 namespace ecf {
 
 // Determine if suite was changed or modified if so, update suite change no
-// This mechanism was used because, when changing some attributes, we can not
+// This mechanism was used because, when changing some attributes, we cannot
 // immediately access the parent suites, to update the change numbers.
 //
 // When given a choice between where to add SuiteChanged, i.e in Node Tree or Commands

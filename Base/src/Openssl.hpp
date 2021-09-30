@@ -43,7 +43,7 @@ public:
    const std::string& ssl() const { return ssl_;}
    bool enabled() const { return !ssl_.empty();}
 
-   bool enable_no_throw(std::string host,const std::string& port,const std::string& ecf_ssl_env = ""); // returns false if can not enable
+   bool enable_no_throw(std::string host,const std::string& port,const std::string& ecf_ssl_env = ""); // returns false if cannot enable
    void enable(std::string host,const std::string& port); // Can throw if certificate (CRT) are missing
    void enable_if_defined(std::string host,const std::string& port); // Can throw if certificate (CRT) are missing
    void disable() { ssl_.clear();}                                   // override environment setting for ECF_SSL

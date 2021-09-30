@@ -213,7 +213,8 @@ if [[ $ecbuild_arg != ecbuild ]] ; then
     module load ecbuild/new   
 fi
 module load python
-module load python3/3.6.8-01
+module load python3/3.6.10-01
+#module load python3/3.8.8-01
 module load cmake/new   # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 
 

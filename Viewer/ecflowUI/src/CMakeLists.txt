@@ -90,7 +90,7 @@ set(viewer_srcs
     NodeQueryResultModel.cpp
     NodeQueryResultView.cpp
     NodeQueryViewDelegate.cpp
-    NodeSearchDialog.cpp
+    NodeSearchWindow.cpp
     NodeSearchWidget.cpp
     NodeViewBase.cpp
     NodeViewDelegate.cpp
@@ -324,7 +324,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeQueryResult.hpp
     NodeQueryResultModel.hpp
     NodeQueryResultView.hpp
-    NodeSearchDialog.hpp
+    NodeSearchWindow.hpp
     NodeSearchWidget.hpp
     NodeWidget.hpp
     OneLineTextEdit.hpp
@@ -439,7 +439,7 @@ set(viewer_wrap_ui_files
     NodeFilterDialog.ui
     NodeQueryEditor.ui
     NodeQuerySaveDialog.ui
-    NodeSearchDialog.ui
+    NodeSearchWindow.ui
     NodeSearchWidget.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
