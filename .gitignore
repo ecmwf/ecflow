@@ -17,6 +17,9 @@ ecflow_*.config
 ecflow_*.files
 ecflow_*.includes
  
+#vscode
+.vscode
+
 # cmake
 ecbuild/
 build/
