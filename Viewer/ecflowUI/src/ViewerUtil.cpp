@@ -18,6 +18,7 @@
 #include <QClipboard>
 #include <QComboBox>
 #include <QDebug>
+#include <QFontMetrics>
 #include <QLabel>
 #include <QLinearGradient>
 #include <QStackedWidget>
@@ -216,4 +217,23 @@ QString ViewerUtil::formatDuration(unsigned int delta) //in seconds
     }
 
     return s;
+}
+
+
+int ViewerUtil::textWidth(const QFontMetrics& fm, QString txt, int len)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    return fm.horizontalAdvance(txt, len);
+#else
+    return fm.width(txt, len);
+#endif
+}
+
+int ViewerUtil::textWidth(const QFontMetrics& fm, QChar ch)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    return fm.horizontalAdvance(ch);
+#else
+    return fm.width(ch);
+#endif
 }

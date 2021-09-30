@@ -19,11 +19,11 @@ if(ECFLOW_LOGVIEW)
     list(APPEND srcs LogLoadData.cpp)
 endif()
 
-if(ECFLOW_QT5)
+if(ECFLOW_QT)
     include_directories(${ECFLOW_QT_INCLUDE_DIR})
-else()
-    include(${QT_USE_FILE})
-    set(ECFLOW_QT_LIBRARIES ${QT_LIBRARIES})
+#else()
+#    include(${QT_USE_FILE})
+#    set(ECFLOW_QT_LIBRARIES ${QT_LIBRARIES})
 endif()
 
 
@@ -54,17 +54,13 @@ endif()
 #        )
 #endif()
 
-
-if(ECFLOW_QT5)
+if(ECFLOW_QT6)
+  QT6_WRAP_CPP(LIBVIEWER_MOC ${moc_files} )
+  QT6_WRAP_UI       (LIBVIEWER_FORMS_HEADERS ${wrap_ui_files})
+elseif(ECFLOW_QT5)
   QT5_WRAP_CPP(LIBVIEWER_MOC ${moc_files} )
-  #QT5_ADD_RESOURCES (LIBVIEWER_RES viewer.qrc)
   QT5_WRAP_UI       (LIBVIEWER_FORMS_HEADERS ${wrap_ui_files})
-else()
-  QT4_WRAP_CPP(LIBVIEWER_MOC ${moc_files} )
-  #QT4_ADD_RESOURCES (LIBVIEWER_RES viewer.qrc)
-  QT4_WRAP_UI       (LIBVIEWER_FORMS_HEADERS ${wrap_ui_files})
 endif()
-
 
 # add all the images as dependencies of the resource file so that it is
 # automatically recompiled when an image changes

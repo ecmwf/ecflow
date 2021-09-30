@@ -15,9 +15,11 @@
 #include <vector>
 #include <boost/current_function.hpp>
 
-class QString;
+#include <QStringList>
+
+//class QString;
 class QModelIndex;
-class QStringList;
+//class QStringList;
 class QVariant;
 class QPoint;
 class QRegion;

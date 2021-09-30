@@ -13,11 +13,15 @@ nbproject/
 ecflow.config
 ecflow.includes
 ecflow.files
+ecflow.cflags
+ecflow.cxxflags
 ecflow_*.config
-ecflow_*.files
 ecflow_*.includes
- 
-#vscode
+ecflow_*.files
+ecflow_*.cflags
+ecflow_*.cxxflags
+
+#vscod
 .vscode
 
 # cmake

@@ -23,6 +23,7 @@ class QComboBox;
 class QStackedWidget;
 class QTabWidget;
 class QTreeView;
+class QFontMetrics;
 
 class ViewerUtil
 {
@@ -42,6 +43,8 @@ public:
    static void setOverrideCursor(QCursor cursor);
    static void restoreOverrideCursor();
    static QString formatDuration(unsigned int);
+   static int textWidth(const QFontMetrics& fm, QString txt, int len);
+   static int textWidth(const QFontMetrics& fm, QChar ch);
 };
 
 #endif // VIEWERUTIL_HPP

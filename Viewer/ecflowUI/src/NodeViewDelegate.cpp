@@ -51,8 +51,8 @@ void LabelStyle::update()
 {
     if(!alwaysEnabled_) {
         enabled_ = enabledProp_->value().toBool();
-        regex_ = QRegExp(regexProp_->value().toString());
-        regex_.setCaseSensitivity(Qt::CaseInsensitive);
+        regex_ = QRegularExpression(regexProp_->value().toString());
+        regex_.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     }
 
     enabledBg_ = enabledBgProp_->value().toBool();

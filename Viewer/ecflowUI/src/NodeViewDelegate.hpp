@@ -15,11 +15,12 @@
 #include <QLinearGradient>
 #include <QMap>
 #include <QPen>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStyledItemDelegate>
 
 #include "FontMetrics.hpp"
 #include "RectMetrics.hpp"
+#include "ViewerUtil.hpp"
 #include "VProperty.hpp"
 
 #include <string>
@@ -78,7 +79,7 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
          height=fontHeight+topPadding+bottomPadding;
          fullHeight=height+topMargin+bottomMargin;
          sizeHintCache=QSize(100,fullHeight);
-         spacing=fm.width('A')*3/4;
+         spacing=ViewerUtil::textWidth(fm,'A')*3/4;
 
          auto h=static_cast<int>(static_cast<float>(fm.height())*0.7);
          iconSize=h;
@@ -89,7 +90,7 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
          if(iconSize > 16)
              iconGap=2;
 
-         iconPreGap=fm.width('A')/2;
+         iconPreGap=ViewerUtil::textWidth(fm,'A')/2;
      }
 };
 
@@ -109,7 +110,7 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
          height=fontHeight+topPadding+bottomPadding;
          fullHeight=height+topMargin+bottomMargin;
          sizeHintCache=QSize(100,fullHeight);
-         spacing=fm.width('A')*3/4;
+         spacing=ViewerUtil::textWidth(fm,'A')*3/4;
 
          int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
          iconSize=h;
@@ -120,7 +121,7 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
          if(iconSize > 16)
              iconGap=2;
 
-         iconPreGap=fm.width('A')/2;
+         iconPreGap=ViewerUtil::textWidth(fm,'A')/2;
      }
 };
 
@@ -135,7 +136,7 @@ public:
     bool enabledBg_;
     QPen fontPen_;
     QBrush bgBrush_;
-    QRegExp regex_;
+    QRegularExpression regex_;
     VProperty *enabledProp_;
     VProperty *enabledBgProp_;
     VProperty *fontProp_;

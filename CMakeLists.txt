@@ -31,7 +31,7 @@ project( ecflow LANGUAGES CXX VERSION 5.7.2 )
 include( ecbuild_system NO_POLICY_SCOPE )
 
 ecbuild_requires_macro_version( 1.6 )
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 ###############################################################################
 # local project
@@ -61,50 +61,65 @@ option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely l
 
 # =========================================================================================
 # Qt for ecFlowUI. 
-# Algorithm: we test for Qt5 - if it's there, then use it; otherwise look for Qt4.
+# Algorithm: we test for Qt6 - if it's there, then use it; otherwise look for Qt5.
 #            if we don't find that, then we cannot build ecFlowUI.
 # =========================================================================================
 if(ENABLE_UI)
 
     ecbuild_info("")
     ecbuild_info("------------------------------ Qt start ---------------------------")
-    ecbuild_info("ecFlowUI is enabled - searching for Qt5")
+    ecbuild_info("ecFlowUI is enabled - searching for Qt6/Qt5")
     ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
 
-    find_package(Qt5Widgets 5.0.0)
-    if (Qt5Widgets_FOUND)
-        find_package(Qt5Gui 5.0.0)
-        if (Qt5Gui_FOUND)
-            find_package(Qt5Network 5.0.0)
-            if (Qt5Network_FOUND)
-                find_package(Qt5Svg 5.0.0)
-                if (Qt5Svg_FOUND)
-                    find_package(Qt5Charts 5.0.0)
-                endif()
-            endif()
+    find_package(Qt6Widgets)
+    if( Qt6Widgets_FOUND )
+        find_package(Qt6Core5Compat  REQUIRED)
+        find_package(Qt6Gui          REQUIRED)
+        find_package(Qt6Network      REQUIRED)
+        find_package(Qt6Svg          REQUIRED)
+        find_package(Qt6Charts)
+
+        ecbuild_debug("Qt6 version ${Qt6Widgets_VERSION_STRING} was found")
+        set(ECFLOW_QT_INCLUDE_DIR ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Gui_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Svg_INCLUDE_DIRS})
+        set(ECFLOW_QT_LIBRARIES   ${Qt6Widgets_LIBRARIES}    ${Qt6Gui_LIBRARIES}   ${Qt6Network_LIBRARIES} ${Qt6Svg_LIBRARIES})
+        set(ECFLOW_QT6 1)
+        add_definitions(-DECFLOW_QT6)
+
+        if(Qt6Charts_FOUND)
+            ecbuild_info("Qt6Charts was found - the server log viewer will be built")
+            list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt6Charts_INCLUDE_DIRS})
+            list(APPEND ECFLOW_QT_LIBRARIES  ${Qt6Charts_LIBRARIES})
+            set(ECFLOW_LOGVIEW 1)
+            add_definitions(-DECFLOW_LOGVIEW)
+        else()
+            ecbuild_info("Qt6Charts was not found - the server log viewer will not be built")
         endif()
-    endif()
-
-    if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND AND Qt5Svg_FOUND)
-          ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
-          set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS})
-          set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES} ${Qt5Svg_LIBRARIES})
-          set(ECFLOW_QT5 1)
-          add_definitions(-DECFLOW_QT5)
-
-          if(Qt5Charts_FOUND)
-              ecbuild_info("Qt5Charts was found - the server log viewer will be built")
-              list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt5Charts_INCLUDE_DIRS})
-              list(APPEND ECFLOW_QT_LIBRARIES  ${Qt5Charts_LIBRARIES})
-              set(ECFLOW_LOGVIEW 1)
-              add_definitions(-DECFLOW_LOGVIEW)
-          else()
-              ecbuild_info("Qt5Charts was not found - the server log viewer will not be built")
-          endif()
-
     else()
-        ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
-        ecbuild_critical("Qt5 Widgets, Network and Gui not found - these are required for ecFlowUI; or use -DENABLE_UI=OFF")
+        find_package(Qt5Widgets)
+        if (Qt5Widgets_FOUND)
+            find_package(Qt5Gui          REQUIRED)
+            find_package(Qt5Network      REQUIRED)
+            find_package(Qt5Svg          REQUIRED)
+            find_package(Qt5Charts)
+
+            ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
+            set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS})
+            set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES} ${Qt5Svg_LIBRARIES})
+            set(ECFLOW_QT5 1)
+            add_definitions(-DECFLOW_QT5)
+
+            if(Qt5Charts_FOUND)
+                ecbuild_info("Qt5Charts was found - the server log viewer will be built")
+                list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt5Charts_INCLUDE_DIRS})
+                list(APPEND ECFLOW_QT_LIBRARIES  ${Qt5Charts_LIBRARIES})
+                set(ECFLOW_LOGVIEW 1)
+                add_definitions(-DECFLOW_LOGVIEW)
+            else()
+                ecbuild_info("Qt5Charts was not found - the server log viewer will not be built")
+            endif()
+        else()
+            ecbuild_critical("Qt5 Widgets, Network and Gui not found - these are required for ecFlowUI; or use -DENABLE_UI=OFF")
+        endif()
     endif()
 
     set(ECFLOW_QT 1)
