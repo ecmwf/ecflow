@@ -271,9 +271,9 @@ void export_Core()
 			"- Raises IndexError when an invalid time series is specified\n"
  			"\nUsage::\n\n"
 			"   time_series = TimeSeries(TimeSlot(10,11),False)\n"			,
-			init<TimeSlot, optional<bool> >())
- 	.def( init<int,int,optional<bool> >())
-	.def( init<TimeSlot,TimeSlot,TimeSlot,optional<bool> >())
+			init<TimeSlot, boost::python::optional<bool> >())
+ 	.def( init<int,int, boost::python::optional<bool> >())
+	.def( init<TimeSlot,TimeSlot,TimeSlot,boost::python::optional<bool> >())
  	.def(self == self )                                // __eq__
  	.def("__str__",     &TimeSeries::toString)         // __str__
    .def("__copy__",copyObject<TimeSeries>)            // __copy__ uses copy constructor
