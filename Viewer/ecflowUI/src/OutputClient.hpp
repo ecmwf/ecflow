@@ -13,7 +13,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
-#include <QTime>
+#include <QElapsedTimer>
 
 class QTcpSocket;
 
@@ -52,7 +52,7 @@ protected:
 	int port_;
 	int timeout_;
 	std::string remoteFile_;
-	QTime stopper_;
+    QElapsedTimer stopper_;
 
 private:
 	OutputClient(const OutputClient&);

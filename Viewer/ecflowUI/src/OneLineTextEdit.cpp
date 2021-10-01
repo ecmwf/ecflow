@@ -15,7 +15,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QStyle>
-#include <QStyleOptionFrameV3>
+//#include <QStyleOptionFrameV3>
 
 OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QTextEdit(parent)
 {

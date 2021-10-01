@@ -12,10 +12,10 @@
 #define SERVERCOMLINE_HPP
 
 #include <QBrush>
+#include <QElapsedTimer>
 #include <QIcon>
 #include <QPen>
 #include <QPixmap>
-#include <QTime>
 #include <QWidget>
 
 #include "FontMetrics.hpp"
@@ -102,7 +102,7 @@ protected:
     QString serverName_;
     QString serverText_;
     QTimer *timer_;
-    QTime inRefreshElapsed_;
+    QElapsedTimer inRefreshElapsed_;
 
     QFont fontServer_;
     QFont fontPeriod_;

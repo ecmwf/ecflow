@@ -13,7 +13,7 @@
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QSettings>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QWidget>
 
 #include "ServerFilter.hpp"
@@ -65,7 +65,7 @@ private:
 	NodeQueryEngine* engine_;
 	NodeQueryResultModel* model_;
 	bool columnsAdjusted_{false};
-    QTime elapsed_;
+    QElapsedTimer elapsed_;
 };
 
 #endif /* VIEWER_SRC_NODESEARCHWIDGET_HPP_ */

@@ -290,7 +290,7 @@ void TimelineInfoDailyDelegate::paint(QPainter *painter,const QStyleOptionViewIt
         //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
         QRect textRect = bgRect.adjusted(2,topPadding_,-3,-bottomPadding_);
         text=fm_.elidedText(text,Qt::ElideMiddle,textRect.width());
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         painter->setFont(font_);
         painter->setPen(Qt::black);
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);

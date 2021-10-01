@@ -15,6 +15,7 @@
 #include <QTextDocument>
 #include <QTextDocumentFragment>
 #include <QTextLayout>
+#include <QRegularExpressionMatch>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -33,15 +34,29 @@ Highlighter::Highlighter(QTextDocument *parent,QString id)
 void Highlighter::addRule(QString pattern,QTextCharFormat format)
 {
 	HighlightingRule rule;
-	rule.pattern = QRegExp(pattern,Qt::CaseSensitive);
-	rule.format = format;
-	rules_.append(rule);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+    rule.pattern = QRegularExpression(pattern);
+    rule.pattern.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+#else
+    rule.pattern = QRegExp(pattern,Qt::CaseInsensitive);
+#endif
+    rule.format = format;
+    rules_.append(rule);
 }
 
 void Highlighter::highlightBlock(const QString &text)
 {
-	Q_FOREACH(HighlightingRule rule, rules_)
-	{
+    Q_FOREACH(HighlightingRule rule, rules_) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+        QRegularExpression expression(rule.pattern);
+        QRegularExpressionMatch rmatch;
+        int index = text.indexOf(expression, 0, &rmatch);
+        while (index >= 0) {
+             int length = rmatch.capturedLength();
+             setFormat(index, length, rule.format);
+             index = text.indexOf(expression, index + length, &rmatch);
+         }
+#else
 		QRegExp expression(rule.pattern);
         int index = text.indexOf(expression);
         while (index >= 0)
@@ -50,6 +65,7 @@ void Highlighter::highlightBlock(const QString &text)
              setFormat(index, length, rule.format);
              index = text.indexOf(expression, index + length);
          }
+#endif
      }
      setCurrentBlockState(0);
 }
@@ -142,7 +158,12 @@ void Highlighter::toHtml(QString& html)
     {
         const QTextLayout* layout(current.layout());
 
-        Q_FOREACH(const QTextLayout::FormatRange &range, layout->additionalFormats())
+        Q_FOREACH(const QTextLayout::FormatRange &range,
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+                  layout->formats())
+#else
+                  layout->additionalFormats())
+#endif
         {
             const int start = current.position() + range.start - selectionStart;
             const int end = start + range.length;

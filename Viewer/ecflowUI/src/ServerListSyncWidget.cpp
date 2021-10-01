@@ -15,6 +15,7 @@
 #include "ServerFilter.hpp"
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
+#include "ViewerUtil.hpp"
 
 ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
 {    
@@ -78,7 +79,7 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
 
             QFont f;
             QFontMetrics fm(f);
-            typeList_->setFixedWidth(fm.width("Host/port changed (2222)"));
+            typeList_->setFixedWidth(ViewerUtil::textWidth(fm,"Host/port changed (2222)"));
 
             connect(typeList_,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
                 this,SLOT(slotTypeChanged(QListWidgetItem*,QListWidgetItem*)));

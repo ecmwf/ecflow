@@ -26,6 +26,13 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
+
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
@@ -36,6 +43,7 @@
 #include "VNode.hpp"
 #include "VProperty.hpp"
 #include "CustomCommandHandler.hpp"
+
 
 int MenuItem::idCnt_=0;
 
@@ -481,12 +489,21 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 	QString wholeCmd = QString::fromStdString(command);
 
 	// find the verb in the command
-	//QRegExp rx("ecflow_client\\s+--(\\S+).*");  //  \s=whitespace, \S=non-whitespace
+    QString commandName;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+    QRegularExpression rx("ecflow_client\\s+--([a-zA-Z]+).*");
+    auto match = rx.match(wholeCmd);
+    if (match.hasMatch()) {
+        commandName=match.captured(1);
+    }
+#else
 	QRegExp rx("ecflow_client\\s+--([a-zA-Z]+).*");  //  \s=whitespace, \S=non-whitespace
 	int i = rx.indexIn(wholeCmd);
-	if (i != -1) // a command was found
-	{
+    if (i != -1) {
 		QString commandName = rx.cap(1);
+    }
+#endif
+    if (!commandName.isEmpty()) {
 		std::string cmdName = commandName.toStdString();
 
 		// is this command one of the ones that requires a prompt?
@@ -495,9 +512,8 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 		if(it != list.end())
 		{
 			// does the command already have a 'yes'?
-			QRegExp rx2(".*\\byes\\b.*");  // \b=word boundary
-			int j = rx2.indexIn(wholeCmd);
-			if (j == -1)  // no
+            QRegularExpression rx2(".*\\byes\\b.*");  // \b=word boundary
+            if(!wholeCmd.contains(rx2))
 			{
 				item->setQuestion((*it).second); // note that we need to ask the user
 

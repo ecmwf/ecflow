@@ -17,9 +17,16 @@
 #include <QPainter>
 #include <QHeaderView>
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QRegExp>
+#else
+#include <QtCore5Compat/QRegExp>
+#endif
+
 #include "IconProvider.hpp"
 #include "VariableModel.hpp"
 #include "VParam.hpp"
+#include "ViewerUtil.hpp"
 
 //========================================================
 //
@@ -129,7 +136,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
     QFont f;
     QFontMetrics fm(f);
-    textRect.setWidth(fm.width(text));
+    textRect.setWidth(ViewerUtil::textWidth(fm,text));
 
     if(index.column() == 0 && !hasChild)
     {
@@ -215,10 +222,10 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
             f.setPointSize(f.pointSize()-1);
             QFontMetrics fm(f);
             QString txt1=rx.cap(1);
-            textRect.setWidth(fm.width(txt1));
+            textRect.setWidth(ViewerUtil::textWidth(fm,txt1));
             painter->setFont(f);
             painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,txt1);
-            textRect.setLeft(textRect.right()+fm.width("D"));
+            textRect.setLeft(textRect.right()+ViewerUtil::textWidth(fm,"D"));
             text=rx.cap(2);
         }
 
@@ -226,7 +233,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         fBold.setPointSize(fBold.pointSize()-1);
         fBold.setBold(true);
         QFontMetrics fmBold(fBold);
-        textRect.setWidth(fmBold.width(text + "a"));
+        textRect.setWidth(ViewerUtil::textWidth(fmBold,text + "a"));
         painter->setFont(fBold);
 
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);

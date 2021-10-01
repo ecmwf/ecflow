@@ -20,6 +20,7 @@
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "ViewerUtil.hpp"
 #include "WidgetNameProvider.hpp"
 
 VProperty* PropertyDialog::prop_=nullptr;
@@ -36,7 +37,7 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 	QFont f;
 	f.setBold(true);
 	QFontMetrics fm(f);
-	int maxW=fm.width("Server options ATAT");
+    int maxW=ViewerUtil::textWidth(fm,"Server options ATAT");
 	list_->setMaximumWidth(maxW+6);
 	list_->setFont(f);
 

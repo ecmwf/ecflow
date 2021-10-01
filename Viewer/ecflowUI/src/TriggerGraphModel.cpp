@@ -172,7 +172,7 @@ QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
             }
             else if(role  == NodePointerRole)
             {
-                 return qVariantFromValue((void *) vnode);
+                 return QVariant::fromValue((void *) vnode);
             }
 
             else if(role  == Qt::TextAlignmentRole)

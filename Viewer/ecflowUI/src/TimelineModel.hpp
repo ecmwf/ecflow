@@ -10,11 +10,17 @@
 #ifndef TIMELINEMODEL_CPP
 #define TIMELINEMODEL_CPP
 
+#include <QtGlobal>
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 #include <QDateTime>
 #include <QSet>
 #include "StringMatchMode.hpp"
+
+#if QT_VERSION < QT_VERSION_CHECK(5,12, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
 
 class TimelineData;
 
@@ -109,7 +115,11 @@ protected:
     StringMatchMode pathMatchMode_;
     QString pathFilter_;
     bool taskFilter_;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+    QRegularExpression pathFilterRx_;
+#else
     QRegExp pathFilterRx_;
+#endif
     ChangeFilterMode changeFilterMode_;
     QString rootNodeFilter_;
 };

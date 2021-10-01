@@ -26,6 +26,7 @@
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VSettings.hpp"
@@ -140,7 +141,7 @@ void BcWidget::reset(QString txt, int maxWidth)
         text_="No selection";
     }
 
-    int len=fm.width(text_);
+    int len=ViewerUtil::textWidth(fm,text_);
     textRect_=QRect(xp,yp,len,itemHeight_);
     width_=xp+len+4;
 
@@ -185,7 +186,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
 
     if(items_.count() ==0)
     {
-        int len=fm.width(text_);
+        int len=ViewerUtil::textWidth(fm,text_);
         textRect_=QRect(xp,yp,len,itemHeight_);
         width_=xp+len+4;
     }
@@ -253,7 +254,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
                 t+="...";
 
                 //We only check the elided texts that are shorter then the max text len
-                redTextLen=fm.width(t);
+                redTextLen=ViewerUtil::textWidth(fm,t);
                 if(redTextLen < maxRedTextLen)
                 {
                     //Estimate the total size with the elided text items
@@ -354,7 +355,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
                 t+="...";
 
                 //We only check the elided texts that are shorter then the max text len
-                redTextLen=fm.width(t);
+                redTextLen=ViewerUtil::textWidth(fm,t);
                 if(redTextLen < len)
                 {
                     //Estimate the total size with the elided text item
@@ -623,7 +624,7 @@ void NodePathItem::setCurrent(bool)
 int NodePathItem::textLen() const
 {
     QFontMetrics fm(owner_->font());
-    return fm.width(text_);
+    return ViewerUtil::textWidth(fm,text_);
 }
 
 void NodePathItem::makeShape(int xp,int yp,int len)
@@ -650,12 +651,12 @@ int NodePathItem::adjust(int xp,int yp,int elidedLen)
     if(elidedLen == 0)
     {
         elidedText_=QString();
-        len=fm.width(text_);
+        len=ViewerUtil::textWidth(fm,text_);
     }
     else
     {
         elidedText_=fm.elidedText(text_,Qt::ElideRight,elidedLen);
-        len=fm.width(elidedText_);
+        len=ViewerUtil::textWidth(fm,elidedText_);
     }
 
     borderCol_=bgCol_.darker(125);
@@ -680,9 +681,9 @@ int NodePathItem::estimateRightPos(int xp,int elidedLen)
     int len;
 
     if(elidedLen==0)
-        len=fm.width(text_);
+        len=ViewerUtil::textWidth(fm,text_);
     else
-        len=fm.width(fm.elidedText(text_,Qt::ElideRight,elidedLen));
+        len=ViewerUtil::textWidth(fm, fm.elidedText(text_,Qt::ElideRight,elidedLen));
 
     return rightPos(xp,len);
 }
@@ -787,7 +788,7 @@ void NodePathServerItem::makeShape(int xp,int yp,int len)
 //=====================================================
 
 NodePathEllipsisItem::NodePathEllipsisItem(BcWidget* owner) :
-    NodePathItem(owner,-1,QString(0x2026),QColor(240,240,240),QColor(Qt::black),false,false)
+    NodePathItem(owner,-1,QString(QChar(0x2026)),QColor(240,240,240),QColor(Qt::black),false,false)
 {
     borderCol_=QColor(190,190,190);
 }
@@ -1384,7 +1385,7 @@ void NodePathWidget::rerender()
 void NodePathWidget::paintEvent(QPaintEvent *)
 {
      QStyleOption opt;
-     opt.init(this);
+     opt.initFrom(this);
      QPainter p(this);
      style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

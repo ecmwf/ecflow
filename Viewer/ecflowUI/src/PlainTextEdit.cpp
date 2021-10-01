@@ -20,6 +20,8 @@
 
 #include "VConfig.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
+
 
 PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
@@ -165,7 +167,7 @@ int PlainTextEdit::lineNumberAreaWidth()
             ++digits;
         }
 
-        int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + rightMargin_;
+        int space = 3 + ViewerUtil::textWidth(fontMetrics(), QLatin1Char('9')) * digits + rightMargin_;
 
         return space;
     }
@@ -459,10 +461,10 @@ void PlainTextEdit::wheelEvent(QWheelEvent *event)
 	{
 		if(event->modifiers() & Qt::ControlModifier)
 		{
-			const int delta = event->delta();
-	        if (delta < 0)
+            auto delta = event->angleDelta();
+            if (delta.y() < 0)
 	        	slotZoomOut();
-	        else if (delta > 0)
+            else if (delta.y() > 0)
 	            slotZoomIn();
 	        return;
 		}

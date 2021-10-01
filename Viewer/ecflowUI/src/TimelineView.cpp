@@ -158,7 +158,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
         QRect textRect = bgRect.adjusted(2,topPadding_,-3,-bottomPadding_);
         text=fm_.elidedText(text,Qt::ElideMiddle,textRect.width());
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         painter->setFont(font_);
         painter->setPen(Qt::black);        
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
@@ -448,7 +448,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
         text=ViewerUtil::formatDuration(val);
         textRect=rect;
         textRect.setX(right+5);
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         right=textRect.x()+textRect.width();
     }
 
@@ -475,7 +475,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
 
         percentRect=rect;
         percentRect.setX(right+5);
-        percentRect.setWidth(fm_.width(percentText));
+        percentRect.setWidth(ViewerUtil::textWidth(fm_,percentText));
         right=percentRect.x()+percentRect.width();
     }
 
@@ -535,7 +535,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, int maxVal, QC
         text=ViewerUtil::formatDuration(val);
         textRect=rect;
         textRect.setX(right+5);
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         right=textRect.x()+textRect.width();
     }
 
@@ -634,7 +634,7 @@ int TimelineDelegate::getDurationMaxTextWidth(int duration) const
         txt=" 999d 23h 59m 59s";
     }
 
-    return fm_.width(txt + " A999%[999] ");
+    return ViewerUtil::textWidth(fm_,txt + " A999%[999] ");
 }
 
 

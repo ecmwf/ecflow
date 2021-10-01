@@ -80,8 +80,8 @@ if(ENABLE_UI)
         find_package(Qt6Charts)
 
         ecbuild_debug("Qt6 version ${Qt6Widgets_VERSION_STRING} was found")
-        set(ECFLOW_QT_INCLUDE_DIR ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Gui_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Svg_INCLUDE_DIRS})
-        set(ECFLOW_QT_LIBRARIES   ${Qt6Widgets_LIBRARIES}    ${Qt6Gui_LIBRARIES}   ${Qt6Network_LIBRARIES} ${Qt6Svg_LIBRARIES})
+        set(ECFLOW_QT_INCLUDE_DIR ${Qt6Core5Compat_INCLUDE_DIRS} ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Gui_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Svg_INCLUDE_DIRS})
+        set(ECFLOW_QT_LIBRARIES  ${Qt6Core5Compat_LIBRARIES} ${Qt6Widgets_LIBRARIES}    ${Qt6Gui_LIBRARIES}   ${Qt6Network_LIBRARIES} ${Qt6Svg_LIBRARIES})
         set(ECFLOW_QT6 1)
         add_definitions(-DECFLOW_QT6)
 

@@ -30,6 +30,7 @@
 #include "Spline.hpp"
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsLinearLayout>
@@ -1179,7 +1180,7 @@ void TriggerGraphView::buildLayout()
     //TODO: refine it
     focus = 0;
 
-    QTime stopwatch;
+    QElapsedTimer stopwatch;
     stopwatch.start();
     bool showCursor = (QGuiApplication::overrideCursor() == nullptr ||
             QGuiApplication::overrideCursor()->shape() != Qt::WaitCursor);

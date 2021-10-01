@@ -15,8 +15,9 @@
 #include <QPainter>
 #include <QSignalMapper>
 #include <QToolButton>
-
+#include "ViewerUtil.hpp"
 #include "ChangeNotify.hpp"
+
 #include "VNodeList.hpp"
 //#include "VProperty.hpp"
 
@@ -118,9 +119,9 @@ void ChangeNotifyButton::updateIcon()
 
 	int w;
 	if(!numText.isEmpty())
-		w=fm.width(text) + 6 + fm.width(numText) + 2;
+        w=ViewerUtil::textWidth(fm, text) + 6 + ViewerUtil::textWidth(fm, numText) + 2;
 	else
-		w=fm.width(text) + 6;
+        w=ViewerUtil::textWidth(fm, text) + 6;
 
     int h=fm.height()+2;
 
@@ -130,7 +131,7 @@ void ChangeNotifyButton::updateIcon()
 	painter.setRenderHint(QPainter::Antialiasing,true);
 	painter.setRenderHint(QPainter::TextAntialiasing,true);
 
-	QRect textRect(0,0,fm.width(text)+6,h);
+    QRect textRect(0,0,ViewerUtil::textWidth(fm, text)+6,h);
 
     QColor bgLight=bgCol.lighter(110);
 	grad_.setColorAt(0,bgLight);
@@ -146,7 +147,7 @@ void ChangeNotifyButton::updateIcon()
 
 	if(!numText.isEmpty())
 	{
-        QRect numRect(textRect.right()-1,0,fmNum.width(numText)+4,fmNum.ascent()+2);
+        QRect numRect(textRect.right()-1,0,ViewerUtil::textWidth(fmNum,numText)+4,fmNum.ascent()+2);
 		painter.setBrush(countBgCol);
 		painter.setPen(countFgCol);
 		painter.drawRoundedRect(numRect,4,4);

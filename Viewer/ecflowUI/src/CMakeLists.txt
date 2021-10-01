@@ -398,6 +398,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VNodeList.hpp
     WhyItemWidget.hpp
     ZombieItemWidget.hpp
+    TextPager/TextCodecWrapper.hpp
     TextPager/TextPagerCursor_p.hpp
     TextPager/TextPagerDocument.hpp
     TextPager/TextPagerDocument_p.hpp

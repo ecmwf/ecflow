@@ -15,6 +15,7 @@
 #ifndef TEXTPAGERDOCUMENT_P_HPP__
 #define TEXTPAGERDOCUMENT_P_HPP__
 
+#include <QtGlobal>
 #include <QString>
 #include <QApplication>
 #include <QThread>
@@ -27,6 +28,8 @@
 #include <QTemporaryFile>
 #include <QDebug>
 #include <QPointer>
+
+#include "TextCodecWrapper.hpp"
 
 #ifndef ASSUME
 #ifdef FATAL_ASSUMES
@@ -154,7 +157,7 @@ public:
           deviceMode(TextPagerDocument::Sparse), chunkSize(64*1024), //chunkSize(1024*64), //chunkSize(16384),
           //undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
           //collapseInsertUndo(false),
-		  hasChunksWithLineNumbers(false), textCodec(nullptr), options(TextPagerDocument::DefaultOptions),
+          hasChunksWithLineNumbers(false), options(TextPagerDocument::DefaultOptions),
           readWriteLock(nullptr), cursorCommand(false)
     {
         first = last = new Chunk;
@@ -190,7 +193,7 @@ public:
 #endif
 
     bool hasChunksWithLineNumbers;
-    QTextCodec *textCodec;
+    TextCodecWrapper textCodec;
     TextPagerDocument::Options options;
     QReadWriteLock *readWriteLock;
     bool cursorCommand;

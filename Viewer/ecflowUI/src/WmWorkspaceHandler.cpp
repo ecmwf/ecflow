@@ -14,6 +14,12 @@
 #include <QWidget>
 #include <QProcess>
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QRegExp>
+#else
+#include <QtCore5Compat/QRegExp>
+#endif
+
 #include "UiLog.hpp"
 
 int WmWorkspaceHandler::commandTested_=0;

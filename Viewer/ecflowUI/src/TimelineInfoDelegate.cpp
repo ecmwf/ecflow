@@ -23,6 +23,7 @@
 #include "TimelineData.hpp"
 #include "TimelineInfoDailyView.hpp"
 #include "VNState.hpp"
+#include "ViewerUtil.hpp"
 
 static std::vector<std::string> propVec;
 
@@ -107,7 +108,7 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
         QRect textRect = vopt.rect;
         textRect.setX(textRect.x()+4);
         QFontMetrics fm(font_);
-        textRect.setWidth(fm.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm,text));
 
         painter->setPen(Qt::black);
 

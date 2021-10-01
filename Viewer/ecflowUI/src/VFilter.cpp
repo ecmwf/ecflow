@@ -26,6 +26,7 @@
 #include "ServerHandler.hpp"
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QTime>
 
 #include <algorithm>
@@ -541,7 +542,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
     }
 
 #ifdef _UI_VFILTER_DEBUG
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 #endif
 
@@ -802,7 +803,7 @@ bool TableNodeFilter::update()
     }
 
 #ifdef _UI_VFILTER_DEBUG
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 #endif
 

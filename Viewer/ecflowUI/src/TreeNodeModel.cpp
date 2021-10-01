@@ -204,7 +204,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(index.column() == 0)
 	{
         if(role == ServerPointerRole)
-            return qVariantFromValue((void *) server);
+            return QVariant::fromValue((void *) server);
 
         //The colour of the server node
 		if(role == ConnectionRole)
@@ -287,7 +287,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* t
 		return QVariant();
 
     if(role == NodePointerRole)
-        return qVariantFromValue((void *) vnode);
+        return QVariant::fromValue((void *) vnode);
 
     else if(role == ConnectionRole)
     {

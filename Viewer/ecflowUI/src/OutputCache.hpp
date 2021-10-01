@@ -12,7 +12,7 @@
 #define OUTPUTCHACHE_HPP_
 
 #include <QMap>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QSet>
 
@@ -42,7 +42,7 @@ protected:
     QString id_;
     VFile_ptr file_;   
     bool used_;
-    QTime inTimeOut_;
+    QElapsedTimer inTimeOut_;
 };
 
 class OutputCache:  public QObject

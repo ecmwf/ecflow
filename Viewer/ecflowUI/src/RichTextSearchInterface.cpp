@@ -12,6 +12,12 @@
 
 #include <QTextBrowser>
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
+
+
 RichTextSearchInterface::RichTextSearchInterface()
 = default;
 
@@ -41,42 +47,46 @@ bool RichTextSearchInterface::findString (QString str, bool highlightAll, QTextD
 
     Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
-    while (keepGoing)
-    {
-        switch (matchMode)
-        {
-            case StringMatchMode::ContainsMatch:
-            {
+    while (keepGoing) {
+        switch (matchMode) {
+            case StringMatchMode::ContainsMatch: {
                 cursor = editor_->document()->find(str, cursor, flags);  // perform the search
-                found = (!cursor.isNull());
+                found  = (!cursor.isNull());
                 break;
             }
-            case StringMatchMode::WildcardMatch:
-            {
+            case StringMatchMode::WildcardMatch: {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+                QRegularExpression regexp;
+                regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str));
+                if (cs == Qt::CaseInsensitive)
+                    regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+#else
                 QRegExp regexp(str);
-                regexp.setCaseSensitivity(cs);
                 regexp.setPatternSyntax(QRegExp::Wildcard);
-
+                regexp.setCaseSensitivity(cs);
+#endif
                 cursor = editor_->document()->find(regexp, cursor, flags);  // perform the search
-                found = (!cursor.isNull());
+                found  = (!cursor.isNull());
                 break;
             }
-            case StringMatchMode::RegexpMatch:
-            {
+            case StringMatchMode::RegexpMatch: {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+                QRegularExpression regexp(str);
+                if (cs == Qt::CaseInsensitive)
+                    regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+#else
                 QRegExp regexp(str);
                 regexp.setCaseSensitivity(cs);
-
+#endif
                 cursor = editor_->document()->find(regexp, cursor, flags);  // perform the search
-                found = (!cursor.isNull());
+                found  = (!cursor.isNull());
                 break;
             }
 
-            default:
-            {
+            default: {
                 break;
             }
         }
-
 
         if (found)
         {

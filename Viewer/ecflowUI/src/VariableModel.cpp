@@ -311,11 +311,7 @@ QModelIndex VariableModel::parent(const QModelIndex &child) const
 	{
 		int id=child.internalId();
 		int r=id/1000-1;
-#ifdef ECFLOW_QT5
 		return createIndex(r,child.column(),quintptr(0));
-#else
-		return createIndex(r,child.column(),0);
-#endif
 	}
 
 	return {};

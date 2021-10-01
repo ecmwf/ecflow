@@ -43,7 +43,7 @@ public:
    static void setOverrideCursor(QCursor cursor);
    static void restoreOverrideCursor();
    static QString formatDuration(unsigned int);
-   static int textWidth(const QFontMetrics& fm, QString txt, int len);
+   static int textWidth(const QFontMetrics& fm, QString txt, int len=-1);
    static int textWidth(const QFontMetrics& fm, QChar ch);
 };
 

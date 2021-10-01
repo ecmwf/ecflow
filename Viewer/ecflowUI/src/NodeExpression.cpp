@@ -8,9 +8,14 @@
 //
 //============================================================================
 
-#include <QDateTime>
-#include <QRegExp>
 #include <QtGlobal>
+#include <QDateTime>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include <boost/algorithm/string.hpp>
 
@@ -771,25 +776,54 @@ bool StringMatchExact::match(std::string searchFor, std::string searchIn)
 
 bool StringMatchContains::match(std::string searchFor, std::string searchIn)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+    QRegularExpression rx(QString::fromStdString(searchFor));
+    if (!caseSensitive_) {
+        rx.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+    }
+    auto m = rx.match(QString::fromStdString(searchIn));
+    return m.hasMatch();
+#else
     Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
     QRegExp regexp(QString::fromStdString(searchFor), cs);
     int index = regexp.indexIn(QString::fromStdString(searchIn));
     return (index != -1);  // -1 means no match
+#endif
 }
 
 bool StringMatchWildcard::match(std::string searchFor, std::string searchIn)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+    QRegularExpression rx;
+    rx.setPattern(QRegularExpression::wildcardToRegularExpression(QString::fromStdString(searchFor)));
+    if (!caseSensitive_) {
+        rx.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+    }
+    auto m = rx.match(QString::fromStdString(searchIn));
+    return m.hasMatch();
+#else
+
     Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
     QRegExp regexp(QString::fromStdString(searchFor), cs);
     regexp.setPatternSyntax(QRegExp::Wildcard);
     return regexp.exactMatch(QString::fromStdString(searchIn));
+#endif
 }
 
 bool StringMatchRegexp::match(std::string searchFor, std::string searchIn)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+    QRegularExpression rx(QString::fromStdString(searchFor));
+    if (!caseSensitive_) {
+        rx.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+    }
+    auto m = rx.match(QString::fromStdString(searchIn));
+    return m.hasMatch();
+#else
     Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
     QRegExp regexp(QString::fromStdString(searchFor), cs);
     return regexp.exactMatch(QString::fromStdString(searchIn));
+#endif
 }
 
 //=========================================================================

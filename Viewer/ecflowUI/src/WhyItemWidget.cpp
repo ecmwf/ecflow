@@ -10,6 +10,7 @@
 #include "WhyItemWidget.hpp"
 
 #include <QDebug>
+#include <QFile>
 
 #include "Node.hpp"
 

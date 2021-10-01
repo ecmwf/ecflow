@@ -11,6 +11,7 @@
 #include "TimelineWidget.hpp"
 
 #include <QtGlobal>
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QTime>
 #include <QButtonGroup>
@@ -933,7 +934,7 @@ void TimelineWidget::loadArchive()
 
     bool loadDone=false;
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     //std::vector<std::string> suites;
@@ -1072,7 +1073,7 @@ void TimelineWidget::loadCore(QString logFile)
 
     ui_->messageLabel->showInfo("Loading timeline data from log file ...");
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     ui_->messageLabel->startProgress(100);

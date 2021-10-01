@@ -16,7 +16,7 @@
 #include "VTask.hpp"
 
 #include <QObject>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QTimer>
 
 class ClientInvoker;
@@ -80,7 +80,7 @@ protected:
 	ServerComThread *comThread_;
 	QTimer* timer_;
     int timeout_;
-    QTime ctStartTime_;
+    QElapsedTimer ctStartTime_;
     int ctStartTimeout_;
     int ctStartWaitTimeout_;
     int startTimeoutTryCnt_;

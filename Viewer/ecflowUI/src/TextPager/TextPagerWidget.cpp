@@ -27,6 +27,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 
+#include "TextCodecWrapper.hpp"
 #include "TextPagerWidget.hpp"
 
 #include "GotoLineDialog.hpp"
@@ -56,7 +57,7 @@ void TextPagerWidget::clear()
 
 bool TextPagerWidget::load(const QString &fileName, TextPagerDocument::DeviceMode mode)
 {
-	return textEditor_->load(fileName, mode, nullptr);
+    return textEditor_->load(fileName, mode, TextCodecWrapper());
 }
 
 void TextPagerWidget::setText(const QString &txt)

@@ -18,6 +18,12 @@
 #include <QGuiApplication>
 #endif
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QRegExp>
+#else
+#include <QtCore5Compat/QRegExp>
+#endif
+
 TextPagerCursor::MoveOperation TextPagerSearchInterface::translateCursorMoveOp(QTextCursor::MoveOperation move)
 {
 	switch (move)

@@ -11,6 +11,7 @@
 
 #include <QtAlgorithms>
 #include <QApplication>
+#include <QElapsedTimer>
 #include <QHeaderView>
 #include <QPalette>
 #include <QScrollBar>
@@ -354,7 +355,7 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 #ifdef _UI_TREENODEVIEW_DEBUG
-            QTime t;
+            QElapsedTimer t;
             t.start();
 #endif
             //apply expand in the view

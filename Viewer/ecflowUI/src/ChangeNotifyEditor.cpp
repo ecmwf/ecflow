@@ -11,6 +11,7 @@
 #include "ChangeNotifyEditor.hpp"
 
 #include "PropertyLine.hpp"
+#include "ViewerUtil.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
 
@@ -40,7 +41,7 @@ ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 	QFontMetrics fm(f);
 	//tree_->setFixedHeight((fm.height()+4)*5.5);
 
-	tree_->setFixedWidth(fm.width("Restartedaaa")+30);
+    tree_->setFixedWidth(ViewerUtil::textWidth(fm, "Restartedaaa")+30);
 
 	//tab_->hide();
 }

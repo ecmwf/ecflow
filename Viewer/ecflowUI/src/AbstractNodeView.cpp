@@ -131,7 +131,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
     }
 
     //Middle button - expand only, no selection
-    else if(event->button() == Qt::MidButton)
+    else if(event->button() == Qt::MiddleButton)
     {
         int viewItemIndex=itemAtCoordinate(event->pos());
         if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)

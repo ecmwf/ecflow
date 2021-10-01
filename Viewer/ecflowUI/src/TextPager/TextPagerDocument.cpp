@@ -2,11 +2,14 @@
 #include "TextPagerCursor.hpp"
 #include "TextPagerCursor_p.hpp"
 #include "TextPagerDocument_p.hpp"
+
+#include <algorithm>
+
 #include <QBuffer>
 #include <QIODevice>
 #include <QObject>
 #include <QString>
-#include <QString>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QList>
@@ -18,9 +21,16 @@
 //#define TEXTDOCUMENT_FIND_DEBUG
 #define TEXTDOCUMENT_USE_FILE_LOCK
 
-
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
  #include <QStandardPaths>
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QStringRef>
+//#include <QTextCodec>
+#else
+#include <QtCore5Compat/QStringRef>
+//#include <QtCore5Compat/QTextCodec>
 #endif
 
 // #define DEBUG_CACHE_HITS
@@ -76,7 +86,7 @@ TextPagerDocument::~TextPagerDocument()
     delete d;
 }
 
-bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *codec)
+bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, TextCodecWrapper codec)
 {
     QWriteLocker locker(d->readWriteLock);
     Q_ASSERT(device);
@@ -114,7 +124,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
     if (d->documentSize <= d->chunkSize && mode == Sparse && !(options & NoImplicitLoadAll))
         mode = LoadAll;
 #if 0
-    if (codec && mode == Sparse) {
+    if (codec.hasValue() && mode == Sparse) {
 
         qWarning("Sparse mode doesn't really work with unicode data yet. I am working on it.\n--\nAnders");
     }
@@ -143,8 +153,9 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
     case LoadAll: {
         device->seek(0);
         QTextStream ts(device);
-        if (d->textCodec)
-            ts.setCodec(d->textCodec);
+        if (d->textCodec.hasValue())
+            ts.setEncoding(d->textCodec.value());
+
         Chunk *current = nullptr;
         d->documentSize = 0; // in case of unicode
         do {
@@ -200,7 +211,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
     return true;
 }
 
-bool TextPagerDocument::load(const QString &fileName, DeviceMode mode, QTextCodec *codec)
+bool TextPagerDocument::load(const QString &fileName, DeviceMode mode, TextCodecWrapper codec)
 {
     if (mode == LoadAll) {
         QFile from(fileName);
@@ -276,6 +287,7 @@ QString TextPagerDocument::read(int pos, int size) const
     return ret;
 }
 
+#if 0
 QStringRef TextPagerDocument::readRef(int pos, int size) const
 {
     QReadLocker locker(d->readWriteLock);
@@ -287,7 +299,7 @@ QStringRef TextPagerDocument::readRef(int pos, int size) const
     }
     return QStringRef();
 }
-
+#endif
 #if 0
 static bool isSameFile(const QIODevice *left, const QIODevice *right)
 {
@@ -352,11 +364,13 @@ TextPagerDocument::DeviceMode TextPagerDocument::deviceMode() const
     return d->deviceMode;
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 QTextCodec * TextPagerDocument::textCodec() const
 {
     QReadLocker locker(d->readWriteLock);
     return d->textCodec;
 }
+#endif
 
 class FindScope
 {
@@ -477,7 +491,7 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
     bool ok = true;
     //int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : nullptr);
-    QTime lastProgressTime;
+    QElapsedTimer lastProgressTime;
     if (flags & FindAllowInterrupt) {
         //progressInterval = qMax<int>(1, (reverse
         //                                 ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
@@ -490,7 +504,7 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
     int index;
     int from;
 #ifdef TEXTDOCUMENT_FIND_DEBUG
-    QTime lap;
+    QElapsedTimer lap;
     lap.start();
 #endif
 
@@ -674,7 +688,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
     //QChar ch = it.current();
     //int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : nullptr);
-    QTime lastProgressTime;
+    QElapsedTimer lastProgressTime;
     if (flags & FindAllowInterrupt) {
         //progressInterval = qMax<int>(1, (reverse
         //                                 ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
@@ -898,7 +912,7 @@ TextPagerCursor TextPagerDocument::find(const QChar &chIn, const TextPagerCursor
     int maxFindLength = 0;
     int progressInterval = 0;
     const FindScope scope(flags & FindAllowInterrupt ? &d->findState : nullptr);
-    QTime lastProgressTime;
+    QElapsedTimer lastProgressTime;
     if (flags & FindAllowInterrupt) {
         progressInterval = qMax<int>(1, (reverse
                                          ? (static_cast<qreal>(pos) / static_cast<qreal>(TEXTDOCUMENT_FIND_INTERVAL_PERCENTAGE))
@@ -975,11 +989,18 @@ void TextPagerDocument::takeTextSection(TextPagerSection *section)
     QWriteLocker locker(d->readWriteLock);
     Q_ASSERT(section);
     Q_ASSERT(section->document() == this);
-
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    QList<TextPagerSection*>::iterator first = std::lower_bound(d->sections.begin(), d->sections.end(), section, compareTextSection);
+#else
     QList<TextPagerSection*>::iterator first = qLowerBound(d->sections.begin(), d->sections.end(), section, compareTextSection);
+#endif
     Q_ASSERT(first != d->sections.end());
-    const QList<TextPagerSection*>::iterator last = qUpperBound(d->sections.begin(), d->sections.end(), section, compareTextSection);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    const QList<TextPagerSection*>::iterator last = std::upper_bound(d->sections.begin(), d->sections.end(), section, compareTextSection);
+#else
+    const QList<TextPagerSection*>::iterator last = qUpperBound(d->sections.begin(), d->sections.end(), section, compareTextSection);
+#endif
     while (first != last) {
         if (*first == section) {
             Q_EMIT sectionRemoved(section);
@@ -1005,8 +1026,13 @@ void TextPagerDocument::insertTextSection(TextPagerSection *section)
 {
     QWriteLocker locker(d->readWriteLock);
     Q_ASSERT(!d->sections.contains(section));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    QList<TextPagerSection*>::iterator it = std::lower_bound<QList<TextPagerSection*>::iterator>(d->sections.begin(), d->sections.end(),
+                                                                                  section, compareTextSection);
+#else
     QList<TextPagerSection*>::iterator it = qLowerBound<QList<TextPagerSection*>::iterator>(d->sections.begin(), d->sections.end(),
                                                                                   section, compareTextSection);
+#endif
     d->sections.insert(it, section);
     Q_EMIT sectionAdded(section);
 }
@@ -1020,7 +1046,11 @@ TextPagerSection *TextPagerDocument::insertTextSection(int pos, int size,
     Q_ASSERT(pos < d->documentSize);
 
     auto *l = new TextPagerSection(pos, size, this, format, data);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    QList<TextPagerSection*>::iterator it = std::lower_bound<QList<TextPagerSection*>::iterator>(d->sections.begin(), d->sections.end(), l, compareTextSection);
+#else
     QList<TextPagerSection*>::iterator it = qLowerBound<QList<TextPagerSection*>::iterator>(d->sections.begin(), d->sections.end(), l, compareTextSection);
+#endif
     d->sections.insert(it, l);
     Q_EMIT sectionAdded(l);
     return l;
@@ -1079,8 +1109,13 @@ void TextPagerDocument::setText(const QString &text)
     QBuffer buffer;
     buffer.open(QIODevice::WriteOnly);
     QTextStream ts(&buffer);
-    if (d->textCodec)
-        ts.setCodec(d->textCodec);
+    if (d->textCodec.hasValue())
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+       ts.setEncoding(d->textCodec.value());
+#else
+       ts.setCodec(d->textCodec.value());
+#endif
+
     ts << text;
     buffer.close();
     buffer.open(QIODevice::ReadOnly);
@@ -1371,12 +1406,7 @@ QString TextDocumentPrivate::chunkData(const Chunk *chunk, int chunkPos) const
         }
 #endif
         QTextStream ts(dev);
-        //if (textCodec)
-         //   ts.setCodec(textCodec);
-//         if (!chunk->swap.isEmpty()) {
-//             qDebug() << "reading stuff from swap" << chunk << chunk->from << chunk->size() << chunk->swap;
-//         }
-       ts.seek(chunk->from);
+        ts.seek(chunk->from);
 
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
 
@@ -1662,8 +1692,12 @@ void TextDocumentPrivate::swapOutChunk(Chunk *c)
         return;
     }
     QTextStream ts(&file);
-    if (textCodec)
-        ts.setCodec(textCodec);
+    if (textCodec.hasValue())
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        ts.setEncoding(textCodec.value());
+#else
+        ts.setCodec(textCodec.value());
+#endif
     ts << c->data;
     c->data.clear();
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
@@ -1724,7 +1758,11 @@ QList<TextPagerSection*> TextDocumentPrivate::getSections(int pos, int size, Tex
     }
 
     const TextPagerSection tmp(pos, size, static_cast<TextPagerDocument*>(nullptr), QTextCharFormat(), QVariant());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    QList<TextPagerSection*>::const_iterator it = std::lower_bound(sections.begin(), sections.end(), &tmp, compareTextSection);
+#else
     QList<TextPagerSection*>::const_iterator it = qLowerBound(sections.begin(), sections.end(), &tmp, compareTextSection);
+#endif
     if (flags & TextPagerSection::IncludePartial && it != sections.begin()) {
         QList<TextPagerSection*>::const_iterator prev = it;
         do {

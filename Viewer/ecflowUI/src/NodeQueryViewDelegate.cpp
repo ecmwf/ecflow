@@ -23,6 +23,7 @@
 #include "IconProvider.hpp"
 #include "ModelColumn.hpp"
 #include "PropertyMapper.hpp"
+#include "ViewerUtil.hpp"
 
 static std::vector<std::string> propVec;
 
@@ -194,7 +195,7 @@ void NodeQueryViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	//The text rectangle
     QRect textRect = itemRect;
 
-	int textWidth=fm.width(text);
+    int textWidth=ViewerUtil::textWidth(fm,text);
     textRect.setWidth(textWidth+nodeBox_->leftPadding+nodeBox_->rightPadding);
 
     int currentRight=textRect.x()+textRect.width();

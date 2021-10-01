@@ -19,6 +19,7 @@
 #include "NodeQueryOptionEdit.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
+#include "ViewerUtil.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
 
@@ -27,7 +28,9 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QPalette>
+#include <QRegularExpression>
 #include <QVBoxLayout>
+
 
 //======================================================
 //
@@ -49,7 +52,7 @@ void NodeQuerySaveDialog::accept()
 {
 	QString name=nameLe_->text();
 
-	if(!name.contains(QRegExp("[\\w|\\s]+")))
+    if(!name.contains(QRegularExpression("[\\w|\\s]+")))
 	{
 		QMessageBox::critical(nullptr,tr("Invalid character"),
 				"Query names can only contain alphanumeric characters, whitespaces and \"_\". Please choose a different name.");
@@ -174,7 +177,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     flagList_->setFixedHeight(listHeight);
 
     listHeight=(fm.height()+2)*10+6;
-    int listWidth=fm.width("variable")+60;
+    int listWidth=ViewerUtil::textWidth(fm,"variable")+60;
     attrList_->setFixedHeight(listHeight);
     attrList_->setFixedWidth(listWidth);
 

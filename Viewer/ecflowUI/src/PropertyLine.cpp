@@ -28,6 +28,7 @@
 #include "ComboMulti.hpp"
 #include "Sound.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 
 #include <cassert>
 
@@ -469,7 +470,7 @@ ColourPropertyLine::ColourPropertyLine(VProperty* guiProp,bool addLabel,QWidget 
 	QFont f;
 	QFontMetrics fm(f);
 	int height=fm.height();
-	int width=fm.width("AAAAAAA");
+    int width=ViewerUtil::textWidth(fm,"AAAAAAA");
 
 	cb_=new QToolButton(parent);
     cb_->setObjectName(prop_->name());

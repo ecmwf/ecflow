@@ -18,6 +18,7 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 #include "VConfig.hpp"
+#include "ViewerUtil.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 #include "WidgetNameProvider.hpp"
@@ -238,8 +239,8 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings)
         {
             QFont f;
             QFontMetrics fm(f);
-            tree_->setColumnWidth(0,fm.width("serverserverserver"));
-            tree_->setColumnWidth(1,fm.width("/suite1/family1/family2/family3/family4/task"));
+            tree_->setColumnWidth(0, ViewerUtil::textWidth(fm, "serverserverserver"));
+            tree_->setColumnWidth(1, ViewerUtil::textWidth(fm, "/suite1/family1/family2/family3/family4/task"));
         }
     }
 }

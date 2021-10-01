@@ -16,8 +16,9 @@
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
+#include <QStringList>
+
 class QModelIndex;
-class QStringList;
 class QStringListModel;
 class VRepeatAttr;
 class RepeatEditor;

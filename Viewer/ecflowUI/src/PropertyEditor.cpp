@@ -23,6 +23,7 @@
 #include "PropertyLine.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
+#include "ViewerUtil.hpp"
 
 PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent)
 {
@@ -215,7 +216,7 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout,Q
                 QFontMetrics fm(f);
                 QString s;
                 s=s.leftJustified(lineLabelLen_,'A');
-                lw->setMinimumWidth(fm.width(s));
+                lw->setMinimumWidth(ViewerUtil::textWidth(fm,s));
             }
 
             gridLayout->addWidget(lw,row,0,Qt::AlignLeft);

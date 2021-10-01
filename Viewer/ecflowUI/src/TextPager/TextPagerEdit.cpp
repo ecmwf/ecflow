@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <QtGlobal>
 #include <QScrollArea>
 #include <QScrollBar>
-#include <QDesktopWidget>
+#include <QGuiApplication>
 #include <QVariant>
 #include "TextPagerEdit.hpp"
 #include "TextPagerEdit_p.hpp"
@@ -23,7 +24,9 @@
 #include "TextPagerSearchHighlighter.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
+#include "ViewerUtil.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 //#define _UI_TEXTPAGER_DEBUG
@@ -311,7 +314,7 @@ bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTe
 }
 #endif
 
-bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode, QTextCodec *codec)
+bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode, TextCodecWrapper codec)
 {
 #ifdef DEBUG_TEXTPAGER
     if (doLog) {
@@ -578,7 +581,8 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
         enum { MinimumTimeOut = 3 };
         int timeout = qMax<int>(MinimumTimeOut, 100 - distance);
         enum { Margin = 3 };
-        if (qApp->desktop()->screenGeometry(this).bottom() - mapToGlobal(d->lastMouseMove).y() <= Margin) {
+        auto sc = QGuiApplication::primaryScreen();
+        if (sc && (sc->geometry().bottom() - mapToGlobal(d->lastMouseMove).y()) <= Margin) {
             timeout = MinimumTimeOut;
         }
         d->autoScrollLines = 1 + ((100 - timeout) / 30);
@@ -774,18 +778,18 @@ int TextPagerEdit::columnNumber(const TextPagerCursor &cursor) const
 
 void TextPagerEdit::wheelEvent(QWheelEvent *e)
 {
-    if (e->orientation() == Qt::Vertical) {
-        d->scrollLines(3 * (e->delta() > 0 ? -1 : 1));
+    auto delta = e->angleDelta();
+    if (delta.y() != 0 ) {
+        d->scrollLines(3 * (delta.y() > 0 ? -1 : 1));
     } else {
         QAbstractScrollArea::wheelEvent(e);
     }
 
     if(e->modifiers() & Qt::ControlModifier)
     {
-    	const int delta = e->delta();
-        if (delta < 0)
+        if (delta.y() < 0)
     	   zoomOut();
-    	else if (delta > 0)
+        else if (delta.y() > 0)
     	   zoomIn();
     	return;
      }
@@ -1050,7 +1054,11 @@ static inline bool compareExtraSelection(const TextPagerEdit::ExtraSelection &le
 void TextPagerEdit::setExtraSelections(const QList<ExtraSelection> &selections)
 {
     d->extraSelections = selections;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    std::sort(d->extraSelections.begin(), d->extraSelections.end(), compareExtraSelection);
+#else
     qSort(d->extraSelections.begin(), d->extraSelections.end(), compareExtraSelection);
+#endif
     d->layoutDirty = true;
     viewport()->update();
 }
@@ -1400,7 +1408,11 @@ void TextEditPrivate::updateCursorPosition(const QPoint &pos)
     const int textPos = textPositionAt(pos);
     if (textPos != -1) {
         QList<TextPagerSection*> hovered = textEdit->sections(textPos, 1, TextPagerSection::IncludePartial);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        std::sort(hovered.begin(), hovered.end(), compareTextSectionByPriority);
+#else
         qSort(hovered.begin(), hovered.end(), compareTextSectionByPriority);
+#endif
         Q_FOREACH(TextPagerSection *section, hovered) {
             if (section->hasCursor()) {
                 delete sectionCursor;
@@ -1925,7 +1937,7 @@ int TextPagerLineNumberArea::computeWidth(int maxLineNum) const
             digits_=maxDigits;
     }
 
-    return  (textEditor_)?(3 + textEditor_->fontMetrics().width(QLatin1Char('9')) * digits_ + rightMargin_):3+rightMargin_;
+    return  (textEditor_)?(3 + ViewerUtil::textWidth(textEditor_->fontMetrics(),QLatin1Char('9')) * digits_ + rightMargin_):3+rightMargin_;
 
 }
 
