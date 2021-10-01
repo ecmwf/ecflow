@@ -231,7 +231,7 @@ Q_SIGNALS:
 
 protected:
     void clearGraph(bool keepConfig=false);
-    void mouseDoubleClickEvent(QMouseEvent *e);
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
     void showEvent(QShowEvent*) override;
     void timerEvent(QTimerEvent *event) override;
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
