@@ -154,7 +154,11 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, TextCodecWrappe
         device->seek(0);
         QTextStream ts(device);
         if (d->textCodec.hasValue())
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             ts.setEncoding(d->textCodec.value());
+#else
+            ts.setCodec(d->textCodec.value());
+#endif
 
         Chunk *current = nullptr;
         d->documentSize = 0; // in case of unicode
@@ -368,7 +372,7 @@ TextPagerDocument::DeviceMode TextPagerDocument::deviceMode() const
 QTextCodec * TextPagerDocument::textCodec() const
 {
     QReadLocker locker(d->readWriteLock);
-    return d->textCodec;
+    return d->textCodec.value();
 }
 #endif
 
