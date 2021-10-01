@@ -114,7 +114,7 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
             formats += syntaxHighlighter->d->formatRanges;
     }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-    textLayout->setFormats(formats);
+    textLayout->setFormats(formats.toVector());
 #else
     textLayout->setAdditionalFormats(formats);
 #endif
