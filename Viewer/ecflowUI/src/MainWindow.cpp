@@ -506,17 +506,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
        event->accept();
     }
     UiLog().dbg() << "closeEvent finished";
-#if 0
-    if(MainWindow::(this))
-	{
-		windows_.removeOne(this);
-		event->accept();
-	}
-	else
-	{
-	  	event->ignore();
-	}
-#endif
 }
 
 //On quitting we need to call the destructor of all the servers shown in the gui.
@@ -659,41 +648,6 @@ void MainWindow::cleanUpOnQuit(MainWindow*)
     Q_FOREACH(MainWindow *win,windows_)
         win->cleanUpOnQuit();
 }
-
-#if 0
-//Return true if close is allowed, false otherwise
-bool MainWindow::aboutToClose(MainWindow* win)
-{
-	//If quit has already stared we ignore the close signal from
-	//the main windows.
-  	if(quitStarted_)
-	{
-		return false;
-	}
-
-	//Otherwise
-	else
-	{
-  		if(windows_.count() > 1)
-		{
-		  	int tabCnt=win->nodePanel_->count();
-			if(tabCnt > 1)
-			{
-		  		if(QMessageBox::question(nullptr,tr("Confirm close"),tr("You are about to close <b>") + QString::number(tabCnt) + tr("</b> tabs. Are you sure you want to continue?"),
-			    	      QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
-				{
-					return false;
-				}
-			}
-		}
-		else if(windows_.count() == 1)
-		{
-            return MainWindow::aboutToQuit(win);
-		}
-		return true;
-	}
-}
-#endif
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {

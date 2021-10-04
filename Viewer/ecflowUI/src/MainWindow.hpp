@@ -120,7 +120,6 @@ private:
     static MainWindow *makeWindow();
     static MainWindow *makeWindow(QString id);
     static MainWindow *makeWindow(QStringList idLst);
-    //static bool aboutToClose(MainWindow*);
     static bool aboutToQuit(MainWindow*);
     static void save(MainWindow *);
     static void saveContents(MainWindow *);
