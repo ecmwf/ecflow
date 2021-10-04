@@ -176,7 +176,9 @@ MainWindow::~MainWindow()
 {
     UiLog().dbg() << "MainWindow --> destructor";
     delete winTitle_;
-    serverFilterMenu_->aboutToDestroy();
+    if (!quitStarted_) {
+        serverFilterMenu_->aboutToDestroy();
+    }
 }
 
 void MainWindow::init(MainWindow *win)
