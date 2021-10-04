@@ -31,7 +31,7 @@ project( ecflow LANGUAGES CXX VERSION 5.7.2 )
 include( ecbuild_system NO_POLICY_SCOPE )
 
 ecbuild_requires_macro_version( 1.6 )
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 ###############################################################################
 # local project
