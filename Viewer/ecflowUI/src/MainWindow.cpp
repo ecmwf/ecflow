@@ -492,7 +492,22 @@ void MainWindow::slotEditServerSettings(ServerHandler* s)
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-  	if(MainWindow::aboutToClose(this))
+    UiLog().dbg() << "closeEvent";
+    if (!quitStarted_) {
+       UiLog().dbg() << "  start close";
+       if (windows_.count() == 1) {
+            UiLog().dbg() << " windows_.count=1, start quit";
+            MainWindow::aboutToQuit(this);
+            UiLog().dbg() << "closeEvent finished";
+            return;
+       }
+       UiLog().dbg() << "  accept close event";
+       windows_.removeOne(this);
+       event->accept();
+    }
+    UiLog().dbg() << "closeEvent finished";
+#if 0
+    if(MainWindow::(this))
 	{
 		windows_.removeOne(this);
 		event->accept();
@@ -501,6 +516,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 	{
 	  	event->ignore();
 	}
+#endif
 }
 
 //On quitting we need to call the destructor of all the servers shown in the gui.
@@ -644,6 +660,7 @@ void MainWindow::cleanUpOnQuit(MainWindow*)
         win->cleanUpOnQuit();
 }
 
+#if 0
 //Return true if close is allowed, false otherwise
 bool MainWindow::aboutToClose(MainWindow* win)
 {
@@ -676,6 +693,7 @@ bool MainWindow::aboutToClose(MainWindow* win)
 		return true;
 	}
 }
+#endif
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
@@ -687,11 +705,6 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 	{
 #endif
         quitStarted_=true;
-
-#ifdef ECFLOW_LOGVIEW
-        if(logCom_)
-            logCom_->closeApp();
-#endif
 
 		//Save browser settings
 		MainWindow::save(topWin);
