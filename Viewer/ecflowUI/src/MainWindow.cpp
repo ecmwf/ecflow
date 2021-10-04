@@ -714,7 +714,7 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 			}
 		}
 
-        // all qt-based classes can decect the the app is quitting
+        // all qt-based classes can decect that the app is quitting
         qApp->setProperty("inQuit","1");
 
         //Ensure the ServerHandler destructors are called

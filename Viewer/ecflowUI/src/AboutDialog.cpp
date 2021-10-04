@@ -143,4 +143,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     }
 
     envTree_->resizeColumnToContents(0);
+
+    tabWidget->setCurrentIndex(0);
 }
