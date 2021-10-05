@@ -198,7 +198,7 @@ void VServerSettings::loadSettings()
 	if(boost::filesystem::exists(fName))
 	{
 		VSettings vs(fName);
-		vs.read();
+        vs.read(false);
 		vs.beginGroup("suite_filter");
 		server_->suiteFilter()->readSettings(&vs);
 		vs.endGroup();

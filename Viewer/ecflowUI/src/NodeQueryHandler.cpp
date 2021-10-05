@@ -99,14 +99,13 @@ void NodeQueryHandler::init(const std::string& dirPath)
 	{
 		std::string fName=DirectoryHandler::concatenate(dirPath_,*it);
 		VSettings vs(fName);
-		vs.read();
-
-		std::size_t pos=(*it).find("." + suffix_);
-		assert(pos != std::string::npos);
-
-		std::string name=(*it).substr(0,pos);
-		NodeQuery* item=add(name);
-		item->load(&vs);
+        if (vs.read(false)) {
+            std::size_t pos=(*it).find("." + suffix_);
+            assert(pos != std::string::npos);
+            std::string name=(*it).substr(0,pos);
+            NodeQuery* item=add(name);
+            item->load(&vs);
+        }
 	}
 }
 

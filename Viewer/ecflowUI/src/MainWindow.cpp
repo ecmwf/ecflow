@@ -706,7 +706,7 @@ void MainWindow::init()
 	VComboSettings vs(cs->sessionFile(),cs->windowFile());
 
 	//Read configuration. If it fails we create an empty window!!
-	if(!vs.read())
+    if(!vs.read(true, "No session config was found! ecFlowUI will start with an empty window."))
 	{
 		 MainWindow::makeWindow(&vs);
 		 return;

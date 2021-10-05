@@ -43,7 +43,7 @@ public:
 	//virtual void write(const std::string &fs);
 
     bool fileExists() const;
-	bool read(bool failIfFileDoesNotExist = true);
+    bool read(bool showPopupOnError, const std::string& extraMessage={});
 	virtual void write();
 
 	virtual void clear();

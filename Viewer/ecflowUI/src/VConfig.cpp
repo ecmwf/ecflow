@@ -89,7 +89,7 @@ void VConfig::init(const std::string& parDirPath)
    std::string guiFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui.json");
    loadInit(guiFile);
 
-   //Read gui definition for the editable properties tahat can be cutomised per server
+   //Read gui definition for the editable properties that can be cutomised per server
    std::string guiServerFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui_server.json");
    loadInit(guiServerFile);
 
@@ -362,7 +362,7 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool gl
 		if(boost::filesystem::exists(parFile))
 		{
 			std::string errorMessage = e.what();
-			UserMessage::message(UserMessage::ERROR, true,
+            UserMessage::message(UserMessage::ERROR, true,
 	                std::string("Error! VConfig::loadSettings() unable to parse settings file: " + parFile + " Message: " +errorMessage));
 		}
 	    return;
