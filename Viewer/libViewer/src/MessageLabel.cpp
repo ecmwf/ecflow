@@ -151,10 +151,10 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	hide();
 
     connect(loadCancelTb_,SIGNAL(clicked()),
-            this,SIGNAL(cancelLoad()));
+            this,SLOT(stopLoadLabelByButton()));
 
     connect(progCancelTb_,SIGNAL(clicked()),
-            this,SIGNAL(cancelProgress()));
+            this,SIGNAL(stopProgressByButton()));
 
 }
 
@@ -261,6 +261,12 @@ void MessageLabel::startLoadLabel(bool showCancelButton)
     loadIconLabel_->movie()->start();
 }
 
+void MessageLabel::stopLoadLabelByButton()
+{
+     stopLoadLabel();
+     Q_EMIT loadStoppedByButton();
+}
+
 void MessageLabel::stopLoadLabel()
 {
     if(loadIconLabel_->movie())
@@ -276,6 +282,12 @@ void MessageLabel::startProgress(int max)
     Q_ASSERT(max >=0 && max <=100);
     progBar_->setRange(0,max);
     progWidget_->show();
+}
+
+void MessageLabel::stopProgressByButton()
+{
+     stopProgress();
+     Q_EMIT progressStoppedByButton();
 }
 
 void MessageLabel::stopProgress()

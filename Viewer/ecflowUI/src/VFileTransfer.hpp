@@ -27,6 +27,9 @@ public:
 protected Q_SLOTS:
     void slotProcFinished(int,QProcess::ExitStatus);
     void slotStdOutput();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    void slotErrorOccurred(QProcess::ProcessError);
+#endif
 
 Q_SIGNALS:
     void transferFinished();

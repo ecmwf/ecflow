@@ -13,9 +13,15 @@
 #include <QtGlobal>
 #include <QFileInfo>
 #include <QProcess>
+#include <QString>
+#include <QMap>
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
+
+static QMap<QProcess::ProcessError, QString> errorStr;
+
+#define UI_FILETRANSFER_DEBUG_
 
 VFileTransfer::VFileTransfer(QObject* parent) :
     QObject(parent),
@@ -23,10 +29,19 @@ VFileTransfer::VFileTransfer(QObject* parent) :
     ignoreSetX_(true),
     scriptName_("ecflow_ui_transfer_file.sh")
 {
+    if (errorStr.isEmpty()) {
+        errorStr[QProcess::FailedToStart] = "failed to start";
+        errorStr[QProcess::Crashed] = "crashed";
+        errorStr[QProcess::Timedout] = "timed out";
+        errorStr[QProcess::WriteError] = "failed with write error";
+        errorStr[QProcess::ReadError] = "failed with read error";
+        errorStr[QProcess::UnknownError] = "failed";
+    }
 }
 
 bool VFileTransfer::isActive() const
 {
+//    UiLog().dbg() << "state=" << proc_->state();
     return (proc_ && proc_->state() != QProcess::NotRunning);
 }
 
@@ -50,6 +65,11 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
 
         connect(proc_,SIGNAL(readyReadStandardOutput()),
                 this,SLOT(slotStdOutput()));
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+        connect(proc_,SIGNAL(errorOccurred(QProcess::ProcessError)),
+                this,SLOT(slotErrorOccurred(QProcess::ProcessError)));
+#endif
     }
 
     Q_ASSERT(proc_->state() == QProcess::NotRunning);
@@ -78,22 +98,42 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
             " " + remoteUid;
 
     proc_->start("/bin/sh -c \"" + command + "\"");
-    //UiLog().dbg() << "/bin/sh -c \"" + command + "\"";
+
+#ifdef UI_FILETRANSFER_DEBUG_
+    UiLog().dbg() << "exeDir=" << exeDir;
+    UiLog().dbg() << "program=" << proc_->program();
+    UiLog().dbg() << "arguments=" << proc_->arguments();
+#endif
 }
 
 void VFileTransfer::stopTransfer()
 {
-    if(proc_)
+    if(proc_) {
         proc_->kill();
+        // on Mac OS (Big Sur) with Qt6 the slotProcFinished() is not
+        // called automaticallywe we need to call it here!
+        slotProcFinished(1, QProcess::CrashExit);
+    }
 }
 
 void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatus)
 {
+#ifdef UI_FILETRANSFER_DEBUG_
+    UI_FUNCTION_LOG
+#endif
+
     if(!proc_)
         return;
 
     QString stdOutTxt(proc_->readAllStandardOutput());
     QString stdErrTxt=stdErr();
+
+#ifdef UI_FILETRANSFER_DEBUG_
+    UiLog().dbg() << "exitCode=" << exitCode << "exitStatus=" << exitStatus;
+    UiLog().dbg() << "errorString=" << proc_->errorString();
+    UiLog().dbg() << "stdout=" << stdOutTxt;
+    UiLog().dbg() << "stderr=" << stdErrTxt;
+#endif
 
     QString errTxt=stdOutTxt;
     if(!errTxt.isEmpty())
@@ -102,7 +142,7 @@ void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatu
     }
     errTxt+=stdErrTxt;
     QString errPreTxt="Script <b>" + scriptName_ + "</b> ";
-    errPreTxt+=(exitStatus==QProcess::CrashExit)?"interrupted!":"failed!";
+    errPreTxt+=errorStr.value(proc_->error(),"failed") + "!";
     errPreTxt+=" Output:\n\n";
     errTxt.prepend(errPreTxt);
 
@@ -121,7 +161,26 @@ void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatu
     }
 
     Q_EMIT transferFailed(errTxt);
+
+    if(proc_)
+    {
+        proc_->deleteLater();
+        proc_=nullptr;
+    }
 }
+
+// It is called when on MacOs with Qt6 and the process fails to start!
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+void VFileTransfer::slotErrorOccurred(QProcess::ProcessError e)
+{
+#ifdef UI_FILETRANSFER_DEBUG_
+    UI_FUNCTION_LOG
+    UiLog().dbg() << "errorString=" << proc_->errorString();
+#endif
+    slotProcFinished(1, QProcess::CrashExit);
+}
+#endif
+
 
 void VFileTransfer::slotStdOutput()
 {

@@ -49,6 +49,8 @@
 
 #include "ui_LogLoadWidget.h"
 
+#define UI_LOGLOADWIDGET_DEBUG_
+
 //=======================================================
 //
 // LogLoadWidget
@@ -62,6 +64,9 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
 
     //message label
     ui_->messageLabel->hide();
+
+    connect(ui_->messageLabel,SIGNAL(loadStoppedByButton()),
+            this,SLOT(slotCancelFileTransfer()));
 
     //Chart views
     viewHandler_=new LogRequestViewHandler(this);
@@ -737,11 +742,15 @@ void LogLoadWidget::slotLogLoadProgress(size_t current,size_t total)
 
 }
 
+// notification from messagelabel: user cancelled the transfer
 void LogLoadWidget::slotCancelFileTransfer()
 {
-    if(fileTransfer_ && fileTransfer_->isActive())
+#ifdef UI_LOGLOADWIDGET_DEBUG_
+    UI_FUNCTION_LOG
+    UiLog().dbg() <<  "fileTransfer_=" << fileTransfer_;
+#endif
+    if(fileTransfer_)
     {
-        //ui_->messageLabel->stopLoad();
         fileTransfer_->stopTransfer();
     }
 }
