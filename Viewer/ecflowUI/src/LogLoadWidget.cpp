@@ -31,6 +31,7 @@
 
 #include <QtGlobal>
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHBoxLayout>
@@ -633,7 +634,7 @@ void LogLoadWidget::loadArchive()
 
     bool loadDone=false;
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     logModel_->beginLoadFromReader();
@@ -762,7 +763,7 @@ void LogLoadWidget::loadCore(QString logFile)
     ui_->messageLabel->showInfo("Loading data from log file ... [size=" +
                                 fInfo.formatSize() + "]");
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     ui_->messageLabel->startProgress(100);

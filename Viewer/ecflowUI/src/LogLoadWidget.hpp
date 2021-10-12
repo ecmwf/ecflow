@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include <QtGlobal>
 #include <QAbstractItemModel>
 #include <QGraphicsItem>
 #include <QMap>
@@ -24,7 +25,11 @@
 #include <QWidget>
 #include <QSortFilterProxyModel>
 #include <QtCharts>
+
+#include <QtCharts>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 #include "LogLoadData.hpp"
 #include "TimelineFileList.hpp"

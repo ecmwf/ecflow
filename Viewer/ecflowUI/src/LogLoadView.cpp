@@ -559,7 +559,7 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
         QChartView::mousePressEvent(event);
     }
-    else if(event->button() == Qt::MidButton || event->button() == Qt::RightButton)
+    else if(event->button() == Qt::MiddleButton || event->button() == Qt::RightButton)
     {
        if(event->pos().x() <= chart()->plotArea().right() &&
           event->pos().x() >= chart()->plotArea().left())

@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include <QtGlobal>
 #include <QAbstractItemModel>
 #include <QGraphicsItem>
 #include <QMap>
@@ -22,7 +23,9 @@
 #include <QWidget>
 
 #include <QtCharts>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 class LogLoadData;
 class LogLoadDataItem;

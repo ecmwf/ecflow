@@ -154,7 +154,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
             this,SLOT(stopLoadLabelByButton()));
 
     connect(progCancelTb_,SIGNAL(clicked()),
-            this,SIGNAL(stopProgressByButton()));
+            this,SLOT(stopProgressByButton()));
 
 }
 
