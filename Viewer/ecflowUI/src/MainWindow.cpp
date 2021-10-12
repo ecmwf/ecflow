@@ -17,7 +17,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPixmap>
-#include <QProcess>
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>

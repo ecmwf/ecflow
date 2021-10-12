@@ -97,7 +97,12 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
     command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +  QString::number(lastBytes) +
             " " + remoteUid;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    proc_->start("/bin/sh", QStringList() << "-c" << command);
+#else
     proc_->start("/bin/sh -c \"" + command + "\"");
+#endif
+
 
 #ifdef UI_FILETRANSFER_DEBUG_
     UiLog().dbg() << "exeDir=" << exeDir;

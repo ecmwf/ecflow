@@ -9,6 +9,7 @@
 
 #include "ShellCommand.hpp"
 
+#include <QtGlobal>
 #include <QDebug>
 #include <QProcess>
 #include <QString>
@@ -88,7 +89,12 @@ ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefSt
             this,SLOT(slotStdError()));
 
     startTime_=QDateTime::currentDateTime();
+
+#if QT_VERSION  >= QT_VERSION_CHECK(6, 0, 0)
+    proc_->start("/bin/sh", QStringList() << "-c" << command_ );
+#else
     proc_->start("/bin/sh -c \"" + command_ + "\"");
+#endif
 }
 
 QString ShellCommand::command() const
