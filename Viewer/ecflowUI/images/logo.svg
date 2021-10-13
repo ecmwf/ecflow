@@ -7,17 +7,17 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:export-ydpi="19.565218"
-   inkscape:export-xdpi="19.565218"
-   inkscape:export-filename="/var/tmp/cgr/git/ecflow/Viewer/images/logo_small.png"
-   sodipodi:docname="logo.svg"
-   height="64"
-   width="64"
-   inkscape:version="1.0 (4035a4f, 2020-05-01)"
-   version="1.1"
-   viewBox="0 0 64 64"
+   id="Layer_1"
    data-name="Layer 1"
-   id="Layer_1">
+   viewBox="0 0 64 64"
+   version="1.1"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   width="64"
+   height="64"
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="/var/tmp/cgr/git/ecflow/Viewer/images/logo_small.png"
+   inkscape:export-xdpi="19.565218"
+   inkscape:export-ydpi="19.565218">
   <title
      id="title2992">ecflow logo</title>
   <metadata
@@ -45,63 +45,63 @@
     </rdf:RDF>
   </metadata>
   <sodipodi:namedview
-     inkscape:document-rotation="0"
-     inkscape:current-layer="Layer_1"
-     inkscape:window-maximized="0"
-     inkscape:window-y="122"
-     inkscape:window-x="144"
-     inkscape:cy="32"
-     inkscape:cx="32"
-     inkscape:zoom="13.390625"
-     showgrid="true"
-     id="namedview25"
-     inkscape:window-height="1047"
-     inkscape:window-width="1505"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0"
-     guidetolerance="10"
-     gridtolerance="10"
-     objecttolerance="10"
-     borderopacity="1"
+     pagecolor="#ffffff"
      bordercolor="#666666"
-     pagecolor="#ffffff">
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1505"
+     inkscape:window-height="1047"
+     id="namedview25"
+     showgrid="true"
+     inkscape:zoom="13.390625"
+     inkscape:cx="32"
+     inkscape:cy="32"
+     inkscape:window-x="144"
+     inkscape:window-y="94"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1"
+     inkscape:document-rotation="0">
     <inkscape:grid
-       id="grid845"
-       type="xygrid" />
+       type="xygrid"
+       id="grid845" />
   </sodipodi:namedview>
   <defs
      id="defs3">
     <style
        id="style5">.cls-1{fill:url(#linear-gradient);}.cls-2{fill:url(#linear-gradient-2);}.cls-3{fill:#fff;opacity:0.66;}</style>
     <linearGradient
-       gradientUnits="userSpaceOnUse"
-       y2="46"
-       x2="83"
-       y1="46"
+       id="linear-gradient-2"
        x1="21"
-       id="linear-gradient-2">
+       y1="46"
+       x2="83"
+       y2="46"
+       gradientUnits="userSpaceOnUse">
       <stop
-         style="stop-color:#007dc1;stop-opacity:1;"
-         id="stop13"
+         offset="0"
          stop-color="#007ac1"
-         offset="0" />
+         id="stop13"
+         style="stop-color:#007dc1;stop-opacity:1;" />
       <stop
-         style="stop-color:#005aab;stop-opacity:1"
-         id="stop15"
+         offset="1"
          stop-color="#00294e"
-         offset="1" />
+         id="stop15"
+         style="stop-color:#005aab;stop-opacity:1" />
     </linearGradient>
   </defs>
   <polygon
-     transform="matrix(0.6947731,0,0,0.69625858,-3.5056648,-0.38329621)"
-     style="fill:url(#linear-gradient-2)"
-     id="polygon21"
+     class="cls-2"
      points="67,52 53,38 53,44 53,44 37,44 37,28 69,28 69,34 83,20 69,6 69,12 21,12 21,86 37,86 37,63 37,60 53,60 53,66 "
-     class="cls-2" />
+     id="polygon21"
+     style="fill:#007dc1;fill-opacity:1"
+     transform="matrix(0.6947731,0,0,0.69625858,-3.5056648,-0.38329621)" />
   <polygon
-     style="opacity:0.66;fill:#ffffff"
-     transform="matrix(0.6947731,0,0,0.69625858,-3.5056648,-0.38329621)"
-     id="polygon23"
+     class="cls-3"
      points="72,24 75.93,20 75.93,20 72,16 72,18 27,18 27,80 31,80 31,54 56,54 56,56 60,52 56,48 56,50 31,50 31,22 72,22 "
-     class="cls-3" />
+     id="polygon23"
+     transform="matrix(0.6947731,0,0,0.69625858,-3.5056648,-0.38329621)"
+     style="opacity:0.66;fill:#ffffff" />
 </svg>
