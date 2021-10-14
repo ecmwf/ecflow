@@ -32,6 +32,7 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VNodeMover.hpp"
+#include "ViewerUtil.hpp"
 
 //#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
@@ -795,7 +796,8 @@ bool StringMatchWildcard::match(std::string searchFor, std::string searchIn)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     QRegularExpression rx;
-    rx.setPattern(QRegularExpression::wildcardToRegularExpression(QString::fromStdString(searchFor)));
+    //rx.setPattern(QRegularExpression::wildcardToRegularExpression(QString::fromStdString(searchFor)));
+    rx.setPattern(ViewerUtil::wildcardToRegex(QString::fromStdString(searchFor)));
     if (!caseSensitive_) {
         rx.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     }

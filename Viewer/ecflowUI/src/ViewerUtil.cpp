@@ -26,6 +26,10 @@
 #include <QTabWidget>
 #include <QTreeView>
 
+
+#include <QRegularExpression>
+
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
 #else
@@ -236,4 +240,104 @@ int ViewerUtil::textWidth(const QFontMetrics& fm, QChar ch)
 #else
     return fm.width(ch);
 #endif
+}
+
+// Taken from the qt-everywhere-opensource-4.8.3 source code:
+// src/corelib/tools/qregexp.cpp:wc2rx()
+// See JIRA issue ECFLOW-1753.
+QString ViewerUtil::wildcardToRegex(const QString &wc_str)
+{
+    const bool enableEscaping = true;
+    const int wclen = wc_str.length();
+    QString rx;
+    int i = 0;
+    bool isEscaping = false; // the previous character is '\'
+    const QChar *wc = wc_str.unicode();
+
+    while (i < wclen) {
+        const QChar c = wc[i++];
+        switch (c.unicode()) {
+        case '\\':
+            if (enableEscaping) {
+                if (isEscaping) {
+                    rx += QLatin1String("\\\\");
+                } // we insert the \\ later if necessary
+                if (i == wclen) { // the end
+                    rx += QLatin1String("\\\\");
+                }
+            } else {
+                rx += QLatin1String("\\\\");
+            }
+            isEscaping = true;
+            break;
+        case '*':
+            if (isEscaping) {
+                rx += QLatin1String("\\*");
+                isEscaping = false;
+            } else {
+                rx += QLatin1String(".*");
+            }
+            break;
+        case '?':
+            if (isEscaping) {
+                rx += QLatin1String("\\?");
+                isEscaping = false;
+            } else {
+                rx += QLatin1Char('.');
+            }
+
+            break;
+        case '$':
+        case '(':
+        case ')':
+        case '+':
+        case '.':
+        case '^':
+        case '{':
+        case '|':
+        case '}':
+            if (isEscaping) {
+                isEscaping = false;
+                rx += QLatin1String("\\\\");
+            }
+            rx += QLatin1Char('\\');
+            rx += c;
+            break;
+         case '[':
+            if (isEscaping) {
+                isEscaping = false;
+                rx += QLatin1String("\\[");
+            } else {
+                rx += c;
+                if (wc[i] == QLatin1Char('^'))
+                    rx += wc[i++];
+                if (i < wclen) {
+                    if (rx[i] == QLatin1Char(']'))
+                        rx += wc[i++];
+                    while (i < wclen && wc[i] != QLatin1Char(']')) {
+                        if (wc[i] == QLatin1Char('\\'))
+                            rx += QLatin1Char('\\');
+                        rx += wc[i++];
+                    }
+                }
+            }
+             break;
+
+        case ']':
+            if(isEscaping){
+                isEscaping = false;
+                rx += QLatin1String("\\");
+            }
+            rx += c;
+            break;
+
+        default:
+            if(isEscaping){
+                isEscaping = false;
+                rx += QLatin1String("\\\\");
+            }
+            rx += c;
+        }
+    }
+    return rx;
 }

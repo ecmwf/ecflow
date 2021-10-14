@@ -16,6 +16,7 @@
 #include <QRegExp>
 #endif
 #include <QRegularExpression>
+#include "ViewerUtil.hpp"
 
 
 RichTextSearchInterface::RichTextSearchInterface()
@@ -57,7 +58,8 @@ bool RichTextSearchInterface::findString (QString str, bool highlightAll, QTextD
             case StringMatchMode::WildcardMatch: {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
                 QRegularExpression regexp;
-                regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str));
+                //regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str));
+                regexp.setPattern(ViewerUtil::wildcardToRegex(str));
                 if (cs == Qt::CaseInsensitive)
                     regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 #else

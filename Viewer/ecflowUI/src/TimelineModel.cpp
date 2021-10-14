@@ -10,6 +10,7 @@
 #include "TimelineModel.hpp"
 
 #include "TimelineData.hpp"
+#include "ViewerUtil.hpp"
 
 #include <QDebug>
 
@@ -367,7 +368,8 @@ void TimelineSortModel::setPathFilter(QString pathFilter)
         pathFilterRx_=QRegularExpression();
         if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch)
         {
-            pathFilterRx_.setPattern(QRegularExpression::wildcardToRegularExpression(pathFilter_));
+            //pathFilterRx_.setPattern(QRegularExpression::wildcardToRegularExpression(pathFilter_));
+            pathFilterRx_.setPattern(ViewerUtil::wildcardToRegex(pathFilter_));
         }
         else
         {
