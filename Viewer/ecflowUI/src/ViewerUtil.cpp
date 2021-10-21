@@ -345,7 +345,7 @@ QString ViewerUtil::wildcardToRegex(const QString &wc_str)
 
 QFont ViewerUtil::findMonospaceFont()
 {
-    QStringList lst{"Menlo", "Monaco", "Courier", "Monospace"};
+    QStringList lst{"Menlo", "Monaco", "Monospace", "Courier"};
     QFontDatabase db = QFontDatabase();
     auto fLst = db.families();
     for(auto s: lst) {
