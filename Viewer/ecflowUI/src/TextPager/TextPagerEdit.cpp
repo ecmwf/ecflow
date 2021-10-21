@@ -1711,31 +1711,25 @@ int TextEditPrivate::findLastPageSize() const
 }
 
 
-
 void TextEditPrivate::toDocStart()
 {
      textCursor.movePosition(TextPagerCursor::Start);
-     textEdit->updateLineNumberArea();
 }
 
 void TextEditPrivate::toDocEnd()
 {
     textCursor.movePosition(TextPagerCursor::End);
-    textEdit->updateLineNumberArea();
 }
 
 void TextEditPrivate::toLineStart()
 {
     textCursor.movePosition(TextPagerCursor::StartOfLine);
-    textEdit->updateLineNumberArea();
 }
 
 void TextEditPrivate::toLineEnd()
 {
     textCursor.movePosition(TextPagerCursor::EndOfLine);
-    textEdit->updateLineNumberArea();
 }
-
 
 void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
 {
@@ -1934,6 +1928,7 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
     painter.setFont(fontNormal);
 
     int cursorPos=d->textCursor.position();
+    bool last = d->document->documentSize() == d->textCursor.position();
 
     //const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : 0;
     //int extraSelectionIndex = 0;
@@ -1950,7 +1945,8 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
             QRect lRect(0,r.y(),numWidth,r.height());
 
         	// is this the current line?
-        	if(cursorPos >= textLayoutOffset && cursorPos <= textLayoutOffset+l->text().size())
+            if(cursorPos >= textLayoutOffset &&
+               (cursorPos <= textLayoutOffset+textSize || (last && textLayoutOffset+textSize+1 == cursorPos)))
         	{
         		painter.setFont(fontBold);
                 painter.fillRect(lRect, lineNumArea_->currentColour());  // highlight the background
