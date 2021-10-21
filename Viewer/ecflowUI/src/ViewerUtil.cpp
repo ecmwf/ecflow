@@ -18,6 +18,7 @@
 #include <QClipboard>
 #include <QComboBox>
 #include <QDebug>
+#include <QFontDatabase>
 #include <QFontMetrics>
 #include <QLabel>
 #include <QLinearGradient>
@@ -340,4 +341,25 @@ QString ViewerUtil::wildcardToRegex(const QString &wc_str)
         }
     }
     return rx;
+}
+
+QFont ViewerUtil::findMonospaceFont()
+{
+    QStringList lst{"Menlo", "Monaco", "Courier", "Monospace"};
+    QFontDatabase db = QFontDatabase();
+    auto fLst = db.families();
+    for(auto s: lst) {
+        for(auto fMem: fLst) {
+            if (fMem == s || fMem.startsWith(s + "[")) {
+                QFont f(fMem);
+                f.setFixedPitch(true);
+                f.setPointSize(10);
+                return f;
+            }
+        }
+    }
+
+    QFont fr;
+    fr.setPointSize(10);
+    return fr;
 }

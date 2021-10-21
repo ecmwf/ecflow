@@ -46,6 +46,7 @@ public:
    static int textWidth(const QFontMetrics& fm, QString txt, int len=-1);
    static int textWidth(const QFontMetrics& fm, QChar ch);
    static QString wildcardToRegex(const QString&);
+   static QFont findMonospaceFont();
 };
 
 #endif // VIEWERUTIL_HPP

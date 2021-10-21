@@ -56,13 +56,7 @@ PlainTextEdit::PlainTextEdit(QWidget * parent) :
 
     updateLineNumberAreaWidth(0);
 
-    QFont f("Courier");
-    //QFont f("Monospace");
-    //f.setStyleHint(QFont::TypeWriter);
-    f.setFixedPitch(true);
-    f.setPointSize(10);
-    //f.setStyleStrategy(QFont::PreferAntialias);
-    setFont(f);
+    setFont(ViewerUtil::findMonospaceFont());
 }
 
 PlainTextEdit::~PlainTextEdit()

@@ -18,6 +18,7 @@
 
 #include "Sound.hpp"
 #include "UserMessage.hpp"
+#include "ViewerUtil.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -557,6 +558,14 @@ QFont VProperty::toFont(const std::string& name)
 {
 	QString qn=QString::fromStdString(name);
 	QFont f;
+
+    // This is the default - automatically finds a
+    // monospace font
+    if (name == "font(Monospace,)") {
+        f = ViewerUtil::findMonospaceFont();
+        return f;
+    }
+
 	QRegExp rx("font\\((.*),(.*)\\)");
 	if(rx.indexIn(qn) > -1 && rx.captureCount() == 2)
 	{

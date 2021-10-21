@@ -17,18 +17,13 @@
 #include <QWheelEvent>
 
 #include "VConfig.hpp"
+#include "ViewerUtil.hpp"
 #include "UiLog.hpp"
 
 RichTextEdit::RichTextEdit(QWidget * parent) :
     QTextBrowser(parent)
 {
-    QFont f("Courier");
-    //QFont f("Monospace");
-    //f.setStyleHint(QFont::TypeWriter);
-    f.setFixedPitch(true);
-    f.setPointSize(10);
-    //f.setStyleStrategy(QFont::PreferAntialias);
-    setFont(f);
+    setFont(ViewerUtil::findMonospaceFont());
 }
 
 RichTextEdit::~RichTextEdit()
