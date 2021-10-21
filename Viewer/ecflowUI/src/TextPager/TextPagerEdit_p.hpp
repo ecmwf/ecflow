@@ -69,6 +69,11 @@ public:
     void cursorMoveKeyEventReadOnly(QKeyEvent *e);
     void relayout() override; // from TextPagerLayout
     void adjustVerticalScrollBar();
+
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
     
     int requestedScrollBarPosition, lastRequestedScrollBarPosition, cursorWidth, sectionCount,
         maximumSizeCopy, pendingTimeOut, autoScrollLines;

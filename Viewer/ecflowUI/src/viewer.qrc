@@ -1,7 +1,7 @@
 <RCC>
   <qresource prefix="viewer">
     <file>../images/goto_line.svg</file>
-    <file>../images/dock_float.svg</file>
+    <file>../images/dock_float.svg</file>   
     <file alias="dock_close.svg">../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
     <file alias="cursor_zoom.svg">../images/cursor_zoom.svg</file>
@@ -33,6 +33,10 @@
     <file alias="arrow_all.svg">../images/arrow_all.svg</file>
     <file alias="arrow_to_end.svg">../images/arrow_to_end.svg</file>
     <file alias="arrow_to_start.svg">../images/arrow_to_start.svg</file>
+    <file alias="arrow_left.svg">../images/arrow_left.svg</file>
+    <file alias="arrow_right.svg">../images/arrow_right.svg</file>
+    <file alias="arrow_top.svg">../images/arrow_top.svg</file>
+    <file alias="arrow_bottom.svg">../images/arrow_bottom.svg</file>
     <file>../images/add.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>

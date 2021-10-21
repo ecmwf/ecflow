@@ -30,7 +30,11 @@ public:
     void zoomIn();
     void zoomOut();
     void gotoLine();
-    
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
+
     //void mouseMoveEvent(QMouseEvent *e);
 	//void timerEvent(QTimerEvent *e);
 protected Q_SLOTS:

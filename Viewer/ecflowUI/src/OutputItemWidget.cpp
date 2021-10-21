@@ -745,6 +745,34 @@ void OutputItemWidget::on_lineNumberTb__clicked(bool st)
 }
 
 //-----------------------------------------
+// Navigation
+//-----------------------------------------
+
+void OutputItemWidget::on_toStartTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toDocStart();
+}
+
+void OutputItemWidget::on_toEndTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toDocEnd();
+}
+
+void OutputItemWidget::on_toLineStartTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toLineStart();
+}
+
+void OutputItemWidget::on_toLineEndTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toLineEnd();
+}
+
+//-----------------------------------------
 // Save local copy of file
 //-----------------------------------------
 

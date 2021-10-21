@@ -1429,7 +1429,7 @@ void TextEditPrivate::updateCursorPosition(const QPoint &pos)
         sectionCursor = nullptr;
     }
 
-    //To notify the line num area widge!
+    //To notify the line num area widget!
     Q_EMIT scrollBarChanged();
 }
 
@@ -1451,32 +1451,61 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
     // ensure that the user does not miss any lines of text when they page up and down through
     // the document. The same change was made in onScrollBarActionTriggered.
 
-    if (e == QKeySequence::MoveToNextLine) {
-        scrollLines(1);
-    } else if (e == QKeySequence::MoveToPreviousLine) {
-        scrollLines(-1);
-    } else if (e == QKeySequence::MoveToStartOfDocument) {
-        textEdit->verticalScrollBar()->setValue(0);
-    } else if (e == QKeySequence::MoveToEndOfDocument) {
-        textEdit->verticalScrollBar()->setValue(textEdit->verticalScrollBar()->maximum());
-    } else if (e == QKeySequence::MoveToNextPage) {
-        scrollLines(qMax(1, visibleLines - 1));
-    } else if (e == QKeySequence::MoveToPreviousPage) {
-        scrollLines(-qMax(1, visibleLines - 2));
-    } else if (e == QKeySequence::MoveToStartOfLine) {
-         textCursor.movePosition(TextPagerCursor::StartOfLine);
-         e->accept();
-         return;
-    } else if (e == QKeySequence::MoveToEndOfLine) {
-         textCursor.movePosition(TextPagerCursor::EndOfLine);
-         e->accept();
-         return;
+    // We try to mimic QPlainTextEdit in readOnly mode, where the following key
+    // bindings are set:
+    // Down: next line
+    // Up: previous line
+    // Home: start of doc
+    // End: end of doc
+    // So these are simple keys and QKeySequences!!! It can cause a problem for example on
+    // linux leap42 where QKeySequence::MoveToStartOfDocument is mapped to
+    // Ctrl+Home!!!
+    // We always suppose that TextPagerEdit is readOnly!
+
+    bool handled = false;
+    if (e->modifiers() == Qt::NoModifier) {
+        if (e->key() == Qt::Key_Down) {
+            scrollLines(1);
+            handled = true;
+        } else if (e->key() == Qt::Key_Up) {
+            scrollLines(-1);
+            handled = true;
+        } else if (e->key() == Qt::Key_Home) {
+            textEdit->verticalScrollBar()->setValue(0);
+            handled = true;
+        } else if (e->key() == Qt::Key_End) {
+            textEdit->verticalScrollBar()->setValue(textEdit->verticalScrollBar()->maximum());
+            handled = true;
+        }
     }
 
-    else {
-        e->ignore();
-        return;
+    if (!handled) {
+        if (e == QKeySequence::MoveToNextLine) {
+            scrollLines(1);
+        } else if (e == QKeySequence::MoveToPreviousLine) {
+            scrollLines(-1);
+        } else if (e == QKeySequence::MoveToStartOfDocument) {
+            textEdit->verticalScrollBar()->setValue(0);
+        } else if (e == QKeySequence::MoveToEndOfDocument) {
+            textEdit->verticalScrollBar()->setValue(textEdit->verticalScrollBar()->maximum());
+        } else if (e == QKeySequence::MoveToNextPage) {
+            scrollLines(qMax(1, visibleLines - 1));
+        } else if (e == QKeySequence::MoveToPreviousPage) {
+            scrollLines(-qMax(1, visibleLines - 2));
+        } else if (e == QKeySequence::MoveToStartOfLine) {
+            textCursor.movePosition(TextPagerCursor::StartOfLine);
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToEndOfLine) {
+            textCursor.movePosition(TextPagerCursor::EndOfLine);
+            e->accept();
+            return;
+        } else {
+            e->ignore();
+            return;
+        }
     }
+
     e->accept();
     textCursor.setPosition(viewportPosition);
 }
@@ -1681,6 +1710,33 @@ int TextEditPrivate::findLastPageSize() const
     return documentSize;
 }
 
+
+
+void TextEditPrivate::toDocStart()
+{
+     textCursor.movePosition(TextPagerCursor::Start);
+     textEdit->updateLineNumberArea();
+}
+
+void TextEditPrivate::toDocEnd()
+{
+    textCursor.movePosition(TextPagerCursor::End);
+    textEdit->updateLineNumberArea();
+}
+
+void TextEditPrivate::toLineStart()
+{
+    textCursor.movePosition(TextPagerCursor::StartOfLine);
+    textEdit->updateLineNumberArea();
+}
+
+void TextEditPrivate::toLineEnd()
+{
+    textCursor.movePosition(TextPagerCursor::EndOfLine);
+    textEdit->updateLineNumberArea();
+}
+
+
 void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
 {
     if (h && h->textEdit() == this) {
@@ -1734,6 +1790,31 @@ void TextPagerEdit::gotoLine(int lineNum)
     if(!cursor.isNull())
         setTextCursor(cursor);
 }
+
+//---------------------------------------------
+// Navigation
+//---------------------------------------------
+
+void TextPagerEdit::toDocStart()
+{
+    d->toDocStart();
+}
+
+void TextPagerEdit::toDocEnd()
+{
+    d->toDocEnd();
+}
+
+void TextPagerEdit::toLineStart()
+{
+    d->toLineStart();
+}
+
+void TextPagerEdit::toLineEnd()
+{
+    d->toLineEnd();
+}
+
 
 //---------------------------------------------
 // Fontsize management
@@ -1794,6 +1875,12 @@ void TextPagerEdit::notifyChange(VProperty* p)
 	{
 		setFont(p->value().value<QFont>());
 	}
+}
+
+void TextPagerEdit::updateLineNumberArea()
+{
+    if(lineNumArea_ && showLineNum_)
+        lineNumArea_->update();
 }
 
 void TextPagerEdit::setShowLineNumbers(bool b)

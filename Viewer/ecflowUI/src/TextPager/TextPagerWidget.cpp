@@ -110,3 +110,23 @@ void TextPagerWidget::gotoLine(int line)
 {
     textEditor_->gotoLine(line);
 }    
+
+void TextPagerWidget::toDocStart()
+{
+    textEditor_->toDocStart();
+}
+
+void TextPagerWidget::toDocEnd()
+{
+    textEditor_->toDocEnd();
+}
+
+void TextPagerWidget::toLineStart()
+{
+    textEditor_->toLineStart();
+}
+
+void TextPagerWidget::toLineEnd()
+{
+    textEditor_->toLineEnd();
+}

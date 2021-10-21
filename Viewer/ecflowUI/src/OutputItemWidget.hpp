@@ -55,6 +55,10 @@ protected Q_SLOTS:
 	void on_reloadTb__clicked();
 	void on_fontSizeUpTb__clicked();
 	void on_fontSizeDownTb__clicked();
+    void on_toStartTb__clicked();
+    void on_toEndTb__clicked();
+    void on_toLineStartTb__clicked();
+    void on_toLineEndTb__clicked();
     void on_saveFileAsTb__clicked();
     void on_copyPathTb__clicked();
     void on_dirReloadTb__clicked();

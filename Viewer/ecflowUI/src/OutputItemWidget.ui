@@ -43,7 +43,7 @@
         <widget class="MessageLabel" name="messageLabel_" native="true"/>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -102,6 +102,74 @@
            </property>
            <property name="popupMode">
             <enum>QToolButton::InstantPopup</enum>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toStartTb_">
+           <property name="toolTip">
+            <string>Go to start of document</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/arrow_top.svg</normaloff>:/viewer/arrow_top.svg</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toEndTb_">
+           <property name="toolTip">
+            <string>Go to end of document</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/arrow_bottom.svg</normaloff>:/viewer/arrow_bottom.svg</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toLineStartTb_">
+           <property name="toolTip">
+            <string>Go to start of line</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/arrow_left.svg</normaloff>:/viewer/arrow_left.svg</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toLineEndTb_">
+           <property name="toolTip">
+            <string>Go to end of line</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/arrow_right.svg</normaloff>:/viewer/arrow_right.svg</iconset>
            </property>
            <property name="autoRaise">
             <bool>true</bool>

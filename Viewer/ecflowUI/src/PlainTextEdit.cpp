@@ -88,6 +88,33 @@ void PlainTextEdit::setShowLineNumbers(bool b)
 	updateLineNumberAreaWidth(0);
 }
 
+void PlainTextEdit::toDocStart()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    setTextCursor(cursor);
+}
+
+void PlainTextEdit::toDocEnd()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::End);
+    setTextCursor(cursor);
+}
+
+void PlainTextEdit::toLineStart()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::StartOfLine);
+    setTextCursor(cursor);
+}
+
+void PlainTextEdit::toLineEnd()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::EndOfLine);
+    setTextCursor(cursor);
+}
 
 // ---------------------------------------------------------------------------
 // TextEdit::cursorRowCol

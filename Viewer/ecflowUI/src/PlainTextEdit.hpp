@@ -31,6 +31,11 @@ public:
     bool showLineNumbers()                 {return showLineNum_;}
     void setShowLineNumbers(bool b);
 
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
+
     void cursorRowCol(int *row, int *col);
     QChar characterBehindCursor(QTextCursor *cursor=nullptr);
 

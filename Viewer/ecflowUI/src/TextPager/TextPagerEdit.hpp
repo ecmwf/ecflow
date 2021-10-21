@@ -138,7 +138,12 @@ public:
     void notifyChange(VProperty* p) override;
     void zoomIn();
     void zoomOut();
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
 
+    void updateLineNumberArea();
     void setShowLineNumbers(bool b);
     void setLineNumberArea(TextPagerLineNumberArea *a);
 
@@ -179,7 +184,6 @@ private:
 
     void lineNumberAreaPaintEvent(QPaintEvent *e);
     int  lineNumberAreaWidth();
-    void updateLineNumberArea();
 
     TextEditPrivate *d;
     friend class TextLayoutCacheManager;

@@ -57,6 +57,10 @@ public:
 	void setFontProperty(VProperty* p);
     void updateFont();
 	void gotoLine();
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
 	void showSearchLine();
     void searchOnReload(bool userClickedReload);
 	void zoomIn();

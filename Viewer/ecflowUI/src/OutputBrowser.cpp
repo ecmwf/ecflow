@@ -382,6 +382,38 @@ void OutputBrowser::gotoLine()
        textPager_->gotoLine(); 
 }
 
+void OutputBrowser::toDocStart()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toDocStart();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toDocStart();
+}
+
+void OutputBrowser::toDocEnd()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toDocEnd();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toDocEnd();
+}
+
+void OutputBrowser::toLineStart()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toLineStart();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toLineStart();
+}
+
+void OutputBrowser::toLineEnd()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toLineEnd();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toLineEnd();
+}
+
 void OutputBrowser::showSearchLine()
 {
     if(searchLine_->hasInterface())
