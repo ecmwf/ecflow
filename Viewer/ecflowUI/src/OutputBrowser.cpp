@@ -208,7 +208,7 @@ void OutputBrowser::loadFile(VFile_ptr file)
     else
     {
         QString s(file_->data());
-        loadText(s,QString::fromStdString(file_->sourcePath()),true);
+        loadText(s,QString::fromStdString(file_->sourcePath()),file_->dataSize(), true);
     }
 
     //Run the filter if defined
@@ -238,7 +238,7 @@ void OutputBrowser::loadFile(QString fileName)
     file.open(QIODevice::ReadOnly);
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
-    
+
     if(isHtmlFile(fileName))
     {
         changeIndex(HtmlIndex,fSize);
@@ -271,16 +271,15 @@ void OutputBrowser::loadFile(QString fileName)
     }
 }
 
-void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
+void OutputBrowser::loadText(QString txt,QString fileName, size_t dataSize, bool resetFile)
 {
     // prior to the ability to save local copies of files, we reset the file_ member here;
     // but now we need to keep it so that we can save a copy of it
     //if(resetFile)
        //file_.reset();
 
-    //We estimate the size in bytes
-	qint64 txtSize=txt.size()*2;
-    
+    qint64 txtSize=dataSize;
+
     if(isHtmlFile(fileName))
     {
         changeIndex(HtmlIndex,txtSize);

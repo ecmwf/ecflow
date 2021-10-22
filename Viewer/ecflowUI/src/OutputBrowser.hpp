@@ -85,7 +85,7 @@ private:
     bool isJobFile(QString fileName);
     bool isHtmlFile(QString fileName);
     void loadFile(QString fileName);
-    void loadText(QString text,QString fileName,bool resetFile=true);
+    void loadText(QString text,QString fileName,size_t dataSize, bool resetFile=true);
     void loadFilteredFile(VFile_ptr file);
     void setCursorPos(qint64 pos);
 
