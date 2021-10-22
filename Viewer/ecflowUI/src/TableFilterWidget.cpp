@@ -66,7 +66,6 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 
 void TableFilterWidget::slotDefChanged()
 {
-	QColor bg(240,240,240);
     queryTe_->setHtml(filterDef_->query()->sqlQuery());
 }
 

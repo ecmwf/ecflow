@@ -341,7 +341,6 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
     tlEndTime_=tlData->endTime();
 
     QColor col(39,49,101);
-    QColor colText(30,30,30);
     QString title=Viewer::formatBoldText("Node: ",col) + QString::fromStdString(data_.path());
 
     ui_->titleLabel->setText(title);

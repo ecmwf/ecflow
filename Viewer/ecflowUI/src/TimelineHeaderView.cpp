@@ -549,7 +549,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     qint64 firstTick=1; //in secs since epoch
 
     int hLineY=pRect.center().y()-majorTickSize_/2-1;
-    int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
+    //int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
     int majorTickTop=hLineY;
     int majorTickBottom=hLineY+majorTickSize_; //pRect.bottom()-fm_.height()-timeTextGap;
     int minorTickTop=hLineY;

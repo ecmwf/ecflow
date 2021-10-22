@@ -90,9 +90,6 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
     initStyleOption(&vopt, index);
 
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     //Save painter state
     painter->save();
 

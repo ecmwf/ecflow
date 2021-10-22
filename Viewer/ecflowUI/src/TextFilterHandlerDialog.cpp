@@ -248,11 +248,8 @@ void TextFilterHandlerDialog::on_table__doubleClicked(const QModelIndex& index)
 
 void TextFilterHandlerDialog::on_actionApply__triggered()
 {
-    int r=table_->currentRow();
-    {
-        applyIndex_=table_->currentRow();
-        close();
-    }
+    applyIndex_=table_->currentRow();
+    close();
 }
 
 void TextFilterHandlerDialog::updateStatus()

@@ -119,10 +119,6 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 #endif
 
     initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     bool selected=option.state & QStyle::State_Selected;
 
     //Save painter state
@@ -194,8 +190,6 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     TimelineData *data=model_->data();
     if(!data)
         return;
-
-    bool selected=option.state & QStyle::State_Selected;
 
     int leftEdge=option.rect.x();
     int rightEdge=option.rect.x()+option.rect.width();
@@ -395,7 +389,6 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
 
 void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
 {
-    QColor endCol;
     if(lighter)
     {
         fillCol = fillCol.lighter(130);
@@ -528,7 +521,6 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, int maxVal, QC
     QString text;
     QRect textRect;
     QString percentText;
-    QRect percentRect;
 
     if(maxTextW > 0)
     {

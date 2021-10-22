@@ -24,7 +24,7 @@
 #include <QStringList>
 #include <QtGlobal>
 
-static int REQCNT=0;
+//static int REQCNT=0;
 
 //=======================================================
 //
@@ -559,7 +559,6 @@ void LogLoadData::getSeries(QLineSeries& series,const LogRequestItem& item,int& 
     maxVal=0;
     if(timeRes_ == SecondResolution)
     {
-        size_t itemIndex=0;
         QVector<size_t> vals(time_.size(),0);
         for(size_t i=0; i < item.index_.size() ; i++)
         {

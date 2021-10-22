@@ -693,7 +693,6 @@ QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const
 	if(matchMode_ != SearchMode)
 		return QModelIndexList();
 
-	QModelIndex root;
 	matchText_=value.toString();
 
 	matchLst_.clear();

@@ -157,7 +157,6 @@ qint64 TimelineFileList::totalSize() const
 
 QString TimelineFileList::firstLoadablePath() const
 {
-    int t=0;
     Q_FOREACH(TimelineFileListItem item, items_)
         if(item.loadable_)
             return item.fileName_;

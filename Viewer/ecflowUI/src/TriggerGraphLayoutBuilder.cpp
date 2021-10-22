@@ -282,7 +282,6 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
     int max_in_a_level = 0;
     int max_level = 0;
     int levelNum = 0;
-    int num_nodes = 0;
 
     SimpleGraphLayoutNode* focus = nullptr;
 

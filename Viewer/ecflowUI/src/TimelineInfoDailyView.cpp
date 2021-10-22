@@ -263,10 +263,6 @@ void TimelineInfoDailyDelegate::paint(QPainter *painter,const QStyleOptionViewIt
 #endif
 
     initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     bool selected=option.state & QStyle::State_Selected;
 
     //Save painter state
@@ -331,8 +327,6 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
 
     int leftEdge=option.rect.x();
     int rightEdge=option.rect.x()+option.rect.width();
-    int xpPrev=leftEdge-2;
-    int xpNext=rightEdge+2;
     int extendedRight=-1;
 
     unsigned int day=index.data().toUInt();
@@ -486,7 +480,6 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
 
 void TimelineInfoDailyDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
 {
-    QColor endCol;
     if(lighter)
     {
         fillCol = fillCol.lighter(130);

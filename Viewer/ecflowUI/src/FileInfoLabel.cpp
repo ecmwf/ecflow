@@ -46,7 +46,6 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	QString s;
 
 	QColor col(39,49,101);
-    QColor colText(30,30,30);
 	QColor colErr(255,0,0);
 
 	QString fileName=QString::fromStdString(reply->fileName());

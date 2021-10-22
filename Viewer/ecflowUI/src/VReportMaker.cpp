@@ -24,8 +24,6 @@ VReportMaker::VReportMaker(QObject *parent) : QObject(parent)
 
 void VReportMaker::run(VInfo_ptr info)
 {
-    VNode *node=info->node();
-
     info_=info;
 
     //Get job output

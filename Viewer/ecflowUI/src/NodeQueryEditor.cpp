@@ -460,8 +460,6 @@ void NodeQueryEditor::checkGuiState()
 void NodeQueryEditor::updateQueryTe()
 {
 	query_->buildQueryString();
-
-	QColor bg(241,241,241);
     queryTe_->setHtml(query_->sqlQuery());
 }
 

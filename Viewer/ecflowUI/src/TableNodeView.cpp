@@ -858,7 +858,6 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
 
         QFont f;
         QFontMetrics fm(f);
-        int textLeft=textRect.x();
         QRect pixRect=QRect(rect.x()+3,rect.center().y()-pixH/2,
                             pix.width(),pix.height());
         if(pixRect.x()+pixRect.width() + ViewerUtil::textWidth(fm,text) + 4 < textRect.x() + textRect.width())

@@ -536,9 +536,6 @@ void MenuHandler::setupShortcut(QObject* receiver, QWidget* w, const std::string
 {
     for(auto m: menus_) {
         for (auto item: m->itemsFixed()) {
-            if (item->command() == "expand") {
-                int a=1;
-            }
             if(QShortcut* sc = item->createShortcut(w, view)) {
                 QObject::connect(sc, SIGNAL(activated()),
                     receiver, SLOT(slotCommandShortcut()));

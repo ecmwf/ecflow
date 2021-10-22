@@ -646,7 +646,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         flags &= ~FindWrap;
     }
 */
-    const QLatin1Char newline('\n');
+    //const QLatin1Char newline('\n');
     int pos;
     ::initFindForLines(cursor, reverse, &pos, &limit);
 
@@ -1613,6 +1613,7 @@ void TextDocumentPrivate::updateChunkLineNumbers(Chunk *c, int chunkPos) const
     Q_ASSERT(c->firstLineIndex != -1);
 }
 
+#if 0
 static inline QList<int> dumpNewLines(const QString &string, int from, int size)
 {
     QList<int> ret;
@@ -1622,7 +1623,7 @@ static inline QList<int> dumpNewLines(const QString &string, int from, int size)
     }
     return ret;
 }
-
+#endif
 
 int TextDocumentPrivate::countNewLines(Chunk *c, int chunkPos, int size) const
 {
