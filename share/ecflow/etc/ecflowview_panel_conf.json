@@ -92,7 +92,7 @@
                 "default": "false"
             },
             "wordWrap": {
-               "label": "Enable word wrap",
+               "label": "Enable text wrap",
                "default": "false"
             }
         },

@@ -219,7 +219,7 @@
          <item>
           <widget class="QToolButton" name="wordWrapTb_">
            <property name="toolTip">
-            <string>Word wrap</string>
+            <string>Text wrap</string>
            </property>
            <property name="text">
             <string>...</string>
