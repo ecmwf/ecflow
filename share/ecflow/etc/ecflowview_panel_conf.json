@@ -90,6 +90,10 @@
              "showLineNumber": {
                 "label": "Show line number",
                 "default": "false"
+            },
+            "wordWrap": {
+               "label": "Enable word wrap",
+               "default": "false"
             }
         },
         "why" : {

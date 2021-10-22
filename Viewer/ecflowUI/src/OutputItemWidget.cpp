@@ -154,6 +154,18 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     bool showLineNum = lineNumProp_->value().toBool();
     lineNumberTb_->setChecked(showLineNum);
     on_lineNumberTb__clicked(showLineNum);
+
+    // wrod wrap
+    wordWrapProp_ = VConfig::instance()->find("panel.output.wordWrap");
+    Q_ASSERT(wordWrapProp_);
+    bool useWordWrap = wordWrapProp_->value().toBool();
+    wordWrapTb_->setChecked(useWordWrap);
+    on_wordWrapTb__clicked(useWordWrap);
+
+    connect(browser_, SIGNAL(wordWrapSupportChanged(bool)),
+            this, SLOT(slotWordWrapSupportChanged(bool)));
+
+    slotWordWrapSupportChanged(browser_->isWordWrapSupported());
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -742,6 +754,22 @@ void OutputItemWidget::on_lineNumberTb__clicked(bool st)
     browser_->setShowLineNumbers(st);
     Q_ASSERT(lineNumProp_);
     lineNumProp_->setValue(st);
+}
+
+//-----------------------------------------
+// Word wrap
+//-----------------------------------------
+
+void OutputItemWidget::on_wordWrapTb__clicked(bool st)
+{
+    browser_->setWordWrap(st);
+    Q_ASSERT(wordWrapProp_);
+    wordWrapProp_->setValue(st);
+}
+
+void OutputItemWidget::slotWordWrapSupportChanged(bool st)
+{
+    wordWrapTb_->setEnabled(st);
 }
 
 //-----------------------------------------

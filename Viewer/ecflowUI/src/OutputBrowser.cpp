@@ -188,6 +188,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
     }
 
     showConfirmSearchLabel();
+    Q_EMIT wordWrapSupportChanged(isWordWrapSupported());
 }
 
 //This should only be called externally when a new output is loaded
@@ -462,6 +463,16 @@ void OutputBrowser::setShowLineNumbers(bool st)
 {
     textEdit_->setShowLineNumbers(st);
     textPager_->textEditor()->setShowLineNumbers(st);
+}
+
+void OutputBrowser::setWordWrap(bool st)
+{
+    textEdit_->setWordWrapMode(st?QTextOption::WrapAtWordBoundaryOrAnywhere:QTextOption::NoWrap);
+}
+
+bool OutputBrowser::isWordWrapSupported() const
+{
+    return (stacked_->currentIndex() == BasicIndex);
 }
 
 void OutputBrowser::showConfirmSearchLabel()

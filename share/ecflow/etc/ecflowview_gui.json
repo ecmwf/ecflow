@@ -5,6 +5,7 @@
             "visible" : "false",
             "line" : "panel.variable.showShadowed",
             "line" : "panel.output.showLineNumber",
+            "line" : "panel.output.wordWrap",
             "line" : "view.table.variableColumns"
         },
 

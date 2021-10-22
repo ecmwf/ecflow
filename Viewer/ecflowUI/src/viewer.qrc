@@ -155,6 +155,7 @@
     <file alias="unselect_all.svg">../images/unselect_all.svg</file>
     <file alias="variable.svg">../images/variable.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>
+    <file alias="wordwrap.svg">../images/wordwrap.svg</file>
     <file alias="why.svg">../images/why.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
     <file alias="zoom_in.svg">../images/zoom_in.svg</file>

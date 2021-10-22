@@ -66,6 +66,8 @@ public:
 	void zoomIn();
 	void zoomOut();
     void setShowLineNumbers(bool);
+    void setWordWrap(bool);
+    bool isWordWrapSupported() const;
     void setSearchButtons(QToolButton* searchTb);
     void setFilterButtons(QToolButton* statusTb,QToolButton* optionTb);
 
@@ -73,6 +75,9 @@ protected Q_SLOTS:
 	void showConfirmSearchLabel();
     void slotRunFilter(QString,bool,bool);
     void slotRemoveFilter();
+
+Q_SIGNALS:
+    void wordWrapSupportChanged(bool);
 
 private:
     enum IndexType {BasicIndex=0,PagerIndex=1,HtmlIndex=2};

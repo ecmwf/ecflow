@@ -63,6 +63,8 @@ protected Q_SLOTS:
     void on_copyPathTb__clicked();
     void on_dirReloadTb__clicked();
     void on_lineNumberTb__clicked(bool st);
+    void on_wordWrapTb__clicked(bool st);
+    void slotWordWrapSupportChanged(bool);
 
 protected:
     void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
@@ -89,6 +91,7 @@ protected:
     bool dirColumnsAdjusted_{false};
     bool submittedWarning_{false};
     VProperty* lineNumProp_{nullptr};
+    VProperty* wordWrapProp_{nullptr};
 };
 
 #endif
