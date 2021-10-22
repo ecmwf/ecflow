@@ -34,9 +34,9 @@
 #include "UiLog.hpp"
 #include "VFile.hpp"
 
-int OutputBrowser::minPagerTextSize_=1*1024*1024;
+int OutputBrowser::minPagerTextSize_=9*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
-int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
+int OutputBrowser::minConfirmSearchSize_=9*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
