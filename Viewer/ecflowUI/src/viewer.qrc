@@ -79,6 +79,8 @@
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
     <file alias="error.svg">../images/error.svg</file>
+    <file alias="expand_left.svg">../images/expand_left.svg</file>
+    <file alias="expand_right.svg">../images/expand_right.svg</file>
     <file alias="expression.svg">../images/expression.svg</file>
     <file alias="favourite.svg">../images/favourite.svg</file>
     <file alias="favourite_empty.svg">../images/favourite_empty.svg</file>

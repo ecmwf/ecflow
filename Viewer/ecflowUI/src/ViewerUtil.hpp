@@ -13,6 +13,7 @@
 
 #include <QBrush>
 #include <QCursor>
+#include <QIcon>
 #include <QPixmap>
 #include <QSettings>
 #include <QString>
@@ -47,6 +48,7 @@ public:
    static int textWidth(const QFontMetrics& fm, QChar ch);
    static QString wildcardToRegex(const QString&);
    static QFont findMonospaceFont();
+   static QIcon makeExpandIcon(bool targetOnRight);
 };
 
 #endif // VIEWERUTIL_HPP

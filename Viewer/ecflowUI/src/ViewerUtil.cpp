@@ -345,7 +345,7 @@ QString ViewerUtil::wildcardToRegex(const QString &wc_str)
 
 QFont ViewerUtil::findMonospaceFont()
 {
-    QStringList lst{"Monospace","Courier New", "Menlo", "Courier", "Courier New", "Monaco"};
+    QStringList lst{"Monospace","Courier New", "Menlo", "Courier", "Monaco"};
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     auto fLst = QFontDatabase::families();
@@ -367,4 +367,12 @@ QFont ViewerUtil::findMonospaceFont()
     QFont fr;
     fr.setPointSize(10);
     return fr;
+}
+
+QIcon ViewerUtil::makeExpandIcon(bool targetOnRight)
+{
+    QIcon ic;
+    ic.addPixmap(QPixmap(":/viewer/expand_left.svg"), QIcon::Normal, (targetOnRight?QIcon::On:QIcon::Off));
+    ic.addPixmap(QPixmap(":/viewer/expand_right.svg"), QIcon::Normal, (targetOnRight?QIcon::Off:QIcon::On));
+    return ic;
 }

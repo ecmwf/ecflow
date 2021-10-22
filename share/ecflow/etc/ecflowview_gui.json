@@ -6,6 +6,7 @@
             "line" : "panel.variable.showShadowed",
             "line" : "panel.output.showLineNumber",
             "line" : "panel.output.wordWrap",
+            "line" : "panel.output.expandFileInfo",
             "line" : "view.table.variableColumns"
         },
 

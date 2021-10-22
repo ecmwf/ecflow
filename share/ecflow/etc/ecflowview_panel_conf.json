@@ -94,6 +94,10 @@
             "wordWrap": {
                "label": "Enable text wrap",
                "default": "false"
+            },
+            "expandFileInfo": {
+               "label": "Expand file info label",
+               "default": "true"
             }
         },
         "why" : {

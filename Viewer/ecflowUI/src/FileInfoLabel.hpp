@@ -23,9 +23,17 @@ class FileInfoLabel : public QLabel
 public:
 	explicit FileInfoLabel(QWidget* parent=nullptr);
 
-	void update(VReply*,QString str=QString());
+    void update(VReply*,QString str=QString());
+    void setCompact(bool);
     static QString formatDate(QDateTime);
     static QString formatFileSize(QString,qint64 size);
+
+protected:
+    QString buildTooltipText();
+
+    bool compact_{false};
+    QString fullText_;
+    QString compactText_;
 };
 
 class DirInfoLabel : public FileInfoLabel

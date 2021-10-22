@@ -18,6 +18,7 @@
 #include "TextFormat.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
+#include "ViewerUtil.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "UiLog.hpp"
@@ -155,7 +156,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     lineNumberTb_->setChecked(showLineNum);
     on_lineNumberTb__clicked(showLineNum);
 
-    // wrod wrap
+    // text wrap
     wordWrapProp_ = VConfig::instance()->find("panel.output.wordWrap");
     Q_ASSERT(wordWrapProp_);
     bool useWordWrap = wordWrapProp_->value().toBool();
@@ -166,6 +167,15 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
             this, SLOT(slotWordWrapSupportChanged(bool)));
 
     slotWordWrapSupportChanged(browser_->isWordWrapSupported());
+
+    // the icon for this button changes according to state
+    expandFileInfoTb_->setIcon(ViewerUtil::makeExpandIcon(false));
+    expandFileInfoTb_->setMaximumSize(QSize(16, 16));
+    expandFileInfoProp_ = VConfig::instance()->find("panel.output.expandFileInfo");
+    Q_ASSERT(expandFileInfoProp_);
+    bool expandSt = expandFileInfoProp_->value().toBool();
+    expandFileInfoTb_->setChecked(expandSt);
+    on_expandFileInfoTb__clicked(expandSt);
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -844,6 +854,17 @@ void OutputItemWidget::on_copyPathTb__clicked()
         cb->setText(txt, QClipboard::Selection);
 #endif
     }
+}
+
+//-------------------------
+// File info label
+//-------------------------
+
+void OutputItemWidget::on_expandFileInfoTb__clicked(bool st)
+{
+    Q_ASSERT(expandFileInfoProp_);
+    expandFileInfoProp_->setValue(st);
+    fileLabel_->setCompact(!st);
 }
 
 //-------------------------
