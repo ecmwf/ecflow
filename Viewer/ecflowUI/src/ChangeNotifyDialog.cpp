@@ -261,7 +261,7 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
     buttonHb_->setSpacing(2);
 
     buttonGroup_=new QButtonGroup(this);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(buttonGroup_, SIGNAL(buttonToggled(QAbstractButton*,bool)),
             this, SLOT(slotButtonToggled(QAbstractButton*, bool)));
 #else
@@ -315,7 +315,7 @@ void ChangeNotifyDialog::add(ChangeNotify* notifier)
     readNtfWidgetSettings(stacked_->count()-1);
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 void ChangeNotifyDialog::slotButtonToggled(QAbstractButton*,bool)
 #else
 void ChangeNotifyDialog::slotButtonToggled(int,bool)
