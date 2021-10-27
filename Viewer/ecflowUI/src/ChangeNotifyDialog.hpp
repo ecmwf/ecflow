@@ -11,6 +11,7 @@
 #ifndef CHANGENOTIFYDIALOG_HPP_
 #define CHANGENOTIFYDIALOG_HPP_
 
+#include <QtGlobal>
 #include <QDialog>
 #include <QLinearGradient>
 #include <QSettings>
@@ -25,6 +26,7 @@
 class ChangeNotify;
 class VProperty;
 
+class QAbstractButton;
 class QButtonGroup;
 class QHBoxLayout;
 class QLabel;
@@ -93,7 +95,11 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void slotSelectionChanged(VInfo_ptr);
     void slotOptions();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    void slotButtonToggled(QAbstractButton*, bool);
+#else
     void slotButtonToggled(int,bool);
+#endif
 
 protected:
     ChangeNotify* indexToNtf(int idx);

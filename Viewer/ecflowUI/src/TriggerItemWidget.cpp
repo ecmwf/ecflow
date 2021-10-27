@@ -92,9 +92,13 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     tableTb_->setChecked(true);
     modeStacked_->setCurrentIndex(TableModeIndex);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    connect(modeGroup_, SIGNAL(buttonToggled(QAbstractButton*,bool)),
+            this, SLOT(slotChangeMode(QAbstractButton*, bool)));
+#else
     connect(modeGroup_, SIGNAL(buttonToggled(int,bool)),
             this, SLOT(slotChangeMode(int, bool)));
-
+#endif
     zoomSlider_->setMaximumWidth(120);
     triggerGraph_->setZoomSlider(zoomSlider_);
     zoomLabel_->setProperty("graphTitle", "1");
@@ -366,7 +370,11 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 
 #endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+void TriggerItemWidget::slotChangeMode(QAbstractButton*, bool)
+#else
 void TriggerItemWidget::slotChangeMode(int, bool)
+#endif
 {
     modeStacked_->setCurrentIndex(modeGroup_->checkedId());
     showGraphButtons(modeGroup_->checkedId() == GraphModeIndex);

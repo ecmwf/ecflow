@@ -22,6 +22,7 @@ class TimelineSortModel;
 class TimelineView;
 class VComboSettings;
 class VFileTransfer;
+class QAbstractButton;
 
 namespace Ui {
     class TimelineWidget;
@@ -70,13 +71,13 @@ protected Q_SLOTS:
    void slotStartChanged(const QDateTime&);
    void slotEndChanged(const QDateTime&);
    void slotLogMode(int);
-   void slotViewMode(int);
+   void slotViewMode(QAbstractButton*);
    void slotPathFilterChanged(QString);
    void slotPathFilterEditFinished();
    void slotSubTree(bool);
    void slotTaskOnly(bool);
    void slotSortMode(int);
-   void slotSortOrderChanged(int);
+   void slotSortOrderChanged(QAbstractButton*);
    void slotShowChanged(bool st);
    void slotPeriodSelectedInView(QDateTime,QDateTime);
    void slotPeriodBeingZoomedInView(QDateTime,QDateTime);

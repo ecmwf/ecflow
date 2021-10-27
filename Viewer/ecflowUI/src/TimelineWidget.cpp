@@ -159,8 +159,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->logModeCombo,SIGNAL(currentIndexChanged(int)),
             this,SLOT(slotLogMode(int)));
 
-    connect(viewModeGr,SIGNAL(buttonClicked(int)),
-            this,SLOT(slotViewMode(int)));
+    connect(viewModeGr,SIGNAL(buttonClicked(QAbstractButton*)),
+            this,SLOT(slotViewMode(QAbstractButton*)));
 
     connect(ui_->pathFilterMatchModeCb,SIGNAL(currentIndexChanged(int)),
         this, SLOT(pathFilterMatchModeChanged(int)));
@@ -183,8 +183,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->durationViewModeCb,SIGNAL(currentIndexChanged(int)),
             this,SLOT(slotDurationViewMode(int)));
 
-    connect(sortGr,SIGNAL(buttonClicked(int)),
-            this,SLOT(slotSortOrderChanged(int)));
+    connect(sortGr,SIGNAL(buttonClicked(QAbstractButton*)),
+            this,SLOT(slotSortOrderChanged(QAbstractButton*)));
 
     connect(ui_->showChangedTb,SIGNAL(toggled(bool)),
             this,SLOT(slotShowChanged(bool)));
@@ -534,7 +534,7 @@ void TimelineWidget::adjustWidgetsToViewMode()
     ui_->durationViewModeCb->setEnabled(!st);
 }
 
-void TimelineWidget::slotViewMode(int)
+void TimelineWidget::slotViewMode(QAbstractButton*)
 {
     bool timelineMode=ui_->timelineViewTb->isChecked();
 
@@ -619,7 +619,7 @@ void TimelineWidget::slotSortMode(int)
     }
 }
 
-void TimelineWidget::slotSortOrderChanged(int)
+void TimelineWidget::slotSortOrderChanged(QAbstractButton*)
 {
     bool ascending=ui_->sortUpTb->isChecked();
     sortModel_->setSortDirection(ascending);
