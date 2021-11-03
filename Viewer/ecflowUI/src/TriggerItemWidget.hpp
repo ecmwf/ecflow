@@ -56,7 +56,7 @@ protected Q_SLOTS:
     void slotLinkSelected(VInfo_ptr info);
     void slotInfoPanelCommand(VInfo_ptr info,QString cmd);
     void slotDashboardCommand(VInfo_ptr info,QString cmd);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void slotChangeMode(QAbstractButton*, bool);
 #else
     void slotChangeMode(int, bool);
