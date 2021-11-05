@@ -612,6 +612,11 @@ void PlainTextEdit::mouseMoveEvent(QMouseEvent *e)
 
 void PlainTextEdit::keyPressEvent(QKeyEvent *e)
 {
+    // In read-only mode this set of actions is mapped to a set
+    // of non standard key-sequences (hard-coded by Qt). It causes
+    // confusion, because the large text viewer uses the standard key-sequences
+    // and users accept them to work too. So here we try to assign the expected
+    // actions to the given key-sequences.
     if (isReadOnly()) {
         if (e == QKeySequence::MoveToStartOfDocument) {
             if (verticalScrollBar()) {
@@ -635,6 +640,18 @@ void PlainTextEdit::keyPressEvent(QKeyEvent *e)
             auto cursor = textCursor();
             cursor.movePosition(QTextCursor::EndOfLine);
             setTextCursor(cursor);
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToNextPage) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->triggerAction(QAbstractSlider::SliderPageStepAdd);
+            }
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToPreviousPage) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->triggerAction(QAbstractSlider::SliderPageStepSub);
+            }
             e->accept();
             return;
         }
