@@ -12,6 +12,7 @@
 #include "GotoLineDialog.hpp"
 
 #include <QtGlobal>
+#include <QScrollBar>
 #include <QDebug>
 #include <QFile>
 #include <QPainter>
@@ -609,3 +610,34 @@ void PlainTextEdit::mouseMoveEvent(QMouseEvent *e)
     QPlainTextEdit::mouseMoveEvent(e);
 }
 
+void PlainTextEdit::keyPressEvent(QKeyEvent *e)
+{
+    if (isReadOnly()) {
+        if (e == QKeySequence::MoveToStartOfDocument) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->setValue(0);
+            }
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToEndOfDocument) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+            }
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToStartOfLine) {
+            auto cursor = textCursor();
+            cursor.movePosition(QTextCursor::StartOfLine);
+            setTextCursor(cursor);
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToEndOfLine) {
+            auto cursor = textCursor();
+            cursor.movePosition(QTextCursor::EndOfLine);
+            setTextCursor(cursor);
+            e->accept();
+            return;
+        }
+     }
+     QPlainTextEdit::keyPressEvent(e);
+}
