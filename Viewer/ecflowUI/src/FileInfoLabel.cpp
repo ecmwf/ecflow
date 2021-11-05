@@ -240,7 +240,7 @@ QString FileInfoLabel::formatDate(QDateTime dt)
 
 QString FileInfoLabel::formatFileSize(QString str,qint64 size)
 {
-	if(size > 10*1024*1024)
+    if(size > 40*1024*1024)
         return Viewer::formatText(str,largeFileColour);
     return str;
 }

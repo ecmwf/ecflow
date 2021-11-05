@@ -34,9 +34,9 @@
 #include "UiLog.hpp"
 #include "VFile.hpp"
 
-int OutputBrowser::minPagerTextSize_=9*1024*1024;
-int OutputBrowser::minPagerSparseSize_=30*1024*1024;
-int OutputBrowser::minConfirmSearchSize_=9*1024*1024;
+int OutputBrowser::minPagerTextSize_=40*1024*1024;
+int OutputBrowser::minPagerSparseSize_=40*1024*1024;
+int OutputBrowser::minConfirmSearchSize_=20*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
@@ -149,7 +149,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 
         //enable and init search
         if(searchTb_) searchTb_->setEnabled(true);
-        searchLine_->setConfirmSearch(false);
+        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
         searchLine_->setSearchInterface(textEditSearchInterface_);
 
         //enable filter
