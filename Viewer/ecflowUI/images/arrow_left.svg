@@ -9,7 +9,7 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    viewBox="0 0 32 32"
    sodipodi:docname="arrow_left.svg"
-   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   inkscape:version="0.91 r13725"
    version="1.1"
    id="svg2"
    height="34.133335"
@@ -22,14 +22,14 @@
      inkscape:snap-to-guides="false"
      inkscape:window-maximized="0"
      inkscape:window-y="25"
-     inkscape:window-x="175"
+     inkscape:window-x="0"
      inkscape:window-height="1095"
      inkscape:window-width="1920"
      showgrid="true"
      inkscape:current-layer="layer3"
      inkscape:document-units="px"
      inkscape:cy="10.188765"
-     inkscape:cx="5.9899073"
+     inkscape:cx="-6.7777695"
      inkscape:zoom="15.46875"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
@@ -86,22 +86,24 @@
      id="layer3"
      inkscape:groupmode="layer">
     <path
-       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49156;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 29.163201,16.749583 7.3896071,16.826173"
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49156022;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 28.130246,16.448752 8.6302437,16.52052"
        id="path6002-1"
-       sodipodi:nodetypes="cc" />
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
     <path
-       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49156;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 17.412373,7.5943772 7.3896071,16.826173 17.181964,25.670999"
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49156022;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 17.606435,7.8697472 8.6302437,16.520521 17.400086,24.80868"
        id="path6004-6"
-       sodipodi:nodetypes="ccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:connector-curvature="0" />
     <rect
-       transform="rotate(90)"
-       ry="0.53677464"
-       y="-4.2975569"
-       x="3.3030303"
-       height="3.0193572"
-       width="25.999998"
+       transform="matrix(0,1,-1,0,0,0)"
+       ry="0.48072475"
+       y="-5.861064"
+       x="3.8484848"
+       height="2.7040768"
+       width="24.363634"
        id="rect3610-0"
        style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.868815" />
   </g>

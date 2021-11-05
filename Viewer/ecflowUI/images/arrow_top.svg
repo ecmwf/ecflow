@@ -9,7 +9,7 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    viewBox="0 0 32 32"
    sodipodi:docname="arrow_top.svg"
-   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   inkscape:version="0.91 r13725"
    version="1.1"
    id="svg2"
    height="34.133335"
@@ -52,7 +52,7 @@
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
      inkscape:cy="16.354555"
-     inkscape:cx="3.9111108"
+     inkscape:cx="-8.856566"
      inkscape:zoom="15.46875"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
@@ -109,15 +109,17 @@
      id="layer3"
      inkscape:groupmode="layer">
     <path
-       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49156;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 16.098901,28.496531 16.022311,7.2077868"
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49155998;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 16.206728,27.695674 16.136565,8.4369153"
        id="path6002-1"
-       sodipodi:nodetypes="cc" />
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
     <path
-       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49156;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 25.254106,17.230553 16.022311,7.2077868 7.177486,17.000143"
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.49155998;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 24.593664,17.503962 16.136565,8.4369153 8.0339631,17.295522"
        id="path6004-6"
-       sodipodi:nodetypes="ccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:connector-curvature="0" />
   </g>
   <g
      inkscape:label="bar"
@@ -125,11 +127,11 @@
      inkscape:groupmode="layer">
     <rect
        transform="scale(1,-1)"
-       ry="0.53677464"
-       y="-4.0496602"
-       x="2.939394"
-       height="3.0193572"
-       width="26"
+       ry="0.48559055"
+       y="-5.5799313"
+       x="4.151515"
+       height="2.7314467"
+       width="23.818182"
        id="rect3610"
        style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.868815" />
   </g>

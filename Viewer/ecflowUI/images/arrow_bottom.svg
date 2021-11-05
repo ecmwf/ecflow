@@ -11,7 +11,7 @@
    height="32"
    id="svg2"
    version="1.1"
-   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="arrow_bottom.svg">
   <defs
      id="defs4">
@@ -35,16 +35,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="28.1875"
+     inkscape:zoom="27.1875"
      inkscape:cx="16"
      inkscape:cy="16"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1092"
-     inkscape:window-x="88"
-     inkscape:window-y="25"
+     inkscape:window-width="1671"
+     inkscape:window-height="1071"
+     inkscape:window-x="243"
+     inkscape:window-y="47"
      inkscape:window-maximized="0"
      inkscape:snap-to-guides="false"
      inkscape:snap-grids="false"
@@ -98,21 +98,23 @@
      id="layer1"
      inkscape:label="bar">
     <path
-       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.72433;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 16.087361,3.3270196 -0.0817,21.2739464"
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.72432971;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 16.088704,4.4443366 16.015704,23.5066"
        id="path6002-1"
-       sodipodi:nodetypes="cc" />
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0" />
     <path
-       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.72433;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 25.888387,13.980968 15.970185,24.920256 6.6066587,14.226739"
+       style="display:inline;fill:none;stroke:#4d4d4d;stroke-width:3.72432971;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 24.846433,13.990679 15.984002,23.792695 7.6172017,14.210899"
        id="path6004-6"
-       sodipodi:nodetypes="ccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:connector-curvature="0" />
     <rect
-       ry="0.57255965"
-       y="27.763083"
-       x="2.0923378"
-       height="3.2206478"
-       width="27.733334"
+       ry="0.51303518"
+       y="26.339972"
+       x="3.58342"
+       height="2.8858225"
+       width="24.781179"
        id="rect3610-0"
        style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.926736" />
   </g>
