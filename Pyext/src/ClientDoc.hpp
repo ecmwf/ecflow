@@ -28,9 +28,7 @@ public:
    static const char* set_retry_connection_period();
    static const char* set_connection_attempts();
 	static const char* get_defs();
-   static const char* edit_script_edit();
-   static const char* edit_script_preprocess();
-   static const char* edit_script_submit();
+
 	static const char* get_log();
 	static const char* new_log();
 	static const char* clear_log();
