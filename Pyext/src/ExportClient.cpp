@@ -15,7 +15,7 @@
 #include <algorithm>  // for std::transform
 #include <boost/python.hpp>
 #include <boost/core/noncopyable.hpp>
-#include <boost/algorithm/string.hpp>
+
 #include "ClientInvoker.hpp"
 #include "Defs.hpp"
 #include "ClientDoc.hpp"
@@ -44,48 +44,11 @@ const std::string& query(ClientInvoker* self,
                          const std::string& query_type,
                          const std::string& path_to_attribute,
                          const std::string& attribute) { self->query(query_type,path_to_attribute,attribute); return self->get_string();}
-
 const std::string& query1(ClientInvoker* self,
                          const std::string& query_type,
                          const std::string& path_to_attribute) { self->query(query_type,path_to_attribute,""); return self->get_string();}
 
-const std::string& edit_script_edit(ClientInvoker* self,
-				    const std::string& absNodePath )
-{ self->edit_script_edit(absNodePath); return self->get_string(); }
-
-const std::string& edit_script_preprocess(ClientInvoker* self,
-					  const std::string& absNodePath )
-{ self->edit_script_preprocess(absNodePath); return self->get_string(); }
-
-int edit_script_submit(ClientInvoker* self,
-		       const std::string& absNodePath,
-		       const bp::list& name_values,
-		       const bp::list& lines,
-		       bool alias = false,
-		       bool run = true
-		      ) {
-  std::vector<std::string> file_contents;
-  BoostPythonUtil::list_to_str_vec(lines, file_contents);
-
-  std::vector<std::string> namv;  
-  BoostPythonUtil::list_to_str_vec(name_values, namv);
-  NameValueVec used_variables;
-  char sep = '=';
-  for (int i=0; i<namv.size(); ++i) {
-    string::size_type pos = namv[i].find(sep);
-    used_variables.push_back(std::make_pair(
-       namv[i].substr(0, pos-1),
-       namv[i].substr(pos+1, namv[i].length())));
-  }
-  return self->edit_script_submit(absNodePath,
-				  used_variables,
-				  file_contents,
-				  alias,
-				  run);
-}
-
-const std::string& get_log(ClientInvoker* self, int lastLines)
-{ self->getLog(lastLines); return self->get_string();}
+const std::string& get_log(ClientInvoker* self) { self->getLog(); return self->get_string();}
 
 const std::string& get_file(ClientInvoker* self,
                             const std::string& absNodePath,
@@ -283,11 +246,10 @@ void export_Client()
    .def("is_auto_sync_enabled",&ClientInvoker::is_auto_sync_enabled,"Returns true if automatic syncing enabled")
    .def("get_defs",         &ClientInvoker::defs,           ClientDoc::get_defs())
    .def("reset",            &ClientInvoker::reset,          "reset client definition, and handle number")
-   .def("in_sync",          &ClientInvoker::in_sync,        ClientDoc::in_sync())
-   .def("get_log" , &get_log, return_value_policy<copy_const_reference>(), ClientDoc::get_log())
-   .def("edit_script_edit", &edit_script_edit, return_value_policy<copy_const_reference>(), ClientDoc::edit_script_edit())
-   .def("edit_script_preprocess", &edit_script_preprocess, return_value_policy<copy_const_reference>(), ClientDoc::edit_script_preprocess())
-   .def("edit_script_submit", &edit_script_submit, ClientDoc::edit_script_submit())
+	.def("in_sync",          &ClientInvoker::in_sync,        ClientDoc::in_sync())
+#ifdef DEBUG
+ 	.def("get_log" ,         &get_log,                       return_value_policy<copy_const_reference>(),ClientDoc::get_log())
+#endif
  	.def("new_log",          &ClientInvoker::new_log, (bp::arg("path")=""),ClientDoc::new_log())
  	.def("clear_log",        &ClientInvoker::clearLog,                     ClientDoc::clear_log())
  	.def("flush_log",        &ClientInvoker::flushLog,                     ClientDoc::flush_log())
