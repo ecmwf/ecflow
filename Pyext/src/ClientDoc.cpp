@@ -140,30 +140,6 @@ const char* ClientDoc::get_defs(){
             ;
 }
 
-const char* ClientDoc::edit_script_edit()
-{
-  return "get script for Edit\n";
-}
-
-const char* ClientDoc::edit_script_preprocess()
-{
-  return "get script for Edit Preprocess\n";
-}
-
-const char* ClientDoc::edit_script_submit()
-{
-  return "submit script from Edit/Preprocess \n"
-    "to run as alias or not\n"
-    "ci = Client()\n"
-    "ci.edit_script_submit(path_to_task,\n"
-    "	                   used_variables, # array name=value\n"
-    "	                   file_contents,  # strings array\n"
-    "	                   alias, # bool False,\n"
-    "	                   run  # bool true\n"
-    "                      )\n"
-    ;
-}
-     
 const char* ClientDoc::get_log()
 {
    return
@@ -173,7 +149,7 @@ const char* ClientDoc::get_log()
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()          # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       print(ci.get_log(100)  # get the 100 last lines from server log file\n"
+            "       print(ci.get_log())    # get the log file from the server\n"
             "   except RuntimeError, e:\n"
             "       print(str(e))\n"
             ;
