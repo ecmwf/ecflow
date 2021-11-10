@@ -139,7 +139,12 @@ endif()
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
       message(STATUS "python install *LOCAL* +++ lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/ecflow +++++++")
-      set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
+      if( NOT INSTALL_PYTHON2_DIR )
+         set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
+      else()
+         # Resolve ${VAR} in the value provided
+         string(CONFIGURE "${INSTALL_PYTHON2_DIR}" PYTHON_SITE)
+      endif()
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
       install( TARGETS ecflow                 DESTINATION ${PYTHON_DEST}  RENAME ecflow.so COMPONENT python )
