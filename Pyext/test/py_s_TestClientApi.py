@@ -1812,27 +1812,25 @@ def test_ECFLOW_189(ci):
 
 
 def test_ECFLOW_1761(ci):
-    print("# get log: default")
-    ci.get_log()
+    print_test(ci,"test_ECFLOW_1761")
     print("# get log: last 10 lines")
     ci.get_log(10)
     
     ci_defs = ci.get_defs()
     task = ci_defs.get_all_nodes()[0]  # take first task
-    print(ci.edit_script_edit(
-        task.get_abs_node_path())
+    
+    #print(ci.edit_script_edit(task.get_abs_node_path())
 
-    print(client.real.edit_script_preprocess(
-        task.get_abs_node_path()))
+    #print(ci.edit_script_preprocess(task.get_abs_node_path()))
 
-    ci.real.edit_script_submit(
-        task.get_abs_node_path(),
-            [],  # name-value variables list
-            [],  # lines (script)
-            False, # True,  $ alias
-            False)  # run
+    #ci.edit_script_submit(
+    #    task.get_abs_node_path(),
+    #        [],  # name-value variables list
+    #        [],  # lines (script)
+    #        False, # True,  $ alias
+    #        False)  # run
 
-          
+
 def test_ECFLOW_199(ci):
     # Test ClientInvoker::changed_node_paths
     print_test(ci,"test_ECFLOW_199")
@@ -1971,7 +1969,8 @@ def do_tests(ci,the_port):
     test_ECFLOW_189(ci)         
     test_ECFLOW_199(ci)         
     test_ECFLOW_1761(ci)
-    
+
+
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))   
 
