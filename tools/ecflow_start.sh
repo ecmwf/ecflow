@@ -38,67 +38,45 @@ check=false
 ssl=false
 halted=false
 
+usage()
+{
+    echo "Usage: $0 [-b] [-c] [-d ecf_home_dir] [-f] [-H] [-v] [-s] [-p port]"
+    echo "       -b        start ECF for backup server or e-suite"
+    echo "       -c        test check point file for errors"
+    echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
+    echo "       -f        forces the ECF to be restarted"
+    echo "       -H        Halted mode (manual restart), overrides -f option"
+    echo "       -v        verbose mode"
+    echo "       -s        enable ssl server. Requires client/server built with openssl libs"
+    echo "       -h        print this help page"
+    echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
+}
+
 #==========================================================================
 # Syntax
-# ecflow_start [-b] [-d ecf_home_directory] [-f] [-h] [-s] [-p port_number ]
+# ecflow_start [-b] [-d ecf_home_directory] [-f] [-h] [-s] [-p port_number]
 #==========================================================================
 # get command line options if any.
-while getopts chHfbd:vp:r option
+while getopts chHfbd:vsp:r option
 do
 case $option in
-c)
-check=true
-;;
-f)
-force=true
-;;
-H)
-halted=true
-;;
-b)
-backup_server=true
-;;
-v)
-verbose=true
-;;
-d)
-ecf_home_directory=$OPTARG
-;;
-p)
-ecf_port=$OPTARG
-;;
-r)
-rerun=true
-;;
-s)
-ssl=true
-;;
-h)
-echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
-echo "       -b        start ECF for backup server or e-suite"
-echo "       -c        test check point file for errors"
-echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
-echo "       -f        forces the ECF to be restarted"
-echo "       -H        Halted mode (manual restart), overrides -f option"
-echo "       -v        verbose mode"
-echo "       -s        enable ssl server. Requires client/server built with openssl libs"
-echo "       -h        print this help page"
-echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
-exit 0
-;;
-*)
-echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
-echo "       -b        start ECF for backup server or e-suite"
-echo "       -c        test check point file for errors"
-echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
-echo "       -f        forces the ECF to be restarted"
-echo "       -H        Halted mode (manual restart), overrides -f option"
-echo "       -v        verbose mode"
-echo "       -s        enable ssl server. Requires client/server built with openssl libs"
-echo "       -h        print this help page"
-echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
-exit 1
-;;
+    c) check=true;;
+    f) force=true;;
+    H) halted=true;;
+    b) backup_server=true;;
+    v) verbose=true;;
+    d) ecf_home_directory=$OPTARG;;
+    p) ecf_port=$OPTARG;;
+    r) rerun=true;;
+    s) ssl=true;;
+    h)
+    usage
+    exit 0
+    ;;
+    *)
+    usage
+    exit 1
+    ;;
 esac
 done
 
