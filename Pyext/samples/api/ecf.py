@@ -558,7 +558,7 @@ def item_to_string(prev, index, name):
     """ index not used... """
     if name is None:
         return ""
-    if name is "":
+    if name == "":
         return prev
     if "<main>" in name:
         raise DefError
