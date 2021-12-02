@@ -77,7 +77,8 @@ def get_uid():
 home = os.getenv("HOME") + "/ecflow_server"
 user = os.getenv("USER")
 
-ECF_PORT = os.getenv("ECF_PORT", 1500 + int(pwd.getpwnam(get_username()).pw_uid))
+ECF_PORT = os.getenv("ECF_PORT", 1500 +
+                     int(pwd.getpwnam(get_username()).pw_uid))
 ECF_HOME = os.getenv("ECF_HOME", "localhost")
 CLIENT = ecflow.Client(ECF_HOME + ":%s" % ECF_PORT)  # PYTHON CLIENT
 deployed = []
@@ -95,6 +96,7 @@ def deploy(script, pathname, extn=".ecf"):
         print("#MSG: created", pathname)
 # deploy("echo acq %TASK%", files + acq + extn)  # create wrapper
 # deploy("ecflow_client --label info %TASK%", files + post + extn)
+
 
 ###################################################################################################
 head_h = """#!%SHELL:/bin/bash%
@@ -158,7 +160,6 @@ def create_head_and_tail(ecf_home=None, head="head.h", tail="tail.h"):
             write(tail_h, file=fip)
 
 
-
 class CWN(object):
     """ CWN is for current working node
     so that new attributes and node are attached to it,
@@ -172,7 +173,8 @@ class CWN(object):
         CWN.__CDP = active
         if active and CWN.is_empty():
             return
-        if DEBUG: print("#DBG: CWN reset")
+        if DEBUG:
+            print("#DBG: CWN reset")
         CWN.__CWN = []
 
     @classmethod
@@ -184,7 +186,8 @@ class CWN(object):
         if CWN.is_empty():
             return
         # if 1: raise
-        if DEBUG: print("#BDG: pop")
+        if DEBUG:
+            print("#BDG: pop")
         CWN.__CWN.pop()
 
     @classmethod
@@ -196,13 +199,13 @@ class CWN(object):
     def __init__(self, item=None):
 
         def name(item):
-          if DEBUG:
-            if type(item) in (Event, Meter, Label):
-                print("#BDG:", type(item), "%s" % item.real)
-            elif type(item) in (Clock, ):
-                print("#BDG:", type(item), "%s" % item.real)
-            else:
-                print("#BDG:", type(item), item.real.name())
+            if DEBUG:
+                if type(item) in (Event, Meter, Label):
+                    print("#BDG:", type(item), "%s" % item.real)
+                elif type(item) in (Clock, ):
+                    print("#BDG:", type(item), "%s" % item.real)
+                else:
+                    print("#BDG:", type(item), item.real.name())
 
         if item is None or not CWN.__CDP:
             # print("#BDG: no item")
@@ -325,15 +328,20 @@ class Extern(object):
         elif isinstance(path, str):
             if DEBUG:
                 print("#MSG: extern", path)
-            if ".Extern" in path: raise Exception
+            if ".Extern" in path:
+                raise Exception
             if ":" in path:
-                Extern(path.split(":")[0])  # define parent so user does not have to
+                # define parent so user does not have to
+                Extern(path.split(":")[0])
 
-            if path == "": pass
-            elif DEFS is not None:         
-                if ".Extern" in path: raise DefError(type(path))       
+            if path == "":
+                pass
+            elif DEFS is not None:
+                if ".Extern" in path:
+                    raise DefError(type(path))
                 DEFS.add_extern(str(path))
-            else: raise DefError
+            else:
+                raise DefError
 
         elif path is None:
             pass
@@ -463,24 +471,31 @@ class Event(Attribute):
 
     def __init__(self, name="", num=0):
         if type(name) == str:
-            if " " in name: num, name = name.split(" ")
+            if " " in name:
+                num, name = name.split(" ")
         try:
-            if int(num) > 100000: num = ""
-        except: pass
+            if int(num) > 100000:
+                num = ""
+        except:
+            pass
         self.load = None
-        if type(name) is int and num == 0: num = name; name = ""
+        if type(name) is int and num == 0:
+            num = name
+            name = ""
 
         if type(name) is int and type(num) == str:
             self.load = ecflow.Event(name, num)
         elif type(name) is str and type(num) == int:
             self.load = ecflow.Event(num, name)
-        elif type(name) is str and type(num) == str:            
+        elif type(name) is str and type(num) == str:
             if num == "":
                 self.load = ecflow.Event(name)
             elif name == "":
                 self.load = ecflow.Event(num)
-            else: self.load = ecflow.Event(int(num), name); # print("#str str")
-        else: self.load = ecflow.Event(name)
+            else:
+                self.load = ecflow.Event(int(num), name)  # print("#str str")
+        else:
+            self.load = ecflow.Event(name)
         CWN(self)
 
     def add_to(self, node):
@@ -488,10 +503,10 @@ class Event(Attribute):
         for test in node.load.events:
             if test.name() == self.load.name():
                 if (test.number() == self.load.number() and
-                    test.name() == self.load.name()):
+                        test.name() == self.load.name()):
                     # print("dupl");
                     return
-                #else: raise Exception(test.number(), self.load.number(),
+                # else: raise Exception(test.number(), self.load.number(),
                 #                      test.name(), self.load.name())
         node.load.add_event(self.load.number(), self.load.name())
         return node
@@ -517,7 +532,8 @@ class Inlimit(Attribute):
                 name = name.replace('-', '_')
             if "None" in path or "None" in name:
                 raise DefError(path, name, fullpath)
-            if " " in name: name, tokens = name.split(" ")
+            if " " in name:
+                name, tokens = name.split(" ")
             self.load = ecflow.InLimit(name, path, int(tokens))
             self.path_ = path
             self.name_ = name
@@ -534,7 +550,7 @@ class Inlimit(Attribute):
         for dup in node.real.inlimits:
             # print(dup.name, self.load.name())
             if (dup.name() == self.load.name() and
-                dup.path_to_node() == self.load.path_to_node()):
+                    dup.path_to_node() == self.load.path_to_node()):
                 # print("lim dup");
                 return None
         node.load.add_inlimit(self.load)
@@ -752,10 +768,12 @@ class TriggerAlways(Trigger):
 
 class Complete(Trigger):
     """ class to host complete expression, added later to a node"""
+
     def __init__(self, expr, unk=False, anded=False):
         if sys.version_info.major == 2:
             super(Complete, self).__init__(expr, unk, anded)
-        else: super().__init__(expr, unk, anded)  # python3
+        else:
+            super().__init__(expr, unk, anded)  # python3
 
     def add_to(self, node):
         if USE_TRIGGER and self.expr is not None:
@@ -786,28 +804,37 @@ class Clock(Attribute):
             self.load = ecflow.Clock(True)
         elif type(arg) == str:
             hybrid = "hybrid" in arg
-            if "hybrid " in arg: arg = nat(arg, "hybrid"); hybrid=1
-            elif "real " in arg: arg = nat(arg, "real"); hybrid=0
-            if " -s" in arg: arg = arg.replace(" -s", ""); sync = True
-            else: sync = False
+            if "hybrid " in arg:
+                arg = nat(arg, "hybrid")
+                hybrid = 1
+            elif "real " in arg:
+                arg = nat(arg, "real")
+                hybrid = 0
+            if " -s" in arg:
+                arg = arg.replace(" -s", "")
+                sync = True
+            else:
+                sync = False
             hhh, mmm, sss = [0, 0, 0]
-            if 1: # try:
+            if 1:  # try:
                 if "." in arg and " " in arg:
                     ymd, hhh = arg.split(" ")
                     ddd, mmm, yyy = ymd.split('.')
                     self.load = ecflow.Clock(int(ddd), int(mmm), int(yyy),
                                              hybrid)
                     rel = "+" in hhh
-                    if hhh != "": 
+                    if hhh != "":
                         self.load.set_gain_in_seconds(int(hhh), rel)
                 elif "+" in arg:
-                    rel = "+" in arg                    
+                    rel = "+" in arg
                     self.load = ecflow.Clock(hybrid)
                     self.load.set_gain_in_seconds(int(arg), rel)
-                elif arg is None and hybrid is False: pass
-                elif arg == "None" and hybrid is False: pass
+                elif arg is None and hybrid is False:
+                    pass
+                elif arg == "None" and hybrid is False:
+                    pass
                 else:
-                    rel = "+" in arg                    
+                    rel = "+" in arg
                     from datetime import date
                     # print("#Clock+", arg, type(arg), hybrid, self.load, )
                     if 0:
@@ -815,10 +842,11 @@ class Clock(Attribute):
                         yyy, mmm, ddd = ymd.split("-")
                         self.load = ecflow.Clock(
                             int(ddd), int(mmm), int(yyy), hybrid)
-                    else: self.load = ecflow.Clock(hybrid)
+                    else:
+                        self.load = ecflow.Clock(hybrid)
                     if arg != "":
                         self.load.set_gain_in_seconds(int(arg), rel)
-            #except ValueError:
+            # except ValueError:
             #    print("#Value Error", arg, hybrid)
             #    self.load = ecflow.Clock(hybrid)
         else:
@@ -826,7 +854,8 @@ class Clock(Attribute):
             self.load = ecflow.Clock(arg, hybrid)
 
         # print("#Clock", arg, hybrid, self.load)
-        if arg is None and hybrid is False: self.load = None
+        if arg is None and hybrid is False:
+            self.load = None
         # if 1: raise Exception
         CWN(self)
 
@@ -878,7 +907,8 @@ class Verify(Attribute):
     """ wrapper to add time """
 
     def __init__(self, arg):
-        if "verify " in arg: arg = nat(arg, "verify")
+        if "verify " in arg:
+            arg = nat(arg, "verify")
         y, z = str(arg).split(":")
         kinds = {
             "aborted": ecflow.State.aborted,
@@ -886,7 +916,7 @@ class Verify(Attribute):
             "active": ecflow.State.active,
             "submitted": ecflow.State.submitted,
             "unknown": ecflow.State.unknown,
-            "queued": ecflow.State.queued, 
+            "queued": ecflow.State.queued,
         }
         self.load = ecflow.Verify(kinds[y], int(z))
 
@@ -937,7 +967,8 @@ class Cron(Time):
         if " -s" in bes:
             bes = bes.replace(" -s", "")
             sync = True
-        else: sync = False
+        else:
+            sync = False
         parsed = parser.parse_args(bes.split())
 
         if parsed.w:
@@ -1017,7 +1048,7 @@ class Defstatus(Attribute):
     def __init__(self, kind):
         if type(kind) == str:
             kinds = {"suspended": ecflow.DState.suspended,
-                # "halted": ecflow.DState.halted, "shutdown": ecflow.DState.shutdown,
+                     # "halted": ecflow.DState.halted, "shutdown": ecflow.DState.shutdown,
                      "aborted": ecflow.DState.aborted,
                      "complete": ecflow.DState.complete,
                      "active": ecflow.DState.active,
@@ -1131,10 +1162,10 @@ class Late(Attribute):
 
 def python_true(key, val):
     if "%s" % val == "True":
-        if key in("HYPERTHREADING",
-                  "CLIM5YR",
-                  "FLEX_SUBMIT",
-                  "USE_HUGEPAGE"):
+        if key in ("HYPERTHREADING",
+                   "CLIM5YR",
+                   "FLEX_SUBMIT",
+                   "USE_HUGEPAGE"):
             return  # OK
         print("#WAR: really???", key, val)
 
@@ -1260,22 +1291,22 @@ class Repeat(Attribute):
                  step=1, kind="date"):
         # print("repeat", name, "#", start, "#", end, "#", step, "#", kind)
         if len(name) > 4:
-          if (name[:4] == "enum" or
-            name[:4] == "date" or
-            "string " in name or
-            name[:3] == "int" or
-            "day " in name):
-            pars = name.split(" ")
-            kind = pars[0]
-            name = pars[1]
-            if "enum" in kind or "string" in kind:
-                start = [i.strip("'").strip('"') for i in pars[2:]]
-            elif "int" in kind or "date" in kind:
-                start = pars[2]
-                if len(pars) > 3:
-                    end = pars[3]
-                if len(pars) > 4:
-                    step = pars[4]
+            if (name[:4] == "enum" or
+                name[:4] == "date" or
+                "string " in name or
+                name[:3] == "int" or
+                    "day " in name):
+                pars = name.split(" ")
+                kind = pars[0]
+                name = pars[1]
+                if "enum" in kind or "string" in kind:
+                    start = [i.strip("'").strip('"') for i in pars[2:]]
+                elif "int" in kind or "date" in kind:
+                    start = pars[2]
+                    if len(pars) > 3:
+                        end = pars[3]
+                    if len(pars) > 4:
+                        step = pars[4]
 
         if kind in ("date", ):
             self.load = ecflow.RepeatDate(
@@ -1284,10 +1315,12 @@ class Repeat(Attribute):
             self.load = ecflow.RepeatInteger(
                 name, int(start), int(end), int(step))
         elif kind == "string":
-            if len(start) == 0: raise Exception
+            if len(start) == 0:
+                raise Exception
             self.load = ecflow.RepeatString(name, start)
         elif "enum" in kind:
-            if len(start) == 0: raise Exception
+            if len(start) == 0:
+                raise Exception
             self.load = ecflow.RepeatEnumerated(name, start)
         elif kind == "day":
             self.load = ecflow.RepeatDay(step)
@@ -1312,7 +1345,8 @@ class Zombie(Attribute):
 """
 
     def __init__(self, arg="ecf:remove:3600"):
-        if "zombie " in arg: arg = nat(arg, "zombie")
+        if "zombie " in arg:
+            arg = nat(arg, "zombie")
         typ, act, kid, num = arg.split(":")
         types = ecflow.ZombieType.names  # ecf user path
         kids = ecflow.ChildCmdType.names  # complete label init abort event wait
@@ -1323,7 +1357,8 @@ class Zombie(Attribute):
         elif "," in kid:
             for k in kid.split(","):
                 when.append(kids[k])
-        else: when.append(kids[kid])
+        else:
+            when.append(kids[kid])
 
         self.load = ecflow.ZombieAttr(types[typ], when, acts[act],
                                       int(num))
@@ -1441,13 +1476,13 @@ class Root(object):  # from where Suite and Node derive
         status = kind
         if type(kind) == str:
             kinds = {  # "suspended": ecflow.DState.suspended,
-                     "halted": ecflow.DState.halted, "shutdown": ecflow.DState.shutdown,
-                     "aborted": ecflow.DState.aborted,
-                     "complete": ecflow.DState.complete,
-                     "active": ecflow.DState.active,
-                     "submitted": ecflow.DState.submitted,
-                     "unknown": ecflow.DState.unknown,
-                     "queued": ecflow.DState.queued, }
+                "halted": ecflow.DState.halted, "shutdown": ecflow.DState.shutdown,
+                "aborted": ecflow.DState.aborted,
+                "complete": ecflow.DState.complete,
+                "active": ecflow.DState.active,
+                "submitted": ecflow.DState.submitted,
+                "unknown": ecflow.DState.unknown,
+                "queued": ecflow.DState.queued, }
             status = kinds[kind]
         elif type(kind) == ecflow.DState:
             pass
@@ -1480,8 +1515,10 @@ class Root(object):  # from where Suite and Node derive
             elif type(item) == int:
                 pass  # raise DefError(item)
             elif type(item) == dict:
-                if item == {}: pass
-                else: raise DefError(item)
+                if item == {}:
+                    pass
+                else:
+                    raise DefError(item)
             else:
                 item.add_to(self)
 
@@ -1554,7 +1591,7 @@ class Root(object):  # from where Suite and Node derive
 
     # @property
     def to_html(self):
-            # from .html import HTMLWrapper
+        # from .html import HTMLWrapper
         return "%s" % HTMLWrapper("%s" % self)  # .generate_node()))
 
     def _repr_html_(self):
@@ -1636,8 +1673,10 @@ def to_pyflow(node, container=None):
         upd['limits'][item.name()] = item.limit()
     for item in node.inlimits:
         arg = item.name()
-        if item.path_to_node() != "": arg = item.path_to_node() + ":" + item.name()
-        if item.tokens() > 1: arg += " %d" % item.tokens()
+        if item.path_to_node() != "":
+            arg = item.path_to_node() + ":" + item.name()
+        if item.tokens() > 1:
+            arg += " %d" % item.tokens()
         upd['inlimits'][item.name()] = arg
     # ('variables', 'events', 'meters', 'labels', 'limits', 'inlimits'):
     for key in list(upd.keys()):
@@ -1665,14 +1704,15 @@ def nat(name, key):
 def to_dict(node, container=None):
     kids = dict()
     if type(node) is ecflow.Defs:
-        res = {':suites': [], } # ':externs': [], }
+        res = {':suites': [], }  # ':externs': [], }
         for item in node.suites:
             res[':suites'].append(to_dict(item))
         if 1:
-          for item in node.externs:
-            if ':externs' not in list(res.keys()): res[':externs'] = []
-            # print(item)
-            res[':externs'].append("%s" % item)
+            for item in node.externs:
+                if ':externs' not in list(res.keys()):
+                    res[':externs'] = []
+                # print(item)
+                res[':externs'].append("%s" % item)
         return res
 
     if type(node) is ecflow.Alias:
@@ -1694,7 +1734,7 @@ def to_dict(node, container=None):
                     'thr': item.color_change(), }}
                 for item in node.meters],
             'labels': {item.name(): '%s' % item.value()
-                        for item in node.labels},
+                       for item in node.labels},
             'limits': {item.name(): item.limit() for item in node.limits},
             'inlimits': [],
             'verifies': ["%s" % item for item in node.verifies],
@@ -1715,7 +1755,8 @@ def to_dict(node, container=None):
         arg = item.name()
         if item.path_to_node() != "":
             arg = item.path_to_node() + ":" + item.name()
-        if item.tokens() > 1: arg += " %d" % item.tokens()
+        if item.tokens() > 1:
+            arg += " %d" % item.tokens()
         temp['inlimits'].append(arg)
     out = {':name': '%s' % node.name(),
            ':kind': '%s' % get_kind(node),
@@ -1723,7 +1764,7 @@ def to_dict(node, container=None):
     defstatus = '%s' % node.get_defstatus()
     if defstatus != 'queued':
         out[':defstatus'] = "%s" % defstatus
-    if get_kind(node) == "suite": 
+    if get_kind(node) == "suite":
         out[':clock'] = nat("%s" % node.get_clock(), "clock")
     if node.get_late() is not None:
         out[':late'] = nat("%s" % node.get_late(), "late")
@@ -1733,7 +1774,8 @@ def to_dict(node, container=None):
 
     # for key in sorted(temp.keys()):
     for key in list(temp.keys()):
-        if temp[key] == 'None':            continue  # WARNING ???
+        if temp[key] == 'None':
+            continue  # WARNING ???
         out[':' + key] = temp[key]
 
     return out
@@ -1752,8 +1794,10 @@ def to_json(item, pyflow=False):
                       sort_keys=True,
                       indent=2)
 
+
 def json_to_defs(treedict, parent=None):
-    if treedict is None: return
+    if treedict is None:
+        return
     res = []
     if ":externs" in list(treedict.keys()):
         for item in treedict[":externs"]:
@@ -1766,7 +1810,7 @@ def json_to_defs(treedict, parent=None):
         if key not in (":externs", ":suites"):
             raise DefError("please use from_json", key)
     return res
-            
+
 
 def from_json(tree):
     out = []
@@ -1776,12 +1820,12 @@ def from_json(tree):
         if tree == []:
             return  # IGN
         if len(tree) == 2:
-                # print(type(tree[0]), type(tree[1]), tree[0], tree[1])
-                if type(tree[0]) == dict:
-                    return from_json(tree[0])
-                return {str(tree[0]): from_json(tree[1])}
-                # return Family(str(tree[0])).add(from_json(tree[1]))
-        elif len(tree) == 1: # return [str(tree[0])]
+            # print(type(tree[0]), type(tree[1]), tree[0], tree[1])
+            if type(tree[0]) == dict:
+                return from_json(tree[0])
+            return {str(tree[0]): from_json(tree[1])}
+            # return Family(str(tree[0])).add(from_json(tree[1]))
+        elif len(tree) == 1:  # return [str(tree[0])]
             return str(tree[0])
         raise Exception("#wwwwww", tree, type(tree))
 
@@ -1841,29 +1885,32 @@ def from_json(tree):
         elif sk in list(ITEMS.keys()):
             raise Exception
 
-        else:             
-            if (type(tree[k]) == dict and 
-                len(tree[k]) == 1 and 
-                ['children', ] == list(tree[k].keys())):
+        else:
+            if (type(tree[k]) == dict and
+                len(tree[k]) == 1 and
+                    ['children', ] == list(tree[k].keys())):
                 kids = tree[k]['children']
                 if type(kids) not in (list, tuple):
                     raise Exception(type(kids))
                 for kid in kids:
-                        if isinstance(kid, str):
-                            out.append((str(k), str(kid)))
-                        elif type(kid) in (dict, ):
-                            for elt in list(kid.keys()):
-                                out.append((str(k), str(elt)))
-                            anot = from_json(kid)
-                            if anot is not None: out.append(anot)
+                    if isinstance(kid, str):
+                        out.append((str(k), str(kid)))
+                    elif type(kid) in (dict, ):
+                        for elt in list(kid.keys()):
+                            out.append((str(k), str(elt)))
+                        anot = from_json(kid)
+                        if anot is not None:
+                            out.append(anot)
 
                 return out
-            elif 1: raise Exception(k, tree[k], type(tree[k]),
-                                    len(tree[k]),
-                                    list(tree[k].keys()))
-            else: out.append(from_json(tree[k]))
+            elif 1:
+                raise Exception(k, tree[k], type(tree[k]),
+                                len(tree[k]),
+                                list(tree[k].keys()))
+            else:
+                out.append(from_json(tree[k]))
 
-    if res is None: 
+    if res is None:
         return out
     return res.add(out)
 
@@ -1971,14 +2018,18 @@ class Defs(object):
 
     def check(self):
         return self.load.check()
+
     def simulate(self):
         return self.load.simulate()
+
     def generate_scripts(self):
         return self.load.generate_scripts()
 
     def add_extern(self, path):
-        if type(path) != str: raise DefError(type(path))
-        if ".Extern" in path: raise DefError(type(path))
+        if type(path) != str:
+            raise DefError(type(path))
+        if ".Extern" in path:
+            raise DefError(type(path))
         self.load.add_extern(path)  # TODO list
 
     def save_as_defs(self, fname):
@@ -2007,8 +2058,10 @@ class Defs(object):
         elif type(item) == Extern:  # back again
             # path = nat(item, "extern")
             path = "%s" % item
-            if type(path) != str: raise DefError(type(path), item)
-            if ".Extern" in path: raise DefError(type(path), path, item)
+            if type(path) != str:
+                raise DefError(type(path), item)
+            if ".Extern" in path:
+                raise DefError(type(path), path, item)
             self.load.add_extern(path)
         elif type(item) == tuple:
             for one in item:
@@ -2021,7 +2074,8 @@ class Defs(object):
         elif isinstance(item, str):
             if "extern " in item:
                 self.load.add_extern(nat(item, "extern"))
-            else: raise DefError("ERR:load add, what?", type(item), item)
+            else:
+                raise DefError("ERR:load add, what?", type(item), item)
         else:
             raise DefError("ERR:load add, what?", type(item), item)
         return self
@@ -2072,16 +2126,16 @@ class Client(object):
         return self.clnt.begin_suite(name)
 
     def resume(self, path):
-        return self.clnt.resume(path)    
+        return self.clnt.resume(path)
 
     def suspend(self, path):
-        return self.clnt.suspend(path)    
+        return self.clnt.suspend(path)
 
     def ping(self):
         self.clnt.ping()
 
     def version(self):
-        self.clnt.version()        
+        self.clnt.version()
 
     def __str__(self):
         return "ecflow client %s@%s v%s" % (
@@ -2221,19 +2275,22 @@ def display(defs, fname=None):
 class TestEcf(unittest.TestCase):
     """ a test case aka use-case """
 
-
     def test_edge(self):
         import json
         s = '{"A": {"children": ["B", {"C": {"children": [{"D": {"children": ["E"]}}, "F"]}}]}}'
         data = json.loads(s)
-        edges = from_json(data);
+        edges = from_json(data)
+
         def rec_form(row, fop):
-            if len(row) == 0: return
-            elif len(row) == 1: row = row[0]
+            if len(row) == 0:
+                return
+            elif len(row) == 1:
+                row = row[0]
             if len(row) == 2:
-                print('  {0} -> {1};'.format(*row), file=fop)            
+                print('  {0} -> {1};'.format(*row), file=fop)
             else:
-                for item in row: rec_form(item, fop)
+                for item in row:
+                    rec_form(item, fop)
         with open('tree.dot', 'w') as fop:
             print('\nstrict digraph tree {', file=fop)
             print("#s\n", s, "\n", edges)
@@ -2339,19 +2396,21 @@ class TestEcf(unittest.TestCase):
     def test_defs(self):
         import json
         git = os.getenv("GIT_ECFLOW", "./")
-        if git[-1] != '/': git += '/'
+        if git[-1] != '/':
+            git += '/'
         locs = [git + "ANode/parser/test/data/good_defs",
-                git + "CSim/test/data/good_defs" ]
+                git + "CSim/test/data/good_defs"]
         global USE_LATE
 
         USE_LATE = True
+
         def process_dir(loc):
             for root, dirs, files in os.walk(loc):
                 for file in files:
                     if file.endswith(".def"):
                         defs = ecflow.Defs(os.path.join(root, file))
                         for att in ecflow.AttrType.names:
-                            defs.sort_attributes(att, True)          
+                            defs.sort_attributes(att, True)
                         tree = to_json(to_dict(defs))
                         print("#name", os.path.join(root, file))
                         # print("#defs", defs, tree, type(tree))
@@ -2377,15 +2436,15 @@ class TestEcf(unittest.TestCase):
                                     suite_diff.walk(alter)
                                     break
                         for att in ecflow.AttrType.names:
-                            DEFS.real.sort_attributes(att, True)          
+                            DEFS.real.sort_attributes(att, True)
 
                         comp = DEFS.real == defs
                         print("#back", comp)
                         if not comp:
                             print("# defs", defs)
                             print("# DEFS", DEFS)  # , data)
-                        
-                for dir in dirs: 
+
+                for dir in dirs:
                     process_dir(os.path.join(root, dir))
 
         for loc in locs:
@@ -2406,13 +2465,16 @@ class TestEcf(unittest.TestCase):
                 with Family("f2"):
                     with Task("t3"):
                         pass
-            if DEBUG: print("#DBG: up*3")
+            if DEBUG:
+                print("#DBG: up*3")
             with Family("f22"):
                 Task("t01")
-                if DEBUG: print("#DBG: up")
+                if DEBUG:
+                    print("#DBG: up")
                 with Task("t11"):
                     pass
-        if DEBUG: print("#DBG: up*2")
+        if DEBUG:
+            print("#DBG: up*2")
         print(s1)
         print(DEFS)
         CWN.cdp(False)
@@ -2490,60 +2552,60 @@ class Dot(object):
 
 
 ITEMS = {'suite': Suite,
-             'family': Family,
-             'task': Task,
+         'family': Family,
+         'task': Task,
 
-             ':state': State,
-             ':repeat': Repeat,
+         ':state': State,
+         ':repeat': Repeat,
 
-             ':event': Event,
-             ':events': Event,
+         ':event': Event,
+         ':events': Event,
 
-             ':externs': Extern,
-             ':extern': Extern,
+         ':externs': Extern,
+         ':extern': Extern,
 
-             ':meter': Meter,
-             ':meters': Meter,
+         ':meter': Meter,
+         ':meters': Meter,
 
-             ':label': Label,
-             ':labels': Label,
+         ':label': Label,
+         ':labels': Label,
 
-             ':edit': Edit,
-             ':edits': Edit,
+         ':edit': Edit,
+         ':edits': Edit,
 
-             ':inlimit': Inlimit,
-             ':limit': Limit,
+         ':inlimit': Inlimit,
+         ':limit': Limit,
 
-             ':inlimits': Inlimit,
-             ':limits': Limit,
+         ':inlimits': Inlimit,
+         ':limits': Limit,
 
-             ':trigger': Trigger,
-             ':complete': Complete,
-             ':defstatus': Defstatus,
-             # ':kids': Limit,
+         ':trigger': Trigger,
+         ':complete': Complete,
+         ':defstatus': Defstatus,
+         # ':kids': Limit,
 
-             ':time': Time,
-             ':times': Time,
-             ':cron': Cron,
-             ':crons': Cron,
-             ':date': Date,
-             ':dates': Date,
-             ':day': Day,
-             ':days': Day,
-             ':today': Today,
-             ':todays': Today,
+         ':time': Time,
+         ':times': Time,
+         ':cron': Cron,
+         ':crons': Cron,
+         ':date': Date,
+         ':dates': Date,
+         ':day': Day,
+         ':days': Day,
+         ':today': Today,
+         ':todays': Today,
 
-             ':zombies': Zombie,  # ecflow.ZombieAttr,
-             ':zombie': Zombie,  # ecflow.ZombieAttr,
+         ':zombies': Zombie,  # ecflow.ZombieAttr,
+         ':zombie': Zombie,  # ecflow.ZombieAttr,
 
-             ':late': Late,
-             ':verifies': Verify,
-             ':clock': Clock,
-             ':autocancel': Autocancel,
+         ':late': Late,
+         ':verifies': Verify,
+         ':clock': Clock,
+         ':autocancel': Autocancel,
 
-             ':suites': Suite,  # dict(),
-             ':suite': Suite,  # dict(),
-             }
+         ':suites': Suite,  # dict(),
+         ':suite': Suite,  # dict(),
+         }
 
 
 if __name__ == '__main__':
