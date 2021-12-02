@@ -322,8 +322,7 @@ class Extern(object):
             for ppp in path:
                 Extern(ppp)
 
-        # elif type(path) in (str, unicode):
-        elif type(path) in (str, ):
+        elif isinstance(path, str):
             if DEBUG:
                 print("#MSG: extern", path)
             if ".Extern" in path: raise Exception
@@ -1774,10 +1773,8 @@ def from_json(tree):
     res = None
 
     if type(tree) in (tuple, list):
-        # if tree is None:            return  # IGN
-        if tree == []: 
+        if tree == []:
             return  # IGN
-        # if type(tree) in (tuple, list):
         if len(tree) == 2:
                 # print(type(tree[0]), type(tree[1]), tree[0], tree[1])
                 if type(tree[0]) == dict:
@@ -1788,8 +1785,7 @@ def from_json(tree):
             return str(tree[0])
         raise Exception("#wwwwww", tree, type(tree))
 
-    # elif type(tree) in (str, unicode):
-    elif type(tree) in (str, ):
+    elif isinstance(tree, str):
         print("#IGN", tree)
         return
 
@@ -1798,8 +1794,6 @@ def from_json(tree):
 
     for k in sorted(tree.keys()):
         sk = k
-        # if type(k) == unicode: sk = str(k)
-        # if type(tree[k]) == unicode: tree[k] = str(tree[k])
         if sk in (':name', ):
             res = ITEMS[tree[':kind']](str(tree[':name']))
 
@@ -1814,7 +1808,7 @@ def from_json(tree):
             for item in tree[k]:
                 out.append(from_json(item))
 
-        elif sk in (':defstatus', ':trigger', ':complete', ':clock', 
+        elif sk in (':defstatus', ':trigger', ':complete', ':clock',
                     ':late', ':externs', ':repeat',):
             out.append(ITEMS[k](tree[k]))
 
@@ -1827,7 +1821,6 @@ def from_json(tree):
                                     int(item[name]['thr'])))
         elif sk in (':edits', ':labels', ':limits', ):
             for item in sorted(tree[k].keys()):
-                # print("kkkkk", k, item, v, tree[k])
                 out.append(ITEMS[k](str(item), str(tree[k][item])))
         elif sk in (':events', ':repeat', ':inlimits', ':crons',
                     ':verifies', ':dates',
@@ -1856,7 +1849,7 @@ def from_json(tree):
                 if type(kids) not in (list, tuple):
                     raise Exception(type(kids))
                 for kid in kids:
-                        if type(kid) in (str, unicode):
+                        if isinstance(kid, str):
                             out.append((str(k), str(kid)))
                         elif type(kid) in (dict, ):
                             for elt in list(kid.keys()):
@@ -2025,7 +2018,7 @@ class Defs(object):
                 self.add(one)
         elif item is None:
             pass
-        elif type(item) in(str, unicode):
+        elif isinstance(item, str):
             if "extern " in item:
                 self.load.add_extern(nat(item, "extern"))
             else: raise DefError("ERR:load add, what?", type(item), item)
