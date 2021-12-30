@@ -59,7 +59,7 @@ Process
 
 0/ Update Documentation
 
-  - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
+  - https://confluence.ecmwf.int/display/ECFLOW/Release+Notes
 
   - Generate ecflow python API(only required when updating confluence)
     - module load python3  # rely on user support to have installed sphinx, make expects sphinx-build on $PATH
@@ -71,17 +71,17 @@ Process
 
 0/ Update WIKI:
    This announces the changes in the release
-   https://software.ecmwf.int/wiki/display/ECFLOW/Latest+news
+   https://confluence.ecmwf.int/display/ECFLOW/Latest+news
 
    In both cases add a tag/label for "news". This make the newly added page
    appear in the top half of the latest news
 
 0/ Check attachments:
    ** The eflow tar ball is automatically upload to confluence
-   http://software.ecmwf.int/wiki/display/ECFLOW/Releases
+   http://confluence.ecmwf.int/display/ECFLOW/Releases
 
    0 Beta releases :
-   https://software.ecmwf.int/wiki/display/ECFLOW/Pre-Releases
+   https://confluence.ecmwf.int/display/ECFLOW/Pre-Releases
 
    Add a page with the title of the release.
    In both cases add a tag/label for "news". This make the newly added page

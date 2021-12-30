@@ -48,7 +48,7 @@ or:
   ecflow_client --complete
 
 Please see:
-   https://software.ecmwf.int/wiki/display/ECFLOW/Release+process
+   https://confluence.ecmwf.int/display/ECFLOW/Release+process
 
 for further details.
 
@@ -57,7 +57,7 @@ Documentation
 
 The online documentation and tutorial are accessible from:
 
-   http://software.ecmwf.int/wiki/display/ECFLOW/Home
+   https://confluence.ecmwf.int/display/ECFLOW/ecflow+home
 
 Tar file
 ======================================================================

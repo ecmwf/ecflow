@@ -16,7 +16,7 @@ import unittest
 class TestConfluence(unittest.TestCase):
     def setUp(self):
         conflunce_base_url = "https://software-test.ecmwf.int/wiki"
-#         conflunce_base_url = "https://software.ecmwf.int/wiki"
+#         conflunce_base_url = "https://confluence.ecmwf.int"
         user = "deploy"  
         password = "deploy2013"  
 #         user = "ma0"

@@ -102,7 +102,7 @@ class MenuBar(tki.Frame):
                             relief=tki.RAISED, text='Help')
         menu = tki.Menu(mb)
         mb['menu'] = menu
-        url = "https://software.ecmwf.int/wiki/display/ECFLOW/Documentation"
+        url = "https://confluence.ecmwf.int/display/ECFLOW/Documentation"
 
         def url1(): self.__url(url=url)
 

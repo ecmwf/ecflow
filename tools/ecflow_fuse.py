@@ -490,7 +490,7 @@ for key in ("o", "law", "mc", "mofc", "tc3", "compo", "ecompo",
 
 def list_used_variables(node, ARGS=None):
     """ thanks Avi
-    https://software.ecmwf.int/wiki/pages/viewpage.action?pageId=53513079
+    https://confluence.ecmwf.int/pages/viewpage.action?pageId=53513079
     """
     if ARGS is None:
         ARGS = object()
