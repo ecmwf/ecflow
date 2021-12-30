@@ -49,18 +49,18 @@ Repeat::~Repeat() = default;
 
 Repeat::Repeat( const Repeat& rhs)
 {
-	if ( rhs.type_) {
-	   type_.reset( rhs.type_->clone());
-	}
+    if ( rhs.type_) {
+       type_.reset( rhs.type_->clone());
+    }
 }
 
 Repeat& Repeat::operator=(const Repeat& rhs)
 {
    type_.reset(nullptr);
-	if ( rhs.type_) {
+    if ( rhs.type_) {
       type_.reset( rhs.type_->clone());
-	}
-	return *this;
+    }
+    return *this;
 }
 
 Repeat& Repeat::operator=(Repeat&& rhs)
@@ -71,10 +71,10 @@ Repeat& Repeat::operator=(Repeat&& rhs)
 
 bool Repeat::operator==(const Repeat& rhs) const
 {
-	if (!type_ && rhs.type_) return false;
-	if (type_ && !rhs.type_) return false;
-	if (!type_ && !rhs.type_) return true	;
-	return type_->compare(rhs.type_.get());
+    if (!type_ && rhs.type_) return false;
+    if (type_ && !rhs.type_) return false;
+    if (!type_ && !rhs.type_) return true;
+    return type_->compare(rhs.type_.get());
 }
 
 const std::string& Repeat::name() const {
@@ -82,10 +82,10 @@ const std::string& Repeat::name() const {
 }
 
 void Repeat::print( std::string& os ) const {
-	if (type_) {
-		Indentor in;
-		Indentor::indent(os); write(os); os += "\n";
-	}
+    if (type_) {
+        Indentor in;
+        Indentor::indent(os); write(os); os += "\n";
+    }
 }
 
 // =========================================================================
@@ -93,10 +93,10 @@ RepeatBase::~RepeatBase() = default;
 
 void RepeatBase::incr_state_change_no()
 {
-	state_change_no_ = Ecf::incr_state_change_no();
+    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "RepeatBase::incr_state_change_no()\n";
+    std::cout << "RepeatBase::incr_state_change_no()\n";
 #endif
 }
 
@@ -162,15 +162,15 @@ RepeatDate::RepeatDate( const std::string& variable,
       }
    }
 
-	// Use date lib to check YMD
-	try {
-		boost::gregorian::date(from_undelimited_string(theStart));
-		boost::gregorian::date(from_undelimited_string(theEnd));
-	}
-	catch (std::exception& e) {
-      std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The start/end is not a valid date." + ss.str());
-	}
+    // Use date lib to check YMD
+    try {
+        (void)boost::gregorian::date(from_undelimited_string(theStart));
+        (void)boost::gregorian::date(from_undelimited_string(theEnd));
+    }
+    catch (std::exception& e) {
+        std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+        throw std::runtime_error("Invalid Repeat date: The start/end is not a valid date." + ss.str());
+    }
 }
 
 void RepeatDate::gen_variables(std::vector<Variable>& vec) const
@@ -252,9 +252,9 @@ void RepeatDate::update_repeat_genvar_value() const
 
 bool RepeatDate::compare(RepeatBase* rb) const
 {
-	auto* rhs = dynamic_cast<RepeatDate*>(rb);
-	if(!rhs) return false;
-	return operator==(*rhs);
+    auto* rhs = dynamic_cast<RepeatDate*>(rb);
+    if(!rhs) return false;
+    return operator==(*rhs);
 }
 
 void RepeatDate::setToLastValue()
@@ -315,41 +315,41 @@ void RepeatDate::write(std::string& ret) const
 
 std::string RepeatDate::dump() const
 {
-	std::stringstream ss;
-	ss << toString() << " value(" << value_ << ")";
-	return ss.str();
+    std::stringstream ss;
+    ss << toString() << " value(" << value_ << ")";
+    return ss.str();
 }
 
 bool RepeatDate::operator==(const RepeatDate& rhs) const
 {
-	if (name_ != rhs.name_) {
-		return false;
-	}
-	if (start_ != rhs.start_) {
-		return false;
-	}
-	if (end_ != rhs.end_) {
-		return false;
-	}
-	if (delta_ != rhs.delta_) {
-		return false;
-	}
-   if (value_ != rhs.value_) {
-      return false;
-   }
-	return true;
+    if (name_ != rhs.name_) {
+        return false;
+    }
+    if (start_ != rhs.start_) {
+        return false;
+    }
+    if (end_ != rhs.end_) {
+        return false;
+    }
+    if (delta_ != rhs.delta_) {
+        return false;
+    }
+    if (value_ != rhs.value_) {
+        return false;
+    }
+    return true;
 }
 
 std::string RepeatDate::valueAsString() const
 {
-	/// will throw a boost::bad_lexical_cast& if value is not convertible to a string
- 	try {
-		return boost::lexical_cast< std::string >( last_valid_value() );
-	}
-	catch ( boost::bad_lexical_cast& ) {
-		LOG_ASSERT(false,"RepeatDate::valueAsString(): could not convert value " << value_ << " to a string");
-	}
-	return string();
+    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
+    try {
+        return boost::lexical_cast< std::string >( last_valid_value() );
+    }
+    catch ( boost::bad_lexical_cast& ) {
+        LOG_ASSERT(false,"RepeatDate::valueAsString(): could not convert value " << value_ << " to a string");
+    }
+    return string();
 }
 
 std::string RepeatDate::value_as_string(int index) const
@@ -397,31 +397,31 @@ void RepeatDate::increment()
 
 void RepeatDate::change( const std::string& newdate)
 {
- 	if (newdate.size() != 8) {
-      std::stringstream ss;
-      ss << "RepeatDate::change: " << toString() << " The new date is not valid, expected 8 characters in yyyymmdd format but found " << newdate;
-		throw std::runtime_error(ss.str());
- 	}
+    if (newdate.size() != 8) {
+        std::stringstream ss;
+        ss << "RepeatDate::change: " << toString() << " The new date is not valid, expected 8 characters in yyyymmdd format but found " << newdate;
+        throw std::runtime_error(ss.str());
+    }
 
-	long the_new_date = 0;
- 	try {
- 		the_new_date = boost::lexical_cast< long >( newdate );
-	}
-	catch ( boost::bad_lexical_cast& ) {
-      std::stringstream ss;
-      ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not convertible to an long";
- 		throw std::runtime_error(ss.str());
-	}
+    long the_new_date = 0;
+    try {
+        the_new_date = boost::lexical_cast< long >( newdate );
+    }
+    catch ( boost::bad_lexical_cast& ) {
+        std::stringstream ss;
+        ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not convertible to an long";
+        throw std::runtime_error(ss.str());
+    }
 
-	// Use date lib to check YMD
-	try { boost::gregorian::date(from_undelimited_string(newdate));}
-	catch (std::exception& e) {
-      std::stringstream ss;
-      ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not valid";
- 		throw std::runtime_error(ss.str());
-	}
+    // Use date lib to check YMD
+    try { (void)boost::gregorian::date(from_undelimited_string(newdate)); }
+    catch (std::exception& e) {
+        std::stringstream ss;
+        ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not valid";
+        throw std::runtime_error(ss.str());
+    }
 
-	changeValue(the_new_date);
+    changeValue(the_new_date);
 }
 
 void RepeatDate::changeValue(long the_new_date)
@@ -451,7 +451,7 @@ void RepeatDate::changeValue(long the_new_date)
        throw std::runtime_error(ss.str());
    }
 
-	set_value(the_new_date);
+    set_value(the_new_date);
 }
 
 void RepeatDate::set_value(long the_new_date)
@@ -483,7 +483,7 @@ RepeatDateList::RepeatDateList( const std::string& variable, const std::vector<i
          throw std::runtime_error("Invalid Repeat datelist " + ss.str());
       }
 
-      try { boost::gregorian::date(from_undelimited_string(date_i));}
+      try { (void)boost::gregorian::date(from_undelimited_string(date_i)); }
       catch (std::exception& e) {
          std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << i  << " is not valid. Please use yyyymmdd format.";
          throw std::runtime_error("Invalid Repeat datelist " + ss.str());
@@ -770,9 +770,9 @@ bool RepeatDateList::operator==(const RepeatDateList& rhs) const
 //======================================================================================
 
 RepeatInteger::RepeatInteger( const std::string& variable, int start, int end, int delta ) :
-	RepeatBase( variable ), start_( start ), end_( end ), delta_( delta ), value_( start )
+    RepeatBase( variable ), start_( start ), end_( end ), delta_( delta ), value_( start )
 {
-//	cout << toString() << "\n";
+// cout << toString() << "\n";
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatInteger: Invalid name: " + variable);
    }
@@ -781,14 +781,14 @@ RepeatInteger::RepeatInteger() = default;
 
 bool RepeatInteger::compare(RepeatBase* rb) const
 {
-	auto* rhs = dynamic_cast<RepeatInteger*>(rb);
-	if(!rhs) return false;
-	return operator==(*rhs);
+    auto* rhs = dynamic_cast<RepeatInteger*>(rb);
+    if(!rhs) return false;
+    return operator==(*rhs);
 }
 
 void RepeatInteger::reset() {
-	value_ = start_;
-	incr_state_change_no();
+    value_ = start_;
+    incr_state_change_no();
 }
 
 long RepeatInteger::last_valid_value() const
@@ -809,41 +809,41 @@ long RepeatInteger::valid_value(long value) const
 }
 
 void RepeatInteger::increment() {
-	value_ += delta_;
-	incr_state_change_no();
+    value_ += delta_;
+    incr_state_change_no();
 }
 
 void RepeatInteger::change( const std::string& newValue)
 {
- 	long the_new_value = 0;
- 	try {
- 		the_new_value = boost::lexical_cast< long >( newValue );
-	}
-	catch ( boost::bad_lexical_cast& ) {
-      std::stringstream ss;
-      ss << "RepeatInteger::change:" << toString() << " The new value(" << newValue << ") is not convertible to an long";
- 		throw std::runtime_error( ss.str() );
-	}
-	changeValue(the_new_value);
+    long the_new_value = 0;
+    try {
+        the_new_value = boost::lexical_cast< long >( newValue );
+    }
+    catch ( boost::bad_lexical_cast& ) {
+        std::stringstream ss;
+        ss << "RepeatInteger::change:" << toString() << " The new value(" << newValue << ") is not convertible to an long";
+        throw std::runtime_error( ss.str() );
+    }
+    changeValue(the_new_value);
 }
 
 void RepeatInteger::changeValue(long the_new_value)
 {
-	if (delta_ > 0) {
-		if (the_new_value < start_ || the_new_value > end_ ) {
-			std::stringstream ss;
-			ss << "RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_ << "-" << end_ << "] but found " << the_new_value;
-			throw std::runtime_error(ss.str());
-		}
-	}
-	else {
+    if (delta_ > 0) {
+        if (the_new_value < start_ || the_new_value > end_ ) {
+            std::stringstream ss;
+            ss << "RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_ << "-" << end_ << "] but found " << the_new_value;
+            throw std::runtime_error(ss.str());
+        }
+    }
+    else {
       if (the_new_value > start_ || the_new_value < end_ ) {
          std::stringstream ss;
          ss << "RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_ << "-" << end_ << "] but found " << the_new_value;
          throw std::runtime_error(ss.str());
       }
-	}
-	set_value(the_new_value);
+    }
+    set_value(the_new_value);
 }
 
 void RepeatInteger::set_value(long the_new_value)
@@ -861,7 +861,7 @@ void RepeatInteger::set_value(long the_new_value)
 void RepeatInteger::setToLastValue()
 {
    value_ = end_;
-	incr_state_change_no();
+    incr_state_change_no();
 }
 
 void RepeatInteger::write(std::string& ret) const
@@ -879,45 +879,45 @@ void RepeatInteger::write(std::string& ret) const
 
 std::string RepeatInteger::dump() const
 {
-	std::stringstream ss;
-	ss << toString() << " value(" << value_ << ")";
-	return ss.str();
+    std::stringstream ss;
+    ss << toString() << " value(" << value_ << ")";
+    return ss.str();
 }
 
 bool RepeatInteger::operator==(const RepeatInteger& rhs) const
 {
-	if (name_ != rhs.name_) {
+    if (name_ != rhs.name_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "RepeatInteger::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << "))" << "\n";
       }
 #endif
-		return false;
-	}
-	if (start_ != rhs.start_) {
+        return false;
+    }
+    if (start_ != rhs.start_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "RepeatInteger::operator==( start_(" << start_ << ") != rhs.start_(" << rhs.start_ << "))" << "\n";
       }
 #endif
-		return false;
-	}
-	if (end_ != rhs.end_) {
+        return false;
+    }
+    if (end_ != rhs.end_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "RepeatInteger::operator==( end_(" << end_ << ") != rhs.end_(" << rhs.end_ << "))" << "\n";
       }
 #endif
-		return false;
-	}
-	if (delta_ != rhs.delta_) {
+        return false;
+    }
+    if (delta_ != rhs.delta_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "RepeatInteger::operator==( delta_(" << delta_ << ") != rhs.delta_(" << rhs.delta_ << "))" << "\n";
       }
 #endif
-		return false;
-	}
+        return false;
+    }
    if (value_ != rhs.value_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
@@ -926,17 +926,17 @@ bool RepeatInteger::operator==(const RepeatInteger& rhs) const
 #endif
       return false;
    }
-	return true;
+    return true;
 }
 
 std::string RepeatInteger::valueAsString() const
 {
-	/// will throw a boost::bad_lexical_cast& if value is not convertible to a string
- 	try {
-		return boost::lexical_cast< std::string >( last_valid_value() );
-	}
-	catch ( boost::bad_lexical_cast& ) { LOG_ASSERT(false,"");}
-	return string();
+    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
+    try {
+        return boost::lexical_cast< std::string >( last_valid_value() );
+    }
+    catch ( boost::bad_lexical_cast& ) { LOG_ASSERT(false,"");}
+    return string();
 }
 
 std::string RepeatInteger::value_as_string(int index) const
@@ -981,15 +981,15 @@ RepeatEnumerated::RepeatEnumerated( const std::string& variable, const std::vect
 }
 
 int RepeatEnumerated::end() const   {
-	if ( theEnums_.empty() ) return 0;
-	return static_cast<int>(theEnums_.size()-1);
+    if ( theEnums_.empty() ) return 0;
+    return static_cast<int>(theEnums_.size()-1);
 }
 
 bool RepeatEnumerated::compare(RepeatBase* rb) const
 {
-	auto* rhs = dynamic_cast<RepeatEnumerated*>(rb);
-	if(!rhs) return false;
-	return operator==(*rhs);
+    auto* rhs = dynamic_cast<RepeatEnumerated*>(rb);
+    if(!rhs) return false;
+    return operator==(*rhs);
 }
 
 void RepeatEnumerated::write(std::string& ret) const
@@ -1004,19 +1004,19 @@ void RepeatEnumerated::write(std::string& ret) const
 
 std::string RepeatEnumerated::dump() const
 {
-	std::stringstream ss;
-	ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
- 	return ss.str();
+    std::stringstream ss;
+    ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
+    return ss.str();
 }
 
 void RepeatEnumerated::reset() {
-	currentIndex_ = 0;
-	incr_state_change_no();
+    currentIndex_ = 0;
+    incr_state_change_no();
 }
 
 void RepeatEnumerated::increment() {
-	currentIndex_++;
-	incr_state_change_no();
+    currentIndex_++;
+    incr_state_change_no();
 }
 
 long RepeatEnumerated::value() const
@@ -1055,9 +1055,9 @@ long RepeatEnumerated::last_valid_value() const
 
 void RepeatEnumerated::setToLastValue()
 {
-	currentIndex_ = static_cast< int > ( theEnums_.size()  - 1);
-	if (currentIndex_ < 0) currentIndex_ = 0;
-	incr_state_change_no();
+    currentIndex_ = static_cast< int > ( theEnums_.size()  - 1);
+    if (currentIndex_ < 0) currentIndex_ = 0;
+    incr_state_change_no();
 }
 
 std::string RepeatEnumerated::valueAsString() const
@@ -1110,38 +1110,37 @@ std::string RepeatEnumerated::prev_value_as_string() const
 
 void RepeatEnumerated::change( const std::string& newValue)
 {
-	// See if if matches one of the enums
-	for(size_t i = 0; i < theEnums_.size(); i++) {
-		if ( theEnums_[i] == newValue) {
-			currentIndex_ = i;
-			incr_state_change_no();
-			return;
-		}
-	}
+    // See if if matches one of the enums
+    for(size_t i = 0; i < theEnums_.size(); i++) {
+        if ( theEnums_[i] == newValue) {
+            currentIndex_ = i;
+            incr_state_change_no();
+            return;
+        }
+    }
 
-	// If the value is convertible to an integer, treat as an index
-  	try {
- 		auto the_new_value = boost::lexical_cast< long >( newValue );
- 		changeValue(the_new_value); // can throw if out of range
- 		return;
-	}
-	catch ( boost::bad_lexical_cast& ) {}
+    // If the value is convertible to an integer, treat as an index
+    try {
+        auto the_new_value = boost::lexical_cast< long >( newValue );
+        changeValue(the_new_value); // can throw if out of range
+        return;
+    }
+    catch ( boost::bad_lexical_cast& ) {}
 
-
-	std::stringstream ss;
-	ss << "RepeatEnumerated::change:" << toString() << "\nThe new value " << newValue << " is not a valid index or a member of the enumerated list\n";
-	throw std::runtime_error(ss.str());
+    std::stringstream ss;
+    ss << "RepeatEnumerated::change:" << toString() << "\nThe new value " << newValue << " is not a valid index or a member of the enumerated list\n";
+    throw std::runtime_error(ss.str());
 }
 
 void RepeatEnumerated::changeValue( long the_new_value)
 {
- 	if ( the_new_value < 0 || the_new_value >= static_cast<int>(theEnums_.size())) {
-		std::stringstream ss;
-		ss << "RepeatEnumerated::changeValue:" << toString() << "\nThe new value '" << the_new_value << "' is not a valid index ";
-		ss << "expected range[0-" << theEnums_.size()-1 << "] but found '" << the_new_value << "'";
-		throw std::runtime_error( ss.str() );
-	}
- 	set_value(the_new_value);
+    if ( the_new_value < 0 || the_new_value >= static_cast<int>(theEnums_.size())) {
+        std::stringstream ss;
+        ss << "RepeatEnumerated::changeValue:" << toString() << "\nThe new value '" << the_new_value << "' is not a valid index ";
+        ss << "expected range[0-" << theEnums_.size()-1 << "] but found '" << the_new_value << "'";
+        throw std::runtime_error( ss.str() );
+    }
+    set_value(the_new_value);
 }
 
 void RepeatEnumerated::set_value(long the_new_value)
@@ -1157,22 +1156,22 @@ void RepeatEnumerated::set_value(long the_new_value)
 
 bool RepeatEnumerated::operator==(const RepeatEnumerated& rhs) const
 {
-	if (name_ != rhs.name_) {
+    if (name_ != rhs.name_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "RepeatEnumerated::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << "))\n";
       }
 #endif
-		return false;
-	}
-	if (theEnums_ != rhs.theEnums_) {
+        return false;
+    }
+    if (theEnums_ != rhs.theEnums_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "RepeatEnumerated::operator==( theEnums_ != rhs.theEnums_ )\n";
       }
 #endif
-		return false;
-	}
+        return false;
+    }
    if (currentIndex_ != rhs.currentIndex_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
@@ -1181,7 +1180,7 @@ bool RepeatEnumerated::operator==(const RepeatEnumerated& rhs) const
 #endif
       return false;
    }
-	return true;
+    return true;
 }
 
 
@@ -1199,15 +1198,15 @@ RepeatString::RepeatString( const std::string& variable, const std::vector<std::
 }
 
 int RepeatString::end() const   {
-	if ( theStrings_.empty() ) return 0;
-	return static_cast<int>(theStrings_.size()-1);
+    if ( theStrings_.empty() ) return 0;
+    return static_cast<int>(theStrings_.size()-1);
 }
 
 bool RepeatString::compare(RepeatBase* rb) const
 {
-	auto* rhs = dynamic_cast<RepeatString*>(rb);
-	if(!rhs) return false;
-	return operator==(*rhs);
+    auto* rhs = dynamic_cast<RepeatString*>(rb);
+    if(!rhs) return false;
+    return operator==(*rhs);
 }
 
 void RepeatString::write(std::string& ret) const
@@ -1222,14 +1221,14 @@ void RepeatString::write(std::string& ret) const
 
 std::string RepeatString::dump() const
 {
-	std::stringstream ss;
-	ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
- 	return ss.str();
+    std::stringstream ss;
+    ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
+    return ss.str();
 }
 
 void RepeatString::reset() {
-	currentIndex_ = 0;
-	incr_state_change_no();
+    currentIndex_ = 0;
+    incr_state_change_no();
 }
 
 long RepeatString::last_valid_value() const
@@ -1267,14 +1266,14 @@ std::string RepeatString::prev_value_as_string() const
 }
 
 void RepeatString::increment() {
-	currentIndex_++;
-	incr_state_change_no();
+    currentIndex_++;
+    incr_state_change_no();
 }
 
 void RepeatString::setToLastValue() {
-	currentIndex_ = static_cast<int>(theStrings_.size()-1);
-   if (currentIndex_ < 0) currentIndex_ = 0;
-	incr_state_change_no();
+    currentIndex_ = static_cast<int>(theStrings_.size()-1);
+    if (currentIndex_ < 0) currentIndex_ = 0;
+    incr_state_change_no();
 }
 
 std::string RepeatString::valueAsString() const
@@ -1293,37 +1292,37 @@ std::string RepeatString::value_as_string(int index) const
 
 void RepeatString::change( const std::string& newValue)
 {
-	// See if if matches one of the strings
-	for(size_t i = 0; i < theStrings_.size(); i++) {
-		if ( theStrings_[i] == newValue) {
-			currentIndex_ = i;
-			incr_state_change_no();
-			return;
-		}
-	}
+    // See if if matches one of the strings
+    for(size_t i = 0; i < theStrings_.size(); i++) {
+        if ( theStrings_[i] == newValue) {
+            currentIndex_ = i;
+            incr_state_change_no();
+            return;
+        }
+    }
 
-	// If the value is convertible to an integer, treat as an index
-  	try {
- 		long the_new_value = boost::lexical_cast< int >( newValue );
- 		changeValue(the_new_value);
- 		return;
-	}
-	catch ( boost::bad_lexical_cast& ) {}
+    // If the value is convertible to an integer, treat as an index
+    try {
+        long the_new_value = boost::lexical_cast< int >( newValue );
+        changeValue(the_new_value);
+        return;
+    }
+    catch ( boost::bad_lexical_cast& ) {}
 
-	std::stringstream ss;
-	ss << "RepeatString::change: " << toString() << "\nThe new value " << newValue << " is not a valid index or member of the string list";
-	throw std::runtime_error(ss.str());
+    std::stringstream ss;
+    ss << "RepeatString::change: " << toString() << "\nThe new value " << newValue << " is not a valid index or member of the string list";
+    throw std::runtime_error(ss.str());
 }
 
 void RepeatString::changeValue( long the_new_value)
 {
-	if ( the_new_value < 0 || the_new_value >= static_cast<int>(theStrings_.size())) {
-		std::stringstream ss;
-		ss << "RepeatString::change: " << toString() << " The new the integer " << the_new_value << " is not a valid index ";
-		ss << "expected range[0-" << theStrings_.size()-1 << "]'";
-		throw std::runtime_error( ss.str() );
-	}
-	set_value(the_new_value);
+    if ( the_new_value < 0 || the_new_value >= static_cast<int>(theStrings_.size())) {
+        std::stringstream ss;
+        ss << "RepeatString::change: " << toString() << " The new the integer " << the_new_value << " is not a valid index ";
+        ss << "expected range[0-" << theStrings_.size()-1 << "]'";
+        throw std::runtime_error( ss.str() );
+    }
+    set_value(the_new_value);
 }
 
 void RepeatString::set_value(long the_new_value)
@@ -1339,25 +1338,25 @@ void RepeatString::set_value(long the_new_value)
 
 bool RepeatString::operator==(const RepeatString& rhs) const
 {
-	if (name_ != rhs.name_) {
-		return false;
-	}
-	if (theStrings_ != rhs.theStrings_) {
-		return false;
-	}
+    if (name_ != rhs.name_) {
+        return false;
+    }
+    if (theStrings_ != rhs.theStrings_) {
+        return false;
+    }
    if (currentIndex_ != rhs.currentIndex_) {
       return false;
    }
-	return true;
+    return true;
 }
 
 //=======================================================================================
 
 bool RepeatDay::compare(RepeatBase* rb) const
 {
-	auto* rhs = dynamic_cast<RepeatDay*>(rb);
-	if(!rhs) return false;
-	return operator==(*rhs);
+    auto* rhs = dynamic_cast<RepeatDay*>(rb);
+    if(!rhs) return false;
+    return operator==(*rhs);
 }
 
 void RepeatDay::write(std::string& ret) const
@@ -1368,15 +1367,15 @@ void RepeatDay::write(std::string& ret) const
 
 std::string RepeatDay::dump() const
 {
-	return toString();
+    return toString();
 }
 
 bool RepeatDay::operator==(const RepeatDay& rhs) const
 {
-	if (step_ != rhs.step_) {
-		return false;
-	}
-	return true;
+    if (step_ != rhs.step_) {
+        return false;
+    }
+    return true;
 }
 // =========================================================================================
 
