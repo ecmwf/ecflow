@@ -494,6 +494,9 @@ public:
    void deleteInlimit(const std::string& name);
    void deleteZombie(const std::string& type); // string must be one of [ user | ecf | path ]
    void deleteLate();
+   void deleteAutoCancel();
+   void deleteAutoRestore();
+   void deleteAutoArchive();
 
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors

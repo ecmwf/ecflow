@@ -125,6 +125,10 @@ void ClientInvoker::set_user_name(const std::string& user) {
    clientEnv_.clear_user_password(); // force re-check of password
 }
 
+void ClientInvoker::set_password(const std::string& password) {
+   clientEnv_.set_password(password);
+}
+
 void ClientInvoker::taskPath(const std::string& s) {
 	test_ = true;
 	clientEnv_.taskPath(s);

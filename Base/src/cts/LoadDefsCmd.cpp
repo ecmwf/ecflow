@@ -21,6 +21,7 @@
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "PrintStyle.hpp"
+#include <boost/filesystem.hpp>
 
 using namespace ecf;
 using namespace std;
@@ -46,12 +47,26 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
       throw std::runtime_error(ss.str());
    }
 
-   // At the end of the parse check the trigger/complete expressions and resolve in-limits
    defs_ptr defs = Defs::create();
    std::string errMsg, warningMsg;
-   if (defs->restore(defs_filename_, errMsg , warningMsg) ) {
 
-	  defs->handle_migration();
+   bool load_ok = false;
+
+   if (defs_filename.find("suite") != std::string::npos && defs_filename.find("endsuite") != std::string::npos) {
+      load_ok = defs->restore_from_string(defs_filename, errMsg, warningMsg);
+      defs_filename_ = "";
+   }
+   else if (boost::filesystem::exists(defs_filename)) {
+      // defs_filename is actually a file, open the file and read it. This is the method
+      // when loading definitions with ecflow_client
+
+      // At the end of the parse check the trigger/complete expressions and resolve in-limits
+
+      load_ok = defs->restore(defs_filename_, errMsg , warningMsg);
+   }
+
+   if (load_ok) {
+      defs->handle_migration();
       defs->set_server().add_or_update_user_variables( client_env ); // use in test environment
 
       if (print) {
@@ -68,10 +83,11 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
       cout << warningMsg;
    }
    else {
-      std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file " << defs_filename_ << "\n";
+      std::stringstream ss; ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file/definition " << defs_filename_ << "\n";
       ss << errMsg;
       throw std::runtime_error( ss.str() );
    }
+
 }
 
 bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const

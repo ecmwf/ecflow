@@ -61,6 +61,8 @@ ClientOptions::ClientOptions()
             "host: If specified will override the environment variable ECF_HOST and default host, localhost");
    desc_->add_options()("user",po::value< string >()->implicit_value( string("") ),
             "user: The user name to be used when contacting the server. Can only be used when password is also specified");
+   desc_->add_options()("password",po::value< string >()->implicit_value( string("") ),
+            "password: The password to be used when contacting the server");
 #ifdef ECF_OPENSSL
    desc_->add_options()("ssl","ssl: If specified will override the environment variable ECF_SSL");
 #endif

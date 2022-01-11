@@ -12,14 +12,14 @@ with dependencies on each other and on time, in a controlled environment.
 It provides tolerance, for hardware and software failures, combined with 
 good restart capabilities.
 
-ecFlow runs as a server receiving requests from clients. 
-The command line interface, the graphical interface, scripts and the 
-Python API(application interface) are the clients. The server is based 
-on C++/boost ASIO and uses TCP/IP for communication. 
-Multiple servers can be run on the same hardware. 
-ecFlow submits tasks (jobs) and receives acknowledgements from tasks via specific commands 
-embedded in the scripts. The relationship between tasks is stored in ecFlow, 
-and it is able to submit tasks dependent on the status of other tasks and attributes like time.
+ecFlow runs as a server receiving requests from clients. The command line interface, 
+the graphical interface, scripts,  Python API and the REST API are the clients. 
+The server is based on C++/boost ASIO and uses TCP/IP for communication. 
+
+Multiple servers can be run on the same hardware. ecFlow submits tasks (jobs) and 
+receives acknowledgements from tasks via specific commands embedded in the scripts.
+The relationship between tasks is stored in ecFlow, and it is able to submit tasks
+dependent on the status of other tasks and attributes like time.
 
 The command line interface for ecFlow allows the suite definition to be 
 loaded and retrieved from the server. Also it provides a rich set of 
@@ -32,7 +32,9 @@ The Python API also provides functionality for client to server communication.
 In addition, it allows checking of the suite, testing the defined 
 interrelations between tasks, and other references and limits.
 
-
+The REST API enables integration to cloud workflows where http calls are commonly
+used to trigger events. ecFlow REST API supports all user and client commands
+available to the command line tool.
 
 Documentation
 -------------
@@ -210,6 +212,9 @@ Cereal
 ^^^^^^
 * ecflow uses embedded CEREAL(version 1.3.0) for client/server communication via JSON
 
+cpp-httplib
+^^^^^^^^^^^
+* ecflow uses cpp-httlib for providing a REST API to ecflow server
 
 Python Api
 ^^^^^^^^^^
