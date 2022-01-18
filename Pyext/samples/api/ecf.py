@@ -2428,63 +2428,6 @@ class TestEcf(unittest.TestCase):
         cmd += "dot -Tps test.gv > test.ps && xdg-open test.ps"
         os.system(cmd)
 
-    def test_defs(self):
-        import json
-        git = os.getenv("GIT_ECFLOW", './')
-        if git[-1] != '/':
-            git += '/'
-        locs = [git + "ANode/parser/test/data/good_defs",
-                git + "CSim/test/data/good_defs"]
-        global USE_LATE
-
-        USE_LATE = True
-
-        def process_dir(loc):
-            for root, dirs, files in os.walk(loc):
-                for file in files:
-                    if file.endswith(".def"):
-                        defs = ecflow.Defs(os.path.join(root, file))
-                        for att in ecflow.AttrType.names:
-                            defs.sort_attributes(att, True)
-                        tree = to_json(to_dict(defs))
-                        print("#name", os.path.join(root, file))
-                        # print("#defs", defs, tree, type(tree))
-                        data = json.loads(tree)
-                        # print("#data", data)
-                        edges = json_to_defs(data)
-                        # print("#edges", edges)
-
-                        DEFS = Defs().add(edges)
-                        import suite_diff
-                        for suite in defs.suites:
-                            for alter in DEFS.real.suites:
-                                if suite.name() == alter.name():
-                                    suite_diff.REF = suite_diff.Content(
-                                        defs, suite.name(), suite)
-                                    suite_diff.RES = suite_diff.Content(
-                                        DEFS.real, suite.name(), alter)
-                                    suite_diff.walk(suite)
-                                    suite_diff.RES = suite_diff.Content(
-                                        defs, suite.name(), suite)
-                                    suite_diff.REF = suite_diff.Content(
-                                        DEFS.real, suite.name(), alter)
-                                    suite_diff.walk(alter)
-                                    break
-                        for att in ecflow.AttrType.names:
-                            DEFS.real.sort_attributes(att, True)
-
-                        comp = DEFS.real == defs
-                        print("#back", comp)
-                        if not comp:
-                            print("# defs", defs)
-                            print("# DEFS", DEFS)  # , data)
-
-                for dir in dirs:
-                    process_dir(os.path.join(root, dir))
-
-        for loc in locs:
-            process_dir(loc)
-
     def test_cdp_aka_pyflow(self):
         CWN.cdp(True)
         with Suite("test",  # trigger="1==1"
