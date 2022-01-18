@@ -415,18 +415,26 @@ void OutputItemWidget::infoReady(VReply* reply)
 
         if(f)
         {
+            bool searched = false;
             //We do not have dir info so the file must be the jobout
-            if(dirModel_->isEmpty())
+            if(dirModel_->isEmpty()) {
                 searchOnReload();
-
+                searched = true;
             //We have dir info
-            else
+            } else
             {
                 auto* op=static_cast<OutputFileProvider*>(infoProvider_);
                 if(reply->fileName() == op->joboutFileName())
                 {
                     searchOnReload();
+                    searched = true;
                 }
+            }
+
+            // if the search is not performed but the user clicked the reload
+            // button we always go to the end of the document
+            if (!searched && userClickedReload_) {
+                browser_->toDocEnd();
             }
         }
 
