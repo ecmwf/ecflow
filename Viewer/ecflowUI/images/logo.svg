@@ -56,19 +56,15 @@
      inkscape:window-width="1505"
      inkscape:window-height="1047"
      id="namedview25"
-     showgrid="true"
-     inkscape:zoom="13.390625"
-     inkscape:cx="32"
-     inkscape:cy="32"
-     inkscape:window-x="144"
-     inkscape:window-y="94"
+     showgrid="false"
+     inkscape:zoom="5.2234043"
+     inkscape:cx="15.368636"
+     inkscape:cy="46"
+     inkscape:window-x="547"
+     inkscape:window-y="68"
      inkscape:window-maximized="0"
      inkscape:current-layer="Layer_1"
-     inkscape:document-rotation="0">
-    <inkscape:grid
-       type="xygrid"
-       id="grid845" />
-  </sodipodi:namedview>
+     inkscape:document-rotation="0" />
   <defs
      id="defs3">
     <style
@@ -88,20 +84,29 @@
       <stop
          offset="1"
          stop-color="#00294e"
-         id="stop15"
-         style="stop-color:#005aab;stop-opacity:1" />
+         id="stop15" />
     </linearGradient>
   </defs>
+  <rect
+     class="cls-1"
+     width="50.757431"
+     height="50.325043"
+     rx="7.7239561"
+     ry="7.6581583"
+     id="rect19"
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.12927;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     x="7.6005416"
+     y="7.4171143" />
   <polygon
      class="cls-2"
-     points="67,52 53,38 53,44 53,44 37,44 37,28 69,28 69,34 83,20 69,6 69,12 21,12 21,86 37,86 37,63 37,60 53,60 53,66 "
+     points="37,28 69,28 69,34 83,20 69,6 69,12 21,12 21,86 37,86 37,63 37,60 53,60 53,66 67,52 53,38 53,44 37,44 "
      id="polygon21"
-     style="fill:#007dc1;fill-opacity:1"
-     transform="matrix(0.6947731,0,0,0.69625858,-3.5056648,-0.38329621)" />
+     style="fill:url(#linear-gradient-2)"
+     transform="matrix(0.52279175,0,0,0.53626033,7.7225883,7.6954632)" />
   <polygon
      class="cls-3"
-     points="72,24 75.93,20 75.93,20 72,16 72,18 27,18 27,80 31,80 31,54 56,54 56,56 60,52 56,48 56,50 31,50 31,22 72,22 "
+     points="27,18 27,80 31,80 31,54 56,54 56,56 60,52 56,48 56,50 31,50 31,22 72,22 72,24 75.93,20 72,16 72,18 "
      id="polygon23"
-     transform="matrix(0.6947731,0,0,0.69625858,-3.5056648,-0.38329621)"
+     transform="matrix(0.52279175,0,0,0.53626033,7.7225883,7.6954632)"
      style="opacity:0.66;fill:#ffffff" />
 </svg>
