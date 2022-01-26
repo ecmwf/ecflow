@@ -375,10 +375,8 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
     } else if (n->logServer(host,port)) {
         UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
                              " port:" << port << " file: " << fileName;
-
-        //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
-        //owner_->infoProgress(reply_);
         owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from log server <i>" + host + "@" + port  +"</i>",0);
+        logServerUsed = true;
     }
 
     if (logServerUsed) {
