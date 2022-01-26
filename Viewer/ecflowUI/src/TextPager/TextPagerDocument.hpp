@@ -23,10 +23,20 @@
 #include <QList>
 #include <QVariant>
 #include <QTextCharFormat>
-#include <QTextCodec>
 #include <QChar>
-#include <QRegExp>
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QStringRef>
+#include <QRegExp>
+#include <QTextCodec>
+#else
+#include <QStringConverter>
+#include <QtCore5Compat/QStringRef>
+//#include <QtCore5Compat/QTextCodec>
+#include <QtCore5Compat/QRegExp>
+#endif
+
+#include "TextCodecWrapper.hpp"
 #include "TextPagerCursor.hpp"
 #include "TextPagerSection.hpp"
 
@@ -69,21 +79,30 @@ public:
     void setOptions(Options opt);
     inline void setOption(Option opt, bool on = true) { setOptions(on ? (options() | opt) : (options() &= ~opt)); }
 
-    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName)
-    { return load(device, mode, QTextCodec::codecForName(codecName)); }
-    inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName)
-    { return load(fileName, mode, QTextCodec::codecForName(codecName)); }
-    bool load(QIODevice *device, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
-    bool load(const QString &fileName, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
+    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName) {
+        return load(device, mode, TextCodecWrapper::fromName(codecName));
+    }
+    inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName) {
+        return load(fileName, mode, TextCodecWrapper::fromName(codecName));
+    }
+    bool load(QIODevice *device, DeviceMode mode = Sparse, TextCodecWrapper = {});
+    bool load(const QString &fileName, DeviceMode mode = Sparse,  TextCodecWrapper = {});
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+//    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName)
+//    { return load(device, mode, QTextCodec::codecForName(codecName)); }
+//    inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName)
+//    { return load(fileName, mode, QTextCodec::codecForName(codecName)); }
+//    bool load(QIODevice *device, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
+//    bool load(const QString &fileName, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
+    QTextCodec *textCodec() const;
+#endif
     void clear();
     DeviceMode deviceMode() const;
 
-    QTextCodec *textCodec() const;
-
     void setText(const QString &text);
     QString read(int pos, int size) const;
-    QStringRef readRef(int pos, int size) const;
+    //QStringRef readRef(int pos, int size) const;
     QChar readCharacter(int index) const;
 
     int documentSize() const;
@@ -113,20 +132,20 @@ public:
 
     QIODevice *device() const;
 
-    TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = nullptr,int limit = -1) const;
-    TextPagerCursor find(const QString &ba, const TextPagerCursor &cursor, FindMode flags = nullptr, int limit = -1) const;
-    TextPagerCursor find(const QChar &ch, const TextPagerCursor &cursor, FindMode flags = nullptr) const;
+    TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = {},int limit = -1) const;
+    TextPagerCursor find(const QString &ba, const TextPagerCursor &cursor, FindMode flags = {}, int limit = -1) const;
+    TextPagerCursor find(const QChar &ch, const TextPagerCursor &cursor, FindMode flags = {}) const;
     TextPagerCursor findLine(int lineNum, const TextPagerCursor &cursor) const;
 
-    inline TextPagerCursor find(const QRegExp &rx, int pos = 0, FindMode flags = nullptr) const
+    inline TextPagerCursor find(const QRegExp &rx, int pos = 0, FindMode flags = {}) const
     { return find(rx, TextPagerCursor(this, pos), flags); }
-    inline TextPagerCursor find(const QString &ba, int pos = 0, FindMode flags = nullptr) const
+    inline TextPagerCursor find(const QString &ba, int pos = 0, FindMode flags = {}) const
     { return find(ba, TextPagerCursor(this, pos), flags); }
-    inline TextPagerCursor find(const QChar &ch, int pos = 0, FindMode flags = nullptr) const
+    inline TextPagerCursor find(const QChar &ch, int pos = 0, FindMode flags = {}) const
     { return find(ch, TextPagerCursor(this, pos), flags); }
 
 
-    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = nullptr) const;
+    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = {}) const;
     inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
     TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
                                    const QVariant &data = QVariant());

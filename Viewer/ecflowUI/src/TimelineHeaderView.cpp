@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -370,33 +370,6 @@ void TimelineHeader::slotZoomState(bool)
 }
 
 
-#if 0
-void TimelineHeader::slotZoomOut(bool)
-{
-    if(!inZoom_ && !isZoomEnabled())
-    {
-        if(zoomHistory_.count() >= 2)
-        {
-            zoomOutCore();
-#if
-            zoomHistory_.pop();
-            QDateTime sDt=zoomHistory_.top().first;
-            QDateTime eDt=zoomHistory_.top().second;
-            if(sDt.isValid() && eDt.isValid())
-            {
-                setPeriodCore(sDt,eDt,false);
-                Q_EMIT periodSelected(sDt,eDt);
-            }
-#endif
-
-            checkActionState();
-        }
-    }
-}
-
-#endif
-
-
 bool TimelineHeader::isColumnZoomable(QPoint pos) const
 {
     int logicalIndex=logicalIndexAt(pos);
@@ -576,7 +549,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     qint64 firstTick=1; //in secs since epoch
 
     int hLineY=pRect.center().y()-majorTickSize_/2-1;
-    int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
+    //int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
     int majorTickTop=hLineY;
     int majorTickBottom=hLineY+majorTickSize_; //pRect.bottom()-fm_.height()-timeTextGap;
     int minorTickTop=hLineY;
@@ -584,8 +557,8 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     int dateTextY= hLineY - (hLineY-pRect.y() - fm_.height())/2 - fm_.height() + 1;
     int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
 
-    int timeItemW=fm_.width("223:442");
-    int dateItemW=fm_.width("2229 May22");
+    int timeItemW=ViewerUtil::textWidth(fm_,"223:442");
+    int dateItemW=ViewerUtil::textWidth(fm_,"2229 May22");
 
     QList<int> majorTickSec;
 
@@ -665,7 +638,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     {
         QDate  nextDay=startDate_.date().addDays(1);
         QDate  lastDay=endDate_.date();
-        qint64 nextSec=QDateTime(nextDay).toMSecsSinceEpoch()/1000;
+        qint64 nextSec=QDateTime(nextDay, QTime()).toMSecsSinceEpoch()/1000;
 
         if((nextSec-startSec) < 3600)
         {
@@ -688,14 +661,14 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
         QDate firstDay=nextDay;
         for(QDate d=firstDay; d < lastDay; d=d.addDays(dayFreq))
         {
-            int xp=secToPos((QDateTime(d).toMSecsSinceEpoch()/1000 +
-            QDateTime(d.addDays(1)).toMSecsSinceEpoch()/1000)/2-startSec,rect);
+            int xp=secToPos((QDateTime(d, QTime()).toMSecsSinceEpoch()/1000 +
+            QDateTime(d.addDays(1), QTime()).toMSecsSinceEpoch()/1000)/2-startSec,rect);
             dateLabels << qMakePair(xp,d.toString("dd MMM"));
         }
 
-        if(QDateTime(lastDay).toMSecsSinceEpoch()/1000 < endSec)
+        if(QDateTime(lastDay, QTime()).toMSecsSinceEpoch()/1000 < endSec)
         {
-            int xp=secToPos((QDateTime(lastDay).toMSecsSinceEpoch()/1000+endSec)/2 - startSec,rect);
+            int xp=secToPos((QDateTime(lastDay, QTime()).toMSecsSinceEpoch()/1000+endSec)/2 - startSec,rect);
             dateLabels << qMakePair(xp,lastDay.toString("dd MMM"));
         }
     }
@@ -705,7 +678,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     for(int i=0; i < dateLabels.count(); i++)
     {
         int xp=dateLabels[i].first;
-        int textW=fm_.width(dateLabels[i].second);
+        int textW=ViewerUtil::textWidth(fm_,dateLabels[i].second);
         //int yp=rect.bottom()-1-fm.height();
         painter->setFont(font_);
         painter->drawText(QRect(xp-textW/2, dateTextY,textW,fm_.height()),
@@ -747,7 +720,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
 #endif
             }
 
-            int textW=fm_.width(s);
+            int textW=ViewerUtil::textWidth(fm_,s);
             painter->setFont(font_);
             painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
                               Qt::AlignHCenter | Qt::AlignVCenter,s);
@@ -822,7 +795,7 @@ void MainTimelineHeader::setStartDate(QDateTime t)
 {
     startDate_=t;
     zoomHistory_.clear();
-    zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
+    zoomHistory_.push(QPair<QDateTime,QDateTime>(startDate_,endDate_));
     checkActionState();
     rerender();
 }
@@ -831,7 +804,7 @@ void MainTimelineHeader::setEndDate(QDateTime t)
 {
     endDate_=t;
     zoomHistory_.clear();
-    zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
+    zoomHistory_.push(QPair<QDateTime,QDateTime>(startDate_,endDate_));
     checkActionState();
     rerender();
 }
@@ -848,7 +821,7 @@ void MainTimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHisto
     endDate_=t2;
     if(addToHistory)
     {
-        zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
+        zoomHistory_.push(QPair<QDateTime,QDateTime>(startDate_,endDate_));
     }
     checkActionState();
     rerender();
@@ -987,7 +960,7 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     int minorTickBottom=majorTickBottom-3;
     int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
 
-    int timeItemW=fm_.width("223:442");
+    int timeItemW=ViewerUtil::textWidth(fm_,"223:442");
 
     QList<int> majorTickSec;
 
@@ -1073,7 +1046,7 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
 #endif
             }
 
-            int textW=fm_.width(s);
+            int textW=ViewerUtil::textWidth(fm_,s);
             painter->setFont(font_);
 
             if( xp-textW/2 < rect.x())
@@ -1142,7 +1115,7 @@ void NodeTimelineHeader::setStartTime(QTime t)
 {
     startTime_=t;
     zoomHistory_.clear();
-    zoomHistory_.push(qMakePair<QTime,QTime>(startTime_,endTime_));
+    zoomHistory_.push(QPair<QTime,QTime>(startTime_,endTime_));
     checkActionState();
     rerender();
 }
@@ -1151,7 +1124,7 @@ void NodeTimelineHeader::setEndTime(QTime t)
 {
     endTime_=t;
     zoomHistory_.clear();
-    zoomHistory_.push(qMakePair<QTime,QTime>(startTime_,endTime_));
+    zoomHistory_.push(QPair<QTime,QTime>(startTime_,endTime_));
     checkActionState();
     rerender();
 }
@@ -1168,7 +1141,7 @@ void NodeTimelineHeader::setPeriodCore(QTime t1,QTime t2,bool addToHistory)
     endTime_=t2;
     if(addToHistory)
     {
-        zoomHistory_.push(qMakePair<QTime,QTime>(startTime_,endTime_));
+        zoomHistory_.push(QPair<QTime,QTime>(startTime_,endTime_));
     }
     checkActionState();
     rerender();

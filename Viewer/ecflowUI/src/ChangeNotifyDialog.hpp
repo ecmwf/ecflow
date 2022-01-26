@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 #ifndef CHANGENOTIFYDIALOG_HPP_
 #define CHANGENOTIFYDIALOG_HPP_
 
+#include <QtGlobal>
 #include <QDialog>
 #include <QLinearGradient>
 #include <QSettings>
@@ -25,6 +26,7 @@
 class ChangeNotify;
 class VProperty;
 
+class QAbstractButton;
 class QButtonGroup;
 class QHBoxLayout;
 class QLabel;
@@ -93,7 +95,11 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void slotSelectionChanged(VInfo_ptr);
     void slotOptions();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void slotButtonToggled(QAbstractButton*, bool);
+#else
     void slotButtonToggled(int,bool);
+#endif
 
 protected:
     ChangeNotify* indexToNtf(int idx);

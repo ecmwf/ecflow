@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,10 +10,15 @@
 
 #include "VProperty.hpp"
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QRegExp>
+#else
+#include <QtCore5Compat/QRegExp>
+#endif
 
 #include "Sound.hpp"
 #include "UserMessage.hpp"
+#include "ViewerUtil.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -108,37 +113,43 @@ void VProperty::setValue(const std::string& val)
 
 	bool changed=false;
 
-    if(isColour(val))
-    {
-        QColor col=toColour(val);
-		changed=(value_.value<QColor>() != col);
-		value_=col;
-    }
-    else if(isFont(val))
-    {
-    	QFont font=toFont(val);
-    	changed=(value_.value<QFont>() != font);
-    	value_=font;
-    }
+    if (type_ == VProperty::StringType) {
+        QString str = QString::fromStdString(val);
+        changed=(value_ != str);
+        value_=str;
+    } else {
+        if(isColour(val))
+        {
+            QColor col=toColour(val);
+            changed=(value_.value<QColor>() != col);
+            value_=col;
+        }
+        else if(isFont(val))
+        {
+            QFont font=toFont(val);
+            changed=(value_.value<QFont>() != font);
+            value_=font;
+        }
 
-    else if(isNumber(val))
-    {
-    	int num=toNumber(val);
-    	changed=(value_.toInt() != num);
-    	value_=num;
-    }
-    else if(isBool(val))
-    {
-    	bool b=toBool(val);
-    	changed=(value_.toBool() != b);
-    	value_=b;
-    }
-    //Sound or string
-    else
-    {
-    	QString str=QString::fromStdString(val);
-    	changed=(value_ != str);
-    	value_=str;
+        else if(isNumber(val))
+        {
+            int num=toNumber(val);
+            changed=(value_.toInt() != num);
+            value_=num;
+        }
+        else if(isBool(val))
+        {
+            bool b=toBool(val);
+            changed=(value_.toBool() != b);
+            value_=b;
+        }
+        //Sound or string
+        else
+        {
+            QString str=QString::fromStdString(val);
+            changed=(value_ != str);
+            value_=str;
+        }
     }
 
     if(!defaultValue_.isNull() &&
@@ -514,7 +525,10 @@ bool VProperty::isSound(const std::string& val)
 
 bool VProperty::isNumber(const std::string& val)
 {
-	QString str=QString::fromStdString(val);
+    if (val.empty()) {
+        return false;
+    }
+    QString str=QString::fromStdString(val);
 	QRegExp re("\\d*");
 	return (re.exactMatch(str));
 }
@@ -544,6 +558,14 @@ QFont VProperty::toFont(const std::string& name)
 {
 	QString qn=QString::fromStdString(name);
 	QFont f;
+
+    // This is the default - automatically finds a
+    // monospace font
+    if (name == "font(Monospace,)") {
+        f = ViewerUtil::findMonospaceFont();
+        return f;
+    }
+
 	QRegExp rx("font\\((.*),(.*)\\)");
 	if(rx.indexIn(qn) > -1 && rx.captureCount() == 2)
 	{

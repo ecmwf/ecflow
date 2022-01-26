@@ -41,7 +41,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     leftMargin_(4),
     itemGap_(12),
     connectorGap_(1),
-    expandConnectorLenght_(20),   
+    expandConnectorLength_(20),   
     connectorColour_(Qt::black),
     drawConnector_(true),
     indentation_(0),
@@ -50,7 +50,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     noSelectionOnMousePress_(false),
     autoScroll_(true)
 {  
-    expandConnectorLenght_=itemGap_-2*connectorGap_;
+    expandConnectorLength_=itemGap_-2*connectorGap_;
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -131,7 +131,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
     }
 
     //Middle button - expand only, no selection
-    else if(event->button() == Qt::MidButton)
+    else if(event->button() == Qt::MiddleButton)
     {
         int viewItemIndex=itemAtCoordinate(event->pos());
         if(viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren)
@@ -1043,11 +1043,8 @@ void AbstractNodeView::setCurrentIndex(const QModelIndex &index)
     if(selectionModel_ && index.isValid())
     {
         QItemSelectionModel::SelectionFlags command = selectionCommand(index, nullptr);
-        selectionModel_->setCurrentIndex(index, command);
-        //currentIndexSet_ = true;
-        QPoint offset;
+        selectionModel_->setCurrentIndex(index, command);     
         if((command & QItemSelectionModel::Current) == 0)
-            //pressedPosition_ = visualRect(currentIndex()).center() + offset;
             pressedRefIndex_=currentIndex();
     }
 }

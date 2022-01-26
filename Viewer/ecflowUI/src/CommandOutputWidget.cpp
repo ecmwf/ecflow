@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -198,8 +198,8 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
     //Adjust the tree columns
     QFont f;
     QFontMetrics fm(f);
-    tree_->setColumnWidth(0,fm.width(" sh ecflow_client --port %ECF_PORT% --host %ECF_HOST% --stats--port %ECF_PORT%"));
-    tree_->setColumnWidth(1,fm.width(" running "));
+    tree_->setColumnWidth(0,ViewerUtil::textWidth(fm, " sh ecflow_client --port %ECF_PORT% --host %ECF_HOST% --stats--port %ECF_PORT%"));
+    tree_->setColumnWidth(1,ViewerUtil::textWidth(fm, " running "));
 
     errTe_->setShowLineNumbers(false);
     outTe_->setShowLineNumbers(false);

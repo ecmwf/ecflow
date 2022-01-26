@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -47,6 +47,8 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
 		parNames_[MaxOutputFileLines]="server.files.maxOutputFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
+        parNames_[UserLogServerHost]="server.files.logServerHost";
+        parNames_[UserLogServerPort]="server.files.logServerPort";
 
         parNames_[NodeMenuMode]="server.menu.nodeMenuMode";
         parNames_[NodeMenuModeForDefStatus]="server.menu.defStatusMenuModeControl";
@@ -196,7 +198,7 @@ void VServerSettings::loadSettings()
 	if(boost::filesystem::exists(fName))
 	{
 		VSettings vs(fName);
-		vs.read();
+        vs.read(false);
 		vs.beginGroup("suite_filter");
 		server_->suiteFilter()->readSettings(&vs);
 		vs.endGroup();

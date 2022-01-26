@@ -12,6 +12,7 @@
 
 #include <QImage>
 #include <QPainter>
+#include "ViewerUtil.hpp"
 
 FontMetrics::FontMetrics(const QFont &font) :
     QFontMetrics(font),
@@ -26,7 +27,7 @@ void FontMetrics::computeRealHeight(QFont f)
 {
     QFontMetrics fm(f);
     QString txt="Ayfgl";
-    QImage img(fm.width(txt)+6,fm.height(),QImage::Format_ARGB32_Premultiplied);
+    QImage img(ViewerUtil::textWidth(fm,txt)+6,fm.height(),QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::white);
     QPainter p(&img);
     p.setPen(Qt::black);

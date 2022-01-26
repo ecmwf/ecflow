@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -28,6 +28,7 @@
 #include "TextFormat.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 #include "VNode.hpp"
 
 QIcon* ServerRefreshInfoWidget::icon_=nullptr;
@@ -773,7 +774,7 @@ int ServerRefreshInfoWidget::determinePeriodTextWidthMin() const
     {
         s=periodDummyFullText_;
     }
-    return fmPeriod_.width(s);
+    return ViewerUtil::textWidth(fmPeriod_,s);
 }
 
 //Indicate if the full period text's size will change in such a way that the
@@ -795,7 +796,7 @@ bool ServerRefreshInfoWidget::periodTextWidthAboutToChange() const
     bool changed=false;
     if(periodTextWidthMin_ == mval)
     {
-        int w=fmPeriod_.width(pt);
+        int w=ViewerUtil::textWidth(fmPeriod_,pt);
         if(w > periodTextWidth_)
         {
             changed=w > periodTextWidthMin_;
@@ -830,7 +831,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
         int currentRight=0;
 
         serverRect_=QRect(buttonRect_.center().x()+4,(height()-h)/2,
-                          buttonRect_.width()/2-4+4+fmServer_.width(serverText_),
+                          buttonRect_.width()/2-4+4+ViewerUtil::textWidth(fmServer_,serverText_),
                           h);
         currentRight=serverRect_.x()+serverRect_.width();
 
@@ -842,7 +843,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
 
         //Compute physical width of the period text
         QString pt=fullPeriodText();
-        int w=fmPeriod_.width(pt);
+        int w=ViewerUtil::textWidth(fmPeriod_,pt);
         if(w <= periodTextWidthMin_)
         {
             periodTextWidth_=periodTextWidthMin_;
@@ -881,7 +882,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo)
         if((hasInfo_ && showLastAutoRefresh_) || !hasInfo_)
         {
             //Compute physical width of the last refresh text
-            lastTextWidth_=fmLast_.width(" last: 22:22:22 ");
+            lastTextWidth_=ViewerUtil::textWidth(fmLast_," last: 22:22:22 ");
 
             lastRect_ = QRect(currentRight,serverRect_.y(),lastTextWidth_,h);
             currentRight+=lastRect_.width()+6;
@@ -999,7 +1000,7 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
         //period + drift text
         if(drift_ > 0)
         {
-            int tw=fmPeriod_.width(fullPeriodText());
+            int tw=ViewerUtil::textWidth(fmPeriod_,fullPeriodText());
             int w=periodRect_.width();
             QRect rr=periodRect_.adjusted((w-tw)/2,0,-(w-tw)/2,0);
 

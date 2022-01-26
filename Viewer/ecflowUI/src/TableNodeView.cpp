@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -34,6 +34,7 @@
 #include "VFilter.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
+#include "ViewerUtil.hpp"
 
 #define _UI_TABLENODEVIEW_DEBUG
 
@@ -857,10 +858,9 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
 
         QFont f;
         QFontMetrics fm(f);
-        int textLeft=textRect.x();
         QRect pixRect=QRect(rect.x()+3,rect.center().y()-pixH/2,
                             pix.width(),pix.height());
-        if(pixRect.x()+pixRect.width() + fm.width(text) + 4 < textRect.x() + textRect.width())
+        if(pixRect.x()+pixRect.width() + ViewerUtil::textWidth(fm,text) + 4 < textRect.x() + textRect.width())
         {
             painter->drawPixmap(pixRect,pix);
             textRect.setX(pixRect.x()+pixRect.width() + 3);

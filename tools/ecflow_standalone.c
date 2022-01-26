@@ -1,5 +1,5 @@
 /*
-## Copyright 2009-2020 ECMWF.
+## Copyright 2009- ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 ## In applying this licence, ECMWF does not waive the privileges and immunities
@@ -74,7 +74,7 @@ ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
 #  define FALSE 0
 #endif
 
-#define MAXLEN 1024                /* Maximum line lenght */
+#define MAXLEN 1024                /* Maximum line length */
 
 char *nameof(char *name) {
   char *s;

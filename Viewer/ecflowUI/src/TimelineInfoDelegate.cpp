@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -23,6 +23,7 @@
 #include "TimelineData.hpp"
 #include "TimelineInfoDailyView.hpp"
 #include "VNState.hpp"
+#include "ViewerUtil.hpp"
 
 static std::vector<std::string> propVec;
 
@@ -89,9 +90,6 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
     initStyleOption(&vopt, index);
 
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     //Save painter state
     painter->save();
 
@@ -107,7 +105,7 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
         QRect textRect = vopt.rect;
         textRect.setX(textRect.x()+4);
         QFontMetrics fm(font_);
-        textRect.setWidth(fm.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm,text));
 
         painter->setPen(Qt::black);
 

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -25,8 +25,13 @@
 #include "VNode.hpp"
 
 #include <QMessageBox>
-#include <QRegExp>
 #include <QString>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include <map>
 
@@ -224,24 +229,33 @@ void CommandHandler::openLinkInBrowser(VInfo_ptr info)
             if(a->value("label_value", str_val))
             {
                 QString s = QString::fromStdString(str_val);
+                QString url;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+                QRegularExpression rx("(http:\\/\\/\\S+|https:\\/\\/\\S+)");
+                auto match = rx.match(s);
+                if (match.hasMatch()) {
+                    url = match.captured(1);
+                }
+#else
                 QRegExp rx("(http:\\/\\/\\S+|https:\\/\\/\\S+)");
                 if(rx.indexIn(s) >= 0)
                 {
-                    QString url=rx.cap(1);
-                    if(!url.isEmpty())
+                    url=rx.cap(1);
+                }
+#endif
+                if(!url.isEmpty())
+                {
+                    QString browser;
+                    if(VProperty* prop=VConfig::instance()->find("menu.web.defaultBrowser"))
                     {
-                        QString browser;
-                        if(VProperty* prop=VConfig::instance()->find("menu.web.defaultBrowser"))
-                        {
-                            browser = prop->valueAsString();
-                        }
-
-                        if(browser.isEmpty())
-                            browser = "firefox";
-
-                        std::string cmd="sh " + browser.toStdString() + " " + url.toStdString();
-                        ShellCommand::run(cmd, cmd, false);
+                        browser = prop->valueAsString();
                     }
+
+                    if(browser.isEmpty())
+                        browser = "firefox";
+
+                    std::string cmd="sh " + browser.toStdString() + " " + url.toStdString();
+                    ShellCommand::run(cmd, cmd, false);
                 }
 
             }

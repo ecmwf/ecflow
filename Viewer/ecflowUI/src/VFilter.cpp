@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -26,6 +26,7 @@
 #include "ServerHandler.hpp"
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QTime>
 
 #include <algorithm>
@@ -541,7 +542,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
     }
 
 #ifdef _UI_VFILTER_DEBUG
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 #endif
 
@@ -802,7 +803,7 @@ bool TableNodeFilter::update()
     }
 
 #ifdef _UI_VFILTER_DEBUG
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 #endif
 

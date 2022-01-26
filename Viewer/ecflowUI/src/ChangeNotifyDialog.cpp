@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,6 +18,7 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 #include "VConfig.hpp"
+#include "ViewerUtil.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 #include "WidgetNameProvider.hpp"
@@ -238,8 +239,8 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings)
         {
             QFont f;
             QFontMetrics fm(f);
-            tree_->setColumnWidth(0,fm.width("serverserverserver"));
-            tree_->setColumnWidth(1,fm.width("/suite1/family1/family2/family3/family4/task"));
+            tree_->setColumnWidth(0, ViewerUtil::textWidth(fm, "serverserverserver"));
+            tree_->setColumnWidth(1, ViewerUtil::textWidth(fm, "/suite1/family1/family2/family3/family4/task"));
         }
     }
 }
@@ -260,8 +261,13 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
     buttonHb_->setSpacing(2);
 
     buttonGroup_=new QButtonGroup(this);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(buttonGroup_, SIGNAL(buttonToggled(QAbstractButton*,bool)),
+            this, SLOT(slotButtonToggled(QAbstractButton*, bool)));
+#else
     connect(buttonGroup_,SIGNAL(buttonToggled(int,bool)),
             this,SLOT(slotButtonToggled(int,bool)));
+#endif
 
 	clearOnCloseCb_->setChecked(true);
 
@@ -309,7 +315,11 @@ void ChangeNotifyDialog::add(ChangeNotify* notifier)
     readNtfWidgetSettings(stacked_->count()-1);
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void ChangeNotifyDialog::slotButtonToggled(QAbstractButton*,bool)
+#else
 void ChangeNotifyDialog::slotButtonToggled(int,bool)
+#endif
 {
     int idx=buttonGroup_->checkedId();
     if(idx != -1)

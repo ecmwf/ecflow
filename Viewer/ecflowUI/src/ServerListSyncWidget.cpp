@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,6 +15,7 @@
 #include "ServerFilter.hpp"
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
+#include "ViewerUtil.hpp"
 
 ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
 {    
@@ -78,7 +79,7 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
 
             QFont f;
             QFontMetrics fm(f);
-            typeList_->setFixedWidth(fm.width("Host/port changed (2222)"));
+            typeList_->setFixedWidth(ViewerUtil::textWidth(fm,"Host/port changed (2222)"));
 
             connect(typeList_,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
                 this,SLOT(slotTypeChanged(QListWidgetItem*,QListWidgetItem*)));

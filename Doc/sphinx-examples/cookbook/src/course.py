@@ -424,7 +424,7 @@ class Reload(Admin):
             Label("info", "from sms to ecFlow"),
             Defcomplete(),
             Variables(
-                URL= "https://software.ecmwf.int/wiki/display/ECFLOW/Home",
+                URL= "https://confluence.ecmwf.int/display/ECFLOW/ecflow+home",
                 ECF_URL_CMD= "${BROWSER:=firefox} -remote 'openURL(%URL%"),
             self.main())
         return node

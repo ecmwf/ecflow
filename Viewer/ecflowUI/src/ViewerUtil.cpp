@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,12 +18,18 @@
 #include <QClipboard>
 #include <QComboBox>
 #include <QDebug>
+#include <QFontDatabase>
+#include <QFontMetrics>
 #include <QLabel>
 #include <QLinearGradient>
 #include <QStackedWidget>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QTreeView>
+
+
+#include <QRegularExpression>
+
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
@@ -216,4 +222,157 @@ QString ViewerUtil::formatDuration(unsigned int delta) //in seconds
     }
 
     return s;
+}
+
+
+int ViewerUtil::textWidth(const QFontMetrics& fm, QString txt, int len)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    return fm.horizontalAdvance(txt, len);
+#else
+    return fm.width(txt, len);
+#endif
+}
+
+int ViewerUtil::textWidth(const QFontMetrics& fm, QChar ch)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    return fm.horizontalAdvance(ch);
+#else
+    return fm.width(ch);
+#endif
+}
+
+// Taken from the qt-everywhere-opensource-4.8.3 source code:
+// src/corelib/tools/qregexp.cpp:wc2rx()
+// See JIRA issue ECFLOW-1753.
+QString ViewerUtil::wildcardToRegex(const QString &wc_str)
+{
+    const bool enableEscaping = true;
+    const int wclen = wc_str.length();
+    QString rx;
+    int i = 0;
+    bool isEscaping = false; // the previous character is '\'
+    const QChar *wc = wc_str.unicode();
+
+    while (i < wclen) {
+        const QChar c = wc[i++];
+        switch (c.unicode()) {
+        case '\\':
+            if (enableEscaping) {
+                if (isEscaping) {
+                    rx += QLatin1String("\\\\");
+                } // we insert the \\ later if necessary
+                if (i == wclen) { // the end
+                    rx += QLatin1String("\\\\");
+                }
+            } else {
+                rx += QLatin1String("\\\\");
+            }
+            isEscaping = true;
+            break;
+        case '*':
+            if (isEscaping) {
+                rx += QLatin1String("\\*");
+                isEscaping = false;
+            } else {
+                rx += QLatin1String(".*");
+            }
+            break;
+        case '?':
+            if (isEscaping) {
+                rx += QLatin1String("\\?");
+                isEscaping = false;
+            } else {
+                rx += QLatin1Char('.');
+            }
+
+            break;
+        case '$':
+        case '(':
+        case ')':
+        case '+':
+        case '.':
+        case '^':
+        case '{':
+        case '|':
+        case '}':
+            if (isEscaping) {
+                isEscaping = false;
+                rx += QLatin1String("\\\\");
+            }
+            rx += QLatin1Char('\\');
+            rx += c;
+            break;
+         case '[':
+            if (isEscaping) {
+                isEscaping = false;
+                rx += QLatin1String("\\[");
+            } else {
+                rx += c;
+                if (wc[i] == QLatin1Char('^'))
+                    rx += wc[i++];
+                if (i < wclen) {
+                    if (rx[i] == QLatin1Char(']'))
+                        rx += wc[i++];
+                    while (i < wclen && wc[i] != QLatin1Char(']')) {
+                        if (wc[i] == QLatin1Char('\\'))
+                            rx += QLatin1Char('\\');
+                        rx += wc[i++];
+                    }
+                }
+            }
+             break;
+
+        case ']':
+            if(isEscaping){
+                isEscaping = false;
+                rx += QLatin1String("\\");
+            }
+            rx += c;
+            break;
+
+        default:
+            if(isEscaping){
+                isEscaping = false;
+                rx += QLatin1String("\\\\");
+            }
+            rx += c;
+        }
+    }
+    return rx;
+}
+
+QFont ViewerUtil::findMonospaceFont()
+{
+    QStringList lst{"Monospace","Courier New", "Menlo", "Courier", "Monaco"};
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    auto fLst = QFontDatabase::families();
+#else
+    QFontDatabase db = QFontDatabase();
+    auto fLst = db.families();
+#endif
+    for(auto s: lst) {
+        for(auto fMem: fLst) {
+            if (fMem == s || fMem.startsWith(s + "[")) {
+                QFont f(fMem);
+                f.setFixedPitch(true);
+                f.setPointSize(10);
+                return f;
+            }
+        }
+    }
+
+    QFont fr;
+    fr.setPointSize(10);
+    return fr;
+}
+
+QIcon ViewerUtil::makeExpandIcon(bool targetOnRight)
+{
+    QIcon ic;
+    ic.addPixmap(QPixmap(":/viewer/expand_left.svg"), QIcon::Normal, (targetOnRight?QIcon::On:QIcon::Off));
+    ic.addPixmap(QPixmap(":/viewer/expand_right.svg"), QIcon::Normal, (targetOnRight?QIcon::Off:QIcon::On));
+    return ic;
 }

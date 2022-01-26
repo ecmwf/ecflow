@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -57,11 +57,17 @@ public:
 	void setFontProperty(VProperty* p);
     void updateFont();
 	void gotoLine();
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
 	void showSearchLine();
     void searchOnReload(bool userClickedReload);
 	void zoomIn();
 	void zoomOut();
     void setShowLineNumbers(bool);
+    void setWordWrap(bool);
+    bool isWordWrapSupported() const;
     void setSearchButtons(QToolButton* searchTb);
     void setFilterButtons(QToolButton* statusTb,QToolButton* optionTb);
 
@@ -70,13 +76,16 @@ protected Q_SLOTS:
     void slotRunFilter(QString,bool,bool);
     void slotRemoveFilter();
 
+Q_SIGNALS:
+    void wordWrapSupportChanged(bool);
+
 private:
     enum IndexType {BasicIndex=0,PagerIndex=1,HtmlIndex=2};
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
     bool isHtmlFile(QString fileName);
     void loadFile(QString fileName);
-    void loadText(QString text,QString fileName,bool resetFile=true);
+    void loadText(QString text,QString fileName,size_t dataSize, bool resetFile=true);
     void loadFilteredFile(VFile_ptr file);
     void setCursorPos(qint64 pos);
 

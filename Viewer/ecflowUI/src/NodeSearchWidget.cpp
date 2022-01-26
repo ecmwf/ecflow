@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -21,6 +21,7 @@
 #include "NodeQueryResultModel.hpp"
 #include "ServerFilter.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 #include "VNState.hpp"
 
 #include <QtGlobal>
@@ -197,11 +198,10 @@ void NodeSearchWidget::slotFind()
     //We set the button state in advance as if the engine were running
     adjustButtonState(true);
 
-    elapsed_.start();
+    elapsed_.restart();
     if(!engine_->runQuery(editor_->query(),editor_->allServers()))
     {
-        elapsed_=QTime();
-
+        elapsed_.invalidate();
         //if we are here we could not start the query and we need to reset the button state
         adjustButtonState();
     }
@@ -256,6 +256,7 @@ void NodeSearchWidget::slotQueryFinished()
     QString s="<b>" + QString::number(model_->rowCount()) + "</b> items found in " +
              QString::number(elapsed_.elapsed()*0.001,'f',1)  + " s";
 
+    elapsed_.invalidate();
     QColor col(90,92,92);
     if(engine_->wasMaxReached())
     {
@@ -266,7 +267,6 @@ void NodeSearchWidget::slotQueryFinished()
         s+=" (query was <b><u><font color=\'" + col.name() + "\'>interrupted!</font></u></b>)";
     }
     progressLabel_->setText(s);
-    elapsed_=QTime();
 
 #ifdef _UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << " isRunning=" << engine_->isRunning();
@@ -310,11 +310,11 @@ void NodeSearchWidget::adjustColumns()
         //for a large number of rows (> 1M)
         QFont f;
         QFontMetrics fm(f);
-        resTree_->setColumnWidth(0,fm.width("serverserverserse"));
-        resTree_->setColumnWidth(1,fm.width("/suite/family1/family2/longtaskname1"));
-        resTree_->setColumnWidth(2,fm.width("suspendedAA"));
-        resTree_->setColumnWidth(3,fm.width("familyAA"));
-        resTree_->setColumnWidth(4,fm.width("2017-Mar-07 15:45:56AA"));
+        resTree_->setColumnWidth(0,ViewerUtil::textWidth(fm,"serverserverserse"));
+        resTree_->setColumnWidth(1,ViewerUtil::textWidth(fm,"/suite/family1/family2/longtaskname1"));
+        resTree_->setColumnWidth(2,ViewerUtil::textWidth(fm,"suspendedAA"));
+        resTree_->setColumnWidth(3,ViewerUtil::textWidth(fm,"familyAA"));
+        resTree_->setColumnWidth(4,ViewerUtil::textWidth(fm,"2017-Mar-07 15:45:56AA"));
 	}
 }
 

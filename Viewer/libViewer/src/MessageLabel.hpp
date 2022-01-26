@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -35,7 +35,7 @@ public:
     void appendError(QString);
     void appendTip(QString);
     void startLoadLabel(bool showCacelButton=false);
-	void stopLoadLabel();
+    void stopLoadLabel();
     void startProgress(int max=0);
     void showProgressCancelButton(bool);
     void stopProgress();
@@ -44,9 +44,13 @@ public:
 	void clear();
     void setNarrowMode(bool);
 
+protected Q_SLOTS:
+    void stopLoadLabelByButton();
+    void stopProgressByButton();
+
 Q_SIGNALS:
-    void cancelProgress();
-    void cancelLoad();
+    void loadStoppedByButton();
+    void progressStoppedByButton();
 
 protected:
     void paintEvent(QPaintEvent *) override;

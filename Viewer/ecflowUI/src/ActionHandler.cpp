@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -119,7 +119,9 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
 #ifdef _UI_ACTIONHANDLER_DEBUG
         UiLog().dbg() << "ActionHandler::contextMenu --> item=" + item->name();
 #endif
-    	if(item->handler() == "info_panel")
+        UI_ASSERT(filteredNodes.size() > 0, "filteredNodes is empty");
+
+        if(item->handler() == "info_panel")
     	{
             Q_EMIT infoPanelCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;

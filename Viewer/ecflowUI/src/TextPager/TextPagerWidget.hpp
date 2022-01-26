@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -30,7 +30,11 @@ public:
     void zoomIn();
     void zoomOut();
     void gotoLine();
-    
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
+
     //void mouseMoveEvent(QMouseEvent *e);
 	//void timerEvent(QTimerEvent *e);
 protected Q_SLOTS:

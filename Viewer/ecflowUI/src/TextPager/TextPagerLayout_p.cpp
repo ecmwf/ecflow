@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <QtGlobal>
+
 #include "TextPagerLayout_p.hpp"
 #include "TextPagerEdit_p.hpp"
 #include "TextPagerDocument.hpp"
@@ -29,7 +31,11 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
     QTextLayout *textLayout = nullptr;
     if (!unusedTextLayouts.isEmpty()) {
         textLayout = unusedTextLayouts.takeLast();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+        textLayout->clearFormats();
+#else
         textLayout->clearAdditionalFormats();
+#endif
     } else {
         textLayout = new QTextLayout;
         textLayout->setCacheEnabled(true);
@@ -107,7 +113,11 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
         if (!syntaxHighlighter->d->formatRanges.isEmpty())
             formats += syntaxHighlighter->d->formatRanges;
     }
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    textLayout->setFormats(formats.toVector());
+#else
     textLayout->setAdditionalFormats(formats);
+#endif
     textLayout->beginLayout();
     const int lineWidth = viewportWidth() - (leftMargin + rightMargin);
 

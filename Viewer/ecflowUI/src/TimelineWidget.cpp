@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 #include "TimelineWidget.hpp"
 
 #include <QtGlobal>
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QTime>
 #include <QButtonGroup>
@@ -36,6 +37,8 @@
 
 #include "ui_TimelineWidget.h"
 
+
+#define UI_TIMELINEWIDGET_DEBUG_
 
 //=======================================================
 //
@@ -65,7 +68,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     //message label
     ui_->messageLabel->hide();
 
-    connect(ui_->messageLabel,SIGNAL(cancelLoad()),
+    connect(ui_->messageLabel,SIGNAL(loadStoppedByButton()),
             this,SLOT(slotCancelFileTransfer()));
 
     data_=new TimelineData(this);
@@ -156,8 +159,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->logModeCombo,SIGNAL(currentIndexChanged(int)),
             this,SLOT(slotLogMode(int)));
 
-    connect(viewModeGr,SIGNAL(buttonClicked(int)),
-            this,SLOT(slotViewMode(int)));
+    connect(viewModeGr,SIGNAL(buttonClicked(QAbstractButton*)),
+            this,SLOT(slotViewMode(QAbstractButton*)));
 
     connect(ui_->pathFilterMatchModeCb,SIGNAL(currentIndexChanged(int)),
         this, SLOT(pathFilterMatchModeChanged(int)));
@@ -180,8 +183,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->durationViewModeCb,SIGNAL(currentIndexChanged(int)),
             this,SLOT(slotDurationViewMode(int)));
 
-    connect(sortGr,SIGNAL(buttonClicked(int)),
-            this,SLOT(slotSortOrderChanged(int)));
+    connect(sortGr,SIGNAL(buttonClicked(QAbstractButton*)),
+            this,SLOT(slotSortOrderChanged(QAbstractButton*)));
 
     connect(ui_->showChangedTb,SIGNAL(toggled(bool)),
             this,SLOT(slotShowChanged(bool)));
@@ -531,7 +534,7 @@ void TimelineWidget::adjustWidgetsToViewMode()
     ui_->durationViewModeCb->setEnabled(!st);
 }
 
-void TimelineWidget::slotViewMode(int)
+void TimelineWidget::slotViewMode(QAbstractButton*)
 {
     bool timelineMode=ui_->timelineViewTb->isChecked();
 
@@ -616,7 +619,7 @@ void TimelineWidget::slotSortMode(int)
     }
 }
 
-void TimelineWidget::slotSortOrderChanged(int)
+void TimelineWidget::slotSortOrderChanged(QAbstractButton*)
 {
     bool ascending=ui_->sortUpTb->isChecked();
     sortModel_->setSortDirection(ascending);
@@ -933,7 +936,7 @@ void TimelineWidget::loadArchive()
 
     bool loadDone=false;
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     //std::vector<std::string> suites;
@@ -1028,6 +1031,8 @@ void TimelineWidget::slotFileTransferFinished()
 
 void TimelineWidget::slotFileTransferFailed(QString err)
 {
+    UI_FUNCTION_LOG
+
     if(!beingCleared_)
     {
         logTransferred_=false;
@@ -1057,11 +1062,15 @@ void TimelineWidget::slotLogLoadProgress(size_t current,size_t total)
 
 }
 
+// notification from messagelabel: user cancelled the transfer
 void TimelineWidget::slotCancelFileTransfer()
 {
-    if(fileTransfer_ && fileTransfer_->isActive())
+#ifdef UI_TIMELINEWIDGET_DEBUG_
+    UI_FUNCTION_LOG
+    UiLog().dbg() <<  "fileTransfer_=" << fileTransfer_;
+#endif
+    if(fileTransfer_)
     {
-        //ui_->messageLabel->stopLoad();
         fileTransfer_->stopTransfer();
     }
 }
@@ -1072,7 +1081,7 @@ void TimelineWidget::loadCore(QString logFile)
 
     ui_->messageLabel->showInfo("Loading timeline data from log file ...");
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     ui_->messageLabel->startProgress(100);

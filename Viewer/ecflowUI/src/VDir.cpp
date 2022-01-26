@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QtGlobal>
 
 VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode)
 {
@@ -57,8 +58,11 @@ void VDir::addItem(const std::string& name, unsigned int size,unsigned int mtime
 
 	item->name_=fileName;
 	item->size_=size;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+    item->mtime_ = QDateTime::fromSecsSinceEpoch(mtime);
+#else
 	item->mtime_ = QDateTime::fromTime_t(mtime);
-
+#endif
 	items_.push_back(item);
 
 }
@@ -82,7 +86,11 @@ void VDir::reload()
         	item->name_ = p.filename().string();
         	item->size_ =  boost::filesystem::file_size(p);
         	item->size_ =  boost::filesystem::file_size(p);
-        	item->mtime_ = QDateTime::fromTime_t(boost::filesystem::last_write_time(p));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+            item->mtime_ = QDateTime::fromSecsSinceEpoch(boost::filesystem::last_write_time(p));
+#else
+            item->mtime_ = QDateTime::fromTime_t(boost::filesystem::last_write_time(p));
+#endif
         	items_.push_back(item);
 
         }

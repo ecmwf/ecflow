@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,6 +9,7 @@
 
 #include "ShellCommand.hpp"
 
+#include <QtGlobal>
 #include <QDebug>
 #include <QProcess>
 #include <QString>
@@ -88,7 +89,12 @@ ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefSt
             this,SLOT(slotStdError()));
 
     startTime_=QDateTime::currentDateTime();
+
+#if QT_VERSION  >= QT_VERSION_CHECK(6, 0, 0)
+    proc_->start("/bin/sh", QStringList() << "-c" << command_ );
+#else
     proc_->start("/bin/sh -c \"" + command_ + "\"");
+#endif
 }
 
 QString ShellCommand::command() const

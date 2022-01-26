@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -66,7 +66,6 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 
 void TableFilterWidget::slotDefChanged()
 {
-	QColor bg(240,240,240);
     queryTe_->setHtml(filterDef_->query()->sqlQuery());
 }
 

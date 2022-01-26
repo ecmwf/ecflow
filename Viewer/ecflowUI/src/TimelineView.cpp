@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -119,10 +119,6 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 #endif
 
     initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     bool selected=option.state & QStyle::State_Selected;
 
     //Save painter state
@@ -158,7 +154,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
         QRect textRect = bgRect.adjusted(2,topPadding_,-3,-bottomPadding_);
         text=fm_.elidedText(text,Qt::ElideMiddle,textRect.width());
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         painter->setFont(font_);
         painter->setPen(Qt::black);        
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
@@ -194,8 +190,6 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     TimelineData *data=model_->data();
     if(!data)
         return;
-
-    bool selected=option.state & QStyle::State_Selected;
 
     int leftEdge=option.rect.x();
     int rightEdge=option.rect.x()+option.rect.width();
@@ -395,7 +389,6 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
 
 void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
 {
-    QColor endCol;
     if(lighter)
     {
         fillCol = fillCol.lighter(130);
@@ -448,7 +441,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
         text=ViewerUtil::formatDuration(val);
         textRect=rect;
         textRect.setX(right+5);
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         right=textRect.x()+textRect.width();
     }
 
@@ -475,7 +468,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
 
         percentRect=rect;
         percentRect.setX(right+5);
-        percentRect.setWidth(fm_.width(percentText));
+        percentRect.setWidth(ViewerUtil::textWidth(fm_,percentText));
         right=percentRect.x()+percentRect.width();
     }
 
@@ -528,14 +521,13 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, int maxVal, QC
     QString text;
     QRect textRect;
     QString percentText;
-    QRect percentRect;
 
     if(maxTextW > 0)
     {
         text=ViewerUtil::formatDuration(val);
         textRect=rect;
         textRect.setX(right+5);
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         right=textRect.x()+textRect.width();
     }
 
@@ -634,7 +626,7 @@ int TimelineDelegate::getDurationMaxTextWidth(int duration) const
         txt=" 999d 23h 59m 59s";
     }
 
-    return fm_.width(txt + " A999%[999] ");
+    return ViewerUtil::textWidth(fm_,txt + " A999%[999] ");
 }
 
 

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -25,6 +25,7 @@
 #include "TreeNodeModel.hpp"
 #include "UiLog.hpp"
 #include "VNState.hpp"
+#include "ViewerUtil.hpp"
 
 static std::vector<std::string> propVec;
 
@@ -95,7 +96,7 @@ public:
          height=realFontHeight+topPadding+bottomPadding;
          fullHeight=height+topMargin+bottomMargin;
          sizeHintCache=QSize(100,fullHeight);
-         spacing=fm.width('A')*3/4;
+         spacing=ViewerUtil::textWidth(fm,'A')*3/4;
 
          auto h=static_cast<int>(static_cast<float>(fm.height())*0.7);
          iconSize=h;
@@ -106,7 +107,7 @@ public:
          if(iconSize > 16)
              iconGap=2;
 
-         iconPreGap=fm.width('A')/2;
+         iconPreGap=ViewerUtil::textWidth(fm,'A')/2;
      }
 
      QRect adjustTextRect(const QRect& rIn) const override
@@ -154,7 +155,7 @@ public:
          height=realFontHeight+topPadding+bottomPadding;
          fullHeight=height+topMargin+bottomMargin;
          sizeHintCache=QSize(100,fullHeight);
-         spacing=fm.width('A')*3/4;
+         spacing=ViewerUtil::textWidth(fm,'A')*3/4;
 
          int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
          iconSize=h;
@@ -165,7 +166,7 @@ public:
          if(iconSize > 16)
              iconGap=2;
 
-         iconPreGap=fm.width('A')/2;
+         iconPreGap=ViewerUtil::textWidth(fm,'A')/2;
      }
 
      QRect adjustTextRect(const QRect& rIn) const override
@@ -520,7 +521,7 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
 
     NodeText nodeText;
     nodeText.text_=text;
-    int textWidth=fm.width(text);
+    int textWidth=ViewerUtil::textWidth(fm,text);
 
     if(nodeStyle_ == BoxAndTextNodeStyle)
     {
@@ -589,9 +590,9 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
         //infoFont.setBold(true);
         fm=QFontMetrics(serverInfoFont_);
 
-        int infoWidth=fm.width(infoTxt);
+        int infoWidth=ViewerUtil::textWidth(fm,infoTxt);
         infoRect = nodeText.br_;
-        infoRect.setLeft(currentRight+fm.width('A'));
+        infoRect.setLeft(currentRight+ViewerUtil::textWidth(fm,'A'));
         infoRect.setWidth(infoWidth);
         currentRight=infoRect.x()+infoRect.width();
     }
@@ -606,7 +607,7 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
     {
         an=animation_->find(Animation::ServerLoadType,true);
 
-        loadRect = QRect(currentRight+fm.width('A'),
+        loadRect = QRect(currentRight+ViewerUtil::textWidth(fm,'A'),
                         itemRect.top()+(itemRect.height()-an->scaledSize().height())/2,
                         an->scaledSize().width(),
                         an->scaledSize().height());
@@ -639,9 +640,9 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
 
             QFontMetrics fmNum(serverNumFont_);
 
-            int numWidth=fmNum.width(numTxt);
+            int numWidth=ViewerUtil::textWidth(fmNum,numTxt);
             numRect = nodeText.br_;
-            numRect.setLeft(currentRight+fmNum.width('A')/2);
+            numRect.setLeft(currentRight+ViewerUtil::textWidth(fmNum,'A')/2);
             numRect.setWidth(numWidth);
             currentRight=numRect.x()+numRect.width();
         }
@@ -658,9 +659,9 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
     {
         QFontMetrics fmErr(abortedReasonFont_);
         errRect = nodeText.br_;
-        errRect.setLeft(currentRight+fmErr.width('A')/2);
+        errRect.setLeft(currentRight+ViewerUtil::textWidth(fmErr,'A')/2);
         errTxt=fmErr.elidedText(errTxt,Qt::ElideRight,220);
-        errRect.setWidth(fmErr.width(errTxt));
+        errRect.setWidth(ViewerUtil::textWidth(fmErr,errTxt));
         currentRight = errRect.x()+errRect.width();
     }
 
@@ -814,7 +815,7 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
 
     //Node type
     QFontMetrics fmType(typeFont_);
-    int typeWidth=fmType.width(" S");
+    int typeWidth=ViewerUtil::textWidth(fmType," S");
 
     if(drawNodeType_)
     {
@@ -831,7 +832,7 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
 
     //The text rectangle
     nodeText.text_=text;
-    int textWidth=fm.width(text);
+    int textWidth=ViewerUtil::textWidth(fm,text);
 
     if(nodeStyle_ == BoxAndTextNodeStyle)
     {
@@ -953,9 +954,9 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
             numTxt="(" + va.toString() + ")";
             QFontMetrics fmNum(suiteNumFont_);
 
-            int numWidth=fmNum.width(numTxt);
+            int numWidth=ViewerUtil::textWidth(fmNum,numTxt);
             numRect = nodeText.br_;
-            numRect.setLeft(currentRight+fmNum.width('A')/2);
+            numRect.setLeft(currentRight+ViewerUtil::textWidth(fmNum,'A')/2);
             numRect.setWidth(numWidth);
             currentRight=numRect.x()+numRect.width();
         }
@@ -970,9 +971,9 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
     {
         QFontMetrics fmSubFail(abortedReasonFont_);
         subFailRect = nodeText.br_;
-        subFailRect.setLeft(currentRight+fmSubFail.width('A')/2);
+        subFailRect.setLeft(currentRight+ViewerUtil::textWidth(fmSubFail,'A')/2);
         subFailTxt=fmSubFail.elidedText(subFailText_,Qt::ElideRight,220);
-        subFailRect.setWidth(fmSubFail.width(subFailTxt));
+        subFailRect.setWidth(ViewerUtil::textWidth(fmSubFail,subFailTxt));
         currentRight=subFailRect.x()+subFailRect.width();
     }
 
@@ -987,9 +988,9 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
     {
         QFontMetrics fmReason(abortedReasonFont_);
         reasonRect = nodeText.br_;
-        reasonRect.setLeft(currentRight+fmReason.width('A')/2);
+        reasonRect.setLeft(currentRight+ViewerUtil::textWidth(fmReason,'A')/2);
         reasonTxt=fmReason.elidedText(reasonTxt,Qt::ElideRight,220);
-        reasonRect.setWidth(fmReason.width(reasonTxt));
+        reasonRect.setWidth(ViewerUtil::textWidth(fmReason,reasonTxt));
         currentRight=reasonRect.x()+reasonRect.width();
     }
 
@@ -1247,7 +1248,7 @@ void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter,const ServerUpda
     QColor maxCol=QColor(43,97,158);
 
     QRect r1=data.br_;
-    r1.setWidth(fm.width(data.prevText_));
+    r1.setWidth(ViewerUtil::textWidth(fm,data.prevText_));
     painter->setPen(minCol);
     //painter->setPen(Qt::red);
     painter->drawText(r1,Qt::AlignLeft | Qt::AlignVCenter,data.prevText_);
@@ -1255,7 +1256,7 @@ void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter,const ServerUpda
     if(!data.prevText_.isEmpty())
     {
         QRect r2=data.br_;
-        r2.setX(data.br_.right()-fm.width(data.nextText_));
+        r2.setX(data.br_.right()-ViewerUtil::textWidth(fm,data.nextText_));
         //painter->setPen(QColor(1,128,73));
         painter->setPen(maxCol);
         painter->drawText(r2,Qt::AlignRight | Qt::AlignVCenter,data.nextText_);
@@ -1299,7 +1300,7 @@ void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWid
 
     NodeText nodeText;
     nodeText.text_=text;
-    int textWidth=fm.width(text);
+    int textWidth=ViewerUtil::textWidth(fm,text);
 
     if(nodeStyle_ == BoxAndTextNodeStyle)
     {
@@ -1325,8 +1326,8 @@ void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWid
     if(hasInfo)
     {
         fm=QFontMetrics(serverInfoFont_);
-        int infoWidth=fm.width(infoTxt);
-        currentRight+=fm.width('A')+infoWidth;
+        int infoWidth=ViewerUtil::textWidth(fm,infoTxt);
+        currentRight+=ViewerUtil::textWidth(fm,'A')+infoWidth;
     }
 
     //The load icon (optional)
@@ -1337,7 +1338,7 @@ void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWid
     if(hasLoad)
     {
         an=animation_->find(Animation::ServerLoadType,true);
-        currentRight+=fm.width('A')+an->scaledSize().width();
+        currentRight+=ViewerUtil::textWidth(fm,'A')+an->scaledSize().width();
     }
     //Stops load animation
     else
@@ -1358,8 +1359,8 @@ void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWid
         {
             numTxt="(" + QString::number(va.toInt()) + ")";
             QFontMetrics fmNum(serverNumFont_);
-            int numWidth=fmNum.width(numTxt);
-            currentRight+=fmNum.width('A')/2+numWidth;
+            int numWidth=ViewerUtil::textWidth(fmNum,numTxt);
+            currentRight+=ViewerUtil::textWidth(fmNum,'A')/2+numWidth;
         }
     }
 
@@ -1381,10 +1382,10 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,int height, QString
 
     //Node type
     QFontMetrics fmType(typeFont_);
-    int typeWidth=fmType.width(" S");
+    int typeWidth=ViewerUtil::textWidth(fmType," S");
 
     //The text rectangle
-    int textWidth=fm.width(text);
+    int textWidth=ViewerUtil::textWidth(fm,text);
 
     if(nodeStyle_ == BoxAndTextNodeStyle)
     {       
@@ -1456,8 +1457,8 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,int height, QString
             {
                 QString numTxt="(" + va.toString() + ")";
                 QFontMetrics fmNum(suiteNumFont_);
-                int numWidth=fmNum.width(numTxt);
-                currentRight+=fmNum.width('A')/2+numWidth;
+                int numWidth=ViewerUtil::textWidth(fmNum,numTxt);
+                currentRight+=ViewerUtil::textWidth(fmNum,'A')/2+numWidth;
             }
         }
     }
@@ -1468,7 +1469,7 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,int height, QString
     {
         QFontMetrics fmSubFail(abortedReasonFont_);
         QString subFailTxt=fmSubFail.elidedText(subFailText_,Qt::ElideRight,220);
-        currentRight+=fmSubFail.width('A')/2+fmSubFail.width(subFailTxt);
+        currentRight+=ViewerUtil::textWidth(fmSubFail,'A')/2+ViewerUtil::textWidth(fmSubFail,subFailTxt);
     }
 
     //The aborted reason
@@ -1483,7 +1484,7 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,int height, QString
         {
             QFontMetrics fmReason(abortedReasonFont_);
             reasonTxt=fmReason.elidedText(reasonTxt,Qt::ElideRight,220);
-            currentRight+=fmReason.width('A')/2+fmReason.width(reasonTxt);
+            currentRight+=ViewerUtil::textWidth(fmReason,'A')/2+ViewerUtil::textWidth(fmReason,reasonTxt);
         }
     }
 

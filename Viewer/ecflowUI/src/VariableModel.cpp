@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -311,11 +311,7 @@ QModelIndex VariableModel::parent(const QModelIndex &child) const
 	{
 		int id=child.internalId();
 		int r=id/1000-1;
-#ifdef ECFLOW_QT5
 		return createIndex(r,child.column(),quintptr(0));
-#else
-		return createIndex(r,child.column(),0);
-#endif
 	}
 
 	return {};
@@ -697,7 +693,6 @@ QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const
 	if(matchMode_ != SearchMode)
 		return QModelIndexList();
 
-	QModelIndex root;
 	matchText_=value.toString();
 
 	matchLst_.clear();

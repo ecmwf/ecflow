@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,7 +13,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QStackedWidget>
-#include <QStyleOptionTabV2>
+#include <QStyleOptionTab>
 #include <QStylePainter>
 #include <QTabBar>
 #include <QToolButton>
@@ -26,7 +26,7 @@ void IconTabBar::paintEvent(QPaintEvent *e)
     QStylePainter painter(this);
     for(int i = 0; i < count(); ++i)
     {
-        QStyleOptionTabV2 option;
+        QStyleOptionTab option;
         initStyleOption(&option, i);
         painter.drawItemPixmap(option.rect, Qt::AlignTop|Qt::AlignHCenter, option.icon.pixmap(option.iconSize));
         //painter.drawItemText(option.rect, Qt::AlignBottom|Qt::AlignHCenter, palette(), 1, option.text);

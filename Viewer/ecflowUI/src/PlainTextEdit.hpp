@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -30,6 +30,11 @@ public:
 
     bool showLineNumbers()                 {return showLineNum_;}
     void setShowLineNumbers(bool b);
+
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
 
     void cursorRowCol(int *row, int *col);
     QChar characterBehindCursor(QTextCursor *cursor=nullptr);
@@ -67,6 +72,7 @@ protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     void fontSizeChangedByZoom();

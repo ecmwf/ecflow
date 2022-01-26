@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -34,9 +34,9 @@
 #include "UiLog.hpp"
 #include "VFile.hpp"
 
-int OutputBrowser::minPagerTextSize_=1*1024*1024;
-int OutputBrowser::minPagerSparseSize_=30*1024*1024;
-int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
+int OutputBrowser::minPagerTextSize_=40*1024*1024;
+int OutputBrowser::minPagerSparseSize_=40*1024*1024;
+int OutputBrowser::minConfirmSearchSize_=20*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
@@ -149,7 +149,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 
         //enable and init search
         if(searchTb_) searchTb_->setEnabled(true);
-        searchLine_->setConfirmSearch(false);
+        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
         searchLine_->setSearchInterface(textEditSearchInterface_);
 
         //enable filter
@@ -188,6 +188,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
     }
 
     showConfirmSearchLabel();
+    Q_EMIT wordWrapSupportChanged(isWordWrapSupported());
 }
 
 //This should only be called externally when a new output is loaded
@@ -207,7 +208,7 @@ void OutputBrowser::loadFile(VFile_ptr file)
     else
     {
         QString s(file_->data());
-        loadText(s,QString::fromStdString(file_->sourcePath()),true);
+        loadText(s,QString::fromStdString(file_->sourcePath()),file_->dataSize(), true);
     }
 
     //Run the filter if defined
@@ -237,7 +238,7 @@ void OutputBrowser::loadFile(QString fileName)
     file.open(QIODevice::ReadOnly);
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
-    
+
     if(isHtmlFile(fileName))
     {
         changeIndex(HtmlIndex,fSize);
@@ -270,16 +271,15 @@ void OutputBrowser::loadFile(QString fileName)
     }
 }
 
-void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
+void OutputBrowser::loadText(QString txt,QString fileName, size_t dataSize, bool resetFile)
 {
     // prior to the ability to save local copies of files, we reset the file_ member here;
     // but now we need to keep it so that we can save a copy of it
     //if(resetFile)
        //file_.reset();
 
-    //We estimate the size in bytes
-	qint64 txtSize=txt.size()*2;
-    
+    qint64 txtSize=dataSize;
+
     if(isHtmlFile(fileName))
     {
         changeIndex(HtmlIndex,txtSize);
@@ -382,6 +382,38 @@ void OutputBrowser::gotoLine()
        textPager_->gotoLine(); 
 }
 
+void OutputBrowser::toDocStart()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toDocStart();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toDocStart();
+}
+
+void OutputBrowser::toDocEnd()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toDocEnd();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toDocEnd();
+}
+
+void OutputBrowser::toLineStart()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toLineStart();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toLineStart();
+}
+
+void OutputBrowser::toLineEnd()
+{
+    if(stacked_->currentIndex() == BasicIndex)
+       textEdit_->toLineEnd();
+    else if(stacked_->currentIndex() == PagerIndex)
+       textPager_->toLineEnd();
+}
+
 void OutputBrowser::showSearchLine()
 {
     if(searchLine_->hasInterface())
@@ -430,6 +462,16 @@ void OutputBrowser::setShowLineNumbers(bool st)
 {
     textEdit_->setShowLineNumbers(st);
     textPager_->textEditor()->setShowLineNumbers(st);
+}
+
+void OutputBrowser::setWordWrap(bool st)
+{
+    textEdit_->setWordWrapMode(st?QTextOption::WrapAtWordBoundaryOrAnywhere:QTextOption::NoWrap);
+}
+
+bool OutputBrowser::isWordWrapSupported() const
+{
+    return (stacked_->currentIndex() == BasicIndex);
 }
 
 void OutputBrowser::showConfirmSearchLabel()

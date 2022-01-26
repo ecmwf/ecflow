@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,7 +17,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPixmap>
-#include <QProcess>
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -176,7 +175,9 @@ MainWindow::~MainWindow()
 {
     UiLog().dbg() << "MainWindow --> destructor";
     delete winTitle_;
-    serverFilterMenu_->aboutToDestroy();
+    if (!quitStarted_) {
+        serverFilterMenu_->aboutToDestroy();
+    }
 }
 
 void MainWindow::init(MainWindow *win)
@@ -492,15 +493,20 @@ void MainWindow::slotEditServerSettings(ServerHandler* s)
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-  	if(MainWindow::aboutToClose(this))
-	{
-		windows_.removeOne(this);
-		event->accept();
-	}
-	else
-	{
-	  	event->ignore();
-	}
+    UiLog().dbg() << "closeEvent";
+    if (!quitStarted_) {
+       UiLog().dbg() << "  start close";
+       if (windows_.count() == 1) {
+            UiLog().dbg() << " windows_.count=1, start quit";
+            MainWindow::aboutToQuit(this);
+            UiLog().dbg() << "closeEvent finished";
+            return;
+       }
+       UiLog().dbg() << "  accept close event";
+       windows_.removeOne(this);
+       event->accept();
+    }
+    UiLog().dbg() << "closeEvent finished";
 }
 
 //On quitting we need to call the destructor of all the servers shown in the gui.
@@ -644,39 +650,6 @@ void MainWindow::cleanUpOnQuit(MainWindow*)
         win->cleanUpOnQuit();
 }
 
-//Return true if close is allowed, false otherwise
-bool MainWindow::aboutToClose(MainWindow* win)
-{
-	//If quit has already stared we ignore the close signal from
-	//the main windows.
-  	if(quitStarted_)
-	{
-		return false;
-	}
-
-	//Otherwise
-	else
-	{
-  		if(windows_.count() > 1)
-		{
-		  	int tabCnt=win->nodePanel_->count();
-			if(tabCnt > 1)
-			{
-		  		if(QMessageBox::question(nullptr,tr("Confirm close"),tr("You are about to close <b>") + QString::number(tabCnt) + tr("</b> tabs. Are you sure you want to continue?"),
-			    	      QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
-				{
-					return false;
-				}
-			}
-		}
-		else if(windows_.count() == 1)
-		{
-            return MainWindow::aboutToQuit(win);
-		}
-		return true;
-	}
-}
-
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
 #if 0
@@ -687,11 +660,6 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 	{
 #endif
         quitStarted_=true;
-
-#ifdef ECFLOW_LOGVIEW
-        if(logCom_)
-            logCom_->closeApp();
-#endif
 
 		//Save browser settings
 		MainWindow::save(topWin);
@@ -714,7 +682,7 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 			}
 		}
 
-        // all qt-based classes can decect the the app is quitting
+        // all qt-based classes can decect that the app is quitting
         qApp->setProperty("inQuit","1");
 
         //Ensure the ServerHandler destructors are called
@@ -737,7 +705,7 @@ void MainWindow::init()
 	VComboSettings vs(cs->sessionFile(),cs->windowFile());
 
 	//Read configuration. If it fails we create an empty window!!
-	if(!vs.read())
+    if(!vs.read(true, "No session config was found! ecFlowUI will start with an empty window."))
 	{
 		 MainWindow::makeWindow(&vs);
 		 return;

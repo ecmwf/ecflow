@@ -224,7 +224,7 @@ locally and remotely. They are:
   * ECF_URL_CMD (for html man pages for tasks, plots display, products
     arrival html page)::
   
-     edit URLBASE https://software.ecmwf.int/wiki/display/
+     edit URLBASE https://confluence.ecmwf.int/display/
      edit URL     ECFLOW/Home
      edit ECF_CHECK_CMD '${BROWSER:=firefox} -remote "openURL(%URLBASE%/%URL%)"'
 

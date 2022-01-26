@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,11 @@
 #include "TextFormat.hpp"
 #include "VFileInfo.hpp"
 #include "VReply.hpp"
+
+static QColor keyColour(39,49,101);
+static QColor errorColour(255,0,0);
+static QColor dateColour(34,107,138);
+static QColor largeFileColour(Qt::red);
 
 FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 {
@@ -38,6 +43,9 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	if(!reply)
     {
         clear();
+        fullText_.clear();
+        compactText_.clear();
+        setToolTip("");
         return;
     }
 
@@ -45,22 +53,20 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	QString ttText;
 	QString s;
 
-	QColor col(39,49,101);
-    QColor colText(30,30,30);
-	QColor colErr(255,0,0);
-
 	QString fileName=QString::fromStdString(reply->fileName());
 
 	if(fileName.isEmpty())
 	{
-        s=Viewer::formatBoldText("File: ",col) + Viewer::formatText(" ??? ",colErr);
+        s=Viewer::formatBoldText("File: ",keyColour) + Viewer::formatText(" ??? ", errorColour);
 		setText(s);
+        fullText_.clear();
+        compactText_.clear();
 		setToolTip(QString());
 		return;
 	}
 
 	//Name
-    labelText=Viewer::formatBoldText("File: ",col);
+    labelText=Viewer::formatBoldText("File: ",keyColour);
     labelText+=fileName;
 
 	s="";
@@ -74,9 +80,9 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             VFileInfo fInfo(QString::fromStdString(f->path()));
             if(fInfo.exists())
             {
-                labelText+=Viewer::formatBoldText(" Size: ",col) +
+                labelText+=Viewer::formatBoldText(" Size: ",keyColour) +
                            formatFileSize(fInfo.formatSize(),fInfo.size());
-                s+=Viewer::formatBoldText(" Modified: ",col.name()) + fInfo.formatModDate();
+                s+=Viewer::formatBoldText(" Modified: ",keyColour.name()) + fInfo.formatModDate();
 
             }
         }
@@ -85,23 +91,23 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             VFileInfo f(fileName);
             if(f.exists())
             {
-                labelText+=Viewer::formatBoldText(" Size: ",col);
+                labelText+=Viewer::formatBoldText(" Size: ",keyColour);
                 labelText+=formatFileSize(f.formatSize(),f.size());
-                s+=Viewer::formatBoldText(" Modified: ",col) + f.formatModDate();
+                s+=Viewer::formatBoldText(" Modified: ",keyColour) + f.formatModDate();
             }
          }
 
          s+="<br>";
-         s+=Viewer::formatBoldText("Source: ",col) + " read from disk";
+         s+=Viewer::formatBoldText("Source: ",keyColour) + " read from disk";
 
          if(f)
          {          
-             s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
+             s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(f->fetchDate());
          }
 
          if(!reply->fileReadMethod().empty())
          {
-            s+=Viewer::formatBoldText(" Lookup method: ",col) + QString::fromStdString(reply->fileReadMethod());
+            s+=Viewer::formatBoldText(" Lookup method: ",keyColour) + QString::fromStdString(reply->fileReadMethod());
          }
 
 	}
@@ -112,7 +118,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
         {
             if(f->storageMode() == VFile::MemoryStorage)
             {
-                labelText+=Viewer::formatBoldText(" Size: ",col);
+                labelText+=Viewer::formatBoldText(" Size: ",keyColour);
                 labelText+=formatFileSize(VFileInfo::formatSize(f->dataSize()),f->dataSize());
             }
             else
@@ -120,14 +126,14 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
                 VFileInfo fInfo(QString::fromStdString(f->path()));
                 if(fInfo.exists())
                 {                   
-                    labelText+=Viewer::formatBoldText(" Size: ",col);
+                    labelText+=Viewer::formatBoldText(" Size: ",keyColour);
                     labelText+=formatFileSize(fInfo.formatSize(),fInfo.size());
                 }
             }
 
             s+="<br>";
-            s+=Viewer::formatBoldText("Source: ",col) + QString::fromStdString(f->fetchModeStr());         
-            s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
+            s+=Viewer::formatBoldText("Source: ",keyColour) + QString::fromStdString(f->fetchModeStr());
+            s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(f->fetchDate());
 
             int rowLimit=f->truncatedTo();
             if(rowLimit >= 0)
@@ -138,8 +144,8 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
         else if(reply->status() == VReply::TaskDone)
         {         
             s+="<br>";
-            s+=Viewer::formatBoldText("Source: ",col) + " fetched from server " +
-               Viewer::formatBoldText(" at ",col) + formatDate(QDateTime::currentDateTime());
+            s+=Viewer::formatBoldText("Source: ",keyColour) + " fetched from server " +
+               Viewer::formatBoldText(" at ",keyColour) + formatDate(QDateTime::currentDateTime());
 
             int rowLimit=reply->readTruncatedTo();
             if(rowLimit >= 0)
@@ -149,7 +155,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
         }
         else
         {           
-            s+="<br>Fetch attempted from server" + Viewer::formatBoldText(" at ",col)  +
+            s+="<br>Fetch attempted from server" + Viewer::formatBoldText(" at ",keyColour)  +
                     formatDate(QDateTime::currentDateTime());
         }
 	}
@@ -162,7 +168,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             //Path + size
             if(f->storageMode() == VFile::MemoryStorage)
 			{
-                labelText+=Viewer::formatBoldText(" Size: ",col);
+                labelText+=Viewer::formatBoldText(" Size: ",keyColour);
                 labelText+=formatFileSize(VFileInfo::formatSize(f->dataSize()),f->dataSize());
 			}
 			else
@@ -170,7 +176,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
                 VFileInfo fInfo(QString::fromStdString(f->path()));
                 if(fInfo.exists())
 				{					
-                    labelText+=Viewer::formatBoldText(" Size: ",col);
+                    labelText+=Viewer::formatBoldText(" Size: ",keyColour);
                     labelText+=formatFileSize(fInfo.formatSize(),fInfo.size());
 				}
 			}
@@ -178,7 +184,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<br>";
 
             //Source
-            s+=Viewer::formatBoldText("Source: ",col);
+            s+=Viewer::formatBoldText("Source: ",keyColour);
 
             if(f->cached())
             {
@@ -186,7 +192,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             }
             s+=QString::fromStdString(f->fetchModeStr());
             s+=" (took " + QString::number(static_cast<float>(f->transferDuration())/1000.,'f',1) + " s)";           
-            s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
+            s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(f->fetchDate());
         }
 	}
 
@@ -197,20 +203,45 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 		labelText +=" <i>" + extraText + "</i>";
 	}
 
-	setText(labelText);
+    fullText_ = labelText;
+    QFileInfo fInfo(fileName);
+    compactText_ = Viewer::formatBoldText("File: ",keyColour) + fInfo.fileName();
+
+    setText((compact_?compactText_:fullText_));
+    setToolTip(buildTooltipText());
 }
+
+void FileInfoLabel::setCompact(bool st)
+{
+    if (st != compact_) {
+        compact_ = st;
+        setText((compact_?compactText_:fullText_));
+        setToolTip(buildTooltipText());
+    }
+}
+
+QString FileInfoLabel::buildTooltipText()
+{
+    if (compact_) {
+        QString s = fullText_;
+        s = s.replace(keyColour.name(), QColor(86,182,194).name());
+        s = s.replace(dateColour.name(), QColor(214,149,69).name());
+        return s;
+    }
+    return {};
+}
+
 
 QString FileInfoLabel::formatDate(QDateTime dt)
 {
-    QColor col(34,107,138);
     QString s=dt.toString("yyyy-MM-dd") + "&nbsp;&nbsp;" +dt.toString("HH:mm:ss");
-    return Viewer::formatBoldText(s,col);
+    return Viewer::formatBoldText(s,dateColour);
 }
 
 QString FileInfoLabel::formatFileSize(QString str,qint64 size)
 {
-	if(size > 10*1024*1024)
-        return Viewer::formatText(str,QColor(Qt::red));
+    if(size > 40*1024*1024)
+        return Viewer::formatText(str,largeFileColour);
     return str;
 }
 

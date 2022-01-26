@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $ 
 //
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,7 +15,7 @@
 #include <algorithm>  // for std::transform
 #include <boost/python.hpp>
 #include <boost/core/noncopyable.hpp>
-
+#include <boost/algorithm/string.hpp>
 #include "ClientInvoker.hpp"
 #include "Defs.hpp"
 #include "ClientDoc.hpp"
@@ -48,7 +48,45 @@ const std::string& query1(ClientInvoker* self,
                          const std::string& query_type,
                          const std::string& path_to_attribute) { self->query(query_type,path_to_attribute,""); return self->get_string();}
 
-const std::string& get_log(ClientInvoker* self) { self->getLog(); return self->get_string();}
+//const std::string& get_log(ClientInvoker* self) { self->getLog(); return self->get_string();}
+
+const std::string& get_log(ClientInvoker* self, int lastLines)
+{ self->getLog(lastLines); return self->get_string();}
+
+const std::string& edit_script_edit(ClientInvoker* self,
+                                    const std::string& absNodePath )
+{ self->edit_script_edit(absNodePath); return self->get_string(); }
+
+const std::string& edit_script_preprocess(ClientInvoker* self,
+                                          const std::string& absNodePath )
+{ self->edit_script_preprocess(absNodePath); return self->get_string(); }
+
+int edit_script_submit(ClientInvoker* self,
+               const std::string& absNodePath,
+               const bp::list& name_values,
+               const bp::list& lines,
+               bool alias = false,
+               bool run = true
+              ) {
+  std::vector<std::string> file_contents;
+  BoostPythonUtil::list_to_str_vec(lines, file_contents);
+
+  std::vector<std::string> namv;  
+  BoostPythonUtil::list_to_str_vec(name_values, namv);
+  NameValueVec used_variables;
+  char sep = '=';
+  for (int i=0; i<namv.size(); ++i) {
+    string::size_type pos = namv[i].find(sep);
+    used_variables.push_back(std::make_pair(
+       namv[i].substr(0, pos-1),
+       namv[i].substr(pos+1, namv[i].length())));
+  }
+  return self->edit_script_submit(absNodePath,
+                  used_variables,
+                  file_contents,
+                  alias,
+                  run);
+}
 
 const std::string& get_file(ClientInvoker* self,
                             const std::string& absNodePath,
@@ -226,7 +264,7 @@ void zombieKillCli(ClientInvoker* self,const bp::list& list){std::vector<std::st
 void export_Client()
 {
    // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
- 	class_<ClientInvoker,std::shared_ptr<ClientInvoker>,boost::noncopyable>("Client",ClientDoc::class_client())
+   class_<ClientInvoker,std::shared_ptr<ClientInvoker>,boost::noncopyable>("Client",ClientDoc::class_client())
    .def( init<std::string>() /* host:port      */)
    .def( init<std::string,std::string>() /* host, port      */)
    .def( init<std::string,int>()         /* host, port(int) */)
@@ -246,40 +284,41 @@ void export_Client()
    .def("is_auto_sync_enabled",&ClientInvoker::is_auto_sync_enabled,"Returns true if automatic syncing enabled")
    .def("get_defs",         &ClientInvoker::defs,           ClientDoc::get_defs())
    .def("reset",            &ClientInvoker::reset,          "reset client definition, and handle number")
-	.def("in_sync",          &ClientInvoker::in_sync,        ClientDoc::in_sync())
-#ifdef DEBUG
- 	.def("get_log" ,         &get_log,                       return_value_policy<copy_const_reference>(),ClientDoc::get_log())
-#endif
- 	.def("new_log",          &ClientInvoker::new_log, (bp::arg("path")=""),ClientDoc::new_log())
- 	.def("clear_log",        &ClientInvoker::clearLog,                     ClientDoc::clear_log())
- 	.def("flush_log",        &ClientInvoker::flushLog,                     ClientDoc::flush_log())
+   .def("in_sync",          &ClientInvoker::in_sync,        ClientDoc::in_sync())
+   .def("get_log" ,         &get_log, return_value_policy<copy_const_reference>(), ClientDoc::get_log())
+   .def("edit_script_edit",       &edit_script_edit, return_value_policy<copy_const_reference>(), ClientDoc::edit_script_edit())
+   .def("edit_script_preprocess", &edit_script_preprocess, return_value_policy<copy_const_reference>(), ClientDoc::edit_script_preprocess())
+   .def("edit_script_submit",     &edit_script_submit, ClientDoc::edit_script_submit())
+   .def("new_log",          &ClientInvoker::new_log, (bp::arg("path")=""),ClientDoc::new_log())
+   .def("clear_log",        &ClientInvoker::clearLog,                     ClientDoc::clear_log())
+   .def("flush_log",        &ClientInvoker::flushLog,                     ClientDoc::flush_log())
    .def("log_msg",          &ClientInvoker::logMsg,                       ClientDoc::log_msg())
- 	.def("restart_server",   &ClientInvoker::restartServer,   ClientDoc::restart_server())
-	.def("halt_server",      &ClientInvoker::haltServer,      ClientDoc::halt_server())
-	.def("shutdown_server",  &ClientInvoker::shutdownServer,  ClientDoc::shutdown_server())
+   .def("restart_server",   &ClientInvoker::restartServer,   ClientDoc::restart_server())
+   .def("halt_server",      &ClientInvoker::haltServer,      ClientDoc::halt_server())
+   .def("shutdown_server",  &ClientInvoker::shutdownServer,  ClientDoc::shutdown_server())
    .def("terminate_server", &ClientInvoker::terminateServer, ClientDoc::terminate_server())
    .def("wait_for_server_reply",&ClientInvoker::wait_for_server_reply,(bp::arg("time_out")=60), ClientDoc::wait_for_server_reply())
-	.def("load" ,            &ClientInvoker::loadDefs,(bp::arg("path_to_defs"),bp::arg("force")=false,bp::arg("check_only")=false,bp::arg("print")=false,bp::arg("stats")=false),ClientDoc::load_defs())
-	.def("load" ,            &ClientInvoker::load,(bp::arg("defs"), bp::arg("force")=false),ClientDoc::load())
-	.def("get_server_defs",  &ClientInvoker::getDefs,         ClientDoc::get_server_defs())
+   .def("load" ,            &ClientInvoker::loadDefs,(bp::arg("path_to_defs"),bp::arg("force")=false,bp::arg("check_only")=false,bp::arg("print")=false,bp::arg("stats")=false),ClientDoc::load_defs())
+   .def("load" ,            &ClientInvoker::load,(bp::arg("defs"), bp::arg("force")=false),ClientDoc::load())
+   .def("get_server_defs",  &ClientInvoker::getDefs,         ClientDoc::get_server_defs())
    .def("sync_local",       &ClientInvoker::sync_local,(bp::arg("sync_suite_clock")=false),ClientDoc::sync())
- 	.def("news_local",       &news_local,                     ClientDoc::news())
+   .def("news_local",       &news_local,                     ClientDoc::news())
    .add_property("changed_node_paths",bp::range( &ClientInvoker::changed_node_paths_begin, &ClientInvoker::changed_node_paths_end),ClientDoc::changed_node_paths())
-	.def("suites" ,          &suites,                         ClientDoc::suites())
-	.def("ch_register",      &ch_register,                    ClientDoc::ch_register())
+   .def("suites" ,          &suites,                         ClientDoc::suites())
+   .def("ch_register",      &ch_register,                    ClientDoc::ch_register())
    .def("ch_suites",        &ch_suites,                      ClientDoc::ch_suites())
    .def("ch_handle",        &ClientInvoker::client_handle,   ClientDoc::ch_register())
-	.def("ch_drop",          &ClientInvoker::ch_drop,         ClientDoc::ch_drop())
+   .def("ch_drop",          &ClientInvoker::ch_drop,         ClientDoc::ch_drop())
    .def("ch_drop",          &ClientInvoker::ch1_drop)
    .def("ch_drop_user",     &ClientInvoker::ch_drop_user,    ClientDoc::ch_drop_user())
-	.def("ch_add",           &ch_add,                         ClientDoc::ch_add())
-	.def("ch_add",           &ch1_add )
-	.def("ch_remove",        &ch_remove,                      ClientDoc::ch_remove())
-	.def("ch_remove",        &ch1_remove)
-	.def("ch_auto_add",      &ClientInvoker::ch_auto_add,     ClientDoc::ch_auto_add())
-	.def("ch_auto_add",      &ClientInvoker::ch1_auto_add)
+   .def("ch_add",           &ch_add,                         ClientDoc::ch_add())
+   .def("ch_add",           &ch1_add )
+   .def("ch_remove",        &ch_remove,                      ClientDoc::ch_remove())
+   .def("ch_remove",        &ch1_remove)
+   .def("ch_auto_add",      &ClientInvoker::ch_auto_add,     ClientDoc::ch_auto_add())
+   .def("ch_auto_add",      &ClientInvoker::ch1_auto_add)
    .def("checkpt",          &ClientInvoker::checkPtDefs,     (bp::arg("mode")=ecf::CheckPt::UNDEFINED, bp::arg("check_pt_interval")=0,bp::arg("check_pt_save_alarm_time")=0), ClientDoc::checkpt())
-	.def("restore_from_checkpt",&ClientInvoker::restoreDefsFromCheckPt,ClientDoc::restore_from_checkpt())
+   .def("restore_from_checkpt",&ClientInvoker::restoreDefsFromCheckPt,ClientDoc::restore_from_checkpt())
    .def("reload_wl_file" ,  &ClientInvoker::reloadwsfile,    ClientDoc::reload_wl_file())
    .def("reload_passwd_file",&ClientInvoker::reloadpasswdfile,"reload the passwd file. <host>.<port>.ecf.passwd")
    .def("reload_custom_passwd_file",&ClientInvoker::reloadcustompasswdfile,"reload the custom passwd file. <host>.<port>.ecf.cusom_passwd. For users using ECF_USER or --user or set_user_name()")
@@ -293,7 +332,7 @@ void export_Client()
    .def("free_time_dep",    &free_time_dep1)
    .def("free_all_dep",     &free_all_dep,                   ClientDoc::free_all_dep())
    .def("free_all_dep",     &free_all_dep1)
-	.def("ping" ,            &ClientInvoker::pingServer,      ClientDoc::ping())
+   .def("ping" ,            &ClientInvoker::pingServer,      ClientDoc::ping())
    .def("stats" ,           &stats,                          ClientDoc::stats())
    .def("stats_reset" ,     &stats_reset,                    ClientDoc::stats_reset())
    .def("get_file" ,        &get_file,                       return_value_policy<copy_const_reference>(), ClientDoc::get_file())
@@ -315,8 +354,8 @@ void export_Client()
    .def("replace" ,         &ClientInvoker::replace_1)
    .def("replace" ,         &replace_1     )
    .def("replace" ,         &replace_2     )
-	.def("order" ,           &order,           ClientDoc::order())
-	.def("group" ,           &ClientInvoker::group,           ClientDoc::group())
+   .def("order" ,           &order,           ClientDoc::order())
+   .def("group" ,           &ClientInvoker::group,           ClientDoc::group())
    .def("begin_suite" ,     &ClientInvoker::begin,           (bp::arg("suite_name"),bp::arg("force")=false), ClientDoc::begin_suite())
    .def("begin_all_suites", &ClientInvoker::begin_all_suites,(bp::arg("force")=false), ClientDoc::begin_all())
    .def("job_generation",   &ClientInvoker::job_gen,         ClientDoc::job_gen())
@@ -362,7 +401,6 @@ void export_Client()
    .def("zombie_remove",    &zombieRemoveCli )
    .def("zombie_kill",      &zombieKillCli )
 
-
    .def("set_child_path",      &ClientInvoker::set_child_path ,    ClientDoc::set_child_path())
    .def("set_child_password",  &ClientInvoker::set_child_password, ClientDoc::set_child_password())
    .def("set_child_pid",       &ClientInvoker::set_child_pid,      ClientDoc::set_child_pid())
@@ -382,66 +420,66 @@ void export_Client()
    .def("child_wait",          &ClientInvoker::child_wait,    "Child command,wait for expression to come true")
    .def("child_queue",         &ClientInvoker::child_queue,(bp::arg("queue_name"),bp::arg("action"),bp::arg("step")="",bp::arg("path_to_node_with_queue")=""),"Child command,active:return current step as string, then increment index, requires queue name, and optionally path to node with the queue")
    .def("child_complete",      &ClientInvoker::child_complete,"Child command,notify server job has complete")
-	;
+    ;
 
-	class_<WhyCmd,  boost::noncopyable >( "WhyCmd",
-	         "The why command reports, the reason why a node is not running.\n\n"
-	         "It needs the  definition structure and the path to node\n"
-	         "\nConstructor::\n\n"
-	         "   WhyCmd(defs, node_path)\n"
-	         "      defs_ptr  defs   : pointer to a definition structure\n"
-	         "      string node_path : The node path\n\n"
-	         "\nExceptions:\n\n"
-	         "- raises RuntimeError if the definition is empty\n"
-	         "- raises RuntimeError if the node path is empty\n"
-	         "- raises RuntimeError if the node path cannot be found in the definition\n"
-	         "\nUsage::\n\n"
-	         "   try:\n"
-	         "      ci = Client()\n"
-	         "      ci.sync_local()\n"
-	         "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
-	         "      print(ask.why())\n"
+    class_<WhyCmd,  boost::noncopyable >( "WhyCmd",
+             "The why command reports, the reason why a node is not running.\n\n"
+             "It needs the  definition structure and the path to node\n"
+             "\nConstructor::\n\n"
+             "   WhyCmd(defs, node_path)\n"
+             "      defs_ptr  defs   : pointer to a definition structure\n"
+             "      string node_path : The node path\n\n"
+             "\nExceptions:\n\n"
+             "- raises RuntimeError if the definition is empty\n"
+             "- raises RuntimeError if the node path is empty\n"
+             "- raises RuntimeError if the node path cannot be found in the definition\n"
+             "\nUsage::\n\n"
+             "   try:\n"
+             "      ci = Client()\n"
+             "      ci.sync_local()\n"
+             "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
+             "      print(ask.why())\n"
             "   except RuntimeError, e:\n"
             "       print(str(e))\n\n"
-	         ,
-			init<defs_ptr,std::string >()
-	)
-	.def("why", &WhyCmd::why, "returns a '/n' separated string, with reasons why node is not running")
- 	;
+             ,
+            init<defs_ptr,std::string >()
+    )
+    .def("why", &WhyCmd::why, "returns a '/n' separated string, with reasons why node is not running")
+     ;
 
-	class_<UrlCmd,  boost::noncopyable >( "UrlCmd",
-	         "Executes a command ECF_URL_CMD to display a url.\n\n"
-	         "It needs the definition structure and the path to node.\n"
-	         "\nConstructor::\n\n"
-	         "   UrlCmd(defs, node_path)\n"
-	         "      defs_ptr  defs   : pointer to a definition structure\n"
-	         "      string node_path : The node path.\n\n"
-	         "\nExceptions\n\n"
-	         "- raises RuntimeError if the definition is empty\n"
-	         "- raises RuntimeError if the node path is empty\n"
-	         "- raises RuntimeError if the node path cannot be found in the definition\n"
-	         "- raises RuntimeError if ECF_URL_CMD not defined or if variable substitution fails\n"
-	         "\nUsage:\n"
-	         "Lets assume that the server has the following definition::\n\n"
-	         "   suite s\n"
-	         "      edit ECF_URL_CMD  \"${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%\"\n"
-	         "      edit ECF_URL_BASE \"http://www.ecmwf.int\"\n"
-	         "      family f\n"
-	         "         task t1\n"
-	         "            edit ECF_URL \"publications/manuals/ecflow\"\n"
-	         "         task t2\n"
-	         "            edit ECF_URL index.html\n\n"
-	         "::\n\n"
+    class_<UrlCmd,  boost::noncopyable >( "UrlCmd",
+             "Executes a command ECF_URL_CMD to display a url.\n\n"
+             "It needs the definition structure and the path to node.\n"
+             "\nConstructor::\n\n"
+             "   UrlCmd(defs, node_path)\n"
+             "      defs_ptr  defs   : pointer to a definition structure\n"
+             "      string node_path : The node path.\n\n"
+             "\nExceptions\n\n"
+             "- raises RuntimeError if the definition is empty\n"
+             "- raises RuntimeError if the node path is empty\n"
+             "- raises RuntimeError if the node path cannot be found in the definition\n"
+             "- raises RuntimeError if ECF_URL_CMD not defined or if variable substitution fails\n"
+             "\nUsage:\n"
+             "Lets assume that the server has the following definition::\n\n"
+             "   suite s\n"
+             "      edit ECF_URL_CMD  \"${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%\"\n"
+             "      edit ECF_URL_BASE \"http://www.ecmwf.int\"\n"
+             "      family f\n"
+             "         task t1\n"
+             "            edit ECF_URL \"publications/manuals/ecflow\"\n"
+             "         task t2\n"
+             "            edit ECF_URL index.html\n\n"
+             "::\n\n"
             "   try:\n"
-	         "      ci = Client()\n"
+             "      ci = Client()\n"
             "      ci.sync_local()\n"
             "      url = UrlCmd(ci.get_defs(),'/suite/family/task')\n"
-	         "      print(url.execute())\n"
+             "      print(url.execute())\n"
             "   except RuntimeError, e:\n"
             "       print(str(e))\n\n"
-  			,
-			init<defs_ptr,std::string >()
-	)
-	.def("execute", &UrlCmd::execute, "Displays url in the chosen browser")
- 	;
+              ,
+            init<defs_ptr,std::string >()
+    )
+    .def("execute", &UrlCmd::execute, "Displays url in the chosen browser")
+     ;
 }

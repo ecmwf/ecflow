@@ -16,6 +16,7 @@
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
+#include <QtGlobal>
 #include <QtAlgorithms>
 #include <QApplication>
 #include <QDebug>
@@ -271,7 +272,15 @@ void StandardView::paint(QPainter *painter,const QRegion& region)
 
     const int itemsCount = viewItems_.size();
     const int viewportWidth = viewport()->width();
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 8, 0)
     QVector<QRect> rects = region.rects();
+#else
+    QVector<QRect> rects;
+    for(auto rect : region) {
+        rects << rect;
+    }
+#endif
     QVector<int> drawn;
     bool multipleRects = (rects.size() > 1);
 

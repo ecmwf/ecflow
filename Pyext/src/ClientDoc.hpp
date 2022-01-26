@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #32 $ 
 //
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -28,7 +28,9 @@ public:
    static const char* set_retry_connection_period();
    static const char* set_connection_attempts();
 	static const char* get_defs();
-
+   static const char* edit_script_edit();
+   static const char* edit_script_preprocess();
+   static const char* edit_script_submit();
 	static const char* get_log();
 	static const char* new_log();
 	static const char* clear_log();

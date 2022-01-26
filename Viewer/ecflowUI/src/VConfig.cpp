@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -89,7 +89,7 @@ void VConfig::init(const std::string& parDirPath)
    std::string guiFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui.json");
    loadInit(guiFile);
 
-   //Read gui definition for the editable properties tahat can be cutomised per server
+   //Read gui definition for the editable properties that can be cutomised per server
    std::string guiServerFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui_server.json");
    loadInit(guiServerFile);
 
@@ -362,7 +362,7 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool gl
 		if(boost::filesystem::exists(parFile))
 		{
 			std::string errorMessage = e.what();
-			UserMessage::message(UserMessage::ERROR, true,
+            UserMessage::message(UserMessage::ERROR, true,
 	                std::string("Error! VConfig::loadSettings() unable to parse settings file: " + parFile + " Message: " +errorMessage));
 		}
 	    return;

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -263,10 +263,6 @@ void TimelineInfoDailyDelegate::paint(QPainter *painter,const QStyleOptionViewIt
 #endif
 
     initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
     bool selected=option.state & QStyle::State_Selected;
 
     //Save painter state
@@ -290,7 +286,7 @@ void TimelineInfoDailyDelegate::paint(QPainter *painter,const QStyleOptionViewIt
         //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
         QRect textRect = bgRect.adjusted(2,topPadding_,-3,-bottomPadding_);
         text=fm_.elidedText(text,Qt::ElideMiddle,textRect.width());
-        textRect.setWidth(fm_.width(text));
+        textRect.setWidth(ViewerUtil::textWidth(fm_,text));
         painter->setFont(font_);
         painter->setPen(Qt::black);
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
@@ -331,8 +327,6 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
 
     int leftEdge=option.rect.x();
     int rightEdge=option.rect.x()+option.rect.width();
-    int xpPrev=leftEdge-2;
-    int xpNext=rightEdge+2;
     int extendedRight=-1;
 
     unsigned int day=index.data().toUInt();
@@ -486,7 +480,6 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
 
 void TimelineInfoDailyDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
 {
-    QColor endCol;
     if(lighter)
     {
         fillCol = fillCol.lighter(130);

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -97,9 +97,7 @@ bool VSettings::containsFullPath(const std::string& key)
 	return (pt_.get_child_optional(key) != boost::none);
 }
 
-
-//bool VSettings::read(const std::string &fs)
-bool VSettings::read(bool failIfFileDoesNotExist)
+bool VSettings::read(bool showPopupOnError, const std::string& extraMessage)
 {
 	try
 	{
@@ -107,19 +105,16 @@ bool VSettings::read(bool failIfFileDoesNotExist)
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
-		namespace fs=boost::filesystem;
-		fs::path boostpath(file_);
-		if (!failIfFileDoesNotExist && !fs::exists(boostpath))  // no file and that's ok
-			return false;
-
-		if(!DirectoryHandler::isFirstStartUp())
-		{
-			std::string errorMessage = e.what();
-			UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
-		}
-		return false;
-	}
-
+        std::string errorMessage = e.what();
+        if(!DirectoryHandler::isFirstStartUp()) {
+            std::string m = "Unable to parse config file : " + errorMessage;
+            if (!extraMessage.empty()) {
+                m += "\n\n" +  extraMessage;
+            }
+            UserMessage::message(UserMessage::WARN, showPopupOnError, m);
+        }
+        return false;
+    }
 	return true;
 }
 

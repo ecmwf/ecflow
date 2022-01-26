@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,6 +11,7 @@
 #include "ChangeNotifyEditor.hpp"
 
 #include "PropertyLine.hpp"
+#include "ViewerUtil.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
 
@@ -40,7 +41,7 @@ ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 	QFontMetrics fm(f);
 	//tree_->setFixedHeight((fm.height()+4)*5.5);
 
-	tree_->setFixedWidth(fm.width("Restartedaaa")+30);
+    tree_->setFixedWidth(ViewerUtil::textWidth(fm, "Restartedaaa")+30);
 
 	//tab_->hide();
 }

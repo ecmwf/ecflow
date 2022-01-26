@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,6 +27,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 
+#include "TextCodecWrapper.hpp"
 #include "TextPagerWidget.hpp"
 
 #include "GotoLineDialog.hpp"
@@ -56,7 +57,7 @@ void TextPagerWidget::clear()
 
 bool TextPagerWidget::load(const QString &fileName, TextPagerDocument::DeviceMode mode)
 {
-	return textEditor_->load(fileName, mode, nullptr);
+    return textEditor_->load(fileName, mode, TextCodecWrapper());
 }
 
 void TextPagerWidget::setText(const QString &txt)
@@ -109,3 +110,23 @@ void TextPagerWidget::gotoLine(int line)
 {
     textEditor_->gotoLine(line);
 }    
+
+void TextPagerWidget::toDocStart()
+{
+    textEditor_->toDocStart();
+}
+
+void TextPagerWidget::toDocEnd()
+{
+    textEditor_->toDocEnd();
+}
+
+void TextPagerWidget::toLineStart()
+{
+    textEditor_->toLineStart();
+}
+
+void TextPagerWidget::toLineEnd()
+{
+    textEditor_->toLineEnd();
+}

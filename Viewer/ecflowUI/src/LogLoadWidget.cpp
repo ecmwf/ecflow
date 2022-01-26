@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,6 +31,7 @@
 
 #include <QtGlobal>
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHBoxLayout>
@@ -49,6 +50,8 @@
 
 #include "ui_LogLoadWidget.h"
 
+#define UI_LOGLOADWIDGET_DEBUG_
+
 //=======================================================
 //
 // LogLoadWidget
@@ -62,6 +65,9 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
 
     //message label
     ui_->messageLabel->hide();
+
+    connect(ui_->messageLabel,SIGNAL(loadStoppedByButton()),
+            this,SLOT(slotCancelFileTransfer()));
 
     //Chart views
     viewHandler_=new LogRequestViewHandler(this);
@@ -628,7 +634,7 @@ void LogLoadWidget::loadArchive()
 
     bool loadDone=false;
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     logModel_->beginLoadFromReader();
@@ -737,11 +743,15 @@ void LogLoadWidget::slotLogLoadProgress(size_t current,size_t total)
 
 }
 
+// notification from messagelabel: user cancelled the transfer
 void LogLoadWidget::slotCancelFileTransfer()
 {
-    if(fileTransfer_ && fileTransfer_->isActive())
+#ifdef UI_LOGLOADWIDGET_DEBUG_
+    UI_FUNCTION_LOG
+    UiLog().dbg() <<  "fileTransfer_=" << fileTransfer_;
+#endif
+    if(fileTransfer_)
     {
-        //ui_->messageLabel->stopLoad();
         fileTransfer_->stopTransfer();
     }
 }
@@ -753,7 +763,7 @@ void LogLoadWidget::loadCore(QString logFile)
     ui_->messageLabel->showInfo("Loading data from log file ... [size=" +
                                 fInfo.formatSize() + "]");
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
 
     ui_->messageLabel->startProgress(100);

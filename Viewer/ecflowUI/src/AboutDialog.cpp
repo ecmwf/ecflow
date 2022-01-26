@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,8 +16,13 @@
 
 #include <QDate>
 #include <QProcessEnvironment>
-#include <QRegExp>
 #include <QTreeWidgetItem>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
@@ -34,6 +39,26 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     descTxt+="<br><b>OpenSSL:</b> disabled";
 #endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+    QRegularExpression rx("boost\\((\\S+)\\)");
+    auto match = rx.match(desc);
+    if (match.hasMatch()) {
+        descTxt+="<br><b>boost version:</b> " + match.captured(1);
+    }
+
+    rx=QRegularExpression("compiler\\(([^\\)]+)\\)");
+    match = rx.match(desc);
+    if (match.hasMatch()) {
+        descTxt+="<br><b>compiler</b>: " + match.captured(1);
+    }
+
+    rx=QRegularExpression("protocol\\((\\S+)\\)");
+    match = rx.match(desc);
+    if (match.hasMatch()) {
+        descTxt+="<br><b>protocol:</b> " + match.captured(1);
+    }
+
+#else
     int pos=0;
     QRegExp rx("boost\\((\\S+)\\)");
     if((pos = rx.indexIn(desc, pos)) != -1)
@@ -52,7 +77,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     {
         descTxt+="<br><b>protocol:</b> " + rx.cap(1);
     }
-
+#endif
     descTxt+="<br><b>compiled on:</b> " +desc.section("Compiled on",1,1);
 
     const char *qtv=qVersion();
@@ -118,4 +143,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     }
 
     envTree_->resizeColumnToContents(0);
+
+    tabWidget->setCurrentIndex(0);
 }

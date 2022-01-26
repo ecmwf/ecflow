@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -559,7 +559,7 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
         QChartView::mousePressEvent(event);
     }
-    else if(event->button() == Qt::MidButton || event->button() == Qt::RightButton)
+    else if(event->button() == Qt::MiddleButton || event->button() == Qt::RightButton)
     {
        if(event->pos().x() <= chart()->plotArea().right() &&
           event->pos().x() >= chart()->plotArea().left())

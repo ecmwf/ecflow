@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,6 +13,7 @@
 
 #include <QBrush>
 #include <QCursor>
+#include <QIcon>
 #include <QPixmap>
 #include <QSettings>
 #include <QString>
@@ -23,6 +24,7 @@ class QComboBox;
 class QStackedWidget;
 class QTabWidget;
 class QTreeView;
+class QFontMetrics;
 
 class ViewerUtil
 {
@@ -42,6 +44,11 @@ public:
    static void setOverrideCursor(QCursor cursor);
    static void restoreOverrideCursor();
    static QString formatDuration(unsigned int);
+   static int textWidth(const QFontMetrics& fm, QString txt, int len=-1);
+   static int textWidth(const QFontMetrics& fm, QChar ch);
+   static QString wildcardToRegex(const QString&);
+   static QFont findMonospaceFont();
+   static QIcon makeExpandIcon(bool targetOnRight);
 };
 
 #endif // VIEWERUTIL_HPP

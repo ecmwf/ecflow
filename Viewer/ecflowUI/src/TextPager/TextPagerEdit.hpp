@@ -19,6 +19,7 @@
 #include <QAbstractScrollArea>
 
 #include "syntaxhighlighter.hpp"
+#include "TextCodecWrapper.hpp"
 #include "TextPagerDocument.hpp"
 #include "TextPagerCursor.hpp"
 #include "TextPagerSection.hpp"
@@ -69,9 +70,7 @@ public:
     void removeSyntaxHighlighter(SyntaxHighlighter *highlighter);
     void clearSyntaxHighlighters();
 
-    //bool load(QIODevice *device, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
-
-    bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = nullptr);
+    bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, TextCodecWrapper = {});
 
     void paintEvent(QPaintEvent *e) override;
     void scrollContentsBy(int dx, int dy) override;
@@ -122,7 +121,7 @@ public:
 
     TextPagerSection *sectionAt(const QPoint &pos) const;
 
-    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = nullptr) const;
+    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = {}) const;
     inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
     TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
                                    const QVariant &data = QVariant());
@@ -139,7 +138,12 @@ public:
     void notifyChange(VProperty* p) override;
     void zoomIn();
     void zoomOut();
+    void toDocStart();
+    void toDocEnd();
+    void toLineStart();
+    void toLineEnd();
 
+    void updateLineNumberArea();
     void setShowLineNumbers(bool b);
     void setLineNumberArea(TextPagerLineNumberArea *a);
 
@@ -180,7 +184,6 @@ private:
 
     void lineNumberAreaPaintEvent(QPaintEvent *e);
     int  lineNumberAreaWidth();
-    void updateLineNumberArea();
 
     TextEditPrivate *d;
     friend class TextLayoutCacheManager;

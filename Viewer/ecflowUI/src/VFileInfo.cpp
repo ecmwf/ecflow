@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,6 +9,7 @@
 
 #include "VFileInfo.hpp"
 
+#include <QtGlobal>
 #include <QDateTime>
 #include <QObject>
 
@@ -54,7 +55,11 @@ QString VFileInfo::formatSize(unsigned int size)
 
 QString VFileInfo::formatDate(const std::time_t& t)
 {
-  	QDateTime dt=QDateTime::fromTime_t(t);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+    QDateTime dt=QDateTime::fromSecsSinceEpoch(t);
+#else
+    QDateTime dt=QDateTime::fromTime_t(t);
+#endif
 	return dt.toString("yyyy-MM-dd hh:mm:ss");
 }
 

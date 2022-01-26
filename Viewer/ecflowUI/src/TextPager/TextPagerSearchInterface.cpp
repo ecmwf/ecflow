@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,6 +16,12 @@
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QRegExp>
+#else
+#include <QtCore5Compat/QRegExp>
 #endif
 
 TextPagerCursor::MoveOperation TextPagerSearchInterface::translateCursorMoveOp(QTextCursor::MoveOperation move)

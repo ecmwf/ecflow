@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -544,7 +544,7 @@ void export_NodeAttr()
 							.def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
 							;
 
-	class_<Event>("Event",NodeAttrDoc::event_doc(), init<int, optional<std::string> >())
+	class_<Event>("Event",NodeAttrDoc::event_doc(), init<int, bp::optional<std::string> >())
 				   .def( init<int,std::string,bool>() )   // here bool is the initial value, by default is false/clear. The value taken by begin/re-queue
 				   .def( init<std::string,bool>() )       // here bool is the initial value, by default is false/clear. The value taken by begin/re-queue
 				   .def( init<std::string>() )
@@ -560,7 +560,7 @@ void export_NodeAttr()
 				   .def("empty",         &Event::empty,         "Return true if the Event is empty. Used when returning a NULL Event, from a find")
 				   ;
 
-	class_<Meter>("Meter",NodeAttrDoc::meter_doc(),init<std::string,int,int,optional<int> >())
+	class_<Meter>("Meter",NodeAttrDoc::meter_doc(),init<std::string,int,int,bp::optional<int> >())
  			.def(self == self )                                  // __eq__
 			.def("__str__",     &Meter::toString)                // __str__
 			.def("__copy__",   copyObject<Meter>)                // __copy__ uses copy constructor
@@ -625,8 +625,8 @@ void export_NodeAttr()
 		   .def("day",         &DayAttr::day,      "Return the day as enumerator")
 		   ;
 
-	class_<TimeAttr>("Time",NodeAttrDoc::time_doc(),init<TimeSlot, optional<bool> >())
-			.def( init<int,int,optional<bool> >())                  // hour, minute, relative
+	class_<TimeAttr>("Time",NodeAttrDoc::time_doc(),init<TimeSlot, bp::optional<bool> >())
+			.def( init<int,int,bp::optional<bool> >())                  // hour, minute, relative
 			.def( init<TimeSeries>())
 			.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
 			.def( init<std::string>())
@@ -636,8 +636,8 @@ void export_NodeAttr()
 			.def("time_series",&TimeAttr::time_series,return_value_policy<copy_const_reference>(), "Return the Time attributes time series")
 			;
 
-	class_<TodayAttr>("Today",NodeAttrDoc::today_doc() ,init<TimeSlot, optional<bool> >())
-			.def( init<int,int,optional<bool> >())                  // hour, minute, relative
+	class_<TodayAttr>("Today",NodeAttrDoc::today_doc() ,init<TimeSlot, bp::optional<bool> >())
+			.def( init<int,int,bp::optional<bool> >())                  // hour, minute, relative
 			.def( init<TimeSeries>())
 			.def( init<TimeSlot,TimeSlot,TimeSlot,bool>())
 			.def( init<std::string>())
@@ -740,7 +740,7 @@ void export_NodeAttr()
 #endif
 
 
-	class_<RepeatDate >("RepeatDate",NodeAttrDoc::repeat_date_doc() ,init< std::string, int, int, optional<int> >()) // name, start, end , delta
+	class_<RepeatDate >("RepeatDate",NodeAttrDoc::repeat_date_doc() ,init< std::string, int, int, bp::optional<int> >()) // name, start, end , delta
  			.def(self == self )                              // __eq__
 			.def("__str__",        &RepeatDate::toString)    // __str__
 			.def("__copy__",       copyObject<RepeatDate>)   // __copy__ uses copy constructor
@@ -760,7 +760,7 @@ void export_NodeAttr()
 		   .def("end",            &RepeatDateList::end,   "Return the end date as an integer in yyyymmdd format")
 		   ;
 
-	class_<RepeatInteger>("RepeatInteger",NodeAttrDoc::repeat_integer_doc(),init< std::string, int, int, optional<int> >()) // name, start, end , delta = 1
+	class_<RepeatInteger>("RepeatInteger",NodeAttrDoc::repeat_integer_doc(),init< std::string, int, int, bp::optional<int> >()) // name, start, end , delta = 1
  			.def(self == self )                                  // __eq__
 			.def("__str__",        &RepeatInteger::toString)     // __str__
 			.def("__copy__",       copyObject<RepeatInteger>)    // __copy__ uses copy constructor
@@ -800,7 +800,7 @@ void export_NodeAttr()
 	bp::register_ptr_to_python< std::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
 #endif
 
-	class_<RepeatDay>("RepeatDay",NodeAttrDoc::repeat_day_doc(),init< optional<int> >())
+	class_<RepeatDay>("RepeatDay",NodeAttrDoc::repeat_day_doc(),init< bp::optional<int> >())
  			.def(self == self )                              // __eq__
 			.def("__str__",        &RepeatDay::toString)     // __str__
 			.def("__copy__",       copyObject<RepeatDay>)    // __copy__ uses copy constructor
@@ -855,7 +855,7 @@ void export_NodeAttr()
 			;
 
 
-	class_<ClockAttr, std::shared_ptr<ClockAttr> >("Clock",NodeAttrDoc::clock_doc() ,init<int,int,int,optional<bool> > ())  // day, month, year, hybrid
+	class_<ClockAttr, std::shared_ptr<ClockAttr> >("Clock",NodeAttrDoc::clock_doc() ,init<int,int,int,bp::optional<bool> > ())  // day, month, year, hybrid
     		.def( init<int,int,int,bool>())
 			.def( init<bool>())
 			.def(self == self )                                   // __eq__

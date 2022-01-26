@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -341,7 +341,6 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
     tlEndTime_=tlData->endTime();
 
     QColor col(39,49,101);
-    QColor colText(30,30,30);
     QString title=Viewer::formatBoldText("Node: ",col) + QString::fromStdString(data_.path());
 
     ui_->titleLabel->setText(title);

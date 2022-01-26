@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -157,7 +157,6 @@ qint64 TimelineFileList::totalSize() const
 
 QString TimelineFileList::firstLoadablePath() const
 {
-    int t=0;
     Q_FOREACH(TimelineFileListItem item, items_)
         if(item.loadable_)
             return item.fileName_;

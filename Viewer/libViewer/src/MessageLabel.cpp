@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -151,10 +151,10 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	hide();
 
     connect(loadCancelTb_,SIGNAL(clicked()),
-            this,SIGNAL(cancelLoad()));
+            this,SLOT(stopLoadLabelByButton()));
 
     connect(progCancelTb_,SIGNAL(clicked()),
-            this,SIGNAL(cancelProgress()));
+            this,SLOT(stopProgressByButton()));
 
 }
 
@@ -261,6 +261,12 @@ void MessageLabel::startLoadLabel(bool showCancelButton)
     loadIconLabel_->movie()->start();
 }
 
+void MessageLabel::stopLoadLabelByButton()
+{
+     stopLoadLabel();
+     Q_EMIT loadStoppedByButton();
+}
+
 void MessageLabel::stopLoadLabel()
 {
     if(loadIconLabel_->movie())
@@ -276,6 +282,12 @@ void MessageLabel::startProgress(int max)
     Q_ASSERT(max >=0 && max <=100);
     progBar_->setRange(0,max);
     progWidget_->show();
+}
+
+void MessageLabel::stopProgressByButton()
+{
+     stopProgress();
+     Q_EMIT progressStoppedByButton();
 }
 
 void MessageLabel::stopProgress()
@@ -326,7 +338,7 @@ void MessageLabel::setNarrowMode(bool b)
 void  MessageLabel::paintEvent(QPaintEvent *)
 {
      QStyleOption opt;
-     opt.init(this);
+     opt.initFrom(this);
      QPainter p(this);
      style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

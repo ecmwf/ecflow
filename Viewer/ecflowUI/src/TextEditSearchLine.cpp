@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -53,7 +53,7 @@ void TextEditSearchLine::highlightMatches(QString txt)
 		interface_->enableHighlights();
 		if(interface_->highlightsNeedSearch() && !txt.isEmpty())
 		{
-			findString(txt, true,  nullptr, QTextCursor::StartOfWord, 0);   // highlight all matches
+            findString(txt, true, QTextDocument::FindFlags(), QTextCursor::StartOfWord, 0);   // highlight all matches
 		}
 	}
 }
@@ -89,7 +89,7 @@ void TextEditSearchLine::slotFind(QString txt)
 	}
 
 	highlightAllTimer_.stop();
-	bool found = findString(txt, false, nullptr, QTextCursor::StartOfWord, 0);  // find the next match
+    bool found = findString(txt, false, QTextDocument::FindFlags(), QTextCursor::StartOfWord, 0);  // find the next match
 	lastFindSuccessful_ = found;
 
 	if (!isEmpty()) // there is a search term supplied by the user
@@ -115,7 +115,7 @@ void TextEditSearchLine::slotFindNext()
 	if(!interface_)
 		return;
 
-	lastFindSuccessful_ = findString(searchLine_->text(), false, nullptr, QTextCursor::NoMove, 0);
+    lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindFlags(), QTextCursor::NoMove, 0);
 	updateButtons(lastFindSuccessful_);
 }
 

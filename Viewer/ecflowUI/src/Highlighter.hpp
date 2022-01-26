@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,8 +11,14 @@
 #ifndef HIGHLIGHTER_HPP_
 #define HIGHLIGHTER_HPP_
 
+#include <QtGlobal>
 #include <string>
 #include <QSyntaxHighlighter>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+#include <QRegExp>
+#endif
+#include <QRegularExpression>
 
 class Highlighter : public QSyntaxHighlighter
 {
@@ -28,9 +34,13 @@ protected:
 private:
 	void load(QString);
 
-	struct HighlightingRule
+    struct HighlightingRule
     {
-		QRegExp pattern;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+        QRegularExpression pattern;
+#else
+        QRegExp pattern;
+#endif
         QTextCharFormat format;
     };
 

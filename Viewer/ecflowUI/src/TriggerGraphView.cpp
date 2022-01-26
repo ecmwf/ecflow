@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -30,6 +30,7 @@
 #include "Spline.hpp"
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsLinearLayout>
@@ -668,7 +669,6 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
 
     prop_=new PropertyMapper(propVec,this);
 
-    VProperty *prop=nullptr;
     std::string propName;
 
     //init
@@ -1179,7 +1179,7 @@ void TriggerGraphView::buildLayout()
     //TODO: refine it
     focus = 0;
 
-    QTime stopwatch;
+    QElapsedTimer stopwatch;
     stopwatch.start();
     bool showCursor = (QGuiApplication::overrideCursor() == nullptr ||
             QGuiApplication::overrideCursor()->shape() != Qt::WaitCursor);
@@ -1296,7 +1296,7 @@ void TriggerGraphView::addRelation(VItem* from, VItem* to,
     from_n->addRelation(to_n);
 
     //edge
-    auto edge = addEdge(from_n, to_n, through, mode, trigger);
+    addEdge(from_n, to_n, through, mode, trigger);
 }
 
 void TriggerGraphView::updateEdgePens()

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -55,10 +55,17 @@ protected Q_SLOTS:
 	void on_reloadTb__clicked();
 	void on_fontSizeUpTb__clicked();
 	void on_fontSizeDownTb__clicked();
+    void on_toStartTb__clicked();
+    void on_toEndTb__clicked();
+    void on_toLineStartTb__clicked();
+    void on_toLineEndTb__clicked();
     void on_saveFileAsTb__clicked();
     void on_copyPathTb__clicked();
     void on_dirReloadTb__clicked();
     void on_lineNumberTb__clicked(bool st);
+    void on_wordWrapTb__clicked(bool st);
+    void on_expandFileInfoTb__clicked(bool st);
+    void slotWordWrapSupportChanged(bool);
 
 protected:
     void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
@@ -85,6 +92,8 @@ protected:
     bool dirColumnsAdjusted_{false};
     bool submittedWarning_{false};
     VProperty* lineNumProp_{nullptr};
+    VProperty* wordWrapProp_{nullptr};
+    VProperty* expandFileInfoProp_{nullptr};
 };
 
 #endif

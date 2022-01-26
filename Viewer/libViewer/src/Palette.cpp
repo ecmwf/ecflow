@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,11 +12,16 @@
 
 #include "UserMessage.hpp"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDebug>
 #include <QMap>
 #include <QPalette>
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
 #include <QRegExp>
+#endif
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -127,14 +132,24 @@ QColor Palette::toColour(const std::string& name)
 {
     QString qn=QString::fromStdString(name);
     QColor col;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+    QRegularExpression rx("rgb\\((\\d+),(\\d+),(\\d+)");
+    auto match = rx.match(qn);
+    if (match.hasMatch()) {
+        col = QColor(match.captured(1).toInt(),
+                     match.captured(2).toInt(),
+                     match.captured(3).toInt());
+    }
+#else
+
     QRegExp rx("rgb\\((\\d+),(\\d+),(\\d+)");
 
-    if(rx.indexIn(qn) > -1 && rx.captureCount() == 3)
-    {
+    if(rx.indexIn(qn) > -1 && rx.captureCount() == 3) {
         col=QColor(rx.cap(1).toInt(),
                   rx.cap(2).toInt(),
                   rx.cap(3).toInt());
 
     }
+#endif
     return col;
 }

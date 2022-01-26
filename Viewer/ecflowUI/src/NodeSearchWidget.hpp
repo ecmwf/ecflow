@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,7 +13,7 @@
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QSettings>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QWidget>
 
 #include "ServerFilter.hpp"
@@ -65,7 +65,7 @@ private:
 	NodeQueryEngine* engine_;
 	NodeQueryResultModel* model_;
 	bool columnsAdjusted_{false};
-    QTime elapsed_;
+    QElapsedTimer elapsed_;
 };
 
 #endif /* VIEWER_SRC_NODESEARCHWIDGET_HPP_ */

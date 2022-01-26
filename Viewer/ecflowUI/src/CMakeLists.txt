@@ -260,11 +260,11 @@ set(viewer_srcs
     TextPager/TextPagerWidget.cpp
     TextPager/syntaxhighlighter.cpp)
 
-if(ECFLOW_QT5)
+if(ECFLOW_QT)
     include_directories(${ECFLOW_QT_INCLUDE_DIR})
-else()
-    include(${QT_USE_FILE}) 
-    set(ECFLOW_QT_LIBRARIES ${QT_LIBRARIES})
+#else()
+#    include(${QT_USE_FILE})
+#    set(ECFLOW_QT_LIBRARIES ${QT_LIBRARIES})
 endif()
 
 
@@ -398,6 +398,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VNodeList.hpp
     WhyItemWidget.hpp
     ZombieItemWidget.hpp
+    TextPager/TextCodecWrapper.hpp
     TextPager/TextPagerCursor_p.hpp
     TextPager/TextPagerDocument.hpp
     TextPager/TextPagerDocument_p.hpp
@@ -494,15 +495,14 @@ if(ECFLOW_LOGVIEW)
 endif()
 
 
-
-if(ECFLOW_QT5)
+if(ECFLOW_QT6)
+  QT6_WRAP_CPP(VIEWER_MOC ${viewer_moc_files} )
+  QT6_ADD_RESOURCES (VIEWER_RES viewer.qrc)
+  QT6_WRAP_UI       (VIEWER_FORMS_HEADERS ${viewer_wrap_ui_files})
+elseif(ECFLOW_QT5)
   QT5_WRAP_CPP(VIEWER_MOC ${viewer_moc_files} )
   QT5_ADD_RESOURCES (VIEWER_RES viewer.qrc)
   QT5_WRAP_UI       (VIEWER_FORMS_HEADERS ${viewer_wrap_ui_files})
-else()
-  QT4_WRAP_CPP(VIEWER_MOC ${viewer_moc_files} )
-  QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-  QT4_WRAP_UI       (VIEWER_FORMS_HEADERS ${viewer_wrap_ui_files})
 endif()
 
 

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -24,7 +24,7 @@
 #include <QStringList>
 #include <QtGlobal>
 
-static int REQCNT=0;
+//static int REQCNT=0;
 
 //=======================================================
 //
@@ -559,7 +559,6 @@ void LogLoadData::getSeries(QLineSeries& series,const LogRequestItem& item,int& 
     maxVal=0;
     if(timeRes_ == SecondResolution)
     {
-        size_t itemIndex=0;
         QVector<size_t> vals(time_.size(),0);
         for(size_t i=0; i < item.index_.size() ; i++)
         {

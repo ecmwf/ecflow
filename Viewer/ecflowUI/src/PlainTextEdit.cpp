@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,6 +12,7 @@
 #include "GotoLineDialog.hpp"
 
 #include <QtGlobal>
+#include <QScrollBar>
 #include <QDebug>
 #include <QFile>
 #include <QPainter>
@@ -20,6 +21,8 @@
 
 #include "VConfig.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
+
 
 PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
@@ -54,13 +57,7 @@ PlainTextEdit::PlainTextEdit(QWidget * parent) :
 
     updateLineNumberAreaWidth(0);
 
-    QFont f("Courier");
-    //QFont f("Monospace");
-    //f.setStyleHint(QFont::TypeWriter);
-    f.setFixedPitch(true);
-    f.setPointSize(10);
-    //f.setStyleStrategy(QFont::PreferAntialias);
-    setFont(f);
+    setFont(ViewerUtil::findMonospaceFont());
 }
 
 PlainTextEdit::~PlainTextEdit()
@@ -86,6 +83,33 @@ void PlainTextEdit::setShowLineNumbers(bool b)
 	updateLineNumberAreaWidth(0);
 }
 
+void PlainTextEdit::toDocStart()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    setTextCursor(cursor);
+}
+
+void PlainTextEdit::toDocEnd()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::End);
+    setTextCursor(cursor);
+}
+
+void PlainTextEdit::toLineStart()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::StartOfLine);
+    setTextCursor(cursor);
+}
+
+void PlainTextEdit::toLineEnd()
+{
+    QTextCursor cursor=textCursor();
+    cursor.movePosition(QTextCursor::EndOfLine);
+    setTextCursor(cursor);
+}
 
 // ---------------------------------------------------------------------------
 // TextEdit::cursorRowCol
@@ -165,7 +189,7 @@ int PlainTextEdit::lineNumberAreaWidth()
             ++digits;
         }
 
-        int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + rightMargin_;
+        int space = 3 + ViewerUtil::textWidth(fontMetrics(), QLatin1Char('9')) * digits + rightMargin_;
 
         return space;
     }
@@ -459,10 +483,10 @@ void PlainTextEdit::wheelEvent(QWheelEvent *event)
 	{
 		if(event->modifiers() & Qt::ControlModifier)
 		{
-			const int delta = event->delta();
-	        if (delta < 0)
+            auto delta = event->angleDelta();
+            if (delta.y() < 0)
 	        	slotZoomOut();
-	        else if (delta > 0)
+            else if (delta.y() > 0)
 	            slotZoomIn();
 	        return;
 		}
@@ -586,3 +610,51 @@ void PlainTextEdit::mouseMoveEvent(QMouseEvent *e)
     QPlainTextEdit::mouseMoveEvent(e);
 }
 
+void PlainTextEdit::keyPressEvent(QKeyEvent *e)
+{
+    // In read-only mode this set of actions is mapped to a set
+    // of non standard key-sequences (hard-coded by Qt). It causes
+    // confusion, because the large text viewer uses the standard key-sequences
+    // and users accept them to work too. So here we try to assign the expected
+    // actions to the given key-sequences.
+    if (isReadOnly()) {
+        if (e == QKeySequence::MoveToStartOfDocument) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->setValue(0);
+            }
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToEndOfDocument) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+            }
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToStartOfLine) {
+            auto cursor = textCursor();
+            cursor.movePosition(QTextCursor::StartOfLine);
+            setTextCursor(cursor);
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToEndOfLine) {
+            auto cursor = textCursor();
+            cursor.movePosition(QTextCursor::EndOfLine);
+            setTextCursor(cursor);
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToNextPage) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->triggerAction(QAbstractSlider::SliderPageStepAdd);
+            }
+            e->accept();
+            return;
+        } else if (e == QKeySequence::MoveToPreviousPage) {
+            if (verticalScrollBar()) {
+                verticalScrollBar()->triggerAction(QAbstractSlider::SliderPageStepSub);
+            }
+            e->accept();
+            return;
+        }
+     }
+     QPlainTextEdit::keyPressEvent(e);
+}

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,6 +10,7 @@
 #include "TimelineModel.hpp"
 
 #include "TimelineData.hpp"
+#include "ViewerUtil.hpp"
 
 #include <QDebug>
 
@@ -363,6 +364,20 @@ void TimelineSortModel::setPathFilter(QString pathFilter)
     if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch ||
        pathMatchMode_.mode() == StringMatchMode::RegexpMatch)
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        pathFilterRx_=QRegularExpression();
+        if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch)
+        {
+            //pathFilterRx_.setPattern(QRegularExpression::wildcardToRegularExpression(pathFilter_));
+            pathFilterRx_.setPattern(ViewerUtil::wildcardToRegex(pathFilter_));
+        }
+        else
+        {
+            pathFilterRx_.setPattern(pathFilter_);
+        }
+        pathFilterRx_.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+#else
+
         pathFilterRx_=QRegExp(pathFilter_);
 
         if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch)
@@ -374,8 +389,8 @@ void TimelineSortModel::setPathFilter(QString pathFilter)
             pathFilterRx_.setPatternSyntax(QRegExp::RegExp);
         }
         pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
+#endif
     }
-
     invalidate();
     Q_EMIT invalidateCalled();
 }

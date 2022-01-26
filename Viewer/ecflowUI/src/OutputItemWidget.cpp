@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -18,6 +18,7 @@
 #include "TextFormat.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
+#include "ViewerUtil.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "UiLog.hpp"
@@ -154,6 +155,27 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     bool showLineNum = lineNumProp_->value().toBool();
     lineNumberTb_->setChecked(showLineNum);
     on_lineNumberTb__clicked(showLineNum);
+
+    // text wrap
+    wordWrapProp_ = VConfig::instance()->find("panel.output.wordWrap");
+    Q_ASSERT(wordWrapProp_);
+    bool useWordWrap = wordWrapProp_->value().toBool();
+    wordWrapTb_->setChecked(useWordWrap);
+    on_wordWrapTb__clicked(useWordWrap);
+
+    connect(browser_, SIGNAL(wordWrapSupportChanged(bool)),
+            this, SLOT(slotWordWrapSupportChanged(bool)));
+
+    slotWordWrapSupportChanged(browser_->isWordWrapSupported());
+
+    // the icon for this button changes according to state
+    expandFileInfoTb_->setIcon(ViewerUtil::makeExpandIcon(false));
+    expandFileInfoTb_->setMaximumSize(QSize(16, 16));
+    expandFileInfoProp_ = VConfig::instance()->find("panel.output.expandFileInfo");
+    Q_ASSERT(expandFileInfoProp_);
+    bool expandSt = expandFileInfoProp_->value().toBool();
+    expandFileInfoTb_->setChecked(expandSt);
+    on_expandFileInfoTb__clicked(expandSt);
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -345,7 +367,7 @@ void OutputItemWidget::infoReady(VReply* reply)
             hasMessage=true;
             submittedWarning_=true;
             messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
-                   because the node status is <b>submitted</b> it may contain the ouput from a previous run!");
+                   because the node status is <b>submitted</b> it may contain the output from a previous run!");
         }
         else
         {
@@ -393,18 +415,26 @@ void OutputItemWidget::infoReady(VReply* reply)
 
         if(f)
         {
+            bool searched = false;
             //We do not have dir info so the file must be the jobout
-            if(dirModel_->isEmpty())
+            if(dirModel_->isEmpty()) {
                 searchOnReload();
-
+                searched = true;
             //We have dir info
-            else
+            } else
             {
                 auto* op=static_cast<OutputFileProvider*>(infoProvider_);
                 if(reply->fileName() == op->joboutFileName())
                 {
                     searchOnReload();
+                    searched = true;
                 }
+            }
+
+            // if the search is not performed but the user clicked the reload
+            // button we always go to the end of the document
+            if (!searched && userClickedReload_) {
+                browser_->toDocEnd();
             }
         }
 
@@ -745,6 +775,50 @@ void OutputItemWidget::on_lineNumberTb__clicked(bool st)
 }
 
 //-----------------------------------------
+// Word wrap
+//-----------------------------------------
+
+void OutputItemWidget::on_wordWrapTb__clicked(bool st)
+{
+    browser_->setWordWrap(st);
+    Q_ASSERT(wordWrapProp_);
+    wordWrapProp_->setValue(st);
+}
+
+void OutputItemWidget::slotWordWrapSupportChanged(bool st)
+{
+    wordWrapTb_->setEnabled(st);
+}
+
+//-----------------------------------------
+// Navigation
+//-----------------------------------------
+
+void OutputItemWidget::on_toStartTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toDocStart();
+}
+
+void OutputItemWidget::on_toEndTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toDocEnd();
+}
+
+void OutputItemWidget::on_toLineStartTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toLineStart();
+}
+
+void OutputItemWidget::on_toLineEndTb__clicked()
+{
+    //We need to call a custom slot here instead of "zoomOut"!!!
+    browser_->toLineEnd();
+}
+
+//-----------------------------------------
 // Save local copy of file
 //-----------------------------------------
 
@@ -788,6 +862,17 @@ void OutputItemWidget::on_copyPathTb__clicked()
         cb->setText(txt, QClipboard::Selection);
 #endif
     }
+}
+
+//-------------------------
+// File info label
+//-------------------------
+
+void OutputItemWidget::on_expandFileInfoTb__clicked(bool st)
+{
+    Q_ASSERT(expandFileInfoProp_);
+    expandFileInfoProp_->setValue(st);
+    fileLabel_->setCompact(!st);
 }
 
 //-------------------------

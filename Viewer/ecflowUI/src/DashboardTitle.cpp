@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,6 +12,7 @@
 #include "Dashboard.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
+#include "ViewerUtil.hpp"
 #include "VNode.hpp"
 #include "UiLog.hpp"
 
@@ -132,7 +133,7 @@ int DashboardTitle::fullWidth() const
     for(auto i : filter_->items())
     {
         QString str=QString::fromStdString(i->name());
-        int tw=fm.width(str);
+        int tw=ViewerUtil::textWidth(fm,str);
         if(tw > w) w=tw;
     }
 
@@ -227,7 +228,7 @@ void DashboardTitle::updateTitle()
 #ifdef _UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
-            QString ellips(0x2026); //horizontal ellipsis
+            QString ellips(QChar(0x2026)); //horizontal ellipsis
 
             if(txt.startsWith(ellips))
             {
@@ -252,7 +253,7 @@ void DashboardTitle::updateTitle()
 #ifdef _UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
-            if(fm.width(txt) > dw)
+            if(ViewerUtil::textWidth(fm, txt) > dw)
             {
                 texts[i]="";
                 noText=true;

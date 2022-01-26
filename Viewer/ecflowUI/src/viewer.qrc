@@ -1,7 +1,7 @@
 <RCC>
   <qresource prefix="viewer">
     <file>../images/goto_line.svg</file>
-    <file>../images/dock_float.svg</file>
+    <file>../images/dock_float.svg</file>   
     <file alias="dock_close.svg">../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
     <file alias="cursor_zoom.svg">../images/cursor_zoom.svg</file>
@@ -33,6 +33,10 @@
     <file alias="arrow_all.svg">../images/arrow_all.svg</file>
     <file alias="arrow_to_end.svg">../images/arrow_to_end.svg</file>
     <file alias="arrow_to_start.svg">../images/arrow_to_start.svg</file>
+    <file alias="arrow_left.svg">../images/arrow_left.svg</file>
+    <file alias="arrow_right.svg">../images/arrow_right.svg</file>
+    <file alias="arrow_top.svg">../images/arrow_top.svg</file>
+    <file alias="arrow_bottom.svg">../images/arrow_bottom.svg</file>
     <file>../images/add.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
@@ -75,6 +79,8 @@
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
     <file alias="error.svg">../images/error.svg</file>
+    <file alias="expand_left.svg">../images/expand_left.svg</file>
+    <file alias="expand_right.svg">../images/expand_right.svg</file>
     <file alias="expression.svg">../images/expression.svg</file>
     <file alias="favourite.svg">../images/favourite.svg</file>
     <file alias="favourite_empty.svg">../images/favourite_empty.svg</file>
@@ -100,6 +106,7 @@
     <file alias="line_num.svg">../images/line_num.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="logo.svg">../images/logo.svg</file>
     <file alias="logo.png">../images/logo.png</file>
     <file alias="logo_small.png">../images/logo_small.png</file>
     <file alias="manage_server.svg">../images/manage_server.svg</file>
@@ -150,6 +157,7 @@
     <file alias="unselect_all.svg">../images/unselect_all.svg</file>
     <file alias="variable.svg">../images/variable.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>
+    <file alias="wordwrap.svg">../images/wordwrap.svg</file>
     <file alias="why.svg">../images/why.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
     <file alias="zoom_in.svg">../images/zoom_in.svg</file>

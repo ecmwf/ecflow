@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2020 ECMWF.
+// Copyright 2009- ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,6 +13,7 @@
 #include "ClientInvoker.hpp"
 #include "File.hpp"
 #include "NodeFwd.hpp"
+#include "Node.hpp"
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
 
@@ -98,6 +99,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
         qRegisterMetaType<std::string>("std::string");
         qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
         qRegisterMetaType<std::vector<ecf::Aspect::Type> >("std::vector<ecf::Aspect::Type>");
+        // to do this we need to incluce Node.hpp !
+        qRegisterMetaType<const Node*>("const Node*");
     }
 
     //Add this instance to the servers_ list.
