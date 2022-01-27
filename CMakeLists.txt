@@ -318,11 +318,11 @@ add_subdirectory( ANode )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
-add_subdirectory( tools )
 add_subdirectory( Doc )
 
 if (ENABLE_SERVER)
     add_subdirectory( Server )
+    add_subdirectory( tools )
     add_subdirectory( Test )
 endif()
 
