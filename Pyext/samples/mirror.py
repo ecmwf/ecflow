@@ -11,7 +11,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-from __future__ import print_function
+
 # -m trace --count -C .
 """an example for a simple python client to help ecFlow scheduling
  + unit test
@@ -47,9 +47,10 @@ import time
 import unittest
 from time import gmtime, strftime
 
-ECFLOWP = "/usr/local/apps/ecflow/current"
-ECFLOWC = ECFLOWP + "/bin/ecflow_client "
-sys.path.append(ECFLOWP + "/lib/python2.7/site-packages/ecflow")
+# ECFLOWP = "/usr/local/apps/ecflow/current"
+# ECFLOWC = ECFLOWP + "/bin/ecflow_client "
+# sys.path.append(ECFLOWP + "/lib/python2.7/site-packages/ecflow")
+ECFLOWC = "ecflow_client "
 child = None
 
 
@@ -282,7 +283,7 @@ class Child(object):
 
 ############################
 destinations = {
-    "test": "${DEST_HOST:=ecgate}@${DEST_PORT=31415}",
+    "emos": "${DEST_HOST:=localhost}@${DEST_PORT=5001}",
 }
 
 def gen_suite(host=None, port=None, path=None):
@@ -293,10 +294,10 @@ def gen_suite(host=None, port=None, path=None):
     defs = Defs()
     sname = "mirror"
     if DEBUG:
-        print(definitions.keys())
+        print(list(definitions.keys()))
 
-    print(definitions.keys())
-    print(destinations.keys())
+    print(list(definitions.keys()))
+    print(list(destinations.keys()))
     defs.add_suite(
         Suite(sname).add(
             ecf.Defstatus("suspended"),
@@ -308,7 +309,7 @@ def gen_suite(host=None, port=None, path=None):
                 Variables(DESTINATIONS=destinations[name]),
                 Label("info", ""),
                 gen_task(0, kind=name), )
-             for name in definitions.keys()
+             for name in list(definitions.keys())
              # if name in destinations.keys()
              ]))
     if DEBUG:
@@ -322,7 +323,7 @@ definitions = {  # strings as path for all nodes below sync
     # or else not sync'ed
     # shall we add list of string/path ???
 
-    "test": Suite("test").add(
+    "emos": Suite("emos").add(
         Defstatus("suspended"),
         Family("f1").add(
             Edit(YMD=20320101),
@@ -397,9 +398,9 @@ $end
             self.servers = ("%s:%s" % (host, port), )
         if self.servers[-1] == "":
             del self.servers[-1]
-        host = os.getenv("ECF_HOST", "$ECF_HOST:none$")
+        host = os.getenv("ECF_HOST", "localhost")
         # if MICRO[0] in host: host = "localhost"
-        port = os.getenv("ECF_PORT", "$ECF_PORT$")
+        port = os.getenv("ECF_PORT", "3141")
         if MICRO[0] in port:
             port = 1500 + int(get_uid())
         # when started with ecflow_start.sh
@@ -429,7 +430,7 @@ $end
             self.register = [suite, ]
 
         elif path == "all":
-            self.register = skel.keys()
+            self.register = list(skel.keys())
 
         else:
             child.report("abort", "register")
@@ -478,8 +479,8 @@ $end
             else:
                 pass
 
-            if suite not in definitions.keys():
-                raise Exception(definitions.keys(), suite)
+            if suite not in list(definitions.keys()):
+                raise Exception(list(definitions.keys()), suite)
 
             if type(definitions[suite]) == str:
                 path = definitions[suite]
@@ -776,10 +777,10 @@ def replay(path, defs=None):
 
 
 def comm(cmd, rem=True):
-    import commands
-    if rem and cmd in memo.keys():
+    import subprocess
+    if rem and cmd in list(memo.keys()):
         return memo[cmd]
-    (rc, res) = commands.getstatusoutput(cmd)
+    (rc, res) = subprocess.getstatusoutput(cmd)
     print("#COMM:", rc, res, cmd)
     if rem:
         memo[cmd] = rc
@@ -814,7 +815,7 @@ if __name__ == '__main__':
     global FORCE
     FORCE = parsed.force
     print(parsed.path, parsed.mirror, parsed.replay,
-          parsed.sms, parsed.force, parsed.test)
+          parsed.force, parsed.test)
     # raise Exception
     child = Child()
 
@@ -858,7 +859,7 @@ if __name__ == '__main__':
         sys.argv.pop()
         unittest.main()
 
-`    elif parsed.path and parsed.replay:
+    elif parsed.path and parsed.replay:
         print("#MSG: path and replay", parsed.path, parsed.replay)
         port = int(os.getenv("SMS_PROG", 0))
         s = parsed.path.split('/')[1]
@@ -870,7 +871,7 @@ if __name__ == '__main__':
 
     elif parsed.mirror and parsed.path:
         print(parsed.mirror, "#", parsed.path, parsed.replay, type(Mirror))
-        mirror = Mirror(parsed.mirror, parsed.path, parsed.replay, parsed.sms)
+        mirror = Mirror(parsed.mirror, parsed.path, parsed.replay)
         print("#MSG: step")
         mirror.process()
         print("#MSG: step")
