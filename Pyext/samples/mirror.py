@@ -301,6 +301,8 @@ class Child(object):
 ############################
 destinations = {
     "emos": "${DEST_HOST:=localhost}@${DEST_PORT=5001}",
+    "test": "${DEST_HOST:=localhost}@${DEST_PORT=5001}",
+    "mc": "localhost@5003",
 }
 
 
@@ -319,14 +321,10 @@ def gen_suite(host=None, port=None, path=None):
         Event,
     )
 
-    destinations = dict()
+    # destinations = dict()
     defs = Defs()
     sname = "mirror"
-    if DEBUG:
-        print(list(definitions.keys()))
-
-    print(list(definitions.keys()))
-    print(list(destinations.keys()))
+    print(list(definitions.keys()), list(destinations.keys()))
     defs.add_suite(
         Suite(sname).add(
             ecf.Defstatus("suspended"),
@@ -357,6 +355,17 @@ definitions = {  # strings as path for all nodes below sync
     "emos": Suite("emos").add(
         Defstatus("suspended"), Family("f1").add(Edit(YMD=20320101), Task("t1"))
     ),
+    "test": Suite("test").add(
+        Defstatus("suspended"), Family("f1").add(Edit(YMD=20320101), Task("t1"))
+    ),
+    "mc": Suite("mc").add(
+        Defstatus("suspended"), Family("main").add(
+            Edit(YMD=20990101), 
+            Family("06bc").add(
+                Task("sweeper"), 
+                Family("fc0006d").add(Task("fc")),
+            ),
+    ), ),
 }
 
 ############################
@@ -364,10 +373,7 @@ definitions = {  # strings as path for all nodes below sync
 
 class Mirror(object):
 
-    """
-    $nopp
-    $end
-    """
+    """    """
 
     def _protect_oper(self, server):
         if server == "xyz@123":
@@ -632,7 +638,7 @@ class Mirror(object):
             return
 
         elif server == self.sname:
-            child.report("abort", "same name")  # DONT
+            child.report("abort", "same name " + server + " " + self.sname)  # DONT
 
         elif client is None:
             child.report("abort", "no client")  # DONT
@@ -926,7 +932,7 @@ if __name__ == "__main__":
         print(
             """
 
-* mirror (slow real-time) a source suite from a source server to a destination server
+* mirrors (slow real-time) a source suite, from a source server, to a destination server
 * mirror suite can be hosted on the source, on the destination or another server
 * this script was used in ecflow course to demonstrate
   * one script that can be used from the command line
@@ -943,14 +949,44 @@ if __name__ == "__main__":
 * update mirror.py: replay add "if" for "protection" not to overwrite source suite by mistake
 
 * download a copy from the source suite
-  ecflow_client --port ${ECF_PORT:3141} --host ${ECF_HOST:localhost} --get > tmp.def
+  ecflow_client --port 3141 --host localhost --get > tmp.def
 
 * load the mirror suite on the source server
-  SUITE=/test ECF_HOST=${ECF_HOST:=localhoast} ECF_PORT=${ECF_PORT:=3141} ./mirror.py -p /mirror/$SUITE -r # load
+  SUITE=test ECF_HOST=localhost ECF_PORT=3141 ./mirror.py -p /mirror/test -r # load
 
 * play (suspended) mirrored suite in destination
-  ECF_HOST=${DEST_HOST:=ecgate} ECF_PORT=${DEST_PORT:=31415} ./mirror.py -m $DEST_HOST@$DEST_PORT -p /$SUITE
+  ECF_HOST=ecgate ECF_PORT=31415 ./mirror.py -m ecgate:31415 -p /test
 
+module load python3; module load ecflow/5.7.0
+ecflow_start.sh -p 5001 # source
+ecflow_start.sh -p 5003 # destination
+# ecflow_client --host vecf1 --port 44444 --get mc > mc.dump # an example suite
+ecflow_client --host localhost --port 5001 --replace /mc mc.dump # we take it as a source
+# definitions =  # contains "mc" definition
+# destinations = { # contains one destination for mc at least
+ export  SUITE=mc ECF_HOST=localhost ECF_PORT=5001
+ ./mirror.py -p /mirror/mc -r # load mirror on source server # might be destination or another server yet
+# ImportError: No module named ecf # ecf shall be in the path, at least it can found in ecflow distrib as 
+# ecflow/Pyext/samples/api/ecf.py
+# ('#MSG: replacing /mirror/test in ', 'localhost', '5001', #5.7.0 # loading OK
+# begin mirror - 
+# Script OK? mirror.py undef ECF_FILES directory?
+# Edit OK? $ is used as ECF_MICRO
+# cron OK?
+# set DESTINATIONS variable as expected
+
+ECF_HOST=localhost ECF_PORT=5003 python3 ./mirror.py -m localhost:5003 -p /mc # ok
+#COMM: 0 ping server(localhost:5003) succeeded in 00:00:00.001058  ~1 milliseconds ecflow_client --ping --port 5003 --host localhost # OK
+# replay?
+ECF_PORT=5003 python3 ./mirror.py -m localhost:5003 -p /mc -r # ok mc loaded on target
+# begin /mc in 5003 (it looks suspended
+# edit ECF_JOB_CMD "python3 $ECF_JOB$ > $ECF_JOBOUT$ &"
+
+# python3 /home/ma/map/mirror/mc/mirror.job1 # OK after ECF_PASS FREE running as zombie ommand line
+# ImportError: No module named 'ecf' # jobs lost in submit
+
+# mirror jobs submits and complete OKWITH ECF_JOB_CMD updated as 
+module load python3 && module load ecflow/5.7.0 && cd /home/ma/map && python3 $ECF_JOB$ > $ECF_JOBOUT$ 2>&1 &
 """
         )
         sys.exit(2)
@@ -988,13 +1024,11 @@ if __name__ == "__main__":
     print("#MSG: step")
     child.report("complete")
 """
-$nopp
-  export ECF_HOST=localhost ECF_PORT=$((1500 + $(id -u))) SUITE=/test
-  ecflow_client --port $ECF_PORT --host $ECF_HOST --get > tmp.def
-  ./mirror.py -p /mirror/$SUITE -r # load
+  export ECF_HOST=localhost ECF_PORT=5001 SUITE=mc
+  ecflow_client --get /mc > tmp.def
+  ./mirror.py -p /mirror/mc -r # load
 
-  ECF_HOST=${DEST_HOST:=localhost} ECF_PORT=${DEST_PORT:=31415} ./mirror.py -m $DEST_HOST@$DEST_PORT -p /$SUITE
+  ECF_HOST=localhost ECF_PORT=31415 ./mirror.py -m localhost:31415 -p /mc
 
 /tmp/map/work/git/ecflow/Pyext/samples/mirror.py
-$end
 """
