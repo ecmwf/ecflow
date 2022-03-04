@@ -18,6 +18,7 @@
 #include <QPixmap>
 
 #include "File.hpp"
+#include "Version.hpp"
 #include "DiagData.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
@@ -41,12 +42,12 @@
 
 int main(int argc, char **argv)
 {
-    //if (argc != 3)
-    //{
-    //  std::cout << "Usage:" << std::endl;
-     //   std::cout << argv[0] << " <host> <port>" << std::endl;
-    //    return 1;
-    //
+    if (argc == 2) {
+        if (strcmp(argv[1], "--version") == 0) {
+            std::cout << ecf::Version::raw() << std::endl;
+            return 0;
+        }
+    }
 
     //Init qt
     QApplication app(argc, argv);
