@@ -64,8 +64,8 @@ openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
   openssl x509  -in server.crt -signkey server.key -x509toreq -out server.csr
 
 
-# Generate dhparam file, Using 512 causes Handshake failed: dh key too small 
-openssl dhparam -out dh1024.pem 1024
+# Generate dhparam file, Using 512/1024 causes Handshake failed: dh key too small
+openssl dhparam -out dh2048.pem 2048
 
 
 # Copy to the install area.
