@@ -177,7 +177,18 @@ std::string Openssl::certificates_dir() const
 std::string Openssl::pem() const
 {
    std::string str = certificates_dir();
-   if (ssl_ == "1") { str += "dh1024.pem"; return str;}
+   if (ssl_ == "1") {
+      // assume 2048-bit dh key, but accept 1024-bit for
+      // backwards-compatibility (note: openssl might
+      // not accept it, depending on the version used)
+      str += "dh2048.pem";
+
+      if (!fs::exists(str)) {
+         return certificates_dir() + "dh1024.pem";
+      }
+      return str;
+   }
+
    str += ssl_;
    str += ".pem";
    return str;
@@ -222,7 +233,7 @@ const char* Openssl::ssl_info() {
             "The certificates can be shared if you have multiple servers running on\n"
             "the same machine. In this case use ECF_SSL=1, then\n"
             "ecflow_server expects the following files in $HOME/.ecflowrc/ssl\n\n"
-            "   - dh1024.pem\n"
+            "   - dh2048.pem\n"
             "   - server.crt\n"
             "   - server.key\n"
             "   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key\n\n"
@@ -256,8 +267,8 @@ const char* Openssl::ssl_info() {
             "     > openssl req -new -key server.key -out server.csr # Generate Certificate Signing Request(CSR)\n"
             "- Generate a self signed certificate CRT, by using the CSR and private key.\n\n"
             "     > openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt\n\n"
-            "- Generate dhparam file. ecFlow expects 1024 key.\n"
-            "     > openssl dhparam -out dh1024.pem 1024"
+            "- Generate dhparam file. ecFlow expects 2048 key.\n"
+            "     > openssl dhparam -out dh2048.pem 2048"
             ;
 }
 
