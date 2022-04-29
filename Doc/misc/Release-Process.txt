@@ -40,21 +40,21 @@ Process
    <Inform Daniel>
 
 0/ Build release: Two approaches, both use meta-builder:
-    1/ git flow release start  5.8.3
-       git_tag=release/5.8.3
+    1/ git flow release start  5.8.4
+       git_tag=release/5.8.4
        Use this approach when multiple people working on the release.
       *Push* branch onto stash, otherwise we cannot pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-    2/ git flow release start  5.8.3
-       git flow release finish 5.8.3
+    2/ git flow release start  5.8.4
+       git flow release finish 5.8.4
        git push
        git push --tags
-       git_tag=5.8.3
+       git_tag=5.8.4
        When single person making release
 
-0/ Update metabuilder/config.yaml master branch to "5.8.3"
+0/ Update metabuilder/config.yaml master branch to "5.8.4"
    Then use the meta builder/master to build/install.
 
 0/ Update Documentation
@@ -89,7 +89,7 @@ Process
 
 0/ Update tag 5new
     module load modulemgr
-    modulemgr -g module -m cca,ccb,cct,ecgb,leap42,lxc,lxg,lxop-dev,sappa,sappb,vsms1 -f -v tag ecflow 5.8.3 5new
+    modulemgr -g module -m cca,ccb,cct,ecgb,leap42,lxc,lxg,lxop-dev,sappa,sappb,vsms1 -f -v tag ecflow 5.8.4 5new
 
 0/ Announce release
    mail group:  ecflow_int@lists.ecmwf.int
