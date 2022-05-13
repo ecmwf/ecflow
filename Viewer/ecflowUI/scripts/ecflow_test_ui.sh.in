@@ -53,7 +53,7 @@ trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
 
 
 # Figure out the directory of the exe
-EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../../../bin"
 ETC_DIR="$EXE_DIR/../share/ecflow/etc"
 DEF_FILE="$ETC_DIR/ecflow_ui_test.def"
 
