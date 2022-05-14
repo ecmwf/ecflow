@@ -1,8 +1,10 @@
 
-# the list of files we want to install
-set (files ecflow_ui ecflow_test_ui.sh ecflow_ui_create_jira_issue.sh
-    ecflow_ui_node_state_diag.sh ecflow_ui_transfer_file.sh)
+# the list of files we want to install bin
+set (files ecflow_ui)
 
+# the list of files we want to install to share/ecflow/etc
+set (files_share ecflow_ui_create_jira_issue.sh
+    ecflow_ui_node_state_diag.sh ecflow_ui_transfer_file.sh ecflow_test_ui.sh)
 
 # set variables which will be expanded in the startup script
 if(ENABLE_UI_BACKTRACE)
@@ -34,4 +36,16 @@ foreach( f ${files} )
              DESTINATION bin
              PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
+endforeach()
+
+
+# for each file, copy it into the build directory at build time
+# and install it into the installation directory at install time (!)
+foreach( f ${files_share} )
+    configure_file(${f}.in ${CMAKE_BINARY_DIR}/share/ecflow/etc/${f} @ONLY)
+
+
+    install( FILES ${CMAKE_BINARY_DIR}/share/ecflow/etc/${f}
+             DESTINATION share/ecflow/etc
+             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 endforeach()

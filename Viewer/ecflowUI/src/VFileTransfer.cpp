@@ -77,8 +77,8 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
     targetFile_=targetFile;
 
     //If there is an exe dir we check if it is added to the PATH env
-    //variable
-    QString exeDir=QString::fromStdString(DirectoryHandler::exeDir());
+    //variable.
+    QString exeDir=QString::fromStdString(DirectoryHandler::etcDir());
     if(!exeDir.isEmpty())
     {
       QProcessEnvironment env = QProcessEnvironment::systemEnvironment();

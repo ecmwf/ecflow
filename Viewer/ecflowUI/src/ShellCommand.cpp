@@ -46,21 +46,26 @@ ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefSt
 
     proc_=new QProcess(this);
 
+    // Some commands/script are located in bin, while some other is share/ecflow/etc
+
     //Check environment - only has to be once
     if(!envChecked_)
     {
-        envChecked_=true;
-
-        QString exeDir=QString::fromStdString(DirectoryHandler::exeDir());
-
-        //If there is an exe dir we check if it is added to the PATH env
-        //variable
-        if(!exeDir.isEmpty())
-        {
-            QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-            QString envPath=env.value("PATH");
-            if(!envPath.contains(exeDir))
-                envHasToBeSet_=true;
+        envChecked_=true;       
+        QStringList pLst = {QString::fromStdString(DirectoryHandler::etcDir()),
+                           QString::fromStdString(DirectoryHandler::exeDir())};
+        for (auto exeDir: pLst) {
+            //If there is an exe dir we check if it is added to the PATH env
+            //variable
+            if(!exeDir.isEmpty())
+            {
+                QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+                QString envPath=env.value("PATH");
+                if(!envPath.contains(exeDir)) {
+                    envHasToBeSet_=true;
+                    break;
+                }
+            }
         }
     }
 
@@ -70,13 +75,22 @@ ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefSt
     if((command_.contains("ecflow_client") ||
         command_.contains("ecflow_ui_node_state_diag.sh") || command_.contains("ecflow_ui_create_jira_issue.sh")) &&
             envHasToBeSet_)
-    {
-        QString exeDir=QString::fromStdString(DirectoryHandler::exeDir());
-        Q_ASSERT(!exeDir.isEmpty());
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        QString envPath=env.value("PATH");
-        env.insert("PATH",exeDir + ":" + envPath);
-        proc_->setProcessEnvironment(env);
+    {        
+        QStringList pLst = {QString::fromStdString(DirectoryHandler::etcDir()),
+                           QString::fromStdString(DirectoryHandler::exeDir())};
+        QString extraPath;
+        for (auto exeDir: pLst) {
+            if(!exeDir.isEmpty()) {
+                extraPath += exeDir + ":";
+            }
+        }
+
+        if (!extraPath.isEmpty()) {
+            QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+            QString envPath=env.value("PATH");
+            env.insert("PATH", extraPath + envPath);
+            proc_->setProcessEnvironment(env);
+        }
     }
 
     connect(proc_,SIGNAL(finished(int,QProcess::ExitStatus)),
