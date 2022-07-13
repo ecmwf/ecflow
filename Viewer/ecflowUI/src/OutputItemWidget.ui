@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
+    <width>505</width>
     <height>449</height>
    </rect>
   </property>
@@ -314,7 +314,7 @@
          <item>
           <widget class="QToolButton" name="lineNumberTb_">
            <property name="toolTip">
-            <string>Show line number</string>
+            <string>Show line numbers</string>
            </property>
            <property name="text">
             <string>...</string>
