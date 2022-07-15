@@ -12,16 +12,8 @@ from __future__ import print_function
 import pwd
 import sys
 import os
-
 assert sys.version_info >= (3, )
-
-try:
-    import ecflow
-except ImportError:
-    raise Exception("Please import (module load) ecflow first")
-    sys.path.append(
-        '/usr/local/apps/ecflow/current/lib/python3.8/site-packages')
-    import ecflow
+import ecflow
 
 
 def printer(opt, iterate, full):
@@ -119,16 +111,8 @@ class Ls(object):
         # path = parsed.path
         if parsed.path is not None:
             filename = parsed.path.replace("/", "_") + ".tmp"
-        found = False
 
-        if 0:  # not parsed.force:
-            try:
-                fid = open(filename, "r")
-                found = True
-            except:
-                pass
-        # if found: print("#MSG: %s found" % filename)
-        elif parsed.sms:
+        if parsed.sms:
             user = os.getlogin()
             log = "set SMS_PROG %s; login %s %s 1;" % (
                 parsed.port, parsed.host, user)
