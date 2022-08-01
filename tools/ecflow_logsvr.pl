@@ -95,21 +95,28 @@ for(;;)
 	my $request = <$client>;
 	chomp($request);
 
-	my ($action,$param) = split(" ",$request,2);
+	print("request=",$request,"\n");
 
-	foreach my $k ( keys %map )
-	{
-		if($param =~ m,^$k,)
-		{
-			$param =~ s,^$k,$map{$k},;
-			last;
+	my ($action,$path) = split(" ",$request,2);
+	my $param; 
+	if ($action eq "delta") {
+		($param, $path) = split(" ",$path,2);
+	} 
+
+	# map path
+	if ($path ne "") {
+		foreach my $k ( keys %map ) {
+			if($path =~ m,^$k,) {
+				$path =~ s,^$k,$map{$k},;
+				last;
+			}
 		}
 	}
-
+	
 	$action = "do_$action";	
 	eval {
 		no strict;
-		$action->($param);
+		$action->($path, $param);
 	};
 	#print $client $@ if($@);
 	warn "$@" if $@;
@@ -118,13 +125,17 @@ for(;;)
 }
 print "$$ eof: $!\n";
 
+sub do_version {
+	print $client "2";
+}
+
 sub do_get {
-	my ($param) = @_;
+	my ($path) = @_;
 
-	print "get $param\n";
-	validate($param);
+	print "get $path\n";
+	validate($path);
 
-	open(IN,"<$param") || die "$param: $!";
+	open(IN,"<$path") || die "$path: $!";
 	my $buf;
 	my $size = 64*1024;
 	my $read;
@@ -137,24 +148,44 @@ sub do_get {
 	close(IN);
 }
 
+sub do_delta {
+	my ($path, $pos) = @_;
+
+	print "delta $pos $path\n";
+	validate($path);
+
+	open(IN,"<$path") || die "$path: $!";
+	my $buf;
+	my $size = 64*1024;
+	my $read;
+
+	seek(IN, $pos, 0);
+	while( ($read = sysread(IN,$buf,$size)) > 0)
+	{
+		syswrite($client,$buf,$size);
+	}
+
+	close(IN);
+}
+
 sub do_list {
-	my ($param) = @_;
+	my ($path) = @_;
 
-	print "list $param\n";
-	validate($param);
+	print "list $path\n";
+	validate($path);
 
-	my ($name,$path) = fileparse($param);
+	my ($name,$dir) = fileparse($path);
 
 	$name =~ s/\..*//;
 
-	opendir(DIR,$path) || die "$path: $!";
+	opendir(DIR,$dir) || die "$dir: $!";
 	while(my $d = readdir(DIR))
 	{
 	  next unless( $d =~ /^$name\./);	
-	  my @x = stat "$path$d";
+	  my @x = stat "$dir$d";
 	  if(@x)
 	    {
-	      print $client "$x[2] $x[4] $x[5] $x[7] $x[8] $x[9] $x[10] $path$d\n";
+	      print $client "$x[2] $x[4] $x[5] $x[7] $x[8] $x[9] $x[10] $dir$d\n";
 	    }
 	}
 	close(DIR);
