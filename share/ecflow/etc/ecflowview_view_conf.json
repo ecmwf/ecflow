@@ -365,6 +365,12 @@
                 "label" : "Show popup when stderr is generated",
                 "default" : "true"
             }
+        },
+        "fileInfoLabel": {
+            "showTransferDetails" : {
+                "label" : "Show file transfer details",
+                "default" : "false"
+            }
         }
     },
     

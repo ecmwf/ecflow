@@ -15,6 +15,8 @@
 #include "VDir.hpp"
 #include "VFile.hpp"
 
+class OutputVersionClient;
+
 class OutputFileClient : public OutputClient
 {
 	Q_OBJECT
@@ -24,7 +26,7 @@ public:
 
     VFile_ptr result() const;
     void clearResult();
-    void getFile(const std::string& name);
+    void getFile(const std::string& name, size_t deltaPos);
     void setExpectedSize(qint64 v);
     int maxProgress() const;
     void setDir(VDir_ptr);
@@ -33,19 +35,56 @@ protected Q_SLOTS:
     void slotError(QAbstractSocket::SocketError err) override;
     void slotRead() override;
     void slotConnected() override;
+    void slotVersionFinished();
+    void slotVersionError(QString);
 
 private:
 	OutputFileClient(const OutputClient&);
 	OutputFileClient& operator=(const OutputClient&);
     void estimateExpectedSize();
 
-	qint64 total_;
-    qint64 expected_;
+    qint64 total_{0};
+    qint64 expected_{0};
 	VFile_ptr out_;
     VDir_ptr dir_;
-	qint64 lastProgress_;
-	const QString progressUnits_;
-	const qint64 progressChunk_;
+    qint64 lastProgress_{0};
+    size_t deltaPos_{0};
+    const QString progressUnits_{"MB"};
+    const qint64 progressChunk_{1024*1024};
+    OutputVersionClient* versionClient_{nullptr};
+};
+
+class OutputVersionClient : public OutputClient
+{
+    Q_OBJECT
+
+public:
+    using OutputClient::OutputClient;
+    OutputVersionClient(const OutputClient&) = delete;
+    OutputVersionClient& operator=(const OutputClient&) = delete;
+    void getVersion();
+    int version() const {return version_;}
+
+    enum VersionStatus {VersionNotFetched, VersionBeingFetched, VersionFailedToFetch, VersionFetched};
+    VersionStatus versionStatus() const {return versionStatus_;}
+
+protected Q_SLOTS:
+    void slotError(QAbstractSocket::SocketError err) override;
+    void slotRead() override;
+    void slotConnected() override;
+
+protected:
+    void timeoutError() override;
+
+private:
+    void buildVersion();
+
+
+    size_t dataSize_;
+    static constexpr size_t maxDataSize_{64};
+    char data_[maxDataSize_+1];
+    int version_{0};
+    VersionStatus versionStatus_{VersionNotFetched};
 };
 
 #endif /* VIEWER_SRC_OUTPUTFILECLIENT_HPP_ */

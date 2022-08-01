@@ -9,6 +9,8 @@
 
 #include "OutputFileProvider.hpp"
 
+#include <deque>
+
 #include "OutputCache.hpp"
 #include "OutputFileClient.hpp"
 #include "VNode.hpp"
@@ -22,29 +24,323 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
-	InfoProvider(owner,VTask::OutputTask),
-    outClient_(nullptr),
-    useOutputClientOnly_(false)
+
+//=================================
+//
+// OutputFileFetchTask
+//
+//=================================
+
+OutputFileFetchTask::OutputFileFetchTask(OutputFileProvider* owner) :
+    owner_(owner)
 {
-    outCache_=new OutputCache(this);
+    Q_ASSERT(owner_);
 }
 
+void OutputFileFetchTask::clear()
+{
+    OutputFetchTask::clear();
+    isJobout_=false;
+    deltaPos_=0;
+    useCache_=false;
+}
+
+void OutputFileFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath, bool isJobout,
+           size_t deltaPos, bool useCache)
+{
+    server_=server;
+    node_=node;
+    filePath_=filePath;
+    isJobout_=isJobout;
+    deltaPos_=deltaPos;
+    useCache_=useCache;
+}
+
+//=================================
+//
+// OutputFileFetchCacheTask
+//
+//=================================
+
+// Try to fetch the logfile from the local cache
+void OutputFileFetchCacheTask::run()
+{
+    UI_FUNCTION_LOG
+    UiLog().dbg() << "OutputFileFetchCacheTask::run <-- file: " << filePath_;
+
+    assert(node_);
+
+    //We try use the cache
+    if(useCache_)
+    {
+        //Check if the given output is already in the cache
+        if(OutputCacheItem* item=owner_->findInCache(filePath_))
+        {
+            VFile_ptr f=item->file();
+            assert(f);
+            f->setCached(true);
+
+            UiLog().dbg() << "  File found in cache";
+
+            auto reply = owner_->reply_;
+            reply->setInfoText("");
+            reply->fileReadMode(VReply::LogServerReadMode);
+            reply->setLog(f->log());
+            reply->addLog("REMARK>File was read from cache.");
+            reply->tmpFile(f);
+
+            succeed();
+            return;
+        }
+    }
+    finish();
+}
+
+//=================================
+//
+// OutputFileFetchRemoteTask
+//
+//=================================
+
+OutputFileFetchRemoteTask::OutputFileFetchRemoteTask(OutputFileProvider* owner) :
+     QObject(nullptr), OutputFileFetchTask(owner)
+{
+}
+
+void OutputFileFetchRemoteTask::clear()
+{
+    OutputFileFetchTask::clear();
+    if(client_) {
+        delete client_;
+        client_ = nullptr;
+    }
+}
+
+//Create an output client (to access the logserver) and ask it to the fetch the
+//file asynchronously. The output client will call clientFinished() or
+//clientError eventually!!
+void OutputFileFetchRemoteTask::run()
+{
+    UI_FUNCTION_LOG
+    UiLog().dbg() << "OutputFileFetchRemoteTask::run <-- file: " << filePath_;
+
+    std::string host, port;
+    assert(node_);
+
+    // First try the user defined logserver, then the system defined one
+    bool userLogServerUsed = node_->userLogServer(host,port);
+    bool sysLogServerUsed = false;
+    if (!userLogServerUsed) {
+        sysLogServerUsed = node_->logServer(host,port);
+    }
+    Q_ASSERT(!userLogServerUsed || !sysLogServerUsed);
+
+    if (userLogServerUsed || sysLogServerUsed) {
+        Q_ASSERT(userLogServerUsed || sysLogServerUsed);
+        if (client_ && (client_->host() != host || client_->portStr() != port)) {
+            delete client_;
+            client_ = nullptr;
+        }
+
+        if (!client_) {
+            client_=new OutputFileClient(host,port,this);
+
+            connect(client_,SIGNAL(error(QString)),
+                    this,SLOT(clientError(QString)));
+
+            connect(client_,SIGNAL(progress(QString,int)),
+                    this,SLOT(clientProgress(QString,int)));
+
+            connect(client_,SIGNAL(finished()),
+                    this,SLOT(clientFinished()));
+        }
+
+        Q_ASSERT(client_);
+        UiLog().dbg() << "OutputFileProvider: logserver=" << client_->longName() << " file=" << filePath_;
+        owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> from" +
+                                  ((userLogServerUsed)?"<b>user defined</b>":"") +
+                                  " log server <i> " + client_->longName() + "</i>",0);
+
+
+        VDir_ptr dir=owner_->dirToFile(filePath_);
+        client_->setDir(dir);
+
+        // fetch the file asynchronously
+        client_->getFile(filePath_, deltaPos_);
+        return;
+    }
+
+
+    //If we are here there is no output client defined/available
+    if (client_) {
+        delete client_;
+        client_ = nullptr;
+    }
+
+    owner_->reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
+    finish();
+}
+
+void OutputFileFetchRemoteTask::clientFinished()
+{
+    VFile_ptr tmp = client_->result();
+    assert(tmp);
+
+    client_->clearResult();
+
+    //Files retrieved from the log server are automatically added to the cache!
+    owner_->addToCache(tmp);
+
+    auto reply = owner_->reply_;
+    reply->setInfoText("");
+    reply->fileReadMode(VReply::LogServerReadMode);
+    reply->addLog("TRY> fetch file from logserver: " + client_->longName() + ": OK");
+
+    tmp->setFetchMode(VFile::LogServerFetchMode);
+    tmp->setLog(reply->log());
+    std::string method="served by " + client_->longName();
+    tmp->setFetchModeStr(method);
+
+    reply->tmpFile(tmp);
+
+    succeed();
+}
+
+void OutputFileFetchRemoteTask::clientProgress(QString msg,int value)
+{
+    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
+
+    owner_->owner_->infoProgress(msg.toStdString(),value);
+
+    //reply_->setInfoText(msg.toStdString());
+    //owner_->infoProgress(reply_);
+    //reply_->setInfoText("");
+}
+
+void OutputFileFetchRemoteTask::clientError(QString msg)
+{
+    auto reply = owner_->reply_;
+    UiLog().dbg() << "OutputFileProvider::slotOutputClientError error:" << msg;
+    reply->addLog("TRY> fetch file from logserver: " + client_->longName() + " FAILED");
+    fail();
+}
+
+//=================================
+//
+// OutputFileFetchLocalTask
+//
+//=================================
+
+// try to read the logfile from the disk (if the settings allow it)
+void OutputFileFetchAnyLocalTask::run()
+{
+    auto reply = owner_->reply_;
+
+    //we do not want to delete the file once the VFile object is destroyed!!
+    VFile_ptr f(VFile::create(filePath_,false));
+    if(f->exists())
+    {
+        reply->fileReadMode(VReply::LocalReadMode);
+        reply->addLog("TRY> read file from disk: OK");
+
+        f->setSourcePath(f->path());
+        f->setFetchMode(VFile::LocalFetchMode);
+        f->setFetchDate(QDateTime::currentDateTime());
+        f->setLog(reply->log());
+
+        reply->tmpFile(f);
+
+        succeed();
+        return ;
+    }
+    reply->addLog("TRY> read file from disk: NO ACCESS");
+    finish();
+}
+
+void OutputFileFetchLocalTask::run()
+{
+    if (server_->readFromDisk() || !isJobout_) {
+        OutputFileFetchAnyLocalTask::run();
+    } else {
+        finish();
+    }
+}
+
+//=================================
+//
+// OutputFileFetchServerTask
+//
+//=================================
+
+// try to fetch the logfile from the server if it is the jobout file
+void OutputFileFetchServerTask::run()
+{
+    if (isJobout_) {
+        owner_->fetchJoboutViaServer(server_,node_,filePath_);
+    } else {
+        finish();
+    }
+}
+
+//========================================
+//
+// OutputFileProvider
+//
+//========================================
+
+OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
+    InfoProvider(owner,VTask::OutputTask)
+{
+    outCache_=new OutputCache(this);
+
+    fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunUntilFirstSucceed, this);
+
+    // these are persistent fetch tasks. We add them to the queue on demand
+    fetchTask_[CacheTask] = new OutputFileFetchCacheTask(this);
+    fetchTask_[RemoteTask] = new OutputFileFetchRemoteTask(this);
+    fetchTask_[AnyLocalTask] = new OutputFileFetchAnyLocalTask(this);
+    fetchTask_[LocalTask] = new OutputFileFetchLocalTask(this);
+    fetchTask_[ServerTask] = new OutputFileFetchServerTask(this);
+}
+
+OutputFileProvider::~OutputFileProvider()
+{
+    delete fetchQueue_;
+    fetchQueue_ = nullptr;
+
+    for (auto it: fetchTask_) {
+        delete it.second;
+    }
+    fetchTask_.clear();
+}
+
+// This is called from the destructor
 void OutputFileProvider::clear()
 {
-    useOutputClientOnly_=false;
-
     //Detach all the outputs registered for this instance in cache
     outCache_->detach();
 
-    if(outClient_)
-	{
-		delete outClient_;
-		outClient_=nullptr;
-	}
-    InfoProvider::clear();
+    // clear the queue and the fetch tasks
+    if (fetchQueue_) {
+        fetchQueue_->clear();
+        for (auto it: fetchTask_) {
+            it.second->clear();
+        }
+    }
 
+    InfoProvider::clear();
     dirs_.clear();
+}
+
+//Check if the given output is already in the cache
+OutputCacheItem* OutputFileProvider::findInCache(const std::string& fileName)
+{
+    return outCache_->attachOne(info_,fileName);
+}
+
+void OutputFileProvider::addToCache(VFile_ptr file)
+{
+    outCache_->add(info_,file->sourcePath(), file);
 }
 
 //This is called when we load a new node in the Output panel. In this
@@ -53,7 +349,8 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
 {
     assert(info_->node() == infoNode->node());
 
-    useOutputClientOnly_=false;
+    // clear the queue
+    fetchQueue_->clear();
 
     //Reset the reply
 	reply_->reset();
@@ -78,13 +375,14 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
 
     //We always try to use the cache in this case
     outCache_->attachOne(info_,jobout);
-    fetchFile(server,n,jobout,true,true);
+    fetchFile(server,n,jobout,true,0,true);
 }
 
 //Get a file
-void OutputFileProvider::file(const std::string& fileName,bool useCache)
+void OutputFileProvider::file(const std::string& fileName, size_t deltaPos, bool useCache)
 {
-    useOutputClientOnly_=false;
+    // clear the queue
+    fetchQueue_->clear();
 
     //If we do not want to use the cache we detach all the output
     //attached to this instance
@@ -111,13 +409,12 @@ void OutputFileProvider::file(const std::string& fileName,bool useCache)
 	VNode *n=info_->node();
 
     //Get the filename
-    std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
+    std::string jobout=joboutFileName();
 
-    fetchFile(server,n,fileName,(fileName==jobout),useCache);
+    fetchFile(server,n,fileName,(fileName==jobout), deltaPos, useCache);
 }
 
-
-void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool useCache)
+void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout, size_t deltaPos, bool useCache)
 {
     //If we do not want to use the cache we detach all the output
     //attached to this instance
@@ -149,7 +446,6 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
             reply_->addLog("MSG>Output file is not defined.");
             owner_->infoFailed(reply_);
 		}
-
 		return;
 	}
 
@@ -175,75 +471,26 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
             reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
     }
     else
-       reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
-
-#if 0
-    if(server->readFromDisk())
     {
-        if(server->isLocalHost())
-        {
-        //We try to read the file directly from the disk
-        if(server->readFromDisk())
-        {
-            if(fetchLocalFile(fileName))
-                return;
-        }
-    }
-#endif
-
-#if 0
-    //if(server->isLocalHost())
-    // {
-    	//We try to read the file directly from the disk
-        if(server->readFromDisk())
-    	{
-    		if(fetchLocalFile(fileName))
-    			return;
-    	}
-    //}
-
-#endif
-
-
-    //We try the output client (aka logserver), its asynchronous!
-    if(fetchFileViaOutputClient(n,fileName,useCache))
-    {
-        //If we are here we created an output client and asked it to the fetch the
-    	//file asynchronously. The output client will call slotOutputClientFinished() or
-    	//slotOutputClientError eventually!!
-    	return;
+        reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
     }
 
-    //If we are here there is no output client defined
-    reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
-
-    //If there is no output client we try
-    //to read it from the disk (if the settings allow it)
-    if(server->readFromDisk() || !isJobout)
-    {
-        //Get the fileName
-        if(fetchLocalFile(fileName))
-            return;
+    // Update the fetch tasks and process them. The queue runs until any task can fetch
+    // the logfile
+    fetchQueue_->clear();
+    Q_ASSERT(fetchQueue_->isEmpty());
+    QList<FetchTaskType> types = {CacheTask, RemoteTask, LocalTask, ServerTask};
+    for (auto k: types) {
+        auto t = fetchTask_[k];
+        t->reset(server,n,fileName,isJobout, deltaPos, useCache);
+        fetchQueue_->add(t);
     }
-
-    //If we are here no output client is defined and we could not read the file from
-    //the local disk, so we try the server if it is the jobout file.
-    if(isJobout)
-    {
-    	fetchJoboutViaServer(server,n,fileName);
-        return;
-    }
-
-    //If we are here we coud not get the file
-    if(n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
-    {
-       reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
-    }
-    owner_->infoFailed(reply_);
+    fetchQueue_->run();
 }
 
-//Get a file with the given fetch mode
-void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,bool useCache)
+//Get a file with the given fetch mode. We use it to fettch files appearing in the directory
+//listing in the Output panel.
+void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache)
 {
     //If we do not want to use the cache we detach all the output
     //attached to this instance
@@ -267,7 +514,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
     }
 
     ServerHandler* server=info_->server();
-    VNode *n=info_->node();
+    VNode *node=info_->node();
 
     //Get the filename
     std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
@@ -294,187 +541,37 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
         return;
     }
 
-    //We try the output client (aka logserver), its asynchronous!
-    if(fetchMode == VDir::LogServerFetchMode)
-    {
-        useOutputClientOnly_=true;
-        if(fetchFileViaOutputClient(n,fileName,useCache))
-        {
-            //If we are here we created an output client and asked it to the fetch the
-            //file asynchronously. The output client will call slotOutputClientFinished() or
-            //slotOutputClientError eventually!!
-            return;
-        }
+    fetchQueue_->clear();
 
-        //If we are here there is no output client defined
-        reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
-    }
-    else if(fetchMode == VDir::LocalFetchMode)
-    {
-        if(fetchLocalFile(fileName))
-           return;
+    OutputFileFetchTask *t=nullptr;
+    if (fetchMode == VDir::LogServerFetchMode) {
+        t = fetchTask_[RemoteTask];
+    } else if(fetchMode == VDir::LocalFetchMode) {
+        t = fetchTask_[AnyLocalTask];
+    } else if(isJobout && fetchMode == VDir::ServerFetchMode) {
+        t = fetchTask_[ServerTask];
     }
 
-    //If we are here no output client is defined and we could not read the file from
-    //the local disk, so we try the server if it is the jobout file.
-    else if(isJobout && fetchMode == VDir::ServerFetchMode)
-    {
-        fetchJoboutViaServer(server,n,fileName);
-        return;
+    if (t) {
+        t->reset(server,node,fileName,isJobout, deltaPos, useCache);
+        fetchQueue_->add(t);
     }
 
-    //If we are here we coud not get the file
-    owner_->infoFailed(reply_);
+    fetchQueue_->run();
 }
 
-bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName,bool useCache)
+void OutputFileProvider::fetchQueueSucceeded()
 {
-    UI_FUNCTION_LOG
-    UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient <-- file: " << fileName;
-
-    std::string host, port;
-    assert(n);
-
-    //We try use the cache
-    if(useCache)
-    {
-        //Check if the given output is already in the cache
-        if(OutputCacheItem* item=outCache_->attachOne(info_,fileName))
-        {           
-            VFile_ptr f=item->file();
-            assert(f);
-            f->setCached(true);
-
-            UiLog().dbg() << "  File found in cache";
-
-            reply_->setInfoText("");
-            reply_->fileReadMode(VReply::LogServerReadMode);
-
-            reply_->setLog(f->log());
-            reply_->addLog("REMARK>File was read from cache.");
-
-            reply_->tmpFile(f);
-            owner_->infoReady(reply_);
-            return true;
-        }
-    }
-
-    //We did/could not use the cache
-
-    // Try the user defined logserver
-    bool logServerUsed = false;
-    if(n->userLogServer(host,port)) {
-
-        UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
-                             " port:" << port << " file: " << fileName;
-
-        owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from <b>user defined<b> log server <i>"
-                                  + host + "@" + port  +"</i>",0);
-        logServerUsed = true;
-
-    } else if (n->logServer(host,port)) {
-        UiLog().dbg() << "OutputFileProvider::fetchFileViaOutputClient --> host:" << host <<
-                             " port:" << port << " file: " << fileName;
-        owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from log server <i>" + host + "@" + port  +"</i>",0);
-        logServerUsed = true;
-    }
-
-    if (logServerUsed) {
-		if(!outClient_)
-		{
-			outClient_=new OutputFileClient(host,port,this);
-
-			connect(outClient_,SIGNAL(error(QString)),
-				this,SLOT(slotOutputClientError(QString)));
-
-            connect(outClient_,SIGNAL(progress(QString,int)),
-                this,SLOT(slotOutputClientProgress(QString,int)));
-
-			connect(outClient_,SIGNAL(finished()),
-				this,SLOT(slotOutputClientFinished()));
-		}
-
-        VDir_ptr dir=dirToFile(fileName);
-        outClient_->setDir(dir);
-        outClient_->getFile(fileName);
-
-		return true;
-	}
-
-	return false;
-}
-
-void OutputFileProvider::slotOutputClientFinished()
-{
-	VFile_ptr tmp = outClient_->result();
-    assert(tmp);
-
-    useOutputClientOnly_=false;
-    outClient_->clearResult();
-
-    //Files retrieved from the log server are automatically added to the cache!
-    outCache_->add(info_,tmp->sourcePath(),tmp);
-
-    reply_->setInfoText("");
-    reply_->fileReadMode(VReply::LogServerReadMode);
-    reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + ": OK");
-
-    tmp->setFetchMode(VFile::LogServerFetchMode);
-    tmp->setLog(reply_->log());
-    std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-    tmp->setFetchModeStr(method);
-
-    reply_->tmpFile(tmp);
     owner_->infoReady(reply_);
 }
 
-void OutputFileProvider::slotOutputClientProgress(QString msg,int value)
+void OutputFileProvider::fetchQueueFinished(VNode* n)
 {
-    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
-
-    owner_->infoProgress(msg.toStdString(),value);
-
-    //reply_->setInfoText(msg.toStdString());
-    //owner_->infoProgress(reply_);
-    //reply_->setInfoText("");
-}
-
-void OutputFileProvider::slotOutputClientError(QString msg)
-{
-    UiLog().dbg() << "OutputFileProvider::slotOutputClientError error:" << msg;
-    reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + " FAILED");
-
-    if(info_ && !useOutputClientOnly_)
-	{
-        useOutputClientOnly_=false;
-        ServerHandler* server=info_->server();
-		VNode *n=info_->node();
-
-		if(server && n)
-		{
-			std::string jobout=n->findVariable("ECF_JOBOUT",true);
-            bool isJobout=(outClient_->remoteFile() == jobout);
-
-            //We try to read the file directly from the disk
-            if(server->readFromDisk() || !isJobout)
-            {
-                if(fetchLocalFile(outClient_->remoteFile()))
-                    return;
-            }
-
-            //Then we try the server
-            if(isJobout)
-			{
-				fetchJoboutViaServer(server,n,jobout);
-				return;
-			}
-		}
-	}
-
-    reply_->setErrorText("Failed to fetch file from logserver "  +
-                         outClient_->host() + "@" + outClient_->portStr() +
-                         "Error: " + msg.toStdString());
-	owner_->infoFailed(reply_);
+    if(n && n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
+    {
+       reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
+    }
+    owner_->infoFailed(reply_);
 }
 
 void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
@@ -495,29 +592,6 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     //in the reply will be prepended to the string we generated above.
     server->run(task_);
 }
-
-bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
-{
-	//we do not want to delete the file once the VFile object is destroyed!!
-	VFile_ptr f(VFile::create(fileName,false));
-	if(f->exists())
-	{
-        reply_->fileReadMode(VReply::LocalReadMode);
-        reply_->addLog("TRY> read file from disk: OK");
-
-        f->setSourcePath(f->path());
-        f->setFetchMode(VFile::LocalFetchMode);
-        f->setFetchDate(QDateTime::currentDateTime());
-        f->setLog(reply_->log());
-
-        reply_->tmpFile(f);
-		owner_->infoReady(reply_);
-		return true;
-	}
-    reply_->addLog("TRY> read file from disk: NO ACCESS");
-	return false;
-}
-
 
 std::string OutputFileProvider::joboutFileName() const
 {

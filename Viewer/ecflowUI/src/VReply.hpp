@@ -62,6 +62,7 @@ public:
 	void fileReadMethod(const std::string& m) {readMethod_=m;}
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
     void setDirectory(VDir_ptr d) {dir_=d;}
+    void appendDirectory(VDir_ptr d)  {dirs_.push_back(d);}
     void setDirectories(const std::vector<VDir_ptr>& d) {dirs_=d;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
 	int readTruncatedTo() const {return readTruncatedTo_;}

@@ -21,23 +21,242 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <memory>
 
-OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
-	InfoProvider(owner,VTask::NoTask),
-    outClient_(nullptr),
-    currentTask_(-1)
+//#define DEBUG_OUTPUTDIRPROVIDER__
+
+OutputDirFetchTask::OutputDirFetchTask(OutputDirProvider* owner) :
+    owner_(owner)
 {
+    Q_ASSERT(owner_);
+}
+
+void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath,RunCondition cond)
+{
+    server_ = server;
+    node_ = node;
+    filePath_ = filePath;
+    runCondition_ = cond;
+}
+
+//=================================
+//
+// OutputFileFetchLocalTask
+//
+//=================================
+
+// try to read the logfile from the disk (if the settings allow it)
+void OutputDirFetchLocalTask::run()
+{
+//#ifdef DEBUG_OUTPUTDIRPROVIDER__
+    UiLog().dbg() << "OutputDirFetchLocalTask::run()";
+//#endif
+    VDir_ptr res;
+
+    boost::filesystem::path p(filePath_);
+
+    //Is it a directory?
+    boost::system::error_code errorCode;
+    if (boost::filesystem::is_directory(p,errorCode)) {
+        fail();
+        return;
+    }
+
+    auto reply = owner_->reply_;
+    try {
+        if(boost::filesystem::exists(p.parent_path())) {
+            std::string dirName=p.parent_path().string();
+            //if(info_ && info_->isNode() && info_->node())
+            if (node_) {
+                std::string nodeName=node_->strName();
+                std::string pattern=nodeName+".";
+                res=std::make_shared<VDir>(dirName,pattern);
+                res->setFetchDate(QDateTime::currentDateTime());
+                res->setFetchMode(VDir::LocalFetchMode);
+                res->setFetchModeStr("from disk");
+
+                reply->appendDirectory(res);
+                succeed();
+                return;
+            }
+        }
+        reply->appendErrorText("No access to path on disk!");
+    } catch (const boost::filesystem::filesystem_error& e) {
+        reply->appendErrorText("No access to path on disk! error: " + std::string(e.what()));
+        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
+        fail();
+    }
+
+    finish();
+}
+
+//=================================
+//
+// OutputDirFetchRemoteTask
+//
+//=================================
+
+OutputDirFetchRemoteTask::OutputDirFetchRemoteTask(OutputDirProvider* owner) :
+     QObject(nullptr), OutputDirFetchTask(owner)
+{
+}
+
+void OutputDirFetchRemoteTask::clear()
+{
+    OutputFetchTask::clear();
+    if(client_) {
+        delete client_;
+        client_ = nullptr;
+    }
+}
+
+//Create an output client (to access the logserver) and ask it to the fetch the
+//file asynchronously. The output client will call clientFinished() or
+//clientError eventually!!
+void OutputDirFetchRemoteTask::run()
+{
+    UI_FUNCTION_LOG
+    UiLog().dbg() << "OutputDirFetchRemoteTask::run <-- file: " << filePath_;
+
+    std::string host, port;
+    assert(node_);
+
+    // First try the user defined logserver, then the system defined one
+    bool userLogServerUsed = node_->userLogServer(host,port);
+    bool sysLogServerUsed = false;
+    if (!userLogServerUsed) {
+        sysLogServerUsed = node_->logServer(host,port);
+    }
+    Q_ASSERT(!userLogServerUsed || !sysLogServerUsed);
+
+    if (userLogServerUsed || sysLogServerUsed) {
+        Q_ASSERT(userLogServerUsed || sysLogServerUsed);
+        if (client_ && (client_->host() != host || client_->portStr() != port)) {
+            delete client_;
+            client_ = nullptr;
+        }
+
+        if (!client_) {
+            client_=new OutputDirClient(host,port,this);
+
+            connect(client_,SIGNAL(error(QString)),
+                    this,SLOT(clientError(QString)));
+
+            connect(client_,SIGNAL(progress(QString,int)),
+                    this,SLOT(clientProgress(QString,int)));
+
+            connect(client_,SIGNAL(finished()),
+                    this,SLOT(clientFinished()));
+        }
+
+        Q_ASSERT(client_);
+//        UiLog().dbg() << "OutputFileProvider: logserver=" << client_->longName() << " file=" << filePath_;
+//        owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> from" +
+//                                  ((userLogServerUsed)?"<b>user defined</b>":"") +
+//                                  " log server <i> " + client_->longName() + "</i>",0);
+
+
+        // fetch the file asynchronously
+        status_ = RunningStatus;
+        client_->getDir(filePath_);
+        return;
+    }
+
+
+    //If we are here there is no output client defined/available
+    if (client_) {
+        delete client_;
+        client_ = nullptr;
+    }
+
+    //owner_->reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
+    finish();
+}
+
+void OutputDirFetchRemoteTask::clientFinished()
+{
+    Q_ASSERT(client_);
+    VDir_ptr dir = client_->result();
+    if(dir)
+    {
+#ifdef DEBUG_OUTPUTDIRPROVIDER__
+        UiLog().dbg() << "OutputDirProvider::slotOutputClientFinished";
+#endif
+        dir->setFetchMode(VDir::LogServerFetchMode);
+        std::string method="served by " + client_->longName();
+        dir->setFetchModeStr(method);
+        dir->setFetchDate(QDateTime::currentDateTime());
+
+        owner_->reply_->appendDirectory(dir);
+        succeed();
+        return;
+    }
+
+    fail();
+}
+
+void OutputDirFetchRemoteTask::clientProgress(QString,int)
+{
+}
+
+void OutputDirFetchRemoteTask::clientError(QString msg)
+{
+    std::string sDesc;
+    if(client_)
+    {
+        sDesc="Failed to fetch from " + client_->longName();
+        if(!msg.isEmpty())
+            sDesc+=" error: " + msg.toStdString();
+
+    }
+    else
+    {
+        sDesc="Failed to fetch from logserver";
+        if(!msg.isEmpty())
+            sDesc+=": " + msg.toStdString();;
+    }
+
+    owner_->reply_->appendErrorText(sDesc);
+    fail();
+}
+
+
+//=================================
+//
+// OutputDirProvider
+//
+//=================================
+
+OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
+    InfoProvider(owner,VTask::NoTask)
+    //outClient_(nullptr),
+    //currentTask_(-1)
+{   
+    fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunAll, this);
+
+    // these are persistent fetch tasks. We add them to the queue on demand
+    fetchTask_[LocalTask1] = new OutputDirFetchLocalTask(this);
+    fetchTask_[RemoteTask1] = new OutputDirFetchRemoteTask(this);
+    fetchTask_[LocalTask2] = new OutputDirFetchLocalTask(this);
+    fetchTask_[RemoteTask2] = new OutputDirFetchRemoteTask(this);
+}
+
+OutputDirProvider::~OutputDirProvider()
+{
+    delete fetchQueue_;
+    fetchQueue_ = nullptr;
+
+    for (auto it: fetchTask_) {
+        delete it.second;
+    }
+    fetchTask_.clear();
 }
 
 void OutputDirProvider::clear()
 {
-	if(outClient_)
-	{
-		delete outClient_;
-		outClient_=nullptr;
-	}
+    // clear the queue and the fetch tasks
+    if (fetchQueue_) {
+        fetchQueue_->clear();
+    }
 
-    queue_.clear();
-    currentTask_=-1;
 	InfoProvider::clear();
 }
 
@@ -48,8 +267,7 @@ void OutputDirProvider::visit(VInfoNode* info)
 	reply_->reset();
 
     //Clear the queue
-    queue_.clear();
-    currentTask_=-1;
+    fetchQueue_->clear();
 
 	if(!info)
  	{
@@ -67,9 +285,44 @@ void OutputDirProvider::visit(VInfoNode* info)
    	}
 
     std::string joboutFile=n->findVariable("ECF_JOBOUT",true);
+
+    // jobout
+    auto t = fetchTask_[RemoteTask1];
+    t->reset(server,n,joboutFile);
+    fetchQueue_->add(t);
+
+    t = fetchTask_[LocalTask1];
+    t->reset(server,n,joboutFile);
+    if(server->readFromDisk()) {
+        fetchQueue_->add(t);
+    } else {
+        t->setRunCondition(OutputFetchTask::RunIfPrevFailed);
+        fetchQueue_->add(t);
+    }
+
+    // jobfile
+    std::string outFile = n->findVariable("ECF_OUT",true);
+    std::string jobFile = n->findVariable("ECF_JOB",true);
+    if(!outFile.empty() && !jobFile.empty()) {
+        t = fetchTask_[RemoteTask2];
+        t->reset(server,n,jobFile);
+        fetchQueue_->add(t);
+
+        t = fetchTask_[LocalTask2];
+        t->reset(server,n,jobFile);
+        if(server->readFromDisk()) {
+            fetchQueue_->add(t);
+        } else {
+            t->setRunCondition(OutputFetchTask::RunIfPrevFailed);
+            fetchQueue_->add(t);
+        }
+    }
+    fetchQueue_->run();
+
+#if 0
     queue_ << OutputDirProviderTask(joboutFile,OutputDirProviderTask::RemoteFetch);
 
-    //With the readFromdisk option we always try read locally
+    //With the readFromdisk option we always try to read locally
     if(server->readFromDisk())
     {
         queue_ << OutputDirProviderTask(joboutFile,OutputDirProviderTask::LocalFetch);
@@ -87,7 +340,7 @@ void OutputDirProvider::visit(VInfoNode* info)
     {
         queue_ << OutputDirProviderTask(jobFile,OutputDirProviderTask::RemoteFetch);
 
-        //With the readFromdisk option we always try read locally
+        //With the readFromdisk option we always try to read locally
         if(server->readFromDisk())
         {
             queue_ << OutputDirProviderTask(jobFile,OutputDirProviderTask::LocalFetch);
@@ -102,303 +355,22 @@ void OutputDirProvider::visit(VInfoNode* info)
 
     //Start fetching the dirs
     fetchNext();
+#endif
+
 }
 
-void OutputDirProvider::fetchIgnored()
+void OutputDirProvider::fetchQueueSucceeded()
 {
-    if(hasNext())
-        fetchNext();
-    else
-        completed();
 }
 
-void OutputDirProvider::fetchFinished(VDir_ptr dir,QString msg)
+void OutputDirProvider::fetchQueueFinished(VNode*)
 {
-    Q_ASSERT(currentTask_ >=0  && currentTask_ < queue_.count());
-    OutputDirProviderTask task=queue_[currentTask_];
-    queue_[currentTask_].dir_=dir;
-    queue_[currentTask_].status_=OutputDirProviderTask::FinishedStatus;
-
-    if(hasNext())
-        fetchNext();
-    else
-        completed();
-}
-
-void OutputDirProvider::fetchFailed(QString msg)
-{
-    Q_ASSERT(currentTask_ >=0  && currentTask_ < queue_.count());
-    OutputDirProviderTask task=queue_[currentTask_];
-    queue_[currentTask_].status_=OutputDirProviderTask::FailedStatus;
-    queue_[currentTask_].error_=msg;
-
-    if(hasNext())
-        fetchNext();
-    else
-        completed();
-}
-
-void OutputDirProvider::failed(QString msg)
-{
-    queue_.clear();
-    currentTask_=-1;
-
+    UiLog().dbg() <<  "OutputDirProvider::fetchQueueFinished";
     reply_->setInfoText("");
-    reply_->setErrorText(msg.toStdString());
-    owner_->infoFailed(reply_);
-}
-
-void OutputDirProvider::completed()
-{
-    bool hasAllFailed=true;
-    std::vector<VDir_ptr> dirVec;
-    Q_FOREACH(OutputDirProviderTask task,queue_)
-    {
-        if(task.dir_)
-            dirVec.push_back(task.dir_);
-
-        if(!task.error_.isEmpty())
-            reply_->appendErrorText(task.error_.toStdString());
-
-        if(task.status_ != OutputDirProviderTask::FailedStatus)
-            hasAllFailed=false;
-    }
-
-    //clear the queue
-    queue_.clear();
-    currentTask_=-1;
-
-    //Notify owner
-    reply_->setDirectories(dirVec);
-    owner_->infoReady(reply_);
-
-    reply_->setInfoText("");
-    reply_->setDirectories(dirVec);
-    if(!hasAllFailed)
-        owner_->infoReady(reply_);
-    else
+    if (reply_->directories().empty()) {
         owner_->infoFailed(reply_);
-}
-
-bool OutputDirProvider::hasNext() const
-{
-    return currentTask_ < queue_.count()-1;
-}
-
-void OutputDirProvider::fetchNext()
-{
-    //point to the next task
-    currentTask_++;
-
-    Q_ASSERT(currentTask_ >=0 && currentTask_ < queue_.count());
-    if(currentTask_ >= queue_.count())
-        return completed();
-
-    VDir_ptr dir;
-    if(!info_ || !info_->isNode() || !info_->node() || !info_->node()->node())
-    {
-        failed("Node not found"); //fatal error
-        return;
+    } else {
+        UiLog().dbg() <<  "dirs=" << reply_->directories().size();
+        owner_->infoReady(reply_);
     }
-
-    ServerHandler* server=info_->server();
-    VNode *n=info_->node();
-    if(!server || !n || !n->node())
-    {
-        failed("Node not found"); //fatal error
-        return;
-    }
-
-    //Get the current task
-    OutputDirProviderTask task=queue_[currentTask_];
-    //Check conditions
-    if(currentTask_ > 0)
-    {
-        OutputDirProviderTask prevTask=queue_[currentTask_-1];
-        if(task.condition_ == OutputDirProviderTask::RunIfPrevFailed &&
-           prevTask.status_ !=  OutputDirProviderTask::FailedStatus)
-        {
-            fetchIgnored(); //we simply skip this task
-            return;
-        }
-
-    }
-
-    //Get the file name
-    std::string fileName=task.path_;
-
-    //Jobout is empty: no dir path is availabale
-    if(fileName.empty())
-    {
-        fetchFailed("Directory path is empty");
-        return;
-    }
-
-    //We try the output client, its asynchronous! Here we create an
-    //output client and ask to the fetch the dir asynchronously. The output client will call
-    //slotOutputClientFinished() or slotOutputClientError() eventually!!
-    if(task.fetchMode_ ==  OutputDirProviderTask::RemoteFetch)
-    {
-        if(!fetchDirViaOutputClient(n,fileName))
-        {
-            //no logserver is defined
-            fetchIgnored();
-        }
-        return;
-    }
-
-    //We try to read it from disk
-    if(task.fetchMode_ == OutputDirProviderTask::LocalFetch)
-    {
-        //If there is no output client we try to read it from disk
-        std::string errStr;
-        dir=fetchLocalDir(fileName,errStr);
-        if(dir)
-        {
-            fetchFinished(dir);
-        }
-        else
-        {
-            fetchFailed(QString::fromStdString(errStr));
-        }
-        return;
-    }
-
-    //If we are here the error or warning is already set in reply
-    fetchFailed();
-}
-
-bool OutputDirProvider::fetchDirViaOutputClient(VNode *n,const std::string& fileName)
-{
-    std::string host, port;
-
-    if(n->userLogServer(host,port)) {
-        outClient_=makeOutputClient(host,port);
-        outClient_->getDir(fileName);
-        return true;
-    } else if(n->logServer(host,port)) {
-        outClient_=makeOutputClient(host,port);
-        outClient_->getDir(fileName);
-        return true;
-    }
-
-    return false;
-}
-
-void OutputDirProvider::slotOutputClientFinished()
-{
-    if(!info_ || queue_.isEmpty())
-        return;
-
-    Q_ASSERT(outClient_);
-    VDir_ptr dir = outClient_->result();
-    if(dir)
-    {
-        dir->setFetchMode(VDir::LogServerFetchMode);
-        std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-        dir->setFetchModeStr(method);
-        dir->setFetchDate(QDateTime::currentDateTime());
-        fetchFinished(dir);
-        return;
-    }
-
-    fetchFailed();
-}
-
-void OutputDirProvider::slotOutputClientProgress(QString,int)
-{
-}
-
-void OutputDirProvider::slotOutputClientError(QString msg)
-{
-    if(!info_ || queue_.isEmpty())
-        return;
-
-    QString sDesc;
-    if(outClient_)
-    {
-        sDesc="Failed to fetch from " + QString::fromStdString(outClient_->host()) +
-                "@" + QString::fromStdString(outClient_->portStr());
-        if(!msg.isEmpty())
-            sDesc+=" error: " + msg;
-
-    }
-    else
-    {
-        sDesc="Failed to fetch from logserver";
-        if(!msg.isEmpty())
-            sDesc+=": " + msg;
-    }
-
-    fetchFailed(sDesc);
-}
-
-VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path,std::string& errorStr)
-{
-    VDir_ptr res;
-
-    boost::filesystem::path p(path);
-
-    //Is it a directory?
-    boost::system::error_code errorCode;
-    if(boost::filesystem::is_directory(p,errorCode))
-    {
-        return res;
-    }
-
-    try
-    {
-        if(boost::filesystem::exists(p.parent_path()))
-        {
-            std::string dirName=p.parent_path().string();
-            if(info_ && info_->isNode() && info_->node())
-            {
-                std::string nodeName=info_->node()->strName();
-                std::string pattern=nodeName+".";
-                res=std::make_shared<VDir>(dirName,pattern);
-                res->setFetchDate(QDateTime::currentDateTime());
-                res->setFetchMode(VDir::LocalFetchMode);
-                res->setFetchModeStr("from disk");
-                return res;
-            }
-        }
-
-        errorStr="No access to path on disk!";
-        return res;
-    }
-    catch (const boost::filesystem::filesystem_error& e)
-    {
-        errorStr="No access to path on disk! error: " + std::string(e.what());
-        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
-    }
-
-    return res;
-}
-
-OutputDirClient* OutputDirProvider::makeOutputClient(const std::string& host,const std::string& port)
-{
-    if(outClient_)
-    {
-        if(outClient_->host() != host || outClient_->portStr() != port)
-        {
-            delete outClient_;
-            outClient_=nullptr;
-        }
-    }
-
-    if(!outClient_)
-    {
-        outClient_=new OutputDirClient(host,port,this);
-
-        connect(outClient_,SIGNAL(error(QString)),
-                this,SLOT(slotOutputClientError(QString)));
-
-        connect(outClient_,SIGNAL(progress(QString,int)),
-                this,SLOT(slotOutputClientProgress(QString,int)));
-
-        connect(outClient_,SIGNAL(finished()),
-                this,SLOT(slotOutputClientFinished()));
-    }
-
-    return outClient_;
 }

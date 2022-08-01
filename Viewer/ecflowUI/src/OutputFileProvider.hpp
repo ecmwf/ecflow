@@ -10,51 +10,127 @@
 #ifndef OUTPUTFILEPROVIDER_HPP_
 #define OUTPUTFILEPROVIDER_HPP_
 
+#include <map>
+
 #include <QObject>
 
+#include "VFile.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
+#include "OutputFetchTask.hpp"
+
+class OutputFileProvider;
 class OutputFileClient;
 class OutputCache;
+struct OutputCacheItem;
 
-class OutputFileProvider : public QObject, public InfoProvider
+class OutputFileFetchTask : public OutputFetchTask
+{
+public:
+    OutputFileFetchTask(OutputFileProvider* owner);
+    void reset(ServerHandler* server,VNode* node,const std::string& filePath, bool isJobout,
+               size_t deltaPos, bool useCache);
+    void clear() override;
+
+protected:
+    OutputFileProvider* owner_{nullptr};
+    bool isJobout_{false};
+    size_t deltaPos_{0};
+    bool useCache_{false};
+};
+
+class OutputFileFetchCacheTask : public OutputFileFetchTask
+{
+public:
+    using OutputFileFetchTask::OutputFileFetchTask;
+    void run() override;
+};
+
+
+class OutputFileFetchRemoteTask : public QObject, public OutputFileFetchTask
 {
 Q_OBJECT
+public:
+    OutputFileFetchRemoteTask(OutputFileProvider* owner);
+    void run() override;
+    void clear() override;
+
+protected Q_SLOTS:
+    void clientFinished();
+    void clientProgress(QString,int);
+    void clientError(QString);
+
+protected:
+    OutputFileClient *client_{nullptr};
+};
+
+class OutputFileFetchAnyLocalTask : public OutputFileFetchTask
+{
+public:
+    using OutputFileFetchTask::OutputFileFetchTask;
+    void run() override;
+};
+
+class OutputFileFetchLocalTask : public OutputFileFetchAnyLocalTask
+{
+public:
+    using OutputFileFetchAnyLocalTask::OutputFileFetchAnyLocalTask;
+    void run() override;
+};
+
+
+class OutputFileFetchServerTask : public OutputFileFetchTask
+{
+public:
+    using OutputFileFetchTask::OutputFileFetchTask;
+    void run() override;
+};
+
+class OutputFileProvider : public QObject, public InfoProvider, public OutputFetchQueueOwner
+{
+     //friend class OutputFileTask;
+     friend class OutputFileFetchCacheTask;
+     friend class OutputFileFetchRemoteTask;
+     friend class OutputFileFetchLocalTask;
+     friend class OutputFileFetchAnyLocalTask;
+     friend class OutputFileFetchServerTask;
 
 public:
 	 explicit OutputFileProvider(InfoPresenter* owner);
+     ~OutputFileProvider();
 
 	 void visit(VInfoNode*) override;
 	 void clear() override;
 
 	 //Get a particular jobout file
-     void file(const std::string& fileName,bool useCache=true);
-     void fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,bool useCache=true);
+     void file(const std::string& fileName,size_t deltaPos, bool useCache);
+     void fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache);
      void setDirectories(const std::vector<VDir_ptr>&);
 
      std::string joboutFileName() const;
      bool isTryNoZero(const std::string& fileName) const;
 
-private Q_SLOTS:
-     void slotOutputClientError(QString);
-     void slotOutputClientProgress(QString,int);
-     void slotOutputClientFinished();
+     void fetchQueueSucceeded() override;
+     void fetchQueueFinished(VNode*) override;
+
+protected:
+     OutputCacheItem* findInCache(const std::string& fileName);
+     void addToCache(VFile_ptr file);
+     void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
+     VDir_ptr dirToFile(const std::string& fileName) const;
 
 private:
-     VDir_ptr dirToFile(const std::string& fileName) const;
-     void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache);
-	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
-     bool fetchFileViaOutputClient(VNode *n,const std::string& fileName,bool useCache);
-	 bool fetchLocalFile(const std::string& fileName);
+     void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout, size_t deltaPos,bool detachCache);
 
-     OutputFileClient *outClient_;
-     bool useOutputClientOnly_;
+     OutputCache* outCache_{nullptr};
+     OutputFetchQueue* fetchQueue_{nullptr};
      std::vector<VDir_ptr> dirs_;
-     OutputCache* outCache_;
+     enum FetchTaskType {RemoteTask, LocalTask, AnyLocalTask, CacheTask, ServerTask};
+     std::map<FetchTaskType, OutputFileFetchTask*> fetchTask_;
 };
 
 #endif

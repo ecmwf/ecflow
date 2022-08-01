@@ -14,13 +14,15 @@
 #include <QVariant>
 
 #include "TextFormat.hpp"
+#include "VConfig.hpp"
 #include "VFileInfo.hpp"
+#include "VProperty.hpp"
 #include "VReply.hpp"
 
 static QColor keyColour(39,49,101);
 static QColor errorColour(255,0,0);
 static QColor dateColour(34,107,138);
-static QColor largeFileColour(Qt::red);
+//static QColor largeFileColour(Qt::red);
 
 FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 {
@@ -36,9 +38,21 @@ FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 
     setFrameShape(QFrame::StyledPanel);
     setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+
+    showTransferDetailsProp_ = VConfig::instance()->find("view.fileInfoLabel.showTransferDetails");
 }
 
 void FileInfoLabel::update(VReply* reply,QString extraText)
+{
+    if(reply) {
+        update(reply, reply->tmpFile(), extraText);
+    } else {
+        VFile_ptr file;
+        update(reply, file, extraText);
+    }
+}
+
+void FileInfoLabel::update(VReply* reply, VFile_ptr file, QString extraText)
 {
 	if(!reply)
     {
@@ -74,10 +88,9 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	//Local read
 	if(reply->fileReadMode() == VReply::LocalReadMode)
 	{
-        VFile_ptr f=reply->tmpFile();
-        if(f)
+        if(file)
         {
-            VFileInfo fInfo(QString::fromStdString(f->path()));
+            VFileInfo fInfo(QString::fromStdString(file->path()));
             if(fInfo.exists())
             {
                 labelText+=Viewer::formatBoldText(" Size: ",keyColour) +
@@ -100,9 +113,9 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
          s+="<br>";
          s+=Viewer::formatBoldText("Source: ",keyColour) + " read from disk";
 
-         if(f)
+         if(file)
          {          
-             s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(f->fetchDate());
+             s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(file->fetchDate());
          }
 
          if(!reply->fileReadMethod().empty())
@@ -113,17 +126,16 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
 	{
-        VFile_ptr f=reply->tmpFile();
-        if(f)
+        if(file)
         {
-            if(f->storageMode() == VFile::MemoryStorage)
+            if(file->storageMode() == VFile::MemoryStorage)
             {
                 labelText+=Viewer::formatBoldText(" Size: ",keyColour);
-                labelText+=formatFileSize(VFileInfo::formatSize(f->dataSize()),f->dataSize());
+                labelText+=formatFileSize(VFileInfo::formatSize(file->dataSize()),file->dataSize());
             }
             else
             {
-                VFileInfo fInfo(QString::fromStdString(f->path()));
+                VFileInfo fInfo(QString::fromStdString(file->path()));
                 if(fInfo.exists())
                 {                   
                     labelText+=Viewer::formatBoldText(" Size: ",keyColour);
@@ -132,10 +144,10 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             }
 
             s+="<br>";
-            s+=Viewer::formatBoldText("Source: ",keyColour) + QString::fromStdString(f->fetchModeStr());
-            s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(f->fetchDate());
+            s+=Viewer::formatBoldText("Source: ",keyColour) + QString::fromStdString(file->fetchModeStr());
+            s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(file->fetchDate());
 
-            int rowLimit=f->truncatedTo();
+            int rowLimit=file->truncatedTo();
             if(rowLimit >= 0)
             {
                 s+=" (<i>text truncated to last " + QString::number(rowLimit) + " lines</i>)";
@@ -162,18 +174,17 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 
 	else if(reply->fileReadMode() == VReply::LogServerReadMode)
 	{
-        VFile_ptr f=reply->tmpFile();
-        if(f)
+        if(file)
         {
             //Path + size
-            if(f->storageMode() == VFile::MemoryStorage)
+            if(file->storageMode() == VFile::MemoryStorage)
 			{
                 labelText+=Viewer::formatBoldText(" Size: ",keyColour);
-                labelText+=formatFileSize(VFileInfo::formatSize(f->dataSize()),f->dataSize());
+                labelText+=formatFileSize(VFileInfo::formatSize(file->dataSize()),file->dataSize());
 			}
 			else
 			{
-                VFileInfo fInfo(QString::fromStdString(f->path()));
+                VFileInfo fInfo(QString::fromStdString(file->path()));
                 if(fInfo.exists())
 				{					
                     labelText+=Viewer::formatBoldText(" Size: ",keyColour);
@@ -186,13 +197,26 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
             //Source
             s+=Viewer::formatBoldText("Source: ",keyColour);
 
-            if(f->cached())
+            if(file->cached())
             {
                 s+="[from cache] ";
             }
-            s+=QString::fromStdString(f->fetchModeStr());
-            s+=" (took " + QString::number(static_cast<float>(f->transferDuration())/1000.,'f',1) + " s)";           
-            s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(f->fetchDate());
+            s+=QString::fromStdString(file->fetchModeStr());
+            //s+=" (took " + QString::number(static_cast<float>(file->transferDuration())/1000.,'f',1) + " s)";
+            s+=Viewer::formatBoldText(" at ",keyColour) + formatDate(file->fetchDate());
+
+            bool showTransferDetails = showTransferDetailsProp_?showTransferDetailsProp_->value().toBool():false;
+            if (showTransferDetails) {
+                VFile_ptr tmpFile = reply->tmpFile();
+                if (tmpFile) {
+                    if (tmpFile->hasDeltaContents()) {
+                        s += QString("<br> Increment=%1 B transferred").arg(tmpFile->sizeInBytes());
+                    } else {
+                        s += QString("<br> The whole file transferred");
+                    }
+                    s += " (in " + QString::number(static_cast<float>(tmpFile->transferDuration())/1000.,'f',1) + " s)";
+                }
+            }
         }
 	}
 
@@ -238,10 +262,10 @@ QString FileInfoLabel::formatDate(QDateTime dt)
     return Viewer::formatBoldText(s,dateColour);
 }
 
-QString FileInfoLabel::formatFileSize(QString str,qint64 size)
+QString FileInfoLabel::formatFileSize(QString str,qint64 /*size*/)
 {
-    if(size > 40*1024*1024)
-        return Viewer::formatText(str,largeFileColour);
+//    if(size > 40*1024*1024)
+//        return Viewer::formatText(str,largeFileColour);
     return str;
 }
 

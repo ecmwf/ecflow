@@ -38,6 +38,97 @@ int OutputBrowser::minPagerTextSize_=40*1024*1024;
 int OutputBrowser::minPagerSparseSize_=40*1024*1024;
 int OutputBrowser::minConfirmSearchSize_=20*1024*1024;
 
+
+//========================================
+//
+// OutputBrowserState
+//
+//========================================
+
+class OutputBrowserState
+{
+public:
+    OutputBrowserState(OutputBrowser* browser) : browser_(browser) {}
+    virtual ~OutputBrowserState() = default;
+
+    virtual void handleClear();
+    virtual void handleLoad(VFile_ptr);
+    virtual void handleReloadBegin();
+
+protected:
+    OutputBrowser* browser_{nullptr};
+};
+
+class OutputBrowserEmptyState : public OutputBrowserState
+{
+public:
+    OutputBrowserEmptyState(OutputBrowser* browser);
+    void handleClear() override;
+};
+
+class OutputBrowserNormalState : public OutputBrowserState
+{
+public:
+    using OutputBrowserState::OutputBrowserState;
+};
+
+class OutputBrowserReloadState : public OutputBrowserState
+{
+public:
+    using OutputBrowserState::OutputBrowserState;
+    void handleLoad(VFile_ptr) override;
+};
+
+void OutputBrowserState::handleClear()
+{
+    browser_->transitionTo(new OutputBrowserEmptyState(browser_));
+}
+
+void OutputBrowserState::handleLoad(VFile_ptr file)
+{
+    browser_->clearIt();
+    browser_->loadIt(file);
+    if (browser_->isFileLoaded()) {
+        browser_->transitionTo(new OutputBrowserNormalState(browser_));
+    } else {
+        browser_->transitionTo(new OutputBrowserEmptyState(browser_));
+    }
+}
+
+void OutputBrowserState::handleReloadBegin()
+{
+    browser_->transitionTo(new OutputBrowserReloadState(browser_));
+}
+
+// Empty
+OutputBrowserEmptyState::OutputBrowserEmptyState(OutputBrowser* b) :
+    OutputBrowserState(b)
+{
+    browser_->clearIt();
+}
+
+void OutputBrowserEmptyState::handleClear()
+{
+    browser_->clearIt();
+}
+
+// Reload
+void OutputBrowserReloadState::handleLoad(VFile_ptr file)
+{
+    browser_->reloadIt(file);
+    if (browser_->isFileLoaded()) {
+        browser_->transitionTo(new OutputBrowserNormalState(browser_));
+    } else {
+        browser_->transitionTo(new OutputBrowserEmptyState(browser_));
+    }
+}
+
+//========================================
+//
+// OutputBrowser
+//
+//========================================
+
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
     searchTb_(nullptr)
@@ -107,6 +198,9 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
 
     //the textfilter is is hidden by default
     textFilter_->hide();
+
+    // initialise state
+    transitionTo(new OutputBrowserEmptyState(this));
 }
 
 OutputBrowser::~OutputBrowser()
@@ -117,6 +211,10 @@ OutputBrowser::~OutputBrowser()
     if(jobHighlighter_ && !jobHighlighter_->parent())
     {
         delete jobHighlighter_;
+    }
+
+    if (state_) {
+        delete state_;
     }
 }
 
@@ -130,111 +228,89 @@ void OutputBrowser::setFilterButtons(QToolButton* statusTb,QToolButton* optionTb
     textFilter_->setExternalButtons(statusTb,optionTb);
 }
 
+//--------------------
+// Public interface
+//--------------------
 void OutputBrowser::clear()
 {
-    textEdit_->clear();
-    textPager_->clear();
-    htmlEdit_->clear();
-    file_.reset();
-    oriFile_.reset();
-}
-
-void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
-{
-    if(indexType == BasicIndex)
-    {
-        stacked_->setCurrentIndex(indexType);               
-        textPager_->clear();
-        htmlEdit_->clear();
-
-        //enable and init search
-        if(searchTb_) searchTb_->setEnabled(true);
-        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
-        searchLine_->setSearchInterface(textEditSearchInterface_);
-
-        //enable filter
-        textFilter_->setEnabledExternalButtons(true);
-    }
-    else if(indexType == PagerIndex)
-    {
-        stacked_->setCurrentIndex(indexType);          
-        textEdit_->clear();
-        htmlEdit_->clear();
-
-        //enable and init search
-        if(searchTb_) searchTb_->setEnabled(true);
-        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
-        searchLine_->setSearchInterface(textPagerSearchInterface_);
-
-        //enable filter
-        textFilter_->setEnabledExternalButtons(true);
-    }
-    else if(indexType == HtmlIndex)
-    {
-        stacked_->setCurrentIndex(indexType);
-        textPager_->clear();
-        textEdit_->clear();
-        if(oriFile_)
-            oriFile_.reset();
-
-        //Disable search
-        if(searchTb_) searchTb_->setEnabled(false);
-        searchLine_->setSearchInterface(nullptr);
-        searchLine_->hide();
-
-        //Disable filter
-        textFilter_->closeIt();
-        textFilter_->setEnabledExternalButtons(false);
-    }
-
-    showConfirmSearchLabel();
-    Q_EMIT wordWrapSupportChanged(isWordWrapSupported());
+    state_->handleClear();
 }
 
 //This should only be called externally when a new output is loaded
 void OutputBrowser::loadFile(VFile_ptr file)
 {
-    if(!file)
-    {
-        clear();
+    state_->handleLoad(file);
+}
+
+void OutputBrowser::reloadBegin()
+{
+    state_->handleReloadBegin();
+}
+
+//---------------------------
+// Internal implementations
+//---------------------------
+void OutputBrowser::clearIt()
+{
+    textEdit_->clear();
+    textPager_->clear();
+    htmlEdit_->clear();
+    file_.reset();
+    contentsFile_.reset();
+}
+
+void OutputBrowser::loadIt(VFile_ptr file)
+{
+    contentsChangedOnLastLoad_ = true;
+
+    file_ = file;
+    if(!file_) {
+        return;
+    }
+    contentsFile_ = filterIt();
+    loadContents();
+}
+
+void OutputBrowser::reloadIt(VFile_ptr file)
+{
+    contentsChangedOnLastLoad_ = false;
+
+    if(!file) {
+        clearIt();
         return;
     }
 
-    file_=file;
-    if(file_->storageMode() == VFile::DiskStorage)
-    {
-        loadFile(QString::fromStdString(file_->path()));
-    }
-    else
-    {
-        QString s(file_->data());
-        loadText(s,QString::fromStdString(file_->sourcePath()),file_->dataSize(), true);
+    if (file->hasDeltaContents() && file_) {
+        if (!file_->append(file)) {
+            return;
+        }
+    } else {
+        file_=file;
     }
 
-    //Run the filter if defined
-    if(textFilter_->isActive())
-    {
-        slotRunFilter(textFilter_->filterText(),textFilter_->isMatched(),
-                      textFilter_->isCaseSensitive());
+    contentsChangedOnLastLoad_ = true;
+    contentsFile_ = filterIt();
+    loadContents();
+}
+
+void OutputBrowser::loadContents()
+{
+    if (contentsFile_ && file_) {
+        if(contentsFile_->storageMode() == VFile::DiskStorage)
+        {
+            loadContentsFromDisk(QString::fromStdString(contentsFile_->path()), QString::fromStdString(file_->path()));
+        }
+        else
+        {
+            QString s(contentsFile_->data());
+            loadContentsFromText(s,QString::fromStdString(file_->sourcePath()),contentsFile_->dataSize(), true);
+        }
     }
 }
 
-void OutputBrowser::loadFilteredFile(VFile_ptr file)
+void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileName)
 {
-    if(!file)
-    {
-        clear();
-        return;
-    }
-
-    file_=file;
-    Q_ASSERT(file_->storageMode() == VFile::DiskStorage);
-    loadFile(QString::fromStdString(file_->path()));
-}
-
-void OutputBrowser::loadFile(QString fileName)
-{
-    QFile file(fileName);
+    QFile file(contentsFileName);
     file.open(QIODevice::ReadOnly);
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
@@ -258,7 +334,7 @@ void OutputBrowser::loadFile(QString fileName)
 
         TextPagerDocument::DeviceMode mode=(fSize >= minPagerSparseSize_)?
         		           TextPagerDocument::Sparse:TextPagerDocument::LoadAll;
-        textPager_->load(fileName, mode);
+        textPager_->load(contentsFileName, mode);
     }
     else
     {
@@ -271,7 +347,7 @@ void OutputBrowser::loadFile(QString fileName)
     }
 }
 
-void OutputBrowser::loadText(QString txt,QString fileName, size_t dataSize, bool resetFile)
+void OutputBrowser::loadContentsFromText(QString txt,QString fileName, size_t dataSize, bool /*resetFile*/)
 {
     // prior to the ability to save local copies of files, we reset the file_ member here;
     // but now we need to keep it so that we can save a copy of it
@@ -337,6 +413,60 @@ void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
             UserMessage::message(UserMessage::ERROR,true,"Failed to save file to  " + fileNameToSaveTo.toStdString());
         }
     }
+}
+
+
+void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
+{
+    if(indexType == BasicIndex)
+    {
+        stacked_->setCurrentIndex(indexType);
+        textPager_->clear();
+        htmlEdit_->clear();
+
+        //enable and init search
+        if(searchTb_) searchTb_->setEnabled(true);
+        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
+        searchLine_->setSearchInterface(textEditSearchInterface_);
+
+        //enable filter
+        textFilter_->setEnabledExternalButtons(true);
+    }
+    else if(indexType == PagerIndex)
+    {
+        stacked_->setCurrentIndex(indexType);
+        textEdit_->clear();
+        htmlEdit_->clear();
+
+        //enable and init search
+        if(searchTb_) searchTb_->setEnabled(true);
+        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
+        searchLine_->setSearchInterface(textPagerSearchInterface_);
+
+        //enable filter
+        textFilter_->setEnabledExternalButtons(true);
+    }
+    else if(indexType == HtmlIndex)
+    {
+        stacked_->setCurrentIndex(indexType);
+        textPager_->clear();
+        textEdit_->clear();
+
+        // the filtered contents should be released
+        contentsFile_ = file_;
+
+        //Disable search
+        if(searchTb_) searchTb_->setEnabled(false);
+        searchLine_->setSearchInterface(nullptr);
+        searchLine_->hide();
+
+        //Disable filter
+        textFilter_->closeIt();
+        textFilter_->setEnabledExternalButtons(false);
+    }
+
+    showConfirmSearchLabel();
+    Q_EMIT wordWrapSupportChanged(isWordWrapSupported());
 }
 
 bool OutputBrowser::isFileLoaded()
@@ -501,20 +631,31 @@ void OutputBrowser::setCursorPos(qint64 pos)
     }
 }
 
-void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive)
+void OutputBrowser::slotRunFilter(QString /*filter*/,bool /*matched*/,bool /*caseSensitive*/)
 {
-    if(stacked_->currentIndex() == HtmlIndex)
-        return;
+    contentsFile_ = filterIt();
+    loadContents();
+}
 
-    if(!file_)
-        return;
+//Run the filter if defined. If no filtering can be performed the original file is returned.
+VFile_ptr OutputBrowser::filterIt()
+{
+    if (!textFilter_->isActive() || stacked_->currentIndex() == HtmlIndex || !file_) {
+        return file_;
+    }
 
-    if(oriFile_)
-        file_=oriFile_;
+    QString filter = textFilter_->filterText();
+    bool matched = textFilter_->isMatched();
+    bool caseSensitive = textFilter_->isCaseSensitive();
+
+    if (filter.isEmpty()){
+        return file_;
+    }
 
     VFile_ptr fTarget=VFile::createTmpFile(true);
     VFile_ptr fSrc=VFile_ptr();
 
+    Q_ASSERT(file_);
     // file is on disk - we use it as it is
     if(file_->storageMode() == VFile::DiskStorage)
     {
@@ -530,9 +671,6 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
             QTextStream out(&file);
             QString s(file_->data());
             out << s;
-        }
-        else
-        {
         }
     }
 
@@ -574,7 +712,7 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
 #endif
         UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
         fTarget.reset();
-        return;
+        return file_;
     }
 
     proc.waitForFinished(60000);
@@ -586,13 +724,14 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
     QString errStr=proc.readAllStandardError();
     if(proc.exitStatus() == QProcess::NormalExit && errStr.isEmpty())
     {
-        oriFile_=file_;
+        //oriFile_=file_;
         bool empty = fTarget->isEmpty();
         textFilter_->setStatus(empty?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));
         if (textFilter_->needNumberOfLines() && !empty) {
            textFilter_->setNumberOfLines(fTarget->numberOfLines());
         }
-        loadFilteredFile(fTarget);
+        return fTarget;
+        //loadFilteredFile(fTarget);
     }
     else
     {        
@@ -612,7 +751,7 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
         fTarget.reset(); //delete
     }
 
-    return;
+    return file_;
 }
 
 void OutputBrowser::slotRemoveFilter()
@@ -620,9 +759,22 @@ void OutputBrowser::slotRemoveFilter()
     if(stacked_->currentIndex() == HtmlIndex)
         return;
 
-    if(oriFile_)
-    {
-        loadFile(oriFile_);
-        oriFile_.reset();
+    contentsFile_ = file_;
+    loadContents();
+}
+
+size_t OutputBrowser::sizeInBytes() const
+{
+    return (file_)?file_->sizeInBytes():0;
+}
+
+void OutputBrowser::transitionTo(OutputBrowserState* state)
+{
+#ifdef MVQFEATURESELECTORITEM_DEBUG_
+    std::cout << " MvQFeatureSelectorItem::transitionTo " << typeid(*state).name() << "\n";
+#endif
+    if (state_ != nullptr) {
+        delete state_;
     }
+    state_ = state;
 }

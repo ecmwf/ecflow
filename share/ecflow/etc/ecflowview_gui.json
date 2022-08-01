@@ -290,6 +290,11 @@
                         "title" : "Text filter in Output tab",
                         "prefix" : "view.textEdit",
                         "line" : "showLineNumInTextFilter"
+                    },
+                    "group" : {
+                        "title" : "File info label in Output tab",
+                        "prefix" : "view.fileInfoLabel",
+                        "line" : "showTransferDetails"
                     }
                 }
             }

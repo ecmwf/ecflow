@@ -15,13 +15,11 @@
 #define _UI_OUTPUTFILECLIENT_DEBUG
 
 OutputFileClient::OutputFileClient(const std::string& host,const std::string& portStr,QObject* parent) :
-	OutputClient(host,portStr,parent),
-	total_(0),
-    expected_(0),
-	lastProgress_(0),
-    progressUnits_("MB"),
-    progressChunk_(1024*1024)
+    OutputClient(host,portStr,parent)
 {
+    versionClient_ = new OutputVersionClient(host, portStr, parent);
+    connect(versionClient_,SIGNAL(finished()), this, SLOT(slotVersionFinished()));
+    connect(versionClient_,SIGNAL(error(QString)), this, SLOT(slotVersionError(QString)));
 }
 
 void OutputFileClient::clearResult()
@@ -34,10 +32,17 @@ void OutputFileClient::clearResult()
 }
 
 void OutputFileClient::slotConnected()
-{
-	soc_->write("get ",4);
-	soc_->write(remoteFile_.c_str(),remoteFile_.size());
-	soc_->write("\n",1);
+{ 
+    if (deltaPos_ > 0) {
+        soc_->write("delta ",6);
+        std::string s = std::to_string(deltaPos_) + " ";
+        soc_->write(s.c_str(), s.size());
+    } else  {
+        soc_->write("get ",4);
+    }
+    soc_->write(remoteFile_.c_str(),remoteFile_.size());
+
+    soc_->write("\n",1);
 }
 
 void OutputFileClient::slotError(QAbstractSocket::SocketError err)
@@ -46,7 +51,7 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 	{
 	case QAbstractSocket::RemoteHostClosedError:
 
-		if(total_ == 0)
+        if(total_ == 0 && deltaPos_ <=0)
 		{
             break;
 		}
@@ -93,13 +98,39 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 
 }
 
-void OutputFileClient::getFile(const std::string& name)
+void OutputFileClient::getFile(const std::string& name, size_t deltaPos)
 {
-	connectToHost(host_,port_);
+    // stop running the current transfer
+    soc_->abort();
+    if(out_)
+    {
+        out_->close();
+        out_.reset();
+    }
+
+    remoteFile_=name;
+    deltaPos_ = deltaPos;
+
+    // we need to know the version. When it finishes will call getFile again
+    if (versionClient_->versionStatus() == OutputVersionClient::VersionNotFetched) {
+#ifdef _UI_OUTPUTFILECLIENT_DEBUG
+        UiLog().dbg() << "OutputFileClient::getFile --> Try to get logserver version";
+#endif
+        versionClient_->getVersion();
+        return;
+    }
+
+    connectToHost(host_,port_);
+
+    // only verson 2 can handle delta increments
+    if (versionClient_->version() != 2) {
+        deltaPos_ = 0;
+    }
 
 	remoteFile_=name;
 	out_.reset();
     out_=VFile_ptr(VFile::create(true)); //we will delete the file from disk
+    out_->setDeltaContents(deltaPos_ >0);
     out_->setSourcePath(name);
     total_=0;
     lastProgress_=0;
@@ -161,7 +192,6 @@ void OutputFileClient::setDir(VDir_ptr dir)
         return;
 
     dir_=dir;
-    //if(expected_ == 0)
     estimateExpectedSize();
 }
 
@@ -195,4 +225,102 @@ void OutputFileClient::estimateExpectedSize()
 #ifdef _UI_OUTPUTFILECLIENT_DEBUG
     UiLog().dbg() << "  expected size=" << QString::number(expected_);
 #endif
+}
+
+void OutputFileClient::slotVersionFinished()
+{
+#ifdef _UI_OUTPUTFILECLIENT_DEBUG
+    UiLog().dbg() << "OutputFileClient::slotVersionFinished";
+#endif
+    Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
+    getFile(remoteFile_, deltaPos_);
+}
+
+void OutputFileClient::slotVersionError(QString t)
+{
+#ifdef _UI_OUTPUTFILECLIENT_DEBUG
+    UiLog().dbg() << "OutputFileClient::slotVersionError " << t;
+#endif
+    Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
+    getFile(remoteFile_, deltaPos_);
+}
+
+//===================================
+//
+// OutputVersionClient
+//
+//===================================
+
+void OutputVersionClient::timeoutError()
+{
+    versionStatus_ = VersionFailedToFetch;
+}
+
+void OutputVersionClient::slotConnected()
+{
+    soc_->write("version",7);
+    soc_->write("\n",1);
+}
+
+void OutputVersionClient::slotError(QAbstractSocket::SocketError err)
+{
+    if (err == QAbstractSocket::RemoteHostClosedError) {
+        //Probably there was no error and the connection was closed because all
+        //the data was transferred. Unfortunately the logserver does not send anything
+        //at the end of the data transfer.
+        if (dataSize_ > 0) {
+            versionStatus_ = VersionFetched;
+            buildVersion();
+            soc_->abort();
+            Q_EMIT finished();
+            return;
+        }
+    }
+
+    versionStatus_ = VersionFailedToFetch;
+    soc_->abort();
+    Q_EMIT error(soc_->errorString());
+}
+
+void OutputVersionClient::slotRead()
+{
+    const qint64 size = 64*1024;
+    char buf[size];
+    qint64 len = 0;
+
+    while((len = soc_->read(buf,size)) > 0)
+    {
+#ifdef _UI_OUTPUTFILECLIENT_DEBUG
+        UiLog().dbg() << "OutputVersionClient::slotRead buf=" << buf;
+#endif
+
+        std::string err;
+        if(dataSize_ + len  < maxDataSize_)
+        {
+            memcpy(data_+dataSize_,buf,len);
+            dataSize_+=len;
+            data_[dataSize_] = '\0';
+        } else {
+            soc_->abort();
+            Q_EMIT error("write failed");
+        }
+    }
+}
+
+void OutputVersionClient::getVersion()
+{
+    versionStatus_ = VersionBeingFetched;
+    version_ = 0;
+    dataSize_ = 0;
+    connectToHost(host_,port_);
+}
+
+void OutputVersionClient::buildVersion()
+{
+    version_ = std::stoi(data_);
+    if (version_ != 2) {
+        version_ = 0;
+    }
+    UiLog().dbg() << "OutputVersionClient::buildVersion logserver[" + host_ + "@" + portStr_ + "] version=" <<
+                          version_;
 }

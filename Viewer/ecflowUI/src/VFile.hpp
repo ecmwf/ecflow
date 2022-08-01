@@ -42,6 +42,9 @@ public:
 	size_t dataSize() const {return dataSize_;}
 	const char* data() const {return data_;}
 
+    size_t fileSize() const;
+    size_t sizeInBytes() const;
+
 	void setTransferDuration(unsigned int  d) {transferDuration_=d;}
 	unsigned int transferDuration() const {return transferDuration_;}
 	void setFetchDate(QDateTime d) {fetchDate_=d;}
@@ -59,6 +62,10 @@ public:
     const std::vector<std::string>& log() const {return log_;}
     int numberOfLines() const;
 
+    bool hasDeltaContents() const {return deltaContents_;}
+    void setDeltaContents(bool b) {deltaContents_=b;}
+
+    bool append(VFile_ptr);
     bool write(const char *buf,size_t len,std::string& err);
     bool write(const std::string& buf,std::string& err);
 
@@ -74,6 +81,7 @@ protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);
 	VFile(const std::string& str,bool deleteFile= true);
 	explicit VFile(bool deleteFile= true);
+    bool appendContentsTo(FILE* fpTarget) const;
 
 	std::string path_;
     std::string sourcePath_;
@@ -84,6 +92,7 @@ protected:
 	char* data_{nullptr};
 	size_t dataSize_{0};
 	FILE* fp_{nullptr};
+    bool deltaContents_{false};
 
     FetchMode fetchMode_{NoFetchMode};
     std::string fetchModeStr_;

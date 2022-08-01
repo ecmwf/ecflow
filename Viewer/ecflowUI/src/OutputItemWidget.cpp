@@ -249,11 +249,19 @@ void OutputItemWidget::getLatestFile()
 //Load the currently selected file in the dir view
 void OutputItemWidget::getCurrentFile(bool doReload)
 {
+    bool useCache = !doReload;
+
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
     messageLabel_->stopProgress();
-    fileLabel_->clear();
-    browser_->clear();
+
+    if (doReload) {
+        browser_->reloadBegin();
+    } else {
+        fileLabel_->clear();
+        browser_->clear();
+    }
+
     fetchInfo_->clearInfo();
 
     if(info_)
@@ -270,14 +278,20 @@ void OutputItemWidget::getCurrentFile(bool doReload)
             //Fetch the file with given fetchmode
             auto* op=static_cast<OutputFileProvider*>(infoProvider_);
 
-            //If the fetchmode is not defined we use the normal fetch policy
-            if(fetchMode == VDir::NoFetchMode)
-               op->file(fullName,!doReload);
-            //Otherwise we need to use the given fetch mode
-            else
-               op->fetchFile(fullName,fetchMode,!doReload);
+            size_t deltaPos = 0;
+            if (doReload) {
+                deltaPos = browser_->sizeInBytes();
+            }
 
-            updateDir(false);  // get the directory listing
+            //If the fetchmode is not defined we use the normal fetch policy
+            if(fetchMode == VDir::NoFetchMode) {
+               op->file(fullName, deltaPos, useCache);
+            //Otherwise we need to use the given fetch mode
+            } else {
+               op->fetchFile(fullName,fetchMode, deltaPos, useCache);
+             }
+            // get the directory listing
+            updateDir(false);
         }
 	}
 }
@@ -383,37 +397,28 @@ void OutputItemWidget::infoReady(VReply* reply)
             }
         }
 
+        // TODO: does it make sense?
         browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
 
+        // Load the file in the browser
         VFile_ptr f=reply->tmpFile();
-
-        //If the info is stored in a tmp file
         if(f)
         {
             browser_->loadFile(f);
             if(f->storageMode() == VFile::DiskStorage)
                 hasMessage=false;
-
-        }
-        //If the info is stored as a string in the reply object
-        else
-        {            
-            //QString s=QString::fromStdString(reply->text());
-            //browser_->loadText(s,QString::fromStdString(reply->fileName()));
         }
 
         if(!hasMessage)
         {
             messageLabel_->hide();
         }
-        //messageLabel_->stopLoadLabel();
 
-        //Update the file label
-        fileLabel_->update(reply);
+        //Update the file label. The reply might only contain a delta!
+        fileLabel_->update(reply, browser_->file());
 
         //Search for some keywords in the current jobout
-
-        if(f)
+        if(f && browser_->contentsChangedOnLastLoad())
         {
             bool searched = false;
             //We do not have dir info so the file must be the jobout
@@ -504,13 +509,13 @@ void OutputItemWidget::infoProgress(VReply* reply)
 	//updateDir(true);
 }
 
-void  OutputItemWidget::infoProgressStart(const std::string& text,int max)
+void OutputItemWidget::infoProgressStart(const std::string& text,int max)
 {
     messageLabel_->showInfo(QString::fromStdString(text));
     messageLabel_->startProgress(max);
 }
 
-void  OutputItemWidget::infoProgress(const std::string& text,int value)
+void OutputItemWidget::infoProgress(const std::string& text,int value)
 {
     messageLabel_->progress(QString::fromStdString(text),value);
 }
@@ -554,7 +559,6 @@ void OutputItemWidget::on_reloadTb__clicked()
 	userClickedReload_ = true;
     reloadTb_->setEnabled(false);
     getCurrentFile(true);
-    //userClickedReload_ = false;
 }
 
 //------------------------------------

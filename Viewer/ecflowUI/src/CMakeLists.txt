@@ -100,6 +100,7 @@ set(viewer_srcs
     OutputCache.cpp
     OutputClient.cpp
     OutputFetchInfo.cpp
+    OutputFetchTask.cpp
     OutputFileClient.cpp
     OutputDirClient.cpp
     OutputModel.cpp

@@ -178,6 +178,7 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 			memcpy(data_+dataSize_,buf,len);
 			dataSize_+=len;
 			data_[dataSize_] = '\0'; //terminate the string
+            // UiLog().dbg() << "VFile::write dataSize=" << dataSize_;
 			return true;
 		}
 		else
@@ -218,48 +219,87 @@ void VFile::close()
 		fclose(fp_);
 		fp_=nullptr;
 	}
-	if(data_)
+    if(data_)
 	{
-		data_[dataSize_]='\0';
-		dataSize_++;
+        data_[dataSize_] = '\0';
 	}
 }
 
-/*
-std::string VFile::tmpName()
+bool VFile::appendContentsTo(FILE* fpTarget) const
 {
-	std::string res;
+    if (storageMode_ == DiskStorage) {
+        FILE* fp = fopen(path_.c_str(),"r");
+        if (fp == nullptr) {
+            return false;
+        }
+        char buf[8*1024];
+        size_t n;
+        while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
+            if (fwrite(buf, 1, n, fpTarget) != n) {
+                fclose(fp);
+                return false;
+            }
+        }
+        fclose(fp);
+    } else if (storageMode_ == MemoryStorage) {
+        if (data_ && dataSize_ > 0) {
+            if(fwrite(data_,1,dataSize_,fpTarget) != dataSize_) {
+                return false;
+            }
+        }
+    }
 
-#if defined(linux) || defined(_AIX)
-
-	char *path = getenv("SCRATCH");
-	char *s = (char*) malloc(128);
-
-	if (!path || !access(path, R_OK))
-	    path=getenv("TMPDIR");
-
-	if (!path || !access(path, R_OK))
-	    path=(char*)"/tmp";
-
-	snprintf(s, 128, "%s/%sXXXXXX", path, "ecflow_ui");
-	if(mkstemp(s) != -1)
-	{
-		res=std::string(s);
-	}
-
-	free(s);
-
-#else
-
-//	char* s=std::string(tmpnam(NULL));
-	res=std::string(tmpnam(NULL));
-
-#endif
-
-	return res;
-
+    return true;
 }
-*/
+
+// Append the contents of o to the current object
+bool VFile::append(VFile_ptr o)
+{
+    if (!o) {
+        return false;
+    }
+
+    if(fetchMode_ == LogServerFetchMode && o->fetchMode() == LogServerFetchMode) {
+        // adjust the storatge mode according to the expected new size
+        if (o->storageMode() == DiskStorage) {
+            setStorageMode(DiskStorage);
+        }
+        if (storageMode_ == MemoryStorage && o->storageMode() == MemoryStorage) {
+            if (dataSize_ + o->dataSize_ >  maxDataSize_) {
+                setStorageMode(DiskStorage);
+            }
+        }
+
+        fetchDate_ = o->fetchDate_;
+        transferDuration_ = o->transferDuration_;
+
+        if (storageMode_ == DiskStorage) {
+            FILE* fp = fopen(path_.c_str(),"a");
+            o->appendContentsTo(fp);
+            fclose(fp);
+        } else if (storageMode_ == MemoryStorage) {
+            assert(o->storageMode() == MemoryStorage);
+            assert(dataSize_ + o->dataSize_ <=  maxDataSize_);
+            if (o->dataSize() > 0) {
+                if(!data_)
+                {
+                    data_ = new char[maxDataSize_+1];
+                }
+                memcpy(data_+dataSize_,o->data_,o->dataSize_);
+                dataSize_+=o->dataSize_;
+                data_[dataSize_] = '\0'; //terminate the string
+//                UiLog().dbg() << "VFile::append prev=" << prev << " current=" << dataSize_ <<
+//                                 " o->data=|" << o->data_ << "|";
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    return false;
+}
+
 
 bool VFile::isEmpty() const
 {
@@ -272,6 +312,23 @@ bool VFile::isEmpty() const
         return (::stat( path_.c_str(), &info ) != 0 || info.st_size == 0);
     }
     return false;
+}
+
+size_t VFile::fileSize() const
+{
+    if(storageMode_ == VFile::DiskStorage) {
+        if(exists()) {
+            struct stat info;
+            if (::stat( path_.c_str(), &info ) == 0)
+                return info.st_size;
+            }
+        }
+    return 0;
+}
+
+size_t VFile::sizeInBytes() const
+{
+    return (storageMode_ == VFile::MemoryStorage)?dataSize_:fileSize();
 }
 
 int VFile::numberOfLines() const
