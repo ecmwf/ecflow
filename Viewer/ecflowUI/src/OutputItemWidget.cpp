@@ -515,7 +515,7 @@ void OutputItemWidget::infoProgressStart(const std::string& text,int max)
     messageLabel_->startProgress(max);
 }
 
-void OutputItemWidget::infoProgress(const std::string& text,int value)
+void OutputItemWidget::infoProgressUpdate(const std::string& text,int value)
 {
     messageLabel_->progress(QString::fromStdString(text),value);
 }
@@ -629,7 +629,7 @@ UI_FUNCTION_LOG
         currentDesc(fullName,fetchMode);
 
 		dirView_->selectionModel()->clearSelection();
-        dirModel_->setData(dirs,op->joboutFileName());
+        dirModel_->resetData(dirs,op->joboutFileName());
         //dirWidget_->show();
 
         //Adjust column width

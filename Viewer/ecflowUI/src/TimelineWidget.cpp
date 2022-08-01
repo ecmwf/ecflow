@@ -80,7 +80,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     model_=new TimelineModel(this);
     sortModel_=new TimelineSortModel(model_,this);
 
-    model_->setData(data_);
+    model_->resetData(data_);
 
     view_=new TimelineView(sortModel_,this);
 
@@ -1181,7 +1181,7 @@ void TimelineWidget::initFromData()
 
     view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
 
-    model_->setData(data_);
+    model_->resetData(data_);
 
     view_->setViewMode(view_->viewMode(),true);
 

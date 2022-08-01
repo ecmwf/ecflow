@@ -96,7 +96,7 @@ void HistoryItemWidget::clearContents()
 
 void HistoryItemWidget::infoReady(VReply* reply)
 {
-    model_->setData(reply->text());
+    model_->resetData(reply->text());
     adjustColumnSize();
     fileLabel_->update(reply,"(Last 100 lines)");
     treeView_->scrollTo(model_->lastIndex());

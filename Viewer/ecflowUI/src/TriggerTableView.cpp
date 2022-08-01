@@ -35,7 +35,7 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
     actionHandler_=new ActionHandler(this,this);
 
     //Set the model
-    setModel(model_);
+    setTableModel(model_);
 
     //Create delegate to the view
     delegate_=new TriggerViewDelegate(this);
@@ -87,7 +87,7 @@ void TriggerTableView::enableOneRowMode()
 }
 
 //We should only call it once!!!
-void TriggerTableView::setModel(TriggerTableModel* model)
+void TriggerTableView::setTableModel(TriggerTableModel* model)
 {
     Q_ASSERT(model_==nullptr);
     model_=model;

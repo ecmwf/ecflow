@@ -29,7 +29,7 @@ Q_SIGNALS:
 
 
 public Q_SLOTS:
-    void done();
+    void doneIt();
     void setButtonStatus();
 
 };

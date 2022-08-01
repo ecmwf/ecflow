@@ -3279,7 +3279,7 @@ LogStatRequestModel::~LogStatRequestModel()
 {
 }
 
-void LogStatRequestModel::setData(const std::vector<LogRequestItem>& data)
+void LogStatRequestModel::resetData(const std::vector<LogRequestItem>& data)
 {
     beginResetModel();
 

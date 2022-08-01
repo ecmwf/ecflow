@@ -133,7 +133,7 @@ TableNodeView::~TableNodeView()
     delete prop_;
 }
 
-void TableNodeView::setModel(TableNodeSortModel *model)
+void TableNodeView::setTableModel(TableNodeSortModel *model)
 {
 	model_= model;
 

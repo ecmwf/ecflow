@@ -35,7 +35,7 @@ TriggerTextWidget::TriggerTextWidget(QWidget* parent) : QTextBrowser(parent)
     document()->setDefaultStyleSheet(cssDoc);
 }
 
-void TriggerTextWidget::reload(TriggerTableItem* item)
+void TriggerTextWidget::reloadItem(TriggerTableItem* item)
 {
     QString s="<table width=\'100%\'>";
     s+=makeHtml(item,"Triggers directly triggering the selected node","Triggers");

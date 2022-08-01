@@ -18,7 +18,7 @@ class OutputModel : public QAbstractItemModel
 public:
     explicit OutputModel(QObject *parent=nullptr);
 
-    void setData(const std::vector<VDir_ptr>&,const std::string& jobout);
+    void resetData(const std::vector<VDir_ptr>&,const std::string& jobout);
    	void clearData();
     bool isEmpty() const {return (!hasData());}
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;

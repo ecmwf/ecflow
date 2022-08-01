@@ -66,7 +66,7 @@ public:
     void setEnableNodeToolTip(bool st) {nodeToolTip_=st;}
     void setEnableAttributeToolTip(bool st) {attributeToolTip_=st;}
 
-   	VModelData* data() const override;
+    VModelData* getData() const override;
 
 public Q_SLOTS:
 	void slotServerAddBegin(int row) override;

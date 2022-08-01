@@ -245,7 +245,7 @@ Q_SIGNALS:
 #endif
 
 private:
-    friend class TextPagerSection;
+    friend struct TextPagerSection;
 };
 
 // should not be kept as a member. Invalidated on inserts/removes

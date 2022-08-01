@@ -27,7 +27,7 @@ VNodeList* ChangeNotifyModel::data()
 	return data_;
 }
 
-void ChangeNotifyModel::setData(VNodeList *data)
+void ChangeNotifyModel::resetData(VNodeList *data)
 {
 	beginResetModel();
 

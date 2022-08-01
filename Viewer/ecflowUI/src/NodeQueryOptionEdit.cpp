@@ -158,7 +158,7 @@ NodeQueryListOptionEdit::NodeQueryListOptionEdit(NodeQueryOption *option,CustomL
     option_=static_cast<NodeQueryListOption*>(option);
     Q_ASSERT(option_);
 
-    connect(list_,SIGNAL(selectionChanged()),
+    connect(list_,SIGNAL(itemSelectionChanged()),
             this,SLOT(slotListChanged()));
 
     connect(resetTb_,SIGNAL(clicked()),
@@ -176,7 +176,7 @@ void NodeQueryListOptionEdit::init(NodeQueryOption* option)
     option_=static_cast<NodeQueryListOption*>(option);
     Q_ASSERT(option_);
     Q_ASSERT(option_->name() == optionId_);
-    list_->setSelection(option_->selection());
+    list_->setSelectionWithList(option_->selection());
     initIsOn_=false;
 }
 

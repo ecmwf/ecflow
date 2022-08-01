@@ -22,7 +22,7 @@
 
 class TextPagerDocument;
 class TextPagerEdit;
-class TextPagerSection
+struct TextPagerSection
 {
 public:
     enum TextSectionOption {
@@ -65,7 +65,7 @@ private:
     {}
 
     friend class TextPagerDocument;
-    friend class TextDocumentPrivate;
+    friend struct TextDocumentPrivate;
     friend class TextPagerEdit;
 };
 

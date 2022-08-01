@@ -35,7 +35,7 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
    	QModelIndex parent (const QModelIndex & ) const override;
 
-	void setData(const std::vector<Zombie>&);
+    void resetData(const std::vector<Zombie>&);
 	bool updateData(const std::vector<Zombie>&);
     void clearData();
     bool hasData() const;

@@ -60,7 +60,7 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 {
 	data_=new VNodeList();
 	model_=new ChangeNotifyModel();
-	model_->setData(data_);
+    model_->resetData(data_);
 
 	proxyModel_=new QSortFilterProxyModel();
 	proxyModel_->setSourceModel(model_);

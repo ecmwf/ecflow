@@ -35,7 +35,7 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
    	QModelIndex parent (const QModelIndex & ) const override;
 
-   	void setData(VNodeList *);
+    void resetData(VNodeList *);
 	bool hasData() const;
 	VNodeList* data();
     VInfo_ptr nodeInfo(const QModelIndex&) const;

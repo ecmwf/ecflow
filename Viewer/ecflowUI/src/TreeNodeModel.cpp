@@ -57,7 +57,7 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
 
 }
 
-VModelData* TreeNodeModel::data() const
+VModelData* TreeNodeModel::getData() const
 {
 	return data_;
 }

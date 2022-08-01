@@ -28,8 +28,8 @@ public:
     virtual void infoReady(VReply*) {}
     virtual void infoFailed(VReply*) {}
     virtual void infoProgress(VReply*) {}
-    virtual void infoProgressStart(const std::string& text,int max) {}
-    virtual void infoProgress(const std::string& text,int value) {}
+    virtual void infoProgressUpdate(const std::string& /*text*/,int /*value*/) {}
+    virtual void infoProgressStart(const std::string& /*text*/,int /*max*/) {}
     virtual void infoAppended(VReply*) {}
     VInfo_ptr info() const {return info_;}
     void registerInfoProvider(InfoProvider* ip) {infoProviders_.push_back(ip);}

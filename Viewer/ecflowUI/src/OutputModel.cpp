@@ -29,7 +29,7 @@ OutputModel::OutputModel(QObject *parent) :
 {
 }
 
-void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
+void OutputModel::resetData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
 {
     beginResetModel();
     dirs_=dirs;

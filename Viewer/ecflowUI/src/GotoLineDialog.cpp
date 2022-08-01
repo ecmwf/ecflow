@@ -15,8 +15,7 @@ GotoLineDialog::GotoLineDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this); // this sets up GUI// setupFileMenu();
 
-
-    connect (buttonBox, SIGNAL(accepted()),                   this, SLOT(done()));
+    connect (buttonBox, SIGNAL(accepted()),                   this, SLOT(doneIt()));
     connect (buttonBox, SIGNAL(rejected()),                   this, SLOT(reject()));
     connect (lineEdit,  SIGNAL(textChanged(const QString &)), this, SLOT(setButtonStatus()));
 }
@@ -68,7 +67,7 @@ void GotoLineDialog::setupUIBeforeShow()
 // text editor to go to the chosen line
 // ---------------------------------------------------------------------------
 
-void GotoLineDialog::done()
+void GotoLineDialog::doneIt()
 {
     int line = lineEdit->text().toInt();
     Q_EMIT gotoLine(line);

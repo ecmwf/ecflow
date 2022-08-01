@@ -29,7 +29,7 @@ public:
     explicit TriggerTableView(QWidget *parent=nullptr);
     ~TriggerTableView() override;
 
-    void setModel(TriggerTableModel* model);
+    void setTableModel(TriggerTableModel* model);
 
     void reload();
     void rerender();

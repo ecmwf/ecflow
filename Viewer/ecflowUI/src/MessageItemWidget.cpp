@@ -94,7 +94,7 @@ void MessageItemWidget::clearContents()
 
 void MessageItemWidget::infoReady(VReply* reply)
 {
-    model_->setData(reply->textVec());
+    model_->resetData(reply->textVec());
 
     //Adjust column size if it is the first run
     if(firstRun && model_->hasData())

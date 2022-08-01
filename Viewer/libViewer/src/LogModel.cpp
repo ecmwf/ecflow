@@ -61,7 +61,7 @@ void LogModel::endLoadFromReader()
 }
 
 
-void LogModel::setData(const std::string& data)
+void LogModel::resetData(const std::string& data)
 {
 	beginResetModel();
 
@@ -86,7 +86,7 @@ void LogModel::setData(const std::string& data)
 	endResetModel();
 }
 
-void LogModel::setData(const std::vector<std::string>& data)
+void LogModel::resetData(const std::vector<std::string>& data)
 {
 	beginResetModel();
 

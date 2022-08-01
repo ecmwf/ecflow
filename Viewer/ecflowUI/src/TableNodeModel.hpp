@@ -44,7 +44,7 @@ public:
   VInfo_ptr nodeInfo(const QModelIndex&) override;
   void selectionChanged(QModelIndexList lst);
   
-  VModelData* data() const override;
+  VModelData* getData() const override;
   void removeColumn(QString);
   ModelColumn* columns() const {return columns_;}
 

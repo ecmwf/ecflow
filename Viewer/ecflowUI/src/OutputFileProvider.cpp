@@ -226,7 +226,7 @@ void OutputFileFetchRemoteTask::clientProgress(QString msg,int value)
 {
     //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
 
-    owner_->owner_->infoProgress(msg.toStdString(),value);
+    owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
 
     //reply_->setInfoText(msg.toStdString());
     //owner_->infoProgress(reply_);

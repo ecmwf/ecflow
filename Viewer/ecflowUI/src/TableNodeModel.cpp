@@ -112,7 +112,7 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
     diagPixId_=IconProvider::add(":/viewer/diag.svg","diag.svg");
 }
 
-VModelData* TableNodeModel::data() const
+VModelData* TableNodeModel::getData() const
 {
 	return data_;
 }

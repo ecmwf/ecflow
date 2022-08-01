@@ -24,9 +24,9 @@
 
 class AnimationHandler;
 class PropertyMapper;
-class NodeShape;
-class NodeText;
-class ServerUpdateData;
+struct NodeShape;
+struct NodeText;
+struct ServerUpdateData;
 class TreeNodeModel;
 class TreeNodeDelegateBox;
 class TreeAttrDelegateBox;

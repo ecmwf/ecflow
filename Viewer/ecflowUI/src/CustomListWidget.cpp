@@ -51,7 +51,7 @@ void CustomListWidget::addItems(QStringList lst,bool checkState,QList<QColor> co
 
 void CustomListWidget::slotItemChanged(QListWidgetItem*)
 {
-	Q_EMIT selectionChanged();
+    Q_EMIT itemSelectionChanged();
 }
 
 bool CustomListWidget::hasSelection() const
@@ -85,10 +85,10 @@ void CustomListWidget::clearSelection()
 	{
 		item(i)->setCheckState(Qt::Unchecked);
 	}
-	Q_EMIT selectionChanged();
+    Q_EMIT itemSelectionChanged();
 }
 
-void CustomListWidget::setSelection(QStringList sel)
+void CustomListWidget::setSelectionWithList(QStringList sel)
 {
 	for(int i=0; i < count(); i++)
 	{

@@ -26,7 +26,7 @@ ZombieModel::ZombieModel(QObject *parent) :
 ZombieModel::~ZombieModel()
 = default;
 
-void ZombieModel::setData(const std::vector<Zombie>& data)
+void ZombieModel::resetData(const std::vector<Zombie>& data)
 {
 	beginResetModel();
 	data_=data;

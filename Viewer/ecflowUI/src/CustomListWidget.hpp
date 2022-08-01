@@ -23,7 +23,7 @@ public:
 	void addItems(QStringList lst,bool checkState,QList<QColor>);
 	QStringList selection() const;
 	bool hasSelection() const;
-	void setSelection(QStringList sel);
+    void setSelectionWithList(QStringList sel);
 
 public Q_SLOTS:
 	void clearSelection();
@@ -32,7 +32,7 @@ protected Q_SLOTS:
 	void slotItemChanged(QListWidgetItem*);
 
 Q_SIGNALS:
-	void selectionChanged();
+    void itemSelectionChanged();
 
 
 };

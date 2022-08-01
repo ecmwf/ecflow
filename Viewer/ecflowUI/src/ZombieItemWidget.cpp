@@ -140,7 +140,7 @@ void ZombieItemWidget::infoReady(VReply* reply)
 	}
 	else
 	{
-		model_->setData(reply->zombies());
+        model_->resetData(reply->zombies());
 	}
 
 	//Adjust column size if it is the first run

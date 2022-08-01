@@ -42,7 +42,7 @@ public:
 	void infoFailed(VReply*) override;
 	void infoProgress(VReply*) override;
     void infoProgressStart(const std::string& text,int max) override;
-    void infoProgress(const std::string& text,int value) override;
+    void infoProgressUpdate(const std::string& text,int value) override;
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
     void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}

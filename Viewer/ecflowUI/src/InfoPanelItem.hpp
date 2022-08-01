@@ -64,13 +64,6 @@ public:
 	//From VTaskObserver
     void taskChanged(VTask_ptr) override {}
 
-	//From VInfoPresenter
-    void infoReady(VReply*) override {}
-    void infoFailed(VReply*) override {}
-    void infoProgress(VReply*) override {}
-    void infoProgressStart(int min,int max,const std::string& text) {}
-    void infoProgress(int value,const std::string& text) {}
-
 	//From NodeObserver
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}

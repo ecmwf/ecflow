@@ -629,7 +629,7 @@ public:
     void setDataCmdUid(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
     void setDataCmdSuite(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
     void setDataSuiteCmd(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
-    void setData(const std::vector<LogRequestItem>& data);
+    void resetData(const std::vector<LogRequestItem>& data);
 
     bool hasData() const;
     void clearData();
