@@ -24,6 +24,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#define DEBUG_OUTPUTFILEPROVIDER__
 
 //=================================
 //
@@ -65,8 +66,10 @@ void OutputFileFetchTask::reset(ServerHandler* server,VNode* node,const std::str
 // Try to fetch the logfile from the local cache
 void OutputFileFetchCacheTask::run()
 {
+#ifdef  DEBUG_OUTPUTFILEPROVIDER__
     UI_FUNCTION_LOG
-    UiLog().dbg() << "OutputFileFetchCacheTask::run <-- file: " << filePath_;
+    UiLog().dbg() << "OutputFileFetchCacheTask::run <-- filePath: " << filePath_;
+#endif
 
     assert(node_);
 
@@ -107,6 +110,11 @@ OutputFileFetchRemoteTask::OutputFileFetchRemoteTask(OutputFileProvider* owner) 
 {
 }
 
+void OutputFileFetchRemoteTask::stop()
+{
+    clear();
+}
+
 void OutputFileFetchRemoteTask::clear()
 {
     OutputFileFetchTask::clear();
@@ -121,9 +129,10 @@ void OutputFileFetchRemoteTask::clear()
 //clientError eventually!!
 void OutputFileFetchRemoteTask::run()
 {
+#ifdef  DEBUG_OUTPUTFILEPROVIDER__
     UI_FUNCTION_LOG
     UiLog().dbg() << "OutputFileFetchRemoteTask::run <-- file: " << filePath_;
-
+#endif
     std::string host, port;
     assert(node_);
 
@@ -156,7 +165,7 @@ void OutputFileFetchRemoteTask::run()
         }
 
         Q_ASSERT(client_);
-        UiLog().dbg() << "OutputFileProvider: logserver=" << client_->longName() << " file=" << filePath_;
+        UiLog().dbg() << "OutputFileFetchRemoteTask: use logserver=" << client_->longName() << " file=" << filePath_;
         owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> from" +
                                   ((userLogServerUsed)?"<b>user defined</b>":"") +
                                   " log server <i> " + client_->longName() + "</i>",0);
@@ -189,12 +198,19 @@ void OutputFileFetchRemoteTask::clientFinished()
     client_->clearResult();
 
     //Files retrieved from the log server are automatically added to the cache!
-    owner_->addToCache(tmp);
+    if (useCache_ && !tmp->hasDeltaContents()) {
+        owner_->addToCache(tmp);
+    }
 
     auto reply = owner_->reply_;
     reply->setInfoText("");
     reply->fileReadMode(VReply::LogServerReadMode);
-    reply->addLog("TRY> fetch file from logserver: " + client_->longName() + ": OK");
+
+    if (tmp->hasDeltaContents()) {
+        reply->addLog("TRY> fetch delta from logserver: " + client_->longName() + ": OK");
+    } else {
+        reply->addLog("TRY> fetch file from logserver: " + client_->longName() + ": OK");
+    }
 
     tmp->setFetchMode(VFile::LogServerFetchMode);
     tmp->setLog(reply->log());
@@ -276,6 +292,7 @@ void OutputFileFetchLocalTask::run()
 void OutputFileFetchServerTask::run()
 {
     if (isJobout_) {
+        // we delegate it back to the FileProvider (this is its built-in task)
         owner_->fetchJoboutViaServer(server_,node_,filePath_);
     } else {
         finish();
@@ -576,6 +593,10 @@ void OutputFileProvider::fetchQueueFinished(VNode* n)
 
 void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
 {
+    // this must be called from the queue and must be the last task of the queue. From this moment on we do
+    // not need the queue and the OutputFileProvider manages the VTask
+    fetchQueue_->clear();
+
     assert(server);
     assert(n);
 

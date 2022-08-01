@@ -20,6 +20,7 @@
 
 void OutputFetchTask::clear()
 {
+    queue_ = nullptr;
     status_ = NoStatus;
     runCondition_ = NoCondition;
     server_=nullptr;
@@ -43,19 +44,25 @@ bool OutputFetchTask::checRunCondition(OutputFetchTask* prev) const
 void OutputFetchTask::succeed()
 {
     status_ = SucceededStatus;
-    queue_->taskSucceeded(this);
+    if (queue_) {
+        queue_->taskSucceeded(this);
+    }
 }
 
 void OutputFetchTask::finish()
 {
     status_ = FinishedStatus;
-    queue_->taskFinished(this);
+    if (queue_) {
+        queue_->taskFinished(this);
+    }
 }
 
 void OutputFetchTask::fail()
 {
     status_ = FailedStatus;
-    queue_->taskFailed(this);
+    if (queue_) {
+        queue_->taskFailed(this);
+    }
 }
 
 //========================================

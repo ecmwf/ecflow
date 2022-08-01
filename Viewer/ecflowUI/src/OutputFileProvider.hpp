@@ -57,6 +57,7 @@ Q_OBJECT
 public:
     OutputFileFetchRemoteTask(OutputFileProvider* owner);
     void run() override;
+    void stop() override;
     void clear() override;
 
 protected Q_SLOTS:
