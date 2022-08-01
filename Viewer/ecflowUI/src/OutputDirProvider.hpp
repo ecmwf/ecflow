@@ -40,7 +40,9 @@ class OutputDirFetchRemoteTask : public QObject, public OutputDirFetchTask
 Q_OBJECT
 public:
     OutputDirFetchRemoteTask(OutputDirProvider* owner);
+    ~OutputDirFetchRemoteTask();
     void run() override;
+    void stop() override;
     void clear() override;
 
 protected Q_SLOTS:
@@ -49,6 +51,8 @@ protected Q_SLOTS:
     void clientError(QString);
 
 protected:
+    void deleteClient();
+
     OutputDirClient *client_{nullptr};
 };
 

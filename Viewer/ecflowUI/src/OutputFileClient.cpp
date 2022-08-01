@@ -65,14 +65,15 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 			{
 				out_->setTransferDuration(stopper_.elapsed());
 				out_->setFetchDate(QDateTime::currentDateTime());
-				out_->close();
+                out_->print();
+                out_->close();
 			}
 
 			Q_EMIT finished();
 
-			if(out_)
+            if(out_) {
 				out_.reset();
-
+            }
             return;
 
 		}

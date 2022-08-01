@@ -99,9 +99,36 @@ OutputDirFetchRemoteTask::OutputDirFetchRemoteTask(OutputDirProvider* owner) :
 {
 }
 
+OutputDirFetchRemoteTask::~OutputDirFetchRemoteTask()
+{
+    if(client_) {
+        client_->disconnect(this);
+    }
+}
+
+void OutputDirFetchRemoteTask::deleteClient()
+{
+    if(client_) {
+        UiLog().dbg() << "OutputDirFetchRemoteTask::deleteClient";
+        client_->disconnect(this);
+        client_->deleteLater();
+        client_ = nullptr;
+    }
+}
+
+void OutputDirFetchRemoteTask::stop()
+{
+    OutputFetchTask::clear();
+    if (status_ == RunningStatus) {
+        deleteClient();
+    }
+}
+
+
 void OutputDirFetchRemoteTask::clear()
 {
     OutputFetchTask::clear();
+    deleteClient();
     if(client_) {
         delete client_;
         client_ = nullptr;
@@ -130,8 +157,7 @@ void OutputDirFetchRemoteTask::run()
     if (userLogServerUsed || sysLogServerUsed) {
         Q_ASSERT(userLogServerUsed || sysLogServerUsed);
         if (client_ && (client_->host() != host || client_->portStr() != port)) {
-            delete client_;
-            client_ = nullptr;
+            deleteClient();
         }
 
         if (!client_) {
@@ -162,10 +188,7 @@ void OutputDirFetchRemoteTask::run()
 
 
     //If we are here there is no output client defined/available
-    if (client_) {
-        delete client_;
-        client_ = nullptr;
-    }
+    deleteClient();
 
     //owner_->reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
     finish();

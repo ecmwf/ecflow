@@ -110,18 +110,36 @@ OutputFileFetchRemoteTask::OutputFileFetchRemoteTask(OutputFileProvider* owner) 
 {
 }
 
+OutputFileFetchRemoteTask::~OutputFileFetchRemoteTask()
+{
+    if(client_) {
+        client_->disconnect(this);
+    }
+}
+
+void OutputFileFetchRemoteTask::deleteClient()
+{
+    if(client_) {
+        UiLog().dbg() << "OutputFileFetchRemoteTask::deleteClient";
+        client_->disconnect(this);
+        client_->deleteLater();
+        client_ = nullptr;
+    }
+}
+
 void OutputFileFetchRemoteTask::stop()
 {
-    clear();
+    UiLog().dbg() << "OutputFileFetchRemoteTask::stop()";
+    OutputFileFetchTask::clear();
+    if (status_ == RunningStatus) {
+        deleteClient();
+    }
 }
 
 void OutputFileFetchRemoteTask::clear()
 {
     OutputFileFetchTask::clear();
-    if(client_) {
-        delete client_;
-        client_ = nullptr;
-    }
+    deleteClient();
 }
 
 //Create an output client (to access the logserver) and ask it to the fetch the
@@ -147,8 +165,7 @@ void OutputFileFetchRemoteTask::run()
     if (userLogServerUsed || sysLogServerUsed) {
         Q_ASSERT(userLogServerUsed || sysLogServerUsed);
         if (client_ && (client_->host() != host || client_->portStr() != port)) {
-            delete client_;
-            client_ = nullptr;
+            deleteClient();
         }
 
         if (!client_) {
@@ -181,10 +198,7 @@ void OutputFileFetchRemoteTask::run()
 
 
     //If we are here there is no output client defined/available
-    if (client_) {
-        delete client_;
-        client_ = nullptr;
-    }
+    deleteClient();
 
     owner_->reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
     finish();

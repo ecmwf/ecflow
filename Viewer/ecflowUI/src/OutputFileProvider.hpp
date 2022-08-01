@@ -56,6 +56,7 @@ class OutputFileFetchRemoteTask : public QObject, public OutputFileFetchTask
 Q_OBJECT
 public:
     OutputFileFetchRemoteTask(OutputFileProvider* owner);
+    ~OutputFileFetchRemoteTask();
     void run() override;
     void stop() override;
     void clear() override;
@@ -66,6 +67,8 @@ protected Q_SLOTS:
     void clientError(QString);
 
 protected:
+    void deleteClient();
+
     OutputFileClient *client_{nullptr};
 };
 

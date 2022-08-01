@@ -87,7 +87,6 @@ void OutputFetchQueue::add(OutputFetchTask* t)
     queue_.push_back(t);
 }
 
-
 void OutputFetchQueue::run()
 {
     if (!queue_.empty()) {
