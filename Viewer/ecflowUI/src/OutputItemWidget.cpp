@@ -505,14 +505,11 @@ void OutputItemWidget::infoReady(VReply* reply)
 void OutputItemWidget::infoProgress(VReply* reply)
 {
 	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-    //messageLabel_->startLoadLabel();
-	//updateDir(true);
 }
 
 void OutputItemWidget::infoProgressStart(const std::string& text,int max)
 {
-    messageLabel_->showInfo(QString::fromStdString(text));
-    messageLabel_->startProgress(max);
+    messageLabel_->startDelayedProgress(QString::fromStdString(text), max);
 }
 
 void OutputItemWidget::infoProgressUpdate(const std::string& text,int value)
