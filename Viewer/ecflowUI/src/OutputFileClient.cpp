@@ -12,7 +12,8 @@
 
 #include "UiLog.hpp"
 
-#define _UI_OUTPUTFILECLIENT_DEBUG
+#define UI_OUTPUTFILECLIENT_DEBUG__
+#define UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
 
 OutputFileClient::OutputFileClient(const std::string& host,const std::string& portStr,QObject* parent) :
     OutputClient(host,portStr,parent)
@@ -24,8 +25,7 @@ OutputFileClient::OutputFileClient(const std::string& host,const std::string& po
 
 void OutputFileClient::clearResult()
 {
-    if(out_)
-    {
+    if(out_) {
         out_->close();
         out_.reset();
     }
@@ -47,6 +47,10 @@ void OutputFileClient::slotConnected()
 
 void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 {
+#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+    UiLog().dbg() <<  UI_FN_INFO  << " --> " << soc_->errorString();
+#endif
+
     switch(err)
 	{
 	case QAbstractSocket::RemoteHostClosedError:
@@ -75,7 +79,6 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 				out_.reset();
             }
             return;
-
 		}
 
 		break;
@@ -114,17 +117,18 @@ void OutputFileClient::getFile(const std::string& name, size_t deltaPos)
 
     // we need to know the version. When it finishes will call getFile again
     if (versionClient_->versionStatus() == OutputVersionClient::VersionNotFetched) {
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
+#ifdef UI_OUTPUTFILECLIENT_DEBUG__
         UiLog().dbg() << "OutputFileClient::getFile --> Try to get logserver version";
 #endif
         versionClient_->getVersion();
         return;
     }
 
-    connectToHost(host_,port_);
-
     // only verson 2 can handle delta increments
     if (versionClient_->version() != 2) {
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+        UiLog().dbg() << "OutputFileClient::getFile --> deltaPos set to 0";
+#endif
         deltaPos_ = 0;
     }
 
@@ -136,6 +140,8 @@ void OutputFileClient::getFile(const std::string& name, size_t deltaPos)
     total_=0;
     lastProgress_=0;
     estimateExpectedSize();
+
+    connectToHost(host_,port_);
 }
 
 void OutputFileClient::slotRead()
@@ -198,49 +204,49 @@ void OutputFileClient::setDir(VDir_ptr dir)
 
 void OutputFileClient::estimateExpectedSize()
 {
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+    UI_FN_DBG
+#endif
     if(!dir_)
     {
         expected_=0;
         return;
     }
 
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-    UiLog().dbg() << "OutputFileClient::estimateExpectedSize -->";
-#endif
     for(int i=0; i < dir_->count(); i++)
     {
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-        UiLog().dbg() << "file: " << dir_->fullName(i);
-#endif
+//#ifdef _UI_OUTPUTFILECLIENT_DETAILED_DEBUG
+//        UiLog().dbg() << " file: " << dir_->fullName(i);
+//#endif
         if(dir_->fullName(i) == remoteFile_)
         {
             expected_=dir_->items().at(i)->size_;
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-            UiLog().dbg() << "  expected size=" << expected_;
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+            UiLog().dbg() << " expected size=" << expected_;
 #endif
             return;
         }
     }
 
     expected_=0;
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-    UiLog().dbg() << "  expected size=" << QString::number(expected_);
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+    UiLog().dbg() << " expected size=" << QString::number(expected_);
 #endif
 }
 
 void OutputFileClient::slotVersionFinished()
 {
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-    UiLog().dbg() << "OutputFileClient::slotVersionFinished";
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+    UI_FN_DBG
 #endif
     Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
     getFile(remoteFile_, deltaPos_);
 }
 
-void OutputFileClient::slotVersionError(QString t)
+void OutputFileClient::slotVersionError(QString errorText)
 {
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-    UiLog().dbg() << "OutputFileClient::slotVersionError " << t;
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "errorText=" << errorText;
 #endif
     Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
     getFile(remoteFile_, deltaPos_);
@@ -280,6 +286,8 @@ void OutputVersionClient::slotError(QAbstractSocket::SocketError err)
 
     versionStatus_ = VersionFailedToFetch;
     soc_->abort();
+    UiLog().dbg() << "OutputVersionClient::slotError logserver[" + longName() +
+                     " ] could not get version! version is set to " << version_;
     Q_EMIT error(soc_->errorString());
 }
 
@@ -291,8 +299,8 @@ void OutputVersionClient::slotRead()
 
     while((len = soc_->read(buf,size)) > 0)
     {
-#ifdef _UI_OUTPUTFILECLIENT_DEBUG
-        UiLog().dbg() << "OutputVersionClient::slotRead buf=" << buf;
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+        UiLog().dbg() << UI_FN_INFO << "buf=" << buf;
 #endif
 
         std::string err;
@@ -310,6 +318,7 @@ void OutputVersionClient::slotRead()
 
 void OutputVersionClient::getVersion()
 {
+    UiLog().dbg() << "OutputVersionClient::getVersion";
     versionStatus_ = VersionBeingFetched;
     version_ = 0;
     dataSize_ = 0;
@@ -318,10 +327,15 @@ void OutputVersionClient::getVersion()
 
 void OutputVersionClient::buildVersion()
 {
-    version_ = std::stoi(data_);
+    try {
+        version_ = std::stoi(data_);
+    } catch (...) {
+        version_ = 0;
+    }
+
     if (version_ != 2) {
         version_ = 0;
     }
-    UiLog().dbg() << "OutputVersionClient::buildVersion logserver[" + host_ + "@" + portStr_ + "] version=" <<
+    UiLog().dbg() << UI_FN_INFO << "logserver[" + longName() + "] version=" <<
                           version_;
 }

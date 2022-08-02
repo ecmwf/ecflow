@@ -12,6 +12,8 @@
 
 #include "UiLog.hpp"
 
+//#define OUTPUTFETCHTASK_DEBUG__
+
 //========================================
 //
 // OutputFetchTask
@@ -99,6 +101,9 @@ void OutputFetchQueue::run()
 
 void OutputFetchQueue::next()
 {
+#ifdef OUTPUTFETCHTASK_DEBUG__
+    UiLog().dbg() << "OutputFetchQueue::next";
+#endif
     if (status_ == RunningState) {
         if (!queue_.empty()) {
             auto prev = queue_.front();
@@ -108,10 +113,14 @@ void OutputFetchQueue::next()
                 auto current = queue_.front();
                 UiLog().dbg() << "OutputFetchQueue::next";
                 if (!current->checRunCondition(prev)) {
+#ifdef OUTPUTFETCHTASK_DEBUG__
                     UiLog().dbg() << " skip current";
+#endif
                     next();
                 } else {
+#ifdef OUTPUTFETCHTASK_DEBUG__
                     UiLog().dbg() << " run current";
+#endif
                     current->run();
                 }
             } else {
@@ -125,6 +134,9 @@ void OutputFetchQueue::next()
 
 void OutputFetchQueue::finish(OutputFetchTask* lastTask)
 {
+#ifdef OUTPUTFETCHTASK_DEBUG__
+    UiLog() << "OutputFetchQueue::finish";
+#endif
     clear();
     if (lastTask && lastTask->node()) {
         owner_->fetchQueueFinished(lastTask->node());
@@ -134,7 +146,7 @@ void OutputFetchQueue::finish(OutputFetchTask* lastTask)
 void OutputFetchQueue::taskSucceeded(OutputFetchTask* t)
 {
     if (status_ == RunningState) {
-        if (policy_ == RunUntilFirstSucceed) {
+        if (policy_ == RunUntilFirstSucceeded) {
             clear();
             owner_->fetchQueueSucceeded();
         } else {

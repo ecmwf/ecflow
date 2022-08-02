@@ -43,9 +43,10 @@ void OutputDirClient::slotCheckTimeout()
 
 void OutputDirClient::slotConnected()
 {
+#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
     UiLog().dbg() << "OutputDirClient::slotConnected() connected to " <<
                          soc_->peerName();
-
+#endif
 	soc_->write("list ",5);
 	soc_->write(remoteFile_.c_str(),remoteFile_.size());
 	soc_->write("\n",1);
@@ -112,8 +113,6 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err)
 
 void OutputDirClient::getDir(const std::string& name)
 {
-	connectToHost(host_,port_);
-
 	boost::filesystem::path fp(name);
 	std::string dirName=fp.parent_path().string();
 
@@ -124,6 +123,8 @@ void OutputDirClient::getDir(const std::string& name)
 
 	//indicates the source of the files
 	dir_->where(host_ + "@" + portStr_);
+
+    connectToHost(host_,port_);
 }
 
 void OutputDirClient::slotRead()

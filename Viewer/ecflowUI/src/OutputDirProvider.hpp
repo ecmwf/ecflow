@@ -64,10 +64,8 @@ public:
     void run() override;
 };
 
-class OutputDirProvider : public QObject, public InfoProvider, public OutputFetchQueueOwner
+class OutputDirProvider : public InfoProvider, public OutputFetchQueueOwner
 {
-Q_OBJECT
-
     friend class OutputDirFetchRemoteTask;
     friend class OutputDirFetchLocalTask;
 

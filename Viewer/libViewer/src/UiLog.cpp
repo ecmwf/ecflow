@@ -75,6 +75,20 @@ std::string UiFunctionLog::logLeave() const
     return "<-- " + funcName_;
 }
 
+// to be used in UI_FN_INFO with __PRETTY_FUNCTION__
+std::string UiFunctionLog::formatFuncInfo(const std::string& funcName)
+{
+    std::size_t pos;
+    std::string resName =  funcName;
+    if((pos=funcName.find_first_of("(")) != std::string::npos)
+    {
+        std::size_t pos1=funcName.rfind(" ",pos);
+        if(pos1 != std::string::npos && pos1+1  < pos)
+            resName=funcName.substr(pos1+1,pos-pos1-1);
+    }
+    return resName + "  ";
+}
+
 //---------------------------------
 // UiLog
 //---------------------------------

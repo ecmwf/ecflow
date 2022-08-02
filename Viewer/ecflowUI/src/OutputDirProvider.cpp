@@ -21,7 +21,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <memory>
 
-//#define DEBUG_OUTPUTDIRPROVIDER__
+#define UI_OUTPUTDIRPROVIDER_DEBUG__
+#define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
 
 OutputDirFetchTask::OutputDirFetchTask(OutputDirProvider* owner) :
     owner_(owner)
@@ -46,9 +47,9 @@ void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::stri
 // try to read the logfile from the disk (if the settings allow it)
 void OutputDirFetchLocalTask::run()
 {
-//#ifdef DEBUG_OUTPUTDIRPROVIDER__
-    UiLog().dbg() << "OutputDirFetchLocalTask::run()";
-//#endif
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
     VDir_ptr res;
 
     boost::filesystem::path p(filePath_);
@@ -109,7 +110,9 @@ OutputDirFetchRemoteTask::~OutputDirFetchRemoteTask()
 void OutputDirFetchRemoteTask::deleteClient()
 {
     if(client_) {
-        UiLog().dbg() << "OutputDirFetchRemoteTask::deleteClient";
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+        UI_FN_DBG
+#endif
         client_->disconnect(this);
         client_->deleteLater();
         client_ = nullptr;
@@ -140,9 +143,9 @@ void OutputDirFetchRemoteTask::clear()
 //clientError eventually!!
 void OutputDirFetchRemoteTask::run()
 {
-    UI_FUNCTION_LOG
-    UiLog().dbg() << "OutputDirFetchRemoteTask::run <-- file: " << filePath_;
-
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+    UiLog().dbg() <<  UI_FN_INFO << "filePath=" << filePath_;
+#endif
     std::string host, port;
     assert(node_);
 
@@ -200,8 +203,8 @@ void OutputDirFetchRemoteTask::clientFinished()
     VDir_ptr dir = client_->result();
     if(dir)
     {
-#ifdef DEBUG_OUTPUTDIRPROVIDER__
-        UiLog().dbg() << "OutputDirProvider::slotOutputClientFinished";
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+        UI_FN_DBG
 #endif
         dir->setFetchMode(VDir::LogServerFetchMode);
         std::string method="served by " + client_->longName();
@@ -250,8 +253,6 @@ void OutputDirFetchRemoteTask::clientError(QString msg)
 
 OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
     InfoProvider(owner,VTask::NoTask)
-    //outClient_(nullptr),
-    //currentTask_(-1)
 {   
     fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunAll, this);
 
@@ -341,45 +342,6 @@ void OutputDirProvider::visit(VInfoNode* info)
         }
     }
     fetchQueue_->run();
-
-#if 0
-    queue_ << OutputDirProviderTask(joboutFile,OutputDirProviderTask::RemoteFetch);
-
-    //With the readFromdisk option we always try to read locally
-    if(server->readFromDisk())
-    {
-        queue_ << OutputDirProviderTask(joboutFile,OutputDirProviderTask::LocalFetch);
-    }
-    //Otherwise we only read the local disk if the remote access (ie logserver) failed
-    else
-    {
-        queue_ << OutputDirProviderTask(joboutFile,OutputDirProviderTask::LocalFetch,
-                                        OutputDirProviderTask::RunIfPrevFailed);
-    }
-
-    std::string outFile = n->findVariable("ECF_OUT",true);
-    std::string jobFile = n->findVariable("ECF_JOB",true);
-    if(!outFile.empty() && !jobFile.empty())
-    {
-        queue_ << OutputDirProviderTask(jobFile,OutputDirProviderTask::RemoteFetch);
-
-        //With the readFromdisk option we always try to read locally
-        if(server->readFromDisk())
-        {
-            queue_ << OutputDirProviderTask(jobFile,OutputDirProviderTask::LocalFetch);
-        }
-        //Otherwise we only read the local disk if the remote access (ie logserver) failed
-        else
-        {
-            queue_ << OutputDirProviderTask(jobFile,OutputDirProviderTask::LocalFetch,
-                                            OutputDirProviderTask::RunIfPrevFailed);
-        }
-    }
-
-    //Start fetching the dirs
-    fetchNext();
-#endif
-
 }
 
 void OutputDirProvider::fetchQueueSucceeded()
@@ -388,12 +350,16 @@ void OutputDirProvider::fetchQueueSucceeded()
 
 void OutputDirProvider::fetchQueueFinished(VNode*)
 {
-    UiLog().dbg() <<  "OutputDirProvider::fetchQueueFinished";
+#ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
+    UI_FN_DBG
+#endif
     reply_->setInfoText("");
     if (reply_->directories().empty()) {
         owner_->infoFailed(reply_);
     } else {
-        UiLog().dbg() <<  "dirs=" << reply_->directories().size();
+#ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
+        UiLog().dbg() << " dirs=" << reply_->directories().size();
+#endif
         owner_->infoReady(reply_);
     }
 }

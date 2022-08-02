@@ -24,7 +24,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#define DEBUG_OUTPUTFILEPROVIDER__
+#define UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+#define UI_OUTPUTFILEPROVIDER_DEBUG__
 
 //=================================
 //
@@ -66,9 +67,8 @@ void OutputFileFetchTask::reset(ServerHandler* server,VNode* node,const std::str
 // Try to fetch the logfile from the local cache
 void OutputFileFetchCacheTask::run()
 {
-#ifdef  DEBUG_OUTPUTFILEPROVIDER__
-    UI_FUNCTION_LOG
-    UiLog().dbg() << "OutputFileFetchCacheTask::run <-- filePath: " << filePath_;
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
 
     assert(node_);
@@ -82,9 +82,9 @@ void OutputFileFetchCacheTask::run()
             VFile_ptr f=item->file();
             assert(f);
             f->setCached(true);
-
-            UiLog().dbg() << "  File found in cache";
-
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+            UiLog().dbg() << " File found in cache";
+#endif
             auto reply = owner_->reply_;
             reply->setInfoText("");
             reply->fileReadMode(VReply::LogServerReadMode);
@@ -120,7 +120,9 @@ OutputFileFetchRemoteTask::~OutputFileFetchRemoteTask()
 void OutputFileFetchRemoteTask::deleteClient()
 {
     if(client_) {
-        UiLog().dbg() << "OutputFileFetchRemoteTask::deleteClient";
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+        UI_FN_DBG
+#endif
         client_->disconnect(this);
         client_->deleteLater();
         client_ = nullptr;
@@ -129,7 +131,9 @@ void OutputFileFetchRemoteTask::deleteClient()
 
 void OutputFileFetchRemoteTask::stop()
 {
-    UiLog().dbg() << "OutputFileFetchRemoteTask::stop()";
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
     OutputFileFetchTask::clear();
     if (status_ == RunningStatus) {
         deleteClient();
@@ -147,9 +151,8 @@ void OutputFileFetchRemoteTask::clear()
 //clientError eventually!!
 void OutputFileFetchRemoteTask::run()
 {
-#ifdef  DEBUG_OUTPUTFILEPROVIDER__
-    UI_FUNCTION_LOG
-    UiLog().dbg() << "OutputFileFetchRemoteTask::run <-- file: " << filePath_;
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     std::string host, port;
     assert(node_);
@@ -182,7 +185,10 @@ void OutputFileFetchRemoteTask::run()
         }
 
         Q_ASSERT(client_);
-        UiLog().dbg() << "OutputFileFetchRemoteTask: use logserver=" << client_->longName() << " file=" << filePath_;
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+        UiLog().dbg() << " use logserver=" << client_->longName();
+#endif
+
         owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> from" +
                                   ((userLogServerUsed)?"<b>user defined</b>":"") +
                                   " log server <i> " + client_->longName() + "</i>",0);
@@ -221,7 +227,7 @@ void OutputFileFetchRemoteTask::clientFinished()
     reply->fileReadMode(VReply::LogServerReadMode);
 
     if (tmp->hasDeltaContents()) {
-        reply->addLog("TRY> fetch delta from logserver: " + client_->longName() + ": OK");
+        reply->addLog("TRY> fetch file increment from logserver: " + client_->longName() + ": OK");
     } else {
         reply->addLog("TRY> fetch file from logserver: " + client_->longName() + ": OK");
     }
@@ -250,7 +256,9 @@ void OutputFileFetchRemoteTask::clientProgress(QString msg,int value)
 void OutputFileFetchRemoteTask::clientError(QString msg)
 {
     auto reply = owner_->reply_;
-    UiLog().dbg() << "OutputFileProvider::slotOutputClientError error:" << msg;
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
+#endif
     reply->addLog("TRY> fetch file from logserver: " + client_->longName() + " FAILED");
     fail();
 }
@@ -264,6 +272,9 @@ void OutputFileFetchRemoteTask::clientError(QString msg)
 // try to read the logfile from the disk (if the settings allow it)
 void OutputFileFetchAnyLocalTask::run()
 {
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
     auto reply = owner_->reply_;
 
     //we do not want to delete the file once the VFile object is destroyed!!
@@ -289,6 +300,9 @@ void OutputFileFetchAnyLocalTask::run()
 
 void OutputFileFetchLocalTask::run()
 {
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
     if (server_->readFromDisk() || !isJobout_) {
         OutputFileFetchAnyLocalTask::run();
     } else {
@@ -305,6 +319,9 @@ void OutputFileFetchLocalTask::run()
 // try to fetch the logfile from the server if it is the jobout file
 void OutputFileFetchServerTask::run()
 {
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
     if (isJobout_) {
         // we delegate it back to the FileProvider (this is its built-in task)
         owner_->fetchJoboutViaServer(server_,node_,filePath_);
@@ -324,7 +341,7 @@ OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 {
     outCache_=new OutputCache(this);
 
-    fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunUntilFirstSucceed, this);
+    fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunUntilFirstSucceeded, this);
 
     // these are persistent fetch tasks. We add them to the queue on demand
     fetchTask_[CacheTask] = new OutputFileFetchCacheTask(this);

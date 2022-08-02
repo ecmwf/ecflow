@@ -273,7 +273,8 @@ void OutputItemWidget::getCurrentFile(bool doReload)
         {            
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
             UI_FUNCTION_LOG
-            UiLog().dbg()  << "output selected: " << fullName;
+            UiLog().dbg()  << UI_FN_INFO << "doReload=" << doReload <<
+                              " fullName=" << fullName;
 #endif
             //Fetch the file with given fetchmode
             auto* op=static_cast<OutputFileProvider*>(infoProvider_);
@@ -601,8 +602,6 @@ void OutputItemWidget::setCurrentInDir(const std::string& fullName,VFile::FetchM
 
 void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartTimer)
 {
-UI_FUNCTION_LOG
-
     if(restartTimer)
 		updateDirTimer_->stop();
 
@@ -641,7 +640,7 @@ UI_FUNCTION_LOG
 
         }
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-        UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
+        UiLog().dbg() << UI_FN_INFO << "dir item count=" << dirModel_->rowCount();
 #endif
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;

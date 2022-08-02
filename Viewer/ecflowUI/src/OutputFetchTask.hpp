@@ -52,18 +52,22 @@ class OutputFetchQueueOwner
 public:
     OutputFetchQueueOwner() = default;
     virtual void fetchQueueSucceeded() = 0;
-    virtual void fetchQueueFinished(VNode* n= nullptr) = 0;
+    virtual void fetchQueueFinished(VNode* n=nullptr) = 0;
 };
 
 
-// The queue runs until a task manages to fetch the
-// logfile and calls taskSucceeded. The queue does not take ownership
-// of the tasks.
+// Simple queue to manage the various fetch tasks defined by the owner
+// (OutputFileProvider or OutputDirProvider). The queue does not take ownership
+// of the tasks and has two modes:
+//  - RunUntilFirstSucceed: runs until a task manages to fetch the
+//            logfile and calls fetchQueueSucceeded() on the owner.
+//  - RunAll: runs all the tasks
+// If all the tasks were run fetchQueueFinished() is called on the owner.
 
 class OutputFetchQueue
 {
 public:
-    enum Policy {RunUntilFirstSucceed, RunAll};
+    enum Policy {RunUntilFirstSucceeded, RunAll};
     OutputFetchQueue(Policy policy, OutputFetchQueueOwner *owner) : policy_(policy), owner_(owner) {}
     void add(OutputFetchTask* t);
     void run();
@@ -79,7 +83,7 @@ protected:
     void next();
     void finish(OutputFetchTask* lastTask=nullptr);
 
-    Policy policy_{RunUntilFirstSucceed};
+    Policy policy_{RunUntilFirstSucceeded};
     OutputFetchQueueOwner *owner_{nullptr};
     std::deque<OutputFetchTask*> queue_;
     Status status_{IdleState};
