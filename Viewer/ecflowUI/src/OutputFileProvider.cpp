@@ -605,10 +605,11 @@ void OutputFileProvider::fetchQueueFinished(VNode* n)
     owner_->infoFailed(reply_);
 }
 
+// this must be called from the queue and must be the last task of the queue
 void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
 {
-    // this must be called from the queue and must be the last task of the queue. From this moment on we do
-    // not need the queue and the OutputFileProvider manages the VTask
+    // From this moment on we do not need the queue and the
+    // OutputFileProvider itself will manage the VTask
     fetchQueue_->clear();
 
     assert(server);
