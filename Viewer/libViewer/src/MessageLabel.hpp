@@ -58,6 +58,7 @@ private:
     QToolButton* progCancelTb_{nullptr};
     QTimer* delayedProgressTimer_{nullptr};
     DelayedProgressDef delayedProgressDef_;
+    int delayInMs_{500}; // ms
 };
 
 class MessageLabelLoadWidget : public QWidget

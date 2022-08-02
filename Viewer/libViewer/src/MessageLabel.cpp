@@ -114,7 +114,7 @@ MessageLabelProgWidget::MessageLabelProgWidget(QWidget *parent) : QWidget(parent
 
     delayedProgressTimer_ = new QTimer(this);
     delayedProgressTimer_->setSingleShot(true);
-    delayedProgressTimer_->setInterval(50);
+    delayedProgressTimer_->setInterval(delayInMs_);
 
     connect(delayedProgressTimer_,SIGNAL(timeout()),
             this, SLOT(showDelayedProgress()));
