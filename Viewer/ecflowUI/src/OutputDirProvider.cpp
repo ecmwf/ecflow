@@ -24,8 +24,8 @@
 #define UI_OUTPUTDIRPROVIDER_DEBUG__
 #define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
 
-OutputDirFetchTask::OutputDirFetchTask(OutputDirProvider* owner) :
-    owner_(owner)
+OutputDirFetchTask::OutputDirFetchTask(const std::string& name, OutputDirProvider* owner) :
+    OutputFetchTask(name), owner_(owner)
 {
     Q_ASSERT(owner_);
 }
@@ -43,6 +43,8 @@ void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::stri
 // OutputFileFetchLocalTask
 //
 //=================================
+OutputDirFetchLocalTask::OutputDirFetchLocalTask(OutputDirProvider *owner) :
+    OutputDirFetchTask("DirFetchLocal", owner) {}
 
 // try to read the logfile from the disk (if the settings allow it)
 void OutputDirFetchLocalTask::run()
@@ -96,7 +98,7 @@ void OutputDirFetchLocalTask::run()
 //=================================
 
 OutputDirFetchRemoteTask::OutputDirFetchRemoteTask(OutputDirProvider* owner) :
-     QObject(nullptr), OutputDirFetchTask(owner)
+     QObject(nullptr), OutputDirFetchTask("DirFetchRemote", owner)
 {
 }
 

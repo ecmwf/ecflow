@@ -17,16 +17,12 @@
 
 #include <QStringList>
 
-//class QString;
 class QModelIndex;
-//class QStringList;
 class QVariant;
 class QPoint;
 class QRegion;
 class QRect;
 class QDateTime;
-
-//#define UI_FUNCTION_LOG_S(server) UiFunctionLog __fclog(server,BOOST_CURRENT_FUNCTION);
 
 class UiFunctionLog
 {

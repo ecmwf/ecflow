@@ -67,6 +67,13 @@ void OutputFetchTask::fail()
     }
 }
 
+std::string OutputFetchTask::print() const
+{
+    return name_ + "[status=" + std::to_string(status_) + ",runCondition=" +  std::to_string(runCondition_) +
+            ",filePath=" + filePath_ + "]";
+}
+
+
 //========================================
 //
 // OutputFetchQueue
@@ -174,4 +181,27 @@ void OutputFetchQueue::taskFailed(OutputFetchTask*)
     } else {
         clear();
     }
+}
+
+std::string OutputFetchQueue::print() const
+{
+    std::string s = "OutpuFetchQueue[";
+    for (auto t: queue_) {
+        s += t->name() + ",";
+    }
+    s[s.size()-1] = ']';
+    return s;
+}
+
+
+std::ostream&  operator <<(std::ostream &stream,OutputFetchTask* t)
+{
+    stream << t->print();
+    return stream;
+}
+
+std::ostream&  operator <<(std::ostream &stream,OutputFetchQueue* q)
+{
+    stream << q->print();
+    return stream;
 }

@@ -31,7 +31,7 @@ struct OutputCacheItem;
 class OutputFileFetchTask : public OutputFetchTask
 {
 public:
-    OutputFileFetchTask(OutputFileProvider* owner);
+    OutputFileFetchTask(const std::string& name, OutputFileProvider* owner);
     void reset(ServerHandler* server,VNode* node,const std::string& filePath, bool isJobout,
                size_t deltaPos, bool useCache);
     void clear() override;
@@ -46,7 +46,7 @@ protected:
 class OutputFileFetchCacheTask : public OutputFileFetchTask
 {
 public:
-    using OutputFileFetchTask::OutputFileFetchTask;
+    OutputFileFetchCacheTask(OutputFileProvider* owner);
     void run() override;
 };
 
@@ -75,14 +75,14 @@ protected:
 class OutputFileFetchAnyLocalTask : public OutputFileFetchTask
 {
 public:
-    using OutputFileFetchTask::OutputFileFetchTask;
+    OutputFileFetchAnyLocalTask(OutputFileProvider* owner);
     void run() override;
 };
 
 class OutputFileFetchLocalTask : public OutputFileFetchAnyLocalTask
 {
 public:
-    using OutputFileFetchAnyLocalTask::OutputFileFetchAnyLocalTask;
+    OutputFileFetchLocalTask(OutputFileProvider* owner);
     void run() override;
 };
 
@@ -90,7 +90,7 @@ public:
 class OutputFileFetchServerTask : public OutputFileFetchTask
 {
 public:
-    using OutputFileFetchTask::OutputFileFetchTask;
+    OutputFileFetchServerTask(OutputFileProvider* owner);
     void run() override;
 };
 

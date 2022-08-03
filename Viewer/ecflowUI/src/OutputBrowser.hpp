@@ -107,6 +107,7 @@ private:
     void loadContentsFromDisk(QString contentsFileName, QString fileName);
     void loadContentsFromText(QString text,QString fileName,size_t dataSize, bool resetFile=true);
     bool addDeltaContents(VFile_ptr);
+    bool addDeltaContentsFromDisk(QString deltaFileName, QString fileName, size_t fileSize);
     bool addDeltaContentsFromText(QString deltaTxt,QString fileName, size_t fileSize);
 
     QStackedWidget *stacked_;

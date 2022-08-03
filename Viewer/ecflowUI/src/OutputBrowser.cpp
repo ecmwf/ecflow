@@ -298,7 +298,6 @@ void OutputBrowser::reloadIt(VFile_ptr file)
     if (delta && contentsFile_.get() == file_.get()) {
         deltaAdded = addDeltaContents(delta);
     }
-
     if(!deltaAdded) {
         loadContents();
     }
@@ -401,8 +400,8 @@ bool OutputBrowser::addDeltaContents(VFile_ptr delta)
     if (delta && contentsFile_ && file_) {
         if(contentsFile_->storageMode() == VFile::DiskStorage)
         {
-            return false;
-            //return addDeltaContentsFromDisk(QString::fromStdString(contentsFile_->path()), QString::fromStdString(file_->path()));
+            return addDeltaContentsFromDisk(QString::fromStdString(delta->path()), QString::fromStdString(file_->path()),
+                                            file_->sizeInBytes());
         }
         else
         {
@@ -410,6 +409,25 @@ bool OutputBrowser::addDeltaContents(VFile_ptr delta)
             return addDeltaContentsFromText(s,QString::fromStdString(file_->sourcePath()),
                                             file_->sizeInBytes());
         }
+    }
+    return false;
+}
+
+
+bool OutputBrowser::addDeltaContentsFromDisk(QString deltaFileName, QString fileName, size_t fileSize)
+{
+    if(isHtmlFile(fileName)) {
+       return false;
+    }
+    else if(!isJobFile(fileName) || fileSize <= minPagerTextSize_) {
+        changeIndex(BasicIndex,fileSize);
+        adjustHighlighter(fileName);
+
+        QFile file(deltaFileName);
+        file.open(QIODevice::ReadOnly);
+        QString deltaTxt=file.readAll();
+        textEdit_->appendPlainText(deltaTxt);
+        return true;
     }
     return false;
 }

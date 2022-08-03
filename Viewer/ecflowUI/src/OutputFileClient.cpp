@@ -12,8 +12,8 @@
 
 #include "UiLog.hpp"
 
-#define UI_OUTPUTFILECLIENT_DEBUG__
-#define UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+//#define UI_OUTPUTFILECLIENT_DEBUG__
+//#define UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
 
 OutputFileClient::OutputFileClient(const std::string& host,const std::string& portStr,QObject* parent) :
     OutputClient(host,portStr,parent)
@@ -207,7 +207,7 @@ void OutputFileClient::estimateExpectedSize()
 #ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
     UI_FN_DBG
 #endif
-    if(!dir_)
+    if(!dir_ || deltaPos_ > 0)
     {
         expected_=0;
         return;

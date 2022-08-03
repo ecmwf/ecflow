@@ -33,8 +33,8 @@
 //
 //=================================
 
-OutputFileFetchTask::OutputFileFetchTask(OutputFileProvider* owner) :
-    owner_(owner)
+OutputFileFetchTask::OutputFileFetchTask(const std::string& name, OutputFileProvider* owner) :
+    OutputFetchTask(name), owner_(owner)
 {
     Q_ASSERT(owner_);
 }
@@ -63,6 +63,9 @@ void OutputFileFetchTask::reset(ServerHandler* server,VNode* node,const std::str
 // OutputFileFetchCacheTask
 //
 //=================================
+
+OutputFileFetchCacheTask::OutputFileFetchCacheTask(OutputFileProvider* owner) :
+    OutputFileFetchTask("FileFetchCache", owner) {}
 
 // Try to fetch the logfile from the local cache
 void OutputFileFetchCacheTask::run()
@@ -106,7 +109,7 @@ void OutputFileFetchCacheTask::run()
 //=================================
 
 OutputFileFetchRemoteTask::OutputFileFetchRemoteTask(OutputFileProvider* owner) :
-     QObject(nullptr), OutputFileFetchTask(owner)
+     QObject(nullptr), OutputFileFetchTask("FileFetchRemote", owner)
 {
 }
 
@@ -273,6 +276,9 @@ void OutputFileFetchRemoteTask::clientError(QString msg)
 //
 //=================================
 
+OutputFileFetchAnyLocalTask::OutputFileFetchAnyLocalTask(OutputFileProvider* owner) :
+    OutputFileFetchTask("FileFetchAnyLocal", owner) {}
+
 // try to read the logfile from the disk (if the settings allow it)
 void OutputFileFetchAnyLocalTask::run()
 {
@@ -303,6 +309,10 @@ void OutputFileFetchAnyLocalTask::run()
     finish();
 }
 
+OutputFileFetchLocalTask::OutputFileFetchLocalTask(OutputFileProvider* owner) :
+    OutputFileFetchAnyLocalTask(owner) { name_ = "FileFetchLocal";}
+
+
 void OutputFileFetchLocalTask::run()
 {
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
@@ -320,6 +330,9 @@ void OutputFileFetchLocalTask::run()
 // OutputFileFetchServerTask
 //
 //=================================
+
+OutputFileFetchServerTask::OutputFileFetchServerTask(OutputFileProvider* owner) :
+    OutputFileFetchTask("FileFetchServer", owner) {}
 
 // try to fetch the logfile from the server if it is the jobout file
 void OutputFileFetchServerTask::run()
@@ -537,7 +550,8 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
         auto t = fetchTask_[k];
         t->reset(server,n,fileName,isJobout, deltaPos, useCache);
         fetchQueue_->add(t);
-    }
+    }   
+    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
     fetchQueue_->run();
 }
 
@@ -610,6 +624,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
         fetchQueue_->add(t);
     }
 
+    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
     fetchQueue_->run();
 }
 

@@ -215,13 +215,14 @@ void OutputItemWidget::reload(VInfo_ptr info)
 }
 
 //Get information (description) about the current selection in the dir list
-void OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const
+bool OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const
 {
     QModelIndex current=dirSortModel_->mapToSource(dirView_->currentIndex());
 
     if(current.isValid())
     {
         dirModel_->itemDesc(current,fullName,fetchMode);
+        return true;
     }
     else
     {
@@ -229,6 +230,7 @@ void OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchM
         fullName=op->joboutFileName();
         fetchMode=VDir::NoFetchMode;
     }
+    return false;
 }
 
 void OutputItemWidget::getLatestFile()
@@ -268,7 +270,16 @@ void OutputItemWidget::getCurrentFile(bool doReload)
 	{
         std::string fullName;
         VDir::FetchMode fetchMode;
-        currentDesc(fullName,fetchMode);
+        bool hasSelection = currentDesc(fullName,fetchMode);
+
+        // this can happen when the file being displayed is no available any longer
+        // in the dir list
+        if (!hasSelection) {
+            doReload = false;
+            fileLabel_->clear();
+            browser_->clear();
+        }
+
         if(!fullName.empty())
         {            
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG

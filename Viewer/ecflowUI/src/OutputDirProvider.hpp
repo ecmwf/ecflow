@@ -27,13 +27,12 @@ class OutputDirProvider;
 class OutputDirFetchTask : public OutputFetchTask
 {
 public:
-    OutputDirFetchTask(OutputDirProvider* owner);
+    OutputDirFetchTask(const std::string& name, OutputDirProvider* owner);
     void reset(ServerHandler* server,VNode* n,const std::string& filePath,RunCondition cond=NoCondition);
 
 protected:
     OutputDirProvider* owner_{nullptr};
 };
-
 
 class OutputDirFetchRemoteTask : public QObject, public OutputDirFetchTask
 {
@@ -60,7 +59,7 @@ protected:
 class OutputDirFetchLocalTask : public OutputDirFetchTask
 {
 public:
-    using OutputDirFetchTask::OutputDirFetchTask;
+    OutputDirFetchLocalTask(OutputDirProvider* owner);
     void run() override;
 };
 

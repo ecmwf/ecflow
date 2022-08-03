@@ -13,6 +13,7 @@
 
 #include <deque>
 #include <string>
+#include <sstream>
 
 class OutputFetchQueue;
 class ServerHandler;
@@ -24,15 +25,17 @@ class OutputFetchTask
 public:
     enum Status {NoStatus, SucceededStatus, FinishedStatus, FailedStatus, RunningStatus};
     enum RunCondition {NoCondition, RunIfPrevFailed};
-    OutputFetchTask() = default;
+    OutputFetchTask(const std::string& name) : name_(name) {}
     virtual ~OutputFetchTask() = default;
     virtual void run()=0;
     virtual void stop() {}
     virtual void clear();
+    const std::string& name() const {return name_;}
     VNode* node() const {return node_;}
     const std::string filePath() const {return filePath_;}
     void setRunCondition(RunCondition c) {runCondition_ = c;}
     bool checRunCondition(OutputFetchTask* prev) const;
+    std::string print() const;
 
 protected:
     void succeed();
@@ -40,6 +43,7 @@ protected:
     void fail();
     void setQueue(OutputFetchQueue*);
 
+    std::string name_;
     OutputFetchQueue* queue_{nullptr};
     Status status_{NoStatus};
     RunCondition runCondition_{NoCondition};
@@ -74,6 +78,7 @@ public:
     void run();
     void clear();
     bool isEmpty() const {return queue_.empty();}
+    std::string print() const;
 
     void taskSucceeded(OutputFetchTask*);
     void taskFinished(OutputFetchTask*);
@@ -89,6 +94,9 @@ protected:
     std::deque<OutputFetchTask*> queue_;
     Status status_{IdleState};
 };
+
+std::ostream&  operator <<(std::ostream &,OutputFetchTask*);
+std::ostream&  operator <<(std::ostream &,OutputFetchQueue*);
 
 #endif // OUTPUTFETCHTASK_HPP
 

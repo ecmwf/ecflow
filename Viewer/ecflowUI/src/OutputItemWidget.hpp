@@ -76,7 +76,7 @@ protected:
 	void searchOnReload();
     void getCurrentFile(bool doReload);
 	void getLatestFile();
-    void currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const;
+    bool currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const;
     void updateHistoryLabel(const std::vector<std::string>&);
     void displayDirErrors(const std::vector<std::string>& errorVec);
 
