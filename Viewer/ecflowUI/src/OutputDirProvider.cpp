@@ -157,6 +157,10 @@ void OutputDirFetchRemoteTask::run()
     }
     Q_ASSERT(!userLogServerUsed || !sysLogServerUsed);
 
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+    UiLog().dbg() <<  UI_FN_INFO << "host=" << host << " port=" << port;
+#endif
+
     if (userLogServerUsed || sysLogServerUsed) {
         Q_ASSERT(userLogServerUsed || sysLogServerUsed);
         if (client_ && (client_->host() != host || client_->portStr() != port)) {
@@ -348,7 +352,7 @@ void OutputDirProvider::fetchQueueSucceeded()
 {
 }
 
-void OutputDirProvider::fetchQueueFinished(VNode*)
+void OutputDirProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*)
 {
 #ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
     UI_FN_DBG

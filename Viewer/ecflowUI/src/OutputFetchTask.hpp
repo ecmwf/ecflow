@@ -30,6 +30,7 @@ public:
     virtual void stop() {}
     virtual void clear();
     VNode* node() const {return node_;}
+    const std::string filePath() const {return filePath_;}
     void setRunCondition(RunCondition c) {runCondition_ = c;}
     bool checRunCondition(OutputFetchTask* prev) const;
 
@@ -52,7 +53,7 @@ class OutputFetchQueueOwner
 public:
     OutputFetchQueueOwner() = default;
     virtual void fetchQueueSucceeded() = 0;
-    virtual void fetchQueueFinished(VNode* n=nullptr) = 0;
+    virtual void fetchQueueFinished(const std::string& filePath, VNode* n=nullptr) = 0;
 };
 
 

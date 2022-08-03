@@ -119,7 +119,7 @@ public:
      bool isTryNoZero(const std::string& fileName) const;
 
      void fetchQueueSucceeded() override;
-     void fetchQueueFinished(VNode*) override;
+     void fetchQueueFinished(const std::string& filePath, VNode*) override;
 
 protected:
      OutputCacheItem* findInCache(const std::string& fileName);

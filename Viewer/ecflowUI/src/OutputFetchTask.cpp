@@ -135,11 +135,11 @@ void OutputFetchQueue::next()
 void OutputFetchQueue::finish(OutputFetchTask* lastTask)
 {
 #ifdef OUTPUTFETCHTASK_DEBUG__
-    UiLog() << "OutputFetchQueue::finish";
+    UI_FN_DBG
 #endif
     clear();
     if (lastTask && lastTask->node()) {
-        owner_->fetchQueueFinished(lastTask->node());
+        owner_->fetchQueueFinished(lastTask->filePath(), lastTask->node());
     }
 }
 
@@ -166,6 +166,9 @@ void OutputFetchQueue::taskFinished(OutputFetchTask*)
 
 void OutputFetchQueue::taskFailed(OutputFetchTask*)
 {
+#ifdef OUTPUTFETCHTASK_DEBUG__
+    UI_FN_DBG
+#endif
     if (status_ == RunningState) {
         next();
     } else {

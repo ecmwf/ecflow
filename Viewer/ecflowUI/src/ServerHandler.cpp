@@ -1413,6 +1413,10 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
         task->status(VTask::ABORTED);
         UserMessage::message(UserMessage::WARN, true, errMsg);
     }
+    else if(task->type()  == VTask::OutputTask) {
+        task->reply()->appendErrorText(errMsg);
+        task->status(VTask::ABORTED);
+    }
     else if(task->type()  == VTask::PlugTask)
     {
         task->reply()->setErrorText(errMsg);

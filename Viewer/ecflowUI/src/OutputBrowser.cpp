@@ -267,6 +267,7 @@ void OutputBrowser::loadIt(VFile_ptr file)
     if(!file_) {
         return;
     }
+    Q_ASSERT(!file->hasDeltaContents());
     contentsFile_ = filterIt();
     loadContents();
 }
@@ -280,7 +281,9 @@ void OutputBrowser::reloadIt(VFile_ptr file)
         return;
     }
 
+    VFile_ptr delta;
     if (file->hasDeltaContents() && file_) {
+        delta = file;
         if (!file_->append(file)) {
             return;
         }
@@ -290,7 +293,15 @@ void OutputBrowser::reloadIt(VFile_ptr file)
 
     contentsChangedOnLastLoad_ = true;
     contentsFile_ = filterIt();
-    loadContents();
+
+    bool deltaAdded = false;
+    if (delta && contentsFile_.get() == file_.get()) {
+        deltaAdded = addDeltaContents(delta);
+    }
+
+    if(!deltaAdded) {
+        loadContents();
+    }
 }
 
 void OutputBrowser::loadContents()
@@ -381,6 +392,42 @@ void OutputBrowser::loadContentsFromText(QString txt,QString fileName, size_t da
 
     //Set the cursor position from the cache
     //updateCursorFromCache(fileName.toStdString());
+}
+
+// try to add delta contents, not all the modes support it so the return value indicates
+// if it was possible
+bool OutputBrowser::addDeltaContents(VFile_ptr delta)
+{
+    if (delta && contentsFile_ && file_) {
+        if(contentsFile_->storageMode() == VFile::DiskStorage)
+        {
+            return false;
+            //return addDeltaContentsFromDisk(QString::fromStdString(contentsFile_->path()), QString::fromStdString(file_->path()));
+        }
+        else
+        {
+            QString s(delta->data());
+            return addDeltaContentsFromText(s,QString::fromStdString(file_->sourcePath()),
+                                            file_->sizeInBytes());
+        }
+    }
+    return false;
+}
+
+bool OutputBrowser::addDeltaContentsFromText(QString deltaTxt,QString fileName, size_t fileSize)
+{
+    // at this point file_ has already been updated with the delta and fileSize contains the
+    // new size. It is guaranteed_ that file_ == contentsFile_
+    if(isHtmlFile(fileName)) {
+        return false;
+    } if (isJobFile(fileName) || fileSize <= minPagerTextSize_) {
+        UiLog().dbg() << UI_FN_INFO << "add fileSize=" << fileSize;
+        changeIndex(BasicIndex,fileSize);
+        adjustHighlighter(fileName);
+        textEdit_->appendPlainText(deltaTxt);
+        return true;
+    }
+    return false;
 }
 
 void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)

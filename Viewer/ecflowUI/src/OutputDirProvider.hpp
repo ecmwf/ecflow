@@ -77,7 +77,7 @@ public:
 	 void clear() override;
 
      void fetchQueueSucceeded() override;
-     void fetchQueueFinished(VNode*) override;
+     void fetchQueueFinished(const std::string& filePath,VNode*) override;
 
 private:
     OutputFetchQueue* fetchQueue_{nullptr};

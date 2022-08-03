@@ -168,7 +168,10 @@ void OutputFileFetchRemoteTask::run()
     if (userLogServerUsed || sysLogServerUsed) {
         Q_ASSERT(userLogServerUsed || sysLogServerUsed);
         if (client_ && (client_->host() != host || client_->portStr() != port)) {
-            deleteClient();
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+        UiLog().dbg() << " host/port does not match! Create new client";
+#endif
+        deleteClient();
         }
 
         if (!client_) {
@@ -227,9 +230,9 @@ void OutputFileFetchRemoteTask::clientFinished()
     reply->fileReadMode(VReply::LogServerReadMode);
 
     if (tmp->hasDeltaContents()) {
-        reply->addLog("TRY> fetch file increment from logserver: " + client_->longName() + ": OK");
+        reply->addLog("TRY> fetch file increment from logserver=" + client_->longName() + " : OK");
     } else {
-        reply->addLog("TRY> fetch file from logserver: " + client_->longName() + ": OK");
+        reply->addLog("TRY> fetch file from logserver=" + client_->longName() + " : OK");
     }
 
     tmp->setFetchMode(VFile::LogServerFetchMode);
@@ -259,7 +262,8 @@ void OutputFileFetchRemoteTask::clientError(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLog("TRY> fetch file from logserver: " + client_->longName() + " FAILED");
+    reply->addLog("TRY> fetch file from logserver=" + client_->longName() + " : FAILED");
+    reply->appendErrorText("Failed to fetch file from logserver=" + client_->longName() + "\n");
     fail();
 }
 
@@ -295,6 +299,7 @@ void OutputFileFetchAnyLocalTask::run()
         return ;
     }
     reply->addLog("TRY> read file from disk: NO ACCESS");
+    reply->appendErrorText("Failed to read file from disk\n");
     finish();
 }
 
@@ -536,7 +541,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     fetchQueue_->run();
 }
 
-//Get a file with the given fetch mode. We use it to fettch files appearing in the directory
+//Get a file with the given fetch mode. We use it to fetch files appearing in the directory
 //listing in the Output panel.
 void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache)
 {
@@ -593,7 +598,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
 
     OutputFileFetchTask *t=nullptr;
     if (fetchMode == VDir::LogServerFetchMode) {
-        t = fetchTask_[RemoteTask];
+        t = fetchTask_[RemoteTask]; 
     } else if(fetchMode == VDir::LocalFetchMode) {
         t = fetchTask_[AnyLocalTask];
     } else if(isJobout && fetchMode == VDir::ServerFetchMode) {
@@ -613,11 +618,14 @@ void OutputFileProvider::fetchQueueSucceeded()
     owner_->infoReady(reply_);
 }
 
-void OutputFileProvider::fetchQueueFinished(VNode* n)
+void OutputFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
 {
     if(n && n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
     {
        reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
+    }
+    if (reply_->errorText().empty()) {
+        reply_->setErrorText("Failed to fetch file!");
     }
     owner_->infoFailed(reply_);
 }
@@ -638,6 +646,7 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
     task_->reply()->setLog(reply_->log());
+    task_->reply()->setErrorText(reply_->errorText());
 
     //owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from server",0);
 
