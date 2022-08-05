@@ -260,10 +260,6 @@ VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile
 		VSettings(file),
 		qs_(QString::fromStdString(qsFile),QSettings::NativeFormat)
 {
-
-	//qs_(QString::fromStdString(application))
-	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
-	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
 #ifdef _UI_SETTINGS_DEBUG
     UiLog().dbg() << "VComboSettings --> fileName=" << qs_.fileName();
 #endif

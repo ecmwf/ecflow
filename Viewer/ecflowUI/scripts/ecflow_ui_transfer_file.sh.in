@@ -14,25 +14,43 @@ set -x #goes to stderr
 
 echo " arguments=$*" >&2
 
-if [[ $# -ne 5 ]] ; then
-    echo "Error: wrong number of arguments = $# (must be 5)" >&2
-    if [[ $# -eq 0 ]] ; then
-        echo "This script should only be called from within ecflow_ui." >&2
-    fi
-    exit 1
-fi
+#if [[ $# -ne 7 ]] ; then
+#    echo "Error: wrong number of arguments = $# (must be 7)" >&2
+#    if [[ $# -eq 0 ]] ; then
+#        echo "This script should only be called from within ecflow_ui." >&2
+#    fi
+#    exit 1
+#fi
 
-sourceFile=$1
-host=$2
-targetFile=$3
-lastBytes=$4
-remoteUid=$5
+sourceFile=
+remoteUid=${USER}
+remoteHost=
+targetFile=
+proxyJump=
+byteMode=
+byteValue=
+
+while getopts s:u:h:t:j:m:v: flag
+do
+    case "${flag}" in
+        s) sourceFile=${OPTARG};;
+        u) remoteUid=${OPTARG};;
+        h) remoteHost=${OPTARG};;
+        t) targetFile=${OPTARG};;
+        j) proxyJump=${OPTARG};;
+        m) byteMode=${OPTARG};;
+        v) byteValue=${OPTARG};;
+    esac
+done
 
 echo ""
 echo "sourceFile=$sourceFile" >&2
-echo "host=$host" >&2
+echo "remoteUid=$remoteUid" >&2
+echo "remoteHost=$remoteHost" >&2
 echo "targetFile=$targetFile" >&2
-echo "lastBytes=$lastBytes" >&2
+echo "proxyJump=$proxyJump" >&2
+echo "byteMode=$byteMode" >&2
+echo "byteValue=$byteValue" >&2
 echo "remoteUid=$remoteUid" >&2
 echo ""
 
@@ -41,8 +59,8 @@ if [[ $sourceFile == "" ]] ; then
     exit 1
 fi
 
-if [[ $host == "" ]] ; then
-    echo "Error: host is empty!" >&2
+if [[ $remoteHost == "" ]] ; then
+    echo "Error: remoteHost is empty!" >&2
     exit 1
 fi
 
@@ -51,13 +69,27 @@ if [[ $targetFile == "" ]] ; then
     exit 1
 fi
 
-if [[ $lastBytes == "" ]] ; then
-    echo "Error: lastBytes is empty!" >&2
+if [[ $proxyJump == "" ]] ; then
+    echo "Error: proxyJump is empty!" >&2
+    exit 1
+elif [[ $proxyJump == "__NOJUMP__" ]] ; then
+    proxyJump=""
+else
+    proxyJump="-J ${proxyJump}"
+fi
+
+if [[ $byteMode != "all" && $byteMode != "pos" &&  $byteMode != "last" ]] ; then
+    echo "Error: invalid byteMode value! Allowed values are: \"all\", \"pos\" and \"last\"" >&2
     exit 1
 fi
 
-if [[ $lastBytes -lt 0 ]] ; then
-    echo "Error: lastBytes (=${lastBytes}) must be positive!" >&2
+if [[ $byteValue == "" ]] ; then
+    echo "Error: byteValue is empty!" >&2
+    exit 1
+fi
+
+if [[ $byteValue -lt 0 ]] ; then
+    echo "Error: byteValue (=${byteValue}) must be >=0!" >&2
     exit 1
 fi
 
@@ -71,20 +103,20 @@ if [[ $remoteUid == "__USER__" ]]  ; then
 fi
 
 # transfer the whole file
-if [[ lastBytes -eq 0 ]] ; then
-
+if [[ $byteMode == "all" ]] ; then
     #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
-    scp ${host}:/${sourceFile} ${targetFile}
+    echo "scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}" >&2
+    scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}
 
 #transfer the last bytes of the file
 else
-    sourceSize=$(ssh ${remoteUid}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
+    sourceSize=$(ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
 
     if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
         #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
-        scp ${host}:/${sourceFile} ${targetFile}
+        scp ${proxyJump} ${remoteHost}:/${sourceFile} ${targetFile}
     else
-        ssh ${remoteUid}@${host} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
+        ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
     fi
 fi
 

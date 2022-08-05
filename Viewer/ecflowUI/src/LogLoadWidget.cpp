@@ -205,7 +205,7 @@ void LogLoadWidget::clear()
     beingCleared_=true;
     if(fileTransfer_)
     {
-        fileTransfer_->stopTransfer();
+        fileTransfer_->stopTransfer(true);
         ui_->messageLabel->stopLoadLabel();
     }
 
@@ -249,7 +249,7 @@ void LogLoadWidget::clearData(bool usePrevState)
     beingCleared_=true;
     if(fileTransfer_)
     {
-        fileTransfer_->stopTransfer();
+        fileTransfer_->stopTransfer(true);
         ui_->messageLabel->stopLoadLabel();
     }
 
@@ -608,7 +608,7 @@ void LogLoadWidget::loadLatest(bool usePrevState)
         }
 
         fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
-                                maxReadSize_,remoteUid_);
+                                VFileTransfer::LastBytes,maxReadSize_,remoteUid_);
     }
     // load local file
     else
@@ -752,7 +752,7 @@ void LogLoadWidget::slotCancelFileTransfer()
 #endif
     if(fileTransfer_)
     {
-        fileTransfer_->stopTransfer();
+        fileTransfer_->stopTransfer(true);
     }
 }
 

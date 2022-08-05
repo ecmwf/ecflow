@@ -15,8 +15,10 @@
 #include "OutputFileClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "VFileTransfer.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
 
 #include <QDateTime>
 
@@ -327,6 +329,125 @@ void OutputFileFetchLocalTask::run()
 
 //=================================
 //
+// OutputFileFetchTransferTask
+//
+//=================================
+
+OutputFileFetchTransferTask::OutputFileFetchTransferTask(OutputFileProvider* owner) :
+     QObject(nullptr), OutputFileFetchTask("FileFetchTransfer", owner)
+{
+}
+
+OutputFileFetchTransferTask::~OutputFileFetchTransferTask()
+{
+}
+
+void OutputFileFetchTransferTask::stopTransfer()
+{
+    if (transfer_) {
+        resFile_.reset();
+        transfer_->stopTransfer(false);
+     }
+}
+
+void OutputFileFetchTransferTask::stop()
+{
+    stopTransfer();
+    OutputFileFetchTask::clear();
+}
+
+void OutputFileFetchTransferTask::clear()
+{
+    stopTransfer();
+    OutputFileFetchTask::clear();
+}
+
+//Create an output client (to access the logserver) and ask it to the fetch the
+//file asynchronously. The output client will call clientFinished() or
+//clientError eventually!!
+void OutputFileFetchTransferTask::run()
+{
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
+#endif
+
+    assert(node_);
+    assert(VConfig::instance()->proxychainsUsed());
+
+    resFile_.reset();
+    resFile_ = VFile::createTmpFile(false);
+
+    if (!transfer_) {
+        transfer_ = new VFileTransfer(this);
+
+        connect(transfer_, SIGNAL(transferFinished()),
+                this, SLOT(transferFinished()));
+
+        connect(transfer_, SIGNAL(transferFailed(QString)),
+                this, SLOT(transferFailed(QString)));
+    }
+
+    Q_ASSERT(transfer_);
+    transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                       QString::fromStdString(resFile_->path()),
+                       VFileTransfer::AllBytes, 0);
+
+    owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> via scp", 0);
+}
+
+void OutputFileFetchTransferTask::transferFinished()
+{
+    //Files retrieved from the log server are automatically added to the cache!
+    if (useCache_ && !resFile_->hasDeltaContents()) {
+        owner_->addToCache(resFile_);
+    }
+    auto reply = owner_->reply_;
+    reply->setInfoText("");
+    reply->fileReadMode(VReply::TransferReadMode);
+
+    if (resFile_->hasDeltaContents()) {
+        reply->addLog("TRY> fetch file increment via scp : OK");
+    } else {
+        reply->addLog("TRY> fetch file via scp : OK");
+    }
+
+    resFile_->setFetchMode(VFile::TransferFetchMode);
+    resFile_->setLog(reply->log());
+//    std::string method="served by " + client_->longName();
+//    tmp->setFetchModeStr(method);
+
+    reply->tmpFile(resFile_);
+    resFile_.reset();
+
+    succeed();
+}
+
+void OutputFileFetchTransferTask::transferProgress(QString msg,int value)
+{
+    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
+
+    owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
+
+    //reply_->setInfoText(msg.toStdString());
+    //owner_->infoProgress(reply_);
+    //reply_->setInfoText("");
+}
+
+void OutputFileFetchTransferTask::transferFailed(QString msg)
+{
+    auto reply = owner_->reply_;
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
+#endif
+    reply->addLog("TRY> fetch file scp : FAILED");
+    reply->appendErrorText("Failed to fetch via scp\n");
+    resFile_.reset();
+    fail();
+}
+
+
+//=================================
+//
 // OutputFileFetchServerTask
 //
 //=================================
@@ -367,6 +488,7 @@ OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
     fetchTask_[AnyLocalTask] = new OutputFileFetchAnyLocalTask(this);
     fetchTask_[LocalTask] = new OutputFileFetchLocalTask(this);
     fetchTask_[ServerTask] = new OutputFileFetchServerTask(this);
+    fetchTask_[TransferTask] = new OutputFileFetchTransferTask(this);
 }
 
 OutputFileProvider::~OutputFileProvider()
@@ -545,7 +667,14 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     // the logfile
     fetchQueue_->clear();
     Q_ASSERT(fetchQueue_->isEmpty());
-    QList<FetchTaskType> types = {CacheTask, RemoteTask, LocalTask, ServerTask};
+    QList<FetchTaskType> types = {CacheTask, RemoteTask};
+    if (VConfig::instance()->proxychainsUsed()) {
+        types << TransferTask;
+    } else {
+        types << LocalTask;
+    }
+    types << ServerTask;
+
     for (auto k: types) {
         auto t = fetchTask_[k];
         t->reset(server,n,fileName,isJobout, deltaPos, useCache);

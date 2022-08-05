@@ -133,7 +133,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     Q_FOREACH(QString envKey,env.keys())
     {
-        if(envKey.startsWith("ECFLOWUI_"))
+        if(envKey.startsWith("ECFLOWUI_") || envKey.contains("PROXY"))
         {
             QString envVal=env.value(envKey);
             auto* item=new QTreeWidgetItem(envTree_);

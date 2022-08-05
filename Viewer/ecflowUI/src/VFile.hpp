@@ -26,7 +26,7 @@ public:
 	virtual ~VFile();
 
     enum StorageMode {MemoryStorage,DiskStorage};
-    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode};
+    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode,TransferFetchMode};
 
     const std::string& path() const {return path_;}
     const std::string& sourcePath() const {return sourcePath_;}

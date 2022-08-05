@@ -18,6 +18,8 @@
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
+#include "VProperty.hpp"
 
 static QMap<QProcess::ProcessError, QString> errorStr;
 
@@ -45,11 +47,19 @@ bool VFileTransfer::isActive() const
     return (proc_ && proc_->state() != QProcess::NotRunning);
 }
 
-void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes,
-                             QString remoteUid)
+void VFileTransfer::transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal)
+{
+    QString user, host;
+    socksRemoteUserAndHost(user, host);
+    transfer(sourceFile,host,targetFile,byteMode,byteVal,user);
+}
+
+void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,ByteMode byteMode,
+                             size_t byteVal, QString remoteUid)
 {
     if(proc_)
     {
+        proc_->disconnect(this);
         proc_->kill();
         proc_->deleteLater();
         proc_=nullptr;
@@ -93,9 +103,26 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
     if(remoteUid.isEmpty() || remoteUid == "$USER")
        remoteUid = "__USER__";
 
+    QString byteModeStr = "all";
+    if (byteMode == BytesFromPos) {
+        byteModeStr = "pos";
+    } else if (byteMode == LastBytes) {
+        byteModeStr = "last";
+    }
+
+    QString proxyJump = buildSocksProxyJump();
+
     QString command=scriptName_ + " ";
-    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +  QString::number(lastBytes) +
-            " " + remoteUid;
+    command += "-s \'" + sourceFile + "\' -u " + remoteUid + " -h " + host +
+            " -t " + " \'" + targetFile + "\' -j " + proxyJump +
+            " -m " + byteModeStr + " -v " +  QString::number(byteVal);
+
+    UiLog().dbg() << "command=" << command;
+//    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +
+//            proxyJump +
+//            " " + byteModeStr +
+//            " " + QString::number(byteVal) +
+//            " " + remoteUid;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     proc_->start("/bin/sh", QStringList() << "-c" << command);
@@ -111,13 +138,21 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
 #endif
 }
 
-void VFileTransfer::stopTransfer()
+void VFileTransfer::stopTransfer(bool broadcast)
 {
     if(proc_) {
         proc_->kill();
-        // on Mac OS (Big Sur) with Qt6 the slotProcFinished() is not
-        // called automaticallywe we need to call it here!
-        slotProcFinished(1, QProcess::CrashExit);
+        if (broadcast) {
+            // on Mac OS (Big Sur) with Qt6 the slotProcFinished() is not
+            // called automatically so we need to call it here!
+            slotProcFinished(1, QProcess::CrashExit);
+        } else {
+            if(proc_) {
+                proc_->disconnect(this);
+                proc_->deleteLater();
+                proc_=nullptr;
+            }
+        }
     }
 }
 
@@ -134,7 +169,7 @@ void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatu
     QString stdErrTxt=stdErr();
 
 #ifdef UI_FILETRANSFER_DEBUG_
-    UiLog().dbg() << "exitCode=" << exitCode << "exitStatus=" << exitStatus;
+    UiLog().dbg() << "exitCode=" << exitCode << " exitStatus=" << exitStatus;
     UiLog().dbg() << "errorString=" << proc_->errorString();
     UiLog().dbg() << "stdout=" << stdOutTxt;
     UiLog().dbg() << "stderr=" << stdErrTxt;
@@ -210,4 +245,42 @@ QString VFileTransfer::stdErr()
     }
 
     return QString(proc_->readAllStandardError());
+}
+
+QString VFileTransfer::buildSocksProxyJump()
+{
+    QString s;
+    if (VConfig::instance()->proxychainsUsed()) {
+        auto p1 = VConfig::instance()->find("network.socks.proxyJumpUser");
+        auto p2 = VConfig::instance()->find("network.socks.proxyJumpHost");
+        if (p1 && p2) {
+            QString user = p1->valueAsString();
+            if (user.isEmpty() || user == "$USER") {
+                if (char* ch = getenv("USER")) {
+                    user = QString(ch);
+                }
+            }
+            s = user + "@" + p2->valueAsString();
+        }
+    }
+    return s;
+}
+
+void VFileTransfer::socksRemoteUserAndHost(QString& user, QString& host)
+{
+    user.clear();
+    host.clear();
+    if (VConfig::instance()->proxychainsUsed()) {
+        auto p1 = VConfig::instance()->find("network.socks.remoteUser");
+        auto p2 = VConfig::instance()->find("network.socks.remoteHost");
+        if (p1 && p2) {
+            user = p1->valueAsString();
+            if (user.isEmpty() || user == "$USER") {
+                if (char* ch = getenv("USER")) {
+                    user = QString(ch);
+                }
+            }
+            host = p2->valueAsString();
+        }
+    }
 }

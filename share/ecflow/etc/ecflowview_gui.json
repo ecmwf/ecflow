@@ -695,7 +695,23 @@
                     "line" : "soundFile"
                 }
             }
-        }
+        },
 
+        "network":  {
+            "label": "Network",
+            "desc" : "Network",
+            "icon" : "network.svg",
+
+            "group" : {
+                "title" : "Socks",
+                "prefix" : "network.socks",
+
+                "line" : "proxyPort",
+                "line" : "proxyJumpUser",
+                "line" : "proxyJumpHost",
+                "line" : "remoteUser",
+                "line" : "remoteHost"
+            }
+        }
     }
 }

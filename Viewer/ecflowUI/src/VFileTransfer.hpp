@@ -19,9 +19,12 @@ class VFileTransfer : public QObject
     Q_OBJECT
 
 public:
+    enum ByteMode {AllBytes, BytesFromPos, LastBytes};
     VFileTransfer(QObject* parent=nullptr);
-    void transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes, QString remoteUid);
-    void stopTransfer();
+    void transfer(QString sourceFile,QString host,QString targetFile,ByteMode byteMode, size_t byteVal, QString remoteUid={});
+    void transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal);
+
+    void stopTransfer(bool broadcast);
     bool isActive() const;
 
 protected Q_SLOTS:
@@ -38,6 +41,8 @@ Q_SIGNALS:
 
 protected:
     QString stdErr();
+    static QString buildSocksProxyJump();
+    static void socksRemoteUserAndHost(QString& user, QString& host);
 
     QProcess* proc_;
     QString targetFile_;

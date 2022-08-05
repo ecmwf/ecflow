@@ -1,0 +1,27 @@
+{
+    "network":  {
+
+            "socks" : {
+                "proxyPort" : {
+                    "label" : "Socks port",
+                    "default" : 9050
+                },
+                "proxyJumpUser" : {
+                    "label" : "Proxy jump username",
+                    "default" : "$USER"
+                },
+                "proxyJumpHost" : {
+                    "label" : "Proxy jump host",
+                    "default" : ""
+                },
+                "remoteUser" : {
+                    "label" : "Remote username",
+                    "default" : "$USER"
+                },
+                "remoteHost" : {
+                    "label": "Remote host",
+                    "default": ""
+                }
+            }
+       }
+}

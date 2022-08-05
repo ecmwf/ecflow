@@ -27,6 +27,7 @@ class OutputFileProvider;
 class OutputFileClient;
 class OutputCache;
 struct OutputCacheItem;
+class VFileTransfer;
 
 class OutputFileFetchTask : public OutputFetchTask
 {
@@ -87,6 +88,28 @@ public:
 };
 
 
+class OutputFileFetchTransferTask : public QObject, public OutputFileFetchTask
+{
+Q_OBJECT
+public:
+    OutputFileFetchTransferTask(OutputFileProvider* owner);
+    ~OutputFileFetchTransferTask();
+    void run() override;
+    void stop() override;
+    void clear() override;
+
+protected Q_SLOTS:
+    void transferFinished();
+    void transferProgress(QString,int);
+    void transferFailed(QString);
+
+protected:
+    void stopTransfer();
+
+    VFileTransfer *transfer_{nullptr};
+    VFile_ptr resFile_;
+};
+
 class OutputFileFetchServerTask : public OutputFileFetchTask
 {
 public:
@@ -101,6 +124,7 @@ class OutputFileProvider : public QObject, public InfoProvider, public OutputFet
      friend class OutputFileFetchRemoteTask;
      friend class OutputFileFetchLocalTask;
      friend class OutputFileFetchAnyLocalTask;
+     friend class OutputFileFetchTransferTask;
      friend class OutputFileFetchServerTask;
 
 public:
@@ -133,7 +157,7 @@ private:
      OutputCache* outCache_{nullptr};
      OutputFetchQueue* fetchQueue_{nullptr};
      std::vector<VDir_ptr> dirs_;
-     enum FetchTaskType {RemoteTask, LocalTask, AnyLocalTask, CacheTask, ServerTask};
+     enum FetchTaskType {RemoteTask, LocalTask, AnyLocalTask, CacheTask, ServerTask, TransferTask};
      std::map<FetchTaskType, OutputFileFetchTask*> fetchTask_;
 };
 

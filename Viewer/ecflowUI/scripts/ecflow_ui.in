@@ -25,6 +25,9 @@ cleanup(){
     trap "" EXIT ERR
     set +e  # do not exit on errors during cleanup
 
+    # kill all the child processes
+    pkill -P $$ || true
+
     # restore stdout/stderr
     if [ x$ECFLOWUI_SLOG != xyes ]
     then
@@ -110,8 +113,6 @@ cleanup(){
             fi # $x11notbroke
         fi
     fi
-
-
 
     # remove temporary directory
     if [ $(echo $ECFLOWUI_TMPDIR | grep -c "/ecflow_ui.") -ge 1 ] ; then
@@ -287,7 +288,7 @@ export git=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
 #---------------------------------------------------------------
-# Create socket dir for local domain socket base communication
+# Create socket dir for local domain socket based communication
 #---------------------------------------------------------------
 
 export ECFLOWUI_SOCKETDIR=$ECFLOWUI_TMPDIR/sockets
@@ -393,6 +394,10 @@ fi
 #-----------------------------------------------------------
 
 exe=${EXE_DIR}/ecflow_ui.x
+
+if [ ${ECFLOWUI_USER_START_CMD} = "proxychains4" ] ; then
+    export ECFLOWUI_USE_PROXYCHAINS=1
+fi
 
 #-----------------------------------------------------------
 # Backtrace report?
