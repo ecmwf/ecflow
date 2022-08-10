@@ -13,6 +13,7 @@
 
 #include <QObject>
 
+#include "VFile.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
@@ -23,6 +24,7 @@
 
 class OutputDirClient;
 class OutputDirProvider;
+class VDirTransfer;
 
 class OutputDirFetchTask : public OutputFetchTask
 {
@@ -63,10 +65,36 @@ public:
     void run() override;
 };
 
+class OutputDirFetchTransferTask : public QObject, public OutputDirFetchTask
+{
+Q_OBJECT
+public:
+    OutputDirFetchTransferTask(OutputDirProvider* owner);
+    ~OutputDirFetchTransferTask();
+    void run() override;
+    void stop() override;
+    void clear() override;
+
+protected Q_SLOTS:
+    void transferFinished();
+    void transferProgress(QString,int);
+    void transferFailed(QString);
+
+protected:
+    void stopTransfer();
+    void parseLine(QString line);
+
+    VDirTransfer *transfer_{nullptr};
+    VFile_ptr resFile_;
+    VDir_ptr dir_;
+};
+
+
 class OutputDirProvider : public InfoProvider, public OutputFetchQueueOwner
 {
     friend class OutputDirFetchRemoteTask;
     friend class OutputDirFetchLocalTask;
+    friend class OutputDirFetchTransferTask;
 
 public:
      explicit OutputDirProvider(InfoPresenter* owner);
@@ -80,7 +108,7 @@ public:
 
 private:
     OutputFetchQueue* fetchQueue_{nullptr};
-    enum FetchTaskType {RemoteTask1, LocalTask1, RemoteTask2, LocalTask2};
+    enum FetchTaskType {RemoteTask1, LocalTask1, TransferTask1, RemoteTask2, LocalTask2, TransferTask2};
     std::map<FetchTaskType, OutputDirFetchTask*> fetchTask_;
 };
 

@@ -909,7 +909,7 @@ void TimelineWidget::loadLatest(bool usePrevState)
         }
 
         fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
-                                VFileTransfer::LastBytes, maxReadSize_,remoteUid_);
+                                remoteUid_,VFileTransfer::LastBytes, maxReadSize_);
     }
     // load local file
     else

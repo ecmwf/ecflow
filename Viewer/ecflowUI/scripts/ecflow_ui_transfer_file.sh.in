@@ -22,6 +22,7 @@ echo " arguments=$*" >&2
 #    exit 1
 #fi
 
+mode=
 sourceFile=
 remoteUid=${USER}
 remoteHost=
@@ -30,20 +31,22 @@ proxyJump=
 byteMode=
 byteValue=
 
-while getopts s:u:h:t:j:m:v: flag
+while getopts m:s:u:h:t:j:b:v: flag
 do
     case "${flag}" in
+        m) mode=${OPTARG};;
         s) sourceFile=${OPTARG};;
         u) remoteUid=${OPTARG};;
         h) remoteHost=${OPTARG};;
         t) targetFile=${OPTARG};;
         j) proxyJump=${OPTARG};;
-        m) byteMode=${OPTARG};;
+        b) byteMode=${OPTARG};;
         v) byteValue=${OPTARG};;
     esac
 done
 
 echo ""
+echo "mode=$mode" >&2
 echo "sourceFile=$sourceFile" >&2
 echo "remoteUid=$remoteUid" >&2
 echo "remoteHost=$remoteHost" >&2
@@ -53,6 +56,11 @@ echo "byteMode=$byteMode" >&2
 echo "byteValue=$byteValue" >&2
 echo "remoteUid=$remoteUid" >&2
 echo ""
+
+if [[ $mode != "file" && $mode != "dir" ]] ; then
+    echo "Error: invalid mode! Has to be \"file\" or \"dir\"" >&2
+    exit 1
+fi
 
 if [[ $sourceFile == "" ]] ; then
     echo "Error: sourceFile is empty!" >&2
@@ -78,19 +86,22 @@ else
     proxyJump="-J ${proxyJump}"
 fi
 
-if [[ $byteMode != "all" && $byteMode != "pos" &&  $byteMode != "last" ]] ; then
-    echo "Error: invalid byteMode value! Allowed values are: \"all\", \"pos\" and \"last\"" >&2
-    exit 1
-fi
 
-if [[ $byteValue == "" ]] ; then
-    echo "Error: byteValue is empty!" >&2
-    exit 1
-fi
+if [[ $mode == "file" ]] ; then
+    if [[ $byteMode != "all" && $byteMode != "pos" &&  $byteMode != "last" ]] ; then
+        echo "Error: invalid byteMode value! Allowed values are: \"all\", \"pos\" and \"last\"" >&2
+        exit 1
+    fi
 
-if [[ $byteValue -lt 0 ]] ; then
-    echo "Error: byteValue (=${byteValue}) must be >=0!" >&2
-    exit 1
+    if [[ $byteValue == "" ]] ; then
+        echo "Error: byteValue is empty!" >&2
+        exit 1
+    fi
+
+    if [[ $byteValue -lt 0 ]] ; then
+        echo "Error: byteValue (=${byteValue}) must be >=0!" >&2
+        exit 1
+    fi
 fi
 
 if [[ $remoteUid == "" ]] ; then
@@ -102,21 +113,47 @@ if [[ $remoteUid == "__USER__" ]]  ; then
     remoteUid=${USER}
 fi
 
-# transfer the whole file
-if [[ $byteMode == "all" ]] ; then
-    #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
-    echo "scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}" >&2
-    scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}
-
-#transfer the last bytes of the file
-else
-    sourceSize=$(ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
-
-    if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
+if [[ $mode == "file" ]] ; then
+    # transfer the whole file
+    if [[ $byteMode == "all" ]] ; then
         #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
-        scp ${proxyJump} ${remoteHost}:/${sourceFile} ${targetFile}
-    else
-        ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
-    fi
-fi
+        echo "scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}" >&2
+        scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}
 
+    #transfer the last bytes of the file
+    else
+        sourceSize=$(ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
+
+        if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
+            #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+            scp ${proxyJump} ${remoteHost}:/${sourceFile} ${targetFile}
+        else
+            ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
+        fi
+    fi
+else
+    dirPath=$(dirname ${sourceFile})
+    sourceName=$(basename ${sourceFile})
+    echo "dirPath="$dirPath >&2
+    echo "sourceName="$sourceName >&2
+    pattern=$(echo $sourceName | cut -d '.' -f 1)".*"
+    # cmd="for f in $(ls "$pattern") ; do  echo $(date -r "$f" +%s) $( wc -c "$f" | awk '{print $1}' ) $f;  done"
+    # cmd="ls -l"
+    # ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "cd ${dirPath}; ls; for f in $(ls $pattern) ; do  echo $(date -r "$f" +%s) $( wc -c "$f" | awk '{print $1}' ) $f;  done" > ${targetFile}
+
+    # the task here is is to get the file modification date, file size in bytes
+    # and file name for each file matching the pattern in the remote directory.
+    # ls -l cannot be used here because apart from the parsing problems the 
+    # modification date is not always complete. Using stat is not an option
+    # either since it can have different options on different unix systems
+    cmd=$(cat <<-END
+    cd ${dirPath}
+    for f in \$(ls $pattern) ; do 
+        echo \$(date -r "\$f" +%s) \$( wc -c "\$f" | awk '{print \$1}' ) \$f
+    done
+END
+)
+    echo "cmd="$cmd >&2
+
+    ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd}" > ${targetFile}
+fi

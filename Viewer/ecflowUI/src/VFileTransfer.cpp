@@ -25,7 +25,7 @@ static QMap<QProcess::ProcessError, QString> errorStr;
 
 #define UI_FILETRANSFER_DEBUG_
 
-VFileTransfer::VFileTransfer(QObject* parent) :
+VFileTransferCore::VFileTransferCore(QObject* parent) :
     QObject(parent),
     proc_(nullptr),
     ignoreSetX_(true),
@@ -41,21 +41,21 @@ VFileTransfer::VFileTransfer(QObject* parent) :
     }
 }
 
-bool VFileTransfer::isActive() const
+bool VFileTransferCore::isActive() const
 {
 //    UiLog().dbg() << "state=" << proc_->state();
     return (proc_ && proc_->state() != QProcess::NotRunning);
 }
 
-void VFileTransfer::transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal)
+void VFileTransferCore::transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal)
 {
     QString user, host;
     socksRemoteUserAndHost(user, host);
-    transfer(sourceFile,host,targetFile,byteMode,byteVal,user);
+    transfer(sourceFile,host,targetFile,user,byteMode,byteVal);
 }
 
-void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,ByteMode byteMode,
-                             size_t byteVal, QString remoteUid)
+void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetFile, QString remoteUid, ByteMode byteMode,
+                             size_t byteVal)
 {
     if(proc_)
     {
@@ -103,6 +103,9 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
     if(remoteUid.isEmpty() || remoteUid == "$USER")
        remoteUid = "__USER__";
 
+    QString command = buildCommand(sourceFile, targetFile, remoteUid, host, byteMode, byteVal);
+
+#if 0
     QString byteModeStr = "all";
     if (byteMode == BytesFromPos) {
         byteModeStr = "pos";
@@ -117,12 +120,14 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
             " -t " + " \'" + targetFile + "\' -j " + proxyJump +
             " -m " + byteModeStr + " -v " +  QString::number(byteVal);
 
+#endif
     UiLog().dbg() << "command=" << command;
 //    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +
 //            proxyJump +
 //            " " + byteModeStr +
 //            " " + QString::number(byteVal) +
 //            " " + remoteUid;
+
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     proc_->start("/bin/sh", QStringList() << "-c" << command);
@@ -138,7 +143,7 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
 #endif
 }
 
-void VFileTransfer::stopTransfer(bool broadcast)
+void VFileTransferCore::stopTransfer(bool broadcast)
 {
     if(proc_) {
         proc_->kill();
@@ -156,7 +161,7 @@ void VFileTransfer::stopTransfer(bool broadcast)
     }
 }
 
-void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatus)
+void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatus)
 {
 #ifdef UI_FILETRANSFER_DEBUG_
     UI_FUNCTION_LOG
@@ -211,7 +216,7 @@ void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatu
 
 // It is called when on MacOs with Qt6 and the process fails to start!
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-void VFileTransfer::slotErrorOccurred(QProcess::ProcessError e)
+void VFileTransferCore::slotErrorOccurred(QProcess::ProcessError e)
 {
 #ifdef UI_FILETRANSFER_DEBUG_
     UI_FUNCTION_LOG
@@ -222,7 +227,7 @@ void VFileTransfer::slotErrorOccurred(QProcess::ProcessError e)
 #endif
 
 
-void VFileTransfer::slotStdOutput()
+void VFileTransferCore::slotStdOutput()
 {
     if(!proc_)
         return;
@@ -230,7 +235,7 @@ void VFileTransfer::slotStdOutput()
     Q_EMIT stdOutputAvailable(proc_->readAllStandardOutput());
 }
 
-QString VFileTransfer::stdErr()
+QString VFileTransferCore::stdErr()
 {
     if(ignoreSetX_)
     {
@@ -247,7 +252,7 @@ QString VFileTransfer::stdErr()
     return QString(proc_->readAllStandardError());
 }
 
-QString VFileTransfer::buildSocksProxyJump()
+QString VFileTransferCore::buildSocksProxyJump()
 {
     QString s;
     if (VConfig::instance()->proxychainsUsed()) {
@@ -266,7 +271,7 @@ QString VFileTransfer::buildSocksProxyJump()
     return s;
 }
 
-void VFileTransfer::socksRemoteUserAndHost(QString& user, QString& host)
+void VFileTransferCore::socksRemoteUserAndHost(QString& user, QString& host)
 {
     user.clear();
     host.clear();
@@ -283,4 +288,35 @@ void VFileTransfer::socksRemoteUserAndHost(QString& user, QString& host)
             host = p2->valueAsString();
         }
     }
+}
+
+QString VFileTransfer::buildCommand(QString sourceFile, QString targetFile, QString remoteUid, QString host,
+                                    ByteMode byteMode, std::size_t byteVal) const
+{
+    QString byteModeStr = "all";
+    if (byteMode == BytesFromPos) {
+        byteModeStr = "pos";
+    } else if (byteMode == LastBytes) {
+        byteModeStr = "last";
+    }
+
+    QString proxyJump = buildSocksProxyJump();
+
+    QString command=scriptName_ + " -m file ";
+    command += "-s \'" + sourceFile + "\' -u " + remoteUid + " -h " + host +
+            " -t " + " \'" + targetFile + "\' -j " + proxyJump +
+            " -b " + byteModeStr + " -v " +  QString::number(byteVal);
+
+    return command;
+}
+
+QString VDirTransfer::buildCommand(QString sourceFile, QString targetFile, QString remoteUid, QString host, ByteMode /*byteMode*/, std::size_t /*byteVal*/) const
+{
+    QString proxyJump = buildSocksProxyJump();
+
+    QString command=scriptName_ + " -m dir ";
+    command += "-s \'" + sourceFile + "\' -u " + remoteUid + " -h " + host +
+            " -t " + " \'" + targetFile + "\' -j " + proxyJump;
+
+    return command;
 }

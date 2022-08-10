@@ -14,15 +14,15 @@
 #include <QDateTime>
 #include <QProcess>
 
-class VFileTransfer : public QObject
+class VFileTransferCore : public QObject
 {
     Q_OBJECT
 
 public:
     enum ByteMode {AllBytes, BytesFromPos, LastBytes};
-    VFileTransfer(QObject* parent=nullptr);
-    void transfer(QString sourceFile,QString host,QString targetFile,ByteMode byteMode, size_t byteVal, QString remoteUid={});
-    void transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal);
+    VFileTransferCore(QObject* parent=nullptr);
+    void transfer(QString sourceFile,QString host,QString targetFile,QString remoteUid, ByteMode byteMode, size_t byteVal);
+    void transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode=AllBytes, size_t byteVal=0);
 
     void stopTransfer(bool broadcast);
     bool isActive() const;
@@ -40,6 +40,8 @@ Q_SIGNALS:
     void stdOutputAvailable(QString);
 
 protected:
+    virtual QString buildCommand(QString sourceFile, QString targetFile ,QString remoteUid, QString host,
+                                        ByteMode byteMode, std::size_t byteVal) const = 0;
     QString stdErr();
     static QString buildSocksProxyJump();
     static void socksRemoteUserAndHost(QString& user, QString& host);
@@ -49,5 +51,25 @@ protected:
     bool ignoreSetX_;
     QString scriptName_;
 };
+
+
+class VFileTransfer: public VFileTransferCore
+{
+public:
+    using  VFileTransferCore::VFileTransferCore;
+protected:
+    QString buildCommand(QString sourceFile, QString targetFile ,QString remoteUid, QString host,
+                                        ByteMode byteMode, std::size_t byteVal) const override;
+};
+
+class VDirTransfer: public VFileTransferCore
+{
+public:
+    using  VFileTransferCore::VFileTransferCore;
+protected:
+    QString buildCommand(QString sourceFile, QString targetFile ,QString remoteUid, QString host,
+                                        ByteMode byteMode, std::size_t byteVal) const override;
+};
+
 
 #endif // VFILETRANSFER_HPP

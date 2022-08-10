@@ -15,11 +15,15 @@
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
+#include "VFileTransfer.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <memory>
+
+#include <QFile>
 
 #define UI_OUTPUTDIRPROVIDER_DEBUG__
 #define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
@@ -38,58 +42,6 @@ void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::stri
     runCondition_ = cond;
 }
 
-//=================================
-//
-// OutputFileFetchLocalTask
-//
-//=================================
-OutputDirFetchLocalTask::OutputDirFetchLocalTask(OutputDirProvider *owner) :
-    OutputDirFetchTask("DirFetchLocal", owner) {}
-
-// try to read the logfile from the disk (if the settings allow it)
-void OutputDirFetchLocalTask::run()
-{
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
-    UI_FN_DBG
-#endif
-    VDir_ptr res;
-
-    boost::filesystem::path p(filePath_);
-
-    //Is it a directory?
-    boost::system::error_code errorCode;
-    if (boost::filesystem::is_directory(p,errorCode)) {
-        fail();
-        return;
-    }
-
-    auto reply = owner_->reply_;
-    try {
-        if(boost::filesystem::exists(p.parent_path())) {
-            std::string dirName=p.parent_path().string();
-            //if(info_ && info_->isNode() && info_->node())
-            if (node_) {
-                std::string nodeName=node_->strName();
-                std::string pattern=nodeName+".";
-                res=std::make_shared<VDir>(dirName,pattern);
-                res->setFetchDate(QDateTime::currentDateTime());
-                res->setFetchMode(VDir::LocalFetchMode);
-                res->setFetchModeStr("from disk");
-
-                reply->appendDirectory(res);
-                succeed();
-                return;
-            }
-        }
-        reply->appendErrorText("No access to path on disk!");
-    } catch (const boost::filesystem::filesystem_error& e) {
-        reply->appendErrorText("No access to path on disk! error: " + std::string(e.what()));
-        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
-        fail();
-    }
-
-    finish();
-}
 
 //=================================
 //
@@ -250,6 +202,199 @@ void OutputDirFetchRemoteTask::clientError(QString msg)
     fail();
 }
 
+//=================================
+//
+// OutputFileFetchLocalTask
+//
+//=================================
+OutputDirFetchLocalTask::OutputDirFetchLocalTask(OutputDirProvider *owner) :
+    OutputDirFetchTask("DirFetchLocal", owner) {}
+
+// try to read the logfile from the disk (if the settings allow it)
+void OutputDirFetchLocalTask::run()
+{
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
+    VDir_ptr res;
+
+    boost::filesystem::path p(filePath_);
+
+    //Is it a directory?
+    boost::system::error_code errorCode;
+    if (boost::filesystem::is_directory(p,errorCode)) {
+        fail();
+        return;
+    }
+
+    auto reply = owner_->reply_;
+    try {
+        if(boost::filesystem::exists(p.parent_path())) {
+            std::string dirName=p.parent_path().string();
+            //if(info_ && info_->isNode() && info_->node())
+            if (node_) {
+                std::string nodeName=node_->strName();
+                std::string pattern=nodeName+".";
+                res=std::make_shared<VDir>(dirName,pattern);
+                res->setFetchDate(QDateTime::currentDateTime());
+                res->setFetchMode(VDir::LocalFetchMode);
+                res->setFetchModeStr("from disk");
+
+                reply->appendDirectory(res);
+                succeed();
+                return;
+            }
+        }
+        reply->appendErrorText("No access to path on disk!");
+    } catch (const boost::filesystem::filesystem_error& e) {
+        reply->appendErrorText("No access to path on disk! error: " + std::string(e.what()));
+        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
+        fail();
+    }
+
+    finish();
+}
+
+//=================================
+//
+// OutputDirFetchTransferTask
+//
+//=================================
+
+OutputDirFetchTransferTask::OutputDirFetchTransferTask(OutputDirProvider* owner) :
+     QObject(nullptr), OutputDirFetchTask("DirFetchTransfer", owner)
+{
+}
+
+OutputDirFetchTransferTask::~OutputDirFetchTransferTask()
+{
+}
+
+void OutputDirFetchTransferTask::stopTransfer()
+{
+    if (transfer_) {
+        dir_.reset();
+        resFile_.reset();
+        transfer_->stopTransfer(false);
+     }
+}
+
+void OutputDirFetchTransferTask::stop()
+{
+    stopTransfer();
+    OutputDirFetchTask::clear();
+}
+
+void OutputDirFetchTransferTask::clear()
+{
+    stopTransfer();
+    OutputDirFetchTask::clear();
+}
+
+//Create an output client (to access the logserver) and ask it to the fetch the
+//file asynchronously. The output client will call clientFinished() or
+//clientError eventually!!
+void OutputDirFetchTransferTask::run()
+{
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
+#endif
+
+    assert(node_);
+    assert(VConfig::instance()->proxychainsUsed());
+
+    dir_.reset();
+    resFile_.reset();
+    resFile_ = VFile::createTmpFile(true);
+
+    if (!transfer_) {
+        transfer_ = new VDirTransfer(this);
+
+        connect(transfer_, SIGNAL(transferFinished()),
+                this, SLOT(transferFinished()));
+
+        connect(transfer_, SIGNAL(transferFailed(QString)),
+                this, SLOT(transferFailed(QString)));
+    }
+
+    Q_ASSERT(transfer_);
+    transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                       QString::fromStdString(resFile_->path()));
+
+    owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> via scp", 0);
+}
+
+void OutputDirFetchTransferTask::transferFinished()
+{
+    auto reply = owner_->reply_;
+    reply->setInfoText("");
+    reply->fileReadMode(VReply::TransferReadMode);
+
+    QFile f(QString::fromStdString(resFile_->path()));
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    boost::filesystem::path fp(filePath_);
+    std::string dirName=fp.parent_path().string();
+    dir_=std::make_shared<VDir>(dirName);
+
+    //QString s = f.readAll();
+    //UiLog().dbg() << UI_FN_INFO << "s=" <<s;
+    f.readLine();
+    while (!f.atEnd()) {
+        QByteArray line = f.readLine();
+        parseLine(line);
+    }
+
+    dir_->setFetchMode(VDir::TransferFetchMode);
+    std::string method="transferred via scp";
+    dir_->setFetchModeStr(method);
+    dir_->setFetchDate(QDateTime::currentDateTime());
+
+    owner_->reply_->appendDirectory(dir_);
+
+    resFile_.reset();
+    dir_.reset();
+
+    succeed();
+}
+
+void OutputDirFetchTransferTask::transferProgress(QString msg,int value)
+{
+    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
+
+    owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
+
+    //reply_->setInfoText(msg.toStdString());
+    //owner_->infoProgress(reply_);
+    //reply_->setInfoText("");
+}
+
+void OutputDirFetchTransferTask::transferFailed(QString msg)
+{
+    auto reply = owner_->reply_;
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
+#endif
+    reply->addLog("TRY> fetch via scp : FAILED");
+    reply->appendErrorText("Failed to fetch via scp\n");
+    resFile_.reset();
+    fail();
+}
+
+void OutputDirFetchTransferTask::parseLine(QString line)
+{
+    assert(dir_);
+    auto lst = line.split(" ");
+    if (lst.count()>=3) {
+        size_t mTime = lst[0].toUInt();
+        int fSize = lst[1].toInt();
+        QString fName = line.mid(lst[0].count()+1+lst[1].count()+1);
+        UiLog().dbg() << UI_FN_INFO << fName << " " << fSize << " " << mTime;
+        dir_->addItem(fName.toStdString(),fSize,mTime);
+    }
+}
+
 
 //=================================
 //
@@ -265,8 +410,10 @@ OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
     // these are persistent fetch tasks. We add them to the queue on demand
     fetchTask_[LocalTask1] = new OutputDirFetchLocalTask(this);
     fetchTask_[RemoteTask1] = new OutputDirFetchRemoteTask(this);
+    fetchTask_[TransferTask1] = new OutputDirFetchTransferTask(this);
     fetchTask_[LocalTask2] = new OutputDirFetchLocalTask(this);
     fetchTask_[RemoteTask2] = new OutputDirFetchRemoteTask(this);
+    fetchTask_[TransferTask2] = new OutputDirFetchTransferTask(this);
 }
 
 OutputDirProvider::~OutputDirProvider()
@@ -321,7 +468,11 @@ void OutputDirProvider::visit(VInfoNode* info)
     t->reset(server,n,joboutFile);
     fetchQueue_->add(t);
 
-    t = fetchTask_[LocalTask1];
+    if (VConfig::instance()->proxychainsUsed()) {
+        t = fetchTask_[TransferTask1];
+    } else {
+        t = fetchTask_[LocalTask1];
+    }
     t->reset(server,n,joboutFile);
     if(server->readFromDisk()) {
         fetchQueue_->add(t);
@@ -338,7 +489,11 @@ void OutputDirProvider::visit(VInfoNode* info)
         t->reset(server,n,jobFile);
         fetchQueue_->add(t);
 
-        t = fetchTask_[LocalTask2];
+        if (VConfig::instance()->proxychainsUsed()) {
+            t = fetchTask_[TransferTask2];
+        } else {
+            t = fetchTask_[LocalTask2];
+        }
         t->reset(server,n,jobFile);
         if(server->readFromDisk()) {
             fetchQueue_->add(t);
