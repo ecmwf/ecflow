@@ -321,7 +321,7 @@ void OutputDirFetchTransferTask::run()
     transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
                        QString::fromStdString(resFile_->path()));
 
-    owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> via scp", 0);
+
 }
 
 void OutputDirFetchTransferTask::transferFinished()
@@ -338,16 +338,16 @@ void OutputDirFetchTransferTask::transferFinished()
     std::string dirName=fp.parent_path().string();
     dir_=std::make_shared<VDir>(dirName);
 
-    //QString s = f.readAll();
-    //UiLog().dbg() << UI_FN_INFO << "s=" <<s;
-    f.readLine();
     while (!f.atEnd()) {
         QByteArray line = f.readLine();
         parseLine(line);
     }
 
     dir_->setFetchMode(VDir::TransferFetchMode);
-    std::string method="transferred via scp";
+    std::string method="via ssh";
+    if (transfer_) {
+        method = "from " + transfer_->remoteUserAndHost().toStdString() + " " + method;
+    }
     dir_->setFetchModeStr(method);
     dir_->setFetchDate(QDateTime::currentDateTime());
 
@@ -376,8 +376,8 @@ void OutputDirFetchTransferTask::transferFailed(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLog("TRY> fetch via scp : FAILED");
-    reply->appendErrorText("Failed to fetch via scp\n");
+    reply->addLog("TRY> fetch via ssh : FAILED");
+    reply->appendErrorText("Failed to fetch via ssh\n");
     resFile_.reset();
     fail();
 }
@@ -385,6 +385,7 @@ void OutputDirFetchTransferTask::transferFailed(QString msg)
 void OutputDirFetchTransferTask::parseLine(QString line)
 {
     assert(dir_);
+    line = line.trimmed();
     auto lst = line.split(" ");
     if (lst.count()>=3) {
         size_t mTime = lst[0].toUInt();

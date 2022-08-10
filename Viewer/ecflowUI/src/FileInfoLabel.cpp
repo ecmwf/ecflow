@@ -172,7 +172,7 @@ void FileInfoLabel::update(VReply* reply, VFile_ptr file, QString extraText)
         }
 	}
 
-	else if(reply->fileReadMode() == VReply::LogServerReadMode)
+    else if(reply->fileReadMode() == VReply::LogServerReadMode || reply->fileReadMode() == VReply::TransferReadMode)
 	{
         if(file)
         {
@@ -218,7 +218,7 @@ void FileInfoLabel::update(VReply* reply, VFile_ptr file, QString extraText)
                 }
             }
         }
-	}
+    }
 
 	ttText=s;
 	labelText += ttText;

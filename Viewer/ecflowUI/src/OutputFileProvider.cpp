@@ -413,8 +413,13 @@ void OutputFileFetchTransferTask::transferFinished()
 
     resFile_->setFetchMode(VFile::TransferFetchMode);
     resFile_->setLog(reply->log());
-//    std::string method="served by " + client_->longName();
-//    tmp->setFetchModeStr(method);
+    std::string method="via ssh";
+    if (transfer_) {
+        method = "from " + transfer_->remoteUserAndHost().toStdString() + " " + method;
+    }
+
+    resFile_->setFetchModeStr(method);
+    resFile_->setFetchDate(QDateTime::currentDateTime());
 
     reply->tmpFile(resFile_);
     resFile_.reset();

@@ -26,6 +26,7 @@ public:
 
     void stopTransfer(bool broadcast);
     bool isActive() const;
+    QString remoteUserAndHost() const {return remoteUserAndHost_;}
 
 protected Q_SLOTS:
     void slotProcFinished(int,QProcess::ExitStatus);
@@ -50,6 +51,7 @@ protected:
     QString targetFile_;
     bool ignoreSetX_;
     QString scriptName_;
+    QString remoteUserAndHost_;
 };
 
 

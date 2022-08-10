@@ -153,7 +153,15 @@ else
     done
 END
 )
-    echo "cmd="$cmd >&2
+#     echo "cmd="$cmd >&2
+
+#     cmd1=$(cat <<-END
+#     cd ${dirPath}
+#     ls
+# END
+# )
+#     echo "cmd1="$cmd1 >&2
+#     ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd1}" >&2
 
     ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd}" > ${targetFile}
 fi

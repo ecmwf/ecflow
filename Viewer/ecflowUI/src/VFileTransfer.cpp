@@ -103,24 +103,10 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
     if(remoteUid.isEmpty() || remoteUid == "$USER")
        remoteUid = "__USER__";
 
+    remoteUserAndHost_ = remoteUid + "@" + host;
+
     QString command = buildCommand(sourceFile, targetFile, remoteUid, host, byteMode, byteVal);
 
-#if 0
-    QString byteModeStr = "all";
-    if (byteMode == BytesFromPos) {
-        byteModeStr = "pos";
-    } else if (byteMode == LastBytes) {
-        byteModeStr = "last";
-    }
-
-    QString proxyJump = buildSocksProxyJump();
-
-    QString command=scriptName_ + " ";
-    command += "-s \'" + sourceFile + "\' -u " + remoteUid + " -h " + host +
-            " -t " + " \'" + targetFile + "\' -j " + proxyJump +
-            " -m " + byteModeStr + " -v " +  QString::number(byteVal);
-
-#endif
     UiLog().dbg() << "command=" << command;
 //    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +
 //            proxyJump +
