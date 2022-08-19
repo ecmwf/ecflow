@@ -214,6 +214,7 @@ void OutputItemWidget::reload(VInfo_ptr info)
 	}
 }
 
+
 //Get information (description) about the current selection in the dir list
 bool OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const
 {
@@ -466,10 +467,14 @@ void OutputItemWidget::infoReady(VReply* reply)
             updateDirTimer_->start();
         }        
         //Update the selection in the dir list according to the file
-        if(f)
-        {          
-            setCurrentInDir(f->sourcePath(),f->fetchMode());
-        }
+        ignoreOutputSelection_=true;
+        setCurrentInDirs();
+        ignoreOutputSelection_=false;
+
+//        if(f)
+//        {
+//            setCurrentInDir(f->sourcePath(),f->fetchMode());
+//        }
 #if 0
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
             info_ && !info_->server()->isLocalHost())
@@ -550,10 +555,15 @@ void OutputItemWidget::infoFailed(VReply* reply)
     //Directories
     else
     {
+        bool hadDirs = !dirModel_->isEmpty();
+
         //We do not have directories
         enableDir(false);
 
-        displayDirErrors(reply->errorTextVec());
+        //  Only displays the error message when there was a contents previously
+        //if (hadDirs) {
+            displayDirErrors(reply->errorTextVec());
+        //}
 
         dirReloadTb_->setEnabled(true);
 
@@ -580,34 +590,46 @@ void OutputItemWidget::on_dirReloadTb__clicked()
     updateDir(false);  // get the directory listing
 }
 
-void OutputItemWidget::setCurrentInDir(const std::string& fullName,VFile::FetchMode fetchMode)
+// set the current item in the directory list based on the contents of the browser. If no mathing
+// dir items found the current index is not set. This relies on the sourcePath in the current file
+// objects so it has to be propely set!!
+void OutputItemWidget::setCurrentInDirs()
 {
-    if(!dirModel_->isEmpty())
-    {
-        //Try to preserve the selection
-        ignoreOutputSelection_=true;
+    if(!dirModel_->isEmpty()) {
 
-        VDir::FetchMode fm=VDir::NoFetchMode;
-        switch(fetchMode)
-        {
-        case VFile::LocalFetchMode:
-            fm=VDir::LocalFetchMode;
-            break;
-        case VFile::ServerFetchMode:
-            fm=VDir::ServerFetchMode;
-            break;
-        case VFile::LogServerFetchMode:
-            fm=VDir::LogServerFetchMode;
-            break;
-        default:
-            break;
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+        UiLog().dbg() << UI_FN_INFO;
+#endif
+        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+        std::string jobOutFileName = op->joboutFileName();
+        VFile_ptr file = browser_->file();
+        QModelIndex idx;
+
+        if (file) {
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+            UiLog().dbg() << " sourcePath=" << file->sourcePath();
+#endif
+            if (file->sourcePath() == jobOutFileName) {
+                idx = dirModel_->itemToIndex(file->sourcePath());
+            } else {
+                VDir::FetchMode mode=VDir::NoFetchMode;
+                if (file->fetchMode() == VFile::LocalFetchMode) {
+                    mode = VDir::LocalFetchMode;
+                } else if (file->fetchMode() == VFile::LogServerFetchMode) {
+                    mode = VDir::LogServerFetchMode;
+                } else if (file->fetchMode() == VFile::TransferFetchMode) {
+                    mode = VDir::TransferFetchMode;
+                }
+                idx = dirModel_->itemToIndex(file->sourcePath(), mode);
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+                UiLog().dbg() << " idx=" << idx <<  " mode=" << mode;
+#endif
+            }
         }
 
-        QModelIndex idx=dirModel_->itemToIndex(fullName,fm);
-        if(idx.isValid())
+        if (idx.isValid()) {
             dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
-
-        ignoreOutputSelection_=false;
+        }
     }
 }
 
@@ -631,10 +653,6 @@ void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartT
         auto* op=static_cast<OutputFileProvider*>(infoProvider_);
         op->setDirectories(dirs);
 
-        std::string fullName;
-        VDir::FetchMode fetchMode;
-        currentDesc(fullName,fetchMode);
-
 		dirView_->selectionModel()->clearSelection();
         dirModel_->resetData(dirs,op->joboutFileName());
         //dirWidget_->show();
@@ -653,19 +671,9 @@ void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartT
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg() << UI_FN_INFO << "dir item count=" << dirModel_->rowCount();
 #endif
-		//Try to preserve the selection
+        //Update the selection
 		ignoreOutputSelection_=true;
-        QModelIndex idx;
-        auto currentFile = browser_->file();
-        if (fullName.empty()) {
-            auto
-            browser_->loadFile(f);
-            idx=dirModel_->itemToIndex(fullName,fetchMode);
-        } else {
-        QModelIndex idx=dirModel_->itemToIndex(fullName,fetchMode);
-        if(idx.isValid())
-            dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
-
+        setCurrentInDirs();
         ignoreOutputSelection_=false;
 	}
 	else
@@ -761,6 +769,7 @@ void OutputItemWidget::searchOnReload()
 //This slot is called when a file item is selected in the dir view
 void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 {
+    UiLog().dbg() << UI_FN_INFO;
 	if(!ignoreOutputSelection_)
         getCurrentFile(false);
 }

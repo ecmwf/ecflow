@@ -416,6 +416,7 @@ void OutputFileFetchTransferTask::transferFinished()
         reply->addLog("TRY> fetch file via scp : OK");
     }
 
+    resFile_->setSourcePath(filePath_);
     resFile_->setDeltaContents(deltaPos_>0);
     resFile_->setFetchMode(VFile::TransferFetchMode);
     resFile_->setLog(reply->log());

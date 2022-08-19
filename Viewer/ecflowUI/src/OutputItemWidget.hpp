@@ -68,7 +68,6 @@ protected Q_SLOTS:
     void slotWordWrapSupportChanged(bool);
 
 protected:
-    void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
     void updateDir(bool);
     void updateDir(const std::vector<VDir_ptr>&,bool);
 	void enableDir(bool);
@@ -76,6 +75,7 @@ protected:
 	void searchOnReload();
     void getCurrentFile(bool doReload);
 	void getLatestFile();
+    void setCurrentInDirs();
     bool currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const;
     void updateHistoryLabel(const std::vector<std::string>&);
     void displayDirErrors(const std::vector<std::string>& errorVec);
