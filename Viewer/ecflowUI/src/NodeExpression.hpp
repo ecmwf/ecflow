@@ -440,11 +440,33 @@ public:
     std::string print() override;
 };
 
+class IsoDateGreaterThanCondition : public BaseNodeCondition
+{
+public:
+    IsoDateGreaterThanCondition() = default;
+    ~IsoDateGreaterThanCondition() override = default;
+
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override;
+};
+
 class IsoDateLessThanEqualCondition : public BaseNodeCondition
 {
 public:
     IsoDateLessThanEqualCondition() = default;
     ~IsoDateLessThanEqualCondition() override = default;
+
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override;
+};
+
+class IsoDateLessThanCondition : public BaseNodeCondition
+{
+public:
+    IsoDateLessThanCondition() = default;
+    ~IsoDateLessThanCondition() override = default;
 
     bool execute(VItem *node) override;
     int  numOperands() override {return 2;}

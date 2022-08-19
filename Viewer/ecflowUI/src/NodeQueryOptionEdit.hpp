@@ -128,8 +128,8 @@ protected:
 protected Q_SLOTS:
     void updateOptions();
     void modeChanged(int);
-    void lastValueChanged(int);
-    void lastUnitsChanged(int);
+    void periodValueChanged(int);
+    void periodUnitsChanged(int);
     void slotFromChanged(QDateTime);
     void slotToChanged(QDateTime);
 
@@ -137,8 +137,8 @@ private:
     NodeQueryPeriodOption* option_;
     QLabel* label_;
     QComboBox* modeCb_;
-    QSpinBox* lastValueSpin_;
-    QComboBox* lastUnitsCb_;
+    QSpinBox* valueSpin_;
+    QComboBox* unitsCb_;
     QDateTimeEdit* periodFromDe_;
     QDateTimeEdit* periodToDe_;
     QWidget* holder_;

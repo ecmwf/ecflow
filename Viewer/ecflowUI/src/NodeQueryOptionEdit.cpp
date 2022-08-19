@@ -286,6 +286,7 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGr
     modeCb_->addItem("any time","any");
     modeCb_->addItem("in the last","last");
     modeCb_->addItem("in period","period");
+    modeCb_->addItem("older than","older");
 
     connect(modeCb_,SIGNAL(currentIndexChanged(int)),
              this,SLOT(modeChanged(int)));
@@ -294,25 +295,25 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGr
     auto* hb=new QHBoxLayout(holder_);
     hb->setContentsMargins(0,0,0,0);
 
-    //last period     
-    lastValueSpin_=new QSpinBox(holder_);
-    lastValueSpin_->setRange(1,100000);
-    hb->addWidget(lastValueSpin_);
+    //last/older period
+    valueSpin_=new QSpinBox(holder_);
+    valueSpin_->setRange(1,100000);
+    hb->addWidget(valueSpin_);
 
-    lastUnitsCb_=new QComboBox(holder_);
-    lastUnitsCb_->addItem(tr("minutes"),"minute");
-    lastUnitsCb_->addItem(tr("hours"),"hour");
-    lastUnitsCb_->addItem(tr("days"),"day");
-    lastUnitsCb_->addItem(tr("weeks"),"week");
-    lastUnitsCb_->addItem(tr("months"),"month");
-    lastUnitsCb_->addItem(tr("years"),"year");
-    hb->addWidget(lastUnitsCb_);
+    unitsCb_=new QComboBox(holder_);
+    unitsCb_->addItem(tr("minutes"),"minute");
+    unitsCb_->addItem(tr("hours"),"hour");
+    unitsCb_->addItem(tr("days"),"day");
+    unitsCb_->addItem(tr("weeks"),"week");
+    unitsCb_->addItem(tr("months"),"month");
+    unitsCb_->addItem(tr("years"),"year");
+    hb->addWidget(unitsCb_);
 
-    connect(lastValueSpin_,SIGNAL(valueChanged(int)),
-            this,SLOT(lastValueChanged(int)));
+    connect(valueSpin_,SIGNAL(valueChanged(int)),
+            this,SLOT(periodValueChanged(int)));
 
-    connect(lastUnitsCb_,SIGNAL(currentIndexChanged(int)),
-            this,SLOT(lastUnitsChanged(int)));
+    connect(unitsCb_,SIGNAL(currentIndexChanged(int)),
+            this,SLOT(periodUnitsChanged(int)));
 
     //Period: from-to   
     periodFromDe_=new QDateTimeEdit(holder_);
@@ -343,7 +344,7 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGr
 
     //Init
     modeCb_->setCurrentIndex(0);
-    lastUnitsCb_->setCurrentIndex(1); //minutes
+    unitsCb_->setCurrentIndex(1); //minutes
 
     init(option);
     Q_ASSERT(option_);
@@ -362,8 +363,14 @@ void NodeQueryPeriodOptionEdit::init(NodeQueryOption* option)
     if(option_->mode() == NodeQueryPeriodOption::LastPeriodMode)
     {
         modeCb_->setCurrentIndex(1);
-        lastValueSpin_->setValue(option_->lastPeriod());
-        ViewerUtil::initComboBoxByData(option_->lastPeriodUnits(),lastUnitsCb_);
+        valueSpin_->setValue(option_->period());
+        ViewerUtil::initComboBoxByData(option_->periodUnits(),unitsCb_);
+    }
+    else if(option_->mode() == NodeQueryPeriodOption::OlderPeriodMode)
+    {
+        modeCb_->setCurrentIndex(3);
+        valueSpin_->setValue(option_->period());
+        ViewerUtil::initComboBoxByData(option_->periodUnits(),unitsCb_);
     }
     else if(option_->mode() == NodeQueryPeriodOption::FixedPeriodMode)
     {
@@ -394,19 +401,19 @@ void NodeQueryPeriodOptionEdit::modeChanged(int)
     }
 
     QString mode=modeCb_->itemData(idx).toString();
-    if(mode == "last")
+    if(mode == "last" || mode == "older")
     {
         holder_->show();
-        lastValueSpin_->show();
-        lastUnitsCb_->show();
+        valueSpin_->show();
+        unitsCb_->show();
         periodFromDe_->hide();
         periodToDe_->hide();
     }
     else if(mode == "period")
     {
         holder_->show();
-        lastValueSpin_->hide();
-        lastUnitsCb_->hide();
+        valueSpin_->hide();
+        unitsCb_->hide();
         periodFromDe_->show();
         periodToDe_->show();
     }
@@ -418,12 +425,12 @@ void NodeQueryPeriodOptionEdit::modeChanged(int)
     updateOptions();
 }
 
-void NodeQueryPeriodOptionEdit::lastValueChanged(int)
+void NodeQueryPeriodOptionEdit::periodValueChanged(int)
 {
     updateOptions();
 }
 
-void NodeQueryPeriodOptionEdit::lastUnitsChanged(int)
+void NodeQueryPeriodOptionEdit::periodUnitsChanged(int)
 {
     updateOptions();
 }
@@ -452,18 +459,22 @@ void NodeQueryPeriodOptionEdit::updateOptions()
         }
         QString mode=modeCb_->itemData(modeIdx).toString();
 
-        //last period
-        if(mode == "last")
+        //last/older period
+        if(mode == "last" || mode == "older")
         {
-            int val=lastValueSpin_->value();
-            int idx=lastUnitsCb_->currentIndex();
+            int val=valueSpin_->value();
+            int idx=unitsCb_->currentIndex();
             QString units;
             if(idx > -1)
-                units=lastUnitsCb_->itemData(idx).toString();
+                units=unitsCb_->itemData(idx).toString();
             else
                 val=-1;
 
-            option_->setLastPeriod(val,units);
+            if (mode == "last") {
+                option_->setLastPeriod(val,units);
+            } else {
+                option_->setOlderPeriod(val,units);
+            }
         }
 
         //fixed period

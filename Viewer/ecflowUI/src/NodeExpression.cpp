@@ -405,9 +405,25 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 }
 
                 //iso date operator
+                else if (*i_ == "date::<")
+                {
+                    auto *dateCond = new IsoDateLessThanCondition();
+                    funcStack.push_back(dateCond);
+                    result = dateCond;
+                }
+
+                //iso date operator
                 else if (*i_ == "date::>=")
                 {
                     auto *dateCond = new IsoDateGreaterThanEqualCondition();
+                    funcStack.push_back(dateCond);
+                    result = dateCond;
+                }
+
+                //iso date operator
+                else if (*i_ == "date::>")
+                {
+                    auto *dateCond = new IsoDateGreaterThanCondition();
                     funcStack.push_back(dateCond);
                     result = dateCond;
                 }
@@ -1145,6 +1161,35 @@ std::string IsoDateGreaterThanEqualCondition::print()
 
 //==========================================
 //
+// ISO date greater than condition
+//
+//==========================================
+
+bool IsoDateGreaterThanCondition::execute(VItem *node)
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    auto* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
+    auto* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
+    Q_ASSERT(leftOperand);
+    Q_ASSERT(rightOperand);
+
+    return leftOperand->secsSinceEpoch(node) > rightOperand->secsSinceEpoch(node);
+}
+
+std::string IsoDateGreaterThanCondition::print()
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    return operands_[1]->print() + " > " + operands_[0]->print();
+}
+
+//==========================================
+//
 // ISO date less than equal condition
 //
 //==========================================
@@ -1170,4 +1215,33 @@ std::string IsoDateLessThanEqualCondition::print()
     Q_ASSERT(operands_[1]);
     //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
     return operands_[1]->print() + " <= " + operands_[0]->print();
+}
+
+//==========================================
+//
+// ISO date less than condition
+//
+//==========================================
+
+bool IsoDateLessThanCondition::execute(VItem *node)
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    auto* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
+    auto* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
+    Q_ASSERT(leftOperand);
+    Q_ASSERT(rightOperand);
+
+    return leftOperand->secsSinceEpoch(node) < rightOperand->secsSinceEpoch(node);
+}
+
+std::string IsoDateLessThanCondition::print()
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    return operands_[1]->print() + " < " + operands_[0]->print();
 }

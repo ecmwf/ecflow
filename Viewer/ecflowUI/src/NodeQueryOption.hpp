@@ -153,25 +153,27 @@ public:
     QString sqlQuery() const override;
     void load(VSettings*) override;
     void save(VSettings*) override;
-
     void clear();
-    void setLastPeriod(int lastPeriod,QString lastPeriodUnits);
-    void setPeriod(QDateTime,QDateTime);
 
-    enum Mode {LastPeriodMode,FixedPeriodMode,NoMode};
+    enum Mode {LastPeriodMode,FixedPeriodMode,OlderPeriodMode,NoMode};
     Mode mode() const {return mode_;}
-    int lastPeriod() const {return lastPeriod_;}
-    QString lastPeriodUnits() const {return lastPeriodUnits_;}
+    void setLastPeriod(int period,QString periodUnits);
+    void setOlderPeriod(int period,QString periodUnits);
+    void setPeriod(QDateTime,QDateTime);
+    int period() const {return period_;}
+    QString periodUnits() const {return periodUnits_;}
     QDateTime fromDate() const {return fromDate_;}
     QDateTime toDate() const {return toDate_;}
     QString valueAsString() const override {return QString();}
 
 protected:
-    Mode mode_;
+    void setPeriod(Mode mode, int period,QString periodUnits);
+
+    Mode mode_{NoMode};
     QDateTime fromDate_;
     QDateTime toDate_;
-    int lastPeriod_;
-    QString lastPeriodUnits_;
+    int period_{-1};
+    QString periodUnits_;
 };
 
 #endif // NODEQUERYOPTION_HPP
