@@ -303,7 +303,7 @@ void OutputItemWidget::getCurrentFile(bool doReload)
                op->fetchFile(fullName,fetchMode, deltaPos, useCache);
              }
             // get the directory listing
-            updateDir(false);
+            //updateDir(false);
         }
 	}
 }
@@ -655,6 +655,13 @@ void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartT
 #endif
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
+        QModelIndex idx;
+        auto currentFile = browser_->file();
+        if (fullName.empty()) {
+            auto
+            browser_->loadFile(f);
+            idx=dirModel_->itemToIndex(fullName,fetchMode);
+        } else {
         QModelIndex idx=dirModel_->itemToIndex(fullName,fetchMode);
         if(idx.isValid())
             dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));

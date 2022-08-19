@@ -47,6 +47,14 @@ bool VFileTransferCore::isActive() const
     return (proc_ && proc_->state() != QProcess::NotRunning);
 }
 
+void VFileTransferCore::clear()
+{
+    remoteUserAndHost_.clear();
+    targetFile_.clear();
+    byteMode_=AllBytes;
+    byteVal_=0;
+}
+
 void VFileTransferCore::transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal)
 {
     QString user, host;
@@ -57,6 +65,7 @@ void VFileTransferCore::transferLocalViaSocks(QString sourceFile, QString target
 void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetFile, QString remoteUid, ByteMode byteMode,
                              size_t byteVal)
 {
+    clear();
     if(proc_)
     {
         proc_->disconnect(this);
@@ -85,6 +94,8 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
     Q_ASSERT(proc_->state() == QProcess::NotRunning);
 
     targetFile_=targetFile;
+    byteMode_ = byteMode;
+    byteVal_ = byteVal;
 
     //If there is an exe dir we check if it is added to the PATH env
     //variable.
@@ -108,19 +119,12 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
     QString command = buildCommand(sourceFile, targetFile, remoteUid, host, byteMode, byteVal);
 
     UiLog().dbg() << "command=" << command;
-//    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +
-//            proxyJump +
-//            " " + byteModeStr +
-//            " " + QString::number(byteVal) +
-//            " " + remoteUid;
-
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     proc_->start("/bin/sh", QStringList() << "-c" << command);
 #else
     proc_->start("/bin/sh -c \"" + command + "\"");
 #endif
-
 
 #ifdef UI_FILETRANSFER_DEBUG_
     UiLog().dbg() << "exeDir=" << exeDir;
@@ -144,6 +148,7 @@ void VFileTransferCore::stopTransfer(bool broadcast)
                 proc_=nullptr;
             }
         }
+        clear();
     }
 }
 
@@ -180,7 +185,7 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     if(exitCode == 0 && exitStatus == QProcess::NormalExit)
     {
         QFileInfo fi(targetFile_);
-        if(fi.exists() && fi.size() >0)
+        if((fi.exists() && fi.size() >0) || (byteMode_ != AllBytes && byteVal_ != 0))
         {
             Q_EMIT transferFinished();
             return;

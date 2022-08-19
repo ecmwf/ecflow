@@ -113,12 +113,24 @@ if [[ $remoteUid == "__USER__" ]]  ; then
     remoteUid=${USER}
 fi
 
+# fetching a file
 if [[ $mode == "file" ]] ; then
     # transfer the whole file
     if [[ $byteMode == "all" ]] ; then
         #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
         echo "scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}" >&2
         scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}
+
+    # tranfers from a given byte offset
+    elif  [[ $byteMode == "pos" ]] ; then
+        cmd=$(cat <<-END
+            tail -c +$((${byteValue}+1)) ${sourceFile}
+END
+)       
+        echo "cmd="$cmd >&2
+        ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd}" > ${targetFile}
+        st=$?
+        echo "status="$st >&2
 
     #transfer the last bytes of the file
     else
@@ -131,37 +143,29 @@ if [[ $mode == "file" ]] ; then
             ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
         fi
     fi
+# fetching directory listing
 else
     dirPath=$(dirname ${sourceFile})
     sourceName=$(basename ${sourceFile})
     echo "dirPath="$dirPath >&2
     echo "sourceName="$sourceName >&2
     pattern=$(echo $sourceName | cut -d '.' -f 1)".*"
-    # cmd="for f in $(ls "$pattern") ; do  echo $(date -r "$f" +%s) $( wc -c "$f" | awk '{print $1}' ) $f;  done"
-    # cmd="ls -l"
-    # ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "cd ${dirPath}; ls; for f in $(ls $pattern) ; do  echo $(date -r "$f" +%s) $( wc -c "$f" | awk '{print $1}' ) $f;  done" > ${targetFile}
-
-    # the task here is is to get the file modification date, file size in bytes
+   
+    # the task here is to get the file modification date, file size in bytes
     # and file name for each file matching the pattern in the remote directory.
     # ls -l cannot be used here because apart from the parsing problems the 
-    # modification date is not always complete. Using stat is not an option
-    # either since it can have different options on different unix systems
+    # modification date is not always complete (e.g. for dates older than 6 months).
+    # Using stat is not an option either since it can have different options on
+    # different unix systems
     cmd=$(cat <<-END
     cd ${dirPath}
     for f in \$(ls $pattern) ; do 
-        echo \$(date -r "\$f" +%s) \$( wc -c "\$f" | awk '{print \$1}' ) \$f
+        if [[ ! -d "\$f" ]] ; then
+            echo \$(date -r "\$f" +%s) \$( wc -c "\$f" | awk '{print \$1}' ) \$f
+        fi
     done
 END
 )
-#     echo "cmd="$cmd >&2
-
-#     cmd1=$(cat <<-END
-#     cd ${dirPath}
-#     ls
-# END
-# )
-#     echo "cmd1="$cmd1 >&2
-#     ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd1}" >&2
 
     ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd}" > ${targetFile}
 fi

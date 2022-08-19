@@ -368,7 +368,7 @@ void OutputFileFetchTransferTask::clear()
 void OutputFileFetchTransferTask::run()
 {
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " deltaPos=" << deltaPos_;
 #endif
 
     assert(node_);
@@ -388,29 +388,35 @@ void OutputFileFetchTransferTask::run()
     }
 
     Q_ASSERT(transfer_);
-    transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+    if (deltaPos_ > 0) {
+        transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                       QString::fromStdString(resFile_->path()),
+                       VFileTransfer::BytesFromPos, deltaPos_);
+    } else {
+        transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
                        QString::fromStdString(resFile_->path()),
                        VFileTransfer::AllBytes, 0);
-
+    }
     owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> via scp", 0);
 }
 
 void OutputFileFetchTransferTask::transferFinished()
 {
     //Files retrieved from the log server are automatically added to the cache!
-    if (useCache_ && !resFile_->hasDeltaContents()) {
+    if (useCache_ && deltaPos_ == 0) {
         owner_->addToCache(resFile_);
     }
     auto reply = owner_->reply_;
     reply->setInfoText("");
     reply->fileReadMode(VReply::TransferReadMode);
 
-    if (resFile_->hasDeltaContents()) {
+    if (deltaPos_ > 0) {
         reply->addLog("TRY> fetch file increment via scp : OK");
     } else {
         reply->addLog("TRY> fetch file via scp : OK");
     }
 
+    resFile_->setDeltaContents(deltaPos_>0);
     resFile_->setFetchMode(VFile::TransferFetchMode);
     resFile_->setLog(reply->log());
     std::string method="via ssh";
@@ -747,6 +753,8 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
     OutputFileFetchTask *t=nullptr;
     if (fetchMode == VDir::LogServerFetchMode) {
         t = fetchTask_[RemoteTask]; 
+    } else if(fetchMode == VDir::TransferFetchMode) {
+        t = fetchTask_[TransferTask];
     } else if(fetchMode == VDir::LocalFetchMode) {
         t = fetchTask_[AnyLocalTask];
     } else if(isJobout && fetchMode == VDir::ServerFetchMode) {

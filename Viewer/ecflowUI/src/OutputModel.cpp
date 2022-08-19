@@ -290,7 +290,7 @@ void OutputModel::itemDesc(const QModelIndex& index,std::string& itemFullName,VD
 
 QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const
 {
-    int row=0;;
+    int row=0;
     for(const auto & dir : dirs_)
     {
         if(dir)
@@ -308,6 +308,18 @@ QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::Fetch
     return {};
 }
 
+QModelIndex OutputModel::itemToIndex(const std::string& itemFullName) const
+{
+    int row=0;
+    for(const auto & dir : dirs_) {
+        if(dir) {
+            for(int j=0; j < dir->count(); j++, row++)
+                if(dir->fullName(j) == itemFullName)
+                    return index(row,0);
+        }
+    }
+    return {};
+}
 
 QString OutputModel::formatSize(unsigned int size) const
 {

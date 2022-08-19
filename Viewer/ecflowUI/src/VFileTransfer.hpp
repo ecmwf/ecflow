@@ -41,6 +41,7 @@ Q_SIGNALS:
     void stdOutputAvailable(QString);
 
 protected:
+    void clear();
     virtual QString buildCommand(QString sourceFile, QString targetFile ,QString remoteUid, QString host,
                                         ByteMode byteMode, std::size_t byteVal) const = 0;
     QString stdErr();
@@ -52,6 +53,8 @@ protected:
     bool ignoreSetX_;
     QString scriptName_;
     QString remoteUserAndHost_;
+    bool byteMode_{AllBytes};
+    size_t byteVal_{0};
 };
 
 

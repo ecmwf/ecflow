@@ -34,6 +34,7 @@ public:
    	std::string fullName(const QModelIndex& index) const;
     void itemDesc(const QModelIndex& index,std::string& itemFullName,VDir::FetchMode& mode) const;
     QModelIndex itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const;
+    QModelIndex itemToIndex(const std::string& itemFullName) const;
 
 protected:
     VDirItem* itemAt(int row,VDir_ptr& dir) const;
