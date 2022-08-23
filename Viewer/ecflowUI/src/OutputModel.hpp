@@ -59,10 +59,10 @@ public:
 	QModelIndex fullNameToIndex(const std::string& fullName);
 };
 
-class OutputDirLitsDelegate : public QStyledItemDelegate
+class OutputDirListDelegate : public QStyledItemDelegate
 {
 public:
-    explicit OutputDirLitsDelegate(QWidget *parent=nullptr);
+    explicit OutputDirListDelegate(QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const override;
 

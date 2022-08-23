@@ -136,6 +136,7 @@ public:
 
 	 //Get a particular jobout file
      void file(const std::string& fileName,size_t deltaPos, bool useCache);
+     void fetchFile(const std::string& fileName,VFile::FetchMode fetchMode,size_t deltaPos, bool useCache);
      void fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache);
      void setDirectories(const std::vector<VDir_ptr>&);
 

@@ -451,7 +451,7 @@ void OutputFileFetchTransferTask::transferFailed(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLog("TRY> fetch file scp : FAILED");
+    reply->addLog("TRY> fetch file via scp : FAILED");
     reply->appendErrorText("Failed to fetch via scp\n");
     resFile_.reset();
     fail();
@@ -698,7 +698,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 
 //Get a file with the given fetch mode. We use it to fetch files appearing in the directory
 //listing in the Output panel.
-void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache)
+void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode fetchMode,size_t deltaPos, bool useCache)
 {
     //If we do not want to use the cache we detach all the output
     //attached to this instance
@@ -752,13 +752,13 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
     fetchQueue_->clear();
 
     OutputFileFetchTask *t=nullptr;
-    if (fetchMode == VDir::LogServerFetchMode) {
-        t = fetchTask_[RemoteTask]; 
-    } else if(fetchMode == VDir::TransferFetchMode) {
+    if (fetchMode == VFile::LogServerFetchMode) {
+        t = fetchTask_[RemoteTask];
+    } else if(fetchMode == VFile::TransferFetchMode) {
         t = fetchTask_[TransferTask];
-    } else if(fetchMode == VDir::LocalFetchMode) {
+    } else if(fetchMode == VFile::LocalFetchMode) {
         t = fetchTask_[AnyLocalTask];
-    } else if(isJobout && fetchMode == VDir::ServerFetchMode) {
+    } else if(isJobout && fetchMode == VFile::ServerFetchMode) {
         t = fetchTask_[ServerTask];
     }
 
@@ -769,6 +769,26 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
 
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
     fetchQueue_->run();
+}
+
+//Get a file with the given fetch mode. We use it to fetch files appearing in the directory
+//listing in the Output panel.
+void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache)
+{
+    VFile::FetchMode fMode =  VFile::NoFetchMode;
+    if (fetchMode == VDir::LogServerFetchMode) {
+        fMode = VFile::LogServerFetchMode;
+    } else if(fetchMode == VDir::TransferFetchMode) {
+        fMode = VFile::TransferFetchMode;
+    } else if(fetchMode == VDir::LocalFetchMode) {
+        fMode = VFile::LocalFetchMode;
+    } else if(fetchMode == VDir::ServerFetchMode) {
+        fMode = VFile::ServerFetchMode;
+    }
+
+    if (fMode != VFile::NoFetchMode) {
+        fetchFile(fileName,fMode,deltaPos,useCache);
+    }
 }
 
 void OutputFileProvider::fetchQueueSucceeded()

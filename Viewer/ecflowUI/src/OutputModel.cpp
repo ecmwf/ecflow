@@ -420,11 +420,11 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
 //
 //========================================================
 
-OutputDirLitsDelegate::OutputDirLitsDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+OutputDirListDelegate::OutputDirListDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
 }
 
-void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+void OutputDirListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
     if(index.column()==1)

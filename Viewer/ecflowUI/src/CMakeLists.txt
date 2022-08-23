@@ -107,6 +107,7 @@ set(viewer_srcs
     OutputItemWidget.cpp
     OutputFileProvider.cpp
     OutputDirProvider.cpp
+    OutputDirWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     PlainTextEdit.cpp
@@ -337,6 +338,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputItemWidget.hpp
     OutputFileProvider.hpp
     OutputDirProvider.hpp
+    OutputDirWidget.hpp
     PlainTextEdit.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
@@ -444,6 +446,7 @@ set(viewer_wrap_ui_files
     NodeSearchWindow.ui
     NodeSearchWidget.ui
     OutputItemWidget.ui 
+    OutputDirWidget.ui
     PropertyDialog.ui
     PropertyEditor.ui
     RepeatEditorWidget.ui

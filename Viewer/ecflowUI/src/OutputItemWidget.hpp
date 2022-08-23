@@ -20,10 +20,10 @@
 
 class OutputDirProvider;
 class OutputFetchInfo;
-class OutputModel;
-class OutputSortModel;
+class OutputDirWidget;
 class VProperty;
 class QTimer;
+
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -48,8 +48,9 @@ public:
     void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
-	void slotOutputSelected(QModelIndex,QModelIndex);
-	void slotUpdateDir();
+    void slotDirItemSelected();
+    void slotUpdateDirs();
+    void adjustShowDirTb();
 	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 	void on_reloadTb__clicked();
@@ -61,35 +62,24 @@ protected Q_SLOTS:
     void on_toLineEndTb__clicked();
     void on_saveFileAsTb__clicked();
     void on_copyPathTb__clicked();
-    void on_dirReloadTb__clicked();
     void on_lineNumberTb__clicked(bool st);
     void on_wordWrapTb__clicked(bool st);
     void on_expandFileInfoTb__clicked(bool st);
     void slotWordWrapSupportChanged(bool);
 
 protected:
-    void updateDir(bool);
-    void updateDir(const std::vector<VDir_ptr>&,bool);
-	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&) override;
 	void searchOnReload();
-    void getCurrentFile(bool doReload);
-	void getLatestFile();
-    void setCurrentInDirs();
-    bool currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const;
+    void reloadCurrentFile();
+    void loadCurrentDirItemFile();
+    void loadCurrentJobout();
+    bool isJoboutLoaded() const;
     void updateHistoryLabel(const std::vector<std::string>&);
-    void displayDirErrors(const std::vector<std::string>& errorVec);
 
-	OutputDirProvider* dirProvider_;
-	OutputModel* dirModel_;
-	OutputSortModel* dirSortModel_;
+    OutputDirProvider* dirProvider_{nullptr};
 
 	bool userClickedReload_{false};
-	bool ignoreOutputSelection_{false};
-	QTimer* updateDirTimer_;
-	static int updateDirTimeout_;
-    OutputFetchInfo* fetchInfo_;
-    bool dirColumnsAdjusted_{false};
+    OutputFetchInfo* fetchInfo_{nullptr};
     bool submittedWarning_{false};
     VProperty* lineNumProp_{nullptr};
     VProperty* wordWrapProp_{nullptr};
