@@ -61,6 +61,7 @@
     <file alias="dependency_detail.svg">../images/dependency_detail.svg</file>
     <file alias="delta.svg">../images/delta.svg</file>
     <file alias="diag.svg">../images/diag.svg</file>
+    <file alias="dir_panel.svg">../images/dir_panel.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
     <file alias="dock_add_variable_column.svg">../images/dock_add_variable_column.svg</file>
     <file alias="dock_chain_closed.svg">../images/dock_chain_closed.svg</file>

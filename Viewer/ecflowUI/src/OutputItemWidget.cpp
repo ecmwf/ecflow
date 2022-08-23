@@ -184,7 +184,6 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
         //Get dir contents
         dirW_->reload();
-        //dirProvider_->info(info_);
 
 		//Start contents update timer
         //dirW_->startTimer();
@@ -212,7 +211,6 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         if(selected_ && !suspended_)
         {            
             dirW_->reload();
-            dirW_->startTimer();
         }
         //If unselected we stop the dir update
         else
@@ -226,12 +224,8 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         //Suspend
         if(suspended_)
         {
-            dirW_->stopTimer();
-            //updateDirTimer_->stop();
             reloadTb_->setEnabled(false);
             dirW_->clear();
-            //dirW_->enableDir(false);
-            //enableDir(false);
         }
         //Resume
         else
@@ -240,8 +234,6 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
             {
                 reloadTb_->setEnabled(true);
                 dirW_->clear();
-                //dirW_->enableDir(false);
-                //enableDir(true);
                 if(selected_)
                 {
                     dirW_->reload();
@@ -379,26 +371,6 @@ void OutputItemWidget::infoReady(VReply* reply)
         dirW_->load(reply, op->joboutFileName());
         dirW_->adjustCurrentSelection(browser_->file());
         op->setDirectories(reply->directories());
-#if 0
-        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_
-        //and is only supposed to display error messages!
-
-        enableDir(true);
-
-        //Update the dir widget and select the proper file in the list
-        updateDir(reply->directories(),true);
-
-        //Update the dir label
-        dirLabel_->update(reply);
-
-        //Enable the update button
-        dirReloadTb_->setEnabled(true);
-#endif
-#if 0
-        //Even though infoReady is called there could be some errors since we could
-        //try to read multiple directories
-        displayDirErrors(reply->errorTextVec());
-#endif
     }
 }
 
@@ -440,25 +412,6 @@ void OutputItemWidget::infoFailed(VReply* reply)
     {
         auto* op=static_cast<OutputFileProvider*>(infoProvider_);
         dirW_->failed(reply, op->joboutFileName());
-#if 0
-        bool hadDirs = !dirModel_->isEmpty();
-
-        //We do not have directories
-        enableDir(false);
-
-        //  Only displays the error message when there was a contents previously
-        if (hadDirs) {
-            displayDirErrors(reply->errorTextVec());
-        } else {
-            displayDirWarning("No directory listings is available!");
-        }
-
-        dirReloadTb_->setEnabled(true);
-
-        //the timer is stopped. It will be restarted again if we get a local file or
-        //a file via the logserver
-        updateDirTimer_->stop();
-#endif
     }
 }
 
@@ -605,166 +558,6 @@ void OutputItemWidget::adjustShowDirTb()
     showDirTb_->setChecked(dirW_->isVisible());
 }
 
-#if 0
-void OutputItemWidget::on_dirReloadTb__clicked()
-{
-    dirReloadTb_->setEnabled(false);
-    updateDir(false);  // get the directory listing
-}
-
-// set the current item in the directory list based on the contents of the browser. If no mathing
-// dir items found the current index is not set. This relies on the sourcePath in the current file
-// objects so it has to be propely set!!
-void OutputItemWidget::setCurrentInDirs()
-{
-    if(!dirModel_->isEmpty()) {
-
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-        UiLog().dbg() << UI_FN_INFO;
-#endif
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
-        std::string jobOutFileName = op->joboutFileName();
-        VFile_ptr file = browser_->file();
-        QModelIndex idx;
-
-        if (file) {
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-            UiLog().dbg() << " sourcePath=" << file->sourcePath();
-#endif
-            if (file->sourcePath() == jobOutFileName) {
-                idx = dirModel_->itemToIndex(file->sourcePath());
-            } else {
-                VDir::FetchMode mode=VDir::NoFetchMode;
-                if (file->fetchMode() == VFile::LocalFetchMode) {
-                    mode = VDir::LocalFetchMode;
-                } else if (file->fetchMode() == VFile::LogServerFetchMode) {
-                    mode = VDir::LogServerFetchMode;
-                } else if (file->fetchMode() == VFile::TransferFetchMode) {
-                    mode = VDir::TransferFetchMode;
-                }
-                idx = dirModel_->itemToIndex(file->sourcePath(), mode);
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-                UiLog().dbg() << " idx=" << idx <<  " mode=" << mode;
-#endif
-            }
-        }
-
-        if (idx.isValid()) {
-            dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
-        }
-    }
-}
-#endif
-
-#if 0
-void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartTimer)
-{
-    if(restartTimer)
-		updateDirTimer_->stop();
-
-    bool status=false;
-    for(const auto & dir : dirs)
-    {
-        if(dir && dir->count() > 0)
-        {
-            status=true;
-            break;
-        }
-    }
-
-	if(status)
-	{
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
-        op->setDirectories(dirs);
-
-		dirView_->selectionModel()->clearSelection();
-        dirModel_->resetData(dirs,op->joboutFileName());
-        //dirWidget_->show();
-
-        //Adjust column width
-        if(!dirColumnsAdjusted_)
-        {
-            dirColumnsAdjusted_=true;
-            for(int i=0; i< dirModel_->columnCount()-1; i++)               
-                dirView_->resizeColumnToContents(i);
-
-            if(dirModel_->columnCount() > 1)
-                dirView_->setColumnWidth(1,dirView_->columnWidth(0));
-
-        }
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-        UiLog().dbg() << UI_FN_INFO << "dir item count=" << dirModel_->rowCount();
-#endif
-        //Update the selection
-		ignoreOutputSelection_=true;
-        setCurrentInDirs();
-        ignoreOutputSelection_=false;
-	}
-	else
-	{
-        //dirWidget_->hide();
-		dirModel_->clearData();
-	}
-
-	if(restartTimer)
-		updateDirTimer_->start(updateDirTimeout_);
-}
-#endif
-
-#if 0
-void OutputItemWidget::updateDir(bool restartTimer)
-{
-	dirProvider_->info(info_);
-
-	//Remember the selection
-	//std::string fullName=currentFullName();
-	//updateDir(restartTimer,fullName);
-}
-#endif
-
-
-
-#if 0
-void OutputItemWidget::enableDir(bool status)
-{
-	if(status)
-	{       
-        dirWidget_->show();
-        dirMessageLabel_->hide();
-        reloadTb_->setEnabled(true);
-	}
-	else
-	{
-        dirWidget_->hide();
-        dirModel_->clearData();
-        dirMessageLabel_->show();
-	}
-}
-
-void OutputItemWidget::displayDirErrors(const std::vector<std::string>& errorVec)
-{   
-    QString s;
-    if(errorVec.size() > 0)
-    {
-        QColor col(70,71,72);
-        s=Viewer::formatBoldText("Output directory: ",col);
-
-        if(errorVec.size() > 1)
-        {
-            for(size_t i=0; i < errorVec.size(); i++)
-                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
-                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
-        }
-        else if(errorVec.size() == 1)
-            s+=QString::fromStdString(errorVec[0]);
-    }
-
-    if(!s.isEmpty())
-        dirMessageLabel_->showError(s);
-    else
-        dirMessageLabel_->hide();
-}
-#endif
 //---------------------------------------------
 // Search
 //---------------------------------------------
