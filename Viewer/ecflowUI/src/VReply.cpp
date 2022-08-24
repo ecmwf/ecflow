@@ -114,7 +114,7 @@ void VReply::addLogMsgEntry(const std::string& s)
 
 void VReply::addLogTryEntry(const std::string& s)
 {
-    log_.push_back("MSG>" + s);
+    log_.push_back("TRY>" + s);
 }
 
 void VReply::addLogRemarkEntry(const std::string& s)

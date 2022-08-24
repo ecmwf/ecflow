@@ -166,10 +166,9 @@ void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
 
     //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_
     //and is only supposed to display error messages!
-    owner_->ui_->messageLabelTop->hide();
+    owner_->ui_->messageLabel->hide();
     owner_->ui_->infoLabel->show();
     owner_->ui_->reloadTb->show();
-    owner_->ui_->messageLabelBottom->hide();
     owner_->ui_->view->show();
 
     //Update the dir widget and select the proper file in the list
@@ -211,18 +210,17 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     owner_->dirModel_->clearData();
 
     // only show the top row with a messageLabel
-    owner_->ui_->messageLabelTop->show();
+    owner_->ui_->messageLabel->show();
     owner_->ui_->infoLabel->hide();
     owner_->ui_->reloadTb->show();
-    owner_->ui_->messageLabelBottom->hide();
     owner_->ui_->view->hide();
 
     auto dt=QDateTime::currentDateTime();
     QColor col(39,49,101);
-    QString err="Failed to fetch directory listing. Last tried at " + Viewer::formatBoldText(" at ",col) +
+    QString err="Failed to fetch directory listing. Last tried " + Viewer::formatBoldText(" at ",col) +
             dt.toString("yyyy-MM-dd HH:mm:ss");
 
-    owner_->ui_->messageLabelTop->showError(err);
+    owner_->ui_->messageLabel->showError(err);
 
     owner_->fetchInfo_->setInfo(reply);
 #if 0
@@ -231,9 +229,9 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     UiLog().dbg() << UI_FN_INFO << "err=" << err;
 #endif
     if (!err.isEmpty()) {
-        owner_->ui_->messageLabelTop->showError(err);
+        owner_->ui_->messageLabel->showError(err);
     } else {
-        owner_->ui_->messageLabelTop->showError("Failed to fetch directory listing");
+        owner_->ui_->messageLabel->showError("Failed to fetch directory listing");
     }
 #endif
     owner_->ui_->reloadTb->setEnabled(true);
@@ -277,18 +275,17 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply)
     owner_->dirModel_->clearData();
 
     // only show the top row with a messageLabel
-    owner_->ui_->messageLabelTop->show();
+    owner_->ui_->messageLabel->show();
     owner_->ui_->infoLabel->hide();
     owner_->ui_->reloadTb->show();
-    owner_->ui_->messageLabelBottom->hide();
     owner_->ui_->view->hide();
 
     // we only show a warning
     auto dt=QDateTime::currentDateTime();
     QColor col(39,49,101);
-    QString err="No access to directory listing. Last tried at " + Viewer::formatBoldText(" at ",col) +
+    QString err="No access to directory listing. Last tried " + Viewer::formatBoldText(" at ",col) +
             dt.toString("yyyy-MM-dd HH:mm:ss");
-    owner_->ui_->messageLabelTop->showWarning(err);
+    owner_->ui_->messageLabel->showWarning(err);
 
     owner_->fetchInfo_->setInfo(reply);
 
@@ -349,12 +346,8 @@ OutputDirWidget::OutputDirWidget(QWidget* parent) :
     // The dir contents
     //--------------------------------
 
-    ui_->messageLabelTop->hide();
-    ui_->messageLabelTop->enableWordWrap(false);
-    ui_->messageLabelTop->setShowTypeTitle(false);
-    ui_->messageLabelBottom->hide();
-    ui_->messageLabelBottom->enableWordWrap(false);
-    ui_->messageLabelBottom->setShowTypeTitle(false);
+    ui_->messageLabel->hide();
+    ui_->messageLabel->setShowTypeTitle(false);
 
     //dirLabel_->hide();
     ui_->infoLabel->setProperty("fileInfo","1");
