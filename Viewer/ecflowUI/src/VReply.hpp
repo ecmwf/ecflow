@@ -67,6 +67,10 @@ public:
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
 	int readTruncatedTo() const {return readTruncatedTo_;}
     void addLog(const std::string& s) {log_.push_back(s);}
+    void addLogMsgEntry(const std::string& s);
+    void addLogTryEntry(const std::string& s);
+    void addLogRemarkEntry(const std::string& s);
+    void addLogOptionEntry(const std::string& s);
     void setLog(const std::vector<std::string>& s) {log_=s;}
     void clearLog() {log_.clear();}
     void setText(const std::string& txt) {text_=txt;}

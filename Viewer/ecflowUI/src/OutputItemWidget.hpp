@@ -19,7 +19,7 @@
 #include "ui_OutputItemWidget.h"
 
 class OutputDirProvider;
-class OutputFetchInfo;
+class OutputFileFetchInfo;
 class OutputDirWidget;
 class VProperty;
 class QTimer;
@@ -52,6 +52,7 @@ protected Q_SLOTS:
     void slotUpdateDirs();
     void slotShowDir(bool);
     void adjustShowDirTb();
+    void shrinkDirPanel();
 	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 	void on_reloadTb__clicked();
@@ -80,7 +81,7 @@ protected:
     OutputDirProvider* dirProvider_{nullptr};
 
 	bool userClickedReload_{false};
-    OutputFetchInfo* fetchInfo_{nullptr};
+    OutputFileFetchInfo* fetchInfo_{nullptr};
     bool submittedWarning_{false};
     VProperty* showDirProp_{nullptr};
     VProperty* lineNumProp_{nullptr};

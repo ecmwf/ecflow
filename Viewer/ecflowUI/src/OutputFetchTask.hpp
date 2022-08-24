@@ -18,6 +18,7 @@
 class OutputFetchQueue;
 class ServerHandler;
 class VNode;
+class VReply;
 
 class OutputFetchTask
 {

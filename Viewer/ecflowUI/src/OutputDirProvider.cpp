@@ -31,7 +31,6 @@
 OutputDirFetchTask::OutputDirFetchTask(const std::string& name, OutputDirProvider* owner) :
     OutputFetchTask(name), owner_(owner)
 {
-    Q_ASSERT(owner_);
 }
 
 void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath,RunCondition cond)
@@ -42,6 +41,10 @@ void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::stri
     runCondition_ = cond;
 }
 
+void OutputDirFetchTask::addTryLog(VReply* r, const std::string& txt) const
+{
+    r->addLogTryEntry("<PATH>" + filePath_ + "</PATH> " +  txt);
+}
 
 //=================================
 //
@@ -151,13 +154,14 @@ void OutputDirFetchRemoteTask::run()
     //If we are here there is no output client defined/available
     deleteClient();
 
-    //owner_->reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
+    addTryLog(owner_->reply_, "fetch from logserver: NOT DEFINED");
     finish();
 }
 
 void OutputDirFetchRemoteTask::clientFinished()
 {
     Q_ASSERT(client_);
+    auto reply = owner_->reply_;
     VDir_ptr dir = client_->result();
     if(dir)
     {
@@ -169,11 +173,13 @@ void OutputDirFetchRemoteTask::clientFinished()
         dir->setFetchModeStr(method);
         dir->setFetchDate(QDateTime::currentDateTime());
 
-        owner_->reply_->appendDirectory(dir);
+        addTryLog(reply, "fetch from logserver=" + client_->longName() + " : OK");
+        reply->appendDirectory(dir);
         succeed();
         return;
     }
 
+    addTryLog(reply, "fetch from logserver=" + client_->longName() + " : FAILED");
     fail();
 }
 
@@ -184,6 +190,7 @@ void OutputDirFetchRemoteTask::clientProgress(QString,int)
 void OutputDirFetchRemoteTask::clientError(QString msg)
 {
     std::string sDesc;
+    auto reply = owner_->reply_;
     if(client_)
     {
         sDesc="Failed to fetch from " + client_->longName();
@@ -198,7 +205,8 @@ void OutputDirFetchRemoteTask::clientError(QString msg)
             sDesc+=": " + msg.toStdString();;
     }
 
-    owner_->reply_->appendErrorText(sDesc);
+    addTryLog(reply, "fetch file from logserver=" + client_->longName() + " : FAILED");
+    reply->appendErrorText(sDesc);
     fail();
 }
 
@@ -239,14 +247,16 @@ void OutputDirFetchLocalTask::run()
                 res->setFetchDate(QDateTime::currentDateTime());
                 res->setFetchMode(VDir::LocalFetchMode);
                 res->setFetchModeStr("from disk");
-
+                addTryLog(reply, "read from disk: OK");
                 reply->appendDirectory(res);
                 succeed();
                 return;
             }
         }
+        addTryLog(reply, "read from disk: NO ACCESS");
         reply->appendErrorText("No access to path on disk!");
     } catch (const boost::filesystem::filesystem_error& e) {
+        addTryLog(reply, "read from disk: NO ACCESS");
         reply->appendErrorText("No access to path on disk! error: " + std::string(e.what()));
         UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
         fail();
@@ -331,8 +341,10 @@ void OutputDirFetchTransferTask::transferFinished()
     reply->fileReadMode(VReply::TransferReadMode);
 
     QFile f(QString::fromStdString(resFile_->path()));
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        addTryLog(reply, "fetch via ssh : FAILED");
         return;
+    }
 
     boost::filesystem::path fp(filePath_);
     std::string dirName=fp.parent_path().string();
@@ -351,7 +363,8 @@ void OutputDirFetchTransferTask::transferFinished()
     dir_->setFetchModeStr(method);
     dir_->setFetchDate(QDateTime::currentDateTime());
 
-    owner_->reply_->appendDirectory(dir_);
+    addTryLog(reply, "fetch via ssh : OK");
+    reply->appendDirectory(dir_);
 
     resFile_.reset();
     dir_.reset();
@@ -376,7 +389,7 @@ void OutputDirFetchTransferTask::transferFailed(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLog("TRY> fetch via ssh : FAILED");
+    addTryLog(reply, "fetch via ssh : FAILED");
     reply->appendErrorText("Failed to fetch via ssh\n");
     resFile_.reset();
     fail();
@@ -395,7 +408,6 @@ void OutputDirFetchTransferTask::parseLine(QString line)
         dir_->addItem(fName.toStdString(),fSize,mTime);
     }
 }
-
 
 //=================================
 //

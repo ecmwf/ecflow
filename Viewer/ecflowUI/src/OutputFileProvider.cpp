@@ -94,7 +94,7 @@ void OutputFileFetchCacheTask::run()
             reply->setInfoText("");
             reply->fileReadMode(VReply::LogServerReadMode);
             reply->setLog(f->log());
-            reply->addLog("REMARK>File was read from cache.");
+            reply->addLogRemarkEntry("File was read from cache.");
             reply->tmpFile(f);
 
             succeed();
@@ -214,7 +214,7 @@ void OutputFileFetchRemoteTask::run()
     //If we are here there is no output client defined/available
     deleteClient();
 
-    owner_->reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
+    owner_->reply_->addLogTryEntry("fetch file from logserver: NOT DEFINED");
     finish();
 }
 
@@ -235,9 +235,9 @@ void OutputFileFetchRemoteTask::clientFinished()
     reply->fileReadMode(VReply::LogServerReadMode);
 
     if (tmp->hasDeltaContents()) {
-        reply->addLog("TRY> fetch file increment from logserver=" + client_->longName() + " : OK");
+        reply->addLogTryEntry("fetch file increment from logserver=" + client_->longName() + " : OK");
     } else {
-        reply->addLog("TRY> fetch file from logserver=" + client_->longName() + " : OK");
+        reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : OK");
     }
 
     tmp->setFetchMode(VFile::LogServerFetchMode);
@@ -267,7 +267,7 @@ void OutputFileFetchRemoteTask::clientError(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLog("TRY> fetch file from logserver=" + client_->longName() + " : FAILED");
+    reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : FAILED");
     reply->appendErrorText("Failed to fetch file from logserver=" + client_->longName() + "\n");
     fail();
 }
@@ -294,7 +294,7 @@ void OutputFileFetchAnyLocalTask::run()
     if(f->exists())
     {
         reply->fileReadMode(VReply::LocalReadMode);
-        reply->addLog("TRY> read file from disk: OK");
+        reply->addLogTryEntry("read file from disk: OK");
 
         f->setSourcePath(f->path());
         f->setFetchMode(VFile::LocalFetchMode);
@@ -306,7 +306,7 @@ void OutputFileFetchAnyLocalTask::run()
         succeed();
         return ;
     }
-    reply->addLog("TRY> read file from disk: NO ACCESS");
+    reply->addLogTryEntry("read file from disk: NO ACCESS");
     reply->appendErrorText("Failed to read file from disk\n");
     finish();
 }
@@ -411,9 +411,9 @@ void OutputFileFetchTransferTask::transferFinished()
     reply->fileReadMode(VReply::TransferReadMode);
 
     if (deltaPos_ > 0) {
-        reply->addLog("TRY> fetch file increment via scp : OK");
+        reply->addLogTryEntry("fetch file increment via scp : OK");
     } else {
-        reply->addLog("TRY> fetch file via scp : OK");
+        reply->addLogTryEntry("fetch file via scp : OK");
     }
 
     resFile_->setSourcePath(filePath_);
@@ -451,7 +451,7 @@ void OutputFileFetchTransferTask::transferFailed(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLog("TRY> fetch file via scp : FAILED");
+    reply->addLogTryEntry("fetch file via scp : FAILED");
     reply->appendErrorText("Failed to fetch via scp\n");
     resFile_.reset();
     fail();
@@ -653,7 +653,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     if(isTryNoZero(fileName))
     {
         reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
-        reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
+        reply_->addLogMsgEntry("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
         owner_->infoReady(reply_);
         return;
     }
@@ -665,14 +665,14 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     if(isJobout)
     {
         if(n->isSubmitted())
-            reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>), but \
+            reply_->addLogRemarkEntry("This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>), but \
                   because the node status is <b>submitted</b> it may contain the output from a previous run!");
         else
-            reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
+            reply_->addLogRemarkEntry("This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
     }
     else
     {
-        reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
+        reply_->addLogRemarkEntry("This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
     }
 
     // Update the fetch tasks and process them. The queue runs until any task can fetch
@@ -735,7 +735,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode 
     if(fileName.empty())
     {
         reply_->setErrorText("Output file is not defined!");
-        reply_->addLog("MSG>Output file is not defined.");
+        reply_->addLogMsgEntry("Output file is not defined.");
         owner_->infoFailed(reply_);
         return;
     }
@@ -744,7 +744,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode 
     if(isTryNoZero(fileName))
     {
         reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
-        reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
+        reply_->addLogMsgEntry("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
         owner_->infoReady(reply_);
         return;
     }

@@ -33,6 +33,8 @@ public:
     void reset(ServerHandler* server,VNode* n,const std::string& filePath,RunCondition cond=NoCondition);
 
 protected:
+    void addTryLog(VReply* r, const std::string& txt) const;
+
     OutputDirProvider* owner_{nullptr};
 };
 

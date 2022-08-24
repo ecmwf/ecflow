@@ -9,15 +9,26 @@
 
 #include "OutputFetchInfo.hpp"
 
+#include <map>
+
+#include <QDebug>
+#include <QDir>
 #include <QLabel>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QString>
 #include <QFile>
+#include <QFileInfo>
 
-#include <QDebug>
+#include <QtGlobal>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QRegExp>
+#else
+#include <QtCore5Compat/QRegExp>
+#endif
 
 #include "ServerHandler.hpp"
+#include "UiLog.hpp"
 
 OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent)
 {
@@ -33,11 +44,70 @@ OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent)
     vb->addWidget(te_,1);
 }
 
+
+QString OutputFetchInfo::buildList(QStringList lst,bool ordered)
+{
+    QString t;
+
+    if(lst.count() > 0)
+    {
+        t+=(ordered)?"<ol>":"<ul>";
+        Q_FOREACH(QString s,lst)
+        {
+            t+="<li>" + s + "</li>";
+        }
+        t+=(ordered)?"</ol>":"</ul>";
+    }
+
+    return t;
+}
+
+void OutputFetchInfo::clearInfo()
+{
+    te_->clear();
+}
+
 void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
 {
     Q_ASSERT(reply);
-
     te_->clear();
+
+    QString html = makeHtml(reply, info);
+    te_->setHtml(html);
+
+    QTextCursor cursor=te_->textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    te_->setTextCursor(cursor);
+}
+
+void OutputFetchInfo::parseTry(QString s, QString& path, QString& msg)
+{
+    QRegExp rx("<PATH>(.+)<\\/PATH>");
+    if(rx.indexIn(s) > -1 && rx.captureCount() == 1)
+    {
+        path = rx.cap(1);
+    }
+
+    //UiLog().dbg() << UI_FN_INFO << "path=" << path << "s=" << s;
+    msg = "tried to ";
+    msg += rx.removeIn(s);
+    //UiLog().dbg() << "msg=" << msg;
+
+    msg.replace(" OK","<font color=\'#269e00\'><b> SUCCEEDED</b></font>");
+    msg.replace(" FAILED","<font color=\'#FF0000\'><b> FAILED</b></font>");
+    msg.replace(" NO ACCESS","<font><b> NO ACCESS</b></font>");
+    msg.replace(" NOT DEFINED","<font><b> NOT DEFINED</b></font>");
+}
+
+//==================================================
+//
+// OutputFileFetchInfo
+//
+//==================================================
+
+QString OutputFileFetchInfo::makeHtml(VReply *reply,VInfo_ptr info)
+{
+    Q_ASSERT(reply);
 
     static QMap<int,QString> nums;
     if(nums.isEmpty())
@@ -79,12 +149,9 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         else if(s.startsWith("TRY>"))
         {
             s.remove(0,4);
-            s.prepend("tried to ");
-            s.replace(" OK","<font color=\'#269e00\'><b> SUCCEEDED</b></font>");
-            s.replace(" FAILED","<font color=\'#FF0000\'><b> FAILED</b></font>");
-            s.replace(" NO ACCESS","<font><b> NO ACCESS</b></font>");
-            s.replace(" NOT DEFINED","<font><b> NOT DEFINED</b></font>");
-            tries << s;
+            QString path, msg;
+            parseTry(s, path, msg);
+            tries << msg;
             cnt++;
             continue;
         }
@@ -134,7 +201,7 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     }
 
     if(!options.isEmpty())
-    {       
+    {
         html+="<p><u>Options</u></p>";
         html+=buildList(options);
     }
@@ -151,42 +218,126 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     }
 
     if(!remarks.isEmpty())
-    {  
+    {
         html+="<p><u>Remarks</u></p>";
         html+=buildList(remarks);
     }
 
     if(!other.isEmpty())
-    {       
+    {
         html+=buildList(other);
 
     }
 
-    te_->setHtml(html);
-
-    QTextCursor cursor=te_->textCursor();
-    cursor.movePosition(QTextCursor::Start);
-    te_->setTextCursor(cursor);
+    return html;
 }
 
-QString OutputFetchInfo::buildList(QStringList lst,bool ordered)
-{
-    QString t;
+//==================================================
+//
+// OutputDirFetchInfo
+//
+//==================================================
 
-    if(lst.count() > 0)
+QString OutputDirFetchInfo::makeHtml(VReply *reply,VInfo_ptr /*info*/)
+{
+    Q_ASSERT(reply);
+
+    static QMap<int,QString> nums;
+    if(nums.isEmpty())
     {
-        t+=(ordered)?"<ol>":"<ul>";
-        Q_FOREACH(QString s,lst)
-        {
-            t+="<li>" + s + "</li>";
-        }
-        t+=(ordered)?"</ol>":"</ul>";
+        nums[1]="1st";
+        nums[2]="2nd";
+        nums[3]="3rd";
+        nums[4]="4th";
     }
 
-    return t;
+    std::map<QString, QStringList> tries;
+    QStringList options;
+    QStringList remarks;
+    QStringList msg;
+    QStringList other;
+    QString alg;
+    QString html;
+
+    int cnt=1;
+    for(const auto & it : reply->log())
+    {
+        QString s=QString::fromStdString(it);
+        if(s.startsWith("REMARK>"))
+        {
+            remarks << s.remove(0,7);
+            continue;
+        }
+        else if(s.startsWith("OPTION>"))
+        {
+            options << s.remove(0,7);
+            continue;
+        }
+        else if(s.startsWith("MSG>"))
+        {
+            msg << s.remove(0,4);
+            continue;
+        }
+        else if(s.startsWith("TRY>"))
+        {
+            s.remove(0,4);
+            QString path, msg;
+            parseTry(s, path, msg);
+            path = makeSearchPath(path);
+            tries[path] << msg;
+            cnt++;
+            continue;
+        }
+        else
+            other << s;
+    }
+
+    if(!msg.isEmpty())
+    {
+       html+="<p><u>Messages</u></p>";
+       html+=buildList(msg);
+    }
+
+    if(!options.isEmpty())
+    {
+        html+="<p><u>Options</u></p>";
+        html+=buildList(options);
+    }
+
+    if(!tries.empty())
+    {
+        html+="<p><u>How was this directory listing fetched?</u></p>";
+        for (auto it: tries) {
+            html+="path=" + it.first;
+            html+=buildList(it.second,true);
+        }
+    }
+
+    if(!alg.isEmpty())
+    {
+       html+="<p><u>Algorithm:</u></p>"+alg;
+    }
+
+    if(!remarks.isEmpty())
+    {
+        html+="<p><u>Remarks</u></p>";
+        html+=buildList(remarks);
+    }
+
+    if(!other.isEmpty())
+    {
+        html+=buildList(other);
+
+    }
+    return html;
 }
 
-void OutputFetchInfo::clearInfo()
+QString OutputDirFetchInfo::makeSearchPath(QString path) const
 {
-    te_->clear();
+    QFileInfo f(path);
+    auto d = f.dir();
+    auto name = f.baseName();
+    return d.filePath(name + ".*");
 }
+
+

@@ -21,7 +21,7 @@ class QTimer;
 
 class OutputFileProvider;
 class OutputDirProvider;
-class OutputFetchInfo;
+class OutputDirFetchInfo;
 class OutputModel;
 class OutputSortModel;
 class VProperty;
@@ -66,11 +66,13 @@ Q_SIGNALS:
     void updateRequested();
     void itemSelected();
     void closedByButton();
+    void shrinkRequested();
 
 protected:
     void startTimer();
     void stopTimer();
     void requestReload();
+    void requestShrink();
     void updateContents(const std::vector<VDir_ptr>&);
     QString formatErrors(const std::vector<std::string>& errorVec) const;
     void transitionTo(DirWidgetState* state);
@@ -83,8 +85,8 @@ protected:
     bool ignoreOutputSelection_{false};
     QTimer* updateTimer_{nullptr};
     static int updateDirTimeout_;
-    OutputFetchInfo* fetchInfo_{nullptr};
     bool dirColumnsAdjusted_{false};
+    OutputDirFetchInfo* fetchInfo_{nullptr};
 
 private:
      void adjustCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);

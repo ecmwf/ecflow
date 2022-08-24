@@ -6,6 +6,7 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 //============================================================================
+
 #ifndef OUTPUTFETCHINFO_HPP
 #define OUTPUTFETCHINFO_HPP
 
@@ -20,16 +21,36 @@ class QTextEdit;
 class OutputFetchInfo : public QWidget
 {
 public:
-    OutputFetchInfo(QWidget* parent=nullptr);
-    void setInfo(VReply*,VInfo_ptr);
+    OutputFetchInfo(QWidget* parent);
     void clearInfo();
+    void setInfo(VReply*, VInfo_ptr info=nullptr);
 
-private:
+protected:
+    virtual QString makeHtml(VReply*, VInfo_ptr info)=0;
     QString buildList(QStringList,bool ordered=false);
+    void parseTry(QString s, QString& path, QString& msg);
 
-    QLabel* label_;
-    QTextEdit* te_;
+    QLabel* label_{nullptr};
+    QTextEdit* te_{nullptr};
+};
 
+class OutputFileFetchInfo : public OutputFetchInfo
+{
+public:
+    using OutputFetchInfo::OutputFetchInfo;
+
+protected:
+    QString makeHtml(VReply*, VInfo_ptr info) override;
+};
+
+class OutputDirFetchInfo : public OutputFetchInfo
+{
+public:
+    using OutputFetchInfo::OutputFetchInfo;
+
+protected:
+    QString makeHtml(VReply*, VInfo_ptr info) override;
+    QString makeSearchPath(QString path) const;
 };
 
 #endif // OUTPUTFETCHINFO_HPP

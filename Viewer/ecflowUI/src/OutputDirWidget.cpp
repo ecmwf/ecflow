@@ -10,9 +10,12 @@
 
 #include "OutputDirWidget.hpp"
 
+#include <QDateTime>
 #include <QItemSelectionModel>
 #include <QTimer>
+#include <QWidgetAction>
 
+#include "OutputFetchInfo.hpp"
 #include "OutputModel.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
@@ -175,6 +178,8 @@ void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
     //Update the dir label
     owner_->ui_->infoLabel->update(reply);
 
+    owner_->fetchInfo_->setInfo(reply);
+
     //Enable the update button
     owner_->ui_->reloadTb->setEnabled(true);
 
@@ -212,6 +217,15 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     owner_->ui_->messageLabelBottom->hide();
     owner_->ui_->view->hide();
 
+    auto dt=QDateTime::currentDateTime();
+    QColor col(39,49,101);
+    QString err="Failed to fetch directory listing. Last tried at " + Viewer::formatBoldText(" at ",col) +
+            dt.toString("yyyy-MM-dd HH:mm:ss");
+
+    owner_->ui_->messageLabelTop->showError(err);
+
+    owner_->fetchInfo_->setInfo(reply);
+#if 0
     auto err = owner_->formatErrors(reply->errorTextVec());
 #ifdef UI_OUTPUTDIRWIDGET_DEBUG_
     UiLog().dbg() << UI_FN_INFO << "err=" << err;
@@ -221,9 +235,10 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     } else {
         owner_->ui_->messageLabelTop->showError("Failed to fetch directory listing");
     }
-
+#endif
     owner_->ui_->reloadTb->setEnabled(true);
     owner_->show();
+    owner_->requestShrink();
 
     // we start the update timer since it was the first failure, we
     // allow one more reload try
@@ -269,7 +284,13 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply)
     owner_->ui_->view->hide();
 
     // we only show a warning
-    owner_->ui_->messageLabelTop->showWarning("No access to output directories");
+    auto dt=QDateTime::currentDateTime();
+    QColor col(39,49,101);
+    QString err="No access to directory listing. Last tried at " + Viewer::formatBoldText(" at ",col) +
+            dt.toString("yyyy-MM-dd HH:mm:ss");
+    owner_->ui_->messageLabelTop->showWarning(err);
+
+    owner_->fetchInfo_->setInfo(reply);
 
     owner_->ui_->reloadTb->setEnabled(true);
     owner_->show();
@@ -329,8 +350,10 @@ OutputDirWidget::OutputDirWidget(QWidget* parent) :
     //--------------------------------
 
     ui_->messageLabelTop->hide();
+    ui_->messageLabelTop->enableWordWrap(false);
     ui_->messageLabelTop->setShowTypeTitle(false);
     ui_->messageLabelBottom->hide();
+    ui_->messageLabelBottom->enableWordWrap(false);
     ui_->messageLabelBottom->setShowTypeTitle(false);
 
     //dirLabel_->hide();
@@ -366,6 +389,12 @@ OutputDirWidget::OutputDirWidget(QWidget* parent) :
 
     connect(ui_->closeTb,SIGNAL(clicked()),
             this,SLOT(closeByButton()));
+
+    // fetch info
+    fetchInfo_=new OutputDirFetchInfo(this);
+    auto* fetchInfoAction=new QWidgetAction(this);
+    fetchInfoAction->setDefaultWidget(fetchInfo_);
+    ui_->fetchInfoTb->addAction(fetchInfoAction);
 
     //Dir contents update timer
     updateTimer_=new QTimer(this);
@@ -430,6 +459,11 @@ void OutputDirWidget::stopTimer()
 void OutputDirWidget::reload()
 {
     state_->handleReload();
+}
+
+void OutputDirWidget::requestShrink()
+{
+    Q_EMIT shrinkRequested();
 }
 
 void OutputDirWidget::requestReload()

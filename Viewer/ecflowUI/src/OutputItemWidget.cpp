@@ -79,6 +79,9 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     connect(dirW_,SIGNAL(closedByButton()),
             this,SLOT(adjustShowDirTb()));
 
+    connect(dirW_,SIGNAL(shrinkRequested()),
+            this,SLOT(shrinkDirPanel()));
+
     dirProvider_=new OutputDirProvider(this);
 
     //show dir panel
@@ -103,7 +106,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//Editor font
 	browser_->setFontProperty(VConfig::instance()->find("panel.output.font"));
 
-    fetchInfo_=new OutputFetchInfo(this);
+    fetchInfo_=new OutputFileFetchInfo(this);
     auto* fetchInfoAction=new QWidgetAction(this);
     fetchInfoAction->setDefaultWidget(fetchInfo_);
     fetchInfoTb_->addAction(fetchInfoAction);
@@ -572,6 +575,16 @@ void OutputItemWidget::adjustShowDirTb()
     showDirTb_->setChecked(dirW_->isNotInDisabledState());
     Q_ASSERT(showDirProp_);
     showDirProp_->setValue(showDirTb_->isChecked());
+}
+
+void OutputItemWidget::shrinkDirPanel()
+{
+    int wHeight=size().height();
+    if(wHeight > 100)
+    {
+        QList<int> sizes = {wHeight,0};
+        splitter_->setSizes(sizes);
+    }
 }
 
 //---------------------------------------------
