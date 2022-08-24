@@ -50,6 +50,7 @@ public:
 protected Q_SLOTS:
     void slotDirItemSelected();
     void slotUpdateDirs();
+    void slotShowDir(bool);
     void adjustShowDirTb();
 	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
@@ -81,6 +82,7 @@ protected:
 	bool userClickedReload_{false};
     OutputFetchInfo* fetchInfo_{nullptr};
     bool submittedWarning_{false};
+    VProperty* showDirProp_{nullptr};
     VProperty* lineNumProp_{nullptr};
     VProperty* wordWrapProp_{nullptr};
     VProperty* expandFileInfoProp_{nullptr};

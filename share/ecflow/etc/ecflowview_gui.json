@@ -7,6 +7,7 @@
             "line" : "panel.output.showLineNumber",
             "line" : "panel.output.wordWrap",
             "line" : "panel.output.expandFileInfo",
+            "line" : "panel.output.showDirPanel",
             "line" : "view.table.variableColumns"
         },
 

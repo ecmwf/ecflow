@@ -98,6 +98,10 @@
             "expandFileInfo": {
                "label": "Expand file info label",
                "default": "true"
+            },
+            "showDirPanel": {
+                "label": "Show directory panel",
+                "default": "true"
             }
         },
         "why" : {

@@ -81,9 +81,15 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     dirProvider_=new OutputDirProvider(this);
 
-    showDirTb_->setChecked(true);
+    //show dir panel
+    showDirProp_ = VConfig::instance()->find("panel.output.showDirPanel");
+    Q_ASSERT(showDirProp_);
+    bool showDirSt = showDirProp_->value().toBool();
+    showDirTb_->setChecked(showDirSt);
+    slotShowDir(showDirSt);
+
     connect(showDirTb_, SIGNAL(clicked(bool)),
-            dirW_,SLOT(showIt(bool)));
+            this,SLOT(slotShowDir(bool)));
 
 	//Set splitter's initial size.
 	int wHeight=size().height();
@@ -554,9 +560,18 @@ void OutputItemWidget::slotDirItemSelected()
     loadCurrentDirItemFile();
 }
 
+void OutputItemWidget::slotShowDir(bool st)
+{
+    dirW_->showIt(st);
+    Q_ASSERT(showDirProp_);
+    showDirProp_->setValue(st);
+}
+
 void OutputItemWidget::adjustShowDirTb()
 {
     showDirTb_->setChecked(dirW_->isNotInDisabledState());
+    Q_ASSERT(showDirProp_);
+    showDirProp_->setValue(showDirTb_->isChecked());
 }
 
 //---------------------------------------------

@@ -183,14 +183,8 @@ void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
     //The update timer is restarted since we seem to have access to the directories
     //so we want automatic updates
     if (!timerSuspended_) {
-#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
-        UiLog().dbg() << UI_FN_INFO << "start timer";
-#endif
         owner_->startTimer();
     }
-#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
-    UiLog().dbg() << UI_FN_INFO << "timerSuspended_=" << timerSuspended_;
-#endif
 }
 
 void DirWidgetSuccessState::handleFailed(VReply* reply)
@@ -236,9 +230,6 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     if (!timerSuspended_) {
         owner_->startTimer();
     }
-#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
-    UiLog().dbg() << UI_FN_INFO << "timerSuspended_=" << timerSuspended_;
-#endif
 }
 
 void DirWidgetFirstFailedState::handleFailed(VReply* reply)
@@ -471,9 +462,7 @@ void OutputDirWidget::adjustCurrentSelection(const std::string& fPath, VFile::Fe
     ignoreOutputSelection_ = false;
 }
 
-// set the current item in the directory list based on the contents of the browser. If no mathing
-// dir items found the current index is not set. This relies on the sourcePath in the current file
-// objects so it has to be propely set!!
+// set the current item in the directory list based on the contents of the output browser
 void OutputDirWidget::setCurrentSelection(const std::string& fPath, VFile::FetchMode fMode)
 {
     if(!dirModel_->isEmpty()) {
@@ -544,7 +533,6 @@ void OutputDirWidget::updateContents(const std::vector<VDir_ptr>& dirs)
 
             if(dirModel_->columnCount() > 1)
                 ui_->view->setColumnWidth(1,ui_->view->columnWidth(0));
-
         }
 #ifdef UI_OUTPUTDIRWIDGET_DEBUG_
         UiLog().dbg() << UI_FN_INFO << "dir item count=" << dirModel_->rowCount();
@@ -598,7 +586,7 @@ void OutputDirWidget::slotItemSelected(const QModelIndex& currentIdx,const QMode
 void OutputDirWidget::transitionTo(DirWidgetState* state)
 {
 #ifdef UI_OUTPUTDIRWIDGET_DEBUG_
-    UiLog().dbg() << UI_FN_INFO << typeid(*state).name() << "\n";
+    UiLog().dbg() << UI_FN_INFO << "state=" << typeid(*state).name() << " timer=" << updateTimer_->isActive();
 #endif
     if (state_ != nullptr) {
         delete state_;
