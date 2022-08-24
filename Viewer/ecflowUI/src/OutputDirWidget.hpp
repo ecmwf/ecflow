@@ -39,7 +39,7 @@ Q_OBJECT
     friend class DirWidgetSuccessState;
     friend class DirWidgetFirstFailedState;
     friend class DirWidgetFailedState;
-    friend class DirWidgetIdleState;
+    friend class DirWidgetEmptyState;
     friend class DirWidgetDisabledState;
 
 public:
@@ -48,14 +48,11 @@ public:
     void clear();
     void load(VReply* reply, const std::string& joboutFile);
     void failed(VReply* reply, const std::string& joboutFile);
-
+    void suspendAutoUpdate();
     bool isEmpty() const;
-
+    bool isNotInDisabledState() const;
     bool currentSelection(std::string& fPath, VDir::FetchMode& dMode) const;
     void adjustCurrentSelection(VFile_ptr loadedFile);
-
-    void startTimer();
-    void stopTimer();
 
 public Q_SLOTS:
     void showIt(bool);
@@ -71,7 +68,10 @@ Q_SIGNALS:
     void closedByButton();
 
 protected:
-    void updateContents(const std::vector<VDir_ptr>&, bool);
+    void startTimer();
+    void stopTimer();
+    void requestReload();
+    void updateContents(const std::vector<VDir_ptr>&);
     QString formatErrors(const std::vector<std::string>& errorVec) const;
     void transitionTo(DirWidgetState* state);
 

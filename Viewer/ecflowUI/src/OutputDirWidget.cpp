@@ -28,23 +28,26 @@ int OutputDirWidget::updateDirTimeout_=1000*60;
 class DirWidgetState
 {
 public:
-    DirWidgetState(OutputDirWidget* owner) : owner_(owner) {}
+    DirWidgetState(OutputDirWidget* owner,  DirWidgetState* prev);
     virtual ~DirWidgetState() = default;
+    virtual void handleReload();
     virtual void handleLoad(VReply*);
     virtual void handleFailed(VReply*)=0;
     virtual void handleClear();
     virtual void handleEnable() {}
     virtual void handleDisable();
+    virtual void handleSuspendAutoUpdate();
     virtual bool isDisabled() const {return false;}
 
 protected:
     OutputDirWidget* owner_{nullptr};
+    bool timerSuspended_{false};
 };
 
 class DirWidgetSuccessState : public DirWidgetState
 {
 public:
-    DirWidgetSuccessState(OutputDirWidget* owner, VReply*);
+    DirWidgetSuccessState(OutputDirWidget* owner, DirWidgetState* prev, VReply*);
     void handleLoad(VReply*) override;
     void handleFailed(VReply*) override;
 
@@ -55,36 +58,38 @@ protected:
 class DirWidgetFirstFailedState : public DirWidgetState
 {
 public:
-    DirWidgetFirstFailedState(OutputDirWidget* owner, VReply* reply);
+    DirWidgetFirstFailedState(OutputDirWidget* owner, DirWidgetState* prev, VReply* reply);
     void handleFailed(VReply*) override;
 };
 
 class DirWidgetFailedState : public DirWidgetState
 {
 public:
-    DirWidgetFailedState(OutputDirWidget* owner, VReply* reply);
+    DirWidgetFailedState(OutputDirWidget* owner, DirWidgetState* prev, VReply* reply);
     void handleFailed(VReply*) override;
 
 protected:
     void handleFailedInternal(VReply* reply);
 };
 
-class DirWidgetIdleState : public DirWidgetState
+class DirWidgetEmptyState : public DirWidgetState
 {
 public:
-    DirWidgetIdleState(OutputDirWidget* owner);
+    DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState* prev);
     void handleFailed(VReply*) override;
 };
 
 class DirWidgetDisabledState : public DirWidgetState
 {
 public:
-    DirWidgetDisabledState(OutputDirWidget* owner);
+    DirWidgetDisabledState(OutputDirWidget* owner, DirWidgetState* prev);
+    void handleReload() override {}
     void handleLoad(VReply*) override {}
     void handleFailed(VReply*) override {}
     void handleClear() override {}
     void handleEnable() override;
     void handleDisable() override {}
+    void handleSuspendAutoUpdate() override {}
     bool isDisabled() const override {return true;}
 };
 
@@ -92,27 +97,56 @@ public:
 // DirWidgetState
 //-------------------------------
 
+DirWidgetState::DirWidgetState(OutputDirWidget* owner,  DirWidgetState* prev) :
+    owner_(owner)
+{
+    if (prev)
+        timerSuspended_ = prev->timerSuspended_;
+}
+
+void DirWidgetState::handleReload()
+{
+    // if reload is requested the timer must come back from its suspended
+    // state
+    timerSuspended_ = false;
+
+    // the timer must be stopped while the reload (might be asynch)
+    // is being executed
+    owner_->stopTimer();
+    owner_->ui_->reloadTb->setEnabled(false);
+    owner_->requestReload();
+}
+
 void DirWidgetState::handleLoad(VReply* reply)
 {
-    owner_->transitionTo(new DirWidgetSuccessState(owner_, reply));
+    owner_->transitionTo(new DirWidgetSuccessState(owner_, this, reply));
 }
 
 void DirWidgetState::handleClear()
 {
-    owner_->transitionTo(new DirWidgetIdleState(owner_));
+    owner_->transitionTo(new DirWidgetEmptyState(owner_, this));
 }
 
 void DirWidgetState::handleDisable()
 {
-    owner_->transitionTo(new DirWidgetDisabledState(owner_));
+    owner_->transitionTo(new DirWidgetDisabledState(owner_, this));
+}
+
+void DirWidgetState::handleSuspendAutoUpdate()
+{
+#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
+    UI_FN_DBG
+#endif
+    owner_->stopTimer();
+    timerSuspended_ = true;
 }
 
 //-------------------------------
 // DirWidgetSuccessState
 //-------------------------------
 
-DirWidgetSuccessState::DirWidgetSuccessState(OutputDirWidget* owner, VReply* reply) :
-    DirWidgetState(owner)
+DirWidgetSuccessState::DirWidgetSuccessState(OutputDirWidget* owner, DirWidgetState* prev, VReply* reply) :
+    DirWidgetState(owner, prev)
 {
     handleLoadInternal(reply);
 }
@@ -124,6 +158,9 @@ void DirWidgetSuccessState::handleLoad(VReply* reply)
 
 void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
 {
+    // we ensure the update timer is stopped
+    owner_->stopTimer();
+
     //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_
     //and is only supposed to display error messages!
     owner_->ui_->messageLabelTop->hide();
@@ -133,7 +170,7 @@ void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
     owner_->ui_->view->show();
 
     //Update the dir widget and select the proper file in the list
-    owner_->updateContents(reply->directories(), true);
+    owner_->updateContents(reply->directories());
 
     //Update the dir label
     owner_->ui_->infoLabel->update(reply);
@@ -142,22 +179,33 @@ void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
     owner_->ui_->reloadTb->setEnabled(true);
 
     owner_->show();
+
+    //The update timer is restarted since we seem to have access to the directories
+    //so we want automatic updates
+    if (!timerSuspended_) {
+#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
+        UiLog().dbg() << UI_FN_INFO << "start timer";
+#endif
+        owner_->startTimer();
+    }
+#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
+    UiLog().dbg() << UI_FN_INFO << "timerSuspended_=" << timerSuspended_;
+#endif
 }
 
 void DirWidgetSuccessState::handleFailed(VReply* reply)
 {
-    owner_->transitionTo(new DirWidgetFirstFailedState(owner_, reply));
+    owner_->transitionTo(new DirWidgetFirstFailedState(owner_, this, reply));
 }
 
 //-------------------------------
 // DirWidgetFirstFailedState
 //-------------------------------
 
-DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, VReply* reply) : DirWidgetState(owner)
+DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, DirWidgetState* prev, VReply* reply) :
+    DirWidgetState(owner, prev)
 {
-    UI_FN_DBG
-    //the timer is stopped. It will be restarted again if we get a local file or
-    //a file via the logserver
+    // we ensure the update timer is stopped
     owner_->stopTimer();
 
     //We do not have directories
@@ -171,7 +219,9 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, VRe
     owner_->ui_->view->hide();
 
     auto err = owner_->formatErrors(reply->errorTextVec());
-    UiLog().dbg() << " err=" << err;
+#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
+    UiLog().dbg() << UI_FN_INFO << "err=" << err;
+#endif
     if (!err.isEmpty()) {
         owner_->ui_->messageLabelTop->showError(err);
     } else {
@@ -181,19 +231,27 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, VRe
     owner_->ui_->reloadTb->setEnabled(true);
     owner_->show();
 
-    UiLog().dbg() << " view=" << owner_->ui_->view->isVisible();
+    // we start the update timer since it was the first failure, we
+    // allow one more reload try
+    if (!timerSuspended_) {
+        owner_->startTimer();
+    }
+#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
+    UiLog().dbg() << UI_FN_INFO << "timerSuspended_=" << timerSuspended_;
+#endif
 }
 
 void DirWidgetFirstFailedState::handleFailed(VReply* reply)
 {
-    owner_->transitionTo(new DirWidgetFailedState(owner_, reply));
+    owner_->transitionTo(new DirWidgetFailedState(owner_, this, reply));
 }
 
 //-------------------------------
 // DirWidgetFailedState
 //-------------------------------
 
-DirWidgetFailedState::DirWidgetFailedState(OutputDirWidget* owner, VReply* reply) : DirWidgetState(owner)
+DirWidgetFailedState::DirWidgetFailedState(OutputDirWidget* owner, DirWidgetState* prev, VReply* reply) :
+    DirWidgetState(owner, prev)
 {
     handleFailedInternal(reply);
 }
@@ -205,11 +263,11 @@ void DirWidgetFailedState::handleFailed(VReply* reply)
 
 void DirWidgetFailedState::handleFailedInternal(VReply* reply)
 {
-    //the timer is stopped. It will be restarted again if we get a local file or
-    //a file via the logserver
+    //The timer is stopped and will not be restarted. Since we had at least two
+    //failures in a row there is probably no access to the dir contents. Manual
+    //reload is still possible.
     owner_->stopTimer();
 
-    //We do not have directories
     owner_->dirModel_->clearData();
 
     // only show the top row with a messageLabel
@@ -219,6 +277,7 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply)
     owner_->ui_->messageLabelBottom->hide();
     owner_->ui_->view->hide();
 
+    // we only show a warning
     owner_->ui_->messageLabelTop->showWarning("No access to output directories");
 
     owner_->ui_->reloadTb->setEnabled(true);
@@ -226,10 +285,11 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply)
 }
 
 //===========================================================
-// DirWidgetIdleState
+// DirWidgetEmptyState
 //===========================================================
 
-DirWidgetIdleState::DirWidgetIdleState(OutputDirWidget* owner) : DirWidgetState(owner)
+DirWidgetEmptyState::DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState* prev) :
+    DirWidgetState(owner, prev)
 {
     owner_->stopTimer();
     owner_->hide();
@@ -237,16 +297,17 @@ DirWidgetIdleState::DirWidgetIdleState(OutputDirWidget* owner) : DirWidgetState(
     owner_->dirModel_->clearData();
 }
 
-void DirWidgetIdleState::handleFailed(VReply* reply)
+void DirWidgetEmptyState::handleFailed(VReply* reply)
 {
-    owner_->transitionTo(new DirWidgetFirstFailedState(owner_, reply));
+    owner_->transitionTo(new DirWidgetFirstFailedState(owner_, this, reply));
 }
 
 //===========================================================
 // DirWidgetDisabledState
 //===========================================================
 
-DirWidgetDisabledState::DirWidgetDisabledState(OutputDirWidget* owner) : DirWidgetState(owner)
+DirWidgetDisabledState::DirWidgetDisabledState(OutputDirWidget* owner, DirWidgetState* prev) :
+    DirWidgetState(owner, prev)
 {
     owner_->stopTimer();
     owner_->hide();
@@ -256,7 +317,7 @@ DirWidgetDisabledState::DirWidgetDisabledState(OutputDirWidget* owner) : DirWidg
 
 void DirWidgetDisabledState::handleEnable()
 {
-    owner_->transitionTo(new DirWidgetIdleState(owner_));
+    owner_->transitionTo(new DirWidgetEmptyState(owner_, this));
     owner_->reload();
 }
 
@@ -323,10 +384,10 @@ OutputDirWidget::OutputDirWidget(QWidget* parent) :
             this,SLOT(reload()));
 
     // initialise state
-    transitionTo(new DirWidgetIdleState(this));
+    transitionTo(new DirWidgetEmptyState(this, nullptr));
 }
 
-
+// must be called externally
 void OutputDirWidget::showIt(bool st)
 {
     if (st) {
@@ -344,7 +405,6 @@ void OutputDirWidget::closeByButton()
 
 void OutputDirWidget::clear()
 {
-    UI_FN_DBG
     state_->handleClear();
 }
 
@@ -356,32 +416,34 @@ void OutputDirWidget::load(VReply* reply, const std::string& joboutFile)
 
 void OutputDirWidget::failed(VReply* reply, const std::string& joboutFile)
 {
-    UI_FN_DBG
     joboutFile_ = joboutFile;
     state_->handleFailed(reply);
 }
 
+void OutputDirWidget::suspendAutoUpdate()
+{
+    UI_FN_DBG
+    state_->handleSuspendAutoUpdate();
+}
+
 void OutputDirWidget::startTimer()
 {
-    //if (!state_->isDisabled()) {
-        updateTimer_->start();
-    //}
+    updateTimer_->start();
 }
 
 void OutputDirWidget::stopTimer()
 {
-     //if (!state_->isDisabled()) {
-         updateTimer_->stop();
-     //}
+    updateTimer_->stop();
 }
 
 void OutputDirWidget::reload()
 {
-    UI_FN_DBG
-    if (!state_->isDisabled()) {
-        ui_->reloadTb->setEnabled(false);
-        Q_EMIT updateRequested();
-    }
+    state_->handleReload();
+}
+
+void OutputDirWidget::requestReload()
+{
+    Q_EMIT updateRequested();
 }
 
 bool OutputDirWidget::currentSelection(std::string& fPath, VDir::FetchMode& mode) const
@@ -397,7 +459,6 @@ bool OutputDirWidget::currentSelection(std::string& fPath, VDir::FetchMode& mode
 
 void OutputDirWidget::adjustCurrentSelection(VFile_ptr loadedFile)
 {
-    UI_FN_DBG
     if (!state_->isDisabled() && loadedFile) {
         adjustCurrentSelection(loadedFile->sourcePath(), loadedFile->fetchMode());
     }
@@ -457,11 +518,8 @@ void OutputDirWidget::setCurrentSelection(const std::string& fPath, VFile::Fetch
     }
 }
 
-void OutputDirWidget::updateContents(const std::vector<VDir_ptr>& dirs, bool restartTimer)
+void OutputDirWidget::updateContents(const std::vector<VDir_ptr>& dirs)
 {
-    if(restartTimer)
-        updateTimer_->stop();
-
     bool status=false;
     for(const auto & dir : dirs)
     {
@@ -488,7 +546,7 @@ void OutputDirWidget::updateContents(const std::vector<VDir_ptr>& dirs, bool res
                 ui_->view->setColumnWidth(1,ui_->view->columnWidth(0));
 
         }
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
         UiLog().dbg() << UI_FN_INFO << "dir item count=" << dirModel_->rowCount();
 #endif
     }
@@ -496,9 +554,6 @@ void OutputDirWidget::updateContents(const std::vector<VDir_ptr>& dirs, bool res
     {
         dirModel_->clearData();
     }
-
-    if(restartTimer)
-        updateTimer_->start(updateDirTimeout_);
 }
 
 bool OutputDirWidget::isEmpty() const
@@ -506,22 +561,10 @@ bool OutputDirWidget::isEmpty() const
     return dirModel_->isEmpty();
 }
 
-
-//void OutputDirWidget::enableDir(bool status)
-//{
-//    if(status)
-//    {
-//        dirWidget_->show();
-//        dirMessageLabel_->hide();
-//        reloadTb_->setEnabled(true);
-//    }
-//    else
-//    {
-//        dirWidget_->hide();
-//        dirModel_->clearData();
-//        dirMessageLabel_->show();
-//    }
-//}
+bool OutputDirWidget::isNotInDisabledState() const
+{
+    return !state_->isDisabled();
+}
 
 QString OutputDirWidget::formatErrors(const std::vector<std::string>& errorVec) const
 {
@@ -551,7 +594,6 @@ void OutputDirWidget::slotItemSelected(const QModelIndex& currentIdx,const QMode
         Q_EMIT itemSelected();
     }
 }
-
 
 void OutputDirWidget::transitionTo(DirWidgetState* state)
 {

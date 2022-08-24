@@ -212,10 +212,10 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         {            
             dirW_->reload();
         }
-        //If unselected we stop the dir update
+        //If unselected we stop the automatic dir update
         else
         {
-            dirW_->stopTimer();
+            dirW_->suspendAutoUpdate();
         }
     }
 
@@ -237,7 +237,6 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
                 if(selected_)
                 {
                     dirW_->reload();
-                    dirW_->startTimer();
                 }
             }
             else
@@ -338,13 +337,15 @@ void OutputItemWidget::infoReady(VReply* reply)
         userClickedReload_ = false;
         reloadTb_->setEnabled(true);
 
+#if 0
         //If we got a local file or a file via the logserver we restart the dir update timer
         if(!suspended_ &&
            (reply->fileReadMode() == VReply::LocalReadMode ||
             reply->fileReadMode() == VReply::LogServerReadMode))
         {
-            dirW_->startTimer();
-        }        
+            dirW_->enableAutoUpdate(true);
+        }
+#endif
         //Update the selection in the dir list according to the file
         dirW_->adjustCurrentSelection(f);
 #if 0
@@ -540,7 +541,7 @@ bool OutputItemWidget::isJoboutLoaded() const
 // Directory contents
 //------------------------------------
 
-// should only invoked from dirW_
+// should only be invoked from dirW_
 void OutputItemWidget::slotUpdateDirs()
 {
     UI_FN_DBG
@@ -555,7 +556,7 @@ void OutputItemWidget::slotDirItemSelected()
 
 void OutputItemWidget::adjustShowDirTb()
 {
-    showDirTb_->setChecked(dirW_->isVisible());
+    showDirTb_->setChecked(dirW_->isNotInDisabledState());
 }
 
 //---------------------------------------------
