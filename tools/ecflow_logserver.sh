@@ -18,8 +18,6 @@ echo "Example:"
 echo "       start_logserver.sh -d %ECF_OUT% -m %ECF_HOME%:%ECF_OUT% -l $HOME/log/logserver.log"
 }
 
-set -x
-
 LOGSERVERLIST=/home/us/usx/logserver/user.lst
 
 # get command line options if any.
@@ -97,13 +95,10 @@ export LOGMAP=${server_map:-$LOGPATH:$LOGPATH}
 username=$(id -u)
 base=35000
 prognum=$((base+username))
-#prognum=35502
 
 PROG=$(which $0)
-#PROG_PATH=$(readlink -f $PROG)
-PROG_PATH=$(readlink $PROG)
-#PATH_NAME=$ecflow_DIR/bin
-PATH_NAME=./
+PROG_PATH=$(readlink -f $PROG)
+PATH_NAME=$ecflow_DIR/bin
 
 export LOGPORT=$prognum
 LOGDIR=$(dirname $LOGFILE)
