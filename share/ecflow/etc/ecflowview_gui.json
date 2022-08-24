@@ -704,10 +704,12 @@
             "icon" : "network.svg",
 
             "group" : {
-                "title" : "Socks",
+                "title" : "SCP/SSH via SOCKS",
                 "prefix" : "network.socks",
+                "note" : {
+                    "default" : "These settings are only used when ecFlowUI was started up with the <b>proxychains</b> command. In this case dynamic port forwarding (using SOCKS) to a remote host is supposed to be up and running. Using these settings ecFlowUI tries to access local log files on the remote host via <b>scp/ssh</b>."
+                 },
 
-                "line" : "proxyPort",
                 "line" : "proxyJumpUser",
                 "line" : "proxyJumpHost",
                 "line" : "remoteUser",

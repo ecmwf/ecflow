@@ -2,10 +2,6 @@
     "network":  {
 
             "socks" : {
-                "proxyPort" : {
-                    "label" : "Socks port",
-                    "default" : 9050
-                },
                 "proxyJumpUser" : {
                     "label" : "Proxy jump username",
                     "default" : "$USER"
