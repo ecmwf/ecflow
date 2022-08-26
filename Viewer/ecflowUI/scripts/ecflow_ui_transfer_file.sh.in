@@ -10,17 +10,10 @@
 #============================================================================
 
 set -e
-set -x #goes to stderr
+#set -x #goes to stderr
 
-echo " arguments=$*" >&2
-
-#if [[ $# -ne 7 ]] ; then
-#    echo "Error: wrong number of arguments = $# (must be 7)" >&2
-#    if [[ $# -eq 0 ]] ; then
-#        echo "This script should only be called from within ecflow_ui." >&2
-#    fi
-#    exit 1
-#fi
+# echo " arguments=$*"
+echo "shell=${SHELL}"
 
 mode=
 sourceFile=
@@ -30,6 +23,9 @@ targetFile=
 proxyJump=
 byteMode=
 byteValue=
+sshProxyJump=
+sshOptions="-o StrictHostKeyChecking=no"
+scpOptions="-o StrictHostKeyChecking=no"
 
 while getopts m:s:u:h:t:j:b:v: flag
 do
@@ -46,15 +42,15 @@ do
 done
 
 echo ""
-echo "mode=$mode" >&2
-echo "sourceFile=$sourceFile" >&2
-echo "remoteUid=$remoteUid" >&2
-echo "remoteHost=$remoteHost" >&2
-echo "targetFile=$targetFile" >&2
-echo "proxyJump=$proxyJump" >&2
-echo "byteMode=$byteMode" >&2
-echo "byteValue=$byteValue" >&2
-echo "remoteUid=$remoteUid" >&2
+echo "mode=$mode"
+echo "sourceFile=$sourceFile"
+echo "remoteUid=$remoteUid"
+echo "remoteHost=$remoteHost"
+echo "targetFile=$targetFile"
+echo "proxyJump=$proxyJump"
+echo "byteMode=$byteMode"
+echo "byteValue=$byteValue"
+echo "remoteUid=$remoteUid"
 echo ""
 
 if [[ $mode != "file" && $mode != "dir" ]] ; then
@@ -83,9 +79,13 @@ if [[ $proxyJump == "" ]] ; then
 elif [[ $proxyJump == "__NOJUMP__" ]] ; then
     proxyJump=""
 else
-    proxyJump="-J ${proxyJump}"
+    sshProxyJump="-J ${proxyJump}"
+    if [[ ${scpOptions} == "" ]] ; then
+        echo "scpOptions cannot be empty!" >&2
+        exit 1
+    fi
+    scpOptions="${scpOptions},ProxyJump=${proxyJump}"
 fi
-
 
 if [[ $mode == "file" ]] ; then
     if [[ $byteMode != "all" && $byteMode != "pos" &&  $byteMode != "last" ]] ; then
@@ -113,42 +113,49 @@ if [[ $remoteUid == "__USER__" ]]  ; then
     remoteUid=${USER}
 fi
 
+remoteUH="${remoteUid}@${remoteHost}"
+
 # fetching a file
 if [[ $mode == "file" ]] ; then
+    
     # transfer the whole file
     if [[ $byteMode == "all" ]] ; then
-        #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
-        echo "scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}" >&2
-        scp ${proxyJump} ${remoteUid}@${remoteHost}:${sourceFile} ${targetFile}
+        echo "transfer the whole file"
+        (set -x; scp ${scpOptions} ${remoteUH}:${sourceFile} ${targetFile})
 
-    # tranfers from a given byte offset
+    # tranfer from a given byte offset
     elif  [[ $byteMode == "pos" ]] ; then
         cmd=$(cat <<-END
             tail -c +$((${byteValue}+1)) ${sourceFile}
 END
 )       
-        echo "cmd="$cmd >&2
-        ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd}" > ${targetFile}
-        st=$?
-        echo "status="$st >&2
-
+        echo "transfer file from byte offset=${byteValue}"
+        (set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
+       
     #transfer the last bytes of the file
+    elif [[ $byteMode == "last" ]] ; then
+        cmd=$(cat <<-END
+            sourceSize=\$(wc -c < ${sourceFile})
+            if [[ \${sourceSize} -gt 0 && \${sourceSize} -le ${byteValue} ]] ; then 
+                cat ${sourceFile}
+            else
+                tail -c ${byteValue} ${sourceFile}
+            fi
+END
+)
+        #printf 'cmd: %s\n' "${cmd}"
+        echo "transfer last ${byteValue} bytes"
+        (set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
     else
-        sourceSize=$(ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
-
-        if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
-            #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
-            scp ${proxyJump} ${remoteHost}:/${sourceFile} ${targetFile}
-        else
-            ssh ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
-        fi
+        echo "Invalid byteMode=${byteMode} option" >&2 
+        exit 1
     fi
 # fetching directory listing
 else
     dirPath=$(dirname ${sourceFile})
     sourceName=$(basename ${sourceFile})
-    echo "dirPath="$dirPath >&2
-    echo "sourceName="$sourceName >&2
+    echo "dirPath="$dirPath
+    echo "sourceName="$sourceName
     pattern=$(echo $sourceName | cut -d '.' -f 1)".*"
    
     # the task here is to get the file modification date, file size in bytes
@@ -166,6 +173,6 @@ else
     done
 END
 )
-
-    ssh ${proxyJump}  ${remoteUid}@${remoteHost} -o StrictHostKeyChecking=no "${cmd}" > ${targetFile}
+    echo "get directory listing"
+    (set -x; ssh ${sshProxyJump}  ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
 fi

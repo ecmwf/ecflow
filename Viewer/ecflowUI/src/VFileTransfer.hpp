@@ -27,6 +27,7 @@ public:
     void stopTransfer(bool broadcast);
     bool isActive() const;
     QString remoteUserAndHost() const {return remoteUserAndHost_;}
+    static void socksRemoteUserAndHost(QString& user, QString& host);
 
 protected Q_SLOTS:
     void slotProcFinished(int,QProcess::ExitStatus);
@@ -46,7 +47,6 @@ protected:
                                         ByteMode byteMode, std::size_t byteVal) const = 0;
     QString stdErr();
     static QString buildSocksProxyJump();
-    static void socksRemoteUserAndHost(QString& user, QString& host);
 
     QProcess* proc_;
     QString targetFile_;

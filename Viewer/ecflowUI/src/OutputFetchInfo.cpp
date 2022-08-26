@@ -308,7 +308,7 @@ QString OutputDirFetchInfo::makeHtml(VReply *reply,VInfo_ptr /*info*/)
     {
         html+="<p><u>How was this directory listing fetched?</u></p>";
         for (auto it: tries) {
-            html+="path=" + it.first;
+            html+="pattern: <i>" + it.first + "</i>";
             html+=buildList(it.second,true);
         }
     }

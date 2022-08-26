@@ -28,7 +28,7 @@ static QMap<QProcess::ProcessError, QString> errorStr;
 VFileTransferCore::VFileTransferCore(QObject* parent) :
     QObject(parent),
     proc_(nullptr),
-    ignoreSetX_(true),
+    ignoreSetX_(false),
     scriptName_("ecflow_ui_transfer_file.sh")
 {
     if (errorStr.isEmpty()) {
@@ -82,8 +82,8 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
         connect(proc_,SIGNAL(finished(int,QProcess::ExitStatus)),
                 this,SLOT(slotProcFinished(int,QProcess::ExitStatus)));
 
-        connect(proc_,SIGNAL(readyReadStandardOutput()),
-                this,SLOT(slotStdOutput()));
+//        connect(proc_,SIGNAL(readyReadStandardOutput()),
+//                this,SLOT(slotStdOutput()));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         connect(proc_,SIGNAL(errorOccurred(QProcess::ProcessError)),
@@ -161,8 +161,11 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     if(!proc_)
         return;
 
-    QString stdOutTxt(proc_->readAllStandardOutput());
     QString stdErrTxt=stdErr();
+    QString stdOutTxt(proc_->readAllStandardOutput());
+
+    stdErrTxt = stdErrTxt.trimmed();
+    stdOutTxt = stdOutTxt.trimmed();
 
 #ifdef UI_FILETRANSFER_DEBUG_
     UiLog().dbg() << "exitCode=" << exitCode << " exitStatus=" << exitStatus;
@@ -174,12 +177,12 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     QString errTxt=stdOutTxt;
     if(!errTxt.isEmpty())
     {
-        errTxt+="/n";
+        errTxt+="\n\n";
     }
     errTxt+=stdErrTxt;
     QString errPreTxt="Script <b>" + scriptName_ + "</b> ";
-    errPreTxt+=errorStr.value(proc_->error(),"failed") + "!";
-    errPreTxt+=" Output:\n\n";
+    errPreTxt+=errorStr.value(proc_->error(),"failed") + "!\n\n";
+    //errPreTxt+=" Output:\n\n";
     errTxt.prepend(errPreTxt);
 
     if(exitCode == 0 && exitStatus == QProcess::NormalExit)
@@ -211,7 +214,9 @@ void VFileTransferCore::slotErrorOccurred(QProcess::ProcessError e)
 {
 #ifdef UI_FILETRANSFER_DEBUG_
     UI_FUNCTION_LOG
-    UiLog().dbg() << "errorString=" << proc_->errorString();
+    if (proc_) {
+        UiLog().dbg() << "errorString=" << proc_->errorString();
+    }
 #endif
     slotProcFinished(1, QProcess::CrashExit);
 }
@@ -223,6 +228,7 @@ void VFileTransferCore::slotStdOutput()
     if(!proc_)
         return;
 
+//    UiLog().dbg() << "STDOUT=" << QString(proc_->readAllStandardOutput());
     Q_EMIT stdOutputAvailable(proc_->readAllStandardOutput());
 }
 
@@ -247,8 +253,8 @@ QString VFileTransferCore::buildSocksProxyJump()
 {
     QString s;
     if (VConfig::instance()->proxychainsUsed()) {
-        auto p1 = VConfig::instance()->find("network.socks.proxyJumpUser");
-        auto p2 = VConfig::instance()->find("network.socks.proxyJumpHost");
+        auto p1 = VConfig::instance()->find("network.sshJump.proxyJumpUser");
+        auto p2 = VConfig::instance()->find("network.sshJump.proxyJumpHost");
         if (p1 && p2) {
             QString user = p1->valueAsString();
             if (user.isEmpty() || user == "$USER") {

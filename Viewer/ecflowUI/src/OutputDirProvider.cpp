@@ -315,6 +315,16 @@ void OutputDirFetchTransferTask::run()
 
     dir_.reset();
     resFile_.reset();
+
+    QString rUser, rHost;
+    VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
+    if (rUser.isEmpty() || rHost.isEmpty()) {
+        owner_->reply_->addLogTryEntry("fetch from SOCKS host via ssh: NOT DEFINED");
+        finish();
+        return;
+    }
+
+
     resFile_ = VFile::createTmpFile(true);
 
     if (!transfer_) {
@@ -342,7 +352,7 @@ void OutputDirFetchTransferTask::transferFinished()
 
     QFile f(QString::fromStdString(resFile_->path()));
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        addTryLog(reply, "fetch via ssh : FAILED");
+        addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
         return;
     }
 
@@ -363,7 +373,7 @@ void OutputDirFetchTransferTask::transferFinished()
     dir_->setFetchModeStr(method);
     dir_->setFetchDate(QDateTime::currentDateTime());
 
-    addTryLog(reply, "fetch via ssh : OK");
+    addTryLog(reply, "fetch from SOCKS host via ssh: OK");
     reply->appendDirectory(dir_);
 
     resFile_.reset();
@@ -374,13 +384,7 @@ void OutputDirFetchTransferTask::transferFinished()
 
 void OutputDirFetchTransferTask::transferProgress(QString msg,int value)
 {
-    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
-
     owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
-
-    //reply_->setInfoText(msg.toStdString());
-    //owner_->infoProgress(reply_);
-    //reply_->setInfoText("");
 }
 
 void OutputDirFetchTransferTask::transferFailed(QString msg)
@@ -389,7 +393,7 @@ void OutputDirFetchTransferTask::transferFailed(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    addTryLog(reply, "fetch via ssh : FAILED");
+    addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
     reply->appendErrorText("Failed to fetch via ssh\n");
     resFile_.reset();
     fail();

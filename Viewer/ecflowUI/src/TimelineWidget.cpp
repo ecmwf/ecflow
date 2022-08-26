@@ -30,6 +30,7 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 #include "ViewerUtil.hpp"
+#include "VConfig.hpp"
 #include "VFileInfo.hpp"
 #include "VFileTransfer.hpp"
 #include "VNode.hpp"
@@ -908,8 +909,13 @@ void TimelineWidget::loadLatest(bool usePrevState)
                     this,SLOT(slotFileTransferStdOutput(QString)));
         }
 
-        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
+        if (VConfig::instance()->proxychainsUsed()) {
+           fileTransfer_->transferLocalViaSocks(logFile_,QString::fromStdString(tmpLogFile_->path()),
+                                                VFileTransfer::LastBytes, maxReadSize_);
+        } else {
+            fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
                                 remoteUid_,VFileTransfer::LastBytes, maxReadSize_);
+        }
     }
     // load local file
     else

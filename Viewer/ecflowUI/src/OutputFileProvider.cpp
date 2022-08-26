@@ -362,8 +362,7 @@ void OutputFileFetchTransferTask::clear()
     OutputFileFetchTask::clear();
 }
 
-//Create an output client (to access the logserver) and ask it to the fetch the
-//file asynchronously. The output client will call clientFinished() or
+//Fetch the file asynchronously via ssh. The output client will call clientFinished() or
 //clientError eventually!!
 void OutputFileFetchTransferTask::run()
 {
@@ -375,6 +374,15 @@ void OutputFileFetchTransferTask::run()
     assert(VConfig::instance()->proxychainsUsed());
 
     resFile_.reset();
+
+    QString rUser, rHost;
+    VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
+    if (rUser.isEmpty() || rHost.isEmpty()) {
+        owner_->reply_->addLogTryEntry("fetch file from SOCKS host via scp: NOT DEFINED");
+        finish();
+        return;
+    }
+
     resFile_ = VFile::createTmpFile(false);
 
     if (!transfer_) {
@@ -397,7 +405,7 @@ void OutputFileFetchTransferTask::run()
                        QString::fromStdString(resFile_->path()),
                        VFileTransfer::AllBytes, 0);
     }
-    owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> via scp", 0);
+    owner_->owner_->infoProgressStart("Getting local file <i>" + filePath_ +  "</i> from SOCKS host via scp", 0);
 }
 
 void OutputFileFetchTransferTask::transferFinished()
@@ -411,9 +419,9 @@ void OutputFileFetchTransferTask::transferFinished()
     reply->fileReadMode(VReply::TransferReadMode);
 
     if (deltaPos_ > 0) {
-        reply->addLogTryEntry("fetch file increment via scp : OK");
+        reply->addLogTryEntry("fetch file increment from SOCKS host via scp : OK");
     } else {
-        reply->addLogTryEntry("fetch file via scp : OK");
+        reply->addLogTryEntry("fetch file from SOCKS host via scp : OK");
     }
 
     resFile_->setSourcePath(filePath_);
@@ -451,8 +459,8 @@ void OutputFileFetchTransferTask::transferFailed(QString msg)
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-    reply->addLogTryEntry("fetch file via scp : FAILED");
-    reply->appendErrorText("Failed to fetch via scp\n");
+    reply->addLogTryEntry("fetch file from SOCKS host via scp : FAILED");
+    reply->appendErrorText("Failed to fetch from SOCKS host via scp\n");
     resFile_.reset();
     fail();
 }
