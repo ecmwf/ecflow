@@ -195,15 +195,6 @@ public:
         int id=IconProvider::add(iconPath,iconPath);
         pix_=IconProvider::pixmap(id,16);
         pixSmall_=IconProvider::pixmap(id,12);
-
-//        if(bg == bgLight)
-//        {
-//            bg_=bg.name();
-//        }
-//        else
-//        {
-//            bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
-//        }
     }
 
     MessageLabelDefData()  = default;
@@ -247,7 +238,6 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	msgLabel_=new QLabel(this);
     msgLabel_->setWordWrap(true);
 	msgLabel_->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
-//    msgLabel_->setAutoFillBackground(true);
 
     //load widget
     loadWidget_=new MessageLabelLoadWidget(this);
