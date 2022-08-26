@@ -53,6 +53,7 @@ void VFileTransferCore::clear()
     targetFile_.clear();
     byteMode_=AllBytes;
     byteVal_=0;
+    transferDuration_ = 0;
 }
 
 void VFileTransferCore::transferLocalViaSocks(QString sourceFile, QString targetFile, ByteMode byteMode, size_t byteVal)
@@ -81,9 +82,6 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
 
         connect(proc_,SIGNAL(finished(int,QProcess::ExitStatus)),
                 this,SLOT(slotProcFinished(int,QProcess::ExitStatus)));
-
-//        connect(proc_,SIGNAL(readyReadStandardOutput()),
-//                this,SLOT(slotStdOutput()));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         connect(proc_,SIGNAL(errorOccurred(QProcess::ProcessError)),
@@ -119,6 +117,8 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
     QString command = buildCommand(sourceFile, targetFile, remoteUid, host, byteMode, byteVal);
 
     UiLog().dbg() << "command=" << command;
+
+    stopper_.start();
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     proc_->start("/bin/sh", QStringList() << "-c" << command);
@@ -161,6 +161,8 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     if(!proc_)
         return;
 
+    transferDuration_ = stopper_.elapsed();
+
     QString stdErrTxt=stdErr();
     QString stdOutTxt(proc_->readAllStandardOutput());
 
@@ -182,7 +184,6 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     errTxt+=stdErrTxt;
     QString errPreTxt="Script <b>" + scriptName_ + "</b> ";
     errPreTxt+=errorStr.value(proc_->error(),"failed") + "!\n\n";
-    //errPreTxt+=" Output:\n\n";
     errTxt.prepend(errPreTxt);
 
     if(exitCode == 0 && exitStatus == QProcess::NormalExit)
@@ -221,16 +222,6 @@ void VFileTransferCore::slotErrorOccurred(QProcess::ProcessError e)
     slotProcFinished(1, QProcess::CrashExit);
 }
 #endif
-
-
-void VFileTransferCore::slotStdOutput()
-{
-    if(!proc_)
-        return;
-
-//    UiLog().dbg() << "STDOUT=" << QString(proc_->readAllStandardOutput());
-    Q_EMIT stdOutputAvailable(proc_->readAllStandardOutput());
-}
 
 QString VFileTransferCore::stdErr()
 {

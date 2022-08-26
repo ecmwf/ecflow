@@ -73,20 +73,21 @@ OutputFileFetchCacheTask::OutputFileFetchCacheTask(OutputFileProvider* owner) :
 void OutputFileFetchCacheTask::run()
 {
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " useCache=" << useCache_;
 #endif
 
     assert(node_);
 
     //We try use the cache
     if(useCache_)
-    {
+    {        
         //Check if the given output is already in the cache
         if(OutputCacheItem* item=owner_->findInCache(filePath_))
         {
             VFile_ptr f=item->file();
             assert(f);
             f->setCached(true);
+            f->setTransferDuration(0);
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
             UiLog().dbg() << " File found in cache";
 #endif
@@ -226,6 +227,7 @@ void OutputFileFetchRemoteTask::clientFinished()
     client_->clearResult();
 
     //Files retrieved from the log server are automatically added to the cache!
+    //sourcePath must be already set on tmp
     if (useCache_ && !tmp->hasDeltaContents()) {
         owner_->addToCache(tmp);
     }
@@ -383,7 +385,7 @@ void OutputFileFetchTransferTask::run()
         return;
     }
 
-    resFile_ = VFile::createTmpFile(false);
+    resFile_ = VFile::createTmpFile(true); //we will delete the file from disk
 
     if (!transfer_) {
         transfer_ = new VFileTransfer(this);
@@ -410,10 +412,6 @@ void OutputFileFetchTransferTask::run()
 
 void OutputFileFetchTransferTask::transferFinished()
 {
-    //Files retrieved from the log server are automatically added to the cache!
-    if (useCache_ && deltaPos_ == 0) {
-        owner_->addToCache(resFile_);
-    }
     auto reply = owner_->reply_;
     reply->setInfoText("");
     reply->fileReadMode(VReply::TransferReadMode);
@@ -431,14 +429,20 @@ void OutputFileFetchTransferTask::transferFinished()
     std::string method="via ssh";
     if (transfer_) {
         method = "from " + transfer_->remoteUserAndHost().toStdString() + " " + method;
+        resFile_->setTransferDuration(transfer_->transferDuration());
     }
 
     resFile_->setFetchModeStr(method);
     resFile_->setFetchDate(QDateTime::currentDateTime());
 
+    //Files retrieved from the log server are automatically added to the cache!
+    //To make it work sourcePath must be set on resFile_ !!!
+    if (useCache_ && deltaPos_ == 0) {
+        owner_->addToCache(resFile_);
+    }
+
     reply->tmpFile(resFile_);
     resFile_.reset();
-
     succeed();
 }
 
@@ -543,6 +547,7 @@ void OutputFileProvider::clear()
 //Check if the given output is already in the cache
 OutputCacheItem* OutputFileProvider::findInCache(const std::string& fileName)
 {
+    outCache_->print();
     return outCache_->attachOne(info_,fileName);
 }
 
@@ -802,6 +807,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
 void OutputFileProvider::fetchQueueSucceeded()
 {
     owner_->infoReady(reply_);
+    reply_->reset();
 }
 
 void OutputFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
@@ -814,6 +820,7 @@ void OutputFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNo
         reply_->setErrorText("Failed to fetch file!");
     }
     owner_->infoFailed(reply_);
+    reply_->reset();
 }
 
 // this must be called from the queue and must be the last task of the queue

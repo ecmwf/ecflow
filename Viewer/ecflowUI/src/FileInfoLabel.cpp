@@ -297,7 +297,7 @@ void DirInfoLabel::update(VReply* reply)
     }
 
     QColor col(39,49,101);
-    QString s="Directory listing updated at " + Viewer::formatBoldText(" at ",col) +
+    QString s="Directory listing updated" + Viewer::formatBoldText(" at ",col) +
             dt.toString("yyyy-MM-dd HH:mm:ss");
     setText(s);
 }

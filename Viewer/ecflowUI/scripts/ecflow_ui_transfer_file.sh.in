@@ -12,8 +12,8 @@
 set -e
 #set -x #goes to stderr
 
-# echo " arguments=$*"
-echo "shell=${SHELL}"
+#echo " arguments=$*"
+#echo "shell=${SHELL}"
 
 mode=
 sourceFile=
@@ -84,7 +84,7 @@ else
         echo "scpOptions cannot be empty!" >&2
         exit 1
     fi
-    scpOptions="${scpOptions},ProxyJump=${proxyJump}"
+    scpOptions="${scpOptions} -o ProxyJump=${proxyJump}"
 fi
 
 if [[ $mode == "file" ]] ; then

@@ -13,6 +13,7 @@
 
 #include <QDateTime>
 #include <QProcess>
+#include <QElapsedTimer>
 
 class VFileTransferCore : public QObject
 {
@@ -28,10 +29,10 @@ public:
     bool isActive() const;
     QString remoteUserAndHost() const {return remoteUserAndHost_;}
     static void socksRemoteUserAndHost(QString& user, QString& host);
+    unsigned int transferDuration() const {return transferDuration_;}
 
 protected Q_SLOTS:
     void slotProcFinished(int,QProcess::ExitStatus);
-    void slotStdOutput();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     void slotErrorOccurred(QProcess::ProcessError);
 #endif
@@ -55,6 +56,8 @@ protected:
     QString remoteUserAndHost_;
     bool byteMode_{AllBytes};
     size_t byteVal_{0};
+    unsigned int transferDuration_{0};
+    QElapsedTimer stopper_;
 };
 
 

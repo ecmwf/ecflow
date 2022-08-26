@@ -325,7 +325,7 @@ void OutputDirFetchTransferTask::run()
     }
 
 
-    resFile_ = VFile::createTmpFile(true);
+    resFile_ = VFile::createTmpFile(true);  //we will delete the file from disk
 
     if (!transfer_) {
         transfer_ = new VDirTransfer(this);

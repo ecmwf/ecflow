@@ -54,7 +54,7 @@
      <item>
       <widget class="QToolButton" name="fetchInfoTb">
        <property name="toolTip">
-        <string>Ditailed in formation about the directory listing fetch process</string>
+        <string>Detailed information about the directory listing fetch process</string>
        </property>
        <property name="text">
         <string>...</string>
