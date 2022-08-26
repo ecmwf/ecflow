@@ -189,21 +189,21 @@ void MessageLabelProgWidget::showDelayedProgress()
 
 class MessageLabelDefData {
 public:
-    MessageLabelDefData(QString iconPath,QString title,QColor bg, QColor bgLight,QColor border) :
+    MessageLabelDefData(QString iconPath,QString title,QColor bg, QColor border) :
         title_(title), bg_(bg.name()), border_(border.name())
     {
         int id=IconProvider::add(iconPath,iconPath);
         pix_=IconProvider::pixmap(id,16);
         pixSmall_=IconProvider::pixmap(id,12);
 
-        if(bg == bgLight)
-        {
-            bg_=bg.name();
-        }
-        else
-        {
-            bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
-        }
+//        if(bg == bgLight)
+//        {
+//            bg_=bg.name();
+//        }
+//        else
+//        {
+//            bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
+//        }
     }
 
     MessageLabelDefData()  = default;
@@ -213,7 +213,6 @@ public:
     QString title_;
     QString bg_;
     QString border_;
-
 };
 
 static std::map<MessageLabel::Type,MessageLabelDefData> typeData;
@@ -225,21 +224,21 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 	if(typeData.empty())
 	{        
-        QColor bg(239,244,249);
-        QColor bgLight=bg; //bg.lighter(105);
-        typeData[InfoType]=MessageLabelDefData(":/viewer/info.svg","Info",bg,bgLight,QColor(95,145,200));
+        auto bg = QColor(232,237,238);
+        auto border = QColor(180,194,230);
+        typeData[InfoType]=MessageLabelDefData(":/viewer/info.svg","Info",bg,border);
 
-		bg=QColor(234,215,150);
-        bgLight=bg;//bg.lighter(112);
-        typeData[WarningType]=MessageLabelDefData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,170,91)); //QColor(226,195,110)); //226,170,91
+        bg = {234,215,150};
+        border = {226,195,110};
+        typeData[WarningType]=MessageLabelDefData(":/viewer/warning.svg","Warning",bg,border);
 
-		bg=QColor(255,231,231);
-        bgLight=bg;//bg.lighter(105);
-        typeData[ErrorType]=MessageLabelDefData(":/viewer/error.svg","Error",bg,bgLight,QColor(223,152,152));
+        bg = {254,242,241};
+        border = {223,152,152};
+        typeData[ErrorType]=MessageLabelDefData(":/viewer/error.svg","Error",bg,border);
 
-        bg=QColor(232,249,236);
-        bgLight=bg;//bg.lighter(105);
-        typeData[TipType]=MessageLabelDefData(":/viewer/tip.svg","Tip",bg,bgLight,QColor(190,220,190));
+        bg = {232,249,236};
+        border = {90,220,190};
+        typeData[TipType]=MessageLabelDefData(":/viewer/tip.svg","Tip",bg,border);
 	}
 
 	pixLabel_=new QLabel(this);
