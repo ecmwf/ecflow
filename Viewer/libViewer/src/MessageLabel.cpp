@@ -247,6 +247,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	msgLabel_=new QLabel(this);
     msgLabel_->setWordWrap(true);
 	msgLabel_->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+//    msgLabel_->setAutoFillBackground(true);
 
     //load widget
     loadWidget_=new MessageLabelLoadWidget(this);
@@ -347,6 +348,12 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 				    border-radius: 0px;}";
 
 		setStyleSheet(sh);
+
+        sh="QLabel { \
+             background: " + it->second.bg_ + "; \
+             border: none;}";
+
+        msgLabel_->setStyleSheet(sh);
 
         pixLabel_->setPixmap(((!narrowMode_)?it->second.pix_:it->second.pixSmall_));
 
