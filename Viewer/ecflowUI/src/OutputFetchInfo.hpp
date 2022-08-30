@@ -15,23 +15,32 @@
 #include "VInfo.hpp"
 #include "VReply.hpp"
 
-class QLabel;
-class QTextEdit;
+class QAbstractButton;
+class QButtonGroup;
+
+namespace Ui {
+    class OutputFetchInfo;
+}
 
 class OutputFetchInfo : public QWidget
 {
+    Q_OBJECT
 public:
     OutputFetchInfo(QWidget* parent);
     void clearInfo();
     void setInfo(VReply*, VInfo_ptr info=nullptr);
+    void setError(QString);
+
+protected Q_SLOTS:
+    void buttonClicked(QAbstractButton*);
 
 protected:
     virtual QString makeHtml(VReply*, VInfo_ptr info)=0;
     QString buildList(QStringList,bool ordered=false);
     void parseTry(QString s, QString& path, QString& msg);
 
-    QLabel* label_{nullptr};
-    QTextEdit* te_{nullptr};
+    Ui::OutputFetchInfo* ui_{nullptr};
+    QButtonGroup *bGroup_{nullptr};
 };
 
 class OutputFileFetchInfo : public OutputFetchInfo

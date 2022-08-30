@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include <QButtonGroup>
 #include <QDebug>
 #include <QDir>
 #include <QLabel>
@@ -29,21 +30,33 @@
 
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
 
-OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent)
+#include "ui_OutputFetchInfo.h"
+
+OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent),  ui_(new Ui::OutputFetchInfo)
 {
-    auto *vb=new QVBoxLayout(this);
-    label_=new QLabel(this);
-    label_->setText("<b>Additional information</b>");
+    ui_->setupUi(this);
 
-    te_=new QTextEdit(this);
-    te_->setReadOnly(true);
-    te_->setMinimumWidth(350);
+    ui_->te->setMinimumWidth(350);
+    ui_->logTe->setMinimumWidth(350);
+//    ui_->stackedWidget->setMinimumWidth(350);
+//    ui_->stackedWidget->setMinimumHeight(350);
+    ui_->stackedWidget->setCurrentIndex(0);
 
-    vb->addWidget(label_);
-    vb->addWidget(te_,1);
+    bGroup_ = new QButtonGroup(this);
+    bGroup_->addButton(ui_->infoTb);
+    bGroup_->addButton(ui_->logTb);
+    ui_->infoTb->setChecked(true);
+
+    connect(bGroup_, SIGNAL(buttonClicked(QAbstractButton*)),
+            this, SLOT(buttonClicked(QAbstractButton*)));
 }
 
+void OutputFetchInfo::buttonClicked(QAbstractButton* b)
+{
+    ui_->stackedWidget->setCurrentIndex((b == ui_->infoTb)?0:1);
+}
 
 QString OutputFetchInfo::buildList(QStringList lst,bool ordered)
 {
@@ -64,20 +77,26 @@ QString OutputFetchInfo::buildList(QStringList lst,bool ordered)
 
 void OutputFetchInfo::clearInfo()
 {
-    te_->clear();
+    ui_->te->clear();
+    ui_->logTe->clear();
 }
 
 void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
 {
     Q_ASSERT(reply);
-    te_->clear();
+    ui_->te->clear();
 
     QString html = makeHtml(reply, info);
-    te_->setHtml(html);
+    ui_->te->setHtml(html);
 
-    QTextCursor cursor=te_->textCursor();
+    QTextCursor cursor=ui_->te->textCursor();
     cursor.movePosition(QTextCursor::Start);
-    te_->setTextCursor(cursor);
+    ui_->te->setTextCursor(cursor);
+}
+
+void OutputFetchInfo::setError(QString err)
+{
+    ui_->logTe->setPlainText(err);
 }
 
 void OutputFetchInfo::parseTry(QString s, QString& path, QString& msg)
@@ -165,21 +184,30 @@ QString OutputFileFetchInfo::makeHtml(VReply *reply,VInfo_ptr info)
         bool rfd=server->readFromDisk();
         QString t;
 
-        t="The following are tried in order:<ul>";
+        t="The following steps are tried in order to fetch the output files:<ul>";
+        t+="<li>fetch from the logserver (if defined)</li>";
 
+        bool proxy = VConfig::instance()->proxychainsUsed();
         if(rfd)
         {
-            t+="<li>Try to read the output files from the logserver \
-               (if defined)</li><li>from disk</li><li>\
-               through the ecflow server (if the <b>current</b> job output) </li>";
+            if (proxy) {
+                t+="<li>read from disk on remote SOCKS host via ssh/scp</li>";
+            } else {
+                t+="<li>read from disk</li>";
+            }
         }
         else
         {
-            t+="<li>Try to read the output files from the logserver \
-               (if defined)</li><li>from disk (if <b>not</b> the <b>current</b> job output)</li>\
-               <li>from the ecflow server (if the <b>current</b> job output)</li> ";
+            if (proxy) {
+                t+="<li>read from disk on remote SOCKS host via ssh/scp (if <b>not</b> the <b>current</b> job output)</li>";
+            } else {
+                t+="<li>read from disk (if <b>not</b> the <b>current</b> job output)</li>";
+            }
         }
-        t+="</ul> (To change this behaviour go Tools -> Preferences -> Server settings -> Fetching files)";
+
+        t+="<li>fetch from the ecflow server (if the <b>current</b> job output) </li> ";
+
+        t+="</ul> (To enable/disable the read from disk option go Tools -> Preferences -> Server settings -> Fetching files)";
 
         alg=t;
 

@@ -395,7 +395,7 @@ fi
 
 exe=${EXE_DIR}/ecflow_ui.x
 
-if [ ${ECFLOWUI_USER_START_CMD} = "proxychains4" ] ; then
+if [[ ${ECFLOWUI_USER_START_CMD} = "proxychains" || ${ECFLOWUI_USER_START_CMD} = "proxychains"[4-9] ]] ; then
     export ECFLOWUI_USE_PROXYCHAINS=1
 fi
 

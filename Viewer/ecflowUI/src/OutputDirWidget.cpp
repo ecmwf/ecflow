@@ -223,17 +223,7 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     owner_->ui_->messageLabel->showError(err);
 
     owner_->fetchInfo_->setInfo(reply);
-#if 0
-    auto err = owner_->formatErrors(reply->errorTextVec());
-#ifdef UI_OUTPUTDIRWIDGET_DEBUG_
-    UiLog().dbg() << UI_FN_INFO << "err=" << err;
-#endif
-    if (!err.isEmpty()) {
-        owner_->ui_->messageLabel->showError(err);
-    } else {
-        owner_->ui_->messageLabel->showError("Failed to fetch directory listing");
-    }
-#endif
+    owner_->fetchInfo_->setError(owner_->formatErrors(reply->errorTextVec()));
     owner_->ui_->reloadTb->setEnabled(true);
     owner_->show();
     owner_->requestShrink();

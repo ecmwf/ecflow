@@ -118,7 +118,6 @@ void OutputFetchQueue::next()
             prev->setQueue(nullptr);
             if (!queue_.empty()) {
                 auto current = queue_.front();
-                UiLog().dbg() << "OutputFetchQueue::next";
                 if (!current->checRunCondition(prev)) {
 #ifdef OUTPUTFETCHTASK_DEBUG__
                     UiLog().dbg() << " skip current";

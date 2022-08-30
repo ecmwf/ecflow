@@ -123,7 +123,7 @@ if [[ $mode == "file" ]] ; then
         echo "transfer the whole file"
         (set -x; scp ${scpOptions} ${remoteUH}:${sourceFile} ${targetFile})
 
-    # tranfer from a given byte offset
+    # transfer from a given byte offset
     elif  [[ $byteMode == "pos" ]] ; then
         cmd=$(cat <<-END
             tail -c +$((${byteValue}+1)) ${sourceFile}

@@ -333,6 +333,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputBrowser.hpp
     OutputCache.hpp
     OutputClient.hpp
+    OutputFetchInfo.hpp
     OutputFileClient.hpp
     OutputDirClient.hpp
     OutputItemWidget.hpp
@@ -445,7 +446,8 @@ set(viewer_wrap_ui_files
     NodeQuerySaveDialog.ui
     NodeSearchWindow.ui
     NodeSearchWidget.ui
-    OutputItemWidget.ui 
+    OutputFetchInfo.ui
+    OutputItemWidget.ui
     OutputDirWidget.ui
     PropertyDialog.ui
     PropertyEditor.ui
