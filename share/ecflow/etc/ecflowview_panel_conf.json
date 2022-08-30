@@ -124,6 +124,18 @@
                   "label" : "Show shadowed",
                   "default" : "true"
               }
-        }
+        },
+         "timeline" : {
+            "expandFileInfo": {
+            "label": "Expand file info label",
+            "default": "true"
+            }
+        },
+        "server_load" : {
+           "expandFileInfo": {
+           "label": "Expand file info label",
+           "default": "true"
+           }
+       }
     }                     
 }

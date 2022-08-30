@@ -45,6 +45,7 @@ class LogRequestViewHandler;
 class ServerLoadView;
 class VComboSettings;
 class VFileTransfer;
+class VProperty;
 class QSortFilterProxyModel;
 class QHBoxLayout;
 class QVBoxLayout;
@@ -107,6 +108,7 @@ protected Q_SLOTS:
    void slotCancelFileTransfer();
    void slotLoadCustomFile();
    void showLogView(bool b);
+   void slotExpandFileInfo(bool st);
 
 private:
     void clearData(bool usePrevState);
@@ -151,6 +153,8 @@ private:
 
     LogLoadPrevState prevState_;
     bool detached_{false};
+
+    VProperty* expandFileInfoProp_{nullptr};
 };
 
 #endif // LOGLOADWIDGET_HPP

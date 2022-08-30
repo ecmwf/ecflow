@@ -153,15 +153,6 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     connect(viewHandler_,SIGNAL(timeRangeReset()),
             this,SLOT(periodWasReset()));
 
-    //logInfo label
-    ui_->logInfoLabel->setProperty("fileInfo","1");
-    ui_->logInfoLabel->setWordWrap(true);
-    ui_->logInfoLabel->setMargin(2);
-    ui_->logInfoLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    ui_->logInfoLabel->setAutoFillBackground(true);
-    ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
-    ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
-
     // log mode
     ui_->logModeCombo->addItem("Current log","latest");
     ui_->logModeCombo->addItem("Archived log","archive");
@@ -178,6 +169,16 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) :
     connect(ui_->loadFileTb,SIGNAL(clicked()),
             this,SLOT(slotLoadCustomFile()));
 
+    // the icon for this button changes according to state
+    ui_->expandFileInfoTb->setIcon(ViewerUtil::makeExpandIcon(false));
+    ui_->expandFileInfoTb->setMaximumSize(QSize(16, 16));
+    expandFileInfoProp_ = VConfig::instance()->find("panel.timeline.expandFileInfo");
+    Q_ASSERT(expandFileInfoProp_);
+    bool expandSt = expandFileInfoProp_->value().toBool();
+    ui_->expandFileInfoTb->setChecked(expandSt);
+    connect(ui_->expandFileInfoTb,SIGNAL(clicked(bool)),
+            this,SLOT(slotExpandFileInfo(bool)));
+    slotExpandFileInfo(expandSt);
 }
 
 LogLoadWidget::~LogLoadWidget()
@@ -213,7 +214,7 @@ void LogLoadWidget::clear()
     ui_->messageLabel->clear();
     ui_->messageLabel->hide();
 
-    ui_->logInfoLabel->setText(QString());
+    ui_->logInfoLabel->clearIt();
 
     viewHandler_->clear();
     logModel_->clearData();
@@ -256,7 +257,7 @@ void LogLoadWidget::clearData(bool usePrevState)
 
     ui_->messageLabel->clear();
     ui_->messageLabel->hide();
-    ui_->logInfoLabel->setText(QString());
+    ui_->logInfoLabel->clearIt();
 
     viewHandler_->clear();
     logModel_->clearData();
@@ -282,18 +283,16 @@ void LogLoadWidget::clearData(bool usePrevState)
 
 void LogLoadWidget::updateInfoLabel(bool showDetails)
 {
-    QColor col(39,49,101);
-    QString txt;
+    QString txt, compactTxt;
 
     auto data = viewHandler_->data();
 
     if(logMode_ == LatestMode)
     {
-        txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
-
-        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-             Viewer::formatBoldText(" Host: ",col) + host_ +
-             Viewer::formatBoldText(" Port: ",col) + port_;
+        txt= FileInfoLabel::formatKwPair("Log file", logFile_) +
+             FileInfoLabel::formatKwPair(" Server", serverName_) +
+             FileInfoLabel::formatKwPair(" Host", host_) +
+             FileInfoLabel::formatKwPair(" Port", port_);
 
         if(showDetails)
         {
@@ -302,23 +301,23 @@ void LogLoadWidget::updateInfoLabel(bool showDetails)
                 if(localLog_)
                 {
                     VFileInfo fi(logFile_);
-                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                    txt+=FileInfoLabel::formatKwPair(" Size", fi.formatSize());
                 }
                 else
                 {
                     VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
-                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                    txt+=FileInfoLabel::formatKwPair(" Size", fi.formatSize());
                 }
             }
 
-            txt+=Viewer::formatBoldText(" Source: ",col);
+            txt+=FileInfoLabel::formatKey(" Source");
 
             //fetch method and time
             if(localLog_)
             {
                 txt+=" read from disk ";
                 if(data->loadedAt().isValid())
-                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data->loadedAt());
+                    txt+=FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(data->loadedAt());
             }
             else
             {
@@ -331,7 +330,7 @@ void LogLoadWidget::updateInfoLabel(bool showDetails)
                     txt+=" fetch failed from remote host ";
                 }
                 if(transferredAt_.isValid())
-                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
+                    txt+=FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(transferredAt_);
             }
 
             if(data->loadStatus() == LogLoadData::LoadDone)
@@ -359,6 +358,9 @@ void LogLoadWidget::updateInfoLabel(bool showDetails)
                 }
             }
         }
+
+        VFileInfo fInfo(logFile_);
+        compactTxt = FileInfoLabel::formatKwPair("File", fInfo.fileName());
     }
 
     //archived
@@ -366,35 +368,35 @@ void LogLoadWidget::updateInfoLabel(bool showDetails)
     {
         if(archiveLogList_.loadableCount() == 1)
         {
-           txt= Viewer::formatBoldText("Log file: ",col) + archiveLogList_.firstLoadablePath();
+           txt= FileInfoLabel::formatKwPair("Log file",archiveLogList_.firstLoadablePath());
         }
         else if(archiveLogList_.loadableCount() > 1)
         {
-           txt= Viewer::formatBoldText("Log files: ",col) + "multiple ["+
-                   QString::number(archiveLogList_.loadableCount())  + "]";
+            txt= FileInfoLabel::formatKwPair("Log files", "multiple ["+
+                    QString::number(archiveLogList_.loadableCount())  + "]");
         }
 
-        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-            Viewer::formatBoldText(" Host: ",col) + host_ +
-            Viewer::formatBoldText(" Port: ",col) + port_;
+        txt+=FileInfoLabel::formatKwPair(" Server", serverName_) +
+             FileInfoLabel::formatKwPair(" Host", host_) +
+             FileInfoLabel::formatKwPair(" Port", port_);
 
         if(showDetails)
         {
             if(data->loadStatus() == LogLoadData::LoadDone)
             {
                 if(archiveLogList_.loadableCount() == 1)
-                    txt+=Viewer::formatBoldText(" Size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+                    txt+=FileInfoLabel::formatKwPair(" Size", VFileInfo::formatSize(archiveLogList_.totalSize()));
                 else if (archiveLogList_.loadableCount() > 1)
-                    txt+=Viewer::formatBoldText(" Total size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+                    txt+=FileInfoLabel::formatKwPair(" Total size", VFileInfo::formatSize(archiveLogList_.totalSize()));
             }
-
-            txt+=Viewer::formatBoldText(" Source: ",col);
-            txt+=" read from disk ";
+            txt+=FileInfoLabel::formatKwPair(" Source", "read from disk ");
         }
 
+        compactTxt = FileInfoLabel::formatKwPair("Log files", "multiple ["+
+                           QString::number(archiveLogList_.loadableCount())  + "]");
     }
 
-    ui_->logInfoLabel->setText(txt);
+    ui_->logInfoLabel->update(txt, compactTxt);
 
     checkButtonState();
 }
@@ -938,6 +940,18 @@ void LogLoadWidget::resolutionChanged(int)
     else if(idx == 2)
         viewHandler_->setResolution(LogLoadData::HourResolution);
 }
+
+//-------------------------
+// File info label
+//-------------------------
+
+void LogLoadWidget::slotExpandFileInfo(bool st)
+{
+    Q_ASSERT(expandFileInfoProp_);
+    expandFileInfoProp_->setValue(st);
+    ui_->logInfoLabel->setCompact(!st);
+}
+
 
 void LogLoadWidget::writeSettings(VComboSettings* vs)
 {

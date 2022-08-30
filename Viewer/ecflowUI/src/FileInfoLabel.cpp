@@ -14,6 +14,7 @@
 #include <QVariant>
 
 #include "TextFormat.hpp"
+#include "TimelineWidget.hpp"
 #include "VConfig.hpp"
 #include "VFileInfo.hpp"
 #include "VProperty.hpp"
@@ -235,6 +236,33 @@ void FileInfoLabel::update(VReply* reply, VFile_ptr file, QString extraText)
     setToolTip(buildTooltipText());
 }
 
+void FileInfoLabel::update(QString fullText, QString compactText)
+{
+    if (fullText.isEmpty())
+    {
+        clear();
+        fullText_.clear();
+        compactText_.clear();
+        setToolTip("");
+
+    } else {
+        fullText_ = fullText;
+        compactText_ = compactText;
+
+    }
+
+    setText((compact_?compactText_:fullText_));
+    setToolTip(buildTooltipText());
+}
+
+void FileInfoLabel::clearIt()
+{
+    clear();
+    fullText_.clear();
+    compactText_.clear();
+    setToolTip("");
+}
+
 void FileInfoLabel::setCompact(bool st)
 {
     if (st != compact_) {
@@ -269,6 +297,21 @@ QString FileInfoLabel::formatFileSize(QString str,qint64 /*size*/)
     return str;
 }
 
+QString FileInfoLabel::formatKwPair(QString key, QString val)
+{
+     return Viewer::formatBoldText(key + ": ",keyColour) + val;
+}
+
+QString FileInfoLabel::formatKey(QString key)
+{
+     return Viewer::formatBoldText(key + ": ",keyColour);
+}
+
+QString FileInfoLabel::formatHighlight(QString txt)
+{
+     return Viewer::formatBoldText(txt ,keyColour);
+}
+
 //=============================================
 //
 //  DirInfoLabel
@@ -296,8 +339,9 @@ void DirInfoLabel::update(VReply* reply)
         dt=QDateTime::currentDateTime();
     }
 
-    QColor col(39,49,101);
-    QString s="Directory listing updated" + Viewer::formatBoldText(" at ",col) +
+    QString s="Directory listing updated" + Viewer::formatBoldText(" at ", keyColour) +
             dt.toString("yyyy-MM-dd HH:mm:ss");
     setText(s);
 }
+
+

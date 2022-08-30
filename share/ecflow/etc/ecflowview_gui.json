@@ -8,6 +8,8 @@
             "line" : "panel.output.wordWrap",
             "line" : "panel.output.expandFileInfo",
             "line" : "panel.output.showDirPanel",
+            "line" : "panel.timeline.expandFileInfo",
+            "line" : "panel.server_load.expandFileInfo",
             "line" : "view.table.variableColumns"
         },
 
