@@ -25,8 +25,8 @@
 
 #include <QFile>
 
-#define UI_OUTPUTDIRPROVIDER_DEBUG__
-#define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+//#define UI_OUTPUTDIRPROVIDER_DEBUG__
+//#define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
 
 OutputDirFetchTask::OutputDirFetchTask(const std::string& name, OutputDirProvider* owner) :
     OutputFetchTask(name), owner_(owner)
@@ -96,7 +96,7 @@ void OutputDirFetchRemoteTask::clear()
 }
 
 //Create an output client (to access the logserver) and ask it to the fetch the
-//file asynchronously. The output client will call clientFinished() or
+//dir asynchronously. The output client will call clientFinished or
 //clientError eventually!!
 void OutputDirFetchRemoteTask::run()
 {
@@ -138,11 +138,6 @@ void OutputDirFetchRemoteTask::run()
         }
 
         Q_ASSERT(client_);
-//        UiLog().dbg() << "OutputFileProvider: logserver=" << client_->longName() << " file=" << filePath_;
-//        owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> from" +
-//                                  ((userLogServerUsed)?"<b>user defined</b>":"") +
-//                                  " log server <i> " + client_->longName() + "</i>",0);
-
 
         // fetch the file asynchronously
         status_ = RunningStatus;
@@ -165,9 +160,6 @@ void OutputDirFetchRemoteTask::clientFinished()
     VDir_ptr dir = client_->result();
     if(dir)
     {
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
-        UI_FN_DBG
-#endif
         dir->setFetchMode(VDir::LogServerFetchMode);
         std::string method="served by " + client_->longName();
         dir->setFetchModeStr(method);
@@ -222,7 +214,7 @@ OutputDirFetchLocalTask::OutputDirFetchLocalTask(OutputDirProvider *owner) :
 void OutputDirFetchLocalTask::run()
 {
 #ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
-    UI_FN_DBG
+    UiLog().dbg() <<  UI_FN_INFO << "filePath=" << filePath_;
 #endif
     VDir_ptr res;
 
@@ -306,7 +298,7 @@ void OutputDirFetchTransferTask::clear()
 //clientError eventually!!
 void OutputDirFetchTransferTask::run()
 {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+#ifdef  UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
 
@@ -324,7 +316,6 @@ void OutputDirFetchTransferTask::run()
         return;
     }
 
-
     resFile_ = VFile::createTmpFile(true);  //we will delete the file from disk
 
     if (!transfer_) {
@@ -340,7 +331,6 @@ void OutputDirFetchTransferTask::run()
     Q_ASSERT(transfer_);
     transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
                        QString::fromStdString(resFile_->path()));
-
 
 }
 
@@ -390,11 +380,8 @@ void OutputDirFetchTransferTask::transferProgress(QString msg,int value)
 void OutputDirFetchTransferTask::transferFailed(QString msg)
 {
     auto reply = owner_->reply_;
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
-#endif
     addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
-    reply->appendErrorText("Failed to fetch via ssh\n");
+    reply->appendErrorText("Failed to fetch from SOCKS host via ssh\n" + msg.toStdString());
     resFile_.reset();
     fail();
 }
@@ -408,7 +395,7 @@ void OutputDirFetchTransferTask::parseLine(QString line)
         size_t mTime = lst[0].toUInt();
         int fSize = lst[1].toInt();
         QString fName = line.mid(lst[0].count()+1+lst[1].count()+1);
-        UiLog().dbg() << UI_FN_INFO << fName << " " << fSize << " " << mTime;
+        //UiLog().dbg() << UI_FN_INFO << fName << " " << fSize << " " << mTime;
         dir_->addItem(fName.toStdString(),fSize,mTime);
     }
 }
@@ -519,6 +506,10 @@ void OutputDirProvider::visit(VInfoNode* info)
             fetchQueue_->add(t);
         }
     }
+
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
+#endif
     fetchQueue_->run();
 }
 
@@ -528,15 +519,12 @@ void OutputDirProvider::fetchQueueSucceeded()
 
 void OutputDirProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*)
 {
-#ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
-    UI_FN_DBG
-#endif
     reply_->setInfoText("");
     if (reply_->directories().empty()) {
         owner_->infoFailed(reply_);
     } else {
 #ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
-        UiLog().dbg() << " dirs=" << reply_->directories().size();
+        UiLog().dbg() << UI_FN_INFO << "dirs=" << reply_->directories().size();
 #endif
         owner_->infoReady(reply_);
     }

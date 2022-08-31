@@ -26,7 +26,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#define UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+//#define UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
 #define UI_OUTPUTFILEPROVIDER_DEBUG__
 
 //=================================
@@ -84,13 +84,13 @@ void OutputFileFetchCacheTask::run()
         //Check if the given output is already in the cache
         if(OutputCacheItem* item=owner_->findInCache(filePath_))
         {
+#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+            UiLog().dbg() << " File found in cache";
+#endif
             VFile_ptr f=item->file();
             assert(f);
             f->setCached(true);
             f->setTransferDuration(0);
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-            UiLog().dbg() << " File found in cache";
-#endif
             auto reply = owner_->reply_;
             reply->setInfoText("");
             reply->fileReadMode(VReply::LogServerReadMode);
@@ -254,21 +254,12 @@ void OutputFileFetchRemoteTask::clientFinished()
 
 void OutputFileFetchRemoteTask::clientProgress(QString msg,int value)
 {
-    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
-
     owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
-
-    //reply_->setInfoText(msg.toStdString());
-    //owner_->infoProgress(reply_);
-    //reply_->setInfoText("");
 }
 
 void OutputFileFetchRemoteTask::clientError(QString msg)
 {
     auto reply = owner_->reply_;
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
-#endif
     reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : FAILED");
     reply->appendErrorText("Failed to fetch file from logserver=" + client_->longName() + "\n");
     fail();
@@ -287,7 +278,7 @@ OutputFileFetchAnyLocalTask::OutputFileFetchAnyLocalTask(OutputFileProvider* own
 void OutputFileFetchAnyLocalTask::run()
 {
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UI_FN_DBG
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     auto reply = owner_->reply_;
 
@@ -448,23 +439,14 @@ void OutputFileFetchTransferTask::transferFinished()
 
 void OutputFileFetchTransferTask::transferProgress(QString msg,int value)
 {
-    //UiLog().dbg() << "OutputFileProvider::slotOutputClientProgress " << msg;
-
     owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
-
-    //reply_->setInfoText(msg.toStdString());
-    //owner_->infoProgress(reply_);
-    //reply_->setInfoText("");
 }
 
 void OutputFileFetchTransferTask::transferFailed(QString msg)
 {
     auto reply = owner_->reply_;
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
-#endif
     reply->addLogTryEntry("fetch file from SOCKS host via scp : FAILED");
-    reply->appendErrorText("Failed to fetch from SOCKS host via scp\n");
+    reply->appendErrorText("Failed to fetch from SOCKS host via scp\n" + msg.toStdString());
     resFile_.reset();
     fail();
 }
@@ -483,7 +465,7 @@ OutputFileFetchServerTask::OutputFileFetchServerTask(OutputFileProvider* owner) 
 void OutputFileFetchServerTask::run()
 {
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UI_FN_DBG
+    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     if (isJobout_) {
         // we delegate it back to the FileProvider (this is its built-in task)
@@ -547,7 +529,6 @@ void OutputFileProvider::clear()
 //Check if the given output is already in the cache
 OutputCacheItem* OutputFileProvider::findInCache(const std::string& fileName)
 {
-    outCache_->print();
     return outCache_->attachOne(info_,fileName);
 }
 
@@ -704,8 +685,10 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
         auto t = fetchTask_[k];
         t->reset(server,n,fileName,isJobout, deltaPos, useCache);
         fetchQueue_->add(t);
-    }   
+    }
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
+#endif
     fetchQueue_->run();
 }
 
@@ -780,7 +763,9 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode 
         fetchQueue_->add(t);
     }
 
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
+#endif
     fetchQueue_->run();
 }
 

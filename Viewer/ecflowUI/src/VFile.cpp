@@ -70,7 +70,7 @@ VFile::~VFile()
 {
 	close();
 
-    UiLog().dbg() << "VFile::~VFile -->";
+    UiLog().dbg() << UI_FN_INFO;
     print();
 
 	if(data_)
@@ -90,8 +90,6 @@ VFile::~VFile()
     {
         UiLog().dbg() << " file was kept on disk";
     }
-
-    UiLog().dbg() << "<-- ~VFile";
 }
 
 bool VFile::exists() const
@@ -352,7 +350,7 @@ int VFile::numberOfLines() const
 
 void VFile::print()
 {
-    std::string str="  VFile contents --> storage:";
+    std::string str=" VFile storage=" + std::to_string(storageMode_) + " ";
     if(storageMode_ == MemoryStorage)
     {
         str+="memory size:" + boost::lexical_cast<std::string>(dataSize_);

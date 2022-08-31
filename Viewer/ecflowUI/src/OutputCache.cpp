@@ -14,7 +14,7 @@
 
 #include "UiLog.hpp"
 
-#define _UI_OUTPUTCACHE_DEBUG
+//#define _UI_OUTPUTCACHE_DEBUG
 
 OutputCacheItem::OutputCacheItem(QString id, VFile_ptr file) :
       id_(id), file_(file), used_(false)
@@ -172,11 +172,6 @@ void OutputCache::detach()
 #endif
         it.value()->detach();
         Q_ASSERT(!it.value()->isAttached());
-
-//#ifdef _UI_OUTPUTCACHE_DEBUG
-//        //print();
-//        UiLog().dbg() <<  UI_FN_INFO << "after=" << *(it.value());
-//#endif
         ++it;
     }
 
@@ -213,7 +208,7 @@ void OutputCache::slotTimeOut()
 
 void OutputCache::print()
 {
-    UI_FN_DBG
+    UiLog().dbg() << UI_FN_INFO << ":";
     QMap<QString, OutputCacheItem*>::iterator it = items_.begin();
     while (it != items_.end() )
     {

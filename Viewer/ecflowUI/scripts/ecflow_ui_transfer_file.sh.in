@@ -12,7 +12,7 @@
 set -e
 #set -x #goes to stderr
 
-#echo " arguments=$*"
+echo " arguments=$*"
 #echo "shell=${SHELL}"
 
 mode=
@@ -42,16 +42,16 @@ do
 done
 
 echo ""
-echo "mode=$mode"
-echo "sourceFile=$sourceFile"
-echo "remoteUid=$remoteUid"
-echo "remoteHost=$remoteHost"
-echo "targetFile=$targetFile"
-echo "proxyJump=$proxyJump"
-echo "byteMode=$byteMode"
-echo "byteValue=$byteValue"
-echo "remoteUid=$remoteUid"
-echo ""
+# echo "mode=$mode"
+# echo "sourceFile=$sourceFile"
+# echo "remoteUid=$remoteUid"
+# echo "remoteHost=$remoteHost"
+# echo "targetFile=$targetFile"
+# echo "proxyJump=$proxyJump"
+# echo "byteMode=$byteMode"
+# echo "byteValue=$byteValue"
+# echo "remoteUid=$remoteUid"
+# echo ""
 
 if [[ $mode != "file" && $mode != "dir" ]] ; then
     echo "Error: invalid mode! Has to be \"file\" or \"dir\"" >&2
@@ -173,6 +173,6 @@ else
     done
 END
 )
-    echo "get directory listing"
+    echo ""
     (set -x; ssh ${sshProxyJump}  ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
 fi

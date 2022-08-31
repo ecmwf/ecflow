@@ -74,7 +74,6 @@ protected:
     void requestReload();
     void requestShrink();
     void updateContents(const std::vector<VDir_ptr>&);
-    QString formatErrors(const std::vector<std::string>& errorVec) const;
     void transitionTo(DirWidgetState* state);
 
     Ui::OutputDirWidget* ui_{nullptr};

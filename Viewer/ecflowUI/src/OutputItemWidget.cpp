@@ -371,6 +371,7 @@ void OutputItemWidget::infoReady(VReply* reply)
         }
 #endif
         fetchInfo_->setInfo(reply,info_);
+        fetchInfo_->setError(reply->errorTextVec());
     }
 
     //------------------------
@@ -416,6 +417,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
         reloadTb_->setEnabled(true);       
 
         fetchInfo_->setInfo(reply,info_);
+        fetchInfo_->setError(reply->errorTextVec());
 	}
     //Directories
     else
@@ -553,7 +555,6 @@ bool OutputItemWidget::isJoboutLoaded() const
 // should only be invoked from dirW_
 void OutputItemWidget::slotUpdateDirs()
 {
-    UI_FN_DBG
     dirProvider_->info(info_);
 }
 

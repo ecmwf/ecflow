@@ -28,7 +28,9 @@
 #include <QtCore5Compat/QRegExp>
 #endif
 
+
 #include "ServerHandler.hpp"
+#include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 
@@ -38,8 +40,8 @@ OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent),  ui_(new Ui
 {
     ui_->setupUi(this);
 
-    ui_->te->setMinimumWidth(350);
-    ui_->logTe->setMinimumWidth(350);
+    ui_->te->setMinimumWidth(400);
+    ui_->logTe->setMinimumWidth(400);
 //    ui_->stackedWidget->setMinimumWidth(350);
 //    ui_->stackedWidget->setMinimumHeight(350);
     ui_->stackedWidget->setCurrentIndex(0);
@@ -96,7 +98,34 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
 
 void OutputFetchInfo::setError(QString err)
 {
-    ui_->logTe->setPlainText(err);
+    ui_->logTe->clear();
+    ui_->logTe->appendHtml(err);
+    QTextCursor cursor=ui_->logTe->textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    ui_->logTe->setTextCursor(cursor);
+}
+
+void OutputFetchInfo::setError(const std::vector<std::string>& errorVec)
+{
+    setError(formatErrors(errorVec));
+}
+
+QString OutputFetchInfo::formatErrors(const std::vector<std::string>& errorVec) const
+{
+    QString s;
+    if(errorVec.size() > 0)
+    {
+        QColor col(70,71,72);
+        if(errorVec.size() > 1)
+        {
+            for(size_t i=0; i < errorVec.size(); i++)
+                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
+                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
+        }
+        else if(errorVec.size() == 1)
+            s+=QString::fromStdString(errorVec[0]);
+    }
+    return s.replace("\n", "<br>");
 }
 
 void OutputFetchInfo::parseTry(QString s, QString& path, QString& msg)

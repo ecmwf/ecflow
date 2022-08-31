@@ -12,6 +12,9 @@
 
 #include <QWidget>
 
+#include <string>
+#include <vector>
+
 #include "VInfo.hpp"
 #include "VReply.hpp"
 
@@ -30,6 +33,7 @@ public:
     void clearInfo();
     void setInfo(VReply*, VInfo_ptr info=nullptr);
     void setError(QString);
+    void setError(const std::vector<std::string>& errorVec);
 
 protected Q_SLOTS:
     void buttonClicked(QAbstractButton*);
@@ -37,6 +41,7 @@ protected Q_SLOTS:
 protected:
     virtual QString makeHtml(VReply*, VInfo_ptr info)=0;
     QString buildList(QStringList,bool ordered=false);
+    QString formatErrors(const std::vector<std::string>& errorVec) const;
     void parseTry(QString s, QString& path, QString& msg);
 
     Ui::OutputFetchInfo* ui_{nullptr};

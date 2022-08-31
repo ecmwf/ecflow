@@ -15,6 +15,7 @@
 #include <QTimer>
 #include <QWidgetAction>
 
+#include "FileInfoLabel.hpp"
 #include "OutputFetchInfo.hpp"
 #include "OutputModel.hpp"
 #include "TextFormat.hpp"
@@ -24,7 +25,7 @@
 
 #include "ui_OutputDirWidget.h"
 
-#define UI_OUTPUTDIRWIDGET_DEBUG_
+//#define UI_OUTPUTDIRWIDGET_DEBUG_
 
 int OutputDirWidget::updateDirTimeout_=1000*60;
 
@@ -177,7 +178,10 @@ void DirWidgetSuccessState::handleLoadInternal(VReply* reply)
     //Update the dir label
     owner_->ui_->infoLabel->update(reply);
 
+    // fetchinfo update
+    owner_->fetchInfo_->clearInfo();
     owner_->fetchInfo_->setInfo(reply);
+    owner_->fetchInfo_->setError(reply->errorTextVec());
 
     //Enable the update button
     owner_->ui_->reloadTb->setEnabled(true);
@@ -215,15 +219,17 @@ DirWidgetFirstFailedState::DirWidgetFirstFailedState(OutputDirWidget* owner, Dir
     owner_->ui_->reloadTb->show();
     owner_->ui_->view->hide();
 
+    // label
     auto dt=QDateTime::currentDateTime();
-    QColor col(39,49,101);
-    QString err="Failed to fetch directory listing. Last tried " + Viewer::formatBoldText(" at ",col) +
+    QString err="Failed to fetch directory listing. Last tried " + FileInfoLabel::formatHighlight(" at ") +
             dt.toString("yyyy-MM-dd HH:mm:ss");
-
     owner_->ui_->messageLabel->showError(err);
 
+    // fetchInfo
+    owner_->fetchInfo_->clearInfo();
     owner_->fetchInfo_->setInfo(reply);
-    owner_->fetchInfo_->setError(owner_->formatErrors(reply->errorTextVec()));
+    owner_->fetchInfo_->setError(reply->errorTextVec());
+
     owner_->ui_->reloadTb->setEnabled(true);
     owner_->show();
     owner_->requestShrink();
@@ -272,12 +278,14 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply)
 
     // we only show a warning
     auto dt=QDateTime::currentDateTime();
-    QColor col(39,49,101);
-    QString err="No access to directory listing. Last tried " + Viewer::formatBoldText(" at ",col) +
+    QString err="No access to directory listing. Last tried " + FileInfoLabel::formatHighlight(" at ") +
             dt.toString("yyyy-MM-dd HH:mm:ss");
     owner_->ui_->messageLabel->showWarning(err);
 
+    // fetchInfo
+    owner_->fetchInfo_->clearInfo();
     owner_->fetchInfo_->setInfo(reply);
+    owner_->fetchInfo_->setError(reply->errorTextVec());
 
     owner_->ui_->reloadTb->setEnabled(true);
     owner_->show();
@@ -294,6 +302,7 @@ DirWidgetEmptyState::DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState*
     owner_->hide();
     owner_->joboutFile_.clear();
     owner_->dirModel_->clearData();
+    owner_->fetchInfo_->clearInfo();
 }
 
 void DirWidgetEmptyState::handleFailed(VReply* reply)
@@ -312,6 +321,7 @@ DirWidgetDisabledState::DirWidgetDisabledState(OutputDirWidget* owner, DirWidget
     owner_->hide();
     owner_->joboutFile_.clear();
     owner_->dirModel_->clearData();
+    owner_->fetchInfo_->clearInfo();
 }
 
 void DirWidgetDisabledState::handleEnable()
@@ -570,27 +580,6 @@ bool OutputDirWidget::isNotInDisabledState() const
 {
     return !state_->isDisabled();
 }
-
-QString OutputDirWidget::formatErrors(const std::vector<std::string>& errorVec) const
-{
-    QString s;
-    if(errorVec.size() > 0)
-    {
-        QColor col(70,71,72);
-        s=Viewer::formatBoldText("Output directory: ",col);
-
-        if(errorVec.size() > 1)
-        {
-            for(size_t i=0; i < errorVec.size(); i++)
-                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
-                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
-        }
-        else if(errorVec.size() == 1)
-            s+=QString::fromStdString(errorVec[0]);
-    }
-    return s;
-}
-
 
 //This slot is called when a file item is selected in the dir view
 void OutputDirWidget::slotItemSelected(const QModelIndex& currentIdx,const QModelIndex& /*idx2*/)

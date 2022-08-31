@@ -23,7 +23,7 @@
 
 static QMap<QProcess::ProcessError, QString> errorStr;
 
-#define UI_FILETRANSFER_DEBUG_
+//#define UI_FILETRANSFER_DEBUG_
 
 VFileTransferCore::VFileTransferCore(QObject* parent) :
     QObject(parent),
@@ -116,7 +116,13 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
 
     QString command = buildCommand(sourceFile, targetFile, remoteUid, host, byteMode, byteVal);
 
-    UiLog().dbg() << "command=" << command;
+#ifdef UI_FILETRANSFER_DEBUG_
+    UiLog().dbg() << UI_FN_INFO;
+    UiLog().dbg() << " command=" << command;
+    UiLog().dbg() << " exeDir=" << exeDir;
+    UiLog().dbg() << " program=" << proc_->program();
+    UiLog().dbg() << " arguments=" << proc_->arguments();
+#endif
 
     stopper_.start();
 
@@ -124,12 +130,6 @@ void VFileTransferCore::transfer(QString sourceFile,QString host,QString targetF
     proc_->start("/bin/sh", QStringList() << "-c" << command);
 #else
     proc_->start("/bin/sh -c \"" + command + "\"");
-#endif
-
-#ifdef UI_FILETRANSFER_DEBUG_
-    UiLog().dbg() << "exeDir=" << exeDir;
-    UiLog().dbg() << "program=" << proc_->program();
-    UiLog().dbg() << "arguments=" << proc_->arguments();
 #endif
 }
 
@@ -155,7 +155,7 @@ void VFileTransferCore::stopTransfer(bool broadcast)
 void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatus)
 {
 #ifdef UI_FILETRANSFER_DEBUG_
-    UI_FUNCTION_LOG
+    UI_FN_DBG
 #endif
 
     if(!proc_)
@@ -170,10 +170,10 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     stdOutTxt = stdOutTxt.trimmed();
 
 #ifdef UI_FILETRANSFER_DEBUG_
-    UiLog().dbg() << "exitCode=" << exitCode << " exitStatus=" << exitStatus;
-    UiLog().dbg() << "errorString=" << proc_->errorString();
-    UiLog().dbg() << "stdout=" << stdOutTxt;
-    UiLog().dbg() << "stderr=" << stdErrTxt;
+    UiLog().dbg() << " exitCode=" << exitCode << " exitStatus=" << exitStatus;
+    UiLog().dbg() << " errorString=" << proc_->errorString();
+    UiLog().dbg() << " stdout=" << stdOutTxt;
+    UiLog().dbg() << " stderr=" << stdErrTxt;
 #endif
 
     QString errTxt=stdOutTxt;
@@ -214,7 +214,7 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
 void VFileTransferCore::slotErrorOccurred(QProcess::ProcessError e)
 {
 #ifdef UI_FILETRANSFER_DEBUG_
-    UI_FUNCTION_LOG
+    UI_FN_DBG
     if (proc_) {
         UiLog().dbg() << "errorString=" << proc_->errorString();
     }
