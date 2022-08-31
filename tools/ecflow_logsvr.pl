@@ -159,10 +159,12 @@ sub do_delta {
 	my $size = 64*1024;
 	my $read;
 
-	seek(IN, $pos, 0);
-	while( ($read = sysread(IN,$buf,$size)) > 0)
+	if (seek(IN, $pos, 0) ==  1) 
 	{
-		syswrite($client,$buf,$size);
+		while( ($read = sysread(IN,$buf,$size)) > 0)
+		{
+			syswrite($client,$buf,$size);
+		}
 	}
 
 	close(IN);
