@@ -12,6 +12,7 @@
 #include "OutputBrowser.hpp"
 
 #include <QtGlobal>
+#include <QByteArray>
 #include <QProcess>
 #include <QVBoxLayout>
 
@@ -353,7 +354,6 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();
 #endif
-
     }
     else if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
     {
@@ -361,6 +361,7 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
         TextPagerDocument::DeviceMode mode=(fSize >= minPagerSparseSize_)?
         		           TextPagerDocument::Sparse:TextPagerDocument::LoadAll;
         textPager_->load(contentsFileName, mode);
+        lastLoadedSizeFromDisk_ = 0;
     }
     else
     {
@@ -373,8 +374,10 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
 #ifdef UI_OUTPUTBROSWER_DEBUG_
                 UiLog().dbg() << UI_FN_INFO << "load local file from offset=" << lastLoadedSizeFromDisk_;
 #endif
-               if (file.seek(lastLoadedSizeFromDisk_)) {
-                    QString deltaTxt=file.readAll();
+                if (file.seek(lastLoadedSizeFromDisk_)) {
+                    QByteArray arr = file.readAll();
+                    lastLoadedSizeFromDisk_ += arr.size();
+                    QString deltaTxt(arr);
                     textEdit_->appendPlainText(deltaTxt);
                     loaded = true;
                 }
@@ -384,15 +387,18 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
                 loaded = true;
 #endif
            }
-
         }
 
-        if (manageLocal) {
-            lastLoadedSizeFromDisk_ = fSize;
-        }
+//        if (manageLocal) {
+//            lastLoadedSizeFromDisk_ = fSize;
+//        }
 
         if(!loaded) {
-            QString str=file.readAll();
+            QByteArray arr = file.readAll();
+            if (manageLocal) {
+                lastLoadedSizeFromDisk_ = arr.size();
+            }
+            QString str(arr);
             textEdit_->document()->setPlainText(str);
         }
     }
@@ -439,7 +445,7 @@ void OutputBrowser::loadContentsFromText(QString txt,QString fileName, size_t da
 bool OutputBrowser::addDeltaContents(VFile_ptr delta)
 {
     if (delta && contentsFile_ && file_) {
-        if(contentsFile_->storageMode() == VFile::DiskStorage)
+        if(delta->storageMode() == VFile::DiskStorage)
         {
             return addDeltaContentsFromDisk(QString::fromStdString(delta->path()), QString::fromStdString(file_->path()),
                                             file_->sizeInBytes());
@@ -463,12 +469,17 @@ bool OutputBrowser::addDeltaContentsFromDisk(QString deltaFileName, QString file
     else if(!isJobFile(fileName) || fileSize <= minPagerTextSize_) {
         changeIndex(BasicIndex,fileSize);
         adjustHighlighter(fileName);
-
+#ifdef UI_OUTPUTBROSWER_DEBUG_
+        UiLog().dbg() << UI_FN_INFO << " deltaFileName=" << deltaFileName;
+#endif
         QFile file(deltaFileName);
-        file.open(QIODevice::ReadOnly);
-        QString deltaTxt=file.readAll();
-        textEdit_->appendPlainText(deltaTxt);
-        return true;
+        if (file.open(QIODevice::ReadOnly)) {
+            QString deltaTxt=file.readAll();
+            textEdit_->appendPlainText(deltaTxt);
+            return true;
+        } else {
+            return false;
+        }
     }
     return false;
 }
@@ -480,7 +491,9 @@ bool OutputBrowser::addDeltaContentsFromText(QString deltaTxt,QString fileName, 
     if(isHtmlFile(fileName)) {
         return false;
     } if (isJobFile(fileName) || fileSize <= minPagerTextSize_) {
-        UiLog().dbg() << UI_FN_INFO << "add fileSize=" << fileSize;
+#ifdef UI_OUTPUTBROSWER_DEBUG_
+        UiLog().dbg() << UI_FN_INFO << " text_size=" << deltaTxt.size();
+#endif
         changeIndex(BasicIndex,fileSize);
         adjustHighlighter(fileName);
         textEdit_->appendPlainText(deltaTxt);
@@ -799,8 +812,10 @@ VFile_ptr OutputBrowser::filterIt()
          QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
          QString::fromStdString(fSrc->path()));
 
+#ifdef UI_OUTPUTBROSWER_DEBUG_
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     UiLog().dbg() << "args=" << proc.arguments().join(" ");
+#endif
 #endif
 
     if(!proc.waitForStarted(1000))
@@ -809,7 +824,6 @@ VFile_ptr OutputBrowser::filterIt()
         QGuiApplication::restoreOverrideCursor();
 #endif
         QString errStr;
-        UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         errStr="Failed to start text filter using command:<br> \'" +
                              proc.program() + " " + proc.arguments().join(" ") + "\'";

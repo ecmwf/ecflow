@@ -246,7 +246,6 @@ void OutputFileFetchRemoteTask::clientFinished()
     tmp->setLog(reply->log());
     std::string method="served by " + client_->longName();
     tmp->setFetchModeStr(method);
-
     reply->tmpFile(tmp);
 
     succeed();
