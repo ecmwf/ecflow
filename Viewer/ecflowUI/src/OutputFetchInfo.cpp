@@ -20,14 +20,8 @@
 #include <QString>
 #include <QFile>
 #include <QFileInfo>
-
-#include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QRegExp>
-#else
-#include <QtCore5Compat/QRegExp>
-#endif
-
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include "ServerHandler.hpp"
 #include "TextFormat.hpp"
@@ -42,8 +36,6 @@ OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent),  ui_(new Ui
 
     ui_->te->setMinimumWidth(400);
     ui_->logTe->setMinimumWidth(400);
-//    ui_->stackedWidget->setMinimumWidth(350);
-//    ui_->stackedWidget->setMinimumHeight(350);
     ui_->stackedWidget->setCurrentIndex(0);
 
     bGroup_ = new QButtonGroup(this);
@@ -130,16 +122,13 @@ QString OutputFetchInfo::formatErrors(const std::vector<std::string>& errorVec) 
 
 void OutputFetchInfo::parseTry(QString s, QString& path, QString& msg)
 {
-    QRegExp rx("<PATH>(.+)<\\/PATH>");
-    if(rx.indexIn(s) > -1 && rx.captureCount() == 1)
-    {
-        path = rx.cap(1);
+    QRegularExpression rx("<PATH>(.+)<\\/PATH>");
+    QRegularExpressionMatch match = rx.match(s);
+    if (match.hasMatch()) {
+         path = match.captured(1);
     }
-
-    //UiLog().dbg() << UI_FN_INFO << "path=" << path << "s=" << s;
     msg = "tried to ";
-    msg += rx.removeIn(s);
-    //UiLog().dbg() << "msg=" << msg;
+    msg += s.remove(rx);
 
     msg.replace(" OK","<font color=\'#269e00\'><b> SUCCEEDED</b></font>");
     msg.replace(" FAILED","<font color=\'#FF0000\'><b> FAILED</b></font>");
