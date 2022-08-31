@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -139,7 +139,7 @@
   <action name="actionClose">
    <property name="icon">
     <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
+     <normaloff>:/viewer/close_grey.svg</normaloff>:/viewer/close_grey.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Close</string>
