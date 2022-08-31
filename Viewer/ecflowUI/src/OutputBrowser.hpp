@@ -103,8 +103,9 @@ private:
     void loadFilteredFile(VFile_ptr file);
     void setCursorPos(qint64 pos);
     VFile_ptr filterIt();
-    void loadContents();
-    void loadContentsFromDisk(QString contentsFileName, QString fileName);
+    bool reloadLocal(VFile_ptr f);
+    void loadContents(bool manageLocal);
+    void loadContentsFromDisk(QString contentsFileName, QString fileName,bool manageLocal);
     void loadContentsFromText(QString text,QString fileName,size_t dataSize, bool resetFile=true);
     bool addDeltaContents(VFile_ptr);
     bool addDeltaContentsFromDisk(QString deltaFileName, QString fileName, size_t fileSize);
@@ -112,7 +113,7 @@ private:
 
     QStackedWidget *stacked_;
 	PlainTextEdit* textEdit_;
-	TextPagerWidget* textPager_;
+    TextPagerWidget* textPager_;
     HtmlEdit* htmlEdit_;
 	TextEditSearchLine* searchLine_;
     TextFilterWidget* textFilter_;
@@ -128,6 +129,7 @@ private:
     VFile_ptr file_;
     VFile_ptr contentsFile_;
     bool contentsChangedOnLastLoad_{false};
+    qint64 lastLoadedSizeFromDisk_{0};
 
     static int minPagerTextSize_;
 	static int minPagerSparseSize_;

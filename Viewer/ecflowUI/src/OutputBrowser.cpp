@@ -38,6 +38,7 @@ int OutputBrowser::minPagerTextSize_=40*1024*1024;
 int OutputBrowser::minPagerSparseSize_=40*1024*1024;
 int OutputBrowser::minConfirmSearchSize_=20*1024*1024;
 
+#define UI_OUTPUTBROSWER_DEBUG_
 
 //========================================
 //
@@ -257,11 +258,13 @@ void OutputBrowser::clearIt()
     htmlEdit_->clear();
     file_.reset();
     contentsFile_.reset();
+    lastLoadedSizeFromDisk_=0;
 }
 
 void OutputBrowser::loadIt(VFile_ptr file)
 {
     contentsChangedOnLastLoad_ = true;
+    lastLoadedSizeFromDisk_=0;
 
     file_ = file;
     if(!file_) {
@@ -269,7 +272,8 @@ void OutputBrowser::loadIt(VFile_ptr file)
     }
     Q_ASSERT(!file->hasDeltaContents());
     contentsFile_ = filterIt();
-    loadContents();
+
+    loadContents(file_->fetchMode() == VFile::LocalFetchMode);
 }
 
 void OutputBrowser::reloadIt(VFile_ptr file)
@@ -281,8 +285,14 @@ void OutputBrowser::reloadIt(VFile_ptr file)
         return;
     }
 
+    // Local cannot have deltacontents. We want to avoid recursion!
+    bool local = (file_ && file_->fetchMode() == VFile::LocalFetchMode && file->fetchMode() == VFile::LocalFetchMode);
     VFile_ptr delta;
-    if (file->hasDeltaContents() && file_) {
+
+    if (local) {
+        file_=file;
+    } else if (file->hasDeltaContents() && file_) {
+        assert(file->fetchMode() != VFile::LocalFetchMode);
         delta = file;
         if (!file_->append(file)) {
             return;
@@ -291,24 +301,27 @@ void OutputBrowser::reloadIt(VFile_ptr file)
         file_=file;
     }
 
+    //TODO: this is not neccesarily true when a local file is updated since at this point we do not know if
+    // the file changed
     contentsChangedOnLastLoad_ = true;
     contentsFile_ = filterIt();
+    bool contentsSame = contentsFile_.get() == file_.get();
 
     bool deltaAdded = false;
     if (delta && contentsFile_.get() == file_.get()) {
         deltaAdded = addDeltaContents(delta);
     }
     if(!deltaAdded) {
-        loadContents();
+        loadContents(contentsSame && local);
     }
 }
 
-void OutputBrowser::loadContents()
+void OutputBrowser::loadContents(bool manageLocal)
 {
     if (contentsFile_ && file_) {
         if(contentsFile_->storageMode() == VFile::DiskStorage)
         {
-            loadContentsFromDisk(QString::fromStdString(contentsFile_->path()), QString::fromStdString(file_->path()));
+            loadContentsFromDisk(QString::fromStdString(contentsFile_->path()), QString::fromStdString(file_->path()), manageLocal);
         }
         else
         {
@@ -318,10 +331,14 @@ void OutputBrowser::loadContents()
     }
 }
 
-void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileName)
+void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileName, bool manageLocal)
 {
     QFile file(contentsFileName);
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly)) {
+        lastLoadedSizeFromDisk_ = 0;
+        return;
+    }
+
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
 
@@ -341,7 +358,6 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
     else if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
     {
         changeIndex(PagerIndex,fSize);
-
         TextPagerDocument::DeviceMode mode=(fSize >= minPagerSparseSize_)?
         		           TextPagerDocument::Sparse:TextPagerDocument::LoadAll;
         textPager_->load(contentsFileName, mode);
@@ -349,11 +365,36 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
     else
     {
     	changeIndex(BasicIndex,fSize);
-
         adjustHighlighter(fileName);
-       
-        QString str=file.readAll();
-        textEdit_->document()->setPlainText(str);
+               
+        bool loaded = false;
+        if (manageLocal && !isJobFile(fileName)) {
+           if (lastLoadedSizeFromDisk_>=0 && lastLoadedSizeFromDisk_ < fSize) {
+#ifdef UI_OUTPUTBROSWER_DEBUG_
+                UiLog().dbg() << UI_FN_INFO << "load local file from offset=" << lastLoadedSizeFromDisk_;
+#endif
+               if (file.seek(lastLoadedSizeFromDisk_)) {
+                    QString deltaTxt=file.readAll();
+                    textEdit_->appendPlainText(deltaTxt);
+                    loaded = true;
+                }
+            } else {
+#ifdef UI_OUTPUTBROSWER_DEBUG_
+                UiLog().dbg() << UI_FN_INFO << "no need to load: local file is the same";
+                loaded = true;
+#endif
+           }
+
+        }
+
+        if (manageLocal) {
+            lastLoadedSizeFromDisk_ = fSize;
+        }
+
+        if(!loaded) {
+            QString str=file.readAll();
+            textEdit_->document()->setPlainText(str);
+        }
     }
 }
 
@@ -699,7 +740,7 @@ void OutputBrowser::setCursorPos(qint64 pos)
 void OutputBrowser::slotRunFilter(QString /*filter*/,bool /*matched*/,bool /*caseSensitive*/)
 {
     contentsFile_ = filterIt();
-    loadContents();
+    loadContents(false);
 }
 
 //Run the filter if defined. If no filtering can be performed the original file is returned.
@@ -825,7 +866,7 @@ void OutputBrowser::slotRemoveFilter()
         return;
 
     contentsFile_ = file_;
-    loadContents();
+    loadContents(false);
 }
 
 size_t OutputBrowser::sizeInBytes() const

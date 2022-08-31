@@ -24,6 +24,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#define UI_VFILE_DEBUG_
+
 const size_t VFile::maxDataSize_=1024*1024*10;
 
 VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
@@ -250,44 +252,55 @@ bool VFile::appendContentsTo(FILE* fpTarget) const
     return true;
 }
 
-// Append the contents of o to the current object
-bool VFile::append(VFile_ptr o)
+// Append the contents of other to the current object
+bool VFile::append(VFile_ptr other)
 {
-    if (!o) {
+    if (!other || !other->hasDeltaContents() || other->sizeInBytes() == 0) {
+#ifdef UI_VFILE_DEBUG_
+        UiLog().dbg() <<  UI_FN_INFO << " empty or has no delta";
+#endif
         return false;
     }
 
-    if(fetchMode_ == LogServerFetchMode && o->fetchMode() == LogServerFetchMode) {
+    // TODO: assert/exit if this happens?
+    if (fetchMode_ != other->fetchMode_) {
+        return false;
+    }
+
+    if(fetchMode_ == LogServerFetchMode || fetchMode_ == TransferFetchMode) {
         // adjust the storatge mode according to the expected new size
-        if (o->storageMode() == DiskStorage) {
+        if (other->storageMode() == DiskStorage) {
             setStorageMode(DiskStorage);
         }
-        if (storageMode_ == MemoryStorage && o->storageMode() == MemoryStorage) {
-            if (dataSize_ + o->dataSize_ >  maxDataSize_) {
+        if (storageMode_ == MemoryStorage && other->storageMode() == MemoryStorage) {
+            if (dataSize_ + other->dataSize_ >  maxDataSize_) {
                 setStorageMode(DiskStorage);
             }
         }
 
-        fetchDate_ = o->fetchDate_;
-        transferDuration_ = o->transferDuration_;
+        fetchDate_ = other->fetchDate_;
+        transferDuration_ = other->transferDuration_;
 
         if (storageMode_ == DiskStorage) {
-            FILE* fp = fopen(path_.c_str(),"a");
-            o->appendContentsTo(fp);
-            fclose(fp);
+            if (FILE* fp = fopen(path_.c_str(),"a")) {
+                other->appendContentsTo(fp);
+                fclose(fp);
+            } else {
+                UiLog().err() << UI_FN_INFO << "could not open file=" << path_ << " in append mode";
+            }
         } else if (storageMode_ == MemoryStorage) {
-            assert(o->storageMode() == MemoryStorage);
-            assert(dataSize_ + o->dataSize_ <=  maxDataSize_);
-            if (o->dataSize() > 0) {
+            assert(other->storageMode() == MemoryStorage);
+            assert(dataSize_ + other->dataSize_ <=  maxDataSize_);
+            if (other->dataSize() > 0) {
                 if(!data_)
                 {
                     data_ = new char[maxDataSize_+1];
                 }
-                memcpy(data_+dataSize_,o->data_,o->dataSize_);
-                dataSize_+=o->dataSize_;
+                memcpy(data_+dataSize_,other->data_,other->dataSize_);
+                dataSize_+=other->dataSize_;
                 data_[dataSize_] = '\0'; //terminate the string
 //                UiLog().dbg() << "VFile::append prev=" << prev << " current=" << dataSize_ <<
-//                                 " o->data=|" << o->data_ << "|";
+//                                 " other->data=|" << other->data_ << "|";
             } else {
                 return false;
             }
