@@ -62,17 +62,18 @@ protected Q_SLOTS:
     void on_toEndTb__clicked();
     void on_toLineStartTb__clicked();
     void on_toLineEndTb__clicked();
-    void on_saveFileAsTb__clicked();
-    void on_copyPathTb__clicked();
-    void on_lineNumberTb__clicked(bool st);
+    void slotSaveFileAs();
+    void slotCopyPath();
+    void slotLineNumber(bool st);
     void on_wordWrapTb__clicked(bool st);
     void on_expandFileInfoTb__clicked(bool st);
     void slotWordWrapSupportChanged(bool);
+    void slotLoadWholeFile();
 
 protected:
     void updateState(const FlagSet<ChangeFlag>&) override;
 	void searchOnReload();
-    void reloadCurrentFile();
+    void reloadCurrentFile(bool wholeFile);
     void loadCurrentDirItemFile();
     void loadCurrentJobout();
     bool isJoboutLoaded() const;

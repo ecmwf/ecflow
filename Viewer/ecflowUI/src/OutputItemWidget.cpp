@@ -41,7 +41,6 @@
 #include <QMenu>
 #include <QMovie>
 #include <QTime>
-#include <QTimer>
 #include <QWidgetAction>
 #include <QFileDialog>
 
@@ -114,34 +113,19 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     filterTb_->setProperty("strip","first");
     filterOptionTb_->setProperty("strip","last");
 
-    auto *menu=new QMenu(this);
-    menu->addAction(actionSaveFileAs_);
-    menu->addAction(actionGotoLine_);
-
-    //TODO: needs proper implementation
-    gotoLineTb_->hide();
-
-    //Sets the menu on the toolbutton
-    moreActionTb_->setMenu(menu);
-    moreActionTb_->hide();
-    moreActionTb_->setEnabled(false);
-    actionSaveFileAs_->setEnabled(false);
-    actionGotoLine_->setEnabled(false);
-
     //Init filter in output browser
     browser_->setFilterButtons(filterTb_,filterOptionTb_);
 
-    //
     browser_->setSearchButtons(searchTb_);
 
     //line number
     lineNumProp_ = VConfig::instance()->find("panel.output.showLineNumber");
     Q_ASSERT(lineNumProp_);
     bool showLineNum = lineNumProp_->value().toBool();
-    lineNumberTb_->setChecked(showLineNum);
-    on_lineNumberTb__clicked(showLineNum);
+    actionLineNumber_->setChecked(showLineNum);
+    slotLineNumber(showLineNum);
 
-    // text wrap
+    // text wrapline
     wordWrapProp_ = VConfig::instance()->find("panel.output.wordWrap");
     Q_ASSERT(wordWrapProp_);
     bool useWordWrap = wordWrapProp_->value().toBool();
@@ -161,6 +145,30 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     bool expandSt = expandFileInfoProp_->value().toBool();
     expandFileInfoTb_->setChecked(expandSt);
     on_expandFileInfoTb__clicked(expandSt);
+
+    // More actions
+    auto menu=new QMenu(this);
+    menu->addAction(actionLineNumber_);
+    menu->addAction(actionSaveFileAs_);
+    menu->addAction(actionCopyFilePath_);
+    auto sep = new QAction(this);
+    sep->setSeparator(true);
+    menu->addAction(sep);
+    menu->addAction(actionLoadWhole_);
+
+    moreActionTb_->setMenu(menu);
+
+    connect(actionLineNumber_, SIGNAL(toggled(bool)),
+            this, SLOT(slotLineNumber(bool)));
+
+    connect(actionSaveFileAs_, SIGNAL(triggered()),
+            this, SLOT(slotSaveFilaAs()));
+
+    connect(actionCopyFilePath_, SIGNAL(triggered()),
+            this, SLOT(slotCopyPath()));
+
+    connect(actionLoadWhole_, SIGNAL(triggered()),
+            this, SLOT(slotLoadWholeFile()));
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -193,9 +201,6 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
         //Get dir contents
         dirW_->reload();
-
-		//Start contents update timer
-        //dirW_->startTimer();
 	}
 }
 
@@ -431,7 +436,14 @@ void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
     reloadTb_->setEnabled(false);
-    reloadCurrentFile();
+    reloadCurrentFile(false);
+}
+
+void OutputItemWidget::slotLoadWholeFile()
+{
+    userClickedReload_ = true;
+    reloadTb_->setEnabled(false);
+    reloadCurrentFile(true);
 }
 
 void OutputItemWidget::loadCurrentJobout()
@@ -452,7 +464,7 @@ void OutputItemWidget::loadCurrentJobout()
 }
 
 // called when the reload button is clicked
-void OutputItemWidget::reloadCurrentFile()
+void OutputItemWidget::reloadCurrentFile(bool wholeFile)
 {
     if(!info_) {
         return;
@@ -484,8 +496,12 @@ void OutputItemWidget::reloadCurrentFile()
         op->file(fPath, deltaPos, useCache);
     } else {
         fPath = f->sourcePath();
-        browser_->reloadBegin();
-        deltaPos = browser_->sizeInBytes();
+        if (wholeFile) {
+            browser_->clear();
+        } else {
+            browser_->reloadBegin();
+            deltaPos = browser_->sizeInBytes();
+        }
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg()  << UI_FN_INFO << "reload - mode=" << f->fetchMode() << " fPath=" << fPath;
 #endif
@@ -633,7 +649,7 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 // Show line number
 //-----------------------------------------
 
-void OutputItemWidget::on_lineNumberTb__clicked(bool st)
+void OutputItemWidget::slotLineNumber(bool st)
 {
     browser_->setShowLineNumbers(st);
     Q_ASSERT(lineNumProp_);
@@ -688,7 +704,7 @@ void OutputItemWidget::on_toLineEndTb__clicked()
 // Save local copy of file
 //-----------------------------------------
 
-void OutputItemWidget::on_saveFileAsTb__clicked()
+void OutputItemWidget::slotSaveFileAs()
 {
 	if (browser_->isFileLoaded())
 	{
@@ -708,7 +724,7 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 // Copy file path
 //-----------------------------------------
 
-void OutputItemWidget::on_copyPathTb__clicked()
+void OutputItemWidget::slotCopyPath()
 {
     auto f = browser_->file();
     if (f) {

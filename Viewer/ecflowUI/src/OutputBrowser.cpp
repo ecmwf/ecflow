@@ -369,8 +369,8 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
         adjustHighlighter(fileName);
                
         bool loaded = false;
-        if (manageLocal && !isJobFile(fileName)) {
-           if (lastLoadedSizeFromDisk_>=0 && lastLoadedSizeFromDisk_ < fSize) {
+        if (manageLocal && !isJobFile(fileName) && lastLoadedSizeFromDisk_ > 0) {
+           if (lastLoadedSizeFromDisk_ < fSize) {
 #ifdef UI_OUTPUTBROSWER_DEBUG_
                 UiLog().dbg() << UI_FN_INFO << "load local file from offset=" << lastLoadedSizeFromDisk_;
 #endif
@@ -381,7 +381,7 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
                     textEdit_->appendPlainText(deltaTxt);
                     loaded = true;
                 }
-            } else {
+            } else if (lastLoadedSizeFromDisk_ == fSize) {
 #ifdef UI_OUTPUTBROSWER_DEBUG_
                 UiLog().dbg() << UI_FN_INFO << "no need to load: local file is the same";
                 loaded = true;
@@ -389,16 +389,13 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
            }
         }
 
-//        if (manageLocal) {
-//            lastLoadedSizeFromDisk_ = fSize;
-//        }
-
         if(!loaded) {
             QByteArray arr = file.readAll();
             if (manageLocal) {
                 lastLoadedSizeFromDisk_ = arr.size();
             }
             QString str(arr);
+            UiLog().dbg() << UI_FN_INFO << "load whole file";
             textEdit_->document()->setPlainText(str);
         }
     }
