@@ -162,7 +162,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
             this, SLOT(slotLineNumber(bool)));
 
     connect(actionSaveFileAs_, SIGNAL(triggered()),
-            this, SLOT(slotSaveFilaAs()));
+            this, SLOT(slotSaveFileAs()));
 
     connect(actionCopyFilePath_, SIGNAL(triggered()),
             this, SLOT(slotCopyPath()));

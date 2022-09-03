@@ -15,7 +15,8 @@
 
 #define UI_FILEPROVIDER_TASK_DEBUG__
 
-GenFileProvider::GenFileProvider()
+GenFileProvider::GenFileProvider(GenFileReceiver* provider) :
+    provider_(provider)
 {
     fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
     reply_ = new VReply();
@@ -46,12 +47,13 @@ void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths)
     for (auto p: fPaths) {
         AbstractFetchTask* t=nullptr;
         if (VConfig::instance()->proxychainsUsed()) {
-            t = makeFetchTask("transfer");
+            t = makeFetchTask("file_transfer");
         } else {
-            t = makeFetchTask("local");
+            t = makeFetchTask("file_local");
         }
         Q_ASSERT(t);
         t->reset(p);
+        t->setAppendResult(true);
         fetchQueue_->add(t);
     }
 
@@ -71,14 +73,16 @@ void GenFileProvider::fetchFile(const std::string& fPath)
     fetchQueue_->setPolicy(FetchQueue::RunUntilFirstSucceeded);
     Q_ASSERT(fetchQueue_->isEmpty());
     AbstractFetchTask* t=nullptr;
+    UiLog().dbg() << UI_FN_INFO << "proxychains=" << VConfig::instance()->proxychainsUsed();
     if (VConfig::instance()->proxychainsUsed()) {
-        t = makeFetchTask("transfer");
+        t = makeFetchTask("file_transfer");
     } else {
-        t = makeFetchTask("local");
+        t = makeFetchTask("file_local");
     }
     Q_ASSERT(t);
     t->setRunCondition(AbstractFetchTask::NoCondition);
     t->reset(fPath);
+    t->setAppendResult(true);
     fetchQueue_->add(t);
 
 #ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
@@ -89,15 +93,25 @@ void GenFileProvider::fetchFile(const std::string& fPath)
 
 void GenFileProvider::fetchQueueSucceeded()
 {
-    //owner_->infoReady(reply_);
+    provider_->fileFetchFinished(reply_);
     reply_->reset();
 }
 
 void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
 {
     if (reply_->errorText().empty()) {
-        reply_->setErrorText("Failed to fetch file!");
+        reply_->setErrorText("Failed to fetch file(s)!");
     }
-    //owner_->infoFailed(reply_);
+    provider_->fileFetchFailed(reply_);
     reply_->reset();
+}
+
+GenFileReceiver::GenFileReceiver()
+{
+    fetchManager_ = new GenFileProvider(this);
+}
+
+GenFileReceiver::~GenFileReceiver()
+{
+    delete fetchManager_;
 }

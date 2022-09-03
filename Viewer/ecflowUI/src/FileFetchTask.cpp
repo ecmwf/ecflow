@@ -30,7 +30,7 @@ FileFetchLocalTask::FileFetchLocalTask(FetchQueueOwner* owner) :
 // try to read the logfile from the disk (if the settings allow it)
 void FileFetchLocalTask::run()
 {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     auto reply = owner_->theReply();
@@ -96,11 +96,11 @@ void FileFetchTransferTask::clear()
 //clientError eventually!!
 void FileFetchTransferTask::run()
 {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " deltaPos=" << deltaPos_;
 #endif
 
-    assert(node_);
+    UiLog().dbg() << UI_FN_INFO << "proxychains=" << VConfig::instance()->proxychainsUsed();
     assert(VConfig::instance()->proxychainsUsed());
 
     assert(queue_);
@@ -145,7 +145,6 @@ void FileFetchTransferTask::run()
 
 void FileFetchTransferTask::transferFinished()
 {
-
     auto reply = owner_->theReply();
     reply->setInfoText("");
     reply->fileReadMode(VReply::TransferReadMode);
@@ -175,7 +174,11 @@ void FileFetchTransferTask::transferFinished()
         owner_->addToCache(resFile_);
     }
 
-    reply->tmpFile(resFile_);
+    if (appendResult_) {
+        reply->appendTmpFile(resFile_);
+    } else {
+        reply->tmpFile(resFile_);
+    }
     resFile_.reset();
     succeed();
 }
@@ -187,6 +190,10 @@ void FileFetchTransferTask::transferProgress(QString msg,int value)
 
 void FileFetchTransferTask::transferFailed(QString msg)
 {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
+#endif
+
     auto reply = owner_->theReply();
     reply->addLogTryEntry("fetch file from SOCKS host via scp : FAILED");
     reply->appendErrorText("Failed to fetch from SOCKS host via scp\n" + msg.toStdString());
@@ -219,7 +226,7 @@ void FileFetchCacheTask::run()
         VFile_ptr f=owner_->findInCache(filePath_);
         if (f)
         {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
             UiLog().dbg() << " File found in cache";
 #endif
             //VFile_ptr f=item->file();
@@ -231,7 +238,11 @@ void FileFetchCacheTask::run()
             reply->fileReadMode(VReply::LogServerReadMode);
             reply->setLog(f->log());
             reply->addLogRemarkEntry("File was read from cache.");
-            reply->tmpFile(f);
+            if (appendResult_) {
+                reply->appendTmpFile(f);
+            } else {
+                reply->tmpFile(f);
+            }
             succeed();
             return;
         }
@@ -379,8 +390,12 @@ void FileFetchLogServerTask::clientFinished()
     tmp->setLog(reply->log());
     std::string method="served by " + client_->longName();
     tmp->setFetchModeStr(method);
-    reply->tmpFile(tmp);
 
+    if (appendResult_) {
+        reply->appendTmpFile(tmp);
+    } else {
+        reply->tmpFile(tmp);
+    }
     succeed();
 }
 
