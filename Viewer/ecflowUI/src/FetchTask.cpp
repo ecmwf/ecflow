@@ -8,11 +8,43 @@
 //
 //============================================================================
 
-#include "OutputFetchTask.hpp"
+#include "FetchTask.hpp"
+
+#include <cassert>
+#include <map>
 
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 
 //#define OUTPUTFETCHTASK_DEBUG__
+
+static std::map<std::string,FetchTaskFactory*>* makers = nullptr;
+
+FetchTaskFactory::FetchTaskFactory(const std::string& name)
+{
+    if(makers == nullptr)
+        makers = new std::map<std::string,FetchTaskFactory*>;
+
+    // Put in reverse order...
+    (*makers)[name] = this;
+}
+
+FetchTaskFactory::~FetchTaskFactory()
+{
+    // Not called
+}
+
+AbstractFetchTask* FetchTaskFactory::create(const std::string& name, FetchQueueOwner* owner)
+{
+    AbstractFetchTask* t=nullptr;
+    auto j = makers->find(name);
+    if(j != makers->end()) {
+        t = (*j).second->make(owner);
+    }
+
+    UI_ASSERT(t, UI_FN_INFO + " unsupported name=" + name);
+    return t;
+}
 
 //========================================
 //
@@ -20,7 +52,7 @@
 //
 //========================================
 
-void OutputFetchTask::clear()
+void AbstractFetchTask::clear()
 {
     queue_ = nullptr;
     status_ = NoStatus;
@@ -28,14 +60,33 @@ void OutputFetchTask::clear()
     server_=nullptr;
     node_=nullptr;
     filePath_.clear();
+    deltaPos_=0;
+    useCache_=false;
 }
 
-void OutputFetchTask::setQueue(OutputFetchQueue* q)
+void AbstractFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath)
+{
+    server_=server;
+    node_=node;
+    filePath_=filePath;
+}
+
+void AbstractFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath,
+           size_t deltaPos, bool useCache)
+{
+    server_=server;
+    node_=node;
+    filePath_=filePath;
+    deltaPos_=deltaPos;
+    useCache_=useCache;
+}
+
+void AbstractFetchTask::setQueue(FetchQueue* q)
 {
     queue_ = q;
 }
 
-bool OutputFetchTask::checRunCondition(OutputFetchTask* prev) const
+bool AbstractFetchTask::checRunCondition(AbstractFetchTask* prev) const
 {
     if (prev && runCondition_ == RunIfPrevFailed && prev->status_ == SucceededStatus) {
         return false;
@@ -43,7 +94,7 @@ bool OutputFetchTask::checRunCondition(OutputFetchTask* prev) const
     return true;
 }
 
-void OutputFetchTask::succeed()
+void AbstractFetchTask::succeed()
 {
     status_ = SucceededStatus;
     if (queue_) {
@@ -51,7 +102,7 @@ void OutputFetchTask::succeed()
     }
 }
 
-void OutputFetchTask::finish()
+void AbstractFetchTask::finish()
 {
     status_ = FinishedStatus;
     if (queue_) {
@@ -59,7 +110,7 @@ void OutputFetchTask::finish()
     }
 }
 
-void OutputFetchTask::fail()
+void AbstractFetchTask::fail()
 {
     status_ = FailedStatus;
     if (queue_) {
@@ -67,7 +118,7 @@ void OutputFetchTask::fail()
     }
 }
 
-std::string OutputFetchTask::print() const
+std::string AbstractFetchTask::print() const
 {
     return name_ + "[status=" + std::to_string(status_) + ",runCondition=" +  std::to_string(runCondition_) +
             ",filePath=" + filePath_ + "]";
@@ -80,7 +131,7 @@ std::string OutputFetchTask::print() const
 //
 //========================================
 
-void OutputFetchQueue::clear()
+void FetchQueue::clear()
 {
     status_ = IdleState;
     for (auto t: queue_) {
@@ -90,13 +141,14 @@ void OutputFetchQueue::clear()
     queue_.clear();
 }
 
-void OutputFetchQueue::add(OutputFetchTask* t)
+void FetchQueue::add(AbstractFetchTask* t)
 {
+    assert(t);
     t->setQueue(this);
     queue_.push_back(t);
 }
 
-void OutputFetchQueue::run()
+void FetchQueue::run()
 {
     if (!queue_.empty()) {
         status_ = RunningState;
@@ -106,7 +158,7 @@ void OutputFetchQueue::run()
     }
 }
 
-void OutputFetchQueue::next()
+void FetchQueue::next()
 {
 #ifdef OUTPUTFETCHTASK_DEBUG__
     UiLog().dbg() << "OutputFetchQueue::next";
@@ -138,7 +190,7 @@ void OutputFetchQueue::next()
     }
 }
 
-void OutputFetchQueue::finish(OutputFetchTask* lastTask)
+void FetchQueue::finish(AbstractFetchTask* lastTask)
 {
 #ifdef OUTPUTFETCHTASK_DEBUG__
     UI_FN_DBG
@@ -149,7 +201,7 @@ void OutputFetchQueue::finish(OutputFetchTask* lastTask)
     }
 }
 
-void OutputFetchQueue::taskSucceeded(OutputFetchTask* t)
+void FetchQueue::taskSucceeded(AbstractFetchTask* t)
 {
     if (status_ == RunningState) {
         if (policy_ == RunUntilFirstSucceeded) {
@@ -161,7 +213,7 @@ void OutputFetchQueue::taskSucceeded(OutputFetchTask* t)
     }
 }
 
-void OutputFetchQueue::taskFinished(OutputFetchTask*)
+void FetchQueue::taskFinished(AbstractFetchTask*)
 {
     if (status_ == RunningState) {
         next();
@@ -170,7 +222,7 @@ void OutputFetchQueue::taskFinished(OutputFetchTask*)
     }
 }
 
-void OutputFetchQueue::taskFailed(OutputFetchTask*)
+void FetchQueue::taskFailed(AbstractFetchTask*)
 {
 #ifdef OUTPUTFETCHTASK_DEBUG__
     UI_FN_DBG
@@ -182,7 +234,7 @@ void OutputFetchQueue::taskFailed(OutputFetchTask*)
     }
 }
 
-std::string OutputFetchQueue::print() const
+std::string FetchQueue::print() const
 {
     std::string s = "OutpuFetchQueue[";
     for (auto t: queue_) {
@@ -192,14 +244,66 @@ std::string OutputFetchQueue::print() const
     return s;
 }
 
+//========================================
+//
+// OutputFetchQueueOwner
+//
+//========================================
 
-std::ostream&  operator <<(std::ostream &stream,OutputFetchTask* t)
+FetchQueueOwner::~FetchQueueOwner()
+{
+    if (fetchQueue_) {
+        delete fetchQueue_;
+        fetchQueue_ = nullptr;
+    }
+
+    for (auto it: fetchTasks_) {
+        for(auto itV: it.second) {
+            delete itV;
+        }
+    }
+    fetchTasks_.clear();
+    unusedTasks_.clear();
+}
+
+void FetchQueueOwner::clear()
+{
+    // clear the queue and the fetch tasks
+    if (fetchQueue_) {
+        fetchQueue_->clear();
+        for (auto it: fetchTasks_) {
+            for(auto itV: it.second) {
+                itV->clear();
+            }
+        }
+    }
+    unusedTasks_ = fetchTasks_;
+}
+
+AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name)
+{
+    auto it = unusedTasks_.find(name);
+    if (it != unusedTasks_.end()) {
+        if (!it->second.empty()) {
+            auto t = it->second.front();
+            it->second.pop_front();
+            return t;
+        }
+    }
+    UiLog().dbg() << UI_FN_INFO << "name=" << name;
+    AbstractFetchTask *t = FetchTaskFactory::create(name, this);
+    fetchTasks_[name].emplace_back(t);
+    return t;
+}
+
+
+std::ostream&  operator <<(std::ostream &stream,AbstractFetchTask* t)
 {
     stream << t->print();
     return stream;
 }
 
-std::ostream&  operator <<(std::ostream &stream,OutputFetchQueue* q)
+std::ostream&  operator <<(std::ostream &stream,FetchQueue* q)
 {
     stream << q->print();
     return stream;

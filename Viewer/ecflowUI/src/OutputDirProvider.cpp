@@ -28,17 +28,9 @@
 //#define UI_OUTPUTDIRPROVIDER_DEBUG__
 //#define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
 
-OutputDirFetchTask::OutputDirFetchTask(const std::string& name, OutputDirProvider* owner) :
-    OutputFetchTask(name), owner_(owner)
+OutputDirFetchTask::OutputDirFetchTask(const std::string& name, FetchQueueOwner* owner) :
+    AbstractFetchTask(name, owner)
 {
-}
-
-void OutputDirFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath,RunCondition cond)
-{
-    server_ = server;
-    node_ = node;
-    filePath_ = filePath;
-    runCondition_ = cond;
 }
 
 void OutputDirFetchTask::addTryLog(VReply* r, const std::string& txt) const
@@ -52,19 +44,19 @@ void OutputDirFetchTask::addTryLog(VReply* r, const std::string& txt) const
 //
 //=================================
 
-OutputDirFetchRemoteTask::OutputDirFetchRemoteTask(OutputDirProvider* owner) :
-     QObject(nullptr), OutputDirFetchTask("DirFetchRemote", owner)
+OutputDirFetchLogServerTask::OutputDirFetchLogServerTask(FetchQueueOwner* owner) :
+     QObject(nullptr), OutputDirFetchTask("DirFetchLogServer", owner)
 {
 }
 
-OutputDirFetchRemoteTask::~OutputDirFetchRemoteTask()
+OutputDirFetchLogServerTask::~OutputDirFetchLogServerTask()
 {
     if(client_) {
         client_->disconnect(this);
     }
 }
 
-void OutputDirFetchRemoteTask::deleteClient()
+void OutputDirFetchLogServerTask::deleteClient()
 {
     if(client_) {
 #ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
@@ -76,18 +68,18 @@ void OutputDirFetchRemoteTask::deleteClient()
     }
 }
 
-void OutputDirFetchRemoteTask::stop()
+void OutputDirFetchLogServerTask::stop()
 {
-    OutputFetchTask::clear();
+    AbstractFetchTask::clear();
     if (status_ == RunningStatus) {
         deleteClient();
     }
 }
 
 
-void OutputDirFetchRemoteTask::clear()
+void OutputDirFetchLogServerTask::clear()
 {
-    OutputFetchTask::clear();
+    AbstractFetchTask::clear();
     deleteClient();
     if(client_) {
         delete client_;
@@ -98,7 +90,7 @@ void OutputDirFetchRemoteTask::clear()
 //Create an output client (to access the logserver) and ask it to the fetch the
 //dir asynchronously. The output client will call clientFinished or
 //clientError eventually!!
-void OutputDirFetchRemoteTask::run()
+void OutputDirFetchLogServerTask::run()
 {
 #ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
     UiLog().dbg() <<  UI_FN_INFO << "filePath=" << filePath_;
@@ -149,14 +141,14 @@ void OutputDirFetchRemoteTask::run()
     //If we are here there is no output client defined/available
     deleteClient();
 
-    addTryLog(owner_->reply_, "fetch from logserver: NOT DEFINED");
+    addTryLog(owner_->theReply(), "fetch from logserver: NOT DEFINED");
     finish();
 }
 
-void OutputDirFetchRemoteTask::clientFinished()
+void OutputDirFetchLogServerTask::clientFinished()
 {
     Q_ASSERT(client_);
-    auto reply = owner_->reply_;
+    auto reply = owner_->theReply();
     VDir_ptr dir = client_->result();
     if(dir)
     {
@@ -175,14 +167,14 @@ void OutputDirFetchRemoteTask::clientFinished()
     fail();
 }
 
-void OutputDirFetchRemoteTask::clientProgress(QString,int)
+void OutputDirFetchLogServerTask::clientProgress(QString,int)
 {
 }
 
-void OutputDirFetchRemoteTask::clientError(QString msg)
+void OutputDirFetchLogServerTask::clientError(QString msg)
 {
     std::string sDesc;
-    auto reply = owner_->reply_;
+    auto reply = owner_->theReply();
     if(client_)
     {
         sDesc="Failed to fetch from " + client_->longName();
@@ -207,7 +199,7 @@ void OutputDirFetchRemoteTask::clientError(QString msg)
 // OutputFileFetchLocalTask
 //
 //=================================
-OutputDirFetchLocalTask::OutputDirFetchLocalTask(OutputDirProvider *owner) :
+OutputDirFetchLocalTask::OutputDirFetchLocalTask(FetchQueueOwner *owner) :
     OutputDirFetchTask("DirFetchLocal", owner) {}
 
 // try to read the logfile from the disk (if the settings allow it)
@@ -227,7 +219,7 @@ void OutputDirFetchLocalTask::run()
         return;
     }
 
-    auto reply = owner_->reply_;
+    auto reply = owner_->theReply();
     try {
         if(boost::filesystem::exists(p.parent_path())) {
             std::string dirName=p.parent_path().string();
@@ -263,7 +255,7 @@ void OutputDirFetchLocalTask::run()
 //
 //=================================
 
-OutputDirFetchTransferTask::OutputDirFetchTransferTask(OutputDirProvider* owner) :
+OutputDirFetchTransferTask::OutputDirFetchTransferTask(FetchQueueOwner* owner) :
      QObject(nullptr), OutputDirFetchTask("DirFetchTransfer", owner)
 {
 }
@@ -311,7 +303,7 @@ void OutputDirFetchTransferTask::run()
     QString rUser, rHost;
     VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
     if (rUser.isEmpty() || rHost.isEmpty()) {
-        owner_->reply_->addLogTryEntry("fetch from SOCKS host via ssh: NOT DEFINED");
+        owner_->theReply()->addLogTryEntry("fetch from SOCKS host via ssh: NOT DEFINED");
         finish();
         return;
     }
@@ -336,7 +328,7 @@ void OutputDirFetchTransferTask::run()
 
 void OutputDirFetchTransferTask::transferFinished()
 {
-    auto reply = owner_->reply_;
+    auto reply = owner_->theReply();
     reply->setInfoText("");
     reply->fileReadMode(VReply::TransferReadMode);
 
@@ -374,12 +366,12 @@ void OutputDirFetchTransferTask::transferFinished()
 
 void OutputDirFetchTransferTask::transferProgress(QString msg,int value)
 {
-    owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
+    //owner_->progressUpdate(msg.toStdString(),value);
 }
 
 void OutputDirFetchTransferTask::transferFailed(QString msg)
 {
-    auto reply = owner_->reply_;
+    auto reply = owner_->theReply();
     addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
     reply->appendErrorText("Failed to fetch from SOCKS host via ssh\n" + msg.toStdString());
     resFile_.reset();
@@ -400,6 +392,98 @@ void OutputDirFetchTransferTask::parseLine(QString line)
     }
 }
 
+
+
+class OutputDirFetchQueueManager : public FetchQueueOwner
+{
+public:
+     OutputDirFetchQueueManager(OutputDirProvider*);
+     void run(ServerHandler* server, VNode* node,const std::string& joboutFile);
+
+     VReply* theReply() const override;
+     void fetchQueueSucceeded() override {}
+     void fetchQueueFinished(const std::string& filePath, VNode*) override;
+//     void progressStart(const std::string& msg, int max) override;
+//     void progressUpdate(const std::string& msg, int value) override;
+
+protected:
+     OutputDirProvider* provider_{nullptr};
+
+};
+
+OutputDirFetchQueueManager::OutputDirFetchQueueManager(OutputDirProvider* provider) : provider_(provider)
+{
+    fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
+}
+
+VReply* OutputDirFetchQueueManager::theReply() const
+{
+    return provider_->reply_;
+}
+
+void OutputDirFetchQueueManager::run(ServerHandler* server, VNode* node,
+                                      const std::string& joboutFile)
+{
+    // jobout
+    fetchQueue_->clear();
+    Q_ASSERT(fetchQueue_->isEmpty());
+    AbstractFetchTask* t=nullptr;
+
+    // jobout
+    t = makeFetchTask("dir_logserver");
+    t->reset(server,node,joboutFile);
+    fetchQueue_->add(t);
+
+    if (VConfig::instance()->proxychainsUsed()) {
+        t = makeFetchTask("dir_transfer");
+    } else {
+        t = makeFetchTask("dir_local");
+    }
+    t->reset(server,node,joboutFile);
+    if(!server->readFromDisk()) {
+        t->setRunCondition(AbstractFetchTask::RunIfPrevFailed);
+    }
+    fetchQueue_->add(t);
+
+    // jobfile
+    std::string outFile = node->findVariable("ECF_OUT",true);
+    std::string jobFile = node->findVariable("ECF_JOB",true);
+    if(!outFile.empty() && !jobFile.empty()) {
+        t = makeFetchTask("dir_logserver");
+        t->reset(server,node,jobFile);
+        fetchQueue_->add(t);
+
+        if (VConfig::instance()->proxychainsUsed()) {
+            t = makeFetchTask("dir_transfer");
+        } else {
+            t = makeFetchTask("dir_local");
+        }
+        t->reset(server,node,jobFile);
+        if(!server->readFromDisk()) {
+            t->setRunCondition(AbstractFetchTask::RunIfPrevFailed);
+        }
+        fetchQueue_->add(t);
+    }
+
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
+#endif
+    fetchQueue_->run();
+}
+
+void OutputDirFetchQueueManager::fetchQueueFinished(const std::string& /*filePath*/, VNode*)
+{
+    theReply()->setInfoText("");
+    if (theReply()->directories().empty()) {
+        provider_->owner_->infoFailed(theReply());
+    } else {
+#ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
+        UiLog().dbg() << UI_FN_INFO << "dirs=" << reply_->directories().size();
+#endif
+        provider_->owner_->infoReady(theReply());
+    }
+}
+
 //=================================
 //
 // OutputDirProvider
@@ -408,34 +492,23 @@ void OutputDirFetchTransferTask::parseLine(QString line)
 
 OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
     InfoProvider(owner,VTask::NoTask)
-{   
-    fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunAll, this);
-
-    // these are persistent fetch tasks. We add them to the queue on demand
-    fetchTask_[LocalTask1] = new OutputDirFetchLocalTask(this);
-    fetchTask_[RemoteTask1] = new OutputDirFetchRemoteTask(this);
-    fetchTask_[TransferTask1] = new OutputDirFetchTransferTask(this);
-    fetchTask_[LocalTask2] = new OutputDirFetchLocalTask(this);
-    fetchTask_[RemoteTask2] = new OutputDirFetchRemoteTask(this);
-    fetchTask_[TransferTask2] = new OutputDirFetchTransferTask(this);
+{      
+    fetchManager_ = new OutputDirFetchQueueManager(this);
 }
 
 OutputDirProvider::~OutputDirProvider()
 {
-    delete fetchQueue_;
-    fetchQueue_ = nullptr;
-
-    for (auto it: fetchTask_) {
-        delete it.second;
+    if (fetchManager_) {
+        delete fetchManager_;
+        fetchManager_ = nullptr;
     }
-    fetchTask_.clear();
 }
 
 void OutputDirProvider::clear()
 {
     // clear the queue and the fetch tasks
-    if (fetchQueue_) {
-        fetchQueue_->clear();
+    if (fetchManager_) {
+        fetchManager_->clear();
     }
 
 	InfoProvider::clear();
@@ -448,7 +521,8 @@ void OutputDirProvider::visit(VInfoNode* info)
 	reply_->reset();
 
     //Clear the queue
-    fetchQueue_->clear();
+    //fetchQueue_->clear();
+    fetchManager_->clear();
 
 	if(!info)
  	{
@@ -467,65 +541,9 @@ void OutputDirProvider::visit(VInfoNode* info)
 
     std::string joboutFile=n->findVariable("ECF_JOBOUT",true);
 
-    // jobout
-    auto t = fetchTask_[RemoteTask1];
-    t->reset(server,n,joboutFile);
-    fetchQueue_->add(t);
-
-    if (VConfig::instance()->proxychainsUsed()) {
-        t = fetchTask_[TransferTask1];
-    } else {
-        t = fetchTask_[LocalTask1];
-    }
-    t->reset(server,n,joboutFile);
-    if(server->readFromDisk()) {
-        fetchQueue_->add(t);
-    } else {
-        t->setRunCondition(OutputFetchTask::RunIfPrevFailed);
-        fetchQueue_->add(t);
-    }
-
-    // jobfile
-    std::string outFile = n->findVariable("ECF_OUT",true);
-    std::string jobFile = n->findVariable("ECF_JOB",true);
-    if(!outFile.empty() && !jobFile.empty()) {
-        t = fetchTask_[RemoteTask2];
-        t->reset(server,n,jobFile);
-        fetchQueue_->add(t);
-
-        if (VConfig::instance()->proxychainsUsed()) {
-            t = fetchTask_[TransferTask2];
-        } else {
-            t = fetchTask_[LocalTask2];
-        }
-        t->reset(server,n,jobFile);
-        if(server->readFromDisk()) {
-            fetchQueue_->add(t);
-        } else {
-            t->setRunCondition(OutputFetchTask::RunIfPrevFailed);
-            fetchQueue_->add(t);
-        }
-    }
-
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-#endif
-    fetchQueue_->run();
+    fetchManager_->run(server, n, joboutFile);
 }
 
-void OutputDirProvider::fetchQueueSucceeded()
-{
-}
-
-void OutputDirProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*)
-{
-    reply_->setInfoText("");
-    if (reply_->directories().empty()) {
-        owner_->infoFailed(reply_);
-    } else {
-#ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
-        UiLog().dbg() << UI_FN_INFO << "dirs=" << reply_->directories().size();
-#endif
-        owner_->infoReady(reply_);
-    }
-}
+static FetchTaskMaker<OutputDirFetchLocalTask> maker1("dir_local");
+static FetchTaskMaker<OutputDirFetchTransferTask> maker2("dir_transfer");
+static FetchTaskMaker<OutputDirFetchLogServerTask> maker3("dir_logserver");

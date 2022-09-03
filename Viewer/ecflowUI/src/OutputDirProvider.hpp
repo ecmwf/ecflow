@@ -20,30 +20,27 @@
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
-#include "OutputFetchTask.hpp"
+#include "FetchTask.hpp"
 
 class OutputDirClient;
 class OutputDirProvider;
+class OutputDirFetchQueueManager;
 class VDirTransfer;
 
-class OutputDirFetchTask : public OutputFetchTask
+class OutputDirFetchTask : public AbstractFetchTask
 {
 public:
-    OutputDirFetchTask(const std::string& name, OutputDirProvider* owner);
-    void reset(ServerHandler* server,VNode* n,const std::string& filePath,RunCondition cond=NoCondition);
-
+    OutputDirFetchTask(const std::string& name,  FetchQueueOwner* owner);
 protected:
     void addTryLog(VReply* r, const std::string& txt) const;
-
-    OutputDirProvider* owner_{nullptr};
 };
 
-class OutputDirFetchRemoteTask : public QObject, public OutputDirFetchTask
+class OutputDirFetchLogServerTask : public QObject, public OutputDirFetchTask
 {
 Q_OBJECT
 public:
-    OutputDirFetchRemoteTask(OutputDirProvider* owner);
-    ~OutputDirFetchRemoteTask();
+    OutputDirFetchLogServerTask(FetchQueueOwner* owner);
+    ~OutputDirFetchLogServerTask();
     void run() override;
     void stop() override;
     void clear() override;
@@ -63,7 +60,7 @@ protected:
 class OutputDirFetchLocalTask : public OutputDirFetchTask
 {
 public:
-    OutputDirFetchLocalTask(OutputDirProvider* owner);
+    OutputDirFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
@@ -71,7 +68,7 @@ class OutputDirFetchTransferTask : public QObject, public OutputDirFetchTask
 {
 Q_OBJECT
 public:
-    OutputDirFetchTransferTask(OutputDirProvider* owner);
+    OutputDirFetchTransferTask(FetchQueueOwner* owner);
     ~OutputDirFetchTransferTask();
     void run() override;
     void stop() override;
@@ -92,11 +89,9 @@ protected:
 };
 
 
-class OutputDirProvider : public InfoProvider, public OutputFetchQueueOwner
+class OutputDirProvider : public InfoProvider //, public OutputFetchQueueOwner
 {
-    friend class OutputDirFetchRemoteTask;
-    friend class OutputDirFetchLocalTask;
-    friend class OutputDirFetchTransferTask;
+    friend class OutputDirFetchQueueManager;
 
 public:
      explicit OutputDirProvider(InfoPresenter* owner);
@@ -105,14 +100,8 @@ public:
 	 void visit(VInfoNode*) override;
 	 void clear() override;
 
-     void fetchQueueSucceeded() override;
-     void fetchQueueFinished(const std::string& filePath,VNode*) override;
-
 private:
-    OutputFetchQueue* fetchQueue_{nullptr};
-    enum FetchTaskType {RemoteTask1, LocalTask1, TransferTask1, RemoteTask2, LocalTask2, TransferTask2};
-    std::map<FetchTaskType, OutputDirFetchTask*> fetchTask_;
+      OutputDirFetchQueueManager* fetchManager_{nullptr};
 };
-
 
 #endif /* VIEWER_SRC_OUTPUTDIRPROVIDER_HPP_ */

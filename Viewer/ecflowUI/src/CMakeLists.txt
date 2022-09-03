@@ -46,11 +46,14 @@ set(viewer_srcs
     EventEditor.cpp
     ExpandState.cpp
     ExpandStateNode.cpp
+    FetchTask.cpp
     FlagSet.hpp
-    FileInfoLabel.cpp
+    FileFetchTask.cpp
+    FileInfoLabel.cpp   
     FileWatcher.cpp
     FilterWidget.cpp
     FontMetrics.cpp
+    GenFileProvider.cpp
     GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
@@ -100,7 +103,6 @@ set(viewer_srcs
     OutputCache.cpp
     OutputClient.cpp
     OutputFetchInfo.cpp
-    OutputFetchTask.cpp
     OutputFileClient.cpp
     OutputDirClient.cpp
     OutputModel.cpp
@@ -299,8 +301,10 @@ set(viewer_moc_files AbstractNodeModel.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
     EventEditor.hpp
+    FileFetchTask.hpp
     FileWatcher.hpp
     FilterWidget.hpp
+    GenFileProvider.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     HtmlItemWidget.hpp

@@ -32,6 +32,7 @@ ServerList* ServerList::instance_=nullptr;
 
 #define _UI_SERVERLIST_DEBUG
 
+
 ServerListTmpItem::ServerListTmpItem(ServerItem* item) :
     name_(item->name()),
     host_(item->host()),

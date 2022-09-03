@@ -31,448 +31,184 @@
 
 //=================================
 //
-// OutputFileFetchTask
-//
-//=================================
-
-OutputFileFetchTask::OutputFileFetchTask(const std::string& name, OutputFileProvider* owner) :
-    OutputFetchTask(name), owner_(owner)
-{
-    Q_ASSERT(owner_);
-}
-
-void OutputFileFetchTask::clear()
-{
-    OutputFetchTask::clear();
-    isJobout_=false;
-    deltaPos_=0;
-    useCache_=false;
-}
-
-void OutputFileFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath, bool isJobout,
-           size_t deltaPos, bool useCache)
-{
-    server_=server;
-    node_=node;
-    filePath_=filePath;
-    isJobout_=isJobout;
-    deltaPos_=deltaPos;
-    useCache_=useCache;
-}
-
-//=================================
-//
-// OutputFileFetchCacheTask
-//
-//=================================
-
-OutputFileFetchCacheTask::OutputFileFetchCacheTask(OutputFileProvider* owner) :
-    OutputFileFetchTask("FileFetchCache", owner) {}
-
-// Try to fetch the logfile from the local cache
-void OutputFileFetchCacheTask::run()
-{
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " useCache=" << useCache_;
-#endif
-
-    assert(node_);
-
-    //We try use the cache
-    if(useCache_)
-    {        
-        //Check if the given output is already in the cache
-        if(OutputCacheItem* item=owner_->findInCache(filePath_))
-        {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-            UiLog().dbg() << " File found in cache";
-#endif
-            VFile_ptr f=item->file();
-            assert(f);
-            f->setCached(true);
-            f->setTransferDuration(0);
-            auto reply = owner_->reply_;
-            reply->setInfoText("");
-            reply->fileReadMode(VReply::LogServerReadMode);
-            reply->setLog(f->log());
-            reply->addLogRemarkEntry("File was read from cache.");
-            reply->tmpFile(f);
-
-            succeed();
-            return;
-        }
-    }
-    finish();
-}
-
-//=================================
-//
-// OutputFileFetchRemoteTask
-//
-//=================================
-
-OutputFileFetchRemoteTask::OutputFileFetchRemoteTask(OutputFileProvider* owner) :
-     QObject(nullptr), OutputFileFetchTask("FileFetchRemote", owner)
-{
-}
-
-OutputFileFetchRemoteTask::~OutputFileFetchRemoteTask()
-{
-    if(client_) {
-        client_->disconnect(this);
-    }
-}
-
-void OutputFileFetchRemoteTask::deleteClient()
-{
-    if(client_) {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-        UI_FN_DBG
-#endif
-        client_->disconnect(this);
-        client_->deleteLater();
-        client_ = nullptr;
-    }
-}
-
-void OutputFileFetchRemoteTask::stop()
-{
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UI_FN_DBG
-#endif
-    OutputFileFetchTask::clear();
-    if (status_ == RunningStatus) {
-        deleteClient();
-    }
-}
-
-void OutputFileFetchRemoteTask::clear()
-{
-    OutputFileFetchTask::clear();
-    deleteClient();
-}
-
-//Create an output client (to access the logserver) and ask it to the fetch the
-//file asynchronously. The output client will call clientFinished() or
-//clientError eventually!!
-void OutputFileFetchRemoteTask::run()
-{
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
-#endif
-    std::string host, port;
-    assert(node_);
-
-    // First try the user defined logserver, then the system defined one
-    bool userLogServerUsed = node_->userLogServer(host,port);
-    bool sysLogServerUsed = false;
-    if (!userLogServerUsed) {
-        sysLogServerUsed = node_->logServer(host,port);
-    }
-    Q_ASSERT(!userLogServerUsed || !sysLogServerUsed);
-
-    if (userLogServerUsed || sysLogServerUsed) {
-        Q_ASSERT(userLogServerUsed || sysLogServerUsed);
-        if (client_ && (client_->host() != host || client_->portStr() != port)) {
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-        UiLog().dbg() << " host/port does not match! Create new client";
-#endif
-        deleteClient();
-        }
-
-        if (!client_) {
-            client_=new OutputFileClient(host,port,this);
-
-            connect(client_,SIGNAL(error(QString)),
-                    this,SLOT(clientError(QString)));
-
-            connect(client_,SIGNAL(progress(QString,int)),
-                    this,SLOT(clientProgress(QString,int)));
-
-            connect(client_,SIGNAL(finished()),
-                    this,SLOT(clientFinished()));
-        }
-
-        Q_ASSERT(client_);
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-        UiLog().dbg() << " use logserver=" << client_->longName();
-#endif
-
-        owner_->owner_->infoProgressStart("Getting file <i>" + filePath_ +  "</i> from" +
-                                  ((userLogServerUsed)?"<b>user defined</b>":"") +
-                                  " log server <i> " + client_->longName() + "</i>",0);
-
-
-        VDir_ptr dir=owner_->dirToFile(filePath_);
-        client_->setDir(dir);
-
-        // fetch the file asynchronously
-        client_->getFile(filePath_, deltaPos_);
-        return;
-    }
-
-
-    //If we are here there is no output client defined/available
-    deleteClient();
-
-    owner_->reply_->addLogTryEntry("fetch file from logserver: NOT DEFINED");
-    finish();
-}
-
-void OutputFileFetchRemoteTask::clientFinished()
-{
-    VFile_ptr tmp = client_->result();
-    assert(tmp);
-
-    client_->clearResult();
-
-    //Files retrieved from the log server are automatically added to the cache!
-    //sourcePath must be already set on tmp
-    if (useCache_ && !tmp->hasDeltaContents()) {
-        owner_->addToCache(tmp);
-    }
-
-    auto reply = owner_->reply_;
-    reply->setInfoText("");
-    reply->fileReadMode(VReply::LogServerReadMode);
-
-    if (tmp->hasDeltaContents()) {
-        reply->addLogTryEntry("fetch file increment from logserver=" + client_->longName() + " : OK");
-    } else {
-        reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : OK");
-    }
-
-    tmp->setFetchMode(VFile::LogServerFetchMode);
-    tmp->setLog(reply->log());
-    std::string method="served by " + client_->longName();
-    tmp->setFetchModeStr(method);
-    reply->tmpFile(tmp);
-
-    succeed();
-}
-
-void OutputFileFetchRemoteTask::clientProgress(QString msg,int value)
-{
-    owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
-}
-
-void OutputFileFetchRemoteTask::clientError(QString msg)
-{
-    auto reply = owner_->reply_;
-    reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : FAILED");
-    reply->appendErrorText("Failed to fetch file from logserver=" + client_->longName() + "\n");
-    fail();
-}
-
-//=================================
-//
-// OutputFileFetchLocalTask
-//
-//=================================
-
-OutputFileFetchAnyLocalTask::OutputFileFetchAnyLocalTask(OutputFileProvider* owner) :
-    OutputFileFetchTask("FileFetchAnyLocal", owner) {}
-
-// try to read the logfile from the disk (if the settings allow it)
-void OutputFileFetchAnyLocalTask::run()
-{
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
-#endif
-    auto reply = owner_->reply_;
-
-    //we do not want to delete the file once the VFile object is destroyed!!
-    VFile_ptr f(VFile::create(filePath_,false));
-    if(f->exists())
-    {
-        reply->fileReadMode(VReply::LocalReadMode);
-        reply->addLogTryEntry("read file from disk: OK");
-
-        f->setSourcePath(f->path());
-        f->setFetchMode(VFile::LocalFetchMode);
-        f->setFetchDate(QDateTime::currentDateTime());
-        f->setLog(reply->log());
-
-        reply->tmpFile(f);
-
-        succeed();
-        return ;
-    }
-    reply->addLogTryEntry("read file from disk: NO ACCESS");
-    reply->appendErrorText("Failed to read file from disk\n");
-    finish();
-}
-
-OutputFileFetchLocalTask::OutputFileFetchLocalTask(OutputFileProvider* owner) :
-    OutputFileFetchAnyLocalTask(owner) { name_ = "FileFetchLocal";}
-
-
-void OutputFileFetchLocalTask::run()
-{
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UI_FN_DBG
-#endif
-    if (server_->readFromDisk() || !isJobout_) {
-        OutputFileFetchAnyLocalTask::run();
-    } else {
-        finish();
-    }
-}
-
-//=================================
-//
-// OutputFileFetchTransferTask
-//
-//=================================
-
-OutputFileFetchTransferTask::OutputFileFetchTransferTask(OutputFileProvider* owner) :
-     QObject(nullptr), OutputFileFetchTask("FileFetchTransfer", owner)
-{
-}
-
-OutputFileFetchTransferTask::~OutputFileFetchTransferTask()
-{
-}
-
-void OutputFileFetchTransferTask::stopTransfer()
-{
-    if (transfer_) {
-        resFile_.reset();
-        transfer_->stopTransfer(false);
-     }
-}
-
-void OutputFileFetchTransferTask::stop()
-{
-    stopTransfer();
-    OutputFileFetchTask::clear();
-}
-
-void OutputFileFetchTransferTask::clear()
-{
-    stopTransfer();
-    OutputFileFetchTask::clear();
-}
-
-//Fetch the file asynchronously via ssh. The output client will call clientFinished() or
-//clientError eventually!!
-void OutputFileFetchTransferTask::run()
-{
-#ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " deltaPos=" << deltaPos_;
-#endif
-
-    assert(node_);
-    assert(VConfig::instance()->proxychainsUsed());
-
-    resFile_.reset();
-
-    QString rUser, rHost;
-    VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
-    if (rUser.isEmpty() || rHost.isEmpty()) {
-        owner_->reply_->addLogTryEntry("fetch file from SOCKS host via scp: NOT DEFINED");
-        finish();
-        return;
-    }
-
-    resFile_ = VFile::createTmpFile(true); //we will delete the file from disk
-
-    if (!transfer_) {
-        transfer_ = new VFileTransfer(this);
-
-        connect(transfer_, SIGNAL(transferFinished()),
-                this, SLOT(transferFinished()));
-
-        connect(transfer_, SIGNAL(transferFailed(QString)),
-                this, SLOT(transferFailed(QString)));
-    }
-
-    Q_ASSERT(transfer_);
-    if (deltaPos_ > 0) {
-        transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       QString::fromStdString(resFile_->path()),
-                       VFileTransfer::BytesFromPos, deltaPos_);
-    } else {
-        transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       QString::fromStdString(resFile_->path()),
-                       VFileTransfer::AllBytes, 0);
-    }
-    owner_->owner_->infoProgressStart("Getting local file <i>" + filePath_ +  "</i> from SOCKS host via scp", 0);
-}
-
-void OutputFileFetchTransferTask::transferFinished()
-{
-    auto reply = owner_->reply_;
-    reply->setInfoText("");
-    reply->fileReadMode(VReply::TransferReadMode);
-
-    if (deltaPos_ > 0) {
-        reply->addLogTryEntry("fetch file increment from SOCKS host via scp : OK");
-    } else {
-        reply->addLogTryEntry("fetch file from SOCKS host via scp : OK");
-    }
-
-    resFile_->setSourcePath(filePath_);
-    resFile_->setDeltaContents(deltaPos_>0);
-    resFile_->setFetchMode(VFile::TransferFetchMode);
-    resFile_->setLog(reply->log());
-    std::string method="via ssh";
-    if (transfer_) {
-        method = "from " + transfer_->remoteUserAndHost().toStdString() + " " + method;
-        resFile_->setTransferDuration(transfer_->transferDuration());
-    }
-
-    resFile_->setFetchModeStr(method);
-    resFile_->setFetchDate(QDateTime::currentDateTime());
-
-    //Files retrieved from the log server are automatically added to the cache!
-    //To make it work sourcePath must be set on resFile_ !!!
-    if (useCache_ && deltaPos_ == 0) {
-        owner_->addToCache(resFile_);
-    }
-
-    reply->tmpFile(resFile_);
-    resFile_.reset();
-    succeed();
-}
-
-void OutputFileFetchTransferTask::transferProgress(QString msg,int value)
-{
-    owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
-}
-
-void OutputFileFetchTransferTask::transferFailed(QString msg)
-{
-    auto reply = owner_->reply_;
-    reply->addLogTryEntry("fetch file from SOCKS host via scp : FAILED");
-    reply->appendErrorText("Failed to fetch from SOCKS host via scp\n" + msg.toStdString());
-    resFile_.reset();
-    fail();
-}
-
-
-//=================================
-//
 // OutputFileFetchServerTask
 //
 //=================================
 
-OutputFileFetchServerTask::OutputFileFetchServerTask(OutputFileProvider* owner) :
-    OutputFileFetchTask("FileFetchServer", owner) {}
+OutputFileFetchServerTask::OutputFileFetchServerTask(FetchQueueOwner* owner) :
+    AbstractFetchTask("FileFetchServer", owner) {}
 
 // try to fetch the logfile from the server if it is the jobout file
 void OutputFileFetchServerTask::run()
 {
 #ifdef  UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
-#endif
-    if (isJobout_) {
-        // we delegate it back to the FileProvider (this is its built-in task)
-        owner_->fetchJoboutViaServer(server_,node_,filePath_);
-    } else {
-        finish();
-    }
+#endif   
+    // we delegate it back to the FileProvider (this is its built-in task)
+    fileProvider_->fetchJoboutViaServer(server_,node_,filePath_);
 }
+
+//========================================
+//
+// OutputFileFetchQueueManager
+//
+//========================================
+
+class OutputFileFetchQueueManager : public FetchQueueOwner
+{
+public:
+     OutputFileFetchQueueManager(OutputFileProvider*);
+     void runFull(ServerHandler* server, VNode* node,
+                  const std::string& fileName, bool isJobout,
+                  size_t deltaPos, bool useCache);
+     void runOne(VFile::FetchMode fetchMode, ServerHandler* server, VNode* node,
+                  const std::string& fileName, bool isJobout,
+                  size_t deltaPos, bool useCache);
+
+     VReply* theReply() const override;
+     VFile_ptr findInCache(const std::string& fileName) override;
+     void addToCache(VFile_ptr file) override;
+     void fetchQueueSucceeded() override;
+     void fetchQueueFinished(const std::string& filePath, VNode*) override;
+     void progressStart(const std::string& msg, int max) override;
+     void progressUpdate(const std::string& msg, int value) override;
+     VDir_ptr dirToFile(const std::string& fileName) const override;
+
+protected:
+     OutputFileProvider* provider_{nullptr};
+
+};
+
+OutputFileFetchQueueManager::OutputFileFetchQueueManager(OutputFileProvider* provider) : provider_(provider)
+{
+    fetchQueue_ = new FetchQueue(FetchQueue::RunUntilFirstSucceeded, this);
+}
+
+VReply* OutputFileFetchQueueManager::theReply() const
+{
+    return provider_->reply_;
+}
+
+
+//Check if the given output is already in the cache
+VFile_ptr OutputFileFetchQueueManager::findInCache(const std::string& fileName)
+{
+    auto item = provider_->findInCache(fileName);
+    return (item)?item->file():nullptr;
+}
+
+void OutputFileFetchQueueManager::addToCache(VFile_ptr file)
+{
+    provider_->addToCache(file);
+}
+
+void OutputFileFetchQueueManager::runFull(ServerHandler* server, VNode* node,
+    const std::string& fileName, bool isJobout,
+    size_t deltaPos, bool useCache)
+{
+    // Update the fetch tasks and process them. The queue runs until any task can fetch
+    // the logfile
+    fetchQueue_->clear();
+    Q_ASSERT(fetchQueue_->isEmpty());
+
+    QList<AbstractFetchTask*> taskLst;
+
+    taskLst << makeFetchTask("file_cache");
+    taskLst << makeFetchTask("file_logserver");
+    if (VConfig::instance()->proxychainsUsed()) {
+        taskLst << makeFetchTask("file_transfer");
+    } else {
+        if (server->readFromDisk() || !isJobout) {
+            taskLst << makeFetchTask("file_local");
+        }
+    }
+    if (isJobout) {
+        AbstractFetchTask* t = makeFetchTask("output_file_server");
+        Q_ASSERT(t);
+        taskLst << t;
+        auto ct = static_cast<OutputFileFetchServerTask*>(t);
+        Q_ASSERT(ct);
+        ct->setFileProvider(provider_);
+    }
+
+    for (auto t: taskLst) {
+        Q_ASSERT(t);
+        t->reset(server,node,fileName,deltaPos, useCache);
+        fetchQueue_->add(t);
+    }
+
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
+#endif
+    fetchQueue_->run();
+}
+
+void OutputFileFetchQueueManager::runOne(VFile::FetchMode fetchMode,
+                                         ServerHandler* server, VNode* node,
+                                         const std::string& fileName, bool isJobout,
+                                         size_t deltaPos, bool useCache)
+{
+    fetchQueue_->clear();
+
+    AbstractFetchTask *t=nullptr;
+    if (fetchMode == VFile::LogServerFetchMode) {
+        t = makeFetchTask("file_logserver");
+    } else if(fetchMode == VFile::TransferFetchMode) {
+        t = makeFetchTask("file_transfer");
+    } else if(fetchMode == VFile::LocalFetchMode) {
+        t = makeFetchTask("file_local");
+    } else if(isJobout && fetchMode == VFile::ServerFetchMode && isJobout) {
+        t = makeFetchTask("output_file_server");
+        auto ct = static_cast<OutputFileFetchServerTask*>(t);
+        ct->setFileProvider(provider_);
+    }
+
+    if (t) {
+        t->reset(server,node,fileName,deltaPos, useCache);
+        fetchQueue_->add(t);
+    }
+
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
+#endif
+    fetchQueue_->run();
+}
+
+
+void OutputFileFetchQueueManager::fetchQueueSucceeded()
+{
+    provider_->owner_->infoReady(theReply());
+    theReply()->reset();
+}
+
+void OutputFileFetchQueueManager::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
+{
+    if(n && n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
+    {
+       theReply()->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
+    }
+    if (theReply()->errorText().empty()) {
+        theReply()->setErrorText("Failed to fetch file!");
+    }
+    provider_->owner_->infoFailed(theReply());
+    theReply()->reset();
+}
+
+void OutputFileFetchQueueManager::progressStart(const std::string& msg, int max)
+{
+    provider_->owner_->infoProgressStart(msg,max);
+}
+
+void OutputFileFetchQueueManager::progressUpdate(const std::string& msg, int value)
+{
+    provider_->owner_->infoProgressUpdate(msg,value);
+}
+
+VDir_ptr OutputFileFetchQueueManager::dirToFile(const std::string& fileName) const
+{
+    return provider_->dirToFile(fileName);
+}
+
 
 //========================================
 //
@@ -483,28 +219,18 @@ void OutputFileFetchServerTask::run()
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
     InfoProvider(owner,VTask::OutputTask)
 {
+    // outCache will be clean up automatically (QObject)
     outCache_=new OutputCache(this);
 
-    fetchQueue_ = new OutputFetchQueue(OutputFetchQueue::RunUntilFirstSucceeded, this);
-
-    // these are persistent fetch tasks. We add them to the queue on demand
-    fetchTask_[CacheTask] = new OutputFileFetchCacheTask(this);
-    fetchTask_[RemoteTask] = new OutputFileFetchRemoteTask(this);
-    fetchTask_[AnyLocalTask] = new OutputFileFetchAnyLocalTask(this);
-    fetchTask_[LocalTask] = new OutputFileFetchLocalTask(this);
-    fetchTask_[ServerTask] = new OutputFileFetchServerTask(this);
-    fetchTask_[TransferTask] = new OutputFileFetchTransferTask(this);
+    fetchManager_ = new OutputFileFetchQueueManager(this);
 }
 
 OutputFileProvider::~OutputFileProvider()
 {
-    delete fetchQueue_;
-    fetchQueue_ = nullptr;
-
-    for (auto it: fetchTask_) {
-        delete it.second;
+    if (fetchManager_) {
+        delete fetchManager_;
+        fetchManager_ = nullptr;
     }
-    fetchTask_.clear();
 }
 
 // This is called from the destructor
@@ -514,11 +240,8 @@ void OutputFileProvider::clear()
     outCache_->detach();
 
     // clear the queue and the fetch tasks
-    if (fetchQueue_) {
-        fetchQueue_->clear();
-        for (auto it: fetchTask_) {
-            it.second->clear();
-        }
+    if (fetchManager_) {
+        fetchManager_->clear();
     }
 
     InfoProvider::clear();
@@ -543,7 +266,8 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
     assert(info_->node() == infoNode->node());
 
     // clear the queue
-    fetchQueue_->clear();
+    fetchManager_->clear();
+    //fetchQueue_->clear();
 
     //Reset the reply
 	reply_->reset();
@@ -575,7 +299,8 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
 void OutputFileProvider::file(const std::string& fileName, size_t deltaPos, bool useCache)
 {
     // clear the queue
-    fetchQueue_->clear();
+    fetchManager_->clear();
+    //fetchQueue_->clear();
 
     //If we do not want to use the cache we detach all the output
     //attached to this instance
@@ -668,27 +393,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
         reply_->addLogRemarkEntry("This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
     }
 
-    // Update the fetch tasks and process them. The queue runs until any task can fetch
-    // the logfile
-    fetchQueue_->clear();
-    Q_ASSERT(fetchQueue_->isEmpty());
-    QList<FetchTaskType> types = {CacheTask, RemoteTask};
-    if (VConfig::instance()->proxychainsUsed()) {
-        types << TransferTask;
-    } else {
-        types << LocalTask;
-    }
-    types << ServerTask;
-
-    for (auto k: types) {
-        auto t = fetchTask_[k];
-        t->reset(server,n,fileName,isJobout, deltaPos, useCache);
-        fetchQueue_->add(t);
-    }
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-#endif
-    fetchQueue_->run();
+    fetchManager_->runFull(server,n,fileName,isJobout, deltaPos, useCache);
 }
 
 //Get a file with the given fetch mode. We use it to fetch files appearing in the directory
@@ -744,28 +449,7 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode 
         return;
     }
 
-    fetchQueue_->clear();
-
-    OutputFileFetchTask *t=nullptr;
-    if (fetchMode == VFile::LogServerFetchMode) {
-        t = fetchTask_[RemoteTask];
-    } else if(fetchMode == VFile::TransferFetchMode) {
-        t = fetchTask_[TransferTask];
-    } else if(fetchMode == VFile::LocalFetchMode) {
-        t = fetchTask_[AnyLocalTask];
-    } else if(isJobout && fetchMode == VFile::ServerFetchMode) {
-        t = fetchTask_[ServerTask];
-    }
-
-    if (t) {
-        t->reset(server,node,fileName,isJobout, deltaPos, useCache);
-        fetchQueue_->add(t);
-    }
-
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-#endif
-    fetchQueue_->run();
+    fetchManager_->runOne(fetchMode, server,node,fileName,isJobout, deltaPos, useCache);
 }
 
 //Get a file with the given fetch mode. We use it to fetch files appearing in the directory
@@ -788,31 +472,13 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
     }
 }
 
-void OutputFileProvider::fetchQueueSucceeded()
-{
-    owner_->infoReady(reply_);
-    reply_->reset();
-}
-
-void OutputFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
-{
-    if(n && n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
-    {
-       reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
-    }
-    if (reply_->errorText().empty()) {
-        reply_->setErrorText("Failed to fetch file!");
-    }
-    owner_->infoFailed(reply_);
-    reply_->reset();
-}
-
 // this must be called from the queue and must be the last task of the queue
 void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
 {
     // From this moment on we do not need the queue and the
     // OutputFileProvider itself will manage the VTask
-    fetchQueue_->clear();
+    fetchManager_->clear();
+    //fetchQueue_->clear();
 
     assert(server);
     assert(n);
@@ -887,3 +553,5 @@ VDir_ptr OutputFileProvider::dirToFile(const std::string& fileName) const
     }
     return dir;
 }
+
+static FetchTaskMaker<OutputFileFetchServerTask> maker1("output_file_server");
