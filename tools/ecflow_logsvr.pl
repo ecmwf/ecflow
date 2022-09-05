@@ -12,6 +12,9 @@ use POSIX qw(:sys_wait_h);
 use File::Basename;
 use Cwd;
 
+# try to load sha1 module
+my $hasSha1 = try_load_module("Digest::SHA1 qw(sha1_hex)");
+
 my $port = $ENV{LOGPORT};
 my $path = $ENV{LOGPATH};
 my $map  = $ENV{LOGMAP};
@@ -94,13 +97,14 @@ for(;;)
 
 	my $request = <$client>;
 	chomp($request);
-
 	print("request=",$request,"\n");
 
+	my @params;
 	my ($action,$path) = split(" ",$request,2);
-	my $param; 
 	if ($action eq "delta") {
-		($param, $path) = split(" ",$path,2);
+		my $p1; my $p2, my $p3;
+		($p1, $p2, $p3, $path) = split(" ",$path,4);
+		push(@params,$p1,$p2,$p3); 
 	} 
 
 	# map path
@@ -116,7 +120,7 @@ for(;;)
 	$action = "do_$action";	
 	eval {
 		no strict;
-		$action->($path, $param);
+		$action->($path, @params);
 	};
 	#print $client $@ if($@);
 	warn "$@" if $@;
@@ -131,7 +135,7 @@ sub do_version {
 
 sub do_get {
 	my ($path) = @_;
-
+	
 	print "get $path\n";
 	validate($path);
 
@@ -148,10 +152,10 @@ sub do_get {
 	close(IN);
 }
 
-sub do_delta {
-	my ($path, $pos) = @_;
+sub do_getf {
+	my ($path) = @_;
 
-	print "delta $pos $path\n";
+	print "getf $path\n";
 	validate($path);
 
 	open(IN,"<$path") || die "$path: $!";
@@ -159,8 +163,94 @@ sub do_delta {
 	my $size = 64*1024;
 	my $read;
 
-	if (seek(IN, $pos, 0) ==  1) 
+	# add a "header" to the front
+	my @md;
+	(@md) = &meta($path);
+	my $mdSize = @md;
+	if ($mdSize == 3)
 	{
+		print $client "0:$md[1]:$md[2]:";
+	} else {
+		print $client "0:::";
+	}
+
+	# send data
+	while( ($read = sysread(IN,$buf,$size)) > 0)
+	{
+		syswrite($client,$buf,$size);
+	}
+
+	close(IN);
+}
+
+sub do_delta {
+	my ($path, $pos, $mtime, $chksum) = @_;
+
+	print "delta $pos $mtime $chksum $path\n";
+	validate($path);
+
+	# get metadat from file
+	my @md;
+	(@md) = &meta($path);
+	my $mdSize = @md;
+	my $aSize="";
+	my $aMtime="";
+	my $aChksum="";
+
+	print "md=@md\n";
+
+	my $all=1;
+	if ($mdSize == 3)
+	{
+		$aSize=$md[0];
+		$aMtime=$md[1];
+		$aChksum=$md[2];
+
+		if ($aSize == $pos)
+		{
+			# nothing changed
+			if($aMtime == $mtime && ($chksum == "x" || $aChksum == $chksum)) 
+			{
+				print $client "0";
+				return;
+			} 
+		} 
+		elsif ($aSize > $pos && $aChksum == $chksum)
+		{
+			$all=0;
+		}
+	}
+	
+	print "all=$all\n";
+
+	open(IN,"<$path") || die "$path: $!";
+	my $buf;
+	my $size = 64*1024;
+	my $read;
+
+	# try to send delta
+	if ($all == 0)
+	{
+		if (seek(IN, $pos, 0) ==  1) 
+		{
+			# send "header"
+			print $client "0:$aMtime:$aChksum:";
+			# send data
+			while( ($read = sysread(IN,$buf,$size)) > 0)
+			{
+				syswrite($client,$buf,$size);
+			}
+			close(IN);
+			return;
+		}
+	} 
+	
+	# if we are here the whole file will be sent
+	if (seek(IN, 0, 0) == 1)
+	{
+		# send "header"
+		print $client "1:$aMtime:$aChksum:";
+		# send data
 		while( ($read = sysread(IN,$buf,$size)) > 0)
 		{
 			syswrite($client,$buf,$size);
@@ -194,6 +284,31 @@ sub do_list {
 
 }
 
+sub meta {
+	my ($path) = @_;
+	my @x = stat "$path";
+	if(@x) 
+	{	
+		my $v="x";
+		# the sha1 module might not be available
+		if ($hasSha1) 
+		{
+			# the chaksum is the sha1 of the 1024 bytes
+			my $fh;
+			if (open($fh, "<", $path))
+			{
+				my $buf;
+				my $maxSize=1024;
+				read($fh, $buf, $maxSize);
+				$v = sha1_hex($buf);
+			}
+			close($fh);
+		}
+		# size, modtime, checksum
+		return ($x[7], $x[9], $v);
+	}
+}
+
 sub validate {
 	my ($file) = @_;
 
@@ -207,3 +322,12 @@ sub validate {
 	die "Invalid file requested $file\n";
 }
 
+sub try_load_module {
+  my $mod = shift;
+  eval("use $mod");
+  if ($@) {
+    return(0);
+  } else {
+    return(1);
+  }
+}
