@@ -24,8 +24,8 @@ proxyJump=
 byteMode=
 byteValue=
 sshProxyJump=
-sshOptions="-o StrictHostKeyChecking=no"
-scpOptions="-o StrictHostKeyChecking=no"
+sshOptions="-C -o StrictHostKeyChecking=no"
+scpOptions="-C -o StrictHostKeyChecking=no"
 
 while getopts m:s:u:h:t:j:b:v: flag
 do
