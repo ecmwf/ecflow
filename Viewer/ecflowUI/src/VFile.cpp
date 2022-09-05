@@ -163,6 +163,10 @@ bool VFile::write(const std::string& buf,std::string& err)
 
 bool VFile::write(const char *buf,size_t len,std::string& err)
 {
+    if (len == 0) {
+        return true;
+    }
+
     //printf("total:%d \n len: %d \n",dataSize_,len);
 
 	//Keep data in memory
@@ -280,6 +284,8 @@ bool VFile::append(VFile_ptr other)
 
         fetchDate_ = other->fetchDate_;
         transferDuration_ = other->transferDuration_;
+        sourceModTime_ = other->sourceModTime_;
+        sourceCheckSum_ = other->sourceCheckSum_;
 
         if (storageMode_ == DiskStorage) {
             if (FILE* fp = fopen(path_.c_str(),"a")) {

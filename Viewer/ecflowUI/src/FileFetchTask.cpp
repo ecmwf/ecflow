@@ -293,8 +293,10 @@ void FileFetchLogServerTask::stop()
 
 void FileFetchLogServerTask::clear()
 {
-    AbstractFetchTask::clear();
-    deleteClient();
+#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+    UI_FN_DBG
+#endif
+      stop();
 }
 
 //Create an output client (to access the logserver) and ask it to the fetch the
@@ -351,7 +353,7 @@ void FileFetchLogServerTask::run()
         client_->setDir(dir);
 
         // fetch the file asynchronously
-        client_->getFile(filePath_, deltaPos_);
+        client_->getFile(filePath_, deltaPos_, modTime_, checkSum_);
         return;
     }
 

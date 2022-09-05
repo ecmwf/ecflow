@@ -31,6 +31,11 @@ public:
     const std::string& path() const {return path_;}
     const std::string& sourcePath() const {return sourcePath_;}
     void setSourcePath(const std::string& p) {sourcePath_=p;}
+    unsigned int sourceModTime() const {return sourceModTime_;}
+    void setSourceModTime(unsigned int t) {sourceModTime_=t;}
+    const std::string& sourceCheckSum() const {return sourceCheckSum_;}
+    void setSourceCheckSum(const std::string& c) {sourceCheckSum_=c;}
+
     void  setContents(const std::string);
 	bool  exists() const;
     bool isEmpty() const;
@@ -85,6 +90,8 @@ protected:
 
 	std::string path_;
     std::string sourcePath_;
+    unsigned int sourceModTime_{0};
+    std::string sourceCheckSum_;
 	bool  deleteFile_;
 
 	StorageMode storageMode_{MemoryStorage};

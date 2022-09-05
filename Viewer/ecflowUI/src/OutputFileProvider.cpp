@@ -45,7 +45,8 @@ void OutputFileFetchServerTask::run()
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif   
     // we delegate it back to the FileProvider (this is its built-in task)
-    fileProvider_->fetchJoboutViaServer(server_,node_,filePath_);
+    std::string fPath = filePath_;
+    fileProvider_->fetchJoboutViaServer(server_,node_,fPath);
 }
 
 //========================================
@@ -60,10 +61,10 @@ public:
      OutputFileFetchQueueManager(OutputFileProvider*);
      void runFull(ServerHandler* server, VNode* node,
                   const std::string& fileName, bool isJobout,
-                  size_t deltaPos, bool useCache);
+                  size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
      void runOne(VFile::FetchMode fetchMode, ServerHandler* server, VNode* node,
                   const std::string& fileName, bool isJobout,
-                  size_t deltaPos, bool useCache);
+                  size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
 
      VReply* theReply() const override;
      VFile_ptr findInCache(const std::string& fileName) override;
@@ -104,7 +105,7 @@ void OutputFileFetchQueueManager::addToCache(VFile_ptr file)
 
 void OutputFileFetchQueueManager::runFull(ServerHandler* server, VNode* node,
     const std::string& fileName, bool isJobout,
-    size_t deltaPos, bool useCache)
+    size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache)
 {
     // Update the fetch tasks and process them. The queue runs until any task can fetch
     // the logfile
@@ -133,7 +134,7 @@ void OutputFileFetchQueueManager::runFull(ServerHandler* server, VNode* node,
 
     for (auto t: taskLst) {
         Q_ASSERT(t);
-        t->reset(server,node,fileName,deltaPos, useCache);
+        t->reset(server,node,fileName,deltaPos, modTime, checkSum, useCache);
         fetchQueue_->add(t);
     }
 
@@ -146,7 +147,7 @@ void OutputFileFetchQueueManager::runFull(ServerHandler* server, VNode* node,
 void OutputFileFetchQueueManager::runOne(VFile::FetchMode fetchMode,
                                          ServerHandler* server, VNode* node,
                                          const std::string& fileName, bool isJobout,
-                                         size_t deltaPos, bool useCache)
+                                         size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache)
 {
     fetchQueue_->clear();
 
@@ -164,7 +165,7 @@ void OutputFileFetchQueueManager::runOne(VFile::FetchMode fetchMode,
     }
 
     if (t) {
-        t->reset(server,node,fileName,deltaPos, useCache);
+        t->reset(server,node,fileName,deltaPos, modTime, checkSum, useCache);
         fetchQueue_->add(t);
     }
 
@@ -267,7 +268,6 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
 
     // clear the queue
     fetchManager_->clear();
-    //fetchQueue_->clear();
 
     //Reset the reply
 	reply_->reset();
@@ -292,15 +292,14 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
 
     //We always try to use the cache in this case
     outCache_->attachOne(info_,jobout);
-    fetchFile(server,n,jobout,true,0,true);
+    fetchFileInternal(server,n,jobout,true,0,true);
 }
 
 //Get a file
-void OutputFileProvider::file(const std::string& fileName, size_t deltaPos, bool useCache)
+void OutputFileProvider::fetchFile(const std::string& fileName, size_t deltaPos, bool useCache)
 {
     // clear the queue
     fetchManager_->clear();
-    //fetchQueue_->clear();
 
     //If we do not want to use the cache we detach all the output
     //attached to this instance
@@ -329,11 +328,13 @@ void OutputFileProvider::file(const std::string& fileName, size_t deltaPos, bool
     //Get the filename
     std::string jobout=joboutFileName();
 
-    fetchFile(server,n,fileName,(fileName==jobout), deltaPos, useCache);
+    fetchFileInternal(server,n,fileName,(fileName==jobout), deltaPos, useCache);
 }
 
-void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout, size_t deltaPos, bool useCache)
+void OutputFileProvider::fetchFileInternal(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout, size_t deltaPos, bool useCache)
 {
+    fetchManager_->clear();
+
     //If we do not want to use the cache we detach all the output
     //attached to this instance
     if(!useCache)
@@ -393,13 +394,22 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
         reply_->addLogRemarkEntry("This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
     }
 
-    fetchManager_->runFull(server,n,fileName,isJobout, deltaPos, useCache);
+    fetchManager_->runFull(server,n,fileName,isJobout, deltaPos, 0, {}, useCache);
+}
+
+void OutputFileProvider::fetchFileForMode(VFile_ptr f, size_t deltaPos, bool useCache)
+{
+    if (f) {
+        fetchFileForModeInternal(f->sourcePath(), f->fetchMode(), deltaPos, f->sourceModTime(), f->sourceCheckSum(), useCache);
+    }
 }
 
 //Get a file with the given fetch mode. We use it to fetch files appearing in the directory
 //listing in the Output panel.
-void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode fetchMode,size_t deltaPos, bool useCache)
+void OutputFileProvider::fetchFileForModeInternal(const std::string& fileName,VFile::FetchMode fetchMode,size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache)
 {
+    fetchManager_->clear();
+
     //If we do not want to use the cache we detach all the output
     //attached to this instance
     if(!useCache)
@@ -449,12 +459,12 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VFile::FetchMode 
         return;
     }
 
-    fetchManager_->runOne(fetchMode, server,node,fileName,isJobout, deltaPos, useCache);
+    fetchManager_->runOne(fetchMode, server,node,fileName,isJobout, deltaPos, modTime, checkSum, useCache);
 }
 
 //Get a file with the given fetch mode. We use it to fetch files appearing in the directory
 //listing in the Output panel.
-void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache)
+void OutputFileProvider::fetchFileForMode(const std::string& fileName,VDir::FetchMode fetchMode, bool useCache)
 {
     VFile::FetchMode fMode =  VFile::NoFetchMode;
     if (fetchMode == VDir::LogServerFetchMode) {
@@ -468,17 +478,16 @@ void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode f
     }
 
     if (fMode != VFile::NoFetchMode) {
-        fetchFile(fileName,fMode,deltaPos,useCache);
+        fetchFileForModeInternal(fileName,fMode,0,0, {}, useCache);
     }
 }
 
-// this must be called from the queue and must be the last task of the queue
+// this must be called from the queue and must be the last task of the queue.
 void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
-{
+{   
     // From this moment on we do not need the queue and the
-    // OutputFileProvider itself will manage the VTask
+    // OutputFileProvider itself will manage the VTask.
     fetchManager_->clear();
-    //fetchQueue_->clear();
 
     assert(server);
     assert(n);
@@ -486,6 +495,7 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
 
+    UiLog().dbg() << UI_FN_INFO << "fileName=" << fileName;
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
     task_->reply()->setLog(reply_->log());

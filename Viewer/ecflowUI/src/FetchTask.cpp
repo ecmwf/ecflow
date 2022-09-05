@@ -16,7 +16,7 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 
-//#define OUTPUTFETCHTASK_DEBUG__
+//#define UI_FETCHTASK_DEBUG__
 
 static std::map<std::string,FetchTaskFactory*>* makers = nullptr;
 
@@ -72,12 +72,14 @@ void AbstractFetchTask::reset(ServerHandler* server,VNode* node,const std::strin
 }
 
 void AbstractFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath,
-           size_t deltaPos, bool useCache)
+           size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache)
 {
     server_=server;
     node_=node;
     filePath_=filePath;
     deltaPos_=deltaPos;
+    modTime_=modTime;
+    checkSum_=checkSum;
     useCache_=useCache;
 }
 
@@ -160,7 +162,7 @@ void FetchQueue::run()
 
 void FetchQueue::next()
 {
-#ifdef OUTPUTFETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG__
     UiLog().dbg() << "OutputFetchQueue::next";
 #endif
     if (status_ == RunningState) {
@@ -171,12 +173,12 @@ void FetchQueue::next()
             if (!queue_.empty()) {
                 auto current = queue_.front();
                 if (!current->checRunCondition(prev)) {
-#ifdef OUTPUTFETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG__
                     UiLog().dbg() << " skip current";
 #endif
                     next();
                 } else {
-#ifdef OUTPUTFETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG__
                     UiLog().dbg() << " run current";
 #endif
                     current->run();
@@ -192,7 +194,7 @@ void FetchQueue::next()
 
 void FetchQueue::finish(AbstractFetchTask* lastTask)
 {
-#ifdef OUTPUTFETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG__
     UI_FN_DBG
 #endif
     clear();
@@ -224,7 +226,7 @@ void FetchQueue::taskFinished(AbstractFetchTask*)
 
 void FetchQueue::taskFailed(AbstractFetchTask*)
 {
-#ifdef OUTPUTFETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG__
     UI_FN_DBG
 #endif
     if (status_ == RunningState) {
@@ -282,6 +284,16 @@ void FetchQueueOwner::clear()
 
 AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name)
 {
+#ifdef UI_FETCHTASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "unusedtasks";
+    for(auto t: unusedTasks_) {
+        UiLog().dbg() << " " << t.first << " len=" << t.second.size();
+    }
+    UiLog().dbg() << UI_FN_INFO << "fetchTasks";
+    for(auto t: fetchTasks_) {
+        UiLog().dbg() << " " << t.first << " len=" << t.second.size();
+    }
+#endif
     auto it = unusedTasks_.find(name);
     if (it != unusedTasks_.end()) {
         if (!it->second.empty()) {
@@ -290,7 +302,9 @@ AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name)
             return t;
         }
     }
-    UiLog().dbg() << UI_FN_INFO << "name=" << name;
+#ifdef UI_FETCHTASK_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "create object for name=" << name;
+#endif
     AbstractFetchTask *t = FetchTaskFactory::create(name, this);
     fetchTasks_[name].emplace_back(t);
     return t;

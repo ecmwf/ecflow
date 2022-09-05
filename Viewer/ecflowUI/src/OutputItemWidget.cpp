@@ -493,7 +493,7 @@ void OutputItemWidget::reloadCurrentFile(bool wholeFile)
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg()  << UI_FN_INFO << "load jobout - fPath=" << fPath;
 #endif
-        op->file(fPath, deltaPos, useCache);
+        op->fetchFile(fPath, 0, useCache);
     } else {
         fPath = f->sourcePath();
         if (wholeFile) {
@@ -505,9 +505,8 @@ void OutputItemWidget::reloadCurrentFile(bool wholeFile)
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg()  << UI_FN_INFO << "reload - mode=" << f->fetchMode() << " fPath=" << fPath;
 #endif
-        op->fetchFile(fPath, f->fetchMode(), deltaPos, useCache);
+        op->fetchFileForMode(f, deltaPos, useCache);
     }
-
     // get the directory listing
     dirW_->reload();
 
@@ -535,7 +534,6 @@ void OutputItemWidget::loadCurrentDirItemFile()
     bool hasSelection = dirW_->currentSelection(fPath, mode);
 
     if (hasSelection) {
-        size_t deltaPos = 0;
         auto* op=static_cast<OutputFileProvider*>(infoProvider_);
 
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
@@ -543,10 +541,10 @@ void OutputItemWidget::loadCurrentDirItemFile()
 #endif
         // if the fetchmode is not defined we use the normal fetch policy
         if(mode == VDir::NoFetchMode) {
-            op->file(fPath, deltaPos, useCache);
+            op->fetchFile(fPath, 0, useCache);
         // otherwise we use the given fetch mode
         } else {
-            op->fetchFile(fPath, mode, deltaPos, useCache);
+            op->fetchFileForMode(fPath, mode, useCache);
         }
         // get the directory listing
         dirW_->reload();

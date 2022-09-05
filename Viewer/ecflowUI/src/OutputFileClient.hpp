@@ -26,7 +26,8 @@ public:
 
     VFile_ptr result() const;
     void clearResult();
-    void getFile(const std::string& name, size_t deltaPos);
+    void getFile(const std::string& name);
+    void getFile(const std::string& name, size_t deltaPos, unsigned int modTime, const std::string& checkSum);
     void setExpectedSize(qint64 v);
     int maxProgress() const;
     void setDir(VDir_ptr);
@@ -42,16 +43,24 @@ private:
 	OutputFileClient(const OutputClient&);
 	OutputFileClient& operator=(const OutputClient&);
     void estimateExpectedSize();
+    bool parseResultHeader(char* buf, quint64& len);
+    bool getHeaderValue(char* buf, quint64 len, int pos1, int& pos2, std::string& val);
+    enum RequestType {GetRequest, GetFRequest, DeltaRequest, NoRequest};
 
     qint64 total_{0};
     qint64 expected_{0};
 	VFile_ptr out_;
     VDir_ptr dir_;
     qint64 lastProgress_{0};
-    size_t deltaPos_{0};
+    bool readStarted_{false};
     const QString progressUnits_{"MB"};
     const qint64 progressChunk_{1024*1024};
     OutputVersionClient* versionClient_{nullptr};
+
+    RequestType reqType_{NoRequest};
+    size_t deltaPos_{0};
+    unsigned int remoteModTime_{0};
+    std::string  remoteCheckSum_;
 };
 
 class OutputVersionClient : public OutputClient

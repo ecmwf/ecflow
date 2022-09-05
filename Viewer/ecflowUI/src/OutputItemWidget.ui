@@ -372,7 +372,7 @@
          <item>
           <widget class="QToolButton" name="reloadTb_">
            <property name="toolTip">
-            <string>Reload the selected output file.  When it is possible only the &lt;b&gt;increment&lt;/b&gt; since the last reload is added.  To force reloading the whole file use the&lt;b&gt; Reload whole file&lt;b&gt; action from the More actions ...  submenu.</string>
+            <string>Reload the selected output file. .  Only the &lt;b&gt;increment&lt;/b&gt; since the last reload is added whenever possible.  To force reloading the whole file use the&lt;b&gt; Reload whole file&lt;b&gt; action from the More actions ...  submenu.</string>
            </property>
            <property name="text">
             <string>...</string>

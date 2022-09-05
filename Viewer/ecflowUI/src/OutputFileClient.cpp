@@ -10,6 +10,9 @@
 
 #include "OutputFileClient.hpp"
 
+#include <cstring>
+
+#include "UIDebug.hpp"
 #include "UiLog.hpp"
 
 //#define UI_OUTPUTFILECLIENT_DEBUG__
@@ -33,37 +36,40 @@ void OutputFileClient::clearResult()
 
 void OutputFileClient::slotConnected()
 { 
+    readStarted_ = false;
+    reqType_ = NoRequest;
+    std::string s;
     if (deltaPos_ > 0) {
+        reqType_ = DeltaRequest;
         soc_->write("delta ",6);
-        std::string s = std::to_string(deltaPos_) + " ";
-        soc_->write(s.c_str(), s.size());
+        s = std::to_string(deltaPos_) + " " + std::to_string(remoteModTime_) + " " +
+               ((remoteCheckSum_.empty())?"x":remoteCheckSum_);
     } else  {
-        soc_->write("get ",4);
+        if (versionClient_->version() == 2) {
+            reqType_ = GetFRequest;
+            soc_->write("getf ",5);
+        } else {
+            reqType_ = GetRequest;
+            soc_->write("get ",4);
+        }
     }
-    soc_->write(remoteFile_.c_str(),remoteFile_.size());
 
-    soc_->write("\n",1);
+    assert(reqType_ != NoRequest);
+    s += " " + remoteFile_ + "\n";
+    soc_->write(s.c_str(), strlen(s.c_str())+1);
 }
 
 void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 {
 #ifdef UI_OUTPUTFILECLIENT_DEBUG__
-    UiLog().dbg() <<  UI_FN_INFO  << " --> " << soc_->errorString();
+    UiLog().dbg() <<  UI_FN_INFO  << "err=" << soc_->errorString();
 #endif
 
-    switch(err)
-	{
-	case QAbstractSocket::RemoteHostClosedError:
-
-        if(total_ == 0 && deltaPos_ <=0)
-		{
-            break;
-		}
+    if (err == QAbstractSocket::RemoteHostClosedError) {
         //Probably there was no error and the connection was closed because all
         //the data was transferred. Unfortunately the logserver does not send anything
         //at the end of the data transfer.
-        else
-		{
+        if(total_ > 0 || reqType_ == DeltaRequest) {
             soc_->abort();
             if(out_)
 			{
@@ -74,46 +80,39 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 			}
 
 			Q_EMIT finished();
-
-            if(out_) {
-				out_.reset();
-            }
             return;
 		}
+    }
 
-		break;
-    case QAbstractSocket::UnknownSocketError:
-        if(soc_->state() != QAbstractSocket::ConnectedState)
-        {
-            break;
-        }
-        break;
-	default:		
-		break;
-	}
-
+    // an error happened
     soc_->abort();
     if(out_)
     {
         out_->close();
         out_.reset();
     }
-    Q_EMIT error(soc_->errorString());
-
+    Q_EMIT error(soc_->errorString());;
 }
 
-void OutputFileClient::getFile(const std::string& name, size_t deltaPos)
+void OutputFileClient::getFile(const std::string& name)
+{
+    getFile(name, 0, 0, "");
+}
+
+void OutputFileClient::getFile(const std::string& name, size_t deltaPos, unsigned int modTime, const std::string& checkSum)
 {
     // stop running the current transfer
     soc_->abort();
-    if(out_)
-    {
-        out_->close();
-        out_.reset();
-    }
+    clearResult();
+
+#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "name=" << name << " deltaPos=" << deltaPos << " modTime=" << modTime << " checksum=" << checkSum;
+#endif
 
     remoteFile_=name;
     deltaPos_ = deltaPos;
+    remoteModTime_ = modTime;
+    remoteCheckSum_ = checkSum;
 
     // we need to know the version. When it finishes will call getFile again
     if (versionClient_->versionStatus() == OutputVersionClient::VersionNotFetched) {
@@ -139,6 +138,8 @@ void OutputFileClient::getFile(const std::string& name, size_t deltaPos)
     out_->setSourcePath(name);
     total_=0;
     lastProgress_=0;
+    readStarted_=false;
+    reqType_ = NoRequest;
     estimateExpectedSize();
 
     connectToHost(host_,port_);
@@ -152,11 +153,27 @@ void OutputFileClient::slotRead()
 
 	while((len = soc_->read(buf,size)) > 0)
 	{
+        // parse+remove "header" in "getf" and "delta" modes from the beginnig of the resulting data
+        if (!readStarted_ && (reqType_ == GetFRequest || reqType_ == DeltaRequest)) {
+            readStarted_ = true;
+            // an error code was sent back
+            if (!parseResultHeader(buf, len)) {
+                soc_->abort();
+                clearResult();
+#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+                UiLog().dbg() << UI_FN_INFO << "error in parsing reult";
+#endif
+                Q_EMIT error("transfer failed");
+                return;
+            }
+        }
+
 		std::string err;
 		if(!out_->write(buf,len,err))
 		{
 			soc_->abort();
 			Q_EMIT error("write failed");
+            return;
 		}
 		total_ += len;
 
@@ -176,6 +193,142 @@ void OutputFileClient::slotRead()
                 Q_EMIT progress(QString::number(lastProgress_) + " " + progressUnits_ + " transferred",prog);
 		}
 	}
+}
+
+bool OutputFileClient::parseResultHeader(char* buf, quint64& len)
+{
+    //  format:
+    //      retCode:modTime:checkSum:result_text
+    //
+    //      where:
+    //          - retCode is a 1-digit number
+    //          - modeTime/checkSum can be empty
+    //          - result_text can be empty
+    //      note: in delta mode a single "0" message is allowed
+    //
+    //  e.g.:
+    //      0:1662369142:8fssaf:abcd
+    //      0:1662369142::abcd
+    //      1:::
+    //      0
+
+    if ((reqType_ == GetFRequest || reqType_ == DeltaRequest)) {
+        if (len <=0) {
+            return false;
+        }
+
+        // is the whole message is "0" there is no delta to add!!
+        if (reqType_ == DeltaRequest && len == 1 && buf[0] == '0') {
+            len = 0;
+            out_->setSourceModTime(remoteModTime_);
+            out_->setSourceCheckSum(remoteCheckSum_);
+            return true;
+        }
+#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+        UiLog().dbg() << UI_FN_INFO << "len=" << len << " buf=" << buf ;
+#endif
+        int pos1=0;
+        int pos2=0;
+
+        // get return code
+        std::string v;
+        if (!getHeaderValue(buf, len, pos1, pos2, v)) {
+            return false;
+        }
+        if (reqType_ == GetFRequest) {
+            if (v != "0") {
+                return false;
+            }
+        }
+        if (reqType_ == DeltaRequest) {
+            // the whole file was sent back
+            if (v == "1") {
+                deltaPos_ = 0;
+                out_->setDeltaContents(false);
+            } else if (v != "0") {
+                return false;
+            }
+        }
+
+        // get modtime
+        if (pos1 >= pos2 || buf[pos2] != ':') {
+            return false;
+        }
+
+        // get modtime
+        pos1=pos2;
+        if (!getHeaderValue(buf, len, pos1, pos2, v)) {
+            return false;
+        }
+        if (!v.empty()) {
+            unsigned int uv = 0;
+            try {
+                uv = std::stoul(v);
+            } catch (...) {
+                uv = 0;
+            }
+            out_->setSourceModTime(uv);
+        }
+
+        // get checksum
+        pos1=pos2;
+        if (!getHeaderValue(buf, len, pos1, pos2, v)) {
+            return false;
+        }
+        if (!v.empty()) {
+            out_->setSourceCheckSum(v);
+        }
+
+        // remove "header" from the bufr
+        Q_ASSERT(pos2>=3);
+        auto startPos = pos2 + 1;
+        Q_ASSERT(startPos>=4);
+        for (size_t i=startPos; i < len; i++) {
+            buf[i-startPos]=buf[i];
+        }
+        Q_ASSERT(startPos <= len);
+        len -= (startPos);
+    }
+    return true;
+}
+
+bool OutputFileClient::getHeaderValue(char* buf, quint64 len, int pos1, int& pos2, std::string& val)
+{
+#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "pos1=" << pos1 << " pos2=" << pos2;
+#endif
+    val = std::string();
+    if (pos1==0 || buf[pos1] == ':') {
+        const int dLenMax=200;
+        char d[dLenMax];
+        int dLen=0;
+        if (pos1 > 0) {
+            pos1++;
+        }
+        pos2=pos1;
+        for (quint64 i=pos1; i < len && dLen < dLenMax-1; i++) {
+            if (buf[i] == ':') {
+                pos2 = i;
+#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+                UiLog().dbg() << " pos2=" << pos2;
+#endif
+                int dSize = pos2-pos1;
+                if (dSize <=0) {
+                    return true;
+                }
+                d[dLen] = '\0';
+                val = std::string(d);
+#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+                UiLog().dbg() << " -1=" << d[dLen-1] << " d=" << d << " dLen=" << dLen;
+                UiLog().dbg() << " val=" << val << " dLen=" << dLen;
+#endif
+                return true;
+            }
+            d[dLen] = buf[i];
+            dLen++;
+        }
+    }
+    return false;;
 }
 
 VFile_ptr OutputFileClient::result() const
@@ -240,7 +393,7 @@ void OutputFileClient::slotVersionFinished()
     UI_FN_DBG
 #endif
     Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
-    getFile(remoteFile_, deltaPos_);
+    getFile(remoteFile_, deltaPos_, remoteModTime_, remoteCheckSum_);
 }
 
 void OutputFileClient::slotVersionError(QString errorText)
@@ -249,7 +402,7 @@ void OutputFileClient::slotVersionError(QString errorText)
     UiLog().dbg() << UI_FN_INFO << "errorText=" << errorText;
 #endif
     Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
-    getFile(remoteFile_, deltaPos_);
+    getFile(remoteFile_, deltaPos_,remoteModTime_, remoteCheckSum_);
 }
 
 //===================================
@@ -286,7 +439,7 @@ void OutputVersionClient::slotError(QAbstractSocket::SocketError err)
 
     versionStatus_ = VersionFailedToFetch;
     soc_->abort();
-    UiLog().dbg() << "OutputVersionClient::slotError logserver[" + longName() +
+    UiLog().dbg() << UI_FN_INFO << "logserver[" + longName() +
                      " ] could not get version! version is set to " << version_;
     Q_EMIT error(soc_->errorString());
 }

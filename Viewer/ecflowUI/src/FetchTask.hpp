@@ -69,7 +69,7 @@ public:
     void setAppendResult(bool b) {appendResult_ = b;}
     void reset(const std::string& filePath) {filePath_ = filePath;}
     void reset(ServerHandler* server,VNode* node,const std::string& filePath);
-    void reset(ServerHandler* server,VNode* node,const std::string& filePath,size_t deltaPos, bool useCache);
+    void reset(ServerHandler* server,VNode* node,const std::string& filePath,size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
     void setDeltaPos(size_t deltaPos) {deltaPos_=deltaPos;}
     void setUseCache(bool useCache) {useCache_=useCache;}
     std::string print() const;
@@ -90,6 +90,8 @@ protected:
     VNode* node_{nullptr};
     bool appendResult_{false};
     size_t deltaPos_{0};
+    unsigned int modTime_{0};
+    std::string checkSum_;
     bool useCache_{false};
 };
 

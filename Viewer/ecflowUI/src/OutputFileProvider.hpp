@@ -51,9 +51,9 @@ public:
 	 void clear() override;
 
 	 //Get a particular jobout file
-     void file(const std::string& fileName,size_t deltaPos, bool useCache);
-     void fetchFile(const std::string& fileName,VFile::FetchMode fetchMode,size_t deltaPos, bool useCache);
-     void fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,size_t deltaPos, bool useCache);
+     void fetchFile(const std::string& fileName,size_t deltaPos, bool useCache);
+     void fetchFileForMode(VFile_ptr f, size_t deltaPos, bool useCache);
+     void fetchFileForMode(const std::string& fileName,VDir::FetchMode fetchMode,bool useCache);
      void setDirectories(const std::vector<VDir_ptr>&);
 
      std::string joboutFileName() const;
@@ -66,7 +66,8 @@ protected:
      VDir_ptr dirToFile(const std::string& fileName) const;
 
 private:
-     void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout, size_t deltaPos,bool detachCache);
+     void fetchFileInternal(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout, size_t deltaPos,bool detachCache);
+     void fetchFileForModeInternal(const std::string& fileName,VFile::FetchMode fetchMode,size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
 
      OutputCache* outCache_{nullptr};
      OutputFileFetchQueueManager* fetchManager_{nullptr};
