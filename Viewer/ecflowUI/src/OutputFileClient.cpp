@@ -74,8 +74,8 @@ void OutputFileClient::slotError(QAbstractSocket::SocketError err)
             if(out_)
 			{
 				out_->setTransferDuration(stopper_.elapsed());
-				out_->setFetchDate(QDateTime::currentDateTime());
-                out_->print();
+				out_->setFetchDate(QDateTime::currentDateTime());               
+                //out_->print();
                 out_->close();
 			}
 
@@ -136,6 +136,9 @@ void OutputFileClient::getFile(const std::string& name, size_t deltaPos, unsigne
     out_=VFile_ptr(VFile::create(true)); //we will delete the file from disk
     out_->setDeltaContents(deltaPos_ >0);
     out_->setSourcePath(name);
+    out_->setFetchMode(VFile::LogServerFetchMode);
+    out_->setFetchModeStr("served by " + longName());
+
     total_=0;
     lastProgress_=0;
     readStarted_=false;

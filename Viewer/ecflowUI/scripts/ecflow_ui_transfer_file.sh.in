@@ -10,148 +10,177 @@
 #============================================================================
 
 set -e
+
+META_MSG_LEN=60
 #set -x #goes to stderr
-
-echo " arguments=$*"
-#echo "shell=${SHELL}"
-
-mode=
-sourceFile=
-remoteUid=${USER}
-remoteHost=
-targetFile=
-proxyJump=
-byteMode=
-byteValue=
-sshProxyJump=
-sshOptions="-C -o StrictHostKeyChecking=no"
-scpOptions="-C -o StrictHostKeyChecking=no"
-
-while getopts m:s:u:h:t:j:b:v: flag
-do
-    case "${flag}" in
-        m) mode=${OPTARG};;
-        s) sourceFile=${OPTARG};;
-        u) remoteUid=${OPTARG};;
-        h) remoteHost=${OPTARG};;
-        t) targetFile=${OPTARG};;
-        j) proxyJump=${OPTARG};;
-        b) byteMode=${OPTARG};;
-        v) byteValue=${OPTARG};;
-    esac
-done
-
-echo ""
-# echo "mode=$mode"
-# echo "sourceFile=$sourceFile"
-# echo "remoteUid=$remoteUid"
-# echo "remoteHost=$remoteHost"
-# echo "targetFile=$targetFile"
-# echo "proxyJump=$proxyJump"
-# echo "byteMode=$byteMode"
-# echo "byteValue=$byteValue"
-# echo "remoteUid=$remoteUid"
-# echo ""
-
-if [[ $mode != "file" && $mode != "dir" ]] ; then
-    echo "Error: invalid mode! Has to be \"file\" or \"dir\"" >&2
+ 
+function failed() {
+    local msg=$1
+    echo $msg >&2
     exit 1
-fi
+}
 
-if [[ $sourceFile == "" ]] ; then
-    echo "Error: sourceFile is empty!" >&2
-    exit 1
-fi
+# The metadata is a fixed ${META_MSG_LEN} bytes added to the end of the result ${targetFile}
+# So when we have the result:
+#  - we need to extract the metadata and write it into ${metaFile}
+#  - we need to remove the metadata from the end of the file
+function proc_md_result() {
 
-if [[ $remoteHost == "" ]] ; then
-    echo "Error: remoteHost is empty!" >&2
-    exit 1
-fi
+    usedLen=$(($META_MSG_LEN + 1))
 
-if [[ $targetFile == "" ]] ; then
-    echo "Error: targetFile is empty!" >&2
-    exit 1
-fi
+    # get "metadata" from end of the file
+    d=$(tail -c $usedLen $targetFile)
 
-if [[ $proxyJump == "" ]] ; then
-    echo "Error: proxyJump is empty!" >&2
-    exit 1
-elif [[ $proxyJump == "__NOJUMP__" ]] ; then
-    proxyJump=""
-else
-    sshProxyJump="-J ${proxyJump}"
-    if [[ ${scpOptions} == "" ]] ; then
-        echo "scpOptions cannot be empty!" >&2
-        exit 1
-    fi
-    scpOptions="${scpOptions} -o ProxyJump=${proxyJump}"
-fi
+    echo "d=$d"
+   
+    # get file size
+    size=$(wc -c <"$targetFile")
 
-if [[ $mode == "file" ]] ; then
-    if [[ $byteMode != "all" && $byteMode != "pos" &&  $byteMode != "last" ]] ; then
-        echo "Error: invalid byteMode value! Allowed values are: \"all\", \"pos\" and \"last\"" >&2
-        exit 1
+    # check pos mode with no delta. In this case a sole "0" is the file contents!
+    if [[ $size -le 2 && ${byteMode} == "pos" ]] ; then
+        if [[ $(echo $d | cut -c 1) == "0" ]] ; then
+            echo "0" > $metaFile
+            : > "$targetFile"
+            return
+        fi
     fi
 
-    if [[ $byteValue == "" ]] ; then
-        echo "Error: byteValue is empty!" >&2
-        exit 1
+    if [[ $size -lt $META_MSG_LEN ]] ; then
+        failed "Invalid resulting file size=$size bytes! Expected at least $META_MSG_LEN bytes"
     fi
 
-    if [[ $byteValue -lt 0 ]] ; then
-        echo "Error: byteValue (=${byteValue}) must be >=0!" >&2
-        exit 1
-    fi
-fi
+    # remove the metadata from the file. This is a generic
+    # solution working even on MacOS (where there is no truncate)
+    #echo $size
+    size=$(($size - $usedLen))
+    #echo $size
+    head -c $size "$targetFile" > "${targetFile}.1"
+    mv "${targetFile}.1" "$targetFile"
 
-if [[ $remoteUid == "" ]] ; then
-    echo "Error: remoteUid is empty!" >&2
-    exit 1
-fi
+    # get metadata
+    r=$(echo $d | cut -d ":" -f 1)
+    t=$(echo $d | cut -d ":" -f 2)
+    c=$(echo $d | cut -d ":" -f 3)
 
-if [[ $remoteUid == "__USER__" ]]  ; then
-    remoteUid=${USER}
-fi
+    # write metadata into file
+    echo "$r:$t:$c:" > $metaFile
+}
 
-remoteUH="${remoteUid}@${remoteHost}"
+# transfer the whole file
+function get_file_all() {
+    echo "transfer the whole file"
+    (set -x; scp ${scpOptions} ${remoteUH}:${sourceFile} ${targetFile})
+}      
 
-# fetching a file
-if [[ $mode == "file" ]] ; then
-    
-    # transfer the whole file
-    if [[ $byteMode == "all" ]] ; then
-        echo "transfer the whole file"
-        (set -x; scp ${scpOptions} ${remoteUH}:${sourceFile} ${targetFile})
-
-    # transfer from a given byte offset
-    elif  [[ $byteMode == "pos" ]] ; then
-        cmd=$(cat <<-END
-            tail -c +$((${byteValue}+1)) ${sourceFile}
+# transfer the file from a given byte offset
+function get_file_pos() {
+    cmd=$(cat <<-END
+        tail -c +$((${byteValue}+1)) ${sourceFile}
 END
 )       
-        echo "transfer file from byte offset=${byteValue}"
-        (set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
-       
-    #transfer the last bytes of the file
-    elif [[ $byteMode == "last" ]] ; then
-        cmd=$(cat <<-END
-            sourceSize=\$(wc -c < ${sourceFile})
-            if [[ \${sourceSize} -gt 0 && \${sourceSize} -le ${byteValue} ]] ; then 
-                cat ${sourceFile}
-            else
-                tail -c ${byteValue} ${sourceFile}
-            fi
+    echo "transfer file from byte offset=${byteValue}"
+    (set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
+}
+
+# transfer the last N bytes of the file
+function get_file_last() {
+    cmd=$(cat <<-END
+        sourceSize=\$(wc -c < ${sourceFile})
+        if [[ \${sourceSize} -gt 0 && \${sourceSize} -le ${byteValue} ]] ; then 
+            cat ${sourceFile}
+        else
+            tail -c ${byteValue} ${sourceFile}
+        fi
 END
 )
-        #printf 'cmd: %s\n' "${cmd}"
-        echo "transfer last ${byteValue} bytes"
-        (set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
-    else
-        echo "Invalid byteMode=${byteMode} option" >&2 
-        exit 1
-    fi
+    #printf 'cmd: %s\n' "${cmd}"
+    echo "transfer last ${byteValue} bytes"
+    (set -x; ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
+}
+
+# transfer the whole file with extra "metadata"
+function get_file_all_md() {
+    echo "transfer the whole file"
+
+    # the metadata is a fixed META_MSG_LEN bytes added to the end of the result.
+    # So when we have the result:
+    #  - we need to extract the metadata and write it into ${metaFile}
+    #  - we need to remove the metadata from the end of the file
+
+    cmd=$(cat <<-END
+        aModTime=\$(date -r "${sourceFile}" +%s)
+        os=\$(uname | tr '[:upper:]' '[:lower:]')
+        if [[ \$os == darwin || \$os == "freebsd" ]] ; then
+            aCheckSum=\$(head -c 1024 ${sourceFile} 2>/dev/null | shasum | cut -d ' ' -f 1)
+        else
+            aCheckSum=\$(head -c 1024 ${sourceFile} 2>/dev/null | sha1sum | cut -d ' ' -f 1)
+        fi
+        m="0:\$aModTime:\$aCheckSum:"
+        m=\$(printf %-${META_MSG_LEN}s \$m | tr ' ' X)
+        cat "${sourceFile}"
+        echo \$m
+END
+)
+    #echo $cmd
+    $(ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > $targetFile)
+
+    # extracts + removes metadata from the end of file
+    proc_md_result
+}
+
+# transfer the file contents from a given byte offset. Based on the "metadata":
+# - if the there is no change a single "0" trnasferred
+# - if data after the offset seems to be appended this delta + metadata is transferred
+# - otherwise the whole file + metadata is transferred back
+function get_file_pos_md() {
+    
+    # the metadata is a fixed META_MSG_LEN bytes added to the end of the result.
+    # So when we have the result:
+    #  - we need to extract the metadata and write it into ${metaFile}
+    #  - we need to remove the metadata from the end of the file
+
+    cmd=$(cat <<-END
+        aSize=\$(wc -c <"${sourceFile}")
+        aModTime=\$(date -r "${sourceFile}" +%s)
+        os=\$(uname | tr '[:upper:]' '[:lower:]')
+        if [[ \$os == darwin || \$os == "freebsd" ]] ; then
+            aCheckSum=\$(head -c 1024 ${sourceFile} 2>/dev/null | shasum | cut -d ' ' -f 1)
+        else
+            aCheckSum=\$(head -c 1024 ${sourceFile} 2>/dev/null | sha1sum | cut -d ' ' -f 1)
+        fi
+
+        all=1
+        if [ \$aSize -eq ${byteValue} ] ; then
+            if [[ ( \$aModTime -eq 0 || \$aModTime -eq ${modTime} ) && ( $checkSum == "x" || \$aCheckSum == "${checkSum}" ) ]] ; then
+                echo "0"
+                exit 0
+            fi
+        elif [[ \$aSize > ${byteValue} && \$aCheckSum == "{$checkSum}" ]] ; then 
+            a=0
+        fi
+
+        if [ \$all -eq 0 ] ; then
+            tail -c +$((${byteValue}+1)) ${sourceFile}
+            m="0:\$aModTime:\$aCheckSum:"
+        else
+            cat ${sourceFile}
+            m="1:\$aModTime:\$aCheckSum:"
+        fi
+            
+        m=\$(printf %-${META_MSG_LEN}s \$m | tr  ' ' X)
+        echo \$m
+END
+)
+    echo "transfer file from byte offset=${byteValue}"
+
+    $(ssh ${sshProxyJump} ${remoteUH} ${sshOptions} "${cmd}" > $targetFile)
+
+    # extracts + removes metadata from end of file
+    proc_md_result
+}
+ 
 # fetching directory listing
-else
+function get_dir() {
     dirPath=$(dirname ${sourceFile})
     sourceName=$(basename ${sourceFile})
     echo "dirPath="$dirPath
@@ -175,4 +204,170 @@ END
 )
     echo ""
     (set -x; ssh ${sshProxyJump}  ${remoteUH} ${sshOptions} "${cmd}" > ${targetFile})
+}
+
+
+#echo " arguments=$*"
+#echo "shell=${SHELL}"
+
+mode=
+sourceFile=/perm/deploy/metabuilder/ecf_out/ecflow-gen-deploy-metab-ci_3141/ecmwf_toolbox/aa/gnu.11.2/wipe_src.1
+remoteUid=cgr
+remoteHost=hpc-login
+targetFile=res.txt
+byteMode=
+byteValue=
+sshProxyJump=
+proxyJump=
+sshOptions="-C -o StrictHostKeyChecking=no"
+scpOptions="-C -o StrictHostKeyChecking=no"
+metaFile=
+modTime=0
+checkSum="x"
+
+while getopts m:s:u:h:t:j:b:v:o:c:x: flag
+do
+    case "${flag}" in
+        m) mode=${OPTARG};;
+        s) sourceFile=${OPTARG};;
+        u) remoteUid=${OPTARG};;
+        h) remoteHost=${OPTARG};;
+        t) targetFile=${OPTARG};;
+        j) proxyJump=${OPTARG};;
+        b) byteMode=${OPTARG};;
+        v) byteValue=${OPTARG};;
+        x) metaFile=${OPTARG};;
+        o) modTime=${OPTARG};;
+        c) checkSum=${OPTARG};;
+    esac
+done
+
+echo ""
+echo "mode=$mode"
+echo "sourceFile=$sourceFile"
+echo "remoteUid=$remoteUid"
+echo "remoteHost=$remoteHost"
+echo "targetFile=$targetFile"
+echo "proxyJump=$proxyJump"
+echo "byteMode=$byteMode"
+echo "byteValue=$byteValue"
+echo "remoteUid=$remoteUid"
+echo "metaFile=$metaFile"
+echo "modTime=$modTime"
+echo "checkSum=$checkSum"
+echo ""
+
+if [[ $mode != "file_md" && $mode != "file" && $mode != "dir" ]] ; then
+    failed "invalid mode=$mode! Has to be file_md, file or dir"
+fi
+
+if [[ $sourceFile == "" ]] ; then
+    failed "sourceFile is empty!"
+fi
+
+if [[ $remoteHost == "" ]] ; then
+    failed "remoteHost is empty!"
+fi
+
+if [[ $targetFile == "" ]] ; then
+    failed "targetFile is empty!"
+fi
+
+if [[ $proxyJump == "" ]] ; then
+    failed "proxyJump is empty!"
+
+elif [[ $proxyJump == "__NOJUMP__" ]] ; then
+    proxyJump=""
+else
+    sshProxyJump="-J ${proxyJump}"
+    if [[ ${scpOptions} == "" ]] ; then
+        failed "scpOptions cannot be empty!" 
+    fi
+    scpOptions="${scpOptions} -o ProxyJump=${proxyJump}"
+fi
+
+if [[ $mode == "file" ]] ; then
+    if [[ $byteMode != "all" && $byteMode != "pos" &&  $byteMode != "last" ]] ; then
+        failed "invalid byteMode value! Allowed values: all, pos, last"
+    fi
+
+    if [[ $byteValue == "" ]] ; then
+        failed "byteValue is empty!"
+    fi
+
+    if [[ $byteValue -lt 0 ]] ; then
+        failed "byteValue (=${byteValue}) must be >=0!"
+    fi
+
+elif [[ $mode == "file_md" ]] ; then
+    if [[ $byteMode != "all" && $byteMode != "pos" ]] ; then
+        failed "invalid byteMode value! Allowed values are: \"all\" and \"pos\""
+    fi
+
+    if [[ $byteValue == "" ]] ; then
+        failed "byteValue is empty!"
+    fi
+
+    if [[ $byteValue -lt 0 ]] ; then
+        failed "byteValue (=${byteValue}) must be >=0!"
+    fi
+
+    if [[ $metaFile == "" ]] ; then
+        failed "metaFile is empty!"
+    fi
+
+    if [[ $byteMode == "pos" ]] ; then
+        if [[ $modTime == "" ]] ; then
+            failed "modTime is empty!"
+        fi
+        if [[ $checkSum == "" ]] ; then
+            failed "checkSum is empty!"
+        fi
+    fi
+
+fi
+
+if [[ $remoteUid == "" ]] ; then
+    failed "remoteUid is empty!"
+fi
+
+if [[ $remoteUid == "__USER__" ]]  ; then
+    remoteUid=${USER}
+fi
+
+remoteUH="${remoteUid}@${remoteHost}"
+
+# fetching a file
+if [[ $mode == "file" ]] ; then
+    
+    # transfer the whole file
+    if [[ $byteMode == "all" ]] ; then
+        get_file_all
+
+    # transfer from a given byte offset
+    elif  [[ $byteMode == "pos" ]] ; then
+        get_file_pos
+
+    #transfer the last bytes of the file
+    elif [[ $byteMode == "last" ]] ; then
+        get_file_last
+    else
+        failed "invalid byteMode=${byteMode} option when mode=${mode}"
+    fi
+
+# fetching a file with metadata + checking
+elif [[ $mode == "file_md" ]] ; then
+    
+    # transfer the whole file
+    if [[ $byteMode == "all" ]] ; then
+        get_file_all_md
+    elif [[ $byteMode == "pos" ]] ; then
+        get_file_pos_md
+    else
+        failed "invalid byteMode=${byteMode} option when mode=${mode}"
+    fi
+
+# fetching directory listing
+else
+   get_dir
 fi

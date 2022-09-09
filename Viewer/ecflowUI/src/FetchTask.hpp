@@ -145,6 +145,7 @@ public:
     virtual void fetchQueueFinished(const std::string& filePath, VNode* n=nullptr) = 0;
     virtual void progressStart(const std::string& /*msg*/, int /*max*/) {}
     virtual void progressUpdate(const std::string& /*msg*/, int /*value*/) {}
+    virtual void progressStop() {}
     virtual VDir_ptr dirToFile(const std::string& /*fileName*/) const {return nullptr;}
 
 protected:

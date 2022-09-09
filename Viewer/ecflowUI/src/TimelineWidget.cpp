@@ -360,7 +360,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
                     VFileInfo fi(logFile_);
                     txt+=FileInfoLabel::formatKwPair(" Size", fi.formatSize());
                 }
-                else
+                else if (tmpLogFile_)
                 {
                     VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
                     txt+=FileInfoLabel::formatKwPair(" Size", fi.formatSize());
@@ -897,7 +897,8 @@ void TimelineWidget::loadLatest(bool usePrevState)
     if(!fInfo.exists())
     {
         localLog_=false;
-        tmpLogFile_=VFile::createTmpFile(true); //will be deleted automatically
+        tmpLogFile_.reset();
+        //tmpLogFile_=VFile::createTmpFile(true); //will be deleted automatically
         ui_->messageLabel->showInfo("Fetching file from remote host ...");
         ui_->messageLabel->startLoadLabel(true);
 
@@ -916,11 +917,9 @@ void TimelineWidget::loadLatest(bool usePrevState)
         }
 
         if (VConfig::instance()->proxychainsUsed()) {
-           fileTransfer_->transferLocalViaSocks(logFile_,QString::fromStdString(tmpLogFile_->path()),
-                                                VFileTransfer::LastBytes, maxReadSize_);
+            fileTransfer_->transferLocalViaSocks(logFile_, VFileTransfer::LastBytes, maxReadSize_);
         } else {
-            fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
-                                remoteUid_,VFileTransfer::LastBytes, maxReadSize_);
+            fileTransfer_->transfer(logFile_,host_,remoteUid_,VFileTransfer::LastBytes, maxReadSize_);
         }
     }
     // load local file
@@ -1033,11 +1032,15 @@ void TimelineWidget::slotFileTransferFinished()
     //we are not in a cleared state
     if(!beingCleared_)
     {
+        tmpLogFile_ = fileTransfer_->result();
+        fileTransfer_->clear();
         logTransferred_=true;
         ui_->messageLabel->stopLoadLabel();
         ui_->messageLabel->hide();
         ui_->messageLabel->update();
-        loadCore(QString::fromStdString(tmpLogFile_->path()));
+        if (tmpLogFile_) {
+            loadCore(QString::fromStdString(tmpLogFile_->path()));
+        }
     }
 }
 
@@ -1047,6 +1050,8 @@ void TimelineWidget::slotFileTransferFailed(QString err)
 
     if(!beingCleared_)
     {
+        tmpLogFile_.reset();
+        fileTransfer_->clear();
         logTransferred_=false;
         ui_->messageLabel->stopLoadLabel();
         logLoaded_=false;
@@ -1064,7 +1069,6 @@ void TimelineWidget::slotFileTransferStdOutput(QString msg)
         ui_->messageLabel->appendInfo(msg);
     }
 }
-
 
 void TimelineWidget::slotLogLoadProgress(size_t current,size_t total)
 {

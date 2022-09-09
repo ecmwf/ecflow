@@ -35,7 +35,6 @@ class FileFetchTransferTask : public QObject, public AbstractFetchTask
 Q_OBJECT
 public:
     FileFetchTransferTask(FetchQueueOwner* owner);
-    ~FileFetchTransferTask();
     void run() override;
     void stop() override;
     void clear() override;
@@ -49,7 +48,6 @@ protected:
     void stopTransfer();
 
     VFileTransfer *transfer_{nullptr};
-    VFile_ptr resFile_;
 };
 
 class FileFetchCacheTask : public AbstractFetchTask

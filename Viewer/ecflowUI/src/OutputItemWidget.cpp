@@ -405,13 +405,27 @@ void OutputItemWidget::infoProgressUpdate(const std::string& text,int value)
     messageLabel_->progress(QString::fromStdString(text),value);
 }
 
+void OutputItemWidget::infoProgressStop()
+{
+    messageLabel_->stopProgress();
+}
+
 void OutputItemWidget::infoFailed(VReply* reply)
 {
     //File
     if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
-		messageLabel_->showError(s);       
+        int lineCnt = s.count("\n");
+
+        // We onny show the first two lines or the error in label
+        if (lineCnt > 2) {
+            auto lst = s.split("\n");
+            if (lst.count() >= 3) {
+                messageLabel_->showError(lst[0] + "\n" + lst[1] + "\n...\nSee the rest of the error message via the <b>Detailed info</b> button");
+            }
+        }
+
         messageLabel_->stopProgress();
         submittedWarning_=false;
 

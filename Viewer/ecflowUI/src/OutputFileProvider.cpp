@@ -62,7 +62,7 @@ public:
      void runFull(ServerHandler* server, VNode* node,
                   const std::string& fileName, bool isJobout,
                   size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
-     void runOne(VFile::FetchMode fetchMode, ServerHandler* server, VNode* node,
+     void runMode(VFile::FetchMode fetchMode, ServerHandler* server, VNode* node,
                   const std::string& fileName, bool isJobout,
                   size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
 
@@ -73,6 +73,7 @@ public:
      void fetchQueueFinished(const std::string& filePath, VNode*) override;
      void progressStart(const std::string& msg, int max) override;
      void progressUpdate(const std::string& msg, int value) override;
+     void progressStop() override;
      VDir_ptr dirToFile(const std::string& fileName) const override;
 
 protected:
@@ -144,7 +145,7 @@ void OutputFileFetchQueueManager::runFull(ServerHandler* server, VNode* node,
     fetchQueue_->run();
 }
 
-void OutputFileFetchQueueManager::runOne(VFile::FetchMode fetchMode,
+void OutputFileFetchQueueManager::runMode(VFile::FetchMode fetchMode,
                                          ServerHandler* server, VNode* node,
                                          const std::string& fileName, bool isJobout,
                                          size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache)
@@ -165,6 +166,15 @@ void OutputFileFetchQueueManager::runOne(VFile::FetchMode fetchMode,
     }
 
     if (t) {
+        t->reset(server,node,fileName,deltaPos, modTime, checkSum, useCache);
+        fetchQueue_->add(t);
+    }
+
+    // when remote fetch mode and the file is the current jobout we also try the server as a fallback
+    if ((fetchMode == VFile::LogServerFetchMode || fetchMode == VFile::TransferFetchMode) && isJobout) {
+        t = makeFetchTask("output_file_server");
+        auto ct = static_cast<OutputFileFetchServerTask*>(t);
+        ct->setFileProvider(provider_);
         t->reset(server,node,fileName,deltaPos, modTime, checkSum, useCache);
         fetchQueue_->add(t);
     }
@@ -203,6 +213,11 @@ void OutputFileFetchQueueManager::progressStart(const std::string& msg, int max)
 void OutputFileFetchQueueManager::progressUpdate(const std::string& msg, int value)
 {
     provider_->owner_->infoProgressUpdate(msg,value);
+}
+
+void OutputFileFetchQueueManager::progressStop()
+{
+    provider_->owner_->infoProgressStop();
 }
 
 VDir_ptr OutputFileFetchQueueManager::dirToFile(const std::string& fileName) const
@@ -459,7 +474,7 @@ void OutputFileProvider::fetchFileForModeInternal(const std::string& fileName,VF
         return;
     }
 
-    fetchManager_->runOne(fetchMode, server,node,fileName,isJobout, deltaPos, modTime, checkSum, useCache);
+    fetchManager_->runMode(fetchMode, server,node,fileName,isJobout, deltaPos, modTime, checkSum, useCache);
 }
 
 //Get a file with the given fetch mode. We use it to fetch files appearing in the directory

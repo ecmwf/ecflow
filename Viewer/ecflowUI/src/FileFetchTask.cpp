@@ -9,6 +9,8 @@
 
 #include "FileFetchTask.hpp"
 
+#include <cassert>
+
 #include "OutputFileClient.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
@@ -68,14 +70,9 @@ FileFetchTransferTask::FileFetchTransferTask(FetchQueueOwner* owner) :
 {
 }
 
-FileFetchTransferTask::~FileFetchTransferTask()
-{
-}
-
 void FileFetchTransferTask::stopTransfer()
 {
     if (transfer_) {
-        resFile_.reset();
         transfer_->stopTransfer(false);
      }
 }
@@ -107,8 +104,6 @@ void FileFetchTransferTask::run()
     auto reply = queue_->owner()->theReply();
     assert(reply);
 
-    resFile_.reset();
-
     QString rUser, rHost;
     VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
     if (rUser.isEmpty() || rHost.isEmpty()) {
@@ -116,8 +111,6 @@ void FileFetchTransferTask::run()
         finish();
         return;
     }
-
-    resFile_ = VFile::createTmpFile(true); //we will delete the file from disk
 
     if (!transfer_) {
         transfer_ = new VFileTransfer(this);
@@ -130,14 +123,12 @@ void FileFetchTransferTask::run()
     }
 
     Q_ASSERT(transfer_);
-    if (deltaPos_ > 0) {
+    if (deltaPos_ > 0) {        
         transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       QString::fromStdString(resFile_->path()),
-                       VFileTransfer::BytesFromPos, deltaPos_);
+                       VFileTransfer::BytesFromPos, deltaPos_,  modTime_, checkSum_);
     } else {
         transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       QString::fromStdString(resFile_->path()),
-                       VFileTransfer::AllBytes, 0);
+                       VFileTransfer::AllBytes, 0,  modTime_, checkSum_);
     }
 
     owner_->progressStart("Getting local file <i>" + filePath_ +  "</i> from SOCKS host via scp", 0);
@@ -155,32 +146,29 @@ void FileFetchTransferTask::transferFinished()
         reply->addLogTryEntry("fetch file from SOCKS host via scp : OK");
     }
 
-    resFile_->setSourcePath(filePath_);
-    resFile_->setDeltaContents(deltaPos_>0);
-    resFile_->setFetchMode(VFile::TransferFetchMode);
-    resFile_->setLog(reply->log());
-    std::string method="via ssh";
-    if (transfer_) {
-        method = "from " + transfer_->remoteUserAndHost().toStdString() + " " + method;
-        resFile_->setTransferDuration(transfer_->transferDuration());
-    }
+    assert(transfer_);
+    auto tmp = transfer_->result();
+    assert(tmp);
+    if (tmp) {
+        tmp->setLog(reply->log());
 
-    resFile_->setFetchModeStr(method);
-    resFile_->setFetchDate(QDateTime::currentDateTime());
+        //Files retrieved from the log server are automatically added to the cache!
+        //To make it work sourcePath must be set on resFile_ !!!
+        if (useCache_ && deltaPos_ == 0) {
+            owner_->addToCache(tmp);
+        }
 
-    //Files retrieved from the log server are automatically added to the cache!
-    //To make it work sourcePath must be set on resFile_ !!!
-    if (useCache_ && deltaPos_ == 0) {
-        owner_->addToCache(resFile_);
-    }
-
-    if (appendResult_) {
-        reply->appendTmpFile(resFile_);
+        if (appendResult_) {
+            reply->appendTmpFile(tmp);
+        } else {
+            reply->tmpFile(tmp);
+        }
+        transfer_->clear();
+        owner_->progressStop();
+        succeed();
     } else {
-        reply->tmpFile(resFile_);
+        transferFailed("No contents was transferred");
     }
-    resFile_.reset();
-    succeed();
 }
 
 void FileFetchTransferTask::transferProgress(QString msg,int value)
@@ -193,11 +181,12 @@ void FileFetchTransferTask::transferFailed(QString msg)
 #ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
-
+    assert(transfer_);
     auto reply = owner_->theReply();
     reply->addLogTryEntry("fetch file from SOCKS host via scp : FAILED");
     reply->appendErrorText("Failed to fetch from SOCKS host via scp\n" + msg.toStdString());
-    resFile_.reset();
+    owner_->progressStop();
+    transfer_->clear();
     fail();
 }
 
@@ -229,15 +218,13 @@ void FileFetchCacheTask::run()
 #ifdef UI_FILEPROVIDER_TASK_DEBUG__
             UiLog().dbg() << " File found in cache";
 #endif
-            //VFile_ptr f=item->file();
-            //assert(f);
             f->setCached(true);
             f->setTransferDuration(0);
             auto reply = owner_->theReply();
             reply->setInfoText("");
             reply->fileReadMode(VReply::LogServerReadMode);
             reply->setLog(f->log());
-            reply->addLogRemarkEntry("File was read from cache.");
+            reply->addLogRemarkEntry("File were read from cache.");
             if (appendResult_) {
                 reply->appendTmpFile(f);
             } else {
@@ -301,7 +288,7 @@ void FileFetchLogServerTask::clear()
 
 //Create an output client (to access the logserver) and ask it to the fetch the
 //file asynchronously. The output client will call clientFinished() or
-//clientError eventually!!
+//clientError() eventually!!
 void FileFetchLogServerTask::run()
 {
 #ifdef  UI_FILEPROVIDER_TASK_DEBUG__
@@ -357,7 +344,6 @@ void FileFetchLogServerTask::run()
         return;
     }
 
-
     //If we are here there is no output client defined/available
     deleteClient();
 
@@ -368,37 +354,42 @@ void FileFetchLogServerTask::run()
 void FileFetchLogServerTask::clientFinished()
 {
     VFile_ptr tmp = client_->result();
-    assert(tmp);
+    //assert(tmp);
+    assert(client_);
 
-    client_->clearResult();
+    if (tmp) {
+        client_->clearResult();
 
-    //Files retrieved from the log server are automatically added to the cache!
-    //sourcePath must be already set on tmp
-    if (useCache_ && !tmp->hasDeltaContents()) {
-        owner_->addToCache(tmp);
-    }
+        //Files retrieved from the log server are automatically added to the cache!
+        //sourcePath must be already set on tmp
+        if (useCache_ && !tmp->hasDeltaContents()) {
+            owner_->addToCache(tmp);
+        }
 
-    auto reply = owner_->theReply();
-    reply->setInfoText("");
-    reply->fileReadMode(VReply::LogServerReadMode);
+        auto reply = owner_->theReply();
+        reply->setInfoText("");
+        reply->fileReadMode(VReply::LogServerReadMode);
 
-    if (tmp->hasDeltaContents()) {
-        reply->addLogTryEntry("fetch file increment from logserver=" + client_->longName() + " : OK");
+        if (tmp->hasDeltaContents()) {
+            reply->addLogTryEntry("fetch file increment from logserver=" + client_->longName() + ": OK");
+        } else {
+            reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + ": OK");
+        }
+
+        tmp->setLog(reply->log());
+
+        if (appendResult_) {
+            reply->appendTmpFile(tmp);
+        } else {
+            reply->tmpFile(tmp);
+        }
+
+        client_->clearResult();
+        owner_->progressStop();
+        succeed();
     } else {
-        reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : OK");
+        clientError("No contents were transferred");
     }
-
-    tmp->setFetchMode(VFile::LogServerFetchMode);
-    tmp->setLog(reply->log());
-    std::string method="served by " + client_->longName();
-    tmp->setFetchModeStr(method);
-
-    if (appendResult_) {
-        reply->appendTmpFile(tmp);
-    } else {
-        reply->tmpFile(tmp);
-    }
-    succeed();
 }
 
 void FileFetchLogServerTask::clientProgress(QString msg,int value)
@@ -408,9 +399,12 @@ void FileFetchLogServerTask::clientProgress(QString msg,int value)
 
 void FileFetchLogServerTask::clientError(QString msg)
 {
+    assert(client_);
+    owner_->progressStop();
     auto reply = owner_->theReply();
-    reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + " : FAILED");
-    reply->appendErrorText("Failed to fetch file from logserver=" + client_->longName() + "\n");
+    reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + ": FAILED");
+    reply->appendErrorText("Failed to fetch file from logserver=" + client_->longName() + "\n" + msg.toStdString());
+    client_->clearResult();
     fail();
 }
 

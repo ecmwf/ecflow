@@ -84,7 +84,6 @@ protected:
     void parseLine(QString line);
 
     VDirTransfer *transfer_{nullptr};
-    VFile_ptr resFile_;
     VDir_ptr dir_;
 };
 

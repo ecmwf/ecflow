@@ -268,7 +268,6 @@ void OutputDirFetchTransferTask::stopTransfer()
 {
     if (transfer_) {
         dir_.reset();
-        resFile_.reset();
         transfer_->stopTransfer(false);
      }
 }
@@ -298,7 +297,6 @@ void OutputDirFetchTransferTask::run()
     assert(VConfig::instance()->proxychainsUsed());
 
     dir_.reset();
-    resFile_.reset();
 
     QString rUser, rHost;
     VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
@@ -307,8 +305,6 @@ void OutputDirFetchTransferTask::run()
         finish();
         return;
     }
-
-    resFile_ = VFile::createTmpFile(true);  //we will delete the file from disk
 
     if (!transfer_) {
         transfer_ = new VDirTransfer(this);
@@ -321,8 +317,7 @@ void OutputDirFetchTransferTask::run()
     }
 
     Q_ASSERT(transfer_);
-    transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       QString::fromStdString(resFile_->path()));
+    transfer_->transferLocalViaSocks(QString::fromStdString(filePath_));
 
 }
 
@@ -332,7 +327,44 @@ void OutputDirFetchTransferTask::transferFinished()
     reply->setInfoText("");
     reply->fileReadMode(VReply::TransferReadMode);
 
-    QFile f(QString::fromStdString(resFile_->path()));
+    if (transfer_) {
+        auto resFile = transfer_->result();
+        transfer_->clear();
+
+        if (!resFile) {
+            addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
+            return;
+        }
+
+        QFile f(QString::fromStdString(resFile->path()));
+        if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
+            return;
+        }
+
+        boost::filesystem::path fp(filePath_);
+        std::string dirName=fp.parent_path().string();
+        dir_=std::make_shared<VDir>(dirName);
+        dir_->setFetchMode(VDir::TransferFetchMode);
+        dir_->setFetchModeStr(resFile->fetchModeStr());
+        dir_->setFetchDate(resFile->fetchDate());
+
+        while (!f.atEnd()) {
+            QByteArray line = f.readLine();
+            parseLine(line);
+        }
+
+        addTryLog(reply, "fetch from SOCKS host via ssh: OK");
+        reply->appendDirectory(dir_);
+
+         dir_.reset();
+         succeed();
+    } else {
+        addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
+    }
+
+#if 0
+    QFile f(QString::fromStdString(resFile->path()));
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
         return;
@@ -358,10 +390,12 @@ void OutputDirFetchTransferTask::transferFinished()
     addTryLog(reply, "fetch from SOCKS host via ssh: OK");
     reply->appendDirectory(dir_);
 
-    resFile_.reset();
+    //resFile_.reset();
     dir_.reset();
 
     succeed();
+#endif
+
 }
 
 void OutputDirFetchTransferTask::transferProgress(QString msg,int value)
@@ -374,7 +408,7 @@ void OutputDirFetchTransferTask::transferFailed(QString msg)
     auto reply = owner_->theReply();
     addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
     reply->appendErrorText("Failed to fetch from SOCKS host via ssh\n" + msg.toStdString());
-    resFile_.reset();
+    transfer_->clear();
     fail();
 }
 
@@ -403,8 +437,6 @@ public:
      VReply* theReply() const override;
      void fetchQueueSucceeded() override {}
      void fetchQueueFinished(const std::string& filePath, VNode*) override;
-//     void progressStart(const std::string& msg, int max) override;
-//     void progressUpdate(const std::string& msg, int value) override;
 
 protected:
      OutputDirProvider* provider_{nullptr};
@@ -521,7 +553,6 @@ void OutputDirProvider::visit(VInfoNode* info)
 	reply_->reset();
 
     //Clear the queue
-    //fetchQueue_->clear();
     fetchManager_->clear();
 
 	if(!info)
