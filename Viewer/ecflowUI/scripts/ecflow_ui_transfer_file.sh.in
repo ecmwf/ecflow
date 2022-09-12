@@ -36,10 +36,10 @@ function proc_md_result() {
     # get file size
     size=$(wc -c <"$targetFile")
 
-    # check pos mode with no delta. In this case a sole "0" is the file contents!
+    # check pos mode with no delta. In this case a sole "1" is the file contents!
     if [[ $size -le 2 && ${byteMode} == "pos" ]] ; then
-        if [[ $(echo $d | cut -c 1) == "0" ]] ; then
-            echo "0" > $metaFile
+        if [[ $(echo $d | cut -c 1) == "1" ]] ; then
+            echo "1" > $metaFile
             : > "$targetFile"
             return
         fi
@@ -129,7 +129,7 @@ END
 }
 
 # transfer the file contents from a given byte offset. Based on the "metadata":
-# - if the there is no change a single "0" trnasferred
+# - if the there is no change a single "1" trnasferred
 # - if data after the offset seems to be appended this delta + metadata is transferred
 # - otherwise the whole file + metadata is transferred back
 function get_file_pos_md() {
@@ -150,21 +150,22 @@ function get_file_pos_md() {
         fi
 
         all=1
-        if [ \$aSize -eq ${byteValue} ] ; then
+
+        if [[ \$aSize -eq ${byteValue} ]] ; then
             if [[ ( \$aModTime -eq 0 || \$aModTime -eq ${modTime} ) && ( $checkSum == "x" || \$aCheckSum == "${checkSum}" ) ]] ; then
-                echo "0"
+                echo "1"
                 exit 0
             fi
-        elif [[ \$aSize > ${byteValue} && \$aCheckSum == "{$checkSum}" ]] ; then 
-            a=0
+        elif [[ \$aSize -gt ${byteValue} && \$aCheckSum == "${checkSum}" ]] ; then 
+            all=0
         fi
 
         if [ \$all -eq 0 ] ; then
             tail -c +$((${byteValue}+1)) ${sourceFile}
-            m="0:\$aModTime:\$aCheckSum:"
+            m="1:\$aModTime:\$aCheckSum:"
         else
             cat ${sourceFile}
-            m="1:\$aModTime:\$aCheckSum:"
+            m="0:\$aModTime:\$aCheckSum:"
         fi
             
         m=\$(printf %-${META_MSG_LEN}s \$m | tr  ' ' X)

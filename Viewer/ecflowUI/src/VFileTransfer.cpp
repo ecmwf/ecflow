@@ -402,7 +402,7 @@ bool VFileTransfer::readMetaData()
     //          - retCode is a 1-digit number
     //          - modeTime/checkSum can be empty
     //          - padding can be empty
-    //      note: in delta mode a single "0" message is allowed
+    //      note: in delta mode a single "1" message is allowed
     //
     //  e.g.:
     //      0:1662369142:8fssaf:abcd
@@ -418,7 +418,7 @@ bool VFileTransfer::readMetaData()
             QString ds = f.readAll();
             ds = ds.simplified();
             UiLog().dbg() << UI_FN_INFO << "ds=" << ds;
-            if (ds == "0" && byteMode_ == BytesFromPos) {
+            if (byteMode_ == BytesFromPos && ds == "1") {
                 fResult_->setDeltaContents(true);
                 fResult_->setSourceModTime(modTime_);
                 fResult_->setSourceCheckSum(checkSum_);
@@ -428,9 +428,22 @@ bool VFileTransfer::readMetaData()
             auto lst = ds.split(":");
             UiLog().dbg() << " lst=" << lst;
             if (lst.count() >=  3) {
-                if (lst[0] == "1") {
+                if (byteMode_ == AllBytes) {
                     fResult_->setDeltaContents(false);
-                } else if (lst[0] != "0") {
+                    if (lst[0] != "0") {
+                        return false;
+                    }
+                } else if (byteMode_ == BytesFromPos) {
+                    // all file
+                    if (lst[0] == "0") {
+                        fResult_->setDeltaContents(false);
+                    // delta
+                    } else if (lst[0] == "1") {
+                        fResult_->setDeltaContents(true);
+                    } else {
+                        return false;
+                    }
+                } else {
                     return false;
                 }
                 fResult_->setSourceModTime(lst[1].toUInt());

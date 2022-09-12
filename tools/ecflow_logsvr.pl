@@ -211,7 +211,7 @@ sub do_delta {
 			# nothing changed
 			if($aMtime == $mtime && ($chksum == "x" || $aChksum == $chksum)) 
 			{
-				print $client "0";
+				print $client "1";
 				return;
 			} 
 		} 
@@ -234,7 +234,7 @@ sub do_delta {
 		if (seek(IN, $pos, 0) ==  1) 
 		{
 			# send "header"
-			print $client "0:$aMtime:$aChksum:";
+			print $client "1:$aMtime:$aChksum:";
 			# send data
 			while( ($read = sysread(IN,$buf,$size)) > 0)
 			{
@@ -249,7 +249,7 @@ sub do_delta {
 	if (seek(IN, 0, 0) == 1)
 	{
 		# send "header"
-		print $client "1:$aMtime:$aChksum:";
+		print $client "0:$aMtime:$aChksum:";
 		# send data
 		while( ($read = sysread(IN,$buf,$size)) > 0)
 		{

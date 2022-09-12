@@ -207,13 +207,13 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len)
     //          - retCode is a 1-digit number
     //          - modeTime/checkSum can be empty
     //          - result_text can be empty
-    //      note: in delta mode a single "0" message is allowed
+    //      note: in delta mode a single "1" message is allowed
     //
     //  e.g.:
     //      0:1662369142:8fssaf:abcd
     //      0:1662369142::abcd
     //      1:::
-    //      0
+    //      1
 
     if ((reqType_ == GetFRequest || reqType_ == DeltaRequest)) {
         if (len <=0) {
@@ -221,7 +221,7 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len)
         }
 
         // is the whole message is "0" there is no delta to add!!
-        if (reqType_ == DeltaRequest && len == 1 && buf[0] == '0') {
+        if (reqType_ == DeltaRequest && len == 1 && buf[0] == '1') {
             len = 0;
             out_->setSourceModTime(remoteModTime_);
             out_->setSourceCheckSum(remoteCheckSum_);
@@ -245,10 +245,10 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len)
         }
         if (reqType_ == DeltaRequest) {
             // the whole file was sent back
-            if (v == "1") {
+            if (v == "0") {
                 deltaPos_ = 0;
                 out_->setDeltaContents(false);
-            } else if (v != "0") {
+            } else if (v != "1") {
                 return false;
             }
         }
