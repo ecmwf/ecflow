@@ -30,7 +30,6 @@ $|=1; # omt
 print "ecFlow log server running on port $port\n";
 print "Serving files from:\n";
 
-
 foreach my $p ( @path )
 {
 	print "   $p\n";
@@ -47,7 +46,7 @@ foreach my $p ( sort keys %map )
 
 print "\n";
 
-
+print "Digest::SHA1 available: ${hasSha1}\n\n";
 
 sub REAPER {
 	print "$$: SIG{CHLD}\n";
@@ -170,6 +169,7 @@ sub do_getf {
 	if ($mdSize == 3)
 	{
 		print $client "0:$md[1]:$md[2]:";
+		# print "meta=0:$md[1]:$md[2]:\n";
 	} else {
 		print $client "0:::";
 	}
@@ -303,7 +303,8 @@ sub meta {
 				$v = sha1_hex($buf);
 			}
 			close($fh);
-		}
+		} 		
+		
 		# size, modtime, checksum
 		return ($x[7], $x[9], $v);
 	}
