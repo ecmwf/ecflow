@@ -486,6 +486,18 @@
     <string>Copy file path</string>
    </property>
   </action>
+  <action name="actionLoadCurrentJobout_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/sync_black.svg</normaloff>:/viewer/sync_black.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Load current jobout file</string>
+   </property>
+   <property name="toolTip">
+    <string>Load current jobout file</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

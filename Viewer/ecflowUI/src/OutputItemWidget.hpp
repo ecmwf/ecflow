@@ -70,13 +70,13 @@ protected Q_SLOTS:
     void on_expandFileInfoTb__clicked(bool st);
     void slotWordWrapSupportChanged(bool);
     void slotLoadWholeFile();
+    void loadCurrentJobout();
 
 protected:
     void updateState(const FlagSet<ChangeFlag>&) override;
 	void searchOnReload();
     void reloadCurrentFile(bool wholeFile);
     void loadCurrentDirItemFile();
-    void loadCurrentJobout();
     bool isJoboutLoaded() const;
     void updateHistoryLabel(const std::vector<std::string>&);
 

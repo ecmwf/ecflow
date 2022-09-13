@@ -51,6 +51,7 @@ public:
 	 void clear() override;
 
 	 //Get a particular jobout file
+     void fetchCurrentJobout(bool useCache);
      void fetchFile(const std::string& fileName,size_t deltaPos, bool useCache);
      void fetchFileForMode(VFile_ptr f, size_t deltaPos, bool useCache);
      void fetchFileForMode(const std::string& fileName,VDir::FetchMode fetchMode,bool useCache);

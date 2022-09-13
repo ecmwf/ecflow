@@ -155,6 +155,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     sep->setSeparator(true);
     menu->addAction(sep);
     menu->addAction(actionLoadWhole_);
+    menu->addAction(actionLoadCurrentJobout_);
 
     moreActionTb_->setMenu(menu);
 
@@ -169,6 +170,9 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     connect(actionLoadWhole_, SIGNAL(triggered()),
             this, SLOT(slotLoadWholeFile()));
+
+    connect(actionLoadCurrentJobout_, SIGNAL(triggered()),
+            this, SLOT(loadCurrentJobout()));
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -471,7 +475,9 @@ void OutputItemWidget::loadCurrentJobout()
     fetchInfo_->clearInfo();
 
     //Get the latest file contents
-    infoProvider_->info(info_);
+    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    Q_ASSERT(op);
+    op->fetchCurrentJobout(false);
 
     // get the directory listing
     dirW_->reload();

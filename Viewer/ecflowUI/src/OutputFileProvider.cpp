@@ -310,6 +310,11 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
     fetchFileInternal(server,n,jobout,true,0,true);
 }
 
+void OutputFileProvider::fetchCurrentJobout(bool useCache)
+{
+    fetchFile(joboutFileName(),0,useCache);
+}
+
 //Get a file
 void OutputFileProvider::fetchFile(const std::string& fileName, size_t deltaPos, bool useCache)
 {
