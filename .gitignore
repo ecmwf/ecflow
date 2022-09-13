@@ -21,7 +21,7 @@ ecflow_*.files
 ecflow_*.cflags
 ecflow_*.cxxflags
 
-#vscod
+#vscode
 .vscode
 
 # cmake
@@ -46,6 +46,9 @@ swap
 
 # hack to ignore naw.def.glog
 **/naw.def.glog
+ 
+# Mac
+.DS_Store
  
 *.lock
 *.log

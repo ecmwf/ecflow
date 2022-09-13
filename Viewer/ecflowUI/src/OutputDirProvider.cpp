@@ -242,7 +242,7 @@ void OutputDirFetchLocalTask::run()
     } catch (const boost::filesystem::filesystem_error& e) {
         addTryLog(reply, "read from disk: NO ACCESS");
         reply->appendErrorText("No access to path on disk! error: " + std::string(e.what()));
-        UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
+        //UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
         fail();
     }
 
@@ -362,40 +362,6 @@ void OutputDirFetchTransferTask::transferFinished()
     } else {
         addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
     }
-
-#if 0
-    QFile f(QString::fromStdString(resFile->path()));
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        addTryLog(reply, "fetch from SOCKS host via ssh: FAILED");
-        return;
-    }
-
-    boost::filesystem::path fp(filePath_);
-    std::string dirName=fp.parent_path().string();
-    dir_=std::make_shared<VDir>(dirName);
-
-    while (!f.atEnd()) {
-        QByteArray line = f.readLine();
-        parseLine(line);
-    }
-
-    dir_->setFetchMode(VDir::TransferFetchMode);
-    std::string method="via ssh";
-    if (transfer_) {
-        method = "from " + transfer_->remoteUserAndHost().toStdString() + " " + method;
-    }
-    dir_->setFetchModeStr(method);
-    dir_->setFetchDate(QDateTime::currentDateTime());
-
-    addTryLog(reply, "fetch from SOCKS host via ssh: OK");
-    reply->appendDirectory(dir_);
-
-    //resFile_.reset();
-    dir_.reset();
-
-    succeed();
-#endif
-
 }
 
 void OutputDirFetchTransferTask::transferProgress(QString msg,int value)

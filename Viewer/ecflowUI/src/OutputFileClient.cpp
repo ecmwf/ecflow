@@ -207,7 +207,12 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len)
     //          - retCode is a 1-digit number
     //          - modeTime/checkSum can be empty
     //          - result_text can be empty
-    //      note: in delta mode a single "1" message is allowed
+    //      note:
+    //          - in getf mode the retCode can only be "'0"
+    //          - in delta mode:
+    //                retCode = "0" : delta transferred
+    //                retCode = "1" : the whole file transferred
+    //          - in delta mode a single "1" message is allowed
     //
     //  e.g.:
     //      0:1662369142:8fssaf:abcd
@@ -474,7 +479,7 @@ void OutputVersionClient::slotRead()
 
 void OutputVersionClient::getVersion()
 {
-    UiLog().dbg() << "OutputVersionClient::getVersion";
+    UiLog().dbg() << UI_FN_INFO << "logserver=" << longName();
     versionStatus_ = VersionBeingFetched;
     version_ = 0;
     dataSize_ = 0;

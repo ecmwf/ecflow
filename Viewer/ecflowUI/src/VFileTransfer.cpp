@@ -41,7 +41,6 @@ VFileTransferCore::VFileTransferCore(QObject* parent) :
 
 bool VFileTransferCore::isActive() const
 {
-//    UiLog().dbg() << "state=" << proc_->state();
     return (proc_ && proc_->state() != QProcess::NotRunning);
 }
 
@@ -168,12 +167,12 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
     stdErrTxt = stdErrTxt.trimmed();
     stdOutTxt = stdOutTxt.trimmed();
 
-//#ifdef UI_FILETRANSFER_DEBUG_
+#ifdef UI_FILETRANSFER_DEBUG_
     UiLog().dbg() << " exitCode=" << exitCode << " exitStatus=" << exitStatus;
     UiLog().dbg() << " errorString=" << proc_->errorString();
     UiLog().dbg() << " stdout=" << stdOutTxt;
     UiLog().dbg() << " stderr=" << stdErrTxt;
-//#endif
+#endif
 
     QString errTxt=stdOutTxt;
     if(!errTxt.isEmpty())
@@ -389,7 +388,13 @@ bool VFileTransfer::checkResults()
     fResult_->setTransferDuration(transferDuration_);
     fResult_->setFetchDate(QDateTime::currentDateTime());
 
-    UiLog().dbg() << UI_FN_INFO << (fResult_ != nullptr) << " size=" << fResult_->sizeInBytes();
+#ifdef UI_FILETRANSFER_DEBUG_
+    if (fResult) {
+        UiLog().dbg() << UI_FN_INFO << "result is null";
+    } else {
+        UiLog().dbg() << UI_FN_INFO << "result size=" << fResult_->sizeInBytes();
+    }
+#endif
     return (!fResult_->isEmpty() || fResult_->hasDeltaContents() || (byteMode_ == LastBytes && byteVal_ != 0));
 }
 
@@ -402,7 +407,12 @@ bool VFileTransfer::readMetaData()
     //          - retCode is a 1-digit number
     //          - modeTime/checkSum can be empty
     //          - padding can be empty
-    //      note: in delta mode a single "1" message is allowed
+    //      note:
+    //          - in AllBytes mode the retCode can only be "'0"
+    //          - in delta (=BytesFromPos) mode:
+    //                retCode = "0" : delta transferred
+    //                retCode = "1" : the whole file transferred
+    //          - in delta mode a single "1" message is allowed
     //
     //  e.g.:
     //      0:1662369142:8fssaf:abcd
@@ -417,7 +427,9 @@ bool VFileTransfer::readMetaData()
         if (f.open(QFile::ReadOnly | QFile::Text)) {
             QString ds = f.readAll();
             ds = ds.simplified();
+#ifdef UI_FILETRANSFER_DEBUG_
             UiLog().dbg() << UI_FN_INFO << "ds=" << ds;
+#endif
             if (byteMode_ == BytesFromPos && ds == "1") {
                 fResult_->setDeltaContents(true);
                 fResult_->setSourceModTime(modTime_);
@@ -426,7 +438,9 @@ bool VFileTransfer::readMetaData()
             }
 
             auto lst = ds.split(":");
+#ifdef UI_FILETRANSFER_DEBUG_
             UiLog().dbg() << " lst=" << lst;
+#endif
             if (lst.count() >=  3) {
                 if (byteMode_ == AllBytes) {
                     fResult_->setDeltaContents(false);

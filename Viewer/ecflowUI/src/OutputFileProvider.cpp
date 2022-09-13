@@ -27,7 +27,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 //#define UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-#define UI_OUTPUTFILEPROVIDER_DEBUG__
+//#define UI_OUTPUTFILEPROVIDER_DEBUG__
 
 //=================================
 //
@@ -139,9 +139,9 @@ void OutputFileFetchQueueManager::runFull(ServerHandler* server, VNode* node,
         fetchQueue_->add(t);
     }
 
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+//#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-#endif
+//#endif
     fetchQueue_->run();
 }
 
@@ -179,9 +179,9 @@ void OutputFileFetchQueueManager::runMode(VFile::FetchMode fetchMode,
         fetchQueue_->add(t);
     }
 
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
-    UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-#endif
+//#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+    UiLog().dbg() << UI_FN_INFO << "fetchMode=" << fetchMode << "queue=" << fetchQueue_;
+//#endif
     fetchQueue_->run();
 }
 
@@ -510,16 +510,15 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
 
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "fileName=" << fileName;
+#endif
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
     task_->reply()->setLog(reply_->log());
     task_->reply()->setErrorText(reply_->errorText());
 
-    //owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from server",0);
-
-    //Run the task in the server. When it finish taskFinished() is called. The text returned
-    //in the reply will be prepended to the string we generated above.
+    //Run the task in the server. When it finish taskFinished() is called.
     server->run(task_);
 }
 
