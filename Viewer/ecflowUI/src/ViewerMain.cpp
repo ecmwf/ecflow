@@ -11,11 +11,13 @@
 #include <string>
 #include <iostream>
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
 #include <QStyleFactory>
 #include <QPixmap>
+#include <QTimer>
 
 #include "File.hpp"
 #include "Version.hpp"
@@ -39,6 +41,7 @@
 #include "SessionHandler.hpp"
 #include "SessionDialog.hpp"
 #include "UiLog.hpp"
+
 
 int main(int argc, char **argv)
 {
@@ -122,9 +125,19 @@ int main(int argc, char **argv)
     std::string queryDir = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "query");
     NodeQueryHandler::instance()->init(queryDir);
 
-    //Initialise the server list. This will update the server list
-    //from the central the system server list
+    //Initialise the server list.
     ServerList::instance()->init();
+
+    //This will update the server list from a local central system server list. When
+    //we use proxychains these files are remote and we need to run the eventloop to fetch
+    //them. So in this case the sync is delayed until the event loop starts.
+    if (!VConfig::instance()->proxychainsUsed()) {
+        ServerList::instance()->syncSystemFiles();
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
+        QTimer::singleShot(10, []() { ServerList::instance()->syncSystemFiles();} );
+#endif
+    }
 
     // startup - via the session manager, or straight to the main window?
     bool startMainWindow = true;

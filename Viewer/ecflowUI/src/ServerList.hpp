@@ -15,8 +15,11 @@
 
 #include <QDateTime>
 
+#include "GenFileProvider.hpp"
+
 class ServerItem;
 class ServerList;
+class GenFileReceiver;
 
 
 class ServerListObserver
@@ -64,7 +67,7 @@ public:
     ChangeType type_;
 };
 
-class ServerList
+class ServerList : public GenFileReceiver
 {
 public:
     int count() const {return static_cast<int>(items_.size());}
@@ -85,14 +88,17 @@ public:
     void init();
 	void save();
 	void rescan();
-    void syncSystemFile();
     bool hasSystemFile() const;
+    void syncSystemFiles();
     const std::vector<ServerListSyncChangeItem*>&  syncChange() const {return syncChange_;}
     bool hasSyncChange() const {return !syncChange_.empty();}
     QDateTime syncDate() const {return syncDate_;}
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
+
+    void fileFetchFinished(VReply*);
+    void fileFetchFailed(VReply*);
 
 	static ServerList* instance();
 
@@ -108,15 +114,20 @@ protected:
     bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
                         bool checkDuplicate,std::string& errStr);
 
+    void syncSystemFiles(const std::vector<std::string>& paths);
+    void readSystemFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec);
+
 	void broadcastChanged();
 	void broadcastChanged(ServerItem*);
 
 	std::vector<ServerItem*> items_;
     std::string localFile_;
-    std::string systemFile_;
+    std::vector<std::string> systemFiles_;
+    bool hasSystemFiles_{false};
 	std::vector<ServerListObserver*> observers_;
     std::vector<ServerListSyncChangeItem*> syncChange_;
     QDateTime syncDate_;
+    GenFileReceiver* fileProvider_{nullptr};
 };
 
 

@@ -14,11 +14,14 @@
 
 #include "ServerList.hpp"
 
+#include "Str.hpp"
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
 #include "UserMessage.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "VReply.hpp"
+#include "MainWindow.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -121,12 +124,12 @@ void ServerList::reset(ServerItem* item,const std::string& name,const std::strin
 	{
         //Check if there is an item with the same name. Names have to be unique!
 		if(item->name() != name && find(name))
-			return;
+            return nullptr;
 
         item->reset(name,host,port,user,ssl);
 
-		save();
-		broadcastChanged();
+        save();
+        broadcastChanged();
 	}
 }
 
@@ -179,7 +182,6 @@ std::string ServerList::uniqueName(const std::string& name)
 	}
 
 	return name;
-
 }
 
 
@@ -229,7 +231,15 @@ bool ServerList::checkItemToAdd(const std::string& name,const std::string& host,
 void ServerList::init()
 {
     localFile_ = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "servers.txt");
-    systemFile_=DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers");
+    if (char *ch = getenv("ECFLOW_SERVERS_LIST")) {
+        auto s = std::string(ch);
+        ecf::Str::split(s, systemFiles_ ,":");
+        for (auto p: systemFiles_) {
+            UiLog().dbg() << UI_FN_INFO <<  p;
+        }
+    }
+
+    //systemFile_=DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers");
 
     if(load() == false)
 	{		
@@ -237,12 +247,12 @@ void ServerList::init()
             save();
 	}
 
-    syncSystemFile();
+    //syncSystemFiles();
 }
 
 bool ServerList::load()
 {
-    UiLog().dbg() << "ServerList::load() -->";
+    UiLog().dbg() << UI_FN_INFO << "-->";
 
     std::ifstream in(localFile_.c_str());
 	if(!in.good())
@@ -392,77 +402,54 @@ bool ServerList::readRcFile()
 
 bool ServerList::hasSystemFile() const
 {
-    boost::filesystem::path p(systemFile_);
-    return boost::filesystem::exists(p);
+    return hasSystemFiles_;
 }
 
-void ServerList::syncSystemFile()
+void ServerList::syncSystemFiles()
 {
-    UiLog().dbg() << "ServerList::syncSystemFile -->";
-
-    std::vector<ServerListTmpItem> sysVec;
-    std::ifstream in(systemFile_.c_str());
-
-    syncDate_=QDateTime::currentDateTime();
-    clearSyncChange();
-
-    if(in.good())
-    {
-        std::string line;
-        while(getline(in,line))
-        {
-            std::string buf=boost::trim_left_copy(line);
-            if(buf.size() >0 && buf.at(0) == '#')
-                    continue;
-
-            std::stringstream ssdata(line);
-            std::vector<std::string> vec;
-
-            while(ssdata >> buf)
-            {
-                vec.push_back(buf);
-            }
-
-            if(vec.size() >= 3)
-            {
-                std::string errStr,name=vec[0], host=vec[1], port=vec[2];
-                if(checkItemToAdd(name,host,port,false,errStr))
-                {
-                    sysVec.emplace_back(vec[0],vec[1],vec[2]);
-                }
-            }
-        }
+    if (!systemFiles_.empty()) {
+        fetchManager_->fetchFiles(systemFiles_);
     }
-    else
+}
+
+void ServerList::syncSystemFiles(const std::vector<std::string>& paths)
+{
+    std::vector<ServerListTmpItem> sysVec;
+    for (auto f: paths) {
+        readSystemFile(f, sysVec);
+    }
+
+    // nothing to sync
+    if (sysVec.empty()) {
         return;
+    }
 
-    in.close();
-
-#ifdef _UI_SERVERLIST_DEBUG
-    for(auto & i : sysVec)
-        UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
-#endif
+    hasSystemFiles_ = true;
 
     bool changed=false;
     bool needBrodcast=false;
+
+#ifdef _UI_SERVERLIST_DEBUG
+        UiLog().dbg() << UI_FN_INFO << "Load system server list:";
+#endif
 
     //See what changed or was added
     for(auto & i : sysVec)
     {
 #ifdef _UI_SERVERLIST_DEBUG
-        UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
+        UiLog().dbg() << i.name() << " " + i.host() << " " + i.port();
 #endif
         ServerItem *item=nullptr;
 
-        //There is a server with same name, host and port as in the local list. We
+        //There is a server with the same name, host and port as in the local list. We
         //mark it as system
         item=find(i.name(),i.host(),i.port());
         if(item)
-        {            
+        {
             if(!item->isSystem())
             {
 #ifdef _UI_SERVERLIST_DEBUG
-                UiLog().dbg() << "  already in list (same name, host, port) -> mark as system";
+                UiLog().dbg() << " -> already in server-list (same name, host, port). Mark as system server";
 #endif
                 changed=true;
                 syncChange_.push_back(new ServerListSyncChangeItem(i,i,
@@ -477,7 +464,7 @@ void ServerList::syncSystemFile()
         if(!item)
         {
 #ifdef _UI_SERVERLIST_DEBUG
-            UiLog().dbg() << "  name not in list -> import as system";
+            UiLog().dbg() << "  -> name is not in server-list. Import as system server";
 #endif
             changed=true;
             std::string name=i.name(),host=i.host(), port=i.port();
@@ -502,7 +489,8 @@ void ServerList::syncSystemFile()
         else
         {
 #ifdef _UI_SERVERLIST_DEBUG
-            UiLog().dbg() << "  name in list with different port or/and host";
+            UiLog().dbg() << "  -> name exsist in server-list with different port or/and host: " << item->host() << "@" << item->port() <<
+            " ! Reset host and port";
 #endif
             changed=true;
             needBrodcast=true;
@@ -552,17 +540,47 @@ void ServerList::syncSystemFile()
 
     if(needBrodcast)
         broadcastChanged();
+}
 
-#ifdef _UI_SERVERLIST_DEBUG
-    UiLog().dbg() << "<-- syncSystemFile";
-#endif
+void ServerList::readSystemFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec)
+{
+    std::ifstream in(fPath.c_str());
+
+    if(in.good())
+    {
+        std::string line;
+        while(getline(in,line))
+        {
+            std::string buf=boost::trim_left_copy(line);
+            if(buf.size() >0 && buf.at(0) == '#')
+                continue;
+
+            std::stringstream ssdata(line);
+            std::vector<std::string> vec;
+
+            while(ssdata >> buf)
+            {
+                vec.push_back(buf);
+            }
+
+            if(vec.size() >= 3)
+            {
+                std::string errStr,name=vec[0], host=vec[1], port=vec[2];
+                if(checkItemToAdd(name,host,port,false,errStr))
+                {
+                    sysVec.emplace_back(vec[0],vec[1],vec[2]);
+                }
+            }
+        }
+    }
+    in.close();
 }
 
 void ServerList::clearSyncChange()
 {
-    for(auto & i : syncChange_)
+    for(auto & i : syncChange_) {
         delete i;
-
+    }
     syncChange_.clear();
 }
 
@@ -593,4 +611,25 @@ void ServerList::broadcastChanged()
 {
 	for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyServerListChanged();
+}
+
+void ServerList::fileFetchFinished(VReply* r)
+{
+    if (!r->tmpFiles().empty()) {
+        syncDate_=QDateTime::currentDateTime();
+        clearSyncChange();
+        std::vector<std::string> paths;
+        for (auto f: r->tmpFiles()) {
+            //UiLog().dbg() << "f=" << f->path();
+            if (f) {
+                paths.emplace_back(f->path());
+            }
+        }
+        syncSystemFiles(paths);
+        MainWindow::initServerSyncTb();
+    }
+}
+
+void ServerList::fileFetchFailed(VReply* /*r*/)
+{
 }

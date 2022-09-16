@@ -139,20 +139,18 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //--------------
 
     //Add server list sync notification
-    if(ServerList::instance()->hasSyncChange())
-    {
-        //Add server list sync notification
-        serverSyncNotifyTb_=new QToolButton(this);
-        serverSyncNotifyTb_->setAutoRaise(true);
-        serverSyncNotifyTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
-        serverSyncNotifyTb_->setText("Server list updated");
-        serverSyncNotifyTb_->setToolTip("Your local copy of the <b>system server list</b> was updated. Click to see the changes.");
-        statusBar()->addWidget(serverSyncNotifyTb_);
-
-        connect(serverSyncNotifyTb_,SIGNAL(clicked(bool)),
+    serverSyncNotifyTb_=new QToolButton(this);
+    serverSyncNotifyTb_->setAutoRaise(true);
+    serverSyncNotifyTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
+    serverSyncNotifyTb_->setText("Server list updated");
+    serverSyncNotifyTb_->setToolTip("Your local copy of the <b>system server list</b> was updated. Click to see the changes.");
+    statusBar()->addWidget(serverSyncNotifyTb_);
+    serverSyncNotifyTb_->hide();
+    connect(serverSyncNotifyTb_,SIGNAL(clicked(bool)),
             this,SLOT(slotServerSyncNotify(bool)));
-    }
+
+    initServerSyncTbInternal();
 
     //Add notification widget
     auto* chw=new ChangeNotifyWidget(this);
@@ -460,6 +458,17 @@ bool MainWindow::selectInTreeView(VInfo_ptr info)
     return nodePanel_->selectInTreeView(info);
 }
 
+void MainWindow::initServerSyncTbInternal()
+{
+    UiLog().dbg() << UI_FN_INFO;
+    if(ServerList::instance()->hasSyncChange())
+    {
+        UiLog().dbg() << "  SHOW";
+        Q_ASSERT(serverSyncNotifyTb_);
+        serverSyncNotifyTb_->show();
+    }
+}
+
 void MainWindow::slotServerSyncNotify(bool)
 {
     if(serverSyncNotifyTb_)
@@ -648,6 +657,14 @@ void MainWindow::cleanUpOnQuit(MainWindow*)
 {
     Q_FOREACH(MainWindow *win,windows_)
         win->cleanUpOnQuit();
+}
+
+//Add server list sync notification
+void MainWindow::initServerSyncTb()
+{
+    Q_FOREACH(MainWindow *win,windows_) {
+        win->initServerSyncTbInternal();
+    }
 }
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
