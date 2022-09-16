@@ -704,26 +704,14 @@
             "label": "Network",
             "desc" : "Network",
             "icon" : "network.svg",
-
-            "group" : {
-                "title" : "SSH Jump",
-                "prefix" : "network.sshJump",
-                "note" : {
-                    "default" : "Used for <b>ssh/scp</b> when remote access service is set up via an <b>SSH Jump Host</b> (e.g. with Teleport)"
-                 },
-
-                "line" : "proxyJumpUser",
-                "line" : "proxyJumpHost"
-            },
             "group" : {
                 "title" : "SOCKS",
                 "prefix" : "network.socks",
                 "note" : {
-                    "default" : "These settings are only used when ecFlowUI was started up with the <b>proxychains</b> command. In this case dynamic port forwarding (using SOCKS) via an SSH Jump Host to a remote host is supposed to be up and running. Using these settings ecFlowUI tries to access <b>local log files</b> on the remote host via <b>scp/ssh</b>."
+                    "default" : "These settings are only used when ecFlowUI was started up with the <b>proxychains</b> command. In this case dynamic port forwarding (using SOCKS) to a remote host is supposed to be up and running. Using these settings ecFlowUI tries to access <b>local log files</b> on the remote host via <b>scp/ssh</b>."
                  },
 
-                "line" : "remoteUser",
-                "line" : "remoteHost"
+                "line" : "port"
             }
 
         }

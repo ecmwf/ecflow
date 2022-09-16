@@ -198,8 +198,10 @@ void FetchQueue::finish(AbstractFetchTask* lastTask)
     UI_FN_DBG
 #endif
     clear();
-    if (lastTask && lastTask->node()) {
+    if (lastTask) {
         owner_->fetchQueueFinished(lastTask->filePath(), lastTask->node());
+    } else {
+        owner_->fetchQueueFinished({}, nullptr);
     }
 }
 

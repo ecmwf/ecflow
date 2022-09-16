@@ -30,7 +30,7 @@ public:
     virtual void clear();
     void stopTransfer(bool broadcast);
     bool isActive() const;
-    static void socksRemoteUserAndHost(QString& user, QString& host);
+    static QString socksPort();
     VFile_ptr const result() {return fResult_;}
 
 protected Q_SLOTS:
@@ -46,10 +46,11 @@ Q_SIGNALS:
 
 protected:
     void stopTransfer(bool broadcast, bool doClear);
-    void transferIt(QString host, QString remoteUid);
-    virtual QString buildCommand(QString remoteUid, QString host) = 0;
+    void transferIt();
+    virtual QString buildCommand() = 0;
     QString stdErr();
     virtual bool checkResults()=0;
+    static void socksRemoteUserAndHost(QString& user, QString& host);
     static QString buildSocksProxyJump();
 
     QProcess* proc_{nullptr};
@@ -57,7 +58,11 @@ protected:
     VFile_ptr fResult_;
     bool ignoreSetX_{false};
     QString scriptName_;
+    QString remoteHost_;
+    QString remoteUser_;
     QString remoteUserAndHost_;
+    QString socksPort_;
+    bool useSocks_{false};
     unsigned int transferDuration_{0};
     QElapsedTimer stopper_;
 };
@@ -76,7 +81,7 @@ public:
 
 protected:
     void transferLocalViaSocks(QString sourceFile, ByteMode byteMode, size_t byteVal, bool useMetaData, size_t remoteModTime, const std::string& remoteCheckSum);
-    QString buildCommand(QString remoteUid, QString host) override;
+    QString buildCommand() override;
     bool checkResults() override;
     bool readMetaData();
 
@@ -96,7 +101,7 @@ public:
     void transferLocalViaSocks(QString sourceFile);
 
 protected:
-    QString buildCommand(QString remoteUid, QString host) override;
+    QString buildCommand() override;
     bool checkResults() override;
 };
 

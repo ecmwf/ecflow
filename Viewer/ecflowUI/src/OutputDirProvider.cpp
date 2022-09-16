@@ -298,9 +298,8 @@ void OutputDirFetchTransferTask::run()
 
     dir_.reset();
 
-    QString rUser, rHost;
-    VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
-    if (rUser.isEmpty() || rHost.isEmpty()) {
+    auto socksPort = VFileTransfer::socksPort();
+    if (socksPort.isEmpty()) {
         owner_->theReply()->addLogTryEntry("fetch from SOCKS host via ssh: NOT DEFINED");
         finish();
         return;
@@ -318,7 +317,6 @@ void OutputDirFetchTransferTask::run()
 
     Q_ASSERT(transfer_);
     transfer_->transferLocalViaSocks(QString::fromStdString(filePath_));
-
 }
 
 void OutputDirFetchTransferTask::transferFinished()

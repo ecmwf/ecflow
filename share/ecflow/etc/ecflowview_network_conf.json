@@ -1,24 +1,9 @@
 {
     "network":  {
-
-            "sshJump" : {
-                "proxyJumpUser" : {
-                    "label" : "Proxy jump username",
-                    "default" : "$USER"
-                },
-                "proxyJumpHost" : {
-                    "label" : "Proxy jump host",
-                    "default" : ""
-                }
-            },
             "socks" : {
-                "remoteUser" : {
-                    "label" : "Remote username",
-                    "default" : "$USER"
-                },
-                "remoteHost" : {
-                    "label": "Remote host",
-                    "default": ""
+                "port" : {
+                    "label" : "SOCKS port",
+                    "default" : "9050"
                 }
             }
        }

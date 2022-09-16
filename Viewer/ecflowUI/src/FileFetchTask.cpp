@@ -104,10 +104,9 @@ void FileFetchTransferTask::run()
     auto reply = queue_->owner()->theReply();
     assert(reply);
 
-    QString rUser, rHost;
-    VFileTransfer::socksRemoteUserAndHost(rUser, rHost);
-    if (rUser.isEmpty() || rHost.isEmpty()) {
-        reply->addLogTryEntry("fetch file from SOCKS host via scp: NOT DEFINED");
+    auto socksPort = VFileTransfer::socksPort();
+    if (socksPort.isEmpty()) {
+        reply->addLogTryEntry("fetch file from SOCKS host: NOT DEFINED");
         finish();
         return;
     }
@@ -123,14 +122,23 @@ void FileFetchTransferTask::run()
     }
 
     Q_ASSERT(transfer_);
-    if (deltaPos_ > 0) {        
-        transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       VFileTransfer::BytesFromPos, deltaPos_,  modTime_, checkSum_);
+    if (useMetaData_) {
+        if (deltaPos_ > 0) {
+            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                           VFileTransfer::BytesFromPos, deltaPos_,  modTime_, checkSum_);
+        } else {
+            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                           VFileTransfer::AllBytes, 0,  modTime_, checkSum_);
+        }
     } else {
-        transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                       VFileTransfer::AllBytes, 0,  modTime_, checkSum_);
+        if (deltaPos_ > 0) {
+            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                           VFileTransfer::BytesFromPos, deltaPos_);
+        } else {
+            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
+                           VFileTransfer::AllBytes, 0);
+        }
     }
-
     owner_->progressStart("Getting local file <i>" + filePath_ +  "</i> from SOCKS host via scp", 0);
 }
 

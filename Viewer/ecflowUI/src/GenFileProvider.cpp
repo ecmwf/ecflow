@@ -54,14 +54,15 @@ void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths)
         Q_ASSERT(t);
         t->reset(p);
         t->setAppendResult(true);
+        t->setUseMetaData(false);
         fetchQueue_->add(t);
     }
 
     Q_ASSERT(fetchQueue_->size() == fPaths.size());
 
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+//#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-#endif
+//#endif
     fetchQueue_->run();
 }
 
@@ -83,6 +84,7 @@ void GenFileProvider::fetchFile(const std::string& fPath)
     t->setRunCondition(AbstractFetchTask::NoCondition);
     t->reset(fPath);
     t->setAppendResult(true);
+    t->setUseMetaData(false);
     fetchQueue_->add(t);
 
 #ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
@@ -99,11 +101,15 @@ void GenFileProvider::fetchQueueSucceeded()
 
 void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
 {
-    if (reply_->errorText().empty()) {
-        reply_->setErrorText("Failed to fetch file(s)!");
+    if (fetchQueue_->policy() == FetchQueue::RunAll && !reply_->tmpFiles().empty()) {
+        fetchQueueSucceeded();
+    } else {
+        if (reply_->errorText().empty()) {
+            reply_->setErrorText("Failed to fetch file(s)!");
+        }
+        provider_->fileFetchFailed(reply_);
+        reply_->reset();
     }
-    provider_->fileFetchFailed(reply_);
-    reply_->reset();
 }
 
 GenFileReceiver::GenFileReceiver()

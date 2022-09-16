@@ -72,6 +72,7 @@ public:
     void reset(ServerHandler* server,VNode* node,const std::string& filePath,size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
     void setDeltaPos(size_t deltaPos) {deltaPos_=deltaPos;}
     void setUseCache(bool useCache) {useCache_=useCache;}
+    void setUseMetaData(bool b) {useMetaData_ = b;}
     std::string print() const;
 
 protected:
@@ -93,6 +94,7 @@ protected:
     unsigned int modTime_{0};
     std::string checkSum_;
     bool useCache_{false};
+    bool useMetaData_{true};
 };
 
 // Simple queue to manage the various fetch tasks defined by the owner
@@ -111,6 +113,7 @@ public:
     void add(AbstractFetchTask* t);
     void run();
     void clear();
+    Policy policy() const {return policy_;}
     void setPolicy(Policy p) {clear(); policy_=p;}
     bool isEmpty() const {return queue_.empty();}
     std::size_t size() const {return queue_.size();}
