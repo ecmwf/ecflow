@@ -197,6 +197,7 @@ public:
     void notifyEndServerScan(ServerHandler* server) override;
 	void notifyServerConnectState(ServerHandler* server) override;
 	void notifyServerActivityChanged(ServerHandler* server) override;
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
     //From VInfoObserver
     void notifyDelete(VInfo*) override {}

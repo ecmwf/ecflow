@@ -25,10 +25,19 @@ VNodeListItem::VNodeListItem(VNode* n) :node_(n)
 {
 	if(n)
 	{
-		server_=n->server()->name();
+        server_=n->server();
 		path_=n->absNodePath();
 		time_=QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
 	}
+}
+
+const std::string& VNodeListItem::serverName() const
+{
+    if (server_) {
+        return server_->name();
+    }
+    static std::string emptyStr;
+    return emptyStr;
 }
 
 bool VNodeListItem::sameAs(VNode *node) const
@@ -38,7 +47,7 @@ bool VNodeListItem::sameAs(VNode *node) const
 	if(node_)
 		return (node_ == node);
 
-	return (server_== node->server()->name() && path_ == node->absNodePath());
+    return (server_== node->server() && path_ == node->absNodePath());
 }
 
 void VNodeListItem::invalidateNode()
@@ -48,10 +57,9 @@ void VNodeListItem::invalidateNode()
 
 bool VNodeListItem::updateNode(ServerHandler* s)
 {
-	if(node_)
-		return (node_->server() == s);
-	else if(s->name() == server_)
-	{
+    if(node_) {
+        return (node_->server() == s && server_ == s);
+    } else if(s == server_) {
 		node_=s->vRoot()->find(path_);
 		return (node_ != nullptr);
 	}
@@ -66,8 +74,7 @@ bool VNodeListItem::updateNode(ServerHandler* s)
 //========================================================
 
 VNodeList::VNodeList(QObject *parent) :
-   QObject(parent)
-   
+   QObject(parent) 
 {
 }
 
@@ -126,12 +133,11 @@ void VNodeList::remove(VNode *node)
 
 			Q_EMIT beginRemoveRow(row);
 			delete *it;
-			data_.erase(it);
+            data_.erase(it);
 
 			detach(node);
 
 			Q_EMIT endRemoveRow(row);
-
 			return;
 		}
 	}
@@ -197,6 +203,7 @@ void VNodeList::clear()
 	Q_EMIT endReset();
 }
 
+// remove all items related to server
 void VNodeList::clear(ServerHandler* server)
 {
 	std::vector<VNodeListItem*> prev=data_;
@@ -206,8 +213,7 @@ void VNodeList::clear(ServerHandler* server)
 
 	for(std::vector<VNodeListItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
 	{
-		ServerHandler *s=(*it)->node_->server();
-		if((*it)->server() == s->name())
+        if((*it)->server() == server)
 		{
 			delete *it;
 		}
@@ -218,11 +224,12 @@ void VNodeList::clear(ServerHandler* server)
 	}
 }
 
+// temporarily disables all items related server
 void VNodeList::serverClear(ServerHandler* server)
 {
 	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
 	{
-		if(server->name() == (*it)->server())
+        if(server == (*it)->server())
 		{
 			(*it)->invalidateNode();
 		}
@@ -238,7 +245,7 @@ void VNodeList::serverScan(ServerHandler* server)
 
 	for(std::vector<VNodeListItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
 	{
-		if(server->name() == (*it)->server())
+        if(server == (*it)->server())
 		{
 			if((*it)->updateNode(server))
 			{
@@ -247,7 +254,9 @@ void VNodeList::serverScan(ServerHandler* server)
 			}
 			else
 				delete *it;
-		}
+        } else {
+            data_.push_back(*it);
+        }
 	}
 
 	if(serverCnt_[server] == 0)
@@ -316,6 +325,11 @@ void VNodeList::notifyEndServerScan(ServerHandler* server)
 	Q_EMIT endReset();
 }
 
+void VNodeList::notifyServerRenamed(ServerHandler*,  const std::string& /*oldName*/)
+{
+    Q_EMIT beginReset();
+    Q_EMIT endReset();
+}
 
 void VNodeList::notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&)
 {

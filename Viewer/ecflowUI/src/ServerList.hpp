@@ -79,7 +79,7 @@ public:
     ServerItem* add(const std::string& name,const std::string& host,const std::string& port, const std::string& user,
                     bool favorite, bool ssl, bool saveIt);
 	void remove(ServerItem*);
-    void reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port,
+    ServerItem* reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port,
                const std::string& user, bool ssl);
 	void setFavourite(ServerItem*,bool);
 

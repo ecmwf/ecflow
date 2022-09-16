@@ -101,6 +101,13 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
             this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
 
     //--------------------------------
+    // Editor
+    //--------------------------------
+
+    connect(editor_,SIGNAL(rerunRequested()),
+            this,SLOT(slotFind()));
+
+    //--------------------------------
     // Query
     //--------------------------------
 

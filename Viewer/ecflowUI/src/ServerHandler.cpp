@@ -1049,6 +1049,13 @@ void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 		((*it)->*proc)(this,ch);
 }
 
+
+void ServerHandler::broadcast(SoMethodV2 proc,const std::string& strVal)
+{
+    for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
+        ((*it)->*proc)(this,strVal);
+}
+
 //------------------------------------------------
 // ServerComObserver
 //------------------------------------------------
@@ -1929,6 +1936,14 @@ QString ServerHandler::nodeMenuMode() const
 QString ServerHandler::defStatusNodeMenuMode() const
 {
     return conf_->stringValue(VServerSettings::NodeMenuModeForDefStatus);
+}
+
+void ServerHandler::rename(const std::string& name)
+{
+    auto oldName = name_;
+    name_ = name;
+    fullLongName_ = name_ + "[" + longName_ + "]";
+    broadcast(&ServerObserver::notifyServerRenamed, oldName);
 }
 
 void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)

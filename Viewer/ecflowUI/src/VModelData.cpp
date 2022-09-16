@@ -228,6 +228,14 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
     changeInfo_->clear();
 }
 
+void VTreeServer::notifyServerRenamed(ServerHandler* s, const std::string& /*oldName*/)
+{
+    refreshServerNode();
+    if (expandState_) {
+        expandState_->updateServerName(s->name());
+    }
+}
+
 //--------------------------------------------------
 // NodeObserver methods
 //--------------------------------------------------
@@ -863,6 +871,13 @@ void VTreeServer::setExpandState(ExpandState* es)
     expandState_=es;
 }
 
+void VTreeServer::refreshServerNode()
+{
+    if (tree_) {
+        Q_EMIT nodeChanged(this, tree_->root());
+    }
+}
+
 //==========================================
 //
 // VTableServer
@@ -1322,9 +1337,8 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
     }
 }
 
-void VModelData::notifyServerFilterChanged(ServerItem* item)
+void VModelData::notifyServerFilterChanged(ServerItem*)
 {
-	//Q_EMIT dataChanged();
 }
 
 void VModelData::notifyServerFilterDelete()

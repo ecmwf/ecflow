@@ -51,6 +51,7 @@ public:
     void notifyEndServerScan(ServerHandler*) override;
     void notifyServerActivityChanged(ServerHandler*) override;
     void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
     void notifyRefreshTimerStarted(ServerHandler* server) override;
     void notifyRefreshTimerStopped(ServerHandler* server) override;

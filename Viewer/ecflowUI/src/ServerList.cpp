@@ -116,7 +116,7 @@ void ServerList::remove(ServerItem *item)
 	}
 }
 
-void ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,
+ServerItem* ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,
                        const std::string& port, const std::string& user, bool ssl)
 {
 	auto it=std::find(items_.begin(),items_.end(),item);
@@ -126,11 +126,22 @@ void ServerList::reset(ServerItem* item,const std::string& name,const std::strin
 		if(item->name() != name && find(name))
             return nullptr;
 
-        item->reset(name,host,port,user,ssl);
-
-        save();
-        broadcastChanged();
+        if (host != item->host() || port != item->port()) {
+            items_.erase(it);
+            broadcastChanged();
+            delete item;
+            item = add(name,host,port,user,false,ssl,true);
+            save();
+            broadcastChanged();
+        } else {
+            assert(host == item->host());
+            assert(port == item->port());
+            item->reset(name,host,port,user,ssl);
+            save();
+            broadcastChanged();
+        }
 	}
+    return item;
 }
 
 void ServerList::setFavourite(ServerItem* item,bool b)
@@ -500,9 +511,12 @@ void ServerList::syncSystemFiles(const std::vector<std::string>& paths)
             syncChange_.push_back(new ServerListSyncChangeItem(i,localTmp,
                                      ServerListSyncChangeItem::MatchChange));
 
-            item->reset(i.name(),i.host(),i.port(), "",false);
-            item->setSystem(true);
-            broadcastChanged();
+            item = reset(item, i.name(),i.host(),i.port(), "",false);
+            if (item) {
+                item->setSystem(true);
+            }
+            //item->reset(i.name(),i.host(),i.port(), "",false);
+            //broadcastChanged();
             continue;
         }
     }

@@ -78,6 +78,8 @@ public:
     virtual VTreeServer* treeServer() const {return nullptr;}
     virtual VTableServer* tableServer() const {return nullptr;}
 
+    virtual void refreshServerNode()=0;
+
 Q_SIGNALS:
     void dataChanged(VModelServer*);
 	void beginServerScan(VModelServer*,int);
@@ -115,6 +117,7 @@ public:
      ExpandState* expandState() const {return expandState_;}
      void setExpandState(ExpandState*);
      void deleteExpandState();
+     void refreshServerNode() override;
 
      //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
@@ -126,6 +129,7 @@ public:
 	 void notifyServerConnectState(ServerHandler* server) override;
 	 void notifyServerActivityChanged(ServerHandler* server) override;
 	 void notifyEndServerSync(ServerHandler* server) override;
+     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
@@ -176,6 +180,7 @@ public:
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
+     void refreshServerNode() override {}
 
 	 //From ServerObserver
      void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
@@ -234,7 +239,6 @@ public:
     bool isFilterComplete() const;
     bool isFilterNull() const;
     virtual void deleteExpandState() {}
-
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*) override;

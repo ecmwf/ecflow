@@ -465,13 +465,20 @@ void ServerListDialog::editItem(const QModelIndex& index)
 		//The dialog checks the name, host and port!
         if(d.exec() == QDialog::Accepted)
 		{
-            ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),
+            bool filtered = filter_->isFiltered(item);
+
+            // reset will return a new item when the host/port changes
+            item = ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),
                                           d.port().toStdString(), d.user().toStdString(), d.isSsl());
 
-            if(item->isFavourite() != d.isFavourite())
-			{
-				ServerList::instance()->setFavourite(item,d.isFavourite());               
-			}
+            if (item) {
+                if(item->isFavourite() != d.isFavourite()) {
+                    ServerList::instance()->setFavourite(item,d.isFavourite());
+                }
+                if (filtered && !filter_->isFiltered(item)) {
+                    filter_->addServer(item);
+                }
+            }
 
             //update the whole view
             sortModel_->invalidate();

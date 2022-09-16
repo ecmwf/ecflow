@@ -103,7 +103,7 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(item->server());
+            return QString::fromStdString(item->serverName());
 			break;
 		case 1:
 			return QString::fromStdString(item->path());

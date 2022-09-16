@@ -31,6 +31,7 @@ public:
     virtual void notifyServerActivityChanged(ServerHandler* server) {}
     virtual void notifyServerSuiteFilterChanged(ServerHandler* server) {}
     virtual void notifyEndServerSync(ServerHandler* server) {}
+    virtual void notifyServerRenamed(ServerHandler* server, const std::string& oldName) {}
 };
 
 

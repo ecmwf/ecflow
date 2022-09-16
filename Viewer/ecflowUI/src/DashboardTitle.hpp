@@ -53,6 +53,7 @@ public:
 	void notifyServerConnectState(ServerHandler* server) override;
 	void notifyServerActivityChanged(ServerHandler* server) override;
     void notifyServerSuiteFilterChanged(ServerHandler* server) override {}
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
 Q_SIGNALS:
     void changed(DashboardTitle*);

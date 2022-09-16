@@ -18,12 +18,7 @@
 
 
 ServerItem::ServerItem(const std::string& name) :
-  name_(name),
-  favourite_(false),
-  system_(false),
-  ssl_(false),
-  useCnt_(0),
-  handler_(nullptr)
+  name_(name)
 {
 }
 
@@ -32,10 +27,7 @@ ServerItem::ServerItem(const std::string& name,const std::string& host,const std
   name_(name), host_(host), port_(port),
   user_(user),
   favourite_(favourite),
-  system_(false),
-  ssl_(ssl),
-  useCnt_(0),
-  handler_(nullptr)
+  ssl_(ssl)
 {
 }
 
@@ -56,7 +48,12 @@ bool ServerItem::isUsed() const
 void ServerItem::reset(const std::string& name,const std::string& host,const std::string& port,
                        const std::string& user, bool ssl)
 {
-    name_=name;
+    if (name_ != name) {
+        name_=name;
+        if (handler_) {
+            handler_->rename(name_);
+        }
+    }
 
     if (host == host_ && port == port_) {
         //TODO: these should be called together
@@ -64,14 +61,12 @@ void ServerItem::reset(const std::string& name,const std::string& host,const std
         setUser(user);
     }
 
-    //host or port changed: full reload needed!!!
+    //host or port changed: full reload needed and this situation cannot
+    // be handled here!
     else
     {
-        host_=host;
-        port_=port;
-        user_=user;
-        ssl_=ssl;
-        //TODO: reload the server!!!
+        assert(host_==host);
+        assert(port_==port);
     }
 
 	broadcastChanged();

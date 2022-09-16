@@ -364,7 +364,7 @@ void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
     reloadAll();
 }
 
-void  ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
+void ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
 {
     Q_ASSERT(server_ == server);
 
@@ -379,9 +379,13 @@ void  ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
     }
 }
 
+void ServerRefreshInfoWidget::notifyServerRenamed(ServerHandler* server, const std::string& /*oldName*/)
+{
+    setServer(server);
+}
+
 void ServerRefreshInfoWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 {
-
 }
 
 

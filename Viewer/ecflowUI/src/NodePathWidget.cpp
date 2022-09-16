@@ -1347,6 +1347,11 @@ void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
     //reset();
 }
 
+void NodePathWidget::notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/)
+{
+     reset();
+}
+
 void NodePathWidget::notifyDataLost(VInfo* info)
 {
 #ifdef _UI_NODEPATHWIDGET_DEBUG

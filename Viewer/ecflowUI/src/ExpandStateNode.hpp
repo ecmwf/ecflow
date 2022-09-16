@@ -36,6 +36,7 @@ public:
     void setExpandedAll();
     void setCollapsedAll();
 
+    void setName(const std::string& name) {name_=name;}
     ExpandStateNode* find(const std::vector<std::string>& pathVec);
     ExpandStateNode* findChild(const std::string& name) const;
     ExpandStateNode* findChild(const std::string& name,std::size_t& pos) const;

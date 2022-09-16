@@ -45,6 +45,7 @@ public:
 	void removeServer(ServerItem*);
     bool isFiltered(ServerItem*) const;
     bool isFiltered(ServerHandler*) const;
+    bool isFiltered(const std::string& serverName) const;
 
     void writeSettings(VSettings*) const;
     void readSettings(VSettings*);

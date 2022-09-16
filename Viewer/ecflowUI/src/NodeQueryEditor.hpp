@@ -80,6 +80,7 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void queryEnabledChanged(bool);
+    void rerunRequested();
 
 private:
 	void updateServers();

@@ -28,7 +28,8 @@ friend class VNodeList;
 public:
 	explicit VNodeListItem(VNode* n);
 	VNode *node() const {return node_;}
-	const std::string& server() const {return server_;}
+    ServerHandler* server() const {return server_;}
+    const std::string& serverName() const;
 	const std::string& path() const {return path_;}
 	QString time() const {return time_;}
 	bool sameAs(VNode *node) const;
@@ -36,8 +37,8 @@ public:
 	bool updateNode(ServerHandler*);
 
 protected:
-	VNode* node_;
-	std::string server_;
+    VNode* node_{nullptr};
+    ServerHandler* server_{nullptr};
 	std::string path_;
 	QString time_;
 };
@@ -65,6 +66,7 @@ public:
  	void notifyEndServerClear(ServerHandler* server) override;
  	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
     void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerRenamed(ServerHandler* server,  const std::string& oldName) override;
 
  	//From NodeObserver
     void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;

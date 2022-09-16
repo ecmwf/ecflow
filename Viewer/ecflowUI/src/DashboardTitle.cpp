@@ -78,34 +78,39 @@ void DashboardTitle::notifyServerFilterDelete()
 	clear();
 }
 
-void DashboardTitle::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)
+void DashboardTitle::notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&)
 {
 	updateTitle();
 }
 
-void DashboardTitle::notifyServerDelete(ServerHandler* server)
+void DashboardTitle::notifyServerDelete(ServerHandler*)
 {
 	//server->removeServerObserver(this);
 }
 
-void DashboardTitle::notifyEndServerClear(ServerHandler* server)
+void DashboardTitle::notifyEndServerClear(ServerHandler*)
 {
 	updateTitle();
 }
 
-void DashboardTitle::notifyEndServerScan(ServerHandler* server)
+void DashboardTitle::notifyEndServerScan(ServerHandler*)
 {
 	updateTitle();
 }
 
-void DashboardTitle::notifyServerConnectState(ServerHandler* server)
+void DashboardTitle::notifyServerConnectState(ServerHandler*)
 {
 	updateTitle();
 }
 
-void DashboardTitle::notifyServerActivityChanged(ServerHandler* server)
+void DashboardTitle::notifyServerActivityChanged(ServerHandler*)
 {
 	updateTitle();
+}
+
+void DashboardTitle::notifyServerRenamed(ServerHandler*,  const std::string& /*oldName*/)
+{
+    updateTitle();
 }
 
 void DashboardTitle::setMaxPixWidth(int w)
@@ -168,8 +173,6 @@ void DashboardTitle::updateTitle()
     {
         //Get text
         QString str=QString::fromStdString(item->name());
-        QString host=QString::fromStdString(item->host());
-        QString port=QString::fromStdString(item->port());
 
         //Get server status
         ServerHandler* server=item->serverHandler();

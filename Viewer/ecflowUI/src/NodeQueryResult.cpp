@@ -396,6 +396,11 @@ void NodeQueryResult::notifyEndServerScan(ServerHandler* server)
 	Q_EMIT endReset();
 }
 
+void NodeQueryResult::notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/)
+{
+    Q_EMIT beginReset();
+    Q_EMIT endReset();
+}
 
 void NodeQueryResult::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& vn)
 {
