@@ -72,7 +72,7 @@ If in doubt please contact ECMWF Software Support.
 Prebuilt binaries
 -----------------
 
-Prebuilt binaries are available for most linix `distributions. <https://confluence.ecmwf.int/display/ECFLOW/Packages>`_
+Prebuilt binaries are available for most linux `distributions. <https://confluence.ecmwf.int/display/ECFLOW/Packages>`_
 
 
 Install from source
@@ -223,7 +223,7 @@ Python Api
     make clean
     make html
     
-* The documentation can then be viewed using yout browser. 
+* The documentation can then be viewed using your browser.
   Just open the file $WK/Doc/online/_build/html/index.html
 
 .. License:
