@@ -378,7 +378,10 @@ void OutputBrowser::loadContentsFromDisk(QString contentsFileName, QString fileN
                     QByteArray arr = file.readAll();
                     lastLoadedSizeFromDisk_ += arr.size();
                     QString deltaTxt(arr);
-                    textEdit_->appendPlainText(deltaTxt);
+                    // appendPlainText always inserts a newline so we cannot use it here
+                    QTextCursor cursor = QTextCursor(textEdit_->document());
+                    cursor.movePosition(QTextCursor::End);
+                    cursor.insertText(deltaTxt);
                     loaded = true;
                 }
             } else if (lastLoadedSizeFromDisk_ == fSize) {
@@ -472,7 +475,10 @@ bool OutputBrowser::addDeltaContentsFromDisk(QString deltaFileName, QString file
         QFile file(deltaFileName);
         if (file.open(QIODevice::ReadOnly)) {
             QString deltaTxt=file.readAll();
-            textEdit_->appendPlainText(deltaTxt);
+            // appendPlainText always inserts a newline so we cannot use it here
+            QTextCursor cursor = QTextCursor(textEdit_->document());
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText(deltaTxt);
             return true;
         } else {
             return false;
@@ -493,7 +499,11 @@ bool OutputBrowser::addDeltaContentsFromText(QString deltaTxt,QString fileName, 
 #endif
         changeIndex(BasicIndex,fileSize);
         adjustHighlighter(fileName);
-        textEdit_->appendPlainText(deltaTxt);
+        // appendPlainText always inserts a newline so we cannot use it here
+        QTextCursor cursor = QTextCursor(textEdit_->document());
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(deltaTxt);
+
         return true;
     }
     return false;

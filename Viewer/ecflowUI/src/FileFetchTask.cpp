@@ -158,6 +158,10 @@ void FileFetchTransferTask::transferFinished()
     auto tmp = transfer_->result();
     assert(tmp);
     if (tmp) {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+        UiLog().dbg() << UI_FN_INFO << "tmp size=" << tmp->sizeInBytes();
+#endif
+
         tmp->setLog(reply->log());
 
         //Files retrieved from the log server are automatically added to the cache!
