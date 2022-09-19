@@ -376,3 +376,10 @@ QIcon ViewerUtil::makeExpandIcon(bool targetOnRight)
     ic.addPixmap(QPixmap(":/viewer/expand_right.svg"), QIcon::Normal, (targetOnRight?QIcon::Off:QIcon::On));
     return ic;
 }
+
+void ViewerUtil::showShortcutInContextMenu(QAction* ac)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    ac->setShortcutVisibleInContextMenu(true);
+#endif
+}

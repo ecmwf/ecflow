@@ -49,6 +49,7 @@ public:
    static QString wildcardToRegex(const QString&);
    static QFont findMonospaceFont();
    static QIcon makeExpandIcon(bool targetOnRight);
+   static void showShortcutInContextMenu(QAction*);
 };
 
 #endif // VIEWERUTIL_HPP
