@@ -395,38 +395,23 @@ void IconFilter::readSettings(VSettings* vs)
 
 //==============================================
 //
-// NodeFilter
-//
+// NodeFilterDef
 //==============================================
 
 NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter,Scope scope) :
-	serverFilter_(serverFilter),
-	nodeState_(nullptr)
+    serverFilter_(serverFilter)
 {
-	nodeState_=new NodeStateFilter;
-
-	//if(scope == NodeStateScope)
-	//	nodeState_=new NodeStateFilter;
-
-	//else if(scope == GeneralScope)
-	//	nodeState_=new NodeStateFilter;
-
-	if(nodeState_)
-	{
-		exprStr_="state = all";
-
-		connect(nodeState_,SIGNAL(changed()),
+	nodeState_=new NodeStateFilter;	
+    exprStr_="state = all";
+    connect(nodeState_,SIGNAL(changed()),
 					this,SIGNAL(changed()));
-	}
-
 	query_=new NodeQuery("tmp",true);
-	//QStringList sel("aborted");
-	//query_->setStateSelection(sel);
 }
 
 NodeFilterDef::~NodeFilterDef()
 {
 	delete query_;
+    delete nodeState_;
 }
 
 NodeQuery* NodeFilterDef::query() const
@@ -455,6 +440,26 @@ void NodeFilterDef::readSettings(VSettings *vs)
 
 	Q_EMIT changed();
 }
+
+void NodeFilterDef::serverRemoved(const std::string& serverName)
+{
+    if (query_->removeServer(serverName)) {
+       Q_EMIT changed();
+    }
+}
+
+void NodeFilterDef::serverRenamed(const std::string& newName, const std::string& oldName)
+{
+    if (query_->renameServer(newName, oldName)) {
+       Q_EMIT changed();
+    }
+}
+
+//==============================================
+//
+// NodeFilter
+//
+//==============================================
 
 NodeFilter::NodeFilter(NodeFilterDef* def,ServerHandler* server) :
 	def_(def),

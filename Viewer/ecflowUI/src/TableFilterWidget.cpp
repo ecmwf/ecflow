@@ -43,6 +43,7 @@ void TableFilterWidget::slotEdit()
 	assert(filterDef_);
 	assert(serverFilter_);
 
+    // it is a blocking call
 	NodeFilterDialog d(this);
 	d.setServerFilter(serverFilter_);
 	d.setQuery(filterDef_->query());

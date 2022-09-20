@@ -228,12 +228,13 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
     changeInfo_->clear();
 }
 
-void VTreeServer::notifyServerRenamed(ServerHandler* s, const std::string& /*oldName*/)
+void VTreeServer::notifyServerRenamed(ServerHandler* s, const std::string& oldName)
 {
     refreshServerNode();
     if (expandState_) {
         expandState_->updateServerName(s->name());
     }
+    Q_EMIT serverRenamed(this, oldName);
 }
 
 //--------------------------------------------------
@@ -922,6 +923,12 @@ int VTableServer::indexOf(const VNode* node) const
     return filter_->indexOf(node);
 }
 
+void VTableServer::notifyServerRenamed(ServerHandler* s, const std::string& oldName)
+{
+    refreshServerNode();
+    Q_EMIT serverRenamed(this, oldName);
+}
+
 //--------------------------------------------------
 // ServerObserver methods
 //--------------------------------------------------
@@ -1137,6 +1144,9 @@ void VModelData::connectToModel(VModelServer* d)
 	connect(d,SIGNAL(endServerClear(VModelServer*,int)),
 		model_,SLOT(slotEndServerClear(VModelServer*,int)));
 
+    connect(d,SIGNAL(serverRenamed(VModelServer*, const std::string&)),
+        this,SLOT(slotServerRenamed(VModelServer*, const std::string&)));
+
 	//The model relays this signal
 	connect(d,SIGNAL(rerender()),
 		model_,SIGNAL(rerender()));
@@ -1331,6 +1341,10 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 #endif
 			//Notifies the model that the change has finished
             Q_EMIT serverRemoveEnd(nodeNum);
+
+            if (filterDef_) {
+                filterDef_->serverRemoved(item->name());
+            }
             return;
 		}
 		i++;
@@ -1418,6 +1432,15 @@ bool VModelData::isFilterNull() const
     }
 
     return true;
+}
+
+
+void VModelData::slotServerRenamed(VModelServer* s, const std::string& oldName)
+{
+//    UiLog().dbg() << UI_FN_INFO << " old_name=" << oldName;
+    if (filterDef_ && s && s->server_) {
+        filterDef_->serverRenamed(s->server_->name(), oldName);
+    }
 }
 
 //==============================================================

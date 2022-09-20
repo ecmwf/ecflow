@@ -86,6 +86,7 @@ Q_SIGNALS:
 	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*,int);
 	void endServerClear(VModelServer*,int);
+    void serverRenamed(VModelServer*, const std::string& /*oldName*/);
 
 	void rerender();
 
@@ -192,6 +193,7 @@ public:
 	 void notifyServerConnectState(ServerHandler* server) override;
 	 void notifyServerActivityChanged(ServerHandler* server) override;
 	 void notifyEndServerSync(ServerHandler* server) override;
+     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
@@ -248,6 +250,7 @@ public:
 
 public Q_SLOTS:
     void slotFilterDefChanged();
+    void slotServerRenamed(VModelServer*, const std::string& /*oldName*/);
 
 Q_SIGNALS:
     //void filterChanged();
