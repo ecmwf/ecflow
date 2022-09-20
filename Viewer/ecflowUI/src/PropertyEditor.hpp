@@ -34,6 +34,8 @@ public:
     void empty();
     bool applyChange();
     VProperty* property() const {return group_;}
+    int currentTopLevelTabIndex() const;
+    void setCurrentTopLevelTabIndex(int idx);
 
 Q_SIGNALS:
 	void changed();
@@ -61,6 +63,7 @@ private:
     QString serverName_;
     QWidget* holder_{nullptr};
     int lineLabelLen_{-1};
+    QTabWidget* topLevelTabW_{nullptr};
 };
 
 

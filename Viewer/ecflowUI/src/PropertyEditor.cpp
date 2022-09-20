@@ -513,6 +513,10 @@ void PropertyEditor::addTabs(VProperty* vProp,QVBoxLayout *layout,QWidget* paren
     auto *t=new QTabWidget(parent);
     t->setObjectName("tab");
     layout->addWidget(t);
+
+    if (!topLevelTabW_  && parent == holder_) {
+        topLevelTabW_ = t;
+    }
    
     Q_FOREACH(VProperty* chProp,vProp->children())
     {
@@ -601,3 +605,14 @@ bool PropertyEditor::applyChange()
     return changed;
 }
 
+int PropertyEditor::currentTopLevelTabIndex() const
+{
+    return (topLevelTabW_)?topLevelTabW_->currentIndex():-1;
+}
+
+void PropertyEditor::setCurrentTopLevelTabIndex(int idx)
+{
+    if (topLevelTabW_) {
+        topLevelTabW_->setCurrentIndex(idx);
+    }
+}

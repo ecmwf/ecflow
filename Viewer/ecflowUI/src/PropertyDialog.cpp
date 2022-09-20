@@ -203,7 +203,12 @@ void PropertyDialog::writeSettings()
 
 	settings.beginGroup("main");
 	settings.setValue("size",size());
-	settings.setValue("current",list_->currentRow());
+
+    int idx = list_->currentRow();
+    settings.setValue("current", idx);
+    if (idx>= 0 && idx < editors_.count()) {
+        settings.setValue("currentPageTab", editors_[idx]->currentTopLevelTabIndex());
+    }
 	settings.endGroup();
 }
 
@@ -227,8 +232,16 @@ void PropertyDialog::readSettings()
 	if(settings.contains("current"))
 	{
 		int current=settings.value("current").toInt();
-		if(current >=0)
+        if(current >=0) {
 			list_->setCurrentRow(current);
+            if (settings.contains("currentPageTab")) {
+                int currentPageTab=settings.value("currentPageTab").toInt();
+                if(currentPageTab >=0 && currentPageTab < editors_.count()) {
+                    editors_[current]->setCurrentTopLevelTabIndex(currentPageTab);
+                }
+            }
+        }
+
 	}
 	settings.endGroup();
 }
