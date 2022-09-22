@@ -22,10 +22,14 @@ PREDEF_SYSTEM_SERVERS_LIST=@UI_SYSTEM_SERVERS_LIST@
 # The system server list
 #-----------------------------------------------------------
 
-# export ECFLOW_SERVERS_LIST=${ECFLOW_SERVERS_LIST:="/ec/vol/ecflow_def/servers.list:/ec/vol/ifs/admin/servers.list:/ec/vol/ecflow_def/servers.list.rd"}
-
 export ECFLOW_SYSTEM_SERVERS_LIST=${ECFLOW_SYSTEM_SERVERS_LIST:=$PREDEF_SYSTEM_SERVERS_LIST}
 
+#-----------------------------------------------------------
+# Figure out the directory of the exe
+#-----------------------------------------------------------
+
+EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+exe=${EXE_DIR}/ecflow_ui.x
 
 # ----------------------------------------------------------
 # Clean up the tmp directory at the end or on error
@@ -213,8 +217,11 @@ done
 #-----------------------------------------------------------
 
 printhelp() { 
+
+    version=$("$exe" --version 2>/dev/null)
+
     cat <<HEND
-ecFlowUI
+ecFlowUI $version
   Command-line flags:
     -fs               : set fontsize (in points) for the user interface
     -log              : write log messages to standard output
@@ -309,7 +316,6 @@ export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 export ECFLOWUI_SOCKETDIR=$ECFLOWUI_TMPDIR/sockets
 mkdir -p $ECFLOWUI_SOCKETDIR
 
-
 #---------------------------------------------------------------
 # Manage config dir.
 # From version 5.3.0 onwards the default config
@@ -382,10 +388,6 @@ ECFLOWUI_SIGLIST="QUIT TERM XCPU  XFSZ"
 trap 'cleanup "EXIT" $LINENO' EXIT
 trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
 
-#Figure out the directory of the exe
-EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-
 # note when we started it up
 ECFLOWUI_STARTTIME=$(date)
 
@@ -406,8 +408,6 @@ fi
 #-----------------------------------------------------------
 # Run the executable
 #-----------------------------------------------------------
-
-exe=${EXE_DIR}/ecflow_ui.x
 
 if [[ ${ECFLOWUI_USER_START_CMD} = "proxychains" || ${ECFLOWUI_USER_START_CMD} = "proxychains"[4-9] ]] ; then
     export ECFLOWUI_USE_PROXYCHAINS=1
