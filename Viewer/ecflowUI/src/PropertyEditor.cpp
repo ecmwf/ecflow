@@ -10,6 +10,8 @@
 
 #include "PropertyEditor.hpp"
 
+#include <stdlib.h>
+
 #include <QDebug>
 #include <QGroupBox>
 #include <QFrame>
@@ -538,7 +540,6 @@ void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
     
     tab->addTab(w,vProp->param("label"));
     
-
     if(!vProp->param("adjustLineLabel").isEmpty())
     {
         lineLabelLen_=vProp->param("adjustLineLabel").toInt();
@@ -554,13 +555,19 @@ void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
     vb->addStretch(1);
 }    
 
+QString PropertyEditor::buildNoteText(VProperty* vProp) const
+{
+    QString txt=vProp->value().toString();
+    txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
+    return txt;
+}
+
 void PropertyEditor::addNote(VProperty* vProp,QVBoxLayout* layout,QWidget *parent)
 {
     if(vProp->name() != "note")
         return;
 
-    QString txt=vProp->value().toString();
-    txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
+    QString txt=buildNoteText(vProp);
 
     layout->addSpacing(5);
     auto *label=new QLabel("<i>Note:</i> " + txt,parent);
@@ -572,22 +579,12 @@ void PropertyEditor::addNote(VProperty* vProp,QGridLayout* layout,QWidget *paren
     if(vProp->name() != "note")
         return;
 
-    QString txt=vProp->value().toString();
-    txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
-
-    //QLabel *empty=new QLabel(" ",parent);
-    //layout->addWidget(empty,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
-   	//QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + txt,parent);
-
-    //QFrame* fr=new QFrame(parent);
-    //fr->setFrameShape(QFrame::HLine);
-    //layout->addWidget(fr,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
+    QString txt=buildNoteText(vProp);
 
     auto *label=new QLabel("<table><tr><td><b>&nbsp;&nbsp;&nbsp;</b></td><td><i>Note:</i> " + txt + "</td></tr></table>",parent);
     label->setWordWrap(true);
     layout->addWidget(label,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 }
-
 
 bool PropertyEditor::applyChange()
 {

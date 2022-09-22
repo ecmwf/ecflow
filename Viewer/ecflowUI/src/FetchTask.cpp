@@ -270,6 +270,11 @@ FetchQueueOwner::~FetchQueueOwner()
     unusedTasks_.clear();
 }
 
+bool FetchQueueOwner::isEmpty() const
+{
+    return (fetchQueue_)?fetchQueue_->isEmpty():true;
+}
+
 void FetchQueueOwner::clear()
 {
     // clear the queue and the fetch tasks

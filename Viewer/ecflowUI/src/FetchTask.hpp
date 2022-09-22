@@ -150,6 +150,7 @@ public:
     virtual void progressUpdate(const std::string& /*msg*/, int /*value*/) {}
     virtual void progressStop() {}
     virtual VDir_ptr dirToFile(const std::string& /*fileName*/) const {return nullptr;}
+    bool isEmpty() const;
 
 protected:
     AbstractFetchTask* makeFetchTask(const std::string& name);

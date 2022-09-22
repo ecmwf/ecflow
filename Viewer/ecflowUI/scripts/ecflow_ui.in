@@ -16,6 +16,16 @@ ECFLOWUI_VERSION=@ECFLOW_VERSION_STR@
 ECFLOWUI_INSTALLDIR=@CMAKE_INSTALL_PREFIX@
 ECFLOWUI_USAGE_LOG=@UI_LOG_FILE@
 ECFLOWUI_SITE_TAG=@UI_LOG_SITE_TAG@
+PREDEF_SYSTEM_SERVERS_LIST=@UI_SYSTEM_SERVERS_LIST@
+
+#-----------------------------------------------------------
+# The system server list
+#-----------------------------------------------------------
+
+# export ECFLOW_SERVERS_LIST=${ECFLOW_SERVERS_LIST:="/ec/vol/ecflow_def/servers.list:/ec/vol/ifs/admin/servers.list:/ec/vol/ecflow_def/servers.list.rd"}
+
+export ECFLOW_SYSTEM_SERVERS_LIST=${ECFLOW_SYSTEM_SERVERS_LIST:=$PREDEF_SYSTEM_SERVERS_LIST}
+
 
 # ----------------------------------------------------------
 # Clean up the tmp directory at the end or on error
@@ -122,8 +132,6 @@ cleanup(){
     exit $status
 }
 
-
-
 #-----------------------------------------------------------
 # checkoption()
 # Checks the command-line options
@@ -200,19 +208,11 @@ do
 done
 }
 
-
-
-checkoption "$@"
-
-
-
 #-----------------------------------------------------------
 # Help message
 #-----------------------------------------------------------
 
-if [ "x$ECFLOWUI_HELP" != x ]
-then
-
+printhelp() { 
     cat <<HEND
 ecFlowUI
   Command-line flags:
@@ -225,9 +225,25 @@ ecFlowUI
     -h                : print this help message
 HEND
 
+cat << HEND
+
+  Environment variables that have an effect on ecFlowUI:
+  [current value in brackets]
+
+  ECFLOW_SYSTEM_SERVERS_LIST   Pre-defined system server list files. User settings in
+                               ecFlowUI (Preferences > Server > System server list) will overwrite it.
+                               [$ECFLOW_SYSTEM_SERVERS_LIST]
+HEND
+
+}
+
+checkoption "$@"
+
+if [ "x$ECFLOWUI_HELP" != x ]
+then
+    printhelp
     exit 0
 fi
-
 
 #-----------------------------------------------------------
 # usage log
@@ -250,7 +266,6 @@ then
 	fi
 fi
 set -e
-
 
 
 #Define tmp root dir
@@ -373,7 +388,6 @@ EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # note when we started it up
 ECFLOWUI_STARTTIME=$(date)
-
 
 #-----------------------------------------------------------
 # The log viewer exe

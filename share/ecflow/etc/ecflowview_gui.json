@@ -647,6 +647,17 @@
                             "default": "0 means there is no upper data limit!"
                         }
                   }
+                },
+                "tab" : {
+                    "label"  : "System server list",
+                    "group" : {
+                        "title" : "System server list",
+                        "prefix" : "server.systemList",
+                        "note" : {
+                            "default": "<b>System server list</b> files can define a set of servers that are automatically added to/removed from the server list on startup. This can be preset via the ECFLOW_SYSTEM_SERVERS_LIST environment variable. The option below overwrites the preset paths (use colon separator for multiple items)."
+                        },
+                        "line" : "paths"
+                    }
                 }
             },
 

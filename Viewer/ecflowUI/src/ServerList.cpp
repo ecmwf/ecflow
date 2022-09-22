@@ -20,6 +20,8 @@
 #include "UserMessage.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
+#include "VProperty.hpp"
 #include "VReply.hpp"
 #include "MainWindow.hpp"
 
@@ -41,6 +43,13 @@ ServerListTmpItem::ServerListTmpItem(ServerItem* item) :
     host_(item->host()),
     port_(item->port())
 {}
+
+ServerList::~ServerList()
+{
+    if (prop_) {
+        delete prop_;
+    }
+}
 
 //Singleton instance method
 ServerList* ServerList::instance()
@@ -139,6 +148,7 @@ ServerItem* ServerList::reset(ServerItem* item,const std::string& name,const std
             item->reset(name,host,port,user,ssl);
             save();
             broadcastChanged();
+
         }
 	}
     return item;
@@ -242,23 +252,78 @@ bool ServerList::checkItemToAdd(const std::string& name,const std::string& host,
 void ServerList::init()
 {
     localFile_ = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "servers.txt");
-    if (char *ch = getenv("ECFLOW_SERVERS_LIST")) {
-        auto s = std::string(ch);
-        ecf::Str::split(s, systemFiles_ ,":");
-        for (auto p: systemFiles_) {
-            UiLog().dbg() << UI_FN_INFO <<  p;
-        }
-    }
 
-    //systemFile_=DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers");
-
+    //system files are loaded in a delayed mode
     if(load() == false)
 	{		
         if(readRcFile())
             save();
 	}
+}
 
-    //syncSystemFiles();
+bool ServerList::buildSystemFileList()
+{
+    if (!prop_) {
+        std::vector<std::string> propVec;
+        propVec.emplace_back("server.systemList.paths");
+        assert(!prop_);
+        prop_=new PropertyMapper(propVec,this);
+        assert(prop_);
+    }
+
+    std::vector<std::string> oriLst = systemFiles_;
+    systemFiles_.clear();
+
+    // Ui config settings take precedence
+    auto p = VConfig::instance()->find("server.systemList.paths");
+    bool useProp = false;
+    if (p) {
+        UiLog().dbg() << UI_FN_INFO << "take paths from Preferences";
+        auto s = p->valueAsStdString();
+        if (!s.empty()) {
+            useProp = true;
+            std::vector<std::string> sVec;
+            ecf::Str::split(s, sVec ,":");
+            for (auto v: sVec) {
+                if (std::find(systemFiles_.begin(), systemFiles_.end(), v) == systemFiles_.end()) {
+                    systemFiles_.push_back(v);
+                }
+            }
+        }
+    }
+
+    // otherwise the env var is used
+    if (!useProp) {
+        if (char *ch = getenv("ECFLOW_SYSTEM_SERVERS_LIST")) {
+            UiLog().dbg() << UI_FN_INFO << "take paths from $ECFLOW_SYSTEM_SERVERS_LIST";
+            auto s = std::string(ch);
+            if (!s.empty()) {
+                std::vector<std::string> sVec;
+                ecf::Str::split(s, sVec ,":");
+                for (auto v: sVec) {
+                    if (std::find(systemFiles_.begin(), systemFiles_.end(), v) == systemFiles_.end()) {
+                        systemFiles_.push_back(v);
+                    }
+                }
+            }
+        }
+    }
+
+    for (auto p: systemFiles_) {
+         UiLog().dbg() << UI_FN_INFO << "system file=" << p;
+    }
+
+    // see if there was a change
+    if (oriLst.size() == systemFiles_.size()) {
+        for (std::size_t i=0; i < oriLst.size(); i++) {
+            if (oriLst[i] != systemFiles_[i]) {
+                return true;
+            }
+        }
+        UiLog().dbg() << UI_FN_INFO << "new paths are the same as the old ones";
+        return false;
+    }
+    return true;
 }
 
 bool ServerList::load()
@@ -270,7 +335,6 @@ bool ServerList::load()
 		return false;
 
     std::string errStr;
-
 	std::string line;
     int lineCnt=1;
 	while(getline(in,line))
@@ -418,7 +482,17 @@ bool ServerList::hasSystemFile() const
 
 void ServerList::syncSystemFiles()
 {
+    UiLog().dbg() << UI_FN_INFO;
+    buildSystemFileList();
+    UiLog().dbg() << UI_FN_INFO << "call internal";
+    syncSystemFilesInternal();
+}
+
+void ServerList::syncSystemFilesInternal()
+{
+    UiLog().dbg() << UI_FN_INFO;
     if (!systemFiles_.empty()) {
+        UiLog().dbg() << UI_FN_INFO << "start fetch";
         fetchManager_->fetchFiles(systemFiles_);
     }
 }
@@ -629,6 +703,7 @@ void ServerList::broadcastChanged()
 
 void ServerList::fileFetchFinished(VReply* r)
 {
+    UiLog().dbg() << UI_FN_INFO;
     if (!r->tmpFiles().empty()) {
         syncDate_=QDateTime::currentDateTime();
         clearSyncChange();
@@ -647,3 +722,17 @@ void ServerList::fileFetchFinished(VReply* r)
 void ServerList::fileFetchFailed(VReply* /*r*/)
 {
 }
+
+void ServerList::notifyChange(VProperty* p)
+{
+    //cannot do
+    if(fetchManager_->isEmpty() &&
+       prop_ && p && p->path() == "server.systemList.paths")
+    {
+        UiLog().dbg() << UI_FN_INFO;
+        if (buildSystemFileList()) {
+            syncSystemFilesInternal();
+        }
+    }
+}
+

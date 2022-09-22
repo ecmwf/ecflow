@@ -128,17 +128,6 @@ int main(int argc, char **argv)
     //Initialise the server list.
     ServerList::instance()->init();
 
-    //This will update the server list from a local central system server list. When
-    //we use proxychains these files are remote and we need to run the eventloop to fetch
-    //them. So in this case the sync is delayed until the event loop starts.
-    if (!VConfig::instance()->proxychainsUsed()) {
-        ServerList::instance()->syncSystemFiles();
-    } else {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
-        QTimer::singleShot(10, []() { ServerList::instance()->syncSystemFiles();} );
-#endif
-    }
-
     // startup - via the session manager, or straight to the main window?
     bool startMainWindow = true;
 
@@ -157,7 +146,7 @@ int main(int argc, char **argv)
 
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
-    
+
     //Import server settings from the previous viewer
     if(DirectoryHandler::isFirstStartUp())
     {
@@ -167,6 +156,18 @@ int main(int argc, char **argv)
 
     //Update objects with saved user settings (these are now stored in VConfig!!)
     VSettingsLoader::process();
+
+    //This will update the server list from a local central system server list. Must be done after
+    //the VConfig init because depends on some Preferences settings.
+    //Note: when we use proxychains these files are remote and we need to run the eventloop to fetch
+    //them. So in this case the sync is delayed until the event loop starts.
+    if (!VConfig::instance()->proxychainsUsed()) {
+        ServerList::instance()->syncSystemFiles();
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
+        QTimer::singleShot(10, []() { ServerList::instance()->syncSystemFiles();} );
+#endif
+    }
 
     //Initialise highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),

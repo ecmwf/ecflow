@@ -27,14 +27,23 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
     //Set the list
     if(ServerList::instance()->syncDate().isValid())
     {
-        QColor col(39,49,101);
-
         if(ServerList::instance()->hasSyncChange())
         {
-            QString t="Your copy of the system server list was updated <b>";
-            t+="<font color=\'" + col.name() + "\'> at </font></b>" +
-               ServerList::instance()->syncDate().toString("yyyy-MM-dd HH:mm") +
-                    ". This is the list of changes:";
+            QString t="Your system server list was updated at " +
+                ServerList::instance()->syncDate().toString("yyyy-MM-dd HH:mm");
+
+            if (ServerList::instance()->systemFiles().size() == 1) {
+                t +=" from the following file: <b>" +
+                    QString::fromStdString(ServerList::instance()->systemFiles().front()) + "</b> .";
+            } else {
+                t += " from the following list of files:";
+                t += "<ul>";
+                for (auto p: ServerList::instance()->systemFiles()) {
+                    t += "<li>" + QString::fromStdString(p) + "</li>";
+                }
+                t += "</ul>";
+            }
+            t += "This is what changed:";
 
             title_->showInfo(t);
 
@@ -88,8 +97,7 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
         }
         else
         {
-            QString t="Your copy of the system server list was updated <b>";
-            t+="<font color=\'" + col.name() + "\'> at </font></b>" +
+            QString t="Your copy of the system server list was updated at " +
                 ServerList::instance()->syncDate().toString("yyyy-MM-dd HH:mm") +
                 " but <u>no changes</u> were found.";
             title_->showInfo(t);

@@ -216,9 +216,13 @@
                         "label": "Play sound",                          
                         "default": "false"
                     }    
-                }                 
-            	
-            }          
-
+                }                            	
+            } ,
+            "systemList": {
+                "paths": {
+                    "label": "Files",
+                    "default": ""
+                }
+            }
      }
 }

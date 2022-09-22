@@ -16,6 +16,8 @@
 #include <QDateTime>
 
 #include "GenFileProvider.hpp"
+#include "VProperty.hpp"
+#include "PropertyMapper.hpp"
 
 class ServerItem;
 class ServerList;
@@ -53,7 +55,7 @@ protected:
 class ServerListSyncChangeItem
 {
 public:
-    enum ChangeType {AddedChange,RemovedChange, MatchChange, SetSysChange,UnsetSysChange};
+    enum ChangeType {AddedChange,RemovedChange,MatchChange,SetSysChange,UnsetSysChange};
 
     ServerListSyncChangeItem(const ServerListTmpItem& sys,const ServerListTmpItem& local,ChangeType type) :
        sys_(sys), local_(local), type_(type) {}
@@ -67,7 +69,7 @@ public:
     ChangeType type_;
 };
 
-class ServerList : public GenFileReceiver
+class ServerList : public GenFileReceiver, public VPropertyObserver
 {
 public:
     int count() const {return static_cast<int>(items_.size());}
@@ -93,18 +95,21 @@ public:
     const std::vector<ServerListSyncChangeItem*>&  syncChange() const {return syncChange_;}
     bool hasSyncChange() const {return !syncChange_.empty();}
     QDateTime syncDate() const {return syncDate_;}
+    const std::vector<std::string>& systemFiles() const {return systemFiles_;}
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
 
-    void fileFetchFinished(VReply*);
-    void fileFetchFailed(VReply*);
+    void fileFetchFinished(VReply*) override;
+    void fileFetchFailed(VReply*) override;
+
+    void notifyChange(VProperty*) override;
 
 	static ServerList* instance();
 
 protected:
     ServerList() = default;
-    ~ServerList() = default;
+    ~ServerList();
 
 	static ServerList* instance_;
 
@@ -114,6 +119,8 @@ protected:
     bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
                         bool checkDuplicate,std::string& errStr);
 
+    bool buildSystemFileList();
+    void syncSystemFilesInternal();
     void syncSystemFiles(const std::vector<std::string>& paths);
     void readSystemFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec);
 
@@ -128,6 +135,7 @@ protected:
     std::vector<ServerListSyncChangeItem*> syncChange_;
     QDateTime syncDate_;
     GenFileReceiver* fileProvider_{nullptr};
+    PropertyMapper* prop_{nullptr};
 };
 
 

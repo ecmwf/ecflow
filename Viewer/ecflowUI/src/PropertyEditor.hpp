@@ -56,6 +56,7 @@ private:
     void addTab(VProperty*,QTabWidget*);
 	void addNote(VProperty* vProp,QVBoxLayout*,QWidget*);
 	void addNote(VProperty* vProp,QGridLayout* layout,QWidget*);
+    QString buildNoteText(VProperty* vProp) const;
 
     VProperty* group_{nullptr};
     QGridLayout* currentGrid_{nullptr};
