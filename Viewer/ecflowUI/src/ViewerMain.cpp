@@ -147,13 +147,6 @@ int main(int argc, char **argv)
     //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
 
-    //Import server settings from the previous viewer
-    if(DirectoryHandler::isFirstStartUp())
-    {
-    	VConfig::instance()->importSettings();
-    	VServerSettings::importRcFiles();
-    }
-
     //Update objects with saved user settings (these are now stored in VConfig!!)
     VSettingsLoader::process();
 
