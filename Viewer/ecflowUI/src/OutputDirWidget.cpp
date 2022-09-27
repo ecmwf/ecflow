@@ -10,6 +10,7 @@
 
 #include "OutputDirWidget.hpp"
 
+#include <QObject>
 #include <QDateTime>
 #include <QItemSelectionModel>
 #include <QTimer>
@@ -29,7 +30,7 @@
 
 int OutputDirWidget::updateDirTimeout_=1000*60;
 
-class DirWidgetState
+class DirWidgetState : public QObject
 {
 public:
     DirWidgetState(OutputDirWidget* owner,  DirWidgetState* prev);
@@ -102,6 +103,7 @@ public:
 //-------------------------------
 
 DirWidgetState::DirWidgetState(OutputDirWidget* owner,  DirWidgetState* prev) :
+    QObject(owner),
     owner_(owner)
 {
     if (prev)
@@ -295,7 +297,7 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply)
 // DirWidgetEmptyState
 //===========================================================
 
-DirWidgetEmptyState::DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState* prev) :
+DirWidgetEmptyState:: DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState* prev) :
     DirWidgetState(owner, prev)
 {
     owner_->stopTimer();
@@ -327,6 +329,7 @@ DirWidgetDisabledState::DirWidgetDisabledState(OutputDirWidget* owner, DirWidget
 void DirWidgetDisabledState::handleEnable()
 {
     owner_->transitionTo(new DirWidgetEmptyState(owner_, this));
+    // this works because in transitionTo the current object is deleted with deleteLater
     owner_->reload();
 }
 
@@ -595,7 +598,7 @@ void OutputDirWidget::transitionTo(DirWidgetState* state)
     UiLog().dbg() << UI_FN_INFO << "state=" << typeid(*state).name() << " timer=" << updateTimer_->isActive();
 #endif
     if (state_ != nullptr) {
-        delete state_;
+        state_->deleteLater();
     }
     state_ = state;
 }
