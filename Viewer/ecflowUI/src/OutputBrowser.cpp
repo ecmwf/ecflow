@@ -13,6 +13,7 @@
 
 #include <QtGlobal>
 #include <QByteArray>
+#include <QObject>
 #include <QProcess>
 #include <QVBoxLayout>
 
@@ -47,10 +48,10 @@ int OutputBrowser::minConfirmSearchSize_=20*1024*1024;
 //
 //========================================
 
-class OutputBrowserState
+class OutputBrowserState : public QObject
 {
 public:
-    OutputBrowserState(OutputBrowser* browser) : browser_(browser) {}
+    OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
     virtual ~OutputBrowserState() = default;
 
     virtual void handleClear();
@@ -213,10 +214,6 @@ OutputBrowser::~OutputBrowser()
     if(jobHighlighter_ && !jobHighlighter_->parent())
     {
         delete jobHighlighter_;
-    }
-
-    if (state_) {
-        delete state_;
     }
 }
 
@@ -901,7 +898,7 @@ void OutputBrowser::transitionTo(OutputBrowserState* state)
     std::cout << " MvQFeatureSelectorItem::transitionTo " << typeid(*state).name() << "\n";
 #endif
     if (state_ != nullptr) {
-        delete state_;
+        state_->deleteLater();
     }
     state_ = state;
 }
