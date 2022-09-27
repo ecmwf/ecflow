@@ -88,7 +88,7 @@ public:
  	void clear();
 
     //From ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+    void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
  	void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
  	void notifyEndServerClear(ServerHandler* server) override;

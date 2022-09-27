@@ -370,7 +370,7 @@ void JobStatusItemWidget::infoReady(VReply* reply)
     setCurrentFileName(reply->fileName());
 }
 
-void JobStatusItemWidget::infoProgress(VReply* reply)
+void JobStatusItemWidget::infoProgress(VReply*)
 {
 }
 
@@ -430,7 +430,7 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
     }
 }
 
-void JobStatusItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
+void JobStatusItemWidget::nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>& aspect)
 {
     //Changes in the nodes
     for(auto it : aspect)

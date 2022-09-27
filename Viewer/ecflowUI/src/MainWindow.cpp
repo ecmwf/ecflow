@@ -65,7 +65,7 @@ int MainWindow::maxWindowNum_=25;
 LogViewerCom* MainWindow::logCom_=NULL;
 #endif
 
-MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
+MainWindow::MainWindow(QStringList /*idLst*/,QWidget *parent) :
     QMainWindow(parent),
     serverSyncNotifyTb_(nullptr)
 {
@@ -826,7 +826,7 @@ void MainWindow::reload()
 	}
 }
 
-void MainWindow::saveSession(SessionItem* s)
+void MainWindow::saveSession(SessionItem*)
 {
 
 }

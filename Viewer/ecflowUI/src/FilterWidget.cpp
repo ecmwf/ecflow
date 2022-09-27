@@ -497,7 +497,7 @@ void ServerFilterMenu::notifyServerListChanged()
 	reload();
 }
 
-void ServerFilterMenu::notifyServerListFavouriteChanged(ServerItem* item)
+void ServerFilterMenu::notifyServerListFavouriteChanged(ServerItem*)
 {
 	reload();
 }

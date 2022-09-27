@@ -109,7 +109,7 @@ int TimelineInfoDailyModel::rowCount( const QModelIndex& parent) const
     return 0;
 }
 
-Qt::ItemFlags TimelineInfoDailyModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags TimelineInfoDailyModel::flags ( const QModelIndex & /*index*/) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -179,7 +179,7 @@ QModelIndex TimelineInfoDailyModel::index( int row, int column, const QModelInde
 
 }
 
-QModelIndex TimelineInfoDailyModel::parent(const QModelIndex &child) const
+QModelIndex TimelineInfoDailyModel::parent(const QModelIndex &/*child*/) const
 {
     return {};
 }
@@ -221,7 +221,7 @@ TimelineInfoDailyDelegate::TimelineInfoDailyDelegate(TimelineInfoDailyModel *mod
 TimelineInfoDailyDelegate::~TimelineInfoDailyDelegate()
 = default;
 
-void TimelineInfoDailyDelegate::notifyChange(VProperty* p)
+void TimelineInfoDailyDelegate::notifyChange(VProperty*)
 {
     updateSettings();
 }

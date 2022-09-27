@@ -408,7 +408,7 @@ MenuItem* MenuHandler::findItemById(int id)
     return nullptr;
 }
 
-MenuItem* MenuHandler::newItem(const std::string &name)
+MenuItem* MenuHandler::newItem(const std::string &/*name*/)
 {
 	return nullptr;
 }

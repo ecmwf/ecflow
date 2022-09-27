@@ -510,7 +510,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 }
 
 
-void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type>& types)
+void ServerComThread::update(const Defs* /*dc*/, const std::vector<ecf::Aspect::Type>& types)
 {
     std::vector<ecf::Aspect::Type> typesCopy=types;
 

@@ -130,7 +130,7 @@ int TimelineInfoModel::rowCount( const QModelIndex& parent) const
     return 0;
 }
 
-Qt::ItemFlags TimelineInfoModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags TimelineInfoModel::flags ( const QModelIndex & /*index*/) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -259,7 +259,7 @@ QModelIndex TimelineInfoModel::index( int row, int column, const QModelIndex & p
 
 }
 
-QModelIndex TimelineInfoModel::parent(const QModelIndex &child) const
+QModelIndex TimelineInfoModel::parent(const QModelIndex &/*child*/) const
 {
     return {};
 }
@@ -273,7 +273,7 @@ QModelIndex TimelineInfoModel::parent(const QModelIndex &child) const
 
 bool TimelineInfoWidget::columnsAdjusted_=false;
 
-TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
+TimelineInfoWidget::TimelineInfoWidget(QWidget */*parent*/) :
     ui_(new Ui::TimelineInfoWidget),
     numOfRows_(0),
     tlEndTime_(0)
@@ -428,7 +428,7 @@ void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
     }
 }
 
-QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats)
+QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int /*num*/,int /*mean*/,TimelineItemStats stats)
 {
     int w=200;
     int h=36;

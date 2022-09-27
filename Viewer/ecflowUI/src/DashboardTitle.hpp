@@ -46,13 +46,13 @@ public:
 
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
 	void notifyServerDelete(ServerHandler* server) override;
-    void notifyBeginServerClear(ServerHandler* server) override {}
+    void notifyBeginServerClear(ServerHandler*) override {}
 	void notifyEndServerClear(ServerHandler* server) override;
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
 	void notifyEndServerScan(ServerHandler* server) override;
 	void notifyServerConnectState(ServerHandler* server) override;
 	void notifyServerActivityChanged(ServerHandler* server) override;
-    void notifyServerSuiteFilterChanged(ServerHandler* server) override {}
+    void notifyServerSuiteFilterChanged(ServerHandler*) override {}
     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
 Q_SIGNALS:

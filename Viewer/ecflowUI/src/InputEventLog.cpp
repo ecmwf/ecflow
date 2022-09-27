@@ -197,7 +197,7 @@ void InputEventLog::logMouseRelease(QObject* obj,QMouseEvent *event)
     }
 }
 
-void InputEventLog::logClose(QObject* obj,QCloseEvent *event)
+void InputEventLog::logClose(QObject* obj,QCloseEvent *)
 {
     QString cn(obj->metaObject()->className());
     if(cn != "QWidgetWindow" && cn != "QTipLabel")
@@ -209,7 +209,7 @@ void InputEventLog::logClose(QObject* obj,QCloseEvent *event)
     }
 }
 
-void InputEventLog::logContextMenu(QObject* obj,QContextMenuEvent *event)
+void InputEventLog::logContextMenu(QObject* obj,QContextMenuEvent*)
 {
     QString cn(obj->metaObject()->className());
     if(cn != "QWidgetWindow")

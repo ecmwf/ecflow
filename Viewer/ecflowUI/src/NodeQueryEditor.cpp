@@ -327,7 +327,7 @@ bool NodeQueryEditor::isQueryPanelVisible() const
     return queryTe_->isVisible();
 }
 
-void NodeQueryEditor::slotAdvMode(bool b)
+void NodeQueryEditor::slotAdvMode(bool /*b*/)
 {
 #if 0
     //	filterBox_->setVisible(!b);
@@ -365,7 +365,7 @@ void NodeQueryEditor::slotServerCbChanged()
 	}
 }
 
-void NodeQueryEditor::slotRootNodeEdited(QString s)
+void NodeQueryEditor::slotRootNodeEdited(QString)
 {
 	if(!initIsOn_)
 	{

@@ -183,7 +183,7 @@ void FileFetchTransferTask::transferFinished()
     }
 }
 
-void FileFetchTransferTask::transferProgress(QString msg,int value)
+void FileFetchTransferTask::transferProgress(QString /*msg*/,int /*value*/)
 {
     //owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
 }

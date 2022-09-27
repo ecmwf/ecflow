@@ -57,7 +57,7 @@ struct QueryAttrDelegateBox : public AttrDelegateBox
       }
 };
 
-NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget *parent)
+NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget */*parent*/)
 {
     nodeBox_=new QueryNodeDelegateBox;
     attrBox_=new QueryAttrDelegateBox;

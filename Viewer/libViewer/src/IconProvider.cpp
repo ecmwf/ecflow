@@ -78,7 +78,7 @@ UnknownIconItem::UnknownIconItem(QString path) : IconItem(path)
 
 }
 
-QPixmap UnknownIconItem::unknown(int size)
+QPixmap UnknownIconItem::unknown(int /*size*/)
 {
 	return QPixmap();
 }

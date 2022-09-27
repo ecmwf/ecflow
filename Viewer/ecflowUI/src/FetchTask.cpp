@@ -205,7 +205,7 @@ void FetchQueue::finish(AbstractFetchTask* lastTask)
     }
 }
 
-void FetchQueue::taskSucceeded(AbstractFetchTask* t)
+void FetchQueue::taskSucceeded(AbstractFetchTask*)
 {
     if (status_ == RunningState) {
         if (policy_ == RunUntilFirstSucceeded) {

@@ -48,7 +48,7 @@
 //
 //=======================================================
 
-TimelineWidget::TimelineWidget(QWidget *parent) :
+TimelineWidget::TimelineWidget(QWidget */*parent*/) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
     logMode_(LatestMode),

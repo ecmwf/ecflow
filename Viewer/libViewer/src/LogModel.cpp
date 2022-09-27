@@ -186,7 +186,7 @@ int LogModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
-Qt::ItemFlags LogModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags LogModel::flags ( const QModelIndex & /*index*/) const
 {
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -368,7 +368,7 @@ QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) c
 
 }
 
-QModelIndex LogModel::parent(const QModelIndex &child) const
+QModelIndex LogModel::parent(const QModelIndex &/*child*/) const
 {
 	return {};
 }

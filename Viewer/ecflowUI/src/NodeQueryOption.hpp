@@ -39,7 +39,7 @@ public:
     virtual void swap(const NodeQueryOption*)=0;
     virtual QString query() const {return QString();}
     virtual QString sqlQuery() const {return query();}
-    virtual QString query(QString op) const {return QString();}
+    virtual QString query(QString /*op*/) const {return QString();}
     virtual void load(VSettings*)=0;
     virtual void save(VSettings*)=0;
 

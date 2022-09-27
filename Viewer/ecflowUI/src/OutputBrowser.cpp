@@ -463,7 +463,7 @@ bool OutputBrowser::addDeltaContentsFromDisk(QString deltaFileName, QString file
     if(isHtmlFile(fileName)) {
        return false;
     }
-    else if(!isJobFile(fileName) || fileSize <= minPagerTextSize_) {
+    else if(!isJobFile(fileName) || fileSize <= static_cast<size_t>(minPagerTextSize_)) {
         changeIndex(BasicIndex,fileSize);
         adjustHighlighter(fileName);
 #ifdef UI_OUTPUTBROSWER_DEBUG_
@@ -490,7 +490,7 @@ bool OutputBrowser::addDeltaContentsFromText(QString deltaTxt,QString fileName, 
     // new size. It is guaranteed_ that file_ == contentsFile_
     if(isHtmlFile(fileName)) {
         return false;
-    } if (isJobFile(fileName) || fileSize <= minPagerTextSize_) {
+    } if (isJobFile(fileName) || fileSize <= static_cast<size_t>(minPagerTextSize_)) {
 #ifdef UI_OUTPUTBROSWER_DEBUG_
         UiLog().dbg() << UI_FN_INFO << " text_size=" << deltaTxt.size();
 #endif

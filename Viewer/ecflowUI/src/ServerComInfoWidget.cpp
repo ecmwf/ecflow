@@ -177,7 +177,7 @@ bool ServerRefreshInfoWidget::isActionEnabled() const
     return refreshAction_->isEnabled();
 }
 
-void ServerRefreshInfoWidget::notifyChange(VProperty* p)
+void ServerRefreshInfoWidget::notifyChange(VProperty*)
 {
     updateSettings();
 }
@@ -635,7 +635,7 @@ bool ServerRefreshInfoWidget::isInText(const QPoint& pos) const
     return (pos.x() > buttonRect_.right());
 }
 
-void ServerRefreshInfoWidget::resizeEvent(QResizeEvent* event)
+void ServerRefreshInfoWidget::resizeEvent(QResizeEvent*)
 {
     buttonRect_=QRect(1,1,height()-2,height()-2);
     buttonRadius2_=pow(buttonRect_.width()/2,2);

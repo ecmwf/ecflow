@@ -294,7 +294,7 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len)
         for (size_t i=startPos; i < len; i++) {
             buf[i-startPos]=buf[i];
         }
-        Q_ASSERT(startPos <= len);
+        Q_ASSERT(static_cast<unsigned int>(startPos) <= len);
         len -= (startPos);
     }
     return true;

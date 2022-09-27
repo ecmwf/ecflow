@@ -46,8 +46,8 @@ public:
 
     void notifyChange(VProperty* p) override;
 
-    void readSettings(VSettings* vs) override {}
-    void writeSettings(VSettings* vs) override {}
+    void readSettings(VSettings*) override {}
+    void writeSettings(VSettings*) override {}
 
 public Q_SLOTS:
     void slotContextMenu(const QPoint &position);

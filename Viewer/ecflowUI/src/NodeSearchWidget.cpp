@@ -165,7 +165,7 @@ void NodeSearchWidget::slotShowQueryPanel(bool b)
     editor_->showQueryPanel(b);
 }
 
-void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
+void NodeSearchWidget::slotQueryEnabledChanged(bool /*queryEnabled*/)
 {
 	//if(!engine_->isRunning())
 	//{

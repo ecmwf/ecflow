@@ -399,7 +399,7 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
     return {};
 }
 
-void TableNodeModel::selectionChanged(QModelIndexList lst)
+void TableNodeModel::selectionChanged(QModelIndexList /*lst*/)
 {
 #if 0
     Q_FOREACH(QModelIndex idx,lst)
@@ -498,7 +498,7 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
 	}
 }
 
-void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
+void TableNodeModel::slotEndServerScan(VModelServer* /*server*/,int num)
 {
 	assert(active_ == true);
 
@@ -544,7 +544,7 @@ void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
 	}
 }
 
-void TableNodeModel::slotEndServerClear(VModelServer* server,int num)
+void TableNodeModel::slotEndServerClear(VModelServer* /*server*/,int num)
 {
 	assert(active_ == true);
 
@@ -578,7 +578,7 @@ void TableNodeModel::slotAddColumnsBegin(int idxStart,int idxEnd)
     beginInsertColumns(QModelIndex(),idxStart,idxEnd);
 }
 
-void TableNodeModel::slotAddColumnsEnd(int idxStart,int idxEnd)
+void TableNodeModel::slotAddColumnsEnd(int /*idxStart*/,int /*idxEnd*/)
 {
     endInsertColumns();
 }
@@ -597,7 +597,7 @@ void TableNodeModel::slotRemoveColumnsBegin(int idxStart,int idxEnd)
     beginRemoveColumns(QModelIndex(),idxStart,idxEnd);
 }
 
-void TableNodeModel::slotRemoveColumnsEnd(int idxStart,int idxEnd)
+void TableNodeModel::slotRemoveColumnsEnd(int /*idxStart*/,int /*idxEnd*/)
 {
     endRemoveColumns();
 }

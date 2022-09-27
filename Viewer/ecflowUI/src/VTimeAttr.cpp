@@ -69,14 +69,14 @@ void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::CronAttr& d
 //
 //=====================================================
 
-VTimeAttr::VTimeAttr(VNode *parent,const ecf::TimeAttr& t, int index) :
+VTimeAttr::VTimeAttr(VNode *parent,const ecf::TimeAttr& /*t*/, int index) :
     VAttribute(parent,index),
     dataType_(TimeData)
 {
     //name_=t.name();
 }
 
-VTimeAttr::VTimeAttr(VNode *parent,const ecf::TodayAttr& t, int index) :
+VTimeAttr::VTimeAttr(VNode *parent,const ecf::TodayAttr& /*t*/, int index) :
     VAttribute(parent,index),
     dataType_(TodayData)
 {

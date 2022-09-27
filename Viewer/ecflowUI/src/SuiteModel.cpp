@@ -166,7 +166,7 @@ int SuiteModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
-Qt::ItemFlags SuiteModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags SuiteModel::flags ( const QModelIndex & /*index*/) const
 {
 	Qt::ItemFlags defaultFlags;
 
@@ -311,7 +311,7 @@ QModelIndex SuiteModel::index( int row, int column, const QModelIndex & parent )
 
 }
 
-QModelIndex SuiteModel::parent(const QModelIndex &child) const
+QModelIndex SuiteModel::parent(const QModelIndex &/*child*/) const
 {
 	return {};
 }

@@ -31,7 +31,7 @@ public:
     void removeTarget(VNode*);
     QList<VNode*> targets() const {return targets_;}
 
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+    void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
     void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
 

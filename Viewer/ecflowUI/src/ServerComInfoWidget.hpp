@@ -45,7 +45,7 @@ public:
 
     void notifyChange(VProperty* p) override;
 
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+    void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
     void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler*) override;
     void notifyEndServerScan(ServerHandler*) override;

@@ -388,7 +388,7 @@ void AbstractNodeView::rowsInserted(const QModelIndex& parent,int start,int end)
   Informs the view that the rows from the start row to the  end row
   inclusive are about to removed from the given parent model item.
 */
-void AbstractNodeView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
+void AbstractNodeView::rowsAboutToBeRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
 {
     //TODO: the selection has to be adjusted!!!
     //QAbstractItemView::rowsAboutToBeRemoved(parent, start, end);
@@ -401,7 +401,7 @@ void AbstractNodeView::rowsAboutToBeRemoved(const QModelIndex &parent, int start
     Informs the view that the rows from the start row to the  end row
     inclusive have been removed from the given  parent model item.
 */
-void AbstractNodeView::rowsRemoved(const QModelIndex &parent, int start, int end)
+void AbstractNodeView::rowsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
 {
     doItemsLayout(true);
 }

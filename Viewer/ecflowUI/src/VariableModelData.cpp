@@ -689,7 +689,7 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 }
 
 //It is called when a node changed.
-bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& /*aspect*/)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
@@ -736,7 +736,7 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 }
 
 //It is called when the server defs was changed
-bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& /*aspect*/)
 {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG

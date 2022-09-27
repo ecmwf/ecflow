@@ -148,7 +148,7 @@ void  AbstractNodeModel::slotFilterDeleteEnd()
 //
 //----------------------------------------------
 
-QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
+QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int /*column*/) const
 {
 	if(info)
 	{

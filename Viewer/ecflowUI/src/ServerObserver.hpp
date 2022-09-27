@@ -24,15 +24,15 @@ public:
     virtual ~ServerObserver() = default;
 	virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)=0;
 	virtual void notifyServerDelete(ServerHandler* server)=0;
-    virtual void notifyBeginServerClear(ServerHandler* server) {}
-    virtual void notifyEndServerClear(ServerHandler* server) {}
-    virtual void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
-    virtual void notifyEndServerScan(ServerHandler* server) {}
-    virtual void notifyServerConnectState(ServerHandler* server) {}
-    virtual void notifyServerActivityChanged(ServerHandler* server) {}
-    virtual void notifyServerSuiteFilterChanged(ServerHandler* server) {}
-    virtual void notifyEndServerSync(ServerHandler* server) {}
-    virtual void notifyServerRenamed(ServerHandler* server, const std::string& oldName) {}
+    virtual void notifyBeginServerClear(ServerHandler*) {}
+    virtual void notifyEndServerClear(ServerHandler*) {}
+    virtual void notifyBeginServerScan(ServerHandler*,const VServerChange&) {}
+    virtual void notifyEndServerScan(ServerHandler*) {}
+    virtual void notifyServerConnectState(ServerHandler*) {}
+    virtual void notifyServerActivityChanged(ServerHandler*) {}
+    virtual void notifyServerSuiteFilterChanged(ServerHandler*) {}
+    virtual void notifyEndServerSync(ServerHandler*) {}
+    virtual void notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/) {}
 };
 
 

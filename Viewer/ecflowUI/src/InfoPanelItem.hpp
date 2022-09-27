@@ -58,7 +58,7 @@ public:
 
     bool isSuspended() const {return suspended_;}
     bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}
-    virtual void notifyInfoChanged(const std::string& path) {}
+    virtual void notifyInfoChanged(const std::string& /*path*/) {}
     virtual void rerender() {}
 
 	//From VTaskObserver
@@ -68,8 +68,8 @@ public:
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
 
-    virtual void writeSettings(VComboSettings* vs) {}
-    virtual void readSettings(VComboSettings* vs) {}
+    virtual void writeSettings(VComboSettings*) {}
+    virtual void readSettings(VComboSettings*) {}
 
 protected:
 	void adjust(VInfo_ptr);

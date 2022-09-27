@@ -87,9 +87,9 @@ Q_SIGNALS:
   void skipSortingEnd();
 
 protected:
-  bool isServer(const QModelIndex & index) const {return false;}
-  ServerHandler* indexToRealServer(const QModelIndex & index) const {return nullptr;}
-  VModelServer* indexToServer(const QModelIndex & index) const {return nullptr;}
+  bool isServer(const QModelIndex &) const {return false;}
+  ServerHandler* indexToRealServer(const QModelIndex &) const {return nullptr;}
+  VModelServer* indexToServer(const QModelIndex &) const {return nullptr;}
   QModelIndex serverToIndex(ServerHandler*) const override {return {};}
   
   QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;

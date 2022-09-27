@@ -310,11 +310,11 @@ void VNodeList::notifyBeginServerClear(ServerHandler* server)
 	serverClear(server);
 }
 
-void VNodeList::notifyEndServerClear(ServerHandler* server)
+void VNodeList::notifyEndServerClear(ServerHandler*)
 {
 }
 
-void VNodeList::notifyBeginServerScan(ServerHandler* server,const VServerChange&)
+void VNodeList::notifyBeginServerScan(ServerHandler*,const VServerChange&)
 {
 	Q_EMIT beginReset();
 }

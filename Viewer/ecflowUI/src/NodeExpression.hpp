@@ -486,7 +486,7 @@ public:
     ~WhatToSearchInOperand() override;
 
     const std::string& name() const {return what_;}
-    bool execute(VItem* node) override  {return false;} // not called
+    bool execute(VItem* /*node*/) override  {return false;} // not called
     std::string print() override {return what_;}
     const std::string& what() const {return what_;}
 
@@ -506,7 +506,7 @@ public:
     ~WhatToSearchForOperand() override;
 
     std::string name() {return what_;}
-    bool execute(VItem* node) override {return false;} // not called
+    bool execute(VItem* /*node*/) override {return false;} // not called
     std::string print() override {return what_;}
     std::string what() {return what_;}
 

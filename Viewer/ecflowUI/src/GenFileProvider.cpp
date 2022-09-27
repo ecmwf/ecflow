@@ -99,7 +99,7 @@ void GenFileProvider::fetchQueueSucceeded()
     reply_->reset();
 }
 
-void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode* n)
+void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*)
 {
     if (fetchQueue_->policy() == FetchQueue::RunAll && !reply_->tmpFiles().empty()) {
         fetchQueueSucceeded();

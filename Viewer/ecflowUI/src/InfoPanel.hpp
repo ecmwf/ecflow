@@ -85,8 +85,8 @@ public:
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
 	void notifyServerDelete(ServerHandler* server) override;
 	void notifyBeginServerClear(ServerHandler* server) override;
-    void notifyEndServerClear(ServerHandler* server) override {}
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+    void notifyEndServerClear(ServerHandler*) override {}
+    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
 	void notifyEndServerScan(ServerHandler* server) override;
 	void notifyServerConnectState(ServerHandler* server) override;
 	void notifyServerSuiteFilterChanged(ServerHandler* server) override;

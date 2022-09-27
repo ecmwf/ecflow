@@ -164,7 +164,7 @@ QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & p
 
 }
 
-QModelIndex ChangeNotifyModel::parent(const QModelIndex &child) const
+QModelIndex ChangeNotifyModel::parent(const QModelIndex &/*child*/) const
 {
 	return {};
 }
@@ -210,7 +210,7 @@ void ChangeNotifyModel::slotBeginRemoveRow(int row)
 	beginRemoveRows(QModelIndex(),row,row);
 }
 
-void ChangeNotifyModel::slotEndRemoveRow(int row)
+void ChangeNotifyModel::slotEndRemoveRow(int /*row*/)
 {
 	endRemoveRows();
 }

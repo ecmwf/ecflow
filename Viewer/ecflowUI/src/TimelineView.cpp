@@ -77,7 +77,7 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
 TimelineDelegate::~TimelineDelegate()
 = default;
 
-void TimelineDelegate::notifyChange(VProperty* p)
+void TimelineDelegate::notifyChange(VProperty*)
 {
     updateSettings();
 }
@@ -727,7 +727,7 @@ TimelineView::~TimelineView()
 }
 
 //Enable sorting without actually performing it!!!
-void TimelineView::setSortingEnabledNoExec(bool b)
+void TimelineView::setSortingEnabledNoExec(bool /*b*/)
 {
 #if 0
     if(b)
@@ -788,7 +788,7 @@ VInfo_ptr TimelineView::currentSelection()
     return VInfo_ptr();
 }
 
-void TimelineView::setCurrentSelection(VInfo_ptr info)
+void TimelineView::setCurrentSelection(VInfo_ptr /*info*/)
 {
 #if 0
     //While the current is being selected we do not allow
@@ -824,7 +824,7 @@ void TimelineView::slotContextMenu(const QPoint &position)
 }
 
 
-void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
+void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList /*indexLst*/,QPoint globalPos,QPoint /*widgetPos*/,QWidget */*widget*/)
 {
     if(!indexClicked.isValid())
         return;
@@ -942,7 +942,7 @@ void TimelineView::slotHzScrollbar(int,int)
         sb->setValue(sb->maximum());
 }
 
-void TimelineView::slotViewCommand(VInfo_ptr info,QString cmd)
+void TimelineView::slotViewCommand(VInfo_ptr /*info*/,QString /*cmd*/)
 {
 }
 
@@ -1160,7 +1160,7 @@ int TimelineView::computeMaxDuration(QString state)
 // Header
 //=========================================
 
-void TimelineView::slotHeaderContextMenu(const QPoint &position)
+void TimelineView::slotHeaderContextMenu(const QPoint &/*position*/)
 {
 }
 

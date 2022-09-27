@@ -346,9 +346,8 @@ void NodeQueryComboOption::save(VSettings* vs)
     vs->put(name_.toStdString(),value().toStdString());
 }
 
-void NodeQueryComboOption::load(VSettings* vs)
+void NodeQueryComboOption::load(VSettings*)
 {
-
 }
 
 //===============================================
