@@ -83,7 +83,7 @@ VTimeAttr::VTimeAttr(VNode *parent,const ecf::TodayAttr& /*t*/, int index) :
     //name_=t.name();
 }
 
-VTimeAttr::VTimeAttr(VNode *parent,const ecf::CronAttr& t, int index) :
+VTimeAttr::VTimeAttr(VNode *parent,const ecf::CronAttr& /*t*/, int index) :
     VAttribute(parent,index),
     dataType_(CronData)
 {
