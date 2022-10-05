@@ -537,13 +537,10 @@ bool ServerList::checkItemToAdd(const std::string& name,const std::string& host,
 void ServerList::init()
 {
     localFile_ = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "servers.txt");
+    load();
 
-    //system files are loaded in a delayed mode
-    if(load() == false)
-	{		
-        if(readRcFile())
-            save();
-	}
+    // Note: system files are loaded in a delayed mode
+    // Note: we do not load the rc file any more. See ECFLOW-1825
 }
 
 bool ServerList::load()
