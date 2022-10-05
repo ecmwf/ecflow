@@ -324,6 +324,7 @@ void ServerFilterMenu::clear()
 {
 	Q_FOREACH(QAction* ac,acAllMap_)
 	{
+        allMenu_->removeAction(ac);
 		delete ac;
 	}
 	acAllMap_.clear();
@@ -335,6 +336,7 @@ void ServerFilterMenu::clearFavourite()
 {
 	Q_FOREACH(QAction* ac,acFavMap_)
 	{
+        menu_->removeAction(ac);
 		delete ac;
 	}
 	acFavMap_.clear();
@@ -450,13 +452,15 @@ void ServerFilterMenu::reload(ServerFilter *filter)
 	if(filter_)
 		filter_->addObserver(this);
 
-	reload();
+    reload(false);
 }
 
 //Reset actions state when a new filter is loaded
-void ServerFilterMenu::reload()
+void ServerFilterMenu::reload(bool favouriteBuilt)
 {
-	buildFavourite();
+    if (!favouriteBuilt) {
+        buildFavourite();
+    }
 
 	QMap<QString,QAction*>::const_iterator it=acAllMap_.constBegin();
 	while(it != acAllMap_.constEnd())
@@ -494,27 +498,27 @@ void ServerFilterMenu::reload()
 void ServerFilterMenu::notifyServerListChanged()
 {
 	init();
-	reload();
+    reload(true);
 }
 
 void ServerFilterMenu::notifyServerListFavouriteChanged(ServerItem*)
 {
-	reload();
+    reload(false);
 }
 
 void ServerFilterMenu::notifyServerFilterAdded(ServerItem*)
 {
-	reload();
+    reload(false);
 }
 
 void ServerFilterMenu::notifyServerFilterRemoved(ServerItem*)
 {
-	reload();
+    reload(false);
 }
 
 void ServerFilterMenu::notifyServerFilterChanged(ServerItem*)
 {
-	reload();
+    reload(false);
 }
 
 void ServerFilterMenu::notifyServerFilterDelete()
