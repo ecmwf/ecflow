@@ -139,6 +139,7 @@ void VReply::reset()
 	readMode_=NoReadMode;
 	readMethod_.clear();
 	tmpFile_.reset();
+    tmpFiles_.clear();
     dir_.reset();
     dirs_.clear();
     log_.clear();

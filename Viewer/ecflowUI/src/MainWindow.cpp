@@ -461,7 +461,8 @@ bool MainWindow::selectInTreeView(VInfo_ptr info)
 void MainWindow::initServerSyncTbInternal()
 {
     UiLog().dbg() << UI_FN_INFO;
-    if(ServerList::instance()->hasSyncChange())
+    auto manager = ServerList::instance()->systemFileManager();
+    if(manager && manager->hasSyncChange())
     {
         UiLog().dbg() << "  SHOW";
         Q_ASSERT(serverSyncNotifyTb_);

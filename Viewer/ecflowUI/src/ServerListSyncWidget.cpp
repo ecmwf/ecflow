@@ -24,30 +24,35 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
     title_->setShowTypeTitle(false);
     browser_->setProperty("log","1");
 
+    auto manager = ServerList::instance()->systemFileManager();
+    if (!manager) {
+        return;
+
+    }
     //Set the list
-    if(ServerList::instance()->syncDate().isValid())
+    if(manager->syncDate().isValid())
     {
-        if(ServerList::instance()->hasSyncChange())
+        if(manager->hasSyncChange())
         {
             QString t="Your system server list was updated at " +
-                ServerList::instance()->syncDate().toString("yyyy-MM-dd HH:mm");
+                manager->syncDate().toString("yyyy-MM-dd HH:mm");
 
-            if (ServerList::instance()->systemFiles().size() == 1) {
+            if (manager->files().size() == 1) {
                 t +=" from the following file: <b>" +
-                    QString::fromStdString(ServerList::instance()->systemFiles().front()) + "</b> .";
+                    QString::fromStdString(manager->files().front()) + "</b> .";
             } else {
                 t += " from the following list of files:";
                 t += "<ul>";
-                for (auto p: ServerList::instance()->systemFiles()) {
+                for (auto p: manager->files()) {
                     t += "<li>" + QString::fromStdString(p) + "</li>";
                 }
                 t += "</ul>";
             }
-            t += "This is what changed:";
+            t += " This is what changed:";
 
             title_->showInfo(t);
 
-            const std::vector<ServerListSyncChangeItem*>& items=ServerList::instance()->syncChange();
+            auto items=manager->changedItems();
             int matchCnt=0, addedCnt=0, setCnt=0, unsetCnt=0;
             for(auto item : items)
             {
@@ -98,7 +103,7 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
         else
         {
             QString t="Your copy of the system server list was updated at " +
-                ServerList::instance()->syncDate().toString("yyyy-MM-dd HH:mm") +
+                manager->syncDate().toString("yyyy-MM-dd HH:mm") +
                 " but <u>no changes</u> were found.";
             title_->showInfo(t);
             typeList_->hide();
@@ -122,7 +127,11 @@ void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item,QListWidgetItem
     if(!item)
         return;
 
-    const std::vector<ServerListSyncChangeItem*>& items=ServerList::instance()->syncChange();
+    auto manager = ServerList::instance()->systemFileManager();
+    if (!manager) {
+        return;
+    }
+    auto items=manager->changedItems();
     ServerListSyncChangeItem::ChangeType type=
             static_cast<ServerListSyncChangeItem::ChangeType>(item->data(Qt::UserRole).toInt());
 

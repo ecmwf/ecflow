@@ -412,7 +412,8 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
     //The synclog is hidden
     sysSyncLogTb->setChecked(false);
     sysSyncLogW_->hide();
-    if(!ServerList::instance()->hasSystemFile())
+    auto manager = ServerList::instance()->systemFileManager();
+    if(!manager || !manager->hasSyncChange())
     {
         sysSyncLogTb->setEnabled(false);
     }
@@ -674,7 +675,8 @@ void ServerListDialog::on_sysSyncLogTb_toggled(bool b)
         else
         {
             sList[1]=h/2;
-            if(ServerList::instance()->hasSyncChange())
+            auto manager = ServerList::instance()->systemFileManager();
+            if(manager && manager->hasSyncChange())
             {
                 if(h > 500)
                     sList[1]=250;
@@ -696,7 +698,7 @@ void ServerListDialog::showSysSyncLog()
     sysSyncLogTb->setChecked(true);
 }
 
-void ServerListDialog::slotItemSelected(const QModelIndex& current,const QModelIndex& prev)
+void ServerListDialog::slotItemSelected(const QModelIndex& /*current*/,const QModelIndex& /*prev*/)
 {
 	checkActionState();
 }
