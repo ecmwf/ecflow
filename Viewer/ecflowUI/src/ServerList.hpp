@@ -161,8 +161,7 @@ protected:
 
 	static ServerList* instance_;
 
-	bool load();
-	bool readRcFile();
+    bool load();
 //    void clearSyncChange();
     bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
                         bool checkDuplicate,std::string& errStr);

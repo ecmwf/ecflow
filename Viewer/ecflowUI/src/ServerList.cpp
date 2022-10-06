@@ -665,55 +665,6 @@ void ServerList::save()
 	out.close();    
 }
 
-bool ServerList::readRcFile()
-{
-    UiLog().dbg() << "ServerList::readRcFile -->";
-    std::string path(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), "servers"));
-
-    UiLog().dbg() << " Read servers from ecflowview rcfile: " << path;
-	std::ifstream in(path.c_str());
-
-	if(in.good())
-	{
-		std::string line;
-		while(getline(in,line))
-		{
-			std::string buf=boost::trim_left_copy(line);
-			if(buf.size() > 0 && buf.at(0) == '#')
-				continue;
-
-			std::stringstream ssdata(line);
-			std::vector<std::string> vec;
-
-			while(ssdata >> buf)
-			{
-				vec.push_back(buf);
-			}
-
-			if(vec.size() >= 3)
-			{				
-                std::string name=vec[0], host=vec[1], port=vec[2];                
-                try
-                {
-                    add(name,host,port,"",false,false,false);
-                }
-                catch(std::exception& e)
-                {
-                    std::string err=e.what();
-                    UiLog().err() << " Failed to read server (name=" << name << ",host=" << host <<
-                                     ",port=" << port << "). " << err;
-                }
-			}
-		}
-	}
-	else
-		return false;
-
-	in.close();
-
-	return true;
-}
-
 // called on startup (possibly in delayed mode)
 void ServerList::syncSystemFiles()
 {
