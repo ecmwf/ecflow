@@ -272,7 +272,7 @@ void ServerListSystemFileManager::loadFiles(const std::vector<std::string>& path
 #ifdef _UI_SERVERSYSTEMLIST_DEBUG
             UiLog().dbg() << UI_FN_INFO << "includedPaths=" << mp;
 #endif
-            // we need allow time for the manager to clean up
+            // we need to allow time for the manager to clean up
 #if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
             QTimer::singleShot(0, [mp, this]() { this->delayedFetchFiles(mp);} );
 #endif
