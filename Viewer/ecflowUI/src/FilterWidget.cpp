@@ -20,6 +20,7 @@
 #include <QVBoxLayout>
 #include <QWidgetAction>
 
+#include "UiLog.hpp"
 #include "VNState.hpp"
 #include "VAttributeType.hpp"
 #include "VConfig.hpp"
@@ -444,7 +445,10 @@ void ServerFilterMenu::syncActionState(QString name,bool checked)
 //Reset actions state when a new filter is loaded
 void ServerFilterMenu::reload(ServerFilter *filter)
 {
-	if(filter_)
+    // hide to avoid crashing. See ECFLOW-1839
+    menu_->hide();
+
+    if(filter_)
 		filter_->removeObserver(this);
 
 	filter_=filter;
@@ -458,6 +462,9 @@ void ServerFilterMenu::reload(ServerFilter *filter)
 //Reset actions state when a new filter is loaded
 void ServerFilterMenu::reload(bool favouriteBuilt)
 {
+    // hide to avoid crashing. See ECFLOW-1839
+    menu_->hide();
+
     if (!favouriteBuilt) {
         buildFavourite();
     }
