@@ -77,7 +77,6 @@ public:
 
     bool hasSyncChange() const {return !changedItems_.empty();}
     bool hasInfo() const {return !changedItems_.empty() || !unfetchedFiles_.empty();}
-//    bool hasSystemFiles() const {return hasSystemFiles_;}
     QDateTime syncDate() const {return syncDate_;}
     const std::vector<std::string>& files() const {return files_;}
     const std::vector<std::string>& fetchedFiles() const {return fetchedFiles_;}
@@ -114,7 +113,7 @@ protected:
     State state_{EmptyState};
 };
 
-class ServerList // : public GenFileReceiver, public VPropertyObserver
+class ServerList
 {
     friend class ServerListSystemFileManager;
 
@@ -137,21 +136,11 @@ public:
     void init();
 	void save();
 	void rescan();
-//    bool hasSystemFile() const;
     void syncSystemFiles();
-    //const std::vector<ServerListSyncChangeItem*>&  syncChange() const {return syncChange_;}
-//    bool hasSyncChange() const {return !syncChange_.empty();}
-//    QDateTime syncDate() const {return syncDate_;}
-//    const std::vector<std::string>& systemFiles() const {return systemFiles_;}
     ServerListSystemFileManager* systemFileManager() const {return sysFileManager_;}
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
-
-//    void fileFetchFinished(VReply*) override;
-//    void fileFetchFailed(VReply*) override;
-
-//    void notifyChange(VProperty*) override;
 
 	static ServerList* instance();
 
@@ -162,35 +151,17 @@ protected:
 	static ServerList* instance_;
 
     bool load();
-//    void clearSyncChange();
     bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
                         bool checkDuplicate,std::string& errStr);
-
-
     void loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
                          std::vector<ServerListSyncChangeItem*>& changeVec);
-
-//    bool buildSystemFileList();
-//    void syncSystemFilesInternal();
-//    void syncSystemFiles(const std::vector<std::string>& paths);
-//    void readSystemFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec);
-
 	void broadcastChanged();
 	void broadcastChanged(ServerItem*);
 
 	std::vector<ServerItem*> items_;
     std::string localFile_;
-    //std::vector<std::string> systemFiles_;
-//    bool hasSystemFiles_{false};
 	std::vector<ServerListObserver*> observers_;
-//    std::vector<ServerListSyncChangeItem*> syncChange_;
-
     ServerListSystemFileManager* sysFileManager_{nullptr};
-    //QDateTime syncDate_;
-    //GenFileReceiver* fileProvider_{nullptr};
-    //PropertyMapper* prop_{nullptr};
 };
-
-
 
 #endif

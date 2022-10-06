@@ -468,6 +468,7 @@ void MainWindow::initServerSyncTbInternal()
             serverSyncNotifyTb_->setText("System server list updated (with some errors)");
         } else {
             serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
+            serverSyncNotifyTb_->setText("System server list updated");
         }
         Q_ASSERT(serverSyncNotifyTb_);
         serverSyncNotifyTb_->show();
