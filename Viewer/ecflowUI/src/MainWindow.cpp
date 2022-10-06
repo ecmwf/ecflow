@@ -460,11 +460,15 @@ bool MainWindow::selectInTreeView(VInfo_ptr info)
 
 void MainWindow::initServerSyncTbInternal()
 {
-    UiLog().dbg() << UI_FN_INFO;
     auto manager = ServerList::instance()->systemFileManager();
-    if(manager && manager->hasSyncChange())
+    if(manager && manager->hasInfo())
     {
-        UiLog().dbg() << "  SHOW";
+        if (!manager->unfetchedFiles().empty()) {
+            serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/error.svg"));
+            serverSyncNotifyTb_->setText("System server list updated (with some errors)");
+        } else {
+            serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
+        }
         Q_ASSERT(serverSyncNotifyTb_);
         serverSyncNotifyTb_->show();
     }

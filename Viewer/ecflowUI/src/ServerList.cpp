@@ -12,6 +12,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include <QTimer>
+
 #include "ServerList.hpp"
 
 #include "Str.hpp"
@@ -67,6 +69,7 @@ void ServerListSystemFileManager::clear()
 {
     files_.clear();
     fetchedFiles_.clear();
+    unfetchedFiles_.clear();
 
     for(auto & item : changedItems_) {
         delete item;
@@ -197,9 +200,10 @@ void ServerListSystemFileManager::fileFetchFinished(VReply* r)
 #ifdef _UI_SERVERSYSTEMLIST_DEBUG
     UiLog().dbg() << UI_FN_INFO;
 #endif
+
+    std::vector<std::string> paths;
     if (!r->tmpFiles().empty()) {
         syncDate_=QDateTime::currentDateTime();
-        std::vector<std::string> paths;
         for (auto f: r->tmpFiles()) {
             if (f) {
 #ifdef _UI_SERVERSYSTEMLIST_DEBUG
@@ -211,8 +215,18 @@ void ServerListSystemFileManager::fileFetchFinished(VReply* r)
                 }
             }
         }
+    }
+
+    for (auto f: fetchManager_ ->filesToFetch()) {
+        if (std::find(fetchedFiles_.begin(), fetchedFiles_.end(), f) == fetchedFiles_.end()) {
+            unfetchedFiles_.emplace_back(f);
+        }
+    }
+
+    if (!paths.empty()) {
         loadFiles(paths);
     }
+
 }
 
 void ServerListSystemFileManager::fileFetchFailed(VReply* /*r*/)
@@ -231,6 +245,11 @@ void ServerListSystemFileManager::notifyChange(VProperty* p)
             syncInternal(newFiles);
         }
     }
+}
+
+void ServerListSystemFileManager::delayedFetchFiles(const std::vector<std::string>& paths)
+{
+    fetchManager_->fetchFiles(paths);
 }
 
 // load one set of files
@@ -253,7 +272,10 @@ void ServerListSystemFileManager::loadFiles(const std::vector<std::string>& path
 #ifdef _UI_SERVERSYSTEMLIST_DEBUG
             UiLog().dbg() << UI_FN_INFO << "includedPaths=" << mp;
 #endif
-            fetchManager_->fetchFiles(mp);
+            // we need allow time for the manager to clean up
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
+            QTimer::singleShot(0, [mp, this]() { this->delayedFetchFiles(mp);} );
+#endif
             return;
         }
     }

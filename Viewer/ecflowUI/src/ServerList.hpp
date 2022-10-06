@@ -76,9 +76,12 @@ public:
     ~ServerListSystemFileManager();
 
     bool hasSyncChange() const {return !changedItems_.empty();}
+    bool hasInfo() const {return !changedItems_.empty() || !unfetchedFiles_.empty();}
 //    bool hasSystemFiles() const {return hasSystemFiles_;}
     QDateTime syncDate() const {return syncDate_;}
     const std::vector<std::string>& files() const {return files_;}
+    const std::vector<std::string>& fetchedFiles() const {return fetchedFiles_;}
+    const std::vector<std::string>& unfetchedFiles() const {return unfetchedFiles_;}
     const std::vector<ServerListSyncChangeItem*>&  changedItems() const {return changedItems_;}
 
     void sync();
@@ -93,6 +96,7 @@ protected:
     bool fileListSameAs(const std::vector<std::string>& v1, const std::vector<std::string>& v2) const;
     void syncInternal(const std::vector<std::string>& newFiles);
     void concludeSync();
+    void delayedFetchFiles(const std::vector<std::string>& paths);
     void loadFiles(const std::vector<std::string>& paths);
     void loadFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec,
                                             std::vector<std::string>& includedPaths);
@@ -101,6 +105,7 @@ protected:
     enum State {EmptyState, FetchState, SyncedState};
     std::vector<std::string> files_;
     std::vector<std::string> fetchedFiles_;
+    std::vector<std::string> unfetchedFiles_;
     std::vector<ServerListSyncChangeItem*> changedItems_;
     std::vector<ServerListTmpItem> pendingItems_;
     QDateTime syncDate_;

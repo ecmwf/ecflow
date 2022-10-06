@@ -27,6 +27,7 @@ public:
 
     virtual void fetchFile(const std::string&);
     virtual void fetchFiles(const std::vector<std::string>&);
+    const std::vector<std::string>& filesToFetch() const {return filesToFetch_;}
     VReply* theReply() const override {return reply_;}
     void fetchQueueSucceeded() override;
     void fetchQueueFinished(const std::string& filePath, VNode*) override;
@@ -34,6 +35,7 @@ public:
 protected:
     VReply* reply_{nullptr};
     GenFileReceiver* provider_{nullptr};
+    std::vector<std::string> filesToFetch_;
 };
 
 class GenFileReceiver

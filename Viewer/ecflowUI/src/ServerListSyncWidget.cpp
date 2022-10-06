@@ -22,33 +22,44 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
     setupUi(this);
 
     title_->setShowTypeTitle(false);
+    errorLabel_->setShowTypeTitle(false);
     browser_->setProperty("log","1");
 
+    QFont f;
+    QFontMetrics fm(f);
+    typeList_->setFixedWidth(ViewerUtil::textWidth(fm,"Host/port changed (2222)"));
+
+    reload();
+
+    connect(typeList_,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            this,SLOT(slotTypeChanged(QListWidgetItem*,QListWidgetItem*)));
+}
+
+ServerListSyncWidget::~ServerListSyncWidget()
+= default;
+
+
+void ServerListSyncWidget::reload()
+{
+    title_->clear();
+    errorLabel_->clear();
+    filesTe_->clear();
+    typeList_->clear();
+    browser_->clear();
+
+    QString  t;
     auto manager = ServerList::instance()->systemFileManager();
     if (!manager) {
         return;
-
     }
+
     //Set the list
     if(manager->syncDate().isValid())
     {
         if(manager->hasSyncChange())
         {
-            QString t="Your system server list was updated at " +
-                manager->syncDate().toString("yyyy-MM-dd HH:mm");
-
-            if (manager->files().size() == 1) {
-                t +=" from the following file: <b>" +
-                    QString::fromStdString(manager->files().front()) + "</b> .";
-            } else {
-                t += " from the following list of files:";
-                t += "<ul>";
-                for (auto p: manager->files()) {
-                    t += "<li>" + QString::fromStdString(p) + "</li>";
-                }
-                t += "</ul>";
-            }
-            t += " This is what changed:";
+            t="Your copy of system server list was updated at " +
+                    manager->syncDate().toString("yyyy-MM-dd HH:mm") +  " and some <u>changes</u> were found.";
 
             title_->showInfo(t);
 
@@ -57,7 +68,7 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
             for(auto item : items)
             {
                 if(item->type() == ServerListSyncChangeItem::MatchChange)
-                   matchCnt++;
+                    matchCnt++;
                 else if(item->type() == ServerListSyncChangeItem::AddedChange)
                     addedCnt++;
                 else if(item->type() == ServerListSyncChangeItem::SetSysChange)
@@ -91,20 +102,13 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
                 typeList_->addItem(item);
             }
 
-            QFont f;
-            QFontMetrics fm(f);
-            typeList_->setFixedWidth(ViewerUtil::textWidth(fm,"Host/port changed (2222)"));
-
-            connect(typeList_,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-                this,SLOT(slotTypeChanged(QListWidgetItem*,QListWidgetItem*)));
-
             typeList_->setCurrentRow(0);
         }
         else
         {
-            QString t="Your copy of the system server list was updated at " +
-                manager->syncDate().toString("yyyy-MM-dd HH:mm") +
-                " but <u>no changes</u> were found.";
+            t="Your copy of the system server list was updated at " +
+                    manager->syncDate().toString("yyyy-MM-dd HH:mm") +
+                    " but <u>no changes</u> were found.";
             title_->showInfo(t);
             typeList_->hide();
             browser_->hide();
@@ -112,15 +116,39 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
     }
     else
     {
-        QString t="Your copy of the system server list has not been updated!";
+        t="Your copy of the system server list has not been updated!";
         title_->showInfo(t);
         typeList_->hide();
         browser_->hide();
     }
-}
 
-ServerListSyncWidget::~ServerListSyncWidget()
-= default;
+    t = "List of loaded input files:";
+    if (!manager->fetchedFiles().empty()) {
+        t += "<ul>";
+        for (auto p: manager->fetchedFiles()) {
+            t += "<li>" + QString::fromStdString(p) + "</li>";
+        }
+        t += "</ul>";
+    }
+
+    if (!manager->unfetchedFiles().empty()) {
+        t += "The following input files could not be accessed/loaded:";
+        t += "<ul>";
+        for (auto p: manager->unfetchedFiles()) {
+            t += "<li>" + QString::fromStdString(p) + "</li>";
+        }
+        t += "</ul>";
+
+        errorLabel_->showError("Failed to access/load some system server list files (see the Files tab for details)");
+
+        if (!manager->hasSyncChange()) {
+            tabWidget_->setCurrentIndex(0);
+        }
+    }
+
+    filesTe_->setHtml(t);
+
+}
 
 void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item,QListWidgetItem*)
 {

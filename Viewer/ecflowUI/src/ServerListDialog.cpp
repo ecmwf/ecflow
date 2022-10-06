@@ -413,7 +413,7 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
     sysSyncLogTb->setChecked(false);
     sysSyncLogW_->hide();
     auto manager = ServerList::instance()->systemFileManager();
-    if(!manager || !manager->hasSyncChange())
+    if(!manager || !manager->hasInfo())
     {
         sysSyncLogTb->setEnabled(false);
     }
