@@ -295,9 +295,9 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void showFullRange();
-    virtual void addRemoveSuite(int idx, bool st) {}
-    virtual void addRemoveCmd(int idx, bool st) {}
-    virtual void addRemoveUid(int idx, bool st) {}
+    virtual void addRemoveSuite(int /*idx*/, bool /*st*/) {}
+    virtual void addRemoveCmd(int /*idx*/, bool /*st*/) {}
+    virtual void addRemoveUid(int /*idx*/, bool /*st*/) {}
 
 protected Q_SLOTS:
     void slotZoom(QRectF);
@@ -529,7 +529,7 @@ public:
 protected:
     void addSuite(int) {}
     void removeSuite(int) {}
-    void buildScanTable(QString& txt,int idx) {}
+    void buildScanTable(QString& /*txt*/,int /*idx*/) {}
 
     LogStatRequestModel* statModel_;
     QSortFilterProxyModel *statSortModel_;

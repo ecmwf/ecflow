@@ -59,7 +59,7 @@
 //
 //=======================================================
 
-LogLoadWidget::LogLoadWidget(QWidget *parent) :
+LogLoadWidget::LogLoadWidget(QWidget */*parent*/) :
     ui_(new Ui::LogLoadWidget)
 {
     ui_->setupUi(this);
@@ -666,7 +666,7 @@ void LogLoadWidget::loadArchive()
             loadDone=true;
         }
 
-        catch(std::runtime_error e)
+        catch(const std::runtime_error& e)
         {
             logModel_->endLoadFromReader();
             //logLoaded_=false;
@@ -787,7 +787,7 @@ void LogLoadWidget::loadCore(QString logFile)
                            logModel_->logData());
         logModel_->endLoadFromReader();
     }
-    catch(std::runtime_error e)
+    catch(const std::runtime_error& e)
     {
         logModel_->endLoadFromReader();
 

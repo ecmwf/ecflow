@@ -304,7 +304,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     FileFetchTask.hpp
     FileWatcher.hpp
     FilterWidget.hpp
-    GenFileProvider.hpp
     GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     HtmlItemWidget.hpp
@@ -341,7 +340,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputFileClient.hpp
     OutputDirClient.hpp
     OutputItemWidget.hpp
-    OutputFileProvider.hpp
     OutputDirProvider.hpp
     OutputDirWidget.hpp
     PlainTextEdit.hpp
@@ -358,7 +356,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
     ServerListSyncWidget.hpp
-    ServerLoadItemWidget.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp

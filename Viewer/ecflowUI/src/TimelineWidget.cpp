@@ -970,34 +970,10 @@ void TimelineWidget::loadArchive()
             loadDone=true;
         }
 
-        catch(std::runtime_error e)
+        catch(const std::runtime_error& e)
         {
-            //logLoaded_=false;
             ui_->messageLabel->stopProgress();
             std::string errTxt(e.what());
-#if 0
-
-            QFileInfo fInfo(logFile);
-            if(!fInfo.exists())
-            {
-                errTxt+=" The specified log file <b>does not exist</b> on disk!";
-            }
-            else if(!fInfo.isReadable())
-            {
-                errTxt+=" The specified log file is <b>not readable</b>!";
-            }
-            else if(!fInfo.isFile())
-            {
-                errTxt+=" The specified log file is <b>not a file</b>!";
-            }
-
-            ui_->messageLabel->showError(QString::fromStdString(errTxt));
-            data_->clear();
-            setAllVisible(false);
-            updateInfoLabel();
-            ViewerUtil::restoreOverrideCursor();
-            return;
-#endif
         }
 
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
@@ -1106,7 +1082,7 @@ void TimelineWidget::loadCore(QString logFile)
     {
         data_->loadLogFile(logFile.toStdString(),maxReadSize_,suites_);
     }
-    catch(std::runtime_error e)
+    catch(const std::runtime_error& e)
     {
         logLoaded_=false;
         ui_->messageLabel->stopProgress();
