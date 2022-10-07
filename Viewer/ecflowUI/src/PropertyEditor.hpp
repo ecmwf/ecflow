@@ -34,6 +34,8 @@ public:
     void empty();
     bool applyChange();
     VProperty* property() const {return group_;}
+    int currentTopLevelTabIndex() const;
+    void setCurrentTopLevelTabIndex(int idx);
 
 Q_SIGNALS:
 	void changed();
@@ -54,6 +56,7 @@ private:
     void addTab(VProperty*,QTabWidget*);
 	void addNote(VProperty* vProp,QVBoxLayout*,QWidget*);
 	void addNote(VProperty* vProp,QGridLayout* layout,QWidget*);
+    QString buildNoteText(VProperty* vProp) const;
 
     VProperty* group_{nullptr};
     QGridLayout* currentGrid_{nullptr};
@@ -61,6 +64,7 @@ private:
     QString serverName_;
     QWidget* holder_{nullptr};
     int lineLabelLen_{-1};
+    QTabWidget* topLevelTabW_{nullptr};
 };
 
 

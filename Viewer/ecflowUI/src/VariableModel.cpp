@@ -90,7 +90,7 @@ int VariableModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
-Qt::ItemFlags VariableModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags VariableModel::flags ( const QModelIndex & /*index*/) const
 {
 	Qt::ItemFlags defaultFlags;
 
@@ -688,7 +688,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
 }    
 
 
-QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const
+QModelIndexList VariableSortModel::match(const QModelIndex& /*start*/,int /*role*/,const QVariant& value,int /*hits*/,Qt::MatchFlags /*flags*/) const
 {
 	if(matchMode_ != SearchMode)
 		return QModelIndexList();

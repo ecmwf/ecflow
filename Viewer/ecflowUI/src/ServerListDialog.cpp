@@ -17,6 +17,10 @@
 #include <QSettings>
 #include <QSortFilterProxyModel>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 0)
+#include <QRegularExpression>
+#endif
+
 #include "IconProvider.hpp"
 #include "ServerFilter.hpp"
 #include "ServerItem.hpp"
@@ -36,16 +40,24 @@ static bool firstShowSysSyncLogW=true;
 
 bool ServerDialogChecker::checkName(QString name,QString oriName)
 {
-	if(name.simplified().isEmpty())
-	{
+    if(name.simplified().isEmpty()) {
 		error(QObject::tr("<b>Name</b> cannot be empty!"));
 		return false;
-	}
-	else if(name.contains(","))
-	{
+    } else if(name.contains(",")) {
 		error(QObject::tr("<b>Name</b> cannot contain comma character!"));
-		return false;
-	}
+		return false;        
+    } else if(name.startsWith(" ") && name.endsWith(" ")) {
+        error(QObject::tr("<b>Name</b> cannot start or end with a space character!"));
+            return false;
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 0)
+        QRegularExpression re("[\\r\\n\\t\\f\\v]");
+        if (name.contains(re)) {
+            error(QObject::tr("<b>Name</b> cannot contain whitespace characters other than space!"));
+            return false;
+        }
+#endif
+    }
 
     if(oriName != name && ServerList::instance()->find(name.toStdString()) )
 	{           
@@ -65,10 +77,17 @@ bool ServerDialogChecker::checkHost(QString host)
 	}
 	else if(host.contains(","))
 	{
-		error(QObject::tr("<b>Host</b> cannot contain comma character!"));
+        error(QObject::tr("<b>Host</b> cannot contain comma characters!"));
 		return false;
-	}
-
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 0)
+        QRegularExpression re("\\s");
+        if (host.contains(re)) {
+            error(QObject::tr("<b>Host</b> cannot contain whitespace characters!"));
+            return false;
+        }
+#endif
+    }
 	return true;
 }
 
@@ -81,9 +100,17 @@ bool ServerDialogChecker::checkPort(QString port)
 	}
 	else if(port.contains(","))
 	{
-		error(QObject::tr("<b>Port</b> cannot contain comma character!"));
+        error(QObject::tr("<b>Port</b> cannot contain comma characters!"));
 		return false;
-	}
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 0)
+        QRegularExpression re("\\D");
+        if (port.contains(re)) {
+            error(QObject::tr("<b>Port</b> can only contain digits!"));
+            return false;
+        }
+#endif
+    }
 	return true;
 }
 
@@ -91,10 +118,17 @@ bool ServerDialogChecker::checkUser(QString user)
 {
     if(user.contains(","))
     {
-        error(QObject::tr("<b>Custom user</b> cannot contain comma character!"));
+        error(QObject::tr("<b>Custom user</b> cannot contain comma characters!"));
+        return false;
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 0)
+    QRegularExpression re("\\s");
+    if (user.contains(re)) {
+        error(QObject::tr("<b>Custom user</b> cannot contain whitespace characters!"));
         return false;
     }
-
+#endif
+}
     return true;
 }
 
@@ -132,6 +166,13 @@ ServerAddDialog::ServerAddDialog(QWidget *parent) :
 #else
     sslMessageLabel->setShowTypeTitle(false);
     sslMessageLabel->showWarning("Option <i><u>Use SSL </u></i> must <b>only</b> be enabled for servers using SSL communication!");
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    nameEdit->setClearButtonEnabled(true);
+    hostEdit->setClearButtonEnabled(true);
+    portEdit->setClearButtonEnabled(true);
+    userEdit->setClearButtonEnabled(true);
 #endif
 }
 
@@ -211,6 +252,13 @@ ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,QStr
 	//nameEdit->setValidator(new QRegExpValidator(""));
 	//hostEdit->setValidator(new QRegExpValidator(""));
 	portEdit->setValidator(new QIntValidator(1025,65535,this));
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    nameEdit->setClearButtonEnabled(true);
+    hostEdit->setClearButtonEnabled(true);
+    portEdit->setClearButtonEnabled(true);
+    userEdit->setClearButtonEnabled(true);
+#endif
 }
 
 void ServerEditDialog::accept()
@@ -364,7 +412,8 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
     //The synclog is hidden
     sysSyncLogTb->setChecked(false);
     sysSyncLogW_->hide();
-    if(!ServerList::instance()->hasSystemFile())
+    auto manager = ServerList::instance()->systemFileManager();
+    if(!manager || !manager->hasInfo())
     {
         sysSyncLogTb->setEnabled(false);
     }
@@ -417,13 +466,20 @@ void ServerListDialog::editItem(const QModelIndex& index)
 		//The dialog checks the name, host and port!
         if(d.exec() == QDialog::Accepted)
 		{
-            ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),
+            bool filtered = filter_->isFiltered(item);
+
+            // reset will return a new item when the host/port changes
+            item = ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),
                                           d.port().toStdString(), d.user().toStdString(), d.isSsl());
 
-            if(item->isFavourite() != d.isFavourite())
-			{
-				ServerList::instance()->setFavourite(item,d.isFavourite());               
-			}
+            if (item) {
+                if(item->isFavourite() != d.isFavourite()) {
+                    ServerList::instance()->setFavourite(item,d.isFavourite());
+                }
+                if (filtered && !filter_->isFiltered(item)) {
+                    filter_->addServer(item);
+                }
+            }
 
             //update the whole view
             sortModel_->invalidate();
@@ -619,7 +675,8 @@ void ServerListDialog::on_sysSyncLogTb_toggled(bool b)
         else
         {
             sList[1]=h/2;
-            if(ServerList::instance()->hasSyncChange())
+            auto manager = ServerList::instance()->systemFileManager();
+            if(manager && manager->hasSyncChange())
             {
                 if(h > 500)
                     sList[1]=250;
@@ -641,7 +698,7 @@ void ServerListDialog::showSysSyncLog()
     sysSyncLogTb->setChecked(true);
 }
 
-void ServerListDialog::slotItemSelected(const QModelIndex& current,const QModelIndex& prev)
+void ServerListDialog::slotItemSelected(const QModelIndex& /*current*/,const QModelIndex& /*prev*/)
 {
 	checkActionState();
 }

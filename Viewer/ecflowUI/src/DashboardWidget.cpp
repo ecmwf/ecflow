@@ -53,7 +53,7 @@ DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent) :
     maximisedAction_->setToolTip(tooltipMaxUnchk);
 }
 
-void DashboardWidget::slotDetachedToggled(bool b)
+void DashboardWidget::slotDetachedToggled(bool)
 {
     detachedChanged();
     detachedAction_->setToolTip((detached())?tooltipChk:tooltipUnchk);

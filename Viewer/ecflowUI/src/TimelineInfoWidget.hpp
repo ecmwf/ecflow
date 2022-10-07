@@ -43,7 +43,7 @@ public:
     QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
     QModelIndex parent (const QModelIndex & ) const override;
 
-    void setData(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
+    void resetData(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
                  unsigned int endDateSec);
     void clearData();
     bool hasData() const;

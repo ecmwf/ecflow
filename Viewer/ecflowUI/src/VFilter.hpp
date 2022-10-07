@@ -128,6 +128,8 @@ public:
 	const std::string& exprStr() const {return exprStr_;}
 	NodeQuery* query() const;
 	void setQuery(NodeQuery*);
+    void serverRemoved(const std::string& serverName);
+    void serverRenamed(const std::string& newName, const std::string& oldName);
 
 	void writeSettings(VSettings *vs);
 	void readSettings(VSettings *vs);
@@ -136,12 +138,12 @@ Q_SIGNALS:
 	void changed();
 
 protected:
-	ServerFilter *serverFilter_;
+    ServerFilter *serverFilter_{nullptr};
 	std::string exprStr_;
-	NodeStateFilter *nodeState_;
+    NodeStateFilter *nodeState_{nullptr};
 	std::string nodePath_;
 	std::string nodeType_;
-	NodeQuery* query_;
+    NodeQuery* query_{nullptr};
 
 	//AttributeFilter *attribute_;
 	//std::string nodeType_;

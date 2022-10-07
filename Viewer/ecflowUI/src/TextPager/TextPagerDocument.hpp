@@ -40,8 +40,8 @@
 #include "TextPagerCursor.hpp"
 #include "TextPagerSection.hpp"
 
-class Chunk;
-class TextDocumentPrivate;
+struct Chunk;
+struct TextDocumentPrivate;
 class TextPagerDocument : public QObject
 {
     Q_OBJECT
@@ -184,9 +184,9 @@ private:
     TextDocumentPrivate *d;
     friend class TextPagerEdit;
     friend class TextPagerCursor;
-    friend class TextDocumentPrivate;
+    friend struct TextDocumentPrivate;
     friend class TextPagerLayout;
-    friend class TextPagerSection;
+    friend struct TextPagerSection;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::FindMode);

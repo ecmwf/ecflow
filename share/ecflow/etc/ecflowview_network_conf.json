@@ -1,0 +1,10 @@
+{
+    "network":  {
+            "socks" : {
+                "port" : {
+                    "label" : "SOCKS port",
+                    "default" : "9050"
+                }
+            }
+       }
+}

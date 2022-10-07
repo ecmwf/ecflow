@@ -39,7 +39,7 @@ public:
 	VDir(const std::string& path, const std::string& pattern);
 	~VDir();
 
-    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode};
+    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode,TransferFetchMode};
 
 	const std::string& path() const {return path_;}
     void path(const std::string& path,bool reload=true);

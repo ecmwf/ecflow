@@ -43,6 +43,7 @@
 #include "VNode.hpp"
 #include "VProperty.hpp"
 #include "CustomCommandHandler.hpp"
+#include "ViewerUtil.hpp"
 
 
 int MenuItem::idCnt_=0;
@@ -407,7 +408,7 @@ MenuItem* MenuHandler::findItemById(int id)
     return nullptr;
 }
 
-MenuItem* MenuHandler::newItem(const std::string &name)
+MenuItem* MenuHandler::newItem(const std::string &/*name*/)
 {
 	return nullptr;
 }
@@ -887,6 +888,7 @@ QAction* MenuItem::createAction(QWidget* parent)
     if(!shortcut_.empty())
     {
         ac->setShortcut(QKeySequence(QString::fromStdString(shortcut_)));
+        ViewerUtil::showShortcutInContextMenu(ac);
     }
 
 	if(!statustip_.empty())

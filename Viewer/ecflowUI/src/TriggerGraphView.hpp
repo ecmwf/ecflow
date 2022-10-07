@@ -36,7 +36,7 @@ class TriggerGraphModel;
 class TriggerGraphView;
 class VComboSettings;
 class GraphLayoutBuilder;
-class GraphLayoutNode;
+struct GraphLayoutNode;
 class QShowEvent;
 class QToolButton;
 

@@ -153,11 +153,30 @@ std::string VItemPathParser::parent() const
 
 void VItemPathParser::extractHostPort(const std::string& server)
 {
-    size_t pos=server.find("@");
-    if(pos !=  std::string::npos)
+    std::size_t pos=server.find("@");
+    if(pos != std::string::npos)
     {
         host_=server.substr(0,pos);
         if(server.length() > pos +1)
             port_=server.substr(pos+1);
     }
+}
+
+std::string VItemPathParser::updateServerName(const std::string& path, const std::string& serverName)
+{
+    std::string s=path;
+    std::size_t pos=path.find("[");
+    std::size_t pos1=path.find("]", pos+1);
+    if (pos == 0 && pos1 != std::string::npos) {
+        std::size_t pos2=path.find("://", pos1+1);
+        if (pos2 != std::string::npos) {
+            s = path.substr(0, pos1+1) + serverName + path.substr(pos2);
+        }
+    } else {
+        std::size_t pos2=path.find(":/");
+        if (pos2 != std::string::npos) {
+            s = serverName + path.substr(pos2);
+        }
+    }
+    return s;
 }

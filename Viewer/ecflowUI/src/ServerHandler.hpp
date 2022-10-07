@@ -111,6 +111,8 @@ public:
 
 	bool isLocalHost() {return (localHostName_ == host_ || host_ == "localhost");}
 
+    void rename(const std::string& name);
+
 	static void saveSettings();
 
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
@@ -222,8 +224,10 @@ private:
 
 	typedef void (ServerObserver::*SoMethod)(ServerHandler*);
 	typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
+    typedef void (ServerObserver::*SoMethodV2)(ServerHandler*,const std::string&);
     void broadcast(SoMethod);
 	void broadcast(SoMethodV1,const VServerChange&);
+    void broadcast(SoMethodV2,const std::string&);
 
 	typedef void (NodeObserver::*NoMethod)(const VNode*);
 	typedef void (NodeObserver::*NoMethodV1)(const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -231,6 +235,7 @@ private:
 	void broadcast(NoMethod,const VNode*);
 	void broadcast(NoMethodV1,const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	void broadcast(NoMethodV2,const VNode*,const VNodeChange&);
+
 
     typedef void (ServerComObserver::*SocMethod)(ServerHandler*);
     void broadcast(SocMethod);

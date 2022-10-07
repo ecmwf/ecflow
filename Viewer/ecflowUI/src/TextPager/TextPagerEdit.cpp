@@ -1148,8 +1148,8 @@ void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count)
     if(textCursor.position() > document->documentSize())
         textCursor.setPosition(0);
 
-    UiLog().dbg() <<
-              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " << textCursor.position();
+//    UiLog().dbg() <<
+//              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " << textCursor.position();
 
     /*if (from > qMin(bufferPosition + buffer.size(), layoutEnd)) {
         return;

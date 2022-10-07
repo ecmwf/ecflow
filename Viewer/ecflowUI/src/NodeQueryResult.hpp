@@ -88,12 +88,13 @@ public:
  	void clear();
 
     //From ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+    void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
  	void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
  	void notifyEndServerClear(ServerHandler* server) override;
  	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
     void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
  	//From NodeObserver
     void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;

@@ -711,7 +711,7 @@ QRect StandardView::visualRect(const QModelIndex &index) const
     if(y >=0)
     {
         //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
-        return {viewItems_[vi].x-1-translation(), y, viewItems_[vi].width+2,viewItems_[vi].height};
+        return {static_cast<int>(viewItems_[vi].x)-1-translation(), y, static_cast<int>(viewItems_[vi].width)+2,static_cast<int>(viewItems_[vi].height)};
     }
     return {};
 }

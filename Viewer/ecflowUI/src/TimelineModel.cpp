@@ -22,7 +22,7 @@ TimelineModel::TimelineModel(QObject *parent) :
 TimelineModel::~TimelineModel()
 = default;
 
-void TimelineModel::setData(TimelineData *data)
+void TimelineModel::resetData(TimelineData *data)
 {
     beginResetModel();
     data_=data;

@@ -17,17 +17,12 @@
 
 #include <QStringList>
 
-//class QString;
 class QModelIndex;
-//class QStringList;
 class QVariant;
 class QPoint;
 class QRegion;
 class QRect;
 class QDateTime;
-
-#define UI_FUNCTION_LOG UiFunctionLog __fclog(BOOST_CURRENT_FUNCTION);
-//#define UI_FUNCTION_LOG_S(server) UiFunctionLog __fclog(server,BOOST_CURRENT_FUNCTION);
 
 class UiFunctionLog
 {
@@ -37,7 +32,10 @@ public:
     ~UiFunctionLog();
 
     std::string logEnter() const;
-    std::string logLeave() const;
+    virtual std::string logLeave() const;
+
+    static std::string formatFuncInfo(const std::string& funcName);
+
 protected:
     void init();
 
@@ -67,7 +65,6 @@ public:
         return ss.str();
    }
 
-
 protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;
@@ -80,6 +77,11 @@ private:
    UiLog(const UiLog&) = delete;
    UiLog& operator =(const UiLog&) = delete;
 };
+
+
+#define UI_FUNCTION_LOG UiFunctionLog __fclog(BOOST_CURRENT_FUNCTION);
+#define UI_FN_DBG UiLog().dbg() << UiFunctionLog::formatFuncInfo(BOOST_CURRENT_FUNCTION);
+#define UI_FN_INFO UiFunctionLog::formatFuncInfo(BOOST_CURRENT_FUNCTION)
 
 //Overload ostringstream for various objects
 std::ostream&  operator <<(std::ostream&,const std::vector<std::string>&);

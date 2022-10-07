@@ -26,11 +26,16 @@ public:
 	virtual ~VFile();
 
     enum StorageMode {MemoryStorage,DiskStorage};
-    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode};
+    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode,TransferFetchMode};
 
     const std::string& path() const {return path_;}
     const std::string& sourcePath() const {return sourcePath_;}
     void setSourcePath(const std::string& p) {sourcePath_=p;}
+    unsigned int sourceModTime() const {return sourceModTime_;}
+    void setSourceModTime(unsigned int t) {sourceModTime_=t;}
+    const std::string& sourceCheckSum() const {return sourceCheckSum_;}
+    void setSourceCheckSum(const std::string& c) {sourceCheckSum_=c;}
+
     void  setContents(const std::string);
 	bool  exists() const;
     bool isEmpty() const;
@@ -41,6 +46,9 @@ public:
 	static size_t maxDataSize() {return maxDataSize_;}
 	size_t dataSize() const {return dataSize_;}
 	const char* data() const {return data_;}
+
+    size_t fileSize() const;
+    size_t sizeInBytes() const;
 
 	void setTransferDuration(unsigned int  d) {transferDuration_=d;}
 	unsigned int transferDuration() const {return transferDuration_;}
@@ -59,6 +67,10 @@ public:
     const std::vector<std::string>& log() const {return log_;}
     int numberOfLines() const;
 
+    bool hasDeltaContents() const {return deltaContents_;}
+    void setDeltaContents(bool b) {deltaContents_=b;}
+
+    bool append(VFile_ptr);
     bool write(const char *buf,size_t len,std::string& err);
     bool write(const std::string& buf,std::string& err);
 
@@ -74,9 +86,12 @@ protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);
 	VFile(const std::string& str,bool deleteFile= true);
 	explicit VFile(bool deleteFile= true);
+    bool appendContentsTo(FILE* fpTarget) const;
 
 	std::string path_;
     std::string sourcePath_;
+    unsigned int sourceModTime_{0};
+    std::string sourceCheckSum_;
 	bool  deleteFile_;
 
 	StorageMode storageMode_{MemoryStorage};
@@ -84,6 +99,7 @@ protected:
 	char* data_{nullptr};
 	size_t dataSize_{0};
 	FILE* fp_{nullptr};
+    bool deltaContents_{false};
 
     FetchMode fetchMode_{NoFetchMode};
     std::string fetchModeStr_;

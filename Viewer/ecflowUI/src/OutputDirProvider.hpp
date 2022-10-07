@@ -13,65 +13,94 @@
 
 #include <QObject>
 
+#include "VFile.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
-class OutputDirClient;
+#include "FetchTask.hpp"
 
-class OutputDirProviderTask
+class OutputDirClient;
+class OutputDirProvider;
+class OutputDirFetchQueueManager;
+class VDirTransfer;
+
+class OutputDirFetchTask : public AbstractFetchTask
 {
 public:
-    enum FetchMode {LocalFetch,RemoteFetch};
-    enum Status {UnkownStatus,FinishedStatus,FailedStatus};
-    enum Condition {NoCondition,RunIfPrevFailed};
+    OutputDirFetchTask(const std::string& name,  FetchQueueOwner* owner);
+protected:
+    void addTryLog(VReply* r, const std::string& txt) const;
+};
 
-    OutputDirProviderTask(const std::string& path,FetchMode fetchMode,Condition cond=NoCondition) :
-        path_(path), fetchMode_(fetchMode), condition_(cond), status_(UnkownStatus) {}
+class OutputDirFetchLogServerTask : public QObject, public OutputDirFetchTask
+{
+Q_OBJECT
+public:
+    OutputDirFetchLogServerTask(FetchQueueOwner* owner);
+    ~OutputDirFetchLogServerTask();
+    void run() override;
+    void stop() override;
+    void clear() override;
 
-    std::string path_;
-    VDir_ptr dir_;
-    QString error_;
-    FetchMode fetchMode_;
-    Condition condition_;
-    Status status_;
+protected Q_SLOTS:
+    void clientFinished();
+    void clientProgress(QString,int);
+    void clientError(QString);
+
+protected:
+    void deleteClient();
+
+    OutputDirClient *client_{nullptr};
 };
 
 
-class OutputDirProvider : public QObject, public InfoProvider
+class OutputDirFetchLocalTask : public OutputDirFetchTask
+{
+public:
+    OutputDirFetchLocalTask(FetchQueueOwner* owner);
+    void run() override;
+};
+
+class OutputDirFetchTransferTask : public QObject, public OutputDirFetchTask
 {
 Q_OBJECT
+public:
+    OutputDirFetchTransferTask(FetchQueueOwner* owner);
+    ~OutputDirFetchTransferTask();
+    void run() override;
+    void stop() override;
+    void clear() override;
+
+protected Q_SLOTS:
+    void transferFinished();
+    void transferProgress(QString,int);
+    void transferFailed(QString);
+
+protected:
+    void stopTransfer();
+    void parseLine(QString line);
+
+    VDirTransfer *transfer_{nullptr};
+    VDir_ptr dir_;
+};
+
+
+class OutputDirProvider : public InfoProvider //, public OutputFetchQueueOwner
+{
+    friend class OutputDirFetchQueueManager;
 
 public:
-	 explicit OutputDirProvider(InfoPresenter* owner);
+     explicit OutputDirProvider(InfoPresenter* owner);
+     ~OutputDirProvider();
 
 	 void visit(VInfoNode*) override;
 	 void clear() override;
 
-private Q_SLOTS:
-	void slotOutputClientError(QString);
-    void slotOutputClientProgress(QString,int);
-	void slotOutputClientFinished();
-
 private:
-    bool hasNext() const;
-    void fetchNext();
-    void fetchIgnored();
-    void fetchFinished(VDir_ptr,QString msg=QString());
-    void fetchFailed(QString msg=QString());
-    void failed(QString);
-    void completed();
-
-	bool fetchDirViaOutputClient(VNode *n,const std::string& fileName);
-    VDir_ptr fetchLocalDir(const std::string& path,std::string& errorStr);
-	OutputDirClient* makeOutputClient(const std::string& host,const std::string& port);
-
-	OutputDirClient *outClient_;
-    QList<OutputDirProviderTask> queue_;
-    int currentTask_;
+      OutputDirFetchQueueManager* fetchManager_{nullptr};
 };
-
 
 #endif /* VIEWER_SRC_OUTPUTDIRPROVIDER_HPP_ */

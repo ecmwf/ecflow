@@ -107,6 +107,26 @@ void  VReply::appendInfoText(const std::string& s)
     infoText_.push_back(s);
 }
 
+void VReply::addLogMsgEntry(const std::string& s)
+{
+    log_.push_back("MSG>" + s);
+}
+
+void VReply::addLogTryEntry(const std::string& s)
+{
+    log_.push_back("TRY>" + s);
+}
+
+void VReply::addLogRemarkEntry(const std::string& s)
+{
+    log_.push_back("REMARK>" + s);
+}
+
+void VReply::addLogOptionEntry(const std::string& s)
+{
+    log_.push_back("OPTION>" + s);
+}
+
 void VReply::reset()
 {
 	status_=NoStatus;
@@ -119,5 +139,8 @@ void VReply::reset()
 	readMode_=NoReadMode;
 	readMethod_.clear();
 	tmpFile_.reset();
+    tmpFiles_.clear();
+    dir_.reset();
+    dirs_.clear();
     log_.clear();
 }

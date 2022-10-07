@@ -26,7 +26,7 @@
 #include "TimelineData.hpp"
 #include "TimelineWidget.hpp"
 
-TimelineItemWidget::TimelineItemWidget(QWidget *parent) :
+TimelineItemWidget::TimelineItemWidget(QWidget */*parent*/) :
     delayedLoad_(false)
 {
     auto* vb=new QVBoxLayout(this);

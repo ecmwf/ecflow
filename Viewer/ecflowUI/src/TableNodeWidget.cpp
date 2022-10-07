@@ -85,10 +85,10 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWi
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
 
-    connect(model_->data(),SIGNAL(updateBegin()),
+    connect(model_->getData(),SIGNAL(updateBegin()),
             view_->realWidget(),SLOT(slotUpdateBegin()));
 
-    connect(model_->data(),SIGNAL(updateEnd()),
+    connect(model_->getData(),SIGNAL(updateEnd()),
             view_->realWidget(),SLOT(slotUpdateEnd()));
 
 #if 0

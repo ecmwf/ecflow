@@ -33,18 +33,18 @@ public:
 
     //From NodeObserver
     void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) override;
-    void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) override {}
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
 
     //From ServerObserver
     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
     void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
-    void notifyEndServerClear(ServerHandler* server) override {}
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+    void notifyEndServerClear(ServerHandler*) override {}
+    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
     void notifyEndServerScan(ServerHandler* server) override;
     void notifyServerConnectState(ServerHandler* server) override;
-    void notifyServerSuiteFilterChanged(ServerHandler* server) override {}
-    void notifyServerSyncFinished(ServerHandler* server) {}
+    void notifyServerSuiteFilterChanged(ServerHandler*) override {}
+    void notifyServerSyncFinished(ServerHandler*) {}
 
     static void edit(VInfo_ptr info,QWidget *parent);
 
@@ -66,7 +66,7 @@ protected:
     virtual void apply()=0;
     virtual void resetValue()=0;
     virtual bool isValueChanged()=0;
-    virtual void nodeChanged(const std::vector<ecf::Aspect::Type>& a) {}
+    virtual void nodeChanged(const std::vector<ecf::Aspect::Type>&) {}
 
     VInfo_ptr info_;
     QStringList attrData_;

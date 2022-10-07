@@ -29,10 +29,10 @@ python version. We current only support python 2.5->2.7
 
 Linux  32
 ===========
-# Buy using a specific version we don't need to update $PATH, 
+# By using a specific version we don't need to update $PATH,
 # when python tests invoked from scripts
 
-# Note sure how to access python version, hence defined a project wide constant variable
+# Not sure how to access python version, hence defined a project wide constant variable
 # This is used during installation
 python_version = [ os.environ PYTHON_VERSION ] ;
 python_version default = 2.7 ; # if PYTHON_VERSION not set, use this default

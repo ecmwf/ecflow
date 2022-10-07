@@ -58,25 +58,18 @@ public:
 
     bool isSuspended() const {return suspended_;}
     bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}
-    virtual void notifyInfoChanged(const std::string& path) {}
+    virtual void notifyInfoChanged(const std::string& /*path*/) {}
     virtual void rerender() {}
 
 	//From VTaskObserver
     void taskChanged(VTask_ptr) override {}
 
-	//From VInfoPresenter
-    void infoReady(VReply*) override {}
-    void infoFailed(VReply*) override {}
-    void infoProgress(VReply*) override {}
-    void infoProgressStart(int min,int max,const std::string& text) {}
-    void infoProgress(int value,const std::string& text) {}
-
 	//From NodeObserver
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
 
-    virtual void writeSettings(VComboSettings* vs) {}
-    virtual void readSettings(VComboSettings* vs) {}
+    virtual void writeSettings(VComboSettings*) {}
+    virtual void readSettings(VComboSettings*) {}
 
 protected:
 	void adjust(VInfo_ptr);

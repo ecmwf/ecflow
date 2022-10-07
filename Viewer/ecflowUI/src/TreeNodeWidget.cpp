@@ -110,7 +110,7 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
         delete view_;
         view_=nullptr;
         delete realW;
-        model_->data()->deleteExpandState();
+        model_->getData()->deleteExpandState();
     }
 
     if(viewLayoutMode_ == CompactLayoutMode)

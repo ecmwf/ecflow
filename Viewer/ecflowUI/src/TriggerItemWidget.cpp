@@ -363,7 +363,7 @@ void TriggerItemWidget::infoProgressStart(const std::string& text,int max)
     messageLabel_->startProgress(max);
 }
 
-void TriggerItemWidget::infoProgress(const std::string& text,int value)
+void TriggerItemWidget::infoProgressUpdate(const std::string& text,int value)
 {
     messageLabel_->progress(QString::fromStdString(text),value);
 }

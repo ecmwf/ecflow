@@ -9,35 +9,142 @@
 
 #include "OutputFetchInfo.hpp"
 
+#include <map>
+
+#include <QButtonGroup>
+#include <QDebug>
+#include <QDir>
 #include <QLabel>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QString>
 #include <QFile>
-
-#include <QDebug>
+#include <QFileInfo>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include "ServerHandler.hpp"
+#include "TextFormat.hpp"
+#include "UiLog.hpp"
+#include "VConfig.hpp"
 
-OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent)
+#include "ui_OutputFetchInfo.h"
+
+OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent),  ui_(new Ui::OutputFetchInfo)
 {
-    auto *vb=new QVBoxLayout(this);
-    label_=new QLabel(this);
-    label_->setText("<b>Additional information</b>");
+    ui_->setupUi(this);
 
-    te_=new QTextEdit(this);
-    te_->setReadOnly(true);
-    te_->setMinimumWidth(350);
+    ui_->te->setMinimumWidth(400);
+    ui_->logTe->setMinimumWidth(400);
+    ui_->stackedWidget->setCurrentIndex(0);
 
-    vb->addWidget(label_);
-    vb->addWidget(te_,1);
+    bGroup_ = new QButtonGroup(this);
+    bGroup_->addButton(ui_->infoTb);
+    bGroup_->addButton(ui_->logTb);
+    ui_->infoTb->setChecked(true);
+
+    connect(bGroup_, SIGNAL(buttonClicked(QAbstractButton*)),
+            this, SLOT(buttonClicked(QAbstractButton*)));
+}
+
+void OutputFetchInfo::buttonClicked(QAbstractButton* b)
+{
+    ui_->stackedWidget->setCurrentIndex((b == ui_->infoTb)?0:1);
+}
+
+QString OutputFetchInfo::buildList(QStringList lst,bool ordered)
+{
+    QString t;
+
+    if(lst.count() > 0)
+    {
+        t+=(ordered)?"<ol>":"<ul>";
+        Q_FOREACH(QString s,lst)
+        {
+            t+="<li>" + s + "</li>";
+        }
+        t+=(ordered)?"</ol>":"</ul>";
+    }
+
+    return t;
+}
+
+void OutputFetchInfo::clearInfo()
+{
+    ui_->te->clear();
+    ui_->logTe->clear();
 }
 
 void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
 {
     Q_ASSERT(reply);
+    ui_->te->clear();
 
-    te_->clear();
+    QString html = makeHtml(reply, info);
+    ui_->te->setHtml(html);
+
+    QTextCursor cursor=ui_->te->textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    ui_->te->setTextCursor(cursor);
+}
+
+void OutputFetchInfo::setError(QString err)
+{
+    ui_->logTe->clear();
+    ui_->logTe->appendHtml(err);
+    QTextCursor cursor=ui_->logTe->textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    ui_->logTe->setTextCursor(cursor);
+}
+
+void OutputFetchInfo::setError(const std::vector<std::string>& errorVec)
+{
+    setError(formatErrors(errorVec));
+}
+
+QString OutputFetchInfo::formatErrors(const std::vector<std::string>& errorVec) const
+{
+    QString s;
+    if(errorVec.size() > 0)
+    {
+        QColor col(70,71,72);
+        if(errorVec.size() > 1)
+        {
+            for(size_t i=0; i < errorVec.size(); i++)
+                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
+                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
+        }
+        else if(errorVec.size() == 1)
+            s+=QString::fromStdString(errorVec[0]);
+    }
+    return s.replace("\n", "<br>");
+}
+
+void OutputFetchInfo::parseTry(QString s, QString& path, QString& msg)
+{
+    QRegularExpression rx("<PATH>(.+)<\\/PATH>");
+    QRegularExpressionMatch match = rx.match(s);
+    if (match.hasMatch()) {
+         path = match.captured(1);
+    }
+    msg = "tried to ";
+    msg += s.remove(rx);
+
+    msg.replace(" OK","<font color=\'#269e00\'><b> SUCCEEDED</b></font>");
+    msg.replace(" FAILED","<font color=\'#FF0000\'><b> FAILED</b></font>");
+    msg.replace(" NO ACCESS","<font><b> NO ACCESS</b></font>");
+    msg.replace(" NOT DEFINED","<font><b> NOT DEFINED</b></font>");
+}
+
+//==================================================
+//
+// OutputFileFetchInfo
+//
+//==================================================
+
+QString OutputFileFetchInfo::makeHtml(VReply *reply,VInfo_ptr info)
+{
+    Q_ASSERT(reply);
 
     static QMap<int,QString> nums;
     if(nums.isEmpty())
@@ -79,12 +186,9 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         else if(s.startsWith("TRY>"))
         {
             s.remove(0,4);
-            s.prepend("tried to ");
-            s.replace(" OK","<font color=\'#269e00\'><b> SUCCEEDED</b></font>");
-            s.replace(" FAILED","<font color=\'#FF0000\'><b> FAILED</b></font>");
-            s.replace(" NO ACCESS","<font><b> NO ACCESS</b></font>");
-            s.replace(" NOT DEFINED","<font><b> NOT DEFINED</b></font>");
-            tries << s;
+            QString path, msg;
+            parseTry(s, path, msg);
+            tries << msg;
             cnt++;
             continue;
         }
@@ -98,21 +202,30 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         bool rfd=server->readFromDisk();
         QString t;
 
-        t="The following are tried in order:<ul>";
+        t="The following steps are tried in order to fetch the output files:<ul>";
+        t+="<li>fetch from the logserver (if defined)</li>";
 
+        bool proxy = VConfig::instance()->proxychainsUsed();
         if(rfd)
         {
-            t+="<li>Try to read the output files from the logserver \
-               (if defined)</li><li>from disk</li><li>\
-               through the ecflow server (if the <b>current</b> job output) </li>";
+            if (proxy) {
+                t+="<li>read from disk on remote SOCKS host via ssh/scp</li>";
+            } else {
+                t+="<li>read from disk</li>";
+            }
         }
         else
         {
-            t+="<li>Try to read the output files from the logserver \
-               (if defined)</li><li>from disk (if <b>not</b> the <b>current</b> job output)</li>\
-               <li>from the ecflow server (if the <b>current</b> job output)</li> ";
+            if (proxy) {
+                t+="<li>read from disk on remote SOCKS host via ssh/scp (if <b>not</b> the <b>current</b> job output)</li>";
+            } else {
+                t+="<li>read from disk (if <b>not</b> the <b>current</b> job output)</li>";
+            }
         }
-        t+="</ul> (To change this behaviour go Tools -> Preferences -> Server settings -> Fetching files)";
+
+        t+="<li>fetch from the ecflow server (if the <b>current</b> job output) </li> ";
+
+        t+="</ul> (To enable/disable the read from disk option go Tools -> Preferences -> Server settings -> Fetching files)";
 
         alg=t;
 
@@ -134,7 +247,7 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     }
 
     if(!options.isEmpty())
-    {       
+    {
         html+="<p><u>Options</u></p>";
         html+=buildList(options);
     }
@@ -151,42 +264,126 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     }
 
     if(!remarks.isEmpty())
-    {  
+    {
         html+="<p><u>Remarks</u></p>";
         html+=buildList(remarks);
     }
 
     if(!other.isEmpty())
-    {       
+    {
         html+=buildList(other);
 
     }
 
-    te_->setHtml(html);
-
-    QTextCursor cursor=te_->textCursor();
-    cursor.movePosition(QTextCursor::Start);
-    te_->setTextCursor(cursor);
+    return html;
 }
 
-QString OutputFetchInfo::buildList(QStringList lst,bool ordered)
-{
-    QString t;
+//==================================================
+//
+// OutputDirFetchInfo
+//
+//==================================================
 
-    if(lst.count() > 0)
+QString OutputDirFetchInfo::makeHtml(VReply *reply,VInfo_ptr /*info*/)
+{
+    Q_ASSERT(reply);
+
+    static QMap<int,QString> nums;
+    if(nums.isEmpty())
     {
-        t+=(ordered)?"<ol>":"<ul>";
-        Q_FOREACH(QString s,lst)
-        {
-            t+="<li>" + s + "</li>";
-        }
-        t+=(ordered)?"</ol>":"</ul>";
+        nums[1]="1st";
+        nums[2]="2nd";
+        nums[3]="3rd";
+        nums[4]="4th";
     }
 
-    return t;
+    std::map<QString, QStringList> tries;
+    QStringList options;
+    QStringList remarks;
+    QStringList msg;
+    QStringList other;
+    QString alg;
+    QString html;
+
+    int cnt=1;
+    for(const auto & it : reply->log())
+    {
+        QString s=QString::fromStdString(it);
+        if(s.startsWith("REMARK>"))
+        {
+            remarks << s.remove(0,7);
+            continue;
+        }
+        else if(s.startsWith("OPTION>"))
+        {
+            options << s.remove(0,7);
+            continue;
+        }
+        else if(s.startsWith("MSG>"))
+        {
+            msg << s.remove(0,4);
+            continue;
+        }
+        else if(s.startsWith("TRY>"))
+        {
+            s.remove(0,4);
+            QString path, msg;
+            parseTry(s, path, msg);
+            path = makeSearchPath(path);
+            tries[path] << msg;
+            cnt++;
+            continue;
+        }
+        else
+            other << s;
+    }
+
+    if(!msg.isEmpty())
+    {
+       html+="<p><u>Messages</u></p>";
+       html+=buildList(msg);
+    }
+
+    if(!options.isEmpty())
+    {
+        html+="<p><u>Options</u></p>";
+        html+=buildList(options);
+    }
+
+    if(!tries.empty())
+    {
+        html+="<p><u>How was this directory listing fetched?</u></p>";
+        for (auto it: tries) {
+            html+="pattern: <i>" + it.first + "</i>";
+            html+=buildList(it.second,true);
+        }
+    }
+
+    if(!alg.isEmpty())
+    {
+       html+="<p><u>Algorithm:</u></p>"+alg;
+    }
+
+    if(!remarks.isEmpty())
+    {
+        html+="<p><u>Remarks</u></p>";
+        html+=buildList(remarks);
+    }
+
+    if(!other.isEmpty())
+    {
+        html+=buildList(other);
+
+    }
+    return html;
 }
 
-void OutputFetchInfo::clearInfo()
+QString OutputDirFetchInfo::makeSearchPath(QString path) const
 {
-    te_->clear();
+    QFileInfo f(path);
+    auto d = f.dir();
+    auto name = f.baseName();
+    return d.filePath(name + ".*");
 }
+
+

@@ -384,6 +384,13 @@ void ExpandState::collectParents(const std::string& fullPath,std::vector<ExpandS
     }
 }
 
+void ExpandState::updateServerName(const std::string& serverName)
+{
+    if (root_) {
+        root_->setName(serverName);
+    }
+}
+
 
 void ExpandState::print() const
 {

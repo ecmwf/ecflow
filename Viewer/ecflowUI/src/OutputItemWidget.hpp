@@ -19,11 +19,11 @@
 #include "ui_OutputItemWidget.h"
 
 class OutputDirProvider;
-class OutputFetchInfo;
-class OutputModel;
-class OutputSortModel;
+class OutputFileFetchInfo;
+class OutputDirWidget;
 class VProperty;
 class QTimer;
+
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -42,14 +42,18 @@ public:
 	void infoFailed(VReply*) override;
 	void infoProgress(VReply*) override;
     void infoProgressStart(const std::string& text,int max) override;
-    void infoProgress(const std::string& text,int value) override;
+    void infoProgressUpdate(const std::string& text,int value) override;
+    void infoProgressStop() override;
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
     void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
-	void slotOutputSelected(QModelIndex,QModelIndex);
-	void slotUpdateDir();
+    void slotDirItemSelected();
+    void slotUpdateDirs();
+    void slotShowDir(bool);
+    void adjustShowDirTb();
+    void shrinkDirPanel();
 	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 	void on_reloadTb__clicked();
@@ -59,38 +63,29 @@ protected Q_SLOTS:
     void on_toEndTb__clicked();
     void on_toLineStartTb__clicked();
     void on_toLineEndTb__clicked();
-    void on_saveFileAsTb__clicked();
-    void on_copyPathTb__clicked();
-    void on_dirReloadTb__clicked();
-    void on_lineNumberTb__clicked(bool st);
+    void slotSaveFileAs();
+    void slotCopyPath();
+    void slotLineNumber(bool st);
     void on_wordWrapTb__clicked(bool st);
     void on_expandFileInfoTb__clicked(bool st);
     void slotWordWrapSupportChanged(bool);
+    void slotLoadWholeFile();
+    void loadCurrentJobout();
 
 protected:
-    void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
-    void updateDir(bool);
-    void updateDir(const std::vector<VDir_ptr>&,bool);
-	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&) override;
 	void searchOnReload();
-    void getCurrentFile(bool doReload);
-	void getLatestFile();
-    void currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const;
+    void reloadCurrentFile(bool wholeFile);
+    void loadCurrentDirItemFile();
+    bool isJoboutLoaded() const;
     void updateHistoryLabel(const std::vector<std::string>&);
-    void displayDirErrors(const std::vector<std::string>& errorVec);
 
-	OutputDirProvider* dirProvider_;
-	OutputModel* dirModel_;
-	OutputSortModel* dirSortModel_;
+    OutputDirProvider* dirProvider_{nullptr};
 
 	bool userClickedReload_{false};
-	bool ignoreOutputSelection_{false};
-	QTimer* updateDirTimer_;
-	static int updateDirTimeout_;
-    OutputFetchInfo* fetchInfo_;
-    bool dirColumnsAdjusted_{false};
+    OutputFileFetchInfo* fetchInfo_{nullptr};
     bool submittedWarning_{false};
+    VProperty* showDirProp_{nullptr};
     VProperty* lineNumProp_{nullptr};
     VProperty* wordWrapProp_{nullptr};
     VProperty* expandFileInfoProp_{nullptr};

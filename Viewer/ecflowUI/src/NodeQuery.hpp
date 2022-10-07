@@ -84,6 +84,8 @@ public:
 	void setServers(QStringList servers) {servers_=servers;}	
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
+    bool removeServer(const std::string& serverName);
+    bool renameServer(const std::string& newName, const std::string& oldName);
 
 	void buildQueryString();
 

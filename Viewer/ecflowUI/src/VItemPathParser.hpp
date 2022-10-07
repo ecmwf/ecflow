@@ -37,6 +37,7 @@ public:
     static std::string encodeWithServer(const std::string& server,const std::string& path,
                                         const std::string& type);
     static std::string encodeAttribute(const std::string& parentPath,const std::string& attrName,const std::string& attrType);
+    static std::string updateServerName(const std::string& path,const std::string& serverName);
 
 protected:
     void extractHostPort(const std::string& server);

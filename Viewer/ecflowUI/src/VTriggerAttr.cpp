@@ -89,7 +89,7 @@ void VTriggerAttrType::encode_empty(QStringList& data) const
 //
 //=====================================================
 
-VTriggerAttr::VTriggerAttr(VNode *parent,Expression* e, int index) :
+VTriggerAttr::VTriggerAttr(VNode *parent,Expression*, int index) :
     VAttribute(parent,index)
 {
 }

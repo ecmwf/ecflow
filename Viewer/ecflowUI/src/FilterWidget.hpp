@@ -83,7 +83,7 @@ protected:
 	void init();
 	void clear();
 	QAction* createAction(QString name,int id);
-	void reload();
+    void reload(bool favoriteBuilt);
 	void buildFavourite();
 	void clearFavourite();
 	void syncActionState(QString,bool);

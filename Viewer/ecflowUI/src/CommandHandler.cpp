@@ -132,7 +132,7 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
             {
                 substituteVariables(realCommand,info);
             }
-            UiLog().dbg() << " final command: " << realCommand;
+            UiLog().dbg() << " final shell command: " << realCommand;
             ShellCommand::run(realCommand,cmd);
             return;
         }

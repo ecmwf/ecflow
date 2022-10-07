@@ -177,7 +177,7 @@ bool ServerRefreshInfoWidget::isActionEnabled() const
     return refreshAction_->isEnabled();
 }
 
-void ServerRefreshInfoWidget::notifyChange(VProperty* p)
+void ServerRefreshInfoWidget::notifyChange(VProperty*)
 {
     updateSettings();
 }
@@ -364,7 +364,7 @@ void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
     reloadAll();
 }
 
-void  ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
+void ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
 {
     Q_ASSERT(server_ == server);
 
@@ -379,9 +379,13 @@ void  ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
     }
 }
 
+void ServerRefreshInfoWidget::notifyServerRenamed(ServerHandler* server, const std::string& /*oldName*/)
+{
+    setServer(server);
+}
+
 void ServerRefreshInfoWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 {
-
 }
 
 
@@ -631,7 +635,7 @@ bool ServerRefreshInfoWidget::isInText(const QPoint& pos) const
     return (pos.x() > buttonRect_.right());
 }
 
-void ServerRefreshInfoWidget::resizeEvent(QResizeEvent* event)
+void ServerRefreshInfoWidget::resizeEvent(QResizeEvent*)
 {
     buttonRect_=QRect(1,1,height()-2,height()-2);
     buttonRadius2_=pow(buttonRect_.width()/2,2);

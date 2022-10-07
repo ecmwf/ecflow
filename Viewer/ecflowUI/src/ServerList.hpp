@@ -15,8 +15,13 @@
 
 #include <QDateTime>
 
+#include "GenFileProvider.hpp"
+#include "VProperty.hpp"
+#include "PropertyMapper.hpp"
+
 class ServerItem;
 class ServerList;
+class GenFileReceiver;
 
 
 class ServerListObserver
@@ -50,7 +55,7 @@ protected:
 class ServerListSyncChangeItem
 {
 public:
-    enum ChangeType {AddedChange,RemovedChange, MatchChange, SetSysChange,UnsetSysChange};
+    enum ChangeType {AddedChange,RemovedChange,MatchChange,SetSysChange,UnsetSysChange};
 
     ServerListSyncChangeItem(const ServerListTmpItem& sys,const ServerListTmpItem& local,ChangeType type) :
        sys_(sys), local_(local), type_(type) {}
@@ -64,8 +69,54 @@ public:
     ChangeType type_;
 };
 
+class ServerListSystemFileManager: public GenFileReceiver, public VPropertyObserver
+{
+public:
+    ServerListSystemFileManager() = default;
+    ~ServerListSystemFileManager();
+
+    bool hasSyncChange() const {return !changedItems_.empty();}
+    bool hasInfo() const {return !changedItems_.empty() || !unfetchedFiles_.empty();}
+    QDateTime syncDate() const {return syncDate_;}
+    const std::vector<std::string>& files() const {return files_;}
+    const std::vector<std::string>& fetchedFiles() const {return fetchedFiles_;}
+    const std::vector<std::string>& unfetchedFiles() const {return unfetchedFiles_;}
+    const std::vector<ServerListSyncChangeItem*>&  changedItems() const {return changedItems_;}
+
+    void sync();
+    void clearChangeInfo();
+    void fileFetchFinished(VReply*) override;
+    void fileFetchFailed(VReply*) override;
+    void notifyChange(VProperty*) override;
+
+protected:
+    void clear();
+    std::vector<std::string> buildFileList();
+    bool fileListSameAs(const std::vector<std::string>& v1, const std::vector<std::string>& v2) const;
+    void syncInternal(const std::vector<std::string>& newFiles);
+    void concludeSync();
+    void delayedFetchFiles(const std::vector<std::string>& paths);
+    void loadFiles(const std::vector<std::string>& paths);
+    void loadFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec,
+                                            std::vector<std::string>& includedPaths);
+    void loadPending();
+
+    enum State {EmptyState, FetchState, SyncedState};
+    std::vector<std::string> files_;
+    std::vector<std::string> fetchedFiles_;
+    std::vector<std::string> unfetchedFiles_;
+    std::vector<ServerListSyncChangeItem*> changedItems_;
+    std::vector<ServerListTmpItem> pendingItems_;
+    QDateTime syncDate_;
+    GenFileReceiver* fileProvider_{nullptr};
+    PropertyMapper* prop_{nullptr};
+    State state_{EmptyState};
+};
+
 class ServerList
 {
+    friend class ServerListSystemFileManager;
+
 public:
     int count() const {return static_cast<int>(items_.size());}
 	ServerItem* itemAt(int);
@@ -76,7 +127,7 @@ public:
     ServerItem* add(const std::string& name,const std::string& host,const std::string& port, const std::string& user,
                     bool favorite, bool ssl, bool saveIt);
 	void remove(ServerItem*);
-    void reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port,
+    ServerItem* reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port,
                const std::string& user, bool ssl);
 	void setFavourite(ServerItem*,bool);
 
@@ -85,11 +136,8 @@ public:
     void init();
 	void save();
 	void rescan();
-    void syncSystemFile();
-    bool hasSystemFile() const;
-    const std::vector<ServerListSyncChangeItem*>&  syncChange() const {return syncChange_;}
-    bool hasSyncChange() const {return !syncChange_.empty();}
-    QDateTime syncDate() const {return syncDate_;}
+    void syncSystemFiles();
+    ServerListSystemFileManager* systemFileManager() const {return sysFileManager_;}
 
 	void addObserver(ServerListObserver*);
 	void removeObserver(ServerListObserver*);
@@ -97,28 +145,23 @@ public:
 	static ServerList* instance();
 
 protected:
-    ServerList() = default;
-    ~ServerList() = default;
+    ServerList();
+    ~ServerList();
 
 	static ServerList* instance_;
 
-	bool load();
-	bool readRcFile();
-    void clearSyncChange();
+    bool load();
     bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
                         bool checkDuplicate,std::string& errStr);
-
+    void loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
+                         std::vector<ServerListSyncChangeItem*>& changeVec);
 	void broadcastChanged();
 	void broadcastChanged(ServerItem*);
 
 	std::vector<ServerItem*> items_;
     std::string localFile_;
-    std::string systemFile_;
 	std::vector<ServerListObserver*> observers_;
-    std::vector<ServerListSyncChangeItem*> syncChange_;
-    QDateTime syncDate_;
+    ServerListSystemFileManager* sysFileManager_{nullptr};
 };
-
-
 
 #endif

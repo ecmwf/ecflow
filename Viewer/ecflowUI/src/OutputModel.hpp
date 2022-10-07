@@ -18,7 +18,7 @@ class OutputModel : public QAbstractItemModel
 public:
     explicit OutputModel(QObject *parent=nullptr);
 
-    void setData(const std::vector<VDir_ptr>&,const std::string& jobout);
+    void resetData(const std::vector<VDir_ptr>&,const std::string& jobout);
    	void clearData();
     bool isEmpty() const {return (!hasData());}
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
@@ -34,6 +34,7 @@ public:
    	std::string fullName(const QModelIndex& index) const;
     void itemDesc(const QModelIndex& index,std::string& itemFullName,VDir::FetchMode& mode) const;
     QModelIndex itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const;
+    QModelIndex itemToIndex(const std::string& itemFullName) const;
 
 protected:
     VDirItem* itemAt(int row,VDir_ptr& dir) const;
@@ -58,10 +59,10 @@ public:
 	QModelIndex fullNameToIndex(const std::string& fullName);
 };
 
-class OutputDirLitsDelegate : public QStyledItemDelegate
+class OutputDirListDelegate : public QStyledItemDelegate
 {
 public:
-    explicit OutputDirLitsDelegate(QWidget *parent=nullptr);
+    explicit OutputDirListDelegate(QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const override;
 

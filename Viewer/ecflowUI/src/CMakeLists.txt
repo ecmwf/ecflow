@@ -46,11 +46,14 @@ set(viewer_srcs
     EventEditor.cpp
     ExpandState.cpp
     ExpandStateNode.cpp
+    FetchTask.cpp
     FlagSet.hpp
-    FileInfoLabel.cpp
+    FileFetchTask.cpp
+    FileInfoLabel.cpp   
     FileWatcher.cpp
     FilterWidget.cpp
     FontMetrics.cpp
+    GenFileProvider.cpp
     GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
@@ -106,6 +109,7 @@ set(viewer_srcs
     OutputItemWidget.cpp
     OutputFileProvider.cpp
     OutputDirProvider.cpp
+    OutputDirWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     PlainTextEdit.cpp
@@ -297,6 +301,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
     EventEditor.hpp
+    FileFetchTask.hpp
     FileWatcher.hpp
     FilterWidget.hpp
     GotoLineDialog.hpp
@@ -331,11 +336,12 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputBrowser.hpp
     OutputCache.hpp
     OutputClient.hpp
+    OutputFetchInfo.hpp
     OutputFileClient.hpp
     OutputDirClient.hpp
     OutputItemWidget.hpp
-    OutputFileProvider.hpp
     OutputDirProvider.hpp
+    OutputDirWidget.hpp
     PlainTextEdit.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
@@ -350,7 +356,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
     ServerListSyncWidget.hpp
-    ServerLoadItemWidget.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
@@ -442,7 +447,9 @@ set(viewer_wrap_ui_files
     NodeQuerySaveDialog.ui
     NodeSearchWindow.ui
     NodeSearchWidget.ui
-    OutputItemWidget.ui 
+    OutputFetchInfo.ui
+    OutputItemWidget.ui
+    OutputDirWidget.ui
     PropertyDialog.ui
     PropertyEditor.ui
     RepeatEditorWidget.ui

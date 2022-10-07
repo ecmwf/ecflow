@@ -183,7 +183,7 @@ void NodeQueryEngine::run()
     broadcastChunk(true);
 }
 
-void NodeQueryEngine::run(ServerHandler *server,VNode* root)
+void NodeQueryEngine::run(ServerHandler*,VNode* root)
 {
     runRecursively(root);
 }

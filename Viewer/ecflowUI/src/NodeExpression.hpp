@@ -440,11 +440,33 @@ public:
     std::string print() override;
 };
 
+class IsoDateGreaterThanCondition : public BaseNodeCondition
+{
+public:
+    IsoDateGreaterThanCondition() = default;
+    ~IsoDateGreaterThanCondition() override = default;
+
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override;
+};
+
 class IsoDateLessThanEqualCondition : public BaseNodeCondition
 {
 public:
     IsoDateLessThanEqualCondition() = default;
     ~IsoDateLessThanEqualCondition() override = default;
+
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override;
+};
+
+class IsoDateLessThanCondition : public BaseNodeCondition
+{
+public:
+    IsoDateLessThanCondition() = default;
+    ~IsoDateLessThanCondition() override = default;
 
     bool execute(VItem *node) override;
     int  numOperands() override {return 2;}
@@ -464,7 +486,7 @@ public:
     ~WhatToSearchInOperand() override;
 
     const std::string& name() const {return what_;}
-    bool execute(VItem* node) override  {return false;} // not called
+    bool execute(VItem* /*node*/) override  {return false;} // not called
     std::string print() override {return what_;}
     const std::string& what() const {return what_;}
 
@@ -484,7 +506,7 @@ public:
     ~WhatToSearchForOperand() override;
 
     std::string name() {return what_;}
-    bool execute(VItem* node) override {return false;} // not called
+    bool execute(VItem* /*node*/) override {return false;} // not called
     std::string print() override {return what_;}
     std::string what() {return what_;}
 

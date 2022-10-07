@@ -158,7 +158,7 @@ void InfoProvider::handleFileNotDefined(VReply *reply)
 	owner_->infoReady(reply_);
 }
 
-bool InfoProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+bool InfoProvider::handleFileMissing(const std::string& /*fileName*/,VReply */*reply*/)
 {
 	return false;
 

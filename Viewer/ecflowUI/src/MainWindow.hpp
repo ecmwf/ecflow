@@ -70,6 +70,7 @@ public:
     static void startPreferences(QString);
     static void updateMenuMode(ServerHandler*);
     static MainWindow* firstWindow();
+    static void initServerSyncTb();
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();
@@ -110,6 +111,7 @@ private:
     void rerenderContents();
     bool selectInTreeView(VInfo_ptr info);
     void updateRefreshActions();
+    void initServerSyncTbInternal();
     void hideServerSyncNotify();
     void cleanUpOnQuit();
 

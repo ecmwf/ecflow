@@ -89,7 +89,7 @@ BcWidget::~BcWidget()
     delete ellipsisItem_;
 }    
 
-void BcWidget::notifyChange(VProperty *p)
+void BcWidget::notifyChange(VProperty*)
 {
     updateSettings();
 }    
@@ -708,7 +708,7 @@ void NodePathItem::reset(QString text,QColor bgCol,QColor fontCol,bool hovered)
         borderCol_=bgCol_.darker(240);
 }
 
-void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
+void NodePathItem::draw(QPainter  *painter,bool useGrad,int /*lighter*/)
 {    
     if(!visible_)
         return;
@@ -895,7 +895,7 @@ void NodePathWidget::setMode(Mode mode)
     }
 }
 
-void NodePathWidget::slotContextMenu(const QPoint& pos)
+void NodePathWidget::slotContextMenu(const QPoint& /*pos*/)
 {
 }
 
@@ -1345,6 +1345,11 @@ void NodePathWidget::notifyServerConnectState(ServerHandler* server)
 void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 {
     //reset();
+}
+
+void NodePathWidget::notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/)
+{
+     reset();
 }
 
 void NodePathWidget::notifyDataLost(VInfo* info)

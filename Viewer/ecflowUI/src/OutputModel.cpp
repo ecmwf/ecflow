@@ -29,7 +29,7 @@ OutputModel::OutputModel(QObject *parent) :
 {
 }
 
-void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
+void OutputModel::resetData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
 {
     beginResetModel();
     dirs_=dirs;
@@ -290,7 +290,7 @@ void OutputModel::itemDesc(const QModelIndex& index,std::string& itemFullName,VD
 
 QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const
 {
-    int row=0;;
+    int row=0;
     for(const auto & dir : dirs_)
     {
         if(dir)
@@ -308,6 +308,18 @@ QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::Fetch
     return {};
 }
 
+QModelIndex OutputModel::itemToIndex(const std::string& itemFullName) const
+{
+    int row=0;
+    for(const auto & dir : dirs_) {
+        if(dir) {
+            for(int j=0; j < dir->count(); j++, row++)
+                if(dir->fullName(j) == itemFullName)
+                    return index(row,0);
+        }
+    }
+    return {};
+}
 
 QString OutputModel::formatSize(unsigned int size) const
 {
@@ -318,7 +330,7 @@ QString OutputModel::formatSize(unsigned int size) const
 	else if(size < 1024*1024*1024)
 	  	return QString::number(size/(1024*1024)) + " MB";
 	else
-	  	return QString::number(size/(1024*1024*1024)) + " GB";
+        return QString::number(static_cast<float>(size)/(1024.*1024.*1024.), 'f', 1) + " GB";
 
  	return QString();
 }
@@ -408,11 +420,11 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
 //
 //========================================================
 
-OutputDirLitsDelegate::OutputDirLitsDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+OutputDirListDelegate::OutputDirListDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
 }
 
-void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+void OutputDirListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
     if(index.column()==1)

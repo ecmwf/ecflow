@@ -148,7 +148,7 @@ VInfo_ptr NodeQueryResultView::currentSelection()
 	return VInfo_ptr();
 }
 
-void NodeQueryResultView::currentSelection(VInfo_ptr info)
+void NodeQueryResultView::currentSelection(VInfo_ptr /*info*/)
 {
 	/*QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
@@ -158,7 +158,7 @@ void NodeQueryResultView::currentSelection(VInfo_ptr info)
 	}*/
 }
 
-void NodeQueryResultView::slotSetCurrent(VInfo_ptr info)
+void NodeQueryResultView::slotSetCurrent(VInfo_ptr /*info*/)
 {
 	/*QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
@@ -208,7 +208,7 @@ void NodeQueryResultView::slotContextMenu(const QPoint &position)
 }
 
 
-void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
+void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint /*widgetPos*/,QWidget */*widget*/)
 {
   	//Node actions
   	if(indexClicked.isValid())   //indexLst[0].isValid() && indexLst[0].column() == 0)
@@ -245,7 +245,7 @@ void NodeQueryResultView::slotCommandShortcut()
     }
 }
 
-void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
+void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString /*cmd*/)
 {
 
 	if(nodeLst.size() == 0)

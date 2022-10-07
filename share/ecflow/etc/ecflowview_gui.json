@@ -7,6 +7,9 @@
             "line" : "panel.output.showLineNumber",
             "line" : "panel.output.wordWrap",
             "line" : "panel.output.expandFileInfo",
+            "line" : "panel.output.showDirPanel",
+            "line" : "panel.timeline.expandFileInfo",
+            "line" : "panel.server_load.expandFileInfo",
             "line" : "view.table.variableColumns"
         },
 
@@ -290,6 +293,11 @@
                         "title" : "Text filter in Output tab",
                         "prefix" : "view.textEdit",
                         "line" : "showLineNumInTextFilter"
+                    },
+                    "group" : {
+                        "title" : "File info label in Output tab",
+                        "prefix" : "view.fileInfoLabel",
+                        "line" : "showTransferDetails"
                     }
                 }
             }
@@ -639,6 +647,17 @@
                             "default": "0 means there is no upper data limit!"
                         }
                   }
+                },
+                "tab" : {
+                    "label"  : "System server list",
+                    "group" : {
+                        "title" : "System server list",
+                        "prefix" : "server.systemList",
+                        "note" : {
+                            "default": "<b>System server list</b> files can define a set of servers that are automatically added to/removed from the server list on startup. This can be pre-set via the ECFLOW_SYSTEM_SERVERS_LIST environment variable. The option below overwrites the pre-set paths (use colon separator for multiple items)."
+                        },
+                        "line" : "paths"
+                    }
                 }
             },
 
@@ -690,7 +709,22 @@
                     "line" : "soundFile"
                 }
             }
-        }
+        },
 
+        "network":  {
+            "label": "Network",
+            "desc" : "Network",
+            "icon" : "network.svg",
+            "group" : {
+                "title" : "SOCKS",
+                "prefix" : "network.socks",
+                "note" : {
+                    "default" : "These settings are only used when ecFlowUI was started up with the <b>proxychains</b> command. In this case dynamic port forwarding (using SOCKS) to a remote host is supposed to be up and running. Using these settings ecFlowUI tries to access <b>local log files</b> on the remote host via <b>scp/ssh</b>."
+                 },
+
+                "line" : "port"
+            }
+
+        }
     }
 }

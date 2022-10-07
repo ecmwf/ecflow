@@ -59,7 +59,7 @@ void LogProvider::setAutoUpdate(bool autoUpdate)
     }
 }
 
-void LogProvider::visit(VInfoServer* info)
+void LogProvider::visit(VInfoServer*)
 {
 	fetchFile();
 }

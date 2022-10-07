@@ -24,6 +24,8 @@
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
+#include "OutputDirWidget.hpp"
+
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
@@ -39,13 +41,16 @@
 #include <QMenu>
 #include <QMovie>
 #include <QTime>
-#include <QTimer>
 #include <QWidgetAction>
 #include <QFileDialog>
 
 #define _UI_OUTPUTITEMWIDGET_DEBUG
 
-int OutputItemWidget::updateDirTimeout_=1000*60;
+//========================================================
+//
+// OutputItemWidget
+//
+//========================================================
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent)
@@ -55,10 +60,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     setupUi(this);
 
-	//--------------------------------
 	// The file contents
-	//--------------------------------
-
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
     warnLabel_->hide();
@@ -66,41 +68,30 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	infoProvider_=new OutputFileProvider(this);
 
-	//--------------------------------
-	// The dir contents
-	//--------------------------------
+    //The dir listing
+    connect(dirW_, SIGNAL(updateRequested()),
+            this, SLOT(slotUpdateDirs()));
 
-    dirMessageLabel_->hide();
-    dirMessageLabel_->setShowTypeTitle(false);
-    //dirLabel_->hide();
-    dirLabel_->setProperty("fileInfo","1");
+    connect(dirW_,SIGNAL(itemSelected()),
+            this,SLOT(slotDirItemSelected()));
 
-	dirProvider_=new OutputDirProvider(this);
+    connect(dirW_,SIGNAL(closedByButton()),
+            this,SLOT(adjustShowDirTb()));
 
-	//The view
-    auto* dirDelegate=new OutputDirLitsDelegate(this);
-    dirView_->setItemDelegate(dirDelegate);
-	dirView_->setRootIsDecorated(false);
-	dirView_->setAllColumnsShowFocus(true);
-	dirView_->setUniformRowHeights(true);
-	dirView_->setAlternatingRowColors(true);
-	dirView_->setSortingEnabled(true);
+    connect(dirW_,SIGNAL(shrinkRequested()),
+            this,SLOT(shrinkDirPanel()));
 
-    //Sort by column "modifiied (ago)", latest files first
-    dirView_->sortByColumn(3, Qt::AscendingOrder);
+    dirProvider_=new OutputDirProvider(this);
 
-	//The models
-	dirModel_=new OutputModel(this);
-	dirSortModel_=new OutputSortModel(this);
-	dirSortModel_->setSourceModel(dirModel_);
-    dirSortModel_->setSortRole(Qt::UserRole);
-    dirSortModel_->setDynamicSortFilter(true);
+    //show dir panel
+    showDirProp_ = VConfig::instance()->find("panel.output.showDirPanel");
+    Q_ASSERT(showDirProp_);
+    bool showDirSt = showDirProp_->value().toBool();
+    showDirTb_->setChecked(showDirSt);
+    slotShowDir(showDirSt);
 
-	dirView_->setModel(dirSortModel_);
-
-	//When the selection changes in the view
-	connect(dirView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
+    connect(showDirTb_, SIGNAL(clicked(bool)),
+            this,SLOT(slotShowDir(bool)));
 
 	//Set splitter's initial size.
 	int wHeight=size().height();
@@ -111,17 +102,10 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 		splitter_->setSizes(sizes);
 	}
 
-	//Dir contents update timer
-	updateDirTimer_=new QTimer(this);
-	updateDirTimer_->setInterval(updateDirTimeout_);
-
-	connect(updateDirTimer_,SIGNAL(timeout()),
-			this,SLOT(slotUpdateDir()));
-
 	//Editor font
 	browser_->setFontProperty(VConfig::instance()->find("panel.output.font"));
 
-    fetchInfo_=new OutputFetchInfo(this);
+    fetchInfo_=new OutputFileFetchInfo(this);
     auto* fetchInfoAction=new QWidgetAction(this);
     fetchInfoAction->setDefaultWidget(fetchInfo_);
     fetchInfoTb_->addAction(fetchInfoAction);
@@ -129,34 +113,19 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     filterTb_->setProperty("strip","first");
     filterOptionTb_->setProperty("strip","last");
 
-    auto *menu=new QMenu(this);
-    menu->addAction(actionSaveFileAs_);
-    menu->addAction(actionGotoLine_);
-
-    //TODO: needs proper implementation
-    gotoLineTb_->hide();
-
-    //Sets the menu on the toolbutton
-    moreActionTb_->setMenu(menu);
-    moreActionTb_->hide();
-    moreActionTb_->setEnabled(false);
-    actionSaveFileAs_->setEnabled(false);
-    actionGotoLine_->setEnabled(false);
-
     //Init filter in output browser
     browser_->setFilterButtons(filterTb_,filterOptionTb_);
 
-    //
     browser_->setSearchButtons(searchTb_);
 
     //line number
     lineNumProp_ = VConfig::instance()->find("panel.output.showLineNumber");
     Q_ASSERT(lineNumProp_);
     bool showLineNum = lineNumProp_->value().toBool();
-    lineNumberTb_->setChecked(showLineNum);
-    on_lineNumberTb__clicked(showLineNum);
+    actionLineNumber_->setChecked(showLineNum);
+    slotLineNumber(showLineNum);
 
-    // text wrap
+    // text wrapline
     wordWrapProp_ = VConfig::instance()->find("panel.output.wordWrap");
     Q_ASSERT(wordWrapProp_);
     bool useWordWrap = wordWrapProp_->value().toBool();
@@ -176,6 +145,34 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     bool expandSt = expandFileInfoProp_->value().toBool();
     expandFileInfoTb_->setChecked(expandSt);
     on_expandFileInfoTb__clicked(expandSt);
+
+    // More actions
+    auto menu=new QMenu(this);
+    menu->addAction(actionLineNumber_);
+    menu->addAction(actionSaveFileAs_);
+    menu->addAction(actionCopyFilePath_);
+    auto sep = new QAction(this);
+    sep->setSeparator(true);
+    menu->addAction(sep);
+    menu->addAction(actionLoadWhole_);
+    menu->addAction(actionLoadCurrentJobout_);
+
+    moreActionTb_->setMenu(menu);
+
+    connect(actionLineNumber_, SIGNAL(toggled(bool)),
+            this, SLOT(slotLineNumber(bool)));
+
+    connect(actionSaveFileAs_, SIGNAL(triggered()),
+            this, SLOT(slotSaveFileAs()));
+
+    connect(actionCopyFilePath_, SIGNAL(triggered()),
+            this, SLOT(slotCopyPath()));
+
+    connect(actionLoadWhole_, SIGNAL(triggered()),
+            this, SLOT(slotLoadWholeFile()));
+
+    connect(actionLoadCurrentJobout_, SIGNAL(triggered()),
+            this, SLOT(loadCurrentJobout()));
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -207,86 +204,14 @@ void OutputItemWidget::reload(VInfo_ptr info)
         infoProvider_->info(info_);
 
         //Get dir contents
-        dirProvider_->info(info_);
-
-		//Start contents update timer
-		updateDirTimer_->start();
-	}
-}
-
-//Get information (description) about the current selection in the dir list
-void OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const
-{
-    QModelIndex current=dirSortModel_->mapToSource(dirView_->currentIndex());
-
-    if(current.isValid())
-    {
-        dirModel_->itemDesc(current,fullName,fetchMode);
-    }
-    else
-    {
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
-        fullName=op->joboutFileName();
-        fetchMode=VDir::NoFetchMode;
-    }
-}
-
-void OutputItemWidget::getLatestFile()
-{
-	messageLabel_->hide();
-    messageLabel_->stopProgress();
-    fileLabel_->clear();
-    browser_->clear();
-    dirMessageLabel_->hide();
-    fetchInfo_->clearInfo();
-
-    //Get the latest file contents
-    infoProvider_->info(info_);
-
-    updateDir(false);  // get the directory listing
-}
-
-//Load the currently selected file in the dir view
-void OutputItemWidget::getCurrentFile(bool doReload)
-{
-	messageLabel_->hide();
-	messageLabel_->stopLoadLabel();
-    messageLabel_->stopProgress();
-    fileLabel_->clear();
-    browser_->clear();
-    fetchInfo_->clearInfo();
-
-    if(info_)
-	{
-        std::string fullName;
-        VDir::FetchMode fetchMode;
-        currentDesc(fullName,fetchMode);
-        if(!fullName.empty())
-        {            
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-            UI_FUNCTION_LOG
-            UiLog().dbg()  << "output selected: " << fullName;
-#endif
-            //Fetch the file with given fetchmode
-            auto* op=static_cast<OutputFileProvider*>(infoProvider_);
-
-            //If the fetchmode is not defined we use the normal fetch policy
-            if(fetchMode == VDir::NoFetchMode)
-               op->file(fullName,!doReload);
-            //Otherwise we need to use the given fetch mode
-            else
-               op->fetchFile(fullName,fetchMode,!doReload);
-
-            updateDir(false);  // get the directory listing
-        }
+        dirW_->reload();
 	}
 }
 
 void OutputItemWidget::clearContents()
 {
-    updateDirTimer_->stop();
     InfoPanelItem::clear();
-    enableDir(false);
+    dirW_->clear();
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();      
@@ -303,13 +228,12 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
     {
         if(selected_ && !suspended_)
         {            
-            slotUpdateDir();
-            updateDirTimer_->start();
+            dirW_->reload();
         }
-        //If unselected we stop the dir update
+        //If unselected we stop the automatic dir update
         else
         {
-            updateDirTimer_->stop();            
+            dirW_->suspendAutoUpdate();
         }
     }
 
@@ -318,9 +242,8 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         //Suspend
         if(suspended_)
         {
-            updateDirTimer_->stop();
             reloadTb_->setEnabled(false);
-            enableDir(false);
+            dirW_->clear();
         }
         //Resume
         else
@@ -328,11 +251,10 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
             if(info_ && info_->node())
             {
                 reloadTb_->setEnabled(true);
-                enableDir(true);
+                dirW_->clear();
                 if(selected_)
                 {
-                    slotUpdateDir();
-                    updateDirTimer_->start();
+                    dirW_->reload();
                 }
             }
             else
@@ -345,6 +267,8 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
+    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+
     //------------------------
     // From output provider
     //------------------------
@@ -360,7 +284,7 @@ void OutputItemWidget::infoReady(VReply* reply)
         //TODO: make it possible to show warning and info at the same time
         bool hasMessage=false;
         submittedWarning_=false;
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+        //auto* op=static_cast<OutputFileProvider*>(infoProvider_);
         if(reply->fileName() == op->joboutFileName() && !op->isTryNoZero(reply->fileName()) &&
            info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
@@ -383,47 +307,37 @@ void OutputItemWidget::infoReady(VReply* reply)
             }
         }
 
+        // TODO: does it make sense?
         browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
 
+        // Load the file in the browser
         VFile_ptr f=reply->tmpFile();
-
-        //If the info is stored in a tmp file
         if(f)
         {
             browser_->loadFile(f);
             if(f->storageMode() == VFile::DiskStorage)
                 hasMessage=false;
-
-        }
-        //If the info is stored as a string in the reply object
-        else
-        {            
-            //QString s=QString::fromStdString(reply->text());
-            //browser_->loadText(s,QString::fromStdString(reply->fileName()));
         }
 
         if(!hasMessage)
         {
             messageLabel_->hide();
         }
-        //messageLabel_->stopLoadLabel();
 
-        //Update the file label
-        fileLabel_->update(reply);
+        //Update the file label. The reply might only contain a delta!
+        fileLabel_->update(reply, browser_->file());
 
         //Search for some keywords in the current jobout
-
-        if(f)
-        {
+        if(f && browser_->contentsChangedOnLastLoad()) {
             bool searched = false;
+
             //We do not have dir info so the file must be the jobout
-            if(dirModel_->isEmpty()) {
+            if(dirW_->isEmpty()) {
                 searchOnReload();
                 searched = true;
             //We have dir info
-            } else
-            {
-                auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+            } else {
+                //auto* op=static_cast<OutputFileProvider*>(infoProvider_);
                 if(reply->fileName() == op->joboutFileName())
                 {
                     searchOnReload();
@@ -441,18 +355,17 @@ void OutputItemWidget::infoReady(VReply* reply)
         userClickedReload_ = false;
         reloadTb_->setEnabled(true);
 
+#if 0
         //If we got a local file or a file via the logserver we restart the dir update timer
         if(!suspended_ &&
            (reply->fileReadMode() == VReply::LocalReadMode ||
             reply->fileReadMode() == VReply::LogServerReadMode))
         {
-            updateDirTimer_->start();
-        }        
-        //Update the selection in the dir list according to the file
-        if(f)
-        {          
-            setCurrentInDir(f->sourcePath(),f->fetchMode());
+            dirW_->enableAutoUpdate(true);
         }
+#endif
+        //Update the selection in the dir list according to the file
+        dirW_->adjustCurrentSelection(f);
 #if 0
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
             info_ && !info_->server()->isLocalHost())
@@ -466,9 +379,8 @@ void OutputItemWidget::infoReady(VReply* reply)
             warnLabel_->showWarning(msg);
         }
 #endif
-
-
         fetchInfo_->setInfo(reply,info_);
+        fetchInfo_->setError(reply->errorTextVec());
     }
 
     //------------------------
@@ -476,43 +388,30 @@ void OutputItemWidget::infoReady(VReply* reply)
     //------------------------
     else
     {    
-        //We do not display info/warning here! The dirMessageLabel_ is not part of the dirWidget_
-        //and is only supposed to display error messages!
-
-        enableDir(true);
-
-        //Update the dir widget and select the proper file in the list
-        updateDir(reply->directories(),true);
-
-        //Update the dir label
-        dirLabel_->update(reply);
-
-        //Enable the update button
-        dirReloadTb_->setEnabled(true);
-#if 0
-        //Even though infoReady is called there could be some errors since we could
-        //try to read multiple directories
-        displayDirErrors(reply->errorTextVec());
-#endif
+        dirW_->load(reply, op->joboutFileName());
+        dirW_->adjustCurrentSelection(browser_->file());
+        op->setDirectories(reply->directories());
     }
 }
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
 	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-    //messageLabel_->startLoadLabel();
-	//updateDir(true);
 }
 
-void  OutputItemWidget::infoProgressStart(const std::string& text,int max)
+void OutputItemWidget::infoProgressStart(const std::string& text,int max)
 {
-    messageLabel_->showInfo(QString::fromStdString(text));
-    messageLabel_->startProgress(max);
+    messageLabel_->startDelayedProgress(QString::fromStdString(text), max);
 }
 
-void  OutputItemWidget::infoProgress(const std::string& text,int value)
+void OutputItemWidget::infoProgressUpdate(const std::string& text,int value)
 {
     messageLabel_->progress(QString::fromStdString(text),value);
+}
+
+void OutputItemWidget::infoProgressStop()
+{
+    messageLabel_->stopProgress();
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
@@ -521,7 +420,16 @@ void OutputItemWidget::infoFailed(VReply* reply)
     if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
-		messageLabel_->showError(s);       
+        int lineCnt = s.count("\n");
+
+        // We onny show the first two lines or the error in label
+        if (lineCnt > 2) {
+            auto lst = s.split("\n");
+            if (lst.count() >= 3) {
+                messageLabel_->showError(lst[0] + "\n" + lst[1] + "\n...\nSee the rest of the error message via the <b>Detailed info</b> button");
+            }
+        }
+
         messageLabel_->stopProgress();
         submittedWarning_=false;
 
@@ -532,20 +440,13 @@ void OutputItemWidget::infoFailed(VReply* reply)
         reloadTb_->setEnabled(true);       
 
         fetchInfo_->setInfo(reply,info_);
+        fetchInfo_->setError(reply->errorTextVec());
 	}
     //Directories
     else
     {
-        //We do not have directories
-        enableDir(false);
-
-        displayDirErrors(reply->errorTextVec());
-
-        dirReloadTb_->setEnabled(true);
-
-        //the timer is stopped. It will be restarted again if we get a local file or
-        //a file via the logserver
-        updateDirTimer_->stop();
+        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+        dirW_->failed(reply, op->joboutFileName());
     }
 }
 
@@ -553,165 +454,172 @@ void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
     reloadTb_->setEnabled(false);
-    getCurrentFile(true);
-    //userClickedReload_ = false;
+    reloadCurrentFile(false);
+}
+
+void OutputItemWidget::slotLoadWholeFile()
+{
+    userClickedReload_ = true;
+    reloadTb_->setEnabled(false);
+    reloadCurrentFile(true);
+}
+
+void OutputItemWidget::loadCurrentJobout()
+{
+    messageLabel_->hide();
+    messageLabel_->stopProgress();
+    fileLabel_->clear();
+    browser_->clear();
+    dirW_->clear();
+
+    fetchInfo_->clearInfo();
+
+    //Get the latest file contents
+    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    Q_ASSERT(op);
+    op->fetchCurrentJobout(false);
+
+    // get the directory listing
+    dirW_->reload();
+}
+
+// called when the reload button is clicked
+void OutputItemWidget::reloadCurrentFile(bool wholeFile)
+{
+    if(!info_) {
+        return;
+    }
+
+    bool doReload = true;
+    bool useCache = !doReload;
+
+    messageLabel_->hide();
+    messageLabel_->stopLoadLabel();
+    messageLabel_->stopProgress();
+    fetchInfo_->clearInfo();
+
+    // the file to fetch
+    std::string fPath;
+
+    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    size_t deltaPos = 0;
+    auto f = browser_->file();
+
+    // if the browser is empty we fetch the current jobout file
+    if (!f) {
+        fileLabel_->clear();
+        browser_->clear();
+        fPath = op->joboutFileName();
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+        UiLog().dbg()  << UI_FN_INFO << "load jobout - fPath=" << fPath;
+#endif
+        op->fetchFile(fPath, 0, useCache);
+    } else {
+        fPath = f->sourcePath();
+        if (wholeFile) {
+            browser_->clear();
+        } else {
+            browser_->reloadBegin();
+            deltaPos = browser_->sizeInBytes();
+        }
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+        UiLog().dbg()  << UI_FN_INFO << "reload - mode=" << f->fetchMode() << " fPath=" << fPath;
+#endif
+        op->fetchFileForMode(f, deltaPos, useCache);
+    }
+    // get the directory listing
+    dirW_->reload();
+
+}
+
+// called when an item is selected in the dir listing
+void OutputItemWidget::loadCurrentDirItemFile()
+{
+    if(!info_) {
+        return;
+    }
+
+    bool doReload = false;
+    bool useCache = !doReload;
+
+    messageLabel_->hide();
+    messageLabel_->stopLoadLabel();
+    messageLabel_->stopProgress();
+    fileLabel_->clear();
+    browser_->clear();
+    fetchInfo_->clearInfo();
+
+    std::string fPath;
+    VDir::FetchMode mode;
+    bool hasSelection = dirW_->currentSelection(fPath, mode);
+
+    if (hasSelection) {
+        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+
+#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+        UiLog().dbg()  << UI_FN_INFO << " mode=" << mode << " fPath=" << fPath;
+#endif
+        // if the fetchmode is not defined we use the normal fetch policy
+        if(mode == VDir::NoFetchMode) {
+            op->fetchFile(fPath, 0, useCache);
+        // otherwise we use the given fetch mode
+        } else {
+            op->fetchFileForMode(fPath, mode, useCache);
+        }
+        // get the directory listing
+        dirW_->reload();
+    }
+}
+
+bool OutputItemWidget::isJoboutLoaded() const
+{
+    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    Q_ASSERT(op);
+    auto f = browser_->file();
+    if (f) {
+        return f->sourcePath() == op->joboutFileName();
+    }
+    return false;
 }
 
 //------------------------------------
 // Directory contents
 //------------------------------------
 
-void OutputItemWidget::on_dirReloadTb__clicked()
+// should only be invoked from dirW_
+void OutputItemWidget::slotUpdateDirs()
 {
-    dirReloadTb_->setEnabled(false);
-    updateDir(false);  // get the directory listing
+    dirProvider_->info(info_);
 }
 
-void OutputItemWidget::setCurrentInDir(const std::string& fullName,VFile::FetchMode fetchMode)
+//This slot is called when a file item is selected in the dir view
+void OutputItemWidget::slotDirItemSelected()
 {
-    if(!dirModel_->isEmpty())
+    loadCurrentDirItemFile();
+}
+
+void OutputItemWidget::slotShowDir(bool st)
+{
+    dirW_->showIt(st);
+    Q_ASSERT(showDirProp_);
+    showDirProp_->setValue(st);
+}
+
+void OutputItemWidget::adjustShowDirTb()
+{
+    showDirTb_->setChecked(dirW_->isNotInDisabledState());
+    Q_ASSERT(showDirProp_);
+    showDirProp_->setValue(showDirTb_->isChecked());
+}
+
+void OutputItemWidget::shrinkDirPanel()
+{
+    int wHeight=size().height();
+    if(wHeight > 100)
     {
-        //Try to preserve the selection
-        ignoreOutputSelection_=true;
-
-        VDir::FetchMode fm=VDir::NoFetchMode;
-        switch(fetchMode)
-        {
-        case VFile::LocalFetchMode:
-            fm=VDir::LocalFetchMode;
-            break;
-        case VFile::ServerFetchMode:
-            fm=VDir::ServerFetchMode;
-            break;
-        case VFile::LogServerFetchMode:
-            fm=VDir::LogServerFetchMode;
-            break;
-        default:
-            break;
-        }
-
-        QModelIndex idx=dirModel_->itemToIndex(fullName,fm);
-        if(idx.isValid())
-            dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
-
-        ignoreOutputSelection_=false;
+        QList<int> sizes = {wHeight,0};
+        splitter_->setSizes(sizes);
     }
-}
-
-void OutputItemWidget::updateDir(const std::vector<VDir_ptr>& dirs,bool restartTimer)
-{
-UI_FUNCTION_LOG
-
-    if(restartTimer)
-		updateDirTimer_->stop();
-
-    bool status=false;
-    for(const auto & dir : dirs)
-    {
-        if(dir && dir->count() > 0)
-        {
-            status=true;
-            break;
-        }
-    }
-
-	if(status)
-	{
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
-        op->setDirectories(dirs);
-
-        std::string fullName;
-        VDir::FetchMode fetchMode;
-        currentDesc(fullName,fetchMode);
-
-		dirView_->selectionModel()->clearSelection();
-        dirModel_->setData(dirs,op->joboutFileName());
-        //dirWidget_->show();
-
-        //Adjust column width
-        if(!dirColumnsAdjusted_)
-        {
-            dirColumnsAdjusted_=true;
-            for(int i=0; i< dirModel_->columnCount()-1; i++)               
-                dirView_->resizeColumnToContents(i);
-
-            if(dirModel_->columnCount() > 1)
-                dirView_->setColumnWidth(1,dirView_->columnWidth(0));
-
-        }
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-        UiLog().dbg() << " dir item count=" << dirModel_->rowCount();
-#endif
-		//Try to preserve the selection
-		ignoreOutputSelection_=true;
-        QModelIndex idx=dirModel_->itemToIndex(fullName,fetchMode);
-        if(idx.isValid())
-            dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
-
-        ignoreOutputSelection_=false;
-	}
-	else
-	{
-        //dirWidget_->hide();
-		dirModel_->clearData();
-	}
-
-	if(restartTimer)
-		updateDirTimer_->start(updateDirTimeout_);
-}
-
-void OutputItemWidget::updateDir(bool restartTimer)
-{
-	dirProvider_->info(info_);
-
-	//Remember the selection
-	//std::string fullName=currentFullName();
-	//updateDir(restartTimer,fullName);
-}
-
-void OutputItemWidget::slotUpdateDir()
-{
-	updateDir(false);
-}
-
-void OutputItemWidget::enableDir(bool status)
-{
-	if(status)
-	{       
-        dirWidget_->show();
-        dirMessageLabel_->hide();
-        reloadTb_->setEnabled(true);
-	}
-	else
-	{
-        dirWidget_->hide();
-        dirModel_->clearData();
-        dirMessageLabel_->show();
-	}
-}
-
-void OutputItemWidget::displayDirErrors(const std::vector<std::string>& errorVec)
-{   
-    QString s;
-    if(errorVec.size() > 0)
-    {
-        QColor col(70,71,72);
-        s=Viewer::formatBoldText("Output directory: ",col);
-
-        if(errorVec.size() > 1)
-        {
-            for(size_t i=0; i < errorVec.size(); i++)
-                s+=Viewer::formatBoldText("[" + QString::number(i+1) + "] ",col) +
-                    QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
-        }
-        else if(errorVec.size() == 1)
-            s+=QString::fromStdString(errorVec[0]);
-    }
-
-    if(!s.isEmpty())
-        dirMessageLabel_->showError(s);
-    else
-        dirMessageLabel_->hide();
 }
 
 //---------------------------------------------
@@ -728,7 +636,6 @@ void OutputItemWidget::on_gotoLineTb__clicked()
 	browser_->gotoLine();
 }
 
-
 // Called when we load a new node's information into the panel, or
 // when we move to the panel from another one.
 // If the search box is open, then search for the first matching item;
@@ -738,13 +645,6 @@ void OutputItemWidget::on_gotoLineTb__clicked()
 void OutputItemWidget::searchOnReload()
 {
 	browser_->searchOnReload(userClickedReload_);
-}
-
-//This slot is called when a file item is selected in the dir view
-void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
-{
-	if(!ignoreOutputSelection_)
-        getCurrentFile(false);
 }
 
 //-----------------------------------------
@@ -767,7 +667,7 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 // Show line number
 //-----------------------------------------
 
-void OutputItemWidget::on_lineNumberTb__clicked(bool st)
+void OutputItemWidget::slotLineNumber(bool st)
 {
     browser_->setShowLineNumbers(st);
     Q_ASSERT(lineNumProp_);
@@ -822,7 +722,7 @@ void OutputItemWidget::on_toLineEndTb__clicked()
 // Save local copy of file
 //-----------------------------------------
 
-void OutputItemWidget::on_saveFileAsTb__clicked()
+void OutputItemWidget::slotSaveFileAs()
 {
 	if (browser_->isFileLoaded())
 	{
@@ -842,25 +742,25 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 // Copy file path
 //-----------------------------------------
 
-void OutputItemWidget::on_copyPathTb__clicked()
+void OutputItemWidget::slotCopyPath()
 {
-    std::string fullName;
-    VDir::FetchMode fetchMode;
-    currentDesc(fullName,fetchMode);
-
-    if(!fullName.empty())
-    {
-        QString txt=QString::fromStdString(fullName);
+    auto f = browser_->file();
+    if (f) {
+        auto fPath = f->sourcePath();
+        if(!fPath.empty())
+        {
+            QString txt=QString::fromStdString(fPath);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        QClipboard* cb=QGuiApplication::clipboard();
-        cb->setText(txt, QClipboard::Clipboard);
-        cb->setText(txt, QClipboard::Selection);
+            QClipboard* cb=QGuiApplication::clipboard();
+            cb->setText(txt, QClipboard::Clipboard);
+            cb->setText(txt, QClipboard::Selection);
 #else
-        QClipboard* cb=QApplication::clipboard();
-        cb->setText(txt, QClipboard::Clipboard);
-        cb->setText(txt, QClipboard::Selection);
+            QClipboard* cb=QApplication::clipboard();
+            cb->setText(txt, QClipboard::Clipboard);
+            cb->setText(txt, QClipboard::Selection);
 #endif
+        }
     }
 }
 
@@ -875,9 +775,9 @@ void OutputItemWidget::on_expandFileInfoTb__clicked(bool st)
     fileLabel_->setCompact(!st);
 }
 
-//-------------------------
-// Update
-//-------------------------
+//------------------------------
+// NodeObserver notofocations
+//------------------------------
 
 void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
 {
@@ -887,17 +787,14 @@ void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect
         if(it == ecf::Aspect::STATE || it == ecf::Aspect::DEFSTATUS ||
             it == ecf::Aspect::SUSPENDED)
         {
-            if(submittedWarning_)
-               getLatestFile();
+            if(submittedWarning_) {
+               loadCurrentJobout();
+            }
             else if(info_ && info_->node() == n && info_->node()->isSubmitted())
             {
-                auto* op=static_cast<OutputFileProvider*>(infoProvider_);
-                Q_ASSERT(op);
-                std::string fullName;
-                VDir::FetchMode fetchMode;
-                currentDesc(fullName,fetchMode);
-                if(fullName == op->joboutFileName())
-                    getLatestFile();
+                if (isJoboutLoaded()) {
+                    loadCurrentJobout();
+                }
             }
             return;
         }

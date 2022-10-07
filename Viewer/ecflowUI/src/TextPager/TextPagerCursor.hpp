@@ -23,7 +23,7 @@
 class TextPagerEdit;
 class TextPagerLayout;
 class TextPagerDocument;
-class TextCursorSharedPrivate;
+struct TextCursorSharedPrivate;
 class TextPagerCursor
 {
 public:
@@ -132,7 +132,7 @@ private:
     friend class TextPagerEdit;
     friend class TextLayoutCacheManager;
     friend class TextPagerDocument;
-    friend class TextDocumentPrivate;
+    friend struct TextDocumentPrivate;
 };
 
 QDebug operator<<(QDebug dbg, const TextPagerCursor &cursor);

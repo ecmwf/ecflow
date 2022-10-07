@@ -44,7 +44,7 @@ NodePanel::~NodePanel()
 //
 //=============================================
 
-Dashboard *NodePanel::addWidget(QString id)
+Dashboard *NodePanel::addWidget(QString /*id*/)
 {
   	auto  *nw=new Dashboard("",this);
 

@@ -43,7 +43,7 @@ public:
 	VInfo_ptr currentSelection() override;
     void setCurrentSelection(VInfo_ptr n) override;
 	void selectFirstServer() override {}
-	void setModel(TableNodeSortModel *model);
+    void setTableModel(TableNodeSortModel *model);
 
 	void notifyChange(VProperty* p) override;
 

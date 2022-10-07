@@ -41,9 +41,15 @@ protected:
     int viewportHeight_{0};
 };
 
+class OutputBrowserState;
+
 class OutputBrowser : public QWidget
 {
 Q_OBJECT
+    friend class OutputBrowserState;
+    friend class OutputBrowserEmptyState;
+    friend class OutputBrowserNormalState;
+    friend class OutputBrowserReloadState;
 
 public:
 	explicit OutputBrowser(QWidget* parent);
@@ -52,6 +58,8 @@ public:
     void clear();
     void loadFile(VFile_ptr file);
     bool isFileLoaded();
+    bool contentsChangedOnLastLoad() const {return contentsChangedOnLastLoad_;}
+    void reloadBegin();
     void saveCurrentFile(QString &fileNameToSaveTo);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
@@ -70,6 +78,8 @@ public:
     bool isWordWrapSupported() const;
     void setSearchButtons(QToolButton* searchTb);
     void setFilterButtons(QToolButton* statusTb,QToolButton* optionTb);
+    size_t sizeInBytes() const;
+    VFile_ptr file() const {return file_;}
 
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
@@ -79,19 +89,31 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void wordWrapSupportChanged(bool);
 
+protected:
+    void clearIt();
+    void loadIt(VFile_ptr);
+    void reloadIt(VFile_ptr);
+    void transitionTo(OutputBrowserState* state);
+
 private:
     enum IndexType {BasicIndex=0,PagerIndex=1,HtmlIndex=2};
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
     bool isHtmlFile(QString fileName);
-    void loadFile(QString fileName);
-    void loadText(QString text,QString fileName,size_t dataSize, bool resetFile=true);
     void loadFilteredFile(VFile_ptr file);
     void setCursorPos(qint64 pos);
+    VFile_ptr filterIt();
+    bool reloadLocal(VFile_ptr f);
+    void loadContents(bool manageLocal);
+    void loadContentsFromDisk(QString contentsFileName, QString fileName,bool manageLocal);
+    void loadContentsFromText(QString text,QString fileName,size_t dataSize, bool resetFile=true);
+    bool addDeltaContents(VFile_ptr);
+    bool addDeltaContentsFromDisk(QString deltaFileName, QString fileName, size_t fileSize);
+    bool addDeltaContentsFromText(QString deltaTxt,QString fileName, size_t fileSize);
 
     QStackedWidget *stacked_;
 	PlainTextEdit* textEdit_;
-	TextPagerWidget* textPager_;
+    TextPagerWidget* textPager_;
     HtmlEdit* htmlEdit_;
 	TextEditSearchLine* searchLine_;
     TextFilterWidget* textFilter_;
@@ -100,11 +122,14 @@ private:
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
     QToolButton* searchTb_;
+    OutputBrowserState* state_{nullptr};
 
-    //we keep a reference to it to make sure that it does not get deleted while
+    //we keep a reference to it to ensure that it does not get deleted while
     //it is being displayed
     VFile_ptr file_;
-    VFile_ptr oriFile_;
+    VFile_ptr contentsFile_;
+    bool contentsChangedOnLastLoad_{false};
+    qint64 lastLoadedSizeFromDisk_{0};
 
     static int minPagerTextSize_;
 	static int minPagerSparseSize_;

@@ -6,30 +6,65 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 //============================================================================
+
 #ifndef OUTPUTFETCHINFO_HPP
 #define OUTPUTFETCHINFO_HPP
 
 #include <QWidget>
 
+#include <string>
+#include <vector>
+
 #include "VInfo.hpp"
 #include "VReply.hpp"
 
-class QLabel;
-class QTextEdit;
+class QAbstractButton;
+class QButtonGroup;
+
+namespace Ui {
+    class OutputFetchInfo;
+}
 
 class OutputFetchInfo : public QWidget
 {
+    Q_OBJECT
 public:
-    OutputFetchInfo(QWidget* parent=nullptr);
-    void setInfo(VReply*,VInfo_ptr);
+    OutputFetchInfo(QWidget* parent);
     void clearInfo();
+    void setInfo(VReply*, VInfo_ptr info=nullptr);
+    void setError(QString);
+    void setError(const std::vector<std::string>& errorVec);
 
-private:
+protected Q_SLOTS:
+    void buttonClicked(QAbstractButton*);
+
+protected:
+    virtual QString makeHtml(VReply*, VInfo_ptr info)=0;
     QString buildList(QStringList,bool ordered=false);
+    QString formatErrors(const std::vector<std::string>& errorVec) const;
+    void parseTry(QString s, QString& path, QString& msg);
 
-    QLabel* label_;
-    QTextEdit* te_;
+    Ui::OutputFetchInfo* ui_{nullptr};
+    QButtonGroup *bGroup_{nullptr};
+};
 
+class OutputFileFetchInfo : public OutputFetchInfo
+{
+public:
+    using OutputFetchInfo::OutputFetchInfo;
+
+protected:
+    QString makeHtml(VReply*, VInfo_ptr info) override;
+};
+
+class OutputDirFetchInfo : public OutputFetchInfo
+{
+public:
+    using OutputFetchInfo::OutputFetchInfo;
+
+protected:
+    QString makeHtml(VReply*, VInfo_ptr info) override;
+    QString makeSearchPath(QString path) const;
 };
 
 #endif // OUTPUTFETCHINFO_HPP

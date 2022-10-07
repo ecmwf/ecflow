@@ -1033,7 +1033,7 @@ void LogLoadData::loadMultiLogFile(const std::string& logFile,const std::vector<
     }
 }
 
-void LogLoadData::loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi,
+void LogLoadData::loadLogFileCore(const std::string& logFile,size_t /*maxReadSize*/,const std::vector<std::string>& /*suites*/, bool /*multi*/,
                                   LogConsumer* logConsumer)
 {
     /// Will read the log file.

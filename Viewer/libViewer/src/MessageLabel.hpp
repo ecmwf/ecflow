@@ -17,6 +17,70 @@ class QHBoxLayout;
 class QLabel;
 class QProgressBar;
 class QToolButton;
+class QTimer;
+
+class DelayedProgressDef
+{
+public:
+    DelayedProgressDef() = default;
+    DelayedProgressDef(QString text, int max=0) : infoText_(text), max_(max) {}
+    void clear() {infoText_.clear(); progText_.clear(); max_=0; progVal_=0;}
+    QString infoText_;
+    QString progText_;
+    int max_{0};
+    int progVal_{0};
+};
+
+class MessageLabelProgWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MessageLabelProgWidget(QWidget *parent);
+
+    void startProgress(int max);
+    void showProgressCancelButton(bool);
+    void stopProgress();
+    void progress(QString text,int value);
+    void startDelayedProgress(QString text, int max=0);
+
+protected Q_SLOTS:
+    void cancelButtonClicked();
+    void showDelayedProgress();
+
+Q_SIGNALS:
+    void showInfoRequested(QString);
+    void stoppedByButton();
+
+private:
+    QLabel*  progLabel_{nullptr};
+    QProgressBar* progBar_{nullptr};
+    QToolButton* progCancelTb_{nullptr};
+    QTimer* delayedProgressTimer_{nullptr};
+    DelayedProgressDef delayedProgressDef_;
+    int delayInMs_{500}; // ms
+};
+
+class MessageLabelLoadWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MessageLabelLoadWidget(QWidget *parent);
+    void startLoadLabel(bool showCacelButton);
+    void stopLoadLabel();
+
+protected Q_SLOTS:
+    void cancelButtonClicked();
+
+Q_SIGNALS:
+    void stoppedByButton();
+
+private:
+    QLabel* loadIconLabel_{nullptr};
+    QLabel* loadTextLabel_{nullptr};
+    QToolButton* loadCancelTb_{nullptr};
+};
 
 class MessageLabel : public QWidget
 {
@@ -26,7 +90,6 @@ public:
 
     enum Type {NoType,InfoType,WarningType,ErrorType,TipType};
 
-	void showInfo(QString);
 	void showWarning(QString);
     void showError(QString);
     void showTip(QString);
@@ -36,17 +99,18 @@ public:
     void appendTip(QString);
     void startLoadLabel(bool showCacelButton=false);
     void stopLoadLabel();
+
     void startProgress(int max=0);
-    void showProgressCancelButton(bool);
     void stopProgress();
     void progress(QString text,int value);
+    void startDelayedProgress(QString text, int max=0);
+
 	void setShowTypeTitle(bool);
 	void clear();
     void setNarrowMode(bool);
 
-protected Q_SLOTS:
-    void stopLoadLabelByButton();
-    void stopProgressByButton();
+public Q_SLOTS:
+    void showInfo(QString);
 
 Q_SIGNALS:
     void loadStoppedByButton();
@@ -59,20 +123,14 @@ private:
     void showMessage(const Type&,QString);
     void appendMessage(const Type&,QString);
 
-	bool showTypeTitle_;
-    bool narrowMode_;
-	Type currentType_;
-	QLabel *pixLabel_;
-	QLabel* msgLabel_;
-    QWidget* loadWidget_;
-    QLabel* loadIconLabel_;
-    QLabel* loadTextLabel_;
-    QToolButton* loadCancelTb_;
-	QHBoxLayout* layout_;
-    QWidget* progWidget_;
-    QLabel*  progLabel_;
-    QProgressBar* progBar_;
-    QToolButton* progCancelTb_;
+    bool showTypeTitle_{true};
+    bool narrowMode_{false};
+    Type currentType_{NoType};
+    QHBoxLayout* layout_;
+    QLabel *pixLabel_{nullptr};
+    QLabel* msgLabel_{nullptr};
+    MessageLabelLoadWidget* loadWidget_{nullptr};
+    MessageLabelProgWidget* progWidget_{nullptr};
     QString message_;
 };
 

@@ -131,7 +131,7 @@ void VTreeServer::adjustFirstScan()
 // ServerObserver methods
 //--------------------------------------------------
 
-void VTreeServer::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)
+void VTreeServer::notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&)
 {
     //When the defs changed we need to update the server node in the model/view
     Q_EMIT dataChanged(this);
@@ -144,7 +144,7 @@ void VTreeServer::notifyServerDelete(ServerHandler* s)
     Q_ASSERT(0);
 }
 
-void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
+void VTreeServer::notifyBeginServerScan(ServerHandler*,const VServerChange& )
 {
     //When the server scan begins we must be in inScan mode so that the model should think that
     //this server tree is empty.
@@ -189,7 +189,7 @@ void VTreeServer::notifyEndServerScan(ServerHandler* /*server*/)
     adjustFirstScan();
 }
 
-void VTreeServer::notifyBeginServerClear(ServerHandler* server)
+void VTreeServer::notifyBeginServerClear(ServerHandler*)
 {
     Q_EMIT beginServerClear(this,-1);
     changeInfo_->clear();
@@ -199,24 +199,24 @@ void VTreeServer::notifyBeginServerClear(ServerHandler* server)
     inScan_=true;
 }
 
-void VTreeServer::notifyEndServerClear(ServerHandler* server)
+void VTreeServer::notifyEndServerClear(ServerHandler*)
 {
 	Q_EMIT endServerClear(this,-1);
 }
 
-void VTreeServer::notifyServerConnectState(ServerHandler* server)
+void VTreeServer::notifyServerConnectState(ServerHandler*)
 {
 	Q_EMIT rerender();
 }
 
-void VTreeServer::notifyServerActivityChanged(ServerHandler* server)
+void VTreeServer::notifyServerActivityChanged(ServerHandler*)
 {
 	Q_EMIT dataChanged(this);
 }
 
 //This is called when a normal sync (neither reset nor rescan) is finished. We have delayed the update of the
 //filter to this point but now we need to do it.
-void VTreeServer::notifyEndServerSync(ServerHandler* server)
+void VTreeServer::notifyEndServerSync(ServerHandler*)
 {
 #ifdef _UI_VMODELDATA_DEBUG
     UI_FUNCTION_LOG_S(server_)
@@ -228,11 +228,20 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
     changeInfo_->clear();
 }
 
+void VTreeServer::notifyServerRenamed(ServerHandler* s, const std::string& oldName)
+{
+    refreshServerNode();
+    if (expandState_) {
+        expandState_->updateServerName(s->name());
+    }
+    Q_EMIT serverRenamed(this, oldName);
+}
+
 //--------------------------------------------------
 // NodeObserver methods
 //--------------------------------------------------
 
-void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
+void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& /*change*/)
 {
 #ifdef _UI_VMODELDATA_DEBUG
     UI_FUNCTION_LOG_S(server_)
@@ -364,7 +373,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 	}
 }
 
-void VTreeServer::notifyEndNodeChange(const VNode* vnode, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
+void VTreeServer::notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&)
 {
 }
 
@@ -863,6 +872,13 @@ void VTreeServer::setExpandState(ExpandState* es)
     expandState_=es;
 }
 
+void VTreeServer::refreshServerNode()
+{
+    if (tree_) {
+        Q_EMIT nodeChanged(this, tree_->root());
+    }
+}
+
 //==========================================
 //
 // VTableServer
@@ -907,6 +923,12 @@ int VTableServer::indexOf(const VNode* node) const
     return filter_->indexOf(node);
 }
 
+void VTableServer::notifyServerRenamed(ServerHandler*, const std::string& oldName)
+{
+    refreshServerNode();
+    Q_EMIT serverRenamed(this, oldName);
+}
+
 //--------------------------------------------------
 // ServerObserver methods
 //--------------------------------------------------
@@ -916,14 +938,14 @@ void VTableServer::notifyServerDelete(ServerHandler* s)
     UI_ASSERT(false,"server: " << s->longName());
 }
 
-void VTableServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
+void VTableServer::notifyBeginServerScan(ServerHandler*,const VServerChange&)
 {
     inScan_=true;
     Q_ASSERT(nodeNum() == 0);
 	//At this point we do not know how many nodes we will have in the filter!
 }
 
-void VTableServer::notifyEndServerScan(ServerHandler* server)
+void VTableServer::notifyEndServerScan(ServerHandler*)
 {
     Q_ASSERT(inScan_);
     filter_->update();
@@ -932,12 +954,12 @@ void VTableServer::notifyEndServerScan(ServerHandler* server)
     Q_EMIT endServerScan(this,nodeNum());
 }
 
-void VTableServer::notifyBeginServerClear(ServerHandler* server)
+void VTableServer::notifyBeginServerClear(ServerHandler*)
 {
     Q_EMIT beginServerClear(this,nodeNum());
 }
 
-void VTableServer::notifyEndServerClear(ServerHandler* server)
+void VTableServer::notifyEndServerClear(ServerHandler*)
 {
     int oriNodeNum=nodeNum();
     filter_->clear();
@@ -945,12 +967,12 @@ void VTableServer::notifyEndServerClear(ServerHandler* server)
     Q_EMIT endServerClear(this,oriNodeNum);
 }
 
-void VTableServer::notifyServerConnectState(ServerHandler* server)
+void VTableServer::notifyServerConnectState(ServerHandler*)
 {
 	Q_EMIT rerender();
 }
 
-void VTableServer::notifyServerActivityChanged(ServerHandler* server)
+void VTableServer::notifyServerActivityChanged(ServerHandler*)
 {
 	Q_EMIT dataChanged(this);
 }
@@ -964,12 +986,12 @@ void VTableServer::notifyEndServerSync(ServerHandler*)
     Q_EMIT updateEnd();
 }
 
-void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
+void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>&,const VNodeChange&)
 {
     Q_EMIT nodeChanged(this,node);
 }
 
-void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
+void VTableServer::notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&)
 {
 }
 
@@ -1121,6 +1143,9 @@ void VModelData::connectToModel(VModelServer* d)
 
 	connect(d,SIGNAL(endServerClear(VModelServer*,int)),
 		model_,SLOT(slotEndServerClear(VModelServer*,int)));
+
+    connect(d,SIGNAL(serverRenamed(VModelServer*, const std::string&)),
+        this,SLOT(slotServerRenamed(VModelServer*, const std::string&)));
 
 	//The model relays this signal
 	connect(d,SIGNAL(rerender()),
@@ -1316,15 +1341,18 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 #endif
 			//Notifies the model that the change has finished
             Q_EMIT serverRemoveEnd(nodeNum);
+
+            if (filterDef_) {
+                filterDef_->serverRemoved(item->name());
+            }
             return;
 		}
 		i++;
     }
 }
 
-void VModelData::notifyServerFilterChanged(ServerItem* item)
+void VModelData::notifyServerFilterChanged(ServerItem*)
 {
-	//Q_EMIT dataChanged();
 }
 
 void VModelData::notifyServerFilterDelete()
@@ -1404,6 +1432,15 @@ bool VModelData::isFilterNull() const
     }
 
     return true;
+}
+
+
+void VModelData::slotServerRenamed(VModelServer* s, const std::string& oldName)
+{
+//    UiLog().dbg() << UI_FN_INFO << " old_name=" << oldName;
+    if (filterDef_ && s && s->server_) {
+        filterDef_->serverRenamed(s->server_->name(), oldName);
+    }
 }
 
 //==============================================================

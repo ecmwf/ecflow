@@ -262,6 +262,35 @@ NodeQueryListOption* NodeQuery::stateOption() const
     return op->isList();
 }
 
+
+bool NodeQuery::removeServer(const std::string& serverName)
+{
+    if(servers_.empty()) {
+        return false;
+    }
+    if (servers_.removeAll(QString::fromStdString(serverName)) > 0) {
+        buildQueryString();
+        return true;
+    }
+    return false;
+}
+
+bool NodeQuery::renameServer(const std::string& newName, const std::string& oldName)
+{
+    if(servers_.empty())
+        return false;
+
+    QString sNew = QString::fromStdString(newName);
+    QString sOld = QString::fromStdString(oldName);
+    int idx = servers_.indexOf(sOld);
+    if (idx >= 0) {
+        servers_[idx] = sNew;
+        buildQueryString();
+        return true;
+    }
+    return false;
+}
+
 void NodeQuery::buildQueryString()
 {
 #ifdef _UI_NODEQUERY_DEBUG

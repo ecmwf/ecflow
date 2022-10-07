@@ -123,6 +123,16 @@ bool ServerFilter::isFiltered(ServerHandler* server) const
     return false;
 }
 
+bool ServerFilter::isFiltered(const std::string& serverName) const
+{
+    for(auto item : items_)
+    {
+        if(item->serverHandler()->name() == serverName)
+            return true;
+    }
+    return false;
+}
+
 void ServerFilter::writeSettings(VSettings* vs) const
 {
 	std::vector<std::string> array;

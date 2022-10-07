@@ -78,11 +78,11 @@ protected:
 	std::string host_;
 	std::string port_;
     std::string user_;
-	bool favourite_;
-    bool system_;
-    bool ssl_;
-	int useCnt_;
-	ServerHandler* handler_;
+    bool favourite_{false};
+    bool system_{false};
+    bool ssl_{false};
+    int useCnt_{0};
+    ServerHandler* handler_{nullptr};
 
 	std::vector<ServerItemObserver*> observers_;
 };

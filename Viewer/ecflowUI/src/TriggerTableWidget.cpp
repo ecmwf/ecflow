@@ -221,7 +221,7 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
     txt.replace("<TGTYPE>",tgType);
 
     depLabel_->setText(txt);
-    depBrowser_->reload(item);
+    depBrowser_->reloadItem(item);
 }
 
 
@@ -275,7 +275,7 @@ void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
     txt.replace("<TYPE>",tgType);
 
     depLabel_->setText(txt);
-    depBrowser_->reload(item);
+    depBrowser_->reloadItem(item);
 }
 
 void TriggerTableWidget::slotShowDependencyInfo(bool b)

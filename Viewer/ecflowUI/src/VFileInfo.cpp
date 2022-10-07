@@ -48,7 +48,7 @@ QString VFileInfo::formatSize(unsigned int size)
 	else if(size < 1024*1024*1024)
 	  	return QString::number(size/(1024*1024)) + " MB";
 	else
-	  	return QString::number(size/(1024*1024*1024)) + " GB";
+        return QString::number(static_cast<float>(size)/(1024.*1024.*1024.), 'f', 1) + " GB";
 
  	return QString();
 }

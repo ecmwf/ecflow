@@ -14,9 +14,12 @@
 #include <QDateTime>
 #include <QLabel>
 
+#include "VFile.hpp"
 #include "VDir.hpp"
 
+class VProperty;
 class VReply;
+class TimelineWidget;
 
 class FileInfoLabel : public QLabel
 {
@@ -24,9 +27,15 @@ public:
 	explicit FileInfoLabel(QWidget* parent=nullptr);
 
     void update(VReply*,QString str=QString());
+    void update(VReply*,VFile_ptr, QString str=QString());
+    void update(QString fullText, QString compactText);
+    void clearIt();
     void setCompact(bool);
     static QString formatDate(QDateTime);
     static QString formatFileSize(QString,qint64 size);
+    static QString formatKwPair(QString label, QString val);
+    static QString formatKey(QString key);
+    static QString formatHighlight(QString key);
 
 protected:
     QString buildTooltipText();
@@ -34,6 +43,7 @@ protected:
     bool compact_{false};
     QString fullText_;
     QString compactText_;
+    VProperty* showTransferDetailsProp_{nullptr};
 };
 
 class DirInfoLabel : public FileInfoLabel

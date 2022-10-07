@@ -78,12 +78,15 @@ public:
     virtual VTreeServer* treeServer() const {return nullptr;}
     virtual VTableServer* tableServer() const {return nullptr;}
 
+    virtual void refreshServerNode()=0;
+
 Q_SIGNALS:
     void dataChanged(VModelServer*);
 	void beginServerScan(VModelServer*,int);
 	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*,int);
 	void endServerClear(VModelServer*,int);
+    void serverRenamed(VModelServer*, const std::string& /*oldName*/);
 
 	void rerender();
 
@@ -115,6 +118,7 @@ public:
      ExpandState* expandState() const {return expandState_;}
      void setExpandState(ExpandState*);
      void deleteExpandState();
+     void refreshServerNode() override;
 
      //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
@@ -126,6 +130,7 @@ public:
 	 void notifyServerConnectState(ServerHandler* server) override;
 	 void notifyServerActivityChanged(ServerHandler* server) override;
 	 void notifyEndServerSync(ServerHandler* server) override;
+     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
@@ -176,9 +181,10 @@ public:
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
+     void refreshServerNode() override {}
 
 	 //From ServerObserver
-     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+     void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
      void notifyServerDelete(ServerHandler*) override;
 	 void notifyBeginServerClear(ServerHandler* server) override;
      void notifyEndServerClear(ServerHandler* server) override;
@@ -187,6 +193,7 @@ public:
 	 void notifyServerConnectState(ServerHandler* server) override;
 	 void notifyServerActivityChanged(ServerHandler* server) override;
 	 void notifyEndServerSync(ServerHandler* server) override;
+     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
@@ -235,7 +242,6 @@ public:
     bool isFilterNull() const;
     virtual void deleteExpandState() {}
 
-
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*) override;
 	void notifyServerFilterRemoved(ServerItem*) override;
@@ -244,6 +250,7 @@ public:
 
 public Q_SLOTS:
     void slotFilterDefChanged();
+    void slotServerRenamed(VModelServer*, const std::string& /*oldName*/);
 
 Q_SIGNALS:
     //void filterChanged();

@@ -381,11 +381,11 @@ void NodeQueryResult::notifyBeginServerClear(ServerHandler* server)
 	serverClear(server);
 }
 
-void NodeQueryResult::notifyEndServerClear(ServerHandler* server)
+void NodeQueryResult::notifyEndServerClear(ServerHandler*)
 {
 }
 
-void NodeQueryResult::notifyBeginServerScan(ServerHandler* server,const VServerChange&)
+void NodeQueryResult::notifyBeginServerScan(ServerHandler*,const VServerChange&)
 {
 	Q_EMIT beginReset();
 }
@@ -396,8 +396,13 @@ void NodeQueryResult::notifyEndServerScan(ServerHandler* server)
 	Q_EMIT endReset();
 }
 
+void NodeQueryResult::notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/)
+{
+    Q_EMIT beginReset();
+    Q_EMIT endReset();
+}
 
-void NodeQueryResult::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& vn)
+void NodeQueryResult::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 	bool changed=false;
 	for(auto it : aspect)

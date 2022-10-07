@@ -65,7 +65,7 @@ int MainWindow::maxWindowNum_=25;
 LogViewerCom* MainWindow::logCom_=NULL;
 #endif
 
-MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
+MainWindow::MainWindow(QStringList /*idLst*/,QWidget *parent) :
     QMainWindow(parent),
     serverSyncNotifyTb_(nullptr)
 {
@@ -139,20 +139,18 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     //--------------
 
     //Add server list sync notification
-    if(ServerList::instance()->hasSyncChange())
-    {
-        //Add server list sync notification
-        serverSyncNotifyTb_=new QToolButton(this);
-        serverSyncNotifyTb_->setAutoRaise(true);
-        serverSyncNotifyTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
-        serverSyncNotifyTb_->setText("Server list updated");
-        serverSyncNotifyTb_->setToolTip("Your local copy of the <b>system server list</b> was updated. Click to see the changes.");
-        statusBar()->addWidget(serverSyncNotifyTb_);
-
-        connect(serverSyncNotifyTb_,SIGNAL(clicked(bool)),
+    serverSyncNotifyTb_=new QToolButton(this);
+    serverSyncNotifyTb_->setAutoRaise(true);
+    serverSyncNotifyTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
+    serverSyncNotifyTb_->setText("Server list updated");
+    serverSyncNotifyTb_->setToolTip("Your local copy of the <b>system server list</b> was updated. Click to see the changes.");
+    statusBar()->addWidget(serverSyncNotifyTb_);
+    serverSyncNotifyTb_->hide();
+    connect(serverSyncNotifyTb_,SIGNAL(clicked(bool)),
             this,SLOT(slotServerSyncNotify(bool)));
-    }
+
+    initServerSyncTbInternal();
 
     //Add notification widget
     auto* chw=new ChangeNotifyWidget(this);
@@ -460,6 +458,23 @@ bool MainWindow::selectInTreeView(VInfo_ptr info)
     return nodePanel_->selectInTreeView(info);
 }
 
+void MainWindow::initServerSyncTbInternal()
+{
+    auto manager = ServerList::instance()->systemFileManager();
+    if(manager && manager->hasInfo())
+    {
+        if (!manager->unfetchedFiles().empty()) {
+            serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/error.svg"));
+            serverSyncNotifyTb_->setText("System server list updated (with some errors)");
+        } else {
+            serverSyncNotifyTb_->setIcon(QPixmap(":/viewer/info.svg"));
+            serverSyncNotifyTb_->setText("System server list updated");
+        }
+        Q_ASSERT(serverSyncNotifyTb_);
+        serverSyncNotifyTb_->show();
+    }
+}
+
 void MainWindow::slotServerSyncNotify(bool)
 {
     if(serverSyncNotifyTb_)
@@ -650,6 +665,14 @@ void MainWindow::cleanUpOnQuit(MainWindow*)
         win->cleanUpOnQuit();
 }
 
+//Add server list sync notification
+void MainWindow::initServerSyncTb()
+{
+    Q_FOREACH(MainWindow *win,windows_) {
+        win->initServerSyncTbInternal();
+    }
+}
+
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
 #if 0
@@ -809,7 +832,7 @@ void MainWindow::reload()
 	}
 }
 
-void MainWindow::saveSession(SessionItem* s)
+void MainWindow::saveSession(SessionItem*)
 {
 
 }

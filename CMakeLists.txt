@@ -25,7 +25,7 @@ endif()
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ) # Before project()  
 
 # this will generate variables, see ACore/ecflow_version.h.in
-project( ecflow LANGUAGES CXX VERSION 5.8.4 )
+project( ecflow LANGUAGES CXX VERSION 5.9.0 )
 
 
 include( ecbuild_system NO_POLICY_SCOPE )
@@ -163,6 +163,11 @@ if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_SITE_TAG))
 	ecbuild_error("If ENABLE_UI_USAGE_LOG is set, UI_LOG_SITE_TAG must also be set")
 endif()
 
+# sanity check - cannot set UI_SYSTEM_SERVERS_LIST if UI IS OFF
+if(UI_SYSTEM_SERVERS_LIST AND (NOT ENABLE_UI))
+        ecbuild_warn("Cannot set UI_SYSTEM_SERVERS_LIST if UI is not enabled")
+    set(UI_SYSTEM_SERVERS_LIST)
+endif()
 
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
@@ -181,15 +186,19 @@ if (ENABLE_UI)
 		ecbuild_info( "UI_BACKTRACE_EMAIL_ADDRESS_FILE : ${UI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
 	endif()
 
-    if(LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE)
-        ecbuild_info( "LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE : ${LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
-    endif()
+        if(LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE)
+            ecbuild_info( "LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE : ${LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
+        endif()
+
+        if(UI_SYSTEM_SERVERS_LIST)
+                ecbuild_info( "UI_SYSTEM_SERVERS_LIST : ${UI_SYSTEM_SERVERS_LIST}" )
+        endif()
 
 	ecbuild_info( "ENABLE_UI_USAGE_LOG        : ${ENABLE_UI_USAGE_LOG}" )
 	if(ENABLE_UI_USAGE_LOG)
-		ecbuild_info( "UI_LOG_FILE                : ${UI_LOG_FILE}" )
-        ecbuild_info( "LOGUI_LOG_FILE             : ${LOGUI_LOG_FILE}" )
-        ecbuild_info( "UI_LOG_SITE_TAG            : ${UI_LOG_SITE_TAG}" )
+            ecbuild_info( "UI_LOG_FILE                : ${UI_LOG_FILE}" )
+            ecbuild_info( "LOGUI_LOG_FILE             : ${LOGUI_LOG_FILE}" )
+            ecbuild_info( "UI_LOG_SITE_TAG            : ${UI_LOG_SITE_TAG}" )
 	endif()
 endif()
 ecbuild_info("")

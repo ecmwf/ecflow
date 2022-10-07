@@ -23,7 +23,7 @@
         },
         "status_change_time" : {
             "type"   : "period",
-            "label"  : "Status changed"
+            "label"  : "Status change"
         }
     },
     "attribute_query" : {

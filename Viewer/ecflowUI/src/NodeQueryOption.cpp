@@ -346,9 +346,8 @@ void NodeQueryComboOption::save(VSettings* vs)
     vs->put(name_.toStdString(),value().toStdString());
 }
 
-void NodeQueryComboOption::load(VSettings* vs)
+void NodeQueryComboOption::load(VSettings*)
 {
-
 }
 
 //===============================================
@@ -358,30 +357,40 @@ void NodeQueryComboOption::load(VSettings* vs)
 //===============================================
 
 NodeQueryPeriodOption::NodeQueryPeriodOption(VProperty* p) :
-  NodeQueryOption(p),
-  mode_(NoMode),
-  lastPeriod_(-1)
+  NodeQueryOption(p)
 {
 }
 
 void NodeQueryPeriodOption::clear()
 {
    mode_=NoMode;
-   lastPeriod_=-1;
-   lastPeriodUnits_.clear();
+   period_=-1;
+   periodUnits_.clear();
    fromDate_=QDateTime();
    toDate_=QDateTime();
    fromDate_.setTimeSpec(Qt::UTC);
    toDate_.setTimeSpec(Qt::UTC);
 }
 
-void NodeQueryPeriodOption::setLastPeriod(int interval,QString intervalUnits)
+void NodeQueryPeriodOption::setLastPeriod(int period,QString periodUnits)
 {
-    mode_=LastPeriodMode;
-    lastPeriod_=interval;
-    lastPeriodUnits_=intervalUnits;
-    fromDate_=QDateTime();
-    toDate_=QDateTime();
+    setPeriod(LastPeriodMode, period, periodUnits);
+}
+
+void NodeQueryPeriodOption::setOlderPeriod(int period,QString periodUnits)
+{
+    setPeriod(OlderPeriodMode, period, periodUnits);
+}
+
+void NodeQueryPeriodOption::setPeriod(Mode mode, int interval,QString intervalUnits)
+{
+    if (mode == LastPeriodMode || mode == OlderPeriodMode) {
+        mode_= mode;
+        period_=interval;
+        periodUnits_=intervalUnits;
+        fromDate_=QDateTime();
+        toDate_=QDateTime();
+   }
 }
 
 void NodeQueryPeriodOption::setPeriod(QDateTime fromDate,QDateTime toDate)
@@ -389,34 +398,38 @@ void NodeQueryPeriodOption::setPeriod(QDateTime fromDate,QDateTime toDate)
     mode_=FixedPeriodMode;
     fromDate_=fromDate;
     toDate_=toDate;
-    lastPeriod_=-1;
-    lastPeriodUnits_.clear();
+    period_=-1;
+    periodUnits_.clear();
 }
 
 QString NodeQueryPeriodOption::query() const
 {
     QString s;
-    if(mode_ == LastPeriodMode)
-    {
-        if(lastPeriod_ >=0 && lastPeriodUnits_ >=nullptr)
+    if(mode_ == LastPeriodMode || mode_ == OlderPeriodMode)
+    {        
+        if(period_ >=0 && periodUnits_ >=nullptr)
         {
             QDateTime prev=QDateTime::currentDateTime();
-            if(lastPeriodUnits_ == "minute")
-                prev=prev.addSecs(-60*lastPeriod_);
-            else if(lastPeriodUnits_ == "hour")
-                prev=prev.addSecs(-3600*lastPeriod_);
-            else if(lastPeriodUnits_ == "day")
-                prev=prev.addDays(-lastPeriod_);
-            else if(lastPeriodUnits_ == "week")
-                prev=prev.addDays(-7*lastPeriod_);
-            else if(lastPeriodUnits_ == "month")
-                prev=prev.addMonths(-lastPeriod_);
-            else if(lastPeriodUnits_ == "year")
-                prev=prev.addYears(-lastPeriod_);
+            if(periodUnits_ == "minute")
+                prev=prev.addSecs(-60*period_);
+            else if(periodUnits_ == "hour")
+                prev=prev.addSecs(-3600*period_);
+            else if(periodUnits_ == "day")
+                prev=prev.addDays(-period_);
+            else if(periodUnits_ == "week")
+                prev=prev.addDays(-7*period_);
+            else if(periodUnits_ == "month")
+                prev=prev.addMonths(-period_);
+            else if(periodUnits_ == "year")
+                prev=prev.addYears(-period_);
             else
                 return QString();
 
-            s=name_ + " date::>= " +  prev.toString(Qt::ISODate);
+            if(mode_ == LastPeriodMode) {
+                s=name_ + " date::>= " +  prev.toString(Qt::ISODate);
+            } else {
+                s=name_ + " date::< " +  prev.toString(Qt::ISODate);
+            }
         }
 
     }
@@ -436,9 +449,17 @@ QString NodeQueryPeriodOption::sqlQuery() const
     QString s;
     if(mode_ == LastPeriodMode)
     {
-        if(lastPeriod_ >=0 && lastPeriodUnits_ >=nullptr)
+        if(period_ >=0 && periodUnits_ >=nullptr)
         {
-            s=name_ +" >= now() -interval " + QString::number(lastPeriod_) + " " + lastPeriodUnits_;
+            s=name_ +" >= now() -interval " + QString::number(period_) + " " + periodUnits_;
+        }
+
+    }
+    else if(mode_ == OlderPeriodMode)
+    {
+        if(period_ >=0 && periodUnits_ >=nullptr)
+        {
+            s=name_ +" < now() -interval " + QString::number(period_) + " " + periodUnits_;
         }
 
     }
@@ -458,9 +479,9 @@ void NodeQueryPeriodOption::swap(const NodeQueryOption* option)
     const auto* op=static_cast<const NodeQueryPeriodOption*>(option);
     Q_ASSERT(op);
 
-    if(op->mode_ == LastPeriodMode)
+    if(op->mode_ == LastPeriodMode || op->mode_ == OlderPeriodMode)
     {
-        setLastPeriod(op->lastPeriod_,op->lastPeriodUnits_);
+        setPeriod(op->mode_, op->period_,op->periodUnits_);
     }
     else if(op->mode_ == FixedPeriodMode)
     {
@@ -480,8 +501,14 @@ void NodeQueryPeriodOption::save(VSettings* vs)
     if(mode_ == LastPeriodMode)
     {
         vs->put("mode","last");
-        vs->put("value",lastPeriod_);
-        vs->put("units",lastPeriodUnits_.toStdString());
+        vs->put("value",period_);
+        vs->put("units",periodUnits_.toStdString());
+    }
+    else if(mode_ == OlderPeriodMode)
+    {
+        vs->put("mode","older");
+        vs->put("value",period_);
+        vs->put("units",periodUnits_.toStdString());
     }
     else if(mode_ == FixedPeriodMode)
     {
@@ -500,20 +527,20 @@ void NodeQueryPeriodOption::load(VSettings* vs)
     vs->beginGroup(name_.toStdString());
     QString mode=QString::fromStdString(vs->get("mode",std::string()));
 
-    if(mode == "last")
+    if(mode == "last" || mode == "older")
     {
-        mode_=LastPeriodMode;
-        lastPeriod_=vs->get<int>("value",lastPeriod_);
-        lastPeriodUnits_=QString::fromStdString(vs->get("units",lastPeriodUnits_.toStdString()));
+        mode_=(mode == "last")?LastPeriodMode:OlderPeriodMode;
+        period_=vs->get<int>("value",period_);
+        periodUnits_=QString::fromStdString(vs->get("units",periodUnits_.toStdString()));
 
         //Check period length
-        if(lastPeriod_ <= 0)
+        if(period_ <= 0)
             clear();
 
         //Check period units
-        if(lastPeriodUnits_ != "minute" && lastPeriodUnits_ != "hour" &&
-           lastPeriodUnits_ != "day" && lastPeriodUnits_ != "week" &&
-           lastPeriodUnits_ != "month" && lastPeriodUnits_ != "year")
+        if(periodUnits_ != "minute" && periodUnits_ != "hour" &&
+           periodUnits_ != "day" && periodUnits_ != "week" &&
+           periodUnits_ != "month" && periodUnits_ != "year")
              clear();
 
     }

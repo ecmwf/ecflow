@@ -36,7 +36,7 @@
 
 int Dashboard::maxWidgetNum_=20;
 
-Dashboard::Dashboard(QString rootNode,QWidget *parent) :
+Dashboard::Dashboard(QString /*rootNode*/,QWidget *parent) :
    QMainWindow(parent),
    settingsAreRead_(false)
 {
@@ -316,7 +316,7 @@ VInfo_ptr Dashboard::currentSelection()
 	return currentSelectionInView();
 }
 
-void Dashboard::currentSelection(VInfo_ptr n)
+void Dashboard::currentSelection(VInfo_ptr /*n*/)
 {
 	//if(NodeWidget *ctl=handler_->currentControl())
 	//	ctl->currentSelection(n);
@@ -494,7 +494,7 @@ Viewer::ViewMode Dashboard::viewMode()
 	return Viewer::TreeViewMode;
 }
 
-void Dashboard::setViewMode(Viewer::ViewMode mode)
+void Dashboard::setViewMode(Viewer::ViewMode /*mode*/)
 {
 	//handler_->setCurrentMode(mode);
 }
@@ -656,7 +656,7 @@ std::string Dashboard::widgetSettingsId(int i)
 	return "widget_" + boost::lexical_cast<std::string>(i);
 }
 
-void Dashboard::notifyServerFilterAdded(ServerItem* item)
+void Dashboard::notifyServerFilterAdded(ServerItem* /*item*/)
 {
 	if(!settingsAreRead_)
     {
@@ -668,7 +668,7 @@ void Dashboard::notifyServerFilterAdded(ServerItem* item)
     }
 }
 
-void Dashboard::notifyServerFilterRemoved(ServerItem* item)
+void Dashboard::notifyServerFilterRemoved(ServerItem* /*item*/)
 {
 	if(!settingsAreRead_)
 		Q_EMIT contentsChanged();

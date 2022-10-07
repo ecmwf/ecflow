@@ -41,6 +41,7 @@ public:
     void saveCollapseAll(const VNode* node);
     void print() const;
     bool isEmpty() const;
+    void updateServerName(const std::string& serverName);
 
 protected:
     void init(const VNode *vnode);

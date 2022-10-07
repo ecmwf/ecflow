@@ -35,8 +35,8 @@ public:
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() const {return groups_;}
     VProperty* find(const std::string& path);
-
     VProperty* cloneServerGui(VProperty *linkTarget);
+    bool proxychainsUsed() const {return proxychainsUsed_;}
 
     void saveSettings();
     void importSettings();
@@ -59,6 +59,7 @@ protected:
     std::string appName_;
     std::string appLongName_;
     std::vector<VProperty*> groups_;
+    bool proxychainsUsed_{false};
 };
 
 #endif

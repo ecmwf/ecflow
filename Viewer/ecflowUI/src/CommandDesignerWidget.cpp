@@ -553,7 +553,7 @@ void CommandDesignerWidget::on_editCommandButton__clicked()
 }
 
 
-void CommandDesignerWidget::on_savedCommandsTable__cellDoubleClicked(int row, int column)
+void CommandDesignerWidget::on_savedCommandsTable__cellDoubleClicked(int /*row*/, int /*column*/)
 {
 	on_editCommandButton__clicked();  // same as selecting a cell and clicking 'edit'
 }
@@ -636,7 +636,7 @@ void CommandDesignerWidget::addCommandToSavedList(CustomCommand *command, int ro
 }
 
 
-void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int row, int column)
+void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int /*row*/, int /*column*/)
 {
 	setSavedCommandsButtonStatus();
 }

@@ -18,11 +18,11 @@ public:
     ServerComObserver() = default;
     virtual ~ServerComObserver() = default;
 
-    virtual void notifyRefreshTimerStarted(ServerHandler* server) {}
-    virtual void notifyRefreshTimerStopped(ServerHandler* server) {}
-    virtual void notifyRefreshTimerChanged(ServerHandler* server) {}
-    virtual void notifyRefreshScheduled(ServerHandler* server) {}
-    virtual void notifyRefreshFinished(ServerHandler* server) {}
+    virtual void notifyRefreshTimerStarted(ServerHandler*) {}
+    virtual void notifyRefreshTimerStopped(ServerHandler*) {}
+    virtual void notifyRefreshTimerChanged(ServerHandler*) {}
+    virtual void notifyRefreshScheduled(ServerHandler*) {}
+    virtual void notifyRefreshFinished(ServerHandler*) {}
 };
 
 #endif // SERVERCOMOBSERVER_HPP

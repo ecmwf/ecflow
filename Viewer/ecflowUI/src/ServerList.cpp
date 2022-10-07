@@ -12,13 +12,20 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include <QTimer>
+
 #include "ServerList.hpp"
 
+#include "Str.hpp"
 #include "DirectoryHandler.hpp"
 #include "ServerItem.hpp"
 #include "UserMessage.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
+#include "VProperty.hpp"
+#include "VReply.hpp"
+#include "MainWindow.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -31,6 +38,13 @@
 ServerList* ServerList::instance_=nullptr;
 
 #define _UI_SERVERLIST_DEBUG
+#define _UI_SERVERSYSTEMLIST_DEBUG
+
+//==================================
+//
+// ServerListTmpItem
+//
+//==================================
 
 ServerListTmpItem::ServerListTmpItem(ServerItem* item) :
     name_(item->name()),
@@ -38,11 +52,317 @@ ServerListTmpItem::ServerListTmpItem(ServerItem* item) :
     port_(item->port())
 {}
 
+//======================================
+//
+// ServerListSystemFileManager
+//
+//======================================
+
+ServerListSystemFileManager::~ServerListSystemFileManager()
+{
+    if (prop_) {
+        delete prop_;
+    }
+}
+
+void ServerListSystemFileManager::clear()
+{
+    files_.clear();
+    fetchedFiles_.clear();
+    unfetchedFiles_.clear();
+
+    for(auto & item : changedItems_) {
+        delete item;
+        changedItems_.clear();
+    }
+
+    pendingItems_.clear();
+}
+
+std::vector<std::string> ServerListSystemFileManager::buildFileList()
+{
+    if (!prop_) {
+        std::vector<std::string> propVec;
+        propVec.emplace_back("server.systemList.paths");
+        assert(!prop_);
+        prop_=new PropertyMapper(propVec,this);
+        assert(prop_);
+    }
+
+    std::vector<std::string> paths;
+
+    // Ui config settings take precedence
+    auto p = VConfig::instance()->find("server.systemList.paths");
+    bool useProp = false;
+    if (p) {
+        UiLog().info() << UI_FN_INFO << "take paths from Preferences";
+        auto s = p->valueAsStdString();
+        if (!s.empty()) {
+            useProp = true;
+            std::vector<std::string> sVec;
+            ecf::Str::split(s, sVec ,":");
+            for (auto v: sVec) {
+                if (std::find(paths.begin(), paths.end(), v) == paths.end()) {
+                    paths.push_back(v);
+                }
+            }
+        }
+    }
+
+    // otherwise the env var is used
+    if (!useProp) {
+        if (char *ch = getenv("ECFLOW_SYSTEM_SERVERS_LIST")) {
+            UiLog().info() << UI_FN_INFO << "take paths from $ECFLOW_SYSTEM_SERVERS_LIST";
+            auto s = std::string(ch);
+            if (!s.empty()) {
+                std::vector<std::string> sVec;
+                ecf::Str::split(s, sVec ,":");
+                for (auto v: sVec) {
+                    if (std::find(paths.begin(), paths.end(), v) == paths.end()) {
+                        paths.push_back(v);
+                    }
+                }
+            }
+        }
+    }
+
+    return paths;
+}
+
+bool ServerListSystemFileManager::fileListSameAs(const std::vector<std::string>& v1, const std::vector<std::string>& v2) const
+{
+    // see if there was a change
+    if (v1.size() == v2.size()) {
+        for (std::size_t i=0; i < v1.size(); i++) {
+            if (v1[i] != v2[i]) {
+                return false;
+            }
+        }
+#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+        UiLog().dbg() << UI_FN_INFO << "new paths are the same as the old ones";
+#endif
+        return true;
+    }
+    return false;
+}
+
+// called on startup (maybe in a delayed mode)
+void ServerListSystemFileManager::sync()
+{
+    if (state_ == FetchState) {
+        // TODO: handle it
+        return;
+    }
+
+    clear();
+    files_ = buildFileList();
+    if (!files_.empty()) {
+#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+        UiLog().dbg() << UI_FN_INFO << "start fetch";
+#endif
+        state_ = FetchState;
+        fetchManager_->fetchFiles(files_);
+    } else {
+        state_ = SyncedState;
+    }
+}
+
+// called when the settings changed
+void ServerListSystemFileManager::syncInternal(const std::vector<std::string>& newFiles)
+{
+    clear();
+    files_ =  newFiles;
+    if (!files_.empty()) {
+#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+        UiLog().dbg() << UI_FN_INFO << "start fetch";
+#endif
+        state_ = FetchState;
+        fetchManager_->fetchFiles(files_);
+    } else {
+        state_ = SyncedState;
+    }
+}
+
+void ServerListSystemFileManager::concludeSync()
+{
+    state_ = SyncedState;
+
+    // if there is nothing more to fetch we load all the pending items
+    if (!pendingItems_.empty()) {
+        loadPending();
+    }
+    MainWindow::initServerSyncTb();
+}
+
+// callbacks from the file provider
+void ServerListSystemFileManager::fileFetchFinished(VReply* r)
+{
+#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+    UiLog().dbg() << UI_FN_INFO;
+#endif
+
+    std::vector<std::string> paths;
+    if (!r->tmpFiles().empty()) {
+        syncDate_=QDateTime::currentDateTime();
+        for (auto f: r->tmpFiles()) {
+            if (f) {
+#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+                UiLog().dbg() << " f=" << f->sourcePath();
+#endif
+                paths.emplace_back(f->path());
+                if (std::find(fetchedFiles_.begin(), fetchedFiles_.end(), f->sourcePath()) == fetchedFiles_.end()) {
+                    fetchedFiles_.emplace_back(f->sourcePath());
+                }
+            }
+        }
+    }
+
+    for (auto f: fetchManager_ ->filesToFetch()) {
+        if (std::find(fetchedFiles_.begin(), fetchedFiles_.end(), f) == fetchedFiles_.end()) {
+            unfetchedFiles_.emplace_back(f);
+        }
+    }
+
+    if (!paths.empty()) {
+        loadFiles(paths);
+    }
+
+}
+
+void ServerListSystemFileManager::fileFetchFailed(VReply* /*r*/)
+{
+    concludeSync();
+}
+
+void ServerListSystemFileManager::notifyChange(VProperty* p)
+{
+    //cannot do
+    if(fetchManager_->isEmpty() &&
+       prop_ && p && p->path() == "server.systemList.paths")
+    {
+        auto newFiles = buildFileList();
+        if (!fileListSameAs(files_, newFiles)) {
+            syncInternal(newFiles);
+        }
+    }
+}
+
+void ServerListSystemFileManager::delayedFetchFiles(const std::vector<std::string>& paths)
+{
+    fetchManager_->fetchFiles(paths);
+}
+
+// load one set of files
+void ServerListSystemFileManager::loadFiles(const std::vector<std::string>& paths)
+{
+    std::vector<std::string> includedPaths;
+    for (auto f: paths) {
+        loadFile(f, pendingItems_, includedPaths);
+    }
+
+    // included paths
+    if (!includedPaths.empty()) {
+        std::vector<std::string> mp;
+        for(auto f: includedPaths) {
+            if (std::find(fetchedFiles_.begin(), fetchedFiles_.end(),f) == fetchedFiles_.end()) {
+                mp.emplace_back(f);
+            }
+        }
+        if (!mp.empty()) {
+#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+            UiLog().dbg() << UI_FN_INFO << "includedPaths=" << mp;
+#endif
+            // we need to allow time for the manager to clean up
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
+            QTimer::singleShot(0, [mp, this]() { this->delayedFetchFiles(mp);} );
+#endif
+            return;
+        }
+    }
+
+    // if there is nothing to fetch we load all the pending items
+    concludeSync();
+}
+
+// load a given file
+void ServerListSystemFileManager::loadFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec,
+                                           std::vector<std::string>& includedPaths)
+{
+    std::ifstream in(fPath.c_str());
+
+    if(in.good())
+    {
+        std::string line;
+        while(getline(in,line))
+        {
+            std::string buf=boost::trim_left_copy(line);
+            if(buf.size() >0 && buf[0] == '#')
+                continue;
+
+            if (buf.size() > 0 && buf[0] == '/') {
+               std::string p=boost::trim_right_copy(buf);
+               if (std::find(includedPaths.begin(), includedPaths.end(), p) == includedPaths.end()) {
+                    includedPaths.emplace_back(p);
+               }
+               continue;
+            }
+
+            std::stringstream ssdata(line);
+            std::vector<std::string> vec;
+
+            while(ssdata >> buf)
+            {
+                vec.push_back(buf);
+            }
+
+            if(vec.size() >= 3)
+            {
+                std::string errStr,name=vec[0], host=vec[1], port=vec[2];
+                if(ServerList::instance()->checkItemToAdd(name,host,port,false,errStr))
+                {
+                    sysVec.emplace_back(vec[0],vec[1],vec[2]);
+                }
+            }
+        }
+    }
+    in.close();
+}
+
+void ServerListSystemFileManager::loadPending()
+{
+    state_ = SyncedState;
+
+    // nothing to sync
+    if (pendingItems_.empty()) {
+        return;
+    }
+
+    ServerList::instance()->loadSystemItems(pendingItems_, changedItems_);
+}
+
+//==================================
+//
+// ServerList
+//
+//==================================
+
+ServerList::ServerList()
+{
+    sysFileManager_ = new ServerListSystemFileManager();
+}
+
+ServerList::~ServerList()
+{
+    if (sysFileManager_) {
+        delete sysFileManager_;
+    }
+}
+
 //Singleton instance method
 ServerList* ServerList::instance()
 {
 	if(!instance_)
-			instance_=new ServerList();
+        instance_=new ServerList();
 	return instance_;
 }
 
@@ -112,7 +432,7 @@ void ServerList::remove(ServerItem *item)
 	}
 }
 
-void ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,
+ServerItem* ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,
                        const std::string& port, const std::string& user, bool ssl)
 {
 	auto it=std::find(items_.begin(),items_.end(),item);
@@ -120,13 +440,25 @@ void ServerList::reset(ServerItem* item,const std::string& name,const std::strin
 	{
         //Check if there is an item with the same name. Names have to be unique!
 		if(item->name() != name && find(name))
-			return;
+            return nullptr;
 
-        item->reset(name,host,port,user,ssl);
+        if (host != item->host() || port != item->port()) {
+            items_.erase(it);
+            broadcastChanged();
+            delete item;
+            item = add(name,host,port,user,false,ssl,true);
+            save();
+            broadcastChanged();
+        } else {
+            assert(host == item->host());
+            assert(port == item->port());
+            item->reset(name,host,port,user,ssl);
+            save();
+            broadcastChanged();
 
-		save();
-		broadcastChanged();
+        }
 	}
+    return item;
 }
 
 void ServerList::setFavourite(ServerItem* item,bool b)
@@ -178,7 +510,6 @@ std::string ServerList::uniqueName(const std::string& name)
 	}
 
 	return name;
-
 }
 
 
@@ -228,27 +559,21 @@ bool ServerList::checkItemToAdd(const std::string& name,const std::string& host,
 void ServerList::init()
 {
     localFile_ = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "servers.txt");
-    systemFile_=DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers");
+    load();
 
-    if(load() == false)
-	{		
-        if(readRcFile())
-            save();
-	}
-
-    syncSystemFile();
+    // Note: system files are loaded in a delayed mode
+    // Note: we do not load the rc file any more. See ECFLOW-1825
 }
 
 bool ServerList::load()
 {
-    UiLog().dbg() << "ServerList::load() -->";
+    UiLog().dbg() << UI_FN_INFO << "-->";
 
     std::ifstream in(localFile_.c_str());
 	if(!in.good())
 		return false;
 
     std::string errStr;
-
 	std::string line;
     int lineCnt=1;
 	while(getline(in,line))
@@ -340,131 +665,47 @@ void ServerList::save()
 	out.close();    
 }
 
-bool ServerList::readRcFile()
+// called on startup (possibly in delayed mode)
+void ServerList::syncSystemFiles()
 {
-    UiLog().dbg() << "ServerList::readRcFile -->";
-    std::string path(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), "servers"));
-
-    UiLog().dbg() << " Read servers from ecflowview rcfile: " << path;
-	std::ifstream in(path.c_str());
-
-	if(in.good())
-	{
-		std::string line;
-		while(getline(in,line))
-		{
-			std::string buf=boost::trim_left_copy(line);
-			if(buf.size() > 0 && buf.at(0) == '#')
-				continue;
-
-			std::stringstream ssdata(line);
-			std::vector<std::string> vec;
-
-			while(ssdata >> buf)
-			{
-				vec.push_back(buf);
-			}
-
-			if(vec.size() >= 3)
-			{				
-                std::string name=vec[0], host=vec[1], port=vec[2];                
-                try
-                {
-                    add(name,host,port,"",false,false,false);
-                }
-                catch(std::exception& e)
-                {
-                    std::string err=e.what();
-                    UiLog().err() << " Failed to read server (name=" << name << ",host=" << host <<
-                                     ",port=" << port << "). " << err;
-                }
-			}
-		}
-	}
-	else
-		return false;
-
-	in.close();
-
-	return true;
+    sysFileManager_->sync();
 }
 
-bool ServerList::hasSystemFile() const
+void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
+                                 std::vector<ServerListSyncChangeItem*>& changeVec)
 {
-    boost::filesystem::path p(systemFile_);
-    return boost::filesystem::exists(p);
-}
-
-void ServerList::syncSystemFile()
-{
-    UiLog().dbg() << "ServerList::syncSystemFile -->";
-
-    std::vector<ServerListTmpItem> sysVec;
-    std::ifstream in(systemFile_.c_str());
-
-    syncDate_=QDateTime::currentDateTime();
-    clearSyncChange();
-
-    if(in.good())
-    {
-        std::string line;
-        while(getline(in,line))
-        {
-            std::string buf=boost::trim_left_copy(line);
-            if(buf.size() >0 && buf.at(0) == '#')
-                    continue;
-
-            std::stringstream ssdata(line);
-            std::vector<std::string> vec;
-
-            while(ssdata >> buf)
-            {
-                vec.push_back(buf);
-            }
-
-            if(vec.size() >= 3)
-            {
-                std::string errStr,name=vec[0], host=vec[1], port=vec[2];
-                if(checkItemToAdd(name,host,port,false,errStr))
-                {
-                    sysVec.emplace_back(vec[0],vec[1],vec[2]);
-                }
-            }
-        }
-    }
-    else
+    // nothing to sync
+    if (sysVec.empty()) {
         return;
-
-    in.close();
-
-#ifdef _UI_SERVERLIST_DEBUG
-    for(auto & i : sysVec)
-        UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
-#endif
+    }
 
     bool changed=false;
     bool needBrodcast=false;
 
+#ifdef _UI_SERVERLIST_DEBUG
+        UiLog().dbg() << UI_FN_INFO << "Load system server list:";
+#endif
+
     //See what changed or was added
-    for(auto & i : sysVec)
+    for(auto & sysItem : sysVec)
     {
 #ifdef _UI_SERVERLIST_DEBUG
-        UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
+        UiLog().dbg() << sysItem.name() << " " + sysItem.host() << " " + sysItem.port();
 #endif
         ServerItem *item=nullptr;
 
-        //There is a server with same name, host and port as in the local list. We
+        //There is a server with the same name, host and port as in the local list. We
         //mark it as system
-        item=find(i.name(),i.host(),i.port());
+        item=find(sysItem.name(),sysItem.host(),sysItem.port());
         if(item)
-        {            
+        {
             if(!item->isSystem())
             {
 #ifdef _UI_SERVERLIST_DEBUG
-                UiLog().dbg() << "  already in list (same name, host, port) -> mark as system";
+                UiLog().dbg() << " -> already in server-list (same name, host, port). Mark as system server";
 #endif
                 changed=true;
-                syncChange_.push_back(new ServerListSyncChangeItem(i,i,
+                changeVec.push_back(new ServerListSyncChangeItem(sysItem,sysItem,
                                      ServerListSyncChangeItem::SetSysChange));
                 item->setSystem(true);
             }
@@ -472,22 +713,22 @@ void ServerList::syncSystemFile()
         }
 
         //There is no server with the same name in the local list
-        item=find(i.name());
+        item=find(sysItem.name());
         if(!item)
         {
 #ifdef _UI_SERVERLIST_DEBUG
-            UiLog().dbg() << "  name not in list -> import as system";
+            UiLog().dbg() << "  -> name is not in server-list. Import as system server";
 #endif
             changed=true;
-            std::string name=i.name(),host=i.host(), port=i.port();
+            std::string name=sysItem.name(),host=sysItem.host(), port=sysItem.port();
             try
             {
                 item=add(name,host,port,"",false,false,false);
                 UI_ASSERT(item != nullptr,"name=" << name << " host=" << host
                           << " port=" << port);
                 item->setSystem(true);
-                syncChange_.push_back(new ServerListSyncChangeItem(i,i,
-                                         ServerListSyncChangeItem::AddedChange));
+                changeVec.push_back(new ServerListSyncChangeItem(sysItem,sysItem,
+                                        ServerListSyncChangeItem::AddedChange));
             }
             catch(std::exception& e)
             {
@@ -501,19 +742,23 @@ void ServerList::syncSystemFile()
         else
         {
 #ifdef _UI_SERVERLIST_DEBUG
-            UiLog().dbg() << "  name in list with different port or/and host";
+            UiLog().dbg() << "  -> name exsist in server-list with different port or/and host: " << item->host() << "@" << item->port() <<
+            " ! Reset host and port";
 #endif
             changed=true;
             needBrodcast=true;
             //assert(item->name() == sysVec[i].name());
 
             ServerListTmpItem localTmp(item);
-            syncChange_.push_back(new ServerListSyncChangeItem(i,localTmp,
+            changeVec.push_back(new ServerListSyncChangeItem(sysItem,localTmp,
                                      ServerListSyncChangeItem::MatchChange));
 
-            item->reset(i.name(),i.host(),i.port(), "",false);
-            item->setSystem(true);
-            broadcastChanged();
+            item = reset(item, sysItem.name(),sysItem.host(),sysItem.port(), "",false);
+            if (item) {
+                item->setSystem(true);
+            }
+            //item->reset(i.name(),i.host(),i.port(), "",false);
+            //broadcastChanged();
             continue;
         }
     }
@@ -538,7 +783,7 @@ void ServerList::syncSystemFile()
             {
                 changed=true;
                 ServerListTmpItem localTmp(*it);
-                syncChange_.push_back(new ServerListSyncChangeItem(localTmp,localTmp,
+                changeVec.push_back(new ServerListSyncChangeItem(localTmp,localTmp,
                                   ServerListSyncChangeItem::UnsetSysChange));
                 //remove item
                 remove(*it);
@@ -551,20 +796,7 @@ void ServerList::syncSystemFile()
 
     if(needBrodcast)
         broadcastChanged();
-
-#ifdef _UI_SERVERLIST_DEBUG
-    UiLog().dbg() << "<-- syncSystemFile";
-#endif
 }
-
-void ServerList::clearSyncChange()
-{
-    for(auto & i : syncChange_)
-        delete i;
-
-    syncChange_.clear();
-}
-
 
 //===========================================================
 // Observers

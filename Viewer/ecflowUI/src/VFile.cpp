@@ -24,6 +24,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#define UI_VFILE_DEBUG_
+
 const size_t VFile::maxDataSize_=1024*1024*10;
 
 VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
@@ -70,7 +72,7 @@ VFile::~VFile()
 {
 	close();
 
-    UiLog().dbg() << "VFile::~VFile -->";
+    UiLog().dbg() << UI_FN_INFO;
     print();
 
 	if(data_)
@@ -90,8 +92,6 @@ VFile::~VFile()
     {
         UiLog().dbg() << " file was kept on disk";
     }
-
-    UiLog().dbg() << "<-- ~VFile";
 }
 
 bool VFile::exists() const
@@ -163,6 +163,10 @@ bool VFile::write(const std::string& buf,std::string& err)
 
 bool VFile::write(const char *buf,size_t len,std::string& err)
 {
+    if (len == 0) {
+        return true;
+    }
+
     //printf("total:%d \n len: %d \n",dataSize_,len);
 
 	//Keep data in memory
@@ -178,6 +182,7 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 			memcpy(data_+dataSize_,buf,len);
 			dataSize_+=len;
 			data_[dataSize_] = '\0'; //terminate the string
+            // UiLog().dbg() << "VFile::write dataSize=" << dataSize_;
 			return true;
 		}
 		else
@@ -218,48 +223,100 @@ void VFile::close()
 		fclose(fp_);
 		fp_=nullptr;
 	}
-	if(data_)
+    if(data_)
 	{
-		data_[dataSize_]='\0';
-		dataSize_++;
+        data_[dataSize_] = '\0';
 	}
 }
 
-/*
-std::string VFile::tmpName()
+bool VFile::appendContentsTo(FILE* fpTarget) const
 {
-	std::string res;
+    if (storageMode_ == DiskStorage) {
+        FILE* fp = fopen(path_.c_str(),"r");
+        if (fp == nullptr) {
+            return false;
+        }
+        char buf[8*1024];
+        size_t n;
+        while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
+            if (fwrite(buf, 1, n, fpTarget) != n) {
+                fclose(fp);
+                return false;
+            }
+        }
+        fclose(fp);
+    } else if (storageMode_ == MemoryStorage) {
+        if (data_ && dataSize_ > 0) {
+            if(fwrite(data_,1,dataSize_,fpTarget) != dataSize_) {
+                return false;
+            }
+        }
+    }
 
-#if defined(linux) || defined(_AIX)
-
-	char *path = getenv("SCRATCH");
-	char *s = (char*) malloc(128);
-
-	if (!path || !access(path, R_OK))
-	    path=getenv("TMPDIR");
-
-	if (!path || !access(path, R_OK))
-	    path=(char*)"/tmp";
-
-	snprintf(s, 128, "%s/%sXXXXXX", path, "ecflow_ui");
-	if(mkstemp(s) != -1)
-	{
-		res=std::string(s);
-	}
-
-	free(s);
-
-#else
-
-//	char* s=std::string(tmpnam(NULL));
-	res=std::string(tmpnam(NULL));
-
-#endif
-
-	return res;
-
+    return true;
 }
-*/
+
+// Append the contents of other to the current object
+bool VFile::append(VFile_ptr other)
+{
+    if (!other || !other->hasDeltaContents() || other->sizeInBytes() == 0) {
+#ifdef UI_VFILE_DEBUG_
+        UiLog().dbg() <<  UI_FN_INFO << " empty or has no delta";
+#endif
+        return false;
+    }
+
+    // TODO: assert/exit if this happens?
+    if (fetchMode_ != other->fetchMode_) {
+        return false;
+    }
+
+    if(fetchMode_ == LogServerFetchMode || fetchMode_ == TransferFetchMode) {
+        // adjust the storatge mode according to the expected new size
+        if (other->storageMode() == DiskStorage) {
+            setStorageMode(DiskStorage);
+        }
+        if (storageMode_ == MemoryStorage && other->storageMode() == MemoryStorage) {
+            if (dataSize_ + other->dataSize_ >  maxDataSize_) {
+                setStorageMode(DiskStorage);
+            }
+        }
+
+        fetchDate_ = other->fetchDate_;
+        transferDuration_ = other->transferDuration_;
+        sourceModTime_ = other->sourceModTime_;
+        sourceCheckSum_ = other->sourceCheckSum_;
+
+        if (storageMode_ == DiskStorage) {
+            if (FILE* fp = fopen(path_.c_str(),"a")) {
+                other->appendContentsTo(fp);
+                fclose(fp);
+            } else {
+                UiLog().err() << UI_FN_INFO << "could not open file=" << path_ << " in append mode";
+            }
+        } else if (storageMode_ == MemoryStorage) {
+            assert(other->storageMode() == MemoryStorage);
+            assert(dataSize_ + other->dataSize_ <=  maxDataSize_);
+            if (other->dataSize() > 0) {
+                if(!data_)
+                {
+                    data_ = new char[maxDataSize_+1];
+                }
+                memcpy(data_+dataSize_,other->data_,other->dataSize_);
+                dataSize_+=other->dataSize_;
+                data_[dataSize_] = '\0'; //terminate the string
+//                UiLog().dbg() << "VFile::append prev=" << prev << " current=" << dataSize_ <<
+//                                 " other->data=|" << other->data_ << "|";
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    return false;
+}
+
 
 bool VFile::isEmpty() const
 {
@@ -272,6 +329,23 @@ bool VFile::isEmpty() const
         return (::stat( path_.c_str(), &info ) != 0 || info.st_size == 0);
     }
     return false;
+}
+
+size_t VFile::fileSize() const
+{
+    if(storageMode_ == VFile::DiskStorage) {
+        if(exists()) {
+            struct stat info;
+            if (::stat( path_.c_str(), &info ) == 0)
+                return info.st_size;
+            }
+        }
+    return 0;
+}
+
+size_t VFile::sizeInBytes() const
+{
+    return (storageMode_ == VFile::MemoryStorage)?dataSize_:fileSize();
 }
 
 int VFile::numberOfLines() const
@@ -295,7 +369,7 @@ int VFile::numberOfLines() const
 
 void VFile::print()
 {
-    std::string str="  VFile contents --> storage:";
+    std::string str=" VFile storage=" + std::to_string(storageMode_) + " ";
     if(storageMode_ == MemoryStorage)
     {
         str+="memory size:" + boost::lexical_cast<std::string>(dataSize_);

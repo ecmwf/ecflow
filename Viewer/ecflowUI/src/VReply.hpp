@@ -21,7 +21,7 @@ class VReply
 {
 public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
-	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
+    enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode,TransferReadMode};
     VReply(void* sender=nullptr) : sender_(sender){}
 	~VReply() = default;
 
@@ -41,6 +41,7 @@ public:
 	FileReadMode fileReadMode() const {return readMode_;}
     const std::string& fileReadMethod() {return readMethod_;}
 	VFile_ptr tmpFile() const {return tmpFile_;}
+    const std::vector<VFile_ptr>& tmpFiles() const {return tmpFiles_;}
     VDir_ptr directory() const {return dir_;}
     std::vector<VDir_ptr> directories() const {return dirs_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}
@@ -61,11 +62,17 @@ public:
 	void fileReadMode(FileReadMode m) {readMode_=m;}
 	void fileReadMethod(const std::string& m) {readMethod_=m;}
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
+    void appendTmpFile(VFile_ptr f)  {tmpFiles_.push_back(f);}
     void setDirectory(VDir_ptr d) {dir_=d;}
+    void appendDirectory(VDir_ptr d)  {dirs_.push_back(d);}
     void setDirectories(const std::vector<VDir_ptr>& d) {dirs_=d;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
 	int readTruncatedTo() const {return readTruncatedTo_;}
     void addLog(const std::string& s) {log_.push_back(s);}
+    void addLogMsgEntry(const std::string& s);
+    void addLogTryEntry(const std::string& s);
+    void addLogRemarkEntry(const std::string& s);
+    void addLogOptionEntry(const std::string& s);
     void setLog(const std::vector<std::string>& s) {log_=s;}
     void clearLog() {log_.clear();}
     void setText(const std::string& txt) {text_=txt;}
@@ -92,8 +99,9 @@ protected:
 	int readTruncatedTo_{-1};
     std::vector<std::string> log_;
 	VFile_ptr  tmpFile_;
+    std::vector<VFile_ptr> tmpFiles_;
     VDir_ptr dir_;
-    std::vector<VDir_ptr> dirs_;
+    std::vector<VDir_ptr> dirs_;  
 	std::vector<Zombie> zombies_;
 };
 

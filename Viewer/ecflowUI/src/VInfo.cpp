@@ -95,6 +95,15 @@ void VInfo::notifyEndServerScan(ServerHandler* server)
     regainData();
 }
 
+void VInfo::notifyServerRenamed(ServerHandler* server, const std::string& /*oldName*/)
+{
+    if (server_ == server) {
+//        UiLog().dbg() << UI_FN_INFO <<  "storedPath_=" << storedPath_;
+        storedPath_ = VItemPathParser::updateServerName(storedPath_, server->name());
+//        UiLog().dbg() << " -> " << storedPath_;
+    }
+}
+
 void VInfo::regainData()
 {
     if(!server_)

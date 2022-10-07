@@ -177,21 +177,14 @@ void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
             }
         }
     }
-
-    //if the item becomes unselected we do not do anything if it is frozen
-    //or the contents must be kept (e.g. for output)
     else
     {
-        if(!frozen_)
+        if(!frozen_ && !unselectedFlags_.isSet(KeepContents))
         {
-            if(!unselectedFlags_.isSet(KeepContents))
-            {
-                //This will also clear the providers
-                clearContents();
-            }
+            //This will also clear the providers
+            clearContents();
+            return;
         }
-
-        return;
     }
 
     //We update the derived class

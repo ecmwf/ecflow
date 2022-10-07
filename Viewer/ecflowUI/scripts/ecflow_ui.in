@@ -16,6 +16,27 @@ ECFLOWUI_VERSION=@ECFLOW_VERSION_STR@
 ECFLOWUI_INSTALLDIR=@CMAKE_INSTALL_PREFIX@
 ECFLOWUI_USAGE_LOG=@UI_LOG_FILE@
 ECFLOWUI_SITE_TAG=@UI_LOG_SITE_TAG@
+PREDEF_SYSTEM_SERVERS_LIST=@UI_SYSTEM_SERVERS_LIST@
+
+#-----------------------------------------------------------
+# The system server list
+#-----------------------------------------------------------
+
+export ECFLOW_SYSTEM_SERVERS_LIST=${ECFLOW_SYSTEM_SERVERS_LIST:=$PREDEF_SYSTEM_SERVERS_LIST}
+
+#-----------------------------------------------------------
+# Figure out the directory of the exe
+#-----------------------------------------------------------
+
+EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+exe=${EXE_DIR}/ecflow_ui.x
+
+
+function failed() {
+    local msg="Error: $1"
+    echo $msg >&2
+    exit 1
+}
 
 # ----------------------------------------------------------
 # Clean up the tmp directory at the end or on error
@@ -24,6 +45,9 @@ cleanup(){
     status=$?
     trap "" EXIT ERR
     set +e  # do not exit on errors during cleanup
+
+    # kill all the child processes
+    pkill -P $$ || true
 
     # restore stdout/stderr
     if [ x$ECFLOWUI_SLOG != xyes ]
@@ -111,8 +135,6 @@ cleanup(){
         fi
     fi
 
-
-
     # remove temporary directory
     if [ $(echo $ECFLOWUI_TMPDIR | grep -c "/ecflow_ui.") -ge 1 ] ; then
         rm -Rf $ECFLOWUI_TMPDIR
@@ -122,7 +144,6 @@ cleanup(){
 }
 
 
-
 #-----------------------------------------------------------
 # checkoption()
 # Checks the command-line options
@@ -130,52 +151,59 @@ cleanup(){
 
 checkoption() {
 
-while [ "$1" != "" ]
-do
-	case "$1" in
+    local USE_PC4=0
+    local USE_CMD=0
+    local CMD_MSG=""
 
-		-log)
+    while [ "$1" != "" ]
+    do
+        case "$1" in
+
+        -log)
             ECFLOWUI_SLOG=yes
-			;;
+            ;;
 
-		-slog)
+        -slog)
             ECFLOWUI_SLOG=yes
-			;;
+            ;;
 
-		-s)
+        -s)
             export ECFLOWUI_SESSION_MANAGER=yes
-			;;
+            ;;
 
-		-ts)
+        -ts)
             export ECFLOWUI_TEMP_SESSION_HOST=$2
             export ECFLOWUI_TEMP_SESSION_PORT=$3
-            if [ "x$ECFLOWUI_TEMP_SESSION_HOST" == x -o "x$ECFLOWUI_TEMP_SESSION_PORT" == x ]
-			then
-				echo "Please supply a host and port:"
-				echo "ecflow_ui -ts <host> <port>"
-				exit 1
-			fi
+            if [ "x$ECFLOWUI_TEMP_SESSION_HOST" == x -o "x$ECFLOWUI_TEMP_SESSION_PORT" == x ] ; then
+                failed "Please supply a host and port: ecflow_ui -ts <host> <port>"
+            fi
             echo "Starting a temporary session: host=$ECFLOWUI_TEMP_SESSION_HOST, port=$ECFLOWUI_TEMP_SESSION_PORT"
-			shift 2
-			;;
+            shift 2
+            ;;
 
-		-title)
+        -title)
             export ECFLOWUI_TITLE=$2
             shift
-			;;
+            ;;
 
         -fs)
-           export ECFLOWUI_FONT_SIZE=$2
-           shift
-           ;;
+            export ECFLOWUI_FONT_SIZE=$2
+            shift
+            ;;
+
+        -pc4)
+            ECFLOWUI_USER_START_CMD="proxychains4"
+            CMD_MSG="Starting ecFlowUI with the following command: ${ECFLOWUI_USER_START_CMD}"
+            USE_PC4=1
+            ;;
 
         -cmd)
-            ECFLOWUI_USER_START_CMD="$2" 
+            ECFLOWUI_USER_START_CMD="$2"
             if [ "x${ECFLOWUI_USER_START_CMD}" == "x" ] ; then
-                echo "No command is specified for option -cmd!"
-                exit 1
-            fi 
-            echo "Starting ecFlowUI with user specified command: ${ECFLOWUI_USER_START_CMD}"
+                failed "No command is specified for option -cmd!"
+            fi
+            CMD_MSG="Starting ecFlowUI with user specified command: ${ECFLOWUI_USER_START_CMD}"
+            USE_CMD=1
             shift
             ;;
 
@@ -183,50 +211,67 @@ do
         -confd)
             export ECFLOWUI_CONFIG_DIR=$2
             if [[ $ECFLOWUI_CONFIG_DIR  != /* ]] ; then
-                echo "Please specify an absolute path for flag -confd!"
-                exit 1
+                failed "Please specify an absolute path for flag -confd!"
             fi
             echo "Starting ecFlowUI with user specified config dir: ${ECFLOWUI_CONFIG_DIR}"
             shift
             ;;
 
-		-h)
+        -h)
             ECFLOWUI_HELP=yes
-			;;
+            ;;
 
-	esac
-	shift
-done
+        esac
+        shift
+    done
+
+    if [[ $USE_PC4 -eq 1 && $USE_CMD -eq 1 ]] ; then
+        failed "The -pc4 and -cmd flags cannot be used together"
+    elif [[  $USE_PC4 -eq 1 || $USE_CMD -eq 1 ]] ; then
+        echo $CMD_MSG
+    fi
 }
-
-
-
-checkoption "$@"
-
-
 
 #-----------------------------------------------------------
 # Help message
 #-----------------------------------------------------------
 
-if [ "x$ECFLOWUI_HELP" != x ]
-then
+printhelp() { 
+
+    version=$("$exe" --version 2>/dev/null)
 
     cat <<HEND
-ecFlowUI
+ecFlowUI $version
   Command-line flags:
     -fs               : set fontsize (in points) for the user interface
     -log              : write log messages to standard output
     -s                : start via the session manager
     -ts <host> <port> : start a temporary session viewing the given server
+    -pc4              : start the executable via the proxychains4 command
     -cmd <cmd>        : start the executable via the specified command
     -confd <dir>      : start with the specified configuraton directory
     -h                : print this help message
 HEND
 
+cat << HEND
+
+  Environment variables that have an effect on ecFlowUI:
+  [current value in brackets]
+
+  ECFLOW_SYSTEM_SERVERS_LIST   Pre-defined system server list files. User settings in
+                               ecFlowUI (Preferences > Server > System server list) will overwrite it.
+                               [$ECFLOW_SYSTEM_SERVERS_LIST]
+HEND
+
+}
+
+checkoption "$@"
+
+if [ "x$ECFLOWUI_HELP" != x ]
+then
+    printhelp
     exit 0
 fi
-
 
 #-----------------------------------------------------------
 # usage log
@@ -249,7 +294,6 @@ then
 	fi
 fi
 set -e
-
 
 
 #Define tmp root dir
@@ -287,12 +331,11 @@ export git=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
 #---------------------------------------------------------------
-# Create socket dir for local domain socket base communication
+# Create socket dir for local domain socket based communication
 #---------------------------------------------------------------
 
 export ECFLOWUI_SOCKETDIR=$ECFLOWUI_TMPDIR/sockets
 mkdir -p $ECFLOWUI_SOCKETDIR
-
 
 #---------------------------------------------------------------
 # Manage config dir.
@@ -366,13 +409,8 @@ ECFLOWUI_SIGLIST="QUIT TERM XCPU  XFSZ"
 trap 'cleanup "EXIT" $LINENO' EXIT
 trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
 
-#Figure out the directory of the exe
-EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-
 # note when we started it up
 ECFLOWUI_STARTTIME=$(date)
-
 
 #-----------------------------------------------------------
 # The log viewer exe
@@ -392,7 +430,9 @@ fi
 # Run the executable
 #-----------------------------------------------------------
 
-exe=${EXE_DIR}/ecflow_ui.x
+if [[ ${ECFLOWUI_USER_START_CMD} = "proxychains" || ${ECFLOWUI_USER_START_CMD} = "proxychains"[4-9] ]] ; then
+    export ECFLOWUI_USE_PROXYCHAINS=1
+fi
 
 #-----------------------------------------------------------
 # Backtrace report?

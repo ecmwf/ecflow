@@ -101,6 +101,13 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
             this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
 
     //--------------------------------
+    // Editor
+    //--------------------------------
+
+    connect(editor_,SIGNAL(rerunRequested()),
+            this,SLOT(slotFind()));
+
+    //--------------------------------
     // Query
     //--------------------------------
 
@@ -158,7 +165,7 @@ void NodeSearchWidget::slotShowQueryPanel(bool b)
     editor_->showQueryPanel(b);
 }
 
-void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
+void NodeSearchWidget::slotQueryEnabledChanged(bool /*queryEnabled*/)
 {
 	//if(!engine_->isRunning())
 	//{

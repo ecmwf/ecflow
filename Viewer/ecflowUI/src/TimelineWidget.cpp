@@ -30,9 +30,11 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 #include "ViewerUtil.hpp"
+#include "VConfig.hpp"
 #include "VFileInfo.hpp"
 #include "VFileTransfer.hpp"
 #include "VNode.hpp"
+#include "VProperty.hpp"
 #include "VSettings.hpp"
 
 #include "ui_TimelineWidget.h"
@@ -46,7 +48,7 @@
 //
 //=======================================================
 
-TimelineWidget::TimelineWidget(QWidget *parent) :
+TimelineWidget::TimelineWidget(QWidget */*parent*/) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
     logMode_(LatestMode),
@@ -80,7 +82,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     model_=new TimelineModel(this);
     sortModel_=new TimelineSortModel(model_,this);
 
-    model_->setData(data_);
+    model_->resetData(data_);
 
     view_=new TimelineView(sortModel_,this);
 
@@ -95,15 +97,6 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     //Define context menu
     //ui_->logView->addAction(actionCopyEntry_);
     //ui_->logView->addAction(actionCopyRow_);
-
-    //logInfo label
-    ui_->logInfoLabel->setProperty("fileInfo","1");
-    ui_->logInfoLabel->setWordWrap(true);
-    ui_->logInfoLabel->setMargin(2);
-    ui_->logInfoLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    ui_->logInfoLabel->setAutoFillBackground(true);
-    ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
-    ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
     // log mode
     ui_->logModeCombo->addItem("Current log","latest");
@@ -222,6 +215,18 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->loadFileTb,SIGNAL(clicked()),
             this,SLOT(slotLoadCustomFile()));
 
+
+    // the icon for this button changes according to state
+    ui_->expandFileInfoTb->setIcon(ViewerUtil::makeExpandIcon(false));
+    ui_->expandFileInfoTb->setMaximumSize(QSize(16, 16));
+    expandFileInfoProp_ = VConfig::instance()->find("panel.timeline.expandFileInfo");
+    Q_ASSERT(expandFileInfoProp_);
+    bool expandSt = expandFileInfoProp_->value().toBool();
+    ui_->expandFileInfoTb->setChecked(expandSt);
+    connect(ui_->expandFileInfoTb,SIGNAL(clicked(bool)),
+            this,SLOT(slotExpandFileInfo(bool)));
+    slotExpandFileInfo(expandSt);
+
     //forced init
     slotSortMode(0);
     slotSortOrderChanged(0);
@@ -243,14 +248,14 @@ void TimelineWidget::clear()
     beingCleared_=true;
     if(fileTransfer_)
     {
-        fileTransfer_->stopTransfer();
+        fileTransfer_->stopTransfer(true);
         ui_->messageLabel->stopLoadLabel();
     }
 
     ui_->messageLabel->clear();
     ui_->messageLabel->hide();
 
-    ui_->logInfoLabel->setText(QString());
+    ui_->logInfoLabel->clearIt();
     //viewHandler_->clear();
 
     model_->clearData();
@@ -299,13 +304,13 @@ void TimelineWidget::clearData(bool usePrevState)
     beingCleared_=true;
     if(fileTransfer_)
     {
-        fileTransfer_->stopTransfer();
+        fileTransfer_->stopTransfer(true);
         ui_->messageLabel->stopLoadLabel();
     }
 
     ui_->messageLabel->clear();
     ui_->messageLabel->hide();
-    ui_->logInfoLabel->setText(QString());
+    ui_->logInfoLabel->clearIt();
 
     model_->clearData();
     view_->dataCleared();
@@ -337,16 +342,14 @@ void TimelineWidget::clearData(bool usePrevState)
 
 void TimelineWidget::updateInfoLabel(bool showDetails)
 {
-    QColor col(39,49,101);
-    QString txt;
+    QString txt, compactTxt;
 
     if(logMode_ == LatestMode)
     {
-        txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
-
-        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-             Viewer::formatBoldText(" Host: ",col) + host_ +
-             Viewer::formatBoldText(" Port: ",col) + port_;
+        txt= FileInfoLabel::formatKwPair("Log file", logFile_) +
+             FileInfoLabel::formatKwPair(" Server", serverName_) +
+             FileInfoLabel::formatKwPair(" Host", host_) +
+             FileInfoLabel::formatKwPair(" Port", port_);
 
         if(showDetails)
         {
@@ -355,23 +358,23 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
                 if(localLog_)
                 {
                     VFileInfo fi(logFile_);
-                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                    txt+=FileInfoLabel::formatKwPair(" Size", fi.formatSize());
                 }
-                else
+                else if (tmpLogFile_)
                 {
                     VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
-                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                    txt+=FileInfoLabel::formatKwPair(" Size", fi.formatSize());
                 }
             }
 
-            txt+=Viewer::formatBoldText(" Source: ",col);
+            txt+=FileInfoLabel::formatKey(" Source");
 
             //fetch method and time
             if(localLog_)
             {
                 txt+=" read from disk ";
                 if(data_->loadedAt().isValid())
-                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
+                    txt+=FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(data_->loadedAt());
             }
             else
             {
@@ -384,7 +387,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
                     txt+=" fetch failed from remote host ";
                 }
                 if(transferredAt_.isValid())
-                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
+                    txt+=FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(transferredAt_);
             }
 
             if(data_->loadStatus() == TimelineData::LoadDone)
@@ -412,6 +415,9 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
                 }
             }
         }
+
+        VFileInfo fInfo(logFile_);
+        compactTxt = FileInfoLabel::formatKwPair("File", fInfo.fileName());
     }
 
     //archived
@@ -419,35 +425,36 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
     {
         if(archiveLogList_.loadableCount() == 1)
         {
-           txt= Viewer::formatBoldText("Log file: ",col) + archiveLogList_.firstLoadablePath();
+           txt= FileInfoLabel::formatKwPair("Log file",archiveLogList_.firstLoadablePath());
         }
         else if(archiveLogList_.loadableCount() > 1)
         {
-           txt= Viewer::formatBoldText("Log files: ",col) + "multiple ["+
-                   QString::number(archiveLogList_.loadableCount())  + "]";
+           txt= FileInfoLabel::formatKwPair("Log files", "multiple ["+
+                   QString::number(archiveLogList_.loadableCount())  + "]");
         }
 
-        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-            Viewer::formatBoldText(" Host: ",col) + host_ +
-            Viewer::formatBoldText(" Port: ",col) + port_;
+        txt+=FileInfoLabel::formatKwPair(" Server", serverName_) +
+             FileInfoLabel::formatKwPair(" Host", host_) +
+             FileInfoLabel::formatKwPair(" Port", port_);
 
         if(showDetails)
         {
             if(data_->loadStatus() == TimelineData::LoadDone)
             {
                 if(archiveLogList_.loadableCount() == 1)
-                    txt+=Viewer::formatBoldText(" Size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+                    txt+=FileInfoLabel::formatKwPair(" Size", VFileInfo::formatSize(archiveLogList_.totalSize()));
                 else if (archiveLogList_.loadableCount() > 1)
-                    txt+=Viewer::formatBoldText(" Total size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+                    txt+=FileInfoLabel::formatKwPair(" Total size", VFileInfo::formatSize(archiveLogList_.totalSize()));
             }
 
-            txt+=Viewer::formatBoldText(" Source: ",col);
-            txt+=" read from disk ";         
+            txt+=FileInfoLabel::formatKwPair(" Source", "read from disk ");
         }
 
+        compactTxt = FileInfoLabel::formatKwPair("Log files", "multiple ["+
+                           QString::number(archiveLogList_.loadableCount())  + "]");
     }
 
-    ui_->logInfoLabel->setText(txt);
+    ui_->logInfoLabel->update(txt, compactTxt);
 
     checkButtonState();
 }
@@ -890,7 +897,8 @@ void TimelineWidget::loadLatest(bool usePrevState)
     if(!fInfo.exists())
     {
         localLog_=false;
-        tmpLogFile_=VFile::createTmpFile(true); //will be deleted automatically
+        tmpLogFile_.reset();
+        //tmpLogFile_=VFile::createTmpFile(true); //will be deleted automatically
         ui_->messageLabel->showInfo("Fetching file from remote host ...");
         ui_->messageLabel->startLoadLabel(true);
 
@@ -908,8 +916,11 @@ void TimelineWidget::loadLatest(bool usePrevState)
                     this,SLOT(slotFileTransferStdOutput(QString)));
         }
 
-        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
-                                maxReadSize_,remoteUid_);
+        if (VConfig::instance()->proxychainsUsed()) {
+            fileTransfer_->transferLocalViaSocks(logFile_, VFileTransfer::LastBytes, maxReadSize_);
+        } else {
+            fileTransfer_->transfer(logFile_,host_,remoteUid_,VFileTransfer::LastBytes, maxReadSize_);
+        }
     }
     // load local file
     else
@@ -959,34 +970,10 @@ void TimelineWidget::loadArchive()
             loadDone=true;
         }
 
-        catch(std::runtime_error e)
+        catch(const std::runtime_error& e)
         {
-            //logLoaded_=false;
             ui_->messageLabel->stopProgress();
             std::string errTxt(e.what());
-#if 0
-
-            QFileInfo fInfo(logFile);
-            if(!fInfo.exists())
-            {
-                errTxt+=" The specified log file <b>does not exist</b> on disk!";
-            }
-            else if(!fInfo.isReadable())
-            {
-                errTxt+=" The specified log file is <b>not readable</b>!";
-            }
-            else if(!fInfo.isFile())
-            {
-                errTxt+=" The specified log file is <b>not a file</b>!";
-            }
-
-            ui_->messageLabel->showError(QString::fromStdString(errTxt));
-            data_->clear();
-            setAllVisible(false);
-            updateInfoLabel();
-            ViewerUtil::restoreOverrideCursor();
-            return;
-#endif
         }
 
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
@@ -1021,11 +1008,15 @@ void TimelineWidget::slotFileTransferFinished()
     //we are not in a cleared state
     if(!beingCleared_)
     {
+        tmpLogFile_ = fileTransfer_->result();
+        fileTransfer_->clear();
         logTransferred_=true;
         ui_->messageLabel->stopLoadLabel();
         ui_->messageLabel->hide();
         ui_->messageLabel->update();
-        loadCore(QString::fromStdString(tmpLogFile_->path()));
+        if (tmpLogFile_) {
+            loadCore(QString::fromStdString(tmpLogFile_->path()));
+        }
     }
 }
 
@@ -1035,6 +1026,8 @@ void TimelineWidget::slotFileTransferFailed(QString err)
 
     if(!beingCleared_)
     {
+        tmpLogFile_.reset();
+        fileTransfer_->clear();
         logTransferred_=false;
         ui_->messageLabel->stopLoadLabel();
         logLoaded_=false;
@@ -1053,7 +1046,6 @@ void TimelineWidget::slotFileTransferStdOutput(QString msg)
     }
 }
 
-
 void TimelineWidget::slotLogLoadProgress(size_t current,size_t total)
 {
     int percent=100*current/total;
@@ -1071,7 +1063,7 @@ void TimelineWidget::slotCancelFileTransfer()
 #endif
     if(fileTransfer_)
     {
-        fileTransfer_->stopTransfer();
+        fileTransfer_->stopTransfer(true);
     }
 }
 
@@ -1090,7 +1082,7 @@ void TimelineWidget::loadCore(QString logFile)
     {
         data_->loadLogFile(logFile.toStdString(),maxReadSize_,suites_);
     }
-    catch(std::runtime_error e)
+    catch(const std::runtime_error& e)
     {
         logLoaded_=false;
         ui_->messageLabel->stopProgress();
@@ -1181,7 +1173,7 @@ void TimelineWidget::initFromData()
 
     view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
 
-    model_->setData(data_);
+    model_->resetData(data_);
 
     view_->setViewMode(view_->viewMode(),true);
 
@@ -1273,6 +1265,18 @@ void TimelineWidget::setMaxReadSize(int maxReadSizeInMb)
     else
         maxReadSize_ = static_cast<size_t>(maxReadSizeInMb)*1024*1024;
 }
+
+//-------------------------
+// File info label
+//-------------------------
+
+void TimelineWidget::slotExpandFileInfo(bool st)
+{
+    Q_ASSERT(expandFileInfoProp_);
+    expandFileInfoProp_->setValue(st);
+    ui_->logInfoLabel->setCompact(!st);
+}
+
 
 void TimelineWidget::writeSettings(VComboSettings* vs)
 {

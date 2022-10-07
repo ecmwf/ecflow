@@ -187,7 +187,7 @@ public:
     virtual void why(std::vector<std::string>& bottomUp,
                      std::vector<std::string>& topDown) const;
 
-    virtual void why(std::vector<std::string>& theReasonWhy) const {}
+    virtual void why(std::vector<std::string>& /*theReasonWhy*/) const {}
 
     const std::string&  abortedReason() const;  
     void statusChangeTime(QString&) const;
@@ -219,8 +219,8 @@ protected:
     void findAttributes(VAttributeType*,std::vector<VAttribute*>& v);
 
     VNode* find(const std::vector<std::string>& pathVec);
-    virtual void check(VServerSettings* conf,bool) {}
-    virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
+    virtual void check(VServerSettings* /*conf*/,bool) {}
+    virtual void check(VServerSettings* /*conf*/,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
     VAttribute* getLimit(const std::string& name);

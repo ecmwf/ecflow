@@ -98,6 +98,10 @@
             "expandFileInfo": {
                "label": "Expand file info label",
                "default": "true"
+            },
+            "showDirPanel": {
+                "label": "Show directory panel",
+                "default": "true"
             }
         },
         "why" : {
@@ -120,6 +124,18 @@
                   "label" : "Show shadowed",
                   "default" : "true"
               }
-        }
+        },
+         "timeline" : {
+            "expandFileInfo": {
+            "label": "Expand file info label",
+            "default": "true"
+            }
+        },
+        "server_load" : {
+           "expandFileInfo": {
+           "label": "Expand file info label",
+           "default": "true"
+           }
+       }
     }                     
 }

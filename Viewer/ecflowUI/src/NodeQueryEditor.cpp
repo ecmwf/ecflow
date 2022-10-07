@@ -327,7 +327,7 @@ bool NodeQueryEditor::isQueryPanelVisible() const
     return queryTe_->isVisible();
 }
 
-void NodeQueryEditor::slotAdvMode(bool b)
+void NodeQueryEditor::slotAdvMode(bool /*b*/)
 {
 #if 0
     //	filterBox_->setVisible(!b);
@@ -365,7 +365,7 @@ void NodeQueryEditor::slotServerCbChanged()
 	}
 }
 
-void NodeQueryEditor::slotRootNodeEdited(QString s)
+void NodeQueryEditor::slotRootNodeEdited(QString)
 {
 	if(!initIsOn_)
 	{
@@ -440,8 +440,18 @@ void NodeQueryEditor::checkGuiState()
 
 	bool oneServer=(serverCb_->count() == 1 || serverCb_->selection().count() == 1);
 
+    bool oriRootLeStatus = rootLe_->isEnabled();
 	rootLabel_->setEnabled(oneServer);
     rootLe_->setEnabled(oneServer);
+
+    if (oriRootLeStatus != rootLe_->isEnabled()) {
+        if (rootLe_->isEnabled()) {
+            query_->setRootNode(rootLe_->text().simplified().toStdString());
+        } else {
+            query_->setRootNode("");
+        }
+        updateQueryTe();
+    }
 
     QString t=nodeTabText_;
     if(query_->hasBasicNodeQueryPart())
@@ -485,6 +495,7 @@ QStringList NodeQueryEditor::allServers() const
 
 void NodeQueryEditor::updateServers()
 {
+//    serverCb_->clearSelection();
 	serverCb_->clear();
 
 	if(serverFilter_)
@@ -506,7 +517,6 @@ void NodeQueryEditor::updateServers()
 	}
 
 	slotServerCbChanged();
-
 }
 
 void NodeQueryEditor::setServerFilter(ServerFilter* sf)
@@ -529,23 +539,64 @@ void NodeQueryEditor::setServerFilter(ServerFilter* sf)
 	updateServers();
 }
 
-void NodeQueryEditor::notifyServerFilterAdded(ServerItem* item)
+void NodeQueryEditor::notifyServerFilterAdded(ServerItem*)
 {
-	/*ServerHandler* s=item->serverHandler();
+    updateServers();
+    /*ServerHandler* s=item->serverHandler();
 	s->addServerObserver(this);
 	updateTitle();*/
 }
 
 void NodeQueryEditor::notifyServerFilterRemoved(ServerItem* item)
 {
-	/*ServerHandler* s=item->serverHandler();
-	s->removeServerObserver(this);
-	updateTitle();*/
+    if (filterMode_) {
+        return;
+    }
+
+    auto sel = serverCb_->selection();
+    auto all = serverCb_->all();
+    serverCb_->clear();
+    all.removeAll(QString::fromStdString(item->name()));
+    sel.removeAll(QString::fromStdString(item->name()));
+    for (auto s: all) {
+         serverCb_->addItem(s);
+    }
+    serverCb_->setSelection(sel);
+    slotServerCbChanged();
+    Q_EMIT rerunRequested();
 }
 
-void NodeQueryEditor::notifyServerFilterChanged(ServerItem*)
+void NodeQueryEditor::notifyServerFilterChanged(ServerItem* item)
 {
-	//updateTitle();
+    if (filterMode_) {
+        return;
+    }
+
+    // try to detect server name change
+    auto sel = serverCb_->selection();
+    auto all = serverCb_->all();
+    QString changedFrom, changedTo;
+    for(int idx=0; idx < all.count(); idx++) {
+        if (!serverFilter_->isFiltered(all[idx].toStdString())) {
+            changedFrom = all[idx];
+            changedTo = QString::fromStdString(item->name());
+            all[idx] = changedTo;
+            auto idx1 = sel.indexOf(changedFrom);
+            if (idx != -1) {
+                sel[idx1] = changedTo;
+            }
+            break;
+        }
+    }
+
+    if (!changedFrom.isEmpty()) {
+        serverCb_->clear();
+        for (auto s: all) {
+            serverCb_->addItem(s);
+        }
+        serverCb_->setSelection(sel);
+        slotServerCbChanged();
+    }
 }
 
 void NodeQueryEditor::notifyServerFilterDelete()

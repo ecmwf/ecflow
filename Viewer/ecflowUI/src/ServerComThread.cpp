@@ -146,7 +146,11 @@ void ServerComThread::run()
                     if(command_.size() >=7 && command_[1] == "--alter" && command_[3] == "variable" &&
                        (command_[2] == "change" || command_[2] == "add"))
                     {
-                        ci_->alter(command_[6],command_[2],command_[3],command_[4],command_[5]);
+                        std::vector<std::string> cmdPaths;
+                        for(size_t i=6; i < command_.size(); i++) {
+                            cmdPaths.emplace_back(command_[i]);
+                        }
+                        ci_->alter(cmdPaths,command_[2],command_[3],command_[4],command_[5]);
                     }
 
                     // call the client invoker with the saved command
@@ -506,7 +510,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 }
 
 
-void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type>& types)
+void ServerComThread::update(const Defs* /*dc*/, const std::vector<ecf::Aspect::Type>& types)
 {
     std::vector<ecf::Aspect::Type> typesCopy=types;
 

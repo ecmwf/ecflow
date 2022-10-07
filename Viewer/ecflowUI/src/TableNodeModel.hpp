@@ -44,7 +44,7 @@ public:
   VInfo_ptr nodeInfo(const QModelIndex&) override;
   void selectionChanged(QModelIndexList lst);
   
-  VModelData* data() const override;
+  VModelData* getData() const override;
   void removeColumn(QString);
   ModelColumn* columns() const {return columns_;}
 
@@ -87,9 +87,9 @@ Q_SIGNALS:
   void skipSortingEnd();
 
 protected:
-  bool isServer(const QModelIndex & index) const {return false;}
-  ServerHandler* indexToRealServer(const QModelIndex & index) const {return nullptr;}
-  VModelServer* indexToServer(const QModelIndex & index) const {return nullptr;}
+  bool isServer(const QModelIndex &) const {return false;}
+  ServerHandler* indexToRealServer(const QModelIndex &) const {return nullptr;}
+  VModelServer* indexToServer(const QModelIndex &) const {return nullptr;}
   QModelIndex serverToIndex(ServerHandler*) const override {return {};}
   
   QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;

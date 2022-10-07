@@ -22,6 +22,7 @@ class TimelineSortModel;
 class TimelineView;
 class VComboSettings;
 class VFileTransfer;
+class VProperty;
 class QAbstractButton;
 
 namespace Ui {
@@ -91,6 +92,7 @@ protected Q_SLOTS:
    void slotLoadCustomFile();
    void pathFilterMatchModeChanged(int newIndex);
    void slotDurationViewMode(int);
+   void slotExpandFileInfo(bool st);
 
 private:
     void clearData(bool usePrevState);
@@ -142,6 +144,8 @@ private:
 
     TimelinePrevState prevState_;
     bool detached_;
+
+    VProperty* expandFileInfoProp_{nullptr};
 };
 
 #endif // TIMELINEWIDGET_HPP

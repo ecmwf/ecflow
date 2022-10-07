@@ -54,7 +54,7 @@ void VUserVarAttrType::encode(const Variable& v,QStringList& data) const
 //
 //=====================================================
 
-VUserVarAttr::VUserVarAttr(VNode *parent,const Variable& v, int index) : VAttribute(parent,index)
+VUserVarAttr::VUserVarAttr(VNode *parent,const Variable& /*v*/, int index) : VAttribute(parent,index)
 {
     //name_=v.name();
 }

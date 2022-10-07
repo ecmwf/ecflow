@@ -50,7 +50,7 @@ public:
     QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
     QModelIndex parent (const QModelIndex & ) const override;
 
-    void setData(TimelineData* data);
+    void resetData(TimelineData* data);
 
     TimelineData* data() const {return data_;}
     void clearData();

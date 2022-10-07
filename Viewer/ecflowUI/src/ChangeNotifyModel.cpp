@@ -27,7 +27,7 @@ VNodeList* ChangeNotifyModel::data()
 	return data_;
 }
 
-void ChangeNotifyModel::setData(VNodeList *data)
+void ChangeNotifyModel::resetData(VNodeList *data)
 {
 	beginResetModel();
 
@@ -103,7 +103,7 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(item->server());
+            return QString::fromStdString(item->serverName());
 			break;
 		case 1:
 			return QString::fromStdString(item->path());
@@ -164,7 +164,7 @@ QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & p
 
 }
 
-QModelIndex ChangeNotifyModel::parent(const QModelIndex &child) const
+QModelIndex ChangeNotifyModel::parent(const QModelIndex &/*child*/) const
 {
 	return {};
 }
@@ -210,7 +210,7 @@ void ChangeNotifyModel::slotBeginRemoveRow(int row)
 	beginRemoveRows(QModelIndex(),row,row);
 }
 
-void ChangeNotifyModel::slotEndRemoveRow(int row)
+void ChangeNotifyModel::slotEndRemoveRow(int /*row*/)
 {
 	endRemoveRows();
 }

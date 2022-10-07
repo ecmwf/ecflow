@@ -103,7 +103,7 @@ int NodeQueryResultModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
-Qt::ItemFlags NodeQueryResultModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags NodeQueryResultModel::flags ( const QModelIndex& /*index*/) const
 {
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -216,7 +216,7 @@ QModelIndex NodeQueryResultModel::index( int row, int column, const QModelIndex 
 
 }
 
-QModelIndex NodeQueryResultModel::parent(const QModelIndex &child) const
+QModelIndex NodeQueryResultModel::parent(const QModelIndex& /*child*/) const
 {
 	return {};
 }
@@ -264,7 +264,7 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
 	return res;
 }
 
-QModelIndex NodeQueryResultModel::infoToIndex(VInfo_ptr info)
+QModelIndex NodeQueryResultModel::infoToIndex(VInfo_ptr /*info*/)
 {
 	/*if(info && info.get())
 	{
@@ -319,7 +319,7 @@ void NodeQueryResultModel::slotBeginRemoveRow(int row)
 	beginRemoveRows(QModelIndex(),row,row);
 }
 
-void NodeQueryResultModel::slotEndRemoveRow(int row)
+void NodeQueryResultModel::slotEndRemoveRow(int /*row*/)
 {
 	endRemoveRows();
 }

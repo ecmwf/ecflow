@@ -57,7 +57,7 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
 
 }
 
-VModelData* TreeNodeModel::data() const
+VModelData* TreeNodeModel::getData() const
 {
 	return data_;
 }
@@ -105,7 +105,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
-Qt::ItemFlags TreeNodeModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags TreeNodeModel::flags ( const QModelIndex & /*index*/) const
 {
 	Qt::ItemFlags defaultFlags;
 
@@ -274,7 +274,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	return QVariant();
 }
 
-QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* tnode) const
+QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role,VTreeNode* tnode) const
 {
     if(role == Qt::ToolTipRole && !nodeToolTip_)
         return QVariant();

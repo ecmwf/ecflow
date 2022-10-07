@@ -28,9 +28,9 @@ public:
     const std::string& host() const {return host_;}
     int port() const {return port_;}
     const std::string& portStr() const {return portStr_;}
-
     const std::string& remoteFile() const {return remoteFile_;}
     bool ok() const { return soc_ != nullptr; }
+    std::string longName() const;
 
 protected Q_SLOTS:
     virtual void slotError(QAbstractSocket::SocketError err)=0;
@@ -45,6 +45,7 @@ Q_SIGNALS:
 
 protected:
 	void connectToHost(std::string,int);
+    virtual void timeoutError() {}
 
 	QTcpSocket* soc_;
 	std::string host_;

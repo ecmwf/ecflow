@@ -328,7 +328,7 @@ QModelIndex LogLoadRequestModel::index( int row, int column, const QModelIndex &
 
 }
 
-QModelIndex LogLoadRequestModel::parent(const QModelIndex &child) const
+QModelIndex LogLoadRequestModel::parent(const QModelIndex &/*child*/) const
 {
     return QModelIndex();
 }
@@ -343,7 +343,7 @@ QString LogLoadRequestModel::formatPrecentage(float perc) const
     return QString::number(perc,'f',1);
 }
 
-void LogLoadRequestModel::updateItem(int idx,bool st,QColor col)
+void LogLoadRequestModel::updateItem(int idx,bool /*st*/,QColor col)
 {
     if(idx>=0 && idx < data_.size())
     {
@@ -3009,7 +3009,7 @@ void LogCmdUidRequestView::loadCore()
         cmdCtl_.model_->selectFirstItem();
 }
 
-void LogCmdUidRequestView::buildScanTable(QString& txt,int idx)
+void LogCmdUidRequestView::buildScanTable(QString& /*txt*/,int /*idx*/)
 {
     return;
 #if 0
@@ -3100,7 +3100,7 @@ LogStatRequestView::LogStatRequestView(LogRequestViewHandler* handler,QWidget* p
     scanLabel_->hide();
 }
 
-void LogStatRequestView::adjustZoom(QRectF r)
+void LogStatRequestView::adjustZoom(QRectF)
 {
     adjustStats();
 }
@@ -3279,10 +3279,9 @@ LogStatRequestModel::~LogStatRequestModel()
 {
 }
 
-void LogStatRequestModel::setData(const std::vector<LogRequestItem>& data)
+void LogStatRequestModel::resetData(const std::vector<LogRequestItem>& /*data*/)
 {
     beginResetModel();
-
     endResetModel();
 }
 
@@ -3558,7 +3557,7 @@ QModelIndex LogStatRequestModel::index( int row, int column, const QModelIndex &
 {
     if(!hasData() || row < 0 || column < 0)
     {
-        return QModelIndex();
+        return {};
     }
 
     //When parent is the root this index refers to a node or server
@@ -3567,11 +3566,11 @@ QModelIndex LogStatRequestModel::index( int row, int column, const QModelIndex &
         return createIndex(row,column);
     }
 
-    return QModelIndex();
+    return {};
 
 }
 
-QModelIndex LogStatRequestModel::parent(const QModelIndex &child) const
+QModelIndex LogStatRequestModel::parent(const QModelIndex &/*child*/) const
 {
-    return QModelIndex();
+    return {};
 }

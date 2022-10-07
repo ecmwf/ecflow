@@ -40,7 +40,7 @@ void AbstractNodeModel::active(bool active)
 
 		beginResetModel();
 
-        data()->setActive(active_);
+        getData()->setActive(active_);
 
 #if 0
 		//When the model becomes active we reload everything
@@ -122,7 +122,7 @@ void AbstractNodeModel::reload()
 
 bool AbstractNodeModel::hasData() const
 {
-	return (active_ && data()->count() > 0);
+    return (active_ && getData()->count() > 0);
 }
 
 void AbstractNodeModel::dataIsAboutToChange()
@@ -148,7 +148,7 @@ void  AbstractNodeModel::slotFilterDeleteEnd()
 //
 //----------------------------------------------
 
-QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
+QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int /*column*/) const
 {
 	if(info)
 	{
