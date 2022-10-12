@@ -135,6 +135,7 @@
    </attribute>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
+   <addaction name="actionPreferences"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
