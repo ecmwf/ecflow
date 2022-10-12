@@ -208,7 +208,7 @@ void VFileTransferCore::slotProcFinished(int exitCode,QProcess::ExitStatus exitS
 
 // It is called when on MacOs with Qt6 and the process fails to start!
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-void VFileTransferCore::slotErrorOccurred(QProcess::ProcessError e)
+void VFileTransferCore::slotErrorOccurred(QProcess::ProcessError)
 {   
 #ifdef UI_FILETRANSFER_DEBUG_
     UI_FN_DBG
@@ -426,7 +426,12 @@ bool VFileTransfer::checkResults()
 
     fResult_->setSourcePath(sourceFile_.toStdString());
     fResult_->setFetchMode(VFile::TransferFetchMode);
-    std::string method = "from " + remoteUserAndHost_.toStdString() + " via ssh";
+    std::string method;
+    if (!remoteUserAndHost_.isEmpty()) {
+        method = "from " + remoteUserAndHost_.toStdString() + " via ssh";
+    } else {
+        method ="via ssh";
+    }
     fResult_->setFetchModeStr(method);
     fResult_->setTransferDuration(transferDuration_);
     fResult_->setFetchDate(QDateTime::currentDateTime());
@@ -572,7 +577,12 @@ bool VDirTransfer::checkResults()
 {
     if (fResult_) {
         fResult_->setFetchMode(VFile::TransferFetchMode);
-        std::string method = "from " + remoteUserAndHost_.toStdString() + " via ssh";
+        std::string method;
+        if (!remoteUserAndHost_.isEmpty()) {
+            method = "from " + remoteUserAndHost_.toStdString() + " via ssh";
+        } else {
+            method ="via ssh";
+        }
         fResult_->setFetchModeStr(method);
         fResult_->setTransferDuration(transferDuration_);
         fResult_->setFetchDate(QDateTime::currentDateTime());
