@@ -380,14 +380,14 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 		string path_to_script = args[2];
 		std::vector<std::string> script_lines;
 
- 		if (!fs::exists(path_to_script)) {
- 			ss << "The script file specified '" << path_to_script << "' does not exist\n";
+		if (!fs::exists(path_to_script)) {
+			ss << "The script file specified '" << path_to_script << "' does not exist\n";
 			throw std::runtime_error(ss.str());
 		}
-	 	if (!File::splitFileIntoLines(path_to_script, script_lines)) {
- 			ss << "Could not open script file " << path_to_script << " (" << strerror(errno) << ")";
+		if (!File::splitFileIntoLines(path_to_script, script_lines)) {
+			ss << "Could not open script file " << path_to_script << " (" << strerror(errno) << ")";
 			throw std::runtime_error(ss.str());
-	 	}
+		}
 
 	 	if (edit_type == EditScriptCmd::SUBMIT || edit_type == EditScriptCmd::SUBMIT_USER_FILE) {
 	 		// extract the Used variables from the script file

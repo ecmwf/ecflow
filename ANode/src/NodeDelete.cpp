@@ -19,6 +19,9 @@
 #include "LateAttr.hpp"
 #include "MiscAttrs.hpp"
 #include "Expression.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
+#include "AutoRestoreAttr.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -441,4 +444,20 @@ void Node::deleteLate()
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void Node::deleteAutoCancel()
+{
+   auto_cancel_.reset(nullptr);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
 
+void Node::deleteAutoArchive()
+{
+   auto_archive_.reset(nullptr);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::deleteAutoRestore()
+{
+   auto_restore_.reset(nullptr);
+   state_change_no_ = Ecf::incr_state_change_no();
+}

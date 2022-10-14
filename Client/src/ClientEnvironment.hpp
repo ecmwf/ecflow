@@ -123,6 +123,7 @@ public:
    void clear_user_password() override { passwd_.clear();}
    const std::string& get_user_name() const override { return user_name_;}
    void set_user_name(const std::string& name) override { user_name_ = name;}
+   void set_password(const std::string& password) override { passwd_ = password; }
 	bool debug() const override { return debug_;} //enabled if ECF_DEBUG_CLIENT set
    void set_test() override { under_test_ = true; }
    bool under_test() const override { return under_test_; }
@@ -134,6 +135,9 @@ public:
    void set_child_try_no(unsigned int try_no) { task_try_num_ = try_no;}
    void set_child_init_add_vars(const std::vector<Variable>& vars)  { init_add_vars_ = vars;}
    void set_child_complete_del_vars(std::vector<std::string>& vars) { complete_del_vars_ = vars;}
+   void set_child_host_file(const std::string& host_file) { host_file_ = host_file;}
+   void set_child_denied(bool denied) { denied_ = denied;}
+   void set_child_no_ecf(bool no_ecf) { no_ecf_ = no_ecf;}
 
    const std::vector<Variable>& init_add_vars() const { return init_add_vars_;}
    const std::vector<std::string>& complete_del_vars() const { return complete_del_vars_;}

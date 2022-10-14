@@ -1,0 +1,1391 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: ecFlow REST API
+paths:
+  /suites:
+    get:
+      summary: List all suites
+      operationId: listSuites
+      tags:
+        - suites
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of suites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                uniqueItems: true
+              example: ["foo", "bar"]
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a new suite
+      operationId: createSuite
+      tags:
+        - suites
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: New suite definition
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                definition:
+                  type: string
+                  example: "suite foo\ntask bar\nendsuite"
+                auto_add_externs:
+                  type: boolean
+                  default: false
+              required:
+              - definition
+      responses:
+        '201':
+          description: Expected response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /suites/tree:
+    get:
+      summary: Show all nodes (suites, families and tasks) as a tree
+      operationId: treeSuites
+      tags:
+        - suites
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full node tree
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                foo:
+                   baz: {}
+                bar: {}
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /suites/{nodeName}/tree:
+    get:
+      summary: Show this node and its children as a tree
+      operationId: treeNodes
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to retrieve
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A tree of nodes
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                baz: {}
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /suites/{nodeName}/status:
+    get:
+      summary: Show status of a node (suite, family or task)
+      operationId: showNodeStatus
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to retrieve
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status of the node
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  default_status:
+                    type: string
+                  status:
+                    type: string
+                  why:
+                    type: object
+                    properties:
+                      bottom_up_why:
+                        type: array
+                        items:
+                          type: string
+                      top_down_why:
+                        type: array
+                        items: 
+                          type: string
+              example:
+                default_status: queued
+                status: complete
+                why:
+                  bottom_up_why: [ "SUITE:/foo is suspended" ]
+                  top_down_why: [ "SUITE:/foo is suspended" ]
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update status of a node (suite, family or task)
+      operationId: updateNodeStatus
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to update
+          schema:
+            type: string
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuthh: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: action to take on node
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Action'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /suites/{nodeName}/attributes:
+    get:
+      summary: Show attributes of a node (suite, family or task)
+      operationId: showNodeAttributes
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to show
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Description of node attributes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attributes"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Update an attribute of a node (suite, family or task)
+      operationId: updateNodeAttribute
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to update
+          schema:
+            type: string
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: attribute to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create a new attribute for a node (suite, family or task)
+      operationId: createNodeAttribute
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of node where attribute is added
+          schema:
+            type: string
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: attribute to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+      responses:
+        '201':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Remove an attribute of a node (suite, family or task)
+      operationId: removeNodeAttribute
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to update
+          schema:
+            type: string
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: attribute to remove
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Attribute'
+      responses:
+        '204':
+          description: Expected response to a valid request
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /suites/{nodeName}/definition:
+    get:
+      summary: Show ecFlow definition of a node (suite, family or task)
+      operationId: showNodeDefinition
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to retrieve
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  definition:
+                    type: string
+                    example: "suite foo\nendsuite"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update definition of a node (suite, family or task)
+      operationId: updateNodeDefinition
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node which definition is updated
+          schema:
+            type: string
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: New definition
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                definition:
+                  type: string
+                  example: "family bar\nendfamily"
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Remove a node (suite, family or task)
+      operationId: removeNode
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to remove
+          schema:
+            type: string
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+      responses:
+        '204':
+          description: Expected response to a valid request
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /suites/{nodeName}/script:
+    get:
+      summary: Show script for a task
+      operationId: showNodeScript
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to retrieve (must be a task)
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Script contents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  script:
+                    type: string
+                  job:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /suites/{nodeName}/output:
+    get:
+      summary: Show output of a task
+      operationId: showNodeOutput
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to retrieve (must be a task)
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_output:
+                    type: string
+                  kill_output:
+                    type: string
+                  status_output:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /server/status:
+    get:
+      summary: Show ecFlow server status
+      operationId: showServerStatus
+      tags:
+        - server
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update ecFlow server status
+      operationId: updateServerStatus
+      tags:
+        - server
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: action to take on ecFlow server
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerAction'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /server/ping:
+    get:
+      summary: Ping ecFlow server
+      operationId: pingServer
+      tags:
+        - server
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  host:
+                    type: string
+                  round_trip_time:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /server/attributes:
+    get:
+      summary: Show ecFlow server attributes
+      operationId: showServerAttributes
+      tags:
+        - server
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServerAttribute'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update ecFlow server attribute
+      operationId: changeServerAttribute
+      tags:
+        - server
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: attribute to change
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerAttribute'
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Remove ecFlow server attribute
+      operationId: removeServerAttribute
+      tags:
+        - server
+      responses:
+        '204':
+          description: Expected response to a valid request
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create a new ecFlow server attribute
+      operationId: createServerAttribute
+      tags:
+        - server
+      security:
+        - BasicAuth: []
+        - TokenAuth: []
+        - ApiKeyAuth: []
+        - ApiKeyAuthLegacy: []
+      requestBody:
+        required: true
+        description: attribute to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerAttribute'
+      responses:
+        '201':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success20x"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /statistics:
+    get:
+      summary: Show REST api statistics
+      operationId: showApiStatistics
+      tags:
+        - api
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  num_requests:
+                    type: integer
+                    example: 1
+                  num_errors:
+                    type: integer
+                    example: 0
+                  num_cached_requests:
+                    type: integer
+                    example: 1
+                  since:
+                    type: string
+                    example: "2022-10-06T12:00:00Z"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+components:
+  schemas:
+    ServerAction:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum: [reload_whitelist_file, reload_passwd_file, reload_custom_passwd_file]
+          example: reload_whitelist_file
+    ServerAttribute:
+      type: object
+      required:
+      - type
+      - name
+      - value
+      properties:
+        type:
+          type: string
+          enum: [variable]
+          example: variable
+        name:
+          type: string
+          example: foo
+        value:
+          type: string
+          example: bar
+    Action:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum: [abort, begin, complete, defstatus, execute, init, requeue, rerun, resume, submit, suspend]
+          example: complete
+        recursive:
+          type: boolean
+          default: false
+        force:
+          type: boolean
+          default: false
+        abort_why:
+          type: string
+        defstatus_value:
+          type: string
+    Attribute:
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum: [autoarchive, autocancel, autorestore, complete, cron, day, date, event, generic, inlimit, label, late, limit, meter, queue, repeat, time, today, trigger, variable]
+          example: variable
+        name:
+          type: string
+        value:
+          type: string
+        old_value:
+          type: string
+        min:
+          type: string
+        max:
+          type: string
+    Success20x:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        path:
+          type: string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+        body:
+          type: string
+    Meter:
+      type: object
+      required:
+        - name
+        - value
+        - min
+        - max
+      properties:
+        name:
+          type: string
+        value:
+          type: integer
+        max:
+          type: integer
+        min:
+          type: integer
+    Event:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        initial_value:
+          type: string
+    Label:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    Variable:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        const:
+          type: boolean
+          default: false
+    Limit:
+      type: object
+      required:
+        - name
+        - value
+        - limit
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        limit:
+          type: integer
+    InLimit:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+    Date:
+      type: object
+      required:
+        - value
+        - free
+      properties:
+        value:
+          type: string
+        free:
+          type: boolean
+    Day:
+      type: object
+      required:
+        - value
+        - free
+        - expired
+      properties:
+        value:
+          type: string
+        free:
+          type: boolean
+        expired:
+          type: boolean
+    Time:
+      type: object
+      required:
+        - value
+        - free
+      properties:
+        value:
+          type: string
+        free:
+          type: boolean
+    Today:
+      type: object
+      required:
+        - value
+        - free
+        - expired
+      properties:
+        value:
+          type: string
+        free:
+          type: boolean
+        expired:
+          type: boolean
+    Cron:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+    Expression:
+      type: object
+      required:
+        - free
+        - value
+        - expressions
+      properties:
+        free:
+          type: boolean
+        value:
+          type: string
+        expressions:
+          type: array
+          items:
+            type:
+              string
+    Flag:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+    Late:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+        submitted:
+          type: string
+        active:
+          type: string
+        complete:
+          type: string
+        complete_is_relative:
+          type: boolean
+        is_late:
+          type: boolean
+    Zombie:
+      type: object
+      properties:
+        type:
+          type: string
+        action:
+          type: string
+        child_commands:
+          type: string
+        lifetime:
+          type: string
+    Queue:
+      type: object
+      required:
+        - name
+        - queue
+        - value
+        - index
+      properties:
+        name:
+          type: string
+        queue:
+          type: array
+          items:
+            type: string
+        index:
+          type: integer
+        value:
+          type: string
+    Generic:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+        value:
+          type: array
+          items:
+            type:
+              string
+    TimeSlot:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+    AutoCancel:
+      type: object
+      required:
+        - relative
+        - days
+        - time
+        - value
+      properties:
+        relative:
+          type: boolean
+        value:
+          type: string
+        days:
+          type: boolean
+        time:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/TimeSlot"
+    AutoRestore:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: array
+          items:
+            type: string
+    AutoArchive:
+      type: object
+      required:
+        - relative
+        - days
+        - time
+        - value
+      properties:
+        relative:
+          type: boolean
+        value:
+          type: string
+        days:
+          type: boolean
+        time:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/TimeSlot"
+    RepeatDate:
+      type: object
+      required:
+        - name
+        - start
+        - end
+        - step
+        - value
+      properties:
+        name:
+          type: string
+        start:
+          type: integer
+        step:
+          type: integer
+        end:
+          type: integer
+        value:
+          type: integer
+    RepeatDateList:
+      type: object
+      required:
+        - name
+        - index
+        - value
+        - values
+      properties:
+        name:
+          type: string
+        index:
+          type: integer
+        value:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+    RepeatInteger:
+      type: object
+      required:
+        - name
+        - start
+        - step
+        - end
+        - value
+      properties:
+        name:
+          type: string
+        start:
+          type: integer
+        step:
+          type: integer
+        end:
+          type: integer
+        value:
+          type: integer
+    RepeatDay:
+      type: object
+      required:
+        - name
+        - step
+        - valid
+      properties:
+        name:
+          type: string
+        step:
+          type: integer
+        valid:
+          type: boolean
+    RepeatEnumerated:
+      type: object
+      required:
+        - name
+        - index
+        - value
+        - values
+      properties:
+        name:
+          type: string
+        index:
+          type: integer
+        value:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+    RepeatString:
+      type: object
+      required:
+        - name
+        - index
+        - value
+        - values
+      properties:
+        name:
+          type: string
+        index:
+          type: integer
+        value:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+    Attributes:
+      type: object
+      required:
+        - meters
+        - events
+        - labels
+        - variables
+        - inherited_variables
+        - limits
+        - inlimits
+        - dates
+        - days
+        - times
+        - todays
+        - crons
+        - repeat
+        - triggers
+        - completes
+        - flag
+        - late
+        - zombie
+        - queue
+        - generic
+        - autocancel
+        - autoarchive
+        - autorestore
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        meters:
+          type: array
+          items:
+            $ref: "#/components/schemas/Meter"
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/Label"
+        variables:
+          type: array
+          items:
+            $ref: "#/components/schemas/Variable"
+        inherited_variables:
+          type: object
+          properties:
+            server:
+              type: array
+              items:
+                $ref: "#/components/schemas/Variable"
+        limits:
+          type: array
+          items:
+            $ref: "#/components/schemas/Limit"
+        inlimits:
+          type: array
+          items:
+            $ref: "#/components/schemas/InLimit"
+        dates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Date"
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/Day"
+        times:
+          type: array
+          items:
+            $ref: "#/components/schemas/Time"
+        todays:
+          type: array
+          items:
+            $ref: "#/components/schemas/Today"
+        crons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Cron"
+        repeat:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/RepeatDate"
+            - $ref: "#/components/schemas/RepeatDateList"
+            - $ref: "#/components/schemas/RepeatInteger"
+            - $ref: "#/components/schemas/RepeatDay"
+            - $ref: "#/components/schemas/RepeatString"
+            - $ref: "#/components/schemas/RepeatEnumerated"
+        triggers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Expression"
+        completes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Expression"
+        flag:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Flag"
+        late:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Late"
+        zombies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Zombie"
+        queues:
+          type: array
+          items:
+            $ref: "#/components/schemas/Queue"
+        generics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Generic"
+        autocancel:
+          allOf:
+            - $ref: "#/components/schemas/AutoCancel"
+        autorestore:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/AutoRestore"
+        autoarchive:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/AutoArchive"
+ 
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    TokenAuth:
+      type: http
+      scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    ApiKeyAuthLegacy:
+      type: apiKey
+      in: query
+      name: key

@@ -72,6 +72,9 @@ public:
    // returns a user specified user name. When this is used a password must be provided
    virtual const std::string& get_user_name() const = 0;
    virtual void set_user_name(const std::string&) = 0;
+   // set password is needed when user is authenticated from an http server call: in this case
+   // the password is given in the url (or some other means), so it will not be read from a local file
+   virtual void set_password(const std::string&) = 0;
 
 	/// Some commands work on construction. to avoid this under test. Call set_test
 	/// i.e Command like CtsCmd::SERVER_LOAD can be client side only, in which case
