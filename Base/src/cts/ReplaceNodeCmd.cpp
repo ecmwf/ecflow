@@ -64,7 +64,14 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
    // Parse the file and load the defs file into memory.
    std::string errMsg, warningMsg;
    defs_ptr client_defs = Defs::create();
-   if ( ! client_defs->restore( path_to_defs , errMsg , warningMsg) ) {
+   bool ok = false;
+   if (path_to_defs.find("suite") != std::string::npos && path_to_defs.find("endsuite") != std::string::npos) {
+      ok = client_defs->restore_from_string(path_to_defs, errMsg, warningMsg);
+   }
+   else {
+      ok = client_defs->restore( path_to_defs , errMsg , warningMsg);
+   }
+   if (!ok) {
       std::stringstream ss;
       ss << "ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " <<  path_to_defs  << " : " << errMsg;
       throw std::runtime_error( ss.str() );

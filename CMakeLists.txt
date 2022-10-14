@@ -58,6 +58,7 @@ option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
 option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely linked" OFF  )
+option( ENABLE_HTTP                "Enable HTTP server (experimental)" OFF  )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -178,6 +179,7 @@ ecbuild_info( "ENABLE_TESTS               : ${ENABLE_TESTS} *if* disabled no nee
 ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries available" )
+ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
 
 
 if (ENABLE_UI)
@@ -347,6 +349,9 @@ if (ENABLE_UI)
     add_subdirectory( share )
 endif()
 
+if (ENABLE_HTTP)
+    add_subdirectory( Http )
+endif()
 
 # =========================================================================================
 # DOXYGEN to use: make doxygen  -> ${CMAKE_CURRENT_BINARY_DIR}/Doc/doxygen/html/index.html
