@@ -73,9 +73,8 @@ void ServerListSystemFileManager::clear()
 
     for(auto & item : changedItems_) {
         delete item;
-        changedItems_.clear();
     }
-
+    changedItems_.clear();
     pendingItems_.clear();
 }
 
