@@ -45,7 +45,6 @@ TimelineItemWidget::TimelineItemWidget(QWidget */*parent*/) :
 
 TimelineItemWidget::~TimelineItemWidget()
 {
-    clearContents();
 }
 
 QWidget* TimelineItemWidget::realWidget()

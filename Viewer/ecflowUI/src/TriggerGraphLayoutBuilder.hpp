@@ -77,8 +77,8 @@ struct SimpleGraphLayoutNode : GraphLayoutNode
 class GraphLayoutBuilder
 {
 public:
-    GraphLayoutBuilder() {}
-    virtual ~GraphLayoutBuilder() {}
+    GraphLayoutBuilder() = default;
+    virtual ~GraphLayoutBuilder() = default;
     virtual void clear() =0;
     virtual void build(std::vector<GraphLayoutNode*>&, std::vector<GraphLayoutEdge*>&, int focus) =0;
     void setXMinGap(int v) {xMinGap_ = v;}
@@ -92,7 +92,7 @@ protected:
 class SimpleGraphLayoutBuilder : public GraphLayoutBuilder
 {
 public:
-    SimpleGraphLayoutBuilder() {}
+    SimpleGraphLayoutBuilder() = default;
     ~SimpleGraphLayoutBuilder() override;
     void clear() override;
     void build(std::vector<GraphLayoutNode*>& nodes, std::vector<GraphLayoutEdge*>& edges, int focus) override;

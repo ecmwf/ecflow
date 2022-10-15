@@ -39,6 +39,10 @@ VFileTransferCore::VFileTransferCore(QObject* parent) :
     }
 }
 
+VFileTransferCore::~VFileTransferCore()
+{
+}
+
 bool VFileTransferCore::isActive() const
 {
     return (proc_ && proc_->state() != QProcess::NotRunning);

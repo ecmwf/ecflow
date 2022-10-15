@@ -54,11 +54,11 @@ public:
     unsigned int endDateSec() const {return endDateSec_;}
 
 protected:
-    TimelineItem* data_;
+    TimelineItem* data_{nullptr};
     std::vector<unsigned int> days_;
-    unsigned int viewStartDateSec_;
-    unsigned int viewEndDateSec_;
-    unsigned int endDateSec_;
+    unsigned int viewStartDateSec_{0};
+    unsigned int viewEndDateSec_{0};
+    unsigned int endDateSec_{0};
 };
 
 class TimelineInfoDailyDelegate : public QStyledItemDelegate, public VPropertyObserver

@@ -23,6 +23,8 @@ class InfoProvider : public VTaskObserver, public VInfoVisitor
 public:
 	InfoProvider(InfoPresenter* owner,VTask::Type);
 	~InfoProvider() override;
+    InfoProvider(const InfoProvider&) = delete;
+    InfoProvider& operator=(const InfoProvider&) = delete;
 
 	void info(VInfo_ptr);
 	void command(VTask::Type);
@@ -46,18 +48,21 @@ protected:
 	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
     virtual void optionsChanged() {}
 
-	InfoPresenter* owner_;
+    InfoPresenter* owner_{nullptr};
 	VInfo_ptr info_;
 	VTask_ptr task_;
-	VReply* reply_;
+    VReply* reply_{nullptr};
 	VTask::Type taskType_;
     std::string fileVarName_;
     std::string fileSuffix_;
 	std::string fileNotDefinedText_;
 	std::string fileMissingText_;
-    bool active_;
-	bool autoUpdate_;
-	bool inAutoUpdate_;
+    bool active_{false};
+    bool autoUpdate_{false};
+    bool inAutoUpdate_{false};
+
+private:
+    void clearInternal();
 };
 
 class JobProvider : public InfoProvider

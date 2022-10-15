@@ -37,10 +37,12 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : 
     setModal(false);
 #endif
 
-    Q_ASSERT(info_ && info_->isAttribute() && info_->attribute());
+    Q_ASSERT(info_);
+    auto attr = info_->attribute();
+    Q_ASSERT(attr);
     messageLabel_->hide();
     
-    attrData_=info_->attribute()->data();
+    attrData_=attr->data();
 
     QString wt="Edit " + type;
     wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
@@ -65,9 +67,11 @@ AttributeEditor::~AttributeEditor()
 
 void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
 {
-    Q_ASSERT(info && info->isAttribute() && info->attribute());
+    Q_ASSERT(info);
     VAttribute* a=info->attribute();
-    Q_ASSERT(a->type());
+    Q_ASSERT(a);
+    auto aType = a->type();
+    Q_ASSERT(aType);
 
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
     Q_FOREACH(AttributeEditor* e,editors)

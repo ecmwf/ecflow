@@ -39,12 +39,15 @@ Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
-    void updateSettings() override;
+    void updateSettings() override {updateSettingsInternal();}
 
     void renderNode(QPainter *painter,const QModelIndex& index,
                                         const QStyleOptionViewItem& option,QString text) const;
 
-    ModelColumn* columns_;
+private:
+    void updateSettingsInternal();
+
+    ModelColumn* columns_{nullptr};
     QPen borderPen_;
 };
 

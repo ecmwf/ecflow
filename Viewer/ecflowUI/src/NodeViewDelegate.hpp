@@ -222,7 +222,7 @@ protected:
     QPixmap limitEmptyPix_;
     QPixmap limitExtraFillPix_;
     enum LimitShape {RectLimitShape,CircleLimitShape};
-    LimitShape  limitShape_;
+    LimitShape  limitShape_{CircleLimitShape};
     int maxLimitItems_ {-1};
     QPen    repeatDayPen_;
     QPen    repeatDatePen_;

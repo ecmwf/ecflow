@@ -23,10 +23,7 @@
 
 InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	owner_(owner),
-	taskType_(taskType),
-    active_(false),
-	autoUpdate_(false),
-	inAutoUpdate_(false)
+    taskType_(taskType)
 {
 	reply_=new VReply(this);
     if(owner_)
@@ -36,16 +33,30 @@ InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 InfoProvider::~InfoProvider()
 {
 	delete reply_;
-	clear();
+    clearInternal();
+}
+
+void InfoProvider::clearInternal()
+{
+    if (task_) {
+        task_->status(VTask::CANCELLED);
+    }
+    if (reply_) {
+        reply_->reset();
+    }
+    info_.reset();
 }
 
 void InfoProvider::clear()
 {
-	if(task_)
-		task_->status(VTask::CANCELLED);
-
-	reply_->reset();
-	info_.reset();
+    clearInternal();
+//    if (task_) {
+//		task_->status(VTask::CANCELLED);
+//    }
+//    if (reply_) {
+//        reply_->reset();
+//    }
+//	info_.reset();
 }
 
 void InfoProvider::setActive(bool b)
@@ -83,14 +94,14 @@ void InfoProvider::visit(VInfoServer* info)
     if(!info->server())
     {
         owner_->infoFailed(reply_);
+    } else {
+        //Define a task for getting the info from the server.
+        task_=VTask::create(taskType_,this);
+
+        //Run the task in the server. When it completes taskFinished() is called. The text returned
+        //in the reply will be prepended to the string we generated above.
+        info->server()->run(task_);
     }
-
-    //Define a task for getting the info from the server.
-    task_=VTask::create(taskType_,this);
-
-    //Run the task in the server. When it completes taskFinished() is called. The text returned
-    //in the reply will be prepended to the string we generated above.
-    info->server()->run(task_);
 }
 
 //Node

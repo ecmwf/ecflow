@@ -463,12 +463,9 @@ void NodeFilterDef::serverRenamed(const std::string& newName, const std::string&
 
 NodeFilter::NodeFilter(NodeFilterDef* def,ServerHandler* server) :
 	def_(def),
-    matchMode_(VectorMatch),
-    server_(server),
-    forceShowNode_(nullptr)
+    server_(server)
 {
     assert(server_);
-
     queryEngine_=new NodeFilterEngine(this);
 }
 

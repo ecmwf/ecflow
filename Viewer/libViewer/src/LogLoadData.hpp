@@ -136,7 +136,7 @@ protected:
     std::vector<LogRequestItem> subReq_;
     LogLoadStatItem fullStat_;
     LogLoadStatItem periodStat_;
-    size_t subReqMax_;
+    size_t subReqMax_{0};
 
     std::string name_; //the name of the item (only makes sense for suites)
 };

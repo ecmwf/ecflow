@@ -27,16 +27,11 @@ public:
     //From VInfoPresenter
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;
-    //void infoProgress(VReply*);
-    //void infoProgressStart(const std::string& text,int max);
-    //void infoProgress(const std::string& text,int value);
 
 protected:
      VReportMaker(QObject* parent=nullptr);
      void run(VInfo_ptr);
      void sendJiraReport(VFile_ptr file);
-
-     OutputFileProvider *infoProvider_;
 };
 
 

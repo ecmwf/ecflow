@@ -30,6 +30,8 @@ class ChangeNotify : public VPropertyObserver
 {
 public:
 	explicit ChangeNotify(const std::string& id);
+    ChangeNotify(const ChangeNotify&) = delete;
+    ChangeNotify& operator=(const ChangeNotify&) = delete;
 
 	const std::string& id() const {return id_;}
     VNodeList* data() const {return data_;}
@@ -71,12 +73,12 @@ protected:
 	static ChangeNotifyDialog* dialog();
 
 	std::string id_;
-	bool enabled_;
-	VNodeList* data_;
-	ChangeNotifyModel* model_;
-	QSortFilterProxyModel* proxyModel_;
-	VProperty* prop_;
-    VProperty* propEnabled_; //central settings in config GUI
+    bool enabled_{false};
+    VNodeList* data_{nullptr};
+    ChangeNotifyModel* model_{nullptr};
+    QSortFilterProxyModel* proxyModel_{nullptr};
+    VProperty* prop_{nullptr};
+    VProperty* propEnabled_{nullptr}; //central settings in config GUI
 	static ChangeNotifyDialog* dialog_;
 };
 

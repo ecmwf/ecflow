@@ -73,22 +73,22 @@ private:
     void detach(Node *node);
     void aspectToStr(std::stringstream& s,const std::vector<ecf::Aspect::Type>& t) const;
 
-	ServerHandler *server_;
+    ServerHandler *server_{nullptr};
     std::string serverName_;
-	ClientInvoker *ci_;
-	VTask::Type taskType_;
+    ClientInvoker *ci_{nullptr};
+    VTask::Type taskType_{VTask::NoTask};
 	std::vector<std::string> command_;
 	std::map<std::string,std::string> params_;
 	std::vector<std::string> contents_;
 	NameValueVec vars_;
     Zombie zombie_;
 	std::string nodePath_;
-	bool rescanNeed_;	
-    bool hasSuiteFilter_;
+    bool rescanNeed_{false};
+    bool hasSuiteFilter_{false};
 	std::vector<std::string> filteredSuites_;
-	bool autoAddNewSuites_;
-	int maxLineNum_;
-    bool initialResetDone_;
+    bool autoAddNewSuites_{false};
+    int maxLineNum_{-1};
+    bool initialResetDone_{false};
 };
 
 #endif

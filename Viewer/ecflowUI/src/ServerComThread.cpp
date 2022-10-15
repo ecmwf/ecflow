@@ -26,12 +26,7 @@
 
 ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
         server_(server),
-        ci_(ci),
-        taskType_(VTask::NoTask),
-        rescanNeed_(false),
-        hasSuiteFilter_(false),
-        autoAddNewSuites_(false),
-        maxLineNum_(-1)
+        ci_(ci)
 {
     assert(server_);
 }

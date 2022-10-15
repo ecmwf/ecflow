@@ -73,8 +73,8 @@ void EditItemWidget::reload(VInfo_ptr info)
 
 void EditItemWidget::clearContents()
 {
-	InfoPanelItem::clear();
-	textEdit_->clear();
+    InfoPanelItem::clear();
+    textEdit_->clear();
 	infoLabel_->clear();
 	infoLabel_->hide();
 }

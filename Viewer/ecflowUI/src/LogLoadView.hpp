@@ -377,28 +377,27 @@ class LogTotalRequestView : public LogRequestView
     Q_OBJECT
 public:
     explicit LogTotalRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
-    ~LogTotalRequestView() {}
+    ~LogTotalRequestView() = default;
 
 public Q_SLOTS:
-    void addRemoveSuite(int idx, bool st);
+    void addRemoveSuite(int idx, bool st) override;
 
 protected:
     enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
 
-    void loadCore();
-
-    void addSuite(int);
-    void removeSuite(int) {}
-    void adjustStats();
+    void loadCore() override;
+    void addSuite(int) override;
+    void removeSuite(int) override {}
+    void adjustStats() override;
 
     QString suiteSeriesId(int idx) const;
     QChart* getChart(ChartType);
     ChartView* getView(ChartType);
-    void buildScanTable(QString& txt,int idx);
+    void buildScanTable(QString& txt,int idx) override;
 
-    LogLoadRequestModel* suiteModel_;
-    LogLoadRequestSortModel* suiteSortModel_;
-    QTreeView* suiteTree_;
+    LogLoadRequestModel* suiteModel_{nullptr};
+    LogLoadRequestSortModel* suiteSortModel_{nullptr};
+    QTreeView* suiteTree_{nullptr};
 };
 
 class LogCmdSuiteRequestView : public  LogRequestView

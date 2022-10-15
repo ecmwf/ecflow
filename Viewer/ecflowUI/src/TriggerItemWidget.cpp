@@ -131,7 +131,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
 TriggerItemWidget::~TriggerItemWidget()
 {
-    clearContents();
 }
 
 QWidget* TriggerItemWidget::realWidget()

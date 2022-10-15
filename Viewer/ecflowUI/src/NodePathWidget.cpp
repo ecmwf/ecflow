@@ -1020,7 +1020,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
     // Interactive breadcrumsbs
     //------------------------------------
 
-    Q_ASSERT(mode_ = GuiMode);
+    Q_ASSERT(mode_ == GuiMode);
 
 	//Get the node list including the server
   	std::vector<VNode*> lst;
@@ -1114,20 +1114,18 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
         return VInfo_ptr();
     }
 
-    ServerHandler* server=info_->server();
-
-	if(info_ && server)
-	{
-		if(VNode *n=info_->node()->ancestorAt(idx,VNode::ParentToChildSort))
-		{
-			if(n == info_->node())
-				return info_;
-			else if(n->isServer())
-				return VInfoServer::create(n->server());
-			else
-				return VInfoNode::create(n);
-		}
-	}
+    if (info_ && info_->server())
+    {
+        if(VNode *n=info_->node()->ancestorAt(idx,VNode::ParentToChildSort))
+        {
+            if(n == info_->node())
+                return info_;
+            else if(n->isServer())
+                return VInfoServer::create(n->server());
+            else
+                return VInfoNode::create(n);
+        }
+    }
 
 	return VInfo_ptr();
 }

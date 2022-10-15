@@ -78,7 +78,7 @@ protected:
     void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
     void relayDashboardCommand(VInfo_ptr info,QString cmd);
 
-    virtual void clear();
+    void clear();
     virtual void updateState(const ChangeFlags&)=0;
 
 	//Notifications about the server changes

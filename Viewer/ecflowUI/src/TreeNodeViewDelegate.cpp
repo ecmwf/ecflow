@@ -75,7 +75,7 @@ public:
          rightPadding=2;
      }
 
-     int realFontHeight;
+    int realFontHeight{0};
      int textTopCorrection{0};
      int textBottomCorrection{0};
 
@@ -140,7 +140,7 @@ public:
          rightPadding=2;
      }
 
-     int realFontHeight;
+    int realFontHeight{0};
      int textTopCorrection{0};
      int textBottomCorrection{0};
 
@@ -196,26 +196,10 @@ public:
 
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent) :
-    nodeRectRad_(0),
-    drawChildCount_(true),
-    nodeStyle_(ClassicNodeStyle),
-    drawNodeType_(true),
-    bgCol_(Qt::white),
-    subFailText_("submission failed"),
     model_(model)
 {
     nodeBox_=new TreeNodeDelegateBox;
     attrBox_=new TreeAttrDelegateBox;
-
-//    if (nodeBox)
-//        nodeBox_ = nodeBox;
-//    else
-//        nodeBox_=new TreeNodeDelegateBox;
-
-//    if (attrBox)
-//        attrBox_ = attrBox;
-//    else
-//        attrBox_=new TreeAttrDelegateBox;
 
     drawAttrSelectionRect_=true;
 
@@ -259,7 +243,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent)
     typeFont_.setBold(true);
     typeFont_.setPointSize(font_.pointSize()-1);
 
-    updateSettings();
+    updateSettingsInternal();
 }
 
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
@@ -269,7 +253,7 @@ TreeNodeViewDelegate::~TreeNodeViewDelegate()
         delete tmpPainter_;
 }
 
-void TreeNodeViewDelegate::updateSettings()
+void TreeNodeViewDelegate::updateSettingsInternal()
 {
     Q_ASSERT(nodeBox_);
     Q_ASSERT(attrBox_);

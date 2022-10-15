@@ -281,19 +281,17 @@ void NodeQueryEditor::init()
     rootLe_->setText(QString::fromStdString(query_->rootNode()));
 
 	//Node name
-    nameEdit_->init(query_);
-    pathEdit_->init(query_);
+    nameEdit_->setQuery(query_);
+    pathEdit_->setQuery(query_);
 
 	//Lists
-    typeEdit_->init(query_);
-    stateEdit_->init(query_);
-    flagEdit_->init(query_);
-    attrEdit_->init(query_);
+    typeEdit_->setQuery(query_);
+    stateEdit_->setQuery(query_);
+    flagEdit_->setQuery(query_);
+    attrEdit_->setQuery(query_);
 
     //period
-    periodEdit_->init(query_);
-
-    //attrPanel_->init();
+    periodEdit_->setQuery(query_);
 
 	initIsOn_=false;
 

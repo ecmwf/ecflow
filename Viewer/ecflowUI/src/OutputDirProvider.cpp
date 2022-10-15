@@ -178,18 +178,20 @@ void OutputDirFetchLogServerTask::clientError(QString msg)
     if(client_)
     {
         sDesc="Failed to fetch from " + client_->longName();
-        if(!msg.isEmpty())
+        if(!msg.isEmpty()) {
             sDesc+=" error: " + msg.toStdString();
-
+        }
+        addTryLog(reply, "fetch file from logserver=" + client_->longName() + " : FAILED");
     }
     else
     {
         sDesc="Failed to fetch from logserver";
-        if(!msg.isEmpty())
-            sDesc+=": " + msg.toStdString();;
+        if(!msg.isEmpty()) {
+            sDesc+=": " + msg.toStdString();
+        }
+        addTryLog(reply, "fetch file from logserver: FAILED");
     }
 
-    addTryLog(reply, "fetch file from logserver=" + client_->longName() + " : FAILED");
     reply->appendErrorText(sDesc);
     fail();
 }
@@ -362,9 +364,8 @@ void OutputDirFetchTransferTask::transferFinished()
     }
 }
 
-void OutputDirFetchTransferTask::transferProgress(QString msg,int value)
+void OutputDirFetchTransferTask::transferProgress(QString /*msg*/,int /*value*/)
 {
-    //owner_->progressUpdate(msg.toStdString(),value);
 }
 
 void OutputDirFetchTransferTask::transferFailed(QString msg)

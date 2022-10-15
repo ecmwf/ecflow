@@ -81,6 +81,8 @@ class NodeFilterEngine
 public:
 	explicit NodeFilterEngine(NodeFilter*);
 	~NodeFilterEngine();
+    NodeFilterEngine(const NodeFilterEngine&) = delete;
+    NodeFilterEngine& operator=(const NodeFilterEngine&) = delete;
 
     bool runQuery(ServerHandler*);
 	void setQuery(NodeQuery*);
@@ -88,11 +90,11 @@ public:
 private:
 	void runRecursively(VNode *node);
 
-	NodeQuery* query_;
-	BaseNodeCondition* parser_;
-	ServerHandler* server_;
-	NodeFilter *owner_;
-    VNode* rootNode_;
+    NodeQuery* query_{nullptr};
+    BaseNodeCondition* parser_{nullptr};
+    ServerHandler* server_{nullptr};
+    NodeFilter *owner_{nullptr};
+    VNode* rootNode_{nullptr};
 };
 
 

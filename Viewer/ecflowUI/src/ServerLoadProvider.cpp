@@ -25,7 +25,6 @@
 ServerLoadProvider::ServerLoadProvider(InfoPresenter* owner) :
     InfoProvider(owner,VTask::HistoryTask)
 {
-
 }
 
 void ServerLoadProvider::clear()

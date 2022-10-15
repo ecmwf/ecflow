@@ -81,15 +81,11 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
     {
        stateMap_["<state>" + (*it)->name() + "</state>"]="<font class=\'"+ (*it)->name() + "\'>" + (*it)->name() + "</font>";
     }
-
-
 }
 
 WhyItemWidget::~WhyItemWidget()
 {
-    clearContents();
 }
-
 
 QWidget* WhyItemWidget::realWidget()
 {

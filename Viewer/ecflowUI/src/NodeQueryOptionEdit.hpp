@@ -40,7 +40,7 @@ Q_OBJECT
 public:
     NodeQueryOptionEdit(QString optionId,QGridLayout* grid,QWidget *parent);
 
-    void init(NodeQuery*);
+    void setQuery(NodeQuery*);
     QString optionId() const {return optionId_;}
     virtual void setVisible(bool)=0;
     virtual void clear() {}
@@ -70,12 +70,15 @@ protected Q_SLOTS:
     void slotMatchChanged(int val);
 
 protected:
-    void init(NodeQueryOption*) override;
+    void init(NodeQueryOption* o) override {initInternal(o);}
 
-    QLabel* label_;
-    StringMatchCombo* matchCb_;
-    QLineEdit *le_;
-    NodeQueryStringOption* option_;
+private:
+    void initInternal(NodeQueryOption*);
+
+    QLabel* label_{nullptr};
+    StringMatchCombo* matchCb_{nullptr};
+    QLineEdit *le_{nullptr};
+    NodeQueryStringOption* option_{nullptr};
 };
 
 class NodeQueryListOptionEdit : public  NodeQueryOptionEdit
@@ -90,11 +93,14 @@ protected Q_SLOTS:
     void slotListChanged();
 
 protected:
-    void init(NodeQueryOption*) override;
+    void init(NodeQueryOption* o) override {initInternal(o);}
 
-    CustomListWidget* list_;
-    QToolButton *resetTb_;
-    NodeQueryListOption* option_;
+private:
+    void initInternal(NodeQueryOption*);
+
+    CustomListWidget* list_{nullptr};
+    QToolButton *resetTb_{nullptr};
+    NodeQueryListOption* option_{nullptr};
 };
 
 class NodeQueryComboOptionEdit : public  NodeQueryOptionEdit
@@ -108,11 +114,14 @@ protected Q_SLOTS:
     void slotCbChanged(int);
 
 protected:
-    void init(NodeQueryOption*) override;
+    void init(NodeQueryOption* o) override {initInternal(o);}
 
-    QLabel* label_;
-    QComboBox* cb_;
-    NodeQueryComboOption* option_;
+private:
+    void initInternal(NodeQueryOption*);
+
+    QLabel* label_{nullptr};
+    QComboBox* cb_{nullptr};
+    NodeQueryComboOption* option_{nullptr};
 };
 
 class NodeQueryPeriodOptionEdit : public NodeQueryOptionEdit
@@ -122,9 +131,6 @@ public:
     NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget *parent);
     void setVisible(bool) override;
 
-protected:
-    void init(NodeQueryOption*) override;
-
 protected Q_SLOTS:
     void updateOptions();
     void modeChanged(int);
@@ -133,18 +139,21 @@ protected Q_SLOTS:
     void slotFromChanged(QDateTime);
     void slotToChanged(QDateTime);
 
+protected:
+    void init(NodeQueryOption* o) override {initInternal(o);}
+
 private:
-    NodeQueryPeriodOption* option_;
-    QLabel* label_;
-    QComboBox* modeCb_;
-    QSpinBox* valueSpin_;
-    QComboBox* unitsCb_;
-    QDateTimeEdit* periodFromDe_;
-    QDateTimeEdit* periodToDe_;
-    QWidget* holder_;
+    void initInternal(NodeQueryOption*);
+
+    NodeQueryPeriodOption* option_{nullptr};
+    QLabel* label_{nullptr};
+    QComboBox* modeCb_{nullptr};
+    QSpinBox* valueSpin_{nullptr};
+    QComboBox* unitsCb_{nullptr};
+    QDateTimeEdit* periodFromDe_{nullptr};
+    QDateTimeEdit* periodToDe_{nullptr};
+    QWidget* holder_{nullptr};
 };
-
-
 
 #endif // NODEQUERYOPTIONEDIT_HPP
 

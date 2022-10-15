@@ -60,13 +60,13 @@ TimelineInfoDelegate::TimelineInfoDelegate(QWidget *parent) :
 
     prop_=new PropertyMapper(propVec,this);
 
-    updateSettings();
+    updateSettingsInternal();
 }
 
 TimelineInfoDelegate::~TimelineInfoDelegate()
 = default;
 
-void TimelineInfoDelegate::updateSettings()
+void TimelineInfoDelegate::updateSettingsInternal()
 {
     //Update the settings handled by the base class
     updateBaseSettings();

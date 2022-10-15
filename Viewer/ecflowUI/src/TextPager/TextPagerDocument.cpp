@@ -1219,13 +1219,17 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &
     qDebug() << "findLine --> line:" << lineNum << "current:" << current; 
 #endif        
         
-    if(lineNum == current)
+    if(lineNum == current) {
         return cursor;
-   
+    }
+
     int offset;
     Chunk *c = d->chunkAt(cursor.position(), &offset);
     
     Q_ASSERT(c != nullptr);
+    if (!c) {
+        return {};
+    }
     
     int pos=cursor.position() - offset;  //points to the chunks beginning
     d->updateChunkLineNumbers(c, pos);
@@ -1245,8 +1249,8 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &
 #endif
         }  
         
-    } else if(lineNum > current) {
-
+    } else {
+        Q_ASSERT(lineNum > current);
         while(c->firstLineIndex < lineNum && c->next) {
             pos+=c->size();
             c=c->next;
@@ -1256,7 +1260,7 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &
 #endif           
         }  
         
-        Q_ASSERT(c != nullptr && c->previous != nullptr);
+        Q_ASSERT(c->previous != nullptr);
         
         c=c->previous;
         pos-=c->size();

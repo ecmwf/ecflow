@@ -79,13 +79,13 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget */*parent*/)
 
     prop_=new PropertyMapper(propVec,this);
 
-    updateSettings();
+    updateSettingsInternal();
 }
 
 TableNodeViewDelegate::~TableNodeViewDelegate()
 = default;
 
-void TableNodeViewDelegate::updateSettings()
+void TableNodeViewDelegate::updateSettingsInternal()
 {
 	if(VProperty* p=prop_->find("view.table.font"))
 	{

@@ -181,17 +181,13 @@ void SuiteItemWidget::updateData()
 	}*/
 }
 
-void SuiteItemWidget::infoReady(VReply* reply)
+void SuiteItemWidget::infoReady(VReply*)
 {
     suiteView->sortByColumn(0,Qt::AscendingOrder);
-    //updateData();
 }
 
-void SuiteItemWidget::infoFailed(VReply* reply)
+void SuiteItemWidget::infoFailed(VReply*)
 {
-	//commandSent_=false;
-	//QString s=QString::fromStdString(reply->errorText());
-	//checkActionState();
 }
 
 void SuiteItemWidget::clearContents()
@@ -332,7 +328,7 @@ void SuiteItemWidget::on_syncTb_clicked(bool)
 	}
 }
 
-void SuiteItemWidget::on_removeTb_clicked(bool val)
+void SuiteItemWidget::on_removeTb_clicked(bool)
 {
     if(SuiteFilter* sf=model_->filter())
     {
@@ -387,7 +383,7 @@ void SuiteItemWidget::slotModelDataUpdated()
 }
 
 
-void SuiteItemWidget::notifyChange(SuiteFilter *filter)
+void SuiteItemWidget::notifyChange(SuiteFilter*)
 {
     checkActionState();
 }

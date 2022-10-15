@@ -78,13 +78,13 @@ NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget */*parent*/)
 
     prop_=new PropertyMapper(propVec,this);
 
-    updateSettings();
+    updateSettingsInternal();
 }
 
 NodeQueryViewDelegate::~NodeQueryViewDelegate()
 = default;
 
-void NodeQueryViewDelegate::updateSettings()
+void NodeQueryViewDelegate::updateSettingsInternal()
 {
     //Update the settings handled by the base class
     updateBaseSettings();

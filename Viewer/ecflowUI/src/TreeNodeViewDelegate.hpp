@@ -57,7 +57,7 @@ Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
-    void updateSettings() override;
+    void updateSettings() override {updateSettingsInternal();}
 
     int renderServer(QPainter *painter,const QModelIndex& index,
                         const QStyleOptionViewItem& option,QString text) const;
@@ -78,18 +78,20 @@ protected:
     void widthHintServer(const QModelIndex& index,int& itemWidth,QString text) const;
     int nodeWidth(const QModelIndex& index,int height, QString text) const;
 
+    void updateSettingsInternal();
+
     QString formatTime(int timeInSec) const;
     QColor interpolate(QColor c1,QColor c2,float r) const;
 
     enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
 
-    AnimationHandler* animation_;
+    AnimationHandler* animation_{nullptr};
 
-    int nodeRectRad_;
-    bool drawChildCount_;
-    NodeStyle nodeStyle_;
+    int nodeRectRad_{0};
+    bool drawChildCount_{true};
+    NodeStyle nodeStyle_{ClassicNodeStyle};
 
-    bool drawNodeType_;
+    bool drawNodeType_{true};
     QColor typeBgCol_;
 
     QFont serverNumFont_;
@@ -97,13 +99,13 @@ protected:
     QFont serverInfoFont_;
     QFont abortedReasonFont_;
     QFont typeFont_;
-    QColor bgCol_;
-    QString subFailText_;
+    QColor bgCol_{Qt::white};
+    QString subFailText_{"submission failed"};
 
-    TreeNodeModel* model_;
+    TreeNodeModel* model_{nullptr};
 
     mutable QPixmap tmpPix_;
-    mutable QPainter* tmpPainter_ {nullptr};
+    mutable QPainter* tmpPainter_{nullptr};
 };
 
 #endif // TREENODEVIEWDELEGATEBASE_HPP

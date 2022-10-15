@@ -64,7 +64,7 @@ void OverviewProvider::visit(VInfoNode* ni)
 	owner_->infoReady(reply_);
 }
 
-void OverviewProvider::visit(VInfoAttribute* ptr)
+void OverviewProvider::visit(VInfoAttribute* /*ptr*/)
 {
 }
 

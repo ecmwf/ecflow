@@ -41,8 +41,7 @@
 //=======================================================
 
 TimelineInfoModel::TimelineInfoModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          data_(nullptr), firstRowInPeriod_(-1), lastRowInPeriod_(-1)
+          QAbstractItemModel(parent)
 {
 }
 

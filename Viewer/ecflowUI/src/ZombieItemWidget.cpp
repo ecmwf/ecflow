@@ -155,10 +155,9 @@ void ZombieItemWidget::infoReady(VReply* reply)
 	checkActionState();
 }
 
-void ZombieItemWidget::infoFailed(VReply* reply)
+void ZombieItemWidget::infoFailed(VReply*)
 {
 	commandSent_=false;
-	//QString s=QString::fromStdString(reply->errorText());
 	checkActionState();
 }
 

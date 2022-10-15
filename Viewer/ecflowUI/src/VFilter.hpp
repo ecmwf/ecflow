@@ -161,6 +161,8 @@ public:
 
     NodeFilter(NodeFilterDef* def,ServerHandler*);
 	virtual ~NodeFilter();
+    NodeFilter(const NodeFilter&) = delete;
+    NodeFilter& operator=(const NodeFilter&) = delete;
 
     virtual void clear();
     virtual bool isNull()=0;
@@ -173,13 +175,13 @@ public:
     void clearForceShowNode();
 
 protected:
-    NodeFilterDef* def_;
-    NodeFilterEngine* queryEngine_;
+    NodeFilterDef* def_{nullptr};
+    NodeFilterEngine* queryEngine_{nullptr};
     std::set<std::string> type_;
-    MatchMode matchMode_;
+    MatchMode matchMode_{VectorMatch};
     std::vector<VNode*> match_;
-    ServerHandler * server_;
-    VNode* forceShowNode_;
+    ServerHandler * server_{nullptr};
+    VNode* forceShowNode_{nullptr};
 };
 
 class TreeNodeFilter : public NodeFilter

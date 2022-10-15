@@ -23,8 +23,11 @@
 //
 //========================================================
 
-SimpleGraphLayoutBuilder::~SimpleGraphLayoutBuilder() {
-    clear();
+SimpleGraphLayoutBuilder::~SimpleGraphLayoutBuilder()
+{
+    for(auto n: nodes_) {
+        delete n;
+    }
 }
 
 void SimpleGraphLayoutBuilder::clear()
@@ -505,9 +508,11 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
     UiLog().dbg() << "focus="  << focus_;
 
     for (auto i: nodes) {
-        auto item = nodes_[i];
-        item->x_ -= minX;
-        item->y_ -= minY;
+        if (i >=0 && i < static_cast<int>(nodes_.size())) {
+            auto item = nodes_[i];
+            item->x_ -= minX;
+            item->y_ -= minY;
+        }
     }
 
     // set width for dummy nodes

@@ -158,7 +158,7 @@ NodeViewDelegate::~NodeViewDelegate()
     }
 }
 
-void NodeViewDelegate::notifyChange(VProperty* p)
+void NodeViewDelegate::notifyChange(VProperty*)
 {
 	updateSettings();
 }
@@ -1430,14 +1430,12 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 
     size=QSize(totalWidth,attrBox_->fullHeight);
 
-    if(data.count() <  8)
+    if(data.count() <  9)
          return;
 
     QString type=data.at(1);
     QString name=data.at(2);
     QString val=data.at(3);
-    QString start=data.at(4);
-    QString end=data.at(5);
     QString step=data.at(6);
     QString pos=data.at(8);
 

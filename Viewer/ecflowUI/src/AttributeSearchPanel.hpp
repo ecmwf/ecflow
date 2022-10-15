@@ -52,9 +52,9 @@ Q_SIGNALS:
 private:
     //void addStringLine(QString labelTxt,QString text,QString group);
 
-	NodeQuery* query_;
+    NodeQuery* query_{nullptr};
     QMap<QString,QList<NodeQueryOptionEdit*> > groups_;
-	QGridLayout* grid_;
+    QGridLayout* grid_{nullptr};
 	QStringList selection_;
 
 };

@@ -26,6 +26,7 @@ class VFileTransferCore : public QObject
 
 public:
     VFileTransferCore(QObject* parent=nullptr);
+    virtual ~VFileTransferCore();
 
     virtual void clear();
     void stopTransfer(bool broadcast);

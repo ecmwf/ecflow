@@ -179,7 +179,7 @@ public:
 
     int documentSize;
     enum SaveState { NotSaving, Saving, AbortSave } saveState;
-    enum FindState { NotFinding, Finding, AbortFind } mutable findState;
+    enum FindState { NotFinding, Finding, AbortFind } findState;
     QList<TextPagerSection*> sections;
     QPointer<QIODevice> device;
     bool ownDevice, modified;

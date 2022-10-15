@@ -60,7 +60,7 @@ public:
 
 private:
 	static std::map<std::string,VNState*> items_;
-    unsigned char ucId_;
+    unsigned char ucId_{0};
 };
 
 #endif

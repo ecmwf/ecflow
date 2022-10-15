@@ -39,19 +39,14 @@ NodeQueryOptionEdit::NodeQueryOptionEdit(QString optionId,QGridLayout* grid,QWid
             parent_,SLOT(slotOptionEditChanged()));
 }
 
-void NodeQueryOptionEdit::init(NodeQuery* query)
+void NodeQueryOptionEdit::setQuery(NodeQuery* query)
 {
     init(query->option(optionId_));
 }
 
-
 NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,
                                                      QWidget* parent,bool sameRow) :
-    NodeQueryOptionEdit(option->name(),grid,parent),
-    label_(nullptr),
-    matchCb_(nullptr),
-    le_(nullptr),
-    option_(nullptr)
+    NodeQueryOptionEdit(option->name(),grid,parent)
 {
     label_=new QLabel(option->label() + ":",parent_);
     matchCb_=new StringMatchCombo(parent_);
@@ -92,11 +87,11 @@ NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGr
     connect(matchCb_,SIGNAL(currentIndexChanged(int)),
            this,SLOT(slotMatchChanged(int)));
 
-    init(option);
+    initInternal(option);
     Q_ASSERT(option_);
 }
 
-void NodeQueryStringOptionEdit::init(NodeQueryOption* option)
+void NodeQueryStringOptionEdit::initInternal(NodeQueryOption* option)
 {
     initIsOn_=true;
     option_=static_cast<NodeQueryStringOption*>(option);
@@ -152,8 +147,7 @@ NodeQueryListOptionEdit::NodeQueryListOptionEdit(NodeQueryOption *option,CustomL
                                                  QToolButton* tb,QWidget* parent) :
      NodeQueryOptionEdit(option->name(),nullptr,parent),
      list_(list),
-     resetTb_(tb),
-     option_(nullptr)
+     resetTb_(tb)
 {
     option_=static_cast<NodeQueryListOption*>(option);
     Q_ASSERT(option_);
@@ -167,10 +161,10 @@ NodeQueryListOptionEdit::NodeQueryListOptionEdit(NodeQueryOption *option,CustomL
     list_->addItems(option_->values(),false);
     resetTb_->setEnabled(list_->hasSelection());
 
-    init(option_);
+    initInternal(option_);
 }
 
-void NodeQueryListOptionEdit::init(NodeQueryOption* option)
+void NodeQueryListOptionEdit::initInternal(NodeQueryOption* option)
 {
     initIsOn_=true;
     option_=static_cast<NodeQueryListOption*>(option);
@@ -205,9 +199,7 @@ void NodeQueryListOptionEdit::slotListChanged()
 //==================================================================
 
 NodeQueryComboOptionEdit::NodeQueryComboOptionEdit(NodeQueryOption *option,QGridLayout* grid, QWidget* parent) :
-     NodeQueryOptionEdit(option->name(),grid,parent),
-     cb_(nullptr),
-     option_(nullptr)
+     NodeQueryOptionEdit(option->name(),grid,parent)
 {
     option_=static_cast<NodeQueryComboOption*>(option);
     Q_ASSERT(option_);
@@ -229,10 +221,10 @@ NodeQueryComboOptionEdit::NodeQueryComboOptionEdit(NodeQueryOption *option,QGrid
         cb_->addItem(labels[i],vals[i]);
     }
 
-    init(option_);
+    initInternal(option_);
 }
 
-void NodeQueryComboOptionEdit::init(NodeQueryOption* option)
+void NodeQueryComboOptionEdit::initInternal(NodeQueryOption* option)
 {
     initIsOn_=true;
     option_=static_cast<NodeQueryComboOption*>(option);
@@ -275,8 +267,7 @@ void NodeQueryComboOptionEdit::setVisible(bool st)
 //==================================================================
 
 NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget *parent) :
-  NodeQueryOptionEdit(option->name(),grid,parent),
-  option_(nullptr)
+  NodeQueryOptionEdit(option->name(),grid,parent)
 {
     int row=grid_->rowCount();
 
@@ -346,14 +337,14 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGr
     modeCb_->setCurrentIndex(0);
     unitsCb_->setCurrentIndex(1); //minutes
 
-    init(option);
+    initInternal(option);
     Q_ASSERT(option_);
 
     //we need to call it to have a proper init!!
     modeChanged(0);
 }
 
-void NodeQueryPeriodOptionEdit::init(NodeQueryOption* option)
+void NodeQueryPeriodOptionEdit::initInternal(NodeQueryOption* option)
 {
     initIsOn_=true;
 

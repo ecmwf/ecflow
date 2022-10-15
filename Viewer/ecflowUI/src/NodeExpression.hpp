@@ -219,13 +219,15 @@ class StringMatchCondition : public BaseNodeCondition
 public:
     StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
     ~StringMatchCondition() override {if (matcher_) delete matcher_;}
+    StringMatchCondition(const StringMatchCondition&) = delete;
+    StringMatchCondition& operator=(const StringMatchCondition&) = delete;
 
     bool execute(VItem *node) override;
     int  numOperands() override {return 2;}
     std::string print() override {return operands_[0]->print() + " = " + operands_[1]->print();}
     bool operand2IsArbitraryString() override {return true;}
 private:
-    StringMatchBase *matcher_;
+    StringMatchBase *matcher_{nullptr};
 };
 
 // -----------------------------------------------------------------

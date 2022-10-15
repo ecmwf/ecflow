@@ -271,7 +271,6 @@ QString TextFilterHandlerDialog::settingsFile()
 
 void TextFilterHandlerDialog::writeSettings()
 {
-    Q_ASSERT(settingsFile().isEmpty() == false);
     QSettings settings(settingsFile(),QSettings::NativeFormat);
 
     //We have to clear it not to remember all the previous windows
@@ -284,7 +283,6 @@ void TextFilterHandlerDialog::writeSettings()
 
 void TextFilterHandlerDialog::readSettings()
 {
-    Q_ASSERT(settingsFile().isEmpty() == false);
     QSettings settings(settingsFile(),QSettings::NativeFormat);
 
     settings.beginGroup("main");

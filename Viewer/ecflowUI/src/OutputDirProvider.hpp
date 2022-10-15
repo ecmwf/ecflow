@@ -95,6 +95,8 @@ class OutputDirProvider : public InfoProvider //, public OutputFetchQueueOwner
 public:
      explicit OutputDirProvider(InfoPresenter* owner);
      ~OutputDirProvider();
+     OutputDirProvider(const OutputDirProvider&) = delete;
+     OutputDirProvider& operator=(const OutputDirProvider&) = delete;
 
 	 void visit(VInfoNode*) override;
 	 void clear() override;

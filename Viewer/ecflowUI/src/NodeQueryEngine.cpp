@@ -329,10 +329,7 @@ void NodeQueryEngine::slotFailed()
 
 NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) :
     query_(new NodeQuery("tmp")),
-    parser_(nullptr),
-    server_(nullptr),
-    owner_(owner),
-    rootNode_(nullptr)
+    owner_(owner)
 {
 }
 

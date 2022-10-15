@@ -35,10 +35,11 @@ public:
                    const QModelIndex& index) const override;
 
 protected:
-    void updateSettings() override;
+    void updateSettings() override {updateSettingsInternal();}
 
+private:
+    void updateSettingsInternal();
     QPen borderPen_;
-
 };
 
 #endif // TIMELINEINFODELEGATE_HPP

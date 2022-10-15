@@ -23,6 +23,9 @@ class GenFileProvider : public FetchQueueOwner
 public:
     GenFileProvider(GenFileReceiver*);
     ~GenFileProvider();
+    GenFileProvider(const GenFileProvider&) = delete;
+    GenFileProvider& operator=(const GenFileProvider&) = delete;
+
     void clear() override;
 
     virtual void fetchFile(const std::string&);
@@ -43,6 +46,9 @@ class GenFileReceiver
 public:
     GenFileReceiver();
     virtual ~GenFileReceiver();
+    GenFileReceiver(const GenFileReceiver&) = delete;
+    GenFileReceiver& operator=(const GenFileReceiver&) = delete;
+
     virtual void fileFetchFinished(VReply*)=0;
     virtual void fileFetchFailed(VReply*)=0;
 

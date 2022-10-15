@@ -159,7 +159,7 @@ void OutputFileFetchQueueManager::runMode(VFile::FetchMode fetchMode,
         t = makeFetchTask("file_transfer");
     } else if(fetchMode == VFile::LocalFetchMode) {
         t = makeFetchTask("file_local");
-    } else if(isJobout && fetchMode == VFile::ServerFetchMode && isJobout) {
+    } else if(isJobout && fetchMode == VFile::ServerFetchMode) {
         t = makeFetchTask("output_file_server");
         auto ct = static_cast<OutputFileFetchServerTask*>(t);
         ct->setFileProvider(provider_);
@@ -279,8 +279,6 @@ void OutputFileProvider::addToCache(VFile_ptr file)
 //case we always try to load the current jobout file.
 void OutputFileProvider::visit(VInfoNode* infoNode)
 {
-    assert(info_->node() == infoNode->node());
-
     // clear the queue
     fetchManager_->clear();
 

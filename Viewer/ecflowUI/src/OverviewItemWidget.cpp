@@ -113,7 +113,7 @@ void OverviewItemWidget::infoFailed(VReply* reply)
 }
 
 //At this point we can be sure that the node is handled by this item.
-void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+void OverviewItemWidget::nodeChanged(const VNode* /*node*/, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	if(frozen_)
 		return;

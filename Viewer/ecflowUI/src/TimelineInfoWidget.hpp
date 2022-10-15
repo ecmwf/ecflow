@@ -50,12 +50,12 @@ public:
     void determineRowsInPeriod();
 
 protected:
-    TimelineItem* data_;
-    unsigned int viewStartDateSec_;
-    unsigned int viewEndDateSec_;
-    unsigned int endDateSec_;
-    int firstRowInPeriod_;
-    int lastRowInPeriod_;
+    TimelineItem* data_{nullptr};
+    unsigned int viewStartDateSec_{0};
+    unsigned int viewEndDateSec_{0};
+    unsigned int endDateSec_{0};
+    int firstRowInPeriod_{-1};
+    int lastRowInPeriod_{-1};
 };
 
 

@@ -636,7 +636,7 @@ void MainWindow::openWindow(QStringList idLst,QWidget *fromW)
 
 void MainWindow::showWindows()
 {
-  	Q_FOREACH(MainWindow *win,windows_)
+    for(auto win: windows_)
 		win->show();
 }
 

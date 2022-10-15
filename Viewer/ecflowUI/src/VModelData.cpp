@@ -846,14 +846,14 @@ void VTreeServer::clearForceShow(const VItem* itemNext)
     //Remove the current showForce node from the node status filter
     filter_->clearForceShowNode();
 
-    //Reload the node status filter
-    VNode* s=vnPrev->suite();
-    Q_ASSERT(s->isTopLevel());
-    Q_ASSERT(s);
-
     std::vector<VNode*> sv;
-    sv.push_back(s);
-
+    //Reload the node status filter
+    if (vnPrev) {
+        VNode* s=vnPrev->suite();
+//        Q_ASSERT(s->isTopLevel());
+        Q_ASSERT(s);
+        sv.push_back(s);
+    }
     updateFilter(sv);
 }
 

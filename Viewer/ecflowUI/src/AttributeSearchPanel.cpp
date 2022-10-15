@@ -124,10 +124,8 @@ void AttrGroupDesc::show()
 //======================================================
 
 AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
-	QWidget(parent),
-	query_(NULL)
+    QWidget(parent)
 {
-	//setupUi(this);
 }
 
 AttributeSearchPanel::~AttributeSearchPanel()

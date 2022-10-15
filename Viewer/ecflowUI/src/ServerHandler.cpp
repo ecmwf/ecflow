@@ -350,7 +350,6 @@ bool ServerHandler::isDisabled() const
        connectState_->state() == ConnectState::VersionIncompatible ||
        connectState_->state() == ConnectState::SslIncompatible ||
        connectState_->state() == ConnectState::SslCertificateError ||
-       connectState_->state() == ConnectState::SslCertificateError ||
        compatibility_ == Incompatible);
 }
 

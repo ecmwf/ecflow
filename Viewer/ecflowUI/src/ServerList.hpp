@@ -118,6 +118,9 @@ class ServerList
     friend class ServerListSystemFileManager;
 
 public:
+    ServerList(const  ServerList&) = delete;
+    ServerList& operator=(const  ServerList&) = delete;
+
     int count() const {return static_cast<int>(items_.size());}
 	ServerItem* itemAt(int);
 	ServerItem* find(const std::string& name);

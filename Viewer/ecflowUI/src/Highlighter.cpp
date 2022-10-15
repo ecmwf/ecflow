@@ -157,12 +157,10 @@ void Highlighter::toHtml(QString& html)
     for(QTextBlock current = start; current.isValid() and current not_eq end; current = current.next())
     {
         const QTextLayout* layout(current.layout());
-
-        Q_FOREACH(const QTextLayout::FormatRange &range,
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-                  layout->formats())
+        Q_FOREACH(const QTextLayout::FormatRange &range, layout->formats())
 #else
-                  layout->additionalFormats())
+        Q_FOREACH(const QTextLayout::FormatRange &range, layout->additionalFormats())
 #endif
         {
             const int start = current.position() + range.start - selectionStart;

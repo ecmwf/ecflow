@@ -34,7 +34,7 @@ class TimelineItem
 public:
     enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
 
-    TimelineItem() : type_(UndeterminedType), sortIndex_(0), treeIndex_(0) {}
+    TimelineItem() = default;
     TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type=UndeterminedType);
     size_t size() const {return status_.size();}
     const std::string& path() const {return path_;}
@@ -68,10 +68,10 @@ public:
 
 //protected:
     std::string path_;
-    Type type_;
-    size_t sortIndex_;
-    size_t treeIndex_;
-    size_t parentIndex_;
+    Type type_{UndeterminedType};
+    size_t sortIndex_{0};
+    size_t treeIndex_{0};
+    size_t parentIndex_{0};
     std::vector<unsigned int> start_;
     std::vector<unsigned char> status_;
 
@@ -83,8 +83,7 @@ class TimelineData : public QObject
 public:
     enum LoadStatus {LoadNotTried,LoadFailed,LoadDone};
 
-    TimelineData(QObject* parent=nullptr) : QObject(parent),
-        startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadStatus_(LoadNotTried) {}
+    TimelineData(QObject* parent=nullptr) : QObject(parent) {}
 
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
     void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last);
@@ -119,13 +118,13 @@ protected:
     void sortByPath();
 
     std::vector<TimelineItem> items_;
-    int numOfRows_;
-    unsigned int startTime_;
-    unsigned int endTime_;
+    int numOfRows_{0};
+    unsigned int startTime_{0};
+    unsigned int endTime_{0};
     QDateTime loadedAt_;
-    size_t maxReadSize_;
-    bool fullRead_;
-    LoadStatus loadStatus_;
+    size_t maxReadSize_{0};
+    bool fullRead_{false};
+    LoadStatus loadStatus_{LoadNotTried};
     QHash<QString,size_t> pathHash_;
     std::vector<size_t> sortIndex_;
 };

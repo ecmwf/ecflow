@@ -27,7 +27,7 @@
 #include "VNState.hpp"
 #include "VSettings.hpp"
 
-ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
+ServerLoadItemWidget::ServerLoadItemWidget(QWidget* /*parent*/)
 {
     auto* vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -51,7 +51,6 @@ ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 
 ServerLoadItemWidget::~ServerLoadItemWidget()
 {
-    clearContents();
 }
 
 QWidget* ServerLoadItemWidget::realWidget()

@@ -32,7 +32,7 @@ public:
     ~UiFunctionLog();
 
     std::string logEnter() const;
-    virtual std::string logLeave() const;
+    std::string logLeave() const;
 
     static std::string formatFuncInfo(const std::string& funcName);
 
@@ -49,7 +49,7 @@ public:
    enum Type {INFO,WARN,ERROR,DBG};
 
    UiLog()= default;
-   UiLog(const std::string& server);
+   explicit UiLog(const std::string& server);
    ~UiLog();
 
    std::ostringstream& info();
