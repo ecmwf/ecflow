@@ -20,7 +20,9 @@ public:
 	enum Mode {InvalidMatch=-1,ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
 
 	StringMatchMode();
-	StringMatchMode(Mode m);
+
+    explicit StringMatchMode(Mode m);
+    explicit StringMatchMode(int);
 	StringMatchMode(const StringMatchMode& r) {mode_=r.mode_;}
 
 	Mode mode() const {return mode_;}

@@ -1003,9 +1003,9 @@ bool NodeFlagCondition::execute(VItem* item)
 	return false;
 }
 
-WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
+WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr) :
+    what_(what)
 {
-    what_ = what;
     searchInAttributes_ = attr;
 }
 

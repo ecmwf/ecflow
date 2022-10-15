@@ -626,7 +626,7 @@ void VariableAddDialog::readSettings()
 //
 //========================================================
 
-VariableItemWidget::VariableItemWidget(QWidget *parent) :
+VariableItemWidget::VariableItemWidget(QWidget* /*parent*/) :
     shadowProp_(nullptr),
     canSaveLastSelection_(true),
     tableViewColumns_(nullptr)
@@ -974,7 +974,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	}
 }
 
-void VariableItemWidget::duplicateItem(const QModelIndex& index)
+void VariableItemWidget::duplicateItem(const QModelIndex&)
 {
 	if(frozen_)
         return;
@@ -1004,7 +1004,7 @@ void VariableItemWidget::duplicateItem(const QModelIndex& index)
 
 }
 
-void VariableItemWidget::addItem(const QModelIndex& index)
+void VariableItemWidget::addItem(const QModelIndex&)
 {
 	if(frozen_)
 		return;

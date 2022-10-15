@@ -64,9 +64,8 @@ void VMeterAttrType::encode(const Meter& m,QStringList& data) const
 //
 //=====================================================
 
-VMeterAttr::VMeterAttr(VNode *parent,const Meter& m, int index) : VAttribute(parent,index)
+VMeterAttr::VMeterAttr(VNode *parent,const Meter& /*m*/, int index) : VAttribute(parent,index)
 {
-    //name_=m.name();
 }
 
 VAttributeType* VMeterAttr::type() const

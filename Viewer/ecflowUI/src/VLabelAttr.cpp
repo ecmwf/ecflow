@@ -60,8 +60,8 @@ void VLabelAttrType::encode(const Label& label,QStringList& data,bool firstLine)
     {
         std::size_t pos=val.find("\n");
         if(pos != std::string::npos)
-        {            
-            val=val.substr(0,pos);
+        {
+            val.resize(pos);
         }
     }
 
@@ -81,9 +81,8 @@ void VLabelAttrType::encode_empty(QStringList& data) const
 //
 //=====================================================
 
-VLabelAttr::VLabelAttr(VNode *parent,const Label& label, int index) : VAttribute(parent,index)
+VLabelAttr::VLabelAttr(VNode *parent,const Label& /*label*/, int index) : VAttribute(parent,index)
 {
-    //name_=label.name();
 }
 
 int VLabelAttr::lineNum() const

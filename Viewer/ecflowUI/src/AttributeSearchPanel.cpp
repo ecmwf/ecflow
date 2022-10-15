@@ -50,7 +50,7 @@ class AttrLineStringDesc : public  AttrLineDesc
 public:
 	AttrLineStringDesc(QString name,int row,QLineEdit *le) : AttrLineDesc(name,row), le_(le) {}
 
-	QString value() {return le_->text();}
+    QString value() override {return le_->text();}
 
 protected:
 	QLineEdit* le_;

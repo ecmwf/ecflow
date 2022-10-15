@@ -83,10 +83,10 @@ protected:
     int maxWidth_{0};
     int height_;
     int itemHeight_{0};
-    QString text_;
+    QString text_{"No selection"};
     QRect textRect_;
-    QColor textCol_;
-    QColor textDisabledCol_;
+    QColor textCol_{Qt::white};
+    QColor textDisabledCol_{220,220,220};
     QList<NodePathItem*> items_;
     NodePathEllipsisItem* ellipsisItem_;
     

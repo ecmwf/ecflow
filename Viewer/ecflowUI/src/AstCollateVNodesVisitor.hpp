@@ -20,7 +20,7 @@ class VItem;
 class AstCollateVNodesVisitor : public ecf::ExprAstVisitor
 {
 public:
-  AstCollateVNodesVisitor(std::vector<VItem*>& );
+  explicit AstCollateVNodesVisitor(std::vector<VItem*>& );
   ~AstCollateVNodesVisitor() override;
 
   void visitTop(AstTop*) override{}

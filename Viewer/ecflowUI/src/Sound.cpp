@@ -49,8 +49,6 @@ Sound* Sound::instance_=nullptr;
 
 Sound::Sound()
 {
-	formats_=".+\\.(wav|mp3|ogg|oga)";
-
 	sysDir_=DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "sounds");
 
 	std::vector<std::string> res;

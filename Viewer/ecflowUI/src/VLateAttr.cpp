@@ -59,10 +59,9 @@ void VLateAttrType::encode(ecf::LateAttr* late,QStringList& data) const
 //
 //=====================================================
 
-VLateAttr::VLateAttr(VNode *parent,const std::string& name) :
+VLateAttr::VLateAttr(VNode *parent,const std::string& /*name*/) :
     VAttribute(parent,0)
 {
-    //name_=name;
 }
 
 VAttributeType* VLateAttr::type() const

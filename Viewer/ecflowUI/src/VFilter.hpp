@@ -139,7 +139,7 @@ Q_SIGNALS:
 
 protected:
     ServerFilter *serverFilter_{nullptr};
-	std::string exprStr_;
+    std::string exprStr_{"state = all"};
     NodeStateFilter *nodeState_{nullptr};
 	std::string nodePath_;
 	std::string nodeType_;

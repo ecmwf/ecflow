@@ -83,9 +83,8 @@ void VLimiterAttrType::encode(const InLimit& lim,QStringList& data) const
 //
 //=====================================================
 
-VLimiterAttr::VLimiterAttr(VNode *parent,const InLimit& lim, int index) : VAttribute(parent,index)
+VLimiterAttr::VLimiterAttr(VNode *parent,const InLimit& /*lim*/, int index) : VAttribute(parent,index)
 {
-    //name_=lim.name();
 }
 
 VAttributeType* VLimiterAttr::type() const

@@ -402,7 +402,6 @@ NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter,Scope scope) :
     serverFilter_(serverFilter)
 {
 	nodeState_=new NodeStateFilter;	
-    exprStr_="state = all";
     connect(nodeState_,SIGNAL(changed()),
 					this,SIGNAL(changed()));
 	query_=new NodeQuery("tmp",true);

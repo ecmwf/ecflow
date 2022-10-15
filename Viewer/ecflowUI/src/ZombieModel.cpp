@@ -107,7 +107,7 @@ int ZombieModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
-Qt::ItemFlags ZombieModel::flags ( const QModelIndex & index) const
+Qt::ItemFlags ZombieModel::flags ( const QModelIndex&) const
 {
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -214,7 +214,7 @@ QModelIndex ZombieModel::index( int row, int column, const QModelIndex & parent 
 
 }
 
-QModelIndex ZombieModel::parent(const QModelIndex &child) const
+QModelIndex ZombieModel::parent(const QModelIndex & /*child*/) const
 {
 	return {};
 }

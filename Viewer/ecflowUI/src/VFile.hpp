@@ -84,7 +84,7 @@ public:
 
 protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);
-	VFile(const std::string& str,bool deleteFile= true);
+    explicit VFile(const std::string& str,bool deleteFile= true);
 	explicit VFile(bool deleteFile= true);
     bool appendContentsTo(FILE* fpTarget) const;
 

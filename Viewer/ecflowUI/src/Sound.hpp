@@ -43,7 +43,7 @@ protected:
     std::string currentPlayer_;
     std::string currentCmd_;
 
-    std::string formats_;
+    std::string formats_{".+\\.(wav|mp3|ogg|oga)"};
     std::string sysDir_;
     std::vector<std::string> sysSounds_;
     time_t prevPlayedAt_{0};

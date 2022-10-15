@@ -597,7 +597,7 @@ void TimelineWidget::slotTaskOnly(bool taskFilter)
 
 void TimelineWidget::pathFilterMatchModeChanged(int)
 {
-     sortModel_->setPathMatchMode(ui_->pathFilterMatchModeCb->currentMatchMode());
+     sortModel_->setPathMatchMode(StringMatchMode(ui_->pathFilterMatchModeCb->currentMatchMode()));
 }
 
 void TimelineWidget::slotPathFilterChanged(QString pattern)
@@ -1317,7 +1317,7 @@ void TimelineWidget::readSettings(VComboSettings* vs)
     //at this point the model is empty so it is cheap to call sort
 
     int matchModeIdx=vs->get<int>("pathFilterMatchMode",1);
-    StringMatchMode matchMode=ui_->pathFilterMatchModeCb->matchMode(matchModeIdx);
+    StringMatchMode matchMode(ui_->pathFilterMatchModeCb->matchMode(matchModeIdx));
     if(matchMode.mode() != StringMatchMode::InvalidMatch)
     {
         ui_->pathFilterMatchModeCb->setMatchMode(matchMode);

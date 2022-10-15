@@ -34,7 +34,7 @@ class PropertyLine;
 class FontSizeSpin : public QSpinBox
 {
 public:
-	FontSizeSpin(QWidget* parent=nullptr);
+    explicit FontSizeSpin(QWidget* parent=nullptr);
 	void setFamily(QString);
 
 protected:

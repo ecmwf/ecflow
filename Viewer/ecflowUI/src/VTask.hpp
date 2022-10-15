@@ -76,7 +76,7 @@ public:
 	static VTask_ptr create(Type t,VNode *node,VTaskObserver* obs=nullptr);
 
 protected:
-	VTask(Type t,VTaskObserver* obs=nullptr);
+    explicit VTask(Type t,VTaskObserver* obs=nullptr);
 	VTask(Type t,VNode *node,VTaskObserver* obs=nullptr);
 
 	Type type_;

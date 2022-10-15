@@ -45,9 +45,7 @@ int NodePathItem::vPadding_=0;
 
 BcWidget::BcWidget(QWidget* parent) : 
     QWidget(parent),
-	 text_("No selection"),
-    textCol_(Qt::white),
-    textDisabledCol_(QColor(220,220,220))
+    font_(QFont())
 {
     font_=QFont();
     font_.setPointSize(font_.pointSize()-1);

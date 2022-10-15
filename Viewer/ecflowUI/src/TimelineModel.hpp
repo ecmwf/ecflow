@@ -90,7 +90,7 @@ public:
     void setSortMode(SortMode);
     void setSortDirection(bool ascending);
     void setSkipSort(bool b) {skipSort_=b;}
-    void setPathMatchMode(StringMatchMode);
+    void setPathMatchMode(const StringMatchMode&);
     void setPathFilter(QString);
     void setTaskFilter(bool);
     void setChangeFilterMode(ChangeFilterMode m);

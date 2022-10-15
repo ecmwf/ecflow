@@ -24,6 +24,12 @@ StringMatchMode::StringMatchMode(Mode mode) :
 	init();
 }
 
+StringMatchMode::StringMatchMode(int idx) :
+    mode_(static_cast<Mode>(idx))
+{
+    init();
+}
+
 void StringMatchMode::init()
 {
 	if(matchOper_.empty())

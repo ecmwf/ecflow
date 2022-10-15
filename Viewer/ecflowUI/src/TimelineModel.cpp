@@ -351,7 +351,7 @@ void TimelineSortModel::setSortDirection(bool ascending)
     }
 }
 
-void TimelineSortModel::setPathMatchMode(StringMatchMode matchMode)
+void TimelineSortModel::setPathMatchMode(const StringMatchMode& matchMode)
 {
     pathMatchMode_ = matchMode;
     setPathFilter(pathFilter_);

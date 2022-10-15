@@ -56,7 +56,7 @@ protected:
 
     static VConfig* instance_;
     
-    std::string appName_;
+    std::string appName_{"ecFlowUI"};
     std::string appLongName_;
     std::vector<VProperty*> groups_;
     bool proxychainsUsed_{false};

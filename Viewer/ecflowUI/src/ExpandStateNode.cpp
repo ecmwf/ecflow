@@ -160,7 +160,7 @@ void ExpandStateNode::print(std::string& indent,bool recursive) const
         for(std::size_t i=0; i < num; i++)
             children_[i]->print(indent,true);
 
-        indent=indent.substr(0,indent.size()-2);
+        indent.resize(indent.size()-2);
     }
 }
 

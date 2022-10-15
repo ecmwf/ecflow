@@ -1402,7 +1402,7 @@ bool LogLoadData::extract_suite_path(
                         suite_name = line.substr(pos,space_pos-pos);
                         if(suite_name.size() > 1 && suite_name[suite_name.size()-1] == ';')
                         {
-                            suite_name = suite_name.substr(0,suite_name.size()-1);
+                            suite_name.resize(suite_name.size()-1);
                         }
                         hasSuiteName = true;
                         break;
@@ -1446,7 +1446,7 @@ bool LogLoadData::extract_suite_path(
                 path = line.substr(forward_slash,space_pos-forward_slash);
                 if(path.size() > 1 && path[path.size()-1] == ';')
                 {
-                    path = path.substr(0,path.size()-1);
+                    path.resize(path.size()-1);
                 }
             }
 
