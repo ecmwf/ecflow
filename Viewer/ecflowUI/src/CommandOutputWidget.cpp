@@ -72,18 +72,18 @@ QVariant CommandOutputModel::data( const QModelIndex& index, int role ) const
 {
     if(!index.isValid() || !hasData())
     {
-        return QVariant();
+        return {};
     }
 
     int pos=CommandOutputHandler::instance()->itemCount()-index.row()-1;
     if(pos < 0 || pos >= CommandOutputHandler::instance()->itemCount())
-        return QVariant();
+        return {};
 
     QString id=columns_->id(index.column());
 
     CommandOutput_ptr item=CommandOutputHandler::instance()->items()[pos];
     if(!item)
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -96,7 +96,7 @@ QVariant CommandOutputModel::data( const QModelIndex& index, int role ) const
         else if(id == "runtime")
             return item->runTime().toString("yyyy-MM-dd hh:mm:ss");
         else
-            return QVariant();
+            return {};
     }
     else if(role == Qt::ForegroundRole)
     {
@@ -104,9 +104,9 @@ QVariant CommandOutputModel::data( const QModelIndex& index, int role ) const
         {
             return item->statusColour();
         }
-        return QVariant();
+        return {};
     }
-    return QVariant();
+    return {};
 }
 
 QVariant CommandOutputModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -119,7 +119,7 @@ QVariant CommandOutputModel::headerData( const int section, const Qt::Orientatio
     else if(role == Qt::UserRole)
         return columns_->id(section);
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex CommandOutputModel::index( int row, int column, const QModelIndex & parent ) const

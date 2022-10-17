@@ -592,7 +592,7 @@ void ServerHandler::removeServer(ServerHandler* server)
 
 ServerHandler* ServerHandler::findServer(const std::string &alias)
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	for(auto it=servers_.begin(); it != servers_.end(); ++it)
 	{
 		ServerHandler *s=*it;
 
@@ -891,7 +891,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 	VNode* vn=vRoot_->toVNode(nc);
 
 	//We must have this VNode
-	assert(vn != NULL);
+	assert(vn != nullptr);
 
 	//Begin update for the VNode
 	VNodeChange change;
@@ -938,7 +938,7 @@ void ServerHandler::removeNodeObserver(NodeObserver *obs)
 
 void ServerHandler::broadcast(NoMethod proc,const VNode* node)
 {
-	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
+	for(auto it=nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
 		((*it)->*proc)(node);
 }
 
@@ -949,7 +949,7 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
     //this we create a copy of the observers and use it in the notification loop.
     std::vector<NodeObserver*> nObsCopy=nodeObservers_;
 
-    for(std::vector<NodeObserver*>::const_iterator it=nObsCopy.begin(); it != nObsCopy.end(); ++it)
+    for(auto it=nObsCopy.begin(); it != nObsCopy.end(); ++it)
     {
         ((*it)->*proc)(node,aspect,change);
     }
@@ -987,7 +987,7 @@ void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 
 	//UserMessage::message(UserMessage::DBG, false," --> Update applied");
 
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
+	for(auto it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		(*it)->notifyDefsChanged(this,aspect);
 }
 
@@ -1031,7 +1031,7 @@ void ServerHandler::broadcast(SoMethod proc)
 	//this we create a copy of the observers and use it in the notification loop.
 	std::vector<ServerObserver*> sObsCopy=serverObservers_;
 
-	for(std::vector<ServerObserver*>::const_iterator it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
+	for(auto it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
 	{
 		//We need to check if the given observer is still in the original list. When we delete the server, due to
 		//dependencies it is possible that the observer is already deleted at this point.
@@ -1044,14 +1044,14 @@ void ServerHandler::broadcast(SoMethod proc)
 
 void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 {
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
+	for(auto it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		((*it)->*proc)(this,ch);
 }
 
 
 void ServerHandler::broadcast(SoMethodV2 proc,const std::string& strVal)
 {
-    for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
+    for(auto it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
         ((*it)->*proc)(this,strVal);
 }
 
@@ -1092,7 +1092,7 @@ void ServerHandler::broadcast(SocMethod proc)
     //this we create a copy of the observers and use it in the notification loop.
     std::vector<ServerComObserver*> sObsCopy=serverComObservers_;
 
-    for(std::vector<ServerComObserver*>::const_iterator it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
+    for(auto it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
     {
         //We need to check if the given observer is still in the original list. When we delete the server, due to
         //dependencies it is possible that the observer is already deleted at this point.
@@ -2006,7 +2006,7 @@ bool ServerHandler::checkNotificationState(const std::string& notifierId)
     bool enabled=false;
     VServerSettings::Param par=VServerSettings::notificationParam(notifierId);
 
-    for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+    for(auto it=servers_.begin(); it != servers_.end(); ++it)
     {
         ServerHandler *s=*it;
         if(s->conf()->boolValue(par))
@@ -2021,7 +2021,7 @@ bool ServerHandler::checkNotificationState(const std::string& notifierId)
 
 void ServerHandler::saveSettings()
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	for(auto it=servers_.begin(); it != servers_.end(); ++it)
 		(*it)->saveConf();
 }
 
@@ -2123,7 +2123,7 @@ int ServerHandler::truncatedLinesFromServer(const std::string& txt) const
 
 ServerHandler* ServerHandler::find(const std::string& name)
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	for(auto it=servers_.begin(); it != servers_.end(); ++it)
 			if((*it)->name() == name)
 					return *it;
 	return nullptr;

@@ -56,7 +56,7 @@ void VParamSet::init(const std::vector<VParam*>& items)
     if(maxId > 0)
     {
         currentCache_.resize(maxId+1,0);
-        for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+        for(auto it=all_.begin(); it != all_.end(); ++it)
         {
             currentCache_[(*it)->id()]=1;
         }
@@ -125,7 +125,7 @@ void VParamSet::setCurrent(const std::vector<VParam*>& items,bool broadcast)
 {
     clearCurrent();
 
-    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+    for(auto it=all_.begin(); it != all_.end(); ++it)
 	{
         if(std::find(items.begin(),items.end(),*it) != items.end())
         {
@@ -141,7 +141,7 @@ void VParamSet::setCurrent(const std::vector<std::string>& names,bool broadcast)
 {
     clearCurrent();
 
-    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+    for(auto it=all_.begin(); it != all_.end(); ++it)
 	{
         if(std::find(names.begin(),names.end(),(*it)->strName()) != names.end())
         {
@@ -157,7 +157,7 @@ void VParamSet::setCurrent(QStringList names,bool broadcast)
 {
     clearCurrent();
 
-    for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+    for(auto it=all_.begin(); it != all_.end(); ++it)
 	{
         if(names.contains(QString::fromStdString((*it)->strName())))
         {
@@ -180,7 +180,7 @@ void VParamSet::writeSettings(VSettings *vs)
     }
     else
     {
-        for(std::vector<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+        for(auto it=current_.begin(); it != current_.end(); ++it)
         {
             array.push_back((*it)->strName());
         }
@@ -212,7 +212,7 @@ void VParamSet::readSettings(VSettings* vs)
         vs->get(settingsId_,array);
     }
 
-	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
+	for(auto it = array.begin(); it != array.end(); ++it)
 	{
 		std::string name=*it;
         if(name == "_ALL_")
@@ -221,7 +221,7 @@ void VParamSet::readSettings(VSettings* vs)
             return;
         }
 
-        for(std::vector<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
+        for(auto itA=all_.begin(); itA != all_.end(); ++itA)
 		{
 			if((*itA)->strName() == name)
                 addToCurrent(*itA);
@@ -381,7 +381,7 @@ void IconFilter::readSettings(VSettings* vs)
         else
         {
             //Check which icons are not in lastNames
-            for(std::vector<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
+            for(auto itA=all_.begin(); itA != all_.end(); ++itA)
             {
                 //The item is not in lastNames so it must be a newly added icon type. We add it to the filter list
                 if(std::find(lastNames.begin(),lastNames.end(),(*itA)->strName()) == lastNames.end())

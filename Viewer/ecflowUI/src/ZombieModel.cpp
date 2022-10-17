@@ -43,7 +43,7 @@ bool ZombieModel::updateData(const std::vector<Zombie>& data)
 		{
 			bool hasIt=false;
 			const std::string& p=it.path_to_task();
-			for(std::vector<Zombie>::const_iterator itM=data_.begin(); itM != data_.end(); ++itM)
+			for(auto itM=data_.begin(); itM != data_.end(); ++itM)
 			{
 				if(p == (*itM).path_to_task())
 				{
@@ -63,7 +63,7 @@ bool ZombieModel::updateData(const std::vector<Zombie>& data)
 	if(sameAs)
 	{
 		data_=data;
-		Q_EMIT dataChanged(index(0,0),index(data_.size()-1,columns_->count()));
+        Q_EMIT dataChanged(index(0,0),index(static_cast<int>(data_.size())-1,columns_->count()));
 		return false;
 	}
 	else
@@ -116,12 +116,12 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 {
 	if(!index.isValid() || !hasData())
     {
-		return QVariant();
+		return {};
 	}
 
 	int row=index.row();
     if(row < 0 || row >= static_cast<int>(data_.size()))
-		return QVariant();
+		return {};
 
 	QString id=columns_->id(index.column());
 
@@ -178,10 +178,10 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
         else if(id == "explanation")
             return QString::fromStdString(data_[row].explanation());
         else
-			return QVariant();
+			return {};
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant ZombieModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -194,7 +194,7 @@ QVariant ZombieModel::headerData( const int section, const Qt::Orientation orien
 	else if(role == Qt::UserRole)
 		return columns_->id(section);
 
-	return QVariant();
+	return {};
 }
 
 QModelIndex ZombieModel::index( int row, int column, const QModelIndex & parent ) const
@@ -227,5 +227,5 @@ Zombie ZombieModel::indexToZombie(const QModelIndex& idx) const
         if(row >= 0 || row < static_cast<int>(data_.size()))
             return data_[row];
     }
-    return Zombie();
+    return {};
 }

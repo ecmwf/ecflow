@@ -38,11 +38,6 @@ DashboardDialog::DashboardDialog(QWidget *parent) :
     WidgetNameProvider::nameChildren(this);
 }
 
-DashboardDialog::~DashboardDialog()
-{
-	//dw_->deleteLater();
-}
-
 void DashboardDialog::add(DashboardWidget* dw)
 {
 	dw_=dw;

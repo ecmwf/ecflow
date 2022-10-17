@@ -93,12 +93,12 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
         role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::TextAlignmentRole &&
         role != Qt::ToolTipRole && role != Qt::ForegroundRole))
     {
-		return QVariant();
+		return {};
 	}
 
 	int row=index.row();
     if(row < 0 || row >= static_cast<int>(tc_->size()))
-		return QVariant();
+		return {};
 
     //QString id=columns_->id(index.column());
 
@@ -184,12 +184,12 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
     {
         const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
         if(modes.find(TriggerCollector::Normal) != modes.end())
-            return QVariant();
+            return {};
         else
             return QColor(233,242,247);
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant TriggerTableModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -197,7 +197,7 @@ QVariant TriggerTableModel::headerData( const int section, const Qt::Orientation
 	if ( orient != Qt::Horizontal)
             return QAbstractItemModel::headerData( section, orient, role );
 
-	return QVariant();
+	return {};
 }
 
 QModelIndex TriggerTableModel::index( int row, int column, const QModelIndex & parent ) const

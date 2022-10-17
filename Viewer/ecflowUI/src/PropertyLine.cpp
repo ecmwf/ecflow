@@ -50,7 +50,7 @@ QString FontSizeSpin::textFromValue(int value) const
 	if(value >=0 && value < vals_.count())
 		return QString::number(vals_.at(value));
 
-	return QString();
+	return {};
 }
 
 //=========================================================================
@@ -165,16 +165,7 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* pa
 
 PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	QObject(parent),
-	prop_(nullptr),
-	guiProp_(guiProp),
-	label_(nullptr),
-	suffixLabel_(nullptr),
-	defaultTb_(nullptr),
-	masterTb_(nullptr),
-	enabled_(true),
-    doNotEmitChange_(false),
-    rule_(nullptr)
-    //ruleLine_(nullptr)
+    guiProp_(guiProp)
 {
 	prop_=guiProp_->link();
 	assert(prop_);
@@ -496,7 +487,7 @@ QWidget* ColourPropertyLine::button()
 
 void ColourPropertyLine::slotReset(QVariant v)
 {
-	QColor c=v.value<QColor>();
+	auto c=v.value<QColor>();
 
 	QString st=styleSheet_;
 	st.replace("BG","rgb(" + QString::number(c.red()) + "," +
@@ -512,7 +503,7 @@ void ColourPropertyLine::slotReset(QVariant v)
 
 void ColourPropertyLine::slotEdit(bool)
 {
-	QColor currentCol=currentValue().value<QColor>();
+	auto currentCol=currentValue().value<QColor>();
 	QColor col=QColorDialog::getColor(currentCol,cb_->parentWidget());
 
 	if(col.isValid())
@@ -525,8 +516,8 @@ bool ColourPropertyLine::applyChange()
 {
 	PropertyLine::applyMaster();
 
-	QColor v=oriVal_.value<QColor>();
-	QColor c=currentValue().value<QColor>();
+	auto v=oriVal_.value<QColor>();
+	auto c=currentValue().value<QColor>();
 
 	if(v != c)
 	{

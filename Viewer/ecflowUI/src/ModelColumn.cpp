@@ -28,7 +28,7 @@ ModelColumn::ModelColumn(const std::string& id) : id_(id), diagStart_(-1), diagE
 
 ModelColumn* ModelColumn::def(const std::string& id)
 {
-	std::map<std::string,ModelColumn*>::const_iterator it=defs.find(id);
+	auto it=defs.find(id);
 	if(it != defs.end())
 		return it->second;
 	return nullptr;
@@ -254,9 +254,9 @@ void ModelColumn::load(VProperty* group)
 //Called via VSettingsLoader after the users settings are read
 void ModelColumn::loadSettings()
 {
-    for(auto it=defs.begin(); it != defs.end(); ++it)
+    for(auto & def : defs)
     {
-        it->second->loadUserSettings();
+        def.second->loadUserSettings();
     }
 }
 

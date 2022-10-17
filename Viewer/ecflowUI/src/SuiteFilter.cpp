@@ -39,7 +39,7 @@ SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) = default;
 SuiteFilter::~SuiteFilter()
 {
 	std::vector<SuiteFilterObserver*> obsCopy=observers_;
-	for(std::vector<SuiteFilterObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
+	for(auto it=obsCopy.begin(); it != obsCopy.end(); ++it)
 	{
 		(*it)->notifyDelete(this);
 	}
@@ -429,7 +429,7 @@ void SuiteFilter::addObserver(SuiteFilterObserver* o)
 {
 	assert(o);
 
-	std::vector<SuiteFilterObserver*>::const_iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it == observers_.end())
 		observers_.push_back(o);
 }
@@ -443,7 +443,7 @@ void SuiteFilter::removeObserver(SuiteFilterObserver* o)
 
 void SuiteFilter::broadcastChange()
 {
-	for(std::vector<SuiteFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	for(auto it=observers_.begin(); it != observers_.end(); ++it)
 	{
 		(*it)->notifyChange(this);
 	}

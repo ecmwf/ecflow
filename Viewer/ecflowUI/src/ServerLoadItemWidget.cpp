@@ -50,8 +50,7 @@ ServerLoadItemWidget::ServerLoadItemWidget(QWidget* /*parent*/)
 }
 
 ServerLoadItemWidget::~ServerLoadItemWidget()
-{
-}
+= default;
 
 QWidget* ServerLoadItemWidget::realWidget()
 {

@@ -178,9 +178,9 @@ int LogModel::rowCount( const QModelIndex& parent) const
 	if(!parent.isValid())
 	{
         if(!filterPeriod_)
-            return data_.size();
+            return static_cast<int>(data_.size());
         else
-            return periodEnd_-periodStart_+1;
+            return static_cast<int>(periodEnd_)-static_cast<int>(periodStart_)+1;
 	}
 
 	return 0;
@@ -195,15 +195,15 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 {
 	if(!index.isValid() || !hasData())
     {
-		return QVariant();
+		return {};
 	}
 	int row=index.row();
 
     if(filterPeriod_)
-        row+=periodStart_;
+        row+=static_cast<int>(periodStart_);
 
     if(row < 0 || row >= static_cast<int>(data_.size()))
-		return QVariant();
+		return {};
 
 	if(role == Qt::DisplayRole)
 	{
@@ -224,7 +224,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
                 case LogDataItem::DebugType:
 					return "DBG ";
 				default:
-					return QVariant();
+					return {};
 				}
 			}
 			break;
@@ -254,7 +254,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
                 case LogDataItem::WarningType:
 					return IconProvider::pixmap("log_warning",12);
 				default:
-					return QVariant();
+					return {};
 			}
 		}
 	}
@@ -267,7 +267,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
                 //return QColor(168,226,145);
                 return QColor(198,223,188);
             else
-                return QVariant();
+                return {};
         }
     }
 
@@ -320,7 +320,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 	}*/
 
 
-	return QVariant();
+	return {};
 }
 
 QVariant LogModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -335,7 +335,7 @@ QVariant LogModel::headerData( const int section, const Qt::Orientation orient ,
    		case 0: return tr("Type");
    		case 1: return tr("Date");
    		case 2: return tr("Entry");
-   		default: return QVariant();
+   		default: return {};
    		}
    	}
    	else if(role== Qt::ToolTipRole)
@@ -345,10 +345,10 @@ QVariant LogModel::headerData( const int section, const Qt::Orientation orient ,
    		case 0: return tr("Type");
    		case 1: return tr("Date");
    		case 2: return tr("Entry");
-   		default: return QVariant();
+   		default: return {};
    		}
    	}
-    return QVariant();
+    return {};
 }
 
 QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) const
@@ -428,9 +428,9 @@ int LogModel::realRow(size_t idx) const
 {
     if(filterPeriod_)
     {
-        return idx-periodStart_;
+        return static_cast<int>(idx)-static_cast<int>(periodStart_);
     }
-    return idx;
+    return static_cast<int>(idx);
 }
 
 QModelIndex LogModel::highlightPeriodIndex() const

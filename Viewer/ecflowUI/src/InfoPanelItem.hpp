@@ -110,7 +110,7 @@ class InfoPanelItemFactory
 {
 public:
 	explicit InfoPanelItemFactory(const std::string&);
-	virtual ~InfoPanelItemFactory();
+    virtual ~InfoPanelItemFactory() = default;
 
     virtual InfoPanelItem* make() = 0;
     static InfoPanelItem* create(const std::string& name);

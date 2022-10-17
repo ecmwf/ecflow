@@ -52,7 +52,7 @@ class OutputBrowserState : public QObject
 {
 public:
     OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
-    virtual ~OutputBrowserState() = default;
+    ~OutputBrowserState() override = default;
 
     virtual void handleClear();
     virtual void handleLoad(VFile_ptr);

@@ -20,11 +20,3 @@ void UIDebug::uiAssert(char const* expr, char const* file, long line, const std:
 	std::cerr << assert_msg << "\n";
 	exit(1);
 }
-
-std::string UIDebug::longToString(long num)
-{
-	constexpr int buff_size = 64;
-	char buf[buff_size];
-	snprintf(buf,buff_size, "%ld", num);
-	return std::string(buf);
-}

@@ -202,12 +202,12 @@ QVariant ChangeNotifyEditorModel::data( const QModelIndex& index, int role ) con
 {
 	if(!index.isValid())
     {
-		return QVariant();
+		return {};
 	}
 
 	int row=index.row();
 	if(row < 0 || row >= data_.count())
-		return QVariant();
+		return {};
 
 	if(role == Qt::DisplayRole)
 	{
@@ -218,7 +218,7 @@ QVariant ChangeNotifyEditorModel::data( const QModelIndex& index, int role ) con
 		case 2:
 			return data_.at(row).desc_;
 		default:
-			return QVariant();
+			return {};
 		}
 	}
 
@@ -229,11 +229,11 @@ QVariant ChangeNotifyEditorModel::data( const QModelIndex& index, int role ) con
 			case 0:
 				return (data_.at(row).enabledVal_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 			default:
-				return QVariant();
+				return {};
 		}
 	}
 
-	return QVariant();
+	return {};
 }
 
 bool ChangeNotifyEditorModel::setData(const QModelIndex& index,const QVariant& value, int role)
@@ -270,11 +270,11 @@ QVariant ChangeNotifyEditorModel::headerData( const int section, const Qt::Orien
    		case 0: return tr("E");
    		case 1: return tr("Title");
    		case 2: return tr("Description");
-   		default: return QVariant();
+   		default: return {};
    		}
    	}
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex ChangeNotifyEditorModel::index( int row, int column, const QModelIndex & parent ) const

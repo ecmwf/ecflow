@@ -16,10 +16,9 @@
 #define UI_FILEPROVIDER_TASK_DEBUG__
 
 GenFileProvider::GenFileProvider(GenFileReceiver* provider) :
-    provider_(provider)
+    reply_(new VReply()), provider_(provider)
 {
-    fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
-    reply_ = new VReply();
+    fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);    
 }
 
 GenFileProvider::~GenFileProvider()

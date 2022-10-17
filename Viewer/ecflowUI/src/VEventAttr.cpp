@@ -93,7 +93,7 @@ std::string VEventAttr::strName() const
         const std::vector<Event>& v=parent_->node_->events();
         return v[index_].name_or_number();
     }
-    return std::string();
+    return {};
 }
 
 void VEventAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

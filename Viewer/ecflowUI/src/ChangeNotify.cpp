@@ -50,19 +50,13 @@ ChangeNotifyDialog* ChangeNotify::dialog_=nullptr;
 //==============================================
 
 ChangeNotify::ChangeNotify(const std::string& id) :
-	id_(id),
-	enabled_(false),
-	data_(nullptr),
-	model_(nullptr),
-	proxyModel_(nullptr),
-    prop_(nullptr),
-    propEnabled_(nullptr)
+    id_(id),
+    data_(new VNodeList()),
+    model_(new ChangeNotifyModel()),
+    proxyModel_(new QSortFilterProxyModel())
+    
 {
-	data_=new VNodeList();
-	model_=new ChangeNotifyModel();
     model_->resetData(data_);
-
-	proxyModel_=new QSortFilterProxyModel();
 	proxyModel_->setSourceModel(model_);
 	proxyModel_->setDynamicSortFilter(true);
 

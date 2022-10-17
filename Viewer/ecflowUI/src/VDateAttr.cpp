@@ -126,7 +126,7 @@ std::string VDateAttr::strName() const
             }
         }
     }
-    return std::string();
+    return {};
 }
 
 void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

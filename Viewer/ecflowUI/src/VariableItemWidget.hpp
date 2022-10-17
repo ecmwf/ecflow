@@ -151,18 +151,18 @@ protected:
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
 
-	VariableModelDataHandler* data_;
-	VariableModel* model_;
-	VariableSortModel* sortModel_;
+    VariableModelDataHandler* data_{nullptr};
+    VariableModel* model_{nullptr};
+    VariableSortModel* sortModel_{nullptr};
 
-	LineEdit* filterLine_;
-	VariableSearchLine *searchLine_;
+    LineEdit* filterLine_{nullptr};
+    VariableSearchLine *searchLine_{nullptr};
 
     VProperty* shadowProp_{nullptr};
     VInfo_ptr lastSelection_;
     bool canSaveLastSelection_{true};
     QList<bool> expanded_;
-    ModelColumn *tableViewColumns_;
+    ModelColumn *tableViewColumns_{nullptr};
 };
 
 #endif

@@ -114,12 +114,12 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
        (role != Qt::DisplayRole && role != Qt::BackgroundRole &&
         role != Qt::TextAlignmentRole && role != SortRole ))
     {
-		return QVariant();
+		return {};
 	}
 
 	int row=index.row();
 	if(row < 0 || row >= data_->size())
-		return QVariant();
+		return {};
 
     auto id=static_cast<ColumnType>(index.column());
 	NodeQueryResultItem* d=data_->itemAt(row);
@@ -139,21 +139,21 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
         else if(id == AttributeColumn)
             return d->attr();
 
-        return QVariant();
+        return {};
 	}
 	else if(role == Qt::BackgroundRole)
 	{
         if(id == StatusColumn)
 			return d->stateColour();
 
-		return QVariant();
+		return {};
 	}
 	else if(role == Qt::TextAlignmentRole)
 	{
         if(id == StatusColumn || id == TypeColumn || id == StatusChangeColumn)
 			return Qt::AlignCenter;
 
-		return QVariant();
+		return {};
 	}
 
     else if(role == SortRole)
@@ -171,10 +171,10 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
         else if(id == AttributeColumn)
             return d->attr();
 
-        return QVariant();
+        return {};
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant NodeQueryResultModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -196,7 +196,7 @@ QVariant NodeQueryResultModel::headerData( const int section, const Qt::Orientat
 			return Qt::AlignCenter;
 	}
 
-	return QVariant();
+	return {};
 }
 
 QModelIndex NodeQueryResultModel::index( int row, int column, const QModelIndex & parent ) const

@@ -36,7 +36,7 @@ void ConfigListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &opt
     QStyleOptionViewItem vopt(option);
     initStyleOption(&vopt, index);   
 
-    QPixmap pix=index.data(Qt::DecorationRole).value<QPixmap>();
+    auto pix=index.data(Qt::DecorationRole).value<QPixmap>();
 
     //Save painter state
     painter->save();

@@ -145,13 +145,13 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
     	else if(item->command() == "copy")
     	{
     		 QString txt;
-             for(std::vector<VInfo_ptr>::const_iterator it=filteredNodes.begin(); it != filteredNodes.end(); ++it)
+             for(const auto & filteredNode : filteredNodes)
     		 {
-    			 if(*it)
+    			 if(filteredNode)
     			 {
     				 if(!txt.isEmpty())
     				    txt+=",";
-    				 txt+=QString::fromStdString((*it)->path());
+    				 txt+=QString::fromStdString(filteredNode->path());
     			 }
     		 }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)

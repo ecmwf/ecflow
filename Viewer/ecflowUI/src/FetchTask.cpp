@@ -29,11 +29,6 @@ FetchTaskFactory::FetchTaskFactory(const std::string& name)
     (*makers)[name] = this;
 }
 
-FetchTaskFactory::~FetchTaskFactory()
-{
-    // Not called
-}
-
 AbstractFetchTask* FetchTaskFactory::create(const std::string& name, FetchQueueOwner* owner)
 {
     AbstractFetchTask* t=nullptr;

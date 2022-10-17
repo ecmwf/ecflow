@@ -229,7 +229,7 @@ TimelineWidget::TimelineWidget(QWidget */*parent*/) :
 
     //forced init
     slotSortMode(0);
-    slotSortOrderChanged(0);
+    slotSortOrderChanged(nullptr);
     slotTaskOnly(false);
     slotShowChanged(true);
 
@@ -555,7 +555,7 @@ void TimelineWidget::slotViewMode(QAbstractButton*)
 
         //reset and reload the sort
         slotSortMode(0);
-        slotSortOrderChanged(0);
+        slotSortOrderChanged(nullptr);
 
     }
     //duration
@@ -1241,9 +1241,8 @@ void TimelineWidget::determineTreeOrder()
 
         // iterate through the timeline items alphabetically
         const std::vector<size_t>& sortIndex=data_->sortIndex();
-        for(size_t i=0; i < sortIndex.size() ;i++)
+        for(int dataIdx : sortIndex)
         {
-            int dataIdx=sortIndex[i];
             if(data_->items()[dataIdx].type() != TimelineItem::ServerType &&
                data_->items()[dataIdx].treeIndex() == 0)
             {

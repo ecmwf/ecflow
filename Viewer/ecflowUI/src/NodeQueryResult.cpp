@@ -22,8 +22,7 @@
 //========================================================
 
 NodeQueryResultItem::NodeQueryResultItem(VNode* node)  :
-	node_(node),
-	server_(nullptr)
+    node_(node)
 {
 	if(node_)
 		server_=node_->server();
@@ -76,14 +75,14 @@ QString NodeQueryResultItem::typeStr() const
 	if(node_)
 		return QString::fromStdString(node_->nodeType());
 
-	return QString("???");
+	return {"???"};
 }
 
 QString NodeQueryResultItem::stateStr() const
 {
 	if(node_)
 		return node_->stateName();
-	return QString("???");
+	return {"???"};
 }
 
 QColor NodeQueryResultItem::stateColour() const
@@ -244,14 +243,14 @@ void NodeQueryResult::clear()
 {
 	Q_EMIT beginReset();
 
-	for(std::map<ServerHandler*,NodeQueryResultBlock>::const_iterator it=blocks_.begin(); it != blocks_.end(); ++it)
+	for(auto it=blocks_.begin(); it != blocks_.end(); ++it)
 	{
 		it->first->removeServerObserver(this);
 		it->first->removeNodeObserver(this);
 	}
 	blocks_.clear();
 
-	for(std::vector<NodeQueryResultItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
+	for(auto it=data_.begin(); it != data_.end(); ++it)
 	{
 		delete *it;
 	}
@@ -275,7 +274,7 @@ void NodeQueryResult::clear(ServerHandler* server)
 	}
 
 	//Adjust data
-	for(std::vector<NodeQueryResultItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
+	for(auto it=prev.begin(); it != prev.end(); ++it)
 	{
 		ServerHandler *s=(*it)->node_->server();
 		if(s == server)
@@ -292,7 +291,7 @@ void NodeQueryResult::clear(ServerHandler* server)
 
 void NodeQueryResult::serverClear(ServerHandler* server)
 {
-	for(std::vector<NodeQueryResultItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
+	for(auto it=data_.begin(); it != data_.end(); ++it)
 	{
 		if(server == (*it)->server_)
 		{
@@ -311,7 +310,7 @@ void NodeQueryResult::serverScan(ServerHandler* server)
 		block.second.clear();
 	}
 
-	for(std::vector<NodeQueryResultItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
+	for(auto it=prev.begin(); it != prev.end(); ++it)
 	{
 		if(server == (*it)->server_)
 		{

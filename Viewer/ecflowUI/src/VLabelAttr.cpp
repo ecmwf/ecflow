@@ -138,7 +138,7 @@ std::string VLabelAttr::strName() const
         const std::vector<Label>& v=parent_->node_->labels();
         return v[index_].name();
     }
-    return std::string();
+    return {};
 }
 
 void VLabelAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

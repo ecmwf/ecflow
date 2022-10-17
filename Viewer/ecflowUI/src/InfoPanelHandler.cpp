@@ -123,10 +123,10 @@ void InfoPanelHandler::visible(VInfo_ptr info,std::vector<InfoPanelDef*>& lst)
 	if(!info || !info.get())
 		return;
 
-	for(std::vector<InfoPanelDef*>::const_iterator it=panels_.begin(); it != panels_.end(); ++it)
+    for(const auto & panel : panels_)
 	{
-          if(!(*it)->hidden() && (*it)->visibleCondition()->execute(info))
-        	 lst.push_back((*it));
+          if(!panel->hidden() && panel->visibleCondition()->execute(info))
+             lst.push_back(panel);
     }
 }
 

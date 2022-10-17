@@ -68,7 +68,7 @@ void RichTextEdit::updateFont()
 {
     if(fontProp_)
     {
-        QFont f=fontProp_->value().value<QFont>();
+        auto f=fontProp_->value().value<QFont>();
         if(font() != f)
             setFont(f);
     }

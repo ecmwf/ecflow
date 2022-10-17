@@ -65,7 +65,7 @@ VNState::VNState(const std::string& name) :
 std::vector<VParam*> VNState::filterItems()
 {
 	std::vector<VParam*> v;
-	for(std::map<std::string,VNState*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto it=items_.begin(); it != items_.end(); ++it)
 	{
 			v.push_back(it->second);
 	}
@@ -84,7 +84,7 @@ VNState* VNState::toState(const VNode *n)
 			return items_["suspended"];
 	else
 	{
-		std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(node->state());
+		auto it=stateMap_.find(node->state());
 		if(it != stateMap_.end())
 			return it->second;
 	}
@@ -99,7 +99,7 @@ VNState* VNState::toRealState(const VNode *n)
 
 	node_ptr node=n->node();
 
-	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(node->state());
+	auto it=stateMap_.find(node->state());
 	if(it != stateMap_.end())
 		return it->second;
 
@@ -121,7 +121,7 @@ VNState* VNState::toDefaultState(const VNode *n)
 
 VNState* VNState::find(const std::string& name)
 {
-	std::map<std::string,VNState*>::const_iterator it=items_.find(name);
+	auto it=items_.find(name);
 	if(it != items_.end())
 				return it->second;
 
@@ -130,7 +130,7 @@ VNState* VNState::find(const std::string& name)
 
 VNState* VNState::find(unsigned char ucId)
 {
-    std::map<unsigned char,VNState*>::const_iterator it=idMap_.find(ucId);
+    auto it=idMap_.find(ucId);
     if(it != idMap_.end())
         return it->second;
 
@@ -217,7 +217,7 @@ VNState* VNState::toState(ServerHandler *s)
 			return items_["suspended"];
 	else
 	{
-		std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(ns);
+		auto it=stateMap_.find(ns);
 		if(it != stateMap_.end())
 			return it->second;
 	}

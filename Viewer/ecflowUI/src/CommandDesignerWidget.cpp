@@ -26,15 +26,10 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent),
 {
 	setupUi(this);
 
-
 	//at least for now, all commands will start with 'ecflow_client' and end with '<full_name>'
 	commandLineEdit_->setText("ecflow_client  <full_name>");
 	//commandLineEdit_->installEventFilter(this);
 	commandLineEdit_->setFocus();
-
-	haveSetUpDefaultCommandLine_ = false;
-	inCommandEditMode_           = false;
-	saveCommandsOnExit_          = false;
 
 	addToContextMenuCb_->setChecked(true);  // by default, suggest saving to context menu
 
@@ -43,7 +38,6 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent),
 
 	saveNameLineEdit_->setPlaceholderText(tr("Unnamed"));
 
-	currentCommandSaved_ = false;
 	refreshSavedCommandList();
 
 

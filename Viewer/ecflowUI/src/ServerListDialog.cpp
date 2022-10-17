@@ -850,13 +850,13 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
               role != Qt::CheckStateRole  && role != Qt::UserRole && role != Qt::FontRole &&
               role != IconStatusRole && role != Qt::ToolTipRole))
 	{
-		return QVariant();
+		return {};
 	}
 
 	ServerItem* item=ServerList::instance()->itemAt(index.row());
 
 	if(!item)
-		return QVariant();
+		return {};
 
 	if(role == Qt::DisplayRole)
 	{
@@ -873,9 +873,9 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
             if(n > 0)
                 return "loaded (" + QString::number(n) + ")";
 
-			return QVariant();
+			return {};
 		}
-		default: return QVariant();
+		default: return {};
 		}
 	}
 	else if (role == Qt::ForegroundRole)
@@ -891,21 +891,21 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         else if(index.column() == FavouriteColumn)
 			return (item->isFavourite())?favPix_:favEmptyPix_;
 
-		return QVariant();
+		return {};
 	}
 	else if (role == Qt::UserRole)
 	{
 		if(index.column() == FavouriteColumn)
 			return item->isFavourite();
 
-		return QVariant();
+		return {};
 	}
 	else if (role == Qt::CheckStateRole)
 	{
 		if(index.column() == LoadColumn && filter_)
 			return (filter_->isFiltered(item))?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 
-		return QVariant();
+		return {};
 	}
 	else if (role == Qt::FontRole)
 	{
@@ -913,7 +913,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 		  filter_ && filter_->isFiltered(item))
 			  return loadFont_;
 
-		return QVariant();
+		return {};
 	}
     else if (role == IconStatusRole)
     {
@@ -923,7 +923,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         else if(index.column() == FavouriteColumn)
             return item->isFavourite();
 
-        return QVariant();
+        return {};
     }
 
     else if(role == Qt::ToolTipRole)
@@ -938,14 +938,14 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
         return QString();
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) const
 {
 	if(ori != Qt::Horizontal)
 	{
-		return QVariant();
+		return {};
 	}
 
 	if(role == Qt::DisplayRole)
@@ -961,7 +961,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
             case SslColumn: return tr("SSL");
             case FavouriteColumn: return tr("F");
             case UseColumn: return tr("Loaded");
-    		default: return QVariant();
+    		default: return {};
 		}
 	}
 	else if(role == Qt::ToolTipRole)
@@ -979,7 +979,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
             case FavouriteColumn: return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \
     				                        are appearing in the server list under the <b>Servers menu</b> in the menubar");
     		case UseColumn: return tr("Indicates the <b>number of tabs</b> where the server is loaded.");
-    		default: return QVariant();
+    		default: return {};
 		}
 	}
 	else if(role == Qt::TextAlignmentRole)
@@ -989,7 +989,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
 
 
 
-    return QVariant();
+    return {};
 }
 
 bool ServerListModel::setData(const QModelIndex& idx, const QVariant & value, int role )

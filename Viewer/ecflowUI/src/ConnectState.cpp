@@ -33,7 +33,7 @@ const std::string& ConnectState::describe() const
 {
 	static std::string empty="";
 
-	std::map<ConnectState::State,std::string>::const_iterator it=descMap.find(state_);
+	auto it=descMap.find(state_);
 	if(it != descMap.end())
 	{
 		return it->second;

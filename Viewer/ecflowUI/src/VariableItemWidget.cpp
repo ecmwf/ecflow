@@ -49,7 +49,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
    cleared_(false),
    suspended_(false)
 {
-	setupUi(this);
+    setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     setModal(false);
 
@@ -101,19 +101,19 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler *data,int define
         h+=" <br>" + EditorInfoLabel::formatKeyLabel("Inherited from: ") + EditorInfoLabel::formatNodePath(definePath);
     }
     header_->setText(h);
-    valueEdit_->setProperty("form","1");   
-	nameEdit_->setText(name);
-	valueEdit_->setPlainText(value);
+    valueEdit_->setProperty("form","1");
+    nameEdit_->setText(name);
+    valueEdit_->setPlainText(value);
     valueEdit_->setFocus();
 
-	if(frozen || readOnly)
-	{
-		nameEdit_->setReadOnly(true);
-		valueEdit_->setReadOnly(true);
+    if(frozen || readOnly)
+    {
+        nameEdit_->setReadOnly(true);
+        valueEdit_->setReadOnly(true);
 
-		QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
+        QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
         Q_ASSERT(sb);
-		sb->setEnabled(false);
+        sb->setEnabled(false);
     }
 
     messageLabel_->hide();
@@ -157,7 +157,7 @@ void VariablePropDialog::accept()
                        tr("</b>. A new user variable will be created for ") +  nodeType_ + " <b>"  + nodeName_ +
                        tr("</b> and shadow the original one.<br><br>Do you want to proceed?"),
                     QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
-                {                  
+                {
                     return;
                 }
                 else
@@ -169,11 +169,11 @@ void VariablePropDialog::accept()
         }
 
         //It is a ne variable
-		if(QMessageBox::question(nullptr,tr("Confirm: create new variable"),
+        if(QMessageBox::question(nullptr,tr("Confirm: create new variable"),
                         tr("You are about to create a <b>new</b> variable in ") + nodeType_ + " <b>" + nodeName_ + "</b>." +
                             tr("<br>Do you want to proceed?"),
                         QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
-        {        
+        {
             return;
         }
         else
@@ -181,23 +181,23 @@ void VariablePropDialog::accept()
             QDialog::accept();
             return;
         }
-	}
+    }
     else if(data_->data(0)->isGenVar(name.toStdString()))
     {
-		if(QMessageBox::question(nullptr,QObject::tr("Confirm: change variable"),
-						tr("You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
-					QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)  == QMessageBox::Cancel)
-		{			
-			return;
+        if(QMessageBox::question(nullptr,QObject::tr("Confirm: change variable"),
+                        tr("You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
+                    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)  == QMessageBox::Cancel)
+        {
+            return;
         }
         else
         {
             QDialog::accept();
             return;
         }
-	}
+    }
 
-	QDialog::accept();
+    QDialog::accept();
 }
 
 void VariablePropDialog::on_nameEdit__textEdited(QString)
@@ -212,12 +212,12 @@ void VariablePropDialog::on_valueEdit__textChanged()
 
 QString VariablePropDialog::name() const
 {
-	return nameEdit_->text();
+    return nameEdit_->text();
 }
 
 QString VariablePropDialog::value() const
 {
-	return valueEdit_->toPlainText();
+    return valueEdit_->toPlainText();
 }
 
 void VariablePropDialog::notifyCleared(VariableModelDataHandler*)
@@ -272,7 +272,7 @@ void VariablePropDialog::slotSuspendedChanged(bool s)
         suspendEdit(true);
     }
     else
-    {       
+    {
         messageLabel_->clear();
         messageLabel_->hide();
         suspendEdit(false);
@@ -288,14 +288,14 @@ void VariablePropDialog::suspendEdit(bool st)
     suspended_=st;
 
     if(st)
-    {       
+    {
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
         Q_ASSERT(sb);
         sb->setEnabled(false);
         form_->setEnabled(false);
     }
     else
-    {       
+    {
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
         Q_ASSERT(sb);
         sb->setEnabled(true);
@@ -351,7 +351,7 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QWidget *par
    cleared_(false),
    suspended_(false)
 {
-	setupUi(this);
+    setupUi(this);
 
     init();
     nameEdit_->setFocus();
@@ -370,12 +370,12 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler *data,QString name
    data_(data),
    cleared_(false)
 {
-	setupUi(this);
+    setupUi(this);
 
     init();
 
-	nameEdit_->setText(name + "_copy");
-	valueEdit_->setText(value);
+    nameEdit_->setText(name + "_copy");
+    valueEdit_->setText(value);
     nameEdit_->setFocus();
 
     QString wt="Add variable";
@@ -422,7 +422,7 @@ void VariableAddDialog::init()
 
 void VariableAddDialog::accept()
 {
-	QString name=nameEdit_->text();
+    QString name=nameEdit_->text();
 
     if(name.simplified().isEmpty())
     {
@@ -487,7 +487,7 @@ void VariableAddDialog::accept()
                     <br>Do you want to proceed?");
 
             if(QMessageBox::question(nullptr,tr("Confirm: overwrite variable"),q,
-					    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
+                        QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
             {
                 return;
             }
@@ -499,17 +499,17 @@ void VariableAddDialog::accept()
         }
     }
 
-	QDialog::accept();
+    QDialog::accept();
 }
 
 QString VariableAddDialog::name() const
 {
-	return nameEdit_->text();
+    return nameEdit_->text();
 }
 
 QString VariableAddDialog::value() const
 {
-	return valueEdit_->text();
+    return valueEdit_->text();
 }
 
 void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
@@ -577,7 +577,7 @@ void VariableAddDialog::suspendEdit(bool st)
         form_->setEnabled(false);
     }
     else
-    {      
+    {
         QPushButton* sb=buttonBox_->button(QDialogButtonBox::Ok);
         Q_ASSERT(sb);
         sb->setEnabled(true);
@@ -626,17 +626,14 @@ void VariableAddDialog::readSettings()
 //
 //========================================================
 
-VariableItemWidget::VariableItemWidget(QWidget* /*parent*/) :
-    shadowProp_(nullptr),
-    canSaveLastSelection_(true),
-    tableViewColumns_(nullptr)
+VariableItemWidget::VariableItemWidget(QWidget* /*parent*/)
 {
-	//This item displays all the ancestors of the info object
+    //This item displays all the ancestors of the info object
     useAncestors_=true;
-    
+
     setupUi(this);
 
-	data_=new VariableModelDataHandler();
+    data_=new VariableModelDataHandler();
 
     //table view columns
     tableViewColumns_=ModelColumn::def("table_columns");
@@ -645,9 +642,9 @@ VariableItemWidget::VariableItemWidget(QWidget* /*parent*/) :
         UiLog().warn() << "Cannot find ModelColumn object for \"table_columns\"";
     }
 
-	//The model and the sort-filter model
-	model_=new VariableModel(data_,this);
-	sortModel_= new VariableSortModel(model_,this);
+    //The model and the sort-filter model
+    model_=new VariableModel(data_,this);
+    sortModel_= new VariableSortModel(model_,this);
     sortModel_->setDynamicSortFilter(true);
 
     //Set the model on the view
@@ -679,7 +676,7 @@ VariableItemWidget::VariableItemWidget(QWidget* /*parent*/) :
 
     //Populate the toolbuttons menu
     findModeTb->addAction(actionFilter);
-	findModeTb->addAction(actionSearch);
+    findModeTb->addAction(actionSearch);
 
     //The filter line editor
     filterLine_=new LineEdit;
@@ -689,60 +686,60 @@ VariableItemWidget::VariableItemWidget(QWidget* /*parent*/) :
     searchLine_=new VariableSearchLine(this);
     stackedWidget->addWidget(searchLine_);
     searchLine_->setView(varView);
-    
+
     //The filter editor changes
     connect(filterLine_,SIGNAL(textChanged(QString)),
         this,SLOT(slotFilterTextChanged(QString)));
 
     //The selection changes in the view
-	connect(varView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
+    connect(varView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 
-	//Init the find mode selection
-	if(sortModel_->matchMode() == VariableSortModel::FilterMode)
-	{
-		actionFilter->trigger();
-	}
-	else
-	{
-		actionSearch->trigger();
-	}
+    //Init the find mode selection
+    if(sortModel_->matchMode() == VariableSortModel::FilterMode)
+    {
+        actionFilter->trigger();
+    }
+    else
+    {
+        actionSearch->trigger();
+    }
 
-	//Add context menu actions to the view
-	auto* sep1=new QAction(this);
-	sep1->setSeparator(true);
-	auto* sep2=new QAction(this);
-	sep2->setSeparator(true);
-	auto* sep3=new QAction(this);
+    //Add context menu actions to the view
+    auto* sep1=new QAction(this);
+    sep1->setSeparator(true);
+    auto* sep2=new QAction(this);
+    sep2->setSeparator(true);
+    auto* sep3=new QAction(this);
     sep3->setSeparator(true);
     auto* sep4=new QAction(this);
     sep4->setSeparator(true);
 
-	//Build context menu
-	varView->addAction(actionAdd);
-	varView->addAction(sep1);
+    //Build context menu
+    varView->addAction(actionAdd);
+    varView->addAction(sep1);
     varView->addAction(actionCopy);
     varView->addAction(actionCopyFull);
     //varView->addAction(actionPaste);
     varView->addAction(sep2);
-	varView->addAction(actionDelete);
-	varView->addAction(sep3);
-	varView->addAction(actionProp);
+    varView->addAction(actionDelete);
+    varView->addAction(sep3);
+    varView->addAction(actionProp);
     varView->addAction(sep4);
     varView->addAction(actionAddToTableView);
 
-	//Add actions for the toolbuttons
-	addTb->setDefaultAction(actionAdd);
-	deleteTb->setDefaultAction(actionDelete);
-	propTb->setDefaultAction(actionProp);
-	exportTb->setDefaultAction(actionExport);
+    //Add actions for the toolbuttons
+    addTb->setDefaultAction(actionAdd);
+    deleteTb->setDefaultAction(actionDelete);
+    propTb->setDefaultAction(actionProp);
+    exportTb->setDefaultAction(actionExport);
 
     //TODO: implement it
     actionExport->setEnabled(false);
     exportTb->setVisible(false);
 
-	//Initialise action state (it depends on the selection)
-	checkActionState();
+    //Initialise action state (it depends on the selection)
+    checkActionState();
 }
 
 VariableItemWidget::~VariableItemWidget()
@@ -750,7 +747,7 @@ VariableItemWidget::~VariableItemWidget()
 
 QWidget* VariableItemWidget::realWidget()
 {
-	return this;
+    return this;
 }
 
 //A new info object is set
@@ -775,9 +772,9 @@ void VariableItemWidget::reload(VInfo_ptr info)
 
     adjust(info);
 
-	data_->reload(info);
-	varView->expandAll();
-	varView->resizeColumnToContents(0);
+    data_->reload(info);
+    varView->expandAll();
+    varView->resizeColumnToContents(0);
 
     if(data_->count() > 0)
     {
@@ -862,26 +859,26 @@ void VariableItemWidget::checkActionState()
          return;
     }
 
-	//The index is invalid (no selection)
-	if(!index.isValid())
-	{
-		actionProp->setEnabled(false);
+    //The index is invalid (no selection)
+    if(!index.isValid())
+    {
+        actionProp->setEnabled(false);
         actionDelete->setEnabled(false);
         actionCopy->setEnabled(false);
         actionCopyFull->setEnabled(false);
         actionAddToTableView->setEnabled(false);
-	}
-	else
-	{
-		//Variables
-		if(model_->isVariable(index))
-		{
-			if(frozen_)
-			{				
-				actionDelete->setEnabled(false);
-			}
-			else
-			{				
+    }
+    else
+    {
+        //Variables
+        if(model_->isVariable(index))
+        {
+            if(frozen_)
+            {
+                actionDelete->setEnabled(false);
+            }
+            else
+            {
                 int block=-1;
                 if(model_->indexToData(index,block))
                 {
@@ -892,7 +889,7 @@ void VariableItemWidget::checkActionState()
                 }
                 else
                     actionDelete->setEnabled(false);
-			}
+            }
             actionProp->setEnabled(true);
             actionCopy->setEnabled(true);
             actionCopyFull->setEnabled(true);
@@ -906,24 +903,17 @@ void VariableItemWidget::checkActionState()
             {
                 actionAddToTableView->setEnabled(false);
             }
-		}
-		//Server or nodes
-		else
-		{
-			if(frozen_)
-			{				
-				actionDelete->setEnabled(false);
-			}
-			else
-			{				
-				actionDelete->setEnabled(false);
-			}
+        }
+        //Server or nodes
+        else
+        {
+            actionDelete->setEnabled(false);
             actionProp->setEnabled(false);
             actionCopy->setEnabled(false);
             actionCopyFull->setEnabled(false);
             actionAddToTableView->setEnabled(false);
         }
-	}
+    }
 
     if(frozen_)
     {
@@ -943,10 +933,10 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 #endif
 
     QString name;
-	QString value;
-	bool genVar;
+    QString value;
+    bool genVar = false;
 
-	QModelIndex vIndex=sortModel_->mapToSource(index);
+    QModelIndex vIndex=sortModel_->mapToSource(index);
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
     UiLog().dbg() << "vIndex=" << vIndex;
 #endif
@@ -964,50 +954,50 @@ void VariableItemWidget::editItem(const QModelIndex& index)
         if(model_->variable(vIndex,name,value,genVar))
         {
             //Start the edit dialog (will be deleted on close - deleteOnClose is set)
-            VariablePropDialog* d=new VariablePropDialog(data_,block,name,value,frozen_,this);
+            auto* d=new VariablePropDialog(data_,block,name,value,frozen_,this);
             connect(d,SIGNAL(accepted()),
                 this,SLOT(slotVariableEdited()));
             connect(this,SIGNAL(suspendedChanged(bool)),
                 d,SLOT(slotSuspendedChanged(bool)));
             d->show();
         }
-	}
+    }
 }
 
 void VariableItemWidget::duplicateItem(const QModelIndex&)
 {
-	if(frozen_)
+    if(frozen_)
         return;
 
 #if 0
-	QString name;
-	QString value;
-	bool genVar;
+    QString name;
+    QString value;
+    bool genVar;
 
-	QModelIndex vIndex=sortModel_->mapToSource(index);
+    QModelIndex vIndex=sortModel_->mapToSource(index);
 
-	VariableModelData* data=model_->indexToData(vIndex);
+    VariableModelData* data=model_->indexToData(vIndex);
 
-	//Get the data from the model
-	if(data && model_->variable(vIndex,name,value,genVar))
-	{
-		//Start add dialog
-		VariableAddDialog d(data,name,value,this);
+    //Get the data from the model
+    if(data && model_->variable(vIndex,name,value,genVar))
+    {
+        //Start add dialog
+        VariableAddDialog d(data,name,value,this);
 
-		if(d.exec() == QDialog::Accepted)
-		{
+        if(d.exec() == QDialog::Accepted)
+        {
             data->alter(d.name().toStdString(),d.value().toStdString());
             //data->add(d.name().toStdString(),d.value().toStdString());
-		}
-	}
+        }
+    }
 #endif
 
 }
 
 void VariableItemWidget::addItem(const QModelIndex&)
 {
-	if(frozen_)
-		return;
+    if(frozen_)
+        return;
 
     if(data_->count() > 0)
     {
@@ -1024,35 +1014,35 @@ void VariableItemWidget::addItem(const QModelIndex&)
 
 void VariableItemWidget::removeItem(const QModelIndex& index)
 {
-	if(frozen_)
-		return;
+    if(frozen_)
+        return;
 
-	QString name;
-	QString value;
-	bool genVar;
+    QString name;
+    QString value;
+    bool genVar = false;
 
-	QModelIndex vIndex=sortModel_->mapToSource(index);
+    QModelIndex vIndex=sortModel_->mapToSource(index);
 
-	VariableModelData* data=model_->indexToData(vIndex);
+    VariableModelData* data=model_->indexToData(vIndex);
 
-	//Get the data from the model
-	if(data && model_->variable(vIndex,name,value,genVar))
-	{
+    //Get the data from the model
+    if(data && model_->variable(vIndex,name,value,genVar))
+    {
         std::string nodePath=data->fullPath();
         std::string nodeName=data->name();
 
         if(QMessageBox::question(nullptr,tr("Confirm: delete variable"),
-						tr("Are you sure that you want to delete variable <b>") + name + "</b> from " +
-						QString::fromStdString(data->type()) + " <b>" + QString::fromStdString(data->name()) +  "</b>?",
-					    QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
-		{
+                        tr("Are you sure that you want to delete variable <b>") + name + "</b> from " +
+                        QString::fromStdString(data->type()) + " <b>" + QString::fromStdString(data->name()) +  "</b>?",
+                        QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
+        {
             //data might have been changed while the dialog was open
             //so we cant use the data object but need to look up the variable again
             int block=-1;
             int row=-1;
             data_->findVariable(name.toStdString(),nodePath,genVar,block,row);
             if(block != -1 && row != -1)
-            {                
+            {
                 data_->data(block)->remove(name.toStdString());
             }
             else
@@ -1068,7 +1058,7 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
                 UserMessage::message(UserMessage::ERROR,true,msg);
             }
         }
-	}
+    }
 }
 
 //Called when the variable has been edited in the dialogue
@@ -1095,7 +1085,7 @@ void VariableItemWidget::slotVariableAdded()
     Q_ASSERT(d);
     Q_ASSERT(data_->count() > 0);
     //We always perform the alter variable operation on the selected
-    //node i.e. on block 0 = data(0) !!!    
+    //node i.e. on block 0 = data(0) !!!
     data_->data(0)->alter(d->name().toStdString(),d->value().toStdString());
 }
 
@@ -1107,42 +1097,42 @@ void VariableItemWidget::on_varView_doubleClicked(const QModelIndex& index)
 
 void VariableItemWidget::on_actionProp_triggered()
 {
-	QModelIndex index=varView->currentIndex();
-	editItem(index);
+    QModelIndex index=varView->currentIndex();
+    editItem(index);
 }
 
 void VariableItemWidget::on_actionAdd_triggered()
 {
-	QModelIndex index=varView->currentIndex();
-	addItem(index);
+    QModelIndex index=varView->currentIndex();
+    addItem(index);
 }
 
 void VariableItemWidget::on_actionDelete_triggered()
 {
-	QModelIndex index=varView->currentIndex();
-	removeItem(index);
+    QModelIndex index=varView->currentIndex();
+    removeItem(index);
 }
 
 void VariableItemWidget::on_actionFilter_triggered()
 {
-	findModeTb->setIcon(actionFilter->icon());
-	sortModel_->setMatchMode(VariableSortModel::FilterMode);
-	filterLine_->clear();
-	searchLine_->clear();
+    findModeTb->setIcon(actionFilter->icon());
+    sortModel_->setMatchMode(VariableSortModel::FilterMode);
+    filterLine_->clear();
+    searchLine_->clear();
 
-	//Notify stackedwidget
-	stackedWidget->setCurrentIndex(0);
+    //Notify stackedwidget
+    stackedWidget->setCurrentIndex(0);
 }
 
 void VariableItemWidget::on_actionSearch_triggered()
 {
-	findModeTb->setIcon(actionSearch->icon());
-	sortModel_->setMatchMode(VariableSortModel::SearchMode);
-	filterLine_->clear();
-	searchLine_->clear();
+    findModeTb->setIcon(actionSearch->icon());
+    sortModel_->setMatchMode(VariableSortModel::SearchMode);
+    filterLine_->clear();
+    searchLine_->clear();
 
-	//Notify stackedwidget
-	stackedWidget->setCurrentIndex(1);
+    //Notify stackedwidget
+    stackedWidget->setCurrentIndex(1);
 
 }
 
@@ -1150,11 +1140,10 @@ void VariableItemWidget::on_actionCopy_triggered()
 {
    QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
    QString name, val;
-   bool gen;
+   bool gen = false;
 
    if(model_->variable(idx,name,val,gen))
    {
-        QString txt;
         if(idx.column() == 0)
             toClipboard(name);
         else if(idx.column() == 1)
@@ -1166,7 +1155,7 @@ void VariableItemWidget::on_actionCopyFull_triggered()
 {
    QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
    QString name, val;
-   bool gen;
+   bool gen = false;
 
    if(model_->variable(idx,name,val,gen))
    {
@@ -1216,14 +1205,14 @@ void VariableItemWidget::slotFilterTextChanged(QString text)
 }
 
 void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
-{                
+{
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
      UI_FUNCTION_LOG
 #endif
     canSaveLastSelection_=false;
     if(data_->nodeChanged(node,aspect))
     {
-        //After any change done we need to reselect the current row. See issue ECFLOW-613.        
+        //After any change done we need to reselect the current row. See issue ECFLOW-613.
         regainSelection();
     }
     canSaveLastSelection_=true;

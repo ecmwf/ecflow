@@ -22,7 +22,6 @@ Q_OBJECT
 
 public:
 	explicit DashboardDialog(QWidget *parent=nullptr);
-    ~DashboardDialog() override;
 	
     void add(DashboardWidget*);
 	DashboardWidget* dashboardWidget() const {return dw_;} 

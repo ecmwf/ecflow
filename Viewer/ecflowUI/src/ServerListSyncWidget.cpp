@@ -79,25 +79,25 @@ void ServerListSyncWidget::reload()
 
             if(matchCnt > 0)
             {
-                QListWidgetItem *item=new QListWidgetItem("Host/port changed (" + QString::number(matchCnt) + ")");
+                auto *item=new QListWidgetItem("Host/port changed (" + QString::number(matchCnt) + ")");
                 item->setData(Qt::UserRole,ServerListSyncChangeItem::MatchChange);
                 typeList_->addItem(item);
             }
             if(unsetCnt > 0)
             {
-                QListWidgetItem *item=new QListWidgetItem("Server removed (" + QString::number(unsetCnt) + ")");
+                auto *item=new QListWidgetItem("Server removed (" + QString::number(unsetCnt) + ")");
                 item->setData(Qt::UserRole,ServerListSyncChangeItem::UnsetSysChange);
                 typeList_->addItem(item);
             }
             if(addedCnt > 0)
             {
-                QListWidgetItem *item=new QListWidgetItem("New server (" + QString::number(addedCnt) + ")");
+                auto *item=new QListWidgetItem("New server (" + QString::number(addedCnt) + ")");
                 item->setData(Qt::UserRole,ServerListSyncChangeItem::AddedChange);
                 typeList_->addItem(item);
             }
             if(setCnt > 0)
             {
-                QListWidgetItem *item=new QListWidgetItem("Marked as system (" + QString::number(setCnt) + ")");
+                auto *item=new QListWidgetItem("Marked as system (" + QString::number(setCnt) + ")");
                 item->setData(Qt::UserRole,ServerListSyncChangeItem::SetSysChange);
                 typeList_->addItem(item);
             }

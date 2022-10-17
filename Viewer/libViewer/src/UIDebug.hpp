@@ -21,7 +21,6 @@ public:
    ~UIDebug() = default;
 
 	static void uiAssert(char const* expr, char const* file, long line, const std::string& message);
-	static std::string longToString(long num);
 };
 
 

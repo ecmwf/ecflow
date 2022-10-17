@@ -19,7 +19,7 @@ VItemPathParser::VItemPathParser(const std::string& path,PathFormat format) : it
     if(path.empty())
         return;
 
-    size_t pos;
+    size_t pos = 0;
     std::string p=path;
 
     if(format== DefaultFormat)
@@ -114,7 +114,7 @@ std::string VItemPathParser::encodeWithServer(const std::string& server,const st
 std::string VItemPathParser::encodeAttribute(const std::string& parentPath,const std::string& attrName,const std::string& attrType)
 {
     if(attrType.empty())
-        return std::string();
+        return {};
 
     VItemPathParser parent(parentPath);
 
@@ -126,7 +126,7 @@ std::string VItemPathParser::parent() const
     switch(itemType_)
     {
     case ServerType:
-        return std::string();
+        return {};
         break;
     case NodeType:
         {
@@ -148,7 +148,7 @@ std::string VItemPathParser::parent() const
         break;
     }
 
-    return std::string();
+    return {};
 }
 
 void VItemPathParser::extractHostPort(const std::string& server)

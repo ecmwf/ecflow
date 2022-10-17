@@ -37,7 +37,7 @@ Q_SIGNALS:
 
 private:
     Mode mode_{BasicMode};
-    bool elide_;
+    bool elide_{false};
 	QString dpyText_;
     QStringList selection_;
 };

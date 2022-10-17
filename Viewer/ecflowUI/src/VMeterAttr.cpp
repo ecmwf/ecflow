@@ -93,7 +93,7 @@ std::string VMeterAttr::strName() const
         const std::vector<Meter>& v=parent_->node_->meters();
         return v[index_].name();
     }
-    return std::string();
+    return {};
 }
 
 void VMeterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

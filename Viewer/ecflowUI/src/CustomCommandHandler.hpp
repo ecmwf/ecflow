@@ -97,14 +97,14 @@ protected:
 class CustomCommandHistoryHandler : public CustomCommandHandler
 {
 public:
-    CustomCommandHistoryHandler();
+    CustomCommandHistoryHandler() = default;
     CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings) override;
     static CustomCommandHistoryHandler* instance();
 
 protected:
     static CustomCommandHistoryHandler* instance_;
     std::string settingsFile() override;
-    int maxCommands_;
+    int maxCommands_{10};
 };
 
 

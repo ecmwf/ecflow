@@ -445,7 +445,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
     //Directories
     else
     {
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+        auto* op=dynamic_cast<OutputFileProvider*>(infoProvider_);
         dirW_->failed(reply, op->joboutFileName());
     }
 }
@@ -475,7 +475,7 @@ void OutputItemWidget::loadCurrentJobout()
     fetchInfo_->clearInfo();
 
     //Get the latest file contents
-    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    auto* op=dynamic_cast<OutputFileProvider*>(infoProvider_);
     Q_ASSERT(op);
     op->fetchCurrentJobout(false);
 
@@ -501,7 +501,7 @@ void OutputItemWidget::reloadCurrentFile(bool wholeFile)
     // the file to fetch
     std::string fPath;
 
-    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    auto* op=dynamic_cast<OutputFileProvider*>(infoProvider_);
     size_t deltaPos = 0;
     auto f = browser_->file();
 
@@ -554,7 +554,7 @@ void OutputItemWidget::loadCurrentDirItemFile()
     bool hasSelection = dirW_->currentSelection(fPath, mode);
 
     if (hasSelection) {
-        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+        auto* op=dynamic_cast<OutputFileProvider*>(infoProvider_);
 
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg()  << UI_FN_INFO << " mode=" << mode << " fPath=" << fPath;
@@ -573,7 +573,7 @@ void OutputItemWidget::loadCurrentDirItemFile()
 
 bool OutputItemWidget::isJoboutLoaded() const
 {
-    auto* op=static_cast<OutputFileProvider*>(infoProvider_);
+    auto* op=dynamic_cast<OutputFileProvider*>(infoProvider_);
     Q_ASSERT(op);
     auto f = browser_->file();
     if (f) {

@@ -23,7 +23,7 @@ VariableEditorWidget::VariableEditorWidget(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
 
-    QLayoutItem *item;
+    QLayoutItem *item = nullptr;
     item=grid_->itemAtPosition(1,0);
     Q_ASSERT(item);
     item->setAlignment(Qt::AlignLeft|Qt::AlignTop);

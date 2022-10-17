@@ -56,7 +56,7 @@ UiFunctionLog::~UiFunctionLog()
 
 void UiFunctionLog::init()
 {
-    std::size_t pos;
+    std::size_t pos = 0;
     if((pos=funcName_.find_first_of("(")) != std::string::npos)
     {
         std::size_t pos1=funcName_.rfind(" ",pos);
@@ -78,7 +78,7 @@ std::string UiFunctionLog::logLeave() const
 // to be used in UI_FN_INFO with __PRETTY_FUNCTION__
 std::string UiFunctionLog::formatFuncInfo(const std::string& funcName)
 {
-    std::size_t pos;
+    std::size_t pos = 0;
     std::string resName =  funcName;
     if((pos=funcName.find_first_of("(")) != std::string::npos)
     {
@@ -94,7 +94,7 @@ std::string UiFunctionLog::formatFuncInfo(const std::string& funcName)
 //---------------------------------
 
 UiLog::UiLog(const std::string& server) :
-    type_(INFO), server_(server)
+    server_(server)
 {}
 
 

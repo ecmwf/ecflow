@@ -603,7 +603,7 @@ void ServerComThread::attach(Node *node)
 
     node->attach(this);
 
-    for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
+    for(auto it=nodes.begin(); it != nodes.end(); ++it)
     {
         attach((*it).get());
     }
@@ -645,7 +645,7 @@ void ServerComThread::detach(Node *node)
 
     node->detach(this);
 
-    for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
+    for(auto it=nodes.begin(); it != nodes.end(); ++it)
     {
         detach((*it).get());
     }

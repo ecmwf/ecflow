@@ -1060,7 +1060,7 @@ QModelIndexList AbstractNodeView::selectedIndexes() const
     if(selectionModel_)
         return selectionModel_->selectedIndexes();
 
-    return QModelIndexList();
+    return {};
 }
 
 
@@ -1351,7 +1351,7 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(
 QRegion AbstractNodeView::visualRegionForSelection(const QItemSelection &selection) const
 {
     if(selection.isEmpty())
-        return QRegion();
+        return {};
 
     QRegion selectionRegion;
     const QRect &viewportRect = viewport()->rect();

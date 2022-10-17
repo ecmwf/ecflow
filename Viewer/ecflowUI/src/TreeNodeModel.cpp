@@ -166,7 +166,7 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         //We only continue for the relevant roles for nodes and attributes
         if(role == InfoRole || role == LoadRole)
         {
-            return QVariant();
+            return {};
         }
 
         bool itIsANode=false;
@@ -186,7 +186,7 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         }
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
@@ -195,11 +195,11 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		return true;
 
     if(role == Qt::ToolTipRole && !serverToolTip_)
-        return QVariant();
+        return {};
 
     ServerHandler *server=indexToServerHandler(index);
 	if(!server)
-		return QVariant();
+		return {};
 
 	if(index.column() == 0)
 	{
@@ -231,7 +231,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 			{
 				return server->vRoot()->totalNum();
 			}
-			return QVariant();
+			return {};
 		}
 
 		//Extra information about the server activity
@@ -252,7 +252,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		else if(role == IconRole)
 		{
 			if(icons_->isEmpty())
-				return QVariant();
+				return {};
 			else
 				return VIcon::pixmapList(server->vRoot(),icons_);
 		}
@@ -271,20 +271,20 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
         }
 	}
 
-	return QVariant();
+	return {};
 }
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role,VTreeNode* tnode) const
 {
     if(role == Qt::ToolTipRole && !nodeToolTip_)
-        return QVariant();
+        return {};
 
     if(!tnode)
-        return QVariant();
+        return {};
 
     VNode* vnode=tnode->vnode();
 	if(!vnode || !vnode->node())
-		return QVariant();
+		return {};
 
     if(role == NodePointerRole)
         return QVariant::fromValue((void *) vnode);
@@ -327,7 +327,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role,VTreeNod
     else if(role == IconRole)
     {
         if(icons_->isEmpty())
-            return QVariant();
+            return {};
         else
             return VIcon::pixmapList(vnode,icons_);
     }
@@ -349,7 +349,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role,VTreeNod
                 return  QString::number(tnode->root()->totalNumOfTopLevel(tnode)) + "/" +
                         QString::number(vnode->server()->vRoot()->totalNumOfTopLevel(vnode));
         }
-        return QVariant();
+        return {};
     }
     else if(role == AbortedReasonRole && vnode->isAborted())
     {
@@ -360,7 +360,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role,VTreeNod
         return vnode->isFlagSet(ecf::Flag::JOBCMD_FAILED);
     }
 
-	return QVariant();
+	return {};
 }
 
 //=======================================================================
@@ -373,7 +373,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeN
 {
     if(role == Qt::ToolTipRole && !attributeToolTip_)
     {
-        return QVariant();
+        return {};
     }
 
 	if(role == Qt::BackgroundRole)
@@ -401,13 +401,13 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeN
             return QString();
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant TreeNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
 	//No header!!!
-	return QVariant();
+	return {};
 }
 
 QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & parent ) const
@@ -582,7 +582,7 @@ VTreeServer* TreeNodeModel::nameToServer(const std::string& name) const
 QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
-	int i;
+	int i = 0;
 	if((i=data_->indexOfServer(server))!= -1)
 			return createIndex(i,0,(void*)nullptr);
 
@@ -592,7 +592,7 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
-	int i;
+	int i = 0;
 	if((i=data_->indexOfServer(server))!= -1)
 			return createIndex(i,0,(void*)nullptr);
 
@@ -608,7 +608,7 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
 //We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex & index) const
 {
-    void *ip;
+    void *ip = nullptr;
     if((ip=index.internalPointer()) == nullptr)
         return nullptr;
 
@@ -641,7 +641,7 @@ VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex & index) const
 //We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex & index,bool &itIsANode) const
 {
-    void *ip;
+    void *ip = nullptr;
     if((ip=index.internalPointer()) == nullptr)
         return nullptr;
 

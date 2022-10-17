@@ -13,7 +13,7 @@
 #include <map>
 
 
-typedef std::multimap<std::string,VConfigLoader*> Map;
+using Map = std::multimap<std::string, VConfigLoader *>;
 
 static Map* makers = nullptr;
 

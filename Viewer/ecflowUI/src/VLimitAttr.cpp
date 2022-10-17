@@ -95,7 +95,7 @@ std::string VLimitAttr::strName() const
         const std::vector<limit_ptr>& v=parent_->node_->limits();
         return v[index_]->name();
     }
-    return std::string();
+    return {};
 }
 
 QStringList VLimitAttr::paths() const

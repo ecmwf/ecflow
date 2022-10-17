@@ -44,7 +44,7 @@ VInfo::~VInfo()
     if(server_)
 		server_->removeServerObserver(this);
 
-	for(std::vector<VInfoObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	for(auto it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyDelete(this);
 
 #ifdef _UI_VINFO_DEBUG
@@ -203,7 +203,7 @@ bool VInfo::operator ==(const VInfo& other)
 VInfo_ptr VInfo::createParent(VInfo_ptr info)
 {
     if(!info)
-        return VInfo_ptr();
+        return {};
 
     if(info->isServer())
         return info;
@@ -216,14 +216,14 @@ VInfo_ptr VInfo::createParent(VInfo_ptr info)
         return VInfoNode::create(info->node());
     }
 
-    return VInfo_ptr();
+    return {};
 }
 
 
 VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
 {
     if(!s || path.empty())
-        return VInfo_ptr();
+        return {};
 
     VItemPathParser p(path);
 
@@ -248,13 +248,13 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s,const std::string& path)
         }
     }
 
-    return VInfo_ptr();
+    return {};
 }
 
 VInfo_ptr VInfo::createFromPath(const std::string& path)
 {
     if(path.empty())
-        return VInfo_ptr();
+        return {};
 
     VItemPathParser p(path);
     if(!p.server().empty())
@@ -264,13 +264,13 @@ VInfo_ptr VInfo::createFromPath(const std::string& path)
             return createFromPath(s,path);
         }
     }
-    return VInfo_ptr();
+    return {};
 }
 
 VInfo_ptr VInfo::createFromItem(VItem* item)
 {
     if(!item)
-        return VInfo_ptr();
+        return {};
 
     if(VServer* s=item->isServer())
     {
@@ -285,7 +285,7 @@ VInfo_ptr VInfo::createFromItem(VItem* item)
         return VInfoAttribute::create(a);
     }
 
-    return VInfo_ptr();
+    return {};
 }
 
 //=========================================
@@ -374,7 +374,7 @@ std::string VInfoNode::name()
 	if(node_ && node_->node())
 		return node_->strName();
 
-	return std::string();
+	return {};
 }
 
 std::string VInfoNode::path()

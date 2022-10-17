@@ -117,7 +117,7 @@ void ChangeNotifyButton::updateIcon()
     fNum.setPointSize(f.pointSize()-1);
     QFontMetrics fmNum(fNum);
 
-	int w;
+	int w = 0;
 	if(!numText.isEmpty())
         w=ViewerUtil::textWidth(fm, text) + 6 + ViewerUtil::textWidth(fm, numText) + 2;
 	else
@@ -188,7 +188,7 @@ ChangeNotifyWidget::~ChangeNotifyWidget()
 
 ChangeNotifyButton* ChangeNotifyWidget::findButton(const std::string& id)
 {
-	std::map<std::string,ChangeNotifyButton*>::const_iterator it=buttons_.find(id);
+	auto it=buttons_.find(id);
 	if(it != buttons_.end())
 		return it->second;
 

@@ -39,13 +39,11 @@ class NodeQueryOptionFactory
 public:
     explicit NodeQueryOptionFactory(const std::string& t);
     virtual ~NodeQueryOptionFactory() = default;
+    explicit NodeQueryOptionFactory(const NodeQueryOptionFactory&) = delete;
+    NodeQueryOptionFactory& operator=(const NodeQueryOptionFactory&) = delete;
 
     virtual NodeQueryOption* make(VProperty* p) = 0;
     static NodeQueryOption* create(VProperty* p);
-
-private:
-    explicit NodeQueryOptionFactory(const NodeQueryOptionFactory&) = delete;
-    NodeQueryOptionFactory& operator=(const NodeQueryOptionFactory&) = delete;
 };
 
 template<class T>
@@ -290,7 +288,7 @@ void NodeQueryListOption::load(VSettings* vs)
     vs->get(name_.toStdString(),v);
 
     selection_.clear();
-    for(std::vector<std::string>::const_iterator it=v.begin(); it != v.end(); ++it)
+    for(auto it=v.begin(); it != v.end(); ++it)
         selection_ << QString::fromStdString(*it);
 }
 
@@ -423,7 +421,7 @@ QString NodeQueryPeriodOption::query() const
             else if(periodUnits_ == "year")
                 prev=prev.addYears(-period_);
             else
-                return QString();
+                return {};
 
             if(mode_ == LastPeriodMode) {
                 s=name_ + " date::>= " +  prev.toString(Qt::ISODate);

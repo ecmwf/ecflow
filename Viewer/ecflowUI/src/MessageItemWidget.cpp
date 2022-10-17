@@ -107,14 +107,12 @@ void MessageItemWidget::infoReady(VReply* reply)
     }
 }
 
-void MessageItemWidget::infoProgress(VReply* reply)
+void MessageItemWidget::infoProgress(VReply*)
 {
-    QString s=QString::fromStdString(reply->text());
 }
 
-void MessageItemWidget::infoFailed(VReply* reply)
+void MessageItemWidget::infoFailed(VReply*)
 {
-    QString s=QString::fromStdString(reply->errorText());
 }
 
 void MessageItemWidget::on_actionCopyEntry__triggered()

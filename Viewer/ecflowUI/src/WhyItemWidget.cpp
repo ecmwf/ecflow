@@ -57,7 +57,7 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 
     //Add css for state names
     std::vector<VParam*> states=VNState::filterItems();
-    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    for(auto it=states.begin(); it!=states.end();++it)
     {     
        cssDoc+="font." + (*it)->name() +
                " {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " +
@@ -77,15 +77,14 @@ WhyItemWidget::WhyItemWidget(QWidget *parent) : HtmlItemWidget(parent)
 
     //Define the mapping for <state>stateName</state> tag replacement with
     //<font class='stateName'>stateName</font>
-    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    for(auto & state : states)
     {
-       stateMap_["<state>" + (*it)->name() + "</state>"]="<font class=\'"+ (*it)->name() + "\'>" + (*it)->name() + "</font>";
+       stateMap_["<state>" + state->name() + "</state>"]="<font class=\'"+ state->name() + "\'>" + state->name() + "</font>";
     }
 }
 
 WhyItemWidget::~WhyItemWidget()
-{
-}
+= default;
 
 QWidget* WhyItemWidget::realWidget()
 {
@@ -192,7 +191,7 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
                                 const std::vector<std::string>& topDownTxt) const
 {
     if(bottomUpTxt.empty() && topDownTxt.empty())
-        return QString();
+        return {};
 
     QString s="<table width=\'100%\'>";
 

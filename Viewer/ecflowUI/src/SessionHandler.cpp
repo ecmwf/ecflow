@@ -117,7 +117,7 @@ SessionHandler::SessionHandler()
 
 SessionHandler::~SessionHandler()
 {
-    for(std::vector<SessionItem*>::const_iterator it=sessions_.begin(); it != sessions_.end(); ++it)
+    for(auto it=sessions_.begin(); it != sessions_.end(); ++it)
     {
         delete (*it);
     }
@@ -155,7 +155,7 @@ std::string SessionHandler::sessionQtDirName(const std::string &sessionName)
 
 SessionItem* SessionHandler::find(const std::string& name)
 {
-    for(std::vector<SessionItem*>::const_iterator it=sessions_.begin(); it != sessions_.end(); ++it)
+    for(auto it=sessions_.begin(); it != sessions_.end(); ++it)
     {
         if((*it)->name() == name)
             return *it;
@@ -169,7 +169,7 @@ SessionItem* SessionHandler::find(const std::string& name)
 int SessionHandler::indexFromName(const std::string& name)
 {
     int n = 0;
-    for(std::vector<SessionItem*>::const_iterator it=sessions_.begin(); it != sessions_.end(); ++it)
+    for(auto it=sessions_.begin(); it != sessions_.end(); ++it)
     {
         if((*it)->name() == name)
             return n;
@@ -187,7 +187,7 @@ void SessionHandler::readSessionListFromDisk()
     DirectoryHandler::findDirs(configDir, filter, dirs);
 
     // add each session to our list (but remove the .session first)
-    for(std::vector<std::string>::const_iterator it=dirs.begin(); it != dirs.end(); ++it)
+    for(auto it=dirs.begin(); it != dirs.end(); ++it)
     {
         std::string dirName       = (*it);
         std::string toRemove      = ".session";

@@ -166,7 +166,7 @@ void NodeQueryEngine::run()
     }
     else
     {
-        for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+        for(auto it=servers_.begin(); it != servers_.end(); ++it)
         {
             ServerHandler *server=*it;
 

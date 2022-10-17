@@ -172,7 +172,7 @@ void VNodeList::trim()
 
 bool VNodeList::contains(VNode *node)
 {
-	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
+	for(auto it=data_.begin(); it != data_.end(); ++it)
 	{
 		if((*it)->sameAs(node))
 			return true;
@@ -186,14 +186,14 @@ void VNodeList::clear()
 {
 	Q_EMIT beginReset();
 
-	for(std::map<ServerHandler*,int>::const_iterator it=serverCnt_.begin(); it != serverCnt_.end(); ++it)
+	for(auto it=serverCnt_.begin(); it != serverCnt_.end(); ++it)
 	{
 		it->first->removeServerObserver(this);
 		it->first->removeNodeObserver(this);
 	}
 	serverCnt_.clear();
 
-	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
+	for(auto it=data_.begin(); it != data_.end(); ++it)
 	{
 		delete *it;
 	}
@@ -211,7 +211,7 @@ void VNodeList::clear(ServerHandler* server)
 
 	detach(server);
 
-	for(std::vector<VNodeListItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
+	for(auto it=prev.begin(); it != prev.end(); ++it)
 	{
         if((*it)->server() == server)
 		{
@@ -227,7 +227,7 @@ void VNodeList::clear(ServerHandler* server)
 // temporarily disables all items related server
 void VNodeList::serverClear(ServerHandler* server)
 {
-	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
+	for(auto it=data_.begin(); it != data_.end(); ++it)
 	{
         if(server == (*it)->server())
 		{
@@ -243,7 +243,7 @@ void VNodeList::serverScan(ServerHandler* server)
 
 	serverCnt_[server]=0;
 
-	for(std::vector<VNodeListItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
+	for(auto it=prev.begin(); it != prev.end(); ++it)
 	{
         if(server == (*it)->server())
 		{

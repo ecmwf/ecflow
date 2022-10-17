@@ -43,7 +43,7 @@ void StringMatchMode::init()
 const std::string& StringMatchMode::matchOperator() const
 {
 	static std::string emptyStr;
-	std::map<Mode,std::string>::const_iterator it=matchOper_.find(mode_);
+	auto it=matchOper_.find(mode_);
 	if(it != matchOper_.end())
 		return it->second;
 
@@ -52,7 +52,7 @@ const std::string& StringMatchMode::matchOperator() const
 
 StringMatchMode::Mode StringMatchMode::operToMode(const std::string& op)
 {
-	for(std::map<Mode,std::string>::const_iterator it=matchOper_.begin(); it != matchOper_.end(); ++it)
+	for(auto it=matchOper_.begin(); it != matchOper_.end(); ++it)
 	{
 		if(op == it->second)
 			return it->first;

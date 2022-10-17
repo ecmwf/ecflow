@@ -182,7 +182,7 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 {
 	if(!index.isValid() || !hasData())
     {
-		return QVariant();
+		return {};
 	}
 
 	//Data lookup can be costly so we immediately return a default value for all
@@ -194,7 +194,7 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 
 	int row=index.row();
 	if(row < 0 || row >= data_->count())
-		return QVariant();
+		return {};
 
 	if(role == Qt::DisplayRole)
 	{
@@ -215,10 +215,10 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
                     if(n != -1)
                         return n;
                     else
-                        return QVariant();
+                        return {};
                 }
                 else
-                    return QVariant();
+                    return {};
             }
             break;
         default:
@@ -234,16 +234,16 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 	{
 		if(!data_->isEnabled())
 		{
-			return QVariant();
+			return {};
 		}
 		else if(index.column() == 1)
 		{
             return (data_->items().at(row).loaded())?presentCol_:notPresentCol_;
 		}
-		return QVariant();
+		return {};
 	}
 
-	return QVariant();
+	return {};
 }
 
 bool SuiteModel::setData(const QModelIndex& index, const QVariant & value, int role )
@@ -276,7 +276,7 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    		case 0: return tr("Suite");
         case 1: return tr("Load status on server");
         case 2: return tr("Number of children");
-   		default: return QVariant();
+   		default: return {};
    		}
    	}
    	else if(role== Qt::ToolTipRole)
@@ -288,10 +288,10 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
                           Please note: this information might not be up to date for <b>unfiltered</b> suites. Use <u>Fetch load status</u> \
                           to get the actual load status list.");
         case 2: return tr("Number of children");
-   		default: return QVariant();
+   		default: return {};
    		}
    	}
-    return QVariant();
+    return {};
 }
 
 QModelIndex SuiteModel::index( int row, int column, const QModelIndex & parent ) const

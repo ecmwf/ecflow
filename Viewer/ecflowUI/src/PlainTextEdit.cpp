@@ -122,7 +122,7 @@ void PlainTextEdit::cursorRowCol(int *row, int *col)
     const QTextCursor cursor = textCursor();
 
     QTextBlock cb, b;
-    int column, line = 1;
+    int column = 0, line = 1;
     cb = cursor.block();
     column = (cursor.position() - cb.position()) + 1;
 
@@ -275,7 +275,7 @@ void PlainTextEdit::focusOutEvent(QFocusEvent *event)
 
 void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
-    int currentRow, currentCol;
+    int currentRow = 0, currentCol = 0;
     cursorRowCol (&currentRow, &currentCol);  // get the current line number so we can highlight it
 
 
@@ -538,7 +538,7 @@ void PlainTextEdit::updateFont()
 {
 	if(fontProp_)
 	{
-		QFont f=fontProp_->value().value<QFont>();
+		auto f=fontProp_->value().value<QFont>();
 		if(font() != f)
 			setFont(f);
 	}

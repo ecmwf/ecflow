@@ -30,7 +30,7 @@ class FetchTaskFactory
 {
 public:
     explicit FetchTaskFactory(const std::string&);
-    virtual ~FetchTaskFactory();
+    virtual ~FetchTaskFactory() = default;
 
     virtual  AbstractFetchTask* make(FetchQueueOwner* owner) = 0;
     static AbstractFetchTask* create(const std::string& name, FetchQueueOwner* owner);

@@ -215,7 +215,7 @@ void NodeViewDelegate::updateBaseSettings()
         gr.setCoordinateMode(QGradient::ObjectBoundingMode);
         gr.setStart(0,0);
         gr.setFinalStop(0,1);
-        QColor c1=p->value().value<QColor>();
+        auto c1=p->value().value<QColor>();
         gr.setColorAt(0,c1);
         gr.setColorAt(1,c1.lighter(110));
         meterFillBrush_=QBrush(gr);
@@ -226,7 +226,7 @@ void NodeViewDelegate::updateBaseSettings()
         gr.setCoordinateMode(QGradient::ObjectBoundingMode);
         gr.setStart(0,0);
         gr.setFinalStop(0,1);
-        QColor c1=p->value().value<QColor>();
+        auto c1=p->value().value<QColor>();
         gr.setColorAt(0,c1);
         gr.setColorAt(1,c1.lighter(110));
         meterThresholdBrush_=QBrush(gr);
@@ -383,7 +383,7 @@ void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
     }
 
     //Fill rect
-    QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+    auto bg=index.data(Qt::BackgroundRole).value<QColor>();
     QColor bgLight=bg.lighter(lighter_);
     QBrush bgBrush;
     if(useStateGrad_)

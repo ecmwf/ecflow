@@ -38,7 +38,7 @@ void VariableSearchLine::setView(QTreeView* view)
     		this,SLOT(slotSortHappened(int,Qt::SortOrder)));
 
     //At this point the model has to be set on the view!!!
-    assert(view_->model() != 0);
+    assert(view_->model() != nullptr);
 
     //We detect when the model is reset
     connect(view_->model(),SIGNAL(modelReset()),

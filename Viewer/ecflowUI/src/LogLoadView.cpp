@@ -102,8 +102,7 @@ LogLoadRequestModel::LogLoadRequestModel(QString dataName,QObject *parent) :
 }
 
 LogLoadRequestModel::~LogLoadRequestModel()
-{
-}
+= default;
 
 
 
@@ -216,11 +215,11 @@ QVariant LogLoadRequestModel::data( const QModelIndex& index, int role ) const
 {
     if(!index.isValid() || !hasData())
     {
-        return QVariant();
+        return {};
     }
     int row=index.row();
     if(row < 0 || row >= data_.count())
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -241,7 +240,7 @@ QVariant LogLoadRequestModel::data( const QModelIndex& index, int role ) const
         if(index.column() == 0)
             return (data_[row].checked_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 
-        return QVariant();
+        return {};
     }
     else if(role == Qt::UserRole)
     {
@@ -262,10 +261,10 @@ QVariant LogLoadRequestModel::data( const QModelIndex& index, int role ) const
         if(data_[row].checked_ && data_[row].col_ != QColor() )
             return data_[row].col_;
 
-        return QVariant();
+        return {};
     }
 
-    return QVariant();
+    return {};
 }
 
 bool LogLoadRequestModel::setData(const QModelIndex& idx, const QVariant & value, int role )
@@ -296,7 +295,7 @@ QVariant LogLoadRequestModel::headerData( const int section, const Qt::Orientati
         {
         case 0: return dataName_;
         case 1: return tr("Request (%)");
-        default: return QVariant();
+        default: return {};
         }
     }
     else if(role== Qt::ToolTipRole)
@@ -305,17 +304,17 @@ QVariant LogLoadRequestModel::headerData( const int section, const Qt::Orientati
         {
         case 0: return dataName_;
         case 1: return tr("Request (%)");
-        default: return QVariant();
+        default: return {};
         }
     }
-    return QVariant();
+    return {};
 }
 
 QModelIndex LogLoadRequestModel::index( int row, int column, const QModelIndex & parent ) const
 {
     if(!hasData() || row < 0 || column < 0)
     {
-        return QModelIndex();
+        return {};
     }
 
     //When parent is the root this index refers to a node or server
@@ -324,13 +323,13 @@ QModelIndex LogLoadRequestModel::index( int row, int column, const QModelIndex &
         return createIndex(row,column);
     }
 
-    return QModelIndex();
+    return {};
 
 }
 
 QModelIndex LogLoadRequestModel::parent(const QModelIndex &/*child*/) const
 {
-    return QModelIndex();
+    return {};
 }
 
 QString LogLoadRequestModel::formatPrecentage(float perc) const
@@ -542,7 +541,7 @@ void ChartCallout::updateGeometry()
 //=============================================
 
 ChartView::ChartView(QChart *chart, QWidget *parent) :
-    QChartView(chart, parent), callout_(0)
+    QChartView(chart, parent), callout_(nullptr)
 {
     setRubberBand(QChartView::HorizontalRubberBand);
 }
@@ -727,7 +726,7 @@ void ChartView::setCallout(qreal val)
         scene()->addItem(callout_);
     }
 
-    if(QValueAxis *axisY=static_cast<QValueAxis*>(chart()->axisY()))
+    if(auto *axisY=static_cast<QValueAxis*>(chart()->axisY()))
     {
         qreal m=axisY->max();
         callout_->setAnchor(QPointF(val,m));
@@ -745,7 +744,7 @@ void ChartView::adjustCallout()
     if(callout_)
     {
         QPointF anchor=callout_->anchor();
-        qint64 start,end;
+        qint64 start = 0,end = 0;
         currentTimeRange(start,end);
         if(anchor.x() >= start && anchor.x() <=end)
             callout_->setAnchor(callout_->anchor());
@@ -753,7 +752,7 @@ void ChartView::adjustCallout()
         {
             scene()->removeItem(callout_);
             delete callout_;
-            callout_=0;
+            callout_=nullptr;
         }
     }
 }
@@ -764,7 +763,7 @@ void ChartView::removeCallout()
     {
         scene()->removeItem(callout_);
         delete callout_;
-        callout_=0;
+        callout_=nullptr;
     }
 }
 
@@ -780,7 +779,7 @@ LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) :
     //The data object - to read and store processed log data
     data_=new LogLoadData();
 
-    LogRequestView* view;
+    LogRequestView* view = nullptr;
 
     //tab: totals
     view=new LogTotalRequestView(this,parent);
@@ -828,17 +827,17 @@ void LogRequestViewHandler::buildOtherTab(QWidget *parent)
     view=new LogCmdUidRequestView(this,parent);
     views_ << view;
 
-    QWidget* w=new QWidget(parent);
-    QVBoxLayout* vb=new QVBoxLayout(w);
+    auto* w=new QWidget(parent);
+    auto* vb=new QVBoxLayout(w);
     vb->setContentsMargins(0,3,0,0);
     vb->setSpacing(1);
 
-    QHBoxLayout* hb=new QHBoxLayout();
+    auto* hb=new QHBoxLayout();
 
-    QLabel *label=new QLabel("Mode: ",w);
+    auto *label=new QLabel("Mode: ",w);
     hb->addWidget(label);
 
-    QComboBox* cb=new QComboBox(w);
+    auto* cb=new QComboBox(w);
     cb->addItem("Command graph per suite",0);
     cb->addItem("Suite graph per command",1);
     cb->addItem("User graph per command",2);
@@ -848,7 +847,7 @@ void LogRequestViewHandler::buildOtherTab(QWidget *parent)
 
     vb->addLayout(hb);
 
-    QStackedWidget* stacked=new QStackedWidget(w);
+    auto* stacked=new QStackedWidget(w);
     int cnt=views_.count();
     for(int i=cnt-4; i < cnt ; i++)
         stacked->addWidget(views_[i]);
@@ -878,17 +877,17 @@ void LogRequestViewHandler::buildTableTab(QWidget *parent)
     view=new LogStatSuiteCmdView(this,parent);
     views_ << view;
 
-    QWidget* w=new QWidget(parent);
-    QVBoxLayout* vb=new QVBoxLayout(w);
+    auto* w=new QWidget(parent);
+    auto* vb=new QVBoxLayout(w);
     vb->setContentsMargins(0,3,0,0);
     vb->setSpacing(1);
 
-    QHBoxLayout* hb=new QHBoxLayout();
+    auto* hb=new QHBoxLayout();
 
-    QLabel *label=new QLabel("Mode: ",w);
+    auto *label=new QLabel("Mode: ",w);
     hb->addWidget(label);
 
-    QComboBox* cb=new QComboBox(w);
+    auto* cb=new QComboBox(w);
     cb->addItem("command vs user",0);
     cb->addItem("user vs command",1);
     cb->addItem("command vs suite",2);
@@ -898,7 +897,7 @@ void LogRequestViewHandler::buildTableTab(QWidget *parent)
 
     vb->addLayout(hb);
 
-    QStackedWidget* stacked=new QStackedWidget(w);
+    auto* stacked=new QStackedWidget(w);
     int cnt=views_.count();
     for(int i=cnt-4; i < cnt ; i++)
         stacked->addWidget(views_[i]);
@@ -1055,7 +1054,7 @@ void LogRequestViewControlItem::adjustColumnWidth()
 LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     QScrollArea(parent),
     handler_(handler),
-    data_(0),
+    data_(nullptr),
     maxVal_(0),
     lastScanIndex_(0)
 {
@@ -1063,7 +1062,7 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     data_=handler_->data_;
     Q_ASSERT(data_);
 
-    QWidget* holder=new QWidget(this);
+    auto* holder=new QWidget(this);
 
     mainLayout_=new QHBoxLayout(holder);
     mainLayout_->setContentsMargins(0,0,0,0);
@@ -1075,7 +1074,7 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
     mainLayout_->addWidget(splitter_);
 
     //views
-    QWidget* w=new QWidget(this);
+    auto* w=new QWidget(this);
     viewLayout_=new QVBoxLayout(w);
     viewLayout_->setContentsMargins(0,0,0,0);
     viewLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
@@ -1111,8 +1110,7 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler,QWidget* parent) :
 }
 
 LogRequestView::~LogRequestView()
-{
-}
+= default;
 
 void LogRequestView::initSplitter()
 {
@@ -1138,8 +1136,8 @@ void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString ti
     item->sortModel_->setSourceModel(item->model_);
     item->sortModel_->setDynamicSortFilter(true);
 
-    QWidget* w=new QWidget(this);
-    QVBoxLayout* vb=new QVBoxLayout(w);
+    auto* w=new QWidget(this);
+    auto* vb=new QVBoxLayout(w);
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(1);
 
@@ -1154,19 +1152,19 @@ void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString ti
 
     controlTab_->addTab(w,title);
 
-    QToolButton* unselectAllTb=new QToolButton(this);
+    auto* unselectAllTb=new QToolButton(this);
     unselectAllTb->setText(tr("Unselect all"));
     QSizePolicy pol=unselectAllTb->sizePolicy();
     pol.setHorizontalPolicy(QSizePolicy::Expanding);
     unselectAllTb->setSizePolicy(pol);
 
-    QToolButton* selectFourTb=new QToolButton(this);
+    auto* selectFourTb=new QToolButton(this);
     selectFourTb->setText(tr("Select 1-4"));
     selectFourTb->setSizePolicy(pol);
 
     if(addSelectAll)
     {
-        QToolButton* selectAllTb=new QToolButton(this);
+        auto* selectAllTb=new QToolButton(this);
         selectAllTb->setText(tr("Select all"));
         selectAllTb->setSizePolicy(pol);
         vb->addWidget(selectAllTb);
@@ -1220,8 +1218,8 @@ void LogRequestView::buildUidControl(LogRequestViewControlItem* item,QString tit
 
 QChart* LogRequestView::addChartById(QString id)
 {
-    QChart* chart = new QChart();
-    ChartView* chartView=new ChartView(chart,this);
+    auto* chart = new QChart();
+    auto* chartView=new ChartView(chart,this);
     chartView->setRenderHint(QPainter::Antialiasing);
     viewLayout_->addWidget(chartView);
     views_ << chartView;
@@ -1263,7 +1261,7 @@ QString LogRequestView::chartId(ChartView* cv)
 
 void LogRequestView::slotZoom(QRectF r)
 {
-    if(ChartView* senderView=static_cast<ChartView*>(sender()))
+    if(auto* senderView=static_cast<ChartView*>(sender()))
     {
         Q_FOREACH(ChartView* v,views_)
         {
@@ -1273,11 +1271,11 @@ void LogRequestView::slotZoom(QRectF r)
            v->adjustCallout();
         }
 
-        qint64 startTime, endTime;
+        qint64 startTime = 0, endTime = 0;
         Q_ASSERT(!views_.isEmpty());
         views_[0]->currentTimeRange(startTime,endTime);
 
-        size_t startIdx,endIdx;
+        size_t startIdx = 0,endIdx = 0;
         if(seriesPeriodIndex(startTime,endTime,startIdx,endIdx))
         {
             data_->computeStat(startIdx,endIdx);
@@ -1358,12 +1356,12 @@ QColor LogRequestView::seriesColour(QChart* chart,QString id)
     {
         if(s->name().endsWith(id))
         {
-            if(QLineSeries *ls=static_cast<QLineSeries*>(s))
+            if(auto *ls=static_cast<QLineSeries*>(s))
                 return ls->color();
             break;
         }
     }
-    return QColor();
+    return {};
 }
 
 void LogRequestView::clear()
@@ -1401,8 +1399,8 @@ void LogRequestView::clearCharts()
 
 void LogRequestView::clearViews()
 {
-    QLayoutItem* child=0;
-    while ((child = viewLayout_->takeAt(0)) != 0)
+    QLayoutItem* child=nullptr;
+    while ((child = viewLayout_->takeAt(0)) != nullptr)
     {
         QWidget* w=child->widget();
         delete child;
@@ -1464,13 +1462,13 @@ void LogRequestView::build(ChartView* view,QLineSeries *series, QString title,in
     if(!chart->axisX())
     {
         chart->legend()->hide();
-        QDateTimeAxis *axisX = new QDateTimeAxis;
+        auto *axisX = new QDateTimeAxis;
         axisX->setTickCount(10);
         axisX->setFormat("HH dd/MM");
         chart->setAxisX(axisX, series);
         view->adjustTimeAxis(data_->period());
 
-        QValueAxis *axisY = new QValueAxis;
+        auto *axisY = new QValueAxis;
         axisY->setLabelFormat("%i");
 
         QString yTitle;
@@ -1500,7 +1498,7 @@ void LogRequestView::adjustMaxVal()
     Q_FOREACH(ChartView* v,views_)
     {
         Q_ASSERT(v->chart());
-        if(QValueAxis *axisY=static_cast<QValueAxis*>(v->chart()->axisY()))
+        if(auto *axisY=static_cast<QValueAxis*>(v->chart()->axisY()))
         {
             axisY->setMax(maxVal_);
         }
@@ -1548,7 +1546,7 @@ void LogRequestView::scanPositionClicked(qreal pos)
             QList<QAbstractSeries*> lst=chart->series();
             if(!lst.empty())
             {
-                QLineSeries *ser=static_cast<QLineSeries*>(lst[0]);
+                auto *ser=static_cast<QLineSeries*>(lst[0]);
                 Q_ASSERT(ser);
                 t1=ser->at(idx).x();
                 t2=t1;
@@ -1590,7 +1588,7 @@ bool LogRequestView::seriesIndex(qint64 t,int startIdx,qint64 tolerance,int& idx
     if(lst.empty())
         return false;
 
-    QLineSeries *ser=static_cast<QLineSeries*>(lst[0]);
+    auto *ser=static_cast<QLineSeries*>(lst[0]);
     Q_ASSERT(ser);
 
     idx=-1;
@@ -1682,7 +1680,7 @@ int LogRequestView::seriesValue(QChart* chart,QString id,int idx)
         {
             if(s->name().endsWith(id))
             {
-                if(QLineSeries *ls=static_cast<QLineSeries*>(s))
+                if(auto *ls=static_cast<QLineSeries*>(s))
                     return ls->at(idx).y();
                 else
                     return 0;
@@ -1832,7 +1830,7 @@ QChart* LogTotalRequestView::getChart(ChartType type)
 {
     if(ChartView *v=getView(type))
         return v->chart();
-    return 0;
+    return nullptr;
 }
 
 ChartView* LogTotalRequestView::getView(ChartType type)
@@ -1850,7 +1848,7 @@ ChartView* LogTotalRequestView::getView(ChartType type)
         break;
     }
 
-    return 0;
+    return nullptr;
 }
 
 void LogTotalRequestView::addRemoveSuite(int suiteIdx, bool st)
@@ -1883,9 +1881,9 @@ void LogTotalRequestView::addRemoveSuite(int suiteIdx, bool st)
 
 void LogTotalRequestView::addSuite(int idx)
 {
-    QChart* chart=0;
+    QChart* chart=nullptr;
 
-    QLineSeries* series=new QLineSeries();
+    auto* series=new QLineSeries();
     series->setName(suiteSeriesId(idx));
     data_->getSuiteTotalReq(idx,*series);
     chart=getChart(TotalChartType);
@@ -1893,7 +1891,7 @@ void LogTotalRequestView::addSuite(int idx)
     series->attachAxis(chart->axisX());
     series->attachAxis(chart->axisY());
 
-    QLineSeries* chSeries=new QLineSeries();
+    auto* chSeries=new QLineSeries();
     chSeries->setName(suiteSeriesId(idx));
     data_->getSuiteChildReq(idx,*chSeries);
     chart=getChart(ChildChartType);
@@ -1901,7 +1899,7 @@ void LogTotalRequestView::addSuite(int idx)
     chSeries->attachAxis(chart->axisX());
     chSeries->attachAxis(chart->axisY());
 
-    QLineSeries* usSeries=new QLineSeries();
+    auto* usSeries=new QLineSeries();
     usSeries->setName(suiteSeriesId(idx));
     data_->getSuiteUserReq(idx,*usSeries);
     chart=getChart(UserChartType);
@@ -1918,15 +1916,15 @@ void LogTotalRequestView::loadCore()
     clearCharts();
 
     int maxVal=0;
-    QLineSeries* tSeries=new QLineSeries();
+    auto* tSeries=new QLineSeries();
     tSeries->setName("all");
     data_->getTotalReq(*tSeries,maxVal);
 
-    QLineSeries* chSeries=new QLineSeries();
+    auto* chSeries=new QLineSeries();
     chSeries->setName("all");
     data_->getChildReq(*chSeries);
 
-    QLineSeries* usSeries=new QLineSeries();
+    auto* usSeries=new QLineSeries();
     usSeries->setName("all");
     data_->getUserReq(*usSeries);
 
@@ -2067,7 +2065,7 @@ void LogCmdSuiteRequestView::addSuite(int suiteIdx)
     {
         if(cmdCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(i));
 
             data_->getSuiteSubReq(suiteIdx,i,*series);
@@ -2091,7 +2089,7 @@ void LogCmdSuiteRequestView::addTotal()
     {
         if(cmdCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(i));
 
             int maxVal=0;
@@ -2150,7 +2148,7 @@ void LogCmdSuiteRequestView::addCmd(int reqIdx)
         {
             QString title="All suites";
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(reqIdx));
 
             int maxVal=0;
@@ -2168,7 +2166,7 @@ void LogCmdSuiteRequestView::addCmd(int reqIdx)
             QString title="suite: " +
                 QString::fromStdString(data_->suites()[suiteIdx].name());
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(reqIdx));
             data_->getSuiteSubReq(suiteIdx,reqIdx,*series);
 
@@ -2331,7 +2329,7 @@ void LogSuiteCmdRequestView::addCmd(int reqIdx)
     {
         if(suiteCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(suiteSeriesId(i));
 
             data_->getSuiteSubReq(i,reqIdx,*series);
@@ -2355,7 +2353,7 @@ void LogSuiteCmdRequestView::addTotal()
     {
         if(suiteCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(suiteSeriesId(i));
 
             int maxVal=0;
@@ -2411,7 +2409,7 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx)
         {
             QString title="All commands";
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(suiteSeriesId(suiteIdx));
 
             int maxVal=0;
@@ -2428,7 +2426,7 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx)
 
             QString title="cmd: " + data_->subReqName(cmdIdx);
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(suiteSeriesId(suiteIdx));
             data_->getSuiteSubReq(suiteIdx,cmdIdx,*series);
             build(views_[i],series,title,maxVal_);
@@ -2596,7 +2594,7 @@ void LogUidCmdRequestView::addUid(int uidIdx)
         {
             QString title="All commands";
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(uidSeriesId(uidIdx));
 
             int maxVal=0;
@@ -2613,7 +2611,7 @@ void LogUidCmdRequestView::addUid(int uidIdx)
             Q_ASSERT(idx >= 0);
             QString title="command: " + data_->subReqName(idx);
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
 
             int userReqIdx=idx;
             series->setName(uidSeriesId(uidIdx));
@@ -2672,7 +2670,7 @@ void LogUidCmdRequestView::addCmd(int reqIdx)
     {
         if(uidCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(uidSeriesId(i));
             data_->getUidSubReq(i,reqIdx,*series);
             build(view,series,title,maxVal_);
@@ -2695,7 +2693,7 @@ void LogUidCmdRequestView::addTotal()
     {
         if(uidCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(uidSeriesId(i));
             int maxVal=0;
             data_->getUidTotalReq(i,*series,maxVal);
@@ -2858,7 +2856,7 @@ void LogCmdUidRequestView::addCmd(int reqIdx)
         {
             QString title="All uids";
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(reqIdx));
 
             int maxVal=0;
@@ -2875,7 +2873,7 @@ void LogCmdUidRequestView::addCmd(int reqIdx)
             Q_ASSERT(idx >= 0);
             QString title="uid: " + data_->uidName(idx);
 
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
 
             int uidIdx=idx;
             series->setName(cmdSeriesId(reqIdx));
@@ -2932,7 +2930,7 @@ void LogCmdUidRequestView::addUid(int uidIdx)
     {
         if(cmdCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(i));
             data_->getUidSubReq(uidIdx,i,*series);
             build(view,series,title,data_->subReqMax());
@@ -2955,7 +2953,7 @@ void LogCmdUidRequestView::addTotal()
     {
         if(cmdCtl_.plotState_[i])
         {
-            QLineSeries* series=new QLineSeries();
+            auto* series=new QLineSeries();
             series->setName(cmdSeriesId(i));
             int maxVal=0;
             data_->getSubReq(i,*series,maxVal);
@@ -3276,8 +3274,7 @@ LogStatRequestModel::LogStatRequestModel(QObject *parent) :
 }
 
 LogStatRequestModel::~LogStatRequestModel()
-{
-}
+= default;
 
 void LogStatRequestModel::resetData(const std::vector<LogRequestItem>& /*data*/)
 {
@@ -3508,15 +3505,15 @@ QVariant LogStatRequestModel::data( const QModelIndex& index, int role ) const
 {
     if(!index.isValid() || !hasData())
     {
-        return QVariant();
+        return {};
     }
     int row=index.row();
     if(row < 0 || row >= data_.rowNum())
-        return QVariant();
+        return {};
 
     int column=index.column();
     if(column < 0 || column >= data_.colNum())
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -3533,7 +3530,7 @@ QVariant LogStatRequestModel::data( const QModelIndex& index, int role ) const
             return QColor(192,219,247);
     }
 
-    return QVariant();
+    return {};
 }
 
 QVariant LogStatRequestModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -3550,7 +3547,7 @@ QVariant LogStatRequestModel::headerData( const int section, const Qt::Orientati
     }
 
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex LogStatRequestModel::index( int row, int column, const QModelIndex & parent ) const

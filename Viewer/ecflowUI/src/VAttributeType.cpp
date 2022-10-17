@@ -49,7 +49,7 @@ VAttributeType::VAttributeType(const std::string& name) :
 std::vector<VParam*> VAttributeType::filterItems()
 {
     std::vector<VParam*> v;
-    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
+    for(auto it=types_.begin(); it != types_.end(); ++it)
         v.push_back(*it);
 
     return v;
@@ -57,7 +57,7 @@ std::vector<VParam*> VAttributeType::filterItems()
 
 VAttributeType* VAttributeType::find(const std::string& name)
 {
-    std::map<std::string,VAttributeType*>::const_iterator it=typesMap_.find(name);
+    auto it=typesMap_.find(name);
     if(it != typesMap_.end())
         return it->second;
 
@@ -72,7 +72,7 @@ VAttributeType* VAttributeType::find(int id)
 
 void VAttributeType::scan(VNode* vnode,std::vector<VAttribute*>& v)
 {
-    for(TypeIterator it=types_.begin(); it != types_.end(); ++it)
+    for(auto it=types_.begin(); it != types_.end(); ++it)
     {
         (*it)->scanProc()(vnode,v);
     }

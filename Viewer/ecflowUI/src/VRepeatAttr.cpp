@@ -27,8 +27,8 @@ static long ecf_repeat_julian_to_date(long jdate);
 
 long ecf_repeat_julian_to_date(long jdate)
 {
-    long x,y,d,m,e;
-    long day,month,year;
+    long x = 0,y = 0,d = 0,m = 0,e = 0;
+    long day = 0,month = 0,year = 0;
 
     x = 4 * jdate - 6884477;
     y = (x / 146097) * 100;
@@ -59,9 +59,9 @@ long ecf_repeat_julian_to_date(long jdate)
 
 long ecf_repeat_date_to_julian(long ddate)
 {
-    long  m1,y1,a,b,c,d,j1;
+    long  m1 = 0,y1 = 0,a = 0,b = 0,c = 0,d = 0,j1 = 0;
 
-    long month,day,year;
+    long month = 0,day = 0,year = 0;
 
     year = ddate / 10000;
     ddate %= 10000;
@@ -226,7 +226,7 @@ std::string VRepeatAttr::strName() const
         if(r.empty() == false)
             return r.name();
     }
-    return std::string();
+    return {};
 }
 
 void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
@@ -259,7 +259,7 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 
 QString VRepeatAttr::allValues() const
 {
-   return QString();
+   return {};
 }
 
 //=====================================================
@@ -418,7 +418,7 @@ QString VRepeatDateListAttr::allValues() const
 
         if(end <= start)
         {
-            return QString();
+            return {};
         }
 
         for(int i=start; i <= end; i++)
@@ -577,7 +577,7 @@ std::string VRepeatEnumAttr::value(int index) const
         const Repeat& r=node->repeat();
         return r.value_as_string(index);
     }
-    return std::string();
+    return {};
 }
 
 int VRepeatEnumAttr::endIndex() const
@@ -622,7 +622,7 @@ QString VRepeatEnumAttr::allValues() const
 
         if(end <= start)
         {
-            return QString();
+            return {};
         }
 
         if(end-start >1)
@@ -673,7 +673,7 @@ std::string VRepeatStringAttr::value(int index) const
         const Repeat& r=node->repeat();
         return r.value_as_string(index);
     }
-    return std::string();
+    return {};
 }
 
 int VRepeatStringAttr::endIndex() const
@@ -718,7 +718,7 @@ QString VRepeatStringAttr::allValues() const
 
         if(end <= start)
         {
-            return QString();
+            return {};
         }
 
         if(end-start >1)

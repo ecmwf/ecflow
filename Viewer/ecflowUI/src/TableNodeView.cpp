@@ -206,7 +206,7 @@ VInfo_ptr TableNodeView::currentSelection()
 	{
 		return model_->nodeInfo(lst.front());
 	}
-	return VInfo_ptr();
+	return {};
 }
 
 //Sets the current selection to the given VInfo item.
@@ -449,7 +449,7 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 
 	QList<QAction*> lst;
 	auto *menu=new QMenu(this);
-	QAction *ac;
+	QAction *ac = nullptr;
 
     //Show/hide current columns
     QString name=header_->model()->headerData(section,Qt::Horizontal).toString();
@@ -853,7 +853,7 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
     QVariant pixVa=model()->headerData(logicalIndex,Qt::Horizontal,Qt::DecorationRole);
     if(pixVa.type() == QVariant::Pixmap)
     {
-        QPixmap pix=pixVa.value<QPixmap>();
+        auto pix=pixVa.value<QPixmap>();
         int pixH=qMin(pix.height(),rect.height()-2);
 
         QFont f;

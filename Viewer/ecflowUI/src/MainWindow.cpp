@@ -62,7 +62,7 @@ QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
 
 #ifdef ECFLOW_LOGVIEW
-LogViewerCom* MainWindow::logCom_=NULL;
+LogViewerCom* MainWindow::logCom_=nullptr;
 #endif
 
 MainWindow::MainWindow(QStringList /*idLst*/,QWidget *parent) :
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QStringList /*idLst*/,QWidget *parent) :
     //Create the main layout
     auto* layout=new QVBoxLayout();
     layout->setContentsMargins(0,0,0,0);
-    QWidget *w=new QWidget(this);
+    auto *w=new QWidget(this);
     w->setObjectName("c");
     w->setLayout(layout);
     setCentralWidget(w);
@@ -405,8 +405,6 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 void MainWindow::updateRefreshActions()
 {
     ServerHandler* s=nullptr;
-
-    QString serverName;
     if(selection_)
 	{
         s=selection_->server();

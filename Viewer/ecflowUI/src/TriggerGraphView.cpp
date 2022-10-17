@@ -202,7 +202,7 @@ void TriggerGraphNodeItem::adjustPos(int x, int y)
 
 GraphLayoutNode* TriggerGraphNodeItem::toGraphNode()
 {
-    GraphLayoutNode* n = new GraphLayoutNode(bRect_.width(), bRect_.height());
+    auto* n = new GraphLayoutNode(bRect_.width(), bRect_.height());
     for(auto p: parents_)
         n->parents_.emplace_back(p->index_);
 
@@ -429,7 +429,7 @@ TriggerGraphEdgeInfoDialog::TriggerGraphEdgeInfoDialog(QWidget* parent) :
     setWindowTitle(tr("Trigger details"));
     setModal(false);
 
-    QVBoxLayout *vb = new QVBoxLayout(this);
+    auto *vb = new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(2);
 
@@ -771,7 +771,7 @@ void TriggerGraphView::slotContextMenu(const QPoint& position)
 
 void TriggerGraphView::slotCommandShortcut()
 {
-    if (QShortcut* sc = static_cast<QShortcut*>(QObject::sender())) {
+    if (auto* sc = static_cast<QShortcut*>(QObject::sender())) {
         TriggerGraphNodeItem* item = currentNodeItem();
         if (item) {
             std::vector<TriggerGraphNodeItem*> itemLst;
@@ -850,7 +850,7 @@ void TriggerGraphView::adjustBackground(VProperty *p)
         p = prop_->find("view.trigger.background", true);
 
     if(p) {
-        QColor col = p->value().value<QColor>();
+        auto col = p->value().value<QColor>();
         if (col.isValid()) {
             setBackgroundBrush(col);
         }
@@ -863,7 +863,7 @@ void TriggerGraphView::adjustParentConnectColour(VProperty *p)
         p = prop_->find("view.trigger.parentConnectorColour", true);
 
     if(p) {
-        QColor col = p->value().value<QColor>();
+        auto col = p->value().value<QColor>();
         if (col.isValid()) {
             parentConnectPen_ = QPen(col);
             updateEdgePens();
@@ -877,7 +877,7 @@ void TriggerGraphView::adjustTriggerConnectColour(VProperty *p)
         p = prop_->find("view.trigger.triggerConnectorColour", true);
 
     if(p) {
-        QColor col = p->value().value<QColor>();
+        auto col = p->value().value<QColor>();
         if (col.isValid()) {
             triggerConnectPen_ = QPen(col);
             updateEdgePens();
@@ -891,7 +891,7 @@ void TriggerGraphView::adjustDepConnectColour(VProperty *p)
         p = prop_->find("view.trigger.dependencyConnectorColour", true);
 
     if(p) {
-        QColor col = p->value().value<QColor>();
+        auto col = p->value().value<QColor>();
         if (col.isValid())  {
             depConnectPen_ = QPen(col);
             updateEdgePens();

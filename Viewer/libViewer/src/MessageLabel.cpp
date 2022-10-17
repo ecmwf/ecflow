@@ -59,7 +59,7 @@ void MessageLabelLoadWidget::startLoadLabel(bool showCancelButton)
 {
     if(!loadIconLabel_->movie())
     {
-        QMovie *movie = new QMovie(":viewer/spinning_wheel.gif", QByteArray(), loadIconLabel_);
+        auto *movie = new QMovie(":viewer/spinning_wheel.gif", QByteArray(), loadIconLabel_);
         loadIconLabel_->setMovie(movie);
     }
 
@@ -327,7 +327,7 @@ void MessageLabel::appendTip(QString msg)
 void MessageLabel::showMessage(const Type& type,QString msg)
 {
     message_=msg;
-    std::map<Type,MessageLabelDefData>::const_iterator it=typeData.find(type);
+    auto it=typeData.find(type);
 	assert(it != typeData.end());
 
 	if(type != currentType_)

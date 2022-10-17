@@ -178,9 +178,9 @@ void TextFilterHandlerDialog::reloadTable()
         filterTxt.replace(QChar(' '),QChar(9251));
 
         auto *filterItem = new QTableWidgetItem(filterTxt);
-        QTableWidgetItem *matchedItem = new QTableWidgetItem((items[i].matched())?"match":"no match");
-        QTableWidgetItem *caseItem = new QTableWidgetItem((items[i].caseSensitive())?"yes":"no");
-        QTableWidgetItem *contextItem = new QTableWidgetItem((items[i].contextMenu())?"yes":"no");
+        auto *matchedItem = new QTableWidgetItem((items[i].matched())?"match":"no match");
+        auto *caseItem = new QTableWidgetItem((items[i].caseSensitive())?"yes":"no");
+        auto *contextItem = new QTableWidgetItem((items[i].contextMenu())?"yes":"no");
 
         table_->setItem(i, 0, matchedItem);
         table_->setItem(i, 1, caseItem);

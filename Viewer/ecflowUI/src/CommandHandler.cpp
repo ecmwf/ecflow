@@ -124,14 +124,7 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
         //Shell command
         if(realCommand.find("sh ") == 0)
         {
-            if(realCommand.find("%ECF_URL_CMD%") != std::string::npos)
-            {
-                substituteVariables(realCommand,info);
-            }
-            else
-            {
-                substituteVariables(realCommand,info);
-            }
+            substituteVariables(realCommand,info);
             UiLog().dbg() << " final shell command: " << realCommand;
             ShellCommand::run(realCommand,cmd);
             return;

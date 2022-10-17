@@ -40,8 +40,7 @@ VFileTransferCore::VFileTransferCore(QObject* parent) :
 }
 
 VFileTransferCore::~VFileTransferCore()
-{
-}
+= default;
 
 bool VFileTransferCore::isActive() const
 {

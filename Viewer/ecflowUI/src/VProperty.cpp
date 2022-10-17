@@ -280,7 +280,7 @@ QString VProperty::param(QString name) const
 	if(it != params_.end())
         return it.value();
 
-	return QString();
+	return {};
 }
 
 QString VProperty::valueLabel() const

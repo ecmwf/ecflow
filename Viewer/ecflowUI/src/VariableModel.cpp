@@ -24,7 +24,7 @@ QColor VariableModel::shadowCol_=QColor(130,130,130);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);
 QColor VariableModel::blockFgCol_=QColor(255,255,255);
 
-#define _UI_VARIABLEMODEL_DEBUG
+#define UI_VARIABLEMODEL_DEBUG
 
 //=======================================================================
 //
@@ -103,7 +103,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 {
 	if( !index.isValid())
     {
-		return QVariant();
+		return {};
 	}
 
 	//Data lookup can be costly so we immediately return a default value for all
@@ -112,7 +112,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
        role != ReadOnlyRole && role != Qt::ToolTipRole && role != GenVarRole && role != Qt::FontRole &&
        role != ShadowRole )
 	{
-		return QVariant();
+		return {};
 	}
 
 	int row=index.row();
@@ -122,7 +122,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	if(level == 1)
 	{
 		if(role == ReadOnlyRole)
-			return QVariant();
+			return {};
 
 		if(role == Qt:: BackgroundRole)
             return blockBgCol_;
@@ -134,7 +134,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
         VariableModelData *d=data_->data(row);
 		if(!d)
 		{
-			return QVariant();
+			return {};
 		}
 
 		if(index.column() == 0)
@@ -148,7 +148,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 			}
 		}
 
-		return QVariant();
+		return {};
 	}
 
 	//Variables
@@ -157,7 +157,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
         VariableModelData *d=data_->data(index.parent().row());
 		if(!d)
 		{
-			return QVariant();
+			return {};
 		}
 
 		if(role == Qt::ForegroundRole)
@@ -219,10 +219,10 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
             return (d->isShadowed(row))?true:false;
         }
 
-		return QVariant();
+		return {};
 	}
 
-	return QVariant();
+	return {};
 }
 
 bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& value,bool& genVar) const
@@ -257,7 +257,7 @@ QVariant VariableModel::headerData( const int section, const Qt::Orientation ori
 	{
    	case 0: return tr("Name");  
         case 1: return tr("Value");
-   	default: return QVariant();
+   	default: return {};
    	}
   }
   else if(role== Qt::ToolTipRole)
@@ -266,10 +266,10 @@ QVariant VariableModel::headerData( const int section, const Qt::Orientation ori
 	{
    	case 0: return tr("Name");  
         case 1: return tr("Value");
-   	default: return QVariant();
+   	default: return {};
    	}
   }
-  return QVariant();
+  return {};
 }
 
 QModelIndex VariableModel::index( int row, int column, const QModelIndex & parent ) const
@@ -309,7 +309,7 @@ QModelIndex VariableModel::parent(const QModelIndex &child) const
 			return {};
 	else if(level == 2)
 	{
-		int id=child.internalId();
+        int id=static_cast<int>(child.internalId());
 		int r=id/1000-1;
 		return createIndex(r,child.column(),quintptr(0));
 	}
@@ -328,7 +328,7 @@ int VariableModel::indexToLevel(const QModelIndex& index) const
 	if(!index.isValid())
 		return 0;
 
-	int id=index.internalId();
+    int id=static_cast<int>(index.internalId());
 	if(id >=0 && id < 1000)
 	{
 	  return 1;
@@ -344,7 +344,7 @@ VariableModelData* VariableModel::indexToData(const QModelIndex& index) const
 
 VariableModelData* VariableModel::indexToData(const QModelIndex& index,int& block) const
 {
-    int row;
+    int row = 0;
 
     identify(index,block,row);
 
@@ -369,7 +369,7 @@ VInfo_ptr VariableModel::indexToInfo(const QModelIndex& index) const
         else
             return d->info(index.row());
     }
-    return VInfo_ptr();
+    return {};
 }
 
 QModelIndex VariableModel::infoToIndex(VInfo_ptr info) const
@@ -442,7 +442,7 @@ void VariableModel::slotReloadEnd()
 
 void VariableModel::slotClearBegin(int block,int num)
 {
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
     UI_FUNCTION_LOG
 #endif
     QModelIndex parent=index(block,0);
@@ -462,7 +462,7 @@ void VariableModel::slotClearBegin(int block,int num)
 
 void VariableModel::slotClearEnd(int block,int num)
 {
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -479,7 +479,7 @@ void VariableModel::slotClearEnd(int block,int num)
 
 void VariableModel::slotLoadBegin(int block,int num)
 {
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
     UI_FUNCTION_LOG
 #endif
     QModelIndex parent=index(block,0);
@@ -498,7 +498,7 @@ void VariableModel::slotLoadBegin(int block,int num)
 
 void VariableModel::slotLoadEnd(int block,int num)
 {
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
     UI_FUNCTION_LOG
 #endif
     QModelIndex parent=index(block,0);
@@ -515,13 +515,13 @@ void VariableModel::slotLoadEnd(int block,int num)
 //It must be called after any data change
 void VariableModel::slotDataChanged(int block)
 {
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
     UI_FUNCTION_LOG
 #endif
     QModelIndex blockIndex0=index(block,0);
 	QModelIndex blockIndex1=index(block,1);
 
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
     UiLog().dbg() << " emit dataChanged:" << " " << blockIndex0 << " " << blockIndex1;
 #endif
 
@@ -601,7 +601,7 @@ void VariableSortModel::slotFilterChanged()
 
 void VariableSortModel::slotRerunFilter()
 {
-#ifdef _UI_VARIABLEMODEL_DEBUG
+#ifdef UI_VARIABLEMODEL_DEBUG
    UiLog().dbg() << "VariableSortModel::slotRerunFilter-->";
 #endif     
    invalidate();
@@ -691,7 +691,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
 QModelIndexList VariableSortModel::match(const QModelIndex& /*start*/,int /*role*/,const QVariant& value,int /*hits*/,Qt::MatchFlags /*flags*/) const
 {
 	if(matchMode_ != SearchMode)
-		return QModelIndexList();
+		return {};
 
 	matchText_=value.toString();
 

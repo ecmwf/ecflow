@@ -112,7 +112,7 @@ std::string VQueueAttr::strName() const
         const std::vector<QueueAttr>& v=node->queues();
         return v[index_].name();
     }
-    return std::string();
+    return {};
 }
 
 void VQueueAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

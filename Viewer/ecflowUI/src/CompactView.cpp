@@ -121,7 +121,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     int widest=0;
     for(int i=first; i < first+count; i++)
     {
-        int w,h;
+        int w = 0,h = 0;
         QModelIndex currentIndex=model_->index(i-first,0,parentIndex);
         delegate_->sizeHintCompute(currentIndex,w,h);
         itemWidthVec.push_back(w);
@@ -326,7 +326,7 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
         int itemsInRow=1;
         for (; i < itemsCount; i+=itemsInRow)
         {
-            int itemHeight;
+            int itemHeight = 0;
             rowProperties(i,itemHeight,itemsInRow,indentVec);
 
 #ifdef _UI_COMPACTVIEW_DEBUG

@@ -23,9 +23,8 @@
 
 InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	owner_(owner),
-    taskType_(taskType)
-{
-	reply_=new VReply(this);
+    reply_(new VReply(this)), taskType_(taskType)
+{	
     if(owner_)
         owner_->registerInfoProvider(this);
 }

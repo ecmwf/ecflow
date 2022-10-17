@@ -551,8 +551,8 @@ void Dashboard::readSettings(VComboSettings* vs)
 		if(vs->contains(id))
 		{
 			vs->beginGroup(id);
-			std::string type=vs->get<std::string>("type","");
-			std::string dockId=vs->get<std::string>("dockId","");
+			auto type=vs->get<std::string>("type","");
+			auto dockId=vs->get<std::string>("dockId","");
 
 			//Create a dashboard widget
             if(DashboardWidget *dw=addWidget(type,dockId,false))
@@ -624,7 +624,7 @@ VInfo_ptr Dashboard::currentSelectionInView()
 			return info;
 	}
 
-	return VInfo_ptr();
+	return {};
 }
 
 //Find an unique id for a new dockwidget

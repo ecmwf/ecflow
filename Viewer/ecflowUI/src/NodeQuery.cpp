@@ -40,7 +40,7 @@ QString NodeQueryAttrGroup::query() const
         return "(" + lst.join(" and ") + ")";
     }
 
-    return QString();
+    return {};
 }
 
 bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const 
@@ -159,7 +159,7 @@ QString NodeQuery::query() const
     else
         return s2;
            
-    return QString();
+    return {};
 }
 
 
@@ -468,8 +468,8 @@ void NodeQuery::load(VSettings* vs)
 	std::vector<std::string> v;
 	vs->get("servers",v);
 	servers_.clear();
-	for(std::vector<std::string>::const_iterator it=v.begin(); it != v.end(); ++it)
-	    servers_ << QString::fromStdString(*it);
+    for(auto & it : v)
+        servers_ << QString::fromStdString(it);
 
 	//allServers_=vs->getAsBool("allServers",allServers_);
 

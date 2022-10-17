@@ -52,7 +52,7 @@ CustomCommand* CustomCommandHandler::replace(int index, const std::string& name,
     assert(index >= 0);
     assert(index < static_cast<int>(items_.size()));
 
-    CustomCommand *item;
+    CustomCommand *item = nullptr;
 
     // already in the list - just update it
     item = items_[index];
@@ -230,12 +230,6 @@ std::string CustomSavedCommandHandler::settingsFile()
 
 
 CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance_=nullptr;
-
-CustomCommandHistoryHandler::CustomCommandHistoryHandler()
-{
-    maxCommands_ = 10;
-}
-
 
 CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance()
 {

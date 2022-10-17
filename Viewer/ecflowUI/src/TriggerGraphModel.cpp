@@ -101,7 +101,7 @@ QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
         role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::TextAlignmentRole &&
         role != Qt::ToolTipRole && role != Qt::ForegroundRole))
     {
-        return QVariant();
+        return {};
     }
 
     VItem *t = items_[index.row()];
@@ -194,7 +194,7 @@ QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
 //            return QColor(233,242,247);
 //    }
 
-    return QVariant();
+    return {};
 }
 
 QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -202,7 +202,7 @@ QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation
     if ( orient != Qt::Horizontal)
             return QAbstractItemModel::headerData( section, orient, role );
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex TriggerGraphModel::index( int row, int column, const QModelIndex & parent ) const

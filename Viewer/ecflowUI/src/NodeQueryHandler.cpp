@@ -95,7 +95,7 @@ void NodeQueryHandler::init(const std::string& dirPath)
 	std::string pattern=".*\\." + suffix_ + "$";
 	DirectoryHandler::findFiles(dirPath_,pattern,res);
 
-	for(std::vector<std::string>::const_iterator it=res.begin(); it != res.end(); ++it)
+	for(auto it=res.begin(); it != res.end(); ++it)
 	{
 		std::string fName=DirectoryHandler::concatenate(dirPath_,*it);
 		VSettings vs(fName);

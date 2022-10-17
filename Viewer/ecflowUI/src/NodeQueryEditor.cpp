@@ -504,16 +504,6 @@ void NodeQueryEditor::updateServers()
 		}
 	}
 
-	//Init
-	if(serverCb_->count() == 1)
-	{
-		//serverCb_->selectSoleItem();
-	}
-	else
-	{
-		//slotServerCbChanged();
-	}
-
 	slotServerCbChanged();
 }
 

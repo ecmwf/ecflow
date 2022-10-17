@@ -130,8 +130,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 }
 
 TriggerItemWidget::~TriggerItemWidget()
-{
-}
+= default;
 
 QWidget* TriggerItemWidget::realWidget()
 {

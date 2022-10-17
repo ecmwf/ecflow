@@ -36,7 +36,7 @@ public Q_SLOTS:
 
 protected:
     Ui::AddModelColumnDialog *ui;
-    ModelColumn* modelColumn_;
+    ModelColumn* modelColumn_{nullptr};
 };
 
 class ChangeModelColumnDialog : public AddModelColumnDialog

@@ -194,10 +194,10 @@ void ViewerUtil::restoreOverrideCursor()
 
 QString ViewerUtil::formatDuration(unsigned int delta) //in seconds
 {
-    int day=delta/86400;
-    int hour=(delta%86400)/3600;
-    int min=(delta % 3600)/60;
-    int sec=delta % 60;
+    int day=static_cast<int>(delta/86400);
+    int hour=(static_cast<int>(delta%86400)/3600);
+    int min=(static_cast<int>(delta % 3600)/60);
+    int sec=static_cast<int>(delta % 60);
 
     QString s;
 

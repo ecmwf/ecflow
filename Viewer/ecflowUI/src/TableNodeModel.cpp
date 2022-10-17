@@ -34,7 +34,7 @@ static VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct);
 
 VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct)
 {
-    std::map<TableNodeModel::ColumnType,VAttributeType*>::const_iterator it=
+    auto it=
        attrTypes.find(ct);
     return (it != attrTypes.end())?it->second:0;
 }
@@ -166,7 +166,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
        (role != Qt::DisplayRole && role != Qt::ToolTipRole &&
         role != Qt::BackgroundRole && role != IconRole && role != SortRole))
     {
-		return QVariant();
+		return {};
 	}
 
 	//We only display nodes!!
@@ -177,10 +177,10 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 {
 	VNode* vnode=indexToNode(index);
 	if(!vnode || !vnode->node())
-		return QVariant();
+		return {};
 
     if(index.column() < 0)
-        return QVariant();
+        return {};
 
     ColumnType id=ExtraColumn;
     if(index.column() < ExtraColumn)
@@ -208,7 +208,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
             if(VAttribute* a=vnode->attributeForType(0,columnToAttrType(id)))
                 return a->data(true);
             else
-                return QVariant();
+                return {};
 		}
 
         else if(id == StatusChangeColumn)
@@ -247,7 +247,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         if(id == PathColumn)
 			return VIcon::pixmapList(vnode,nullptr);
 		else
-			return QVariant();
+			return {};
 	}
     else if(role == SortRole)
     {
@@ -267,7 +267,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
         }
     }
 
-	return QVariant();
+	return {};
 }
 
 QVariant TableNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -276,7 +276,7 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
       		  return QAbstractItemModel::headerData( section, orient, role );
 
 	if (section < 0 || section >= columns_->count())  // this can happen during a server reset
-			return QVariant();
+			return {};
 
 	if(role == Qt::DisplayRole)
     {
@@ -314,7 +314,7 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
         }
     }
 
-	return QVariant();
+	return {};
 }
 
 

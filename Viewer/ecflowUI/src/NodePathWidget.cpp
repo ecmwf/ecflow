@@ -645,7 +645,7 @@ int NodePathItem::adjust(int xp,int yp,int elidedLen)
     visible_=true;
 
     QFontMetrics fm(owner_->font());
-    int len;
+    int len = 0;
     if(elidedLen == 0)
     {
         elidedText_=QString();
@@ -676,7 +676,7 @@ int NodePathItem::rightPos(int xp,int len) const
 int NodePathItem::estimateRightPos(int xp,int elidedLen)
 {
     QFontMetrics fm(owner_->font());
-    int len;
+    int len = 0;
 
     if(elidedLen==0)
         len=ViewerUtil::textWidth(fm,text_);
@@ -1109,7 +1109,7 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
     Q_ASSERT(mode_ == GuiMode);
     if(mode_ == TextMode)
     {
-        return VInfo_ptr();
+        return {};
     }
 
     if (info_ && info_->server())
@@ -1125,7 +1125,7 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
         }
     }
 
-	return VInfo_ptr();
+	return {};
 }
 
 void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
@@ -1406,7 +1406,7 @@ void NodePathWidget::writeSettings(VSettings *vs)
 void NodePathWidget::readSettings(VSettings* vs)
 {
 	vs->beginGroup("breadcrumbs");
-    std::string modeStr=vs->get<std::string>("mode","");
+    auto modeStr=vs->get<std::string>("mode","");
 
     if(modeStr == "text")
     {

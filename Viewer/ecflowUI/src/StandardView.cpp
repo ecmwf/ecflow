@@ -145,7 +145,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
 
         //We compute the size of the item. For attributes we delay the width computation until we
         //actually paint them and we set their width to 300.
-        int w,h;
+        int w = 0,h = 0;
         delegate_->sizeHintCompute(currentIndex,w,h);
         item->width=w;
         item->height=h;

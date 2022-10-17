@@ -79,5 +79,5 @@ QString LocalSocketServer::generateServerName(QString serverId,qint64 pid)
         return QString::fromStdString(socketPath) + "/" + serverId + "_" + QString::number(pid);
     }
 
-    return QString();
+    return {};
 }

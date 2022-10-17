@@ -749,7 +749,7 @@ QDateTime MainTimelineHeader::posToDate(QPoint pos) const
 {
     int logicalIndex=logicalIndexAt(pos);
     if(logicalIndex == -1)
-        return QDateTime();
+        return {};
 
     int xp=sectionPosition(logicalIndex);
     int w=sectionSize(logicalIndex);
@@ -758,11 +758,11 @@ QDateTime MainTimelineHeader::posToDate(QPoint pos) const
     QPoint rPos=realPos(pos);
 
     if(w <= 0 || rPos.x() < xp)
-        return QDateTime();
+        return {};
 
     double r=static_cast<double>(rPos.x()-xp)/static_cast<double>(w);
     if(r < 0 || r > 1)
-        return QDateTime();
+        return {};
 
     //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
     qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
@@ -1102,7 +1102,7 @@ QTime NodeTimelineHeader::posToTime(QPoint pos) const
 
     double r=static_cast<double>(rPos.x()-xp)/static_cast<double>(w);
     if(r < 0 || r > 1)
-        return QTime();
+        return {};
 
     //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
     qint64 period=endTime_.msecsSinceStartOfDay()/1000-startTime_.msecsSinceStartOfDay()/1000;

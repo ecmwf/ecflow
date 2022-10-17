@@ -86,7 +86,7 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
     painter->save();
 
     //Background
-    QColor bgcol=index.data(Qt::UserRole).value<QColor>();
+    auto bgcol=index.data(Qt::UserRole).value<QColor>();
     if(bgcol.isValid())
         painter->fillRect(vopt.rect,bgcol);
 

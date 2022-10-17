@@ -147,9 +147,9 @@ void OutputDirClient::parseData()
 	QTextStream in(data_);
 	while(!in.atEnd())
 	{
-		 int mode,uid,gid;
-		 unsigned int size;
-		 unsigned int atime,mtime,ctime;
+		 int mode = 0,uid = 0,gid = 0;
+		 unsigned int size = 0;
+		 unsigned int atime = 0,mtime = 0,ctime = 0;
 		 QString name;
 
 		 in >> mode >> uid >> gid >> size >> atime >> mtime >> ctime >> name;

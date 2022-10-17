@@ -27,11 +27,6 @@ InfoPanelItemFactory::InfoPanelItemFactory(const std::string& name)
 	(*makers)[name] = this;
 }
 
-InfoPanelItemFactory::~InfoPanelItemFactory()
-{
-	// Not called
-}
-
 InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 {
 	auto j = makers->find(name);

@@ -314,7 +314,7 @@ void TreeNodeWidget::writeSettings(VComboSettings* vs)
 
 void TreeNodeWidget::readSettings(VComboSettings* vs)
 {
-	std::string type=vs->get<std::string>("type","");
+	auto type=vs->get<std::string>("type","");
 	if(type != type_)
 		return;
 

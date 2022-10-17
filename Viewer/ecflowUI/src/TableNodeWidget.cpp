@@ -246,7 +246,7 @@ void TableNodeWidget::writeSettings(VComboSettings* vs)
 
 void TableNodeWidget::readSettings(VComboSettings* vs)
 {
-	std::string type=vs->get<std::string>("type","");
+	auto type=vs->get<std::string>("type","");
 	if(type != type_)
 		return;
 

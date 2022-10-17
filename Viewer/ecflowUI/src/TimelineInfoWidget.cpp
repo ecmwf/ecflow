@@ -138,12 +138,12 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
 {
     if(!index.isValid() || !hasData())
     {
-        return QVariant();
+        return {};
     }
 
     int row=index.row();
     if(row < 0 || row >= static_cast<int>(data_->size()))
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -215,7 +215,7 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
         return 3;
     }
 
-    return QVariant();
+    return {};
 }
 
 QVariant TimelineInfoModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -234,11 +234,11 @@ QVariant TimelineInfoModel::headerData( const int section, const Qt::Orientation
         case 2:
             return "Duration in state";
         default:
-            return QVariant();
+            return {};
         }
     }
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex TimelineInfoModel::index( int row, int column, const QModelIndex & parent ) const

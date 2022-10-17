@@ -82,11 +82,11 @@ private:
 
 	//bool eventFilter(QObject* object, QEvent* event);
 
-	bool currentCommandSaved_;
-	bool haveSetUpDefaultCommandLine_;
-	bool inCommandEditMode_;
-	bool saveCommandsOnExit_;
-	bool saveOptionsVisible_;
+    bool currentCommandSaved_{false};
+    bool haveSetUpDefaultCommandLine_{false};
+    bool inCommandEditMode_{false};
+    bool saveCommandsOnExit_{false};
+    bool saveOptionsVisible_{false};
 	std::vector<std::string> componentBlacklist_;
 	MenuItem menuItem_;
 

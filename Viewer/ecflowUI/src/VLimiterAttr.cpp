@@ -112,7 +112,7 @@ std::string VLimiterAttr::strName() const
         const std::vector<InLimit>& v=parent_->node_->inlimits();
         return v[index_].name();
     }
-    return std::string();
+    return {};
 }
 
 void VLimiterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

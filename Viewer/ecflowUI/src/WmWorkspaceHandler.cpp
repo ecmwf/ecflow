@@ -24,11 +24,11 @@
 
 int WmWorkspaceHandler::commandTested_=0;
 
-#define _UI_WMWORKSPACEHANDLER_DEBUG
+#define UI_WMWORKSPACEHANDLER_DEBUG
 
 bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget,QWidget* targetWidget)
 {
-#ifdef _UI_WMWORKSPACEHANDLER_DEBUG
+#ifdef UI_WMWORKSPACEHANDLER_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -47,7 +47,7 @@ bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget,QWidget* targetWidget)
     int sourceWinId=sourceWidget->winId();
     int targetWinId=targetWidget->winId();
 
-#ifdef _UI_WMWORKSPACEHANDLER_DEBUG
+#ifdef UI_WMWORKSPACEHANDLER_DEBUG
     UiLog().dbg() << " sourceWinId=" << sourceWinId  << " targetWinId=" << targetWinId;
 #endif
     if(sourceWinId != targetWinId)
@@ -55,7 +55,7 @@ bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget,QWidget* targetWidget)
         //Get the virtual workspace id
         int sourceWsId=workspaceId(sourceWinId);
         int targetWsId=workspaceId(targetWinId);
-#ifdef _UI_WMWORKSPACEHANDLER_DEBUG
+#ifdef UI_WMWORKSPACEHANDLER_DEBUG
         UiLog().dbg() << " sourceWsId=" << sourceWsId  << " targetWsId=" << targetWsId;
 #endif
         //move the source window to the target workspace

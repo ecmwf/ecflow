@@ -69,13 +69,13 @@ public:
 
     void getEvent(VNode* node ,const std::string& eventName,std::vector<std::string> &res)
     {
-        std::map<std::string,std::vector<int> >::const_iterator it=eventData_.find(eventName);
+        auto it=eventData_.find(eventName);
         if(it != eventData_.end())
         {
             VServer* s=node->root();
-            for(size_t i=0; i < it->second.size(); i++)
+            for(int i : it->second)
             {
-                if(VNode* triggeredNode=s->nodeAt((it->second)[i]))
+                if(VNode* triggeredNode=s->nodeAt(i))
                     res.push_back(triggeredNode->absNodePath());
             }
         }
@@ -613,14 +613,14 @@ void VNode::collectInheritedVariableNames(std::set<std::string>& vars) const
     variables(v);
     genVariables(gv);
 
-    for(size_t i=0; i < v.size(); i++)
+    for(auto & i : v)
     {
-        vars.insert(v[i].name());
+        vars.insert(i.name());
     }
 
-    for(size_t i=0; i < gv.size(); i++)
+    for(auto & i : gv)
     {
-        vars.insert(gv[i].name());
+        vars.insert(i.name());
     }
 
     //Try to find it in the parent
@@ -713,7 +713,7 @@ std::string VNode::strName() const
 	if(node_ && node_.get())
 		return node_->name();
 
-	return std::string();
+	return {};
 	/*
 	if(name_.empty())
 	{
@@ -735,7 +735,7 @@ std::string VNode::serverName() const
 	{
 		return s->name();
 	}
-	return std::string();
+	return {};
 }
 
 QString VNode::stateName()
@@ -758,7 +758,7 @@ QString VNode::defaultStateName()
 
 QString VNode::serverStateName()
 {
-	return QString("");
+	return {""};
 }
 
 bool VNode::isSuspended() const
@@ -1328,7 +1328,7 @@ void VServer::clear()
 	bool hasNotifications=server_->conf()->notificationsEnabled();
 
 	//Delete the children nodes. It will recursively delete all the nodes. It also saves the prevNodeState!!
-	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); ++it)
+	for(auto it=children_.begin(); it != children_.end(); ++it)
 	{
 		deleteNode(*it,hasNotifications);
 	}
@@ -1560,7 +1560,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
         node->children_.reserve(nodes.size());
     }
 
-	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
+	for(auto it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		VNode* vn=nullptr;
 		if((*it)->isTask())
@@ -1571,7 +1571,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
 			if(hasNotifications)
 			{
 				std::string path=(*it)->absNodePath();
-				std::map<std::string,VNodeInternalState>::const_iterator itP=prevNodeState_.find(path);
+				auto itP=prevNodeState_.find(path);
 				if(itP != prevNodeState_.end())
 					vn->check(server_->conf(),itP->second);
             }
@@ -1723,7 +1723,7 @@ std::string VServer::strName() const
 	if(server_)
 		return server_->name();
 
-	return std::string();
+	return {};
 
 
 	/*if(name_.empty())

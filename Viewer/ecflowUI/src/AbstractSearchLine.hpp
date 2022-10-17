@@ -50,10 +50,10 @@ protected:
 	void hideEvent(QHideEvent* event) override;
 	void showEvent(QShowEvent* event) override;
 
-	bool status_;
-	bool caseSensitive_;
-	bool wholeWords_;
-	bool highlightAll_;
+    bool status_{true};
+    bool caseSensitive_{false};
+    bool wholeWords_{false};
+    bool highlightAll_{false};
     StringMatchMode matchMode_;
 
     QBrush oriBrush_;

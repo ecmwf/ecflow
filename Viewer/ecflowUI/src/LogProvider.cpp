@@ -147,7 +147,7 @@ void LogProvider::watchFile(const std::string& fileName,size_t offset)
 {
 	if(autoUpdate_)
 	{
-		assert(fileWatcher_ == 0);
+		assert(fileWatcher_ == nullptr);
 		fileWatcher_=new FileWatcher(fileName,offset,this);
 
 		connect(fileWatcher_,SIGNAL(linesAppended(QStringList)),

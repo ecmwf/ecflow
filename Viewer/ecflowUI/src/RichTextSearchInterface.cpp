@@ -157,7 +157,6 @@ void RichTextSearchInterface::automaticSearchForKeywords(bool userClickedReload)
     {
         // search direction
         QTextDocument::FindFlags findFlags;
-        QTextCursor cursor(editor_->textCursor());
         std::string searchFrom = vpAutomaticSearchFrom_->valueAsStdString();
         QTextCursor::MoveOperation move;
         if (searchFrom == "bottom")

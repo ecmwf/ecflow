@@ -192,7 +192,7 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 	//boost::property_tree::ptree ptArray=it->second;
 	for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
 	{
-		std::string name=it->second.get_value<std::string>();
+		auto name=it->second.get_value<std::string>();
 		val.push_back(name);
 	}
 }

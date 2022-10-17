@@ -10,7 +10,7 @@
 
 #include "PropertyEditor.hpp"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <QDebug>
 #include <QGroupBox>
@@ -96,7 +96,7 @@ void PropertyEditor::build()
 	if(!group_)
 		return;
 
-	assert(holder_==NULL);
+	assert(holder_==nullptr);
 
 	holder_=new QWidget(scAreaContents_);
     holder_->setObjectName("h");
@@ -440,7 +440,7 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
 
     		QList<PropertyLine*> lineLst;
 
-    		QWidget* w=new QWidget(parent);
+    		auto* w=new QWidget(parent);
     		auto* vb=new QVBoxLayout(w);
     		//vb->setContentsMargins(4,4,4,4);
 
@@ -448,7 +448,7 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
             
             if(VProperty *root=VConfig::instance()->find(chProp->param("root").toStdString()))
             {
-            	QLabel *labelDesc=new QLabel(tr("Description: <b>") + root->param("description") + "</b>",w);
+            	auto *labelDesc=new QLabel(tr("Description: <b>") + root->param("description") + "</b>",w);
             	//labelDesc->setProperty("editorNotifyHeader","1");
             	vb->addWidget(labelDesc);
             	vb->addSpacing(5);

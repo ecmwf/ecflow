@@ -78,7 +78,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     }
 
     //Paint item highlight!! It is taken from the UserRole   
-    QColor highCol=index.data(Qt::UserRole).value<QColor>();
+    auto highCol=index.data(Qt::UserRole).value<QColor>();
     if(highCol.isValid())
     {
     	painter->fillRect(bgRect.adjusted(1,1,-1,-1),highCol);
@@ -87,7 +87,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     else if(!selected)
     {
     	//Paint the item background
-    	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+    	auto bg=index.data(Qt::BackgroundRole).value<QColor>();
     	if(bg.isValid())
     	{
             painter->fillRect(bgRect,bg);
@@ -209,7 +209,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     }
     else if(index.column() == 0)
     {
-        QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+        auto fg=index.data(Qt::ForegroundRole).value<QColor>();
         if(!fg.isValid())
             fg=Qt::black;
         painter->setPen(fg);

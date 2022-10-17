@@ -103,15 +103,12 @@ void HistoryItemWidget::infoReady(VReply* reply)
     checkActionState();
 }
 
-void HistoryItemWidget::infoProgress(VReply* reply)
+void HistoryItemWidget::infoProgress(VReply*)
 {
-    QString s=QString::fromStdString(reply->text());
 }
 
-void HistoryItemWidget::infoFailed(VReply* reply)
+void HistoryItemWidget::infoFailed(VReply*)
 {
-    QString s=QString::fromStdString(reply->errorText());
-
     checkActionState();
 }
 

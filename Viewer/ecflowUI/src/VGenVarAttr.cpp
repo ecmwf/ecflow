@@ -86,7 +86,7 @@ std::string VGenVarAttr::strName() const
         parent_->genVariables(v);
         return v[index_].name();
     }
-    return std::string();
+    return {};
 }
 
 void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

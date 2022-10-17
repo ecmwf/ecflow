@@ -118,9 +118,9 @@ void OverviewItemWidget::nodeChanged(const VNode* /*node*/, const std::vector<ec
 	if(frozen_)
 		return;
 
-	for(auto it=aspect.begin(); it != aspect.end(); ++it)
+	for(auto it : aspect)
 	{
-        if(*it != ecf::Aspect::ORDER && *it != ecf::Aspect::NOT_DEFINED)
+        if(it != ecf::Aspect::ORDER && it != ecf::Aspect::NOT_DEFINED)
 		{
 			reload();
 			return;

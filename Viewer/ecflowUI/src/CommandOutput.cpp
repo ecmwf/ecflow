@@ -65,10 +65,10 @@ QString CommandOutput::statusStr() const
     case RunningStatus:
         return runningStr;
     default:
-        return QString();
+        return {};
     }
 
-    return QString();
+    return {};
 }
 
 QColor CommandOutput::statusColour() const

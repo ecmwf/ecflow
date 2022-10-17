@@ -40,19 +40,19 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
-    QRegularExpression rx("boost\\((\\S+)\\)");
+    QRegularExpression rx(R"(boost\((\S+)\))");
     auto match = rx.match(desc);
     if (match.hasMatch()) {
         descTxt+="<br><b>boost version:</b> " + match.captured(1);
     }
 
-    rx=QRegularExpression("compiler\\(([^\\)]+)\\)");
+    rx=QRegularExpression(R"(compiler\(([^\)]+)\))");
     match = rx.match(desc);
     if (match.hasMatch()) {
         descTxt+="<br><b>compiler</b>: " + match.captured(1);
     }
 
-    rx=QRegularExpression("protocol\\((\\S+)\\)");
+    rx=QRegularExpression(R"(protocol\((\S+)\))");
     match = rx.match(desc);
     if (match.hasMatch()) {
         descTxt+="<br><b>protocol:</b> " + match.captured(1);

@@ -34,7 +34,7 @@ AddLabelDialog::AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* paren
 
     ui_->setupUi(this);
 
-    QLayoutItem *item;
+    QLayoutItem *item = nullptr;
     item=ui_->grid->itemAtPosition(1,0);
     Q_ASSERT(item);
     item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
@@ -106,7 +106,9 @@ void AddLabelDialog::readSettings()
     }
     else
     {
-        resize(QSize(310,200));
+        const int defaultWidth=310;
+        const int defaultHeight=200;
+        resize(QSize(defaultWidth,defaultHeight));
     }
 
     settings.endGroup();

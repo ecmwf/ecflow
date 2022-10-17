@@ -145,7 +145,7 @@ VInfo_ptr NodeQueryResultView::currentSelection()
 	{
 		return model_->nodeInfo(sortModel_->mapToSource(lst.front()));
 	}
-	return VInfo_ptr();
+	return {};
 }
 
 void NodeQueryResultView::currentSelection(VInfo_ptr /*info*/)

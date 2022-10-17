@@ -89,11 +89,11 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 {
 	if(!index.isValid() || !hasData())
     {
-		return QVariant();
+		return {};
 	}
 	int row=index.row();
 	if(row < 0 || row >= data_->size())
-		return QVariant();
+		return {};
 
 	if(role == Qt::DisplayRole)
 	{
@@ -116,7 +116,7 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 		}
 	}
 
-	return QVariant();
+	return {};
 }
 
 QVariant ChangeNotifyModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -124,27 +124,17 @@ QVariant ChangeNotifyModel::headerData( const int section, const Qt::Orientation
 	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
       		  return QAbstractItemModel::headerData( section, orient, role );
 
-   	if(role == Qt::DisplayRole)
+    if(role == Qt::DisplayRole || role== Qt::ToolTipRole)
    	{
    		switch ( section )
    		{
    		case 0: return tr("Server");
    		case 1: return tr("Node");
    		case 2: return tr("Time of change");
-   		default: return QVariant();
+   		default: return {};
    		}
    	}
-   	else if(role== Qt::ToolTipRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("Server");
-   		case 1: return tr("Node");
-   		case 2: return tr("Time of change");
-   		default: return QVariant();
-   		}
-   	}
-    return QVariant();
+    return {};
 }
 
 QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & parent ) const

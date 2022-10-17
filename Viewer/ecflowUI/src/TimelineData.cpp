@@ -201,9 +201,9 @@ void TimelineItem::durationStats(unsigned char statusId,int& num,float& mean, Ti
 void TimelineItem::days(std::vector<unsigned int>& lst) const
 {
     unsigned int prevDay = 0;
-    for(size_t i=0; i < start_.size(); i++)
+    for(unsigned int i : start_)
     {
-       unsigned int day=start_[i]/86400;
+       unsigned int day=i/86400;
        if(prevDay != day)
        {
            prevDay=day;
@@ -480,15 +480,15 @@ void TimelineData::guessNodeType()
             taskIndex.push_back(i);
     }
 
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto & item : items_)
     {
-        if(items_[i].type_ == TimelineItem::UndeterminedType)
+        if(item.type_ == TimelineItem::UndeterminedType)
         {
             for(size_t j=0; j < taskIndex.size(); j++)
             {
-                if(items_[j].path_.find(items_[i].path_) != std::string::npos)
+                if(items_[j].path_.find(item.path_) != std::string::npos)
                 {
-                    items_[i].type_=TimelineItem::FamilyType;
+                    item.type_=TimelineItem::FamilyType;
                     break;
                 }
             }

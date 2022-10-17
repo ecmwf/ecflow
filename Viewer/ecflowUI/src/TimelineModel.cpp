@@ -69,12 +69,12 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
 {
     if(!index.isValid() || !hasData())
     {
-        return QVariant();
+        return {};
     }
 
     int row=index.row();
     if(row < 0 || row >= static_cast<int>(data_->size()))
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -96,7 +96,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         if(index.column() ==  PathColumn)
             return static_cast<qint64>(data_->items()[row].sortIndex());
         else
-            return QVariant();
+            return {};
     }
 
     //sort roles
@@ -124,7 +124,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         if(index.column() ==  PathColumn)
             return static_cast<qint64>(data_->items()[row].treeIndex());
         else
-            return QVariant();
+            return {};
     }
 
     //Qt sort roles
@@ -151,7 +151,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
                 return data_->items()[row].firstActiveDuration(startDate_,endDate_,data_->endTime());
             }
         }
-        return QVariant();
+        return {};
     }
 
     //task filter
@@ -160,7 +160,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         if(index.column() ==  PathColumn)
             return data_->items()[row].isTask();
         else
-            return QVariant();
+            return {};
     }
 
     //filter = unchanged in period
@@ -209,7 +209,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     {
     }
 
-    return QVariant();
+    return {};
 }
 
 QVariant TimelineModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -238,11 +238,11 @@ QVariant TimelineModel::headerData( const int section, const Qt::Orientation ori
                 return tr("First active duration in period");
             }
         default:
-            return QVariant();
+            return {};
         }
     }
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex TimelineModel::index( int row, int column, const QModelIndex & parent ) const

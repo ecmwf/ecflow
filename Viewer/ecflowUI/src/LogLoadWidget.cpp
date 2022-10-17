@@ -182,8 +182,7 @@ LogLoadWidget::LogLoadWidget(QWidget */*parent*/) :
 }
 
 LogLoadWidget::~LogLoadWidget()
-{
-}
+= default;
 
 //void LogLoadWidget::initSplitter()
 //{

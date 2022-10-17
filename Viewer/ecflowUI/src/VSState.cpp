@@ -68,7 +68,7 @@ VSState* VSState::toState(ServerHandler* s)
 	if(s->connectState()->state() != ConnectState::Normal)
 		return items_["disconnected"];
 
-	std::map<SState::State,VSState*>::const_iterator it=stateMap_.find(s->serverState());
+	auto it=stateMap_.find(s->serverState());
 	if(it != stateMap_.end())
 		return it->second;
 
@@ -77,7 +77,7 @@ VSState* VSState::toState(ServerHandler* s)
 
 VSState* VSState::find(const std::string& name)
 {
-	std::map<std::string,VSState*>::const_iterator it=items_.find(name);
+	auto it=items_.find(name);
 	if(it != items_.end())
 				return it->second;
 

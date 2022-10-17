@@ -44,8 +44,7 @@ TimelineItemWidget::TimelineItemWidget(QWidget */*parent*/) :
 }
 
 TimelineItemWidget::~TimelineItemWidget()
-{
-}
+= default;
 
 QWidget* TimelineItemWidget::realWidget()
 {

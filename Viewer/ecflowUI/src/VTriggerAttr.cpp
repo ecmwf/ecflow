@@ -102,7 +102,7 @@ VAttributeType* VTriggerAttr::type() const
 
 QStringList VTriggerAttr::data(bool /*firstLine*/) const
 {
-    static auto* atype=static_cast<VTriggerAttrType*>(type());
+    static auto* atype=dynamic_cast<VTriggerAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node())
     {
@@ -120,7 +120,7 @@ QStringList VTriggerAttr::data(bool /*firstLine*/) const
 
 std::string VTriggerAttr::strName() const
 {
-    return std::string("trigger");
+    return {"trigger"};
 }
 
 void VTriggerAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

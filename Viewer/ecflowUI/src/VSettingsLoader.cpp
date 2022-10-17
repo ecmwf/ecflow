@@ -12,7 +12,7 @@
 
 #include <vector>
 
-typedef std::vector<VSettingsLoader*> Vec;
+using Vec = std::vector<VSettingsLoader *>;
 
 static Vec* makers = nullptr;
 
@@ -29,8 +29,8 @@ void VSettingsLoader::process()
     if(!makers)
         return;
 
-    for(size_t i=0; i < makers->size(); i++)
+    for(auto & maker : *makers)
     {
-        makers->at(i)->loadSettings();
+        maker->loadSettings();
     }
 }

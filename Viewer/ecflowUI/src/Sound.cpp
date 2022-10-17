@@ -103,7 +103,7 @@ void Sound::play(const std::string& fName,int loopCount)
 
 void  Sound::setCurrentPlayer(const std::string& current)
 {
-	std::map<std::string,std::string>::const_iterator it=players_.find(current);
+	auto it=players_.find(current);
 	if(it != players_.end())
 	{
 		currentPlayer_=it->first;

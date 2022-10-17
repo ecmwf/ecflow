@@ -60,7 +60,7 @@ NodeExpressionParser::NodeExpressionParser()
     nameToNodeType_["alias"]=ALIAS;
     nameToNodeType_["node"]=NODE;
 
-    for(std::map<std::string,NodeType>::const_iterator it=nameToNodeType_.begin();  it != nameToNodeType_.end(); ++it)
+    for(auto it=nameToNodeType_.begin();  it != nameToNodeType_.end(); ++it)
     {
         nodeTypeToName_[it->second]=it->first;
     }
@@ -1103,7 +1103,7 @@ std::string IsoDateCondition::print()
 #else
         return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000).toUTC().toString(Qt::ISODate).toStdString();
 #endif
-    return std::string();
+    return {};
 }
 
 //==========================================

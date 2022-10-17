@@ -34,7 +34,7 @@ class DirWidgetState : public QObject
 {
 public:
     DirWidgetState(OutputDirWidget* owner,  DirWidgetState* prev);
-    virtual ~DirWidgetState() = default;
+    ~DirWidgetState() override = default;
     virtual void handleReload();
     virtual void handleLoad(VReply*);
     virtual void handleFailed(VReply*)=0;

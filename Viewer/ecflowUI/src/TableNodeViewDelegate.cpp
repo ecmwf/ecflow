@@ -89,7 +89,7 @@ void TableNodeViewDelegate::updateSettingsInternal()
 {
 	if(VProperty* p=prop_->find("view.table.font"))
 	{
-		QFont newFont=p->value().value<QFont>();
+		auto newFont=p->value().value<QFont>();
 
 		if(font_ != newFont)
 	    {
@@ -240,7 +240,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	}
 
 	//Draw text
-	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+	auto fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
 	painter->setFont(font_);
     painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);

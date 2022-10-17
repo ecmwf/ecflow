@@ -67,7 +67,7 @@ VAttributeType* VUserVarAttr::type() const
 
 QStringList VUserVarAttr::data(bool /*firstLine*/) const
 {
-    static auto* atype=static_cast<VUserVarAttrType*>(type());
+    static auto* atype=dynamic_cast<VUserVarAttrType*>(type());
     QStringList s;
 
     //Node
@@ -108,7 +108,7 @@ std::string VUserVarAttr::strName() const
         parent_->variables(v);
         return v[index_].name();
     }
-    return std::string();
+    return {};
 }
 
 void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)

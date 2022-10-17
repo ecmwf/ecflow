@@ -263,8 +263,7 @@ OutputDirFetchTransferTask::OutputDirFetchTransferTask(FetchQueueOwner* owner) :
 }
 
 OutputDirFetchTransferTask::~OutputDirFetchTransferTask()
-{
-}
+= default;
 
 void OutputDirFetchTransferTask::stopTransfer()
 {

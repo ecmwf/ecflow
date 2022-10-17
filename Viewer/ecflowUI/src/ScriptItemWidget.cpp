@@ -101,7 +101,6 @@ void ScriptItemWidget::infoReady(VReply* reply)
 
 void ScriptItemWidget::infoProgress(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
     messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 }
 

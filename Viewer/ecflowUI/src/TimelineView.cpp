@@ -86,7 +86,7 @@ void TimelineDelegate::updateSettings()
 {
     if(VProperty* p=prop_->find("view.table.font"))
     {
-        QFont newFont=p->value().value<QFont>();
+        auto newFont=p->value().value<QFont>();
 
         if(font_ != newFont)
         {
@@ -785,7 +785,7 @@ VInfo_ptr TimelineView::currentSelection()
         return model_->nodeInfo(lst.front());
     }
 #endif
-    return VInfo_ptr();
+    return {};
 }
 
 void TimelineView::setCurrentSelection(VInfo_ptr /*info*/)

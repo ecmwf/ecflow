@@ -239,7 +239,7 @@ void NodeQueryViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	}
 
 	//Draw text
-	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+	auto fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
     painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
 

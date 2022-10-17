@@ -76,7 +76,7 @@ void VConfig::init(const std::string& parDirPath)
        std::sort(vec.begin(), vec.end()); 
        
        //The paths are now in alphabetical order
-       for(std::vector<fs::path>::const_iterator it=vec.begin(); it != vec.end(); ++it) 
+       for(auto it=vec.begin(); it != vec.end(); ++it) 
        {
             if(fs::is_regular_file(*it))
             {
@@ -160,7 +160,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	//Default value
     	if(name == "default")
     	{
-    		std::string val=ptProp.get_value<std::string>();
+    		auto val=ptProp.get_value<std::string>();
     		prop->setDefaultValue(val);
     	}
 
@@ -169,7 +169,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	{
     		auto *chProp=new VProperty(name);
     		prop->addChild(chProp);
-    		std::string val=ptProp.get_value<std::string>();
+    		auto val=ptProp.get_value<std::string>();
 
     		QString prefix=prop->param("prefix");
     		if(!prefix.isEmpty())
@@ -195,7 +195,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	//If the property is a "line" (i.e. a line with additional parameters)
     	else if(prop->name() == "line" && name ==  "link")
     	{
-    		std::string val=ptProp.get_value<std::string>();
+    		auto val=ptProp.get_value<std::string>();
 
 #ifdef _UI_CONFIG_LOAD_DEBUG
             UiLog().dbg() << "   VConfig::loadProperty() line link: " << val;
@@ -237,7 +237,7 @@ VProperty* VConfig::find(const std::string& path)
 {
 	VProperty* res=nullptr;
 
-	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); ++it)
+	for(auto it=groups_.begin();it != groups_.end(); ++it)
 	{
 	    VProperty *vGroup=*it;
 	    res=vGroup->find(path);
@@ -252,7 +252,7 @@ VProperty* VConfig::find(const std::string& path)
 
 VProperty* VConfig::group(const std::string& name)
 {
-	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); ++it)
+	for(auto it=groups_.begin();it != groups_.end(); ++it)
 	{
 		if((*it)->strName() == name)
 			return *it;
@@ -303,7 +303,7 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
-	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
+	for(auto it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
 		if(global)
 		{
@@ -372,11 +372,11 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool gl
 	    return;
     }
 
-	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
+	for(auto it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
 		if(pt.get_child_optional((*it)->path()) != boost::none)
 		{
-			std::string val=pt.get<std::string>((*it)->path());
+			auto val=pt.get<std::string>((*it)->path());
 
 			if(!global)
 			{
@@ -396,11 +396,11 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool gl
         std::string actPath="server.menu.nodeMenuMode";
         if(pt.get_child_optional(prevPath) != boost::none)
         {
-            for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
+            for(auto it=linkVec.begin(); it != linkVec.end(); ++it)
             {
                 if((*it)->path() == actPath)
                 {
-                    std::string val=pt.get<std::string>(prevPath);
+                    auto val=pt.get<std::string>(prevPath);
                     (*it)->setValue(val);
                     break;
                 }
@@ -415,11 +415,11 @@ void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt,VProper
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
-	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
+	for(auto it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
 		if(pt.get_child_optional((*it)->path()) != boost::none)
 		{
-			std::string val=pt.get<std::string>((*it)->path());
+			auto val=pt.get<std::string>((*it)->path());
 			(*it)->setValue(val);
 		}
 		else if((*it)->master())

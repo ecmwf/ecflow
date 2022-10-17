@@ -199,7 +199,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
     //Generated variables
     std::vector<Variable> gvar;
     snode->genVariables(gvar);
-    for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
+    for(auto it = gvar.begin(); it != gvar.end(); ++it)
     {
     	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
     }
@@ -207,7 +207,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
     //Variables
     std::vector<Variable> var;
     snode->variables(var);
-    for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
+    for(auto it = var.begin(); it != var.end(); ++it)
     {
        	f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
     }
@@ -313,7 +313,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	//Generated variables
 	std::vector<Variable> gvar;
 	node->genVariables(gvar);
-	for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
+	for(auto it = gvar.begin(); it != gvar.end(); ++it)
 	{
 	    	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
@@ -321,22 +321,22 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	//Variables
 	std::vector<Variable> var;
 	node->variables(var);
-	for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
+	for(auto it = var.begin(); it != var.end(); ++it)
 	{
 		f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
 
     //Other attributes
     const std::vector<VAttribute*>& attr=node->attr();
-    for(auto it=attr.begin(); it != attr.end(); ++it)
+    for(auto it : attr)
     {
-        if((*it)->typeName() != "var" && (*it)->typeName() != "genvar")
+        if(it->typeName() != "var" && it->typeName() != "genvar")
         {
-            f << inc << (*it)->definition().toStdString() << "\n";
+            f << inc << it->definition().toStdString() << "\n";
 
-            if((*it)->typeName() == "trigger" || (*it)->typeName() == "complete")
+            if(it->typeName() == "trigger" || it->typeName() == "complete")
             {
-                if(auto* tgAtt=static_cast<VTriggerAttr*>(*it))
+                if(auto* tgAtt=static_cast<VTriggerAttr*>(it))
                 {
                     std::string trigger_ast=tgAtt->ast_str();
                     if(!trigger_ast.empty())

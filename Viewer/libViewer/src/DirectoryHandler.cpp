@@ -326,7 +326,7 @@ std::string DirectoryHandler::tmpFileName()
         }
     }
 
-    return std::string();
+    return {};
 }
 
 

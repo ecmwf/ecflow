@@ -29,7 +29,7 @@ DiagDataServerItem::DiagDataServerItem(const std::string& host,const std::string
     host_(host), port_(port)
 {
     for(size_t i=0; i < colNum; i++)
-        data_.push_back(std::vector<std::string>());
+        data_.emplace_back();
 }
 
 const std::string& DiagDataServerItem::dataAt(int row,int column) const
@@ -51,9 +51,9 @@ int DiagDataServerItem::findRowByPath(const std::string& path) const
 bool DiagDataServerItem::checkSizes() const
 {
     size_t num=pathData_.size();
-    for(size_t i=0; i < data_.size(); i++)
+    for(const auto & d : data_)
     {
-        if(data_[i].size() !=  num)
+        if(d.size() !=  num)
             return false;
     }
     return true;

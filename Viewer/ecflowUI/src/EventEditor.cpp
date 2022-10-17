@@ -137,8 +137,8 @@ void EventEditor::buildList()
 
         //Update the model(=node list)
         QStringList lst;
-        for(size_t i=0; i < v.size(); i++)
-            lst << QString::fromStdString(v[i]);
+        for(auto & s : v)
+            lst << QString::fromStdString(s);
 
         setModelData(lst);
 

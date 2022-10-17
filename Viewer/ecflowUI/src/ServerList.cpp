@@ -376,7 +376,7 @@ ServerItem* ServerList::itemAt(int index)
 
 ServerItem* ServerList::find(const std::string& name)
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto it=items_.begin(); it != items_.end(); ++it)
 	{
 		if((*it)->name() == name)
 			return *it;
@@ -386,7 +386,7 @@ ServerItem* ServerList::find(const std::string& name)
 
 ServerItem* ServerList::find(const std::string& name, const std::string& host, const std::string& port)
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto it=items_.begin(); it != items_.end(); ++it)
 	{
 		if((*it)->name() == name && (*it)->host() == host && (*it)->port() == port)
 			return *it;
@@ -466,7 +466,7 @@ void ServerList::setFavourite(ServerItem* item,bool b)
 	if(it != items_.end())
 	{
 		item->setFavourite(b);
-		for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+		for(auto it=observers_.begin(); it != observers_.end(); ++it)
 			(*it)->notifyServerListFavouriteChanged(item);
 	}
 }
@@ -474,7 +474,7 @@ void ServerList::setFavourite(ServerItem* item,bool b)
 std::string ServerList::uniqueName(const std::string& name)
 {
 	bool hasIt=false;
-    for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto it=items_.begin(); it != items_.end(); ++it)
     {
         if((*it)->name() == name)
         {
@@ -494,7 +494,7 @@ std::string ServerList::uniqueName(const std::string& name)
 		std::string currentName=name+"_"+c.str();
 
 		hasIt=false;
-		for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+		for(auto it=items_.begin(); it != items_.end(); ++it)
 		{
 			if((*it)->name() == currentName)
 			{
@@ -765,7 +765,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
     std::vector<ServerItem*> itemsCopy=items_;
 
     //See what needs to be removed
-    for(std::vector<ServerItem*>::const_iterator it=itemsCopy.begin(); it != itemsCopy.end(); ++it)
+    for(auto it=itemsCopy.begin(); it != itemsCopy.end(); ++it)
     {
         if((*it)->isSystem())
         {
@@ -821,6 +821,6 @@ void ServerList::removeObserver(ServerListObserver* o)
 
 void ServerList::broadcastChanged()
 {
-	for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	for(auto it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyServerListChanged();
 }

@@ -24,7 +24,7 @@
 
 static std::string defaultStr("");
 
-#define _UI_VARIABLEMODELDATA_DEBUG
+#define UI_VARIABLEMODELDATA_DEBUG
 
 //==========================================
 //
@@ -78,19 +78,19 @@ void VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std::
     std::vector<Variable> gvOri=genVars;
     genVars.clear();
 
-    for(std::vector<Variable>::const_iterator it=gvOri.begin(); it != gvOri.end(); ++it)
+    for(auto & it : gvOri)
     {
          bool hasIt=false;
          for(const auto & var : vars)
          {
-             if((*it).name() == var.name())
+             if(it.name() == var.name())
              {
                 hasIt=true;
                 break;
              }
          }
          if(!hasIt)
-             genVars.push_back(*it);
+             genVars.push_back(it);
     }
 }
 
@@ -99,7 +99,7 @@ std::string VariableModelData::fullPath()
 	if(info_ && info_->node())
         return info_->path();
 
-	return std::string();
+	return {};
 }
 
 std::string VariableModelData::name()
@@ -117,7 +117,7 @@ std::string VariableModelData::type()
 			return info_->node()->nodeType();
 	}
 
-	return std::string();
+	return {};
 }
 
 VNode* VariableModelData::node() const
@@ -133,7 +133,7 @@ VInfo_ptr VariableModelData::info(int index) const
     if(info_)
     {
         if(index < 0 || index >= varNum())
-            return VInfo_ptr();
+            return {};
 
         std::string p=info_->storedPath();
         if(!isGenVar(index))
@@ -148,7 +148,7 @@ VInfo_ptr VariableModelData::info(int index) const
         return VInfo::createFromPath(p);
     }
 
-    return VInfo_ptr();
+    return {};
 }
 
 const std::string& VariableModelData::name(int index) const
@@ -381,7 +381,7 @@ bool VariableModelData::updateShadowed(std::set<std::string>& names)
     shadowed_.clear();
     bool changed=false;
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " ori shadowed:";
     for(const auto & it : ori)
     {
@@ -408,7 +408,7 @@ bool VariableModelData::updateShadowed(std::set<std::string>& names)
         names.insert(genVar.name());
     }
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " shadowed:";
     for(const auto & it : shadowed_)
     {
@@ -461,21 +461,21 @@ int VariableModelData::checkUpdateDiff(std::vector<Variable>& v,std::vector<Vari
 //variables are the same but some of their names or values have been changed.
 bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<Variable>& vg)
 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
 #endif
 
 #if 0
     if(info_ && info_->node() && v.empty() && vg.empty())
 	{
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
         UiLog().dbg() << " call latestVars";
 #endif
         latestVars(v,vg);
 	}
 #endif
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " new list of variables:";
     for(const auto & i : v)
          UiLog().dbg() << "  " <<  i.name() << "=" << i.theValue();
@@ -493,7 +493,7 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
     if(v.size() != vars_.size() || vg.size() != genVars_.size())
     {
         changed=true;
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
         UiLog().dbg() << " variables size changed! var: " << vars_.size() <<
                             " -> " <<  v.size() << "gen var: " <<
                             genVars_.size() << " -> " <<  vg.size();
@@ -511,7 +511,7 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
         {
             if(vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue())
             {                
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
                 UiLog().dbg() << " variable changed! name: " << vars_[i].name() << " -> " <<
                            v[i].name()  << " value: " <<   vars_[i].theValue() << " -> " <<  v[i].theValue();
 #endif
@@ -526,7 +526,7 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
             {
                 if(genVars_[i].name() != vg[i].name() || genVars_[i].theValue() != vg[i].theValue())
                 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
                     UiLog().dbg() << " generated variable changed! name: " << genVars_[i].name() << " -> " <<
                            vg[i].name()  << " value: " <<   genVars_[i].theValue() << " -> " << vg[i].theValue();
 #endif
@@ -541,7 +541,7 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 	{
 		vars_=v;
 		genVars_=vg;        
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
         UiLog().dbg() << " updated vars and genvars";
 #endif
 	}
@@ -615,7 +615,7 @@ void VariableModelDataHandler::reload()
 
 bool VariableModelDataHandler::updateShadowed()
 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -640,7 +640,7 @@ bool VariableModelDataHandler::updateShadowed()
             shadowChanged=true;
     }
 
-//#ifdef _UI_VARIABLEMODELDATA_DEBUG
+//#ifdef UI_VARIABLEMODELDATA_DEBUG
 #if 0
     UiLog().dbg() << " names:";
     for(std::set<std::string>::const_iterator it=names_.begin(); it != names_.end(); ++it)
@@ -691,7 +691,7 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 //It is called when a node changed.
 bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& /*aspect*/)
 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
 #endif
     int dataIndex=-1;
@@ -704,7 +704,7 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 		}
 	}
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " dataIndex=" << dataIndex;
 #endif
     Q_ASSERT(dataIndex != -1);
@@ -738,7 +738,7 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 //It is called when the server defs was changed
 bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& /*aspect*/)
 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -763,7 +763,7 @@ bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>&
 
 bool VariableModelDataHandler::updateVariables(int dataIndex)
 {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UI_FUNCTION_LOG
     UiLog().dbg() << " dataIndex=" << dataIndex;
 #endif
@@ -783,7 +783,7 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
     const int numOld=data_[dataIndex]->varNum(); //the current num in the model
     const int numNew=v.size()+vg.size(); //the new num
 
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " cntDiff=" << cntDiff << " numOld=" << numOld <<
                          " numNew=" << numNew;
 #endif
@@ -805,7 +805,7 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
     //Check if the shadowed list of variables changed
     if(updateShadowed())
     {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
+#ifdef UI_VARIABLEMODELDATA_DEBUG
         UiLog().dbg() << " emit rerunFilter";
 #endif
         //We need to rerun the filter!!
@@ -907,16 +907,16 @@ void VariableModelDataHandler::removeObserver(VariableModelDataObserver* o)
 void VariableModelDataHandler::broadcastClear()
 {
     std::vector<VariableModelDataObserver*> obsCopy=observers_;
-    for(std::vector<VariableModelDataObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
+    for(auto & it : obsCopy)
     {
-        (*it)->notifyCleared(this);
+        it->notifyCleared(this);
     }
 }
 
 void VariableModelDataHandler::broadcastUpdate()
 {
-    for(std::vector<VariableModelDataObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+    for(auto & observer : observers_)
     {
-        (*it)->notifyUpdated(this);
+        observer->notifyUpdated(this);
     }
 }

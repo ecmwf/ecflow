@@ -86,14 +86,14 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 {
     if(!hasData() || (role != Qt::DisplayRole && role != Qt::UserRole &&
         role != Qt::ForegroundRole && role != Qt::ToolTipRole && role != Qt::FontRole))
-		return QVariant();
+		return {};
 
 	int row=index.row();
     VDir_ptr dir;
     VDirItem *item=itemAt(row,dir);
 
     if(!item || !dir)
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -165,7 +165,7 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
     }
 
 
-	return QVariant();
+	return {};
 }
 
 QVariant OutputModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -181,10 +181,10 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
     case 3: return tr("Modified (ago)");
     case 4: return tr("Modified");
     case 5: return tr("Source");
-   	default: return QVariant();
+   	default: return {};
     }
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent ) const
@@ -243,7 +243,7 @@ bool OutputModel::hasData() const
 std::string OutputModel::fullName(const QModelIndex& index) const
 {
 	if(!hasData())
-		return std::string();
+		return {};
 
     int row=index.row();
     for(const auto & dir : dirs_)
@@ -260,7 +260,7 @@ std::string OutputModel::fullName(const QModelIndex& index) const
        }
     }
 
-    return std::string();
+    return {};
 }
 
 void OutputModel::itemDesc(const QModelIndex& index,std::string& itemFullName,VDir::FetchMode& mode) const
@@ -332,7 +332,7 @@ QString OutputModel::formatSize(unsigned int size) const
 	else
         return QString::number(static_cast<float>(size)/(1024.*1024.*1024.), 'f', 1) + " GB";
 
- 	return QString();
+ 	return {};
 }
 
 QString OutputModel::formatDate(QDateTime dt) const

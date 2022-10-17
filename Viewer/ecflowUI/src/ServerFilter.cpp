@@ -27,12 +27,12 @@ ServerFilter::ServerFilter()
 ServerFilter::~ServerFilter()
 {
 	std::vector<ServerFilterObserver*> obsCopy=observers_;
-	for(std::vector<ServerFilterObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
+	for(auto it=obsCopy.begin(); it != obsCopy.end(); ++it)
 	{
 		(*it)->notifyServerFilterDelete();
 	}
 
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto it=items_.begin(); it != items_.end(); ++it)
 	{
 		(*it)->removeObserver(this);
 	}
@@ -151,7 +151,7 @@ void ServerFilter::readSettings(VSettings* vs)
 	std::vector<std::string> array;
 	vs->get("server",array);
 
-	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
+	for(auto it = array.begin(); it != array.end(); ++it)
 	{
 		std::string name=*it;
 		if(ServerItem* s=ServerList::instance()->find(name))
@@ -182,7 +182,7 @@ void ServerFilter::readSettings(VSettings* vs)
 
 void ServerFilter::broadcastAdd(ServerItem *server)
 {
-	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	for(auto it=observers_.begin(); it != observers_.end(); ++it)
 	{
 		(*it)->notifyServerFilterAdded(server);
 	}
@@ -190,7 +190,7 @@ void ServerFilter::broadcastAdd(ServerItem *server)
 
 void ServerFilter::broadcastRemove(ServerItem *server)
 {
-	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	for(auto it=observers_.begin(); it != observers_.end(); ++it)
 	{
 		(*it)->notifyServerFilterRemoved(server);
 	}
@@ -198,7 +198,7 @@ void ServerFilter::broadcastRemove(ServerItem *server)
 
 void ServerFilter::broadcastChange(ServerItem *server)
 {
-	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	for(auto it=observers_.begin(); it != observers_.end(); ++it)
 	{
 		(*it)->notifyServerFilterChanged(server);
 	}

@@ -73,14 +73,9 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
     auto *shortcut = new QShortcut(ctrlg, parent); // should be destroyed by parent
     connect(shortcut, SIGNAL(activated()), this, SLOT(slotFindNext()));
 
-	status_=true;
-
 	setFocusProxy(searchLine_);
 
 	// set the menu on the Options toolbutton
-	caseSensitive_ = false;
-	wholeWords_    = false;
-	highlightAll_  = false;
 	auto *menu=new QMenu(this);
 	menu->addAction(actionCaseSensitive_);
 	menu->addAction(actionWholeWords_);

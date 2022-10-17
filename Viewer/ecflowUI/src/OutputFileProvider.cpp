@@ -532,7 +532,7 @@ std::string OutputFileProvider::joboutFileName() const
 		return info_->node()->findVariable("ECF_JOBOUT",true);
 	}
 
-	return std::string();
+	return {};
 }
 
 //Returns true if

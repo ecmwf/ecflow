@@ -379,11 +379,11 @@ MenuItem* MenuHandler::findItem(QAction* ac)
 	{
 		for(auto & menu : menus_)
 		{
-			for(auto it=menu->items().begin(); it!=menu->items().end(); ++it)
+			for(auto it : menu->items())
 			{
-				if((*it)->id() == ac->data().toInt())
+				if(it->id() == ac->data().toInt())
 				{
-					return *it;
+					return it;
 				}
 			}
 		}

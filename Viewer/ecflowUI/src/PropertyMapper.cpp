@@ -27,7 +27,7 @@ PropertyMapper::PropertyMapper(const std::vector<std::string>&  names,VPropertyO
 
 PropertyMapper::~PropertyMapper()
 {
-	for(std::vector<VProperty*>::const_iterator it=props_.begin(); it != props_.end(); ++it)
+	for(auto it=props_.begin(); it != props_.end(); ++it)
 	{
 		(*it)->removeObserver(obs_);
 	}

@@ -98,7 +98,7 @@ VAttributeType* VTimeAttr::type() const
 
 QStringList VTimeAttr::data(bool /*firstLine*/) const
 {
-    static auto* atype=static_cast<VTimeAttrType*>(type());
+    static auto* atype=dynamic_cast<VTimeAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -151,7 +151,7 @@ std::string VTimeAttr::strName() const
             }
         }
     }
-    return std::string();
+    return {};
 }
 
 void VTimeAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
@@ -186,9 +186,9 @@ int VTimeAttr::totalNum(VNode* vnode)
 {
     if(vnode->node_)
     {
-        return vnode->node_->timeVec().size() +
+        return static_cast<int>(vnode->node_->timeVec().size() +
             vnode->node_->todayVec().size() +
-            vnode->node_->crons().size();
+            vnode->node_->crons().size());
     }
     return 0;
 }

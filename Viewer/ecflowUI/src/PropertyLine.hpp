@@ -168,18 +168,18 @@ protected:
 	void valueChanged();
     void addRuleLine(PropertyLine*);
 
-	VProperty* prop_;
-	VProperty* guiProp_;
-	QLabel* label_;
-	QLabel* suffixLabel_;
-	QToolButton* defaultTb_;
-	QToolButton* masterTb_;
-	bool enabled_;
+    VProperty* prop_{nullptr};
+    VProperty* guiProp_{nullptr};
+    QLabel* label_{nullptr};
+    QLabel* suffixLabel_{nullptr};
+    QToolButton* defaultTb_{nullptr};
+    QToolButton* masterTb_{nullptr};
+    bool enabled_{true};
 	QVariant oriVal_;
-	bool doNotEmitChange_;
+    bool doNotEmitChange_{false};
 	QMap<QString,PropertyLine*> helpers_;
-    PropertyRule* rule_;
-    QList<PropertyLine*> ruleLines_;
+    PropertyRule* rule_{nullptr};
+    QList<PropertyLine*> ruleLines_{nullptr};
     //QString ruleValue_;
 };
 
@@ -207,7 +207,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 private:
-	QLineEdit* le_;
+    QLineEdit* le_{nullptr};
 };
 
 //-------------------------------------
@@ -233,7 +233,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 private:
-	QToolButton* cb_;
+    QToolButton* cb_{nullptr};
 	QColor currentCol_;
 	QString styleSheet_;
 };
@@ -263,11 +263,11 @@ protected:
 	void setEnabledEditable(bool) override;
 
 private:
-	QWidget* holderW_;
-	QComboBox* familyCb_;
-	QSpinBox* sizeSpin_;
-	QLabel* lName_;
-	QToolButton *tbEdit_;
+    QWidget* holderW_{nullptr};
+    QComboBox* familyCb_{nullptr};
+    QSpinBox* sizeSpin_{nullptr};
+    QLabel* lName_{nullptr};
+    QToolButton *tbEdit_{nullptr};
 	QFont font_;
 };
 
@@ -294,7 +294,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 private:
-	QLineEdit* le_;
+    QLineEdit* le_{nullptr};
 };
 
 //-------------------------------------
@@ -320,7 +320,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 private:
-	QCheckBox* cb_;
+    QCheckBox* cb_{nullptr};
 };
 
 //-------------------------------------
@@ -346,7 +346,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 protected:
-	QComboBox* cb_;
+    QComboBox* cb_{nullptr};
 };
 
 
@@ -374,7 +374,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 protected:
-	ComboMulti* cb_;
+    ComboMulti* cb_{nullptr};
 };
 
 //-------------------------------------
@@ -397,7 +397,7 @@ protected:
 	void setEnabledEditable(bool) override;
 
 private:
-	QToolButton* playTb_;
+    QToolButton* playTb_{nullptr};
 
 };
 

@@ -227,7 +227,7 @@ QPixmap VIcon::pixmap(int size)
 std::vector<VParam*> VIcon::filterItems()
 {
 	std::vector<VParam*> v;
-	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto it=items_.begin(); it != items_.end(); ++it)
 	{
 		v.push_back(it->second);
 	}
@@ -237,7 +237,7 @@ std::vector<VParam*> VIcon::filterItems()
 
 VIcon* VIcon::find(const std::string& name)
 {
-	std::map<std::string,VIcon*>::const_iterator it=items_.find(name);
+	auto it=items_.find(name);
 	if(it != items_.end())
 		return it->second;
 
@@ -251,7 +251,7 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	if(!vnode)
 		return lst;
 
-	for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
+	for(auto it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
 	{
 		VIcon *v=*it;
 
@@ -275,7 +275,7 @@ int VIcon::pixmapNum(VNode *vnode,VParamSet *filter)
 
     int ret=0;
 
-    for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
+    for(auto it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
     {
         VIcon *v=*it;
         if(!filter || filter->isSet(v))
@@ -293,12 +293,12 @@ int VIcon::pixmapNum(VNode *vnode,VParamSet *filter)
 QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 {
     if(!filter || filter->isEmpty())
-		return QString();
+		return {};
 
 	int iconSize=16;
 	QString txt;
 
-	for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
+	for(auto it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
 	{
 	   VIcon *v=*it;
 
@@ -336,14 +336,14 @@ QString VIcon::shortDescription() const
 }
 void VIcon::names(std::vector<std::string>& v)
 {
-    for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto it=items_.begin(); it != items_.end(); ++it)
         v.push_back(it->first);
 }
 
 void VIcon::saveLastNames()
 {
     lastNames_.clear();
-    for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto it=items_.begin(); it != items_.end(); ++it)
         lastNames_.push_back(it->first);
 
     std::string iconFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_icons.txt");

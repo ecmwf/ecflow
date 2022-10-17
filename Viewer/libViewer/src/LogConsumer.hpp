@@ -16,6 +16,7 @@
 class LogConsumer
 {
 public:
+    virtual ~LogConsumer() = default;
     virtual void addLogLine(const std::string&) = 0;
 };
 

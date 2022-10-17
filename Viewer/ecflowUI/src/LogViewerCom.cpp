@@ -74,7 +74,7 @@ void LogViewerCom::start(QStringList args)
 
     if(logViewerId_.isEmpty())
     {
-        qint64 pid;
+        qint64 pid = 0;
         if(QProcess::startDetached(program_,args,QString(),&pid))
         {
             logViewerId_ = LocalSocketServer::generateServerName("log",pid);
@@ -97,7 +97,7 @@ void LogViewerCom::start(QStringList args)
         else
         {
             //start new process
-            qint64 pid;
+            qint64 pid = 0;
             if(QProcess::startDetached(program_,args,QString(),&pid))
             {
                 logViewerId_ = LocalSocketServer::generateServerName("log",pid);

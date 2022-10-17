@@ -80,7 +80,7 @@ void Palette::load(const std::string& parFile)
 		std::string name=it->first;
 		ptree ptItem=it->second;
 
-		QPalette::ColorGroup group;
+        QPalette::ColorGroup group=QPalette::Active;
 		if(name == "active")
 			group=QPalette::Active;
 		else if(name == "inactive")
@@ -97,7 +97,7 @@ void Palette::load(const std::string& parFile)
 		for(ptree::const_iterator itItem = ptItem.begin(); itItem != ptItem.end(); ++itItem)
 		{
 			std::string role=itItem->first;
-			std::string val=itItem->second.get_value<std::string>();
+            auto val=itItem->second.get_value<std::string>();
 
 			QMap<std::string,QPalette::ColorRole>::const_iterator itP=paletteId.find(role);
 			if(itP != paletteId.end())

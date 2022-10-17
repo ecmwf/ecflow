@@ -68,10 +68,10 @@ VTreeNode* VTreeNode::findChild(const std::string& name) const
 
 int VTreeNode::indexOfChild(const VTreeNode* vn) const
 {
-    for(unsigned int i=0; i < children_.size(); i++)
+    for(auto i=0; i < children_.size(); i++)
     {
         if(children_[i] == vn)
-            return i;
+            return static_cast<int>(i);
     }
 
     return -1;
@@ -101,14 +101,14 @@ int VTreeNode::attrRow(int row,AttributeFilter *filter) const
 int VTreeNode::attrNum(AttributeFilter *filter) const
 {
     if(isAttrInitialised() == false)
-        attrNum_=vnode_->attrNum(filter);
+        attrNum_=static_cast<short>(vnode_->attrNum(filter));
 
     return attrNum_;   
 }
 
 void VTreeNode::updateAttrNum(AttributeFilter *filter)
 {
-    attrNum_=vnode_->attrNum(filter);
+    attrNum_=static_cast<short>(vnode_->attrNum(filter));
 }
 
 #if 0
@@ -299,7 +299,7 @@ VTreeNode* VTree::makeBranch(const std::vector<VNode*>& filter,VTreeNode* parent
     VNode* vnode=parentNode->vnode();
     auto *branch=new VTreeNode(vnode,nullptr);
 
-    assert(filter[vnode->index()] != NULL);
+    assert(filter[vnode->index()] != nullptr);
 
     for(int i=0; i < vnode->numOfChildren();i++)
     {

@@ -237,7 +237,7 @@ bool VFile::appendContentsTo(FILE* fpTarget) const
             return false;
         }
         char buf[8*1024];
-        size_t n;
+        size_t n = 0;
         while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
             if (fwrite(buf, 1, n, fpTarget) != n) {
                 fclose(fp);
@@ -354,7 +354,7 @@ int VFile::numberOfLines() const
         return -1;
 
     int num =0;
-    int c;
+    int c = 0;
     FILE* fp = fopen(path_.c_str(), "r");
     if(!fp)
         return -1;

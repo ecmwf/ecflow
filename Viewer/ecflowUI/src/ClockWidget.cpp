@@ -78,13 +78,15 @@ void ClockWidget::adjustTimer()
     {
         if(showSec_)
         {
-            timer_->start(1000);
+            timer_->start(timeoutInMs_);
         }
         else
         {
+            const int msInSec = 1000;
+            const int secInMin = 60;
             int sec=QTime::currentTime().second();
-            int interval=(sec <=1)?(60):(60-sec+1);
-            interval*=1000;
+            int interval=(sec <=1)?(secInMin):(secInMin-sec+1);
+            interval*=msInSec;
             if(timer_->interval() != interval || !timer_->isActive())
             {
                 timer_->start(interval);

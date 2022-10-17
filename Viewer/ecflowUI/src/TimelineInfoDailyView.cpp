@@ -118,12 +118,12 @@ QVariant TimelineInfoDailyModel::data(const QModelIndex& index, int role ) const
 {
     if(!index.isValid() || !hasData())
     {
-        return QVariant();
+        return {};
     }
 
     int row=index.row();
     if(row < 0 || row >= static_cast<int>(days_.size()))
-        return QVariant();
+        return {};
 
     if(role == Qt::DisplayRole)
     {
@@ -138,7 +138,7 @@ QVariant TimelineInfoDailyModel::data(const QModelIndex& index, int role ) const
         }
     }
 
-    return QVariant();
+    return {};
 }
 
 QVariant TimelineInfoDailyModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -155,11 +155,11 @@ QVariant TimelineInfoDailyModel::headerData( const int section, const Qt::Orient
         case 1:
             return "Daily cycle";
         default:
-            return QVariant();
+            return {};
         }
     }
 
-    return QVariant();
+    return {};
 }
 
 QModelIndex TimelineInfoDailyModel::index( int row, int column, const QModelIndex & parent ) const
@@ -230,7 +230,7 @@ void TimelineInfoDailyDelegate::updateSettings()
 {
     if(VProperty* p=prop_->find("view.table.font"))
     {
-        QFont newFont=p->value().value<QFont>();
+        auto newFont=p->value().value<QFont>();
 
         if(font_ != newFont)
         {

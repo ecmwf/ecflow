@@ -65,7 +65,7 @@ QPixmap IconItem::pixmap(int size)
 		pixmaps_[size]=pix;
 		return pix;
 	 }
-	 return QPixmap();
+	 return {};
 }
 
 QPixmap IconItem::unknown(int size)
@@ -80,7 +80,7 @@ UnknownIconItem::UnknownIconItem(QString path) : IconItem(path)
 
 QPixmap UnknownIconItem::unknown(int /*size*/)
 {
-	return QPixmap();
+	return {};
 }
 
 //===========================================
@@ -98,7 +98,7 @@ QString IconProvider::path(int id)
 	if(it != iconsById_.end())
 		return it->second->path();
 
-	return QString();
+	return {};
 
 }
 

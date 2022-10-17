@@ -86,17 +86,17 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
 	prop_=globalProp_->clone(false,true,true); //they all use their master by default!
 
-	for(std::map<Param,std::string>::const_iterator it=parNames_.begin(); it != parNames_.end(); ++it)
+	for(auto & parName : parNames_)
 	{
-		if(VProperty* p=prop_->find(it->second))
+		if(VProperty* p=prop_->find(parName.second))
 		{
-			parToProp_[it->first]=p;
-			propToPar_[p]=it->first;
+			parToProp_[parName.first]=p;
+			propToPar_[p]=parName.first;
 			p->addObserver(this);
 		}
 		else
 		{
-            UiLog().dbg() << "VServerSettings - could not find property: " << it->second;
+            UiLog().dbg() << "VServerSettings - could not find property: " << parName.second;
 			assert(0);
 		}
 	}
@@ -157,20 +157,20 @@ void VServerSettings::notifyChange(VProperty* p)
 
 std::string VServerSettings::notificationId(Param par)
 {
-	std::map<Param,std::string>::const_iterator it=notifyIds_.find(par);
+	auto it=notifyIds_.find(par);
 	if(it != notifyIds_.end())
 	{
 		return it->second;
 	}
-	return std::string();
+	return {};
 }
 
 VServerSettings::Param VServerSettings::notificationParam(const std::string& id)
 {
-    for(std::map<Param,std::string>::const_iterator it=notifyIds_.begin(); it != notifyIds_.end(); ++it)
+    for(auto & notifyId : notifyIds_)
     {
-        if(it->second == id)
-            return it->first;
+        if(notifyId.second == id)
+            return notifyId.first;
     }
 
     return UnknownParam;
@@ -178,9 +178,9 @@ VServerSettings::Param VServerSettings::notificationParam(const std::string& id)
 
 bool VServerSettings::notificationsEnabled() const
 {
-	for(std::map<Param,std::string>::const_iterator it=notifyIds_.begin(); it != notifyIds_.end(); ++it)
+	for(auto & notifyId : notifyIds_)
 	{
-		if(boolValue(it->first))
+		if(boolValue(notifyId.first))
 			return true;
 	}
 	return false;
