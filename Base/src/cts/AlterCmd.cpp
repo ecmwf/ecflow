@@ -522,7 +522,7 @@ const char* AlterCmd::desc() {
          "arg4 = new_value\n"
          "       specifies the new value only used for 'change'/'add'\n"
          "       values with spaces must be quoted\n"
-         "arg5 = paths : At lease one node path required.The paths must start with a leading '/' character\n\n"
+         "arg5 = paths : At least one node path required.The paths must start with a leading '/' character\n\n"
             "\nUsage:\n\n"
             "   ecflow_client --alter=add variable GLOBAL \"value\" /           # add server variable\n"
             "   ecflow_client --alter=add variable FRED \"value\" /path/to/node # add node variable\n"
