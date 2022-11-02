@@ -5,7 +5,7 @@ Brew
 
 
 ecFlow's graphical user interface,
-`ecFlowUI <https://confluence.ecmwf.int/display/ECFLOW/ecFlowUI+Documentation>`__,
+:ref:`ecFlowUI <ecflowui>`,
 can be installed on macOS platforms from
 `brew <https://formulae.brew.sh/formula/ecflow-ui>`__ via this command::
 

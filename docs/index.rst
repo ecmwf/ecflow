@@ -21,6 +21,10 @@ Welcome to ecFlow's documentation
    :caption: Documentation
 
    overview
+   python_api/python_api.rst
+   ecflow/index.rst
+   ecflow_ui/index.rst
+   faq
 
 .. toctree::
    :maxdepth: 1

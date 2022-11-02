@@ -19,6 +19,8 @@ import sys
 sys.path.insert(0, os.path.abspath("."))
 sys.path.append(os.path.abspath("./_ext"))
 
+build_path     = "/Users/cgr/build/ecflow/debug/Pyext/python3"
+sys.path.insert(0,build_path) 
 
 # -- Project information -----------------------------------------------------
 
@@ -37,6 +39,8 @@ copyright = "%s, European Centre for Medium-Range Weather Forecasts (ECMWF)" % (
 # ones.
 extensions = [
     "sphinx_rtd_theme",
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -68,9 +72,13 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+html_css_files = ["css/custom_style.css"]
+
 html_logo = ""
 
 highlight_language = "none"
+
+numfig = True
 
 rst_prolog = """
 .. role:: mval

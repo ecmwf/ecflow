@@ -1,0 +1,29 @@
+.. _get:
+
+get
+///
+
+The CLI command **get** can be used to **show** the definition that is
+loaded in the server.
+
+Get all-suite node trees from the server and write to standard out.
+
+.. code-block:: shell
+
+  ecflow_client --get
+
+This gets the suite "s1" from the server and writes to standard out. In
+both of the examples, the output is fully parse-able
+
+.. code-block:: shell
+
+  ecflow_client --get=/s1  
+
+To write the node tree **state** to standard output please use group
+option, i.e.
+
+.. code-block:: shell
+
+  ecflow_client --get_state
+  ecflow_client --get_state=/s1
+

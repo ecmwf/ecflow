@@ -1,0 +1,3 @@
+import ecflow
+
+print("a")

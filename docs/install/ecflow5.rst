@@ -28,7 +28,7 @@ Dependencies
      see below.
 
 -  | Qt for
-     `ecFlowUI <https://confluence.ecmwf.int/display/ECFLOW/ecFlowUI+Documentation>`__
+     :ref:`ecFlowUI <ecflowui>`
      (Qt5 mandatory).
    | For self-installed Qt libraries, consider setting CMAKE_PREFIX_PATH
      (see below). See also http://doc.qt.io/qt-5/cmake-manual.html for

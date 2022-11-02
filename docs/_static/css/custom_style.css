@@ -1,0 +1,58 @@
+div.leftside {
+    width: 54px;
+    padding: 5px 5px 0px 0px;
+    float: left;
+  }
+  
+div.rightside {
+    margin-left: 20px;
+    margin-bottom: 40px;
+    padding-left: 40px;
+    /*float: right;*/
+  }
+
+.mval {
+  background-color: rgb(236,240,233);
+  font-family: monospace;
+}
+
+.wy-table-responsive table td, .wy-table-responsive table th {
+  white-space: inherit;
+}
+
+
+.red {
+    color:red;
+}
+
+.yellow {
+    color: yellow;
+}
+
+.gold {
+    color: gold;
+}
+
+.orange {
+    color: orange;
+}
+
+.darkgreen {
+    color: darkgreen;
+}
+
+.magenta {
+    color: magenta;
+}
+
+.pink {
+    color: pink;
+}
+
+.lightblue {
+    color: lightblue;
+}
+
+.mediumturquoise {
+    color: mediumturquoise;
+}
