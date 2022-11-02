@@ -42,5 +42,5 @@ signal.signal (signal.SIGTERM, SigHandler)
 signal.signal (signal.SIGXCPU, SigHandler)
 signal.signal (signal.SIGPWR,  SigHandler)
 
-print('start')
+print 'start'
 xinit()

@@ -15,7 +15,6 @@ Sweeper is used in operation to start product generation earlier.
    :width: 5.41667in
    :height: 2.60417in
 
-
 .. literalinclude:: src/meter sweeper.py
     :language: python
     :caption: meter sweeper

@@ -6,5 +6,6 @@ Documentation
     :glob:
     
     user_manual/index.rst
+    tutorial/tutorial.rst
     cookbook/index.rst
     glossary
