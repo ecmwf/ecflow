@@ -14,7 +14,7 @@
    aborted
       Is a :term:`node` :term:`status`. 
       
-      When the ECF_JOB_CMD fails or the :term:`job file` sends a :term:`ecflow_client` --abort :term:`child command`, then
+      When the :term:`ECF_JOB_CMD` fails or the :term:`job file` sends a :term:`ecflow_client` --abort :term:`child command`, then
       the task is placed into a aborted state.
       
    active
@@ -30,7 +30,9 @@
       expressed in days. Any node may have a single autocancel attribute. 
       If the auto cancelled node is referenced in the :term:`trigger` expression of other nodes
       it may leave the node waiting. This can be solved by making sure the :term:`trigger`
-      expression also checks for the :term:`unknown` state. i.e.::
+      expression also checks for the :term:`unknown` state. i.e.:
+
+      .. code-block:: shell
       
          trigger node_to_cancel == complete or node_to_cancel == unknown
       
@@ -42,7 +44,7 @@
 
          * - :ref:`python_api`
            - :py:class:`ecflow.Autocancel`, :py:class:`ecflow.Node.add_autocancel`
-         * - :ref:`grammer`
+         * - :ref:`grammar`
            - :token:`autocancel`
 
    check point 
@@ -63,7 +65,7 @@
          ecflow_client --load=<check_point_file> print check_only
       
    child command
-      Child command's(or task requests) are called from within the :term:`ecf script` files. The table also includes the default action(from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by ecflow_client command. Until time out, or manual/automatic intervention.
+      Child command's(or task requests) are called from within the :term:`ecf script` files. The table also includes the default action(from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
 
       .. list-table:: 
          :header-rows: 1
@@ -72,32 +74,32 @@
          * - Child Command 
            - Description
            - Zombie (default action)
-         * - :term:`ecflow_client`  --init
+         * - :ref:`ecflow_client --init <init_cli>`
            - Sets the :term:`task` to the :term:`active` :term:`status`
            - block
-         * - :term:`ecflow_client`  --wait
+         * - :ref:`ecflow_client --wait <wait_cli>`
            - Wait for a expression to evaluate
            - block
-         * - :term:`ecflow_client`  --queue
+         * - :ref:`ecflow_client --queue <queue_cli>`
            - Update queue step in server
            - block
-         * - :term:`ecflow_client`  --abort
+         * - :ref:`ecflow_client --abort <abort_cli>`
            - Sets the :term:`task` to the :term:`aborted` :term:`status`
            - block
-         * - :term:`ecflow_client`  --complete
+         * - :ref:`ecflow_client --complete <complete_cli>`
            - Sets the :term:`task` to the :term:`complete` :term:`status`
            - block 
-         * - :term:`ecflow_client`  --event
+         * - :ref:`ecflow_client --event <event_cli>`
            - Set an event
            - fob
-         * - :term:`ecflow_client`  --meter
+         * - :ref:`ecflow_client --meter <meter_cli>`
            - Change a meter
            - fob
-         * - :term:`ecflow_client`  --label
+         * - :ref:`ecflow_client --label <meter_cli>`
            - Change a label
            - fob
 
-      The following environment variables must be set for the child commands. ECF_HOST, ECF_NAME ,ECF_PASS and ECF_RID. See :term:`ecflow_client`.                                         
+      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` ,ECF_PASS and ECF_RID. See :term:`ecflow_client`.                                         
        
       
    clock
@@ -145,10 +147,11 @@
       See also:
 
       .. list-table::
+         :widths: 40 60
 
          * - :ref:`python_api`
            - :py:class:`ecflow.Clock`, :py:class:`ecflow.Suite.add_clock`
-         * - :ref:`grammer`
+         * - :ref:`grammar`
            - :token:`clock`
 
    complete 
@@ -157,17 +160,25 @@
       The node can be set to complete:
 
       - By the :term:`complete expression`
-      - At job end when the :term:`task` receives the :term:`ecflow_client` –complete :term:`child command`
+      - At job end when the :term:`task` receives the :ref:`ecflow_client –complete <complete_cli>` :term:`child command`
       - Manually via the command line or GUI. When this happens any time attributes are expired in order.
 
-      
+  
    complete expression
       Force a node to be complete **if** the expression evaluates, without running any of the nodes. 
       
       This allows you to have tasks in the suite which a run only if others fail. 
       In practice the node would need to have a :term:`trigger` also. 
       
-      For python see :py:class:`ecflow.Expression` and :py:class:`ecflow.Node.add_complete`
+      .. list-table::
+         :widths: 40 60
+
+         * - :ref:`ecflow_cli`
+           - :ref:`--complete <complete_cli>` 
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Expression`, :py:class:`ecflow.Node.add_complete`
+         * - :ref:`grammar`
+           - :token:`complete`
       
    cron
       Like :term:`time`, cron defines time dependency for a :term:`node`, but it will be repeated indefinitely:
@@ -225,10 +236,11 @@
       See also:
 
       .. list-table::
+         :widths: 40 60
 
          * - :ref:`python_api`
            - :py:class:`ecflow.Cron`, :py:class:`ecflow.Node.add_cron` 
-         * - :ref:`grammer`
+         * - :ref:`grammar`
            - :token:`cron`
 
    date
@@ -243,8 +255,14 @@
       of the :term:`suite`, without running the corresponding job. Otherwise under a hybrid clock the :term:`suite` would
       never :term:`complete`.
       
-      For python see: :py:class:`ecflow.Date` and :py:class:`ecflow.Node.add_date`. For text BNF see :token:`date`
-       
+      .. list-table::
+         :widths: 40 60
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Date`, :py:class:`ecflow.Node.add_date`
+         * - :ref:`grammar`
+           - :token:`date`
+
    day
       This defines a day dependency for a  node.
       
@@ -254,7 +272,12 @@
       of the :term:`suite`, without running the corresponding job. Otherwise under a hybrid clock the :term:`suite` would
       never :term:`complete`.
       
-      For python see: :py:class:`ecflow.Day` and :py:class:`ecflow.Node.add_day`. For text BNF see :token:`day`
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Day`, :py:class:`ecflow.Node.add_day`
+         * - :ref:`grammar`
+           - :token:`day`
        
    defstatus
       Defines the default :term:`status` for a task/family to be assigned to the :term:`node` when the begin command is issued.
@@ -269,8 +292,8 @@
 
          * - :ref:`python_api`
            - :py:class:`ecflow.DState`, :py:class:`ecflow.Node.add_defstatus`
-         * - :ref:`grammer`
-           - :token:`rdefstatus`
+         * - :ref:`grammar`
+           - :token:`defstatus`
        
    dependencies
       Dependencies are attributes of node, that can suppress/hold a :term:`task` from taking part in :term:`job creation`.
@@ -319,9 +342,9 @@
       Symbol                                  Meaning
       ====================== ============================================================================
       %include <filename>    %ECF_INCLUDE% directory is searched for the :file:`filename` and the contents
-                             included into the job file. If that variable is not defined ECF_HOME is used.
-                             If the ECF_INCLUDE is defined but the file does not exist, then we look in
-                             ECF_HOME. This allows specific files to be placed in ECF_INCLUDE and the 
+                             included into the job file. If that variable is not defined :term:`ECF_HOME` is used.
+                             If the :term:`ECF_INCLUDE` is defined but the file does not exist, then we look in
+                             :term:`ECF_HOME`. This allows specific files to be placed in ECF_INCLUDE and the 
                              more general/common include files to be placed in ECF_HOME.
                              This is the recommended format
       %include "filename"    Include the contents of the file:
@@ -362,19 +385,23 @@
       Care should be taken to avoid spaces in the variable values.       
 
    ecf file location algorithm
-     :term:`ecflow_server` and job creation checking uses the following algorithm to locate the '.ecf' file corresponding to a :term:`task`:
-      
-     * **ECF_SCRIPT**: First it uses the generated variable ECF_SCRIPT to locate the script. 
+     :term:`ecflow_server` and job creation checking uses the following algorithm to locate the '.ecf' file corresponding to a :term:`task`.
+
+     .. note::
+
+         To search for files with a different extension, i.e. to look for python file '.py'. Override the :term:`ECF_EXTN` variable. Its default value is '.ecf'
+     
+     * :term:`ECF_SCRIPT`: First it uses the generated variable ECF_SCRIPT to locate the script. 
        This variable is generated from: ECF_HOME/<path to task>.ecf
        Hence if the task path is /suite/f1/f2/t1, then ECF_SCRIPT=ECF_HOME/suite/f1/f2/t1.ecf
         
-     * **ECF_FETCH** (user variable): File is obtained from running the command after some postfix arguments are added.  (Output of popen)
+     * :term:`ECF_FETCH` (user variable): File is obtained from running the command after some postfix arguments are added. (Output of popen)
 
-     * **ECF_SCRIPT_CMD** (user variable): File is obtained from running the command. (Output of popen)
+     * :term:`ECF_SCRIPT_CMD` (user variable): File is obtained from running the command. (Output of popen)
      
-     * **ECF_FILES** :Second it checks for the user defined ECF_FILES variable. If defined the value of this variable must correspond to a directory. This directory is searched in reverse order.
+     * **ECF_FILES**: Second it checks for the user defined ECF_FILES variable. If defined the value of this variable must correspond to a directory. This directory is searched in reverse order.
       
-      i.e lets assume we have a task: /o/12/fc/model and ECF_FILES is defined as: /home/ecmwf/emos/def/o/ECFfiles
+      I.e. lets assume we have a :term:`task` /o/12/fc/model and ECF_FILES is defined as /home/ecmwf/emos/def/o/ECFfiles
         
       The ecFlow will use the following search pattern.
         
@@ -389,18 +416,20 @@
 
             edit ECF_FILES /home/ecmwf/emos/def/o/%FILE_DIR:ECFfiles%
        
-      The search can be reversed, by adding a variable ECF_FILES_LOOKUP, with a value of "prune_leaf" ( from ecflow 4.12.0). Then ecFlow will use the following search pattern.
+      The search can be reversed, by adding a variable **ECF_FILES_LOOKUP**, with a value of "prune_leaf" ( from ecflow 4.12.0). Then ecFlow will use the following search pattern.
 
          #. /home/ecmwf/emos/def/o/ECFfiles/o/12/fc/model.ecf
          #. /home/ecmwf/emos/def/o/ECFfiles/o/12/model.ecf
          #. /home/ecmwf/emos/def/o/ECFfiles/o/model.ecf
          #. /home/ecmwf/emos/def/o/ECFfiles/model.ecf
         
-      However please be aware this will also affect the search in ECF_HOME
+      However please be aware this will also affect the search in :term:`ECF_HOME`
 
-     * **ECF_HOME**: Thirdly it searchs for the script in reverse order using ECF_HOME (i.e like ECF_FILES). If this fails, than the :term:`task` is placed into the :term:`aborted` state. We can check that file can be located before loading the suites into the server.
+     * :term:`ECF_HOME`: Thirdly it searches for the script in reverse order using :term:`ECF_HOME` (i.e like ECF_FILES). If this fails, than the :term:`task` is placed into the :term:`aborted` state. We can check that file can be located before loading the suites into the server.
       
-     Note: The addition of variable with a name ECF_FILES_LOOKUP and value 'prune_leaf', affects the search in BOTH ECF_FILES and ECF_HOME
+     Note: The addition of variable with a name **ECF_FILES_LOOKUP** and value 'prune_leaf', affects the search in BOTH **ECF_FILES** and :term:`ECF_HOME`
+
+     See also:
 
          * :ref:`tutorial-checking-job-creation`
          * :py:class:`ecflow.Defs.check_job_creation`    
@@ -420,7 +449,6 @@
       Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
       the :term:`ecflow_server` is aware when the job starts(i.e changes state to :term:`active`) and finishes ( i.e changes state to :term:`complete`)
        
-      
    ECF_DUMMY_TASK
       This is a user variable that can be added to :term:`task` to indicate that there is no
       associated :term:`ecf script` file. 
@@ -452,12 +480,12 @@
       The output of running these commands (-s) is used to create the job.
 
    ECF_HOME
-      This is user defined variable; it has four functions:
+      This is user defined :term:`variable`; it has four functions:
       
-      - it is used as a prefix portion of the path of the job files created by ecFlow server; see the description of the ECF_JOB generated variable.
-      - it is a default directory where ecFlow server looks for scripts ( with file extension defined by ECF_EXTN,default is .ecf); overridden by ECF_FILES user defined variable. See the "ecf file location algorithm" entry for more detail.
-      - it is a default directory where ecFlow server looks for include files; overridden by ECF_INCLUDE user defined variable. See the "directives" entry for more detail.
-      - it is used as a default prefix portion of the job output path (the ECF_JOBOUT generated variable); overridden by ECF_OUT user defined variable. See descriptions of ECF_JOBOUT and ECF_OUT variables for more detail.
+      - it is used as a prefix portion of the path of the job files created by ecFlow server; see the description of the :term:`ECF_JOB` generated variable.
+      - it is a default directory where ecFlow server looks for scripts ( with file extension defined by :term:`ECF_EXTN`,default is .ecf); overridden by ECF_FILES user defined variable. See the "ecf file location algorithm" entry for more detail.
+      - it is a default directory where ecFlow server looks for include files; overridden by :term:`ECF_INCLUDE` user defined variable. See the "directives" entry for more detail.
+      - it is used as a default prefix portion of the job output path (the :term:`ECF_JOBOUT` generated variable); overridden by **ECF_OUT** user defined variable. See descriptions of :term:`ECF_JOBOUT` and :term:`ECF_OUT` variables for more detail.
 
    ECF_INCLUDE
       This is a user defined variable. It is used to specify directory locations, that are used to search for include files.
@@ -475,7 +503,7 @@
          ECF_HOME/ECF_NAME.job<ECF_TRYNO>
        
    ECF_JOB_CMD
-      This variable should point to a script that can submit the job. (i.e. to the queuing system, via, SLURM,PBS). 
+      This :term:`variable` should point to a script that can submit the job. (i.e. to the queuing system, via, SLURM,PBS). 
       
       The ecFlow server will detect abnormal termination of this command. Hence for errors in the job file, should call 'ecflow_client --abort", then exits cleanly.
       Otherwise server detects abnormal job termination, and abort flag is set. Which will prevent job re-queue(due to ECF_TRIES). 
@@ -485,7 +513,7 @@
    ECF_JOBOUT
       This is a generated :term:`variable`. This variable defines the path name for the job output file. The variable is composed as following. 
 
-      If ECF_OUT is specified::
+      If :term:`ECF_OUT` is specified::
 
          ECF_OUT/ECF_NAME.ECF_TRYNO
       
@@ -569,7 +597,7 @@
       It can be overriden, but must be replaced by a single character.
       
    ECF_NAME
-      This is a generated :term:`variable`. It defines the path name of the task. It will typically be used inside script file, referring to the corresponding task. 
+      This is a generated :term:`variable`. It defines the path name of the :term:`task`. It will typically be used inside script file, referring to the corresponding task. 
 
       .. code-block:: shell
          :caption: t1.ecf
@@ -582,9 +610,9 @@
       
       
    ECF_NO_SCRIPT
-      This is a user variable, that can be added to a :term:`node` (introduced with ecFlow release 4.3.0). It is used to inform the ecflow_server that there is **no SCRIPT** associated with a task. However unlike ECF_DUMMY_TASK, the task can still be submitted provided the ECF_JOB_CMD is set up.
+      This is a user :term:`variable`, that can be added to a :term:`node` (introduced with ecFlow release 4.3.0). It is used to inform the ecflow_server that there is **no SCRIPT** associated with a task. However unlike ECF_DUMMY_TASK, the task can still be submitted provided the :term:`ECF_JOB_CMD` is set up.
 
-      This is suitable for very **lightweight** tasks that want to minimize latency. The output can still be seen, if it is redirected  to ECF_JOBOUT. Care must be taken to ensure the path  to ecflow_client is accessible.
+      This is suitable for very **lightweight** tasks that want to minimize latency. The output can still be seen, if it is redirected  to :term:`ECF_JOBOUT`. Care must be taken to ensure the path  to ecflow_client is accessible.
 
       .. code-block:: shell
          :caption: ECF_NO_SCRIPT examples
@@ -609,6 +637,11 @@
          edit ECF_JOB_CMD "ECF_PASS=%ECF_PASS% ECF_NAME=%ECF_NAME% /usr/local/bin/ymd2jul.sh -p %ECF_PORT% -n %ECF_HOST% -r /%SUITE%/%FAMILY% -y %YMD% > %ECF_JOBOUT% 2>&1 &"
          # /usr/local/bin/ymd2jul.sh can be called on command line or as ecflow_client
          endfamily
+
+   ECF_OUT
+      This is user/suite variable that specifies a directory PATH. It controls the location of job output(stdout and stderr of the process) on a remote file system. It provides an alternate location for the job and cmd output files. If it exists, it is used as a base for :term:`ECF_JOBOUT`, but it is also used to search for the output by ecFlow, when asked by :term:`ecflow_ui`/:term:`ecflow_client`. If the output is in ECF_OUT/ECF_NAME.ECF_TRYNO  it is returned, otherwise ECF_HOME/ECF_NAME.ECF_TRYNO is used.
+
+      The user must ensure that all the directories exists, including :term:`suite`/:term:`family`. If this is not done, you may well find task remains stuck in a submitted state. At ECMWF our submission scripts will ensure that directories exists.
 
    ECF_PASS
       This is a generated :term:`variable`. During job generation process in the server, a unique password is generated and stored in the task. It then replaces %ECF_PASS% in the scripts(.ecf), with the actual value. When the job runs, ecflow_client reads this, as an environment variable, and passes it to the server. The server then compares this password with the one held on the task. This is used as a part of the authentication for child commands, and is used to detect zombies.
@@ -721,7 +754,7 @@
       
       The following variables affect the execution of ecflow_client. 
       
-      Since the :term:`ecf script` can call ecflow_client( i.e :term:`child command`) then typically
+      Since the :term:`ecf script` can call ecflow_client(i.e :term:`child command`) then typically
       some are set in an include header. i.e. :ref:`tutorial-head_h`.
       
       .. list-table:: Environment variables common for user and child commands
@@ -735,15 +768,19 @@
          * - ECF_PORT
            - Port number of the :term:`ecflow_server`. Must match :term:`ecflow_server`
            - Yes/No
-           - We can use::
+           - We can use:
             
-               ecflow_client --port 3141
+             .. code-block:: shell
+            
+                ecflow_client --port 3141
 
              as an alternative to specifying the ECF_PORT.
          * - ECF_HOST
            - Name of the host running the :term:`ecflow_server` 
            - Yes/No
-           - We can use::
+           - We can use:
+            
+             .. code-block:: shell 
             
                ecflow --host machine1
 
@@ -751,14 +788,14 @@
          * - NO_ECF
            - If set exit's ecflow_client immediately with success. This allows the scripts to be tested independent of the server
            - No
-           - ::
+           - .. code-block:: shell
             
                export NO_ECF=1
 
          * - ECF_DENIED
            - If server denies client communication and this flag is set, exit with an error. Avoids 24hr hour connection attempt to :term:`ecflow_server`.
            - No
-           - ::
+           - .. code-block:: shell
              
                export ECF_DENIED=1
 
@@ -785,11 +822,11 @@
            - Explanation
            - Compulsory
            - Example
-         * - ECF_NAME
+         * - :term:`ECF_NAME`
            - Path to the task
            - Yes
            - /suite/family/task
-         * - ECF_PASS
+         * - :term:`ECF_PASS`
            - Jobs password. Generated by the server, will replace %ECF_PASS% in the scripts,during job generation.Used for authenticating child commands.
            - Yes
            - (generated)
@@ -797,7 +834,7 @@
            - Remote id. Allow easier job kill, and disambiguate a zombie
            - Yes
            - (generated)
-         * - ECF_TRYNO
+         * - :term:`ECF_TRYNO`
            - The number of times the job has run. This is allocated by the server and used in job/output file name generation.
            - No 
            - (generated)
@@ -808,14 +845,18 @@
          * - ECF_TIMEOUT
            - Maximum time is seconds for the client to deliver message
            - No
-           - 24*3600 (default value)::
+           - 24*3600 (default value):
+
+             .. code-block:: shell
 
                export ECF_TIMEOUT=36024*3600   
 
          * - ECF_ZOMBIE_TIMEOUT
            - Maximum time in seconds for the child(init, abort, complete, etc) zombie client to get a reply from the server. 
            - No
-           - 12*3600 (default value)::
+           - 12*3600 (default value):
+
+             .. code-block:: shell
              
                export ECF_ZOMBIE_TIMEOUT=36024*3600
          
@@ -827,23 +868,25 @@
            - Explanation
            - Compulsory
            - Example
-         * - ECF_PASSWD
+         * - :term:`ECF_PASSWD`
            - path to the client password file, used for password based authentication
            - No
-           - ::
-              
+           - .. code-block:: shell
+  
                export ECF_PASSWD=mymachine.3141.ecf.passwd
 
          * - ECF_USER
            - When user need to pose as another user, i.e. when users id on the client machine, doesn't  match his id on the remote server. Requires password file.
            - No
-           - ::
+           - .. code-block:: shell
               
                export ECF_USER=my_user_name
 
-             To avoid setting environment variable we can use::
-               
-               ecflow_client --user my_user_name ......
+             To avoid setting environment variable we can use:
+
+             .. code-block:: shell
+                  
+                ecflow_client --user my_user_name ......
 
    ecflow_server
       This executable is the server. 
@@ -865,7 +908,7 @@
          * - Variable Name
            - Explanation
            - Default value
-         * - ECF_HOME
+         * - :term:`ECF_HOME`
            - Home for all the :term:`ecFlow` files
            - Current working directory
          * - ECF_PORT
@@ -889,7 +932,7 @@
          * - ECF_TASK_THRESHOLD
            - Report in log file all task/job that take longer than given threshold. Used to debug/instrument, those scripts that are very large.
            - 4000 (milliseconds). Before release 4.0.6 default was 2000 ms.
-         * - ECF_PASSWD
+         * - :term:`ECF_PASSWD`
            - path to server password file, used to authenticate :term:`user command`\ s. Use when ALL should be password authenticated
            - <host>.<port>.ecf.passwd
          * - ECF_CUSTOM_PASSWD
@@ -897,7 +940,7 @@
            - <host>.<port>.ecf.custom_passwd
          * - ECF_PRUNE_NODE_LOG
            - When the checkpoint point file is loaded, node log history older than 30 days is automatically pruned. The variable allows this value to be changed.Setting the variable to zero, means there will be no pruning. All history is preserved at the cost increasing server memory, and time taken to write checkpoint file.
-           - ::
+           - .. code-block:: shell
             
                export ECF_PRUNE_NODE_LOG=40
                
@@ -906,14 +949,16 @@
            - For secure socket communication with client.Requires client/server built with openssl libs
            - .. code-block:: shell
               
-              #Use same certificate for multiple servers
-              export ECF_SSL=1
-              # Use server specific certificates
-              export ECF_SSL=<host>.<port> 
+               #Use same certificate for multiple servers
+               export ECF_SSL=1
+               # Use server specific certificates
+               export ECF_SSL=<host>.<port> 
                
-             Alternatively to avoid setting environmental variables we can use::
+             Alternatively to avoid setting environmental variables we can use:
+
+             .. code-block:: shell
                
-              ecflow_server --ssl ... || ecflow_start.sh -s
+               ecflow_server --ssl ... || ecflow_start.sh -s
               
              The server will then first look for $HOME/.ecflowrc/ssl/server.crt then $HOME/.ecflowrc/ssl/<host>.<port>.crt
 
@@ -944,7 +989,7 @@
            - :ref:`event_cli`
          * - :ref:`python_api`
            - :py:class:`ecflow.Event`, :py:class:`ecflow.Node.add_event`
-         * - :ref:`grammer`
+         * - :ref:`grammar`
            - :token:`event`
               
       Events can be referenced in :term:`trigger` and :term:`complete expression` s.
@@ -952,7 +997,7 @@
    extern
       This allows an external :term:`node` to be used in a :term:`trigger` expression. 
       
-      All :term:`node`'s in :term:`trigger`'s must be known to :term:`ecflow_server` by the end of the load command. 
+      All :term:`node`\ s in :term:`trigger`'s must be known to :term:`ecflow_server` by the end of the load command. 
       No cross-suite :term:`dependencies` are allowed unless the names of tasks outside the suite are declared as external. 
       An external :term:`trigger` reference is considered unknown if it is not defined when the :term:`trigger` is evaluated. 
       You are strongly advised to avoid cross-suite :term:`dependencies`. 
@@ -960,7 +1005,8 @@
       Families and suites that depend on one another should be placed in a single :term:`suite`. 
       If you think you need cross-suite dependencies, you should consider merging the suites 
       together and have each as a top-level family in the merged suite.
-      For BNF see :token:`extern`
+      
+      For grammar see :token:`extern`.
       
           
    family
@@ -974,7 +1020,7 @@
       It serves as an intermediate :term:`node` in a :term:`suite definition`.
       
    halted
-      Is a :term:`ecflow_server` state. See :term:`server states`
+      Is a :term:`ecflow_server` state. See :term:`server states`.
       
    hybrid clock      
       A hybrid :term:`clock` is a complex notion: the date and time are not connected. 
@@ -1044,7 +1090,14 @@
                endfamily
             endsuite
 
-      For python see :py:class:`ecflow.InLimit` and :py:class:`ecflow.Node.add_inlimit`. For text BNF see :term:`inlimit`
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.InLimit`, :py:class:`ecflow.Node.add_inlimit`
+         * - :ref:`grammar`
+           - :token:`inlimit`
       
    job creation
       Job creation or task invocation can be initiated manually via :term:`ecflow_ui` but also by 
@@ -1059,7 +1112,7 @@
       - :term:`pre-processing` the contents of the :term:`ecf script` file       
                   
       The steps above transforms an :term:`ecf script` to a :term:`job file` that can be submitted by
-      performing :term:`variable substitution` on the ECF_JOB_CMD :term:`variable` and invoking the command.
+      performing :term:`variable substitution` on the :term:`ECF_JOB_CMD` :term:`variable` and invoking the command.
          
       The running jobs will communicate back to the :term:`ecflow_server` by calling :term:`child command`'s.
         
@@ -1100,8 +1153,15 @@
 
       If the label :term:`child command`\ s results in a :term:`zombie` then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally. (i.e. without any errors). This default can be overridden by using a :term:`zombie` attribute.
 
-      For python see :py:class:`ecflow.Label` and :py:class:`ecflow.Node.add_label`. For text BNF see :token:`label`
-      
+      .. list-table::
+ 
+         * - :ref:`ecflow_cli`
+           - :ref:`label_cli`, :ref:`add_cli`, :ref:`alter_cli` 
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Label`, :py:class:`ecflow.Node.add_label`
+         * - :ref:`grammar`
+           - :token:`label`
+
    late
       Define a tag for a node to be late. A node can only have **one** late attribute. The late attribute only applies to a task. You can define it on a Suite/Family in which case it will be inherited. Any late defined lower down the hierarchy will override the aspect(submitted,active, complete) defined higher up.
 
@@ -1158,8 +1218,17 @@
          ecflow_client --alter change late "-s 00:01 -a 14:30 -c +00:01" <path-to-node>
          ecflow_client --alter delete late  
 
-      For python see :py:class:`ecflow.Late` and :py:class:`ecflow.Node.add_late`. For text BNF see :token:`late`
-            
+      See also:
+
+      .. list-table::
+
+         * - :ref:`ecflow_cli`
+           - :ref:`add_cli`, :ref:`alter_cli` 
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Late`, :py:class:`ecflow.Node.add_late`
+         * - :ref:`grammar`
+           - :token:`late`
+         
    limit
       Limits provide simple load management by limiting the number of tasks
       submitted by a specific :term:`ecflow_server`.
@@ -1197,8 +1266,17 @@
          except RuntimeError, e:
             print("Failed: " + str(e))
       
-      For python see :py:class:`ecflow.Limit` and :py:class:`ecflow.Node.add_limit`. For BNF see :token:`limit` and :term:`inlimit`
-      
+      See also:
+
+      .. list-table::
+
+         * - :ref:`ecflow_cli`
+           - :ref:`add_cli`, :ref:`alter_cli` 
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Limit`, :py:class:`ecflow.Node.add_limit`
+         * - :ref:`grammar`
+           - :token:`limit`
+
    manual page
       Manual pages are part of the :term:`ecf script`. 
       
@@ -1241,8 +1319,17 @@
           
       If the meter :term:`child command` results in a zombie, then the default action if for the server to **fob**, this allows the ecflow_client command to exit normally (i.e. without any errors). This default can be overridden by using a zombie attribute.
 
-      For python see: :py:class:`ecflow.Meter` and :py:class:`ecflow.Node.add_meter`. For text BNF see :token:`meter`
-      
+      See also:
+
+      .. list-table::
+
+         * - :ref:`ecflow_cli`
+           - :ref:`meter_cli`, :ref:`add_cli`, :ref:`alter_cli` 
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Meter`, :py:class:`ecflow.Node.add_meter`
+         * - :ref:`grammar`
+           - :token:`meter`
+
       Meter's can be referenced in :term:`trigger` and :term:`complete expression` expressions.
       
    node
@@ -1365,9 +1452,11 @@
 
       .. list-table::
 
+         * - :ref:`ecflow_cli`
+           - :ref:`add_cli`, :ref:`alter_cli`    
          * - :ref:`python_api`
            - :py:class:`ecflow.Node.add_repeat`, :py:class:`ecflow.Repeat`, :py:class:`ecflow.RepeatDate`, :py:class:`ecflow.RepeatEnumerated`, :py:class:`ecflow.RepeatInteger`, :py:class:`ecflow.RepeatDay`
-         * - :ref:`grammer`
+         * - :ref:`grammar`
            - :token:`repeat`
       
    running
@@ -1409,7 +1498,7 @@
       Is a :term:`node` :term:`status`. 
       
       When the :term:`task` :term:`dependencies` are resolved/free the :term:`ecflow_server` places the task into a submitted state.
-      However if the ECF_JOB_CMD fails, the task is placed into the :term:`aborted` state
+      However if the :term:`ECF_JOB_CMD` fails, the task is placed into the :term:`aborted` state
       
    suite
       A suite is an organisational entity. It is serves as the root :term:`node` in a :term:`suite definition`.
@@ -1451,13 +1540,21 @@
            - <day>:<month>:<day of week>:<day of year>. i.e.  Tuesday:December:2:348
 
       It is a collection of :term:`family`'s, :term:`variable`'s, :term:`repeat` and a single
-      :term:`clock` definition. For a complete list of attributes look at BNF for :token:`suite`.
-      For python see :py:class:`ecflow.Suite`.
+      :term:`clock` definition. 
+      
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Suite`
+         * - :ref:`grammar`
+           - :token:`suite`
       
    suite definition
       The suite definition is the hierarchical :term:`node` tree. It describes how your :term:`task`'s run and interact. It can be built up using:
       
-      * Ascii text file by following the rules defined in the ecFlow :ref:`grammer`. Hence any language can be used, to generate this format.
+      * Ascii text file by following the rules defined in the ecFlow :ref:`grammar`. Hence any language can be used, to generate this format.
          
       * :ref:`python_based_suite_definition`
          
@@ -1480,7 +1577,14 @@
       so that no harm is done by rerunning it, since a task may be automatically 
       submitted more than once if it aborts.
       
-      For python see :py:class:`ecflow.Task`. For text BNF see :token:`task`
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Task`
+         * - :ref:`grammar`
+           - :token:`task`
             
    time
       This defines a time dependency for a node. 
@@ -1510,8 +1614,15 @@
          
       If the 10:00 run takes more than an hour, the 11:00 run will never occur.
       
-      For python see :py:class:`ecflow.Time` and :py:class:`ecflow.Node.add_time`. For BNF see :token:`time`
-   
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Time`, :py:class:`ecflow.Node.add_time`
+         * - :ref:`grammar`
+           - :token:`time`
+
    time dependencies
       This includes :term:`time`, :term:`today`, :term:`day`, :term:`date` and :term:`cron`.
       
@@ -1532,7 +1643,6 @@
             time 20:00
             date 17.2.2017
             date 19.2.2017
-
 
    today
       Like :term:`time`, but If the suites begin time is **past** the time given for the "today" command the :term:`node` is free
@@ -1567,7 +1677,14 @@
          
       If the 10:00 run takes more than an hour, the 11:00 run will never occur.
       
-      For python see :py:class:`ecflow.Today`. For text BNF see :token:`today`
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Today`
+         * - :ref:`grammar`
+           - :token:`today`
             
    trigger
       Triggers defines a dependency for a :term:`task` or :term:`family`. 
@@ -1661,7 +1778,14 @@
       
       Hence in the example above expression ``foo:blah >= 0`` will reference the event.
       
-      For python see :py:class:`ecflow.Expression` and :py:class:`ecflow.Node.add_trigger`
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Expression`, :py:class:`ecflow.Node.add_trigger`
+         * - :ref:`grammar`
+           - :token:`trigger`
        
    unknown
       Is a :term:`node` :term:`status`. 
@@ -1688,7 +1812,7 @@
 
          * - :ref:`python_api`
            - :py:class:`ecflow.Node.add_variable`
-         * - :ref:`grammer`
+         * - :ref:`grammar`
            - :token:`variable`
       
    variable inheritance
@@ -1702,7 +1826,7 @@
       Suite definition variables are looked for first, and then any generated variables. 
       
    variable substitution
-      Takes place during :term:`pre-processing` *or* command invocation.(i.e ECF_JOB_CMD,ECF_KILL_CMD,etc)
+      Takes place during :term:`pre-processing` *or* command invocation.(i.e :term:`ECF_JOB_CMD`,ECF_KILL_CMD,etc)
       
       It involves searching each line of :term:`ecf script` file or command, for :term:`ECF_MICRO` character. typically '%'
       
@@ -1761,8 +1885,15 @@
       attempting to contact the :term:`ecflow_server` for 24 hours. This is configurable 
       see ECF_TIMEOUT on :term:`ecflow_client`)
       
-      For python see :py:class:`ecflow.ZombieAttr`, :py:class:`ecflow.ZombieUserActionType`
-            
+      See also:
+
+      .. list-table::
+
+         * - :ref:`python_api`
+           - :py:class:`ecflow.ZombieAttr`, :py:class:`ecflow.ZombieUserActionType`
+         * - :ref:`grammar`
+           - :token:`zombie`
+      
       There are several types of zombies see :term:`zombie type` and :py:class:`ecflow.ZombieType`  
      
    zombie attribute

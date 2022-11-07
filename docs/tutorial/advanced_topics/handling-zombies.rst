@@ -53,7 +53,7 @@ The automated response can be defined statically using python and text interface
 
 * python interface (see ecflow.ZombieAttr)
 
-* text interface ( See :ref:`grammer`):
+* text interface ( See :ref:`grammar`):
 
   .. code-block:: shell
 

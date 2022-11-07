@@ -17,7 +17,7 @@ There are two main methods for describing a :term:`suite definition` to the :ter
   
 * via a **text** :term:`suite definition` 
     
-  The grammar of this text definition is described by :ref:`grammer`.  
+  The grammar of this text definition is described by :ref:`grammar`.  
   This grammar does not support conditional statements (such as if,while,for)
   nor the ability to define functions. However, the text definition file can 
   be generated/created using any language which in itself supports conditional statements.  

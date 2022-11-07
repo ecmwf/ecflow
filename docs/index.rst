@@ -13,7 +13,7 @@ Welcome to ecFlow's documentation
    :caption: Documentation
 
    overview
-   ug/ecflow_quickstart.rst
+   ug/quickstart.rst
    python_api/python_api.rst
    client_api/index.rst
    ug/user_manual/index.rst

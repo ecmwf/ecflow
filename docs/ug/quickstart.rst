@@ -1,6 +1,6 @@
 .. _ecflow_quickstart:
 
-ecFlow Quickstart
+Quickstart
 /////////////////
 
 This page gives a simple exercise that will allow you to create a very
