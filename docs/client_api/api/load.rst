@@ -1,0 +1,43 @@
+
+.. _load_cli:
+
+load
+////
+
+::
+
+   
+   load
+   ----
+   
+   Check and load definition or checkpoint file into server.
+   The loaded definition will be checked for valid trigger and complete expressions,
+   additionally in-limit references to limits will be validated.
+   If the server already has the 'suites' of the same name, then a error message is issued.
+   The suite's can be overwritten if the force option is used.
+   To just check the definition and not send to server, use 'check_only'
+   This command can also be used to load a checkpoint file into the server
+     arg1 = path to the definition file or checkpoint file
+     arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all
+   Usage:
+   --load=/my/home/exotic.def               # will error if suites of same name exists
+   --load=/my/home/exotic.def force         # overwrite suite's of same name in the server
+   --load=/my/home/exotic.def check_only    # Just check, don't send to server
+   --load=/my/home/exotic.def stats         # Show defs statistics, don't send to server
+   --load=host1.3141.check                  # Load checkpoint file to the server
+   --load=host1.3141.check print            # print definition to standard out in defs format
+   
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

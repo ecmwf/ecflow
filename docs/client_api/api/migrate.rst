@@ -1,0 +1,44 @@
+
+.. _migrate_cli:
+
+migrate
+///////
+
+::
+
+   
+   migrate
+   -------
+   
+   Used to print state of the definition returned from the server to standard output.
+   The node state is shown in the comments.
+   This is the format used in the check point file, but with indentation.
+   Since this is essentially the defs format with state in the comments,it allows the definition to be migrated to future version of ecflow.
+   The output includes edit history but excludes externs.
+   When the definition is reloaded *NO* checking is done.
+   
+   The following shows a summary of the features associated with each choice:
+                          --get  --get_state  --migrate
+   Auto generate externs    Yes    Yes          No
+   Checking on reload       Yes    Yes          No
+   Edit History             No     No           Yes
+   Show trigger AST         No     Yes          No
+   
+   Usage:
+       --migrate         # show all suites
+       --migrate=/s1     # show state for suite s1
+   
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

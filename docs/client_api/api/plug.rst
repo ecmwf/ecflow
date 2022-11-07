@@ -1,0 +1,41 @@
+
+.. _plug_cli:
+
+plug
+////
+
+::
+
+   
+   plug
+   ----
+   
+   Plug command is used to move nodes.
+   The destination node can be on another server In which case the destination
+   path should be of the form '<host>:<port>/suite/family/task
+     arg1 = path to source node
+     arg2 = path to the destination node
+   This command can fail because:
+   - Source node is in a 'active' or 'submitted' state
+   - Another user already has an lock
+   - source/destination paths do not exist on the corresponding servers
+   - If the destination node path is empty, i.e. only host:port is specified,
+     then the source node must correspond to a suite.
+   - If the source node is added as a child, then its name must be unique
+     amongst its peers
+   Usage:
+     --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

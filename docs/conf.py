@@ -19,8 +19,8 @@ import sys
 sys.path.insert(0, os.path.abspath("."))
 sys.path.append(os.path.abspath("./_ext"))
 
-build_path     = "/Users/cgr/build/ecflow/debug/Pyext/python3"
-sys.path.insert(0,build_path) 
+# build_path = "/Users/cgr/build/ecflow/debug/Pyext/python3"
+# sys.path.insert(0, build_path)
 
 # -- Project information -----------------------------------------------------
 
@@ -37,11 +37,7 @@ copyright = "%s, European Centre for Medium-Range Weather Forecasts (ECMWF)" % (
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-    "sphinx_rtd_theme",
-    'sphinx.ext.viewcode',
-    'sphinx.ext.autodoc'
-]
+extensions = ["sphinx_rtd_theme", "sphinx.ext.viewcode", "sphinx.ext.autodoc"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -49,7 +45,13 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "python_api_old",
+    "build_python_api",
+]
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -89,16 +91,30 @@ rst_prolog = """
 # built documents.
 #
 
+
 def get_ecflow_version():
     version = "5.9.0"
     ecflow_version = version.split(".")
-    print("Extracted ecflow version '" + str(ecflow_version) )
+    print("Extracted ecflow version '" + str(ecflow_version))
     return ecflow_version
 
+
+# import sphinx.ext.autodoc
+
+# _RST_FP = open("MY_PY.rst", "w")
+
+
+# def add_line(self, line, source, *lineno):
+#     """Append one line of generated reST to the output."""
+#     _RST_FP.write(line + "\n")
+#     # print(f"source={source}")
+#     self.directive.result.append(self.indent + line, source, *lineno)
+
+
+# sphinx.ext.autodoc.Documenter.add_line = add_line
 
 # The full version, including alpha/beta/rc tags.
 ecflow_version_list = get_ecflow_version()
 assert len(ecflow_version_list) == 3, "Expected version to have release, major,minor"
 version = ".".join(ecflow_version_list[:2])
 release = ".".join(ecflow_version_list)
-

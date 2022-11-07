@@ -5,3 +5,8 @@ __pycache__/
 
 # Sphinx documentation
 _build
+
+# Utils
+client_ap/*.txt
+build_python_api/rst
+build_python_api/_build

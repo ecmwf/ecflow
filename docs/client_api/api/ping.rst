@@ -1,0 +1,34 @@
+
+.. _ping_cli:
+
+ping
+////
+
+::
+
+   
+   ping
+   ----
+   
+   Check if server is running on given host/port. Result reported to standard output.
+   Usage:
+     --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144
+     --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,
+                                     # otherwise default port of 3141
+     --ping                          # Check if server alive by using environment variables
+                                     # ECF_HOST and ECF_PORT
+   If ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

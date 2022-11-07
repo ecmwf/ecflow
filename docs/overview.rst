@@ -30,28 +30,23 @@ it finishes.
 **ecFlow** functionality is provided by the following executables and
 shared libraries
 
--  `ecflow_client <http://confluence.ecmwf.int/display/ECFLOW/Glossary>`__:
+-  :term:`ecflow_client`:
    This executable is a command-line program; it is used for all
-   communication with the server. This executable implements the Command
-   Level Interface (CLI). The bulk of this functionality is also
-   provided by the python API
+   communication with the server. This executable implements the :ref:`ecflow_cli`. The bulk of this functionality is also provided by the :ref:`python_api`
 
--  `ecflow_ui <http://confluence.ecmwf.int/display/ECFLOW/ecFlowUI>`__:
+-  :ref:`ecflow_ui`:
    This is a specialized GUI client that monitors and visualizes the
    node tree hierarchy. Based on QT.
 
--  `ecflow_server <http://confluence.ecmwf.int/display/ECFLOW/Glossary>`__:
+-  :term:`ecflow_server`:
    This executable is the server. It is responsible for scheduling the
    jobs and responding to ecflow_client requests.
 
--  `ecflow.so <https://confluence.ecmwf.int/display/ECFLOW/ecFlow+Python+Api>`__ : 
-   ` Python interface <http://confluence.ecmwf.int/pages/viewpage.action?pageId=7372849>`__ These
-   shared libraries provide the python API for creating the suite
-   definition and communication with the server.
+-  :ref:`ecflow.so <python_api>`: Python interface. This shared library provide the python API for creating the suite definition and communication with the server.
 
 **ecFlow** runs as a server receiving requests from clients. CLI, GUI,
 and suite jobs are clients. Communication is based on TCP/IP. Note that
-ecFlow is a scheduler and is not a queuing system such as NQS, SGE, Load
+ecFlow is a scheduler sand is not a queuing system such as NQS, SGE, Load
 leveler, or PBS. However, it can submit to queuing systems.
 
 History
@@ -75,8 +70,7 @@ proprietary script language used by SMS, CDP, has been replaced by
 Python.
 
 The development of ecflow 4 has now stopped. But support is still
-provided. It has been replaced by `ecflow
-5 <https://confluence.ecmwf.int/display/ECFLOW/ecflow+5+what%27s+new>`__
+provided. It has been replaced by ecFlow 5.
 
 You can find an introduction to ecFlow in the `ECMWF Newsletter
 article <http://www.ecmwf.int/sites/default/files/elibrary/2011/14594-newsletter-no129-autumn-2011.pdf>`__ 

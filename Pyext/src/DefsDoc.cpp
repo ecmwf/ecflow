@@ -366,7 +366,7 @@ const char* DefsDoc::task_doc()
 const char* DefsDoc::alias_doc()
 {
    return
-            "A Aliases is create by the GUI or via edit_script command\n\n"
+            "Aliases can be created by the GUI or via edit_script command\n\n"
             "Aliases provide a mechanism to edit/test task scripts without effecting the suite\n"
             "The Aliases parent is always a Task.Multiple Alias can be added\n"
             ;

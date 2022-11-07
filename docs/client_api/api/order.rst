@@ -1,0 +1,49 @@
+
+.. _order_cli:
+
+order
+/////
+
+::
+
+   
+   order
+   -----
+   
+   Re-orders the nodes held by the server
+     arg1 = node path
+     arg2 = [ top | bottom | alpha | order | up | down | runtime]
+   It should be noted that in the absence of triggers and time/date dependencies,
+   the tasks are submitted in order.
+   This changes the order and hence affects the submission order::
+   
+      o top     raises the node within its parent, so that it is first
+      o bottom  lowers the node within its parent, so that it is last
+      o alpha   Arranges for all the peers of selected note to be sorted alphabetically (case-insensitive)
+      o order   Arranges for all the peers of selected note to be sorted in reverse alphabet(case-insensitive)
+      o up      Moves the selected node up one place amongst its peers
+      o down    Moves the selected node down one place amongst its peers
+   
+      o runtime Orders the nodes according to state change runtime
+                for families by accumulated runtime of its children
+                useful to submit the task that take longer earlier
+   
+   This command can fail because:
+   - The node path does not exist in the server
+   - The order_type is not does not match one of arg2
+   Usage:
+     --order=/suite/f1 top  # move node f1 to the top
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

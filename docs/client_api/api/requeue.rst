@@ -1,0 +1,40 @@
+
+.. _requeue_cli:
+
+requeue
+///////
+
+::
+
+   
+   requeue
+   -------
+   
+   Re queues the specified node(s)
+     If any child of the specified node(s) is in a suspended state, this state is cleared
+   Repeats are reset to their starting values, relative time attributes are reset.
+     arg1 = (optional) [ abort | force ]
+            abort  = re-queue only aborted tasks below node
+            force  = Force the re-queueing even if there are nodes that are active or submitted
+            <null> = Checks if any tasks are in submitted or active states below the node
+                     if so does nothing. Otherwise re-queues the node.
+     arg2 = list of node paths. The node paths must begin with a leading '/' character
+   
+   Usage:
+     --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1
+     --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.
+     --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

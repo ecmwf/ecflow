@@ -1,0 +1,43 @@
+
+.. _ch_register_cli:
+
+ch_register
+///////////
+
+::
+
+   
+   ch_register
+   -----------
+   
+   Register interest in a set of suites.
+   If a definition has lots of suites, but the client. is only interested in a small subset,
+   Then using this command can reduce network bandwidth and synchronisation will be quicker.
+   This command will create a client handle, which must be used for any other changes.
+   The newly created handle can be shown with the --ch_suites command
+   Deleted suites will stay registered, and must be explicitly removed/dropped.
+   Note: Suites can be registered before they are loaded into the server
+   This command affects news() and sync() commands
+      arg1 = true | false           # true means add new suites to my list, when they are created
+      arg2 = names                  # should be a list of suite names, names not in the definition are ignored
+   Usage:
+      --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites
+      --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only
+      --ch_register=false           # register handle, suites will be added later on
+      --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites
+                                    # The client handle as the first argument is typically used by GUI/python                                 # When the client handle is no zero, then it is dropped first
+   To list all suites and handles use --ch_suites
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   

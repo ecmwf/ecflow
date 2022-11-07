@@ -16,7 +16,7 @@ its descendants.
 
 The search dialogue is split into three parts - the editor, the
 generated query and the results. The first two parts can be hidden in
-order to give more space to the results.
+order to give more space to the results
 
 .. image:: /_static/ecflow_ui/searching_for_nodes/image2.png
    :width: 3.95833in
@@ -56,7 +56,7 @@ below:
 
    **String match options**                                           
                                                                        
-   *  **Matches** is a wildcard match, similar to UNIX file syntax, where "*" means "any number of any characters"  and "?" means "one of any character", e.g. "*monitor?". If no wildcard characters are used, the result will be that only those nodes hose names/paths exactly match the string will be found. This is often the simplest way of searching. See http://doc.qt.io/qt-5qregexphtml#wildcard-matching. 
+   *  **Matches** is a wildcard match, similar to UNIX file syntax, where "*" means "any number of any characters"  and "?" means "one of any character", e.g. "*monitor?*". If no wildcard characters are used, the result will be that only those nodes hose names/paths exactly match the string will be found. This is often the simplest way of searching. See http://doc.qt.io/qt-5qregexphtml#wildcard-matching. 
                                                       
    *  **Regexp** is a regular expression match, using the Qt regexp syntax. The regexp equivalent of the above example would be ".*monitor.". See http://doc.qt.io/qt-5/qregexp.html#introduction.                
                                                                        

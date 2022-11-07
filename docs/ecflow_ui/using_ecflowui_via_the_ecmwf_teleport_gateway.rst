@@ -16,9 +16,7 @@ port forwarding.
 .. note::
 
     You can install ecFlowUI on MacOS platforms using                  
-    :ref:`Brew <brew>`, or    
-    the full ecFlow from                                               
-    `conda-forge <https://confluence.ecmwf.int/display/ECFLOW/Conda-forge>`__. 
+    :ref:`brew`, or the full ecFlow from :ref:`conda-forge`. 
 
 Dynamic port forwarding
 =======================

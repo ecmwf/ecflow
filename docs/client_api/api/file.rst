@@ -1,0 +1,33 @@
+
+.. _file_cli:
+
+file
+////
+
+::
+
+   
+   file
+   ----
+   
+   Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]
+   By default will return the script.
+     arg1 = path to node
+     arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]
+            kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill
+            stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat
+     arg3 = (optional) max_lines = 10000 <default>
+   
+   The client reads in the following environment variables. These are read by user and child command
+   
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | Name     |  Type    | Required   | Description                                                       |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   | ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |
+   | ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |
+   | ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |
+   |----------|----------|------------|-------------------------------------------------------------------|
+   
+   * The host and port must be specified in order for the client to communicate with the server, this can 
+     be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line
+   
