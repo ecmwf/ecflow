@@ -27,7 +27,9 @@ Exception:
 - Throws a RuntimeError if the name is not valid
 - Throws a RuntimeError if a duplicate family is added
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   suite = Suite('suite_1')       # create a suite
   family = Family('family_1')    # create a family

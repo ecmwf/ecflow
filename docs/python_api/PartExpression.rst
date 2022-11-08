@@ -24,13 +24,17 @@ Constructor::
                     If false the expression is to be 'ored', with a previously added expression
 
 Usage:
-To add simple expression this class can be by-passed, i.e. can use::
+To add simple expression this class can be by-passed, i.e. can use:
+
+.. code-block:: python
 
   task = Task('t1')
   task.add_trigger( 't2 == active' )
   task.add_complete( 't2 == complete' )
 
-To add large triggers and complete expression::
+To add large triggers and complete expression:
+
+.. code-block:: python
 
   exp1 = PartExpression('t1 == complete')
   # a simple expression can be added as a string

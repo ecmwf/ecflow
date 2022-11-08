@@ -24,7 +24,9 @@ Add a :term:`family`. See :py:class:`ecflow.Family`.
     
     - Throws RuntimeError if a duplicate is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       suite = Suite('suite')          # create a suite
       f1 = Family('f1')               # create a family
@@ -47,7 +49,9 @@ Add a :term:`task`. See :py:class:`ecflow.Task`
     
     - Throws RuntimeError if a duplicate is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       f1 = Family('f1')      # create a family
       t1 = Task('t1')          # create a task

@@ -36,7 +36,9 @@ Exceptions:
 
 - raises IndexError when an invalid Today is specified
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    today1 = Today( 10,10 )                                                   #  today 10:10 
    today2 = Today( TimeSlot(10,10) )                                         #  today 10:10 

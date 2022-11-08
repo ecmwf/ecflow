@@ -21,7 +21,9 @@ Constructor::
       string name: the name of the limit
       int   value: The value of the limit
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    limit = Limit('fast', 10)
     ...

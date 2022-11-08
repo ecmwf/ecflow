@@ -39,7 +39,9 @@ Exceptions:
 
 - raises IndexError when an invalid Time is specified
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    time1 = Time( 10,10 )                                                   #  time 10:10 
    time2 = Time( TimeSlot(10,10), true)                                    #  time +10:10 

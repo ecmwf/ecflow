@@ -16,7 +16,9 @@ Constructor::
    RepeatDay(step)
       int step:     The step.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    t = Task('t1',
              RepeatDay( 1 ))

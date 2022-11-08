@@ -25,7 +25,9 @@ Constructor::
    Autocancel(days)
       int days:        Delete the node 'days' after completion
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    attr = Autocancel( 1,30, true )              # delete node 1 hour and 30 minutes after completion
    attr = Autocancel( TimeSlot(0,10), true )    # delete node 10 minutes after completion

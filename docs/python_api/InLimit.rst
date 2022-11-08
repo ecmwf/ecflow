@@ -7,7 +7,9 @@ ecflow.InLimit
 
    Bases: :py:class:`~Boost.Python.instance`
 
-:term:`inlimit` is used in conjunction with :term:`limit` to provide simple load management::
+:term:`inlimit` is used in conjunction with :term:`limit` to provide simple load management:
+
+.. code-block:: shell
 
    suite x
       limit fast 1
@@ -32,7 +34,9 @@ Constructor::
       bool limit_this_node_only<optional> : Only limits this node and *NOT* its children
                                             Can be used load balance families
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    inlimit = InLimit('fast','/x/f', 2)
     ...

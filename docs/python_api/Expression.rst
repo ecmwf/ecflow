@@ -22,7 +22,9 @@ Constructor::
       PartExpression part: The first part expression should have no 'and/or' set
 
 Usage:
-To add simple expression this class can be by passed, i.e. can use::
+To add simple expression this class can be by passed, i.e. can use:
+
+.. code-block:: python
 
   task = Task('t1')
   task.add_trigger( 't2 == active' )
@@ -32,7 +34,9 @@ To add simple expression this class can be by passed, i.e. can use::
   task.add_trigger( 't1 == active' )
   task.add_part_trigger( 't3 == active', True)
 
-To store and add large expressions use a Expression with PartExpression::
+To store and add large expressions use a Expression with PartExpression:
+
+.. code-block:: python
 
   big_expr = Expression( PartExpression('t1 == complete or t4 == complete') )
   big_expr.add( PartExpression('t5 == active',True) )
@@ -42,7 +46,7 @@ To store and add large expressions use a Expression with PartExpression::
 In the example above the trigger for task is equivalent to
 't1 == complete or t4 == complete and t5 == active or t7 == active'
 
-::
+.. code-block:: python
 
   big_expr2 = Expression('t0 == complete'))
   big_expr2.add( PartExpression('t1 == complete or t4 == complete',True) )

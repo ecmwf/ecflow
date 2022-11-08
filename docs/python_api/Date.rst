@@ -28,7 +28,9 @@ Exceptions:
 
 - raises IndexError when an invalid date is specified
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   date = Date(11,12,2010)  # represent 11th of December 2010
   date = Date(1,0,0);      # means the first day of every month of every year

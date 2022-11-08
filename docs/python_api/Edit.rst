@@ -27,14 +27,18 @@ Constructor::
 
    Edit(dict,kwarg) # alternative that allows multiple variables
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    ...
    var = Variable('ECF_JOB_CMD','/bin/sh %ECF_JOB% &')
    task.add_variable(var)
    task.add_variable('JOE','90')
 
-The following use example of using Edit, which allow multiple variables to added at the same time ::
+The following use example of using Edit, which allow multiple variables to added at the same time :
+
+.. code-block:: python
 
    t = Task('t1',
              Edit({ 'a':'y', 'b':'bb'}, c='v',d='b'),
@@ -42,7 +46,7 @@ The following use example of using Edit, which allow multiple variables to added
              Edit(g='d'),
              Edit(h='1'))
 
-::
+.. code-block:: python
 
   defs = Defs(
             Suite('s1'),

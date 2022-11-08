@@ -33,7 +33,9 @@ Exceptions:
 
 - raises IndexError when an invalid Clock is specified
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    suite = Suite('s1')
    clock = Clock(1,1,2012,False)

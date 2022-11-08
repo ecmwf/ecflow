@@ -21,7 +21,9 @@ Constructor::
 
    Autorestore( list of paths )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    attr = Autorestore( ['/s1/f1'] )           # restore archived node at /s1/f1
    attr = Autorestore( ['/s1/f1','/s1/f2'] )  # restore archived node at /s1/f1 and /s1/f2

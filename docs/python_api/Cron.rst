@@ -29,7 +29,9 @@ Exceptions:
 
 - raises IndexError || RuntimeError when an invalid cron is specified
 
-Usage::
+Usage:
+
+.. code-block:: python
 
     cron = Cron('+00:00 23:00 00:30', days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])
 

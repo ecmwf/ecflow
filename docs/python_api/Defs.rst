@@ -22,10 +22,12 @@ If however the definition is created in python, then checking should be done exp
 
       :py:class:`ecflow.Edit` - specifies user defined server variables
 
-Example::
+Example:
 
-  # Build definition using Constructor approach, This allows indentation, to show the structure
-  # This is a made up example to demonstrate suite construction:
+.. code-block:: python
+
+ # Build definition using Constructor approach, This allows indentation, to show the structure
+ # This is a made up example to demonstrate suite construction:
  defs = Defs(
      Edit(SLEEP=10,FRED='bill'),  # user defined server variables
      Suite('s1'
@@ -60,7 +62,9 @@ Example::
   for i in [ '_1', '_2', '_3' ]: family.add_task( 't' + i )
   defs.save_as_defs('filename.def')  # save defs into file
 
-Create a Defs from an existing file on disk. ::
+Create a Defs from an existing file on disk:
+
+.. code-block:: python
 
   defs = Defs('filename.def')   #  Will open and parse the file and create the Definition
   print(defs)
@@ -72,7 +76,9 @@ Create a Defs from an existing file on disk. ::
 object add(tuple args, dict kwds) :
     add(..) provides a way to append Nodes and attributes
     
-    This is best illustrated with an example::
+    This is best illustrated with an example:
+    
+    .. code-block:: python
     
      defs = Defs().add(
          Suite('s1').add(
@@ -99,16 +105,18 @@ object add(tuple args, dict kwds) :
                  ),
              [ Family('f{}'.format(i)) for i in range(1,6)]))
     
-    We can also use '+=' with a list here are a few examples::
+    We can also use '+=' with a list here are a few examples:
+    
+    .. code-block:: python
     
      defs = Defs();
      defs += [ Suite('s2'),Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b') ]
     
-    ::
+    .. code-block:: python
     
      defs += [ Suite('s{}'.format(i)) for i in range(1,6) ]
     
-    ::
+    .. code-block:: python
     
      defs = Defs()
      defs += [ Suite('suite').add(
@@ -122,7 +130,7 @@ object add(tuple args, dict kwds) :
     
     It is also possible to use '+'
     
-    ::
+    .. code-block:: python
     
      defs = Defs() + Suite('s1')
      defs.s1 += Autocancel(1, 10, True)
@@ -145,11 +153,15 @@ object add(tuple args, dict kwds) :
 loaded yet. The references to node paths and variable must exist, or exist as externs
 Externs can be added manually or automatically.
 
-Manual Method::
+Manual Method:
+
+.. code-block:: python
 
   void add_extern(string nodePath )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   defs = Defs('file.def')
   ....
@@ -165,11 +177,13 @@ Automatic Method:
   be added. It is the user's responsibility to check that extern's are eventually defined
   otherwise trigger expression will not evaluate correctly
 
-::
+.. code-block:: python
 
   void auto_add_externs(bool remove_existing_externs_first )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   defs = Defs('file.def')
   ...
@@ -188,7 +202,9 @@ Add a :term:`suite` :term:`node`. See :py:class:`ecflow.Suite`
     - Throws RuntimeError is the suite name is not valid
     - Throws RuntimeError if duplicate suite is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       defs = Defs()                # create a empty defs
       suite = Suite('suite')       # create a stand alone Suite 
@@ -229,7 +245,9 @@ Adds a name value :term:`variable`. Also see :py:class:`ecflow.Edit`
     
     - Writes warning to standard output, if a duplicate variable name is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       task.add_variable( Variable('ECF_HOME','/tmp/'))
       task.add_variable( 'TMPDIR','/tmp/')
@@ -254,11 +272,15 @@ add_variable( (Defs)arg1, (dict)arg2) -> Defs
 loaded yet. The references to node paths and variable must exist, or exist as externs
 Externs can be added manually or automatically.
 
-Manual Method::
+Manual Method:
+
+.. code-block:: python
 
   void add_extern(string nodePath )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   defs = Defs('file.def')
   ....
@@ -274,11 +296,13 @@ Automatic Method:
   be added. It is the user's responsibility to check that extern's are eventually defined
   otherwise trigger expression will not evaluate correctly
 
-::
+.. code-block:: python
 
   void auto_add_externs(bool remove_existing_externs_first )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   defs = Defs('file.def')
   ...
@@ -298,7 +322,9 @@ Check :term:`trigger` and :term:`complete expression` s and :term:`limit` s
 
 Returns a non empty string for any errors or warning
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    # Client side
    defs = Defs('my.def')        # Load my.def from disk
@@ -331,7 +357,9 @@ Check `job creation` .
     If no node path is set on class JobCreationCtrl then all tasks are checked.
     In the case where we want to check all tasks, use the convenience function that take no arguments.
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        defs = Defs('my.def')                     # specify the defs we want to check, load into memory
        ...
@@ -430,7 +458,9 @@ Optional:
 - SLEEP: Uses this variable to delay time between calls to child commands, if not specified uses delay of one second
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    defs = ecflow.Defs()
    suite = defs.add_suite('s1')
@@ -461,7 +491,9 @@ Returns all the :term:`task` nodes
 Returns the :term:`ecflow_server` state: See :term:`server states`
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()           # use default host(ECF_HOST) & port(ECF_PORT)
@@ -516,7 +548,9 @@ Simulates a suite definition, allowing you predict/verify the behaviour of your 
 The simulator will analyse the definition, and simulate the ecflow server.
 Allowing time dependencies that span several months, to be simulated in a few seconds.
 Ecflow allows the use of verify attributes. This example show how we can verify the number of times
-a task should run, given a start(optional) and end time(optional)::
+a task should run, given a start(optional) and end time(optional):
+
+.. code-block:: shell
 
   suite cron3              # use real clock otherwise clock starts when the simulations starts.
      clock real  1.1.2006  # define a start date for deterministic behaviour
@@ -543,7 +577,9 @@ use 1 hour resolution. This needs to be taken into account when specifying the v
 If the simulation does not complete it creates  defs.flat and  defs.depth files.
 This provides clues as to the state of the definition at the end of the simulation
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    defs = Defs('my.def')        # specify the defs we want to simulate
    ....

@@ -11,7 +11,9 @@ This enum is used as argument to a :py:class:`ecflow.Day` class.
 
 It represents the days of the week
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    day1 = Day(Days.sunday)
    day2 = Day(Days.monday)

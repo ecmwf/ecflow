@@ -59,13 +59,6 @@ master_doc = "index"
 #
 html_theme = "sphinx_rtd_theme"
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
-html_logo = ""
-
 highlight_language = "none"
 
 
@@ -73,23 +66,31 @@ import sphinx.ext.autodoc
 
 
 class TargetFile:
+    LAST_NAME = "ZombieVec"
+
     def __init__(self):
         self.name = ""
         self.fp = None
 
     def write(self, source, line):
         _, _, s = source.rpartition("docstring of ecflow.")
+        if "zombievec" in s.lower():
+            print(s)
         s = s.split(".")
         if s:
             name = s[0]
-            self._open(name)
-            if self.fp is not None:
-                self.fp.write(line + "\n")
+            if name and name[0].isupper():
+                self._open(name)
+                if self.fp is not None:
+                    self.fp.write(line + "\n")
+                    if self.name == self.LAST_NAME:
+                        self.fp.close()
+                        self.fp = None
 
     def _open(self, name):
         if self.name == name and self.name != "":
             if self.fp is None:
-                self.fp = open(f"{name}.rst", "w")
+                self.fp = open(f"rst/{name}.rst", "a")
         else:
             self.name = name
             if self.fp is not None:
@@ -108,7 +109,7 @@ targetFile = TargetFile()
 def add_line(self, line, source, *lineno):
     """Append one line of generated reST to the output."""
     # _RST_FP.write(line + "\n")
-    print(f"source={source}")
+    # print(f"source={source}")
     targetFile.write(source, line)
     self.directive.result.append(self.indent + line, source, *lineno)
 

@@ -19,7 +19,9 @@ Constructor::
                            referenced in trigger expressions using the variable name
       vector list:         The list of enumerations
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    t = Task('t1',
             RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))

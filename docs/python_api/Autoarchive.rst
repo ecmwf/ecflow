@@ -37,7 +37,9 @@ Constructor::
       bool idle:     True archive if node queued,aborted and complete, False means archive after completion only
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    attr = Autoarchive( 1,30, true )              # archive node 1 hour and 30 minutes after completion
    attr = Autoarchive( TimeSlot(0,10), true )    # archive node 10 minutes after completion

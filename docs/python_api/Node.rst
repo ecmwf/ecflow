@@ -18,7 +18,9 @@ Every Node instance has a name, and a path relative to a suite
 object add(tuple args, dict kwds) :
     add(..) provides a way to append Nodes and attributes
     
-    This is best illustrated with an example::
+    This is best illustrated with an example:
+    
+    .. code-block:: python
     
      defs = Defs().add(
          Suite('s1').add(
@@ -45,16 +47,18 @@ object add(tuple args, dict kwds) :
                  ),
              [ Family('f{}'.format(i)) for i in range(1,6)]))
     
-    We can also use '+=' with a list here are a few examples::
+    We can also use '+=' with a list here are a few examples:
+    
+    .. code-block:: python
     
      defs = Defs();
      defs += [ Suite('s2'),Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b') ]
     
-    ::
+    .. code-block:: python
     
      defs += [ Suite('s{}'.format(i)) for i in range(1,6) ]
     
-    ::
+    .. code-block:: python
     
      defs = Defs()
      defs += [ Suite('suite').add(
@@ -68,7 +72,7 @@ object add(tuple args, dict kwds) :
     
     It is also possible to use '+'
     
-    ::
+    .. code-block:: python
     
      defs = Defs() + Suite('s1')
      defs.s1 += Autocancel(1, 10, True)
@@ -100,7 +104,9 @@ Add a `autoarchive` attribute. See :py:class:`ecflow.Autoarchive`
     
     - Throws a RuntimeError if more than one auto archive is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_autoarchive( Autoarchive(20,10,False) )  # hour,min, relative
@@ -138,7 +144,9 @@ Add a `autocancel` attribute. See :py:class:`ecflow.Autocancel`
     
     - Throws a RuntimeError if more than one auto cancel is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_autocancel( Autocancel(20,10,False) )  # hour,min, relative
@@ -177,7 +185,9 @@ Add a `autorestore` attribute. See :py:class:`ecflow.Autorestore`
     
     - Throws a RuntimeError if more than one autorestore is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_autorestore( ['/s1/f1'] )   
@@ -209,13 +219,17 @@ Add a :term:`trigger` or :term:`complete expression`.Also see :py:class:`ecflow.
     Usage:
     
     Note we cannot make multiple add_trigger(..) calls on the same :term:`task`!
-    to add a simple trigger::
+    to add a simple trigger:
+    
+    .. code-block:: python
     
       task1.add_trigger( 't2 == active' )
       task2.add_trigger( 't1 == complete or t4 == complete' )
       task3.add_trigger( 't5 == active' )
     
-    Long expression can be broken up using add_part_trigger::
+    Long expression can be broken up using add_part_trigger:
+    
+    .. code-block:: python
     
       task2.add_part_trigger( 't1 == complete or t4 == complete')
       task2.add_part_trigger( 't5 == active',True)  # True means  AND
@@ -233,7 +247,9 @@ add_complete( (Node)arg1, (Expression)arg2) -> Node
 Add a :term:`cron` time dependency. See :py:class:`ecflow.Cron`
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   start = TimeSlot(0,0)
   finish = TimeSlot(23,0)
@@ -263,7 +279,9 @@ Add a :term:`date` time dependency. See :py:class:`ecflow.Date`
     
     - Throws RuntimeError if an invalid date is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1',
                 Date('1.*.*'),
@@ -283,7 +301,9 @@ add_date( (Node)arg1, (Date)arg2) -> Node
 Add a :term:`day` time dependency. See :py:class:`ecflow.Day`
     
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1',
                 Day('sunday'))  # Create Day on Task creation
@@ -306,7 +326,9 @@ Set the default status( :term:`defstatus` ) of node at begin or re queue. See :p
     A :term:`defstatus` is useful in preventing suites from running automatically
     once begun, or in setting Task's complete so they can be run selectively
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1') + Defstatus('complete')
       t2 = Task('t2').add_defstatus( DState.suspended )
@@ -322,7 +344,9 @@ add_defstatus( (Node)arg1, (Defstatus)arg2) -> Node :
     A :term:`defstatus` is useful in preventing suites from running automatically
     once begun, or in setting Task's complete so they can be run selectively
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1') + Defstatus('complete')
       t2 = Task('t2').add_defstatus( DState.suspended )
@@ -344,7 +368,9 @@ Add a :term:`event`. See :py:class:`ecflow.Event`
     
     - Throws RuntimeError if a duplicate is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1',
                 Event(12),
@@ -355,7 +381,9 @@ Add a :term:`event`. See :py:class:`ecflow.Event`
       t1.add_event( 12 )
       t1.add_event( 13, 'name')
     
-    To reference event 'flag' in a trigger::
+    To reference event 'flag' in a trigger:
+    
+    .. code-block:: python
     
       t1.add_event('flag')
       t2 = Task('t2',
@@ -385,7 +413,9 @@ Adds a :term:`inlimit` to a :term:`node`. See :py:class:`ecflow.InLimit`
     
     - Throws RuntimeError if a duplicate is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       task2.add_inlimit( InLimit('limitName','/s1/f1',2) )
       task2.add_inlimit( 'limitName','/s1/f1',2 )
@@ -405,12 +435,16 @@ Adds a :term:`label` to a :term:`node`. See :py:class:`ecflow.Label`
     
     - Throws RuntimeError if a duplicate label name is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       task.add_label( Label('TEA','/me/'))
       task.add_label( 'Joe','/me/')
     
-    The corresponding child command in the .ecf script file might be::
+    The corresponding child command in the .ecf script file might be:
+    
+    .. code-block:: shell
     
       ecflow_client --label=TEA time
       ecflow_client --label=Joe ninety
@@ -429,7 +463,9 @@ Exception:
 
 - Throws a RuntimeError if more than one late is added
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   late = Late()
   late.submitted( 20,10 )     # hour,minute
@@ -455,7 +491,9 @@ Adds a :term:`limit` to a :term:`node` for simple load management. See :py:class
     
     - Throws RuntimeError if a duplicate limit name is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       family.add_limit( Limit('load',12) )
       family.add_limit( 'load',12 )
@@ -475,14 +513,18 @@ Add a :term:`meter`. See :py:class:`ecflow.Meter`
     
     - Throws RuntimeError if a duplicate is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1',
                 Meter('met',0,50))                   # create Meter on Task creation
       t1.add_meter( Meter('metername',0,100,50) )  # create Meter using function
       t1.add_meter( 'meter',0,200)
     
-    To reference in a trigger::
+    To reference in a trigger:
+    
+    .. code-block:: python
     
       t2 = Task('t2')
       t2.add_trigger('t1:meter >= 10')
@@ -510,13 +552,17 @@ Add a :term:`trigger` or :term:`complete expression`.Also see :py:class:`ecflow.
     Usage:
     
     Note we cannot make multiple add_trigger(..) calls on the same :term:`task`!
-    to add a simple trigger::
+    to add a simple trigger:
+    
+    .. code-block:: python
     
       task1.add_trigger( 't2 == active' )
       task2.add_trigger( 't1 == complete or t4 == complete' )
       task3.add_trigger( 't5 == active' )
     
-    Long expression can be broken up using add_part_trigger::
+    Long expression can be broken up using add_part_trigger:
+    
+    .. code-block:: python
     
       task2.add_part_trigger( 't1 == complete or t4 == complete')
       task2.add_part_trigger( 't5 == active',True)  # True means  AND
@@ -549,13 +595,17 @@ Add a :term:`trigger` or :term:`complete expression`.Also see :py:class:`ecflow.
     Usage:
     
     Note we cannot make multiple add_trigger(..) calls on the same :term:`task`!
-    to add a simple trigger::
+    to add a simple trigger:
+    
+    .. code-block:: python
     
       task1.add_trigger( 't2 == active' )
       task2.add_trigger( 't1 == complete or t4 == complete' )
       task3.add_trigger( 't5 == active' )
     
-    Long expression can be broken up using add_part_trigger::
+    Long expression can be broken up using add_part_trigger:
+    
+    .. code-block:: python
     
       task2.add_part_trigger( 't1 == complete or t4 == complete')
       task2.add_part_trigger( 't5 == active',True)  # True means  AND
@@ -590,7 +640,9 @@ Add a RepeatDate attribute. See :py:class:`ecflow.RepeatDate`
     
     - Throws a RuntimeError if more than one repeat is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_repeat( RepeatDate('YMD',20100111,20100115) )
@@ -605,7 +657,9 @@ add_repeat( (Node)arg1, (RepeatDateList)arg2) -> Node :
     
     A node can only have one repeat
     Reference to a RepeatDateList in a trigger will use date arithmetic. i.e.
-    Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer::
+    Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer:
+    
+    .. code-block:: python
     
       trigger /suite/family:YMD + 1 > 20190101
     
@@ -614,7 +668,9 @@ add_repeat( (Node)arg1, (RepeatDateList)arg2) -> Node :
     
     - Throws a RuntimeError if more than one repeat is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_repeat( RepeatDateList('YMD',[20100111,20100115]) )
@@ -633,7 +689,9 @@ add_repeat( (Node)arg1, (RepeatInteger)arg2) -> Node :
     
     - Throws a RuntimeError if more than one repeat is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_repeat( RepeatInteger('testInteger',0,100,2) )
@@ -652,7 +710,9 @@ add_repeat( (Node)arg1, (RepeatString)arg2) -> Node :
     
     - Throws a RuntimeError if more than one repeat is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_repeat( RepeatString('test_string',['a', 'b', 'c' ] ) )
@@ -671,7 +731,9 @@ add_repeat( (Node)arg1, (RepeatEnumerated)arg2) -> Node :
     
     - Throws a RuntimeError if more than one repeat is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1')
       t1.add_repeat( RepeatEnumerated('test_string', ['red', 'green', 'blue' ] ) )
@@ -690,7 +752,9 @@ add_repeat( (Node)arg1, (RepeatDay)arg2) -> Node :
     
     - Throws a RuntimeError if more than one repeat is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t2 = Task('t2',
                 RepeatDay(1))
@@ -703,7 +767,9 @@ add_repeat( (Node)arg1, (RepeatDay)arg2) -> Node :
 Add a :term:`time` dependency. See :py:class:`ecflow.Time`
     
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1', Time('+00:30 20:00 01:00')) # Create Time in Task constructor
       t1.add_time( '00:30' )
@@ -734,7 +800,9 @@ add_time( (Node)arg1, (Time)arg2) -> Node
 Add a :term:`today` time dependency. See :py:class:`ecflow.Today`
     
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       t1 = Task('t1',
                 Today('+00:30 20:00 01:00')) # Create Today in Task constructor
@@ -780,13 +848,17 @@ Add a :term:`trigger` or :term:`complete expression`.Also see :py:class:`ecflow.
     Usage:
     
     Note we cannot make multiple add_trigger(..) calls on the same :term:`task`!
-    to add a simple trigger::
+    to add a simple trigger:
+    
+    .. code-block:: python
     
       task1.add_trigger( 't2 == active' )
       task2.add_trigger( 't1 == complete or t4 == complete' )
       task3.add_trigger( 't5 == active' )
     
-    Long expression can be broken up using add_part_trigger::
+    Long expression can be broken up using add_part_trigger:
+    
+    .. code-block:: python
     
       task2.add_part_trigger( 't1 == complete or t4 == complete')
       task2.add_part_trigger( 't5 == active',True)  # True means  AND
@@ -816,7 +888,9 @@ Adds a name value :term:`variable`. Also see :py:class:`ecflow.Edit`
     
     - Writes warning to standard output, if a duplicate variable name is added
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       task.add_variable( Variable('ECF_HOME','/tmp/'))
       task.add_variable( 'TMPDIR','/tmp/')
@@ -864,7 +938,9 @@ Constructor::
       int lifetime<optional>: Defines the life time in seconds of the zombie in the server.
                               On expiration, zombie is removed automatically
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    # Add a zombie attribute so that child commands(i.e ecflow_client --init)
    # will fail the job if it is a zombie process.

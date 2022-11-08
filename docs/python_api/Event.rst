@@ -17,7 +17,9 @@ Suites and Families can have events, but these events must be set via the Alter 
 Multiple events can be added to a task.
 An Event has a number and a optional name. Events are typically used
 in :term:`trigger` and :term:`complete expression` , to control job creation.
-Event are fired within a script/:term:`job file`, i.e.::
+Event are fired within a script/:term:`job file`, i.e.:
+
+.. code-block:: shell
 
    ecflow_client --init=$$
    ecflow_client --event=foo
@@ -32,7 +34,9 @@ Constructor::
       int number            : The number must be >= 0
       string name<optional> : If name is given, can only refer to Event by its name
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    event = Event(2,'event_name')
    task.add_event(event)

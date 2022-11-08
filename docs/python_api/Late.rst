@@ -18,7 +18,9 @@ Constructor::
    Late()
    Late(kwargs)
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    # This is interpreted as: The node can stay :term:`submitted` for a maximum of 15 minutes
    # and it must become :term:`active` by 20:00 and the run time must not exceed 2 hours

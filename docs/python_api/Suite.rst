@@ -25,7 +25,9 @@ Exception:
 - Throws a RuntimeError if the name is not valid
 - Throws a RuntimeError if duplicate suite names added
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   defs = Defs()                  # create a empty definition. Root of all Suites
   suite = Suite('suite_1')       # create a stand alone suite

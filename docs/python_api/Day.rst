@@ -21,7 +21,9 @@ Constructor::
    Day(Days)
       Days day: Is an enumerator with represent the days of the week
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    day1 = Day(Days.sunday)
    t = Task('t1',

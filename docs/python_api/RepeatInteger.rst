@@ -21,7 +21,9 @@ Constructor::
       int end:             End end integer value
       int step<optional>:  Default = 1, The step amount
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    t = Task('t1',
             RepeatInteger('HOUR', 6, 24, 6 ))

@@ -29,12 +29,16 @@ Usage:
 
 Using a meter requires:
 
-- Defining a meter on a :term:`task`::
+- Defining a meter on a :term:`task`:
+
+.. code-block:: python
 
      meter = Meter('progress',0,100,100)
      task.add_meter(meter)
 
-- Updating the corresponding :term:`ecf script` file with the meter :term:`child command`::
+- Updating the corresponding :term:`ecf script` file with the meter :term:`child command`:
+
+.. code-block:: shell
 
      ecflow_client --init=$$
      for i in 10 20 30 40 50 60 80 100; do
@@ -43,11 +47,15 @@ Using a meter requires:
      done
      ecflow_client --complete
 
-- Optionally addition in a :term:`trigger` or :term:`complete expression` for job control::
+- Optionally addition in a :term:`trigger` or :term:`complete expression` for job control:
+
+  .. code-block:: shell
 
      trigger task:progress ge 60
 
-  trigger and complete expression should *avoid* using equality i.e::
+  trigger and complete expression should *avoid* using equality i.e.:
+
+  .. code-block:: shell
 
      trigger task:progress == 60
 

@@ -7,7 +7,9 @@ ecflow.Client
 
    Bases: :py:class:`~Boost.Python.instance`
 
-Class client provides an interface to communicate with the :term:`ecflow_server`.::
+Class client provides an interface to communicate with the :term:`ecflow_server`.:
+
+.. code-block:: shell
 
    Client(
       string host, # The server name. Cannot be empty.
@@ -44,7 +46,9 @@ The ECF_HOST and ECF_PORT can be overridden by using the Constructor or set_host
 For optimal usage it is best to reuse the same Client rather than recreating for each client server interaction
 By default the Client interface will throw exceptions for error's.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client('localhost:3150')   # for errors will throw RuntimeError
@@ -79,7 +83,9 @@ Alter command is used to change the attributes of a node
     - absolute_node_path does not exist.
     - parsing fails
     
-    The following describes the parameters in more detail::
+    The following describes the parameters in more detail:
+    
+    .. code-block:: shell
     
      add variable variable_name variable_value
      add time   format    # when format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
@@ -142,7 +148,9 @@ Alter command is used to change the attributes of a node
                                    # string and enum,  the name must either be an integer, that is a valid index or
                                    # if it is a string, it must correspond to one of enum's or strings list
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       try:
          ci = Client()     # use default host(ECF_HOST) & port(ECF_PORT)
@@ -171,7 +179,9 @@ Archives suite or family nodes. Saves the suite/family nodes to disk, and then r
           string absolute_node_path
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -196,7 +206,9 @@ Begin playing all the :term:`suite` s in the :term:`ecflow_server`
       [(bool)force=False] : bypass the checks for submitted and active jobs
    )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)
@@ -220,7 +232,9 @@ Begin playing the chosen :term:`suite` s in the :term:`ecflow_server`
       [(bool)force=False]   : bypass the checks for submitted and active jobs
    )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()                  # use default host(ECF_HOST) & port(ECF_PORT)
@@ -247,7 +261,9 @@ Add a set of suites, to an existing registered handle
          list suite_names : list of strings representing suite names
       )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            with Client() as ci:       # use default host(ECF_HOST) & port(ECF_PORT)
@@ -279,7 +295,9 @@ Change an existing handle so that new suites can be added automatically
           bool auto_add_new_suite : automatically add new suites using handle on the client
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            with Client() as ci:                     # use default host(ECF_HOST) & port(ECF_PORT)
@@ -313,7 +331,9 @@ Drop/de-register the client handle.
     
     - RunTimeError thrown if handle has not been previously registered
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
         try:
           ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
@@ -326,7 +346,9 @@ Drop/de-register the client handle.
           ci.ch_drop()
     
     To automatically drop the handle(Preferred) use with
-    ::
+    :
+    
+    .. code-block:: python
     
        try:
            with Client() as ci:
@@ -362,7 +384,9 @@ Exception:
 
 - RunTimeError thrown if handle has not been previously registered
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   try:
       ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
@@ -391,7 +415,9 @@ Registering a client handle affects the news() and sync() commands::
       list suite_names         : should be a list of suite names, names not in the definition are ignored
    )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()
@@ -403,7 +429,9 @@ Usage::
 
 The client 'ci' will hold locally the client handle. Since we have made multiple calls to register
 a handle, the variable 'ci' will hold the handle for the last call only.
-The handle associated with the suite can be manually retrieved::
+The handle associated with the suite can be manually retrieved:
+
+.. code-block:: python
 
    try:
        ci = Client()
@@ -415,7 +443,9 @@ The handle associated with the suite can be manually retrieved::
    finally:
        ci.ch_drop( client_handle )           # de-register the handle
 
-To automatically drop the handle(preferred) use with::
+To automatically drop the handle(preferred) use with:
+
+.. code-block:: python
 
    try:
        with Client() as ci:
@@ -442,7 +472,9 @@ Registering a client handle affects the news() and sync() commands::
       list suite_names         : should be a list of suite names, names not in the definition are ignored
    )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()
@@ -454,7 +486,9 @@ Usage::
 
 The client 'ci' will hold locally the client handle. Since we have made multiple calls to register
 a handle, the variable 'ci' will hold the handle for the last call only.
-The handle associated with the suite can be manually retrieved::
+The handle associated with the suite can be manually retrieved:
+
+.. code-block:: python
 
    try:
        ci = Client()
@@ -466,7 +500,9 @@ The handle associated with the suite can be manually retrieved::
    finally:
        ci.ch_drop( client_handle )           # de-register the handle
 
-To automatically drop the handle(preferred) use with::
+To automatically drop the handle(preferred) use with:
+
+.. code-block:: python
 
    try:
        with Client() as ci:
@@ -495,7 +531,9 @@ Remove a set of suites, from an existing handle
          list suite_names : list of strings representing suite names
       )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            with Client() as ci:                     # use default host(ECF_HOST) & port(ECF_PORT)
@@ -531,7 +569,9 @@ since that always retrieves the full definition from the server::
    void changed_node_paths()
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()                          # use default host(ECF_HOST) & port(ECF_PORT)
@@ -570,7 +610,9 @@ Check :term:`trigger` and :term:`complete expression` s and :term:`limit` s
           string absolute_node_path
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -618,7 +660,9 @@ The back up :term:`check point` file name can be overridden via ECF_CHECKOLD ser
           * The definition is very large and needs to split
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()                      # use default host(ECF_HOST) & port(ECF_PORT)
@@ -689,7 +733,9 @@ Request the :term:`ecflow_server` to clear log file.
 Log file will be empty after this call.
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -736,7 +782,9 @@ Delete the :term:`node` (s) specified.
           [(bool)force=False]       : If true delete even if in 'active' or 'submitted' states
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
@@ -767,7 +815,9 @@ the force parameter to true
                             Which risks creating zombies.
    )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -861,9 +911,12 @@ get script for Edit Preprocess
    :module: ecflow
 
 submit script from Edit/Preprocess 
-to run as alias or not
-ci = Client()
-ci.edit_script_submit(path_to_task,
+to run as alias or not:
+
+.. code-block:: python
+
+ ci = Client()
+ ci.edit_script_submit(path_to_task,
                        used_variables, # array name=value
                        file_contents,  # strings array
                        alias, # bool False,
@@ -945,7 +998,9 @@ Request the :term:`ecflow_server` to flush and then close log file
 It is best that the server is :term:`shutdown` first, as log file will be reopened
 whenever a command wishes to log any changes.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -971,7 +1026,9 @@ Set or clear a :term:`event`
           string signal : [ set | clear ]
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1011,7 +1068,9 @@ Force a node(s) to a given state
           State::State state : [ unknown | complete | queued | submitted | active | aborted ]
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1028,6 +1087,8 @@ Force a node(s) to a given state
     
     Lets see the effect of forcing complete on the following defs
     ::
+    
+    .. code-block:: shell
     
        suite s1
           task t1; time 10:00             # will complete straight away
@@ -1054,7 +1115,9 @@ Force node(s) to a given state recursively
           State::State state  : [ unknown | complete | queued | submitted | active | aborted ]
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
       try:
           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1083,7 +1146,9 @@ Free all :term:`trigger`, :term:`date` and all time(:term:`day`, :term:`today`, 
     After freeing the time related dependencies (i.e time,today,cron)
     the next time slot will be missed.
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1105,7 +1170,9 @@ Free :term:`date` :term:`dependencies` for a :term:`node`
           string absolute_node_path : Path name to node
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1130,7 +1197,9 @@ Free all time :term:`dependencies`. i.e :term:`time`, :term:`day`, :term:`today`
     After freeing the time related dependencies (i.e time,today,cron)
     the next time slot will be missed.
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1152,7 +1221,9 @@ Free :term:`trigger` :term:`dependencies` for a :term:`node`
           string absolute_node_path : Path name to node
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1172,7 +1243,9 @@ Returns the :term:`suite definition` stored on the Client.
 Use :py:class:`ecflow.Client.sync_local()` to retrieve the definition from the server first.
 The definition is *retained* in memory until the next call to sync_local().
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1197,7 +1270,9 @@ File command can be used to request the various file types associated with a :te
           [(string)max_lines='10000'] : The number of lines in the file to return
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()        # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1224,7 +1299,9 @@ Request the :term:`ecflow_server` to return the log file contents as a string
 Use with caution as the returned string could be several megabytes.
 Only enabled in the debug build of ECF.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()          # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1251,7 +1328,9 @@ If you need to access the server definition in a loop use :py:class:`ecflow.Clie
 since this is capable of returning incremental changes, and thus considerably
 reducing the network load.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1272,7 +1351,9 @@ Allows a series of commands to be executed in the :term:`ecflow_server`
        string cmds : a list of ';' separated commands 
    )
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()               # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1290,7 +1371,9 @@ Halt the :term:`ecflow_server`
 Stop server communication with jobs, and new job scheduling, and stops check pointing.
 See :term:`server states`
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1306,7 +1389,9 @@ Returns true if the definition on the client is in sync with the :term:`ecflow_s
 
 .. Warning:: Calling in_sync() is **only** valid after a call to sync_local().
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
       ci = Client()                       # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1342,7 +1427,9 @@ to avoid waiting for the server poll, this commands allows early job generation
    )
    If empty string specified generates for full definition.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1366,7 +1453,9 @@ Kills the job associated with the :term:`node`
     
     If a :term:`family` or :term:`suite` is selected, will kill hierarchically.
     Kill uses the ECF_KILL_CMD variable. After :term:`variable substitution` it is invoked as a command.
-    The ECF_KILL_CMD variable should be written in such a way that the output is written to %ECF_JOB%.kill, i.e::
+    The ECF_KILL_CMD variable should be written in such a way that the output is written to %ECF_JOB%.kill, i.e:
+    
+    .. code-block:: shell
     
        kill -15 %ECF_RID% > %ECF_JOB%.kill 2>&1
        /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1
@@ -1378,7 +1467,9 @@ Kills the job associated with the :term:`node`
     - ECF_KILL_CMD variable is not defined
     - :term:`variable substitution` fails
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1408,7 +1499,9 @@ Load a :term:`suite definition` or checkpoint file given by the file_path argume
     If force is not used and :term:`suite` of the same name already exists in the server,
     then a error is thrown
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        defs_file = 'Hello.def' 
        defs = Defs()
@@ -1436,7 +1529,9 @@ load( (Client)arg1, (Defs)defs [, (bool)force=False]) -> int :
     
     If force is not used and :term:`suite` already exists in the server, then a error is thrown.
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        defs = Defs()
        suite = defs.add_suite('s1')
@@ -1463,7 +1558,9 @@ Request the :term:`ecflow_server` to use the path provided, as the new log file
 
 The old log file is released.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()               # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1488,7 +1585,9 @@ news_local() uses the definition stored on the client::
    bool news_local()
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()                  # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1528,7 +1627,9 @@ Exceptions can be raised because:
 - The absolute_node_path does not exist in the server
 - The order_type is not the right type
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1550,7 +1651,9 @@ It should be noted that any Client function will fail if the server is
 is not running. Hence ping() is not strictly required. However its main
 distinction from other Client function is that it is quite fast.
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client('localhost','3150')
@@ -1587,7 +1690,9 @@ Exceptions can be raised because:
   then the source :term:`node` must correspond to a :term:`suite`.
 - If the source node is added as a child, then its name must be unique
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1610,7 +1715,9 @@ Query the status of event, meter, state, variable, limit, limit_max or trigger e
  - variable  return value to standard out
  - trigger   returns 'true' if the expression is true, otherwise 'false'
 
-::
+:
+
+.. code-block:: shell
 
   string query(
      string query_type        # [ event | meter | variable | trigger | limit | limit_max ]
@@ -1629,7 +1736,9 @@ Exceptions can be raised if the path to the attribute does not exist and because
   specified node or any of its parent
 - trigger expression does not parse, or if references to node/attributes are not defined
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1667,7 +1776,9 @@ access to the :term:`ecflow_server`::
 
    void reload_wl_file()
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1712,7 +1823,9 @@ Replaces a :term:`node` in a :term:`suite definition` with the given path. The d
     Please note, you can use check() to check trigger expression and limits in the server.
     
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1751,7 +1864,9 @@ Re queues the specified :term:`node` (s)
           [(string)option='']       : option = ('' | 'abort' | 'force')
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()                   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1780,7 +1895,9 @@ Restart the :term:`ecflow_server`
 Start job scheduling, communication with jobs, and respond to all requests.
 See :term:`server states`
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1802,7 +1919,9 @@ Restore archived nodes.
           string absolute_node_path
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1823,7 +1942,9 @@ The server will first try to open file at ECF_HOME/ECF_CHECK if that fails it wi
 then try path ECF_HOME/ECF_CHECKOLD.
 An error is returned if the server has not been :term:`halted` or contains a :term:`suite definition`
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1846,7 +1967,9 @@ Resume `job creation` / generation for the given :term:`node`
           string absolute_node_path: Path name to node to resume.
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1887,7 +2010,9 @@ Immediately run the jobs associated with the input :term:`node`.
           [(bool)force=False]       : If true, run even if there are nodes that are active or submitted.
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()                          # use default host(ECF_HOST) & port(ECF_PORT)
@@ -1897,9 +2022,11 @@ Immediately run the jobs associated with the input :term:`node`.
        except RuntimeError, e:
            print(str(e))
     
-    Effect::
+    Effect:
     
-       Lets see the effect of run command on the following defs::
+       Lets see the effect of run command on the following defs:
+    
+    .. code-block:: shell
     
        suite s1
           task t1; time 10:00             # will complete straight away
@@ -2012,7 +2139,9 @@ Exceptions:
 
 - None
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    ci = Client()
    ci.set_connection_attempts(3)     # make 3 attempts for server connection
@@ -2025,6 +2154,8 @@ Usage::
 Override the default(localhost and port 3141) and environment setting(ECF_HOST and ECF_PORT)
     
     and set it explicitly::
+    
+    .. code-block:: shell
     
        set_host_port(
           string host, # The server name. Cannot be empty.
@@ -2044,7 +2175,9 @@ Override the default(localhost and port 3141) and environment setting(ECF_HOST a
     
     - Raise a RuntimeError if the host or port is empty
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()
@@ -2073,6 +2206,8 @@ This wait between connection attempts can be configured here.
 i.e This could be reduced to increase responsiveness.
 Default: In debug this period is 1 second and in release mode 10 seconds::
 
+.. code-block:: shell
+
    set_retry_connection_period(
       int period # must be an integer >= 0
    )
@@ -2081,7 +2216,9 @@ Exceptions:
 
 - None
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    ci = Client()
    ci.set_connection_attempts(3)     # make 3 attempts for server connection
@@ -2108,7 +2245,9 @@ Shut down the :term:`ecflow_server`
 Stop server from scheduling new jobs.
 See :term:`server states`
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2131,7 +2270,9 @@ Prints the :term:`ecflow_server` statistics to standard out
 
    void stats()
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2148,7 +2289,9 @@ Resets the statistical data in the server
 
    void stats_reset()
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2172,7 +2315,9 @@ Shows the status of a job associated with a :term:`task`
     
     If a :term:`family` or :term:`suite` is selected, will invoke status command hierarchically.
     Status uses the ECF_STATUS_CMD variable. After :term:`variable substitution` it is invoked as a command.
-    The command should be written in such a way that the output is written to %ECF_JOB%.stat, i.e::
+    The command should be written in such a way that the output is written to %ECF_JOB%.stat, i.e:
+    
+    .. code-block:: shell
     
        /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1
     
@@ -2182,7 +2327,9 @@ Shows the status of a job associated with a :term:`task`
     - ECF_STATUS_CMD variable is not defined
     - :term:`variable substitution` fails
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2204,7 +2351,9 @@ Returns a list strings representing the :term:`suite` names
 
    list(string) suites()
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2227,7 +2376,9 @@ Suspend `job creation` / generation for the given :term:`node`
           string absolute_node_path: Path name to node to suspend.
        )
     
-    Usage::
+    Usage:
+    
+    .. code-block:: python
     
        try:
            ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2262,7 +2413,9 @@ Exceptions:
 - raise a RuntimeError if the delta change cannot be applied.
 - this could happen if the client Defs bears no resemblance to server Defs
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()                       # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2285,7 +2438,9 @@ Calling sync_local() is considerably faster than calling get_server_defs() for l
 Terminate the :term:`ecflow_server`
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    try:
        ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)
@@ -2312,7 +2467,9 @@ Wait for a response from the :term:`ecflow_server`::
 This is used to check if server has started. Typically for tests.
 Returns true if server(ping) replies before time out, otherwise false
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
    if ci.wait_for_server_reply(30):

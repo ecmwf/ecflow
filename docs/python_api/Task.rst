@@ -27,7 +27,9 @@ Exception:
 - Throws a RuntimeError if the name is not valid
 - Throws a RuntimeError if a duplicate Task is added
 
-Usage::
+Usage:
+
+.. code-block:: python
 
   task = Task('t1')            # create a stand alone task
   family.add_task(task)        # add to the family

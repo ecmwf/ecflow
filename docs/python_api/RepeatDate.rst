@@ -29,7 +29,9 @@ Exception:
 
 - Throws a RuntimeError if start/end are not valid dates
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    rep = RepeatDate('YMD', 20050130, 20050203 )
    rep = RepeatDate('YMD', 20050130, 20050203, 2)

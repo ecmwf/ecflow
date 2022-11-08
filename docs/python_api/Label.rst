@@ -26,7 +26,9 @@ Constructor::
       string name:  The name of the label
       string value: The value of the label
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    t1 = Task('t1',
              Label('name','value'),  # create Labels in-place

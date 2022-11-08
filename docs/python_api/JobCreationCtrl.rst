@@ -14,7 +14,9 @@ Constructor::
    JobCreationCtrl()
 
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    defs = Defs('my.def')                     # specify the definition we want to check, load into memory
    job_ctrl = JobCreationCtrl()

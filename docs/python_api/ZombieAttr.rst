@@ -27,7 +27,9 @@ Constructor::
       int lifetime<optional>: Defines the life time in seconds of the zombie in the server.
                               On expiration, zombie is removed automatically
 
-Usage::
+Usage:
+
+.. code-block:: python
 
    # Add a zombie attribute so that child commands(i.e ecflow_client --init)
    # will fail the job if it is a zombie process.

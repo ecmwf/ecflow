@@ -18,8 +18,9 @@ def fix_glossary():
                     for item in glossary_items:
                         t = re.sub(rf"`{item}`_", rf":term:`{item}`", t)
 
-                    with open(fname, "w") as f:
-                        f.write(t)
+            if t:
+                with open(fname, "w") as f:
+                    f.write(t)
 
 
 fix_glossary()
