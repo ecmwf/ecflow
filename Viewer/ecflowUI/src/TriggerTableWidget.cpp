@@ -38,7 +38,7 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 
     //Node - model + view
     nodeModel_ = new TriggerTableModel(TriggerTableModel::NodeMode,this);
-    nodeView_->setModel(nodeModel_);
+    nodeView_->setTableModel(nodeModel_);
 
     //Set the height of the node display area
     nodeView_->enableOneRowMode();
@@ -54,11 +54,11 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 
     //Trigger - model + view
     triggerModel_ = new TriggerTableModel(TriggerTableModel::TriggerMode,this);
-    triggerView_->setModel(triggerModel_);
+    triggerView_->setTableModel(triggerModel_);
 
     //triggered - model + view
     triggeredModel_ = new TriggerTableModel(TriggerTableModel::TriggeredMode,this);
-    triggeredView_->setModel(triggeredModel_);
+    triggeredView_->setTableModel(triggeredModel_);
 
     //normal selection
     connect(triggerView_,SIGNAL(selectionChanged(TriggerTableItem*)),

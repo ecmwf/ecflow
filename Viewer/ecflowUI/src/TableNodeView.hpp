@@ -13,6 +13,8 @@
 
 #include <QHeaderView>
 #include <QTreeView>
+
+#include <cassert>
 #include <set>
 
 #include "NodeViewBase.hpp"
@@ -88,6 +90,10 @@ protected:
     VInfo_ptr lastSelection_;
     bool setCurrentAfterUpdateIsRunning_;
     bool autoScrollToSelection_;
+
+private:
+    // we enforce the usage of setTableModel()
+    void setModel(QAbstractItemModel *) override {assert(false);}
 };
 
 class TableNodeHeaderButton
