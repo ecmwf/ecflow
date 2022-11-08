@@ -65,11 +65,10 @@
          ecflow_client --load=<check_point_file> print check_only
       
    child command
-      Child command's(or task requests) are called from within the :term:`ecf script` files. The table also includes the default action(from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
+      Child commands (or task requests) are called from within the :term:`ecf script` files. The table also includes the default action(from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
 
       .. list-table:: 
          :header-rows: 1
-         :widths: 30 40 30
          
          * - Child Command 
            - Description
@@ -81,7 +80,7 @@
            - Wait for a expression to evaluate
            - block
          * - :ref:`ecflow_client --queue <queue_cli>`
-           - Update queue step in server
+           - Update :term:`queue` step in server
            - block
          * - :ref:`ecflow_client --abort <abort_cli>`
            - Sets the :term:`task` to the :term:`aborted` :term:`status`
@@ -90,16 +89,16 @@
            - Sets the :term:`task` to the :term:`complete` :term:`status`
            - block 
          * - :ref:`ecflow_client --event <event_cli>`
-           - Set an event
+           - Set an :term:`event`
            - fob
          * - :ref:`ecflow_client --meter <meter_cli>`
-           - Change a meter
+           - Change a :term:`meter`
            - fob
-         * - :ref:`ecflow_client --label <meter_cli>`
-           - Change a label
+         * - :ref:`ecflow_client --label <label_cli>`
+           - Change a :term:`label`
            - fob
 
-      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` ,ECF_PASS and ECF_RID. See :term:`ecflow_client`.                                         
+      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` ,:term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.                                         
        
       
    clock
@@ -107,7 +106,7 @@
       
       A gain can be specified to offset from the given date.
       
-      The hybrid and real clock's always runs in phase with the system clock (UTC in UNIX) 
+      The hybrid and real clocks always runs in phase with the system clock (UTC in UNIX) 
       but can have any offset from the system clock. 
       
       The clock can be :
@@ -352,9 +351,9 @@
       %include filename      Include the contents of the file :file:`filename` into the output. The only form
                              that can be used safely must start with a slash '/'
       %includenopp filename  Same as %include, but the file is not interpreted at all.
-      %comment               Start's a comment, which is ended by %end directive.
+      %comment               Starts a comment, which is ended by %end directive.
                              The section enclosed by %comment - %end is removed during :term:`pre-processing`
-      %manual                Start's a manual, which is ended by %end directive.
+      %manual                Starts a manual, which is ended by %end directive.
                              The section enclosed by %manual - %end is removed during :term:`pre-processing`.
                              The manual directive is used to create the :term:`manual page`
                              show in :term:`ecflow_ui`. 
@@ -365,7 +364,7 @@
                              include file the effect is retained for the rest of the job( or until
                              set again). It should be noted that the ecfmicro directive specified in
                              the :term:`ecf script` file, does **not** effect the variable substitution
-                             for ECF_JOB_CMD, ECF_KILL_CMD or ECF_STATUS_CMD variables. They still use
+                             for :term:`ECF_JOB_CMD`, ECF_KILL_CMD or :term:`ECF_STATUS_CMD` variables. They still use
                              :term:`ECF_MICRO`. If no ecfmicro directive exists, we default to using
                              :term:`ECF_MICRO` from the :term:`suite definition`
       ====================== ============================================================================
@@ -445,7 +444,7 @@
       
       The ecFlow script is similar to a UNIX shell script.  
       
-      The differences, however, includes the addition of “C” like pre-processing :term:`directives` and ecFlow :term:`variable`'s.
+      The differences, however, includes the addition of “C” like pre-processing :term:`directives` and ecFlow :term:`variable`\ s.
       Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
       the :term:`ecflow_server` is aware when the job starts(i.e changes state to :term:`active`) and finishes ( i.e changes state to :term:`complete`)
        
@@ -697,6 +696,28 @@
             endfamily
          endsuite
    
+   ECF_STATUS_CMD
+      User defined :term:`variable` defining the :ref:`ecflow_client --status <status_cli>` command. It invokes a user-supplied (shell) command that queries the status of the job.
+      
+      The command should be written in such a way that the output is written to %ECF_JOB%.stat, and if the script determines that the job is not active, it should abort the task in ecflow. This command can be particularly useful when nodes on the supercomputer go down, and we don't know the true state of the jobs.
+
+      The status command can be invoked from the :ref:`ecflow_cli` and :ref:`ecflow_ui`. If applied to a :term:`family` or :term:`suite`, the command will be run hierarchically. In :ref:`ecflow_ui` use the Status tab in the Info panel or use Special > Status from the node context menu to run it and see the output.
+
+      The code below allows the output of the status command to be shown by the ``--file`` command on the command line, and automatically via the Status tab in :ref:`ecflow_ui`:
+
+      .. code-block:: shell
+
+         suite s1
+            edit ECF_STATUS_CMD /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1
+         ....
+         endsuite      
+
+      .. code-block:: shell
+         :caption: Invoking status cmd, from the command line
+
+         ecflow_client --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat
+         ecflow_client --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file" 
+
    ECF_TRIES
       This is generated variable added at the server level with a default value of 2.  It can be overridden by the user and controls the number of times job should re-run should it abort. Provided:
 
@@ -786,7 +807,7 @@
 
              as an alternative to specifying ECF_HOST
          * - NO_ECF
-           - If set exit's ecflow_client immediately with success. This allows the scripts to be tested independent of the server
+           - If set exits ecflow_client immediately with success. This allows the scripts to be tested independent of the server
            - No
            - .. code-block:: shell
             
@@ -895,7 +916,7 @@
       
       Multiple servers can be run on the same machine/host providing they are assigned a unique port number.
       
-      The server record's all request's in the log file.  
+      The server records all requests in the log file.  
       
       The server will periodically (see ECF_CHECKINTERVAL) write out a :term:`check point` file. 
             
@@ -997,7 +1018,7 @@
    extern
       This allows an external :term:`node` to be used in a :term:`trigger` expression. 
       
-      All :term:`node`\ s in :term:`trigger`'s must be known to :term:`ecflow_server` by the end of the load command. 
+      All :term:`node`\ s in :term:`trigger`\ s must be known to :term:`ecflow_server` by the end of the load command. 
       No cross-suite :term:`dependencies` are allowed unless the names of tasks outside the suite are declared as external. 
       An external :term:`trigger` reference is considered unknown if it is not defined when the :term:`trigger` is evaluated. 
       You are strongly advised to avoid cross-suite :term:`dependencies`. 
@@ -1011,7 +1032,7 @@
           
    family
       A family is an organisational entity that is used to provide hierarchy and grouping. 
-      It consists of a collection of :term:`task`'s and families.
+      It consists of a collection of :term:`task`\ s and families.
       
       Typically you place tasks that are related to each other inside the same family, analogous to the way you 
       create directories to contain related files. 
@@ -1105,7 +1126,7 @@
              
       The process of job creation includes:
       
-      - Generating a unique password ECF_PASS, which is placed in :term:`ecf script` during :term:`pre-processing`. See :ref:`tutorial-head_h`
+      - Generating a unique password :term:`ECF_PASS`, which is placed in :term:`ecf script` during :term:`pre-processing`. See :ref:`tutorial-head_h`
           
       - Locating :term:`ecf script` files , corresponding to the :term:`task` in the :term:`suite definition`, See :term:`ecf file location algorithm`
          
@@ -1114,9 +1135,9 @@
       The steps above transforms an :term:`ecf script` to a :term:`job file` that can be submitted by
       performing :term:`variable substitution` on the :term:`ECF_JOB_CMD` :term:`variable` and invoking the command.
          
-      The running jobs will communicate back to the :term:`ecflow_server` by calling :term:`child command`'s.
+      The running jobs will communicate back to the :term:`ecflow_server` by calling :term:`child command`\ s.
         
-      This causes :term:`status` changes on the :term:`node`'s in the :term:`ecflow_server` and flags can be set 
+      This causes :term:`status` changes on the :term:`node`\ s in the :term:`ecflow_server` and flags can be set 
       to indicate various events.  
       
       If a :term:`task` is to be treated as a dummy task( i.e. is used as a scheduling task) and is not meant to
@@ -1330,13 +1351,13 @@
          * - :ref:`grammar`
            - :token:`meter`
 
-      Meter's can be referenced in :term:`trigger` and :term:`complete expression` expressions.
+      Meters can be referenced in :term:`trigger` and :term:`complete expression` expressions.
       
    node
       :term:`suite`, :term:`family` and :term:`task` form a hierarchy.
       Where a :term:`suite` serves as the root of the hierarchy. 
       The :term:`family` provides the intermediate nodes, and the :term:`task`
-      provide the leaf's. 
+      provide the leafs. 
       
       Collectively :term:`suite`, :term:`family` and :term:`task` can be referred
       to as nodes.     
@@ -1354,6 +1375,66 @@
          
          - performing :term:`variable substitution`  
          
+   queue
+      Queues allows efficiently running jobs that are identical but vary only in the step.
+
+      This attribute makes it possible to follow a producer(server)/consumer(tasks) pattern. Note additional task consumers can be added for load balancing.
+
+      .. code-block:: shell
+
+         suite test_queue
+         family f1
+            queue q1 001 002 003 004 005 006 007
+            task t
+         endfamily
+         family f2
+            queue q2 1 2 3 4 5 6 8 9 10
+            task a
+            task b
+               # notice that queue name is accessible to the trigger
+               trigger /test_queue/f1:q1 > 5     
+            task c
+               trigger ../f2/a:q2 > 9
+         endfamily
+         endsuite        
+
+      The  :ref:`queue_cli` :term:`child command` will signal when a step is active, complete, or has aborted:
+               
+      .. code-block:: shell
+
+         # Note: because --queue is treated like a child command(init,complete,event,label,meter,abort,wait), the task path ECF_NAME is read from the environment
+         
+         # The --queue command will search up the node hierarchy for the queue name. If not found it fails.
+         
+         step=$(ecflow_client --queue queue_name  active)                # returns first queued/aborted step from the server and makes it active, Return "NULL" for the last step.
+         ecflow_client --queue queue_name complete $step                 # Tell the server that step has completed for the given queue
+         ecflow_client --queue queue_name aborted  $step                 # Tell the server that step has aborted for the given queue
+         no_of_aborted=$(ecflow_client --queue queue_name no_of_aborted) # returns as a string the number of aborted steps
+         ecflow_client --queue queue_name reset        
+
+      The queue values can be strings, however, if they are to be used in :term:`trigger` expressions, they must be convertible to integers:
+
+      .. code-block:: shell
+
+         suite test_queue
+            family f1
+               queue q1 red orange yellow green blue indigo violet
+               task t
+            endfamily
+         endsuite
+
+      See also:
+
+      .. list-table::
+
+         * - :ref:`ecflow_cli`
+           - :ref:`queue_cli`
+         * - :ref:`python_api`
+           - :py:class:`ecflow.Queue`, :py:class:`ecflow.Node.add_queue`
+         * - :ref:`grammar`
+           - :token:`queue`
+
+
    queued
       Is a :term:`node` :term:`status`. 
       
@@ -1539,7 +1620,7 @@
          * - ECF_CLOCK
            - <day>:<month>:<day of week>:<day of year>. i.e.  Tuesday:December:2:348
 
-      It is a collection of :term:`family`'s, :term:`variable`'s, :term:`repeat` and a single
+      It is a collection of :term:`family`\ s, :term:`variable`\ s, :term:`repeat` and a single
       :term:`clock` definition. 
       
       See also:
@@ -1552,7 +1633,7 @@
            - :token:`suite`
       
    suite definition
-      The suite definition is the hierarchical :term:`node` tree. It describes how your :term:`task`'s run and interact. It can be built up using:
+      The suite definition is the hierarchical :term:`node` tree. It describes how your :term:`task`\ s run and interact. It can be built up using:
       
       * Ascii text file by following the rules defined in the ecFlow :ref:`grammar`. Hence any language can be used, to generate this format.
          
@@ -1693,7 +1774,7 @@
       but that can be a complex boolean expression of the :term:`status` of several nodes. 
       Triggers should be avoided on suites.
       A node with a trigger can only be activated when its trigger has expired. 
-      A trigger holds the node as long as the trigger's expression evaluation returns false. 
+      A trigger holds the node as long as the trigger expression evaluation returns false. 
       
       Trigger evaluation occurs when ever the :term:`child command` communicates with the server. i.e whenever
       there is a state change in the suite definition.
