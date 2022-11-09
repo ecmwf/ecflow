@@ -196,9 +196,9 @@ archive( (Client)arg1, (list)arg2) -> None
 .. py:method:: Client.begin_all_suites( (Client)arg1 [, (bool)force=False]) -> int :
    :module: ecflow
 
-Begin playing all the :term:`suite` s in the :term:`ecflow_server`
+Begin playing all the :term:`suite`\ s in the :term:`ecflow_server`
 
-.. Note:: using the force option may cause :term:`zombie` s if suite has running jobs
+.. Note:: using the force option may cause :term:`zombie`\ s if suite has running jobs
 
 ::
 
@@ -221,9 +221,9 @@ Usage:
 .. py:method:: Client.begin_suite( (Client)arg1, (str)suite_name [, (bool)force=False]) -> int :
    :module: ecflow
 
-Begin playing the chosen :term:`suite` s in the :term:`ecflow_server`
+Begin playing the chosen :term:`suite`\ s in the :term:`ecflow_server`
 
-.. Note:: using the force option may cause :term:`zombie` s if suite has running jobs
+.. Note:: using the force option may cause :term:`zombie`\ s if suite has running jobs
 
 ::
 
@@ -402,7 +402,7 @@ Usage:
 .. py:method:: Client.ch_handle( (Client)arg1) -> int :
    :module: ecflow
 
-Register interest in a set of :term:`suite` s.
+Register interest in a set of :term:`suite`\ s.
 
 If a definition has lots of suites, but the client is only interested in a small subset.
 Then using this command can reduce network bandwidth and synchronisation will be quicker.
@@ -459,7 +459,7 @@ To automatically drop the handle(preferred) use with:
 .. py:method:: Client.ch_register( (Client)arg1, (bool)arg2, (list)arg3) -> None :
    :module: ecflow
 
-Register interest in a set of :term:`suite` s.
+Register interest in a set of :term:`suite`\ s.
 
 If a definition has lots of suites, but the client is only interested in a small subset.
 Then using this command can reduce network bandwidth and synchronisation will be quicker.
@@ -596,9 +596,9 @@ Usage:
 .. py:method:: Client.check( (Client)arg1, (str)arg2) -> str :
    :module: ecflow
 
-Check :term:`trigger` and :term:`complete expression` s and :term:`limit` s
+Check :term:`trigger` and :term:`complete expression`\ s and :term:`limit`\ s
     
-    The :term:`ecflow_server` does not store :term:`extern` s. Hence all unresolved references
+    The :term:`ecflow_server` does not store :term:`extern`\ s. Hence all unresolved references
     are reported as errors.
     Returns a non empty string for any errors or warning
     ::
@@ -627,7 +627,7 @@ check( (Client)arg1, (list)arg2) -> str
 .. py:method:: Client.checkpt( (Client)arg1 [, (CheckPt)mode=ecflow.CheckPt.UNDEFINED [, (int)check_pt_interval=0 [, (int)check_pt_save_alarm_time=0]]]) -> int :
    :module: ecflow
 
-Request the :term:`ecflow_server` :term:`check point` s the definition held in the server immediately
+Request the :term:`ecflow_server` :term:`check point`\ s the definition held in the server immediately
 
 This effectively saves the definition held in the server to disk,
 in a platform independent manner. This is the default when no arguments are specified.
@@ -802,7 +802,7 @@ delete( (Client)arg1, (list)paths [, (bool)force=False]) -> None
 .. py:method:: Client.delete_all( (Client)arg1 [, (bool)force=False]) -> int :
    :module: ecflow
 
-Delete all the :term:`node` s held in the :term:`ecflow_server`.
+Delete all the :term:`node`\ s held in the :term:`ecflow_server`.
 
 The :term:`suite definition` in the server will be empty, after this call. **Use with care**
 If a node is :term:`submitted` or :term:`active`, then a Exception will be raised.
@@ -1604,10 +1604,10 @@ Usage:
 .. py:method:: Client.order( (Client)arg1, (str)arg2, (str)arg3) -> None :
    :module: ecflow
 
-Re-orders the :term:`node` s in the :term:`suite definition` held by the :term:`ecflow_server`
+Re-orders the :term:`node`\ s in the :term:`suite definition` held by the :term:`ecflow_server`
 
 It should be noted that in the absence of :term:`dependencies`,
-the order in which :term:`task` s are :term:`submitted`, depends on the order in the definition.
+the order in which :term:`task`\ s are :term:`submitted`, depends on the order in the definition.
 This changes the order and hence affects the submission order
 ::
 
@@ -1667,7 +1667,7 @@ Usage:
 .. py:method:: Client.plug( (Client)arg1, (str)arg2, (str)arg3) -> int :
    :module: ecflow
 
-Plug command is used to move :term:`node` s
+Plug command is used to move :term:`node`\ s
 
 The destination node can be on another :term:`ecflow_server`.
 In which case the destination path should be of the form '//<host>:<port>/suite/family/task
@@ -1988,7 +1988,7 @@ resume( (Client)arg1, (list)arg2) -> None
 
 Immediately run the jobs associated with the input :term:`node`.
     
-    Ignore :term:`trigger` s, :term:`limit` s, :term:`suspended`, :term:`time` or :term:`date` dependencies,
+    Ignore :term:`trigger`\ s, :term:`limit`\ s, :term:`suspended`, :term:`time` or :term:`date` dependencies,
     just run the :term:`task`.
     When a job completes, it may be automatically re-queued if it has
     multiple time :term:`dependencies`. In the specific case where a :term:`task` has a SINGLE

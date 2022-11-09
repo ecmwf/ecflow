@@ -284,7 +284,7 @@ locally and remotely. They are:
 
   * example:
 
-    .. code-block:: shell
+    .. code-block::
 
       edit ECF_JOB_CMD    '$HOME/bin/ecf_submit %USER% %HOST% %ECF_JOB% %ECF_JOBOUT%
       edit ECF_KILL_CMD   '$HOME/bin/ecf_kill %USER% %HOST% %ECF_RID% %ECF_JOB%

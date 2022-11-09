@@ -7,7 +7,7 @@ ecflow.NodeVec
 
    Bases: :py:class:`~Boost.Python.instance`
 
-Hold a list of Nodes (i.e :term:`suite`, :term:`family` or :term:`task` s)
+Hold a list of Nodes (i.e :term:`suite`, :term:`family` or :term:`task`\ s)
 
 
 .. py:method:: NodeVec.append( (NodeVec)arg1, (object)arg2) -> None

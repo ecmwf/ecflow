@@ -3,6 +3,6 @@ Install
 
 .. toctree::
     :maxdepth: 1
-    :glob:
     
-    *
+    brew
+    conda-forge

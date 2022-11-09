@@ -30,7 +30,7 @@ Create a file called :file:`test.def`,using your favourite text editor, with the
 1. This line is a comment line. Any characters between the # and the end of line are ignored
 2. The second line is empty 
 3. This line defines a new :term:`suite` by the name of test.  
-4. Here we define a ecflow :term:`variable` called ECF_HOME.
+4. Here we define a ecFlow :term:`variable` called ECF_HOME.
    This :term:`variable` defines the directory where all the unix files that will be used by the :term:`suite` test will reside.
    For the rest of the course all file names will be given relative to this directory.  
    

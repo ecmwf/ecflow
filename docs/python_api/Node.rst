@@ -361,7 +361,7 @@ add_defstatus( (Node)arg1, (Defstatus)arg2) -> Node :
    :module: ecflow
 
 Add a :term:`event`. See :py:class:`ecflow.Event`
-    Events can be referenced in :term:`trigger` and :term:`complete expression` s
+    Events can be referenced in :term:`trigger` and :term:`complete expression`\ s
     
     
     Exception:
@@ -506,7 +506,7 @@ add_limit( (Node)arg1, (Limit)arg2) -> Node
    :module: ecflow
 
 Add a :term:`meter`. See :py:class:`ecflow.Meter`
-    Meters can be referenced in :term:`trigger` and :term:`complete expression` s
+    Meters can be referenced in :term:`trigger` and :term:`complete expression`\ s
     
     
     Exception:
@@ -964,19 +964,19 @@ Usage:
 .. py:property:: Node.crons
    :module: ecflow
 
-Returns a list of :term:`cron` s
+Returns a list of :term:`cron`\ s
 
 
 .. py:property:: Node.dates
    :module: ecflow
 
-Returns a list of :term:`date` s
+Returns a list of :term:`date`\ s
 
 
 .. py:property:: Node.days
    :module: ecflow
 
-Returns a list of :term:`day` s
+Returns a list of :term:`day`\ s
 
 
 .. py:method:: Node.delete_complete( (Node)arg1) -> None
@@ -1074,7 +1074,7 @@ evaluate trigger expression
 .. py:property:: Node.events
    :module: ecflow
 
-Returns a list of :term:`event` s
+Returns a list of :term:`event`\ s
 
 
 .. py:method:: Node.find_event( (Node)arg1, (str)arg2) -> Event :
@@ -1146,7 +1146,7 @@ Find user variable on the node only.  Returns a object
 .. py:property:: Node.generics
    :module: ecflow
 
-Returns a list of `generic`_ s
+Returns a list of `generic`_\ s
 
 
 .. py:method:: Node.get_abs_node_path( (Node)arg1) -> str :
@@ -1240,7 +1240,7 @@ Returns the time of the last state change as a string. Default format is iso_ext
 .. py:property:: Node.inlimits
    :module: ecflow
 
-Returns a list of :term:`inlimit` s
+Returns a list of :term:`inlimit`\ s
 
 
 .. py:method:: Node.is_suspended( (Node)arg1) -> bool :
@@ -1252,19 +1252,19 @@ Returns true if the :term:`node` is in a :term:`suspended` state
 .. py:property:: Node.labels
    :module: ecflow
 
-Returns a list of :term:`label` s
+Returns a list of :term:`label`\ s
 
 
 .. py:property:: Node.limits
    :module: ecflow
 
-Returns a list of :term:`limit` s
+Returns a list of :term:`limit`\ s
 
 
 .. py:property:: Node.meters
    :module: ecflow
 
-Returns a list of :term:`meter` s
+Returns a list of :term:`meter`\ s
 
 
 .. py:method:: Node.name( (Node)arg1) -> str
@@ -1274,7 +1274,7 @@ Returns a list of :term:`meter` s
 .. py:property:: Node.queues
    :module: ecflow
 
-Returns a list of `queue`_ s
+Returns a list of :term:`queue`\ s
 
 
 .. py:method:: Node.remove( (Node)arg1) -> Node :
@@ -1313,13 +1313,13 @@ sort_attributes( (Node)arg1, (AttrType)arg2, (bool)attribute_type [, (object)rec
 .. py:property:: Node.times
    :module: ecflow
 
-Returns a list of :term:`time` s
+Returns a list of :term:`time`\ s
 
 
 .. py:property:: Node.todays
    :module: ecflow
 
-Returns a list of :term:`today` s
+Returns a list of :term:`today`\ s
 
 
 .. py:method:: Node.update_generated_variables( (Node)arg1) -> None
@@ -1329,7 +1329,7 @@ Returns a list of :term:`today` s
 .. py:property:: Node.variables
    :module: ecflow
 
-Returns a list of user defined :term:`variable` s
+Returns a list of user defined :term:`variable`\ s
 
 
 .. py:property:: Node.verifies
@@ -1341,5 +1341,5 @@ Returns a list of Verify's
 .. py:property:: Node.zombies
    :module: ecflow
 
-Returns a list of :term:`zombie` s
+Returns a list of :term:`zombie`\ s
 

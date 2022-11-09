@@ -28,22 +28,21 @@ the :term:`meter` (named *use*) while an *update_disk* task runs periodically, b
       
    ...
 
-
-.. code-block:: shell
-   :caption: Task definition
+.. code-block::
+   :caption: Task Definition
 
    #!/usr/bin/ksh
-   
+
    %manual
    DESCRIPTION
    Check available disk space in working directory's fileset and update meter
    %end
-   
+
    %include <init.h>
-   
+
    value=$(df %WORKDIR% | grep %WORKDIR% | awk '{print $5}' | sed s/%%//g)
    ecflow_client --alter=change meter "use" "$value" /%SUITE%/%FAMILY%
-   
+
    %include <endt.h>
 
 

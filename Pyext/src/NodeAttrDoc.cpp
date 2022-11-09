@@ -92,7 +92,7 @@ const char* NodeAttrDoc::zombie_doc()
 const char* NodeAttrDoc::zombie_type_doc()
 {
    return
-            "`zombie`_ s are running jobs that fail authentication when communicating with the `ecflow_server`_.\n\n"
+            "`zombie`_\\ s are running jobs that fail authentication when communicating with the `ecflow_server`_.\n\n"
             "See class `zombie type`_ and :py:class:`ecflow.ZombieAttr` for further information.\n"
             ;
 }
@@ -108,7 +108,7 @@ const char* NodeAttrDoc::zombie_user_action_type_doc()
             "- block:  The `child command`_ is asked to block.\n"
             "  This is the default action for init,complete and abort child commands\n"
             "\nserver side:\n\n"
-            "- adopt:  Allows the password supplied with the `child command`_ s, to be adopted by the server\n"
+            "- adopt:  Allows the password supplied with the `child command`_\\ s, to be adopted by the server\n"
             "- kill:   Kills the zombie process associated with the `child command`_ using ECF_KILL_CMD.\n"
             "  path zombies will need to be killed manually. If kill is specified for path zombies\n"
             "  they will be fobed, i.e allowed to complete without blocking the job.\n"
@@ -122,7 +122,7 @@ const char* NodeAttrDoc::zombie_user_action_type_doc()
 const char* NodeAttrDoc::child_cmd_type_doc()
 {
    return
-            "ChildCmdType represents the different `child command`_ s.\n"
+            "ChildCmdType represents the different `child command`_\\ s.\n"
             "This type is used as a parameter to the class :py:class:`ecflow.ZombieAttr`\n\n"
             "Child commands are called within a `job file`_::\n\n"
             "  ChildCmdType::init     corresponds to : ecflow_client --init=<process_id>\n"
@@ -167,7 +167,7 @@ const char* NodeAttrDoc::limit_doc()
 {
    return
             "`limit`_ provides a simple load management\n\n"
-            "i.e. by limiting the number of `task`_ s submitted by a server.\n"
+            "i.e. by limiting the number of `task`_\\ s submitted by a server.\n"
             "Limits are typically defined at the `suite`_ level, or defined in a\n"
             "separate suite, so that they can be used by multiple suites.\n"
             "Once a limit is defined in a `suite definition`_, you must also assign families/tasks to use\n"
@@ -223,10 +223,10 @@ const char* NodeAttrDoc::inlimit_doc()
 const char* NodeAttrDoc::event_doc()
 {
    return
-            "`event`_ s are used as signal mechanism.\n\n"
+            "`event`_\\ s are used as signal mechanism.\n\n"
             "Typically they would be used to signal partial completion of a `task`_\n"
             "and to be able to `trigger`_ another job, which is waiting for this partial completion.\n"
-            "Only tasks can have events that are automatically set via a `child command`_ s, see below.\n"
+            "Only tasks can have events that are automatically set via a `child command`_\\ s, see below.\n"
             "Events are cleared automatically when a `node`_ is re-queued or begun.\n"
             "Suites and Families can have events, but these events must be set via the Alter command\n"
             "Multiple events can be added to a task.\n"
@@ -258,7 +258,7 @@ const char* NodeAttrDoc::event_doc()
 const char* NodeAttrDoc::meter_doc()
 {
    return
-            "`meter`_ s can be used to indicate proportional completion of `task`_\n\n"
+            "`meter`_\\ s can be used to indicate proportional completion of `task`_\n\n"
             "They are able to `trigger`_ another job, which is waiting on this proportion.\n"
             "Can also be used to indicate progress of a job. Meters can be used in\n"
             "`trigger`_ and `complete expression`_.\n"
@@ -409,7 +409,7 @@ const char* NodeAttrDoc::today_doc()
 {
    return
             "`today`_ is a time dependency that does not wrap to tomorrow.\n\n"
-            "If the `suite`_ s begin time is past the time given for the Today,\n"
+            "If the `suite`_\\ s begin time is past the time given for the Today,\n"
             "then the node is free to run.\n"
             "\nConstructor::\n\n"
             "   Today(hour,minute,relative<optional> = false)\n"

@@ -20,7 +20,7 @@ client side:
 
 server side:
 
-- adopt:  Allows the password supplied with the :term:`child command` s, to be adopted by the server
+- adopt:  Allows the password supplied with the :term:`child command`\ s, to be adopted by the server
 - kill:   Kills the zombie process associated with the :term:`child command` using ECF_KILL_CMD.
   path zombies will need to be killed manually. If kill is specified for path zombies
   they will be fobed, i.e allowed to complete without blocking the job.

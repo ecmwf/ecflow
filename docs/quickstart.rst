@@ -27,7 +27,7 @@ Download the example suite definition
 Click the following link to download the files needed to define our
 sample suite:
 
-`ecflow_quickstart.tar.gz <https://confluence.ecmwf.int/download/attachments/298946749/ecflow_quickstart.tar.gz?api=v2&modificationDate=1667401676492&version=1>`__
+`ecflow_quickstart.tar.gz <https://get.ecmwf.int/repository/test-data/ecflow/tutorial/ecflow_quickstart.tar.gz>`__
 
 Now, move it into your chosen working directory and untar it:
 

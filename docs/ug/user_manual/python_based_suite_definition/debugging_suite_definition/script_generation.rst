@@ -5,9 +5,9 @@ Script Generation
 
 This is suitable when you are only concerned about the design and behaviour of your suite definition.
 
-It is only available with the ecflow :ref:`python_api`.
+It is only available with the ecFlow :ref:`python_api`.
 
-The ecflow python API can automatically generate the '.ecf' scripts for
+The ecFlow python API can automatically generate the '.ecf' scripts for
 any definition.
 
 The header and tail include that allows communication with the server
@@ -16,7 +16,7 @@ uses the content of the definition to parametrise what gets generated,
 and the location of the files.
 
 Hence if a task definition specifies events, meters, or labels, then the
-generated scripts, will place ecflow child commands that will exercise
+generated scripts, will place ecFlow child commands that will exercise
 those attributes in the generated scripts.
 
 It makes a few assumptions.
@@ -33,7 +33,7 @@ It makes a few assumptions.
 - If the script file already exists, the script generation will fail.
   (To avoid overwriting user-specified .ecf scripts)
 - The generated scripts assume that ecflow_client executable is
-  accessible. This can be overridden by adding an ecflow variable
+  accessible. This can be overridden by adding an ecFlow variable
   ECF_CLIENT_EXE_PATH
 - The generated header and tail include files, assume the server is
   on the local machine.

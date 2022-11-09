@@ -7,7 +7,7 @@ ecflow.ChildCmdType
 
    Bases: :py:class:`~Boost.Python.enum`
 
-ChildCmdType represents the different :term:`child command` s.
+ChildCmdType represents the different :term:`child command`\ s.
 This type is used as a parameter to the class :py:class:`ecflow.ZombieAttr`
 
 Child commands are called within a :term:`job file`::

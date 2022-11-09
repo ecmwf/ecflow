@@ -149,7 +149,7 @@ object add(tuple args, dict kwds) :
 
 :term:`extern` refer to nodes that have not yet been defined typically due to cross suite :term:`dependencies`
 
-:term:`trigger` and :term:`complete expression` s may refer to paths, and variables in other suites, that have not been
+:term:`trigger` and :term:`complete expression`\ s may refer to paths, and variables in other suites, that have not been
 loaded yet. The references to node paths and variable must exist, or exist as externs
 Externs can be added manually or automatically.
 
@@ -268,7 +268,7 @@ add_variable( (Defs)arg1, (dict)arg2) -> Defs
 
 :term:`extern` refer to nodes that have not yet been defined typically due to cross suite :term:`dependencies`
 
-:term:`trigger` and :term:`complete expression` s may refer to paths, and variables in other suites, that have not been
+:term:`trigger` and :term:`complete expression`\ s may refer to paths, and variables in other suites, that have not been
 loaded yet. The references to node paths and variable must exist, or exist as externs
 Externs can be added manually or automatically.
 
@@ -312,11 +312,11 @@ Usage:
 .. py:method:: Defs.check( (Defs)arg1) -> str :
    :module: ecflow
 
-Check :term:`trigger` and :term:`complete expression` s and :term:`limit` s
+Check :term:`trigger` and :term:`complete expression`\ s and :term:`limit`\ s
 
 * Client Side: The client side can specify externs. Hence all node path references
-  in :term:`trigger` expressions, and :term:`inlimit` references to :term:`limit` s, that are
-  unresolved and which do *not* appear in :term:`extern` s are reported as errors
+  in :term:`trigger` expressions, and :term:`inlimit` references to :term:`limit`\ s, that are
+  unresolved and which do *not* appear in :term:`extern`\ s are reported as errors
 * Server Side: The server does not store externs. Hence all unresolved references
   are reported as errors
 
@@ -351,7 +351,7 @@ Check `job creation` .
     - manual and comments :term:`pre-processing`
     - :term:`variable substitution`
     
-    Some :term:`task` s are dummy tasks have no associated :term:`ecf script` file.
+    Some :term:`task`\ s are dummy tasks have no associated :term:`ecf script` file.
     To disable error message for these tasks please add a variable called ECF_DUMMY_TASK to them.
     Checking is done in conjunction with the class :py:class:`ecflow.JobCreationCtrl`.
     If no node path is set on class JobCreationCtrl then all tasks are checked.
@@ -402,7 +402,7 @@ An empty string will delete all user variables
 .. py:property:: Defs.externs
    :module: ecflow
 
-Returns a list of :term:`extern` s
+Returns a list of :term:`extern`\ s
 
 
 .. py:method:: Defs.find_abs_node( (Defs)arg1, (str)arg2) -> Node :
@@ -432,11 +432,11 @@ Given a name, find the corresponding :term:`suite`
 .. py:method:: Defs.generate_scripts( (Defs)arg1) -> None :
    :module: ecflow
 
-Automatically generate template :term:`ecf script` s for this definition
-Will automatically add :term:`child command` s for :term:`event`, :term:`meter` and :term:`label` s.
+Automatically generate template :term:`ecf script`\ s for this definition
+Will automatically add :term:`child command`\ s for :term:`event`\ s, :term:`meter`\ s and :term:`label`\ s.
 This allows the definition to be refined with out worrying about the scripts.
 However it should be noted that, this will create a lot of *duplicated* script contents
-i.e in the absence of :term:`event` s, :term:`meter` s and :term:`label` s, most of generated :term:`ecf script` files will
+i.e in the absence of :term:`event`\ s, :term:`meter`\ s and :term:`label`\ s, most of generated :term:`ecf script` files will
 be the same. Hence should only be used an aid to debugging the definition.
 It uses the contents of the definition to parameterise what gets
 generated, and the location of the files. Will throw Exceptions for errors.
@@ -476,7 +476,7 @@ Usage:
 .. py:method:: Defs.get_all_nodes( (Defs)arg1) -> NodeVec :
    :module: ecflow
 
-Returns all the :term:`node` s in the definition
+Returns all the :term:`node`\ s in the definition
 
 
 .. py:method:: Defs.get_all_tasks( (Defs)arg1) -> TaskVec :
@@ -537,7 +537,7 @@ Save the in memory :term:`suite definition` into a file. The file name must be p
 .. py:property:: Defs.server_variables
    :module: ecflow
 
-Returns a list of server :term:`variable` s
+Returns a list of server :term:`variable`\ s
 
 
 .. py:method:: Defs.simulate( (Defs)arg1) -> str :
@@ -602,11 +602,11 @@ sort_attributes( (Defs)arg1, (AttrType)arg2, (bool)attribute_type [, (object)rec
 .. py:property:: Defs.suites
    :module: ecflow
 
-Returns a list of :term:`suite` s
+Returns a list of :term:`suite`\ s
 
 
 .. py:property:: Defs.user_variables
    :module: ecflow
 
-Returns a list of user defined :term:`variable` s
+Returns a list of user defined :term:`variable`\ s
 

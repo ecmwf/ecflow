@@ -440,7 +440,7 @@ void export_NodeAttr()
 		   .def("empty",          &ZombieAttr::empty,          "Return true if the attribute is empty")
 		   .def("zombie_type",    &ZombieAttr::zombie_type,    "Returns the `zombie type`_")
 		   .def("user_action",    &ZombieAttr::action,         "The automated action to invoke, when zombies arise")
-		   .def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of `zombie`_ in the server")
+           .def("zombie_lifetime",&ZombieAttr::zombie_lifetime,"Returns the lifetime in seconds of `zombie`_ in the server")
 		   .add_property( "child_cmds",bp::range(&ZombieAttr::child_begin,&ZombieAttr::child_end),"The list of child commands. If empty action applies to all child cmds")
 		   ;
 

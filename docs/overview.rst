@@ -3,11 +3,6 @@
 Overview
 //////////////
 
-
-.. image:: /_static/overview/image1.png
-   :width: 4.16667in
-   :height: 2.60417in
-
 .. image:: /_static/overview/image2.png
    :width: 4.16667in
    :height: 2.60417in
@@ -69,7 +64,7 @@ easier modification, and introduces object orientated features. The
 proprietary script language used by SMS, CDP, has been replaced by
 Python.
 
-The development of ecflow 4 has now stopped. But support is still
+The development of ecFlow 4 has now stopped. But support is still
 provided. It has been replaced by ecFlow 5.
 
 You can find an introduction to ecFlow in the `ECMWF Newsletter

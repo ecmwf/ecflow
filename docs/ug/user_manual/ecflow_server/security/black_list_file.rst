@@ -5,7 +5,7 @@ Black list file (experimental)
 
 This allows user commands to be authenticated via passwords.
 
-**In ecflow 5 this functionality is enabled by default**.       
+**In ecFlow 5 this functionality is enabled by default**.       
 
 One password file must be specified for the client and server. In both
 cases, the file is located via ECF_PASSWD environment variable.

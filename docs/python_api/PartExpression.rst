@@ -9,7 +9,7 @@ ecflow.PartExpression
 
 PartExpression holds part of a :term:`trigger` or :term:`complete expression`.
 
-Expressions can contain references to :term:`event`, :term:`meter` s, user variables,
+Expressions can contain references to :term:`event`\s, :term:`meter`\ s, user variables,
 :term:`repeat` variables and generated variables. The part expression allows us
 to split a large trigger or complete expression into smaller ones
 

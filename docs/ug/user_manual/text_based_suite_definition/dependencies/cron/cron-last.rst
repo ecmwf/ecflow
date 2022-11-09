@@ -4,7 +4,7 @@ cron-last
 /////////
 
 Cron has been extended to support ' **last day of the month** ' and
-**last week day of the month in ecflow 5**.
+**last week day of the month in ecFlow 5**.
 
 Lets recap the structure of a cron attribute:
 

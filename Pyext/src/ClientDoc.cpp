@@ -500,7 +500,7 @@ const char* ClientDoc::changed_node_paths() {
 
 const char* ClientDoc::checkpt(){
    return
-            "Request the `ecflow_server`_ `check point`_ s the definition held in the server immediately\n\n"
+            "Request the `ecflow_server`_ `check point`_\\ s the definition held in the server immediately\n\n"
             "This effectively saves the definition held in the server to disk,\n"
             "in a platform independent manner. This is the default when no arguments are specified.\n"
             "The saved file will include node state, passwords, etc.\n"
@@ -581,7 +581,7 @@ const char* ClientDoc::reload_wl_file(){
 const char* ClientDoc::run(){
    return
             "Immediately run the jobs associated with the input `node`_.\n\n"
-            "Ignore `trigger`_ s, `limit`_ s, `suspended`_, `time`_ or `date`_ dependencies,\n"
+            "Ignore `trigger`_\\ s, `limit`_\\ s, `suspended`_, `time`_ or `date`_ dependencies,\n"
             "just run the `task`_.\n"
             "When a job completes, it may be automatically re-queued if it has\n"
             "multiple time `dependencies`_. In the specific case where a `task`_ has a SINGLE\n"
@@ -781,7 +781,7 @@ const char* ClientDoc::suites(){
 
 const char* ClientDoc::ch_register() {
    return
-            "Register interest in a set of `suite`_ s.\n\n"
+            "Register interest in a set of `suite`_\\ s.\n\n"
             "If a definition has lots of suites, but the client is only interested in a small subset.\n"
             "Then using this command can reduce network bandwidth and synchronisation will be quicker.\n"
             "This command will create a client handle. This handle is held locally on the :py:class:`ecflow.Client`, and\n"
@@ -994,7 +994,7 @@ const char* ClientDoc::get_file(){
 
 const char* ClientDoc::plug(){
    return
-            "Plug command is used to move `node`_ s\n\n"
+            "Plug command is used to move `node`_\\ s\n\n"
             "The destination node can be on another `ecflow_server`_.\n"
             "In which case the destination path should be of the form '//<host>:<port>/suite/family/task\n::\n\n"
             "   void plug(\n"
@@ -1361,9 +1361,9 @@ const char* ClientDoc::status(){
 
 const char* ClientDoc::order(){
    return
-            "Re-orders the `node`_ s in the `suite definition`_ held by the `ecflow_server`_\n\n"
+            "Re-orders the `node`_\\ s in the `suite definition`_ held by the `ecflow_server`_\n\n"
             "It should be noted that in the absence of `dependencies`_,\n"
-            "the order in which `task`_ s are `submitted`_, depends on the order in the definition.\n"
+            "the order in which `task`_\\ s are `submitted`_, depends on the order in the definition.\n"
             "This changes the order and hence affects the submission order\n::\n\n"
             "   void order(\n"
             "      string absolute_node_path: Path name to node.\n"
@@ -1407,8 +1407,8 @@ const char* ClientDoc::group(){
 
 const char* ClientDoc::begin_suite(){
    return
-            "Begin playing the chosen `suite`_ s in the `ecflow_server`_\n\n"
-            ".. Note:: using the force option may cause `zombie`_ s if suite has running jobs\n\n"
+            "Begin playing the chosen `suite`_\\ s in the `ecflow_server`_\n\n"
+            ".. Note:: using the force option may cause `zombie`_\\ s if suite has running jobs\n\n"
             "::\n\n"
             "   void begin_suite\n"
             "      string suite_name     : begin playing the given suite\n"
@@ -1427,8 +1427,8 @@ const char* ClientDoc::begin_suite(){
 
 const char* ClientDoc::begin_all(){
    return
-            "Begin playing all the `suite`_ s in the `ecflow_server`_\n\n"
-            ".. Note:: using the force option may cause `zombie`_ s if suite has running jobs\n\n"
+            "Begin playing all the `suite`_\\ s in the `ecflow_server`_\n\n"
+            ".. Note:: using the force option may cause `zombie`_\\ s if suite has running jobs\n\n"
             "::\n\n"
             "   void begin_all_suites(\n"
             "      [(bool)force=False] : bypass the checks for submitted and active jobs\n"
@@ -1536,7 +1536,7 @@ const char* ClientDoc::delete_node(){
 
 const char* ClientDoc::delete_all(){
    return
-            "Delete all the `node`_ s held in the `ecflow_server`_.\n\n"
+            "Delete all the `node`_\\ s held in the `ecflow_server`_.\n\n"
             "The `suite definition`_ in the server will be empty, after this call. **Use with care**\n"
             "If a node is `submitted`_ or `active`_, then a Exception will be raised.\n"
             "To force the deletion at the expense of `zombie`_ creation, then set\n"
@@ -1559,8 +1559,8 @@ const char* ClientDoc::delete_all(){
 const char* ClientDoc::check()
 {
    return
-            "Check `trigger`_ and `complete expression`_ s and `limit`_ s\n\n"
-            "The `ecflow_server`_ does not store `extern`_ s. Hence all unresolved references\n"
+            "Check `trigger`_ and `complete expression`_\\ s and `limit`_\\ s\n\n"
+            "The `ecflow_server`_ does not store `extern`_\\ s. Hence all unresolved references\n"
             "are reported as errors.\n"
             "Returns a non empty string for any errors or warning\n::\n\n"
             "   string check(\n"

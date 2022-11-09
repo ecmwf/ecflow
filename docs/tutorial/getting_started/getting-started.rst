@@ -82,7 +82,7 @@ or
 #. Type 'use ecflow' to setup up the paths.
 
       .. code-block:: shell
-        :caption: Access ecflow command line interface and python interface
+        :caption: Access ecFlow command line interface and python interface
             
         module load ecflow/5new
         module load python3
@@ -99,11 +99,11 @@ or
 #. Make sure the following does not error:
  
       .. code-block:: shell
-        :caption: Check ecflow python API
+        :caption: Check ecFlow python API
       
         python3 -c "import ecflow"
 
 .. note::
 
-      If in the subsequent sections, you have the need to start a new shell and want access to the server, then ensure ECF_PORT is set. (also call **module load ecflow/new**, and **module load python3** in each new shell). The python is needed to access ecflow python API only.
+      If in the subsequent sections, you have the need to start a new shell and want access to the server, then ensure ECF_PORT is set. (also call **module load ecflow/new**, and **module load python3** in each new shell). The python is needed to access ecFlow python API only.
 

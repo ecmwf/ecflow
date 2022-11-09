@@ -2,9 +2,8 @@
 Welcome to ecFlow's documentation
 ====================================
 
-.. warning::
-
-  This documentation is still work in progress and can only be regarded as a **draft**.
+.. image:: /_static/overview/image1.png
+   :width: 300px
 
 *ecFlow* is a client/server workflow package that enables users to run a large number of programs (with dependencies on each other and on time) in a controlled environment. It provides reasonable tolerance for hardware and software failures, combined with restart capabilities. It is used at ECMWF to run all our operational suites across a range of platforms.
 
@@ -13,14 +12,12 @@ Welcome to ecFlow's documentation
    :caption: Documentation
 
    overview
-   ug/quickstart.rst
+   quickstart.rst
+   tutorial/tutorial.rst
    python_api/python_api.rst
    client_api/index.rst
-   ug/user_manual/index.rst
-   ecflow_ui/index.rst
-   tutorial/tutorial.rst
-   cookbook/index.rst
-   ug/glossary.rst
+   ug/index.rst
+   glossary.rst
    faq
 
 .. toctree::

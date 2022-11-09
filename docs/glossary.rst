@@ -369,7 +369,7 @@
                              :term:`ECF_MICRO` from the :term:`suite definition`
       ====================== ============================================================================
 
-      From ecflow release 4.4.0, use of %VAR% (variable substitution) can be a part of the include filename. i.e.:
+      From ecFlow release 4.4.0, use of %VAR% (variable substitution) can be a part of the include filename. i.e.:
 
       .. code-block:: shell
 
@@ -415,7 +415,7 @@
 
             edit ECF_FILES /home/ecmwf/emos/def/o/%FILE_DIR:ECFfiles%
        
-      The search can be reversed, by adding a variable **ECF_FILES_LOOKUP**, with a value of "prune_leaf" ( from ecflow 4.12.0). Then ecFlow will use the following search pattern.
+      The search can be reversed, by adding a variable **ECF_FILES_LOOKUP**, with a value of "prune_leaf" ( from ecFlow 4.12.0). Then ecFlow will use the following search pattern.
 
          #. /home/ecmwf/emos/def/o/ECFfiles/o/12/fc/model.ecf
          #. /home/ecmwf/emos/def/o/ECFfiles/o/12/model.ecf
@@ -461,7 +461,7 @@
 
    ECF_FETCH
       *Experimental*
-      This is used to specify a command, whose output can be used as a job script. The ecflow server will run the command with popen. Hence create care needs to be taken not to doom the server, with command that can hang. As this could severely affect servers ability to schedule jobs.
+      This is used to specify a command, whose output can be used as a job script. The ecFlow server will run the command with popen. Hence create care needs to be taken not to doom the server, with command that can hang. As this could severely affect servers ability to schedule jobs.
 
       .. code-block:: shell
 
@@ -507,7 +507,7 @@
       The ecFlow server will detect abnormal termination of this command. Hence for errors in the job file, should call 'ecflow_client --abort", then exits cleanly.
       Otherwise server detects abnormal job termination, and abort flag is set. Which will prevent job re-queue(due to ECF_TRIES). 
       
-      If the job also sends an abort, zombies can be created. If ECF_JOB_CMD command fails, and the task is in a submitted state, then the task is set to the aborted state. However if the task was active or complete, then we do NOT abort the task. Instead the zombie flag is set. (since ecflow 4.17.1)
+      If the job also sends an abort, zombies can be created. If ECF_JOB_CMD command fails, and the task is in a submitted state, then the task is set to the aborted state. However if the task was active or complete, then we do NOT abort the task. Instead the zombie flag is set. (since ecFlow 4.17.1)
 
    ECF_JOBOUT
       This is a generated :term:`variable`. This variable defines the path name for the job output file. The variable is composed as following. 
@@ -568,7 +568,7 @@
           -*    # all users have read access
 
       .. code-block:: shell 
-         :caption: From ecflow release 4.1.0, users can be restricted via node paths
+         :caption: From ecFlow release 4.1.0, users can be restricted via node paths
 
           4.4.5
           fred             # has read /write access to all suites
@@ -1317,7 +1317,7 @@
 
       Suite and families may also have a manual page. These will also be available in the GUI. Ecflow will look for a file ``<node_name>.man`` (where node_name is the name of suite or family) using a backwards search algorithm first in ECF_FILES directory, then ECF_HOME directory. Note that errors in variable pre-processing are ignored inside of a manual section. It should also be noted that for family and suite manuals, the %manual and %end directives are not strictly necessary, as the whole file is treated as a manual. 
  
-      If we have family ``/suite/big/f1``, ecflow will search for "f1.man" in:
+      If we have family ``/suite/big/f1``, ecFlow will search for "f1.man" in:
 
       .. code-block:: shell
 
@@ -1460,7 +1460,7 @@
       
       The repeat variable name is available as a generated variable.
 
-      The **repeat date** defines additional generated variables (from ecflow 4.7.0), which are scoped with prefix of the variable name i.e.:
+      The **repeat date** defines additional generated variables (from ecFlow 4.7.0), which are scoped with prefix of the variable name i.e.:
             
       .. code-block:: shell
 
@@ -1616,7 +1616,7 @@
          * - ECF_DATE
            - YYYMMDD   year,month,day of the month as 8 digit integer
          * - ECF_JULIAN
-           - The julian value of the current date (added in ecflow 4.7.0)
+           - The julian value of the current date (added in ecFlow 4.7.0)
          * - ECF_CLOCK
            - <day>:<month>:<day of week>:<day of year>. i.e.  Tuesday:December:2:348
 

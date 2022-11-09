@@ -45,4 +45,4 @@ Checking is done using :py:class:`ecflow.Defs.check_job_creation`
 
 #. Add :term:`job creation` checking to $HOME/course/test.py
 #. ``python3 test.py``  |  ``./test.py``
-#. Examine the job file :file:`$HOME/course/test/t1.job0`. In particular note the substitutions made by the ecflow server such as ECF_PORT, ECF_HOST, etc
+#. Examine the job file :file:`$HOME/course/test/t1.job0`. In particular note the substitutions made by the ecFlow server such as ECF_PORT, ECF_HOST, etc

@@ -7,11 +7,11 @@ ecflow.Event
 
    Bases: :py:class:`~Boost.Python.instance`
 
-:term:`event` s are used as signal mechanism.
+:term:`event`\ s are used as signal mechanism.
 
 Typically they would be used to signal partial completion of a :term:`task`
 and to be able to :term:`trigger` another job, which is waiting for this partial completion.
-Only tasks can have events that are automatically set via a :term:`child command` s, see below.
+Only tasks can have events that are automatically set via a :term:`child command`\ s, see below.
 Events are cleared automatically when a :term:`node` is re-queued or begun.
 Suites and Families can have events, but these events must be set via the Alter command
 Multiple events can be added to a task.

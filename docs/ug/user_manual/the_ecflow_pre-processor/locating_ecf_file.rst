@@ -44,7 +44,7 @@ locate the '.ecf' associated with a task.
  /o/12/fc/model** etc. This *trick* works nicely as long as there are no other tasks named
  **model** in the same family.
 
-* ALTERNATIVE: The search can be reversed, by **adding** a variable ECF_FILES_LOOKUP with a value of "prune_leaf". ( from ecflow 4.12.0):
+* ALTERNATIVE: The search can be reversed, by **adding** a variable ECF_FILES_LOOKUP with a value of "prune_leaf". ( from ecFlow 4.12.0):
 
       .. code-block:: shell
 

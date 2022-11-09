@@ -6,7 +6,7 @@
 Add a cron
 ==============
 
-The ecflow server records all commands sent to it, in a log file (<host>.<port>.ecf.log)
+The ecFlow server records all commands sent to it, in a log file (<host>.<port>.ecf.log)
 This log file will grow over time to a considerable size.
 In this exercise, we will create a task, whose job is to periodically back up and clear this log file.
 This will be done with :term:`cron` attribute introduced in the previous page. A cron will run indefinitely. i.e. once it has completed it will automatically re-queue itself.

@@ -9,7 +9,7 @@ ecflow.Limit
 
 :term:`limit` provides a simple load management
 
-i.e. by limiting the number of :term:`task` s submitted by a server.
+i.e. by limiting the number of :term:`task`\ s submitted by a server.
 Limits are typically defined at the :term:`suite` level, or defined in a
 separate suite, so that they can be used by multiple suites.
 Once a limit is defined in a :term:`suite definition`, you must also assign families/tasks to use

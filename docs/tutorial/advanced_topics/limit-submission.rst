@@ -6,7 +6,7 @@
 Limit-submission
 ================== 
 
-In the previous exercise, we showed how ecflow provides simple load management.
+In the previous exercise, we showed how ecFlow provides simple load management.
 
 The limits can still allow several hundred jobs to be submitted at once. This can cause problems:
 

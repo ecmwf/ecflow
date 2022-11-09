@@ -7,7 +7,7 @@ ecflow.ZombieType
 
    Bases: :py:class:`~Boost.Python.enum`
 
-:term:`zombie` s are running jobs that fail authentication when communicating with the :term:`ecflow_server`.
+:term:`zombie`\ s are running jobs that fail authentication when communicating with the :term:`ecflow_server`.
 
 See class :term:`zombie type` and :py:class:`ecflow.ZombieAttr` for further information.
 

@@ -6,9 +6,9 @@ Open ssl
 OpenSSL enables encrypted communication between the client and the
 server. For ecFlow, this can be used for user commands.
 
-To enable this for ecflow 4, please ensure you build ecFlow with
+To enable this for ecFlow 4, please ensure you build ecFlow with
 '-DENABLE_SSL'. You will need to ensure that open SSL is installed on
-your system. This is **enabled by default for ecflow 5 if** the SSL libraries are
+your system. This is **enabled by default for ecFlow 5 if** the SSL libraries are
 found on the system.
 
 .. code-block:: shell

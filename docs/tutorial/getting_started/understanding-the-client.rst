@@ -44,7 +44,7 @@ This is shown by the following python example:
   
 .. literalinclude:: src/understanding-the-client.py
    :language: python
-   :caption: How to ping ecflow server in python
+   :caption: How to ping ecFlow server in python
     
     
 **What to do**
@@ -55,8 +55,8 @@ It should be noted that, if the server was started with :file:`ecf_start.sh` scr
 
 .. code-block:: shell
 
-   export ECF_HOST=<HOST> # as given when setting up ecflow server
-   export ECF_PORT=<PORT> # as given when setting up ecflow server
+   export ECF_HOST=<HOST> # as given when setting up ecFlow server
+   export ECF_PORT=<PORT> # as given when setting up ecFlow server
 
 **netstat** can be used to determine the port number if the server was started on your local machine:
 

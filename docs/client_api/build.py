@@ -34,9 +34,8 @@ def build():
 {"/" * len(title)} 
 
 The command line interface is provided by the :term:`ecflow_client`
-executable. Most users of ecFlow will be happy to use GUI, but some things can
-only be done from the command line. Note also that most of the commands that you
-execute using GUI are actually CLI commands. 
+executable. Note that most of the commands that you
+execute using :ref:`ecflow_ui` are actually CLI commands. 
 
 The very first argument to :term:`ecflow_client` specifies the command and must be prefixed with ``--``, e.g. ``--load`` in the example below:
 

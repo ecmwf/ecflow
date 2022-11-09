@@ -13,7 +13,7 @@ relevant information in the online ecFlow documentation.
 
 There are two main methods for describing a suite to the :term:`ecflow_server`.  The first is to write 
 a text definition file which is then loaded to the server.  The grammar of this text definition file
-is described here :ref:`grammar`.  This grammar does not support conditional statements (such as if,while,for)
+is described :ref:`here <grammar>`.  This grammar does not support conditional statements (such as if,while,for)
 nor the ability to define functions. However, the text definition file can be generated using any language
 which in itself supports conditional statements.  The language is similar to that offered by SMS/CDP and
 as such may be an appropriate migration path for some.

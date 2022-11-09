@@ -6,7 +6,7 @@ Simulation
 The suite definition describes the static structure, it's not until the
 definition is loaded in the server, that we see its dynamic behaviour.
 
-With ecflow python API, the dynamic behaviour of the suite can be
+With ecFlow python API, the dynamic behaviour of the suite can be
 simulated, ( i.e. in the same manner as the server).
 
 Simulation has the following benefits:

@@ -7,7 +7,7 @@ ecflow.Meter
 
    Bases: :py:class:`~Boost.Python.instance`
 
-:term:`meter` s can be used to indicate proportional completion of :term:`task`
+:term:`meter`\ s can be used to indicate proportional completion of :term:`task`
 
 They are able to :term:`trigger` another job, which is waiting on this proportion.
 Can also be used to indicate progress of a job. Meters can be used in

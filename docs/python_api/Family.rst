@@ -9,7 +9,7 @@ ecflow.Family
 
 Create a :term:`family` :term:`node`.A Family node lives inside a :term:`suite` or another :term:`family`
 
-A family is used to collect :term:`task` s together or to group other families.
+A family is used to collect :term:`task`\ s together or to group other families.
 Typically you place tasks that are related to each other inside the same family
 analogous to the way you create directories to contain related files.
 There are two ways of adding a family, see example below.

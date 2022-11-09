@@ -83,7 +83,7 @@ const char* DefsDoc::part_expression_doc()
 {
    return
             "PartExpression holds part of a `trigger`_ or `complete expression`_.\n\n"
-            "Expressions can contain references to `event`_, `meter`_ s, user variables,\n"
+            "Expressions can contain references to `event`_\\s, `meter`_\\ s, user variables,\n"
             "`repeat`_ variables and generated variables. The part expression allows us\n"
             "to split a large trigger or complete expression into smaller ones\n"
             "\nConstructor::\n\n"
@@ -325,7 +325,7 @@ const char* DefsDoc::family_doc()
 {
    return
             "Create a `family`_ `node`_.A Family node lives inside a `suite`_ or another `family`_\n\n"
-            "A family is used to collect `task`_ s together or to group other families.\n"
+            "A family is used to collect `task`_\\ s together or to group other families.\n"
             "Typically you place tasks that are related to each other inside the same family\n"
             "analogous to the way you create directories to contain related files.\n"
             "There are two ways of adding a family, see example below.\n"
@@ -423,7 +423,7 @@ const char* DefsDoc::add_extern_doc()
 {
    return
             "`extern`_ refer to nodes that have not yet been defined typically due to cross suite `dependencies`_\n\n"
-            "`trigger`_ and `complete expression`_ s may refer to paths, and variables in other suites, that have not been\n"
+            "`trigger`_ and `complete expression`_\\ s may refer to paths, and variables in other suites, that have not been\n"
             "loaded yet. The references to node paths and variable must exist, or exist as externs\n"
             "Externs can be added manually or automatically.\n\n"
             "Manual Method:\n\n"
@@ -575,7 +575,7 @@ const char* DefsDoc::add_event_doc()
 {
    return
             "Add a `event`_. See :py:class:`ecflow.Event`\n"
-            "Events can be referenced in `trigger`_ and `complete expression`_ s\n\n"
+            "Events can be referenced in `trigger`_ and `complete expression`_\\ s\n\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage:\n\n"
@@ -599,7 +599,7 @@ const char* DefsDoc::add_meter_doc()
 {
    return
             "Add a `meter`_. See :py:class:`ecflow.Meter`\n"
-            "Meters can be referenced in `trigger`_ and `complete expression`_ s\n\n"
+            "Meters can be referenced in `trigger`_ and `complete expression`_\\ s\n\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage:\n\n"
@@ -984,7 +984,7 @@ const char* DefsDoc::check_job_creation_doc()
             "- recursive includes\n"
             "- manual and comments `pre-processing`_\n"
             "- `variable substitution`_\n\n"
-            "Some `task`_ s are dummy tasks have no associated `ecf script`_ file.\n"
+            "Some `task`_\\ s are dummy tasks have no associated `ecf script`_ file.\n"
             "To disable error message for these tasks please add a variable called ECF_DUMMY_TASK to them.\n"
             "Checking is done in conjunction with the class :py:class:`ecflow.JobCreationCtrl`.\n"
             "If no node path is set on class JobCreationCtrl then all tasks are checked.\n"
@@ -1022,11 +1022,11 @@ const char* DefsDoc::check_job_creation_doc()
 const char* DefsDoc::generate_scripts_doc()
 {
    return
-            "Automatically generate template `ecf script`_ s for this definition\n"
-            "Will automatically add `child command`_ s for `event`_, `meter`_ and `label`_ s.\n"
+            "Automatically generate template `ecf script`_\\ s for this definition\n"
+            "Will automatically add `child command`_\\ s for `event`_\\ s, `meter`_\\ s and `label`_\\ s.\n"
             "This allows the definition to be refined with out worrying about the scripts.\n"
             "However it should be noted that, this will create a lot of *duplicated* script contents\n"
-            "i.e in the absence of `event`_ s, `meter`_ s and `label`_ s, most of generated `ecf script`_ files will\n"
+            "i.e in the absence of `event`_\\ s, `meter`_\\ s and `label`_\\ s, most of generated `ecf script`_ files will\n"
             "be the same. Hence should only be used an aid to debugging the definition.\n"
             "It uses the contents of the definition to parameterise what gets\n"
             "generated, and the location of the files. Will throw Exceptions for errors.\n"
@@ -1059,10 +1059,10 @@ const char* DefsDoc::generate_scripts_doc()
 const char* DefsDoc::check()
 {
    return
-            "Check `trigger`_ and `complete expression`_ s and `limit`_ s\n\n"
+            "Check `trigger`_ and `complete expression`_\\ s and `limit`_\\ s\n\n"
             "* Client Side: The client side can specify externs. Hence all node path references\n"
-            "  in `trigger`_ expressions, and `inlimit`_ references to `limit`_ s, that are\n"
-            "  unresolved and which do *not* appear in `extern`_ s are reported as errors\n"
+            "  in `trigger`_ expressions, and `inlimit`_ references to `limit`_\\ s, that are\n"
+            "  unresolved and which do *not* appear in `extern`_\\ s are reported as errors\n"
             "* Server Side: The server does not store externs. Hence all unresolved references\n"
             "  are reported as errors\n\n"
             "Returns a non empty string for any errors or warning\n"

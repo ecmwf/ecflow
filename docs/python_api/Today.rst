@@ -9,7 +9,7 @@ ecflow.Today
 
 :term:`today` is a time dependency that does not wrap to tomorrow.
 
-If the :term:`suite` s begin time is past the time given for the Today,
+If the :term:`suite`\ s begin time is past the time given for the Today,
 then the node is free to run.
 
 Constructor::
