@@ -3,10 +3,7 @@
 ecflow_ui web menu
 ///////////////////
 
-Some might notice that what was known as "Web menu" in ecflowview does
-not appear in the latest GUI.
-
-Just click menu **User Defined > Manage Commands > Command**
+In :ref:`ecflow_ui` just click the ode context menu and select **User Defined > Manage Commands > Command**
 
 .. code-block:: shell
 
@@ -16,12 +13,12 @@ Then **Save Option > sName "Web" > Save As New**
 
 You can then connect a node, Suite, Family, Task, to a web page like a
 project front end, html man page, third party monitoring tool ...
-ecflowview has also a "second level menus" in order to access man
+:ref:`ecflow_ui` has also a "second level menus" in order to access man
 pages, job file, output, when a suite stores this information as
 dedicated (user) variables, and not the default (ecflow) variables
 ECF_JOB, ECF_JOBOUT, ...
 
-Here are the commands below, you can define as extra menus in ecflow_ui
+Here are the commands below, you can define as extra menus in :ref:`ecflow_ui`
 
 .. code-block:: shell
 

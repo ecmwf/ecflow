@@ -3,7 +3,7 @@
 Customising the views
 /////////////////////
 
-ecFlowUI offers many ways to view your suites, including options that
+:ref:`ecflow_ui` offers multiple ways to view your suites, including options that
 mimic the deprecated ecflowview interface.
 
 Customising the tree view

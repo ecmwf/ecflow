@@ -378,7 +378,7 @@ class Course(ie.Seed):
 
 class Admin(Course):
     """host newlog task + logsvr start/stop/check task
-    -- server logs can be renewed with a ecflowview menu command also
+    -- server logs can be renewed with an ecFlowUI menu command also
     """
 
     def __init__(self):
