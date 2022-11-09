@@ -27,7 +27,7 @@ More rarer causes might be:
 - Server crash and recovered :term:`check point` file is out of date
 - Machine crash
 
-How can zombie's be handled?
+How can zombies be handled?
 -----------------------------
 
 The default behaviour for init, complete, abort and wait child commands, is to **block** the job, and for event, label, meter to continue(fob). (With **fob**, the job no longer blocks, but the server will not change the node tree) 
@@ -47,7 +47,7 @@ The jobs can also configured, so that if the server denies the communication, th
 
 .. note::
 
-  The zombie's tab is shown, in the info panel when the server node( i.e. topmost) is selected. 
+  The zombies tab is shown, in the info panel when the server node( i.e. topmost) is selected. 
 
 The actions include:
 
