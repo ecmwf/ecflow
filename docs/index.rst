@@ -25,6 +25,7 @@ Welcome to ecFlow's documentation
    :caption: Installation
 
    install/index.rst
+   release_notes/index.rst
    support
    contributing
    licence
