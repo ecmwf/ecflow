@@ -10,16 +10,21 @@ Overview
 
 **ecFlow** is a client/server workflow package that enables users to run
 a large number of programs (with dependencies on each other and on time)
-in a controlled environment. It provides reasonable tolerance for
+in a controlled environment. It provides tolerance for
 hardware and software failures, combined with restart capabilities. It
 is used at ECMWF to run all our operational suites across a range of
 platforms.
 
-**ecFlow** submits **tasks** (jobs) and receives acknowledgments from
-the tasks when they change **status** and when they send **events**,
-using **child** commands embedded in your scripts. ecFlow stores the
+ecFlow runs as a :term:`server <ecflow_server>` receiving requests from clients. The :ref:`command line interface <ecflow_cli>`, 
+the :ref:`graphical interface <ecflow_ui>`, scripts and the :ref:`Python API (application interface) <python_api>` are the clients. 
+The server is based on C++/boost ASIO and uses TCP/IP for communication. Multiple servers
+can be run on the same hardware. 
+
+**ecFlow** submits :term:`task`\ s (jobs) and receives acknowledgments from
+the tasks when they change :term:`status` and when they send :term:`event`\ s,
+using :term:`child command`\s embedded in your scripts. ecFlow stores the
 relationships between tasks, and is able to submit tasks dependant on
-triggers, such as when a given task changes its status, for example when
+:term:`trigger`\ s, such as when a given task changes its status, for example when
 it finishes. 
 
 **ecFlow** functionality is provided by the following executables and
