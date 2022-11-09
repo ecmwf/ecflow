@@ -6,7 +6,7 @@
 Add an event
 ============
 
-Sometimes waiting for the completion of a task is not good enough. If a task is producing several results, another task may start as soon as the first results are ready. For that, ecFlow introduces the concept of :term:`event`'s. 
+Sometimes waiting for the completion of a task is not good enough. If a task is producing several results, another task may start as soon as the first results are ready. For that, ecFlow introduces the concept of :term:`event`\ s. 
 
 An :term:`event` is a message that a task will report to :term:`ecflow_server` while it is running. Events have names and a :term:`task` can set several of them.
 
@@ -17,7 +17,7 @@ We will create new tasks (t3, t4) that will be triggered by the  events emitted 
 
 Create the :term:`ecf script` for t3 and t4 by copying t1.
     
-To notify :term:`ecflow_server`, the task (**t2** in the example below) must call :term:`ecflow_client` --event which is one of the :term:`child command`'s
+To notify :term:`ecflow_server`, the task (**t2** in the example below) must call :term:`ecflow_client` --event which is one of the :term:`child command`\ s
 
 .. code-block:: shell
    :caption: Amend $HOME/course/test/f1/t2.ecf

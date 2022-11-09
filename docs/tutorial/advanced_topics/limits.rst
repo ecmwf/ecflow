@@ -9,7 +9,7 @@ Limits
 
 Limits provide simple load management by limiting the number of tasks submitted by a specific :term:`ecflow_server`
       
-We have learnt from experience that suite designers were using :term:`trigger`'s in two different ways: as data dependency triggers and as courtesy triggers. Triggers where designed for the former. The latter are used to prevent too many jobs running at once and are actually an artificial way of queueing jobs. 
+We have learnt from experience that suite designers were using :term:`trigger`\ s in two different ways: as data dependency triggers and as courtesy triggers. Triggers where designed for the former. The latter are used to prevent too many jobs running at once and are actually an artificial way of queueing jobs. 
 
 Because ecFlow does not distinguish between the two sorts of triggers, suites can become difficult to maintain after a while. So the concept of :term:`limit` was introduced. Limits are declared with the **limit** keyword 
 

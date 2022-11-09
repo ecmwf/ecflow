@@ -113,7 +113,7 @@ When time dependencies are placed on different nodes in the hierarchy, the resul
 The example above assumes we have a suite, with an infinite repeat loop. So why does the task run on Monday morning at  00:00?
 This is because time dependencies on different nodes act independently of each other.  In this case, the time attribute was set free on Sunday at 10 am ( and once free it stays free until it is re-queued).  Hence task **tt** is free to run on Monday morning. After the task has run and re-queued. It will then run on Monday at 10 am.
 
-Like :term:`trigger`'s, :term:`date` and :term:`time` :term:`dependencies` can be set for a :term:`family`. 
+Like :term:`trigger`\ s, :term:`date` and :term:`time` :term:`dependencies` can be set for a :term:`family`. 
 In this case, the tasks of this family will only run according to these :term:`dependencies`.
 
 .. note::
@@ -164,7 +164,7 @@ For brevity we have left out :term:`family` **f1**. In python this would be:
 **What to do:**
 
 #. Make the changes to the :term:`suite definition` file
-#. Create all the necessary :term:`ecf script`'s by copying the one from **/test/f1/t7**
+#. Create all the necessary :term:`ecf script`\ s by copying the one from **/test/f1/t7**
 #. Replace the :term:`suite`.
 
    | Python: ``python3 test.py ; python3 client.py``

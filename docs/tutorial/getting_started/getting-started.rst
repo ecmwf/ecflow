@@ -51,7 +51,7 @@ On a shared machine multiple users and ecFlow servers can coexist. To allow this
       or :term:`ecflow_ui` you need to know these information.
 
       By setting the value of the environment variables ECF_HOST and ECF_PORT you 
-      identify the server you wish to access. Multiple :term:`ecflow_server`'s can run on the same system.
+      identify the server you wish to access. Multiple :term:`ecflow_server`\ s can run on the same system.
 
 **Local Machine**
 

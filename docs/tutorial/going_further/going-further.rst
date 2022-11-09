@@ -5,7 +5,7 @@
 
 We will now try to build a more complex :term:`suite` by introducing one by one various ecFlow functionalities. 
 
-We will add more :term:`task`'s and learn how to group them into families. 
+We will add more :term:`task`\ s and learn how to group them into families. 
 
 We will also learn to define :term:`dependencies` between tasks. 
 

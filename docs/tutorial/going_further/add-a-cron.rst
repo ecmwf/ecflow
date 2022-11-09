@@ -61,7 +61,7 @@ For brevity, the previous families have been omitted.
 **What to do:**
 
 #. Make the changes to the :term:`suite definition` file
-#. Create all the necessary :term:`ecf script`'s by copying the one from **/test/f1/t7**
+#. Create all the necessary :term:`ecf script`\ s by copying the one from **/test/f1/t7**
 #. Replace the :term:`suite`.
 
    | Python: ``python3 test.py ; python3 client.py``

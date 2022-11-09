@@ -6,7 +6,7 @@
 Families
 ========
 
-Tasks can be logically grouped into :term:`family`'s.
+Tasks can be logically grouped into :term:`family`\ s.
 
 You can picture a suite as a hierarchical structure very similar to a unix 
 file system, where the families are the directories and the tasks are the files. The suite is a family with some extra attributes (See :ref:`tutorial-dates-and-clocks`). Like directories, families can themselves contain other families. And like directories, there can be many tasks with the same name, as long as they are in different families.
@@ -26,7 +26,7 @@ Whenever angled brackets are used, ecFlow first looks to see if ECF_INCLUDE vari
 
 This has the added advantage that specific includes files can be placed under ECF_INCLUDE, and includes file common to **many** tasks can placed in ECF_HOME. For more details see :term:`directives`.  
 
-We need to do the following changes to the :term:`ecf script`'s. 
+We need to do the following changes to the :term:`ecf script`\ s. 
 
 from:
 
@@ -44,7 +44,7 @@ to:
    echo "I am part of a suite that lives in %ECF_HOME%"
    %include <tail.h> 
 
-:term:`suite`'s, :term:`family`'s and :term:`task`'s are called :term:`node`'s.
+:term:`suite`\ s, :term:`family`\ s and :term:`task`\ s are called :term:`node`\ s.
  
 
 Text
@@ -77,7 +77,7 @@ The hierarchy is shown as a tree in :term:`ecflow_ui`.
 **What to do:**
 
 #. Update the :term:`suite definition`
-#. Create the directories needed, move the :term:`ecf script`'s
+#. Create the directories needed, move the :term:`ecf script`\ s
 #. Edit the script to include :ref:`tutorial-head_h` and :ref:`tutorial-tail_h` from the ECF_INCLUDE directory.
 #. Replace the :term:`suite`. For Python use:
 

@@ -21,7 +21,7 @@ In the examples below replace the string ?????? with a host name of your choice.
 
 .. note:: 
 
-   The environment of a task running on a remote host is different from that of a task running locally. This depends on how your system is set up. Here we need to set PATH, to allow :term:`child command`'s to be used. So add the following line into your :ref:`tutorial-head_h` file before the call to :term:`ecflow_client` --init ::
+   The environment of a task running on a remote host is different from that of a task running locally. This depends on how your system is set up. Here we need to set PATH, to allow :term:`child command`\ s to be used. So add the following line into your :ref:`tutorial-head_h` file before the call to :term:`ecflow_client` --init ::
 
     export PATH=$PATH:/usr/local/apps/ecflow/%ECF_VERSION%/bin
 

@@ -6,14 +6,14 @@
 Add a meter
 ===========
 
-A :term:`meter` is very similar to an :term:`event`. Instead of being a boolean value (on/off), it can take a range of integer values. Other tasks are then triggered when the :term:`meter` reaches a certain value. Like events, :term:`meter`'s have names and a :term:`task` can have several of them.
+A :term:`meter` is very similar to an :term:`event`. Instead of being a boolean value (on/off), it can take a range of integer values. Other tasks are then triggered when the :term:`meter` reaches a certain value. Like events, :term:`meter`\ s have names and a :term:`task` can have several of them.
 
 Ecf Script
 ----------
 
 We will create new tasks (t5, t6 and t7) that will be triggered when the :term:`meter` in task t1 reaches certain values.
     
-To notify :term:`ecflow_server`, the :term:`task` ( **t1** in the example below) must call ``ecflow_client` --meter``. This is also one of the :term:`child command`'s.
+To notify :term:`ecflow_server`, the :term:`task` ( **t1** in the example below) must call ``ecflow_client` --meter``. This is also one of the :term:`child command`\ s.
 
 .. code-block:: shell
    :caption: $HOME/course/f1/t1.ecf

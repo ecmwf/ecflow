@@ -90,7 +90,7 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
    
   .. code-block:: python 
         
-    s1 = ecflow.Suite('s1')
+    s1 = ecflow.Suite(\ s1')
     child_list = [ ChildCmdType.label ]
     zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob, 300)
     s1.add_zombie(zombie_attr)
@@ -114,7 +114,7 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
   
   .. code-block:: python 
         
-    s1 = ecflow.Suite('s1')
+    s1 = ecflow.Suite(\ s1')
     child_list = [ ChildCmdType.label, ChildCmdType.event, ChildCmdType.meter ]
     zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob, 300)
     s1.add_zombie(zombie_attr)
@@ -138,7 +138,7 @@ The zombie attribute is inherited in the same manner as :ref:`tutorial-variable-
 
   .. code-block:: python 
 
-    with ecflow.Suite('s1') as s1:
+    with ecflow.Suite(\ s1') as s1:
         with s1.add_family("critical") as crit :
             child_list = []  # empty child list means apply to all child commands
             for zombie_type in (ZombieType.ecf,ZombieType.path,ZombieType.user,ZombieType.ecf_pid,ZombieType.ecf_passwd,ZombieType.ecf_pid_passwd):

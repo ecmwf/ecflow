@@ -16,7 +16,7 @@ A suite clock can be modified by a gain. This is useful for suites running on ol
 
 The value of the date is in the generated :term:`variable` ECF_DATE, and the value of the time is in ECF_TIME. ECF_CLOCK contains other information such as the day of week.
 
-It is safer for a job to always use the suite generated time and date :term:`variable`'s, and not access directly the system date to prevent confusion.
+It is safer for a job to always use the suite generated time and date :term:`variable`\ s, and not access directly the system date to prevent confusion.
 
 
 **What to do:**
@@ -29,7 +29,7 @@ It is safer for a job to always use the suite generated time and date :term:`var
 
     ecflow_client --alter change clock_date 1.4.2020   /test
 
-#. Check the values of the ecFlow :term:`variable`'s
+#. Check the values of the ecFlow :term:`variable`\ s
 #. Set the suite clock to sync  with the computer::
   
     ecflow_client --alter change clock_sync   /test

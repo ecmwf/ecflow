@@ -19,7 +19,7 @@ Operational Suite
 What do:
 
 1. Write a :term:`suite definition` for this suite.
-2. How should the :term:`ecf script`'s be organised? 
+2. How should the :term:`ecf script`\ s be organised? 
 
 
 Useful pointers:

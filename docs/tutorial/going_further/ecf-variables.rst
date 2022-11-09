@@ -7,7 +7,7 @@
 ecFlow variables
 ================
 
-| We already saw that ecFlow has some :term:`variable`'s, like ECF_HOME. 
+| We already saw that ecFlow has some :term:`variable`\ s, like ECF_HOME. 
 | There are three kinds of variables:
 
 * The variables that are used by :term:`ecFlow`, like ECF_HOME.
