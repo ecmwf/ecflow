@@ -74,8 +74,6 @@ class TargetFile:
 
     def write(self, source, line):
         _, _, s = source.rpartition("docstring of ecflow.")
-        if "zombievec" in s.lower():
-            print(s)
         s = s.split(".")
         if s:
             name = s[0]
