@@ -9,7 +9,7 @@ The documentation can be found at https://ecflow.readthedocs.io/.
 COPYRIGHT AND LICENCE
 ----------------------
 
-(C) Copyright 2005- ECMWF.
+Copyright 2005- European Centre for Medium-Range Weather Forecasts (ECMWF).
 
 This software is licensed under the terms of the Apache Licence Version 2.0
 which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
