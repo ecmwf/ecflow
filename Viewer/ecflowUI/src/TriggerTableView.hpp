@@ -11,6 +11,8 @@
 #ifndef TRIGGERTABLEVIEW_HPP
 #define TRIGGERTABLEVIEW_HPP
 
+#include <cassert>
+
 #include <QTreeView>
 
 #include "VInfo.hpp"
@@ -63,6 +65,10 @@ protected:
     ActionHandler* actionHandler_;
     bool needItemsLayout_{false};
     TriggerViewDelegate* delegate_;
+
+private:
+    // we enforce the usage of setTableModel()
+    void setModel(QAbstractItemModel*) override {assert(false);}
 };
 
 #endif // TRIGGERTABLEVIEW_HPP
