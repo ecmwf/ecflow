@@ -296,7 +296,11 @@ if [[ $socksPort != "" ]] ; then
     if [[ ${scpOptions} == "" ]] ; then
         failed "scpOptions cannot be empty!" 
     fi
-    remoteUH=localhost
+    if [[ $remoteUid == "" || $remoteUid == "__USER__" ]]  ; then
+        remoteUH=localhost
+    else    
+        remoteUH="${remoteUid}@localhost"
+    fi  
 # no SOCKS
 else 
     if [[ $remoteHost == "" ]] ; then
