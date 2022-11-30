@@ -14,7 +14,7 @@ def get_ecflow_version( work_space ):
     "This will extract ecFlow version *list* from the source code."
     "The version is defined in the file CMakeList.txt"
     "expecting string of form:"
-    "project( ecflow LANGUAGES CXX VERSION 5.9.1 )"
+    "project( ecflow LANGUAGES CXX VERSION 5.9.2 )"
     file = work_space + "/CMakeLists.txt11"
     ecflow_version = []
     if os.path.exists(file):
