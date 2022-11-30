@@ -32,6 +32,7 @@ public:
     void stopTransfer(bool broadcast);
     bool isActive() const;
     static QString socksPort();
+    static QString socksUser();
     VFile_ptr const result() {return fResult_;}
 
 protected Q_SLOTS:

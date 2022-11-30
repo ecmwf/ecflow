@@ -4,6 +4,10 @@
                 "port" : {
                     "label" : "SOCKS port",
                     "default" : "9050"
+                },
+                "uid" : {
+                    "label" : "Username on remote host",
+                    "default" : "$USER"
                 }
             }
        }
