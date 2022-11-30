@@ -123,15 +123,6 @@ Node attribute overview
      - N/A
      -
      -
-   * - :term:`trigger`
-     - 
-     - ❎
-     - 
-     -
-     -
-     - N/A
-     -
-     -
    * - :term:`complete`
      - 
      - ❎
