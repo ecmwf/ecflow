@@ -42,12 +42,12 @@ shared libraries
    This executable is the server. It is responsible for scheduling the
    jobs and responding to ecflow_client requests.
 
--  :ref:`ecflow.so <python_api>`: Python interface. This shared library provide the python API for creating the suite definition and communication with the server.
+-  :ref:`ecflow.so <python_api>`: Python interface. This shared library provides the python API for creating the suite definition and communication with the server.
 
 **ecFlow** runs as a server receiving requests from clients. CLI, GUI,
 and suite jobs are clients. Communication is based on TCP/IP. Note that
-ecFlow is a scheduler sand is not a queuing system such as NQS, SGE, Load
-leveler, or PBS. However, it can submit to queuing systems.
+ecFlow is a scheduler and is not a queuing system such as NQS, SGE, Load
+leveler, or PBS. However, it can submit jobs to queuing systems.
 
 History
 =======
