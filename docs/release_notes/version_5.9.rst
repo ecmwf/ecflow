@@ -4,6 +4,30 @@ Version 5.9 updates
 ////////////////////
 
 
+Version 5.9.2
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2022-11-30
+
+ecFlowUI
+----------
+
+- **Improvement**: added option to specify remote user id for ssh transfer when run via proxychains
+
+- **Fix**: fixed issue where the UI could not generate the output directly listing when run via proxychains if the local username does not match the remote username
+
+
+Version 5.9.1
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2022-11-10
+
+ecFlowUI
+----------
+
+- **Fix**: fixed issue where clicking on a node in the Triggers tab could cause a crash
+
+
 Version 5.9.0
 ==============
 
