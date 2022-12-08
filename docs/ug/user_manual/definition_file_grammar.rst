@@ -82,8 +82,6 @@ Definition file grammar
                : `repeat_integer` | `repeat_enumerated` | `repeat_string` | 
                : `repeat_datelist`
     repeat_day: "day" >> unsigned integer >> !`ymd`
-    repeat_month: “month" >> unsigned integer >> !`ymd`
-    repeat_year: "year" >> unsigned integer >> !`ymd`
     repeat_integer: "integer" >> `identifier` >> integer >> " " >> 
                   : integer >> " " >> integer
     repeat_enumerated: "enumerated" >> `identifier` >> +`identifier`
