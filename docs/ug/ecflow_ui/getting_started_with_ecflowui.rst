@@ -6,14 +6,14 @@ Getting Started with ecFlowUI
 Starting ecFlowUI
 =================
 
-The command to start the application from ECMWF workstations and ecgate
-is::
+The command to start the application on the ECMWF HPC::
 
-   module load ecflow/5new                                            
+   module load ecflow/new                                            
    ecflow_ui                                                          
 
-**This version should only be for testing the new user interface and not
-for running a server!**
+.. warning::
+
+   This version should only be for testing the new user interface and not for running a server!
 
 Starting ecFlowUI for the first time
 ====================================
@@ -58,8 +58,7 @@ Viewing the tree
 ================
 
 The tree nodes are expanded and collapsed using the small icons to the
-left of each node (these may vary in appearance depending on your
-workstation setup). Alternatively, double-click on the node name.
+left of each node. Alternatively, double-click on the node name.
 
 At the top of the tree is a set of *breadcrumbs*, showing the hierarchy
 up to the currently-selected node. Clicking on a node in the breadcrumbs

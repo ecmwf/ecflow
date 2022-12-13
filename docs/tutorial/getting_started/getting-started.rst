@@ -19,19 +19,26 @@ Getting Started
    using-ecflowui
    execute_rerun_and_requeue
 
-First ensure that the paths to ecFlow executables are accessible. At ECMWF this is done using **use** command. Hence type the following at the command line.
+First ensure that the paths to ecFlow executables are accessible. On the ECMWF HPC this is done using the **module** command. Hence type the following in the command line:
 
 .. code-block:: shell
 
       module load ecflow/new
       module load python3
 
-Create a directory called course in your home directory and change to that directory. If you do not use modules you will need to add the correct path to your ecFlow binaries: e.g. in ksh  ``export PATH=/usr/local/apps/ecflow/5.5.0/bin:$PATH``
+Create a directory called course in your home directory and enter that directory:
 
 .. code-block:: shell
       
       cd $HOME
       mkdir course; cd course
+
+If you do not use modules (or outside ECMWF) you will need to add the correct path to your ecFlow binaries, e.g. : 
+
+.. code-block:: shell
+
+      export PATH=path_to_your_ecflow_bin:$PATH
+
 
 In order to use ecFlow we first need to start the :term:`ecflow_server`
 
@@ -82,9 +89,9 @@ or
 #. Type 'use ecflow' to setup up the paths.
 
       .. code-block:: shell
-        :caption: Access ecFlow command line interface and python interface
+        :caption: Access ecFlow command line interface and python interface on ECMWF HPC
             
-        module load ecflow/5new
+        module load ecflow/new
         module load python3
 
 #. Create $HOME/course directory
@@ -105,5 +112,5 @@ or
 
 .. note::
 
-      If in the subsequent sections, you have the need to start a new shell and want access to the server, then ensure ECF_PORT is set. (also call **module load ecflow/new**, and **module load python3** in each new shell). The python is needed to access ecFlow python API only.
+      If in the subsequent sections, you have the need to start a new shell and want access to the server, then ensure ECF_PORT is set (also call **module load ecflow/new**, and **module load python3** in each new shell). Python is needed to access ecFlow Python API only.
 
