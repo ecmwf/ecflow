@@ -264,12 +264,28 @@ QString VFileTransferCore::buildSocksProxyJump()
     return s;
 }
 
+
 QString VFileTransferCore::socksPort()
 {
     if (VConfig::instance()->proxychainsUsed()) {
         auto p = VConfig::instance()->find("network.socks.port");
         if (p) {
             return p->valueAsString();
+        }
+    }
+    return {};
+}
+
+QString VFileTransferCore::socksUser()
+{
+    if (VConfig::instance()->proxychainsUsed()) {
+        auto p = VConfig::instance()->find("network.socks.uid");
+        if (p) {
+            auto user = p->valueAsString().simplified();
+            if (user == "$USER") {
+                user.clear();
+            }
+            return user;
         }
     }
     return {};
@@ -336,6 +352,7 @@ void VFileTransfer::transferLocalViaSocks(QString sourceFile, ByteMode byteMode,
     useMetaData_ = useMetaData;
     modTime_ = remoteModTime;
     checkSum_ = remoteCheckSum;
+    remoteUser_ = socksUser();
     socksPort_ = socksPort();
     useSocks_ = true;
 
@@ -386,14 +403,16 @@ QString VFileTransfer::buildCommand()
         command += " -j " + proxyJump;
     }
 
+    auto u = remoteUser_;
+    if(u.isEmpty() || u == "$USER") {
+       u = "__USER__";
+    }
+    command += " -u " + u;
+
     if (useSocks_) {
         command += " -p " + socksPort_;
     } else {
-        auto u = remoteUser_;
-        if(u.isEmpty() || u == "$USER") {
-           u = "__USER__";
-        }
-        command += " -u " + u + " -h " + remoteHost_;
+        command += " -h " + remoteHost_;
     }
 
 
@@ -545,6 +564,7 @@ void VDirTransfer::transferLocalViaSocks(QString sourceFile)
     clear();
 
     sourceFile_ = sourceFile;
+    remoteUser_ = socksUser();
     socksPort_ = socksPort();
     useSocks_ = true;
 
@@ -563,14 +583,16 @@ QString VDirTransfer::buildCommand()
         command += " -j " + proxyJump;
     }
 
+    auto u = remoteUser_;
+    if(u.isEmpty() || u == "$USER") {
+       u = "__USER__";
+    }
+    command += " -u " + u;
+
     if (useSocks_) {
         command += " -p " + socksPort_;
     } else {
-        auto u = remoteUser_;
-        if(u.isEmpty() || u == "$USER") {
-           u = "__USER__";
-        }
-        command += " -u " + u + " -h " + remoteHost_;
+        command += " -h " + remoteHost_;
     }
 
     return command;

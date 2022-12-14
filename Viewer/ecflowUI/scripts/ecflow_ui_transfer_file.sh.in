@@ -230,16 +230,16 @@ END
 #echo "shell=${SHELL}"
 
 mode=
-sourceFile=/perm/deploy/metabuilder/ecf_out/ecflow-gen-deploy-metab-ci_3141/ecmwf_toolbox/aa/gnu.11.2/wipe_src.1
-remoteUid=cgr
-remoteHost=hpc-login
-targetFile=res.txt
+sourceFile=
+remoteUid=
+remoteHost=
+targetFile=
 byteMode=
 byteValue=
 sshProxyJump=
 proxyJump=
-sshOptions="-C -o StrictHostKeyChecking=no"
-scpOptions="-C -o StrictHostKeyChecking=no"
+sshOptions="-C -o StrictHostKeyChecking=no -o PasswordAuthentication=no"
+scpOptions="-C -o StrictHostKeyChecking=no -o PasswordAuthentication=no"
 metaFile=
 modTime=0
 checkSum="x"
@@ -273,7 +273,6 @@ echo "targetFile=$targetFile"
 echo "proxyJump=$proxyJump"
 echo "byteMode=$byteMode"
 echo "byteValue=$byteValue"
-echo "remoteUid=$remoteUid"
 echo "metaFile=$metaFile"
 echo "modTime=$modTime"
 echo "checkSum=$checkSum"
@@ -297,7 +296,11 @@ if [[ $socksPort != "" ]] ; then
     if [[ ${scpOptions} == "" ]] ; then
         failed "scpOptions cannot be empty!" 
     fi
-    remoteUH=localhost
+    if [[ $remoteUid == "" || $remoteUid == "__USER__" ]]  ; then
+        remoteUH=localhost
+    else    
+        remoteUH="${remoteUid}@localhost"
+    fi  
 # no SOCKS
 else 
     if [[ $remoteHost == "" ]] ; then

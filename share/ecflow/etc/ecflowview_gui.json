@@ -640,7 +640,7 @@
                         "prefix" : "server.files",
                         "line" : "uidForServerLogTransfer",
                         "note" : {
-                            "default": "USER is the only shell variable that is substituted for this parameter!"
+                            "default": "<b>Not used</b> when started via <b>proxychains</b>! USER is the only shell variable that is substituted for this parameter!"
                         },
                         "line" : "maxSizeForTimelineData",
                         "note" : {
@@ -719,10 +719,14 @@
                 "title" : "SOCKS",
                 "prefix" : "network.socks",
                 "note" : {
-                    "default" : "These settings are only used when ecFlowUI was started up with the <b>proxychains</b> command. In this case dynamic port forwarding (using SOCKS) to a remote host is supposed to be up and running. Using these settings ecFlowUI tries to access <b>local log files</b> on the remote host via <b>scp/ssh</b>."
+                    "default" : "These settings are only used when ecFlowUI was started up with the <b>proxychains</b> command. In this case dynamic port forwarding (using SOCKS) to a remote host is supposed to be up and running. Using these settings ecFlowUI tries to access <b>local log files</b> and <b>server logs</b> for timeline and server load on the remote host via <b>scp/ssh</b>."
                  },
 
-                "line" : "port"
+                "line" : "port",
+                "line" : "uid",
+                "note" : {
+                    "default": "USER is the only shell variable that is substituted for this parameter!"
+                }
             }
 
         }
