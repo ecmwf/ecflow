@@ -376,12 +376,12 @@ bool Str::valid_name(const std::string& name, std::string &msg)
        return false;
    }
 
-   // verify that the first character is alphanumeric or has underscore
+   // verify that the first character is alphanumeric or is an underscore
    bool result = Str::ALPHANUMERIC_UNDERSCORE().find( name[0], 0 ) != string::npos;
    if ( !result ) {
       msg = "Valid names can only consist of alphanumeric characters, "
             "underscores and dots (The first character cannot be a dot). "
-            "The first character is not valid: ";
+            "The first character is not valid (only alphanumeric or an underscore is allowed): ";
       msg += name;
       return false;
    }
