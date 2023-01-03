@@ -2,14 +2,14 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #49 $ 
+// Revision    : $Revision: #49 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : This class is used as a helper class
 //============================================================================
@@ -83,32 +83,32 @@ const std::string& Str::NUMERIC() { static string NUMERIC = "0123456789"; return
 
 void Str::removeQuotes(std::string& s)
 {
-	if (!s.empty()) {
-		if (s[0] == '"' && s[s.size()-1] == '"') {
-			s.erase(s.begin());
-			s.erase(s.begin() + s.size()-1);
-		}
-	}
+    if (!s.empty()) {
+        if (s[0] == '"' && s[s.size()-1] == '"') {
+            s.erase(s.begin());
+            s.erase(s.begin() + s.size()-1);
+        }
+    }
 }
 // 047 is octal for '
 void Str::removeSingleQuotes(std::string& s)
 {
-	if (!s.empty()) {
-		if (s[0] == 047 && s[s.size()-1] == 047) {
-			s.erase(s.begin());
-			s.erase(s.begin() + s.size()-1);
-		}
-	}
+    if (!s.empty()) {
+        if (s[0] == 047 && s[s.size()-1] == 047) {
+            s.erase(s.begin());
+            s.erase(s.begin() + s.size()-1);
+        }
+    }
 }
 
 bool Str::replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace)
 {
-	size_t pos = jobLine.find(stringToFind);
-	if (pos != string::npos) {
-		jobLine.replace(pos,stringToFind.length(),stringToRplace);
-		return true;
-	}
-	return false;
+    size_t pos = jobLine.find(stringToFind);
+    if (pos != string::npos) {
+        jobLine.replace(pos,stringToFind.length(),stringToRplace);
+        return true;
+    }
+    return false;
 }
 
 bool Str::replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace)
@@ -327,7 +327,7 @@ static bool caseInsCharCompare(char a, char b) { return  (toupper(a) == toupper(
 
 bool Str::caseInsCompare( const std::string& s1, const std::string& s2)
 {
-	return ( (s1.size() == s2.size()) && equal(s1.begin(),s1.end(), s2.begin(), caseInsCharCompare));
+    return ( (s1.size() == s2.size()) && equal(s1.begin(),s1.end(), s2.begin(), caseInsCharCompare));
 }
 
 
@@ -372,26 +372,27 @@ bool Str::valid_name(const std::string& name, std::string &msg)
 
    // verify that the string is not empty
    if ( name.empty() ) {
-	   msg = "Invalid name. Empty string.";
-	   return false;
+       msg = "Invalid name. Empty string.";
+       return false;
    }
 
-   // verify that the first character is alphabetic or has underscore
- 	bool result = Str::ALPHANUMERIC_UNDERSCORE().find( name[0], 0 ) != string::npos;
-	if ( !result ) {
-      msg = "Valid names can only consist of alphanumeric characters "
-            ",underscores and dots. The first character cannot be a dot: ";
+   // verify that the first character is alphanumeric or has underscore
+   bool result = Str::ALPHANUMERIC_UNDERSCORE().find( name[0], 0 ) != string::npos;
+   if ( !result ) {
+      msg = "Valid names can only consist of alphanumeric characters, "
+            "underscores and dots (The first character cannot be a dot). "
+            "The first character is not valid: ";
       msg += name;
-		return false;
-	}
+      return false;
+   }
 
    // verify that any other characters are alphanumeric or underscore
    if (name.size() > 1) {
       result = name.find_first_not_of(VALID_NODE_CHARS, 1) == string::npos;
       if ( !result ) {
-         msg = "Valid names can only consist of alphanumeric characters "
-               ",underscores and dots. The first character cannot be a dot. ";
-         if (name.find('\r') != string::npos)  msg += "Window's line ending ? ";
+         msg = "Valid names can only consist of alphanumeric characters, "
+               "underscores and dots (The first character cannot be a dot). ";
+         if (name.find('\r') != string::npos)  msg += "Windows line ending ? ";
          msg += "'";
          msg += name;
          msg += "'"; // use '<name>' to show if PC format. i.e carriage return
@@ -427,29 +428,29 @@ bool Str::valid_name(const std::string& name)
 
 int Str::to_int( const std::string& the_str, int error_return)
 {
-	if ( the_str.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
-		try {
-			return boost::lexical_cast< int >( the_str );
-		}
-		catch ( boost::bad_lexical_cast&) {}
-	}
-	return error_return;
+    if ( the_str.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+        try {
+            return boost::lexical_cast< int >( the_str );
+        }
+        catch ( boost::bad_lexical_cast&) {}
+    }
+    return error_return;
 }
 
 bool Str::truncate_at_start(  std::string& fileContents, size_t max_lines)
 {
-	if (fileContents.empty()) return false;
+    if (fileContents.empty()) return false;
 
-	/// Truncate from the front
-	size_t no_of_new_lines = 0;
-	for(size_t i =fileContents.size()-1; i >0; --i) {
-		if (fileContents[i] == '\n') no_of_new_lines++;
-		if ( no_of_new_lines >=  max_lines) {
-			fileContents.erase(fileContents.begin(),fileContents.begin() + i +1); //skip new line at start of file
-			return true;
-		}
-	}
-	return false;
+    /// Truncate from the front
+    size_t no_of_new_lines = 0;
+    for(size_t i =fileContents.size()-1; i >0; --i) {
+        if (fileContents[i] == '\n') no_of_new_lines++;
+        if ( no_of_new_lines >=  max_lines) {
+            fileContents.erase(fileContents.begin(),fileContents.begin() + i +1); //skip new line at start of file
+            return true;
+        }
+    }
+    return false;
 }
 
 bool Str::truncate_at_end(  std::string& fileContents, size_t max_lines)
