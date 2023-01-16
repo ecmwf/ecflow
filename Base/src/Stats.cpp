@@ -184,7 +184,7 @@ void Stats::show(std::ostream& os) const
    os << left << setw(width) << "   Check pt mode " << show_checkpt_mode(checkpt_mode_) << "\n";
    os << left << setw(width) << "   Check pt save time alarm " << checkpt_save_time_alarm_ << "s\n";
    os << left << setw(width) << "   Number of Suites " << no_of_suites_ << "\n";
-   os << left << setw(width) << "   Request's per 1,5,15,30,60 min " <<  request_stats_ << "\n";
+   os << left << setw(width) << "   Request/s per 1,5,15,30,60 min " <<  request_stats_ << "\n";
 
    if (checkpt_ || restore_defs_from_checkpt_ || server_version_ || restart_server_ || shutdown_server_ || halt_server_ || 
        ping_ || debug_server_on_ || debug_server_off_ || get_defs_ || sync_ || sync_full_ || sync_clock_ || news_)  os << "\n";
