@@ -43,6 +43,11 @@ void Stats::update_for_serialisation()
    /// This *ONLY* computes the data when this function is called
    /// >>> Hence the server load is only valid for last hour <<<
 
+   if (!request_stats_.empty()) {
+      // Found request statistics in 'cache'. Nothing further to do...
+      return;
+   }
+
    if (request_vec_.empty()) {
       // No data to create statistics...
       return;
