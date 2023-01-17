@@ -73,19 +73,25 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
        test/TestApiV1.cpp
   )
 
-  ecbuild_add_test( TARGET       s_http
-                    SOURCES      ${test_srcs}
-                    LIBS         libhttp libclient libserver ${OPENSSL_LIBRARIES} 
-                                 ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
-                                 ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
-                    INCLUDES     src
-                                 ../ANode/test
-                                 ../Base/test
-                                 ../Server/src
-                                 ${Boost_INCLUDE_DIRS}
-                    DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                    TEST_DEPENDS u_base s_client
-  )
+  if (OPENSSL_FOUND)
+
+    ecbuild_add_test( TARGET       s_http
+                      SOURCES      ${test_srcs}
+                      LIBS         libhttp libclient libserver ${OPENSSL_LIBRARIES} 
+                                  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                                  ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
+                      INCLUDES     src
+                                  ../ANode/test
+                                  ../Base/test
+                                  ../Server/src
+                                  ${Boost_INCLUDE_DIRS}
+                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
+                      TEST_DEPENDS u_base s_client
+   )
+
+  else()
+    message(WARNING "SSL not enabled - will not run HTTP server tests")
+  endif()
 
 endif()
 
