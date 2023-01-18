@@ -113,6 +113,7 @@ list( APPEND test_srcs
    test/TestSSyncCmd_CH1.cpp
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
+   test/TestStatsCmd.cpp
 )
 
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
