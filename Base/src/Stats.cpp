@@ -16,6 +16,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/range/adaptors.hpp>
+
 #include "Stats.hpp"
 #include "SState.hpp"
 
@@ -59,7 +61,7 @@ void Stats::update_for_serialisation()
    int count = 0;
    double request = 0.0;
    double seconds = 0.0;
-   for(const auto& entry : request_vec_) {
+   for(const auto& entry : boost::adaptors::reverse(request_vec_)) {
       count++;
       request += entry.first;
       seconds += entry.second;

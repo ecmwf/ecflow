@@ -101,7 +101,10 @@ BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_requests_per_second) {
   int polling = 60; // every 60 seconds
   int samples = 60; // to cover 1 hour 'uptime'
   for (int i = 0; i < samples; ++i) {
-    server.stats().request_count_ = 30; // meaning 0.5 request per second
+    int sample = 30 + (samples - i - 1);
+    // Note: the request counter sample varies to allow checking that the
+    // measurements are processed in the correct order
+    server.stats().request_count_ = sample;
     server.stats().update_stats(polling);
   }
 
@@ -119,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_requests_per_second) {
 
         auto requests_per_second =
             extract_request_per_second(reply->get_string());
-        BOOST_REQUIRE(requests_per_second == "0.50 0.50 0.50 0.50 0.50");
+        BOOST_REQUIRE(requests_per_second == "0.50 0.53 0.62 0.74 0.99");
       }
     } catch (std::exception &e) {
       BOOST_CHECK_MESSAGE(false, "Unexpected exception : " << e.what() << " : "
