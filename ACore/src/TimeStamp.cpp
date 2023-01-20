@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Log
+// Name        : TimeStamp
 // Author      : Avi
 // Revision    : $Revision: #57 $
 //
@@ -10,44 +10,40 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 //
-// Description : Simple singleton implementation of log
 //============================================================================
 #include "TimeStamp.hpp"
-#include <cstdio>
+
 #include <ctime>
 
-using namespace std;
-
 namespace ecf {
+namespace TimeStamp {
 
-std::string TimeStamp::now()
-{
-   std::string time_stamp;
-   now(time_stamp);
-   return time_stamp;
+namespace {
+
+struct regular {
+  static constexpr char const *format = "[%H:%M:%S %-e.%-m.%Y] ";
+  static constexpr size_t size = 23;
+};
+
+struct brief {
+  static constexpr char const *format = "[%H:%M:%S %-e.%-m] ";
+  static constexpr size_t size = 18;
+};
+
+template <typename FMT = regular> std::string format_now() {
+  std::time_t now = std::time(nullptr);
+  char buffer[FMT::size];
+  std::strftime(buffer, sizeof(buffer), FMT::format, std::localtime(&now));
+  return buffer;
 }
 
-void TimeStamp::now(std::string& time_stamp)
-{
-   constexpr int buff_size = 255;
-   char t_fmt[buff_size];
-   time_t stamp = std::time(nullptr);
-   struct tm *tod = localtime(&stamp);
-   snprintf(t_fmt,buff_size, "[%02d:%02d:%02d %d.%d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
-           tod->tm_mday, tod->tm_mon + 1, tod->tm_year + 1900);
+} // namespace
 
-   time_stamp = t_fmt;
-}
+std::string now() { return format_now(); }
 
-void TimeStamp::now_in_brief(std::string& time_stamp)
-{
-   constexpr int buff_size = 255;
-   char t_fmt[buff_size];
-   time_t stamp = time( nullptr);
-   struct tm *tod = localtime(&stamp);
-   snprintf(t_fmt,buff_size, "[%02d:%02d:%02d %d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
-           tod->tm_mday, tod->tm_mon + 1);
+void now(std::string &time_stamp) { time_stamp = format_now(); }
 
-   time_stamp = t_fmt;
-}
-}
+void now_in_brief(std::string &time_stamp) { time_stamp = format_now<brief>(); }
+
+} // namespace TimeStamp
+} // namespace ecf
