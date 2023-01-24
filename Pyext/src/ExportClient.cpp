@@ -88,17 +88,34 @@ int edit_script_submit(ClientInvoker* self,
                   run);
 }
 
-const std::string& get_file(ClientInvoker* self,
+namespace /* __ANONYMOUS__ */ {
+
+boost::python::object convert_to_pyobject(const std::string &s, bool as_bytes) {
+  boost::python::object result;
+  if (as_bytes) {
+    result = boost::python::object(boost::python::handle<>(PyBytes_FromObject(
+        PyMemoryView_FromMemory(const_cast<char *>(s.data()),
+                                static_cast<ssize_t>(s.size()), PyBUF_READ))));
+  } else {
+    result = boost::python::object(boost::python::handle<>(
+        PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
+  }
+  return result;
+}
+
+} // namespace
+
+boost::python::object get_file(ClientInvoker* self,
                             const std::string& absNodePath,
                             const std::string& file_type = "script",
-                            const std::string& max_lines = "10000")
-{ self->file(absNodePath,file_type,max_lines); return self->get_string(); }
+                            const std::string& max_lines = "10000",
+                            bool as_bytes = false)
+{
+  self->file(absNodePath,file_type,max_lines);
+  const std::string& s = self->get_string();
 
-const std::string& get_file_1(ClientInvoker* self,
-                            const std::string& absNodePath,
-                            const std::string& file_type = "script" )
-{ self->file(absNodePath,file_type,"10000"); return self->get_string(); }
-
+  return convert_to_pyobject(s, as_bytes);
+}
 
 /// Set the CLI to enable output to standard out
 class CliSetter {
@@ -335,8 +352,7 @@ void export_Client()
    .def("ping" ,            &ClientInvoker::pingServer,      ClientDoc::ping())
    .def("stats" ,           &stats,                          ClientDoc::stats())
    .def("stats_reset" ,     &stats_reset,                    ClientDoc::stats_reset())
-   .def("get_file" ,        &get_file,                       return_value_policy<copy_const_reference>(), ClientDoc::get_file())
-   .def("get_file" ,        &get_file_1,                     return_value_policy<copy_const_reference>())
+   .def("get_file" ,        &get_file,                       (bp::arg("task"), bp::arg("type") = "script", bp::arg("max_lines") = "10000", bp::arg("as_bytes") = false), ClientDoc::get_file())
    .def("plug" ,            &ClientInvoker::plug,            ClientDoc::plug())
    .def("query" ,           &query,                          return_value_policy<copy_const_reference>(),ClientDoc::query())
    .def("query" ,           &query1,                         return_value_policy<copy_const_reference>(),ClientDoc::query())
