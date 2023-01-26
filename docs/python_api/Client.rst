@@ -1256,33 +1256,33 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.get_file( (Client)arg1, (str)arg2, (str)arg3, (str)arg4) -> str :
+.. py:method:: Client.get_file( (Client)arg1, (str)task [, (str)type='script' [, (str)max_lines='10000' [, (bool)as_bytes=False]]]) -> object :
    :module: ecflow
 
-File command can be used to request the various file types associated with a :term:`node`
-    
-    This command defaults to returning a max of 10000 lines. This can be changed
-    ::
-    
-       string get_file(
-          string absolute_node_path    : Path name to node
-          [(string)file_type='script'] : file_type = [ script<default> | job | jobout | manual | kill | stat ]
-          [(string)max_lines='10000'] : The number of lines in the file to return
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()        # use default host(ECF_HOST) & port(ECF_PORT)
-           for file in [ 'script', 'job', 'jobout', 'manual', 'kill', 'stat' ]:
-              print(ci.get_file('/suite/f1/t1',file))  # print the contents of the file
-       except RuntimeError, e:
-          print(str(e))
-    
+The File command is used to request the various file types associated with a :term:`node`.
 
-get_file( (Client)arg1, (str)arg2, (str)arg3) -> str
+By default, the output is composed of the last 10000 lines of the file. The number of lines can be customised via the :code:`max_lines` parameter.
+
+The content can be retrieved as a sequence of 'bytes'. This allows to download a file that contains invalid Unicode sequence, without causing an :code:`UnicodeDecodeError` to be raised.
+::
+
+   string get_file(
+      string absolute_node_path    : Path name to node
+      [(string)file_type='script'] : file_type = [ script<default> | job | jobout | manual | kill | stat ]
+      [(string)max_lines='10000'] : The number of lines in the file to return
+      [(bool)as_bytes=False] : A flag indicating if the output should be 'bytes'; by default the output is of type 'str'
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()        # use default host(ECF_HOST) & port(ECF_PORT)
+       for file in [ 'script', 'job', 'jobout', 'manual', 'kill', 'stat' ]:
+           print(ci.get_file('/suite/f1/t1',file))  # print the contents of the file
+   except RuntimeError, e:
+       print(str(e))
 
 
 .. py:method:: Client.get_host( (Client)arg1) -> str :

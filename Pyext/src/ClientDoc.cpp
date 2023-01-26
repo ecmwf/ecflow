@@ -975,8 +975,8 @@ const char* ClientDoc::ch_auto_add() {
 const char* ClientDoc::get_file(){
    return
             "The File command is used to request the various file types associated with a `node`_.\n\n"
-            "By default, the output is composed of the first 10000 lines of the file. The number of lines can be customised via the :code:`max_lines` parameter.\n\n"
-            "The content can be retrieved as a sequence of 'bytes'. This allows to download a file that contains invalid Unicode sequence, and thus causes an :code:`UnicodeDecodeError` to be raised.\n"
+            "By default, the output is composed of the last 10000 lines of the file. The number of lines can be customised via the :code:`max_lines` parameter.\n\n"
+            "The content can be retrieved as a sequence of 'bytes'. This allows to download a file that contains invalid Unicode sequence, without causing an :code:`UnicodeDecodeError` to be raised.\n"
             "::\n\n"
             "   string get_file(\n"
             "      string absolute_node_path    : Path name to node\n"
