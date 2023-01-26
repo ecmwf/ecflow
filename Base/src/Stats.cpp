@@ -16,6 +16,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/range/adaptors.hpp>
+
 #include "Stats.hpp"
 #include "SState.hpp"
 
@@ -30,7 +32,9 @@ void Stats::update_stats(int poll_interval)
    request_count_ = 0;
    request_stats_.clear();
 
-   // To stop excessive memory usage , we will only store, request per poll period, for 1 hour
+   // To avoid excessive memory usage, we store only a limited number of:
+   //  - requests per poll period
+   // Since we're polling every 60 seconds, sample cover the last hour
    if (request_vec_.size() > 60) {
       request_vec_.pop_front();
    }
@@ -38,36 +42,42 @@ void Stats::update_stats(int poll_interval)
 
 void Stats::update_for_serialisation()
 {
-   /// This *ONLY* compute the data when this function is called
+   /// This *ONLY* computes the data when this function is called
    /// >>> Hence the server load is only valid for last hour <<<
-   no_of_suites_ = 0;
-   if (request_vec_.empty()) return;
+
+   if (!request_stats_.empty()) {
+      // Found request statistics in 'cache'. Nothing further to do...
+      return;
+   }
+
+   if (request_vec_.empty()) {
+      // No data to create statistics...
+      return;
+   }
 
    std::stringstream ss;
-   int count = 0;
-   int request = 0;
-   int seconds = 0;
-   auto rend = request_vec_.rend();
-   for(auto i = request_vec_.rbegin(); i != rend; ++i) {
-      count++;
-      request += (*i).first;
-      seconds += (*i).second;
-      auto request_per_second = static_cast<double>(request/seconds);
+   ss << setiosflags(ios::fixed) << setprecision(2);
 
-      if (count == 1) {
-         ss << setiosflags(ios::fixed) << setprecision(2) << request_per_second;
-      }
-      else if (count ==  5) {
-         ss << " " << request_per_second;
-      }
-      else if (count == 15) {
-         ss << " " << request_per_second;
-      }
-      else if (count == 30) {
-         ss << " " << request_per_second ;
-      }
-      else if (count == 60) {
-         ss << " " << request_per_second;
+   int count = 0;
+   double request = 0.0;
+   double seconds = 0.0;
+   for(const auto& entry : boost::adaptors::reverse(request_vec_)) {
+      count++;
+      request += entry.first;
+      seconds += entry.second;
+      double request_per_second = request/seconds;
+
+      switch (count) {
+        case 5: case 15: case 30: case 60: {
+          ss << " ";
+          /* [[fallthrough]] */
+        }
+        case 1: {
+          ss << request_per_second;
+        }
+        default: {
+          // nothing to do...
+        }
       }
    }
    request_stats_ = ss.str();
@@ -181,7 +191,7 @@ void Stats::show(std::ostream& os) const
    os << left << setw(width) << "   Check pt mode " << show_checkpt_mode(checkpt_mode_) << "\n";
    os << left << setw(width) << "   Check pt save time alarm " << checkpt_save_time_alarm_ << "s\n";
    os << left << setw(width) << "   Number of Suites " << no_of_suites_ << "\n";
-   os << left << setw(width) << "   Request's per 1,5,15,30,60 min " <<  request_stats_ << "\n";
+   os << left << setw(width) << "   Request/s per 1,5,15,30,60 min " <<  request_stats_ << "\n";
 
    if (checkpt_ || restore_defs_from_checkpt_ || server_version_ || restart_server_ || shutdown_server_ || halt_server_ || 
        ping_ || debug_server_on_ || debug_server_off_ || get_defs_ || sync_ || sync_full_ || sync_clock_ || news_)  os << "\n";

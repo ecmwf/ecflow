@@ -21,6 +21,7 @@
 #include "Str.hpp"
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <nlohmann/json.hpp>
 #include "HttpServerException.hpp"

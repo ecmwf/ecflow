@@ -224,6 +224,9 @@ std::string Log::handle_write_failure()
       msg += "\nFailed to write to log file: ";
       msg += File::stream_error_condition(logImpl_->stream());
    }
+   // Append 'regular' format timestamp to end of message
+   msg += " ";
+   msg += TimeStamp::now();
 
    // handle write failure, by closing then re-opening log file
    logImpl_.reset();
