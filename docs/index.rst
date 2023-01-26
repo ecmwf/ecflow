@@ -16,6 +16,7 @@ Welcome to ecFlow's documentation
    tutorial/tutorial.rst
    python_api/python_api.rst
    client_api/index.rst
+   rest_api.rst
    ug/index.rst
    glossary.rst
    faq
