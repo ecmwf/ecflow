@@ -974,21 +974,24 @@ const char* ClientDoc::ch_auto_add() {
 
 const char* ClientDoc::get_file(){
    return
-            "File command can be used to request the various file types associated with a `node`_\n\n"
-            "This command defaults to returning a max of 10000 lines. This can be changed\n::\n\n"
+            "The File command is used to request the various file types associated with a `node`_.\n\n"
+            "By default, the output is composed of the last 10000 lines of the file. The number of lines can be customised via the :code:`max_lines` parameter.\n\n"
+            "The content can be retrieved as a sequence of 'bytes'. This allows to download a file that contains invalid Unicode sequence, without causing an :code:`UnicodeDecodeError` to be raised.\n"
+            "::\n\n"
             "   string get_file(\n"
             "      string absolute_node_path    : Path name to node\n"
             "      [(string)file_type='script'] : file_type = [ script<default> | job | jobout | manual | kill | stat ]\n"
             "      [(string)max_lines='10000'] : The number of lines in the file to return\n"
+            "      [(bool)as_bytes=False] : A flag indicating if the output should be 'bytes'; by default the output is of type 'str'\n"
             "   )\n"
             "\nUsage:\n\n"
             ".. code-block:: python\n\n"
             "   try:\n"
             "       ci = Client()        # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       for file in [ 'script', 'job', 'jobout', 'manual', 'kill', 'stat' ]:\n"
-            "   	      print(ci.get_file('/suite/f1/t1',file))  # print the contents of the file\n"
+            "           print(ci.get_file('/suite/f1/t1',file))  # print the contents of the file\n"
             "   except RuntimeError, e:\n"
-            "      print(str(e))\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -1677,4 +1680,3 @@ const char* ClientDoc::set_child_complete_del_vars()
             "Needs a list of strings, representing the variable names."
             ;
 }
-
