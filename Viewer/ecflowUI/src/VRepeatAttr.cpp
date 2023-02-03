@@ -423,8 +423,10 @@ QString VRepeatDateListAttr::allValues() const
 
         for(int i=start; i <= end; i++)
         {
-            if(!vals.isEmpty()) vals+=" ";
-                vals+="\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+            if(!vals.isEmpty()) {
+                vals+=" ";
+            }
+            vals+= QString::fromStdString(r.value_as_string(i));
         }
         return vals;
     }
