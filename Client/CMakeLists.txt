@@ -72,6 +72,7 @@ SET_TARGET_PROPERTIES(ecflow_client PROPERTIES
 
 list( APPEND test_srcs
     test/TestClientEnvironment.cpp
+    test/TestClientOptions.cpp
     test/TestClientInterface.cpp
     test/TestJobGenOnly.cpp
     test/TestLifeCycle.cpp
