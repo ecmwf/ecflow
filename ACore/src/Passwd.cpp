@@ -18,9 +18,6 @@
 
 #include "Passwd.hpp"
 
-//extern char *crypt(const char *key, const char *salt);
-
-
 double ecf_drand48();
 
 

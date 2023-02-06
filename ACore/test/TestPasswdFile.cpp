@@ -12,15 +12,14 @@
 //
 // Description :
 //============================================================================
-#include <iostream>
-#include <unistd.h>
-
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include <iostream>
 
-#include "PasswdFile.hpp"
 #include "File.hpp"
+#include "PasswdFile.hpp"
+#include "PasswordEncryption.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -146,11 +145,11 @@ BOOST_AUTO_TEST_CASE( test_passwd )
 //   tom host3 3143    x12ggg # sdsdsd
 
    std::vector<Pass_wd> expected_passwds;
-   expected_passwds.emplace_back("fred", "host",  "3141", crypt("x12ggg","fred") );
-   expected_passwds.emplace_back("fred", "host3", "3143", crypt("passwd","fred") );
-   expected_passwds.emplace_back("fred", "host4", "3145", crypt("x12ggg","fred") );
-   expected_passwds.emplace_back("jake", "host",  "3141", crypt("x12ggg","jake") );
-   expected_passwds.emplace_back("tom",  "host3", "3143", crypt("x12ggg","tom") );
+   expected_passwds.emplace_back("fred", "host",  "3141", PasswordEncryption::encrypt("x12ggg","fred") );
+   expected_passwds.emplace_back("fred", "host3", "3143", PasswordEncryption::encrypt("passwd","fred") );
+   expected_passwds.emplace_back("fred", "host4", "3145", PasswordEncryption::encrypt("x12ggg","fred") );
+   expected_passwds.emplace_back("jake", "host",  "3141", PasswordEncryption::encrypt("x12ggg","jake") );
+   expected_passwds.emplace_back("tom",  "host3", "3143", PasswordEncryption::encrypt("x12ggg","tom") );
 
    BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds() ,"expected passwords to match");
 }
