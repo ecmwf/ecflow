@@ -170,6 +170,11 @@ if(UI_SYSTEM_SERVERS_LIST AND (NOT ENABLE_UI))
     set(UI_SYSTEM_SERVERS_LIST)
 endif()
 
+if(ENABLE_HTTP AND NOT ENABLE_SERVER)
+    ecbuild_warn("ENABLE_SERVER is disabled, therefore HTTP_SERVER will also be disabled")
+    set(ENABLE_HTTP OFF)
+endif()
+
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
