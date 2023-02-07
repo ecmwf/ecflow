@@ -26,6 +26,7 @@
 #include "Ecf.hpp"
 #include "Child.hpp"
 #include "TaskApi.hpp"
+#include "PasswordEncryption.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -136,6 +137,11 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
        std::string user = vm[ "user" ].as< std::string > ();
        if (env->debug())  std::cout << "  user " << user << " overridden at the command line\n";
        env->set_user_name(user);
+    }
+    if ( vm.count( "password" ) ) {
+       std::string password = vm[ "password" ].as< std::string > ();
+       if (env->debug())  std::cout << "  password overridden at the command line\n";
+       env->set_password(PasswordEncryption::encrypt(password, env->get_user_name()));
     }
 
 #ifdef ECF_OPENSSL

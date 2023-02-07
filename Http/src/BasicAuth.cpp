@@ -15,14 +15,16 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "BasicAuth.hpp"
+
+#include "Base64.hpp"
 #include "HttpServerException.hpp"
-#include <Base64.hpp>
-#include <Str.hpp>
+#include "PasswordEncryption.hpp"
+#include "Str.hpp"
 
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
    const std::string decoded = base64_decode(token);
    std::vector<std::string> elems;
    ecf::Str::split(decoded, elems, ":");
 
-   return std::make_pair(elems[0], crypt(elems[1].c_str(), elems[0].c_str()));
+   return std::make_pair(elems[0], PasswordEncryption::encrypt(elems[1], elems[0]));
 }

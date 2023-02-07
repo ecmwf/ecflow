@@ -13,7 +13,6 @@
 // Description : Parser for white list file
 //============================================================================
 
-#include <unistd.h>  // for crypt
 #include <iostream>
 
 #include <boost/lexical_cast.hpp>
@@ -23,6 +22,7 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "User.hpp"
+#include "PasswordEncryption.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -269,7 +269,7 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
       return false;
    }
 
-   vec_.emplace_back(tokens[0],tokens[1],tokens[2],crypt(tokens[3].c_str(),tokens[0].c_str()));
+   vec_.emplace_back(tokens[0],tokens[1],tokens[2],PasswordEncryption::encrypt(tokens[3],tokens[0]));
 
    return true;
 }
