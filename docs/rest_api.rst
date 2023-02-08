@@ -7,7 +7,7 @@ Compilation
 -----------
 
 ecFlow REST API is implemented using an HTTP server. The HTTP server
-compilation can be enabled using cmake option :: 
+compilation is enabled by default, and can be enabled (ON) or disabled (OFF) using cmake option :: 
 
   -DENABLE_HTTP=ON
 
