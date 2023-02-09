@@ -3,6 +3,9 @@
 REST API
 //////////////////////
 
+.. caution:: 
+  ecFlow's REST API is experimental, and its details are subject to change. The documentation reflects its current operation.
+
 Compilation
 -----------
 

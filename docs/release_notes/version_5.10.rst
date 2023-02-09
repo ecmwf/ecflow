@@ -12,7 +12,7 @@ Version 5.10.0
 REST API
 --------
 
-- **New feature**: a new HTTP server provides access to a running ecFlow server via a REST API. This is still experimental, but if you'd like to have a look, the documentation is here: :ref:`rest_api`
+- **New feature**: a new HTTP server provides access to a running ecFlow server via a REST API. This is still experimental and subject to change, but if you'd like to have a look, the documentation is here: :ref:`rest_api`
 
 ecFlowUI
 --------
