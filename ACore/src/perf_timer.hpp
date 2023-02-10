@@ -11,55 +11,53 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <functional> // std::ref
-#include <chrono>
-#include <iostream>
-#include <vector>
-#include <string>
 #include <cassert>
+#include <chrono>
+#include <functional> // std::ref
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include <boost/lexical_cast.hpp>
 
 // remove when we use c++17
-template<typename F, typename... Args>
-auto invoke(F f, Args&&... args) -> decltype(std::ref(f)(std::forward<Args>(args)...))
-{
-  return std::ref(f)(std::forward<Args>(args)...);
+template <typename F, typename... Args>
+auto invoke(F f, Args&&... args) -> decltype(std::ref(f)(std::forward<Args>(args)...)) {
+    return std::ref(f)(std::forward<Args>(args)...);
 }
 
-template <typename Time = std::chrono::microseconds,
-          typename Clock = std::chrono::high_resolution_clock>
-struct perf_timer {
-   template <typename F, typename... Args>
-   static Time duration(F&& f, Args... args) {
-      auto start = Clock::now();
+template <typename Time = std::chrono::microseconds, typename Clock = std::chrono::high_resolution_clock>
+struct perf_timer
+{
+    template <typename F, typename... Args> static Time duration(F&& f, Args... args) {
+        auto start = Clock::now();
 
-      // std::invoke(std::forward<F>(f), std::forward<Args>(args)...); // c++17
-      invoke(std::forward<F>(f), std::forward<Args>(args)...);
+        // std::invoke(std::forward<F>(f), std::forward<Args>(args)...); // c++17
+        invoke(std::forward<F>(f), std::forward<Args>(args)...);
 
-      auto end = Clock::now();
-      return std::chrono::duration_cast<Time>(end - start);
-   }
+        auto end = Clock::now();
+        return std::chrono::duration_cast<Time>(end - start);
+    }
 };
 
-template<class Resolution = std::chrono::milliseconds>
-class Timer {
+template <class Resolution = std::chrono::milliseconds> class Timer {
 public:
-   using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
-                                    std::chrono::high_resolution_clock,
-                                    std::chrono::steady_clock>;
-private:
-   const Clock::time_point start_ = Clock::now();
-public:
-   Timer() = default;
-   ~Timer() = default;
-   void elapsed(const char* msg) const {
-      const auto end = Clock::now();
-      std::cout << msg << " " << std::chrono::duration_cast<Resolution>(end - start_).count() << std::endl;
-   }
+    using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
+                                     std::chrono::high_resolution_clock,
+                                     std::chrono::steady_clock>;
 
-   Resolution elapsed() const {
-      return std::chrono::duration_cast<Resolution>(Clock::now() - start_);
-   }
+private:
+    const Clock::time_point start_ = Clock::now();
+
+public:
+    Timer()  = default;
+    ~Timer() = default;
+    void elapsed(const char* msg) const {
+        const auto end = Clock::now();
+        std::cout << msg << " " << std::chrono::duration_cast<Resolution>(end - start_).count() << std::endl;
+    }
+
+    Resolution elapsed() const { return std::chrono::duration_cast<Resolution>(Clock::now() - start_); }
 };
 
 #endif

@@ -4,14 +4,14 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #6 $ 
+// Revision    : $Revision: #6 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : Simple class the reports wall clock time duration
 //============================================================================
@@ -21,32 +21,38 @@ namespace ecf {
 
 class DurationTimer {
 public:
-	DurationTimer() : start_time_(boost::posix_time::microsec_clock::universal_time()) {}
-	~DurationTimer() = default;
+    DurationTimer() : start_time_(boost::posix_time::microsec_clock::universal_time()) {}
+    ~DurationTimer() = default;
 
-	int duration() const {
-		boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
-		return duration.total_seconds();
-	}
+    int duration() const {
+        boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
+        return duration.total_seconds();
+    }
 
-	boost::posix_time::time_duration elapsed() const { return boost::posix_time::microsec_clock::universal_time() - start_time_;}
+    boost::posix_time::time_duration elapsed() const {
+        return boost::posix_time::microsec_clock::universal_time() - start_time_;
+    }
 
-	double elapsed_seconds() const { return (double) elapsed().total_milliseconds()/(double)1000 ; }
+    double elapsed_seconds() const { return (double)elapsed().total_milliseconds() / (double)1000; }
+
 private:
- 	boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime start_time_;
 };
 
 class ScopedDurationTimer {
 public:
-   ScopedDurationTimer(const char* msg) : start_time_(boost::posix_time::microsec_clock::universal_time()),msg_(msg) {}
-   ~ScopedDurationTimer();
+    ScopedDurationTimer(const char* msg)
+        : start_time_(boost::posix_time::microsec_clock::universal_time()), msg_(msg) {}
+    ~ScopedDurationTimer();
 
-   boost::posix_time::time_duration elapsed() const { return boost::posix_time::microsec_clock::universal_time() - start_time_;}
+    boost::posix_time::time_duration elapsed() const {
+        return boost::posix_time::microsec_clock::universal_time() - start_time_;
+    }
 
 private:
-   boost::posix_time::ptime start_time_;
-   const char* msg_;
+    boost::posix_time::ptime start_time_;
+    const char* msg_;
 };
 
-}
+} // namespace ecf
 #endif

@@ -4,14 +4,14 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #15 $ 
+// Revision    : $Revision: #15 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : Holds the version of ECFlow. Checked against definition file
 //               For each major release the major number should be
@@ -28,30 +28,30 @@ namespace ecf {
 
 class Version {
 public:
-	/// Outputs a string of the form:
-	/// ECF <tag> version release_.major_.minor_
-	static std::string description();
+    /// Outputs a string of the form:
+    /// ECF <tag> version release_.major_.minor_
+    static std::string description();
 
-	/// Outputs string of form: ecflow_<release>_<major>_<minor>
-	/// This could be used by install
-	static std::string version();
+    /// Outputs string of form: ecflow_<release>_<major>_<minor>
+    /// This could be used by install
+    static std::string version();
 
-   /// Outputs string of form: <release>.<major>.<minor>
-   static std::string raw();
-
-private:
-   Version() = delete;
-   Version(const Version&) = delete;
-   const Version& operator=(const Version&) = delete;
-
-	static const std::string TAG; // alpha, beta, release
+    /// Outputs string of form: <release>.<major>.<minor>
+    static std::string raw();
 
 private:
-   /// return version of the boost library
-   static std::string boost();
+    Version()                                = delete;
+    Version(const Version&)                  = delete;
+    const Version& operator=(const Version&) = delete;
 
-   // Return the version of the compiler. Can return empty string
-   static std::string compiler();
+    static const std::string TAG; // alpha, beta, release
+
+private:
+    /// return version of the boost library
+    static std::string boost();
+
+    // Return the version of the compiler. Can return empty string
+    static std::string compiler();
 };
-}
+} // namespace ecf
 #endif

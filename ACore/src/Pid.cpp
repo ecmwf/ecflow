@@ -13,25 +13,27 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <stdexcept>
 #include "Pid.hpp"
-#include <unistd.h>    // for getpid
-#include <boost/lexical_cast.hpp>
 
-std::string Pid::getpid()
-{
-   std::string pid;
-   try { pid = boost::lexical_cast<std::string>(::getpid());  }
-   catch (boost::bad_lexical_cast& e) {
-      throw std::runtime_error("Pid::getpid(): Could not convert PID to a string\n");
-   }
-   return pid;
+#include <stdexcept>
+
+#include <boost/lexical_cast.hpp>
+#include <unistd.h> // for getpid
+
+std::string Pid::getpid() {
+    std::string pid;
+    try {
+        pid = boost::lexical_cast<std::string>(::getpid());
+    }
+    catch (boost::bad_lexical_cast& e) {
+        throw std::runtime_error("Pid::getpid(): Could not convert PID to a string\n");
+    }
+    return pid;
 }
 
-std::string Pid::unique_name(const std:: string& prefix)
-{
-   std::string ret = prefix;
-   ret += "_";
-   ret += Pid::getpid();
-   return ret;
+std::string Pid::unique_name(const std::string& prefix) {
+    std::string ret = prefix;
+    ret += "_";
+    ret += Pid::getpid();
+    return ret;
 }

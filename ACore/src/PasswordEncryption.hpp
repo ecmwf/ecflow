@@ -16,35 +16,36 @@
 //                + specific POSIX implementation
 //============================================================================
 
-#include <unistd.h>
-
 #include <string>
 
-struct PosixEncryption {
-  using salt_t = std::string;
-  using key_t = std::string;
-  using encrypted_t = std::string;
+#include <unistd.h>
 
-  static encrypted_t encrypt(const key_t& key, const salt_t& salt) {
-    auto result = crypt(key.c_str(), salt.c_str());
-    if (!result) {
-      throw std::runtime_error("Error: unable to encrypt the given key");
+struct PosixEncryption
+{
+    using salt_t      = std::string;
+    using key_t       = std::string;
+    using encrypted_t = std::string;
+
+    static encrypted_t encrypt(const key_t& key, const salt_t& salt) {
+        auto result = crypt(key.c_str(), salt.c_str());
+        if (!result) {
+            throw std::runtime_error("Error: unable to encrypt the given key");
+        }
+        return std::string{result};
     }
-    return std::string{result};
-  }
 };
 
-template <typename ENGINE>
-struct BasePasswordEncryption {
-  using username_t = std::string;
-  using plain_password_t = std::string;
-  using encrypted_password_t = std::string;
+template <typename ENGINE> struct BasePasswordEncryption
+{
+    using username_t           = std::string;
+    using plain_password_t     = std::string;
+    using encrypted_password_t = std::string;
 
-  static encrypted_password_t encrypt(const plain_password_t& password, const username_t& username) {
-    return ENGINE::encrypt(password, username);
-  }
+    static encrypted_password_t encrypt(const plain_password_t& password, const username_t& username) {
+        return ENGINE::encrypt(password, username);
+    }
 };
 
 using PasswordEncryption = BasePasswordEncryption<PosixEncryption>;
 
-#endif  // PASSWORD_ENCRYPTION_HPP_
+#endif // PASSWORD_ENCRYPTION_HPP_

@@ -19,13 +19,13 @@
 
 class Cal {
 public:
-   static long date_to_julian(long);
-   static long julian_to_date(long);
+    static long date_to_julian(long);
+    static long julian_to_date(long);
 
 private:
-   Cal() = delete;
-   Cal(const Cal&) = delete;
-   const Cal& operator=(const Cal&) = delete;
+    Cal()                            = delete;
+    Cal(const Cal&)                  = delete;
+    const Cal& operator=(const Cal&) = delete;
 };
 
 #endif
