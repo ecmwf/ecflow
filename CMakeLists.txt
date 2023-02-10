@@ -27,6 +27,7 @@ find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 # this will generate variables, see ACore/ecflow_version.h.in
 project( ecflow LANGUAGES CXX VERSION 5.10.0 )
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 include( ecbuild_system NO_POLICY_SCOPE )
 
@@ -324,6 +325,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
 endif()
 
+# =========================================================================================
+# enable clang-format
+# =========================================================================================
+find_package(ClangFormat)
 
 # =========================================================================================
 # build source code
