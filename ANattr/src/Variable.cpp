@@ -13,112 +13,113 @@
 // Description :
 //============================================================================
 
+#include "Variable.hpp"
+
 #include <sstream>
 #include <stdexcept>
 
-#include "Variable.hpp"
 #include "Indentor.hpp"
-#include "Str.hpp"
 #include "Serialization.hpp"
+#include "Str.hpp"
 
 using namespace std;
 using namespace ecf;
 
 // init static's
-const Variable& Variable::EMPTY() { static const Variable VARIABLE = Variable(); return VARIABLE; }
+const Variable& Variable::EMPTY() {
+    static const Variable VARIABLE = Variable();
+    return VARIABLE;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Variable::Variable(const std::string& name, const std::string& value)
-: n_(name), v_(value)
-{
-   std::string msg;
-   if ( !Str::valid_name( name,msg ) ) {
-      throw std::runtime_error("Variable::Variable: Invalid Variable name: " + msg);
-   }
+Variable::Variable(const std::string& name, const std::string& value) : n_(name), v_(value) {
+    std::string msg;
+    if (!Str::valid_name(name, msg)) {
+        throw std::runtime_error("Variable::Variable: Invalid Variable name: " + msg);
+    }
 }
 
-void Variable::set_name(const std::string& v)
-{
-   std::string msg;
-   if ( !Str::valid_name( v,msg ) ) {
-      throw std::runtime_error("Variable::set_name: Invalid Variable name: " + msg);
-   }
-   n_ = v;
+void Variable::set_name(const std::string& v) {
+    std::string msg;
+    if (!Str::valid_name(v, msg)) {
+        throw std::runtime_error("Variable::set_name: Invalid Variable name: " + msg);
+    }
+    n_ = v;
 }
 
-int Variable::value() const
-{
-   // see if the value is convertible to a integer
-   return Str::to_int( v_, 0/* value to return if conversion fails*/);
+int Variable::value() const {
+    // see if the value is convertible to a integer
+    return Str::to_int(v_, 0 /* value to return if conversion fails*/);
 }
 
-bool Variable::operator==( const Variable& rhs ) const {
-   if ( v_ != rhs.v_ )
-      return false;
-   if ( n_ != rhs.n_ )
-      return false;
-   return true;
+bool Variable::operator==(const Variable& rhs) const {
+    if (v_ != rhs.v_)
+        return false;
+    if (n_ != rhs.n_)
+        return false;
+    return true;
 }
 
-void Variable::print( std::string& os ) const {
-   // see notes in VariableParser.h
-   //               Hence we do the following:
-   //                  a/ On parsing always remove quotes ie single or double
-   //                  b/ On serialising always add single quotes
-   Indentor in;
-   Indentor::indent( os ); write(os); os += "\n";
+void Variable::print(std::string& os) const {
+    // see notes in VariableParser.h
+    //               Hence we do the following:
+    //                  a/ On parsing always remove quotes ie single or double
+    //                  b/ On serialising always add single quotes
+    Indentor in;
+    Indentor::indent(os);
+    write(os);
+    os += "\n";
 }
 
-void Variable::print_server_variable( std::string& os ) const {
-   // see notes in VariableParser.h
-   //               Hence we do the following:
-   //                  a/ On parsing always remove quotes ie single or double
-   //                  b/ On serialising always add single quotes
-   Indentor in;
-   Indentor::indent( os );  write(os); os += " # server\n";
+void Variable::print_server_variable(std::string& os) const {
+    // see notes in VariableParser.h
+    //               Hence we do the following:
+    //                  a/ On parsing always remove quotes ie single or double
+    //                  b/ On serialising always add single quotes
+    Indentor in;
+    Indentor::indent(os);
+    write(os);
+    os += " # server\n";
 }
 
-void Variable::print_generated( std::string& os ) const {
-   Indentor in;
-   Indentor::indent( os ); os += "# ";  write(os); os += "\n";
+void Variable::print_generated(std::string& os) const {
+    Indentor in;
+    Indentor::indent(os);
+    os += "# ";
+    write(os);
+    os += "\n";
 }
 
-std::string Variable::toString() const
-{
-   std::string ret; ret.reserve(n_.size() + v_.size() + 8);
-   write(ret);
-   return ret;
+std::string Variable::toString() const {
+    std::string ret;
+    ret.reserve(n_.size() + v_.size() + 8);
+    write(ret);
+    return ret;
 }
 
-void Variable::write(std::string& ret) const
-{
-   ret += "edit ";
-   ret += n_;
-   ret += " '";
-   if (v_.find("\n") == std::string::npos) ret += v_;
-   else {
-      // replace \n, otherwise re-parse will fail
-      std::string value = v_;
-      Str::replaceall(value,"\n","\\n");
-      ret += value;
-   }
-   ret += "'";
+void Variable::write(std::string& ret) const {
+    ret += "edit ";
+    ret += n_;
+    ret += " '";
+    if (v_.find("\n") == std::string::npos)
+        ret += v_;
+    else {
+        // replace \n, otherwise re-parse will fail
+        std::string value = v_;
+        Str::replaceall(value, "\n", "\\n");
+        ret += value;
+    }
+    ret += "'";
 }
 
-std::string Variable::dump() const
-{
-   std::stringstream ss;
-   ss << toString() << " value(" << value() << ")";
-   return ss.str();
+std::string Variable::dump() const {
+    std::stringstream ss;
+    ss << toString() << " value(" << value() << ")";
+    return ss.str();
 }
 
-
-template<class Archive>
-void Variable::serialize(Archive & ar)
-{
-   ar( CEREAL_NVP(n_),
-       CEREAL_NVP(v_)
-   );
+template <class Archive> void Variable::serialize(Archive& ar) {
+    ar(CEREAL_NVP(n_), CEREAL_NVP(v_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(Variable);

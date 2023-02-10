@@ -14,45 +14,46 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <vector>
 #include <string>
-namespace cereal { class access; }
+#include <vector>
+namespace cereal {
+class access;
+}
 
 // Class GenericAttr:
 // Use compiler , generated destructor, assignment, copy constructor
 // GenericAttr does *not* have any changeable state
 class GenericAttr {
 public:
-   GenericAttr(const std::string& name, const std::vector<std::string>& values);
-   explicit GenericAttr(const std::string& name);
-   GenericAttr() = default;
+    GenericAttr(const std::string& name, const std::vector<std::string>& values);
+    explicit GenericAttr(const std::string& name);
+    GenericAttr() = default;
 
-   bool operator==(const GenericAttr& rhs) const;
-   bool operator<(const GenericAttr& rhs) const { return name_ < rhs.name();}
-   void print(std::string&) const;
-   bool empty() const { return name_.empty(); }
+    bool operator==(const GenericAttr& rhs) const;
+    bool operator<(const GenericAttr& rhs) const { return name_ < rhs.name(); }
+    void print(std::string&) const;
+    bool empty() const { return name_.empty(); }
 
-   const std::string& name() const { return name_;}
-   const std::vector<std::string>& values() { return values_;}
+    const std::string& name() const { return name_; }
+    const std::vector<std::string>& values() { return values_; }
 
-   std::vector<std::string>::const_iterator values_begin() const { return values_.begin();} // for python
-   std::vector<std::string>::const_iterator values_end()   const { return values_.end();  } // for python
+    std::vector<std::string>::const_iterator values_begin() const { return values_.begin(); } // for python
+    std::vector<std::string>::const_iterator values_end() const { return values_.end(); }     // for python
 
-   std::string to_string() const;
+    std::string to_string() const;
 
-   // Added to support return by reference
-   static const GenericAttr& EMPTY();
-
-private:
-   void write(std::string& ret) const;
+    // Added to support return by reference
+    static const GenericAttr& EMPTY();
 
 private:
-   std::string name_;
-   std::vector<std::string> values_;
+    void write(std::string& ret) const;
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar);
+private:
+    std::string name_;
+    std::vector<std::string> values_;
+
+    friend class cereal::access;
+    template <class Archive> void serialize(Archive& ar);
 };
 
 #endif

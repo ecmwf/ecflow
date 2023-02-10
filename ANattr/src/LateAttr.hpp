@@ -3,26 +3,29 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #13 $ 
+// Revision    : $Revision: #13 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 //============================================================================
 
 #include <string>
+#include <utility> // for pair
 #include <vector>
-#include <utility>  // for pair
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "TimeSlot.hpp"
 class NState;
-namespace ecf { class Calendar;} // forward declare class
+namespace ecf {
+class Calendar;
+} // namespace ecf
 
 namespace ecf {
 /// ========================================================================
@@ -45,70 +48,76 @@ namespace ecf {
 ///               taken from the time the node became active, otherwise node must be complete by
 ///               the time given.
 /// ========================================================================
-class LateAttr  {
+class LateAttr {
 public:
-   LateAttr();
+    LateAttr();
 
-	void print(std::string&) const;
-	bool operator==(const LateAttr& rhs) const;
+    void print(std::string&) const;
+    bool operator==(const LateAttr& rhs) const;
 
-	void addSubmitted( const TimeSlot& s)    { s_  = s; }
-	void add_submitted(int hour, int minute) { s_  = TimeSlot(hour,minute); }
-	void addActive( const TimeSlot& s )      { a_  = s; }
-	void add_active(int hour, int minute)    { a_  = TimeSlot(hour,minute); }
-	void addComplete( const TimeSlot& s,  bool relative)   { c_  = s;                     c_is_rel_ = relative;}
-	void add_complete(int hour, int minute,bool relative)  { c_  = TimeSlot(hour,minute); c_is_rel_ = relative; }
+    void addSubmitted(const TimeSlot& s) { s_ = s; }
+    void add_submitted(int hour, int minute) { s_ = TimeSlot(hour, minute); }
+    void addActive(const TimeSlot& s) { a_ = s; }
+    void add_active(int hour, int minute) { a_ = TimeSlot(hour, minute); }
+    void addComplete(const TimeSlot& s, bool relative) {
+        c_        = s;
+        c_is_rel_ = relative;
+    }
+    void add_complete(int hour, int minute, bool relative) {
+        c_        = TimeSlot(hour, minute);
+        c_is_rel_ = relative;
+    }
 
-	const TimeSlot& submitted() const { return s_; }
-	const TimeSlot& active() const { return a_; }
-	const TimeSlot& complete() const { return c_; }
-	bool complete_is_relative() const { return c_is_rel_; }
+    const TimeSlot& submitted() const { return s_; }
+    const TimeSlot& active() const { return a_; }
+    const TimeSlot& complete() const { return c_; }
+    bool complete_is_relative() const { return c_is_rel_; }
 
-	/// i.e no time structs specified
-	bool isNull() const;
+    /// i.e no time structs specified
+    bool isNull() const;
 
-	/// Given the state and time of state change, and calendar work out if we are late
-	/// if we are sets the late flag
-   void checkForLateness( const std::pair<NState,boost::posix_time::time_duration>&  state, const ecf::Calendar& c );
-   bool check_for_lateness( const std::pair<NState,boost::posix_time::time_duration>&  state, const ecf::Calendar& c ) const;
+    /// Given the state and time of state change, and calendar work out if we are late
+    /// if we are sets the late flag
+    void checkForLateness(const std::pair<NState, boost::posix_time::time_duration>& state, const ecf::Calendar& c);
+    bool check_for_lateness(const std::pair<NState, boost::posix_time::time_duration>& state,
+                            const ecf::Calendar& c) const;
 
-	///  To be used by GUI to inform used that a node is late
-	bool isLate() const { return isLate_;}
+    ///  To be used by GUI to inform used that a node is late
+    bool isLate() const { return isLate_; }
 
-	/// To be called at begin and re-queue time
-	void reset() { setLate(false); }
+    /// To be called at begin and re-queue time
+    void reset() { setLate(false); }
 
-	// Overide this late attributes with the settings form the input.
-	void override_with(LateAttr*);
+    // Overide this late attributes with the settings form the input.
+    void override_with(LateAttr*);
 
-	// The state_change_no is never reset. Must be incremented if it can affect equality
- 	unsigned int state_change_no() const { return state_change_no_; }
+    // The state_change_no is never reset. Must be incremented if it can affect equality
+    unsigned int state_change_no() const { return state_change_no_; }
 
- 	/// set flag to be late
-	void setLate(bool f);
+    /// set flag to be late
+    void setLate(bool f);
 
-	std::string toString() const;
-   std::string name() const { return toString(); }
-  
-   static void parse(LateAttr&, const std::string& line, const std::vector<std::string >& lineTokens, size_t index);
-   static LateAttr create(const std::string& lateString);
+    std::string toString() const;
+    std::string name() const { return toString(); }
 
-private:
-   void write(std::string&) const;
-
-private:
-	TimeSlot s_;                    // relative by default
-	TimeSlot a_;
-	TimeSlot c_;
-	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
-	bool c_is_rel_{false};
-	bool isLate_{false};
+    static void parse(LateAttr&, const std::string& line, const std::vector<std::string>& lineTokens, size_t index);
+    static LateAttr create(const std::string& lateString);
 
 private:
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar);
+    void write(std::string&) const;
+
+private:
+    TimeSlot s_; // relative by default
+    TimeSlot a_;
+    TimeSlot c_;
+    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+    bool c_is_rel_{false};
+    bool isLate_{false};
+
+private:
+    friend class cereal::access;
+    template <class Archive> void serialize(Archive& ar);
 };
 
-}
+} // namespace ecf
 #endif

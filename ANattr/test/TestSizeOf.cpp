@@ -12,36 +12,37 @@
 //
 // Description
 //============================================================================
-#include <boost/test/unit_test.hpp>
-#include <iostream>
 #include <fstream>
-#include "TimeSeries.hpp"
+#include <iostream>
+
+#include <boost/test/unit_test.hpp>
+
 #include "DayAttr.hpp"
+#include "TimeSeries.hpp"
 
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
+BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
 
-BOOST_AUTO_TEST_CASE( test_size_of )
-{
-   cout << "ACore:: ...test_size_of\n" ;
-   cout << "   sizeof(std::ofstream)      " << sizeof(std::ofstream) << "\n";
-   cout << "   sizeof(std::string)        " << sizeof(std::string) << "\n";
-   cout << "   sizeof(vector<int>)        " << sizeof(std::vector<int>) << "\n";
-   cout << "   sizeof(vector<string>)     " << sizeof(vector<string>) << "\n";
-   cout << "   sizeof(std::weak_ptr<int>) " << sizeof(std::weak_ptr<int>) << "\n";
-   cout << "   sizeof(nullptr)            " << sizeof(nullptr) << "\n";
-   cout << "   sizeof(unique_ptr)         " << sizeof(unique_ptr<int>) << "\n";
-   cout << "   sizeof(double)             " << sizeof(double) << "\n";
-   cout << "   sizeof(long)               " << sizeof(long) << "\n";
-   cout << "   sizeof(int)                " << sizeof(int) << "\n";
-   cout << "   sizeof(unsigned int)       " << sizeof(unsigned int) << "\n";
-   cout << "   sizeof(bool)               " << sizeof(bool) << "\n";
-   cout << "   sizeof(TimeSeries)         " << sizeof(ecf::TimeSeries) << "\n";
-   cout << "   sizeof(DayAttr)            " << sizeof(DayAttr) << "\n";
+BOOST_AUTO_TEST_CASE(test_size_of) {
+    cout << "ACore:: ...test_size_of\n";
+    cout << "   sizeof(std::ofstream)      " << sizeof(std::ofstream) << "\n";
+    cout << "   sizeof(std::string)        " << sizeof(std::string) << "\n";
+    cout << "   sizeof(vector<int>)        " << sizeof(std::vector<int>) << "\n";
+    cout << "   sizeof(vector<string>)     " << sizeof(vector<string>) << "\n";
+    cout << "   sizeof(std::weak_ptr<int>) " << sizeof(std::weak_ptr<int>) << "\n";
+    cout << "   sizeof(nullptr)            " << sizeof(nullptr) << "\n";
+    cout << "   sizeof(unique_ptr)         " << sizeof(unique_ptr<int>) << "\n";
+    cout << "   sizeof(double)             " << sizeof(double) << "\n";
+    cout << "   sizeof(long)               " << sizeof(long) << "\n";
+    cout << "   sizeof(int)                " << sizeof(int) << "\n";
+    cout << "   sizeof(unsigned int)       " << sizeof(unsigned int) << "\n";
+    cout << "   sizeof(bool)               " << sizeof(bool) << "\n";
+    cout << "   sizeof(TimeSeries)         " << sizeof(ecf::TimeSeries) << "\n";
+    cout << "   sizeof(DayAttr)            " << sizeof(DayAttr) << "\n";
 
-   BOOST_CHECK_MESSAGE(true,"Dummy");
+    BOOST_CHECK_MESSAGE(true, "Dummy");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

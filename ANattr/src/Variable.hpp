@@ -16,53 +16,53 @@
 //============================================================================
 
 #include <string>
-namespace cereal { class access; }
+namespace cereal {
+class access;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Class Variable:
 // Use compiler , generated destructor, assignment,  copy constructor
 class Variable {
 public:
-   // This constructor added as an optimisation to avoid, checking variable names.
-   // i.e the generated variables, and created by the default constructors of Suite/Family/Task etc
-   // These are called during serialisation, hence to avoid checking generated names, we know are valid
-   // use this constructor. The bool is used as a dummy argument, so that we call the right constructor
-   Variable(const std::string& name, const std::string& value, bool /*check_names_dummy*/)
-   : n_(name), v_(value) {}
-   Variable(const std::string& name, const std::string& value);
-   Variable() = default;
+    // This constructor added as an optimisation to avoid, checking variable names.
+    // i.e the generated variables, and created by the default constructors of Suite/Family/Task etc
+    // These are called during serialisation, hence to avoid checking generated names, we know are valid
+    // use this constructor. The bool is used as a dummy argument, so that we call the right constructor
+    Variable(const std::string& name, const std::string& value, bool /*check_names_dummy*/) : n_(name), v_(value) {}
+    Variable(const std::string& name, const std::string& value);
+    Variable() = default;
 
-   const std::string& name() const   { return  n_;}
-   void print(std::string&) const;
-   void print_server_variable(std::string&) const;
-   void print_generated(std::string&) const;
-   bool empty() const { return n_.empty(); }
+    const std::string& name() const { return n_; }
+    void print(std::string&) const;
+    void print_server_variable(std::string&) const;
+    void print_generated(std::string&) const;
+    bool empty() const { return n_.empty(); }
 
-   void set_value(const std::string& v) { v_ = v; }
-   const std::string& theValue() const  { return  v_;}
-   int value() const;
+    void set_value(const std::string& v) { v_ = v; }
+    const std::string& theValue() const { return v_; }
+    int value() const;
 
-   void set_name(const std::string& v);
-   std::string& value_by_ref() { return v_;}
+    void set_name(const std::string& v);
+    std::string& value_by_ref() { return v_; }
 
-   bool operator==(const Variable& rhs) const;
-   bool operator<(const Variable& rhs) const { return n_ < rhs.name();}
-   std::string toString() const;
-   std::string dump() const;
+    bool operator==(const Variable& rhs) const;
+    bool operator<(const Variable& rhs) const { return n_ < rhs.name(); }
+    std::string toString() const;
+    std::string dump() const;
 
-   // Added to support return by reference
-   static const Variable& EMPTY();
-
-private:
-   void write(std::string&) const;
+    // Added to support return by reference
+    static const Variable& EMPTY();
 
 private:
-   std::string  n_;
-   std::string  v_;
+    void write(std::string&) const;
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar);
+private:
+    std::string n_;
+    std::string v_;
+
+    friend class cereal::access;
+    template <class Archive> void serialize(Archive& ar);
 };
 
 #endif
