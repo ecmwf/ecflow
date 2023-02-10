@@ -358,10 +358,10 @@
                              The manual directive is used to create the :term:`manual page`
                              show in :term:`ecflow_ui`. 
       %nopp                  Stop pre-processing until a line starting with %end is found.
-                             No interpretation of the text will be done( i.e. no variable substitutions)
+                             No interpretation of the text will be done (i.e. no variable substitutions)
       %end                   End processing of %comment or %manual or %nopp
       %ecfmicro CHAR         Change the directive character, to the character given. If set in an 
-                             include file the effect is retained for the rest of the job( or until
+                             include file the effect is retained for the rest of the job (or until
                              set again). It should be noted that the ecfmicro directive specified in
                              the :term:`ecf script` file, does **not** effect the variable substitution
                              for :term:`ECF_JOB_CMD`, ECF_KILL_CMD or :term:`ECF_STATUS_CMD` variables. They still use
@@ -415,7 +415,7 @@
 
             edit ECF_FILES /home/ecmwf/emos/def/o/%FILE_DIR:ECFfiles%
        
-      The search can be reversed, by adding a variable **ECF_FILES_LOOKUP**, with a value of "prune_leaf" ( from ecFlow 4.12.0). Then ecFlow will use the following search pattern.
+      The search can be reversed, by adding a variable **ECF_FILES_LOOKUP**, with a value of "prune_leaf" (from ecFlow 4.12.0). Then ecFlow will use the following search pattern.
 
          #. /home/ecmwf/emos/def/o/ECFfiles/o/12/fc/model.ecf
          #. /home/ecmwf/emos/def/o/ECFfiles/o/12/model.ecf
@@ -446,7 +446,7 @@
       
       The differences, however, includes the addition of “C” like pre-processing :term:`directives` and ecFlow :term:`variable`\ s.
       Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
-      the :term:`ecflow_server` is aware when the job starts(i.e changes state to :term:`active`) and finishes ( i.e changes state to :term:`complete`)
+      the :term:`ecflow_server` is aware when the job starts(i.e changes state to :term:`active`) and finishes (i.e changes state to :term:`complete`)
        
    ECF_DUMMY_TASK
       This is a user variable that can be added to :term:`task` to indicate that there is no
@@ -482,7 +482,7 @@
       This is user defined :term:`variable`; it has four functions:
       
       - it is used as a prefix portion of the path of the job files created by ecFlow server; see the description of the :term:`ECF_JOB` generated variable.
-      - it is a default directory where ecFlow server looks for scripts ( with file extension defined by :term:`ECF_EXTN`,default is .ecf); overridden by ECF_FILES user defined variable. See the "ecf file location algorithm" entry for more detail.
+      - it is a default directory where ecFlow server looks for scripts (with file extension defined by :term:`ECF_EXTN`,default is .ecf); overridden by ECF_FILES user defined variable. See the "ecf file location algorithm" entry for more detail.
       - it is a default directory where ecFlow server looks for include files; overridden by :term:`ECF_INCLUDE` user defined variable. See the "directives" entry for more detail.
       - it is used as a default prefix portion of the job output path (the :term:`ECF_JOBOUT` generated variable); overridden by **ECF_OUT** user defined variable. See descriptions of :term:`ECF_JOBOUT` and :term:`ECF_OUT` variables for more detail.
 
@@ -722,7 +722,7 @@
       This is generated variable added at the server level with a default value of 2.  It can be overridden by the user and controls the number of times job should re-run should it abort. Provided:
 
       - the task/job has NOT been killed(user action) 
-      - the job process( created from .ecf or .py) exited cleanly and not with exit 1 || sys.exit(1) as process death is captured by the server. Always ensure your script exits cleanly. i.e. exit(0)
+      - the job process (created from .ecf or .py) exited cleanly and not with exit 1 || sys.exit(1) as process death is captured by the server. Always ensure your script exits cleanly. i.e. exit(0)
       - the task has NOT been set to abort by the user(user action)
       - job creation has not failed . i.e. task pre-processing(include file expansion,variable - substitution, change of file permission for job file)
       - the value of the variable ECF_TRIES must be convertible to an integer.
@@ -1140,7 +1140,7 @@
       This causes :term:`status` changes on the :term:`node`\ s in the :term:`ecflow_server` and flags can be set 
       to indicate various events.  
       
-      If a :term:`task` is to be treated as a dummy task( i.e. is used as a scheduling task) and is not meant to
+      If a :term:`task` is to be treated as a dummy task (i.e. is used as a scheduling task) and is not meant to
       to be run, then a variable of name :term:`ECF_DUMMY_TASK` can be added:
 
       .. code-block:: shell
@@ -1496,7 +1496,7 @@
 
          RepeatDate       -> value
          RepeatDateList   -> value
-         RepeatString     -> index  ( will always return a index)
+         RepeatString     -> index  (will always return a index)
          RepeatInteger    -> value
          RepeatEnumerated -> value | index  ( return value at index if cast-able to integer, otherwise return index )
          RepeatDay        -> value
@@ -1915,7 +1915,7 @@
       
       This variable is searched for in the :term:`suite definition`. 
       
-      First the suite definition variables( sometimes referred to as user variables) are searched
+      First the suite definition variables (sometimes referred to as user variables) are searched
       and then Repeat variable name, and finally the generated variables. If no variable
       is found then the same search pattern is repeated up the node tree.
       
@@ -1962,7 +1962,7 @@
          
       When authentication fails the job is considered to be a zombie.
       The :term:`ecflow_server` will keep a note of the zombie for a period of time, before it is automatically removed.
-      However the removed zombie, may well re-appear. ( this is because each :term:`child command` will continue
+      However the removed zombie, may well re-appear. (this is because each :term:`child command` will continue
       attempting to contact the :term:`ecflow_server` for 24 hours. This is configurable 
       see ECF_TIMEOUT on :term:`ecflow_client`)
       
@@ -1990,7 +1990,7 @@
 
       How do zombies arise.
 
-      - Server crashed ( or terminated and restarted) and the recovered check point file is out of date.
+      - Server crashed (or terminated and restarted) and the recovered check point file is out of date.
       - A task is repeatedly re-run, earlier copies will not be remembered.
       - Job sent by another ecflow_server , but which cannot talk to the original ecflow_server
       - Network glitches/network down
@@ -2009,7 +2009,7 @@
       * **ecf**: Jobs are created as part of the normal :term:`scheduling`
          
          - Two init commands or task complete or aborted but receives another :term:`child command`
-         - Server crashed ( or terminated and restarted) and the recovered :term:`check point` file is out of date.
+         - Server crashed (or terminated and restarted) and the recovered :term:`check point` file is out of date.
          - A :term:`task` is repeatedly re-run, earlier copies will not be remembered.
          - Job sent by another :term:`ecflow_server`, but which cannot talk to the original :term:`ecflow_server`
          - Network glitches/network down
