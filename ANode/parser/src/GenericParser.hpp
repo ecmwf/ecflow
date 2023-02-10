@@ -1,5 +1,5 @@
 #ifndef GENERIC_PARSER_HPP_
-#define  GENERIC_PARSER_HPP_
+#define GENERIC_PARSER_HPP_
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -17,9 +17,9 @@
 
 class GenericParser : public Parser {
 public:
-   explicit GenericParser(DefsStructureParser* p) : Parser(p) {}
-   const char* keyword() const override { return "generic"; }
-   bool doParse( const std::string& line, std::vector<std::string >& lineTokens ) override;
+    explicit GenericParser(DefsStructureParser* p) : Parser(p) {}
+    const char* keyword() const override { return "generic"; }
+    bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };
 
 #endif

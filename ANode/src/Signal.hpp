@@ -23,18 +23,19 @@ namespace ecf {
 
 class Signal {
 private:
-  Signal(const Signal&) = delete;
-  const Signal& operator=(const Signal&) = delete;
+    Signal(const Signal&)                  = delete;
+    const Signal& operator=(const Signal&) = delete;
+
 public:
-   Signal();
+    Signal();
 
-   /// UNBLOCK SIGCHLD at start of destructor
-   /// BLOCK SIGCHLD and the end of the destructor
-   /// During the gap in between handle process termination
-   ~Signal();
+    /// UNBLOCK SIGCHLD at start of destructor
+    /// BLOCK SIGCHLD and the end of the destructor
+    /// During the gap in between handle process termination
+    ~Signal();
 
-   static void block_sigchild();
-   static void unblock_sigchild();
+    static void block_sigchild();
+    static void unblock_sigchild();
 };
-}
+} // namespace ecf
 #endif

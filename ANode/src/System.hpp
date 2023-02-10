@@ -3,14 +3,14 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #18 $ 
+// Revision    : $Revision: #18 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : Works with class Signal
 //
@@ -31,6 +31,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <string>
+
 #include "NodeFwd.hpp"
 
 namespace ecf {
@@ -49,8 +50,9 @@ namespace ecf {
 
 class System {
 private:
-  System(const System&) = delete;
-  const System& operator=(const System&) = delete;
+    System(const System&)                  = delete;
+    const System& operator=(const System&) = delete;
+
 public:
     static System* instance();
 
@@ -60,14 +62,14 @@ public:
     /// Let the server set this. Typically only set once, however in test  can be many times
     /// Note:: In test the Defs file in the server can be cleared, i.e. for each new test
     ///        Hence we maintain a weak_ptr to the Defs.
-    void setDefs(const defs_ptr& defs) { defs_ = defs;}
+    void setDefs(const defs_ptr& defs) { defs_ = defs; }
 
     // return true, if command can be spawned, else false.
     // For jobs, We can't store reference to Task*, as future functionality like
     // auto-migrate, etc, means we may end up pointing to garbage.
     // so instead we will store absNodePath. For other commands this can be empty
-    enum CmdType { ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD};
-    bool spawn(CmdType,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg);
+    enum CmdType { ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD };
+    bool spawn(CmdType, const std::string& cmdToSpawn, const std::string& absPath, std::string& errorMsg);
 
     // Handle children that have stopped,aborted or terminated, etc
     // The signal handler is kept as light as possible, since it is re-entrant.
@@ -89,16 +91,17 @@ private:
     // When a process terminates abnormally. This function is used to find the
     // associated task, and set it to the abort state.
     // Relies on the stored Defs ptr. which was set in the server
-    void died( const std::string& absNodePath, CmdType, const std::string& reason);
+    void died(const std::string& absNodePath, CmdType, const std::string& reason);
 
     /// Does the real work of spawning children
-    int sys(CmdType,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg);
+    int sys(CmdType, const std::string& cmdToSpawn, const std::string& absPath, std::string& errorMsg);
 
     static std::string cmd_type(CmdType);
+
 private:
-    weak_defs_ptr  defs_;      // weak_ptr is an observer of a shared_ptr
+    weak_defs_ptr defs_; // weak_ptr is an observer of a shared_ptr
     static System* instance_;
 };
 
-}
+} // namespace ecf
 #endif

@@ -13,30 +13,35 @@
 // Description :
 //============================================================================
 
-#include <stdexcept>
 #include "DefsStateParser.hpp"
+
+#include <stdexcept>
+
 #include "Defs.hpp"
 #include "DefsStructureParser.hpp"
 
 using namespace std;
 
-bool DefsStateParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
-{
-// cout << "line = " << line << "\n";
-   if ( lineTokens.size() < 2 ) throw std::runtime_error( "DefsStateParser::doParse Invalid defs_state " + line );
+bool DefsStateParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+    // cout << "line = " << line << "\n";
+    if (lineTokens.size() < 2)
+        throw std::runtime_error("DefsStateParser::doParse Invalid defs_state " + line);
 
-   if (lineTokens[1] == PrintStyle::to_string(PrintStyle::STATE))        rootParser()->set_file_type( PrintStyle::STATE );
-   else if (lineTokens[1] == PrintStyle::to_string(PrintStyle::MIGRATE)) rootParser()->set_file_type( PrintStyle::MIGRATE );
-   else if (lineTokens[1] == PrintStyle::to_string(PrintStyle::NET))     rootParser()->set_file_type( PrintStyle::NET );
-   else throw std::runtime_error( "DefsStateParser::doParse: file type not specified : " + line );
+    if (lineTokens[1] == PrintStyle::to_string(PrintStyle::STATE))
+        rootParser()->set_file_type(PrintStyle::STATE);
+    else if (lineTokens[1] == PrintStyle::to_string(PrintStyle::MIGRATE))
+        rootParser()->set_file_type(PrintStyle::MIGRATE);
+    else if (lineTokens[1] == PrintStyle::to_string(PrintStyle::NET))
+        rootParser()->set_file_type(PrintStyle::NET);
+    else
+        throw std::runtime_error("DefsStateParser::doParse: file type not specified : " + line);
 
-   defsfile()->read_state(line,lineTokens); // this can throw
-   return true;
+    defsfile()->read_state(line, lineTokens); // this can throw
+    return true;
 }
 
-bool HistoryParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
-{
-// cout << "line = " << line << "\n";
-   defsfile()->read_history(line,lineTokens); // this can throw
-   return true;
+bool HistoryParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+    // cout << "line = " << line << "\n";
+    defsfile()->read_history(line, lineTokens); // this can throw
+    return true;
 }

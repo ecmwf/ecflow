@@ -11,19 +11,19 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <string>
-#include <map>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 
-#include <boost/test/unit_test.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
+#include <boost/test/unit_test.hpp>
 
-#include "ExprParser.hpp"
 #include "ExprAst.hpp"
 #include "ExprDuplicate.hpp"
+#include "ExprParser.hpp"
 using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -31,12 +31,10 @@ using namespace boost::posix_time;
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's
 
-BOOST_AUTO_TEST_SUITE( NodeTestSuite )
+BOOST_AUTO_TEST_SUITE(NodeTestSuite)
 
-
-BOOST_AUTO_TEST_CASE( test_single_expression )
-{
-    std::cout <<  "ANode:: ...test_single_expression\n";
+BOOST_AUTO_TEST_CASE(test_single_expression) {
+    std::cout << "ANode:: ...test_single_expression\n";
 
     // Duplicate AST are held in a static map. Delete them, to avoid ASAN complaining
     ExprDuplicate reclaim_cloned_ast_memory;
@@ -44,76 +42,84 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
     // The map key = trigger expression,
     // value.first  = type of expected root abstract syntax tree
     // value.second = result of expected evaluation
-    map<string,std::pair<string,bool> > exprMap;
+    map<string, std::pair<string, bool>> exprMap;
 
-   exprMap[":var == 0"] = std::make_pair(AstEqual::stype(),true);
-   exprMap[":var != 1"] = std::make_pair(AstNotEqual::stype(),true);
+    exprMap[":var == 0"] = std::make_pair(AstEqual::stype(), true);
+    exprMap[":var != 1"] = std::make_pair(AstNotEqual::stype(), true);
 
-	for(std::pair<string, std::pair<string,bool>> p : exprMap ) {
+    for (std::pair<string, std::pair<string, bool>> p : exprMap) {
 
-  		ExprParser theExprParser(p.first);
-		std::string errorMsg;
-		bool ok = theExprParser.doParse(errorMsg);
-		BOOST_REQUIRE_MESSAGE(ok,errorMsg);
+        ExprParser theExprParser(p.first);
+        std::string errorMsg;
+        bool ok = theExprParser.doParse(errorMsg);
+        BOOST_REQUIRE_MESSAGE(ok, errorMsg);
 
-		string expectedRootType       = p.second.first;
-		bool expectedEvaluationResult = p.second.second;
+        string expectedRootType       = p.second.first;
+        bool expectedEvaluationResult = p.second.second;
 
-		Ast* top = theExprParser.getAst();
-		BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
-		BOOST_REQUIRE_MESSAGE( top->left() ,"No root created");
-		BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a root or attribute " + p.first);
-		BOOST_REQUIRE_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
-		BOOST_REQUIRE_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type " << expectedRootType << " or 'variable' but found " << top->left()->type() << " " << p.first);
-      {
-		   std::stringstream ss;
-		   top->print_flat(ss);
-		   std::string print_flat = ss.str();
-		   cout << print_flat << "\n";
-		   BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << print_flat << "\n" << *top);
-      }
-      {
-         std::stringstream ss;
-         top->print(ss);
-         cout << ss.str() << "\n";
-      }
+        Ast* top                      = theExprParser.getAst();
+        BOOST_REQUIRE_MESSAGE(top, "No abstract syntax tree");
+        BOOST_REQUIRE_MESSAGE(top->left(), "No root created");
+        BOOST_REQUIRE_MESSAGE(top->left()->isRoot() || top->left()->is_attribute(),
+                              "First child of top should be a root or attribute " + p.first);
+        BOOST_REQUIRE_MESSAGE(top->left()->is_evaluateable(),
+                              "expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
+        BOOST_REQUIRE_MESSAGE(top->left()->type() == expectedRootType || top->left()->type() == "variable",
+                              "expected root type " << expectedRootType << " or 'variable' but found "
+                                                    << top->left()->type() << " " << p.first);
+        {
+            std::stringstream ss;
+            top->print_flat(ss);
+            std::string print_flat = ss.str();
+            cout << print_flat << "\n";
+            BOOST_REQUIRE_MESSAGE(expectedEvaluationResult == top->evaluate(),
+                                  "evaluation not as expected for:\n"
+                                      << p.first << "\n"
+                                      << print_flat << "\n"
+                                      << *top);
+        }
+        {
+            std::stringstream ss;
+            top->print(ss);
+            cout << ss.str() << "\n";
+        }
 
-      std::string why;
-		top->why(why);
-		cout << "why: " << why << "\n";
-	}
+        std::string why;
+        top->why(why);
+        cout << "why: " << why << "\n";
+    }
 }
 
-
-//BOOST_AUTO_TEST_CASE( test_expression_read_from_file )
+// BOOST_AUTO_TEST_CASE( test_expression_read_from_file )
 //{
-//   std::cout <<  "ANode:: ...test_expression_read_from_file\n";
+//    std::cout <<  "ANode:: ...test_expression_read_from_file\n";
 //
-//   std::string filename = "${ECF_TEST_DEFS_DIR}/triggers.list";
-//   std::ifstream the_file(filename.c_str(),std::ios_base::in);
-//   BOOST_REQUIRE_MESSAGE(the_file,"file " << filename << "not found");
+//    std::string filename = "${ECF_TEST_DEFS_DIR}/triggers.list";
+//    std::ifstream the_file(filename.c_str(),std::ios_base::in);
+//    BOOST_REQUIRE_MESSAGE(the_file,"file " << filename << "not found");
 //
-//   int  i = 0;
-//   string line;
-//   while ( std::getline(the_file,line) ) {
-//      i++;
-//      // cout << i << ": " << line << "\n";
-//      ExprParser theExprParser(line);
-//      std::string errorMsg;
-//      bool ok = theExprParser.doParse(errorMsg);
-//      BOOST_CHECK_MESSAGE(ok,errorMsg << " line: " << i );
+//    int  i = 0;
+//    string line;
+//    while ( std::getline(the_file,line) ) {
+//       i++;
+//       // cout << i << ": " << line << "\n";
+//       ExprParser theExprParser(line);
+//       std::string errorMsg;
+//       bool ok = theExprParser.doParse(errorMsg);
+//       BOOST_CHECK_MESSAGE(ok,errorMsg << " line: " << i );
 //
-//      if (ok) {
-//         Ast* top = theExprParser.getAst();
-//         BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree " + line);
-//         BOOST_REQUIRE_MESSAGE( top->left() ,"No root created " + line);
-//         BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a root or variable " + line);
-//         //top->print_flat(ss);
-//      }
-//   }
+//       if (ok) {
+//          Ast* top = theExprParser.getAst();
+//          BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree " + line);
+//          BOOST_REQUIRE_MESSAGE( top->left() ,"No root created " + line);
+//          BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a
+//          root or variable " + line);
+//          //top->print_flat(ss);
+//       }
+//    }
 //
-//   ExprDuplicate reclaim_cloned_ast_memory;
-//   cout << " read " << i << " expressions\n";
-//}
+//    ExprDuplicate reclaim_cloned_ast_memory;
+//    cout << " read " << i << " expressions\n";
+// }
 
 BOOST_AUTO_TEST_SUITE_END()

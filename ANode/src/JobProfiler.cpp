@@ -14,9 +14,10 @@
 //============================================================================
 
 #include "JobProfiler.hpp"
+
 #include "JobsParam.hpp"
-#include "Task.hpp"
 #include "Log.hpp"
+#include "Task.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -29,44 +30,47 @@ static size_t task_threshold_ = 4000;
 
 namespace ecf {
 
-int JobProfiler::task_threshold_default() { return 4000;}
+int JobProfiler::task_threshold_default() {
+    return 4000;
+}
 
 // =================================================================================
-JobProfiler::JobProfiler(Task* node,JobsParam& jobsParam, size_t threshold)
-: node_(node),
-  jobsParam_(jobsParam),
-  start_time_(boost::posix_time::microsec_clock::universal_time()),
-  threshold_(threshold)
-{
-   // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
-   // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
-   // Should allow greater child/user command communication.
-	if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
-		jobsParam_.set_timed_out_of_job_generation(start_time_);
-	}
+JobProfiler::JobProfiler(Task* node, JobsParam& jobsParam, size_t threshold)
+    : node_(node), jobsParam_(jobsParam), start_time_(boost::posix_time::microsec_clock::universal_time()),
+      threshold_(threshold) {
+    // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
+    // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+    // Should allow greater child/user command communication.
+    if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
+        jobsParam_.set_timed_out_of_job_generation(start_time_);
+    }
 }
 
-JobProfiler::~JobProfiler()
-{
-   if (node_) {
-      boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
-      size_t time_taken = duration.total_milliseconds();
+JobProfiler::~JobProfiler() {
+    if (node_) {
+        boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
+        size_t time_taken                         = duration.total_milliseconds();
 
-      // When testing we set submitJobsInterval to < 0
-      if (jobsParam_.submitJobsInterval() < 0 ) {
-         time_taken = threshold_ + 1;
-      }
+        // When testing we set submitJobsInterval to < 0
+        if (jobsParam_.submitJobsInterval() < 0) {
+            time_taken = threshold_ + 1;
+        }
 
-      if ( time_taken > threshold_)  {
-         std::stringstream ss;
-         ss << "Job generation for task " << node_->absNodePath() << " took " << time_taken << "ms, Exceeds ECF_TASK_THRESHOLD(" << threshold_ << "ms)";
-         log(Log::WAR,ss.str());
-         node_->flag().set(ecf::Flag::THRESHOLD);
-      }
-   }
+        if (time_taken > threshold_) {
+            std::stringstream ss;
+            ss << "Job generation for task " << node_->absNodePath() << " took " << time_taken
+               << "ms, Exceeds ECF_TASK_THRESHOLD(" << threshold_ << "ms)";
+            log(Log::WAR, ss.str());
+            node_->flag().set(ecf::Flag::THRESHOLD);
+        }
+    }
 }
 
-void JobProfiler::set_task_threshold(size_t threshold){task_threshold_ = threshold;}
-size_t JobProfiler::task_threshold() { return task_threshold_; }
-
+void JobProfiler::set_task_threshold(size_t threshold) {
+    task_threshold_ = threshold;
 }
+size_t JobProfiler::task_threshold() {
+    return task_threshold_;
+}
+
+} // namespace ecf
