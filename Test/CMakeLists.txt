@@ -3,7 +3,7 @@
 #    cd $WK/Test
 #    find src -name \*.cpp -print | sort
 # =======================================================
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
+file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
  
 # This library is used for the syste, level testing, hence can include test directories
 ecbuild_add_library( TARGET   libharness
@@ -25,6 +25,8 @@ target_include_directories(libharness PUBLIC src
                                               ../Client/src
                                               ../Client/test 
 )
+
+target_clangformat(libharness)
 
 # =================================================================
 # test
@@ -69,7 +71,7 @@ if (ENABLE_ALL_TESTS)
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
 	                  TEST_DEPENDS s_client
 	                )
-   
+	target_clangformat(s_test)
    
 	ecbuild_add_test( TARGET       s_test_zombies
 	                  SOURCES      ./TestZombies.cpp
@@ -79,6 +81,7 @@ if (ENABLE_ALL_TESTS)
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
 	                  TEST_DEPENDS s_test
 	                )
+	target_clangformat(s_test_zombies)
 	
    
 	# This test runs forever, hence not suitable for unit test.                          
