@@ -46,7 +46,9 @@ set_target_properties(ecflow PROPERTIES
                              PREFIX ""
                              INSTALL_RPATH ""
                      )
-                     
+
+target_clangformat(ecflow)
+
 # =====================================================================
 # tests 
 
@@ -190,4 +192,3 @@ else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
 endif()
-
