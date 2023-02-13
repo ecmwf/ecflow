@@ -1,4 +1,12 @@
 list( APPEND srcs
+   # HEADERS
+   src/Analyser.hpp
+   src/AstAnalyserVisitor.hpp
+   src/DefsAnalyserVisitor.hpp
+   src/FlatAnalyserVisitor.hpp
+   src/Simulator.hpp
+   src/SimulatorVisitor.hpp
+   # SOURCES
    src/Analyser.cpp
    src/AstAnalyserVisitor.cpp
    src/DefsAnalyserVisitor.cpp
@@ -20,8 +28,12 @@ target_include_directories(libsimu PUBLIC src
                                            ../Base/src
 )
 
+target_clangformat(libsimu)
 
 list( APPEND test_srcs
+   # HEADERS
+   test/TestUtil.hpp
+   # SOURCES
    test/TestAutoArchive.cpp
    test/TestAutoCancel.cpp
    test/TestAutoRestore.cpp
@@ -43,7 +55,8 @@ ecbuild_add_test( TARGET       c_csim
                   DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_base
                  )
-                 
+
+target_clangformat(c_csim)
 
 if (ENABLE_ALL_TESTS)
 	ecbuild_add_test( TARGET        c_csim_single
@@ -55,5 +68,5 @@ if (ENABLE_ALL_TESTS)
                       DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                  )
+  target_clangformat(c_csim_single)
 endif()
-              
