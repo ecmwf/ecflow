@@ -16,17 +16,19 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/python.hpp>
+
 #include "Variable.hpp"
 
 class Edit {
 public:
-   explicit Edit(const boost::python::dict& dict);
-   Edit(const boost::python::dict& dict,const boost::python::dict& dict2);
-   const std::vector<Variable>& variables() const { return vec_;}
-   static std::string to_string() { return "edit";}
-   static boost::python::object init(boost::python::tuple args, boost::python::dict kw);
+    explicit Edit(const boost::python::dict& dict);
+    Edit(const boost::python::dict& dict, const boost::python::dict& dict2);
+    const std::vector<Variable>& variables() const { return vec_; }
+    static std::string to_string() { return "edit"; }
+    static boost::python::object init(boost::python::tuple args, boost::python::dict kw);
+
 private:
-   std::vector<Variable> vec_;
+    std::vector<Variable> vec_;
 };
 
 #endif
