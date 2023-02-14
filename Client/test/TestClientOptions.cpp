@@ -21,22 +21,22 @@
 BOOST_AUTO_TEST_SUITE(ClientTestSuite)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
-  const char* expected_username = "username";
-  const char* plain_password = "password";
-  std::string expected_password = PasswordEncryption::encrypt(plain_password, expected_username);
+    const char* expected_username = "username";
+    const char* plain_password    = "password";
+    std::string expected_password = PasswordEncryption::encrypt(plain_password, expected_username);
 
-  const char* argv[]{"ecflow_client", "--user", expected_username, "--password", plain_password, "--ping"};
-  int argc = boost::size(argv);
+    const char* argv[]{"ecflow_client", "--user", expected_username, "--password", plain_password, "--ping"};
+    int argc = boost::size(argv);
 
-  ClientOptions options;
-  ClientEnvironment environment(false);
-  options.parse(argc, const_cast<char**>(argv), &environment);
+    ClientOptions options;
+    ClientEnvironment environment(false);
+    options.parse(argc, const_cast<char**>(argv), &environment);
 
-  std::string actual_username = environment.get_user_name();
-  BOOST_REQUIRE(expected_username == actual_username);
+    std::string actual_username = environment.get_user_name();
+    BOOST_REQUIRE(expected_username == actual_username);
 
-  std::string actual_password = environment.get_user_password(expected_username);
-  BOOST_REQUIRE(expected_password == actual_password);
+    std::string actual_password = environment.get_user_password(expected_username);
+    BOOST_REQUIRE(expected_password == actual_password);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
