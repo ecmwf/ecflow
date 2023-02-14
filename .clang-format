@@ -25,6 +25,8 @@ BraceWrapping:
   SplitEmptyNamespace: true
   AfterExternBlock: false # Keeps extern "C" blocks unindented.
 
+AlwaysBreakTemplateDeclarations: Yes
+
 # Indent case labels.
 IndentCaseLabels: true
 
