@@ -12,16 +12,13 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "SslServer.hpp"
+
 #include "ServerEnvironment.hpp"
 
-SslServer::SslServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv )
-: BaseServer(io_service,serverEnv),
-  server_(this,io_service,serverEnv)
-{
+SslServer::SslServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
+    : BaseServer(io_service, serverEnv), server_(this, io_service, serverEnv) {
 }
 
-const std::string& SslServer::ssl() const
-{
-   return serverEnv_.openssl().ssl();
+const std::string& SslServer::ssl() const {
+    return serverEnv_.openssl().ssl();
 }
-

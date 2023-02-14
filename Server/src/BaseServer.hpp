@@ -23,86 +23,90 @@
 
 #include <boost/asio.hpp>
 
-#include "NodeTreeTraverser.hpp"
-#include "CheckPtSaver.hpp"
 #include "AbstractServer.hpp"
+#include "CheckPtSaver.hpp"
+#include "NodeTreeTraverser.hpp"
 
 class ServerEnvironment;
 
 class BaseServer : public AbstractServer {
 public:
-   /// Constructor opens the acceptor and starts waiting for the first incoming
-   /// connection.
-   explicit BaseServer(boost::asio::io_service& io_service,ServerEnvironment&);
-   ~BaseServer() override;
+    /// Constructor opens the acceptor and starts waiting for the first incoming
+    /// connection.
+    explicit BaseServer(boost::asio::io_service& io_service, ServerEnvironment&);
+    ~BaseServer() override;
 
+    void handle_terminate();
 
-   void handle_terminate();
+    // abort server if check pt files exist, but can't be loaded
+    bool load_check_pt_file_on_startup();
+    void loadCheckPtFile();
+    bool restore_from_checkpt(const std::string& filename, bool& failed);
+    void update_defs_server_state();
+    void set_server_state(SState::State);
 
-   // abort server if check pt files exist, but can't be loaded
-   bool load_check_pt_file_on_startup();
-   void loadCheckPtFile();
-   bool restore_from_checkpt(const std::string& filename, bool& failed);
-   void update_defs_server_state();
-   void set_server_state(SState::State);
+    /// AbstractServer functions
+    SState::State state() const override { return serverState_; }
+    std::pair<std::string, std::string> hostPort() const override;
+    defs_ptr defs() const override { return defs_; }
+    void updateDefs(defs_ptr, bool force) override;
+    void clear_defs() override;
+    bool checkPtDefs(ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED,
+                     int check_pt_interval        = 0,
+                     int check_pt_save_time_alarm = 0) override;
+    void restore_defs_from_checkpt() override;
+    void nodeTreeStateChanged() override;
+    bool allowTaskCommunication() const override;
+    void shutdown() override;
+    void halted() override;
+    void restart() override;
+    bool reloadWhiteListFile(std::string& errorMsg) override;
+    bool reloadPasswdFile(std::string& errorMsg) override;
+    bool reloadCustomPasswdFile(std::string& errorMsg) override;
+    bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) override;
+    bool authenticateReadAccess(const std::string& user,
+                                bool custom_user,
+                                const std::string& passwd,
+                                const std::string& path) override;
+    bool authenticateReadAccess(const std::string& user,
+                                bool custom_user,
+                                const std::string& passwd,
+                                const std::vector<std::string>& paths) override;
+    bool authenticateWriteAccess(const std::string& user) override;
+    bool authenticateWriteAccess(const std::string& user, const std::string& path) override;
+    bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override;
+    bool lock(const std::string& user) override;
+    void unlock() override;
+    const std::string& lockedUser() const override;
+    void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,
+                                             bool user_cmd_context) const override;
+    int poll_interval() const override;
+    void debug_server_on() override;
+    void debug_server_off() override;
+    bool debug() const override;
 
-
-   /// AbstractServer functions
-   SState::State state() const override { return serverState_; }
-   std::pair<std::string,std::string> hostPort() const override;
-   defs_ptr defs() const override { return defs_;}
-   void updateDefs(defs_ptr,bool force) override;
-   void clear_defs() override;
-   bool checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
-                               int check_pt_interval = 0,
-                               int check_pt_save_time_alarm = 0) override;
-   void restore_defs_from_checkpt() override;
-   void nodeTreeStateChanged() override;
-   bool allowTaskCommunication() const override;
-   void shutdown() override;
-   void halted() override;
-   void restart() override;
-   bool reloadWhiteListFile(std::string& errorMsg) override;
-   bool reloadPasswdFile(std::string& errorMsg) override;
-   bool reloadCustomPasswdFile(std::string& errorMsg) override;
-   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd) override;
-   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd,const std::string& path) override;
-   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd,const std::vector<std::string>& paths) override;
-   bool authenticateWriteAccess(const std::string& user) override;
-   bool authenticateWriteAccess(const std::string& user, const std::string& path) override;
-   bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override;
-   bool lock(const std::string& user) override;
-   void unlock() override;
-   const std::string& lockedUser() const override;
-   void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool user_cmd_context) const override;
-   int poll_interval() const override;
-   void debug_server_on() override;
-   void debug_server_off() override;
-   bool debug() const override;
-
-   // used in signal, for emergency check point during system session
-   void sigterm_signal_handler();
+    // used in signal, for emergency check point during system session
+    void sigterm_signal_handler();
 
 protected:
+    /// The io_service used to perform asynchronous operations.
+    boost::asio::io_service& io_service_;
 
-   /// The io_service used to perform asynchronous operations.
-   boost::asio::io_service& io_service_;
+    /// The signal_set is used to register for automatic check pointing
+    boost::asio::signal_set signals_;
 
-   /// The signal_set is used to register for automatic check pointing
-   boost::asio::signal_set signals_;
+    defs_ptr defs_; // shared because is deleted in Test, and used in System::instance()
+    NodeTreeTraverser traverser_;
+    friend class NodeTreeTraverser;
 
-   defs_ptr defs_;             // shared because is deleted in Test, and used in System::instance()
-   NodeTreeTraverser traverser_;
-   friend class NodeTreeTraverser;
+    CheckPtSaver checkPtSaver_;
+    friend class CheckPtSaver;
 
-   CheckPtSaver checkPtSaver_;
-   friend class CheckPtSaver;
+    SState::State serverState_;
+    SState::State server_state_to_preserve_{SState::RUNNING}; // preserve state over plug cmd ECFLOW-1606
 
-   SState::State serverState_;
-   SState::State server_state_to_preserve_{SState::RUNNING}; // preserve state over plug cmd ECFLOW-1606
-
-   ServerEnvironment& serverEnv_;
-   std::string userWhoHasLock_;
+    ServerEnvironment& serverEnv_;
+    std::string userWhoHasLock_;
 };
 
 #endif
