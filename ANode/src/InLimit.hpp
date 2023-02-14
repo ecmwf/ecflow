@@ -80,7 +80,8 @@ private:
     bool incremented_{false};      // state
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 #endif

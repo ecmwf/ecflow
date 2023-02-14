@@ -25,7 +25,8 @@ using namespace std;
 using namespace boost;
 
 /// Output a vector to cout
-template <class T> ostream& operator<<(ostream& os, const vector<T>& v) {
+template <class T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
     copy(v.begin(), v.end(), ostream_iterator<T>(cout, " "));
     return os;
 }

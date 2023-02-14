@@ -936,7 +936,8 @@ void TimeSeries::testTime(int hour, int minute) {
     }
 }
 
-template <class Archive> void TimeSeries::serialize(Archive& ar, std::uint32_t const /*version*/) {
+template <class Archive>
+void TimeSeries::serialize(Archive& ar, std::uint32_t const /*version*/) {
     ar(CEREAL_NVP(start_));
     CEREAL_OPTIONAL_NVP(ar, finish_, [this]() { return !finish_.isNULL(); });
     CEREAL_OPTIONAL_NVP(ar, incr_, [this]() { return !incr_.isNULL(); });

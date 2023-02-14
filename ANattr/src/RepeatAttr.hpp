@@ -113,7 +113,8 @@ protected:
 
 private:
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 ///
@@ -184,7 +185,8 @@ private:
     mutable Variable julian_; // *not* persisted
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class RepeatDateList final : public RepeatBase {
@@ -247,7 +249,8 @@ private:
     mutable Variable julian_; // *not* persisted
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class RepeatInteger final : public RepeatBase {
@@ -298,7 +301,8 @@ private:
     long value_{0};
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 // Note:: Difference between RepeatEnumerated and  RepeatString, is that
@@ -350,7 +354,8 @@ private:
     std::vector<std::string> theEnums_;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class RepeatString final : public RepeatBase {
@@ -399,7 +404,8 @@ private:
     std::vector<std::string> theStrings_;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 /// The current repeat day is not that well defined or deterministic.
@@ -472,7 +478,8 @@ private:
     bool valid_{true}; // not persisted since only used in simulator
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class Repeat {
@@ -574,7 +581,8 @@ private:
     std::unique_ptr<RepeatBase> type_;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

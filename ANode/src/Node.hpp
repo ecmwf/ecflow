@@ -916,7 +916,8 @@ private:
 private:
     // conditionally save to cut down on client/server bandwidth.
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

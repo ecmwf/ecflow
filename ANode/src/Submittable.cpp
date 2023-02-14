@@ -1175,7 +1175,8 @@ void SubGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_ecfpass_);
 }
 
-template <class Archive> void Submittable::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Submittable::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Node>(this));
 
     CEREAL_OPTIONAL_NVP(ar, paswd_, [this]() { return !paswd_.empty(); }); // conditionally save

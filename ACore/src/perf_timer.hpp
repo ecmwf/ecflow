@@ -29,7 +29,8 @@ auto invoke(F f, Args&&... args) -> decltype(std::ref(f)(std::forward<Args>(args
 template <typename Time = std::chrono::microseconds, typename Clock = std::chrono::high_resolution_clock>
 struct perf_timer
 {
-    template <typename F, typename... Args> static Time duration(F&& f, Args... args) {
+    template <typename F, typename... Args>
+    static Time duration(F&& f, Args... args) {
         auto start = Clock::now();
 
         // std::invoke(std::forward<F>(f), std::forward<Args>(args)...); // c++17
@@ -40,7 +41,8 @@ struct perf_timer
     }
 };
 
-template <class Resolution = std::chrono::milliseconds> class Timer {
+template <class Resolution = std::chrono::milliseconds>
+class Timer {
 public:
     using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
                                      std::chrono::high_resolution_clock,

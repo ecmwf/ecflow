@@ -1450,11 +1450,13 @@ bool RepeatDay::operator==(const RepeatDay& rhs) const {
 }
 // =========================================================================================
 
-template <class Archive> void RepeatBase::serialize(Archive& ar) {
+template <class Archive>
+void RepeatBase::serialize(Archive& ar) {
     ar(CEREAL_NVP(name_));
 }
 
-template <class Archive> void RepeatDate::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void RepeatDate::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this),
        CEREAL_NVP(start_),
        CEREAL_NVP(end_),
@@ -1462,7 +1464,8 @@ template <class Archive> void RepeatDate::serialize(Archive& ar, std::uint32_t c
        CEREAL_NVP(value_));
 }
 
-template <class Archive> void RepeatInteger::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void RepeatInteger::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this),
        CEREAL_NVP(start_),
        CEREAL_NVP(end_),
@@ -1470,23 +1473,28 @@ template <class Archive> void RepeatInteger::serialize(Archive& ar, std::uint32_
        CEREAL_NVP(value_));
 }
 
-template <class Archive> void RepeatEnumerated::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void RepeatEnumerated::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this), CEREAL_NVP(theEnums_), CEREAL_NVP(currentIndex_));
 }
 
-template <class Archive> void RepeatDateList::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void RepeatDateList::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this), CEREAL_NVP(list_), CEREAL_NVP(currentIndex_));
 }
 
-template <class Archive> void RepeatString::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void RepeatString::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this), CEREAL_NVP(theStrings_), CEREAL_NVP(currentIndex_));
 }
 
-template <class Archive> void RepeatDay::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void RepeatDay::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this), CEREAL_NVP(step_));
 }
 
-template <class Archive> void Repeat::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Repeat::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(type_));
 }
 

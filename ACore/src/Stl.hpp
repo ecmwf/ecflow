@@ -22,7 +22,8 @@
 
 namespace ecf {
 /// Helper struct that will aid the deletion of Pointer from a container
-template <typename T> struct TSeqDeletor
+template <typename T>
+struct TSeqDeletor
 {
     void operator()(T pointer) const {
         // std::cout << "Destroy of this pointer" << std::endl;
@@ -36,13 +37,15 @@ template <typename T> struct TSeqDeletor
 ///        vect.push_back (new std::string ("Stephane"));
 ///        DeletePtrs (vect);
 ///     }
-template <typename Container> void DeletePtrs(Container& pContainer) {
+template <typename Container>
+void DeletePtrs(Container& pContainer) {
     std::for_each(pContainer.begin(), pContainer.end(), TSeqDeletor<typename Container::value_type>());
     pContainer.clear();
 }
 
 /// Helper struct that will aid the deletion of Pointer from a Associative container
-template <typename TPair> struct TAsoDeletor
+template <typename TPair>
+struct TAsoDeletor
 {
     void operator()(TPair& tElem) const {
         if (tElem.second) {
@@ -56,7 +59,8 @@ template <typename TPair> struct TAsoDeletor
 ///        theMap[0] =  new std::string ("Stephane");
 ///        AssoDeletePtrs(theMap);
 ///     }
-template <typename Container> void AssoDeletePtrs(Container& pContainer) {
+template <typename Container>
+void AssoDeletePtrs(Container& pContainer) {
     std::for_each(pContainer.begin(), pContainer.end(), TAsoDeletor<typename Container::value_type>());
     pContainer.clear();
 }

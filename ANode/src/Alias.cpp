@@ -162,7 +162,8 @@ node_ptr Alias::find_node_up_the_tree(const std::string& name) const {
     return node_ptr();
 }
 
-template <class Archive> void Alias::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Alias::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Submittable>(this));
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Alias);

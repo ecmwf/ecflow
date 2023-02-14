@@ -34,7 +34,8 @@ public:
 private:
     // This method lets cereal know which data members to serialize
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& archive, std::uint32_t const version) {
+    template <class Archive>
+    void serialize(Archive& archive, std::uint32_t const version) {
         archive(CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(state_));
     }
     int x{2}, y{2};
@@ -62,7 +63,8 @@ public:
 private:
     // This method lets cereal know which data members to serialize
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& archive, std::uint32_t const version) {
+    template <class Archive>
+    void serialize(Archive& archive, std::uint32_t const version) {
         archive(cereal::base_class<MyClass>(this), CEREAL_NVP(x_), CEREAL_NVP(y_), CEREAL_NVP(z_));
     }
     int x_{1}, y_{1}, z_{1};

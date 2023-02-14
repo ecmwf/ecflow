@@ -84,7 +84,8 @@ private:
     unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 // Class Event:
@@ -139,7 +140,8 @@ private:
     bool used_{false}; // used by the simulator not persisted
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 // Class Meter:
@@ -194,6 +196,7 @@ private:
     bool used_{false};                // used by the simulator not persisted
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 #endif

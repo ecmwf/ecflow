@@ -138,155 +138,193 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
 
 // ===================================================================================================
 
-template <class Archive> void Memento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Memento::serialize(Archive& ar, std::uint32_t const version) {
 }
 
-template <class Archive> void CompoundMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void CompoundMemento::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, clear_attributes_, [this]() { return clear_attributes_; }); // conditionally save
     ar(CEREAL_NVP(absNodePath_), CEREAL_NVP(vec_));
 }
 
-template <class Archive> void StateMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void StateMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(state_));
 }
 
-template <class Archive> void NodeStateMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeStateMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(state_));
 }
 
-template <class Archive> void OrderMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void OrderMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(order_));
 }
 
-template <class Archive> void ChildrenMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void ChildrenMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(children_));
 }
 
-template <class Archive> void AliasChildrenMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void AliasChildrenMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(children_));
 }
 
-template <class Archive> void AliasNumberMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void AliasNumberMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(alias_no_));
 }
 
-template <class Archive> void SuspendedMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void SuspendedMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(suspended_));
 }
 
-template <class Archive> void ServerStateMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void ServerStateMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(state_));
 }
 
-template <class Archive> void ServerVariableMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void ServerVariableMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(serverEnv_));
 }
 
-template <class Archive> void NodeDefStatusDeltaMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeDefStatusDeltaMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(state_));
 }
 
-template <class Archive> void NodeEventMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeEventMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(event_));
 }
 
-template <class Archive> void NodeMeterMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeMeterMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(meter_));
 }
 
-template <class Archive> void NodeLabelMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeLabelMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(label_));
 }
 
-template <class Archive> void NodeQueueMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeQueueMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(queue_));
 }
 
-template <class Archive> void NodeGenericMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeGenericMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(generic_));
 }
 
-template <class Archive> void NodeQueueIndexMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeQueueIndexMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(index_), CEREAL_NVP(name_), CEREAL_NVP(state_vec_));
 }
 
-template <class Archive> void NodeTriggerMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeTriggerMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(exp_));
 }
 
-template <class Archive> void NodeCompleteMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeCompleteMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(exp_));
 }
 
-template <class Archive> void NodeRepeatMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeRepeatMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(repeat_));
 }
 
-template <class Archive> void NodeRepeatIndexMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeRepeatIndexMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(index_or_value_));
 }
 
-template <class Archive> void NodeLimitMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeLimitMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(limit_));
 }
 
-template <class Archive> void NodeInLimitMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeInLimitMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(inlimit_));
 }
 
-template <class Archive> void NodeVariableMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeVariableMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(var_));
 }
 
-template <class Archive> void NodeLateMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeLateMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(late_));
 }
 
-template <class Archive> void FlagMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void FlagMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(flag_));
 }
 
-template <class Archive> void NodeTodayMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeTodayMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(attr_));
 }
 
-template <class Archive> void NodeTimeMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeTimeMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(attr_));
 }
 
-template <class Archive> void NodeDayMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeDayMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(attr_));
 }
 
-template <class Archive> void NodeCronMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeCronMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(attr_));
 }
 
-template <class Archive> void NodeDateMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeDateMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(attr_));
 }
 
-template <class Archive> void NodeZombieMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeZombieMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(attr_));
 }
 
-template <class Archive> void NodeVerifyMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeVerifyMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(verifys_));
 }
 
-template <class Archive> void SubmittableMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void SubmittableMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(paswd_), CEREAL_NVP(rid_), CEREAL_NVP(abr_), CEREAL_NVP(tryNo_));
 }
 
-template <class Archive> void SuiteClockMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void SuiteClockMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(clockAttr_));
 }
 
-template <class Archive> void SuiteBeginDeltaMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void SuiteBeginDeltaMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(begun_));
 }
 
-template <class Archive> void SuiteCalendarMemento::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void SuiteCalendarMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(cal_));
 }
 

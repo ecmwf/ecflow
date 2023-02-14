@@ -53,7 +53,8 @@ private:
     std::vector<std::string> values_;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 #endif

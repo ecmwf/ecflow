@@ -218,7 +218,8 @@ private:
     // why() command on the client side. By default calendar is initialised in the *server*
     // at begin time, from the clock attribute
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const /*version*/);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const /*version*/);
 };
 } // namespace ecf
 

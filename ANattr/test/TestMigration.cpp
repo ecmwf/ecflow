@@ -227,7 +227,8 @@ private:
     bool free_{false};
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar) {
+    template <class Archive>
+    void serialize(Archive& ar) {
         ar(CEREAL_NVP(day_));
         CEREAL_OPTIONAL_NVP(ar, free_, [this]() { return free_; }); // conditionally save
     }
@@ -260,7 +261,8 @@ private:
     boost::gregorian::date date_; // new data member 5.5.0
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar) {
+    template <class Archive>
+    void serialize(Archive& ar) {
         ar(CEREAL_NVP(day_));
         CEREAL_OPTIONAL_NVP(ar, free_, [this]() { return free_; });       // conditionally save
         CEREAL_OPTIONAL_NVP(ar, expired_, [this]() { return expired_; }); // conditionally save

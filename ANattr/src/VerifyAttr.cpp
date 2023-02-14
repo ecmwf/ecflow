@@ -76,7 +76,8 @@ std::string VerifyAttr::dump() const {
     return ss.str();
 }
 
-template <class Archive> void VerifyAttr::serialize(Archive& ar) {
+template <class Archive>
+void VerifyAttr::serialize(Archive& ar) {
     ar(CEREAL_NVP(state_), CEREAL_NVP(expected_), CEREAL_NVP(actual_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(VerifyAttr);

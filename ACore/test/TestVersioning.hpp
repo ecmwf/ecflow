@@ -26,7 +26,10 @@ private:
     int hour_;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version) { ar& hour_; }
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
+        ar& hour_;
+    }
 };
 } // namespace version0
 
@@ -41,7 +44,8 @@ private:
     int hour_;
     int min_;
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version) {
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
         // When *loading* the version pertains to loaded version in the data
         // When *saving* the version always pertains to the latest version
         ar& hour_;
@@ -62,7 +66,10 @@ public:
 private:
     int hours_;
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version) { ar& hours_; }
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
+        ar& hours_;
+    }
 };
 } // namespace version_change_dm_name
 CEREAL_CLASS_VERSION(version_change_dm_name::X, 1)
@@ -77,7 +84,8 @@ public:
 private:
     std::string hour_;
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version) {
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
         // When *loading* the version pertains to loaded version in the data
         // When *saving* the version always pertains to the latest version
         if (version == 0) {

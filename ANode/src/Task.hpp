@@ -138,7 +138,8 @@ private:
     node_ptr find_immediate_child(const boost::string_view&) const override;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 
 private:
     unsigned int order_state_change_no_{0};      // no need to persist

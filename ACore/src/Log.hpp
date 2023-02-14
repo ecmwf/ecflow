@@ -211,7 +211,8 @@ void log_assert(char const* expr, char const* file, long line, const std::string
 // LOG(Log::WAR,"this is " << path << " ok ");
 //
 // helper, see STRINGIZE() macro
-template <typename Functor> std::string stringize_f(Functor const& f) {
+template <typename Functor>
+std::string stringize_f(Functor const& f) {
     std::ostringstream out;
     f(out);
     return out.str();

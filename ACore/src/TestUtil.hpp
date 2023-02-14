@@ -22,7 +22,8 @@
 
 namespace ecf {
 
-template <typename T> static std::vector<std::string> toStrVec(const std::vector<T>& vec) {
+template <typename T>
+static std::vector<std::string> toStrVec(const std::vector<T>& vec) {
     std::vector<std::string> retVec;
     retVec.reserve(vec.size());
     for (T s : vec) {

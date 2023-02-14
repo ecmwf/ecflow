@@ -39,7 +39,8 @@ public:
 private:
     // This method lets cereal know which data members to serialize
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version) {
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
         ar(CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(state_));
         CEREAL_OPTIONAL_NVP(ar, test_, [this]() { return test_; }); // conditionally save
     }

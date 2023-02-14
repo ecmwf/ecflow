@@ -295,7 +295,8 @@ void QueueAttr::set_name(const std::string& name) {
     name_ = name;
 }
 
-template <class Archive> void QueueAttr::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void QueueAttr::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(theQueue_), CEREAL_NVP(state_vec_), CEREAL_NVP(name_), CEREAL_NVP(currentIndex_));
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(QueueAttr);

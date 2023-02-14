@@ -84,7 +84,8 @@ private:
     std::set<std::string> paths_; // Updated via increment()/decrement()/reset(). Typically task paths
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 #endif

@@ -182,7 +182,8 @@ private:
     bool free_{false};                // persisted for use by why() on client side && for state changes
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 } // namespace ecf

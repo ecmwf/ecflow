@@ -457,7 +457,8 @@ boost::posix_time::ptime Calendar::second_clock_time() {
 
 // ==================================================================================
 
-template <class Archive> void Calendar::serialize(Archive& ar, std::uint32_t const /*version*/) {
+template <class Archive>
+void Calendar::serialize(Archive& ar, std::uint32_t const /*version*/) {
     if (Archive::is_saving::value) {
         if (initTime_.is_special()) {
             // Initialise the ptimes to avoid serialisation exceptions

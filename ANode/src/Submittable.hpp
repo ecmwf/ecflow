@@ -157,7 +157,8 @@ private:
 private:
     // never change defaults !! or will mess up client/server protocol
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 // We can have several thousands Submittables. This class helps in avoiding

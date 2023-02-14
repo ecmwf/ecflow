@@ -24,7 +24,8 @@
 namespace ecf {
 
 // The following template  functions are used test/debug only
-template <typename T> void do_restore(const std::string& fileName, const T& saved) {
+template <typename T>
+void do_restore(const std::string& fileName, const T& saved) {
     T restored;
     try {
         ecf::restore(fileName, restored);
@@ -36,12 +37,14 @@ template <typename T> void do_restore(const std::string& fileName, const T& save
     //   BOOST_CHECK_MESSAGE(saved == restored," save and restored don't match\n" << saved  << "\n" << restored );
 }
 
-template <typename T> void doRestore(const std::string& fileName, const T& saved) {
+template <typename T>
+void doRestore(const std::string& fileName, const T& saved) {
     do_restore(fileName, saved);
     std::remove(fileName.c_str());
 }
 
-template <typename T> void doSave(const std::string& fileName, const T& saved) {
+template <typename T>
+void doSave(const std::string& fileName, const T& saved) {
     try {
         ecf::save(fileName, saved);
     }
@@ -50,17 +53,20 @@ template <typename T> void doSave(const std::string& fileName, const T& saved) {
     }
 }
 
-template <typename T> void doSave(const std::string& fileName) {
+template <typename T>
+void doSave(const std::string& fileName) {
     T saved;
     doSave(fileName, saved);
 }
 
-template <typename T> void doSaveAndRestore(const std::string& fileName, const T& saved) {
+template <typename T>
+void doSaveAndRestore(const std::string& fileName, const T& saved) {
     doSave(fileName, saved);
     doRestore(fileName, saved);
 }
 
-template <typename T> void doSaveAndRestore(const std::string& fileName) {
+template <typename T>
+void doSaveAndRestore(const std::string& fileName) {
     T saved;
     doSaveAndRestore(fileName, saved);
 }

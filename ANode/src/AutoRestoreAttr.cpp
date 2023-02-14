@@ -144,7 +144,8 @@ void AutoRestoreAttr::check(std::string& errorMsg) const {
     }
 }
 
-template <class Archive> void AutoRestoreAttr::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void AutoRestoreAttr::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(nodes_to_restore_));
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(AutoRestoreAttr);

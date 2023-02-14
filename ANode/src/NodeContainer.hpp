@@ -162,7 +162,8 @@ private:
     void swap(NodeContainer& rhs);
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 
 private:
     std::vector<node_ptr> nodes_;

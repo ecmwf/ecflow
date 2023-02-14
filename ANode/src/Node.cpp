@@ -2857,7 +2857,8 @@ std::vector<GenericAttr>::const_iterator Node::generic_end() const {
     return generics_.end();
 }
 
-template <class Archive> void Node::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Node::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(n_));
 
     CEREAL_OPTIONAL_NVP(ar, st_, [this]() { return st_.first != NState::default_state(); }); // conditionally save

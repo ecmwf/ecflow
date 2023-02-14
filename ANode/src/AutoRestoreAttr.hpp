@@ -52,7 +52,8 @@ private:
     std::vector<std::string> nodes_to_restore_; // must be suite or family
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 } // namespace ecf

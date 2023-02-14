@@ -101,7 +101,8 @@ std::ostream& operator<<(std::ostream& os, const TimeSlot& d) {
     return os;
 }
 
-template <class Archive> void TimeSlot::serialize(Archive& ar) {
+template <class Archive>
+void TimeSlot::serialize(Archive& ar) {
     ar(CEREAL_NVP(h_), CEREAL_NVP(m_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(TimeSlot);

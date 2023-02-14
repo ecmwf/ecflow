@@ -72,7 +72,8 @@ private:
 
 private:
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 // Used for storing all the memento's associated with a single node
@@ -97,7 +98,8 @@ private:
     bool clear_attributes_{false};
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class StateMemento : public Memento {
@@ -114,7 +116,8 @@ private:
     friend class Defs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeStateMemento : public Memento {
@@ -131,7 +134,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class OrderMemento : public Memento {
@@ -159,7 +163,8 @@ private:
     friend class Defs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class ChildrenMemento : public Memento {
@@ -179,7 +184,8 @@ private:
     friend class NodeContainer;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class AliasChildrenMemento : public Memento {
@@ -196,7 +202,8 @@ private:
     friend class Task;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class AliasNumberMemento : public Memento {
@@ -213,7 +220,8 @@ private:
     friend class Task;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class SuspendedMemento : public Memento {
@@ -230,7 +238,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class ServerStateMemento : public Memento {
@@ -247,7 +256,8 @@ private:
     friend class Defs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class ServerVariableMemento : public Memento {
@@ -264,7 +274,8 @@ private:
     friend class Defs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeDefStatusDeltaMemento : public Memento {
@@ -281,7 +292,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeEventMemento : public Memento {
@@ -298,7 +310,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeMeterMemento : public Memento {
@@ -315,7 +328,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeLabelMemento : public Memento {
@@ -332,7 +346,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeQueueMemento : public Memento {
@@ -350,7 +365,8 @@ private:
     friend class MiscAttrs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeGenericMemento : public Memento {
@@ -368,7 +384,8 @@ private:
     friend class MiscAttrs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeQueueIndexMemento : public Memento {
@@ -389,7 +406,8 @@ private:
     friend class MiscAttrs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeTriggerMemento : public Memento {
@@ -406,7 +424,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeCompleteMemento : public Memento {
@@ -423,7 +442,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeRepeatMemento : public Memento {
@@ -440,7 +460,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeRepeatIndexMemento : public Memento {
@@ -457,7 +478,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeLimitMemento : public Memento {
@@ -474,7 +496,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeInLimitMemento : public Memento {
@@ -492,7 +515,8 @@ private:
     friend class InLimitMgr;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeVariableMemento : public Memento {
@@ -509,7 +533,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeLateMemento : public Memento {
@@ -526,7 +551,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class FlagMemento : public Memento {
@@ -547,7 +573,8 @@ private:
     friend class Defs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeTodayMemento : public Memento {
@@ -564,7 +591,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeTimeMemento : public Memento {
@@ -581,7 +609,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeDayMemento : public Memento {
@@ -598,7 +627,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeCronMemento : public Memento {
@@ -615,7 +645,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeDateMemento : public Memento {
@@ -632,7 +663,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeZombieMemento : public Memento {
@@ -649,7 +681,8 @@ private:
     friend class Node;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class NodeVerifyMemento : public Memento {
@@ -667,7 +700,8 @@ private:
     friend class MiscAttrs;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class SubmittableMemento : public Memento {
@@ -694,7 +728,8 @@ private:
     friend class Submittable;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class SuiteClockMemento : public Memento {
@@ -711,7 +746,8 @@ private:
     friend class Suite;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class SuiteBeginDeltaMemento : public Memento {
@@ -728,7 +764,8 @@ private:
     friend class Suite;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 class SuiteCalendarMemento : public Memento {
@@ -745,7 +782,8 @@ private:
     friend class Suite;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

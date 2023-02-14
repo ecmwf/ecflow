@@ -1408,7 +1408,8 @@ void NodeContainer::generate_scripts(const std::map<std::string, std::string>& o
     }
 }
 
-template <class Archive> void NodeContainer::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void NodeContainer::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Node>(this), CEREAL_NVP(nodes_));
 
     // Setup the parent pointers. Since they are not serialised

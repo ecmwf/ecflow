@@ -119,7 +119,8 @@ std::string Variable::dump() const {
     return ss.str();
 }
 
-template <class Archive> void Variable::serialize(Archive& ar) {
+template <class Archive>
+void Variable::serialize(Archive& ar) {
     ar(CEREAL_NVP(n_), CEREAL_NVP(v_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(Variable);

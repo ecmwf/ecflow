@@ -140,7 +140,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
     static const int root_path_ID            = 62;
     static const int parent_variable_ID      = 63;
 
-    template <typename ScannerT> struct definition
+    template <typename ScannerT>
+    struct definition
     {
         rule<ScannerT, parser_tag<cal_date_to_julian_ID>> cal_date_to_julian;
         rule<ScannerT, parser_tag<cal_julian_to_date_ID>> cal_julian_to_date;

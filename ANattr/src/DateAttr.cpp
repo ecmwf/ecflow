@@ -396,7 +396,8 @@ boost::gregorian::date DateAttr::next_matching_date(const ecf::Calendar& c) cons
     return c.date();
 }
 
-template <class Archive> void DateAttr::serialize(Archive& ar) {
+template <class Archive>
+void DateAttr::serialize(Archive& ar) {
     ar(CEREAL_NVP(day_), CEREAL_NVP(month_), CEREAL_NVP(year_));
     CEREAL_OPTIONAL_NVP(ar, free_, [this]() { return free_; }); // conditionally save
 }

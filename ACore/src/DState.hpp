@@ -58,7 +58,8 @@ private:
 
     // *IMPORTANT* no version for a simple class
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -89,7 +89,8 @@ private:
     bool end_clock_{false}; // *NOT* persisted, used for end clock, simulator only
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

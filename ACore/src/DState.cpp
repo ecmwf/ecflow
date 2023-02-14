@@ -183,7 +183,8 @@ std::vector<DState::State> DState::states() {
 
 // ==========================================================================
 
-template <class Archive> void DState::serialize(Archive& ar) {
+template <class Archive>
+void DState::serialize(Archive& ar) {
     ar(CEREAL_NVP(st_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(DState);

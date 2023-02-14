@@ -115,7 +115,8 @@ private:
     void write_state(std::string&, bool&) const override;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 
 private:
     Defs* defs_{nullptr}; // *NOT* persisted, set by parent Defs

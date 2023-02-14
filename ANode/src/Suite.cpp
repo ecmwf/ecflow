@@ -960,7 +960,8 @@ void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_time_);
 }
 
-template <class Archive> void Suite::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Suite::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<NodeContainer>(this));
     CEREAL_OPTIONAL_NVP(ar, begun_, [this]() { return begun_; });               // conditionally save
     CEREAL_OPTIONAL_NVP(ar, clockAttr_, [this]() { return clockAttr_.get(); }); // conditionally save

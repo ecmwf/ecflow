@@ -24,7 +24,8 @@
 //
 namespace ecf {
 
-template <class T> NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate) {
+template <class T>
+NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate) {
     // std::cout << "theComputedNodeState vec size = " << nodeVec.size() << " immediate  = " <<  immediate << "\n";
     int unknownCount   = 0;
     int completeCount  = 0;

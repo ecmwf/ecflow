@@ -153,7 +153,8 @@ void InLimit::write(std::string& ret) const {
     }
 }
 
-template <class Archive> void InLimit::serialize(Archive& ar) {
+template <class Archive>
+void InLimit::serialize(Archive& ar) {
     ar(CEREAL_NVP(n_));
     CEREAL_OPTIONAL_NVP(ar, path_, [this]() { return !path_.empty(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, tokens_, [this]() { return tokens_ != 1; }); // conditionally save

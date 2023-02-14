@@ -96,7 +96,8 @@ bool AutoCancelAttr::isFree(const ecf::Calendar& calendar,
     return false;
 }
 
-template <class Archive> void AutoCancelAttr::serialize(Archive& ar, std::uint32_t const /*version*/) {
+template <class Archive>
+void AutoCancelAttr::serialize(Archive& ar, std::uint32_t const /*version*/) {
     ar(CEREAL_NVP(time_));
     CEREAL_OPTIONAL_NVP(ar, relative_, [this]() { return !relative_; }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, days_, [this]() { return days_; });          // conditionally save

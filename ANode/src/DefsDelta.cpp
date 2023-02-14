@@ -84,7 +84,8 @@ void DefsDelta::add(compound_memento_ptr memento) {
     compound_mementos_.push_back(memento);
 }
 
-template <class Archive> void DefsDelta::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void DefsDelta::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(server_state_change_no_), CEREAL_NVP(server_modify_change_no_), CEREAL_NVP(compound_mementos_));
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(DefsDelta);

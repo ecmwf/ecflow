@@ -222,7 +222,8 @@ void FamGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_family1_);
 }
 
-template <class Archive> void Family::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Family::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<NodeContainer>(this));
 }
 

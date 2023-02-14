@@ -91,7 +91,8 @@ private:
     void get_all_active_submittables(std::vector<Submittable*>&) const override {}
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 std::ostream& operator<<(std::ostream& os, const Alias&);

@@ -939,7 +939,8 @@ void Task::set_memento(const AliasNumberMemento* memento, std::vector<ecf::Aspec
     alias_no_ = memento->alias_no_;
 }
 
-template <class Archive> void Task::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Task::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Submittable>(this));
     CEREAL_OPTIONAL_NVP(ar, alias_no_, [this]() { return alias_no_ != 0; });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, aliases_, [this]() { return !aliases_.empty(); }); // conditionally save

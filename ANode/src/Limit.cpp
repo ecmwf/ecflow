@@ -213,7 +213,8 @@ void Limit::update_change_no() {
     }
 }
 
-template <class Archive> void Limit::serialize(Archive& ar) {
+template <class Archive>
+void Limit::serialize(Archive& ar) {
     ar(CEREAL_NVP(n_), CEREAL_NVP(lim_));
     CEREAL_OPTIONAL_NVP(ar, value_, [this]() { return value_ != 0; });     // conditionally save
     CEREAL_OPTIONAL_NVP(ar, paths_, [this]() { return !paths_.empty(); }); // conditionally save

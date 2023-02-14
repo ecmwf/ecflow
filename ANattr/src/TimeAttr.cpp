@@ -246,7 +246,8 @@ bool TimeAttr::why(const ecf::Calendar& c,
     return true;
 }
 
-template <class Archive> void TimeAttr::serialize(Archive& ar) {
+template <class Archive>
+void TimeAttr::serialize(Archive& ar) {
     ar(CEREAL_NVP(ts_));
 
     // Only persisted for testing, see usage of isSetFree()

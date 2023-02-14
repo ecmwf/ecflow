@@ -32,7 +32,8 @@ struct brief
     static constexpr size_t size        = 18;
 };
 
-template <typename FMT = regular> std::string format_now() {
+template <typename FMT = regular>
+std::string format_now() {
     std::time_t now = std::time(nullptr);
     char buffer[FMT::size];
     std::strftime(buffer, sizeof(buffer), FMT::format, std::localtime(&now));

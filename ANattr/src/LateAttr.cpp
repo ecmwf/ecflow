@@ -260,7 +260,8 @@ LateAttr LateAttr::create(const std::string& lateString) {
     return lateAttr;
 }
 
-template <class Archive> void LateAttr::serialize(Archive& ar) {
+template <class Archive>
+void LateAttr::serialize(Archive& ar) {
     CEREAL_OPTIONAL_NVP(ar, s_, [this]() { return !s_.isNULL(); });
     CEREAL_OPTIONAL_NVP(ar, a_, [this]() { return !a_.isNULL(); });
     CEREAL_OPTIONAL_NVP(ar, c_, [this]() { return !c_.isNULL(); });

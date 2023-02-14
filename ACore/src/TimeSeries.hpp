@@ -198,7 +198,8 @@ private:
     // Note: nextTimeSlot_ is persisted for use by why() command on the client side.
     // Note: relativeDuration_ is persisted for use by why() command on the client side.
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const /*version*/);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const /*version*/);
 };
 
 std::ostream& operator<<(std::ostream& os, const TimeSeries*);

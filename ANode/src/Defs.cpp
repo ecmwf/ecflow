@@ -2133,7 +2133,8 @@ std::string Defs::stats() const {
     return stats.print();
 }
 
-template <class Archive> void Defs::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Defs::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(state_change_no_),
        CEREAL_NVP(modify_change_no_),
        CEREAL_NVP(updateCalendarCount_),

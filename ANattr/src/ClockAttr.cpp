@@ -206,7 +206,8 @@ boost::posix_time::ptime ClockAttr::ptime() const {
     return the_time;
 }
 
-template <class Archive> void ClockAttr::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void ClockAttr::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(hybrid_));
     CEREAL_OPTIONAL_NVP(ar, positiveGain_, [this]() { return positiveGain_; });
     CEREAL_OPTIONAL_NVP(ar, gain_, [this]() { return gain_ != 0; });

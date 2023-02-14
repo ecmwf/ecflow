@@ -33,7 +33,8 @@ using namespace boost::gregorian;
 
 // #define DEBUG_PARSER 1
 
-template <class T> ostream& operator<<(ostream& os, const vector<T>& v) {
+template <class T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
     copy(v.begin(), v.end(), ostream_iterator<T>(cout, ","));
     return os;
 }

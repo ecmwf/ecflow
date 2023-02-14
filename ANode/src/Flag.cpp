@@ -368,7 +368,8 @@ void Flag::set_flag(const std::string& flags) {
     }
 }
 
-template <class Archive> void Flag::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Flag::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(flag_));
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Flag);

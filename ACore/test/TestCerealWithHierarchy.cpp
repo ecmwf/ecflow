@@ -36,7 +36,8 @@ public:
 
 private:
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& archive, std::uint32_t const version) {}
+    template <class Archive>
+    void serialize(Archive& archive, std::uint32_t const version) {}
 };
 
 class Derived1 : public BaseCmd {
@@ -66,7 +67,8 @@ private:
     int x_{0};
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version) {
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
         ar(cereal::base_class<BaseCmd>(this), x_);
     }
 };
@@ -101,7 +103,10 @@ private:
     std::shared_ptr<BaseCmd> cmd_;
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& archive) { archive(CEREAL_NVP(cmd_)); }
+    template <class Archive>
+    void serialize(Archive& archive) {
+        archive(CEREAL_NVP(cmd_));
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, CmdContainer const& m) {

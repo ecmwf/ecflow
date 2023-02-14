@@ -361,7 +361,8 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
     }
 }
 
-template <class Archive> void Zombie::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void Zombie::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(user_action_),
        CEREAL_NVP(try_no_),
        CEREAL_NVP(duration_),

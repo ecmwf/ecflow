@@ -880,7 +880,8 @@ CronAttr CronAttr::create(const std::string& cronString) {
     return theCronAttr;
 }
 
-template <class Archive> void CronAttr::serialize(Archive& ar, std::uint32_t const version) {
+template <class Archive>
+void CronAttr::serialize(Archive& ar, std::uint32_t const version) {
     ar(CEREAL_NVP(timeSeries_));
     CEREAL_OPTIONAL_NVP(ar, weekDays_, [this]() { return !weekDays_.empty(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(

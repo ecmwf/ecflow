@@ -33,7 +33,8 @@
 
 namespace ecf {
 
-template <typename T> void save(const std::string& fileName, const T& t) {
+template <typename T>
+void save(const std::string& fileName, const T& t) {
     std::ofstream os(fileName);
 #ifdef DEBUG
     cereal::JSONOutputArchive oarchive(os); // Use default Indent can be very slow
@@ -43,13 +44,15 @@ template <typename T> void save(const std::string& fileName, const T& t) {
     oarchive(cereal::make_nvp(typeid(t).name(), t)); // Write the data to the archive
 }
 
-template <typename T> void restore(const std::string& fileName, T& restored) {
+template <typename T>
+void restore(const std::string& fileName, T& restored) {
     std::ifstream is(fileName);
     cereal::JSONInputArchive iarchive(is); // Create an input archive
     iarchive(restored);                    // Read the data from the archive
 }
 
-template <typename T> void save_as_string(std::string& outbound_data, const T& t) {
+template <typename T>
+void save_as_string(std::string& outbound_data, const T& t) {
     std::ostringstream archive_stream;
     {
 #ifdef DEBUG
@@ -65,7 +68,8 @@ template <typename T> void save_as_string(std::string& outbound_data, const T& t
     outbound_data = archive_stream.str();
 }
 
-template <typename T> void restore_from_string(const std::string& archive_data, T& restored) {
+template <typename T>
+void restore_from_string(const std::string& archive_data, T& restored) {
     std::istringstream archive_stream(archive_data);
     cereal::JSONInputArchive iarchive(archive_stream); // Create an input archive
     iarchive(restored);                                // Read the data from the archive

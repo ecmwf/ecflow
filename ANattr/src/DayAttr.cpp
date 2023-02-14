@@ -547,7 +547,8 @@ boost::gregorian::date DayAttr::next_matching_date(const ecf::Calendar& c) const
     return c.date();
 }
 
-template <class Archive> void DayAttr::serialize(Archive& ar) {
+template <class Archive>
+void DayAttr::serialize(Archive& ar) {
     ar(CEREAL_NVP(day_));
     CEREAL_OPTIONAL_NVP(ar, free_, [this]() { return free_; }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, expired_, [this]() {

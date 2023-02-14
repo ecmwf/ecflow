@@ -133,7 +133,8 @@ private:
     bool free_{false};
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 } // namespace ecf

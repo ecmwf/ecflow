@@ -282,12 +282,14 @@ void Expression::clearFree() {
     free_ = false;
 }
 
-template <class Archive> void PartExpression::serialize(Archive& ar) {
+template <class Archive>
+void PartExpression::serialize(Archive& ar) {
     ar(CEREAL_NVP(exp_));
     CEREAL_OPTIONAL_NVP(ar, type_, [this]() { return type_ != default_expr_type(); }); // conditionally save
 }
 
-template <class Archive> void Expression::serialize(Archive& ar) {
+template <class Archive>
+void Expression::serialize(Archive& ar) {
     ar(CEREAL_NVP(vec_));
     CEREAL_OPTIONAL_NVP(ar, free_, [this]() { return free_; }); // conditionally save
 }

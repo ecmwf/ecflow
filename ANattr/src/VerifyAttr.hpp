@@ -49,7 +49,8 @@ private:
     unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar);
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 #endif

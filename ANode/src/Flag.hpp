@@ -116,7 +116,8 @@ private:
     unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 } // namespace ecf
 

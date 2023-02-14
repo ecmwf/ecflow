@@ -159,7 +159,8 @@ std::vector<NState::State> NState::states() {
     return vec;
 }
 
-template <class Archive> void NState::serialize(Archive& ar) {
+template <class Archive>
+void NState::serialize(Archive& ar) {
     ar(CEREAL_NVP(st_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(NState);

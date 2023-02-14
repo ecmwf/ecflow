@@ -483,20 +483,23 @@ void Label::parse(const std::string& line,
     }
 }
 
-template <class Archive> void Label::serialize(Archive& ar) {
+template <class Archive>
+void Label::serialize(Archive& ar) {
     ar(CEREAL_NVP(n_));
     CEREAL_OPTIONAL_NVP(ar, v_, [this]() { return !v_.empty(); });
     CEREAL_OPTIONAL_NVP(ar, new_v_, [this]() { return !new_v_.empty(); }); // conditionally save
 }
 
-template <class Archive> void Event::serialize(Archive& ar) {
+template <class Archive>
+void Event::serialize(Archive& ar) {
     CEREAL_OPTIONAL_NVP(ar, n_, [this]() { return !n_.empty(); });
     CEREAL_OPTIONAL_NVP(ar, number_, [this]() { return number_ != std::numeric_limits<int>::max(); });
     CEREAL_OPTIONAL_NVP(ar, v_, [this]() { return v_; });
     CEREAL_OPTIONAL_NVP(ar, iv_, [this]() { return iv_; });
 }
 
-template <class Archive> void Meter::serialize(Archive& ar) {
+template <class Archive>
+void Meter::serialize(Archive& ar) {
     ar(CEREAL_NVP(min_), CEREAL_NVP(max_), CEREAL_NVP(v_), CEREAL_NVP(n_), CEREAL_NVP(cc_));
 }
 

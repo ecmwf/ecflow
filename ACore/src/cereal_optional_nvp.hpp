@@ -64,7 +64,8 @@ make_optional_nvp(Archive& ar, const char* name, T&& value) {
     return false;
 }
 
-template <class Archive, class T> void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value) {
+template <class Archive, class T>
+void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value) {
     ar(make_nvp(name, std::forward<T>(value)));
 }
 

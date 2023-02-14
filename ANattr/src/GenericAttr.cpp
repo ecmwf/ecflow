@@ -74,7 +74,8 @@ void GenericAttr::write(std::string& ret) const {
     }
 }
 
-template <class Archive> void GenericAttr::serialize(Archive& ar) {
+template <class Archive>
+void GenericAttr::serialize(Archive& ar) {
     ar(CEREAL_NVP(name_), CEREAL_NVP(values_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(GenericAttr);

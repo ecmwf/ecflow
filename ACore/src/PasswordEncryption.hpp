@@ -35,7 +35,8 @@ struct PosixEncryption
     }
 };
 
-template <typename ENGINE> struct BasePasswordEncryption
+template <typename ENGINE>
+struct BasePasswordEncryption
 {
     using username_t           = std::string;
     using plain_password_t     = std::string;

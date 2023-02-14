@@ -78,7 +78,8 @@ private:
     int zombie_lifetime_{0};                                  // How long zombie lives in server
 
     friend class cereal::access;
-    template <class Archive> void serialize(Archive& ar, std::uint32_t const version);
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

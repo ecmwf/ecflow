@@ -246,7 +246,8 @@ bool TodayAttr::why(const ecf::Calendar& c,
     return true;
 }
 
-template <class Archive> void TodayAttr::serialize(Archive& ar) {
+template <class Archive>
+void TodayAttr::serialize(Archive& ar) {
     ar(CEREAL_NVP(ts_));
     CEREAL_OPTIONAL_NVP(ar, free_, [this]() { return free_; }); // conditionally save
 }
