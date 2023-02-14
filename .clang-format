@@ -55,7 +55,7 @@ AllowShortCaseLabelsOnASingleLine: false
 KeepEmptyLinesAtTheStartOfBlocks: true
 
 # Indent nested PP directives.
-IndentPPDirectives: AfterHash
+IndentPPDirectives: BeforeHash
 
 # Preserve include blocks
 IncludeBlocks: Regroup
