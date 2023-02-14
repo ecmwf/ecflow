@@ -15,13 +15,13 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 class HttpServer {
-  public:
-   HttpServer(int argc, char** argv);
-   void run();
-   ~HttpServer() = default;
+public:
+    HttpServer(int argc, char** argv);
+    void run();
+    ~HttpServer() = default;
 
-  private:
-   void parse_args(int argc, char** argv);
+private:
+    void parse_args(int argc, char** argv);
 };
 
 #endif
