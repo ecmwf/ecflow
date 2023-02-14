@@ -22,14 +22,14 @@
 // #define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
 #ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
-#    include <fstream>
-#    include <iostream>
+    #include <fstream>
+    #include <iostream>
 
-#    include <boost/timer/timer.hpp>
+    #include <boost/timer/timer.hpp>
 
-#    include "File.hpp"
-#    include "Str.hpp"
-#    include "StringSplitter.hpp"
+    #include "File.hpp"
+    #include "Str.hpp"
+    #include "StringSplitter.hpp"
 
 using namespace std;
 using namespace ecf;

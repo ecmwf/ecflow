@@ -25,9 +25,9 @@
 #include "Str.hpp"
 
 #ifdef DEBUG
-#    include <ostream>
+    #include <ostream>
 
-#    include "Ecf.hpp"
+    #include "Ecf.hpp"
 #endif
 
 using namespace ecf;

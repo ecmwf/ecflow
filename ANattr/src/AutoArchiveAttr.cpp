@@ -21,7 +21,7 @@
 #include "Serialization.hpp"
 
 #ifdef DEBUG
-#    include <boost/date_time/posix_time/time_formatters.hpp>
+    #include <boost/date_time/posix_time/time_formatters.hpp>
 #endif
 
 using namespace std;

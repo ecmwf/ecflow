@@ -25,7 +25,7 @@
 #include "cereal_boost_time.hpp"
 
 #ifdef DEBUG
-#    include "Ecf.hpp"
+    #include "Ecf.hpp"
 #endif
 
 using namespace std;

@@ -41,7 +41,7 @@
 // #define DEBUG_MAN_FILE 1
 
 #ifdef DEBUG_ECF_
-#    include <iostream>
+    #include <iostream>
 #endif
 
 namespace fs = boost::filesystem;

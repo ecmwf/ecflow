@@ -29,7 +29,7 @@
 #include "Str.hpp"
 
 #ifdef CMAKE
-#    include "ecflow_source_build_dir.h"
+    #include "ecflow_source_build_dir.h"
 #endif
 
 using namespace std;
@@ -862,57 +862,57 @@ static std::string bjam_workspace_dir() {
 }
 
 static std::string find_bjam_ecf_server_path() {
-#    ifdef DEBUG_SERVER_PATH
+    #ifdef DEBUG_SERVER_PATH
     cout << " File::find_ecf_server_path() using bjam\n";
-#    endif
+    #endif
 
     // bjam uses in source tree, for build, which is in the workspace dir
     std::string bin_dir = bjam_workspace_dir() + "/Server/bin/";
 
-#    ifdef DEBUG_SERVER_PATH
+    #ifdef DEBUG_SERVER_PATH
     cout << "  Searching under: " << bin_dir << "\n";
-#    endif
+    #endif
 
     // We need to take into account that on linux, we may have the GNU and CLANG executables
     // Hence we need to distinguish between them.
     std::vector<std::string> required_path_tokens;
 
     // We have 3 variants debug,release,profile
-#    ifdef DEBUG
+    #ifdef DEBUG
 
     required_path_tokens.push_back(std::string("debug"));
-#        if defined(__clang__)
+        #if defined(__clang__)
     required_path_tokens.push_back(std::string("clang"));
-#        endif
+        #endif
 
     return File::findPath(bin_dir, Ecf::SERVER_NAME(), required_path_tokens);
 
-#    else
+    #else
 
     required_path_tokens.push_back(std::string("release"));
-#        if defined(__clang__)
+        #if defined(__clang__)
     required_path_tokens.push_back(std::string("clang"));
-#        endif
+        #endif
 
     std::string path = File::findPath(bin_dir, Ecf::SERVER_NAME(), required_path_tokens);
     if (path.empty()) {
 
         required_path_tokens.clear();
         required_path_tokens.push_back(std::string("profile"));
-#        if defined(__clang__)
+        #if defined(__clang__)
         required_path_tokens.push_back(std::string("clang"));
-#        endif
+        #endif
 
         path = File::findPath(bin_dir, Ecf::SERVER_NAME(), required_path_tokens);
     }
     return path;
-#    endif
+    #endif
 }
 
 static std::string find_bjam_ecf_client_path() {
-#    ifdef DEBUG_CLIENT_PATH
+    #ifdef DEBUG_CLIENT_PATH
     cout << " find_bjam_ecf_client_path \n";
-#    endif
+    #endif
 
     // Bjam uses, in source build
     std::string binDir = bjam_workspace_dir() + "/Client/bin/";
@@ -922,35 +922,35 @@ static std::string find_bjam_ecf_client_path() {
     std::vector<std::string> required_path_tokens;
 
     // We have 3 variants debug,release,profile
-#    ifdef DEBUG
+    #ifdef DEBUG
 
     required_path_tokens.push_back(std::string("debug"));
-#        if defined(__clang__)
+        #if defined(__clang__)
     required_path_tokens.push_back(std::string("clang"));
-#        endif
+        #endif
 
     return File::findPath(binDir, Ecf::CLIENT_NAME(), required_path_tokens);
 
-#    else
+    #else
 
     required_path_tokens.push_back(std::string("release"));
-#        if defined(__clang__)
+        #if defined(__clang__)
     required_path_tokens.push_back(std::string("clang"));
-#        endif
+        #endif
 
     std::string path = File::findPath(binDir, Ecf::CLIENT_NAME(), required_path_tokens);
     if (path.empty()) {
 
         required_path_tokens.clear();
         required_path_tokens.push_back(std::string("profile"));
-#        if defined(__clang__)
+        #if defined(__clang__)
         required_path_tokens.push_back(std::string("clang"));
-#        endif
+        #endif
 
         path = File::findPath(binDir, Ecf::CLIENT_NAME(), required_path_tokens);
     }
     return path;
-#    endif
+    #endif
 }
 #endif
 
@@ -960,9 +960,9 @@ std::string File::find_ecf_server_path() {
     path += "/bin/";
     path += Ecf::SERVER_NAME();
 
-#    ifdef DEBUG_SERVER_PATH
+    #ifdef DEBUG_SERVER_PATH
     cout << " File::find_ecf_server_path() path = " << path << "\n";
-#    endif
+    #endif
 
     return path;
 
@@ -978,9 +978,9 @@ std::string File::find_ecf_client_path() {
     path += "/bin/";
     path += Ecf::CLIENT_NAME();
 
-#    ifdef DEBUG_CLIENT_PATH
+    #ifdef DEBUG_CLIENT_PATH
     cout << " File::find_ecf_client_path() returning path " << path << "\n";
-#    endif
+    #endif
 
     return path;
 

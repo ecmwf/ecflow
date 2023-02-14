@@ -24,7 +24,7 @@
 #include "Serialization.hpp"
 #include "Str.hpp"
 #ifdef DEBUG
-#    include "Ecf.hpp"
+    #include "Ecf.hpp"
 #endif
 
 using namespace std;

@@ -23,7 +23,7 @@
 #include "Serialization.hpp"
 
 #ifdef DEBUG
-#    include <iostream>
+    #include <iostream>
 #endif
 
 using namespace ecf;

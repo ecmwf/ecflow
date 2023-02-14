@@ -23,7 +23,7 @@
 #include "Str.hpp"
 
 #ifdef SHOW_PARSER_STATS
-#    include "Indentor.hpp"
+    #include "Indentor.hpp"
 #endif
 
 using namespace ecf;

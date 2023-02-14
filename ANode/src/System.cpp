@@ -18,7 +18,7 @@
 #include <sys/wait.h> // for waitpid
 
 #ifndef O_WRONLY
-#    include <fcntl.h>
+    #include <fcntl.h>
 #endif
 
 #include "Defs.hpp"
@@ -34,7 +34,7 @@
 // #define DEBUG_CHILD_ABORT 1
 
 #ifdef DEBUG_FORK
-#    include <iostream>
+    #include <iostream>
 #endif
 
 using namespace std;

@@ -113,17 +113,17 @@ std::string Version::compiler() {
 #elif defined(HPUX)
     ss << "aCC " << __HP_aCC;        // type aCC +help, this will show compiler manual, search for Predefined Macros
 #else
-#    if defined(__clang__)
+    #if defined(__clang__)
     //  To find the list of defines for clang use:
     //  echo | /usr/local/apps/clang/current/bin/clang++ -dM -E -
     ss << "clang " << __clang_major__ << "." << __clang_minor__;
-#    elif defined(__INTEL_COMPILER)
+    #elif defined(__INTEL_COMPILER)
     ss << "intel " << __INTEL_COMPILER;
-#    elif defined(_CRAYC)
+    #elif defined(_CRAYC)
     ss << "cray " << _CRAYC;
-#    else
+    #else
     ss << "gcc " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
-#    endif
+    #endif
 #endif
     return ss.str();
 }
