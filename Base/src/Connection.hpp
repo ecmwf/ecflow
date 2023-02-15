@@ -25,8 +25,6 @@
 #include <sstream>
 
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include "Serialization.hpp"
 
@@ -68,8 +66,7 @@ public:
         catch (const std::exception& ae) {
             // Unable to decode data. Something went wrong, inform the caller.
             log_archive_error("Connection::async_write, exception ", ae, outbound_data_);
-            boost::system::error_code error(boost::asio::error::invalid_argument);
-            boost::asio::post(socket_.get_executor(), boost::bind(handler, error));
+            boost::asio::post(socket_.get_executor(), [handler]() { handler(boost::asio::error::invalid_argument); });
             return;
         }
 
@@ -82,8 +79,7 @@ public:
         if (!header_stream || header_stream.str().size() != header_length) {
             // Something went wrong, inform the caller.
             log_error("Connection::async_write, could not format header");
-            boost::system::error_code error(boost::asio::error::invalid_argument);
-            boost::asio::post(socket_.get_executor(), boost::bind(handler, error));
+            boost::asio::post(socket_.get_executor(), [handler]() { handler(boost::asio::error::invalid_argument); });
             return;
         }
         outbound_header_ = header_stream.str();
@@ -101,7 +97,10 @@ public:
         buffers.reserve(2);
         buffers.emplace_back(boost::asio::buffer(outbound_header_));
         buffers.emplace_back(boost::asio::buffer(outbound_data_));
-        boost::asio::async_write(socket_, buffers, handler);
+        boost::asio::async_write(
+            socket_, buffers, [handler](const boost::system::error_code& error, std::size_t bytes_transferred) {
+                handler(error);
+            });
 
 #ifdef DEBUG_CONNECTION
         std::cout << "   END\n";
@@ -119,22 +118,19 @@ public:
             std::cout << "CLIENT: Connection::async_read\n";
 #endif
 
-        // Issue a read operation to read exactly the number of bytes in a header.
-        void (connection::*f)(const boost::system::error_code&, T&, boost::tuple<Handler>) =
-            &connection::handle_read_header<T, Handler>;
-
+        // Issue a read operation to read exactly the number of bytes in a header
         boost::asio::async_read(
             socket_,
             boost::asio::buffer(inbound_header_),
-            boost::bind(f, this, boost::asio::placeholders::error, boost::ref(t), boost::make_tuple(handler)));
+            [this, &t, handler](const boost::system::error_code& error, std::size_t transferred_bytes) {
+                this->handle_read_header(error, t, handler);
+            });
     }
 
 private:
-    /// Handle a completed read of a message header. The handler is passed using
-    /// a tuple since boost::bind seems to have trouble binding a function object
-    /// created using boost::bind as a parameter.
+    /// Handle a completed read of a message header.
     template <typename T, typename Handler>
-    void handle_read_header(const boost::system::error_code& e, T& t, boost::tuple<Handler> handler) {
+    void handle_read_header(const boost::system::error_code& e, T& t, Handler handler) {
 #ifdef DEBUG_CONNECTION
         if (Ecf::server())
             std::cout << "SERVER: Connection::handle_read_header\n";
@@ -144,7 +140,7 @@ private:
                   << "'  # this size of payload in hex\n";
 #endif
         if (e) {
-            boost::get<0>(handler)(e);
+            handler(e);
         }
         else {
             // Determine the length of the serialized data.
@@ -156,25 +152,23 @@ private:
                 std::string err =
                     "Connection::handle_read_header: invalid header : " + std::string(inbound_header_, header_length);
                 log_error(err.c_str());
-                boost::system::error_code error(boost::asio::error::invalid_argument);
-                boost::get<0>(handler)(error);
+                handler(boost::asio::error::invalid_argument);
                 return;
             }
 
             // Start an asynchronous call to receive the data.
-            inbound_data_.resize(inbound_data_size);
-            void (connection::*f)(const boost::system::error_code&, T&, boost::tuple<Handler>) =
-                &connection::handle_read_data<T, Handler>;
-
-            boost::asio::async_read(socket_,
-                                    boost::asio::buffer(inbound_data_),
-                                    boost::bind(f, this, boost::asio::placeholders::error, boost::ref(t), handler));
+            boost::asio::async_read(
+                socket_,
+                boost::asio::buffer(inbound_data_),
+                [this, &t, handler](const boost::system::error_code& error, std::size_t bytes_transferred) {
+                    this->handle_read_data(error, t, handler);
+                });
         }
     }
 
     /// Handle a completed read of message data.
     template <typename T, typename Handler>
-    void handle_read_data(const boost::system::error_code& e, T& t, boost::tuple<Handler> handler) {
+    void handle_read_data(const boost::system::error_code& e, T& t, Handler handler) {
 #ifdef DEBUG_CONNECTION
         if (Ecf::server())
             std::cout << "SERVER: Connection::handle_read_data\n";
@@ -183,7 +177,7 @@ private:
 #endif
 
         if (e) {
-            boost::get<0>(handler)(e);
+            handler(e);
         }
         else {
             // Extract the data structure from the data just received.
@@ -198,13 +192,12 @@ private:
             }
             catch (std::exception& e) {
                 log_archive_error("Connection::handle_read_data, Unable to decode data :", e, archive_data);
-                boost::system::error_code error(boost::asio::error::invalid_argument);
-                boost::get<0>(handler)(error);
+                handler(boost::asio::error::invalid_argument);
                 return;
             }
 
             // Inform caller that data has been received ok.
-            boost::get<0>(handler)(e);
+            handler(e);
         }
     }
 

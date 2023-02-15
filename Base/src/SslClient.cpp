@@ -16,8 +16,6 @@
 
 #include <stdexcept>
 
-#include <boost/bind.hpp>
-
 #include "ErrorCmd.hpp"
 #include "StcCmd.hpp"
 
@@ -111,9 +109,10 @@ bool SslClient::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_
         deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
         boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
-        connection_.socket_ll().async_connect(
-            endpoint,
-            boost::bind(&SslClient::handle_connect, this, boost::asio::placeholders::error, endpoint_iterator));
+        connection_.socket_ll().async_connect(endpoint,
+                                              [this, endpoint_iterator](const boost::system::error_code& error) {
+                                                  this->handle_connect(error, endpoint_iterator);
+                                              });
     }
     else {
         // ran out of end points
@@ -226,7 +225,7 @@ void SslClient::start_write() {
     deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
     connection_.async_write(outbound_request_,
-                            boost::bind(&SslClient::handle_write, this, boost::asio::placeholders::error));
+                            [this](const boost::system::error_code& error) { this->handle_write(error); });
 }
 
 void SslClient::handle_write(const boost::system::error_code& e) {
@@ -270,7 +269,7 @@ void SslClient::start_read() {
     deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
     connection_.async_read(inbound_response_,
-                           boost::bind(&SslClient::handle_read, this, boost::asio::placeholders::error));
+                           [this](const boost::system::error_code& error) { this->handle_write(error); });
 }
 
 void SslClient::handle_read(const boost::system::error_code& e) {

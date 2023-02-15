@@ -12,19 +12,17 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include "Openssl.hpp"
+
 #include <cassert>
 #include <cstdlib> // getenv
 #include <stdexcept>
 
-// #include <iostream>
-
-#include <boost/bind.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "File.hpp"
 #include "Host.hpp"
-#include "Openssl.hpp"
 #include "Str.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;
@@ -126,7 +124,10 @@ void Openssl::init_for_server() {
         ssl_context_->set_options(boost::asio::ssl::context::default_workarounds | boost::asio::ssl::context::no_sslv2 |
                                   boost::asio::ssl::context::single_dh_use);
         // this must be done before loading any keys. as below
-        ssl_context_->set_password_callback(boost::bind(&Openssl::get_password, this));
+        ssl_context_->set_password_callback(
+            [this](std::size_t size, boost::asio::ssl::context_base::password_purpose purpose) {
+                return this->get_password();
+            });
         ssl_context_->use_certificate_chain_file(crt());
         ssl_context_->use_private_key_file(key(), boost::asio::ssl::context::pem);
         ssl_context_->use_tmp_dh_file(pem());

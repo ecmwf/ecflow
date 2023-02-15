@@ -15,8 +15,6 @@
 
 #include <iostream>
 
-#include <boost/bind.hpp>
-
 #include "Log.hpp"
 #include "Server.hpp"
 #include "ServerEnvironment.hpp"
@@ -59,7 +57,7 @@ void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr
         // client sent to us. The connection::async_read() function will
         // automatically. serialise the inbound_request_ data structure for us.
         conn->async_read(inbound_request_,
-                         boost::bind(&TcpServer::handle_read, this, boost::asio::placeholders::error, conn));
+                         [this, conn](const boost::system::error_code& error) { this->handle_read(error, conn); });
     }
     else {
         if (serverEnv_.debug())
@@ -99,12 +97,12 @@ void TcpServer::handle_read(const boost::system::error_code& e, connection_ptr c
 
         // Always *Reply* back to the client, Otherwise client will get EOF
         conn->async_write(outbound_response_,
-                          boost::bind(&TcpServer::handle_write, this, boost::asio::placeholders::error, conn));
+                          [this, conn](const boost::system::error_code& error) { this->handle_write(error, conn); });
     }
     else {
         handle_read_error(e); // populates outbound_response_
         conn->async_write(outbound_response_,
-                          boost::bind(&TcpServer::handle_write, this, boost::asio::placeholders::error, conn));
+                          [this, conn](const boost::system::error_code& error) { this->handle_write(error, conn); });
     }
 }
 

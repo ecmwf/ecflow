@@ -16,9 +16,8 @@
 //               of all client based command
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <fstream>
+#include <sstream>
 #include <string>
-
-#include <boost/lambda/lambda.hpp>
 
 namespace ecf {
 
@@ -58,7 +57,7 @@ std::string stringize_rtt(Functor const& f) {
     f(out);
     return out.str();
 }
-#define STRINGIZE_RTT(EXPRESSION) (ecf::stringize_rtt(boost::lambda::_1 << EXPRESSION))
+#define STRINGIZE_RTT(EXPRESSION) (ecf::stringize_rtt([](std::ostringstream& os) { os << EXPRESSION };))
 #define RTT(EXPRESSION) ecf::rtt(STRINGIZE_RTT(EXPRESSION))
 } // namespace ecf
 #endif

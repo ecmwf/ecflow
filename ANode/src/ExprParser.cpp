@@ -33,6 +33,7 @@
 #include <utility>
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/cast.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/spirit/include/classic_actor.hpp>
@@ -49,9 +50,6 @@
 #include "Log.hpp"
 #include "NodeAttr.hpp"
 #include "Str.hpp"
-#include "boost/cast.hpp"
-#include "boost/lambda/bind.hpp"
-#include "boost/lambda/lambda.hpp"
 
 // Reference
 // ‘*’   Zero or more

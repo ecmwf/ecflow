@@ -42,7 +42,9 @@ ssl_connection::ssl_connection(boost::asio::io_service& io_service, boost::asio:
     // if (Ecf::server())
     // socket_.set_verify_mode(boost::asio::ssl::verify_peer|boost::asio::ssl::verify_fail_if_no_peer_cert); else
     // socket_.set_verify_mode(boost::asio::ssl::verify_peer);
-    socket_.set_verify_callback(boost::bind(&ssl_connection::verify_certificate, this, _1, _2));
+    socket_.set_verify_callback([this](bool preverified, boost::asio::ssl::verify_context& ctx) {
+        return this->verify_certificate(preverified, ctx);
+    });
 }
 
 bool ssl_connection::verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx) {
