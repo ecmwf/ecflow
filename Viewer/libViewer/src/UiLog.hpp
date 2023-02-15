@@ -10,12 +10,12 @@
 #ifndef UILOG_HPP
 #define UILOG_HPP
 
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
-#include <boost/current_function.hpp>
 
 #include <QStringList>
+#include <boost/current_function.hpp>
 
 class QModelIndex;
 class QVariant;
@@ -24,10 +24,9 @@ class QRegion;
 class QRect;
 class QDateTime;
 
-class UiFunctionLog
-{
+class UiFunctionLog {
 public:
-    UiFunctionLog(const std::string& server,const std::string& funcName);
+    UiFunctionLog(const std::string& server, const std::string& funcName);
     UiFunctionLog(const std::string& funcName);
     ~UiFunctionLog();
 
@@ -43,58 +42,55 @@ protected:
     std::string funcName_;
 };
 
-class UiLog
-{
+class UiLog {
 public:
-   enum Type {INFO,WARN,ERROR,DBG};
+    enum Type { INFO, WARN, ERROR, DBG };
 
-   UiLog()= default;
-   explicit UiLog(const std::string& server);
-   ~UiLog();
+    UiLog() = default;
+    explicit UiLog(const std::string& server);
+    ~UiLog();
 
-   std::ostringstream& info();
-   std::ostringstream& err();
-   std::ostringstream& warn();
-   std::ostringstream& dbg();
+    std::ostringstream& info();
+    std::ostringstream& err();
+    std::ostringstream& warn();
+    std::ostringstream& dbg();
 
-   static void enableTruncation();
+    static void enableTruncation();
 
-   static std::string toString(int i) {
+    static std::string toString(int i) {
         std::stringstream ss;
         ss << i;
         return ss.str();
-   }
+    }
 
 protected:
-   void output(const std::string& msg);
-   void appendType(std::string& s,Type t) const;
+    void output(const std::string& msg);
+    void appendType(std::string& s, Type t) const;
 
-   Type type_{INFO};
-   std::ostringstream os_;
-   std::string server_;
+    Type type_{INFO};
+    std::ostringstream os_;
+    std::string server_;
 
 private:
-   UiLog(const UiLog&) = delete;
-   UiLog& operator =(const UiLog&) = delete;
+    UiLog(const UiLog&)            = delete;
+    UiLog& operator=(const UiLog&) = delete;
 };
-
 
 #define UI_FUNCTION_LOG UiFunctionLog __fclog(BOOST_CURRENT_FUNCTION);
 #define UI_FN_DBG UiLog().dbg() << UiFunctionLog::formatFuncInfo(BOOST_CURRENT_FUNCTION);
 #define UI_FN_INFO UiFunctionLog::formatFuncInfo(BOOST_CURRENT_FUNCTION)
 
-//Overload ostringstream for various objects
-std::ostream&  operator <<(std::ostream&,const std::vector<std::string>&);
+// Overload ostringstream for various objects
+std::ostream& operator<<(std::ostream&, const std::vector<std::string>&);
 
-//Overload ostringstream for qt objects
-std::ostream&  operator <<(std::ostream&,const QString &);
-std::ostream&  operator <<(std::ostream&,const QModelIndex&);
-std::ostream&  operator <<(std::ostream&,const QVariant&);
-std::ostream&  operator <<(std::ostream&,const QStringList&);
-std::ostream&  operator <<(std::ostream&,const QRegion&);
-std::ostream&  operator <<(std::ostream&,const QRect&);
-std::ostream&  operator <<(std::ostream&,const QPoint&);
-std::ostream&  operator <<(std::ostream&,const QDateTime&);
+// Overload ostringstream for qt objects
+std::ostream& operator<<(std::ostream&, const QString&);
+std::ostream& operator<<(std::ostream&, const QModelIndex&);
+std::ostream& operator<<(std::ostream&, const QVariant&);
+std::ostream& operator<<(std::ostream&, const QStringList&);
+std::ostream& operator<<(std::ostream&, const QRegion&);
+std::ostream& operator<<(std::ostream&, const QRect&);
+std::ostream& operator<<(std::ostream&, const QPoint&);
+std::ostream& operator<<(std::ostream&, const QDateTime&);
 
 #endif // UILOG_HPP
-

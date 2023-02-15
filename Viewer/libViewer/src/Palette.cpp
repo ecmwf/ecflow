@@ -10,145 +10,129 @@
 
 #include "Palette.hpp"
 
-#include "UserMessage.hpp"
-
-#include <QtGlobal>
 #include <QApplication>
 #include <QDebug>
 #include <QMap>
 #include <QPalette>
+#include <QtGlobal>
+
+#include "UserMessage.hpp"
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-#include <QRegExp>
+    #include <QRegExp>
 #endif
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-static QMap<std::string,QPalette::ColorRole> paletteId;
+static QMap<std::string, QPalette::ColorRole> paletteId;
 
-Palette::Palette()
-= default;
+Palette::Palette() = default;
 
-void Palette::load(const std::string& parFile)
-{
+void Palette::load(const std::string& parFile) {
 
-	if(paletteId.isEmpty())
-	{
-  		paletteId["window"]=QPalette::Window;
-		paletteId["windowtext"]=QPalette::WindowText;
-		paletteId["base"]=QPalette::Base;
-		paletteId["alternatebase"]=QPalette::AlternateBase;
-		paletteId["tooltipbase"]=QPalette::ToolTipBase;
-		paletteId["tooltiptext"]=QPalette::ToolTipText;
-  		paletteId["text"]=QPalette::Text;
-		paletteId["button"]=QPalette::Button;
-		paletteId["buttontext"]=QPalette::ButtonText;
-		paletteId["brighttext"]=QPalette::BrightText;
-		paletteId["light"]=QPalette::Light;
-		paletteId["midlight"]=QPalette::Midlight;
-		paletteId["dark"]=QPalette::Dark;
-		paletteId["mid"]=QPalette::Mid;
-		paletteId["shadow"]=QPalette::Shadow;
-		paletteId["higlight"]=QPalette::Highlight;
-		paletteId["highlightedtext"]=QPalette::HighlightedText;
-		paletteId["link"]=QPalette::Link;
-		paletteId["linkvisited"]=QPalette::LinkVisited;
-	}
+    if (paletteId.isEmpty()) {
+        paletteId["window"]          = QPalette::Window;
+        paletteId["windowtext"]      = QPalette::WindowText;
+        paletteId["base"]            = QPalette::Base;
+        paletteId["alternatebase"]   = QPalette::AlternateBase;
+        paletteId["tooltipbase"]     = QPalette::ToolTipBase;
+        paletteId["tooltiptext"]     = QPalette::ToolTipText;
+        paletteId["text"]            = QPalette::Text;
+        paletteId["button"]          = QPalette::Button;
+        paletteId["buttontext"]      = QPalette::ButtonText;
+        paletteId["brighttext"]      = QPalette::BrightText;
+        paletteId["light"]           = QPalette::Light;
+        paletteId["midlight"]        = QPalette::Midlight;
+        paletteId["dark"]            = QPalette::Dark;
+        paletteId["mid"]             = QPalette::Mid;
+        paletteId["shadow"]          = QPalette::Shadow;
+        paletteId["higlight"]        = QPalette::Highlight;
+        paletteId["highlightedtext"] = QPalette::HighlightedText;
+        paletteId["link"]            = QPalette::Link;
+        paletteId["linkvisited"]     = QPalette::LinkVisited;
+    }
 
-	//Parse param file using the boost JSON property tree parser
-	using boost::property_tree::ptree;
-	ptree pt;
+    // Parse param file using the boost JSON property tree parser
+    using boost::property_tree::ptree;
+    ptree pt;
 
-	try
-	{
-		read_json(parFile,pt);
-	}
-	catch (const boost::property_tree::json_parser::json_parser_error& e)
-	{
-		 std::string errorMessage = e.what();
-		 UserMessage::message(UserMessage::ERROR, true,
-				 std::string("Error! Palette::load() unable to parse definition file: " + parFile + " Message: " +errorMessage));
-		 return;
-	}
+    try {
+        read_json(parFile, pt);
+    }
+    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+        std::string errorMessage = e.what();
+        UserMessage::message(UserMessage::ERROR,
+                             true,
+                             std::string("Error! Palette::load() unable to parse definition file: " + parFile +
+                                         " Message: " + errorMessage));
+        return;
+    }
 
-	QPalette palette=qApp->palette();
+    QPalette palette = qApp->palette();
 
-	for(ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
-	{
-		std::string name=it->first;
-		ptree ptItem=it->second;
+    for (ptree::const_iterator it = pt.begin(); it != pt.end(); ++it) {
+        std::string name           = it->first;
+        ptree ptItem               = it->second;
 
-        QPalette::ColorGroup group=QPalette::Active;
-		if(name == "active")
-			group=QPalette::Active;
-		else if(name == "inactive")
-			group=QPalette::Inactive;
-		else if(name == "disabled")
-			group=QPalette::Disabled;
-		else
-		{
-			 UserMessage::message(UserMessage::ERROR, true,
-							 std::string("Error! Palette::load() unable to identify group: " + name));
-			 continue;
-		}
+        QPalette::ColorGroup group = QPalette::Active;
+        if (name == "active")
+            group = QPalette::Active;
+        else if (name == "inactive")
+            group = QPalette::Inactive;
+        else if (name == "disabled")
+            group = QPalette::Disabled;
+        else {
+            UserMessage::message(
+                UserMessage::ERROR, true, std::string("Error! Palette::load() unable to identify group: " + name));
+            continue;
+        }
 
-		for(ptree::const_iterator itItem = ptItem.begin(); itItem != ptItem.end(); ++itItem)
-		{
-			std::string role=itItem->first;
-            auto val=itItem->second.get_value<std::string>();
+        for (ptree::const_iterator itItem = ptItem.begin(); itItem != ptItem.end(); ++itItem) {
+            std::string role                                           = itItem->first;
+            auto val                                                   = itItem->second.get_value<std::string>();
 
-			QMap<std::string,QPalette::ColorRole>::const_iterator itP=paletteId.find(role);
-			if(itP != paletteId.end())
-			{
-                QColor col=toColour(val);
-				if(col.isValid())
-				{					
-					palette.setColor(group,itP.value(),col);
-				}
-			}
-		}
-	}
+            QMap<std::string, QPalette::ColorRole>::const_iterator itP = paletteId.find(role);
+            if (itP != paletteId.end()) {
+                QColor col = toColour(val);
+                if (col.isValid()) {
+                    palette.setColor(group, itP.value(), col);
+                }
+            }
+        }
+    }
 
-	qApp->setPalette(palette);
+    qApp->setPalette(palette);
 }
 
-void Palette::statusColours(QColor bg,QColor &bgLight,QColor &border)
-{
-    int lighter=150;
-    if(bg.value() < 235)
-        bgLight=bg.lighter(130);
+void Palette::statusColours(QColor bg, QColor& bgLight, QColor& border) {
+    int lighter = 150;
+    if (bg.value() < 235)
+        bgLight = bg.lighter(130);
     else
-        bgLight=bg.lighter(lighter);
+        bgLight = bg.lighter(lighter);
 
-    //if(bg.hsvHue() < 58 && bg.hsvHue() > 50)
-    //    bgLight=bg.lighter(170);
+    // if(bg.hsvHue() < 58 && bg.hsvHue() > 50)
+    //     bgLight=bg.lighter(170);
 
-    border=bg.darker(120); //125 150
+    border = bg.darker(120); // 125 150
 }
 
-QColor Palette::toColour(const std::string& name)
-{
-    QString qn=QString::fromStdString(name);
+QColor Palette::toColour(const std::string& name) {
+    QString qn = QString::fromStdString(name);
     QColor col;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
     QRegularExpression rx("rgb\\((\\d+),(\\d+),(\\d+)");
     auto match = rx.match(qn);
     if (match.hasMatch()) {
-        col = QColor(match.captured(1).toInt(),
-                     match.captured(2).toInt(),
-                     match.captured(3).toInt());
+        col = QColor(match.captured(1).toInt(), match.captured(2).toInt(), match.captured(3).toInt());
     }
 #else
 
     QRegExp rx("rgb\\((\\d+),(\\d+),(\\d+)");
 
-    if(rx.indexIn(qn) > -1 && rx.captureCount() == 3) {
-        col=QColor(rx.cap(1).toInt(),
-                  rx.cap(2).toInt(),
-                  rx.cap(3).toInt());
-
+    if (rx.indexIn(qn) > -1 && rx.captureCount() == 3) {
+        col = QColor(rx.cap(1).toInt(), rx.cap(2).toInt(), rx.cap(3).toInt());
     }
 #endif
     return col;

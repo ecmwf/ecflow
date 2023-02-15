@@ -11,60 +11,56 @@
 #ifndef ICONPROVIDER_HPP_
 #define ICONPROVIDER_HPP_
 
-#include <QPixmap>
-
 #include <map>
 
-class IconItem
-{
+#include <QPixmap>
+
+class IconItem {
 public:
-  	explicit IconItem(QString);
+    explicit IconItem(QString);
     virtual ~IconItem() = default;
 
-	QPixmap pixmap(int);
-    int id () const {return id_;}
-	QString path() const {return path_;}
+    QPixmap pixmap(int);
+    int id() const { return id_; }
+    QString path() const { return path_; }
 
 protected:
-  	virtual QPixmap unknown(int);
+    virtual QPixmap unknown(int);
 
-  	QString path_;
-	std::map<int,QPixmap> pixmaps_;
-	int id_;
+    QString path_;
+    std::map<int, QPixmap> pixmaps_;
+    int id_;
 };
 
-class UnknownIconItem : public IconItem
-{
+class UnknownIconItem : public IconItem {
 public:
-  	explicit UnknownIconItem(QString);
+    explicit UnknownIconItem(QString);
 
 protected:
-  	QPixmap unknown(int) override;
+    QPixmap unknown(int) override;
 };
 
-
-class IconProvider
-{
+class IconProvider {
 public:
-	IconProvider();
+    IconProvider();
 
-	static int add(QString path,QString name);
+    static int add(QString path, QString name);
 
-	static QString path(int id);
-	static QPixmap pixmap(QString name,int size);
-	static QPixmap pixmap(int id,int size);
+    static QString path(int id);
+    static QPixmap pixmap(QString name, int size);
+    static QPixmap pixmap(int id, int size);
 
-	static QPixmap lockPixmap(int);
-	static QPixmap warningPixmap(int);
-	static QPixmap errorPixmap(int);
-	static QPixmap infoPixmap(int);
+    static QPixmap lockPixmap(int);
+    static QPixmap warningPixmap(int);
+    static QPixmap errorPixmap(int);
+    static QPixmap infoPixmap(int);
 
 private:
-	static IconItem* icon(QString name);
-	static IconItem* icon(int id);
+    static IconItem* icon(QString name);
+    static IconItem* icon(int id);
 
-	static std::map<QString,IconItem*> icons_;
-	static std::map<int,IconItem*> iconsById_;
+    static std::map<QString, IconItem*> icons_;
+    static std::map<int, IconItem*> iconsById_;
 };
 
 #endif

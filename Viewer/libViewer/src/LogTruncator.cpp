@@ -9,62 +9,54 @@
 
 #include "LogTruncator.hpp"
 
-#include <QtGlobal>
 #include <QFileInfo>
 #include <QTime>
 #include <QTimer>
+#include <QtGlobal>
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 
-LogTruncator::LogTruncator(QString path, int timeout,int sizeLimit,int lineNum,QObject* parent) :
-    QObject(parent),
-    path_(path),
-    timeout_(timeout),
-    sizeLimit_(sizeLimit),
-    lineNum_(lineNum)
-{
-    timer_=new QTimer(this);
-    connect(timer_,SIGNAL(timeout()),this,SLOT(truncate()));
+LogTruncator::LogTruncator(QString path, int timeout, int sizeLimit, int lineNum, QObject* parent)
+    : QObject(parent), path_(path), timeout_(timeout), sizeLimit_(sizeLimit), lineNum_(lineNum) {
+    timer_ = new QTimer(this);
+    connect(timer_, SIGNAL(timeout()), this, SLOT(truncate()));
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    int secToM=86400-QTime::currentTime().msecsSinceStartOfDay()/1000;
+    int secToM = 86400 - QTime::currentTime().msecsSinceStartOfDay() / 1000;
 #else
-    int secToM=86400-QTime(0,0).secsTo(QTime::currentTime());
+    int secToM = 86400 - QTime(0, 0).secsTo(QTime::currentTime());
 #endif
-    if(secToM > 5*60)
-        timer_->start(secToM*1000);
+    if (secToM > 5 * 60)
+        timer_->start(secToM * 1000);
     else
-        timer_->start(secToM*1000+timeout_);
+        timer_->start(secToM * 1000 + timeout_);
 
-    UiLog().dbg() << "LogTruncator --> secs to midnight=" << secToM << "s" <<
-                     " initial timeout=" << timer_->interval()/1000 << "s";
+    UiLog().dbg() << "LogTruncator --> secs to midnight=" << secToM << "s"
+                  << " initial timeout=" << timer_->interval() / 1000 << "s";
 }
 
-void LogTruncator::truncate()
-{
-    //The log file might not exist. It is not necessarily an error because
-    //the startup script decides on whether the main log goes into the stdout or into
-    //a file.
+void LogTruncator::truncate() {
+    // The log file might not exist. It is not necessarily an error because
+    // the startup script decides on whether the main log goes into the stdout or into
+    // a file.
     QFileInfo info(path_);
-    if(!info.exists())
+    if (!info.exists())
         return;
 
     Q_EMIT truncateBegin();
 
-    qint64 fSize=info.size();
-    if(fSize > sizeLimit_)
-    {
+    qint64 fSize = info.size();
+    if (fSize > sizeLimit_) {
         std::string errStr;
-        DirectoryHandler::truncateFile(path_.toStdString(),
-                          lineNum_,errStr);
+        DirectoryHandler::truncateFile(path_.toStdString(), lineNum_, errStr);
 
         info.refresh();
-        UiLog().info() << "LogTruncator::truncate --> truncated from " << fSize <<
-                          " bytes to " <<  info.size() << " bytes;  log file: " << path_;
+        UiLog().info() << "LogTruncator::truncate --> truncated from " << fSize << " bytes to " << info.size()
+                       << " bytes;  log file: " << path_;
     }
 
     Q_EMIT truncateEnd();
 
-    if(timeout_ != timer_->interval())
+    if (timeout_ != timer_->interval())
         timer_->setInterval(timeout_);
 }

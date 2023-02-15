@@ -9,73 +9,63 @@
 
 #include "LocalSocketServer.hpp"
 
-#include <QtGlobal>
-#include <QApplication>
-#include <QLocalServer>
-#include <QLocalSocket>
-#include <QDebug>
-#include "DirectoryHandler.hpp"
-
 #include <unistd.h>
 
-LocalSocketServer::LocalSocketServer(QString serverId,QObject* parent) :
-    QObject(parent),
-    serverId_(serverId)
-{
-    QString name=generateServerName();
+#include <QApplication>
+#include <QDebug>
+#include <QLocalServer>
+#include <QLocalSocket>
+#include <QtGlobal>
 
-    //remove existings sockets with the same name
+#include "DirectoryHandler.hpp"
+
+LocalSocketServer::LocalSocketServer(QString serverId, QObject* parent) : QObject(parent), serverId_(serverId) {
+    QString name = generateServerName();
+
+    // remove existings sockets with the same name
     QLocalServer::removeServer(name);
 
-    //Create the server
+    // Create the server
     server_ = new QLocalServer(parent);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    //Restrict access to the socket
+    // Restrict access to the socket
     server_->setSocketOptions(QLocalServer::UserAccessOption);
 #endif
 
-    //Start listening
-    bool b=server_->listen(name);
+    // Start listening
+    bool b = server_->listen(name);
 
     qDebug() << "b" << b << server_->serverError() << server_->errorString();
     qDebug() << "full" << server_->fullServerName();
 
-    connect(server_,SIGNAL(newConnection()),
-        this,SLOT(slotMessageReceived()));
+    connect(server_, SIGNAL(newConnection()), this, SLOT(slotMessageReceived()));
 }
 
-LocalSocketServer::~LocalSocketServer()
-= default;
+LocalSocketServer::~LocalSocketServer() = default;
 
-void LocalSocketServer::slotMessageReceived()
-{
-    QLocalSocket *localSocket = server_->nextPendingConnection();
-    if(!localSocket->waitForReadyRead(5000))
-    {
-        //qDebug(localSocket->errorString().toLatin1());
+void LocalSocketServer::slotMessageReceived() {
+    QLocalSocket* localSocket = server_->nextPendingConnection();
+    if (!localSocket->waitForReadyRead(5000)) {
+        // qDebug(localSocket->errorString().toLatin1());
         return;
     }
     QByteArray byteArray = localSocket->readAll();
-    QString message = QString::fromUtf8(byteArray.constData());
+    QString message      = QString::fromUtf8(byteArray.constData());
     Q_EMIT messageReceived(message);
 }
 
-QString LocalSocketServer::serverName()
-{
+QString LocalSocketServer::serverName() {
     return generateServerName();
 }
 
-QString LocalSocketServer::generateServerName()
-{
-    return generateServerName(serverId_,qApp->applicationPid());
+QString LocalSocketServer::generateServerName() {
+    return generateServerName(serverId_, qApp->applicationPid());
 }
 
-QString LocalSocketServer::generateServerName(QString serverId,qint64 pid)
-{
-    std::string socketPath=DirectoryHandler::socketDir();
-    if(!socketPath.empty())
-    {
+QString LocalSocketServer::generateServerName(QString serverId, qint64 pid) {
+    std::string socketPath = DirectoryHandler::socketDir();
+    if (!socketPath.empty()) {
         return QString::fromStdString(socketPath) + "/" + serverId + "_" + QString::number(pid);
     }
 

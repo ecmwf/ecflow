@@ -15,62 +15,54 @@
 #include "IconProvider.hpp"
 #include "UiLog.hpp"
 
-LogModel::LogModel(QObject *parent) :
-          QAbstractItemModel(parent)
-{
-	IconProvider::add(":/viewer/log_error.svg","log_error");
-	IconProvider::add(":/viewer/log_info.svg","log_info");
-	IconProvider::add(":/viewer/log_warning.svg","log_warning");
+LogModel::LogModel(QObject* parent) : QAbstractItemModel(parent) {
+    IconProvider::add(":/viewer/log_error.svg", "log_error");
+    IconProvider::add(":/viewer/log_info.svg", "log_info");
+    IconProvider::add(":/viewer/log_warning.svg", "log_warning");
 }
 
-LogModel::~LogModel()
-= default;
+LogModel::~LogModel() = default;
 
-void LogModel::loadFromFile(const std::string& fileName,size_t startPos)
-{
+void LogModel::loadFromFile(const std::string& fileName, size_t startPos) {
     beginResetModel();
 
-    filterPeriod_=false;
-    periodStart_=0;
-    periodEnd_=0;
-    highlightPeriod_=false;
-    highlightStart_=0;
-    highlightEnd_=0;
+    filterPeriod_    = false;
+    periodStart_     = 0;
+    periodEnd_       = 0;
+    highlightPeriod_ = false;
+    highlightStart_  = 0;
+    highlightEnd_    = 0;
 
-    data_.loadFromFile(fileName,startPos);
+    data_.loadFromFile(fileName, startPos);
     endResetModel();
 
     UiLog().dbg() << "first date: " << data_.date(0).toString("hh:mm:ss dd.M.yyyy");
 }
 
-void LogModel::beginLoadFromReader()
-{
+void LogModel::beginLoadFromReader() {
     beginResetModel();
 
-    filterPeriod_=false;
-    periodStart_=0;
-    periodEnd_=0;
-    highlightPeriod_=false;
-    highlightStart_=0;
-    highlightEnd_=0;
+    filterPeriod_    = false;
+    periodStart_     = 0;
+    periodEnd_       = 0;
+    highlightPeriod_ = false;
+    highlightStart_  = 0;
+    highlightEnd_    = 0;
 }
 
-void LogModel::endLoadFromReader()
-{
+void LogModel::endLoadFromReader() {
     endResetModel();
 }
 
+void LogModel::resetData(const std::string& data) {
+    beginResetModel();
 
-void LogModel::resetData(const std::string& data)
-{
-	beginResetModel();
-
-    filterPeriod_=false;
-    periodStart_=0;
-    periodEnd_=0;
-    highlightPeriod_=false;
-    highlightStart_=0;
-    highlightEnd_=0;
+    filterPeriod_    = false;
+    periodStart_     = 0;
+    periodEnd_       = 0;
+    highlightPeriod_ = false;
+    highlightStart_  = 0;
+    highlightEnd_    = 0;
 
     data_.loadFromText(data);
 #if 0
@@ -83,19 +75,18 @@ void LogModel::resetData(const std::string& data)
             data_.data_.push_back(LogDataItem(s.toStdString()));
 	}
 #endif
-	endResetModel();
+    endResetModel();
 }
 
-void LogModel::resetData(const std::vector<std::string>& data)
-{
-	beginResetModel();
+void LogModel::resetData(const std::vector<std::string>& data) {
+    beginResetModel();
 
-    filterPeriod_=false;
-    periodStart_=0;
-    periodEnd_=0;
-    highlightPeriod_=false;
-    highlightStart_=0;
-    highlightEnd_=0;
+    filterPeriod_    = false;
+    periodStart_     = 0;
+    periodEnd_       = 0;
+    highlightPeriod_ = false;
+    highlightStart_  = 0;
+    highlightEnd_    = 0;
     data_.loadFromText(data);
 #if 0
     data_.clear();
@@ -109,25 +100,21 @@ void LogModel::resetData(const std::vector<std::string>& data)
 		}
 	}
 #endif
-	endResetModel();
+    endResetModel();
 }
 
-void LogModel::appendData(const std::vector<std::string>& data)
-{
-	int num=0;
+void LogModel::appendData(const std::vector<std::string>& data) {
+    int num = 0;
 
-    for(const auto & it : data)
-	{
-		QString s=QString::fromStdString(it);
-		if(!s.simplified().isEmpty())
-		{
-			num++;
-		}
-	}
+    for (const auto& it : data) {
+        QString s = QString::fromStdString(it);
+        if (!s.simplified().isEmpty()) {
+            num++;
+        }
+    }
 
-	if(num >0)
-	{
-		beginInsertRows(QModelIndex(),rowCount(),rowCount()+num-1);
+    if (num > 0) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount() + num - 1);
         data_.appendFromText(data);
 #if 0
         for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
@@ -140,304 +127,267 @@ void LogModel::appendData(const std::vector<std::string>& data)
 		}
 #endif
 
-		endInsertRows();
-	}
+        endInsertRows();
+    }
 }
 
-
-
-void LogModel::clearData()
-{
-	beginResetModel();
-    filterPeriod_=false;
-    periodStart_=0;
-    periodEnd_=0;
-    highlightPeriod_=false;
-    highlightStart_=0;
-    highlightEnd_=0;
-	data_.clear();
-	endResetModel();
+void LogModel::clearData() {
+    beginResetModel();
+    filterPeriod_    = false;
+    periodStart_     = 0;
+    periodEnd_       = 0;
+    highlightPeriod_ = false;
+    highlightStart_  = 0;
+    highlightEnd_    = 0;
+    data_.clear();
+    endResetModel();
 }
 
-bool LogModel::hasData() const
-{
+bool LogModel::hasData() const {
     return !data_.isEmpty();
 }
 
-int LogModel::columnCount( const QModelIndex& /*parent */ ) const
-{
-   	 return 3;
+int LogModel::columnCount(const QModelIndex& /*parent */) const {
+    return 3;
 }
 
-int LogModel::rowCount( const QModelIndex& parent) const
-{
-	if(!hasData())
-		return 0;
+int LogModel::rowCount(const QModelIndex& parent) const {
+    if (!hasData())
+        return 0;
 
-	//Parent is the root:
-	if(!parent.isValid())
-	{
-        if(!filterPeriod_)
+    // Parent is the root:
+    if (!parent.isValid()) {
+        if (!filterPeriod_)
             return static_cast<int>(data_.size());
         else
-            return static_cast<int>(periodEnd_)-static_cast<int>(periodStart_)+1;
-	}
+            return static_cast<int>(periodEnd_) - static_cast<int>(periodStart_) + 1;
+    }
 
-	return 0;
+    return 0;
 }
 
-Qt::ItemFlags LogModel::flags ( const QModelIndex & /*index*/) const
-{
-	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+Qt::ItemFlags LogModel::flags(const QModelIndex& /*index*/) const {
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant LogModel::data( const QModelIndex& index, int role ) const
-{
-	if(!index.isValid() || !hasData())
-    {
-		return {};
-	}
-	int row=index.row();
+QVariant LogModel::data(const QModelIndex& index, int role) const {
+    if (!index.isValid() || !hasData()) {
+        return {};
+    }
+    int row = index.row();
 
-    if(filterPeriod_)
-        row+=static_cast<int>(periodStart_);
+    if (filterPeriod_)
+        row += static_cast<int>(periodStart_);
 
-    if(row < 0 || row >= static_cast<int>(data_.size()))
-		return {};
+    if (row < 0 || row >= static_cast<int>(data_.size()))
+        return {};
 
-	if(role == Qt::DisplayRole)
-	{
-		switch(index.column())
-		{
-		case 0:
-			{
-                switch(data_.type(row))
-				{
+    if (role == Qt::DisplayRole) {
+        switch (index.column()) {
+            case 0: {
+                switch (data_.type(row)) {
+                    case LogDataItem::MessageType:
+                        return "MSG ";
+                    case LogDataItem::LogType:
+                        return "LOG ";
+                    case LogDataItem::ErrorType:
+                        return "ERR ";
+                    case LogDataItem::WarningType:
+                        return "WAR ";
+                    case LogDataItem::DebugType:
+                        return "DBG ";
+                    default:
+                        return {};
+                }
+            } break;
+            case 1:
+                return data_.date(row).toString("hh:mm:ss dd.M.yyyy");
+                ;
+                break;
+            case 2:
+                return data_.entry(row);
+                break;
+            default:
+                break;
+        }
+    }
+
+    else if (role == Qt::DecorationRole) {
+        if (index.column() == 0) {
+            switch (data_.type(row)) {
                 case LogDataItem::MessageType:
-					return "MSG ";
+                    return IconProvider::pixmap("log_info", 12);
                 case LogDataItem::LogType:
-					return "LOG ";
+                    return IconProvider::pixmap("log_info", 12);
                 case LogDataItem::ErrorType:
-					return "ERR ";
+                    return IconProvider::pixmap("log_error", 12);
                 case LogDataItem::WarningType:
-					return "WAR ";
-                case LogDataItem::DebugType:
-					return "DBG ";
-				default:
-					return {};
-				}
-			}
-			break;
-		case 1:
-            return data_.date(row).toString("hh:mm:ss dd.M.yyyy");;
-			break;
-		case 2:
-            return data_.entry(row);
-			break;
-		default:
-			break;
-		}
-	}
+                    return IconProvider::pixmap("log_warning", 12);
+                default:
+                    return {};
+            }
+        }
+    }
 
-	else if(role == Qt::DecorationRole)
-	{
-		if(index.column() ==0)
-		{
-            switch(data_.type(row))
-			{
-                case LogDataItem::MessageType:
-					return IconProvider::pixmap("log_info",12);
-                case LogDataItem::LogType:
-					return IconProvider::pixmap("log_info",12);
-                case LogDataItem::ErrorType:
-					return IconProvider::pixmap("log_error",12);
-                case LogDataItem::WarningType:
-					return IconProvider::pixmap("log_warning",12);
-				default:
-					return {};
-			}
-		}
-	}
-
-    else if(role == Qt::BackgroundRole)
-    {
-        if(highlightPeriod_)
-        {
-            if(static_cast<size_t>(row) >= highlightStart_ && static_cast<size_t>(row)  <= highlightEnd_)
-                //return QColor(168,226,145);
-                return QColor(198,223,188);
+    else if (role == Qt::BackgroundRole) {
+        if (highlightPeriod_) {
+            if (static_cast<size_t>(row) >= highlightStart_ && static_cast<size_t>(row) <= highlightEnd_)
+                // return QColor(168,226,145);
+                return QColor(198, 223, 188);
             else
                 return {};
         }
     }
 
-	else if(role == Qt::FontRole)
-	{
-		QFont f;
+    else if (role == Qt::FontRole) {
+        QFont f;
 
         /*if(data_.at(row).type_ == LogDataItem::ErrorType)
-		{
-			f.setBold(true);
-		}*/
+                {
+                        f.setBold(true);
+                }*/
 
-		return f;
-	}
+        return f;
+    }
 
-    else if(role == Qt::ToolTipRole)
-    {
-        QString txt="<b>Type: </b>";
-        switch(data_.type(row))
-        {
+    else if (role == Qt::ToolTipRole) {
+        QString txt = "<b>Type: </b>";
+        switch (data_.type(row)) {
             case LogDataItem::MessageType:
-                    txt +="MSG ";
-                    break;
+                txt += "MSG ";
+                break;
             case LogDataItem::LogType:
-                    txt +="LOG ";
-                    break;
+                txt += "LOG ";
+                break;
             case LogDataItem::ErrorType:
-                    txt +="ERR ";
-                    break;
+                txt += "ERR ";
+                break;
             case LogDataItem::WarningType:
-                    txt +="WAR ";
-                    break;
+                txt += "WAR ";
+                break;
             case LogDataItem::DebugType:
-                    txt +="DBG ";
+                txt += "DBG ";
             default:
-                    break;
+                break;
         }
 
-        txt+="<br><b>Date: </b>" + data_.date(row).toString("hh:mm:ss dd.M.yyyy");
-        txt+="<br><b>Entry: </b>" + data_.entry(row);
+        txt += "<br><b>Date: </b>" + data_.date(row).toString("hh:mm:ss dd.M.yyyy");
+        txt += "<br><b>Entry: </b>" + data_.entry(row);
         return txt;
     }
 
-	/*else if(role == Qt::SizeHintRole)
-	{
-		QFont f;
-		f.setBold(true);
-		QFontMetrics fm(f);
-		return fm.height()+10;
-	}*/
+    /*else if(role == Qt::SizeHintRole)
+    {
+            QFont f;
+            f.setBold(true);
+            QFontMetrics fm(f);
+            return fm.height()+10;
+    }*/
 
-
-	return {};
-}
-
-QVariant LogModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
-	  return QAbstractItemModel::headerData( section, orient, role );
-
-   	if(role == Qt::DisplayRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("Type");
-   		case 1: return tr("Date");
-   		case 2: return tr("Entry");
-   		default: return {};
-   		}
-   	}
-   	else if(role== Qt::ToolTipRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("Type");
-   		case 1: return tr("Date");
-   		case 2: return tr("Entry");
-   		default: return {};
-   		}
-   	}
     return {};
 }
 
-QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) const
-{
-	if(!hasData() || row < 0 || column < 0)
-	{
-		return {};
-	}
+QVariant LogModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole))
+        return QAbstractItemModel::headerData(section, orient, role);
 
-	//When parent is the root this index refers to a node or server
-	if(!parent.isValid())
-	{
-		return createIndex(row,column);
-	}
-
-	return {};
-
-}
-
-QModelIndex LogModel::parent(const QModelIndex &/*child*/) const
-{
-	return {};
-}
-
-QModelIndex LogModel::lastIndex() const
-{
-	return index(rowCount()-1,0);
-}
-
-QString LogModel::entryText(const QModelIndex &idx) const
-{
-    return data(index(idx.row(),2)).toString();
-}
-
-QString LogModel::fullText(const QModelIndex &idx) const
-{
-    return data(index(idx.row(),0)).toString() + " " +
-           data(index(idx.row(),1)).toString() + " " +
-           data(index(idx.row(),2)).toString();
-}
-
-void LogModel::setPeriod(qint64 start,qint64 end)
-{
-    beginResetModel();
-    filterPeriod_=data_.indexOfPeriod(start,end,periodStart_,periodEnd_,0);
-    endResetModel();
-
-    Q_EMIT scrollToHighlightedPeriod();
-}
-
-void LogModel::setHighlightPeriod(qint64 start,qint64 end,qint64 tolerance)
-{
-    //beginResetModel();
-    if(data_.indexOfPeriod(start,end,highlightStart_,highlightEnd_,tolerance))
-    {
-        highlightPeriod_=true;
-        Q_EMIT rerender();
-        //need a repaint
+    if (role == Qt::DisplayRole) {
+        switch (section) {
+            case 0:
+                return tr("Type");
+            case 1:
+                return tr("Date");
+            case 2:
+                return tr("Entry");
+            default:
+                return {};
+        }
     }
-   // endResetModel();
-
-    Q_EMIT scrollToHighlightedPeriod();
+    else if (role == Qt::ToolTipRole) {
+        switch (section) {
+            case 0:
+                return tr("Type");
+            case 1:
+                return tr("Date");
+            case 2:
+                return tr("Entry");
+            default:
+                return {};
+        }
+    }
+    return {};
 }
 
-void LogModel::resetPeriod()
-{
+QModelIndex LogModel::index(int row, int column, const QModelIndex& parent) const {
+    if (!hasData() || row < 0 || column < 0) {
+        return {};
+    }
+
+    // When parent is the root this index refers to a node or server
+    if (!parent.isValid()) {
+        return createIndex(row, column);
+    }
+
+    return {};
+}
+
+QModelIndex LogModel::parent(const QModelIndex& /*child*/) const {
+    return {};
+}
+
+QModelIndex LogModel::lastIndex() const {
+    return index(rowCount() - 1, 0);
+}
+
+QString LogModel::entryText(const QModelIndex& idx) const {
+    return data(index(idx.row(), 2)).toString();
+}
+
+QString LogModel::fullText(const QModelIndex& idx) const {
+    return data(index(idx.row(), 0)).toString() + " " + data(index(idx.row(), 1)).toString() + " " +
+           data(index(idx.row(), 2)).toString();
+}
+
+void LogModel::setPeriod(qint64 start, qint64 end) {
     beginResetModel();
-    filterPeriod_=false;
-    periodStart_=0;
-    periodEnd_=0;
+    filterPeriod_ = data_.indexOfPeriod(start, end, periodStart_, periodEnd_, 0);
     endResetModel();
 
     Q_EMIT scrollToHighlightedPeriod();
 }
 
-int LogModel::realRow(size_t idx) const
-{
-    if(filterPeriod_)
-    {
-        return static_cast<int>(idx)-static_cast<int>(periodStart_);
+void LogModel::setHighlightPeriod(qint64 start, qint64 end, qint64 tolerance) {
+    // beginResetModel();
+    if (data_.indexOfPeriod(start, end, highlightStart_, highlightEnd_, tolerance)) {
+        highlightPeriod_ = true;
+        Q_EMIT rerender();
+        // need a repaint
+    }
+    // endResetModel();
+
+    Q_EMIT scrollToHighlightedPeriod();
+}
+
+void LogModel::resetPeriod() {
+    beginResetModel();
+    filterPeriod_ = false;
+    periodStart_  = 0;
+    periodEnd_    = 0;
+    endResetModel();
+
+    Q_EMIT scrollToHighlightedPeriod();
+}
+
+int LogModel::realRow(size_t idx) const {
+    if (filterPeriod_) {
+        return static_cast<int>(idx) - static_cast<int>(periodStart_);
     }
     return static_cast<int>(idx);
 }
 
-QModelIndex LogModel::highlightPeriodIndex() const
-{
-    if(highlightPeriod_)
-    {
-        return index(realRow(highlightStart_),0);
+QModelIndex LogModel::highlightPeriodIndex() const {
+    if (highlightPeriod_) {
+        return index(realRow(highlightStart_), 0);
     }
     return {};
 }
@@ -448,46 +398,40 @@ QModelIndex LogModel::highlightPeriodIndex() const
 //
 //========================================================
 
-LogDelegate::LogDelegate(QWidget *parent) : QStyledItemDelegate(parent)
-{
-
+LogDelegate::LogDelegate(QWidget* parent) : QStyledItemDelegate(parent) {
 }
 
-void LogDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const
-{
-	QStyledItemDelegate::paint(painter,option,index);
+void LogDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QStyledItemDelegate::paint(painter, option, index);
 
-	/*if(index.column()==11)
-	{
-        QStyleOptionViewItem vopt(option);
-		initStyleOption(&vopt, index);
+    /*if(index.column()==11)
+    {
+    QStyleOptionViewItem vopt(option);
+            initStyleOption(&vopt, index);
 
-		const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-		const QWidget* widget = vopt.widget;
+            const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
+            const QWidget* widget = vopt.widget;
 
-		QString text=index.data(Qt::DisplayRole).toString();
-		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-		if(text == "ERR")
-		{
-			QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-		}
+            QString text=index.data(Qt::DisplayRole).toString();
+            QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+            if(text == "ERR")
+            {
+                    QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+            }
 
-		painter->fillRect(textRect,Qt::red);
-		painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-	}
-	else
-	{
-		QStyledItemDelegate::paint(painter,option,index);
-	}*/
+            painter->fillRect(textRect,Qt::red);
+            painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    }
+    else
+    {
+            QStyledItemDelegate::paint(painter,option,index);
+    }*/
 }
 
+QSize LogDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QSize size = QStyledItemDelegate::sizeHint(option, index);
 
-QSize LogDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
-{
-	QSize size=QStyledItemDelegate::sizeHint(option,index);
-
-	size+=QSize(0,2);
+    size += QSize(0, 2);
 
     return size;
 }

@@ -13,12 +13,10 @@
 
 #include <string>
 
-class LogConsumer
-{
+class LogConsumer {
 public:
-    virtual ~LogConsumer() = default;
+    virtual ~LogConsumer()                      = default;
     virtual void addLogLine(const std::string&) = 0;
 };
-
 
 #endif // LOGCONSUMER_HPP

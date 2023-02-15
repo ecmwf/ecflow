@@ -10,38 +10,37 @@
 #ifndef LOGMODEL_H
 #define LOGMODEL_H
 
+#include <string>
+#include <vector>
+
 #include <QAbstractItemModel>
 #include <QDateTime>
 #include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 
-#include <string>
-#include <vector>
-
 #include "LogData.hpp"
 
-class LogModel : public QAbstractItemModel
-{
+class LogModel : public QAbstractItemModel {
     Q_OBJECT
 public:
-   	explicit LogModel(QObject *parent=nullptr);
-   	~LogModel() override;
+    explicit LogModel(QObject* parent = nullptr);
+    ~LogModel() override;
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-   	Qt::ItemFlags flags ( const QModelIndex & index) const override;
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
-   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex&, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
-   	QModelIndex parent (const QModelIndex & ) const override;
+    QModelIndex index(int, int, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex&) const override;
 
-    void loadFromFile(const std::string&,size_t startPos=0);
+    void loadFromFile(const std::string&, size_t startPos = 0);
     void resetData(const std::string&);
     void resetData(const std::vector<std::string>&);
-	void appendData(const std::vector<std::string>&);
-	bool hasData() const;
+    void appendData(const std::vector<std::string>&);
+    bool hasData() const;
     void clearData();
     QModelIndex lastIndex() const;
     QModelIndex highlightPeriodIndex() const;
@@ -51,11 +50,11 @@ public:
 
     void beginLoadFromReader();
     void endLoadFromReader();
-    LogData* logData() {return &data_;}
+    LogData* logData() { return &data_; }
 
 public Q_SLOTS:
-    void setPeriod(qint64,qint64);
-    void setHighlightPeriod(qint64,qint64,qint64 tolerance=0);
+    void setPeriod(qint64, qint64);
+    void setHighlightPeriod(qint64, qint64, qint64 tolerance = 0);
     void resetPeriod();
 
 Q_SIGNALS:
@@ -65,7 +64,7 @@ Q_SIGNALS:
 protected:
     int realRow(size_t idx) const;
 
-    //QList<LogModelLine> data_;
+    // QList<LogModelLine> data_;
     LogData data_;
     bool filterPeriod_{false};
     size_t periodStart_{0};
@@ -75,16 +74,12 @@ protected:
     size_t highlightEnd_{0};
 };
 
-class LogDelegate : public QStyledItemDelegate
-{
+class LogDelegate : public QStyledItemDelegate {
 public:
-    explicit LogDelegate(QWidget *parent=nullptr);
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    explicit LogDelegate(QWidget* parent = nullptr);
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
-
-
 
 #endif
