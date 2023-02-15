@@ -10,6 +10,7 @@
 #ifndef DIRECTORY_HANDLER_HPP_
 #define DIRECTORY_HANDLER_HPP_
 
+#include <string>
 #include <vector>
 
 class DirectoryHandler {
