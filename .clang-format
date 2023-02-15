@@ -27,6 +27,9 @@ BraceWrapping:
 
 AlwaysBreakTemplateDeclarations: Yes
 
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: CurrentLine
+
 # Indent case labels.
 IndentCaseLabels: true
 
