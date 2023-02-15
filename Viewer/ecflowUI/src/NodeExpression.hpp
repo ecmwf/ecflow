@@ -2,22 +2,21 @@
 #define NODEEXPRESSION_HPP_
 
 //============================================================================
-// Copyright 2009- ECMWF. 
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// Copyright 2009- ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //============================================================================
 
 #include "DState.hpp"
-
+#include "StringMatchMode.hpp"
+#include "VAttribute.hpp"
 #include "VInfo.hpp"
 #include "VItem.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
-#include "StringMatchMode.hpp"
-#include "VAttribute.hpp"
 
 class VItem;
 class VAttributeType;
@@ -26,54 +25,70 @@ class VAttributeType;
 // Node condition classes
 // ----------------------
 
-class BaseNodeCondition;  // forward declaration
+class BaseNodeCondition; // forward declaration
 
-class NodeExpressionParser
-{
+class NodeExpressionParser {
 public:
-    enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS, NODE, BAD};
+    enum NodeType { SERVER, SUITE, FAMILY, TASK, ALIAS, NODE, BAD };
 
-    enum AttributeType {ATTRIBUTE, METER, EVENT, REPEAT, TRIGGER, LABEL, TIME, DATE,
-                   LATE, LIMIT, LIMITER, VAR, GENVAR, BADATTRIBUTE};
+    enum AttributeType {
+        ATTRIBUTE,
+        METER,
+        EVENT,
+        REPEAT,
+        TRIGGER,
+        LABEL,
+        TIME,
+        DATE,
+        LATE,
+        LIMIT,
+        LIMITER,
+        VAR,
+        GENVAR,
+        BADATTRIBUTE
+    };
 
     static NodeExpressionParser* instance();
 
-    BaseNodeCondition *parseWholeExpression(const std::string&, bool caseSensitiveStringMatch=true);
+    BaseNodeCondition* parseWholeExpression(const std::string&, bool caseSensitiveStringMatch = true);
 
-    NodeType  nodeType(const std::string &name) const;
+    NodeType nodeType(const std::string& name) const;
     const std::string& typeName(const NodeType&) const;
-    VAttributeType* toAttrType(const std::string &name) const;
-    //AttributeType toAttrType(const std::string &name) const;
-    //const std::string& toAttrName(const AttributeType&) const;
+    VAttributeType* toAttrType(const std::string& name) const;
+    // AttributeType toAttrType(const std::string &name) const;
+    // const std::string& toAttrName(const AttributeType&) const;
 
 protected:
     NodeExpressionParser();
 
-    bool isMenuMode(const std::string &str) const;
-    bool isEnvVar(const std::string &str) const;
-    bool isNodeHasAttribute(const std::string &str) const;
-    bool isNodeFlag(const std::string &str) const;
-    bool isWhatToSearchIn(const std::string &str, bool &isAttribute) const;
+    bool isMenuMode(const std::string& str) const;
+    bool isEnvVar(const std::string& str) const;
+    bool isNodeHasAttribute(const std::string& str) const;
+    bool isNodeFlag(const std::string& str) const;
+    bool isWhatToSearchIn(const std::string& str, bool& isAttribute) const;
 #if 0
     bool isAttribute(const std::string &str) const;
 #endif
-    bool isAttributeState(const std::string &str) const;
-    bool isIsoDate(const std::string &str) const;
+    bool isAttributeState(const std::string& str) const;
+    bool isIsoDate(const std::string& str) const;
 
-    BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
-    void setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();}
-    std::vector<BaseNodeCondition *> popLastNOperands(std::vector<BaseNodeCondition *> &inOperands, int n);
+    BaseNodeCondition* parseExpression(bool caseSensitiveStringMatch);
+    void setTokens(std::vector<std::string>& tokens) {
+        tokens_ = tokens;
+        i_      = tokens_.begin();
+    }
+    std::vector<BaseNodeCondition*> popLastNOperands(std::vector<BaseNodeCondition*>& inOperands, int n);
 
     static NodeExpressionParser* instance_;
     std::vector<std::string> tokens_;
     std::vector<std::string>::const_iterator i_;
-    std::map<std::string,NodeType> nameToNodeType_;
-    std::map<NodeType,std::string> nodeTypeToName_;
+    std::map<std::string, NodeType> nameToNodeType_;
+    std::map<NodeType, std::string> nodeTypeToName_;
 
-    std::map<std::string,VAttributeType*> nameToAttrType_;
+    std::map<std::string, VAttributeType*> nameToAttrType_;
 
-    //std::map<std::string,AttributeType> nameToAttrType_;
-    //std::map<AttributeType,std::string> attrTypeToName_;
+    // std::map<std::string,AttributeType> nameToAttrType_;
+    // std::map<AttributeType,std::string> attrTypeToName_;
     std::string badTypeStr_;
     std::string badAttributeStr_;
 };
@@ -88,70 +103,68 @@ protected:
 // others which need to consume their arguments immediately.
 // -----------------------------------------------------------------
 
-class BaseNodeCondition
-{
+class BaseNodeCondition {
 public:
-    BaseNodeCondition() {delayUnwinding_ = false;}
+    BaseNodeCondition() { delayUnwinding_ = false; }
     virtual ~BaseNodeCondition() = default;
 
     bool execute(VInfo_ptr nodeInfo);
-    virtual bool execute(VItem* item)=0;
+    virtual bool execute(VItem* item) = 0;
 
-    virtual int  numOperands() {return 0;}
+    virtual int numOperands() { return 0; }
     virtual std::string print() = 0;
-    virtual bool operand2IsArbitraryString() {return false;}
+    virtual bool operand2IsArbitraryString() { return false; }
 
-    void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;}
+    void setOperands(std::vector<BaseNodeCondition*> ops) { operands_ = ops; }
     bool containsAttributeSearch();
-    bool delayUnwinding() const {return delayUnwinding_;}
+    bool delayUnwinding() const { return delayUnwinding_; }
 
 protected:
-    virtual bool searchInAttributes() {return false;}
+    virtual bool searchInAttributes() { return false; }
 
-    std::vector<BaseNodeCondition *> operands_;
+    std::vector<BaseNodeCondition*> operands_;
     bool delayUnwinding_;
 };
 
 // -----------------------------------------------------------------
 
-class AndNodeCondition : public BaseNodeCondition
-{
+class AndNodeCondition : public BaseNodeCondition {
 public:
-    AndNodeCondition() {delayUnwinding_ = true;}
+    AndNodeCondition() { delayUnwinding_ = true; }
     ~AndNodeCondition() override = default;
 
     bool execute(VItem* node) override;
-    int  numOperands() override {return 2;}
-    std::string print() override {return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
+    int numOperands() override { return 2; }
+    std::string print() override {
+        return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";
+    }
 };
 
 // -----------------------------------------------------------------
 
-class OrNodeCondition : public BaseNodeCondition
-{
+class OrNodeCondition : public BaseNodeCondition {
 public:
-    OrNodeCondition()  {delayUnwinding_ = true;}
+    OrNodeCondition() { delayUnwinding_ = true; }
     ~OrNodeCondition() override = default;
 
     bool execute(VItem* node) override;
-    int  numOperands() override {return 2;}
-    std::string print() override {return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
+    int numOperands() override { return 2; }
+    std::string print() override {
+        return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";
+    }
 };
 
 // -----------------------------------------------------------------
 
-class NotNodeCondition : public BaseNodeCondition
-{
+class NotNodeCondition : public BaseNodeCondition {
 public:
-    NotNodeCondition()  = default;
+    NotNodeCondition()           = default;
     ~NotNodeCondition() override = default;
 
     bool execute(VItem* node) override;
-    int  numOperands() override {return 1;}
-    std::string print() override {return std::string("not") + "(" + operands_[0]->print() + ")";}
+    int numOperands() override { return 1; }
+    std::string print() override { return std::string("not") + "(" + operands_[0]->print() + ")"; }
 };
-
-
 
 // --------------------------------
 // String matching utitlity classes
@@ -160,11 +173,10 @@ public:
 // note that it would be ideal for the match() function to take references to strings
 // for efficiency, but this is not always possible.
 
-class StringMatchBase
-{
+class StringMatchBase {
 public:
-    StringMatchBase(bool caseSensitive)  {caseSensitive_ = caseSensitive;}
-    virtual ~StringMatchBase() = default;
+    StringMatchBase(bool caseSensitive) { caseSensitive_ = caseSensitive; }
+    virtual ~StringMatchBase()                                      = default;
 
     virtual bool match(std::string searchFor, std::string searchIn) = 0;
 
@@ -172,8 +184,7 @@ protected:
     bool caseSensitive_;
 };
 
-class StringMatchExact : public StringMatchBase
-{
+class StringMatchExact : public StringMatchBase {
 public:
     StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchExact() override = default;
@@ -181,28 +192,25 @@ public:
     bool match(std::string searchFor, std::string searchIn) override;
 };
 
-class StringMatchContains : public StringMatchBase
-{
+class StringMatchContains : public StringMatchBase {
 public:
-    StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
+    StringMatchContains(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchContains() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
 };
 
-class StringMatchWildcard : public StringMatchBase
-{
+class StringMatchWildcard : public StringMatchBase {
 public:
-    StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
+    StringMatchWildcard(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchWildcard() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
 };
 
-class StringMatchRegexp : public StringMatchBase
-{
+class StringMatchRegexp : public StringMatchBase {
 public:
-    StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
+    StringMatchRegexp(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchRegexp() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -214,20 +222,23 @@ public:
 // String matching condition
 // -------------------------
 
-class StringMatchCondition : public BaseNodeCondition
-{
+class StringMatchCondition : public BaseNodeCondition {
 public:
     StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
-    ~StringMatchCondition() override {if (matcher_) delete matcher_;}
-    StringMatchCondition(const StringMatchCondition&) = delete;
+    ~StringMatchCondition() override {
+        if (matcher_)
+            delete matcher_;
+    }
+    StringMatchCondition(const StringMatchCondition&)            = delete;
     StringMatchCondition& operator=(const StringMatchCondition&) = delete;
 
-    bool execute(VItem *node) override;
-    int  numOperands() override {return 2;}
-    std::string print() override {return operands_[0]->print() + " = " + operands_[1]->print();}
-    bool operand2IsArbitraryString() override {return true;}
+    bool execute(VItem* node) override;
+    int numOperands() override { return 2; }
+    std::string print() override { return operands_[0]->print() + " = " + operands_[1]->print(); }
+    bool operand2IsArbitraryString() override { return true; }
+
 private:
-    StringMatchBase *matcher_{nullptr};
+    StringMatchBase* matcher_{nullptr};
 };
 
 // -----------------------------------------------------------------
@@ -236,24 +247,22 @@ private:
 // Basic true/false conditions
 // ---------------------------
 
-class TrueNodeCondition : public BaseNodeCondition
-{
+class TrueNodeCondition : public BaseNodeCondition {
 public:
-    TrueNodeCondition()  = default;
+    TrueNodeCondition()           = default;
     ~TrueNodeCondition() override = default;
 
-    bool execute(VItem*) override {return true;}
-    std::string print() override {return std::string("true");}
+    bool execute(VItem*) override { return true; }
+    std::string print() override { return std::string("true"); }
 };
 
-class FalseNodeCondition : public BaseNodeCondition
-{
+class FalseNodeCondition : public BaseNodeCondition {
 public:
-    FalseNodeCondition()  = default;
+    FalseNodeCondition()           = default;
     ~FalseNodeCondition() override = default;
 
-    bool execute(VItem*) override {return false;}
-    std::string print() override {return std::string("false");}
+    bool execute(VItem*) override { return false; }
+    std::string print() override { return std::string("false"); }
 };
 
 // -----------------------------------------------------------------
@@ -262,14 +271,13 @@ public:
 // Node type condition
 // -------------------
 
-class TypeNodeCondition : public BaseNodeCondition
-{
+class TypeNodeCondition : public BaseNodeCondition {
 public:
-    explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;}
+    explicit TypeNodeCondition(NodeExpressionParser::NodeType type) { type_ = type; }
     ~TypeNodeCondition() override = default;
 
     bool execute(VItem* node) override;
-    std::string print() override {return NodeExpressionParser::instance()->typeName(type_);}
+    std::string print() override { return NodeExpressionParser::instance()->typeName(type_); }
 
 private:
     NodeExpressionParser::NodeType type_;
@@ -281,14 +289,13 @@ private:
 // Node state condition
 // --------------------
 
-class StateNodeCondition : public BaseNodeCondition
-{
+class StateNodeCondition : public BaseNodeCondition {
 public:
     explicit StateNodeCondition(QString stateName) : stateName_(stateName) {}
     ~StateNodeCondition() override = default;
 
     bool execute(VItem* node) override;
-    std::string print() override {return stateName_.toStdString();}
+    std::string print() override { return stateName_.toStdString(); }
 
 private:
     QString stateName_;
@@ -300,14 +307,13 @@ private:
 // User level condition
 // --------------------
 
-class NodeMenuModeCondition : public BaseNodeCondition
-{
+class NodeMenuModeCondition : public BaseNodeCondition {
 public:
     explicit NodeMenuModeCondition(QString menuModeName) : menuModeName_(menuModeName) {}
     ~NodeMenuModeCondition() override = default;
 
     bool execute(VItem*) override;
-    std::string print() override {return menuModeName_.toStdString();}
+    std::string print() override { return menuModeName_.toStdString(); }
 
 private:
     QString menuModeName_;
@@ -319,14 +325,13 @@ private:
 // Envvar condition
 // --------------------
 
-class EnvVarCondition : public BaseNodeCondition
-{
+class EnvVarCondition : public BaseNodeCondition {
 public:
     explicit EnvVarCondition(QString envVarName) : envVarName_(envVarName), defined_(-1) {}
     ~EnvVarCondition() override = default;
 
     bool execute(VItem*) override;
-    std::string print() override {return envVarName_.toStdString();}
+    std::string print() override { return envVarName_.toStdString(); }
 
 private:
     QString envVarName_;
@@ -335,24 +340,21 @@ private:
 
 // -----------------------------------------------------------------
 
-
 // --------------------
 // UI state condition
 // --------------------
 
-class UIStateCondition : public BaseNodeCondition
-{
+class UIStateCondition : public BaseNodeCondition {
 public:
     explicit UIStateCondition(const std::string& uiStateName) : uiStateName_(uiStateName) {}
     ~UIStateCondition() override = default;
 
     bool execute(VItem*) override;
-    std::string print() override {return uiStateName_;}
+    std::string print() override { return uiStateName_; }
 
 private:
     std::string uiStateName_;
 };
-
 
 // -----------------------------------------------------------------
 
@@ -360,14 +362,13 @@ private:
 // Node attribute condition
 // ------------------------
 
-class NodeAttributeCondition : public BaseNodeCondition
-{
+class NodeAttributeCondition : public BaseNodeCondition {
 public:
     explicit NodeAttributeCondition(QString nodeAttrName) : nodeAttrName_(nodeAttrName) {}
     ~NodeAttributeCondition() override = default;
 
     bool execute(VItem*) override;
-    std::string print() override {return nodeAttrName_.toStdString();}
+    std::string print() override { return nodeAttrName_.toStdString(); }
 
 private:
     QString nodeAttrName_;
@@ -379,14 +380,13 @@ private:
 // Node flag condition
 // ------------------------
 
-class NodeFlagCondition : public BaseNodeCondition
-{
+class NodeFlagCondition : public BaseNodeCondition {
 public:
     explicit NodeFlagCondition(QString nodeFlagName) : nodeFlagName_(nodeFlagName) {}
     ~NodeFlagCondition() override = default;
 
     bool execute(VItem*) override;
-    std::string print() override {return nodeFlagName_.toStdString();}
+    std::string print() override { return nodeFlagName_.toStdString(); }
 
 private:
     QString nodeFlagName_;
@@ -397,32 +397,29 @@ private:
 // ISO date condition
 // ----------------------------------
 
-class IsoDateCondition : public BaseNodeCondition
-{
+class IsoDateCondition : public BaseNodeCondition {
 public:
-    explicit IsoDateCondition(QString str=QString());
+    explicit IsoDateCondition(QString str = QString());
     ~IsoDateCondition() override = default;
 
-    bool execute(VItem*) override {return false;}
+    bool execute(VItem*) override { return false; }
     std::string print() override;
-    virtual qint64 secsSinceEpoch(VItem*) const {return secsSinceEpoch_;}
+    virtual qint64 secsSinceEpoch(VItem*) const { return secsSinceEpoch_; }
 
 private:
     qint64 secsSinceEpoch_{-1};
-
 };
 
 // ----------------------------------
 // Node status change date condition
 // ----------------------------------
 
-class NodeStatusChangeDateCondition : public IsoDateCondition
-{
+class NodeStatusChangeDateCondition : public IsoDateCondition {
 public:
-    explicit NodeStatusChangeDateCondition() = default;
+    explicit NodeStatusChangeDateCondition()  = default;
     ~NodeStatusChangeDateCondition() override = default;
 
-    bool execute(VItem*) override {return false;}
+    bool execute(VItem*) override { return false; }
     std::string print() override;
     qint64 secsSinceEpoch(VItem*) const override;
 };
@@ -431,47 +428,43 @@ public:
 // ISO date comparison conditions
 // --------------------------------
 
-class IsoDateGreaterThanEqualCondition : public BaseNodeCondition
-{
+class IsoDateGreaterThanEqualCondition : public BaseNodeCondition {
 public:
-    IsoDateGreaterThanEqualCondition() = default;
+    IsoDateGreaterThanEqualCondition()           = default;
     ~IsoDateGreaterThanEqualCondition() override = default;
 
-    bool execute(VItem *node) override;
-    int  numOperands() override {return 2;}
+    bool execute(VItem* node) override;
+    int numOperands() override { return 2; }
     std::string print() override;
 };
 
-class IsoDateGreaterThanCondition : public BaseNodeCondition
-{
+class IsoDateGreaterThanCondition : public BaseNodeCondition {
 public:
-    IsoDateGreaterThanCondition() = default;
+    IsoDateGreaterThanCondition()           = default;
     ~IsoDateGreaterThanCondition() override = default;
 
-    bool execute(VItem *node) override;
-    int  numOperands() override {return 2;}
+    bool execute(VItem* node) override;
+    int numOperands() override { return 2; }
     std::string print() override;
 };
 
-class IsoDateLessThanEqualCondition : public BaseNodeCondition
-{
+class IsoDateLessThanEqualCondition : public BaseNodeCondition {
 public:
-    IsoDateLessThanEqualCondition() = default;
+    IsoDateLessThanEqualCondition()           = default;
     ~IsoDateLessThanEqualCondition() override = default;
 
-    bool execute(VItem *node) override;
-    int  numOperands() override {return 2;}
+    bool execute(VItem* node) override;
+    int numOperands() override { return 2; }
     std::string print() override;
 };
 
-class IsoDateLessThanCondition : public BaseNodeCondition
-{
+class IsoDateLessThanCondition : public BaseNodeCondition {
 public:
-    IsoDateLessThanCondition() = default;
+    IsoDateLessThanCondition()           = default;
     ~IsoDateLessThanCondition() override = default;
 
-    bool execute(VItem *node) override;
-    int  numOperands() override {return 2;}
+    bool execute(VItem* node) override;
+    int numOperands() override { return 2; }
     std::string print() override;
 };
 
@@ -481,36 +474,34 @@ public:
 // Search conditions
 // -----------------
 
-class WhatToSearchInOperand : public BaseNodeCondition
-{
+class WhatToSearchInOperand : public BaseNodeCondition {
 public:
-    explicit WhatToSearchInOperand(std::string what, bool &attr);
+    explicit WhatToSearchInOperand(std::string what, bool& attr);
     ~WhatToSearchInOperand() override;
 
-    const std::string& name() const {return what_;}
-    bool execute(VItem* /*node*/) override  {return false;} // not called
-    std::string print() override {return what_;}
-    const std::string& what() const {return what_;}
+    const std::string& name() const { return what_; }
+    bool execute(VItem* /*node*/) override { return false; } // not called
+    std::string print() override { return what_; }
+    const std::string& what() const { return what_; }
 
 private:
-    std::string what_;  // TODO XXX: optimise - we should store an enum here
+    std::string what_; // TODO XXX: optimise - we should store an enum here
     bool searchInAttributes_;
 
-    bool searchInAttributes() override {return searchInAttributes_;}
+    bool searchInAttributes() override { return searchInAttributes_; }
 };
 
 // -----------------------------------------------------------------
 
-class WhatToSearchForOperand : public BaseNodeCondition
-{
+class WhatToSearchForOperand : public BaseNodeCondition {
 public:
     explicit WhatToSearchForOperand(const std::string& what) : what_(what) {}
     ~WhatToSearchForOperand() override;
 
-    std::string name() {return what_;}
-    bool execute(VItem* /*node*/) override {return false;} // not called
-    std::string print() override {return what_;}
-    std::string what() {return what_;}
+    std::string name() { return what_; }
+    bool execute(VItem* /*node*/) override { return false; } // not called
+    std::string print() override { return what_; }
+    std::string what() { return what_; }
 
 private:
     std::string what_;
@@ -520,39 +511,35 @@ private:
 // Attribute condition
 // ------------------------
 
-class AttributeCondition : public BaseNodeCondition
-{
+class AttributeCondition : public BaseNodeCondition {
 public:
-    //explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
+    // explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
     explicit AttributeCondition(VAttributeType* type) : type_(type) {}
     ~AttributeCondition() override = default;
 
     bool execute(VItem*) override;
-    //std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
-    std::string print() override {return ""; /*type_->strName();*/}
+    // std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
+    std::string print() override { return ""; /*type_->strName();*/ }
 
 private:
-    //NodeExpressionParser::AttributeType type_;
-    VAttributeType *type_;
+    // NodeExpressionParser::AttributeType type_;
+    VAttributeType* type_;
 };
 
 //---------------------------------
 // Node attribute state condition
 // ----------------------------
 
-class AttributeStateCondition : public BaseNodeCondition
-{
+class AttributeStateCondition : public BaseNodeCondition {
 public:
     explicit AttributeStateCondition(QString attrState) : attrState_(attrState) {}
     ~AttributeStateCondition() override = default;
 
     bool execute(VItem*) override;
-    std::string print() override {return attrState_.toStdString();}
+    std::string print() override { return attrState_.toStdString(); }
 
 private:
     QString attrState_;
 };
-
-
 
 #endif

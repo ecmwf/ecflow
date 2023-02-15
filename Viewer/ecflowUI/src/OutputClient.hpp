@@ -11,54 +11,52 @@
 #ifndef VIEWER_SRC_OUTPUTCLIENT_HPP_
 #define VIEWER_SRC_OUTPUTCLIENT_HPP_
 
+#include <QElapsedTimer>
 #include <QObject>
 #include <QTcpSocket>
-#include <QElapsedTimer>
 
 class QTcpSocket;
 
-class OutputClient : public QObject
-{
-	Q_OBJECT
+class OutputClient : public QObject {
+    Q_OBJECT
 
 public:
-    OutputClient(const std::string& host,const std::string& port,QObject *parent);
+    OutputClient(const std::string& host, const std::string& port, QObject* parent);
     ~OutputClient() override;
 
-    const std::string& host() const {return host_;}
-    int port() const {return port_;}
-    const std::string& portStr() const {return portStr_;}
-    const std::string& remoteFile() const {return remoteFile_;}
+    const std::string& host() const { return host_; }
+    int port() const { return port_; }
+    const std::string& portStr() const { return portStr_; }
+    const std::string& remoteFile() const { return remoteFile_; }
     bool ok() const { return soc_ != nullptr; }
     std::string longName() const;
 
 protected Q_SLOTS:
-    virtual void slotError(QAbstractSocket::SocketError err)=0;
-    virtual void slotRead()=0;
-    virtual void slotConnected()=0;
+    virtual void slotError(QAbstractSocket::SocketError err) = 0;
+    virtual void slotRead()                                  = 0;
+    virtual void slotConnected()                             = 0;
     void slotCheckTimeout();
 
 Q_SIGNALS:
-	void error(QString);
-    void progress(QString,int);
-	void finished();
+    void error(QString);
+    void progress(QString, int);
+    void finished();
 
 protected:
-	void connectToHost(std::string,int);
+    void connectToHost(std::string, int);
     virtual void timeoutError() {}
 
-	QTcpSocket* soc_;
-	std::string host_;
-	std::string portStr_;
-	int port_;
-	int timeout_;
-	std::string remoteFile_;
+    QTcpSocket* soc_;
+    std::string host_;
+    std::string portStr_;
+    int port_;
+    int timeout_;
+    std::string remoteFile_;
     QElapsedTimer stopper_;
 
 private:
-	OutputClient(const OutputClient&);
-	OutputClient& operator=(const OutputClient&);
+    OutputClient(const OutputClient&);
+    OutputClient& operator=(const OutputClient&);
 };
-
 
 #endif /* VIEWER_SRC_OUTPUTCLIENT_HPP_ */

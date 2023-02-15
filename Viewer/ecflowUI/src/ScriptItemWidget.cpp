@@ -22,52 +22,46 @@
 //
 //========================================================
 
-ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
-{
+ScriptItemWidget::ScriptItemWidget(QWidget* parent) : CodeItemWidget(parent) {
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
-       
-    //Remove the first spacer item!!
+
+    // Remove the first spacer item!!
     removeSpacer();
-    
-    //The document becomes the owner of the highlighter
-    new Highlighter(textEdit_->document(),"script");
 
-	infoProvider_=new ScriptProvider(this);
+    // The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(), "script");
 
-	//Editor font
-	textEdit_->setFontProperty(VConfig::instance()->find("panel.script.font"));
+    infoProvider_ = new ScriptProvider(this);
+
+    // Editor font
+    textEdit_->setFontProperty(VConfig::instance()->find("panel.script.font"));
 }
 
-ScriptItemWidget::~ScriptItemWidget()
-= default;
+ScriptItemWidget::~ScriptItemWidget() = default;
 
-QWidget* ScriptItemWidget::realWidget()
-{
-	return this;
+QWidget* ScriptItemWidget::realWidget() {
+    return this;
 }
 
-void ScriptItemWidget::reload(VInfo_ptr info)
-{
+void ScriptItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if(suspended_)
+    if (suspended_)
         return;
 
     clearContents();
-    info_=info;
+    info_ = info;
     messageLabel_->hide();
 
-    //Info must be a node
-    if(info_ && info_->isNode() && info_->node())
-    {          
+    // Info must be a node
+    if (info_ && info_->isNode() && info_->node()) {
         reloadTb_->setEnabled(false);
         infoProvider_->info(info_);
     }
 }
 
-void ScriptItemWidget::clearContents()
-{
+void ScriptItemWidget::clearContents() {
     InfoPanelItem::clear();
     fileLabel_->clear();
     textEdit_->clear();
@@ -76,21 +70,18 @@ void ScriptItemWidget::clearContents()
     clearCurrentFileName();
 }
 
-void ScriptItemWidget::infoReady(VReply* reply)
-{
+void ScriptItemWidget::infoReady(VReply* reply) {
     Q_ASSERT(reply);
 
     messageLabel_->hide();
-    
-    QString s=QString::fromStdString(reply->text());
+
+    QString s = QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
-    
-    if(reply->hasWarning())
-    {
+
+    if (reply->hasWarning()) {
         messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
     }
-    else if(reply->hasInfo())
-    {
+    else if (reply->hasInfo()) {
         messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
 
@@ -99,42 +90,33 @@ void ScriptItemWidget::infoReady(VReply* reply)
     setCurrentFileName(reply->fileName());
 }
 
-void ScriptItemWidget::infoProgress(VReply* reply)
-{
+void ScriptItemWidget::infoProgress(VReply* reply) {
     messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 }
 
-void ScriptItemWidget::infoFailed(VReply* reply)
-{
-    QString s=QString::fromStdString(reply->errorText());
-    //textEdit_->setPlainText(s);   
+void ScriptItemWidget::infoFailed(VReply* reply) {
+    QString s = QString::fromStdString(reply->errorText());
+    // textEdit_->setPlainText(s);
     messageLabel_->showError(s);
     reloadTb_->setEnabled(true);
 }
 
-void ScriptItemWidget::reloadRequested()
-{
+void ScriptItemWidget::reloadRequested() {
     reload(info_);
 }
 
-void ScriptItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
-{
-    if(flags.isSet(SuspendedChanged))
-    {
-        //Suspend
-        if(suspended_)
-        {
+void ScriptItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
+    if (flags.isSet(SuspendedChanged)) {
+        // Suspend
+        if (suspended_) {
             reloadTb_->setEnabled(false);
         }
-        //Resume
-        else
-        {
-            if(info_ && info_->node())
-            {
+        // Resume
+        else {
+            if (info_ && info_->node()) {
                 reloadTb_->setEnabled(true);
             }
-            else
-            {
+            else {
                 clearContents();
             }
         }

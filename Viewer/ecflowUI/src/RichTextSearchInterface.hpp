@@ -15,26 +15,28 @@
 
 class QTextBrowser;
 
-class RichTextSearchInterface : public AbstractTextEditSearchInterface
-{
+class RichTextSearchInterface : public AbstractTextEditSearchInterface {
 public:
     RichTextSearchInterface();
-    void setEditor(QTextBrowser* e) {editor_=e;}
+    void setEditor(QTextBrowser* e) { editor_ = e; }
 
-    bool findString(QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
-                     QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode) override;
+    bool findString(QString str,
+                    bool highlightAll,
+                    QTextDocument::FindFlags findFlags,
+                    QTextCursor::MoveOperation move,
+                    int iteration,
+                    StringMatchMode::Mode matchMode) override;
 
     void automaticSearchForKeywords(bool) override;
     void refreshSearch() override;
     void clearHighlights() override;
     void disableHighlights() override;
     void enableHighlights() override {}
-    bool highlightsNeedSearch() override {return true;}
+    bool highlightsNeedSearch() override { return true; }
     void gotoLastLine() override;
 
 protected:
-
-    QTextBrowser *editor_{nullptr};
+    QTextBrowser* editor_{nullptr};
 };
 
 #endif // RichTextSearchInterface_HPP

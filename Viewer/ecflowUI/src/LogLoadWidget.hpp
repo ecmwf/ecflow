@@ -15,18 +15,16 @@
 #include <string>
 #include <vector>
 
-#include <QtGlobal>
 #include <QAbstractItemModel>
+#include <QByteArray>
 #include <QGraphicsItem>
 #include <QMap>
 #include <QScrollArea>
-#include <QByteArray>
+#include <QSortFilterProxyModel>
 #include <QStringList>
 #include <QWidget>
-#include <QSortFilterProxyModel>
 #include <QtCharts>
-
-#include <QtCharts>
+#include <QtGlobal>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
 #endif
@@ -59,7 +57,7 @@ class QSplitter;
 class QLabel;
 
 namespace Ui {
-    class LogLoadWidget;
+class LogLoadWidget;
 }
 
 struct LogLoadPrevState
@@ -72,23 +70,27 @@ struct LogLoadPrevState
     bool fullEnd;
 };
 
-
-//the main widget containing all components
-class LogLoadWidget : public QWidget
-{
-Q_OBJECT
+// the main widget containing all components
+class LogLoadWidget : public QWidget {
+    Q_OBJECT
 
 public:
-    explicit LogLoadWidget(QWidget *parent=nullptr);
+    explicit LogLoadWidget(QWidget* parent = nullptr);
     ~LogLoadWidget() override;
 
     void clear();
-    void initLoad(QString serverName, QString host, QString port, QString logFile,
-              const std::vector<std::string>& suites, QString remoteUid,int maxReadSize,
-              const std::string& nodePath, bool detached);
-    QString logFile() const {return logFile_;}
+    void initLoad(QString serverName,
+                  QString host,
+                  QString port,
+                  QString logFile,
+                  const std::vector<std::string>& suites,
+                  QString remoteUid,
+                  int maxReadSize,
+                  const std::string& nodePath,
+                  bool detached);
+    QString logFile() const { return logFile_; }
 
-    enum LogMode {LatestMode, ArchiveMode};
+    enum LogMode { LatestMode, ArchiveMode };
     void setLogMode(LogMode logMode);
     void setDetached(bool);
 
@@ -96,19 +98,19 @@ public:
     void readSettings(VComboSettings* vs);
 
 protected Q_SLOTS:
-   void periodWasReset();
-   void periodChanged(qint64 start,qint64 end);
-   void resolutionChanged(int);
-   void slotReload();
-   void slotLogMode(int);
-   void slotFileTransferFinished();
-   void slotFileTransferFailed(QString);
-   void slotFileTransferStdOutput(QString msg);
-   void slotLogLoadProgress(size_t current, size_t total);
-   void slotCancelFileTransfer();
-   void slotLoadCustomFile();
-   void showLogView(bool b);
-   void slotExpandFileInfo(bool st);
+    void periodWasReset();
+    void periodChanged(qint64 start, qint64 end);
+    void resolutionChanged(int);
+    void slotReload();
+    void slotLogMode(int);
+    void slotFileTransferFinished();
+    void slotFileTransferFailed(QString);
+    void slotFileTransferStdOutput(QString msg);
+    void slotLogLoadProgress(size_t current, size_t total);
+    void slotCancelFileTransfer();
+    void slotLoadCustomFile();
+    void showLogView(bool b);
+    void slotExpandFileInfo(bool st);
 
 private:
     void clearData(bool usePrevState);
@@ -118,14 +120,14 @@ private:
     void loadCore(QString logFile);
     void initFromData();
     void setAllVisible(bool);
-    void updateInfoLabel(bool showDetails=true);
+    void updateInfoLabel(bool showDetails = true);
     void checkButtonState();
     void setMaxReadSize(int maxReadSizeInMb);
     bool shouldShowLog() const;
     void updateTimeLabel(QDateTime, QDateTime);
     void initSplitter();
 
-    enum TabIndex {TotalTab=0,SuiteTab=1,SubReqTab=2};
+    enum TabIndex { TotalTab = 0, SuiteTab = 1, SubReqTab = 2 };
 
     Ui::LogLoadWidget* ui_;
     QString serverName_;
@@ -133,15 +135,15 @@ private:
     QString port_;
     QString logFile_;
     VFile_ptr tmpLogFile_;
-    size_t maxReadSize_{100*1024*1024};
+    size_t maxReadSize_{100 * 1024 * 1024};
     std::vector<std::string> suites_;
     QString remoteUid_;
     LogMode logMode_{LatestMode};
     TimelineFileList archiveLogList_;
     QString currentNodePath_;
 
-    LogRequestViewHandler *viewHandler_;
-    QMap<TabIndex,ServerLoadView*> views_;
+    LogRequestViewHandler* viewHandler_;
+    QMap<TabIndex, ServerLoadView*> views_;
     LogModel* logModel_{nullptr};
     bool beingCleared_{false};
 

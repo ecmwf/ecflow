@@ -8,95 +8,84 @@
 //============================================================================
 
 #include "AddModelColumnDialog.hpp"
-#include "ModelColumn.hpp"
 
 #include <QCompleter>
 #include <QMessageBox>
 
+#include "ModelColumn.hpp"
 #include "ui_AddModelColumnDialog.h"
 
-AddModelColumnDialog::AddModelColumnDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::AddModelColumnDialog)
-{
+AddModelColumnDialog::AddModelColumnDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AddModelColumnDialog) {
     ui->setupUi(this);
 }
 
-AddModelColumnDialog::~AddModelColumnDialog()
-{
+AddModelColumnDialog::~AddModelColumnDialog() {
     delete ui;
 }
 
-void AddModelColumnDialog::init(ModelColumn* mc,const std::set<std::string>& vars,QString defaultText)
-{
-    modelColumn_=mc;
+void AddModelColumnDialog::init(ModelColumn* mc, const std::set<std::string>& vars, QString defaultText) {
+    modelColumn_ = mc;
     QStringList varLst;
-    for(const auto & var : vars)
-    {
-        int idx=-1;
-        bool ok=true;
-        QString n=QString::fromStdString(var);
-        if((idx=modelColumn_->indexOf(n)) != -1)
-            ok=!modelColumn_->isExtra(idx);
+    for (const auto& var : vars) {
+        int idx   = -1;
+        bool ok   = true;
+        QString n = QString::fromStdString(var);
+        if ((idx = modelColumn_->indexOf(n)) != -1)
+            ok = !modelColumn_->isExtra(idx);
 
-        if(ok)
+        if (ok)
             varLst << n;
     }
 
-    auto *c=new QCompleter(varLst,this);
+    auto* c = new QCompleter(varLst, this);
     c->setCaseSensitivity(Qt::CaseInsensitive);
     ui->variableLe->setCompleter(c);
     ui->variableLe->setText(defaultText);
 }
 
-void AddModelColumnDialog::accept()
-{
-    QString name=ui->variableLe->text();
-    if(modelColumn_->indexOf(name) == -1)
-    {
-        modelColumn_->addExtraItem(name,name);
+void AddModelColumnDialog::accept() {
+    QString name = ui->variableLe->text();
+    if (modelColumn_->indexOf(name) == -1) {
+        modelColumn_->addExtraItem(name, name);
     }
-    else
-    {
-        QMessageBox::warning(this,"Column already defined",tr("Column \'") + name +
-                             tr("\' is already added to table view. Please choose another variable!"),
-                             QMessageBox::Ok,QMessageBox::NoButton);
+    else {
+        QMessageBox::warning(this,
+                             "Column already defined",
+                             tr("Column \'") + name +
+                                 tr("\' is already added to table view. Please choose another variable!"),
+                             QMessageBox::Ok,
+                             QMessageBox::NoButton);
         return;
     }
 
     QDialog::accept();
 }
 
-ChangeModelColumnDialog::ChangeModelColumnDialog(QWidget *parent) :
-    AddModelColumnDialog(parent)
-{
+ChangeModelColumnDialog::ChangeModelColumnDialog(QWidget* parent) : AddModelColumnDialog(parent) {
     setWindowTitle(tr("Change column in table view"));
 }
 
-
-void ChangeModelColumnDialog::setColumn(QString cname)
-{
-    columnName_=cname;
+void ChangeModelColumnDialog::setColumn(QString cname) {
+    columnName_ = cname;
     ui->variableLe->setText(columnName_);
     setWindowTitle(tr("Change column ") + columnName_ + tr(" in table view"));
 }
 
-void ChangeModelColumnDialog::accept()
-{
-    QString name=ui->variableLe->text();
-    if(modelColumn_->indexOf(name) == -1)
-    {
-        int colIdx=modelColumn_->indexOf(columnName_);
-        if(colIdx != -1)
-        {
-            modelColumn_->changeExtraItem(colIdx,name,name);
+void ChangeModelColumnDialog::accept() {
+    QString name = ui->variableLe->text();
+    if (modelColumn_->indexOf(name) == -1) {
+        int colIdx = modelColumn_->indexOf(columnName_);
+        if (colIdx != -1) {
+            modelColumn_->changeExtraItem(colIdx, name, name);
         }
     }
-    else
-    {
-        QMessageBox::warning(this,"Column already defined",tr("Column <b>") + name +
-                             tr("</b> is already added to table view. Please choose another variable!"),
-                             QMessageBox::Ok,QMessageBox::NoButton);
+    else {
+        QMessageBox::warning(this,
+                             "Column already defined",
+                             tr("Column <b>") + name +
+                                 tr("</b> is already added to table view. Please choose another variable!"),
+                             QMessageBox::Ok,
+                             QMessageBox::NoButton);
         return;
     }
 

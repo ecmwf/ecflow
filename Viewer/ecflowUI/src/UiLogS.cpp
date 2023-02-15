@@ -15,15 +15,13 @@
 // UiFunctionLog
 //---------------------------------
 
-UiFunctionLogS::UiFunctionLogS(ServerHandler* server,const std::string& funcName) :
-    UiFunctionLog(((server)?server->longName():""),funcName)
-{
+UiFunctionLogS::UiFunctionLogS(ServerHandler* server, const std::string& funcName)
+    : UiFunctionLog(((server) ? server->longName() : ""), funcName) {
 }
 
 //---------------------------------
 // UiLog
 //---------------------------------
 
-UiLogS::UiLogS(ServerHandler* server) : UiLog((server)?server->longName():"")
-{
+UiLogS::UiLogS(ServerHandler* server) : UiLog((server) ? server->longName() : "") {
 }

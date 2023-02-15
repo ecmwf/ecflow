@@ -11,13 +11,12 @@
 #ifndef VARIABLEITEMWIDGET_HPP_
 #define VARIABLEITEMWIDGET_HPP_
 
-#include "ui_VariablePropDialog.h"
+#include "InfoPanelItem.hpp"
+#include "VInfo.hpp"
+#include "VariableModelDataObserver.hpp"
 #include "ui_VariableAddDialog.h"
 #include "ui_VariableItemWidget.h"
-
-#include "InfoPanelItem.hpp"
-#include "VariableModelDataObserver.hpp"
-#include "VInfo.hpp"
+#include "ui_VariablePropDialog.h"
 
 class LineEdit;
 class ModelColumn;
@@ -28,22 +27,26 @@ class VariableSortModel;
 class VariableSearchLine;
 class VProperty;
 
-class VariablePropDialog : public QDialog, public VariableModelDataObserver, private Ui::VariablePropDialog
-{
-Q_OBJECT
+class VariablePropDialog : public QDialog, public VariableModelDataObserver, private Ui::VariablePropDialog {
+    Q_OBJECT
 
 public:
-    VariablePropDialog(VariableModelDataHandler* data,int defineIndex,QString name,QString value,bool frozen,QWidget* parent=nullptr);
+    VariablePropDialog(VariableModelDataHandler* data,
+                       int defineIndex,
+                       QString name,
+                       QString value,
+                       bool frozen,
+                       QWidget* parent = nullptr);
     ~VariablePropDialog() override;
 
-	QString name() const;
-	QString value() const;
+    QString name() const;
+    QString value() const;
 
     void notifyCleared(VariableModelDataHandler*) override;
     void notifyUpdated(VariableModelDataHandler*) override;
 
 public Q_SLOTS:
-	void accept() override;
+    void accept() override;
     void slotSuspendedChanged(bool s);
 
 protected Q_SLOTS:
@@ -66,26 +69,24 @@ protected:
     QString defineNodeType_;
     bool cleared_;
     bool suspended_;
-
 };
 
-class VariableAddDialog : public QDialog, public VariableModelDataObserver, private Ui::VariableAddDialog
-{
-Q_OBJECT
+class VariableAddDialog : public QDialog, public VariableModelDataObserver, private Ui::VariableAddDialog {
+    Q_OBJECT
 
 public:
-    VariableAddDialog(VariableModelDataHandler* data,QWidget* parent=nullptr);
-    VariableAddDialog(VariableModelDataHandler* data,QString name,QString value,QWidget* parent=nullptr);
+    VariableAddDialog(VariableModelDataHandler* data, QWidget* parent = nullptr);
+    VariableAddDialog(VariableModelDataHandler* data, QString name, QString value, QWidget* parent = nullptr);
     ~VariableAddDialog() override;
 
-	QString name() const;
-	QString value() const;
+    QString name() const;
+    QString value() const;
 
     void notifyCleared(VariableModelDataHandler*) override;
     void notifyUpdated(VariableModelDataHandler*) override {}
 
 public Q_SLOTS:
-	void accept() override;
+    void accept() override;
     void slotSuspendedChanged(bool s);
 
 protected:
@@ -102,22 +103,20 @@ protected:
     bool suspended_;
 };
 
-
-class VariableItemWidget : public QWidget, public InfoPanelItem, protected Ui::VariableItemWidget
-{
-Q_OBJECT
+class VariableItemWidget : public QWidget, public InfoPanelItem, protected Ui::VariableItemWidget {
+    Q_OBJECT
 
 public:
-	explicit VariableItemWidget(QWidget *parent=nullptr);
-	~VariableItemWidget() override;
+    explicit VariableItemWidget(QWidget* parent = nullptr);
+    ~VariableItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-public Q_SLOTS:	
+public Q_SLOTS:
     void slotFilterTextChanged(QString text);
-	void slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx);
+    void slotItemSelected(const QModelIndex& idx, const QModelIndex& prevIdx);
 
 protected Q_SLOTS:
     void on_actionProp_triggered();
@@ -129,7 +128,7 @@ protected Q_SLOTS:
     void on_actionCopy_triggered();
     void on_actionCopyFull_triggered();
     void on_actionAddToTableView_triggered();
-    void on_shadowTb_clicked(bool showShadowed);   
+    void on_shadowTb_clicked(bool showShadowed);
     void slotVariableEdited();
     void slotVariableAdded();
 
@@ -137,11 +136,11 @@ Q_SIGNALS:
     void suspendedChanged(bool);
 
 protected:
-	void checkActionState();
-	void editItem(const QModelIndex& index);
-	void duplicateItem(const QModelIndex& index);
-	void addItem(const QModelIndex& index);
-	void removeItem(const QModelIndex& index);
+    void checkActionState();
+    void editItem(const QModelIndex& index);
+    void duplicateItem(const QModelIndex& index);
+    void addItem(const QModelIndex& index);
+    void removeItem(const QModelIndex& index);
     void updateState(const ChangeFlags&) override;
     void toClipboard(QString txt) const;
     void regainSelection();
@@ -149,21 +148,20 @@ protected:
     void restoreExpandState();
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
 
     VariableModelDataHandler* data_{nullptr};
     VariableModel* model_{nullptr};
     VariableSortModel* sortModel_{nullptr};
 
     LineEdit* filterLine_{nullptr};
-    VariableSearchLine *searchLine_{nullptr};
+    VariableSearchLine* searchLine_{nullptr};
 
     VProperty* shadowProp_{nullptr};
     VInfo_ptr lastSelection_;
     bool canSaveLastSelection_{true};
     QList<bool> expanded_;
-    ModelColumn *tableViewColumns_{nullptr};
+    ModelColumn* tableViewColumns_{nullptr};
 };
 
 #endif
-

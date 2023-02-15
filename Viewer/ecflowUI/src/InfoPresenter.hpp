@@ -10,35 +10,35 @@
 #ifndef INFOPRESENTER_HPP_
 #define INFOPRESENTER_HPP_
 
-#include "VInfo.hpp"
 #include <vector>
+
+#include "VInfo.hpp"
 
 class InfoProvider;
 class VReply;
 
-//This is a base class for presenting a VInfo object. The InfoPanelItems 
-//are derived from this class. It can contain an InfoProvider member that
-//is able to generate the information we want to display about the VInfo.
+// This is a base class for presenting a VInfo object. The InfoPanelItems
+// are derived from this class. It can contain an InfoProvider member that
+// is able to generate the information we want to display about the VInfo.
 
-class InfoPresenter
-{
+class InfoPresenter {
 public:
-    InfoPresenter()= default;
+    InfoPresenter()          = default;
     virtual ~InfoPresenter() = default;
     virtual void infoReady(VReply*) {}
     virtual void infoFailed(VReply*) {}
     virtual void infoProgress(VReply*) {}
-    virtual void infoProgressUpdate(const std::string& /*text*/,int /*value*/) {}
-    virtual void infoProgressStart(const std::string& /*text*/,int /*max*/) {}
+    virtual void infoProgressUpdate(const std::string& /*text*/, int /*value*/) {}
+    virtual void infoProgressStart(const std::string& /*text*/, int /*max*/) {}
     virtual void infoProgressStop() {}
     virtual void infoAppended(VReply*) {}
-    VInfo_ptr info() const {return info_;}
-    void registerInfoProvider(InfoProvider* ip) {infoProviders_.push_back(ip);}
+    VInfo_ptr info() const { return info_; }
+    void registerInfoProvider(InfoProvider* ip) { infoProviders_.push_back(ip); }
 
 protected:
-	VInfo_ptr info_;
-    InfoProvider* infoProvider_{nullptr}; //the main info provider
-    std::vector<InfoProvider*> infoProviders_; //the list of all the providers including the main one
+    VInfo_ptr info_;
+    InfoProvider* infoProvider_{nullptr};      // the main info provider
+    std::vector<InfoProvider*> infoProviders_; // the list of all the providers including the main one
 };
 
 #endif

@@ -7,15 +7,13 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-
 #ifndef TRIGGERTABLEWIDGET_HPP_
 #define TRIGGERTABLEWIDGET_HPP_
 
 #include <QDialog>
-#include "VInfo.hpp"
 
 #include "Aspect.hpp"
-
+#include "VInfo.hpp"
 #include "ui_TriggerTableWidget.h"
 
 class TriggerTableItem;
@@ -25,21 +23,20 @@ class TriggerItemWidget;
 class TriggeredScanner;
 class VComboSettings;
 
-class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget
-{
-	Q_OBJECT
+class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget {
+    Q_OBJECT
 
 public:
-    explicit TriggerTableWidget(QWidget *parent = nullptr);
+    explicit TriggerTableWidget(QWidget* parent = nullptr);
     ~TriggerTableWidget() override;
 
     void setInfo(VInfo_ptr, bool);
-    VInfo_ptr info() const {return info_;}
+    VInfo_ptr info() const { return info_; }
 
     void clear();
     void clearSelection();
     void setTriggeredScanner(TriggeredScanner* scanner);
-    bool dependency() const {return dependency_;}
+    bool dependency() const { return dependency_; }
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);
@@ -57,8 +54,8 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
     void linkSelected(VInfo_ptr);
-    void infoPanelCommand(VInfo_ptr,QString);
-    void dashboardCommand(VInfo_ptr,QString);
+    void infoPanelCommand(VInfo_ptr, QString);
+    void dashboardCommand(VInfo_ptr, QString);
     void depInfoWidgetClosureRequested();
 
 private:
@@ -70,13 +67,13 @@ private:
     TriggerTableCollector* nodeCollector_;
     TriggerTableCollector* triggerCollector_;
     TriggerTableCollector* triggeredCollector_;
-    TriggeredScanner *triggeredScanner_ {nullptr};
-    TriggerTableModel *nodeModel_;
-    TriggerTableModel *triggerModel_;
-    TriggerTableModel *triggeredModel_;
+    TriggeredScanner* triggeredScanner_{nullptr};
+    TriggerTableModel* nodeModel_;
+    TriggerTableModel* triggerModel_;
+    TriggerTableModel* triggeredModel_;
     VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
-    bool dependency_ {false};
+    bool dependency_{false};
 };
 
 #endif

@@ -16,21 +16,20 @@
 #include "ui_ShortcutHelpDialog.h"
 
 namespace Ui {
-    class ShortcutHelpDialog;
+class ShortcutHelpDialog;
 }
 
-class ShortcutHelpDialog : public QDialog
-{
+class ShortcutHelpDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit ShortcutHelpDialog(QWidget *parent=nullptr);
+    explicit ShortcutHelpDialog(QWidget* parent = nullptr);
 
 public Q_SLOTS:
     void accept() override;
 
 protected:
     void loadText(QString txt);
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent* event) override;
     void writeSettings();
     void readSettings();
 
@@ -38,4 +37,3 @@ protected:
 };
 
 #endif // SHORTCUTHELPDIALOG_HPP
-

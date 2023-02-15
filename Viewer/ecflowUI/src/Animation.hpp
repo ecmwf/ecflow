@@ -11,52 +11,50 @@
 #define ANIMATION_HPP_
 
 #include <QMap>
-#include <QMovie>
 #include <QModelIndex>
+#include <QMovie>
 
 #include "ServerObserver.hpp"
 #include "VNode.hpp"
 
 class VNode;
 
-class Animation : public QMovie, public ServerObserver
-{
-Q_OBJECT
+class Animation : public QMovie, public ServerObserver {
+    Q_OBJECT
 
 public:
-	enum Type {ServerLoadType};
-	Animation(QWidget*,Type);
+    enum Type { ServerLoadType };
+    Animation(QWidget*, Type);
 
     void addTarget(VNode*);
     void removeTarget(VNode*);
-    QList<VNode*> targets() const {return targets_;}
+    QList<VNode*> targets() const { return targets_; }
 
     void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
     void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
 
 Q_SIGNALS:
-	void repaintRequest(Animation*);
+    void repaintRequest(Animation*);
 
 protected Q_SLOTS:
-	void renderFrame(int);
+    void renderFrame(int);
 
 protected:
-	QWidget* view_;
+    QWidget* view_;
     QList<VNode*> targets_;
-	Type type_;
+    Type type_;
 };
 
-class AnimationHandler
-{
+class AnimationHandler {
 public:
-	explicit AnimationHandler(QWidget* view);
-	~AnimationHandler();
-	Animation* find(Animation::Type,bool makeIt);
+    explicit AnimationHandler(QWidget* view);
+    ~AnimationHandler();
+    Animation* find(Animation::Type, bool makeIt);
 
 protected:
-	QWidget* view_;
-	QMap<Animation::Type,Animation*> items_;
+    QWidget* view_;
+    QMap<Animation::Type, Animation*> items_;
 };
 
 #endif

@@ -13,54 +13,47 @@
 // limitations under the License.
 
 #include "TextPagerSection.hpp"
+
 #include "TextPagerDocument.hpp"
 #include "TextPagerDocument_p.hpp"
 
-TextPagerSection::~TextPagerSection()
-{
+TextPagerSection::~TextPagerSection() {
     if (d.document)
         d.document->takeTextSection(this);
 }
 
-QString TextPagerSection::text() const
-{
+QString TextPagerSection::text() const {
     Q_ASSERT(d.document);
     return d.document->read(d.position, d.size);
 }
 
-void TextPagerSection::setFormat(const QTextCharFormat &format)
-{
+void TextPagerSection::setFormat(const QTextCharFormat& format) {
     Q_ASSERT(d.document);
     d.format = format;
     Q_EMIT d.document->d->sectionFormatChanged(this);
 }
 
-QCursor TextPagerSection::cursor() const
-{
+QCursor TextPagerSection::cursor() const {
     return d.cursor;
 }
 
-void TextPagerSection::setCursor(const QCursor &cursor)
-{
-    d.cursor = cursor;
+void TextPagerSection::setCursor(const QCursor& cursor) {
+    d.cursor    = cursor;
     d.hasCursor = true;
     Q_EMIT d.document->d->sectionCursorChanged(this);
 }
 
-void TextPagerSection::resetCursor()
-{
+void TextPagerSection::resetCursor() {
     d.hasCursor = false;
-    d.cursor = QCursor();
+    d.cursor    = QCursor();
     Q_EMIT d.document->d->sectionCursorChanged(this);
 }
 
-bool TextPagerSection::hasCursor() const
-{
+bool TextPagerSection::hasCursor() const {
     return d.hasCursor;
 }
 
-void TextPagerSection::setPriority(int priority)
-{
+void TextPagerSection::setPriority(int priority) {
     d.priority = priority;
     Q_EMIT d.document->d->sectionFormatChanged(this); // ### it hasn't really but I to need it dirtied
 }

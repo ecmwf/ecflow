@@ -11,14 +11,13 @@
 #ifndef TABLENODEVIEW_HPP_
 #define TABLENODEVIEW_HPP_
 
-#include <QHeaderView>
-#include <QTreeView>
-
 #include <cassert>
 #include <set>
 
-#include "NodeViewBase.hpp"
+#include <QHeaderView>
+#include <QTreeView>
 
+#include "NodeViewBase.hpp"
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
@@ -31,34 +30,33 @@ class NodeFilterDef;
 class PropertyMapper;
 class TableNodeHeader;
 
-class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
-{
-Q_OBJECT
+class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver {
+    Q_OBJECT
 public:
-	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
+    explicit TableNodeView(TableNodeSortModel* model, NodeFilterDef* filterDef, QWidget* parent = nullptr);
     ~TableNodeView() override;
 
     void reload() override {}
-	void rerender() override;
+    void rerender() override;
     QWidget* realWidget() override;
     QObject* realObject() override;
-	VInfo_ptr currentSelection() override;
+    VInfo_ptr currentSelection() override;
     void setCurrentSelection(VInfo_ptr n) override;
-	void selectFirstServer() override {}
-    void setTableModel(TableNodeSortModel *model);
+    void selectFirstServer() override {}
+    void setTableModel(TableNodeSortModel* model);
 
-	void notifyChange(VProperty* p) override;
+    void notifyChange(VProperty* p) override;
 
     void readSettings(VSettings*) override;
     void writeSettings(VSettings*) override;
 
 public Q_SLOTS:
-	void slotDoubleClickItem(const QModelIndex&);
-	void slotContextMenu(const QPoint &position);
+    void slotDoubleClickItem(const QModelIndex&);
+    void slotContextMenu(const QPoint& position);
     void slotCommandShortcut();
-    void slotViewCommand(VInfo_ptr,QString);
-	void slotHeaderContextMenu(const QPoint &position);
-	void slotSizeHintChangedGlobal();
+    void slotViewCommand(VInfo_ptr, QString);
+    void slotHeaderContextMenu(const QPoint& position);
+    void slotSizeHintChangedGlobal();
     void slotRerender();
     void slotAddVariableColumn();
     void slotUpdateBegin();
@@ -66,26 +64,30 @@ public Q_SLOTS:
     void slotSelectionAutoScrollChanged(bool);
 
 Q_SIGNALS:
-	void selectionChanged(VInfo_ptr);
-	void infoPanelCommand(VInfo_ptr,QString);
-	void dashboardCommand(VInfo_ptr,QString);
-	void headerButtonClicked(QString,QPoint);
+    void selectionChanged(VInfo_ptr);
+    void infoPanelCommand(VInfo_ptr, QString);
+    void dashboardCommand(VInfo_ptr, QString);
+    void headerButtonClicked(QString, QPoint);
 
 protected:
-	QModelIndexList selectedList();
-	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
-	void adjustBackground(QColor col);
-	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
+    QModelIndexList selectedList();
+    void handleContextMenu(QModelIndex indexClicked,
+                           QModelIndexList indexLst,
+                           QPoint globalPos,
+                           QPoint widgetPos,
+                           QWidget* widget);
+    void adjustBackground(QColor col);
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
     void setSortingEnabledNoExec(bool b);
     void collectVariableNames(std::set<std::string>& vars);
     void changeVariableColumn(QString varName);
     void setCurrentSelectionAfterUpdate(VInfo_ptr info);
 
     TableNodeSortModel* model_;
-	ActionHandler* actionHandler_;
-	TableNodeHeader* header_;
-	bool needItemsLayout_;
-	PropertyMapper* prop_;
+    ActionHandler* actionHandler_;
+    TableNodeHeader* header_;
+    bool needItemsLayout_;
+    PropertyMapper* prop_;
     bool setCurrentIsRunning_;
     VInfo_ptr lastSelection_;
     bool setCurrentAfterUpdateIsRunning_;
@@ -93,48 +95,43 @@ protected:
 
 private:
     // we enforce the usage of setTableModel()
-    void setModel(QAbstractItemModel *) override {assert(false);}
+    void setModel(QAbstractItemModel*) override { assert(false); }
 };
 
-class TableNodeHeaderButton
-{
+class TableNodeHeaderButton {
 public:
-	TableNodeHeaderButton(QString id) : id_(id) {}
+    TableNodeHeaderButton(QString id) : id_(id) {}
 
-	QString id() const {return id_;}
-	void setRect(QRect r) {rect_=r;}
-	QRect rect() const {return rect_;}
+    QString id() const { return id_; }
+    void setRect(QRect r) { rect_ = r; }
+    QRect rect() const { return rect_; }
 
-	QString id_;
-	QRect rect_;
+    QString id_;
+    QRect rect_;
 };
 
-class TableNodeHeader : public QHeaderView
-{
-Q_OBJECT
+class TableNodeHeader : public QHeaderView {
+    Q_OBJECT
 
 public:
-	explicit TableNodeHeader(QWidget *parent=nullptr);
+    explicit TableNodeHeader(QWidget* parent = nullptr);
 
-	QSize sizeHint() const override;
-	void setModel(QAbstractItemModel *model) override;
+    QSize sizeHint() const override;
+    void setModel(QAbstractItemModel* model) override;
 
 public Q_SLOTS:
-	void slotSectionResized(int i);
+    void slotSectionResized(int i);
 
 Q_SIGNALS:
-	void customButtonClicked(QString,QPoint);
+    void customButtonClicked(QString, QPoint);
 
 protected:
-	void showEvent(QShowEvent *QSize) override;
-	void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const override;
-	void mousePressEvent(QMouseEvent *event) override;
+    void showEvent(QShowEvent* QSize) override;
+    void paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const override;
+    void mousePressEvent(QMouseEvent* event) override;
 
-	QPixmap customPix_;
-	mutable QMap<int,TableNodeHeaderButton> customButton_;
+    QPixmap customPix_;
+    mutable QMap<int, TableNodeHeaderButton> customButton_;
 };
 
 #endif
-
-
-

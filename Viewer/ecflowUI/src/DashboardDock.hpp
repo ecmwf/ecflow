@@ -17,24 +17,23 @@
 class DashboardWidget;
 class QToolButton;
 
-class DashboardDockTitleWidget : public QWidget, protected Ui::DashboardDockTitleWidget
-{
-Q_OBJECT
+class DashboardDockTitleWidget : public QWidget, protected Ui::DashboardDockTitleWidget {
+    Q_OBJECT
 
 public:
-	explicit DashboardDockTitleWidget(QWidget *parent=nullptr);
+    explicit DashboardDockTitleWidget(QWidget* parent = nullptr);
 
     void addInfoPanelActions();
     QSize sizeHint() const override;
-	QSize minimumSizeHint() const override;
-	QToolButton* optionsTb() const;
-    void setBcWidget(QWidget *w);
-	void addActions(QList<QAction*> lst);
-    void setDetachedAction(QAction *ac);
-    void setMaximisedAction(QAction *ac);
+    QSize minimumSizeHint() const override;
+    QToolButton* optionsTb() const;
+    void setBcWidget(QWidget* w);
+    void addActions(QList<QAction*> lst);
+    void setDetachedAction(QAction* ac);
+    void setMaximisedAction(QAction* ac);
 
 public Q_SLOTS:
-    void slotUpdateTitle(QString txt,QString type);
+    void slotUpdateTitle(QString txt, QString type);
 
 protected Q_SLOTS:
 #if 0
@@ -52,19 +51,18 @@ protected:
     QPixmap warnPix_;
 };
 
-class DashboardDock : public QDockWidget
-{
-Q_OBJECT
+class DashboardDock : public QDockWidget {
+    Q_OBJECT
 
 public:
-	explicit DashboardDock(DashboardWidget* dw,QWidget * parent=nullptr);
+    explicit DashboardDock(DashboardWidget* dw, QWidget* parent = nullptr);
 
 Q_SIGNALS:
-	void closeRequested();
+    void closeRequested();
 
 protected:
-	void showEvent(QShowEvent* event) override;
-	void closeEvent (QCloseEvent *event) override;
+    void showEvent(QShowEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 };
 
 #endif

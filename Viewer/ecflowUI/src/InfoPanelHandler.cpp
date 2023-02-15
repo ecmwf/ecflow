@@ -9,124 +9,103 @@
 
 #include "InfoPanelHandler.hpp"
 
-
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
+#include <boost/property_tree/ptree.hpp>
 
 #include "NodeExpression.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
-InfoPanelHandler* InfoPanelHandler::instance_=nullptr;
+InfoPanelHandler* InfoPanelHandler::instance_ = nullptr;
 
-
-InfoPanelDef::InfoPanelDef(const std::string& name) :
-    name_(name),
-    hidden_(false),
-	visibleCondition_(nullptr),
-    enabledCondition_(nullptr)
-{
+InfoPanelDef::InfoPanelDef(const std::string& name)
+    : name_(name), hidden_(false), visibleCondition_(nullptr), enabledCondition_(nullptr) {
 }
 
-InfoPanelHandler::InfoPanelHandler()
-= default;
+InfoPanelHandler::InfoPanelHandler() = default;
 
-InfoPanelHandler* InfoPanelHandler::instance()
-{
-	if(!instance_)
-		instance_=new InfoPanelHandler();
+InfoPanelHandler* InfoPanelHandler::instance() {
+    if (!instance_)
+        instance_ = new InfoPanelHandler();
 
-	return instance_;
+    return instance_;
 }
 
-void InfoPanelHandler::init(const std::string &configFile)
-{
-	// parse the response using the boost JSON property tree parser
+void InfoPanelHandler::init(const std::string& configFile) {
+    // parse the response using the boost JSON property tree parser
 
-	using boost::property_tree::ptree;
-	ptree pt;
+    using boost::property_tree::ptree;
+    ptree pt;
 
-	try
-	{
-		read_json(configFile, pt);
-	}
-	catch (const boost::property_tree::json_parser::json_parser_error& e)
-	{
+    try {
+        read_json(configFile, pt);
+    }
+    catch (const boost::property_tree::json_parser::json_parser_error& e) {
         std::string errorMessage = e.what();
-        UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON menu file : " + errorMessage));
-		return;
+        UserMessage::message(
+            UserMessage::ERROR, true, std::string("Error, unable to parse JSON menu file : " + errorMessage));
+        return;
     }
 
-
     // iterate over the top level of the tree
-	for (ptree::const_iterator itTopLevel = pt.begin(); itTopLevel != pt.end(); ++itTopLevel)
-    {
-        if (itTopLevel->first == "info_panel")
-        {
+    for (ptree::const_iterator itTopLevel = pt.begin(); itTopLevel != pt.end(); ++itTopLevel) {
+        if (itTopLevel->first == "info_panel") {
             UiLog().dbg() << "Panels:";
 
-            ptree const &panelsPt = itTopLevel->second;
+            ptree const& panelsPt = itTopLevel->second;
 
             // iterate through all the panels
-		    for (ptree::const_iterator itPanel = panelsPt.begin(); itPanel != panelsPt.end(); ++itPanel)
-            {
-                ptree const &panelPt = itPanel->second;
+            for (ptree::const_iterator itPanel = panelsPt.begin(); itPanel != panelsPt.end(); ++itPanel) {
+                ptree const& panelPt = itPanel->second;
 
-                std::string cname = panelPt.get("name", "");
+                std::string cname    = panelPt.get("name", "");
 
-                UiLog().dbg() <<  "  " << cname;
+                UiLog().dbg() << "  " << cname;
 
-                auto* def= new InfoPanelDef(cname);
+                auto* def = new InfoPanelDef(cname);
 
-                def->setLabel(panelPt.get("label",""));
-                def->setIcon(panelPt.get("icon",""));
-                def->setDockIcon(panelPt.get("dock_icon",""));
-                def->setShow(panelPt.get("show",""));
-                def->setTooltip(panelPt.get("tooltip",""));
-                def->setButtonTooltip(panelPt.get("button_tooltip",""));
+                def->setLabel(panelPt.get("label", ""));
+                def->setIcon(panelPt.get("icon", ""));
+                def->setDockIcon(panelPt.get("dock_icon", ""));
+                def->setShow(panelPt.get("show", ""));
+                def->setTooltip(panelPt.get("tooltip", ""));
+                def->setButtonTooltip(panelPt.get("button_tooltip", ""));
 
-                std::string enabled  = panelPt.get("enabled_for", "");
-                std::string visible  = panelPt.get("visible_for", "");
+                std::string enabled = panelPt.get("enabled_for", "");
+                std::string visible = panelPt.get("visible_for", "");
 
-                if(panelPt.get("hidden", "") == "1")
-                {
-                	def->setHidden(true);
+                if (panelPt.get("hidden", "") == "1") {
+                    def->setHidden(true);
                 }
 
-                BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
-                if (enabledCond == nullptr)
-                {
-                	UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
+                BaseNodeCondition* enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
+                if (enabledCond == nullptr) {
+                    UserMessage::message(
+                        UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
                     enabledCond = new FalseNodeCondition();
                 }
                 def->setEnabledCondition(enabledCond);
 
-
-                BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
-                if (visibleCond == nullptr)
-                {
-                	UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
+                BaseNodeCondition* visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
+                if (visibleCond == nullptr) {
+                    UserMessage::message(
+                        UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
                     visibleCond = new FalseNodeCondition();
                 }
                 def->setVisibleCondition(visibleCond);
 
                 panels_.push_back(def);
-
             }
         }
     }
 }
 
-void InfoPanelHandler::visible(VInfo_ptr info,std::vector<InfoPanelDef*>& lst)
-{
-	if(!info || !info.get())
-		return;
+void InfoPanelHandler::visible(VInfo_ptr info, std::vector<InfoPanelDef*>& lst) {
+    if (!info || !info.get())
+        return;
 
-    for(const auto & panel : panels_)
-	{
-          if(!panel->hidden() && panel->visibleCondition()->execute(info))
-             lst.push_back(panel);
+    for (const auto& panel : panels_) {
+        if (!panel->hidden() && panel->visibleCondition()->execute(info))
+            lst.push_back(panel);
     }
 }
-

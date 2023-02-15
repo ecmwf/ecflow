@@ -16,22 +16,20 @@
 
 #include "StringMatchMode.hpp"
 
-class StringMatchTb : public QToolButton
-{
+class StringMatchTb : public QToolButton {
 public:
-    explicit StringMatchTb(QWidget* parent=nullptr);
-};    
+    explicit StringMatchTb(QWidget* parent = nullptr);
+};
 
-class StringMatchCombo : public QComboBox
-{
-Q_OBJECT
+class StringMatchCombo : public QComboBox {
+    Q_OBJECT
 
 public:
-	explicit StringMatchCombo(QWidget* parent=nullptr);
+    explicit StringMatchCombo(QWidget* parent = nullptr);
 
-	StringMatchMode::Mode matchMode(int) const;
-	StringMatchMode::Mode currentMatchMode() const;
-	void setMatchMode(const StringMatchMode& mode);
+    StringMatchMode::Mode matchMode(int) const;
+    StringMatchMode::Mode currentMatchMode() const;
+    void setMatchMode(const StringMatchMode& mode);
 };
 
 #endif /* VIEWER_SRC_STRINGMATCHCOMBO_HPP_ */

@@ -10,75 +10,69 @@
 #ifndef VIEWER_SRC_CUSTOMCOMMANDHANDLER_HPP_
 #define VIEWER_SRC_CUSTOMCOMMANDHANDLER_HPP_
 
-#include <string>
 #include <deque>
-
+#include <string>
 
 class VSettings;
 
-class CustomCommand
-{
+class CustomCommand {
 public:
-	CustomCommand(const std::string &name, const std::string &command, bool context);
-    const std::string& name()    const {return name_;}
-    const std::string& command() const {return command_;}
-    bool inContextMenu()  const {return inContextMenu_;}
-    std::string contextString() const {return (inContextMenu_ ? "yes" : "no");}
-	void set(const std::string &name, const std::string &command, bool context);
-    void save(VSettings *vs) const;
-
+    CustomCommand(const std::string& name, const std::string& command, bool context);
+    const std::string& name() const { return name_; }
+    const std::string& command() const { return command_; }
+    bool inContextMenu() const { return inContextMenu_; }
+    std::string contextString() const { return (inContextMenu_ ? "yes" : "no"); }
+    void set(const std::string& name, const std::string& command, bool context);
+    void save(VSettings* vs) const;
 
 private:
-	std::string name_;
-	std::string command_;
-	bool        inContextMenu_;
+    std::string name_;
+    std::string command_;
+    bool inContextMenu_;
 };
 
-
-class CustomCommandHandler
-{
+class CustomCommandHandler {
 public:
-	CustomCommandHandler();
+    CustomCommandHandler();
 
-	virtual CustomCommand* add(const std::string& name, const std::string& command, bool context, bool WriteSettings) = 0;
-	CustomCommand* replace(int index, const std::string& name, const std::string& command, bool context);
-	CustomCommand* replace(int index, const CustomCommand &cmd);
-	CustomCommand* duplicate(int index);
-	void remove(int index);
-	//void remove(const std::string& name);
-	//void remove(CustomCommand*);
-	//CustomCommand* find(const std::string& name) const;
+    virtual CustomCommand*
+    add(const std::string& name, const std::string& command, bool context, bool WriteSettings) = 0;
+    CustomCommand* replace(int index, const std::string& name, const std::string& command, bool context);
+    CustomCommand* replace(int index, const CustomCommand& cmd);
+    CustomCommand* duplicate(int index);
+    void remove(int index);
+    // void remove(const std::string& name);
+    // void remove(CustomCommand*);
+    // CustomCommand* find(const std::string& name) const;
 
-	//void save();
-	//void save(CustomCommand*);
-	void init();
-	//const std::vector<NodeQuery*>& items() const {return items_;}
-	CustomCommand* find(const std::string& name) const;
-	int findIndexFromName(const std::string& name) const;
-    int numCommands() const {return items_.size();}
-	CustomCommand *commandFromIndex(int i) {return items_[i];};
-	bool stringToBool(std::string &str);
-	void swapCommandsByIndex(int i1, int i2);
-	void writeSettings();
+    // void save();
+    // void save(CustomCommand*);
+    void init();
+    // const std::vector<NodeQuery*>& items() const {return items_;}
+    CustomCommand* find(const std::string& name) const;
+    int findIndexFromName(const std::string& name) const;
+    int numCommands() const { return items_.size(); }
+    CustomCommand* commandFromIndex(int i) { return items_[i]; };
+    bool stringToBool(std::string& str);
+    void swapCommandsByIndex(int i1, int i2);
+    void writeSettings();
 
 protected:
-	void readSettings();
-	virtual std::string settingsFile() = 0;
+    void readSettings();
+    virtual std::string settingsFile() = 0;
 
-	const std::string suffix_;
-	std::deque<CustomCommand*> items_;
+    const std::string suffix_;
+    std::deque<CustomCommand*> items_;
 };
-
-
 
 // ----------------------------------------------------------------------------------------------
 // specialisation of CustomCommandHandler to handle the commands that the user has manually saved
 // ----------------------------------------------------------------------------------------------
 
-class CustomSavedCommandHandler : public CustomCommandHandler
-{
+class CustomSavedCommandHandler : public CustomCommandHandler {
 public:
-    CustomSavedCommandHandler() = default;;
+    CustomSavedCommandHandler() = default;
+    ;
     CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings) override;
 
     static CustomSavedCommandHandler* instance();
@@ -88,14 +82,11 @@ protected:
     std::string settingsFile() override;
 };
 
-
-
 // --------------------------------------------------------------------------------------------
 // specialisation of CustomCommandHandler to handle the commands that the user has recently run
 // --------------------------------------------------------------------------------------------
 
-class CustomCommandHistoryHandler : public CustomCommandHandler
-{
+class CustomCommandHistoryHandler : public CustomCommandHandler {
 public:
     CustomCommandHistoryHandler() = default;
     CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings) override;
@@ -106,8 +97,5 @@ protected:
     std::string settingsFile() override;
     int maxCommands_{10};
 };
-
-
-
 
 #endif /* VIEWER_SRC_CUSTOMCOMMANDHANDLER_HPP_ */

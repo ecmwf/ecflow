@@ -10,10 +10,11 @@
 #ifndef ADDMODELCOLUMNDIALOG_HPP
 #define ADDMODELCOLUMNDIALOG_HPP
 
-#include <QDialog>
-#include <QString>
 #include <set>
 #include <string>
+
+#include <QDialog>
+#include <QString>
 
 class ModelColumn;
 
@@ -21,30 +22,28 @@ namespace Ui {
 class AddModelColumnDialog;
 }
 
-class AddModelColumnDialog : public QDialog
-{
+class AddModelColumnDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit AddModelColumnDialog(QWidget *parent = nullptr);
+    explicit AddModelColumnDialog(QWidget* parent = nullptr);
     ~AddModelColumnDialog() override;
 
-    void init(ModelColumn* mc,const std::set<std::string>&,QString defaultText = QString(""));
+    void init(ModelColumn* mc, const std::set<std::string>&, QString defaultText = QString(""));
 
 public Q_SLOTS:
-    void accept() override ;
+    void accept() override;
 
 protected:
-    Ui::AddModelColumnDialog *ui;
+    Ui::AddModelColumnDialog* ui;
     ModelColumn* modelColumn_{nullptr};
 };
 
-class ChangeModelColumnDialog : public AddModelColumnDialog
-{
+class ChangeModelColumnDialog : public AddModelColumnDialog {
     Q_OBJECT
 
 public:
-    explicit ChangeModelColumnDialog(QWidget *parent = nullptr);
+    explicit ChangeModelColumnDialog(QWidget* parent = nullptr);
 
     void setColumn(QString);
 
@@ -54,6 +53,5 @@ public Q_SLOTS:
 protected:
     QString columnName_;
 };
-
 
 #endif // ADDMODELCOLUMNDIALOG_HPP

@@ -8,10 +8,7 @@
 //
 //============================================================================
 
-
 #include "TextEditSearchLine.hpp"
-
-#include "AbstractTextEditSearchInterface.hpp"
 
 #include <QColor>
 #include <QDebug>
@@ -20,204 +17,179 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-//#include "UserMessage.hpp"
+#include "AbstractTextEditSearchInterface.hpp"
 
-TextEditSearchLine::TextEditSearchLine(QWidget *parent) :
-	AbstractSearchLine(parent),
-	interface_(nullptr),
-	lastFindSuccessful_(false)
-{
-	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
-		this, SLOT(matchModeChanged(int)));
+// #include "UserMessage.hpp"
+
+TextEditSearchLine::TextEditSearchLine(QWidget* parent)
+    : AbstractSearchLine(parent), interface_(nullptr), lastFindSuccessful_(false) {
+    connect(matchModeCb_, SIGNAL(currentIndexChanged(int)), this, SLOT(matchModeChanged(int)));
 }
 
-TextEditSearchLine::~TextEditSearchLine()
-= default;
+TextEditSearchLine::~TextEditSearchLine() = default;
 
-void TextEditSearchLine::setSearchInterface(AbstractTextEditSearchInterface *e)
-{
-	interface_=e;
+void TextEditSearchLine::setSearchInterface(AbstractTextEditSearchInterface* e) {
+    interface_ = e;
 }
 
-bool TextEditSearchLine::findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, QTextCursor::MoveOperation move, int iteration)
-{
-	QTextDocument::FindFlags flags = findFlags() | extraFlags;
-	lastFindSuccessful_ = interface_->findString(str,highlightAll,flags,move,iteration,matchModeCb_->currentMatchMode());
-	return lastFindSuccessful_;
+bool TextEditSearchLine::findString(QString str,
+                                    bool highlightAll,
+                                    QTextDocument::FindFlags extraFlags,
+                                    QTextCursor::MoveOperation move,
+                                    int iteration) {
+    QTextDocument::FindFlags flags = findFlags() | extraFlags;
+    lastFindSuccessful_ =
+        interface_->findString(str, highlightAll, flags, move, iteration, matchModeCb_->currentMatchMode());
+    return lastFindSuccessful_;
 }
 
-void TextEditSearchLine::highlightMatches(QString txt)
-{
-	if(interface_)
-	{
-		interface_->enableHighlights();
-		if(interface_->highlightsNeedSearch() && !txt.isEmpty())
-		{
-            findString(txt, true, QTextDocument::FindFlags(), QTextCursor::StartOfWord, 0);   // highlight all matches
-		}
-	}
+void TextEditSearchLine::highlightMatches(QString txt) {
+    if (interface_) {
+        interface_->enableHighlights();
+        if (interface_->highlightsNeedSearch() && !txt.isEmpty()) {
+            findString(txt, true, QTextDocument::FindFlags(), QTextCursor::StartOfWord, 0); // highlight all matches
+        }
+    }
 }
 
-void TextEditSearchLine::slotHighlight()
-{
-	//UserMessage::message(UserMessage::DBG, false," highlight: " + searchLine_->text().toStdString());
+void TextEditSearchLine::slotHighlight() {
+    // UserMessage::message(UserMessage::DBG, false," highlight: " + searchLine_->text().toStdString());
 
-	highlightAllTimer_.stop();
+    highlightAllTimer_.stop();
 
-	if (highlightAll())
-		highlightMatches(searchLine_->text());
+    if (highlightAll())
+        highlightMatches(searchLine_->text());
 }
 
-//This slot is called as we type in the search string
-void TextEditSearchLine::slotFind(QString txt)
-{
-	if(!interface_)
-		return;
+// This slot is called as we type in the search string
+void TextEditSearchLine::slotFind(QString txt) {
+    if (!interface_)
+        return;
 
-	//In confirmSearch mode we do not start the search
-	if(confirmSearch_)
-	{
-		toDefaultState();
-		return;
-	}
+    // In confirmSearch mode we do not start the search
+    if (confirmSearch_) {
+        toDefaultState();
+        return;
+    }
 
-	if(txt.isEmpty())
-	{
-		highlightAllTimer_.stop();
-		toDefaultState();
-		return;
-	}
+    if (txt.isEmpty()) {
+        highlightAllTimer_.stop();
+        toDefaultState();
+        return;
+    }
 
-	highlightAllTimer_.stop();
-    bool found = findString(txt, false, QTextDocument::FindFlags(), QTextCursor::StartOfWord, 0);  // find the next match
-	lastFindSuccessful_ = found;
+    highlightAllTimer_.stop();
+    bool found = findString(txt, false, QTextDocument::FindFlags(), QTextCursor::StartOfWord, 0); // find the next match
+    lastFindSuccessful_ = found;
 
-	if (!isEmpty()) // there is a search term supplied by the user
-	{
-		// don't highlight the matches immediately - this can be expensive for large files,
-		// and we don't want to highlight each time the user types a new character; wait
-		// a moment and then start the highlight
-		highlightAllTimer_.setInterval(500);
-		highlightAllTimer_.disconnect();
-		connect(&highlightAllTimer_, SIGNAL(timeout()), this, SLOT(slotHighlight()));
-		highlightAllTimer_.start();
-	}
-	else
-	{
-		clearHighlights();
-	}
+    if (!isEmpty()) // there is a search term supplied by the user
+    {
+        // don't highlight the matches immediately - this can be expensive for large files,
+        // and we don't want to highlight each time the user types a new character; wait
+        // a moment and then start the highlight
+        highlightAllTimer_.setInterval(500);
+        highlightAllTimer_.disconnect();
+        connect(&highlightAllTimer_, SIGNAL(timeout()), this, SLOT(slotHighlight()));
+        highlightAllTimer_.start();
+    }
+    else {
+        clearHighlights();
+    }
 
-	updateButtons(found);
+    updateButtons(found);
 }
 
-void TextEditSearchLine::slotFindNext()
-{
-	if(!interface_)
-		return;
+void TextEditSearchLine::slotFindNext() {
+    if (!interface_)
+        return;
 
     lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindFlags(), QTextCursor::NoMove, 0);
-	updateButtons(lastFindSuccessful_);
+    updateButtons(lastFindSuccessful_);
 }
 
-void TextEditSearchLine::slotFindPrev()
-{
-	if(!interface_)
-		return;
+void TextEditSearchLine::slotFindPrev() {
+    if (!interface_)
+        return;
 
-	lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindBackward, QTextCursor::NoMove, 0);
-	updateButtons(lastFindSuccessful_);
+    lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindBackward, QTextCursor::NoMove, 0);
+    updateButtons(lastFindSuccessful_);
 }
 
-QTextDocument::FindFlags TextEditSearchLine::findFlags()
-{
-	QTextDocument::FindFlags flags;
+QTextDocument::FindFlags TextEditSearchLine::findFlags() {
+    QTextDocument::FindFlags flags;
 
-	if(caseSensitive())
-	{
-		flags = flags | QTextDocument::FindCaseSensitively;
-	}
+    if (caseSensitive()) {
+        flags = flags | QTextDocument::FindCaseSensitively;
+    }
 
-	if(wholeWords())
-	{
-		flags = flags | QTextDocument::FindWholeWords;
-	}
+    if (wholeWords()) {
+        flags = flags | QTextDocument::FindWholeWords;
+    }
 
-	return flags;
+    return flags;
 }
-
 
 // EditorSearchLine::refreshSearch
 // performed when the user changes search parameters such as case sensitivity - we want to
 // re-do the search from the current point, but if the current selection still matches then
 // we'd like it to be found first.
 
-void TextEditSearchLine::refreshSearch()
-{
-	if(!interface_)
-		return;
+void TextEditSearchLine::refreshSearch() {
+    if (!interface_)
+        return;
 
-	// if there's something selected already then move the cursor to the start of the line and search again
-	interface_->refreshSearch();
+    // if there's something selected already then move the cursor to the start of the line and search again
+    interface_->refreshSearch();
 
-	slotFindNext();
-	slotHighlight();
+    slotFindNext();
+    slotHighlight();
 }
 
-void TextEditSearchLine::disableHighlights()
-{
-    if(interface_)
+void TextEditSearchLine::disableHighlights() {
+    if (interface_)
         interface_->disableHighlights();
 }
 
-
-void TextEditSearchLine::clearHighlights()
-{
-    if(interface_)
+void TextEditSearchLine::clearHighlights() {
+    if (interface_)
         interface_->clearHighlights();
 }
 
-void TextEditSearchLine::matchModeChanged(int notUsed)
-{
-	if(matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
-		actionWholeWords_->setEnabled(true);
-	else
-		actionWholeWords_->setEnabled(false);
+void TextEditSearchLine::matchModeChanged(int notUsed) {
+    if (matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
+        actionWholeWords_->setEnabled(true);
+    else
+        actionWholeWords_->setEnabled(false);
 
-	refreshSearch();
+    refreshSearch();
 }
 
-
-void TextEditSearchLine::on_actionCaseSensitive__toggled(bool b)
-{
+void TextEditSearchLine::on_actionCaseSensitive__toggled(bool b) {
     AbstractSearchLine::on_actionCaseSensitive__toggled(b);
 
-	refreshSearch();
+    refreshSearch();
 }
 
-
-void TextEditSearchLine::on_actionWholeWords__toggled(bool b)
-{
+void TextEditSearchLine::on_actionWholeWords__toggled(bool b) {
     AbstractSearchLine::on_actionWholeWords__toggled(b);
 
-	refreshSearch();
+    refreshSearch();
 }
 
-void TextEditSearchLine::on_actionHighlightAll__toggled(bool b)
-{
+void TextEditSearchLine::on_actionHighlightAll__toggled(bool b) {
     AbstractSearchLine::on_actionHighlightAll__toggled(b);
 
-	if (b)                  // user switched on the highlights
-		slotHighlight();
-	else                    // user switched off the highlights
+    if (b) // user switched on the highlights
+        slotHighlight();
+    else // user switched off the highlights
         disableHighlights();
 
-	if(interface_ && interface_->highlightsNeedSearch())
-		refreshSearch();
+    if (interface_ && interface_->highlightsNeedSearch())
+        refreshSearch();
 }
 
-void TextEditSearchLine::slotClose()
-{
-	AbstractSearchLine::slotClose();    
+void TextEditSearchLine::slotClose() {
+    AbstractSearchLine::slotClose();
     clearHighlights();
 }
 
@@ -228,20 +200,16 @@ void TextEditSearchLine::slotClose()
 // If the search box is not open, search for a pre-configured list of
 // keywords. If none are found, and the user has clicked on the 'reload'
 // button then we just go to the last line of the output
-void TextEditSearchLine::searchOnReload(bool userClickedReload)
-{
-	if (isVisible() && !isEmpty())
-	{
-		slotFindNext();
-		slotHighlight();
-		if(!lastFindSuccessful())
-			interface_->gotoLastLine();
-	}
-	else if(interface_)
-	{
-		// search for a highlight any of the pre-defined keywords so that
-		// the (probably) most important piece of information is highlighted
-		interface_->automaticSearchForKeywords(userClickedReload);
-	}
+void TextEditSearchLine::searchOnReload(bool userClickedReload) {
+    if (isVisible() && !isEmpty()) {
+        slotFindNext();
+        slotHighlight();
+        if (!lastFindSuccessful())
+            interface_->gotoLastLine();
+    }
+    else if (interface_) {
+        // search for a highlight any of the pre-defined keywords so that
+        // the (probably) most important piece of information is highlighted
+        interface_->automaticSearchForKeywords(userClickedReload);
+    }
 }
-

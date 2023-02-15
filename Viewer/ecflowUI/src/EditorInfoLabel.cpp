@@ -13,14 +13,12 @@
 #include <QStringList>
 #include <QVariant>
 
-
-EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent)
-{
-    //Define id for the css
-    setProperty("editorInfo","1");
+EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent) {
+    // Define id for the css
+    setProperty("editorInfo", "1");
     setWordWrap(true);
 
-    //Set size policy
+    // Set size policy
     /*QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
@@ -30,57 +28,45 @@ EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent)
     //setMaximumSize(QSize(16777215, 45));*/
 
     setMargin(4);
-    setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+    setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-    //Other settings
+    // Other settings
     setAutoFillBackground(true);
 
     setFrameShape(QFrame::StyledPanel);
-    setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+    setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
 }
 
-void EditorInfoLabel::setInfo(QString parent,QString type)
-{
-    setText(formatKeyLabel("Node path: ") + formatNodePath(parent) + "<br>" +
-            formatKeyLabel("Attibute type: ") + type);
+void EditorInfoLabel::setInfo(QString parent, QString type) {
+    setText(formatKeyLabel("Node path: ") + formatNodePath(parent) + "<br>" + formatKeyLabel("Attibute type: ") + type);
 }
 
-static QColor nodeNameColour(7,108,209);
-static QColor serverNameColour(0,0,0);
-static QColor labelColour(59,60,61);
+static QColor nodeNameColour(7, 108, 209);
+static QColor serverNameColour(0, 0, 0);
+static QColor labelColour(59, 60, 61);
 
-QString EditorInfoLabel::formatKeyLabel(QString n)
-{
+QString EditorInfoLabel::formatKeyLabel(QString n) {
     return "<font color=\'" + labelColour.name() + "\'><b>" + n + "</b></font>";
 }
 
-QString EditorInfoLabel::formatNodeName(QString n)
-{
+QString EditorInfoLabel::formatNodeName(QString n) {
     return "<font color=\'" + nodeNameColour.name() + "\'>" + n + "</font>";
 }
 
-QString EditorInfoLabel::formatNodePath(QString p)
-{
-    if(p.endsWith("://"))
-    {
+QString EditorInfoLabel::formatNodePath(QString p) {
+    if (p.endsWith("://")) {
         return p;
     }
 
-    QStringList lst=p.split("/");
-    if(lst.count() > 0)
-    {
-        QString n=lst.back();
+    QStringList lst = p.split("/");
+    if (lst.count() > 0) {
+        QString n = lst.back();
         lst.pop_back();
-        QColor c(80,80,80);
-        QString s="<font color=\'" + c.name() + "\'>" + lst.join("/") + "/" +
-                "</font><font color=\'" + serverNameColour.name() + "\'>" +  n + "</font>";
+        QColor c(80, 80, 80);
+        QString s = "<font color=\'" + c.name() + "\'>" + lst.join("/") + "/" + "</font><font color=\'" +
+                    serverNameColour.name() + "\'>" + n + "</font>";
         return s;
     }
 
     return p;
 }
-
-
-
-
-

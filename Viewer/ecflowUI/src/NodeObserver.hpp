@@ -16,14 +16,14 @@
 class VNode;
 class VNodeChange;
 
-class NodeObserver
-{
+class NodeObserver {
 public:
-    NodeObserver() = default;
+    NodeObserver()          = default;
     virtual ~NodeObserver() = default;
 
-	virtual void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
-	virtual void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
+    virtual void
+    notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a, const VNodeChange&)            = 0;
+    virtual void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a, const VNodeChange&) = 0;
 };
 
 #endif

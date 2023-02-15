@@ -12,11 +12,10 @@
 
 #include "VTask.hpp"
 
-class VTaskObserver
-{
+class VTaskObserver {
 public:
-    virtual ~VTaskObserver() = default;
-	virtual void taskChanged(VTask_ptr)=0;
+    virtual ~VTaskObserver()            = default;
+    virtual void taskChanged(VTask_ptr) = 0;
 };
 
 #endif

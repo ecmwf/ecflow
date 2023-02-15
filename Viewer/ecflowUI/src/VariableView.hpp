@@ -11,7 +11,6 @@
 #ifndef VARIABLEVIEW_HPP_
 #define VARIABLEVIEW_HPP_
 
-
 #include <QBrush>
 #include <QMap>
 #include <QPen>
@@ -21,15 +20,13 @@
 
 class VariableView;
 
-class VariableDelegate : public QStyledItemDelegate
-{
+class VariableDelegate : public QStyledItemDelegate {
     friend class VariableView;
 
 public:
-    explicit VariableDelegate(QTreeView *parent);
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
+    explicit VariableDelegate(QTreeView* parent);
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 protected:
     QPen selectPen_;
@@ -40,19 +37,16 @@ protected:
     int genVarPixId_;
     int shadowGenVarPixId_;
     QTreeView* view_;
-
 };
 
-class VariableView : public TreeView
-{
+class VariableView : public TreeView {
 public:
-	explicit VariableView(QWidget *parent=nullptr);
+    explicit VariableView(QWidget* parent = nullptr);
 
 protected:
-    void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const override;
+    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
 
-    VariableDelegate *delegate_;
+    VariableDelegate* delegate_;
 };
-
 
 #endif

@@ -11,12 +11,13 @@
 #ifndef VQUEUEATTR_HPP
 #define VQUEUEATTR_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
+
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
@@ -24,29 +25,27 @@ class VNode;
 
 class QueueAttr;
 
-class VQueueAttrType : public VAttributeType
-{
+class VQueueAttrType : public VAttributeType {
 public:
     explicit VQueueAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(const QueueAttr&,QStringList&) const;
+    void encode(const QueueAttr&, QStringList&) const;
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,AllValuesIndex=3, PosIndex=4};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, ValueIndex = 2, AllValuesIndex = 3, PosIndex = 4 };
 };
 
-class VQueueAttr : public VAttribute
-{
+class VQueueAttr : public VAttribute {
 
 public:
-    VQueueAttr(VNode *parent,const QueueAttr&,int index);
+    VQueueAttr(VNode* parent, const QueueAttr&, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif // VQUEUEATTR_HPP

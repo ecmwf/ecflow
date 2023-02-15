@@ -17,12 +17,11 @@
 
 class ServerFilter;
 
-class NodeFilterDialog : public QDialog, protected Ui::NodeFilterDialog
-{
+class NodeFilterDialog : public QDialog, protected Ui::NodeFilterDialog {
     Q_OBJECT
 
 public:
-    explicit NodeFilterDialog(QWidget *parent = nullptr);
+    explicit NodeFilterDialog(QWidget* parent = nullptr);
     ~NodeFilterDialog() override;
 
     void setQuery(NodeQuery*);
@@ -30,17 +29,15 @@ public:
     void setServerFilter(ServerFilter*);
 
 protected Q_SLOTS:
-	void accept() override;
+    void accept() override;
     void reject() override;
 
 protected:
-	void closeEvent(QCloseEvent * event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     void readSettings();
     void writeSettings();
 };
-
-
 
 #endif /* VIEWER_SRC_NODEFILTERDIALOG_HPP_ */

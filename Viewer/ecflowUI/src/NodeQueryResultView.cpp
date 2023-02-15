@@ -24,266 +24,220 @@
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 
-NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
-	QTreeView(parent)
-{
-	//setProperty("style","nodeView");
-	setProperty("view","query");
+NodeQueryResultView::NodeQueryResultView(QWidget* parent) : QTreeView(parent) {
+    // setProperty("style","nodeView");
+    setProperty("view", "query");
 
-    actionHandler_=new ActionHandler(this,this);
+    actionHandler_ = new ActionHandler(this, this);
 
-	sortModel_=new QSortFilterProxyModel(this);
-    //sortModel_->setDynamicSortFilter(true);
-	setModel(sortModel_);
+    sortModel_     = new QSortFilterProxyModel(this);
+    // sortModel_->setDynamicSortFilter(true);
+    setModel(sortModel_);
 
-	//Create delegate to the view
-	delegate_=new NodeQueryViewDelegate(this);
-	setItemDelegate(delegate_);
+    // Create delegate to the view
+    delegate_ = new NodeQueryViewDelegate(this);
+    setItemDelegate(delegate_);
 
-	connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
-			this,SLOT(slotSizeHintChangedGlobal()));
+    connect(delegate_, SIGNAL(sizeHintChangedGlobal()), this, SLOT(slotSizeHintChangedGlobal()));
 
-	//setRootIsDecorated(false);
-	setAllColumnsShowFocus(true);
-	setUniformRowHeights(true);
-	setMouseTracking(true);
-	setRootIsDecorated(false);
+    // setRootIsDecorated(false);
+    setAllColumnsShowFocus(true);
+    setUniformRowHeights(true);
+    setMouseTracking(true);
+    setRootIsDecorated(false);
     setSortingEnabled(true);
-	setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	//!!!!We need to do it because:
-	//The background colour between the view's left border and the nodes cannot be
-	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
-	//colour from the palette. Here we set this to transparent so that Qt could leave
-	//this area empty and we will fill it appropriately in our delegate.
-	QPalette pal=palette();
-	pal.setColor(QPalette::Highlight,QColor(128,128,128,0));//Qt::transparent);
-	setPalette(pal);
+    //!!!!We need to do it because:
+    // The background colour between the view's left border and the nodes cannot be
+    // controlled by delegates or stylesheets. It always takes the QPalette::Highlight
+    // colour from the palette. Here we set this to transparent so that Qt could leave
+    // this area empty and we will fill it appropriately in our delegate.
+    QPalette pal = palette();
+    pal.setColor(QPalette::Highlight, QColor(128, 128, 128, 0)); // Qt::transparent);
+    setPalette(pal);
 
-	//Context menu
-	enableContextMenu(true);
+    // Context menu
+    enableContextMenu(true);
 
-	//Selection
-	connect(this,SIGNAL(clicked(const QModelIndex&)),
-            this,SLOT(slotSelectItem(const QModelIndex&)));
+    // Selection
+    connect(this, SIGNAL(clicked(const QModelIndex&)), this, SLOT(slotSelectItem(const QModelIndex&)));
 
-	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
-            this,SLOT(slotDoubleClickItem(const QModelIndex&)));
-
+    connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(slotDoubleClickItem(const QModelIndex&)));
 }
 
-NodeQueryResultView::~NodeQueryResultView()
-{
-	delete actionHandler_;
+NodeQueryResultView::~NodeQueryResultView() {
+    delete actionHandler_;
 }
 
+void NodeQueryResultView::enableContextMenu(bool enable) {
+    if (enable) {
+        setContextMenuPolicy(Qt::CustomContextMenu);
 
-void NodeQueryResultView::enableContextMenu(bool enable)
-{
-	if (enable)
-	{
-		setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotContextMenu(const QPoint&)));
+    }
+    else {
+        setContextMenuPolicy(Qt::NoContextMenu);
 
-		connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-		                	this, SLOT(slotContextMenu(const QPoint &)));
-	}
-	else
-	{
-		setContextMenuPolicy(Qt::NoContextMenu);
-
-		disconnect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-		                	this, SLOT(slotContextMenu(const QPoint &)));
-	}
+        disconnect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotContextMenu(const QPoint&)));
+    }
 }
 
-
-void NodeQueryResultView::setSourceModel(NodeQueryResultModel *model)
-{
-	model_= model;
-	sortModel_->setSourceModel(model_);
+void NodeQueryResultView::setSourceModel(NodeQueryResultModel* model) {
+    model_ = model;
+    sortModel_->setSourceModel(model_);
     sortModel_->setSortRole(NodeQueryResultModel::SortRole);
 }
 
-
-
-//Collects the selected list of indexes
-QModelIndexList NodeQueryResultView::selectedList()
-{
-  	QModelIndexList lst;
-  	Q_FOREACH(QModelIndex idx,selectedIndexes())
-  	{
-  		if(idx.column() == 0)
-		  	lst << idx;
-  	}
-	return lst;
+// Collects the selected list of indexes
+QModelIndexList NodeQueryResultView::selectedList() {
+    QModelIndexList lst;
+    Q_FOREACH (QModelIndex idx, selectedIndexes()) {
+        if (idx.column() == 0)
+            lst << idx;
+    }
+    return lst;
 }
 
 // this is called even if the user clicks outside of the node list to deselect all
-void NodeQueryResultView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
-{
-	QTreeView::selectionChanged(selected, deselected);
-	Q_EMIT selectionChanged();
+void NodeQueryResultView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+    QTreeView::selectionChanged(selected, deselected);
+    Q_EMIT selectionChanged();
 }
 
-void NodeQueryResultView::slotSelectItem(const QModelIndex&)
-{
-	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
-	{
-		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(lst.front()));
-		if(info)
-		{
-			Q_EMIT selectionChanged(info);            
-		}
-	}
+void NodeQueryResultView::slotSelectItem(const QModelIndex&) {
+    QModelIndexList lst = selectedIndexes();
+    if (lst.count() > 0) {
+        VInfo_ptr info = model_->nodeInfo(sortModel_->mapToSource(lst.front()));
+        if (info) {
+            Q_EMIT selectionChanged(info);
+        }
+    }
 }
 
-VInfo_ptr NodeQueryResultView::currentSelection()
-{
-	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
-	{
-		return model_->nodeInfo(sortModel_->mapToSource(lst.front()));
-	}
-	return {};
+VInfo_ptr NodeQueryResultView::currentSelection() {
+    QModelIndexList lst = selectedIndexes();
+    if (lst.count() > 0) {
+        return model_->nodeInfo(sortModel_->mapToSource(lst.front()));
+    }
+    return {};
 }
 
-void NodeQueryResultView::currentSelection(VInfo_ptr /*info*/)
-{
-	/*QModelIndex idx=model_->infoToIndex(info);
-	if(idx.isValid())
-	{
-		setCurrentIndex(idx);
-		Q_EMIT selectionChanged(info);
-	}*/
+void NodeQueryResultView::currentSelection(VInfo_ptr /*info*/) {
+    /*QModelIndex idx=model_->infoToIndex(info);
+    if(idx.isValid())
+    {
+            setCurrentIndex(idx);
+            Q_EMIT selectionChanged(info);
+    }*/
 }
 
-void NodeQueryResultView::slotSetCurrent(VInfo_ptr /*info*/)
-{
-	/*QModelIndex idx=model_->infoToIndex(info);
-	if(idx.isValid())
-	{
-		setCurrentIndex(idx);
-		Q_EMIT selectionChanged(info);
-	}*/
+void NodeQueryResultView::slotSetCurrent(VInfo_ptr /*info*/) {
+    /*QModelIndex idx=model_->infoToIndex(info);
+    if(idx.isValid())
+    {
+            setCurrentIndex(idx);
+            Q_EMIT selectionChanged(info);
+    }*/
 }
 
-void NodeQueryResultView::selectFirstServer()
-{
-	QModelIndex idx=sortModel_->index(0,0);
-	if(idx.isValid())
-	{
-		setCurrentIndex(idx);
-		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(idx));
-		Q_EMIT selectionChanged(info);
-	}
+void NodeQueryResultView::selectFirstServer() {
+    QModelIndex idx = sortModel_->index(0, 0);
+    if (idx.isValid()) {
+        setCurrentIndex(idx);
+        VInfo_ptr info = model_->nodeInfo(sortModel_->mapToSource(idx));
+        Q_EMIT selectionChanged(info);
+    }
 }
 
+void NodeQueryResultView::getListOfSelectedNodes(std::vector<VInfo_ptr>& nodeList) {
+    QModelIndexList indexList = selectedList();
 
-void NodeQueryResultView::getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList)
-{
-	QModelIndexList indexList=selectedList();
-
-	nodeList.clear();
-	for(int i=0; i < indexList.count(); i++)
-	{
-		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(indexList[i]));
-		if(info && !info->isEmpty())
-			nodeList.push_back(info);
-	}
+    nodeList.clear();
+    for (int i = 0; i < indexList.count(); i++) {
+        VInfo_ptr info = model_->nodeInfo(sortModel_->mapToSource(indexList[i]));
+        if (info && !info->isEmpty())
+            nodeList.push_back(info);
+    }
 }
 
-
-void NodeQueryResultView::slotDoubleClickItem(const QModelIndex&)
-{
+void NodeQueryResultView::slotDoubleClickItem(const QModelIndex&) {
 }
 
-void NodeQueryResultView::slotContextMenu(const QPoint &position)
-{
-	QModelIndexList lst=selectedList();
-	//QModelIndex index=indexAt(position);
-	QPoint scrollOffset(horizontalScrollBar()->value(),verticalScrollBar()->value());
+void NodeQueryResultView::slotContextMenu(const QPoint& position) {
+    QModelIndexList lst = selectedList();
+    // QModelIndex index=indexAt(position);
+    QPoint scrollOffset(horizontalScrollBar()->value(), verticalScrollBar()->value());
 
-	handleContextMenu(indexAt(position),lst,mapToGlobal(position),position+scrollOffset,this);
+    handleContextMenu(indexAt(position), lst, mapToGlobal(position), position + scrollOffset, this);
 }
 
-
-void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint /*widgetPos*/,QWidget */*widget*/)
-{
-  	//Node actions
-  	if(indexClicked.isValid())   //indexLst[0].isValid() && indexLst[0].column() == 0)
-	{
-  		std::vector<VInfo_ptr> nodeLst;
-		for(int i=0; i < indexLst.count(); i++)
-		{
-			VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(indexLst[i]));
-			if(info && !info->isEmpty())
-				nodeLst.push_back(info);
-		}
-
-		actionHandler_->contextMenu(nodeLst,globalPos);
-	}
-
-	//Desktop actions
-	else
-	{
-	}
-}
-
-void NodeQueryResultView::slotCommandShortcut()
-{
-    if (auto* sc = static_cast<QShortcut*>(QObject::sender())) {
-        QModelIndexList indexLst=selectedList();
+void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,
+                                            QModelIndexList indexLst,
+                                            QPoint globalPos,
+                                            QPoint /*widgetPos*/,
+                                            QWidget* /*widget*/) {
+    // Node actions
+    if (indexClicked.isValid()) // indexLst[0].isValid() && indexLst[0].column() == 0)
+    {
         std::vector<VInfo_ptr> nodeLst;
-        for(int i=0; i < indexLst.count(); i++)
-        {
-            VInfo_ptr info=model_->nodeInfo(indexLst[i]);
-            if(info && !info->isEmpty())
+        for (int i = 0; i < indexLst.count(); i++) {
+            VInfo_ptr info = model_->nodeInfo(sortModel_->mapToSource(indexLst[i]));
+            if (info && !info->isEmpty())
+                nodeLst.push_back(info);
+        }
+
+        actionHandler_->contextMenu(nodeLst, globalPos);
+    }
+
+    // Desktop actions
+    else {}
+}
+
+void NodeQueryResultView::slotCommandShortcut() {
+    if (auto* sc = static_cast<QShortcut*>(QObject::sender())) {
+        QModelIndexList indexLst = selectedList();
+        std::vector<VInfo_ptr> nodeLst;
+        for (int i = 0; i < indexLst.count(); i++) {
+            VInfo_ptr info = model_->nodeInfo(indexLst[i]);
+            if (info && !info->isEmpty())
                 nodeLst.push_back(info);
         }
         actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }
 }
 
-void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString /*cmd*/)
-{
+void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst, QString /*cmd*/) {
 
-	if(nodeLst.size() == 0)
-		return;
+    if (nodeLst.size() == 0)
+        return;
 
-	/*if(cmd == "set_as_root")
-	{	
-		model_->setRootNode(nodeLst.at(0)->node());
-		expandAll();
-	}*/
+    /*if(cmd == "set_as_root")
+    {
+            model_->setRootNode(nodeLst.at(0)->node());
+            expandAll();
+    }*/
 }
 
-void NodeQueryResultView::reload()
-{
-	//model_->reload();
-	//expandAll();
+void NodeQueryResultView::reload() {
+    // model_->reload();
+    // expandAll();
 }
 
-void NodeQueryResultView::rerender()
-{
-	if(needItemsLayout_)
-	{
-		doItemsLayout();
-		needItemsLayout_=false;
-	}
-	else
-	{
-		viewport()->update();
-	}
+void NodeQueryResultView::rerender() {
+    if (needItemsLayout_) {
+        doItemsLayout();
+        needItemsLayout_ = false;
+    }
+    else {
+        viewport()->update();
+    }
 }
 
-void NodeQueryResultView::slotRerender()
-{
-	rerender();
+void NodeQueryResultView::slotRerender() {
+    rerender();
 }
 
-
-void NodeQueryResultView::slotSizeHintChangedGlobal()
-{
-	needItemsLayout_=true;
+void NodeQueryResultView::slotSizeHintChangedGlobal() {
+    needItemsLayout_ = true;
 }

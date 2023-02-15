@@ -10,33 +10,31 @@
 #ifndef TABLEFILTERWIDGET_INC_
 #define TABLEFILTERWIDGET_INC_
 
-#include "ui_TableFilterWidget.h"
-
 #include <QWidget>
+
+#include "ui_TableFilterWidget.h"
 
 class NodeFilterDef;
 class ServerFilter;
 
-class TableFilterWidget : public QWidget, private Ui::TableFilterWidget
-{
-Q_OBJECT
+class TableFilterWidget : public QWidget, private Ui::TableFilterWidget {
+    Q_OBJECT
 
 public:
-    explicit TableFilterWidget(QWidget *parent=nullptr);
+    explicit TableFilterWidget(QWidget* parent = nullptr);
     ~TableFilterWidget() override = default;
 
-    void build(NodeFilterDef*,ServerFilter*);
+    void build(NodeFilterDef*, ServerFilter*);
 
 public Q_SLOTS:
-	void slotEdit();
-	void slotDefChanged();
-	void slotHeaderFilter(QString column,QPoint globalPos);
-	void slotTotalNumChanged(int);
+    void slotEdit();
+    void slotDefChanged();
+    void slotHeaderFilter(QString column, QPoint globalPos);
+    void slotTotalNumChanged(int);
 
 private:
-	NodeFilterDef* filterDef_{nullptr};
-	ServerFilter* serverFilter_{nullptr};
+    NodeFilterDef* filterDef_{nullptr};
+    ServerFilter* serverFilter_{nullptr};
 };
 
 #endif
-

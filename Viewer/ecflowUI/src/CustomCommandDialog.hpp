@@ -7,7 +7,6 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-
 #ifndef CUSTOMCOMMANDDIALOG_HPP_
 #define CUSTOMCOMMANDDIALOG_HPP_
 
@@ -15,17 +14,16 @@
 
 #include "ui_CustomCommandDialog.h"
 
-class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
-{
-	Q_OBJECT
+class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog {
+    Q_OBJECT
 
 public:
-	explicit CustomCommandDialog(QWidget *parent = nullptr);
+    explicit CustomCommandDialog(QWidget* parent = nullptr);
     ~CustomCommandDialog() override = default;
 
-    MenuItem &menuItem() {return commandDesigner_->menuItem();}
-    void setNodes(const std::vector<VInfo_ptr> &nodes) {commandDesigner_->setNodes(nodes);}
-    const std::vector<VInfo_ptr> &selectedNodes() {return commandDesigner_->selectedNodes();}
+    MenuItem& menuItem() { return commandDesigner_->menuItem(); }
+    void setNodes(const std::vector<VInfo_ptr>& nodes) { commandDesigner_->setNodes(nodes); }
+    const std::vector<VInfo_ptr>& selectedNodes() { return commandDesigner_->selectedNodes(); }
 };
 
 #endif

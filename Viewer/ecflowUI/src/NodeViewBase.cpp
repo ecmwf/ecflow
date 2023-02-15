@@ -9,7 +9,5 @@
 
 #include "NodeViewBase.hpp"
 
-NodeViewBase::NodeViewBase(NodeFilterDef* filterDef) : filterDef_(filterDef)
-{
-
+NodeViewBase::NodeViewBase(NodeFilterDef* filterDef) : filterDef_(filterDef) {
 }

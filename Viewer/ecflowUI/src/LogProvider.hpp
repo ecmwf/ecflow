@@ -8,42 +8,40 @@
 //
 //============================================================================
 
-
 #ifndef VIEWER_SRC_LOGPROVIDER_HPP_
 #define VIEWER_SRC_LOGPROVIDER_HPP_
 
 #include <QObject>
 #include <QStringList>
 
+#include "InfoProvider.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
-#include "InfoProvider.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
 class FileWatcher;
 
-class LogProvider : public QObject, public InfoProvider
-{
-   Q_OBJECT
+class LogProvider : public QObject, public InfoProvider {
+    Q_OBJECT
 
 public:
-   LogProvider(InfoPresenter* owner,QObject* parent=nullptr);
+    LogProvider(InfoPresenter* owner, QObject* parent = nullptr);
 
-   void visit(VInfoServer*) override;
-   void clear() override;
-   void setAutoUpdate(bool) override;
+    void visit(VInfoServer*) override;
+    void clear() override;
+    void setAutoUpdate(bool) override;
 
-   public Q_SLOTS:
-   void slotLinesAppend(QStringList);
+public Q_SLOTS:
+    void slotLinesAppend(QStringList);
 
-   private:
-   void fetchFile();
-   void fetchFile(ServerHandler *server,const std::string& fileName);
-   void watchFile(const std::string&,size_t);
-   void stopWatchFile();
+private:
+    void fetchFile();
+    void fetchFile(ServerHandler* server, const std::string& fileName);
+    void watchFile(const std::string&, size_t);
+    void stopWatchFile();
 
-   FileWatcher* fileWatcher_;
+    FileWatcher* fileWatcher_;
 };
 
 #endif

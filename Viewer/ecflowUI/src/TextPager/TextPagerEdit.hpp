@@ -15,26 +15,24 @@
 #ifndef TEXTPAGEREDIT_HPP__
 #define TEXTPAGEREDIT_HPP__
 
-#include <QtGui>
 #include <QAbstractScrollArea>
+#include <QtGui>
 
-#include "syntaxhighlighter.hpp"
 #include "TextCodecWrapper.hpp"
-#include "TextPagerDocument.hpp"
 #include "TextPagerCursor.hpp"
+#include "TextPagerDocument.hpp"
 #include "TextPagerSection.hpp"
-
 #include "VProperty.hpp"
+#include "syntaxhighlighter.hpp"
 
 class TextPagerLineNumberArea;
 class TextEditPrivate;
 class TextPagerSearchHighlighter;
 
-class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver
-{
-	friend class TextPagerLineNumberArea;
+class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver {
+    friend class TextPagerLineNumberArea;
 
-	Q_OBJECT
+    Q_OBJECT
     Q_PROPERTY(int cursorWidth READ cursorWidth WRITE setCursorWidth)
     Q_PROPERTY(bool readOnly READ readOnly WRITE setReadOnly)
     Q_PROPERTY(bool cursorVisible READ cursorVisible WRITE setCursorVisible)
@@ -43,11 +41,11 @@ class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver
     Q_PROPERTY(bool lineBreaking READ lineBreaking WRITE setLineBreaking)
 
 public:
-    TextPagerEdit(QWidget *parent = nullptr);
+    TextPagerEdit(QWidget* parent = nullptr);
     ~TextPagerEdit() override;
 
-    TextPagerDocument *document() const;
-    void setDocument(TextPagerDocument *doc);
+    TextPagerDocument* document() const;
+    void setDocument(TextPagerDocument* doc);
 
     int cursorWidth() const;
     void setCursorWidth(int cc);
@@ -58,30 +56,34 @@ public:
         QTextCharFormat format;
     };
 
-    void setExtraSelections(const QList<ExtraSelection> &selections);
+    void setExtraSelections(const QList<ExtraSelection>& selections);
     QList<ExtraSelection> extraSelections() const;
 
-    void setSyntaxHighlighter(SyntaxHighlighter *h);
-    inline SyntaxHighlighter *syntaxHighlighter() const { return syntaxHighlighters().value(0); }
+    void setSyntaxHighlighter(SyntaxHighlighter* h);
+    inline SyntaxHighlighter* syntaxHighlighter() const { return syntaxHighlighters().value(0); }
 
     QList<SyntaxHighlighter*> syntaxHighlighters() const;
-    void addSyntaxHighlighter(SyntaxHighlighter *highlighter);
-    void takeSyntaxHighlighter(SyntaxHighlighter *highlighter);
-    void removeSyntaxHighlighter(SyntaxHighlighter *highlighter);
+    void addSyntaxHighlighter(SyntaxHighlighter* highlighter);
+    void takeSyntaxHighlighter(SyntaxHighlighter* highlighter);
+    void removeSyntaxHighlighter(SyntaxHighlighter* highlighter);
     void clearSyntaxHighlighters();
 
-    bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, TextCodecWrapper = {});
+    bool load(const QString& fileName,
+              TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse,
+              TextCodecWrapper                   = {});
 
-    void paintEvent(QPaintEvent *e) override;
+    void paintEvent(QPaintEvent* e) override;
     void scrollContentsBy(int dx, int dy) override;
 
-    bool moveCursorPosition(TextPagerCursor::MoveOperation op, TextPagerCursor::MoveMode = TextPagerCursor::MoveAnchor, int n = 1);
+    bool moveCursorPosition(TextPagerCursor::MoveOperation op,
+                            TextPagerCursor::MoveMode = TextPagerCursor::MoveAnchor,
+                            int n                     = 1);
     void setCursorPosition(int pos, TextPagerCursor::MoveMode mode = TextPagerCursor::MoveAnchor);
 
     int viewportPosition() const;
     int cursorPosition() const;
 
-    int textPositionAt(const QPoint &pos) const;
+    int textPositionAt(const QPoint& pos) const;
 
     bool readOnly() const;
     void setReadOnly(bool rr);
@@ -92,13 +94,13 @@ public:
     int maximumSizeCopy() const;
     void setMaximumSizeCopy(int max);
 
-    QRect cursorBlockRect(const TextPagerCursor &cursor) const;
-    QRect cursorRect(const TextPagerCursor &cursor) const;
+    QRect cursorBlockRect(const TextPagerCursor& cursor) const;
+    QRect cursorRect(const TextPagerCursor& cursor) const;
 
     int lineNumber(int position) const;
     int columnNumber(int position) const;
-    int lineNumber(const TextPagerCursor &cursor) const;
-    int columnNumber(const TextPagerCursor &cursor) const;
+    int lineNumber(const TextPagerCursor& cursor) const;
+    int columnNumber(const TextPagerCursor& cursor) const;
 
     bool cursorVisible() const;
     void setCursorVisible(bool cc);
@@ -106,33 +108,37 @@ public:
     QString selectedText() const;
     bool hasSelection() const;
 
-    void setText(const QString &text);
+    void setText(const QString& text);
     QString read(int pos, int size) const;
     QChar readCharacter(int index) const;
 
-    void insert(int pos, const QString &text);
+    void insert(int pos, const QString& text);
     void remove(int from, int size);
 
-    TextPagerCursor &textCursor();
-    const TextPagerCursor &textCursor() const;
-    void setTextCursor(const TextPagerCursor &textCursor);
+    TextPagerCursor& textCursor();
+    const TextPagerCursor& textCursor() const;
+    void setTextCursor(const TextPagerCursor& textCursor);
 
-    TextPagerCursor cursorForPosition(const QPoint &pos) const;
+    TextPagerCursor cursorForPosition(const QPoint& pos) const;
 
-    TextPagerSection *sectionAt(const QPoint &pos) const;
+    TextPagerSection* sectionAt(const QPoint& pos) const;
 
     QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = {}) const;
-    inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
-    TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
-                                   const QVariant &data = QVariant());
+    inline TextPagerSection* sectionAt(int pos) const {
+        return sections(pos, 1, TextPagerSection::IncludePartial).value(0);
+    }
+    TextPagerSection* insertTextSection(int pos,
+                                        int size,
+                                        const QTextCharFormat& format = QTextCharFormat(),
+                                        const QVariant& data          = QVariant());
 
-    void ensureCursorVisible(const TextPagerCursor &cursor, int linesMargin = 0);
+    void ensureCursorVisible(const TextPagerCursor& cursor, int linesMargin = 0);
 
     void setEnableSearchHighlighter(bool);
     void clearSearchHighlighter();
-    void setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode);
-    void setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode);
-    
+    void setSearchHighlighter(QString txt, TextPagerDocument::FindMode mode);
+    void setSearchHighlighter(QRegExp rx, TextPagerDocument::FindMode mode);
+
     void gotoLine(int);
     void setFontProperty(VProperty* p);
     void notifyChange(VProperty* p) override;
@@ -145,13 +151,10 @@ public:
 
     void updateLineNumberArea();
     void setShowLineNumbers(bool b);
-    void setLineNumberArea(TextPagerLineNumberArea *a);
+    void setLineNumberArea(TextPagerLineNumberArea* a);
 
-    enum ActionType {
-        CopyAction,
-        SelectAllAction
-    };
-    QAction *action(ActionType type) const;
+    enum ActionType { CopyAction, SelectAllAction };
+    QAction* action(ActionType type) const;
 
 public Q_SLOTS:
     void ensureCursorVisible();
@@ -164,28 +167,28 @@ Q_SIGNALS:
     void textChanged();
     void selectionChanged();
     void cursorPositionChanged(int pos);
-    void sectionClicked(TextPagerSection *section, const QPoint &pos);
+    void sectionClicked(TextPagerSection* section, const QPoint& pos);
 
 protected:
-    //virtual void paste(int position, QClipboard::Mode mode);
-    void changeEvent(QEvent *e) override;
-    void keyPressEvent(QKeyEvent *e) override;
-    void keyReleaseEvent(QKeyEvent *e) override;
-    void wheelEvent(QWheelEvent *e) override;
-    void mousePressEvent(QMouseEvent *e) override;
-    void mouseDoubleClickEvent(QMouseEvent *) override;
-    void mouseMoveEvent(QMouseEvent *e) override;
-    void mouseReleaseEvent(QMouseEvent *e) override;
-    void resizeEvent(QResizeEvent *e) override;
+    // virtual void paste(int position, QClipboard::Mode mode);
+    void changeEvent(QEvent* e) override;
+    void keyPressEvent(QKeyEvent* e) override;
+    void keyReleaseEvent(QKeyEvent* e) override;
+    void wheelEvent(QWheelEvent* e) override;
+    void mousePressEvent(QMouseEvent* e) override;
+    void mouseDoubleClickEvent(QMouseEvent*) override;
+    void mouseMoveEvent(QMouseEvent* e) override;
+    void mouseReleaseEvent(QMouseEvent* e) override;
+    void resizeEvent(QResizeEvent* e) override;
 
 private:
     void updateFont();
     void fontSizeChangedByZoom();
 
-    void lineNumberAreaPaintEvent(QPaintEvent *e);
-    int  lineNumberAreaWidth();
+    void lineNumberAreaPaintEvent(QPaintEvent* e);
+    int lineNumberAreaWidth();
 
-    TextEditPrivate *d;
+    TextEditPrivate* d;
     friend class TextLayoutCacheManager;
     friend class TextEditPrivate;
     friend class TextPagerCursor;
@@ -198,26 +201,24 @@ private:
     VProperty* fontProp_{nullptr};
 };
 
-
-class TextPagerLineNumberArea : public QWidget
-{
+class TextPagerLineNumberArea : public QWidget {
 public:
-    explicit TextPagerLineNumberArea(TextPagerEdit *editor);
-    QSize sizeHint() const override {return {computeWidth(), 0};}
-    int rightMargin() const {return rightMargin_;}
-    void updateWidth(int maxLineNum=-1);
-    QColor bgColour() const {return bgCol_;}
-    QColor fontColour() const {return fontCol_;}
-    QColor separatorColour() const {return separatorCol_;}
-    QColor currentColour() const {return currentCol_;}
+    explicit TextPagerLineNumberArea(TextPagerEdit* editor);
+    QSize sizeHint() const override { return {computeWidth(), 0}; }
+    int rightMargin() const { return rightMargin_; }
+    void updateWidth(int maxLineNum = -1);
+    QColor bgColour() const { return bgCol_; }
+    QColor fontColour() const { return fontCol_; }
+    QColor separatorColour() const { return separatorCol_; }
+    QColor currentColour() const { return currentCol_; }
 
 protected:
-    void paintEvent(QPaintEvent *event) override { textEditor_->lineNumberAreaPaintEvent(event);}
+    void paintEvent(QPaintEvent* event) override { textEditor_->lineNumberAreaPaintEvent(event); }
 
 private:
-    int computeWidth(int maxLineNum=-1) const;
+    int computeWidth(int maxLineNum = -1) const;
 
-    TextPagerEdit *textEditor_;
+    TextPagerEdit* textEditor_;
     mutable int digits_;
     int rightMargin_;
     QColor bgCol_;
@@ -225,7 +226,5 @@ private:
     QColor separatorCol_;
     QColor currentCol_;
 };
-
-
 
 #endif

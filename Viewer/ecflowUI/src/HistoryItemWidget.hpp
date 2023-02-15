@@ -12,24 +12,21 @@
 #define HISTORYITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "VInfo.hpp"
-
 #include "ServerHandler.hpp"
-
+#include "VInfo.hpp"
 #include "ui_HistoryItemWidget.h"
 
 class LogModel;
 
-class HistoryItemWidget :  public QWidget, public InfoPanelItem, protected Ui::HistoryItemWidget
-{
-Q_OBJECT
+class HistoryItemWidget : public QWidget, public InfoPanelItem, protected Ui::HistoryItemWidget {
+    Q_OBJECT
 
 public:
-	explicit HistoryItemWidget(QWidget *parent=nullptr);
+    explicit HistoryItemWidget(QWidget* parent = nullptr);
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
-    void clearContents() override; 
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
+    void clearContents() override;
 
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;

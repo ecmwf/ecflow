@@ -11,192 +11,161 @@
 
 #include <QVBoxLayout>
 
-#include "Node.hpp"
-
 #include "InfoProvider.hpp"
-
 #include "MessageLabel.hpp"
+#include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
-#include "UiLog.hpp"
-#include "VNode.hpp"
-#include "VNState.hpp"
-#include "VSettings.hpp"
-
 #include "TimelineData.hpp"
 #include "TimelineWidget.hpp"
+#include "UiLog.hpp"
+#include "VNState.hpp"
+#include "VNode.hpp"
+#include "VSettings.hpp"
 
-TimelineItemWidget::TimelineItemWidget(QWidget */*parent*/) :
-    delayedLoad_(false)
-{
-    auto* vb=new QVBoxLayout(this);
-    vb->setContentsMargins(0,0,0,0);
+TimelineItemWidget::TimelineItemWidget(QWidget* /*parent*/) : delayedLoad_(false) {
+    auto* vb = new QVBoxLayout(this);
+    vb->setContentsMargins(0, 0, 0, 0);
 
-    w_=new TimelineWidget(this);
+    w_ = new TimelineWidget(this);
     vb->addWidget(w_);
 
-    //This tab is always visible whatever node is selected!!!
-    //We keep the data unchanged unless a new server is selected
-    keepServerDataOnLoad_=true;
+    // This tab is always visible whatever node is selected!!!
+    // We keep the data unchanged unless a new server is selected
+    keepServerDataOnLoad_ = true;
 
-    //We will KEEP the contents when the item (aka tab) becomes unselected
-    //unselectedFlags_.clear();
+    // We will KEEP the contents when the item (aka tab) becomes unselected
+    // unselectedFlags_.clear();
 }
 
-TimelineItemWidget::~TimelineItemWidget()
-= default;
+TimelineItemWidget::~TimelineItemWidget() = default;
 
-QWidget* TimelineItemWidget::realWidget()
-{
+QWidget* TimelineItemWidget::realWidget() {
     return this;
 }
 
-void TimelineItemWidget::reload(VInfo_ptr info)
-{
+void TimelineItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if(suspended_)
+    if (suspended_)
         return;
 
     clearContents();
 
-    if(info && info->server() && info->server()->isDisabled())
-    {
+    if (info && info->server() && info->server()->isDisabled()) {
         setEnabled(false);
         return;
     }
-    else
-    {
+    else {
         setEnabled(true);
     }
 
-    bool same=hasSameContents(info);
+    bool same = hasSameContents(info);
 
-    //set the info. We do not need to observe the node!!!
-    info_=info;
+    // set the info. We do not need to observe the node!!!
+    info_ = info;
 
-    if(!same)
-    {
+    if (!same) {
         load();
     }
-    else if(info_)
-    {
+    else if (info_) {
         w_->selectPathInView(info_->nodePath());
     }
 }
 
-void TimelineItemWidget::load()
-{
-    if(info_ && info_->server())
-    {
-        ServerHandler *sh=info_->server();
+void TimelineItemWidget::load() {
+    if (info_ && info_->server()) {
+        ServerHandler* sh = info_->server();
         Q_ASSERT(sh);
 
-        if(sh->activity() == ServerHandler::LoadActivity)
-        {
-            delayedLoad_=true;
+        if (sh->activity() == ServerHandler::LoadActivity) {
+            delayedLoad_ = true;
         }
-        else
-        {
-            if(VServer* vs=sh->vRoot())
-            {
-                QString logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
-                if(!logFile.isEmpty())
-                {
+        else {
+            if (VServer* vs = sh->vRoot()) {
+                QString logFile = QString::fromStdString(vs->findVariable("ECF_LOG", false));
+                if (!logFile.isEmpty()) {
                     std::vector<std::string> suites;
-                    if(SuiteFilter* sf=sh->suiteFilter())
-                    {
-                        if(sf->isEnabled())
-                            suites=sh->suiteFilter()->filter();
+                    if (SuiteFilter* sf = sh->suiteFilter()) {
+                        if (sf->isEnabled())
+                            suites = sh->suiteFilter()->filter();
                     }
 
-                    //last 100 MB are read
+                    // last 100 MB are read
                     w_->initLoad(QString::fromStdString(sh->name()),
-                         QString::fromStdString(sh->host()),
-                         QString::fromStdString(sh->port()),
-                         logFile, suites, sh->uidForServerLogTransfer(),
-                         sh->maxSizeForTimelineData(),
-                         info_->nodePath(), detached_);//last 100 MB are read
+                                 QString::fromStdString(sh->host()),
+                                 QString::fromStdString(sh->port()),
+                                 logFile,
+                                 suites,
+                                 sh->uidForServerLogTransfer(),
+                                 sh->maxSizeForTimelineData(),
+                                 info_->nodePath(),
+                                 detached_); // last 100 MB are read
 
-                    delayedLoad_=false;
-
+                    delayedLoad_ = false;
                 }
             }
         }
     }
 
-    if(info_)
-    {
-       w_->selectPathInView(info_->nodePath());
+    if (info_) {
+        w_->selectPathInView(info_->nodePath());
     }
 }
 
-void TimelineItemWidget::clearContents()
-{
+void TimelineItemWidget::clearContents() {
     w_->clear();
-    delayedLoad_=false;
+    delayedLoad_ = false;
     InfoPanelItem::clear();
 }
 
-bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
-{
-    if(info && info_ && info->server())
-    {
+bool TimelineItemWidget::hasSameContents(VInfo_ptr info) {
+    if (info && info_ && info->server()) {
         return info->server() == info_->server();
     }
     return false;
 }
 
-void TimelineItemWidget::notifyInfoChanged(const std::string& path)
-{
-    if(info_)
+void TimelineItemWidget::notifyInfoChanged(const std::string& path) {
+    if (info_)
         w_->selectPathInView(path);
 }
 
-void TimelineItemWidget::serverSyncFinished()
-{
-    if(delayedLoad_)
+void TimelineItemWidget::serverSyncFinished() {
+    if (delayedLoad_)
         load();
 }
 
-void TimelineItemWidget::connectStateChanged()
-{
-    if(frozen_)
+void TimelineItemWidget::connectStateChanged() {
+    if (frozen_)
         return;
 
-    if(delayedLoad_)
+    if (delayedLoad_)
         load();
 }
 
-void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
-{
-    if(flags.isSet(SuspendedChanged))
-    {
-        //Suspend
-        if(suspended_)
-        {
-            //reloadTb_->setEnabled(false);
+void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
+    if (flags.isSet(SuspendedChanged)) {
+        // Suspend
+        if (suspended_) {
+            // reloadTb_->setEnabled(false);
         }
-        //Resume
-        else
-        {
-            if(info_ && info_->node())
-            {
-                //reloadTb_->setEnabled(true);
-                if(delayedLoad_)
+        // Resume
+        else {
+            if (info_ && info_->node()) {
+                // reloadTb_->setEnabled(true);
+                if (delayedLoad_)
                     load();
             }
-            else
-            {
+            else {
                 clearContents();
             }
         }
     }
 
-    if(flags.isSet(DetachedChanged))
-    {
+    if (flags.isSet(DetachedChanged)) {
         w_->setDetached(detached_);
-        if(!detached_ && info_)
+        if (!detached_ && info_)
             w_->selectPathInView(info_->nodePath());
 #if 0
         // we just returned from detached state
@@ -216,15 +185,13 @@ void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
     }
 }
 
-void TimelineItemWidget::writeSettings(VComboSettings* vs)
-{
+void TimelineItemWidget::writeSettings(VComboSettings* vs) {
     vs->beginGroup("timeline");
     w_->writeSettings(vs);
     vs->endGroup();
 }
 
-void TimelineItemWidget::readSettings(VComboSettings* vs)
-{
+void TimelineItemWidget::readSettings(VComboSettings* vs) {
     vs->beginGroup("timeline");
     w_->readSettings(vs);
     vs->endGroup();

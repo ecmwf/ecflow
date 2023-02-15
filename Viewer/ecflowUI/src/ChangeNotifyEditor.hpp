@@ -10,12 +10,12 @@
 #ifndef VIEWER_SRC_CHANGENOTIFYEDITOR_HPP_
 #define VIEWER_SRC_CHANGENOTIFYEDITOR_HPP_
 
-#include <QWidget>
-#include <QAbstractItemModel>
-
 #include <vector>
-#include "VProperty.hpp"
 
+#include <QAbstractItemModel>
+#include <QWidget>
+
+#include "VProperty.hpp"
 #include "ui_ChangeNotifyEditor.h"
 
 class QGridlayout;
@@ -23,68 +23,62 @@ class QGridlayout;
 class ChangeNotifyEditorModel;
 class PropertyLine;
 
-class ChangeNotifyEditor : public QWidget, protected Ui::ChangeNotifyEditor
-{
-	Q_OBJECT
+class ChangeNotifyEditor : public QWidget, protected Ui::ChangeNotifyEditor {
+    Q_OBJECT
 
 public:
-	explicit ChangeNotifyEditor(QWidget* parent=nullptr);
-	void addRow(QString,QList<PropertyLine*>,QWidget*);
+    explicit ChangeNotifyEditor(QWidget* parent = nullptr);
+    void addRow(QString, QList<PropertyLine*>, QWidget*);
 
 protected Q_SLOTS:
-	void slotRowSelected(const QModelIndex& idx);
+    void slotRowSelected(const QModelIndex& idx);
 
 private:
-	ChangeNotifyEditorModel* model_;
+    ChangeNotifyEditorModel* model_;
 };
 
-
-class ChangeNotifyEditorModelData
-{
+class ChangeNotifyEditorModelData {
 public:
-	ChangeNotifyEditorModelData() = default;
+    ChangeNotifyEditorModelData() = default;
 
-	QString label_;
-	QString desc_;
-	VProperty* enabled_{nullptr};
-	bool enabledMaster_{false};
-	bool enabledVal_{false};
+    QString label_;
+    QString desc_;
+    VProperty* enabled_{nullptr};
+    bool enabledMaster_{false};
+    bool enabledVal_{false};
 };
 
-
-class ChangeNotifyEditorModel : public QAbstractItemModel
-{
-	Q_OBJECT
+class ChangeNotifyEditorModel : public QAbstractItemModel {
+    Q_OBJECT
 
 public:
-   	explicit ChangeNotifyEditorModel(QObject *parent=nullptr);
-   	~ChangeNotifyEditorModel() override;
+    explicit ChangeNotifyEditorModel(QObject* parent = nullptr);
+    ~ChangeNotifyEditorModel() override;
 
-   	void add(QString,QList<VProperty*>);
+    void add(QString, QList<VProperty*>);
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
-   	bool setData(const QModelIndex & index, const QVariant& value, int role = Qt::EditRole) override;
-   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
+    QVariant data(const QModelIndex&, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+    QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
-   	QModelIndex parent (const QModelIndex & ) const override;
-   	Qt::ItemFlags flags ( const QModelIndex & index) const override;
+    QModelIndex index(int, int, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex&) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 public Q_SLOTS:
-   	void slotEnabledChanged(QVariant v);
-   	void slotEnabledMasterChanged(bool b);
+    void slotEnabledChanged(QVariant v);
+    void slotEnabledMasterChanged(bool b);
 
 Q_SIGNALS:
-	void enabledChanged(VProperty*,QVariant);
+    void enabledChanged(VProperty*, QVariant);
 
 protected:
-	int lineToRow(PropertyLine* line) const;
+    int lineToRow(PropertyLine* line) const;
 
-	QList<ChangeNotifyEditorModelData> data_;
+    QList<ChangeNotifyEditorModelData> data_;
 };
-
 
 #endif /* VIEWER_SRC_CHANGENOTIFYEDITOR_HPP_ */

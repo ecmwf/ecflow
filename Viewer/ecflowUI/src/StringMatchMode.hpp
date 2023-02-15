@@ -11,33 +11,31 @@
 #ifndef VIEWER_SRC_STRINGMATCHMODE_HPP_
 #define VIEWER_SRC_STRINGMATCHMODE_HPP_
 
-#include <string>
 #include <map>
+#include <string>
 
-class StringMatchMode
-{
+class StringMatchMode {
 public:
-	enum Mode {InvalidMatch=-1,ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
+    enum Mode { InvalidMatch = -1, ContainsMatch = 0, WildcardMatch = 1, RegexpMatch = 2 };
 
-	StringMatchMode();
+    StringMatchMode();
 
     explicit StringMatchMode(Mode m);
     explicit StringMatchMode(int);
-	StringMatchMode(const StringMatchMode& r) {mode_=r.mode_;}
+    StringMatchMode(const StringMatchMode& r) { mode_ = r.mode_; }
 
-	Mode mode() const {return mode_;}
-	void setMode(Mode m) {mode_=m;}
-	const std::string& matchOperator() const;
-	int toInt() const {return static_cast<int>(mode_);}
+    Mode mode() const { return mode_; }
+    void setMode(Mode m) { mode_ = m; }
+    const std::string& matchOperator() const;
+    int toInt() const { return static_cast<int>(mode_); }
 
-	static Mode operToMode(const std::string&);
+    static Mode operToMode(const std::string&);
 
 private:
-	void init();
+    void init();
 
-	Mode mode_{WildcardMatch};
-	static std::map<Mode,std::string> matchOper_;
+    Mode mode_{WildcardMatch};
+    static std::map<Mode, std::string> matchOper_;
 };
-
 
 #endif /* VIEWER_SRC_STRINGMATCHMODE_HPP_ */

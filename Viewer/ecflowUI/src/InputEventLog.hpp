@@ -19,8 +19,7 @@ class QFile;
 class QMouseEvent;
 class LogTruncator;
 
-class InputEventLog : public QObject
-{
+class InputEventLog : public QObject {
     Q_OBJECT
 public:
     ~InputEventLog() override;
@@ -35,21 +34,19 @@ protected Q_SLOTS:
     void truncateLogEnd();
 
 protected:
-    InputEventLog(QObject* parent=nullptr);
+    InputEventLog(QObject* parent = nullptr);
 
-    bool eventFilter(QObject *obj, QEvent *event) override;
-    void logMousePress(QObject* obj,QMouseEvent *e);
-    void logMouseRelease(QObject* obj,QMouseEvent *e);
-    void logClose(QObject* obj,QCloseEvent *e);
-    void logContextMenu(QObject* obj,QContextMenuEvent *e);
+    bool eventFilter(QObject* obj, QEvent* event) override;
+    void logMousePress(QObject* obj, QMouseEvent* e);
+    void logMouseRelease(QObject* obj, QMouseEvent* e);
+    void logClose(QObject* obj, QCloseEvent* e);
+    void logContextMenu(QObject* obj, QContextMenuEvent* e);
 
     static InputEventLog* instance_;
     bool paused_{false};
-    QFile *outFile_;
+    QFile* outFile_;
     QTextStream out_;
     LogTruncator* truncator_;
 };
 
-
 #endif // INPUTEVENTLOG_HPP
-

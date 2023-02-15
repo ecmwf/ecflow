@@ -11,39 +11,38 @@
 #ifndef VUSERVARATTR_HPP
 #define VUSERVARATTR_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
+
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 class Variable;
 
-class VUserVarAttrType : public VAttributeType
-{
+class VUserVarAttrType : public VAttributeType {
 public:
     explicit VUserVarAttrType();
     QString toolTip(QStringList d) const override;
-    void encode(const Variable&,QStringList&) const;
+    void encode(const Variable&, QStringList&) const;
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, ValueIndex = 2 };
 };
 
-class VUserVarAttr : public VAttribute
-{
+class VUserVarAttr : public VAttribute {
 public:
-    VUserVarAttr(VNode *parent,const Variable&,int index);
+    VUserVarAttr(VNode* parent, const Variable&, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif

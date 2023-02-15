@@ -10,8 +10,8 @@
 #ifndef TIMELINEWIDGET_HPP
 #define TIMELINEWIDGET_HPP
 
-#include <QWidget>
 #include <QDateTime>
+#include <QWidget>
 
 #include "TimelineFileList.hpp"
 #include "VFile.hpp"
@@ -26,7 +26,7 @@ class VProperty;
 class QAbstractButton;
 
 namespace Ui {
-    class TimelineWidget;
+class TimelineWidget;
 }
 
 struct TimelinePrevState
@@ -39,24 +39,28 @@ struct TimelinePrevState
     bool fullEnd;
 };
 
-
-//the main widget containing all components
-class TimelineWidget : public QWidget
-{
-Q_OBJECT
+// the main widget containing all components
+class TimelineWidget : public QWidget {
+    Q_OBJECT
 
 public:
-    explicit TimelineWidget(QWidget *parent=nullptr);
+    explicit TimelineWidget(QWidget* parent = nullptr);
     ~TimelineWidget() override;
 
     void clear();
-    void initLoad(QString serverName, QString host, QString port, QString logFile,
-              const std::vector<std::string>& suites, QString remoteUid,int maxReadSize,
-              const std::string& nodePath, bool detached);
+    void initLoad(QString serverName,
+                  QString host,
+                  QString port,
+                  QString logFile,
+                  const std::vector<std::string>& suites,
+                  QString remoteUid,
+                  int maxReadSize,
+                  const std::string& nodePath,
+                  bool detached);
 
-    QString logFile() const {return logFile_;}
+    QString logFile() const { return logFile_; }
 
-    enum LogMode {LatestMode, ArchiveMode};
+    enum LogMode { LatestMode, ArchiveMode };
     void setLogMode(LogMode logMode);
     void selectPathInView(const std::string& p);
     void setDetached(bool);
@@ -65,34 +69,34 @@ public:
     void readSettings(VComboSettings* vs);
 
 protected Q_SLOTS:
-   void slotReload();
-   void slotResetStart();
-   void slotResetEnd();
-   void slotWholePeriod();
-   void slotStartChanged(const QDateTime&);
-   void slotEndChanged(const QDateTime&);
-   void slotLogMode(int);
-   void slotViewMode(QAbstractButton*);
-   void slotPathFilterChanged(QString);
-   void slotPathFilterEditFinished();
-   void slotSubTree(bool);
-   void slotTaskOnly(bool);
-   void slotSortMode(int);
-   void slotSortOrderChanged(QAbstractButton*);
-   void slotShowChanged(bool st);
-   void slotPeriodSelectedInView(QDateTime,QDateTime);
-   void slotPeriodBeingZoomedInView(QDateTime,QDateTime);
-   void slotLookup(QString);
-   void slotCopyPath(QString);
-   void slotFileTransferFinished();
-   void slotFileTransferFailed(QString);
-   void slotFileTransferStdOutput(QString msg);
-   void slotLogLoadProgress(size_t current, size_t total);
-   void slotCancelFileTransfer();
-   void slotLoadCustomFile();
-   void pathFilterMatchModeChanged(int newIndex);
-   void slotDurationViewMode(int);
-   void slotExpandFileInfo(bool st);
+    void slotReload();
+    void slotResetStart();
+    void slotResetEnd();
+    void slotWholePeriod();
+    void slotStartChanged(const QDateTime&);
+    void slotEndChanged(const QDateTime&);
+    void slotLogMode(int);
+    void slotViewMode(QAbstractButton*);
+    void slotPathFilterChanged(QString);
+    void slotPathFilterEditFinished();
+    void slotSubTree(bool);
+    void slotTaskOnly(bool);
+    void slotSortMode(int);
+    void slotSortOrderChanged(QAbstractButton*);
+    void slotShowChanged(bool st);
+    void slotPeriodSelectedInView(QDateTime, QDateTime);
+    void slotPeriodBeingZoomedInView(QDateTime, QDateTime);
+    void slotLookup(QString);
+    void slotCopyPath(QString);
+    void slotFileTransferFinished();
+    void slotFileTransferFailed(QString);
+    void slotFileTransferStdOutput(QString msg);
+    void slotLogLoadProgress(size_t current, size_t total);
+    void slotCancelFileTransfer();
+    void slotLoadCustomFile();
+    void pathFilterMatchModeChanged(int newIndex);
+    void slotDurationViewMode(int);
+    void slotExpandFileInfo(bool st);
 
 private:
     void clearData(bool usePrevState);
@@ -102,7 +106,7 @@ private:
     void loadArchive();
     void loadCore(QString logFile);
     void initFromData();
-    void updateInfoLabel(bool showDetails=true);
+    void updateInfoLabel(bool showDetails = true);
     void setAllVisible(bool b);
     void checkButtonState();
     void determineNodeTypes();

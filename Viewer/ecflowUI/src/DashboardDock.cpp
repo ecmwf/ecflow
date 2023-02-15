@@ -16,46 +16,43 @@
 #include "DashboardWidget.hpp"
 #include "IconProvider.hpp"
 
-DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
-        QWidget(parent)
-{
-	setupUi(this);
+DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-	setProperty("dockTitle","1");
+    setProperty("dockTitle", "1");
 
-	//We define the style here because it did not work from the qss file
-	QPalette p=palette();
-	QLinearGradient gr(0,0,0,1);
-	gr.setCoordinateMode(QGradient::ObjectBoundingMode);
-    gr.setColorAt(0,QColor(126,126,126));
-    gr.setColorAt(0.4,QColor(105,105,105));
-    gr.setColorAt(0.41,QColor(97,97,97));
-    gr.setColorAt(1,QColor(70,70,70));
-	p.setBrush(QPalette::Window,gr);
-	setPalette(p);
+    // We define the style here because it did not work from the qss file
+    QPalette p = palette();
+    QLinearGradient gr(0, 0, 0, 1);
+    gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+    gr.setColorAt(0, QColor(126, 126, 126));
+    gr.setColorAt(0.4, QColor(105, 105, 105));
+    gr.setColorAt(0.41, QColor(97, 97, 97));
+    gr.setColorAt(1, QColor(70, 70, 70));
+    p.setBrush(QPalette::Window, gr);
+    setPalette(p);
 
-    //Add warning icon
-    IconProvider::add(":viewer/warning.svg","warning");
+    // Add warning icon
+    IconProvider::add(":viewer/warning.svg", "warning");
 
-    //Title icon + text
-	p=titleLabel_->palette();
-	p.setColor(QPalette::WindowText,Qt::white);
-	titleLabel_->setPalette(p);
+    // Title icon + text
+    p = titleLabel_->palette();
+    p.setColor(QPalette::WindowText, Qt::white);
+    titleLabel_->setPalette(p);
     titleLabel_->hide();
     titleIconLabel_->hide();
 
-    detachedTb_->setProperty("docktitle","1");
-    maxTb_->setProperty("docktitle","1");
-    optionsTb_->setProperty("docktitle","1");
-    closeTb_->setProperty("docktitle","1");
+    detachedTb_->setProperty("docktitle", "1");
+    maxTb_->setProperty("docktitle", "1");
+    optionsTb_->setProperty("docktitle", "1");
+    closeTb_->setProperty("docktitle", "1");
 }
 
-void DashboardDockTitleWidget::setBcWidget(QWidget *w)
-{
+void DashboardDockTitleWidget::setBcWidget(QWidget* w) {
     Q_ASSERT(mainLayout->count() > 1);
     Q_ASSERT(w);
-    titleBc_=w;
-    mainLayout->insertWidget(1,titleBc_,1);
+    titleBc_ = w;
+    mainLayout->insertWidget(1, titleBc_, 1);
 #if 0
     for(int i=0; i < mainLayout->count(); i++)
     {
@@ -74,80 +71,67 @@ void DashboardDockTitleWidget::setBcWidget(QWidget *w)
     Q_ASSERT(titleBc_);
 }
 
-void DashboardDockTitleWidget::setDetachedAction(QAction *ac)
-{
+void DashboardDockTitleWidget::setDetachedAction(QAction* ac) {
     detachedTb_->setDefaultAction(ac);
 }
 
-void DashboardDockTitleWidget::setMaximisedAction(QAction *ac)
-{
+void DashboardDockTitleWidget::setMaximisedAction(QAction* ac) {
     maxTb_->setDefaultAction(ac);
 }
 
-void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
-{  
-    Q_FOREACH(QAction* ac,lst)
-	{
-    	 auto *tb=new QToolButton(this);
-         tb->setProperty("docktitle","1");
-         tb->setDefaultAction(ac);
-         tb->setAutoRaise(true);
-         tb->setPopupMode(QToolButton::InstantPopup);
-         //tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+void DashboardDockTitleWidget::addActions(QList<QAction*> lst) {
+    Q_FOREACH (QAction* ac, lst) {
+        auto* tb = new QToolButton(this);
+        tb->setProperty("docktitle", "1");
+        tb->setDefaultAction(ac);
+        tb->setAutoRaise(true);
+        tb->setPopupMode(QToolButton::InstantPopup);
+        // tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-         QPalette p=tb->palette();
-         p.setColor(QPalette::ButtonText,Qt::white);
-         tb->setPalette(p);
+        QPalette p = tb->palette();
+        p.setColor(QPalette::ButtonText, Qt::white);
+        tb->setPalette(p);
 
-         actionLayout_->addWidget(tb);
+        actionLayout_->addWidget(tb);
 
-         if(!ac->isEnabled())
-             tb->hide();
+        if (!ac->isEnabled())
+            tb->hide();
 
-         actionTbList_ << tb;
+        actionTbList_ << tb;
 
-         connect(ac,SIGNAL(changed()),
-                 this,SLOT(slotActionChanged()));
+        connect(ac, SIGNAL(changed()), this, SLOT(slotActionChanged()));
     }
 
-    //Hide the separator line if no buttons were added
-    //if(actionTbList_.isEmpty())
-    //    line_->hide();
+    // Hide the separator line if no buttons were added
+    // if(actionTbList_.isEmpty())
+    //     line_->hide();
 }
 
-void DashboardDockTitleWidget::slotActionChanged()
-{
-    Q_FOREACH(QToolButton *tb, actionTbList_)
-    {
-        if(!tb->isEnabled())
-        {
+void DashboardDockTitleWidget::slotActionChanged() {
+    Q_FOREACH (QToolButton* tb, actionTbList_) {
+        if (!tb->isEnabled()) {
             tb->hide();
         }
-        else
-        {
+        else {
             tb->show();
         }
     }
 }
 
-
-QSize DashboardDockTitleWidget::sizeHint() const
-{
-	QSize s=QWidget::sizeHint();
-	//s.setHeight();
-	return s;
+QSize DashboardDockTitleWidget::sizeHint() const {
+    QSize s = QWidget::sizeHint();
+    // s.setHeight();
+    return s;
 }
 
-QSize DashboardDockTitleWidget::minimumSizeHint() const
-{
-	QSize s=QWidget::minimumSizeHint();
-	//s.setHeight(16);
-	return s;
+QSize DashboardDockTitleWidget::minimumSizeHint() const {
+    QSize s = QWidget::minimumSizeHint();
+    // s.setHeight(16);
+    return s;
 }
 
-QToolButton* DashboardDockTitleWidget::optionsTb() const
-{
-	return optionsTb_;
+QToolButton* DashboardDockTitleWidget::optionsTb() const {
+    return optionsTb_;
 }
 
 #if 0
@@ -164,32 +148,25 @@ void DashboardDockTitleWidget::on_floatTb__clicked(bool)
 }
 #endif
 
-void DashboardDockTitleWidget::on_closeTb__clicked(bool)
-{
-	if(auto *dw = qobject_cast<QDockWidget*>(parentWidget()))
-	{
-		dw->close();
-	}
+void DashboardDockTitleWidget::on_closeTb__clicked(bool) {
+    if (auto* dw = qobject_cast<QDockWidget*>(parentWidget())) {
+        dw->close();
+    }
 }
 
-void DashboardDockTitleWidget::slotUpdateTitle(QString txt,QString type)
-{
-    if(txt.isEmpty())
-    {
-       titleLabel_->hide();
-       titleIconLabel_->hide();
+void DashboardDockTitleWidget::slotUpdateTitle(QString txt, QString type) {
+    if (txt.isEmpty()) {
+        titleLabel_->hide();
+        titleIconLabel_->hide();
     }
-    else
-    {
-        if(type == "warning")
-        {
-            titleIconLabel_->setPixmap(IconProvider::pixmap("warning",16));
+    else {
+        if (type == "warning") {
+            titleIconLabel_->setPixmap(IconProvider::pixmap("warning", 16));
             titleIconLabel_->show();
             txt.prepend(" ");
             txt.append("  ");
         }
-        else
-        {
+        else {
             titleIconLabel_->show();
         }
 
@@ -204,34 +181,29 @@ void DashboardDockTitleWidget::slotUpdateTitle(QString txt,QString type)
 //
 //============================================================
 
-DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
-	QDockWidget(parent)
-{
-	setFeatures(QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable);
+DashboardDock::DashboardDock(DashboardWidget* dw, QWidget* parent) : QDockWidget(parent) {
+    setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
 
-	auto *dt=new DashboardDockTitleWidget(this);
+    auto* dt = new DashboardDockTitleWidget(this);
 
-	setTitleBarWidget(dt);
+    setTitleBarWidget(dt);
 
     dt->setDetachedAction(dw->detachedAction());
     dt->setMaximisedAction(dw->maximisedAction());
-	dt->addActions(dw->dockTitleActions());
+    dt->addActions(dw->dockTitleActions());
 
-    connect(dw,SIGNAL(titleUpdated(QString,QString)),
-            dt,SLOT(slotUpdateTitle(QString,QString)));
+    connect(dw, SIGNAL(titleUpdated(QString, QString)), dt, SLOT(slotUpdateTitle(QString, QString)));
 
     dw->populateDockTitleBar(dt);
 
-	setWidget(dw);
+    setWidget(dw);
 }
 
-void DashboardDock::showEvent(QShowEvent* event)
-{
-	QWidget::showEvent(event);
+void DashboardDock::showEvent(QShowEvent* event) {
+    QWidget::showEvent(event);
 }
 
-void DashboardDock::closeEvent (QCloseEvent *event)
-{
-	QWidget::closeEvent(event);
-	Q_EMIT closeRequested();
+void DashboardDock::closeEvent(QCloseEvent* event) {
+    QWidget::closeEvent(event);
+    Q_EMIT closeRequested();
 }

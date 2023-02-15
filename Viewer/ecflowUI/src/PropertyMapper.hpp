@@ -13,13 +13,12 @@
 
 #include "VProperty.hpp"
 
-class PropertyMapper
-{
+class PropertyMapper {
 public:
-    PropertyMapper(const std::vector<std::string>&,VPropertyObserver* obs);
+    PropertyMapper(const std::vector<std::string>&, VPropertyObserver* obs);
     ~PropertyMapper();
-    VProperty* find(const std::string& path,bool failOnError=false) const;
-    void initObserver(VPropertyObserver *obs) const;
+    VProperty* find(const std::string& path, bool failOnError = false) const;
+    void initObserver(VPropertyObserver* obs) const;
 
 private:
     VPropertyObserver* obs_;
@@ -27,4 +26,3 @@ private:
 };
 
 #endif
-

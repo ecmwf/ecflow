@@ -15,11 +15,9 @@
 
 #include "ui_AboutDialog.h"
 
-class AboutDialog : public QDialog, protected Ui::AboutDialog
-{
+class AboutDialog : public QDialog, protected Ui::AboutDialog {
 public:
-    explicit AboutDialog(QWidget *parent=nullptr);
+    explicit AboutDialog(QWidget* parent = nullptr);
 };
 
 #endif
-

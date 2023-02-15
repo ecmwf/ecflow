@@ -9,43 +9,38 @@
 //============================================================================
 
 #include "VGenVarAttr.hpp"
-#include "VAttributeType.hpp"
-#include "VNode.hpp"
 
 #include "NodeAttr.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
 
 //================================
 // VGenVarAttrType
 //================================
 
-VGenVarAttrType::VGenVarAttrType() : VAttributeType("genvar")
-{
-    dataCount_=3;
-    searchKeyToData_["var_name"]=NameIndex;
-    searchKeyToData_["var_value"]=ValueIndex;
-    searchKeyToData_["var_type"]=TypeIndex;
-    searchKeyToData_["name"]=NameIndex;
-    scanProc_=VGenVarAttr::scan;
+VGenVarAttrType::VGenVarAttrType() : VAttributeType("genvar") {
+    dataCount_                    = 3;
+    searchKeyToData_["var_name"]  = NameIndex;
+    searchKeyToData_["var_value"] = ValueIndex;
+    searchKeyToData_["var_type"]  = TypeIndex;
+    searchKeyToData_["name"]      = NameIndex;
+    scanProc_                     = VGenVarAttr::scan;
 }
 
-QString VGenVarAttrType::toolTip(QStringList d) const
-{
-    QString t="<b>Type:</b> User variable<br>";
-    if(d.count() == dataCount_)
-    {
-        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
-        QString s=d[ValueIndex];
-        if(s.size() > 150) s=s.left(150) + "...";
-        t+="<b>Value:</b> " + s;
+QString VGenVarAttrType::toolTip(QStringList d) const {
+    QString t = "<b>Type:</b> User variable<br>";
+    if (d.count() == dataCount_) {
+        t += "<b>Name:</b> " + d[NameIndex] + "<br>";
+        QString s = d[ValueIndex];
+        if (s.size() > 150)
+            s = s.left(150) + "...";
+        t += "<b>Value:</b> " + s;
     }
     return t;
 }
 
-void VGenVarAttrType::encode(const Variable& v,QStringList& data) const
-{
-    data << qName_ <<
-            QString::fromStdString(v.name()) <<
-            QString::fromStdString(v.theValue());
+void VGenVarAttrType::encode(const Variable& v, QStringList& data) const {
+    data << qName_ << QString::fromStdString(v.name()) << QString::fromStdString(v.theValue());
 }
 
 //=====================================================
@@ -54,34 +49,28 @@ void VGenVarAttrType::encode(const Variable& v,QStringList& data) const
 //
 //=====================================================
 
-VGenVarAttr::VGenVarAttr(VNode *parent,const Variable& /*v*/, int index) : VAttribute(parent,index)
-{
-    //name_=v.name();
+VGenVarAttr::VGenVarAttr(VNode* parent, const Variable& /*v*/, int index) : VAttribute(parent, index) {
+    // name_=v.name();
 }
 
-VAttributeType* VGenVarAttr::type() const
-{
-    static VAttributeType* atype=VAttributeType::find("genvar");
+VAttributeType* VGenVarAttr::type() const {
+    static VAttributeType* atype = VAttributeType::find("genvar");
     return atype;
 }
 
-QStringList VGenVarAttr::data(bool /*firstLine*/) const
-{
-    static auto* atype=static_cast<VGenVarAttrType*>(type());
+QStringList VGenVarAttr::data(bool /*firstLine*/) const {
+    static auto* atype = static_cast<VGenVarAttrType*>(type());
     QStringList s;
-    if(parent_)
-    {
+    if (parent_) {
         std::vector<Variable> v;
         parent_->genVariables(v);
-        atype->encode(v[index_],s);
+        atype->encode(v[index_], s);
     }
     return s;
 }
 
-std::string VGenVarAttr::strName() const
-{
-    if(parent_)
-    {
+std::string VGenVarAttr::strName() const {
+    if (parent_) {
         std::vector<Variable> v;
         parent_->genVariables(v);
         return v[index_].name();
@@ -89,24 +78,22 @@ std::string VGenVarAttr::strName() const
     return {};
 }
 
-void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-    if(vnode)
-    {
+void VGenVarAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
+    if (vnode) {
         std::vector<Variable> v;
         vnode->genVariables(v);
-        auto n=static_cast<int>(v.size());
-        for(int i=0; i < n; i++)
-        {
-            vec.push_back(new VGenVarAttr(vnode,v[i],i));
+        auto n = static_cast<int>(v.size());
+        for (int i = 0; i < n; i++) {
+            vec.push_back(new VGenVarAttr(vnode, v[i], i));
         }
     }
 }
 
-bool VGenVarAttr::isReadOnly(const std::string& varName)
-{
-    static QStringList readOnlyVars=QStringList() <<
-                 "ECF_HOST" << "ECF_PORT" << "ECF_PID" <<
-                 "ECF_VERSION" << "ECF_LISTS";
+bool VGenVarAttr::isReadOnly(const std::string& varName) {
+    static QStringList readOnlyVars = QStringList() << "ECF_HOST"
+                                                    << "ECF_PORT"
+                                                    << "ECF_PID"
+                                                    << "ECF_VERSION"
+                                                    << "ECF_LISTS";
     return readOnlyVars.contains(QString::fromStdString(varName));
 }

@@ -10,33 +10,20 @@
 
 #include "NodeQueryCombo.hpp"
 
+#include <QVariant>
+
 #include "NodeQuery.hpp"
 #include "NodeQueryHandler.hpp"
 
-#include <QVariant>
+NodeQueryCombo::NodeQueryCombo(QWidget* parent) : QComboBox(parent) {
+    for (auto it : NodeQueryHandler::instance()->items()) {
+        addItem(QString::fromStdString(it->name()));
+    }
 
-NodeQueryCombo::NodeQueryCombo(QWidget* parent) : QComboBox(parent)
-{
-	for(auto it : NodeQueryHandler::instance()->items())
-	{
-		addItem(QString::fromStdString(it->name()));
-	}
-
-	connect(this,SIGNAL(currentIndexChanged(int)),
-			this,SLOT(slotCurrentChanged(int)));
+    connect(this, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentChanged(int)));
 }
 
-void NodeQueryCombo::slotCurrentChanged(int current)
-{
-	if(current != -1)
-		Q_EMIT changed(itemData(current).toString());
+void NodeQueryCombo::slotCurrentChanged(int current) {
+    if (current != -1)
+        Q_EMIT changed(itemData(current).toString());
 }
-
-
-
-
-
-
-
-
-

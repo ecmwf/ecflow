@@ -13,21 +13,18 @@
 
 #include <QTextEdit>
 
-class OneLineTextEdit : public QTextEdit
-{
-Q_OBJECT
+class OneLineTextEdit : public QTextEdit {
+    Q_OBJECT
 
 public:
-	OneLineTextEdit(QWidget* parent=nullptr);
-	QSize sizeHint() const override;
+    OneLineTextEdit(QWidget* parent = nullptr);
+    QSize sizeHint() const override;
 
 Q_SIGNALS:
-	void clicked();
+    void clicked();
 
 protected:
-	void mousePressEvent(QMouseEvent *e) override;
+    void mousePressEvent(QMouseEvent* e) override;
 };
-
-
 
 #endif /* VIEWER_SRC_ONELINETEXTEDIT_HPP_ */

@@ -26,20 +26,18 @@
 //
 //=================================
 
-FileFetchLocalTask::FileFetchLocalTask(FetchQueueOwner* owner) :
-     AbstractFetchTask("FileFetchLocal", owner) {}
+FileFetchLocalTask::FileFetchLocalTask(FetchQueueOwner* owner) : AbstractFetchTask("FileFetchLocal", owner) {
+}
 
 // try to read the logfile from the disk (if the settings allow it)
-void FileFetchLocalTask::run()
-{
+void FileFetchLocalTask::run() {
 #ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     auto reply = owner_->theReply();
-    //we do not want to delete the file once the VFile object is destroyed!!
-    VFile_ptr f(VFile::create(filePath_,false));
-    if(f->exists())
-    {
+    // we do not want to delete the file once the VFile object is destroyed!!
+    VFile_ptr f(VFile::create(filePath_, false));
+    if (f->exists()) {
         reply->fileReadMode(VReply::LocalReadMode);
         reply->addLogTryEntry("read file from disk: OK");
 
@@ -48,11 +46,12 @@ void FileFetchLocalTask::run()
         f->setFetchDate(QDateTime::currentDateTime());
         if (appendResult_) {
             reply->appendTmpFile(f);
-        } else {
+        }
+        else {
             reply->tmpFile(f);
         }
         succeed();
-        return ;
+        return;
     }
     reply->addLogTryEntry("read file from disk: NO ACCESS");
     reply->appendErrorText("Failed to read file from disk\n");
@@ -65,34 +64,29 @@ void FileFetchLocalTask::run()
 //
 //=================================
 
-FileFetchTransferTask::FileFetchTransferTask(FetchQueueOwner* owner) :
-     QObject(nullptr), AbstractFetchTask("FileFetchTransfer", owner)
-{
+FileFetchTransferTask::FileFetchTransferTask(FetchQueueOwner* owner)
+    : QObject(nullptr), AbstractFetchTask("FileFetchTransfer", owner) {
 }
 
-void FileFetchTransferTask::stopTransfer()
-{
+void FileFetchTransferTask::stopTransfer() {
     if (transfer_) {
         transfer_->stopTransfer(false);
-     }
+    }
 }
 
-void FileFetchTransferTask::stop()
-{
+void FileFetchTransferTask::stop() {
     stopTransfer();
     AbstractFetchTask::clear();
 }
 
-void FileFetchTransferTask::clear()
-{
+void FileFetchTransferTask::clear() {
     stopTransfer();
     AbstractFetchTask::clear();
 }
 
-//Fetch the file asynchronously via ssh. The output client will call clientFinished() or
-//clientError eventually!!
-void FileFetchTransferTask::run()
-{
+// Fetch the file asynchronously via ssh. The output client will call clientFinished() or
+// clientError eventually!!
+void FileFetchTransferTask::run() {
 #ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " deltaPos=" << deltaPos_;
 #endif
@@ -114,43 +108,42 @@ void FileFetchTransferTask::run()
     if (!transfer_) {
         transfer_ = new VFileTransfer(this);
 
-        connect(transfer_, SIGNAL(transferFinished()),
-                this, SLOT(transferFinished()));
+        connect(transfer_, SIGNAL(transferFinished()), this, SLOT(transferFinished()));
 
-        connect(transfer_, SIGNAL(transferFailed(QString)),
-                this, SLOT(transferFailed(QString)));
+        connect(transfer_, SIGNAL(transferFailed(QString)), this, SLOT(transferFailed(QString)));
     }
 
     Q_ASSERT(transfer_);
     if (useMetaData_) {
         if (deltaPos_ > 0) {
-            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                           VFileTransfer::BytesFromPos, deltaPos_,  modTime_, checkSum_);
-        } else {
-            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                           VFileTransfer::AllBytes, 0,  modTime_, checkSum_);
+            transfer_->transferLocalViaSocks(
+                QString::fromStdString(filePath_), VFileTransfer::BytesFromPos, deltaPos_, modTime_, checkSum_);
         }
-    } else {
-        if (deltaPos_ > 0) {
-            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                           VFileTransfer::BytesFromPos, deltaPos_);
-        } else {
-            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_),
-                           VFileTransfer::AllBytes, 0);
+        else {
+            transfer_->transferLocalViaSocks(
+                QString::fromStdString(filePath_), VFileTransfer::AllBytes, 0, modTime_, checkSum_);
         }
     }
-    owner_->progressStart("Getting local file <i>" + filePath_ +  "</i> from SOCKS host via scp", 0);
+    else {
+        if (deltaPos_ > 0) {
+            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_), VFileTransfer::BytesFromPos, deltaPos_);
+        }
+        else {
+            transfer_->transferLocalViaSocks(QString::fromStdString(filePath_), VFileTransfer::AllBytes, 0);
+        }
+    }
+    owner_->progressStart("Getting local file <i>" + filePath_ + "</i> from SOCKS host via scp", 0);
 }
 
-void FileFetchTransferTask::transferFinished()
-{
+void FileFetchTransferTask::transferFinished() {
     auto reply = owner_->theReply();
     reply->setInfoText("");
     reply->fileReadMode(VReply::TransferReadMode);
 
     if (deltaPos_ > 0) {
         reply->addLogTryEntry("fetch file increment from SOCKS host via scp : OK");
-    } else {
+    }
+    else {
         reply->addLogTryEntry("fetch file from SOCKS host via scp : OK");
     }
 
@@ -164,32 +157,32 @@ void FileFetchTransferTask::transferFinished()
 
         tmp->setLog(reply->log());
 
-        //Files retrieved from the log server are automatically added to the cache!
-        //To make it work sourcePath must be set on resFile_ !!!
+        // Files retrieved from the log server are automatically added to the cache!
+        // To make it work sourcePath must be set on resFile_ !!!
         if (useCache_ && deltaPos_ == 0) {
             owner_->addToCache(tmp);
         }
 
         if (appendResult_) {
             reply->appendTmpFile(tmp);
-        } else {
+        }
+        else {
             reply->tmpFile(tmp);
         }
         transfer_->clear();
         owner_->progressStop();
         succeed();
-    } else {
+    }
+    else {
         transferFailed("No contents was transferred");
     }
 }
 
-void FileFetchTransferTask::transferProgress(QString /*msg*/,int /*value*/)
-{
-    //owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
+void FileFetchTransferTask::transferProgress(QString /*msg*/, int /*value*/) {
+    // owner_->owner_->infoProgressUpdate(msg.toStdString(),value);
 }
 
-void FileFetchTransferTask::transferFailed(QString msg)
-{
+void FileFetchTransferTask::transferFailed(QString msg) {
 #ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
@@ -208,25 +201,22 @@ void FileFetchTransferTask::transferFailed(QString msg)
 //
 //=================================
 
-FileFetchCacheTask::FileFetchCacheTask(FetchQueueOwner* owner) :
-    AbstractFetchTask("FileFetchCache", owner) {}
+FileFetchCacheTask::FileFetchCacheTask(FetchQueueOwner* owner) : AbstractFetchTask("FileFetchCache", owner) {
+}
 
 // Try to fetch the logfile from the local cache
-void FileFetchCacheTask::run()
-{
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+void FileFetchCacheTask::run() {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " useCache=" << useCache_;
 #endif
 
     assert(node_);
 
-    //We try use the cache
-    if(useCache_)
-    {
-        //Check if the given output is already in the cache
-        VFile_ptr f=owner_->findInCache(filePath_);
-        if (f)
-        {
+    // We try use the cache
+    if (useCache_) {
+        // Check if the given output is already in the cache
+        VFile_ptr f = owner_->findInCache(filePath_);
+        if (f) {
 #ifdef UI_FILEPROVIDER_TASK_DEBUG__
             UiLog().dbg() << " File found in cache";
 #endif
@@ -239,7 +229,8 @@ void FileFetchCacheTask::run()
             reply->addLogRemarkEntry("File were read from cache.");
             if (appendResult_) {
                 reply->appendTmpFile(f);
-            } else {
+            }
+            else {
                 reply->tmpFile(f);
             }
             succeed();
@@ -255,22 +246,19 @@ void FileFetchCacheTask::run()
 //
 //=================================
 
-FileFetchLogServerTask::FileFetchLogServerTask(FetchQueueOwner* owner) :
-     QObject(nullptr), AbstractFetchTask("FileFetchLogServer", owner)
-{
+FileFetchLogServerTask::FileFetchLogServerTask(FetchQueueOwner* owner)
+    : QObject(nullptr), AbstractFetchTask("FileFetchLogServer", owner) {
 }
 
-FileFetchLogServerTask::~FileFetchLogServerTask()
-{
-    if(client_) {
+FileFetchLogServerTask::~FileFetchLogServerTask() {
+    if (client_) {
         client_->disconnect(this);
     }
 }
 
-void FileFetchLogServerTask::deleteClient()
-{
-    if(client_) {
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+void FileFetchLogServerTask::deleteClient() {
+    if (client_) {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
         UI_FN_DBG
 #endif
         client_->disconnect(this);
@@ -279,9 +267,8 @@ void FileFetchLogServerTask::deleteClient()
     }
 }
 
-void FileFetchLogServerTask::stop()
-{
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+void FileFetchLogServerTask::stop() {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UI_FN_DBG
 #endif
     AbstractFetchTask::clear();
@@ -290,65 +277,61 @@ void FileFetchLogServerTask::stop()
     }
 }
 
-void FileFetchLogServerTask::clear()
-{
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+void FileFetchLogServerTask::clear() {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UI_FN_DBG
 #endif
-      stop();
+    stop();
 }
 
-//Create an output client (to access the logserver) and ask it to the fetch the
-//file asynchronously. The output client will call clientFinished() or
-//clientError() eventually!!
-void FileFetchLogServerTask::run()
-{
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+// Create an output client (to access the logserver) and ask it to the fetch the
+// file asynchronously. The output client will call clientFinished() or
+// clientError() eventually!!
+void FileFetchLogServerTask::run() {
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     std::string host, port;
     assert(node_);
 
     // First try the user defined logserver, then the system defined one
-    bool userLogServerUsed = node_->userLogServer(host,port);
-    bool sysLogServerUsed = false;
+    bool userLogServerUsed = node_->userLogServer(host, port);
+    bool sysLogServerUsed  = false;
     if (!userLogServerUsed) {
-        sysLogServerUsed = node_->logServer(host,port);
+        sysLogServerUsed = node_->logServer(host, port);
     }
     Q_ASSERT(!userLogServerUsed || !sysLogServerUsed);
 
     if (userLogServerUsed || sysLogServerUsed) {
         Q_ASSERT(userLogServerUsed || sysLogServerUsed);
         if (client_ && (client_->host() != host || client_->portStr() != port)) {
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
-        UiLog().dbg() << " host/port does not match! Create new client";
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+            UiLog().dbg() << " host/port does not match! Create new client";
 #endif
-        deleteClient();
+            deleteClient();
         }
 
         if (!client_) {
-            client_=new OutputFileClient(host,port,this);
+            client_ = new OutputFileClient(host, port, this);
 
-            connect(client_,SIGNAL(error(QString)),
-                    this,SLOT(clientError(QString)));
+            connect(client_, SIGNAL(error(QString)), this, SLOT(clientError(QString)));
 
-            connect(client_,SIGNAL(progress(QString,int)),
-                    this,SLOT(clientProgress(QString,int)));
+            connect(client_, SIGNAL(progress(QString, int)), this, SLOT(clientProgress(QString, int)));
 
-            connect(client_,SIGNAL(finished()),
-                    this,SLOT(clientFinished()));
+            connect(client_, SIGNAL(finished()), this, SLOT(clientFinished()));
         }
 
         Q_ASSERT(client_);
-#ifdef  UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEPROVIDER_TASK_DEBUG__
         UiLog().dbg() << " use logserver=" << client_->longName();
 #endif
 
-        owner_->progressStart("Getting file <i>" + filePath_ +  "</i> from" +
-                              ((userLogServerUsed)?"<b>user defined</b>":"") +
-                              " log server <i> " + client_->longName() + "</i>",0);
+        owner_->progressStart("Getting file <i>" + filePath_ + "</i> from" +
+                                  ((userLogServerUsed) ? "<b>user defined</b>" : "") + " log server <i> " +
+                                  client_->longName() + "</i>",
+                              0);
 
-        VDir_ptr dir=owner_->dirToFile(filePath_);
+        VDir_ptr dir = owner_->dirToFile(filePath_);
         client_->setDir(dir);
 
         // fetch the file asynchronously
@@ -356,24 +339,23 @@ void FileFetchLogServerTask::run()
         return;
     }
 
-    //If we are here there is no output client defined/available
+    // If we are here there is no output client defined/available
     deleteClient();
 
     owner_->theReply()->addLogTryEntry("fetch file from logserver: NOT DEFINED");
     finish();
 }
 
-void FileFetchLogServerTask::clientFinished()
-{
+void FileFetchLogServerTask::clientFinished() {
     VFile_ptr tmp = client_->result();
-    //assert(tmp);
+    // assert(tmp);
     assert(client_);
 
     if (tmp) {
         client_->clearResult();
 
-        //Files retrieved from the log server are automatically added to the cache!
-        //sourcePath must be already set on tmp
+        // Files retrieved from the log server are automatically added to the cache!
+        // sourcePath must be already set on tmp
         if (useCache_ && !tmp->hasDeltaContents()) {
             owner_->addToCache(tmp);
         }
@@ -384,7 +366,8 @@ void FileFetchLogServerTask::clientFinished()
 
         if (tmp->hasDeltaContents()) {
             reply->addLogTryEntry("fetch file increment from logserver=" + client_->longName() + ": OK");
-        } else {
+        }
+        else {
             reply->addLogTryEntry("fetch file from logserver=" + client_->longName() + ": OK");
         }
 
@@ -392,25 +375,25 @@ void FileFetchLogServerTask::clientFinished()
 
         if (appendResult_) {
             reply->appendTmpFile(tmp);
-        } else {
+        }
+        else {
             reply->tmpFile(tmp);
         }
 
         client_->clearResult();
         owner_->progressStop();
         succeed();
-    } else {
+    }
+    else {
         clientError("No contents were transferred");
     }
 }
 
-void FileFetchLogServerTask::clientProgress(QString msg,int value)
-{
-    owner_->progressUpdate(msg.toStdString(),value);
+void FileFetchLogServerTask::clientProgress(QString msg, int value) {
+    owner_->progressUpdate(msg.toStdString(), value);
 }
 
-void FileFetchLogServerTask::clientError(QString msg)
-{
+void FileFetchLogServerTask::clientError(QString msg) {
     assert(client_);
     owner_->progressStop();
     auto reply = owner_->theReply();
@@ -420,9 +403,7 @@ void FileFetchLogServerTask::clientError(QString msg)
     fail();
 }
 
-
 static FetchTaskMaker<FileFetchLocalTask> maker1("file_local");
 static FetchTaskMaker<FileFetchTransferTask> maker2("file_transfer");
 static FetchTaskMaker<FileFetchCacheTask> maker3("file_cache");
 static FetchTaskMaker<FileFetchLogServerTask> maker4("file_logserver");
-

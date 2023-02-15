@@ -11,11 +11,12 @@
 #ifndef VTRIGGERATTR_HPP
 #define VTRIGGERATTR_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
+#include <vector>
 
 #include <QStringList>
-#include <vector>
+
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
@@ -23,34 +24,31 @@ class VNode;
 
 class Expression;
 
-class VTriggerAttrType : public VAttributeType
-{
+class VTriggerAttrType : public VAttributeType {
 public:
     explicit VTriggerAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encodeTrigger(Expression*,QStringList&) const;
-    void encodeComplete(Expression*,QStringList&) const;
+    void encodeTrigger(Expression*, QStringList&) const;
+    void encodeComplete(Expression*, QStringList&) const;
     void encode_empty(QStringList& data) const;
 
 private:
-    enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
+    enum DataIndex { TypeIndex = 0, CompleteIndex = 1, ExprIndex = 2 };
 };
 
-class VTriggerAttr : public VAttribute
-{
+class VTriggerAttr : public VAttribute {
 
 public:
-    VTriggerAttr(VNode *parent,Expression*, int index);
+    VTriggerAttr(VNode* parent, Expression*, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
     std::string ast_str() const;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
-    static void expressions(const VNode* vnode,std::string& trigger, std::string& complete);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
+    static void expressions(const VNode* vnode, std::string& trigger, std::string& complete);
 };
 
 #endif // VTRIGGERATTR_HPP
-

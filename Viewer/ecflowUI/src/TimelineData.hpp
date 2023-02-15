@@ -14,8 +14,8 @@
 #include <vector>
 
 #include <QDateTime>
-#include <QObject>
 #include <QHash>
+#include <QObject>
 #include <QtGlobal>
 
 struct TimelineItemStats
@@ -28,45 +28,45 @@ struct TimelineItemStats
     int perc75;
 };
 
-
-class TimelineItem
-{
+class TimelineItem {
 public:
-    enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
+    enum Type { UndeterminedType, ServerType, SuiteType, FamilyType, TaskType };
 
     TimelineItem() = default;
-    TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type=UndeterminedType);
-    size_t size() const {return status_.size();}
-    const std::string& path() const {return path_;}
-    Type type() const {return type_;}
-    void setType(Type t) {type_ = t;}
-    size_t sortIndex() const {return sortIndex_;}
-    size_t treeIndex() const {return treeIndex_;}
-    void setTreeIndex(size_t t) {treeIndex_=t;}
-    bool isTask() const {return type_ ==  TaskType;}
-    void add(unsigned char status,unsigned int time);
-    int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
-    bool hasSubmittedOrActiveDuration(QDateTime startDt,QDateTime endDt) const;
-    int firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const;
-    int firstActiveDuration(QDateTime startDt,QDateTime endDt,unsigned int tlEndTime) const;
-    void meanSubmittedDuration(float&,int&,unsigned int tlEndTime) const;
-    void meanActiveDuration(float&,int&,unsigned int tlEndTime) const;
-    void durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats,unsigned int tlEndTime) const;
+    TimelineItem(const std::string& path, unsigned char status, unsigned int time, Type type = UndeterminedType);
+    size_t size() const { return status_.size(); }
+    const std::string& path() const { return path_; }
+    Type type() const { return type_; }
+    void setType(Type t) { type_ = t; }
+    size_t sortIndex() const { return sortIndex_; }
+    size_t treeIndex() const { return treeIndex_; }
+    void setTreeIndex(size_t t) { treeIndex_ = t; }
+    bool isTask() const { return type_ == TaskType; }
+    void add(unsigned char status, unsigned int time);
+    int firstInPeriod(QDateTime startDt, QDateTime endDt) const;
+    bool hasSubmittedOrActiveDuration(QDateTime startDt, QDateTime endDt) const;
+    int firstSubmittedDuration(QDateTime startDt, QDateTime endDt) const;
+    int firstActiveDuration(QDateTime startDt, QDateTime endDt, unsigned int tlEndTime) const;
+    void meanSubmittedDuration(float&, int&, unsigned int tlEndTime) const;
+    void meanActiveDuration(float&, int&, unsigned int tlEndTime) const;
+    void durationStats(unsigned char statusId,
+                       int& num,
+                       float& mean,
+                       TimelineItemStats& stats,
+                       unsigned int tlEndTime) const;
     void days(std::vector<unsigned int>&) const;
 
-    static unsigned int fromQDateTime(QDateTime dt)
-          {return dt.toMSecsSinceEpoch()/1000;}
+    static unsigned int fromQDateTime(QDateTime dt) { return dt.toMSecsSinceEpoch() / 1000; }
 
-    static QDateTime toQDateTime(unsigned int t)  {
+    static QDateTime toQDateTime(unsigned int t) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-        return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000,Qt::UTC);
+        return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t) * 1000, Qt::UTC);
 #else
-        return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000).toUTC();
+        return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t) * 1000).toUTC();
 #endif
     }
 
-
-//protected:
+    // protected:
     std::string path_;
     Type type_{UndeterminedType};
     size_t sortIndex_{0};
@@ -74,46 +74,46 @@ public:
     size_t parentIndex_{0};
     std::vector<unsigned int> start_;
     std::vector<unsigned char> status_;
-
 };
 
-class TimelineData : public QObject
-{
+class TimelineData : public QObject {
     Q_OBJECT
 public:
-    enum LoadStatus {LoadNotTried,LoadFailed,LoadDone};
+    enum LoadStatus { LoadNotTried, LoadFailed, LoadDone };
 
-    TimelineData(QObject* parent=nullptr) : QObject(parent) {}
+    TimelineData(QObject* parent = nullptr) : QObject(parent) {}
 
-    void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
-    void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last);
+    void loadLogFile(const std::string& logFile, size_t maxReadSize, const std::vector<std::string>& suites);
+    void
+    loadMultiLogFile(const std::string& logFile, const std::vector<std::string>& suites, int logFileIndex, bool last);
 
-    QDateTime loadedAt() const {return loadedAt_;}
-    size_t size() const {return  items_.size();}
-    const std::vector<TimelineItem>& items() const {return items_;}
-    unsigned int startTime() const {return startTime_;}
-    unsigned int endTime() const {return endTime_;}
-    QDateTime qStartTime() const {return TimelineItem::toQDateTime(startTime_);}
-    QDateTime qEndTime() const {return TimelineItem::toQDateTime(endTime_);}
-    void clear();    
-    void setItemType(int index,TimelineItem::Type type);
-    void setItemTreeIndex(size_t index,size_t treeIndex);
-    bool isFullRead() const {return fullRead_;}
-    LoadStatus loadStatus() const {return loadStatus_;}
-    void markAsLoadDone() {loadStatus_ = LoadDone;}
-    bool indexOfItem(const std::string&,size_t&);
-    const std::vector<size_t>& sortIndex() const {return sortIndex_;}
+    QDateTime loadedAt() const { return loadedAt_; }
+    size_t size() const { return items_.size(); }
+    const std::vector<TimelineItem>& items() const { return items_; }
+    unsigned int startTime() const { return startTime_; }
+    unsigned int endTime() const { return endTime_; }
+    QDateTime qStartTime() const { return TimelineItem::toQDateTime(startTime_); }
+    QDateTime qEndTime() const { return TimelineItem::toQDateTime(endTime_); }
+    void clear();
+    void setItemType(int index, TimelineItem::Type type);
+    void setItemTreeIndex(size_t index, size_t treeIndex);
+    bool isFullRead() const { return fullRead_; }
+    LoadStatus loadStatus() const { return loadStatus_; }
+    void markAsLoadDone() { loadStatus_ = LoadDone; }
+    bool indexOfItem(const std::string&, size_t&);
+    const std::vector<size_t>& sortIndex() const { return sortIndex_; }
 
-    static bool parseLine(const std::string& line,std::string& name,
-                          unsigned char& statusId,unsigned int& statusTime);
+    static bool
+    parseLine(const std::string& line, std::string& name, unsigned char& statusId, unsigned int& statusTime);
 
 Q_SIGNALS:
-    void loadProgress(size_t current,size_t total);
+    void loadProgress(size_t current, size_t total);
 
 protected:
-    void loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi);
+    void
+    loadLogFileCore(const std::string& logFile, size_t maxReadSize, const std::vector<std::string>& suites, bool multi);
     void guessNodeType();
-    TimelineItem::Type guessNodeType(const std::string& line,const std::string& name) const;
+    TimelineItem::Type guessNodeType(const std::string& line, const std::string& name) const;
     TimelineItem::Type guessNodeType(const std::string& line) const;
     void sortByPath();
 
@@ -125,7 +125,7 @@ protected:
     size_t maxReadSize_{0};
     bool fullRead_{false};
     LoadStatus loadStatus_{LoadNotTried};
-    QHash<QString,size_t> pathHash_;
+    QHash<QString, size_t> pathHash_;
     std::vector<size_t> sortIndex_;
 };
 

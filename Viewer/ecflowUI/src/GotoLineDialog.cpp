@@ -11,19 +11,15 @@
 
 #include <QPushButton>
 
-GotoLineDialog::GotoLineDialog(QWidget *parent) : QDialog(parent)
-{
+GotoLineDialog::GotoLineDialog(QWidget* parent) : QDialog(parent) {
     setupUi(this); // this sets up GUI// setupFileMenu();
 
-    connect (buttonBox, SIGNAL(accepted()),                   this, SLOT(doneIt()));
-    connect (buttonBox, SIGNAL(rejected()),                   this, SLOT(reject()));
-    connect (lineEdit,  SIGNAL(textChanged(const QString &)), this, SLOT(setButtonStatus()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(doneIt()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setButtonStatus()));
 }
 
-
-GotoLineDialog::~GotoLineDialog()
-= default;
-
+GotoLineDialog::~GotoLineDialog() = default;
 
 // ---------------------------------------------------------------------------
 // GotoLineDialog::setButtonStatus
@@ -32,34 +28,28 @@ GotoLineDialog::~GotoLineDialog()
 // in the box is changed.
 // ---------------------------------------------------------------------------
 
-void GotoLineDialog::setButtonStatus()
-{
-    QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+void GotoLineDialog::setButtonStatus() {
+    QPushButton* okButton = buttonBox->button(QDialogButtonBox::Ok);
 
-    if (lineEdit->text().isEmpty())
-    {
+    if (lineEdit->text().isEmpty()) {
         okButton->setEnabled(false);
     }
-    else
-    {
+    else {
         okButton->setEnabled(true);
     }
 }
-
 
 // ---------------------------------------------------------------------------
 // GotoLineDialog::setupUIBeforeShow
 // sets up UI elements before the dialog is displayed.
 // ---------------------------------------------------------------------------
 
-void GotoLineDialog::setupUIBeforeShow()
-{
+void GotoLineDialog::setupUIBeforeShow() {
     lineEdit->setFocus(Qt::OtherFocusReason);
     buttonBox->button(QDialogButtonBox::Ok)->setDefault(true);
-    
+
     setButtonStatus();
 }
-
 
 // ---------------------------------------------------------------------------
 // GotoLineDialog::accept
@@ -67,8 +57,7 @@ void GotoLineDialog::setupUIBeforeShow()
 // text editor to go to the chosen line
 // ---------------------------------------------------------------------------
 
-void GotoLineDialog::doneIt()
-{
+void GotoLineDialog::doneIt() {
     int line = lineEdit->text().toInt();
     Q_EMIT gotoLine(line);
     close();

@@ -15,25 +15,24 @@
 #ifndef TEXTPAGERDOCUMENT_HPP__
 #define TEXTPAGERDOCUMENT_HPP__
 
-#include <QObject>
-#include <QString>
-#include <QString>
-#include <QPair>
+#include <QChar>
 #include <QEventLoop>
 #include <QList>
-#include <QVariant>
+#include <QObject>
+#include <QPair>
+#include <QString>
 #include <QTextCharFormat>
-#include <QChar>
+#include <QVariant>
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QStringRef>
-#include <QRegExp>
-#include <QTextCodec>
+    #include <QRegExp>
+    #include <QStringRef>
+    #include <QTextCodec>
 #else
-#include <QStringConverter>
-#include <QtCore5Compat/QStringRef>
-//#include <QtCore5Compat/QTextCodec>
-#include <QtCore5Compat/QRegExp>
+    #include <QStringConverter>
+    #include <QtCore5Compat/QStringRef>
+    // #include <QtCore5Compat/QTextCodec>
+    #include <QtCore5Compat/QRegExp>
 #endif
 
 #include "TextCodecWrapper.hpp"
@@ -42,8 +41,7 @@
 
 struct Chunk;
 struct TextDocumentPrivate;
-class TextPagerDocument : public QObject
-{
+class TextPagerDocument : public QObject {
     Q_OBJECT
     Q_PROPERTY(int documentSize READ documentSize)
     Q_PROPERTY(int chunkCount READ chunkCount)
@@ -55,23 +53,20 @@ class TextPagerDocument : public QObject
     Q_FLAGS(FindMode)
 
 public:
-    TextPagerDocument(QObject *parent = nullptr);
+    TextPagerDocument(QObject* parent = nullptr);
     ~TextPagerDocument() override;
 
-    enum DeviceMode {
-        Sparse,
-        LoadAll
-    };
+    enum DeviceMode { Sparse, LoadAll };
 
     enum Option {
-        NoOptions = 0x0000,
-        SwapChunks = 0x0001,
-        KeepTemporaryFiles = 0x0002,
-        ConvertCarriageReturns = 0x0004, // incompatible with Sparse and must be set before loading
+        NoOptions                 = 0x0000,
+        SwapChunks                = 0x0001,
+        KeepTemporaryFiles        = 0x0002,
+        ConvertCarriageReturns    = 0x0004, // incompatible with Sparse and must be set before loading
         AutoDetectCarriageReturns = 0x0010,
-        NoImplicitLoadAll = 0x0020,
-        Locking = 0x0040,
-        DefaultOptions = AutoDetectCarriageReturns
+        NoImplicitLoadAll         = 0x0020,
+        Locking                   = 0x0040,
+        DefaultOptions            = AutoDetectCarriageReturns
     };
     Q_DECLARE_FLAGS(Options, Option);
 
@@ -79,30 +74,30 @@ public:
     void setOptions(Options opt);
     inline void setOption(Option opt, bool on = true) { setOptions(on ? (options() | opt) : (options() &= ~opt)); }
 
-    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName) {
+    inline bool load(QIODevice* device, DeviceMode mode, const QByteArray& codecName) {
         return load(device, mode, TextCodecWrapper::fromName(codecName));
     }
-    inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName) {
+    inline bool load(const QString& fileName, DeviceMode mode, const QByteArray& codecName) {
         return load(fileName, mode, TextCodecWrapper::fromName(codecName));
     }
-    bool load(QIODevice *device, DeviceMode mode = Sparse, TextCodecWrapper = {});
-    bool load(const QString &fileName, DeviceMode mode = Sparse,  TextCodecWrapper = {});
+    bool load(QIODevice* device, DeviceMode mode = Sparse, TextCodecWrapper = {});
+    bool load(const QString& fileName, DeviceMode mode = Sparse, TextCodecWrapper = {});
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-//    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName)
-//    { return load(device, mode, QTextCodec::codecForName(codecName)); }
-//    inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName)
-//    { return load(fileName, mode, QTextCodec::codecForName(codecName)); }
-//    bool load(QIODevice *device, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
-//    bool load(const QString &fileName, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
-    QTextCodec *textCodec() const;
+    //    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName)
+    //    { return load(device, mode, QTextCodec::codecForName(codecName)); }
+    //    inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName)
+    //    { return load(fileName, mode, QTextCodec::codecForName(codecName)); }
+    //    bool load(QIODevice *device, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
+    //    bool load(const QString &fileName, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
+    QTextCodec* textCodec() const;
 #endif
     void clear();
     DeviceMode deviceMode() const;
 
-    void setText(const QString &text);
+    void setText(const QString& text);
     QString read(int pos, int size) const;
-    //QStringRef readRef(int pos, int size) const;
+    // QStringRef readRef(int pos, int size) const;
     QChar readCharacter(int index) const;
 
     int documentSize() const;
@@ -117,59 +112,65 @@ public:
     void unlock();
 
     enum FindModeFlag {
-        FindNone = 0x00000,
-        FindBackward = 0x00001,
+        FindNone            = 0x00000,
+        FindBackward        = 0x00001,
         FindCaseSensitively = 0x00002,
-        FindWholeWords = 0x00004,
-        FindAllowInterrupt = 0x00008,
-        FindWrap = 0x00010,
-        FindAll = 0x00020
+        FindWholeWords      = 0x00004,
+        FindAllowInterrupt  = 0x00008,
+        FindWrap            = 0x00010,
+        FindAll             = 0x00020
     };
     Q_DECLARE_FLAGS(FindMode, FindModeFlag);
 
     int chunkSize() const;
     void setChunkSize(int pos);
 
-    QIODevice *device() const;
+    QIODevice* device() const;
 
-    TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = {},int limit = -1) const;
-    TextPagerCursor find(const QString &ba, const TextPagerCursor &cursor, FindMode flags = {}, int limit = -1) const;
-    TextPagerCursor find(const QChar &ch, const TextPagerCursor &cursor, FindMode flags = {}) const;
-    TextPagerCursor findLine(int lineNum, const TextPagerCursor &cursor) const;
+    TextPagerCursor find(const QRegExp& rx, const TextPagerCursor& cursor, FindMode flags = {}, int limit = -1) const;
+    TextPagerCursor find(const QString& ba, const TextPagerCursor& cursor, FindMode flags = {}, int limit = -1) const;
+    TextPagerCursor find(const QChar& ch, const TextPagerCursor& cursor, FindMode flags = {}) const;
+    TextPagerCursor findLine(int lineNum, const TextPagerCursor& cursor) const;
 
-    inline TextPagerCursor find(const QRegExp &rx, int pos = 0, FindMode flags = {}) const
-    { return find(rx, TextPagerCursor(this, pos), flags); }
-    inline TextPagerCursor find(const QString &ba, int pos = 0, FindMode flags = {}) const
-    { return find(ba, TextPagerCursor(this, pos), flags); }
-    inline TextPagerCursor find(const QChar &ch, int pos = 0, FindMode flags = {}) const
-    { return find(ch, TextPagerCursor(this, pos), flags); }
-
+    inline TextPagerCursor find(const QRegExp& rx, int pos = 0, FindMode flags = {}) const {
+        return find(rx, TextPagerCursor(this, pos), flags);
+    }
+    inline TextPagerCursor find(const QString& ba, int pos = 0, FindMode flags = {}) const {
+        return find(ba, TextPagerCursor(this, pos), flags);
+    }
+    inline TextPagerCursor find(const QChar& ch, int pos = 0, FindMode flags = {}) const {
+        return find(ch, TextPagerCursor(this, pos), flags);
+    }
 
     QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = {}) const;
-    inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
-    TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
-                                   const QVariant &data = QVariant());
-    void insertTextSection(TextPagerSection *section);
-    void takeTextSection(TextPagerSection *section);
+    inline TextPagerSection* sectionAt(int pos) const {
+        return sections(pos, 1, TextPagerSection::IncludePartial).value(0);
+    }
+    TextPagerSection* insertTextSection(int pos,
+                                        int size,
+                                        const QTextCharFormat& format = QTextCharFormat(),
+                                        const QVariant& data          = QVariant());
+    void insertTextSection(TextPagerSection* section);
+    void takeTextSection(TextPagerSection* section);
     int currentMemoryUsage() const;
 
     bool isModified() const;
 
     int lineNumber(int position) const;
     int columnNumber(int position) const;
-    int lineNumber(const TextPagerCursor &cursor) const;
-    int columnNumber(const TextPagerCursor &cursor) const;
-    virtual bool isWordCharacter(const QChar &ch, int index) const;
+    int lineNumber(const TextPagerCursor& cursor) const;
+    int columnNumber(const TextPagerCursor& cursor) const;
+    virtual bool isWordCharacter(const QChar& ch, int index) const;
 
 public Q_SLOTS:
     bool abortSave();
     bool abortFind() const;
 
 Q_SIGNALS:
-    void entryFound(const TextPagerCursor &cursor) const;
+    void entryFound(const TextPagerCursor& cursor) const;
     void textChanged();
-    void sectionAdded(TextPagerSection *section);
-    void sectionRemoved(TextPagerSection *removed);
+    void sectionAdded(TextPagerSection* section);
+    void sectionRemoved(TextPagerSection* removed);
     void charactersAdded(int from, int count);
     void charactersRemoved(int from, int count);
     void saveProgress(qreal progress);
@@ -178,10 +179,10 @@ Q_SIGNALS:
     void modificationChanged(bool modified);
 
 protected:
-    virtual QString swapFileName(Chunk *chunk);
+    virtual QString swapFileName(Chunk* chunk);
 
 private:
-    TextDocumentPrivate *d;
+    TextDocumentPrivate* d;
     friend class TextPagerEdit;
     friend class TextPagerCursor;
     friend struct TextDocumentPrivate;

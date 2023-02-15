@@ -10,178 +10,161 @@
 #ifndef TRIGGERCOLLECTOR_HPP
 #define TRIGGERCOLLECTOR_HPP
 
+#include <cstdio>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <cstdio>
 
 class TriggerListItem;
 class VItem;
 
 #include "VNode.hpp"
 
-class TriggerCollector
-{
+class TriggerCollector {
 public:
-    TriggerCollector() = default;
+    TriggerCollector()          = default;
     virtual ~TriggerCollector() = default;
 
-    enum Mode { Normal    = 0,   // Normal trigger_node
-                Parent    = 1,   // Through parent
-                Child     = 2,   // Through child
-                Hierarchy = 3    // Through child
+    enum Mode {
+        Normal    = 0, // Normal trigger_node
+        Parent    = 1, // Through parent
+        Child     = 2, // Through child
+        Hierarchy = 3  // Through child
     };
 
-    virtual bool add(VItem*, VItem*,Mode) = 0;
+    virtual bool add(VItem*, VItem*, Mode) = 0;
     virtual bool scanParents() { return false; }
-    virtual bool scanKids()    { return false; }
-    virtual bool scanSelf()    { return true; }
+    virtual bool scanKids() { return false; }
+    virtual bool scanSelf() { return true; }
 
 private:
-    TriggerCollector(const TriggerCollector&) = delete;
+    TriggerCollector(const TriggerCollector&)            = delete;
     TriggerCollector& operator=(const TriggerCollector&) = delete;
 };
 
-class TriggerListCollector : public TriggerCollector
-{
+class TriggerListCollector : public TriggerCollector {
 public:
-    TriggerListCollector(bool extended) :
-        extended_(extended) {}
+    TriggerListCollector(bool extended) : extended_(extended) {}
 
     ~TriggerListCollector() override;
-    bool add(VItem*, VItem*,Mode) override;
+    bool add(VItem*, VItem*, Mode) override;
     bool scanParents() override { return extended_; }
     bool scanKids() override { return extended_; }
     void setDependency(bool);
     void clear();
-    size_t size() const {return items_.size();}
+    size_t size() const { return items_.size(); }
 
-    const std::vector<TriggerListItem*>& items() const {return items_;}
+    const std::vector<TriggerListItem*>& items() const { return items_; }
 
 protected:
     bool extended_;
     std::vector<TriggerListItem*> items_;
 };
 
-class TriggerChildCollector : public TriggerCollector
-{
+class TriggerChildCollector : public TriggerCollector {
 public:
-    TriggerChildCollector(VItem *n,VItem* child,TriggerCollector* collector) :
-        node_(n), child_(child), collector_(collector) {}
+    TriggerChildCollector(VItem* n, VItem* child, TriggerCollector* collector)
+        : node_(n), child_(child), collector_(collector) {}
 
-    bool add(VItem*, VItem*,Mode) override;
+    bool add(VItem*, VItem*, Mode) override;
 
 private:
-  VItem* node_;
-  VItem* child_;
-  TriggerCollector* collector_;
+    VItem* node_;
+    VItem* child_;
+    TriggerCollector* collector_;
 };
 
-class TriggerParentCollector : public TriggerCollector
-{
+class TriggerParentCollector : public TriggerCollector {
 public:
-    TriggerParentCollector(VItem* parent,TriggerCollector* collector) :
-        parent_(parent), collector_(collector) {}
+    TriggerParentCollector(VItem* parent, TriggerCollector* collector) : parent_(parent), collector_(collector) {}
 
-    bool add(VItem*, VItem*,Mode) override;
+    bool add(VItem*, VItem*, Mode) override;
 
 private:
-  VItem* parent_;
-  TriggerCollector* collector_;
+    VItem* parent_;
+    TriggerCollector* collector_;
 };
 
-class TriggeredCollector : public TriggerListCollector
-{
+class TriggeredCollector : public TriggerListCollector {
 public:
-    TriggeredCollector(VNode* n) :
-        TriggerListCollector(false), node_(n) {}
-    bool add(VItem*, VItem*,Mode) override;
+    TriggeredCollector(VNode* n) : TriggerListCollector(false), node_(n) {}
+    bool add(VItem*, VItem*, Mode) override;
 
 private:
-  VItem* node_;
+    VItem* node_;
 };
 
-class TriggerListItem
-{
+class TriggerListItem {
 public:
-    TriggerListItem(VItem* t,VItem* dep,TriggerCollector::Mode mode) :
-        t_(t), dep_(dep), mode_(mode) {}
+    TriggerListItem(VItem* t, VItem* dep, TriggerCollector::Mode mode) : t_(t), dep_(dep), mode_(mode) {}
 
-    VItem* item() const {return t_;}
-    VItem* dep()  const {return dep_;}
-    TriggerCollector::Mode mode() const {return mode_;}
+    VItem* item() const { return t_; }
+    VItem* dep() const { return dep_; }
+    TriggerCollector::Mode mode() const { return mode_; }
 
 protected:
-    VItem* t_; //trigger or triggered
+    VItem* t_; // trigger or triggered
     VItem* dep_;
     TriggerCollector::Mode mode_;
 };
 
-class TriggerDependencyItem
-{
+class TriggerDependencyItem {
 public:
-    TriggerDependencyItem(VItem* dep,TriggerCollector::Mode mode) :
-        dep_(dep), mode_(mode) {}
+    TriggerDependencyItem(VItem* dep, TriggerCollector::Mode mode) : dep_(dep), mode_(mode) {}
 
-    VItem* dep()  const {return dep_;}
-    TriggerCollector::Mode mode() const {return mode_;}
+    VItem* dep() const { return dep_; }
+    TriggerCollector::Mode mode() const { return mode_; }
 
 protected:
     VItem* dep_;
     TriggerCollector::Mode mode_;
 };
 
-class TriggerTableItem
-{
+class TriggerTableItem {
 public:
-    TriggerTableItem(VItem* t) :t_(t){}
+    TriggerTableItem(VItem* t) : t_(t) {}
 
-    void addDependency(VItem* dep,TriggerCollector::Mode mode)
-            {deps_.emplace_back(dep,mode);}
+    void addDependency(VItem* dep, TriggerCollector::Mode mode) { deps_.emplace_back(dep, mode); }
 
-    VItem* item() const {return t_;}
-    const std::vector<TriggerDependencyItem>& dependencies() const {return deps_;}
+    VItem* item() const { return t_; }
+    const std::vector<TriggerDependencyItem>& dependencies() const { return deps_; }
     const std::set<TriggerCollector::Mode>& modes() const;
 
 protected:
-     VItem* t_; //trigger or triggered
-     std::vector<TriggerDependencyItem> deps_;
-     mutable std::set<TriggerCollector::Mode> modes_;
+    VItem* t_; // trigger or triggered
+    std::vector<TriggerDependencyItem> deps_;
+    mutable std::set<TriggerCollector::Mode> modes_;
 };
 
-
-class TriggerTableCollector : public TriggerCollector
-{
+class TriggerTableCollector : public TriggerCollector {
 public:
-    TriggerTableCollector(bool extended) :
-        extended_(extended) {}
+    TriggerTableCollector(bool extended) : extended_(extended) {}
 
     ~TriggerTableCollector() override;
-    bool add(VItem*, VItem*,Mode) override;
+    bool add(VItem*, VItem*, Mode) override;
     bool scanParents() override { return extended_; }
     bool scanKids() override { return extended_; }
     void setDependency(bool);
-    bool isExtended() const {return extended_;}
+    bool isExtended() const { return extended_; }
     void clear();
-    size_t size() const {return items_.size();}
+    size_t size() const { return items_.size(); }
 
     bool contains(TriggerTableItem*) const;
-    bool contains(const VNode*,bool attrParents=true) const;
+    bool contains(const VNode*, bool attrParents = true) const;
     TriggerTableItem* find(const VItem* item) const;
     TriggerTableItem* findByContents(const VItem* item) const;
-    const std::vector<TriggerTableItem*>& items() const {return items_;}
+    const std::vector<TriggerTableItem*>& items() const { return items_; }
 
 protected:
     bool extended_;
     std::vector<TriggerTableItem*> items_;
 };
 
-//class TriggerRelationCollector : public TriggerCollector
+// class TriggerRelationCollector : public TriggerCollector
 //{
-//public:
-//    TriggerRelationCollector(VItem* node, TriggerGraphWidget* w, bool e) :
-//       node_(node), w_(w), e_(e) {}
+// public:
+//     TriggerRelationCollector(VItem* node, TriggerGraphWidget* w, bool e) :
+//        node_(node), w_(w), e_(e) {}
 
 //    bool scanParents() override { return e_; }
 //    bool scanKids() override { return e_; }
@@ -191,12 +174,12 @@ protected:
 //        n_++;
 //    }
 
-//private:
-//    int n_ {0};
-//    VItem* node_;
-//    TriggerGraphWidget* w_;
-//    bool e_;
-//};
+// private:
+//     int n_ {0};
+//     VItem* node_;
+//     TriggerGraphWidget* w_;
+//     bool e_;
+// };
 
 #if 0
 class nl1 : public trigger_lister {
@@ -220,6 +203,4 @@ public:
 };
 #endif
 
-
 #endif // TRIGGERCOLLECTOR_HPP
-

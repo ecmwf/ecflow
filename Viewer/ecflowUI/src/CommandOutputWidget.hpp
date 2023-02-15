@@ -15,27 +15,25 @@
 #include <QSettings>
 #include <QWidget>
 
-#include "ui_CommandOutputWidget.h"
-
 #include "CommandOutput.hpp"
+#include "ui_CommandOutputWidget.h"
 
 class ModelColumn;
 
-class CommandOutputModel : public QAbstractItemModel
-{
+class CommandOutputModel : public QAbstractItemModel {
 public:
-    explicit  CommandOutputModel(QObject *parent=nullptr);
+    explicit CommandOutputModel(QObject* parent = nullptr);
     ~CommandOutputModel() override;
 
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    Qt::ItemFlags flags ( const QModelIndex & index) const override;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex&, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
 
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
-    QModelIndex parent (const QModelIndex & ) const override;
+    QModelIndex index(int, int, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex&) const override;
 
     void dataIsAboutToChange();
     void dataChanged();
@@ -48,23 +46,22 @@ protected:
     ModelColumn* columns_{nullptr};
 };
 
-class CommandOutputWidget : public QWidget, protected Ui::CommandOutputWidget
-{
-Q_OBJECT
+class CommandOutputWidget : public QWidget, protected Ui::CommandOutputWidget {
+    Q_OBJECT
 
 public:
-    explicit CommandOutputWidget(QWidget *parent=nullptr);
+    explicit CommandOutputWidget(QWidget* parent = nullptr);
     ~CommandOutputWidget() override;
 
     void readSettings(QSettings&);
     void writeSettings(QSettings&);
 
 protected Q_SLOTS:
-    void slotItemSelected(const QModelIndex&,const QModelIndex&);
+    void slotItemSelected(const QModelIndex&, const QModelIndex&);
     void slotItemAddBegin();
     void slotItemAddEnd();
-    void slotItemOutputAppend(CommandOutput_ptr,QString);
-    void slotItemErrorAppend(CommandOutput_ptr,QString);
+    void slotItemOutputAppend(CommandOutput_ptr, QString);
+    void slotItemErrorAppend(CommandOutput_ptr, QString);
     void slotItemOutputReload(CommandOutput_ptr);
     void slotItemErrorReload(CommandOutput_ptr);
     void slotItemStatusChanged(CommandOutput_ptr);

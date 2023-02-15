@@ -7,95 +7,79 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include "SessionHandler.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <unistd.h>
- 
-#include "SessionHandler.hpp"
+
 #include "DirectoryHandler.hpp"
+#include "ServerList.hpp"
 #include "Str.hpp"
 #include "UserMessage.hpp"
-#include "ServerList.hpp"
 
+SessionHandler* SessionHandler::instance_ = nullptr;
 
-SessionHandler* SessionHandler::instance_=nullptr;
-
-
-SessionItem::SessionItem(const std::string& name) :
-  name_(name)
-{
-	checkDir();
-	isTemporary_ = false;
-	askToPreserveTemporarySession_ = true;
+SessionItem::SessionItem(const std::string& name) : name_(name) {
+    checkDir();
+    isTemporary_                   = false;
+    askToPreserveTemporarySession_ = true;
 }
 
-SessionItem::~SessionItem()
-{
-	// temporary session? if so, remove the directory on exit
-	if (isTemporary_)
-	{
-		std::string msg;
+SessionItem::~SessionItem() {
+    // temporary session? if so, remove the directory on exit
+    if (isTemporary_) {
+        std::string msg;
         DirectoryHandler::removeDir(dirPath_, msg);
-	}
+    }
 }
 
-void SessionItem::checkDir()
-{
-	dirPath_ = SessionHandler::sessionDirName(name_);
-	DirectoryHandler::createDir(dirPath_);
+void SessionItem::checkDir() {
+    dirPath_ = SessionHandler::sessionDirName(name_);
+    DirectoryHandler::createDir(dirPath_);
 
-    qtPath_= SessionHandler::sessionQtDirName(name_);
+    qtPath_ = SessionHandler::sessionQtDirName(name_);
     DirectoryHandler::createDir(qtPath_);
 }
 
-std::string SessionItem::sessionFile() const
-{
-	return DirectoryHandler::concatenate(dirPath_, "session.json");
+std::string SessionItem::sessionFile() const {
+    return DirectoryHandler::concatenate(dirPath_, "session.json");
 }
 
-std::string SessionItem::windowFile() const
-{
-	return DirectoryHandler::concatenate(dirPath_, "window.conf");
+std::string SessionItem::windowFile() const {
+    return DirectoryHandler::concatenate(dirPath_, "window.conf");
 }
 
-std::string SessionItem::settingsFile() const
-{
-	return DirectoryHandler::concatenate(dirPath_, "settings.json");
+std::string SessionItem::settingsFile() const {
+    return DirectoryHandler::concatenate(dirPath_, "settings.json");
 }
 
-std::string SessionItem::recentCustomCommandsFile() const
-{
+std::string SessionItem::recentCustomCommandsFile() const {
     return DirectoryHandler::concatenate(dirPath_, "recent_custom_commands.json");
 }
 
-std::string SessionItem::savedCustomCommandsFile() const
-{
+std::string SessionItem::savedCustomCommandsFile() const {
     return DirectoryHandler::concatenate(dirPath_, "saved_custom_commands.json");
 }
 
-std::string SessionItem::textFilterFile() const
-{
+std::string SessionItem::textFilterFile() const {
     return DirectoryHandler::concatenate(dirPath_, "text_filters.json");
 }
 
-std::string SessionItem::serverFile(const std::string& serverName) const
-{
-	return DirectoryHandler::concatenate(dirPath_, serverName + ".conf.json");
+std::string SessionItem::serverFile(const std::string& serverName) const {
+    return DirectoryHandler::concatenate(dirPath_, serverName + ".conf.json");
 }
 
-std::string SessionItem::infoPanelDialogFile() const
-{
+std::string SessionItem::infoPanelDialogFile() const {
     return DirectoryHandler::concatenate(dirPath_, "info_panel_dialog.json");
 }
 
-std::string SessionItem::qtDir() const
-{
+std::string SessionItem::qtDir() const {
     return qtPath_;
 }
 
-std::string SessionItem::qtSettingsFile(const std::string& name) const
-{
+std::string SessionItem::qtSettingsFile(const std::string& name) const {
     return DirectoryHandler::concatenate(qtPath_, name + ".conf");
 }
 
@@ -105,90 +89,73 @@ std::string SessionItem::qtSettingsFile(const std::string& name) const
 //
 //=================================================
 
-SessionHandler::SessionHandler()
-{
-	//The default must always be exist!
-	current_=add(defaultSessionName());
-	loadedLastSessionName_ = false;
+SessionHandler::SessionHandler() {
+    // The default must always be exist!
+    current_               = add(defaultSessionName());
+    loadedLastSessionName_ = false;
 
-	readSessionListFromDisk();
-	readLastSessionName();
+    readSessionListFromDisk();
+    readLastSessionName();
 }
 
-SessionHandler::~SessionHandler()
-{
-    for(auto it=sessions_.begin(); it != sessions_.end(); ++it)
-    {
+SessionHandler::~SessionHandler() {
+    for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
         delete (*it);
     }
 }
 
+SessionHandler* SessionHandler::instance() {
+    if (!instance_) {
+        instance_ = new SessionHandler();
+    }
 
-SessionHandler* SessionHandler::instance()
-{
-	if(!instance_)
-	{
-		instance_=new SessionHandler();
-	}
-
-	return instance_;
+    return instance_;
 }
 
-void SessionHandler::destroyInstance()
-{
-	if (instance_)
-		delete instance_;
+void SessionHandler::destroyInstance() {
+    if (instance_)
+        delete instance_;
 
-	instance_ = nullptr;
+    instance_ = nullptr;
 }
 
-std::string SessionHandler::sessionDirName(const std::string &sessionName)
-{
-	return DirectoryHandler::concatenate(DirectoryHandler::configDir(), sessionName + ".session");
+std::string SessionHandler::sessionDirName(const std::string& sessionName) {
+    return DirectoryHandler::concatenate(DirectoryHandler::configDir(), sessionName + ".session");
 }
 
-std::string SessionHandler::sessionQtDirName(const std::string &sessionName)
-{
-	std::string basedir = sessionDirName(sessionName);
-	return DirectoryHandler::concatenate(basedir, "qt");
+std::string SessionHandler::sessionQtDirName(const std::string& sessionName) {
+    std::string basedir = sessionDirName(sessionName);
+    return DirectoryHandler::concatenate(basedir, "qt");
 }
 
-SessionItem* SessionHandler::find(const std::string& name)
-{
-    for(auto it=sessions_.begin(); it != sessions_.end(); ++it)
-    {
-        if((*it)->name() == name)
+SessionItem* SessionHandler::find(const std::string& name) {
+    for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
+        if ((*it)->name() == name)
             return *it;
     }
     return nullptr;
-
 }
 
-
 // returns -1 if the session name is not found
-int SessionHandler::indexFromName(const std::string& name)
-{
+int SessionHandler::indexFromName(const std::string& name) {
     int n = 0;
-    for(auto it=sessions_.begin(); it != sessions_.end(); ++it)
-    {
-        if((*it)->name() == name)
+    for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
+        if ((*it)->name() == name)
             return n;
         n++;
     }
     return -1;
 }
 
-void SessionHandler::readSessionListFromDisk()
-{
+void SessionHandler::readSessionListFromDisk() {
     // get the list of existing sessions (by listing the directories)
     std::string configDir = DirectoryHandler::configDir();
-    std::string filter = ".*\\.session";
+    std::string filter    = ".*\\.session";
     std::vector<std::string> dirs;
     DirectoryHandler::findDirs(configDir, filter, dirs);
 
     // add each session to our list (but remove the .session first)
-    for(auto it=dirs.begin(); it != dirs.end(); ++it)
-    {
+    for (auto it = dirs.begin(); it != dirs.end(); ++it) {
         std::string dirName       = (*it);
         std::string toRemove      = ".session";
         std::string toReplaceWith = "";
@@ -197,287 +164,233 @@ void SessionHandler::readSessionListFromDisk()
     }
 }
 
-bool SessionHandler::loadLastSessionAtStartup()
-{
+bool SessionHandler::loadLastSessionAtStartup() {
     // if there was a last session file, then it means the user wanted to load at startup
     return loadedLastSessionName_;
 }
 
-
-
-SessionItem* SessionHandler::add(const std::string& name)
-{
-	// only add if not already there
-	if (find(name) == nullptr)
-	{
-		auto *item=new SessionItem(name);
-		sessions_.push_back(item);
-		return item;
-	}
-	else
-		return nullptr;
+SessionItem* SessionHandler::add(const std::string& name) {
+    // only add if not already there
+    if (find(name) == nullptr) {
+        auto* item = new SessionItem(name);
+        sessions_.push_back(item);
+        return item;
+    }
+    else
+        return nullptr;
 }
 
-void SessionHandler::remove(const std::string& sessionName)
-{
-	SessionItem *session = find(sessionName);
-	assert(session);
+void SessionHandler::remove(const std::string& sessionName) {
+    SessionItem* session = find(sessionName);
+    assert(session);
 
-	remove(session);
+    remove(session);
 }
 
-void SessionHandler::remove(SessionItem* session)
-{
+void SessionHandler::remove(SessionItem* session) {
     auto it = std::find(sessions_.begin(), sessions_.end(), session);
-    assert(it != sessions_.end());  // session was not found - should not be possible
-
+    assert(it != sessions_.end()); // session was not found - should not be possible
 
     // remove the session's directory
     std::string errorMessage;
     bool ok = DirectoryHandler::removeDir(sessionDirName(session->name()), errorMessage);
 
-    if (ok)
-    {
+    if (ok) {
         // remove it from our list
         sessions_.erase(it);
     }
-    else
-    {
+    else {
         UserMessage::message(UserMessage::ERROR, true, errorMessage);
     }
 }
 
-
-void SessionHandler::rename(SessionItem* item, const std::string& newName)
-{
+void SessionHandler::rename(SessionItem* item, const std::string& newName) {
     std::string errorMessage;
     bool ok = DirectoryHandler::renameDir(sessionDirName(item->name()), sessionDirName(newName), errorMessage);
 
-    if (ok)
-    {
+    if (ok) {
         item->name(newName);
     }
-    else
-    {
+    else {
         UserMessage::message(UserMessage::ERROR, true, errorMessage);
     }
 }
 
-
-void SessionHandler::current(SessionItem* item)
-{
-	if(std::find(sessions_.begin(),sessions_.end(),item) != sessions_.end())
-	{
-		current_=item;
-		load();
-	}
+void SessionHandler::current(SessionItem* item) {
+    if (std::find(sessions_.begin(), sessions_.end(), item) != sessions_.end()) {
+        current_ = item;
+        load();
+    }
 }
 
-
-SessionItem* SessionHandler::current()
-{
-	return current_;
+SessionItem* SessionHandler::current() {
+    return current_;
 }
 
-void SessionHandler::save()
-{
-	if(current_)
-	{
-		//current_->save();
-	}
+void SessionHandler::save() {
+    if (current_) {
+        // current_->save();
+    }
 }
 
-void SessionHandler::load()
-{
-
+void SessionHandler::load() {
 }
 
-
-bool SessionHandler::requestStartupViaSessionManager()
-{
-    char *sm = getenv("ECFLOWUI_SESSION_MANAGER");
-	if (sm)
-		return true;
-	else
-		return false;
+bool SessionHandler::requestStartupViaSessionManager() {
+    char* sm = getenv("ECFLOWUI_SESSION_MANAGER");
+    if (sm)
+        return true;
+    else
+        return false;
 }
 
+void SessionHandler::setTemporarySessionIfReqested() {
+    char* sh = getenv("ECFLOWUI_TEMP_SESSION_HOST");
+    if (sh) {
+        char* sp = getenv("ECFLOWUI_TEMP_SESSION_PORT");
+        if (sp) {
+            // create a session name, likely to be unique - if it already exists in the list, then use that
+            constexpr int buff_size = 1024;
 
-void SessionHandler::setTemporarySessionIfReqested()
-{
-    char *sh = getenv("ECFLOWUI_TEMP_SESSION_HOST");
-	if (sh)
-	{
-        char *sp = getenv("ECFLOWUI_TEMP_SESSION_PORT");
-		if (sp)
-		{
-			// create a session name, likely to be unique - if it already exists in the list, then use that
-			constexpr int buff_size = 1024;
+            char sessName[buff_size];
+            snprintf(sessName, buff_size, "temporary_%s_%s_%d", sh, sp, getpid());
+            std::string sname(sessName);
+            SessionItem* si = instance()->add(sname);
+            if (!si)
+                si = instance()->find(sname);
 
-			char sessName[buff_size];
-			snprintf(sessName,buff_size, "temporary_%s_%s_%d", sh, sp, getpid());
-			std::string sname(sessName);
-			SessionItem *si = instance()->add(sname);
-			if (!si)
-				si = instance()->find(sname);
+            instance()->current(si);
+            si->temporary(true);
 
-			instance()->current(si);
-			si->temporary(true);
+            char* sask = getenv("ECFLOWUI_TEMP_SESSION_PRESERVE_CONFIRM");
+            if (sask && !strcmp(sask, "no"))
+                si->askToPreserveTemporarySession(false);
 
-            char *sask = getenv("ECFLOWUI_TEMP_SESSION_PRESERVE_CONFIRM");
-			if (sask && !strcmp(sask, "no"))
-				si->askToPreserveTemporarySession(false);
+            std::string templateName("ecflow_ui_test_session_template.json");
+            instance()->createSessionDirWithTemplate(sname, templateName);
 
-			std::string templateName("ecflow_ui_test_session_template.json");
-			instance()->createSessionDirWithTemplate(sname, templateName);
+            // construct an alias for this server
+            char calias[buff_size];
+            snprintf(calias, buff_size, "%s:%s", sh, sp);
+            std::string alias(calias);
+            si->temporaryServerAlias(alias);
 
-			// construct an alias for this server
-			char calias[buff_size];
-			snprintf(calias,buff_size, "%s:%s", sh, sp);
-			std::string alias(calias);
-			si->temporaryServerAlias(alias);
-
-			// does this exact server already exist in the user's list?
-			std::string host(sh);
+            // does this exact server already exist in the user's list?
+            std::string host(sh);
             std::string port(sp);
-            if(ServerList::instance()->find(alias, host, port) == nullptr)
-			{
-				// no - add it, and make sure it's got a unique alias
-				std::string uniqueName = ServerList::instance()->uniqueName(alias);
-                ServerList::instance()->add(uniqueName, host, port, "",false, false, true);
-			}
-		}
-	}
+            if (ServerList::instance()->find(alias, host, port) == nullptr) {
+                // no - add it, and make sure it's got a unique alias
+                std::string uniqueName = ServerList::instance()->uniqueName(alias);
+                ServerList::instance()->add(uniqueName, host, port, "", false, false, true);
+            }
+        }
+    }
 }
 
+void SessionHandler::saveLastSessionName() {
+    std::string configDir           = DirectoryHandler::configDir();
+    std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
 
-void SessionHandler::saveLastSessionName()
-{
-	std::string configDir = DirectoryHandler::configDir();
-	std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
+    // open the last_session.txt file and try to read it
+    std::ofstream out(lastSessionFilename.c_str());
 
-	// open the last_session.txt file and try to read it
-	std::ofstream out(lastSessionFilename.c_str());
-
-	if (out.good())
-	{
-		// the file is a one-line file containing the name of the current session
-		std::string line = current()->name();
-		out << line << std::endl;
-	}
+    if (out.good()) {
+        // the file is a one-line file containing the name of the current session
+        std::string line = current()->name();
+        out << line << std::endl;
+    }
 }
 
-void SessionHandler::removeLastSessionName()
-{
-	std::string configDir = DirectoryHandler::configDir();
-	std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
+void SessionHandler::removeLastSessionName() {
+    std::string configDir           = DirectoryHandler::configDir();
+    std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
 
-	std::string errorMessage;
-	bool ok = DirectoryHandler::removeFile(lastSessionFilename, errorMessage);
+    std::string errorMessage;
+    bool ok = DirectoryHandler::removeFile(lastSessionFilename, errorMessage);
 
-	if (!ok)
-	{
-		UserMessage::message(UserMessage::ERROR, true, errorMessage);
-	}
+    if (!ok) {
+        UserMessage::message(UserMessage::ERROR, true, errorMessage);
+    }
 }
 
+void SessionHandler::readLastSessionName() {
+    std::string configDir           = DirectoryHandler::configDir();
+    std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
 
-void SessionHandler::readLastSessionName()
-{
-	std::string configDir = DirectoryHandler::configDir();
-	std::string lastSessionFilename = DirectoryHandler::concatenate(configDir, "last_session.txt");
+    // open the last_session.txt file and try to read it
+    std::ifstream in(lastSessionFilename.c_str());
 
-	// open the last_session.txt file and try to read it
-	std::ifstream in(lastSessionFilename.c_str());
+    if (in.good()) {
+        // the file is a one-line file containing the name of the session we want
+        std::string line;
+        if (getline(in, line)) {
+            loadedLastSessionName_ = true;
+            lastSessionName_       = line;
+        }
+        else
+            lastSessionName_ = defaultSessionName();
+    }
+    else {
+        // could not read the file, so just use the default
+        lastSessionName_ = defaultSessionName();
+    }
 
-	if (in.good())
-	{
-		// the file is a one-line file containing the name of the session we want
-		std::string line;
-		if (getline(in, line))
-		{
-			loadedLastSessionName_ = true;
-			lastSessionName_ = line;
-		}
-		else
-			lastSessionName_ = defaultSessionName();
-	}
-	else
-	{
-		// could not read the file, so just use the default
-		lastSessionName_ = defaultSessionName();
-	}
-
-
-	// set this session as the current one if it exists
-	SessionItem *item = find(lastSessionName_);
-	if (item)
-	{
-		current(item);
-	}
-	else
-	{
-		lastSessionName_ = defaultSessionName();  // the last session file contained the name of a non-existant session
-	}
+    // set this session as the current one if it exists
+    SessionItem* item = find(lastSessionName_);
+    if (item) {
+        current(item);
+    }
+    else {
+        lastSessionName_ = defaultSessionName(); // the last session file contained the name of a non-existant session
+    }
 }
 
+bool SessionHandler::createSessionDirWithTemplate(const std::string& sessionName, const std::string& templateFile) {
+    // we want to:
+    // 1) create a new directory for the session
+    // 2) copy the session template JSON file across to the new dir
 
-bool SessionHandler::createSessionDirWithTemplate(const std::string &sessionName, const std::string &templateFile)
-{
-	// we want to:
-	// 1) create a new directory for the session
-	// 2) copy the session template JSON file across to the new dir
+    std::string sessionDir = sessionDirName(sessionName);
+    bool created           = DirectoryHandler::createDir(sessionDir);
 
-	std::string sessionDir = sessionDirName(sessionName);
-	bool created = DirectoryHandler::createDir(sessionDir);
+    if (created) {
+        std::string errorMsg;
+        std::string fullTemplatePath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), templateFile);
+        std::string fullDestPath     = DirectoryHandler::concatenate(sessionDir, "session.json");
+        bool copied                  = DirectoryHandler::copyFile(fullTemplatePath, fullDestPath, errorMsg);
+        if (!copied) {
+            UserMessage::message(UserMessage::ERROR, true, errorMsg);
+            return false;
+        }
+    }
+    else {
+        UserMessage::message(UserMessage::ERROR, true, "Could not create temporary session directory: " + sessionDir);
+        return false;
+    }
 
-	if (created)
-	{
-		std::string errorMsg;
-		std::string fullTemplatePath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), templateFile);
-		std::string fullDestPath = DirectoryHandler::concatenate(sessionDir, "session.json");
-		bool copied = DirectoryHandler::copyFile(fullTemplatePath, fullDestPath, errorMsg);
-		if (!copied)
-		{
-			UserMessage::message(UserMessage::ERROR, true, errorMsg);
-			return false;
-		}
-	}
-	else
-	{
-		UserMessage::message(UserMessage::ERROR, true, "Could not create temporary session directory: " + sessionDir);
-		return false;
-	}
-
-	return true;
+    return true;
 }
 
-
-SessionItem *SessionHandler::copySession(SessionItem* source, std::string &destName)
-{
-	// the main work is to make a copy of the source session's directory (recursively)
-	std::string errorMessage;
-	std::string sourceSessionDir = sessionDirName(source->name());
-	std::string destSessionDir   = sessionDirName(destName);
-	bool ok = DirectoryHandler::copyDir(sourceSessionDir, destSessionDir, errorMessage);
-	if (ok)
-	{
-		// add it to our list
-		SessionItem *newItem = add(destName);
-		return newItem;
-	}
-	else
-	{
-		UserMessage::message(UserMessage::ERROR, true, errorMessage);
-		return nullptr;
-	}
+SessionItem* SessionHandler::copySession(SessionItem* source, std::string& destName) {
+    // the main work is to make a copy of the source session's directory (recursively)
+    std::string errorMessage;
+    std::string sourceSessionDir = sessionDirName(source->name());
+    std::string destSessionDir   = sessionDirName(destName);
+    bool ok                      = DirectoryHandler::copyDir(sourceSessionDir, destSessionDir, errorMessage);
+    if (ok) {
+        // add it to our list
+        SessionItem* newItem = add(destName);
+        return newItem;
+    }
+    else {
+        UserMessage::message(UserMessage::ERROR, true, errorMessage);
+        return nullptr;
+    }
 }
 
-SessionItem *SessionHandler::copySession(std::string &source, std::string &destName)
-{
-	SessionItem *sourceSession = find(source);
-	assert(sourceSession);
+SessionItem* SessionHandler::copySession(std::string& source, std::string& destName) {
+    SessionItem* sourceSession = find(source);
+    assert(sourceSession);
 
-	return copySession(sourceSession, destName);
+    return copySession(sourceSession, destName);
 }
-

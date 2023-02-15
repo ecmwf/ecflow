@@ -9,31 +9,29 @@
 
 #include "InfoPanelItem.hpp"
 
+#include <map>
+
 #include "InfoPanel.hpp"
 #include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 
-#include <map>
+static std::map<std::string, InfoPanelItemFactory*>* makers = nullptr;
 
-static std::map<std::string,InfoPanelItemFactory*>* makers = nullptr;
+InfoPanelItemFactory::InfoPanelItemFactory(const std::string& name) {
+    if (makers == nullptr)
+        makers = new std::map<std::string, InfoPanelItemFactory*>;
 
-InfoPanelItemFactory::InfoPanelItemFactory(const std::string& name)
-{
-	if(makers == nullptr)
-		makers = new std::map<std::string,InfoPanelItemFactory*>;
-
-	// Put in reverse order...
-	(*makers)[name] = this;
+    // Put in reverse order...
+    (*makers)[name] = this;
 }
 
-InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
-{
-	auto j = makers->find(name);
-	if(j != makers->end())
+InfoPanelItem* InfoPanelItemFactory::create(const std::string& name) {
+    auto j = makers->find(name);
+    if (j != makers->end())
         return (*j).second->make();
 
-	return nullptr;
+    return nullptr;
 }
 
 //=======================================================
@@ -42,277 +40,229 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 //
 //=======================================================
 
-
-InfoPanelItem::~InfoPanelItem()
-{
-	clear();
+InfoPanelItem::~InfoPanelItem() {
+    clear();
 }
 
-void InfoPanelItem::setOwner(InfoPanel* owner)
-{
+void InfoPanelItem::setOwner(InfoPanel* owner) {
     assert(!owner_);
-    owner_=owner;
+    owner_ = owner;
 }
 
-//Set the new VInfo object.
-//We also we need to manage the node observers. The InfoItem 
-//will be the observer of the server of the object stored in
-//the new VInfo
-void InfoPanelItem::adjust(VInfo_ptr info)
-{
-  	//Check if there is data in info
-    if(info)
-  	{
-  		ServerHandler *server=info->server();
+// Set the new VInfo object.
+// We also we need to manage the node observers. The InfoItem
+// will be the observer of the server of the object stored in
+// the new VInfo
+void InfoPanelItem::adjust(VInfo_ptr info) {
+    // Check if there is data in info
+    if (info) {
+        ServerHandler* server = info->server();
 
-  		bool sameServer=(info_)?(info_->server() == server):false;
+        bool sameServer       = (info_) ? (info_->server() == server) : false;
 
-  		//Handle observers
-  		if(!sameServer)
-  		{
-  			if(info_ && info_->server())
-  			{
-  				info_->server()->removeNodeObserver(this);
-  			}
-  			info->server()->addNodeObserver(this);
-  		}
-  	}
-  	//If the there is no data we clean everything and return
-  	else
-  	{
-  	  	if(info_ && info_->server())
-  	  	{
-  	  		info_->server()->removeNodeObserver(this);
-  	  	}
-  	}
+        // Handle observers
+        if (!sameServer) {
+            if (info_ && info_->server()) {
+                info_->server()->removeNodeObserver(this);
+            }
+            info->server()->addNodeObserver(this);
+        }
+    }
+    // If the there is no data we clean everything and return
+    else {
+        if (info_ && info_->server()) {
+            info_->server()->removeNodeObserver(this);
+        }
+    }
 
-  	//Set the info 
-  	info_=info;
+    // Set the info
+    info_ = info;
 }
 
-void InfoPanelItem::clear()
-{
-	if(info_ && info_->server())
-  	{
-  	  	//info_->server()->removeServerObserver(this);
-  	  	info_->server()->removeNodeObserver(this);
-  	}
+void InfoPanelItem::clear() {
+    if (info_ && info_->server()) {
+        // info_->server()->removeServerObserver(this);
+        info_->server()->removeNodeObserver(this);
+    }
 
-	info_.reset();
+    info_.reset();
 
-    for(auto & infoProvider : infoProviders_)
-    {
+    for (auto& infoProvider : infoProviders_) {
         infoProvider->clear();
     }
 }
 
-//This function is called when the infopanel
-// is being reset. The info_ might be unset.
-void InfoPanelItem::setActive(bool active)
-{
-    active_=active;
+// This function is called when the infopanel
+//  is being reset. The info_ might be unset.
+void InfoPanelItem::setActive(bool active) {
+    active_ = active;
 
-    if(active_)
-	{
-        //Enable the infoProviders
-        for(auto & infoProvider : infoProviders_)
-        {
+    if (active_) {
+        // Enable the infoProviders
+        for (auto& infoProvider : infoProviders_) {
             infoProvider->setActive(true);
         }
-	}
-	else
-	{
+    }
+    else {
         clearContents();
 
-        selected_=false;
-        suspended_=false;
+        selected_  = false;
+        suspended_ = false;
 
-        //Disable the info provider
-        for(auto & infoProvider : infoProviders_)
-        {
-            //This will clear the providers again
+        // Disable the info provider
+        for (auto& infoProvider : infoProviders_) {
+            // This will clear the providers again
             infoProvider->setActive(false);
         }
-	}
+    }
 
-    //updateWidgetState();
+    // updateWidgetState();
 }
 
-void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
-{
-    if(selected_ == selected)
-    {
+void InfoPanelItem::setSelected(bool selected, VInfo_ptr info) {
+    if (selected_ == selected) {
         return;
     }
 
     ChangeFlags flags(SelectedChanged);
-    selected_=selected;
+    selected_ = selected;
 
     assert(active_);
 
-    if(selected_)
-    {
-        //Suspend
-        if(suspended_) {}
-        //Resume
-        else
-        {
-            if(unselectedFlags_.isSet(KeepContents))
-            {
-                if(!info_)
-                {
+    if (selected_) {
+        // Suspend
+        if (suspended_) {}
+        // Resume
+        else {
+            if (unselectedFlags_.isSet(KeepContents)) {
+                if (!info_) {
                     reload(info);
                     return;
                 }
             }
-            else
-            {
+            else {
                 reload(info);
                 return;
             }
         }
     }
-    else
-    {
-        if(!frozen_ && !unselectedFlags_.isSet(KeepContents))
-        {
-            //This will also clear the providers
+    else {
+        if (!frozen_ && !unselectedFlags_.isSet(KeepContents)) {
+            // This will also clear the providers
             clearContents();
             return;
         }
     }
 
-    //We update the derived class
+    // We update the derived class
     updateState(flags);
 }
 
-void InfoPanelItem::setSuspended(bool suspended,VInfo_ptr info)
-{
-    if(suspended_ == suspended)
+void InfoPanelItem::setSuspended(bool suspended, VInfo_ptr info) {
+    if (suspended_ == suspended)
         return;
 
-    suspended_=suspended;
+    suspended_ = suspended;
     ChangeFlags flags(SuspendedChanged);
 
-    if(!active_)
+    if (!active_)
         return;
 
-    //Suspend
-    if(suspended_) {}
-    //Resume
-    else
-    {
-        if(selected_ && !info_)
-        {
+    // Suspend
+    if (suspended_) {}
+    // Resume
+    else {
+        if (selected_ && !info_) {
             reload(info);
             return;
         }
     }
 
-    //We update the derived class
+    // We update the derived class
     updateState(flags);
 }
 
-void InfoPanelItem::setFrozen(bool b)
-{
-	frozen_=b;
-    if(!active_)
+void InfoPanelItem::setFrozen(bool b) {
+    frozen_ = b;
+    if (!active_)
         return;
 
-    //We update the derived class
+    // We update the derived class
     updateState(FrozenChanged);
-
 }
 
-void InfoPanelItem::setDetached(bool b, bool update)
-{
-	detached_=b;
+void InfoPanelItem::setDetached(bool b, bool update) {
+    detached_ = b;
 
-    if(update)
-    {
-        if(!active_)
+    if (update) {
+        if (!active_)
             return;
 
-        //We update the derived class
+        // We update the derived class
         updateState(DetachedChanged);
     }
 }
 
-bool InfoPanelItem::hasSameContents(VInfo_ptr)
-{
+bool InfoPanelItem::hasSameContents(VInfo_ptr) {
     return false;
 }
 
-void InfoPanelItem::linkSelected(const std::string& path)
-{
-    if(!suspended_)
-    {
-        VInfo_ptr info=VInfo::createFromPath(info_->server(),path);
+void InfoPanelItem::linkSelected(const std::string& path) {
+    if (!suspended_) {
+        VInfo_ptr info = VInfo::createFromPath(info_->server(), path);
 
-        if(info)
-        {
+        if (info) {
             assert(owner_);
             owner_->linkSelected(info);
         }
     }
 }
 
-void InfoPanelItem::linkSelected(VInfo_ptr info)
-{
-    if(!suspended_)
-    {
-        if(info)
-        {
+void InfoPanelItem::linkSelected(VInfo_ptr info) {
+    if (!suspended_) {
+        if (info) {
             assert(owner_);
             owner_->linkSelected(info);
         }
     }
 }
 
-void InfoPanelItem::relayInfoPanelCommand(VInfo_ptr info,QString cmd)
-{
-    if(info)
-    {
+void InfoPanelItem::relayInfoPanelCommand(VInfo_ptr info, QString cmd) {
+    if (info) {
         assert(owner_);
-        owner_->relayInfoPanelCommand(info,cmd);
+        owner_->relayInfoPanelCommand(info, cmd);
     }
 }
 
-void InfoPanelItem::relayDashboardCommand(VInfo_ptr info,QString cmd)
-{
-    if(info)
-    {
+void InfoPanelItem::relayDashboardCommand(VInfo_ptr info, QString cmd) {
+    if (info) {
         assert(owner_);
-        owner_->relayDashboardCommand(info,cmd);
+        owner_->relayDashboardCommand(info, cmd);
     }
 }
 
-//From NodeObserver
-void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
-{
-    if(!node  || frozen_ || !active_ || suspended_)
-		return;
+// From NodeObserver
+void InfoPanelItem::notifyBeginNodeChange(const VNode* node,
+                                          const std::vector<ecf::Aspect::Type>& aspect,
+                                          const VNodeChange&) {
+    if (!node || frozen_ || !active_ || suspended_)
+        return;
 
-    //Check if there is data in info
-    if(info_)
-	{
-		if(info_->isNode())
-		{                
-            //Check if updates are handled when unselected
-            if(!selected_ && !unselectedFlags_.isSet(KeepContents))
-            {
+    // Check if there is data in info
+    if (info_) {
+        if (info_->isNode()) {
+            // Check if updates are handled when unselected
+            if (!selected_ && !unselectedFlags_.isSet(KeepContents)) {
                 return;
             }
 
-            //Check if the updated node is handled by the item
-            if(handleAnyChange_ || info_->node() == node ||
-              (useAncestors_ && info_->node()->isAncestor(node)))
-            {
-			    //We call the method implemented in the concrete class 
-                //to handle the changes
-                nodeChanged(node,aspect);
-				return;
+            // Check if the updated node is handled by the item
+            if (handleAnyChange_ || info_->node() == node || (useAncestors_ && info_->node()->isAncestor(node))) {
+                // We call the method implemented in the concrete class
+                // to handle the changes
+                nodeChanged(node, aspect);
+                return;
             }
-		}
-	}
+        }
+    }
 }

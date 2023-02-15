@@ -11,34 +11,33 @@
 #ifndef SERVERLISTSYNCWIDGET_HPP
 #define SERVERLISTSYNCWIDGET_HPP
 
-#include <QWidget>
-
 #include <vector>
+
+#include <QWidget>
 
 #include "ui_ServerListSyncWidget.h"
 
 class ServerListSyncChangeItem;
 class QListWidgetItem;
 
-class ServerListSyncWidget : public QWidget, protected Ui::ServerListSyncWidget
-{
+class ServerListSyncWidget : public QWidget, protected Ui::ServerListSyncWidget {
     Q_OBJECT
 
 public:
-    ServerListSyncWidget(QWidget *parent = nullptr);
+    ServerListSyncWidget(QWidget* parent = nullptr);
     ~ServerListSyncWidget() override;
     void reload();
 
 protected Q_SLOTS:
-    void slotTypeChanged(QListWidgetItem* item,QListWidgetItem*);
+    void slotTypeChanged(QListWidgetItem* item, QListWidgetItem*);
 
 private:
     void build();
     QString buildAddedChange(ServerListSyncChangeItem*);
     QString buildMatchChange(ServerListSyncChangeItem*);
-    QString buildSetSysChange(ServerListSyncChangeItem *t);
-    QString buildUnsetSysChange(ServerListSyncChangeItem *t);
-    QString buildTable(QString name,QString host,QString port) const;
+    QString buildSetSysChange(ServerListSyncChangeItem* t);
+    QString buildUnsetSysChange(ServerListSyncChangeItem* t);
+    QString buildTable(QString name, QString host, QString port) const;
 };
 
 #endif // SERVERLISTSYNCWIDGET_HPP

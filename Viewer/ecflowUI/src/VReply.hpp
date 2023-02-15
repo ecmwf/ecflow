@@ -13,96 +13,98 @@
 #include <string>
 #include <vector>
 
-#include "Zombie.hpp"
-#include "VFile.hpp"
 #include "VDir.hpp"
+#include "VFile.hpp"
+#include "Zombie.hpp"
 
-class VReply
-{
+class VReply {
 public:
-	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
-    enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode,TransferReadMode};
-    explicit VReply(void* sender=nullptr) : sender_(sender){}
-	~VReply() = default;
+    enum Status { NoStatus, TaskDone, TaskFailed, TaskCancelled };
+    enum FileReadMode { NoReadMode, LocalReadMode, ServerReadMode, LogServerReadMode, TransferReadMode };
+    explicit VReply(void* sender = nullptr) : sender_(sender) {}
+    ~VReply() = default;
 
-	void reset();
+    void reset();
 
-	void* sender() const {return sender_;}
-	void setSender(void* s) {sender_=s;}
+    void* sender() const { return sender_; }
+    void setSender(void* s) { sender_ = s; }
 
-    std::string errorText(const std::string& sep="") const;
-    const std::vector<std::string>& errorTextVec() const {return errorText_;}
-    std::string warningText(const std::string& sep="") const;
-    std::string infoText(const std::string& sep="") const;
-	const std::string& text() const {return text_;}
-	const std::vector<std::string>& textVec() const {return textVec_;}
-	Status status() const {return status_;}
-    const std::string& fileName() const {return fileName_;}
-	FileReadMode fileReadMode() const {return readMode_;}
-    const std::string& fileReadMethod() {return readMethod_;}
-	VFile_ptr tmpFile() const {return tmpFile_;}
-    const std::vector<VFile_ptr>& tmpFiles() const {return tmpFiles_;}
-    VDir_ptr directory() const {return dir_;}
-    std::vector<VDir_ptr> directories() const {return dirs_;}
-	const std::vector<Zombie>& zombies() const {return zombies_;}
-	void setReadTruncatedTo(int ival) {readTruncatedTo_=ival;}
-    const std::vector<std::string>& log() const {return log_;}
+    std::string errorText(const std::string& sep = "") const;
+    const std::vector<std::string>& errorTextVec() const { return errorText_; }
+    std::string warningText(const std::string& sep = "") const;
+    std::string infoText(const std::string& sep = "") const;
+    const std::string& text() const { return text_; }
+    const std::vector<std::string>& textVec() const { return textVec_; }
+    Status status() const { return status_; }
+    const std::string& fileName() const { return fileName_; }
+    FileReadMode fileReadMode() const { return readMode_; }
+    const std::string& fileReadMethod() { return readMethod_; }
+    VFile_ptr tmpFile() const { return tmpFile_; }
+    const std::vector<VFile_ptr>& tmpFiles() const { return tmpFiles_; }
+    VDir_ptr directory() const { return dir_; }
+    std::vector<VDir_ptr> directories() const { return dirs_; }
+    const std::vector<Zombie>& zombies() const { return zombies_; }
+    void setReadTruncatedTo(int ival) { readTruncatedTo_ = ival; }
+    const std::vector<std::string>& log() const { return log_; }
 
-	bool textFromFile(const std::string&);
-	void text(const std::vector<std::string>& msg);
-	void setTextVec(const std::vector<std::string>& msg) {textVec_=msg;;}
-	void text(const std::string& s) {text_=s;}
+    bool textFromFile(const std::string&);
+    void text(const std::vector<std::string>& msg);
+    void setTextVec(const std::vector<std::string>& msg) {
+        textVec_ = msg;
+        ;
+    }
+    void text(const std::string& s) { text_ = s; }
     void setErrorText(const std::string& s);
     void appendErrorText(const std::string& s);
     void setWarningText(const std::string& s);
     void appendWarningText(const std::string& s);
     void setInfoText(const std::string& s);
     void appendInfoText(const std::string& s);
-	void fileName(const std::string& s) {fileName_=s;}
-	void fileReadMode(FileReadMode m) {readMode_=m;}
-	void fileReadMethod(const std::string& m) {readMethod_=m;}
-	void tmpFile(VFile_ptr f) {tmpFile_=f;}
-    void appendTmpFile(VFile_ptr f)  {tmpFiles_.push_back(f);}
-    void setDirectory(VDir_ptr d) {dir_=d;}
-    void appendDirectory(VDir_ptr d)  {dirs_.push_back(d);}
-    void setDirectories(const std::vector<VDir_ptr>& d) {dirs_=d;}
-	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
-	int readTruncatedTo() const {return readTruncatedTo_;}
-    void addLog(const std::string& s) {log_.push_back(s);}
+    void fileName(const std::string& s) { fileName_ = s; }
+    void fileReadMode(FileReadMode m) { readMode_ = m; }
+    void fileReadMethod(const std::string& m) { readMethod_ = m; }
+    void tmpFile(VFile_ptr f) { tmpFile_ = f; }
+    void appendTmpFile(VFile_ptr f) { tmpFiles_.push_back(f); }
+    void setDirectory(VDir_ptr d) { dir_ = d; }
+    void appendDirectory(VDir_ptr d) { dirs_.push_back(d); }
+    void setDirectories(const std::vector<VDir_ptr>& d) { dirs_ = d; }
+    void zombies(const std::vector<Zombie>& z) { zombies_ = z; }
+    int readTruncatedTo() const { return readTruncatedTo_; }
+    void addLog(const std::string& s) { log_.push_back(s); }
     void addLogMsgEntry(const std::string& s);
     void addLogTryEntry(const std::string& s);
     void addLogRemarkEntry(const std::string& s);
     void addLogOptionEntry(const std::string& s);
-    void setLog(const std::vector<std::string>& s) {log_=s;}
-    void clearLog() {log_.clear();}
-    void setText(const std::string& txt) {text_=txt;}
+    void setLog(const std::vector<std::string>& s) { log_ = s; }
+    void clearLog() { log_.clear(); }
+    void setText(const std::string& txt) { text_ = txt; }
 
-    bool hasWarning() const {return (!warningText_.empty() && !warningText_[0].empty());}
-    bool hasInfo() const {return (!infoText_.empty() && !infoText_[0].empty());}
+    bool hasWarning() const { return (!warningText_.empty() && !warningText_[0].empty()); }
+    bool hasInfo() const { return (!infoText_.empty() && !infoText_[0].empty()); }
 
-	void prependText(const std::string&);
-	void appendText(const std::string&);
+    void prependText(const std::string&);
+    void appendText(const std::string&);
 
-	void status(Status s) {status_=s;}
+    void status(Status s) { status_ = s; }
 
 protected:
-	void* sender_;
-	Status status_{NoStatus};
+    void* sender_;
+    Status status_{NoStatus};
     std::vector<std::string> errorText_;
     std::vector<std::string> warningText_;
     std::vector<std::string> infoText_;
-	std::string text_;
-	std::vector<std::string> textVec_;
-	std::string fileName_;
-	FileReadMode readMode_{NoReadMode};
-	std::string  readMethod_;
-	int readTruncatedTo_{-1};
+    std::string text_;
+    std::vector<std::string> textVec_;
+    std::string fileName_;
+    FileReadMode readMode_{NoReadMode};
+    std::string readMethod_;
+    int readTruncatedTo_{-1};
     std::vector<std::string> log_;
-	VFile_ptr  tmpFile_;
+    VFile_ptr tmpFile_;
     std::vector<VFile_ptr> tmpFiles_;
     VDir_ptr dir_;
-    std::vector<VDir_ptr> dirs_;  
-	std::vector<Zombie> zombies_;
+    std::vector<VDir_ptr> dirs_;
+    std::vector<Zombie> zombies_;
 };
 
 #endif

@@ -9,78 +9,70 @@
 //============================================================================
 
 #include "VTriggerAttr.hpp"
+
+#include "Expression.hpp"
+#include "Indentor.hpp"
+#include "NodeAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
-
-#include "Indentor.hpp"
-#include "Expression.hpp"
-
-#include "NodeAttr.hpp"
 
 //================================
 // VTriggerAttrType
 //================================
 
-VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger")
-{
-    dataCount_=3;
-    searchKeyToData_["trigger_type"]=CompleteIndex;
-    searchKeyToData_["trigger_expression"]=ExprIndex;
-    searchKeyToData_["name"]=TypeIndex;
-    scanProc_=VTriggerAttr::scan;
+VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger") {
+    dataCount_                             = 3;
+    searchKeyToData_["trigger_type"]       = CompleteIndex;
+    searchKeyToData_["trigger_expression"] = ExprIndex;
+    searchKeyToData_["name"]               = TypeIndex;
+    scanProc_                              = VTriggerAttr::scan;
 }
 
-QString VTriggerAttrType::toolTip(QStringList d) const
-{
+QString VTriggerAttrType::toolTip(QStringList d) const {
     QString t;
-    if(d.count() == dataCount_)
-    {
-        if(d[CompleteIndex] == "0")
-            t+="<b>Type:</b> Trigger<br>";
-        else if(d[CompleteIndex] == "1")
-            t+="<b>Type:</b> Complete<br>";
+    if (d.count() == dataCount_) {
+        if (d[CompleteIndex] == "0")
+            t += "<b>Type:</b> Trigger<br>";
+        else if (d[CompleteIndex] == "1")
+            t += "<b>Type:</b> Complete<br>";
         else
             return t;
 
-        t+="<b>Expression:</b> " + d[ExprIndex];
+        t += "<b>Expression:</b> " + d[ExprIndex];
     }
     return t;
 }
 
-QString VTriggerAttrType::definition(QStringList d) const
-{
+QString VTriggerAttrType::definition(QStringList d) const {
     QString t;
-    if(d.count() == dataCount_)
-    {
-        if(d[CompleteIndex] == "0")
-            t+="trigger";
-        else if(d[CompleteIndex] == "1")
-            t+="complete";
+    if (d.count() == dataCount_) {
+        if (d[CompleteIndex] == "0")
+            t += "trigger";
+        else if (d[CompleteIndex] == "1")
+            t += "complete";
 
-        t+=" " + d[ExprIndex];
+        t += " " + d[ExprIndex];
     }
     return t;
 }
 
-void VTriggerAttrType::encodeTrigger(Expression *e,QStringList& data) const
-{
-    if(e)
+void VTriggerAttrType::encodeTrigger(Expression* e, QStringList& data) const {
+    if (e)
         data << qName_ << "0" << QString::fromStdString(e->expression());
     else
         encode_empty(data);
 }
 
-void VTriggerAttrType::encodeComplete(Expression *e,QStringList& data) const
-{
-    if(e)
+void VTriggerAttrType::encodeComplete(Expression* e, QStringList& data) const {
+    if (e)
         data << qName_ << "1" << QString::fromStdString(e->expression());
     else
         encode_empty(data);
 }
 
-void VTriggerAttrType::encode_empty(QStringList& data) const
-{
-    data << qName_ << "" << "";
+void VTriggerAttrType::encode_empty(QStringList& data) const {
+    data << qName_ << ""
+         << "";
 }
 
 //=====================================================
@@ -89,96 +81,78 @@ void VTriggerAttrType::encode_empty(QStringList& data) const
 //
 //=====================================================
 
-VTriggerAttr::VTriggerAttr(VNode *parent,Expression*, int index) :
-    VAttribute(parent,index)
-{
+VTriggerAttr::VTriggerAttr(VNode* parent, Expression*, int index) : VAttribute(parent, index) {
 }
 
-VAttributeType* VTriggerAttr::type() const
-{
-    static VAttributeType* atype=VAttributeType::find("trigger");
+VAttributeType* VTriggerAttr::type() const {
+    static VAttributeType* atype = VAttributeType::find("trigger");
     return atype;
 }
 
-QStringList VTriggerAttr::data(bool /*firstLine*/) const
-{
-    static auto* atype=dynamic_cast<VTriggerAttrType*>(type());
+QStringList VTriggerAttr::data(bool /*firstLine*/) const {
+    static auto* atype = dynamic_cast<VTriggerAttrType*>(type());
     QStringList s;
-    if(node_ptr node=parent_->node())
-    {
-        if(index_ == 0)
-        {
-            atype->encodeTrigger(node->get_trigger(),s);
+    if (node_ptr node = parent_->node()) {
+        if (index_ == 0) {
+            atype->encodeTrigger(node->get_trigger(), s);
         }
-        else
-        {
-            atype->encodeComplete(node->get_complete(),s);
+        else {
+            atype->encodeComplete(node->get_complete(), s);
         }
     }
     return s;
 }
 
-std::string VTriggerAttr::strName() const
-{
+std::string VTriggerAttr::strName() const {
     return {"trigger"};
 }
 
-void VTriggerAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-    if(node_ptr node=vnode->node())
-    {
-        Expression* eT=node->get_trigger();
-        Expression* eC=node->get_complete();
+void VTriggerAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
+    if (node_ptr node = vnode->node()) {
+        Expression* eT = node->get_trigger();
+        Expression* eC = node->get_complete();
 
-        if(eT)
-            vec.push_back(new VTriggerAttr(vnode,eT,0));
+        if (eT)
+            vec.push_back(new VTriggerAttr(vnode, eT, 0));
 
-        if(eC)
-            vec.push_back(new VTriggerAttr(vnode,eC,1));
+        if (eC)
+            vec.push_back(new VTriggerAttr(vnode, eC, 1));
     }
 }
 
-void VTriggerAttr::expressions(const VNode* vnode,std::string& trigger, std::string& complete)
-{
-    if(node_ptr node=vnode->node())
-    {
-        Expression* eT=node->get_trigger();
-        Expression* eC=node->get_complete();
+void VTriggerAttr::expressions(const VNode* vnode, std::string& trigger, std::string& complete) {
+    if (node_ptr node = vnode->node()) {
+        Expression* eT = node->get_trigger();
+        Expression* eC = node->get_complete();
 
-        if(eT)
-            trigger=eT->expression();
+        if (eT)
+            trigger = eT->expression();
 
-        if(eC)
-            complete=eC->expression();
+        if (eC)
+            complete = eC->expression();
     }
 }
 
-std::string VTriggerAttr::ast_str() const
-{
+std::string VTriggerAttr::ast_str() const {
     std::stringstream ss;
-    if(node_ptr node=parent_->node())
-    {        
-        if(index_ == 0)
-        {
-            if(Expression* e=node->get_trigger())
-            {
-                if (e->isFree() )
+    if (node_ptr node = parent_->node()) {
+        if (index_ == 0) {
+            if (Expression* e = node->get_trigger()) {
+                if (e->isFree())
                     ecf::Indentor::indent(ss) << "# (free)\n";
 
                 // show the Abstract Syntax Tree for the expression. This also uses Indentor
-                if(Ast* ast =  node->triggerAst())
+                if (Ast* ast = node->triggerAst())
                     ast->print(ss);
             }
         }
-        else
-        {
-            if(Expression* e=node->get_complete())
-            {
-                if (e->isFree() )
+        else {
+            if (Expression* e = node->get_complete()) {
+                if (e->isFree())
                     ecf::Indentor::indent(ss) << "# (free)\n";
 
                 // show the Abstract Syntax Tree for the expression. This also uses Indentor
-                if(Ast* ast =  node->completeAst())
+                if (Ast* ast = node->completeAst())
                     ast->print(ss);
             }
         }
@@ -186,5 +160,3 @@ std::string VTriggerAttr::ast_str() const
 
     return ss.str();
 }
-
-

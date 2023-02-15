@@ -12,13 +12,13 @@
 #include <QItemSelectionModel>
 #include <QSortFilterProxyModel>
 
+#include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
-#include "InfoProvider.hpp"
 #include "ZombieModel.hpp"
 
-static bool firstRun=true;
+static bool firstRun = true;
 
 //========================================================
 //
@@ -26,244 +26,202 @@ static bool firstRun=true;
 //
 //========================================================
 
-ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
-	QWidget(parent)
-{
-	setupUi(this);
+ZombieItemWidget::ZombieItemWidget(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-	infoProvider_=new ZombieProvider(this);
+    infoProvider_ = new ZombieProvider(this);
 
-	model_=new ZombieModel(this);
+    model_        = new ZombieModel(this);
 
-	sortModel_=new QSortFilterProxyModel(this);
-	sortModel_->setSourceModel(model_);
+    sortModel_    = new QSortFilterProxyModel(this);
+    sortModel_->setSourceModel(model_);
     sortModel_->setSortRole(Qt::UserRole);
 
-	zombieView->setModel(sortModel_);
+    zombieView->setModel(sortModel_);
 
-	//The selection changes in the view
-	connect(zombieView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
+    // The selection changes in the view
+    connect(zombieView->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+            this,
+            SLOT(slotItemSelected(QModelIndex, QModelIndex)));
 
-    connect(zombieView,SIGNAL(doubleClicked(const QModelIndex&)),
-            this,SLOT(slotDoubleClicked(const QModelIndex&)));
+    connect(zombieView, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(slotDoubleClicked(const QModelIndex&)));
 
-	//Build context menu
-    auto* sep1=new QAction(this);
+    // Build context menu
+    auto* sep1 = new QAction(this);
     sep1->setSeparator(true);
 
     zombieView->addAction(actionRescue);
     zombieView->addAction(actionFoboff);
-	zombieView->addAction(actionKill);
-	zombieView->addAction(actionTerminate);
+    zombieView->addAction(actionKill);
+    zombieView->addAction(actionTerminate);
     zombieView->addAction(actionDelete);
     zombieView->addAction(sep1);
     zombieView->addAction(actionLookup);
 
-	//Add actions for the pushbuttons
-	terminateTb_->setDefaultAction(actionTerminate);
-	rescueTb_->setDefaultAction(actionRescue);
-	foboffTb_->setDefaultAction(actionFoboff);
-	deleteTb_->setDefaultAction(actionDelete);
-	killTb_->setDefaultAction(actionKill);
+    // Add actions for the pushbuttons
+    terminateTb_->setDefaultAction(actionTerminate);
+    rescueTb_->setDefaultAction(actionRescue);
+    foboffTb_->setDefaultAction(actionFoboff);
+    deleteTb_->setDefaultAction(actionDelete);
+    killTb_->setDefaultAction(actionKill);
 
-	checkActionState();
+    checkActionState();
 }
 
-ZombieItemWidget::~ZombieItemWidget()
-= default;
+ZombieItemWidget::~ZombieItemWidget() = default;
 
-QWidget* ZombieItemWidget::realWidget()
-{
-	return this;
+QWidget* ZombieItemWidget::realWidget() {
+    return this;
 }
 
-void ZombieItemWidget::reload(VInfo_ptr info)
-{
+void ZombieItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if(suspended_)
+    if (suspended_)
         return;
 
     clearContents();
 
-    if(info && info->server() && info->server()->isDisabled())
-    {
+    if (info && info->server() && info->server()->isDisabled()) {
         setEnabled(false);
         return;
     }
-    else
-    {
+    else {
         setEnabled(true);
     }
 
-    info_=info;
+    info_ = info;
 
-    if(info_ && info_->server())
-	{
-		commandSent_=false;
-		infoProvider_->info(info_);
-	}
+    if (info_ && info_->server()) {
+        commandSent_ = false;
+        infoProvider_->info(info_);
+    }
 }
 
-void ZombieItemWidget::clearContents()
-{
-	InfoPanelItem::clear();
-	model_->clearData();
-	checkActionState();
-}
-
-
-void ZombieItemWidget::updateContents()
-{
-	//model_->clearData();
-    if(info_ && info_->server())
-	{
-		infoProvider_->info(info_);
-	}
-}
-
-void ZombieItemWidget::updateState(const FlagSet<ChangeFlag>&)
-{
+void ZombieItemWidget::clearContents() {
+    InfoPanelItem::clear();
+    model_->clearData();
     checkActionState();
 }
 
+void ZombieItemWidget::updateContents() {
+    // model_->clearData();
+    if (info_ && info_->server()) {
+        infoProvider_->info(info_);
+    }
+}
 
-void ZombieItemWidget::infoReady(VReply* reply)
-{
-	commandSent_=false;
+void ZombieItemWidget::updateState(const FlagSet<ChangeFlag>&) {
+    checkActionState();
+}
 
-	//We need to know what task it was!
-	if(model_->hasData())
-	{
-		model_->updateData(reply->zombies());
-	}
-	else
-	{
+void ZombieItemWidget::infoReady(VReply* reply) {
+    commandSent_ = false;
+
+    // We need to know what task it was!
+    if (model_->hasData()) {
+        model_->updateData(reply->zombies());
+    }
+    else {
         model_->resetData(reply->zombies());
-	}
+    }
 
-	//Adjust column size if it is the first run
-	if(firstRun && model_->hasData())
-	{
-		firstRun=false;
-		for(int i=0; i < model_->columnCount()-1; i++)
-		{
-			zombieView->resizeColumnToContents(i);
-		}
-	}
-	checkActionState();
+    // Adjust column size if it is the first run
+    if (firstRun && model_->hasData()) {
+        firstRun = false;
+        for (int i = 0; i < model_->columnCount() - 1; i++) {
+            zombieView->resizeColumnToContents(i);
+        }
+    }
+    checkActionState();
 }
 
-void ZombieItemWidget::infoFailed(VReply*)
-{
-	commandSent_=false;
-	checkActionState();
+void ZombieItemWidget::infoFailed(VReply*) {
+    commandSent_ = false;
+    checkActionState();
 }
 
-void ZombieItemWidget::on_actionTerminate_triggered()
-{
-	command("zombie_fail");
+void ZombieItemWidget::on_actionTerminate_triggered() {
+    command("zombie_fail");
 }
 
-void ZombieItemWidget::on_actionRescue_triggered()
-{
-	command("zombie_adopt");
+void ZombieItemWidget::on_actionRescue_triggered() {
+    command("zombie_adopt");
 }
 
-void ZombieItemWidget::on_actionFoboff_triggered()
-{
-	command("zombie_fob");
+void ZombieItemWidget::on_actionFoboff_triggered() {
+    command("zombie_fob");
 }
 
-void ZombieItemWidget::on_actionDelete_triggered()
-{
-	command("zombie_remove");
+void ZombieItemWidget::on_actionDelete_triggered() {
+    command("zombie_remove");
 }
 
-void ZombieItemWidget::on_actionKill_triggered()
-{
-	command("zombie_kill");
+void ZombieItemWidget::on_actionKill_triggered() {
+    command("zombie_kill");
 }
 
-void ZombieItemWidget::on_actionLookup_triggered()
-{
+void ZombieItemWidget::on_actionLookup_triggered() {
     lookup(zombieView->currentIndex());
 }
 
-void ZombieItemWidget::on_reloadTb__clicked(bool)
-{
-	updateContents();
+void ZombieItemWidget::on_reloadTb__clicked(bool) {
+    updateContents();
 }
 
-void ZombieItemWidget::command(const std::string& cmdName)
-{
-	if(info_ && info_->server())
-	{
-		//Get selection form view
-        QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
+void ZombieItemWidget::command(const std::string& cmdName) {
+    if (info_ && info_->server()) {
+        // Get selection form view
+        QModelIndexList lst = zombieView->selectionModel()->selectedRows(0);
 
-		if(!lst.isEmpty())
-		{           
+        if (!lst.isEmpty()) {
             QList<Zombie> zLst;
-            Q_FOREACH(QModelIndex idx,lst)
-            {
+            Q_FOREACH (QModelIndex idx, lst) {
                 zLst << model_->indexToZombie(sortModel_->mapToSource(idx));
             }
 
-            Q_FOREACH(Zombie z,zLst)
-            {
-                if(z.empty() == false)
-                {
-                    VTask_ptr t=VTask::create(VTask::ZombieCommandTask);
+            Q_FOREACH (Zombie z, zLst) {
+                if (z.empty() == false) {
+                    VTask_ptr t = VTask::create(VTask::ZombieCommandTask);
                     t->setZombie(z);
-                    t->param("command",cmdName);
+                    t->param("command", cmdName);
                     info_->server()->run(t);
-                    commandSent_=true;
+                    commandSent_ = true;
                 }
             }
-		}
-	}
+        }
+    }
 }
 
-
-void ZombieItemWidget::lookup(const QModelIndex& index)
-{
-    if(!info_ || !info_->server())
+void ZombieItemWidget::lookup(const QModelIndex& index) {
+    if (!info_ || !info_->server())
         return;
 
-    QModelIndex idx=sortModel_->mapToSource(index);
+    QModelIndex idx = sortModel_->mapToSource(index);
 
-    if(idx.isValid())
-    {
-        Zombie z=model_->indexToZombie(idx);
-        std::string p=z.path_to_task();
-        if(!p.empty())
-        {
-            VInfo_ptr ni=VInfo::createFromPath(info_->server(),p);
-            if(ni)
-            {
+    if (idx.isValid()) {
+        Zombie z      = model_->indexToZombie(idx);
+        std::string p = z.path_to_task();
+        if (!p.empty()) {
+            VInfo_ptr ni = VInfo::createFromPath(info_->server(), p);
+            if (ni) {
                 InfoPanelItem::linkSelected(ni);
             }
         }
     }
 }
 
-
-void ZombieItemWidget::slotDoubleClicked(const QModelIndex &index)
-{
+void ZombieItemWidget::slotDoubleClicked(const QModelIndex& index) {
     lookup(index);
 }
 
-void ZombieItemWidget::slotItemSelected(QModelIndex,QModelIndex)
-{
-	checkActionState();
+void ZombieItemWidget::slotItemSelected(QModelIndex, QModelIndex) {
+    checkActionState();
 }
 
-void ZombieItemWidget::checkActionState()
-{
-    if(suspended_)
-    {
+void ZombieItemWidget::checkActionState() {
+    if (suspended_) {
         reloadTb_->setEnabled(false);
         actionRescue->setEnabled(false);
         actionFoboff->setEnabled(false);
@@ -272,43 +230,35 @@ void ZombieItemWidget::checkActionState()
         actionDelete->setEnabled(false);
         return;
     }
-    else
-    {
+    else {
         reloadTb_->setEnabled(true);
     }
 
-    QModelIndex vIndex=zombieView->currentIndex();
-	QModelIndex index=sortModel_->mapToSource(vIndex);
+    QModelIndex vIndex = zombieView->currentIndex();
+    QModelIndex index  = sortModel_->mapToSource(vIndex);
 
-	bool acState=(index.isValid())?true:false;
+    bool acState       = (index.isValid()) ? true : false;
 
-	actionRescue->setEnabled(acState);
-	actionFoboff->setEnabled(acState);
-	actionKill->setEnabled(acState);
-	actionTerminate->setEnabled(acState);
-	actionDelete->setEnabled(acState);
+    actionRescue->setEnabled(acState);
+    actionFoboff->setEnabled(acState);
+    actionKill->setEnabled(acState);
+    actionTerminate->setEnabled(acState);
+    actionDelete->setEnabled(acState);
 }
 
-bool ZombieItemWidget::hasSameContents(VInfo_ptr info)
-{
-    if(info && info_ && info->server())
-    {
+bool ZombieItemWidget::hasSameContents(VInfo_ptr info) {
+    if (info && info_ && info->server()) {
         return info->server() == info_->server();
     }
     return false;
 }
 
-
-void ZombieItemWidget::serverSyncFinished()
-{
-	//If a command has previously sent
-	if(commandSent_)
-	{
-		commandSent_=false;
-		updateContents();
-	}
+void ZombieItemWidget::serverSyncFinished() {
+    // If a command has previously sent
+    if (commandSent_) {
+        commandSent_ = false;
+        updateContents();
+    }
 }
 
-
 static InfoPanelItemMaker<ZombieItemWidget> maker1("zombie");
-

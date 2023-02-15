@@ -13,31 +13,30 @@
 
 #include <string>
 
-//This class enables registered objects to read the settings updated with users settings via
-//static function "loadSettings()"
+// This class enables registered objects to read the settings updated with users settings via
+// static function "loadSettings()"
 
-class VSettingsLoader
-{
+class VSettingsLoader {
 public:
     explicit VSettingsLoader();
-    virtual ~VSettingsLoader() = default;
+    virtual ~VSettingsLoader()  = default;
 
     virtual void loadSettings() = 0;
     static void process();
 
 private:
     // No copy allowed
-    explicit VSettingsLoader(const VSettingsLoader&) = delete;
+    explicit VSettingsLoader(const VSettingsLoader&)   = delete;
     VSettingsLoader& operator=(const VSettingsLoader&) = delete;
 };
 
-template<class T>
-class SimpleSettingsLoader : public VSettingsLoader
-{
+template <class T>
+class SimpleSettingsLoader : public VSettingsLoader {
 public:
     explicit SimpleSettingsLoader() : VSettingsLoader() {}
+
 protected:
-    void loadSettings() override { T::loadSettings();}
+    void loadSettings() override { T::loadSettings(); }
 };
 
 #endif // VSETTINGSLOADER_HPP

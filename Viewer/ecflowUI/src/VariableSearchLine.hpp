@@ -10,18 +10,17 @@
 #ifndef VARIABLESEARCHLINE_HPP_
 #define VARIABLESEARCHLINE_HPP_
 
-#include "AbstractSearchLine.hpp"
-
 #include <QModelIndex>
+
+#include "AbstractSearchLine.hpp"
 
 class QTreeView;
 
-class  VariableSearchLine : public AbstractSearchLine
-{
+class VariableSearchLine : public AbstractSearchLine {
     Q_OBJECT
 
 public:
-     explicit VariableSearchLine(QWidget *parent);
+    explicit VariableSearchLine(QWidget* parent);
     ~VariableSearchLine() override;
     void setView(QTreeView* view);
 
@@ -29,16 +28,16 @@ public Q_SLOTS:
     void slotFind(QString) override;
     void slotFindNext() override;
     void slotFindPrev() override;
-    void slotFindNext(bool) { slotFindNext();}
-    void slotFindPrev(bool) {slotFindPrev();}
-    void slotSortHappened(int,Qt::SortOrder);
+    void slotFindNext(bool) { slotFindNext(); }
+    void slotFindPrev(bool) { slotFindPrev(); }
+    void slotSortHappened(int, Qt::SortOrder);
     void slotUpdate();
-    void slotUpdate(const QModelIndex&,const QModelIndex&);
+    void slotUpdate(const QModelIndex&, const QModelIndex&);
 
-protected:   
+protected:
     void selectIndex(const QModelIndex& index);
     void clearRequested() {}
-    
+
     QTreeView* view_;
     QModelIndexList resultItems_;
     int currentResultItem_;

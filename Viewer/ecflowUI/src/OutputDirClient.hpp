@@ -11,17 +11,16 @@
 #ifndef VIEWER_SRC_OUTPUTDIRCLIENT_HPP_
 #define VIEWER_SRC_OUTPUTDIRCLIENT_HPP_
 
+#include <QByteArray>
+
 #include "OutputClient.hpp"
 #include "VDir.hpp"
 
-#include <QByteArray>
-
-class OutputDirClient : public OutputClient
-{
-	Q_OBJECT
+class OutputDirClient : public OutputClient {
+    Q_OBJECT
 
 public:
-    OutputDirClient(const std::string& host,const std::string& port,QObject *parent);
+    OutputDirClient(const std::string& host, const std::string& port, QObject* parent);
 
     VDir_ptr result() const;
     void getDir(const std::string& name);
@@ -33,14 +32,13 @@ protected Q_SLOTS:
     void slotCheckTimeout();
 
 private:
-	OutputDirClient(const OutputDirClient&);
-	OutputDirClient& operator=(const OutputDirClient&);
+    OutputDirClient(const OutputDirClient&);
+    OutputDirClient& operator=(const OutputDirClient&);
 
-	void parseData();
+    void parseData();
 
-	VDir_ptr  dir_;
-	QByteArray data_;
+    VDir_ptr dir_;
+    QByteArray data_;
 };
-
 
 #endif /* VIEWER_SRC_OUTPUTDIRCLIENT_HPP_ */

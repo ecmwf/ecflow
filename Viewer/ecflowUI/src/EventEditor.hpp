@@ -11,33 +11,31 @@
 #ifndef EventEditor_HPP
 #define EventEditor_HPP
 
-#include "ui_EventEditorWidget.h"
+#include <QStringList>
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
-
-#include <QStringList>
+#include "ui_EventEditorWidget.h"
 
 class EventEditor;
 class QStringListModel;
 
-class EventEditorWidget :  public QWidget, protected Ui::EventEditorWidget
-{
-friend class EventEditor;
+class EventEditorWidget : public QWidget, protected Ui::EventEditorWidget {
+    friend class EventEditor;
+
 public:
-    EventEditorWidget(QWidget *parent=nullptr);
+    EventEditorWidget(QWidget* parent = nullptr);
 };
 
-class EventEditor : public AttributeEditor
-{
-Q_OBJECT
+class EventEditor : public AttributeEditor {
+    Q_OBJECT
 public:
-    EventEditor(VInfo_ptr,QWidget* parent=nullptr);
+    EventEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~EventEditor() override;
 
-protected Q_SLOTS:  
+protected Q_SLOTS:
     void slotLookUp();
-    void slotDoubleClicked(const QModelIndex &index);
+    void slotDoubleClicked(const QModelIndex& index);
     void slotStatusToggled(bool);
     void scanStarted();
     void scanFinished();
@@ -45,13 +43,13 @@ protected Q_SLOTS:
     void buildList();
 
 protected:
-    void paintEvent(QPaintEvent *e) override;
+    void paintEvent(QPaintEvent* e) override;
     void resetValue() override;
     void apply() override;
     bool isValueChanged() override;
     void nodeChanged(const std::vector<ecf::Aspect::Type>& a) override;
     void setModelData(QStringList lst);
-    void lookup(const QModelIndex &index);
+    void lookup(const QModelIndex& index);
     void readSettings();
     void writeSettings();
 
@@ -63,5 +61,3 @@ protected:
 };
 
 #endif // EventEditor_HPP
-
-

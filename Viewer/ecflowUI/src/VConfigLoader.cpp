@@ -12,40 +12,35 @@
 
 #include <map>
 
-
-using Map = std::multimap<std::string, VConfigLoader *>;
+using Map          = std::multimap<std::string, VConfigLoader*>;
 
 static Map* makers = nullptr;
 
-VConfigLoader::VConfigLoader(const std::string& name)
-{
-    if(makers == nullptr)
+VConfigLoader::VConfigLoader(const std::string& name) {
+    if (makers == nullptr)
         makers = new Map();
 
-    makers->insert(Map::value_type(name,this));
+    makers->insert(Map::value_type(name, this));
 }
 
-VConfigLoader::~VConfigLoader()
-{
+VConfigLoader::~VConfigLoader() {
     // Not called
 }
 
-bool VConfigLoader::process(const std::string& name,VProperty *prop)
-{
-    Map::size_type entries=makers->count(name);
-    auto it=makers->find(name);
+bool VConfigLoader::process(const std::string& name, VProperty* prop) {
+    Map::size_type entries = makers->count(name);
+    auto it                = makers->find(name);
 
-    bool retVal=false;
-    for(Map::size_type cnt=0; cnt != entries; ++cnt, ++it)
-    {
-    	(*it).second->load(prop);
-    	retVal=true;
+    bool retVal            = false;
+    for (Map::size_type cnt = 0; cnt != entries; ++cnt, ++it) {
+        (*it).second->load(prop);
+        retVal = true;
     }
 
-   /* if(it != makers->end())
-    {
-        (*it).second->load(prop);
-        return true;
-    }*/
+    /* if(it != makers->end())
+     {
+         (*it).second->load(prop);
+         return true;
+     }*/
     return retVal;
-}   
+}

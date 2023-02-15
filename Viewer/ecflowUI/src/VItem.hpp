@@ -12,6 +12,7 @@
 #define VITEM_HPP_
 
 #include <cstdlib>
+
 #include <QString>
 
 class ServerHandler;
@@ -24,37 +25,35 @@ class VTaskNode;
 class VAttribute;
 class VItemVisitor;
 
-class VItem
-{
+class VItem {
 public:
     VItem(VNode* parent) : parent_(parent) {}
     virtual ~VItem() = default;
 
-    VNode* parent() const {return parent_;}
-    virtual VServer* isServer() const {return nullptr;}
-    virtual VNode* isNode() const {return nullptr;}
-    virtual VSuiteNode* isSuite() const {return nullptr;}
-    virtual VFamilyNode* isFamily() const {return nullptr;}
-    virtual VTaskNode* isTask() const {return nullptr;}
-    virtual VAliasNode* isAlias() const {return nullptr;}
-    virtual VAttribute* isAttribute() const {return nullptr;}
+    VNode* parent() const { return parent_; }
+    virtual VServer* isServer() const { return nullptr; }
+    virtual VNode* isNode() const { return nullptr; }
+    virtual VSuiteNode* isSuite() const { return nullptr; }
+    virtual VFamilyNode* isFamily() const { return nullptr; }
+    virtual VTaskNode* isTask() const { return nullptr; }
+    virtual VAliasNode* isAlias() const { return nullptr; }
+    virtual VAttribute* isAttribute() const { return nullptr; }
 
-    virtual ServerHandler* server() const=0;
-    virtual VServer* root() const=0;
-    virtual bool isTopLevel() const {return false;}
-    virtual std::string strName() const=0;
-    virtual QString name() const=0;
-    virtual const std::string& typeName() const=0;
-    virtual std::string fullPath() const=0;
-    virtual bool sameContents(VItem*) const=0;
+    virtual ServerHandler* server() const = 0;
+    virtual VServer* root() const         = 0;
+    virtual bool isTopLevel() const { return false; }
+    virtual std::string strName() const         = 0;
+    virtual QString name() const                = 0;
+    virtual const std::string& typeName() const = 0;
+    virtual std::string fullPath() const        = 0;
+    virtual bool sameContents(VItem*) const     = 0;
     virtual bool isAncestor(const VItem*) const;
-    virtual QString nodeMenuMode() const {return QString();}
-    virtual QString defStatusNodeMenuMode() const {return QString();}
+    virtual QString nodeMenuMode() const { return QString(); }
+    virtual QString defStatusNodeMenuMode() const { return QString(); }
 
 protected:
     VNode* parent_;
 };
-
 
 #if 0
 class VItemVisitor
@@ -69,6 +68,4 @@ public:
 };
 #endif
 
-
 #endif // VITEM_HPP_
-

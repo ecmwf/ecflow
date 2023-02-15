@@ -8,54 +8,43 @@
 //
 //============================================================================
 
-
 #include "StringMatchMode.hpp"
 
-std::map<StringMatchMode::Mode,std::string> StringMatchMode::matchOper_;
+std::map<StringMatchMode::Mode, std::string> StringMatchMode::matchOper_;
 
-StringMatchMode::StringMatchMode()
-{
-	init();
-}
-
-StringMatchMode::StringMatchMode(Mode mode) :
-  mode_(mode)
-{
-	init();
-}
-
-StringMatchMode::StringMatchMode(int idx) :
-    mode_(static_cast<Mode>(idx))
-{
+StringMatchMode::StringMatchMode() {
     init();
 }
 
-void StringMatchMode::init()
-{
-	if(matchOper_.empty())
-	{
-		matchOper_[ContainsMatch]="~";
-		matchOper_[WildcardMatch]="=";
-		matchOper_[RegexpMatch]="=~";
-	}
+StringMatchMode::StringMatchMode(Mode mode) : mode_(mode) {
+    init();
 }
 
-const std::string& StringMatchMode::matchOperator() const
-{
-	static std::string emptyStr;
-	auto it=matchOper_.find(mode_);
-	if(it != matchOper_.end())
-		return it->second;
-
-	return emptyStr;
+StringMatchMode::StringMatchMode(int idx) : mode_(static_cast<Mode>(idx)) {
+    init();
 }
 
-StringMatchMode::Mode StringMatchMode::operToMode(const std::string& op)
-{
-	for(auto it=matchOper_.begin(); it != matchOper_.end(); ++it)
-	{
-		if(op == it->second)
-			return it->first;
-	}
-	return InvalidMatch;
+void StringMatchMode::init() {
+    if (matchOper_.empty()) {
+        matchOper_[ContainsMatch] = "~";
+        matchOper_[WildcardMatch] = "=";
+        matchOper_[RegexpMatch]   = "=~";
+    }
+}
+
+const std::string& StringMatchMode::matchOperator() const {
+    static std::string emptyStr;
+    auto it = matchOper_.find(mode_);
+    if (it != matchOper_.end())
+        return it->second;
+
+    return emptyStr;
+}
+
+StringMatchMode::Mode StringMatchMode::operToMode(const std::string& op) {
+    for (auto it = matchOper_.begin(); it != matchOper_.end(); ++it) {
+        if (op == it->second)
+            return it->first;
+    }
+    return InvalidMatch;
 }

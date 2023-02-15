@@ -17,19 +17,17 @@
 #include <QTimer>
 
 #include "Aspect.hpp"
-
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
 #include "MainWindow.hpp"
+#include "SessionHandler.hpp"
 #include "TriggeredScanner.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VEventAttr.hpp"
 #include "VNode.hpp"
-#include "SessionHandler.hpp"
 
-EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent)
-{
+EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
 
     pathView_->addAction(actionLookUp_);
@@ -37,26 +35,23 @@ EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent)
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-EventEditor::EventEditor(VInfo_ptr info,QWidget* parent) :
-    AttributeEditor(info,"event",parent),
-    model_(nullptr),
-    scanned_(false)
-{
-    w_=new EventEditorWidget(this);
+EventEditor::EventEditor(VInfo_ptr info, QWidget* parent)
+    : AttributeEditor(info, "event", parent), model_(nullptr), scanned_(false) {
+    w_ = new EventEditorWidget(this);
     addForm(w_);
 
-    VAttribute* a=info_->attribute();
+    VAttribute* a = info_->attribute();
 
     Q_ASSERT(a);
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "event");
-    QStringList aData=a->data();
+    QStringList aData = a->data();
 
-    if(aData.count() < 3)
-       return;
+    if (aData.count() < 3)
+        return;
 
-    QString name=aData[1];
-    oriVal_=aData[2].toInt();
+    QString name = aData[1];
+    oriVal_      = aData[2].toInt();
 
     w_->nameLabel_->setText(name);
     w_->statusSetRb_->setChecked(oriVal_ == 1);
@@ -65,233 +60,198 @@ EventEditor::EventEditor(VInfo_ptr info,QWidget* parent) :
     w_->messageLabel_->hide();
     w_->messageLabel_->setShowTypeTitle(false);
 
-    connect(w_->actionLookUp_,SIGNAL(triggered()),
-            this,SLOT(slotLookUp()));
+    connect(w_->actionLookUp_, SIGNAL(triggered()), this, SLOT(slotLookUp()));
 
-    connect(w_->pathView_,SIGNAL(doubleClicked(const QModelIndex&)),
-            this,SLOT(slotDoubleClicked(const QModelIndex&)));
+    connect(
+        w_->pathView_, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(slotDoubleClicked(const QModelIndex&)));
 
-    connect(w_->statusSetRb_,SIGNAL(toggled(bool)),
-            this,SLOT(slotStatusToggled(bool)));
+    connect(w_->statusSetRb_, SIGNAL(toggled(bool)), this, SLOT(slotStatusToggled(bool)));
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Event");
+    header_->setInfo(QString::fromStdString(info_->path()), "Event");
 
     checkButtonStatus();
 
     readSettings();
 
-    //No reset button is allowed because we can perform irreversible changes!
+    // No reset button is allowed because we can perform irreversible changes!
     doNotUseReset();
 }
 
-EventEditor::~EventEditor()
-{
+EventEditor::~EventEditor() {
     writeSettings();
 }
 
-//This was the only way to guarantee that the trigger scanning is called
-//after the dialogue appears on screen (showEvent did not work!)
-void EventEditor::paintEvent(QPaintEvent *e)
-{
+// This was the only way to guarantee that the trigger scanning is called
+// after the dialogue appears on screen (showEvent did not work!)
+void EventEditor::paintEvent(QPaintEvent* e) {
     QDialog::paintEvent(e);
-    if(!scanned_)
-    {
-         QTimer::singleShot(0, this, SLOT(buildList()));
+    if (!scanned_) {
+        QTimer::singleShot(0, this, SLOT(buildList()));
     }
 }
 
-//We only build the list when the dialogoue is already visible so that
-//the progressbar could show the scanning process
-void EventEditor::buildList()
-{   
-    if(!info_)
+// We only build the list when the dialogoue is already visible so that
+// the progressbar could show the scanning process
+void EventEditor::buildList() {
+    if (!info_)
         return;
 
-    VAttribute* a=info_->attribute();
-    if(!a)
+    VAttribute* a = info_->attribute();
+    if (!a)
         return;
 
-    if(!model_)
-    {
-        model_=new QStringListModel(this);
+    if (!model_) {
+        model_ = new QStringListModel(this);
         w_->pathView_->setModel(model_);
     }
 
-    if(VNode* node=info_->node())
-    {
-        auto* scanner=new TriggeredScanner(this);
+    if (VNode* node = info_->node()) {
+        auto* scanner = new TriggeredScanner(this);
 
-        connect(scanner,SIGNAL(scanStarted()),
-                this,SLOT(scanStarted()));
+        connect(scanner, SIGNAL(scanStarted()), this, SLOT(scanStarted()));
 
-        connect(scanner,SIGNAL(scanFinished()),
-                this,SLOT(scanFinished()));
+        connect(scanner, SIGNAL(scanFinished()), this, SLOT(scanFinished()));
 
-        connect(scanner,SIGNAL(scanProgressed(int)),
-                this,SLOT(scanProgressed(int)));
+        connect(scanner, SIGNAL(scanProgressed(int)), this, SLOT(scanProgressed(int)));
 
         std::vector<std::string> v;
-        node->triggeredByEvent(a->strName(),v,scanner);
+        node->triggeredByEvent(a->strName(), v, scanner);
 
         w_->messageLabel_->hide();
 
-        //Update the model(=node list)
+        // Update the model(=node list)
         QStringList lst;
-        for(auto & s : v)
+        for (auto& s : v)
             lst << QString::fromStdString(s);
 
         setModelData(lst);
 
         delete scanner;
 
-        scanned_=true;
+        scanned_ = true;
     }
 }
 
-void EventEditor::scanStarted()
-{
+void EventEditor::scanStarted() {
     w_->messageLabel_->showInfo("Scanning dependencies based on this event ...");
     w_->messageLabel_->startProgress(100);
 }
 
-void EventEditor::scanFinished()
-{
+void EventEditor::scanFinished() {
     w_->messageLabel_->stopProgress();
     w_->messageLabel_->hide();
 }
 
-void EventEditor::scanProgressed(int value)
-{
-    std::string text="";
-    w_->messageLabel_->progress(QString::fromStdString(text),value);
+void EventEditor::scanProgressed(int value) {
+    std::string text = "";
+    w_->messageLabel_->progress(QString::fromStdString(text), value);
 }
 
-void EventEditor::apply()
-{
-    int intVal=(w_->statusSetRb_->isChecked())?1:0;
-    std::string val=(w_->statusSetRb_->isChecked())?"set":"clear";
-    std::string name=w_->nameLabel_->text().toStdString();
+void EventEditor::apply() {
+    int intVal       = (w_->statusSetRb_->isChecked()) ? 1 : 0;
+    std::string val  = (w_->statusSetRb_->isChecked()) ? "set" : "clear";
+    std::string name = w_->nameLabel_->text().toStdString();
 
     std::vector<std::string> valCmd;
-    VAttribute::buildAlterCommand(valCmd,"change","event",name,val);
+    VAttribute::buildAlterCommand(valCmd, "change", "event", name, val);
 
-    if(oriVal_ != intVal)
-    {
-        CommandHandler::run(info_,valCmd);
+    if (oriVal_ != intVal) {
+        CommandHandler::run(info_, valCmd);
     }
 }
 
-void EventEditor::resetValue()
-{
+void EventEditor::resetValue() {
 }
 
-void EventEditor::slotStatusToggled(bool)
-{
+void EventEditor::slotStatusToggled(bool) {
     checkButtonStatus();
 }
 
-bool EventEditor::isValueChanged()
-{
-    return (oriVal_ != (w_->statusSetRb_->isChecked()?1:0));
+bool EventEditor::isValueChanged() {
+    return (oriVal_ != (w_->statusSetRb_->isChecked() ? 1 : 0));
 }
 
-void EventEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
-{
-    bool eventCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::EVENT) != aspect.end());
-    if(eventCh && info_)
-    {
-        VAttribute* a=info_->attribute();
+void EventEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect) {
+    bool eventCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::EVENT) != aspect.end());
+    if (eventCh && info_) {
+        VAttribute* a = info_->attribute();
         Q_ASSERT(a);
 
-        QStringList aData=a->data();
-        if(aData.count() < 3)
+        QStringList aData = a->data();
+        if (aData.count() < 3)
             return;
 
-        oriVal_=aData[2].toInt();
-        w_->statusSetRb_->setChecked(oriVal_==1);
+        oriVal_ = aData[2].toInt();
+        w_->statusSetRb_->setChecked(oriVal_ == 1);
 
-        //Update the model (=node list)
-        //setModelData(lim->paths());
+        // Update the model (=node list)
+        // setModelData(lim->paths());
     }
 }
 
-void EventEditor::setModelData(QStringList lst)
-{
+void EventEditor::setModelData(QStringList lst) {
     Q_ASSERT(model_);
 
-    bool hadData=(modelData_.isEmpty() == false);
-    modelData_=lst;
+    bool hadData = (modelData_.isEmpty() == false);
+    modelData_   = lst;
     model_->setStringList(modelData_);
 
-    if(!modelData_.isEmpty())
-    {
-        if(!hadData)
-        {
-            w_->pathView_->setCurrentIndex(model_->index(0,0));
+    if (!modelData_.isEmpty()) {
+        if (!hadData) {
+            w_->pathView_->setCurrentIndex(model_->index(0, 0));
             w_->pathView_->setFocus(Qt::MouseFocusReason);
         }
     }
 }
-//Lookup in tree
+// Lookup in tree
 
-void EventEditor::slotLookUp()
-{
-     QModelIndex idx=w_->pathView_->currentIndex();
-     lookup(idx);
+void EventEditor::slotLookUp() {
+    QModelIndex idx = w_->pathView_->currentIndex();
+    lookup(idx);
 }
 
-void EventEditor::slotDoubleClicked(const QModelIndex &index)
-{
+void EventEditor::slotDoubleClicked(const QModelIndex& index) {
     lookup(index);
 }
 
-void EventEditor::lookup(const QModelIndex &idx)
-{
-    if(!info_)
+void EventEditor::lookup(const QModelIndex& idx) {
+    if (!info_)
         return;
 
     Q_ASSERT(model_);
 
-    std::string nodePath=
-            model_->data(idx,Qt::DisplayRole).toString().toStdString();
+    std::string nodePath = model_->data(idx, Qt::DisplayRole).toString().toStdString();
 
-    VInfo_ptr ni=VInfo::createFromPath(info_->server(),nodePath);
-    if(ni)
-    {
+    VInfo_ptr ni         = VInfo::createFromPath(info_->server(), nodePath);
+    if (ni) {
         MainWindow::lookUpInTree(ni);
     }
 }
 
-void EventEditor::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void EventEditor::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("EventEditor")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("EventEditor")), QSettings::NativeFormat);
 
-    //We have to clear it so that should not remember all the previous values
+    // We have to clear it so that should not remember all the previous values
     settings.clear();
 
     settings.beginGroup("main");
-    settings.setValue("size",size());
+    settings.setValue("size", size());
     settings.endGroup();
 }
 
-void EventEditor::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void EventEditor::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("EventEditor")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("EventEditor")), QSettings::NativeFormat);
 
     settings.beginGroup("main");
-    if(settings.contains("size"))
-    {
+    if (settings.contains("size")) {
         resize(settings.value("size").toSize());
     }
-    else
-    {
-        resize(QSize(420,400));
+    else {
+        resize(QSize(420, 400));
     }
 
     settings.endGroup();

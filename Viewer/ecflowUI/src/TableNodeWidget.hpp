@@ -10,22 +10,20 @@
 #ifndef TABLENODEWIDGET_HPP_
 #define TABLENODEWIDGET_HPP_
 
-#include "ui_TableNodeWidget.h"
-
 #include "NodeWidget.hpp"
+#include "ui_TableNodeWidget.h"
 
 class NodeStateFilter;
 class TableNodeSortModel;
 class VParamFilterMenu;
 class VSettings;
 
-class TableNodeWidget : public NodeWidget, protected Ui::TableNodeWidget
-{
-Q_OBJECT
+class TableNodeWidget : public NodeWidget, protected Ui::TableNodeWidget {
+    Q_OBJECT
 
 public:
-    TableNodeWidget(ServerFilter* servers,bool interactive,QWidget* parent=nullptr);
-	~TableNodeWidget() override;
+    TableNodeWidget(ServerFilter* servers, bool interactive, QWidget* parent = nullptr);
+    ~TableNodeWidget() override;
 
     void populateDockTitleBar(DashboardDockTitleWidget* tw) override;
     void rerender() override;
@@ -34,7 +32,7 @@ public:
     void readSettings(VComboSettings*) override;
 
 protected Q_SLOTS:
-	void on_actionBreadcrumbs_triggered(bool b);
+    void on_actionBreadcrumbs_triggered(bool b);
     void slotSelectionChangedInView(VInfo_ptr info);
     void slotSelectionAutoScrollChanged(bool b);
 
@@ -42,10 +40,9 @@ protected:
     void detachedChanged() override {}
 
 private:
-    TableNodeSortModel *sortModel_;
-    VParamFilterMenu *stateFilterMenu_;
+    TableNodeSortModel* sortModel_;
+    VParamFilterMenu* stateFilterMenu_;
     QAction* acAutoScroll_;
 };
 
 #endif
-

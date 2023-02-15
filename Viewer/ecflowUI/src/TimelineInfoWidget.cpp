@@ -9,7 +9,6 @@
 
 #include "TimelineInfoWidget.hpp"
 
-#include <QtGlobal>
 #include <QBuffer>
 #include <QCloseEvent>
 #include <QDialogButtonBox>
@@ -18,6 +17,7 @@
 #include <QSettings>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <QtGlobal>
 
 #include "SessionHandler.hpp"
 #include "TextFormat.hpp"
@@ -26,12 +26,10 @@
 #include "TimelineInfoDelegate.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
-#include "TextFormat.hpp"
 #include "UiLog.hpp"
-#include "ViewerUtil.hpp"
 #include "VNState.hpp"
+#include "ViewerUtil.hpp"
 #include "WidgetNameProvider.hpp"
-
 #include "ui_TimelineInfoWidget.h"
 
 //=======================================================
@@ -40,174 +38,137 @@
 //
 //=======================================================
 
-TimelineInfoModel::TimelineInfoModel(QObject *parent) :
-          QAbstractItemModel(parent)
-{
+TimelineInfoModel::TimelineInfoModel(QObject* parent) : QAbstractItemModel(parent) {
 }
 
-TimelineInfoModel::~TimelineInfoModel()
-= default;
+TimelineInfoModel::~TimelineInfoModel() = default;
 
-void TimelineInfoModel::resetData(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
-                                unsigned int endDateSec)
-{
+void TimelineInfoModel::resetData(TimelineItem* data,
+                                  unsigned int viewStartDateSec,
+                                  unsigned int viewEndDateSec,
+                                  unsigned int endDateSec) {
     beginResetModel();
-    viewStartDateSec_=viewStartDateSec;
-    viewEndDateSec_=viewEndDateSec;
-    endDateSec_=endDateSec;
-    data_=data;
+    viewStartDateSec_ = viewStartDateSec;
+    viewEndDateSec_   = viewEndDateSec;
+    endDateSec_       = endDateSec;
+    data_             = data;
     determineRowsInPeriod();
     endResetModel();
 }
 
+void TimelineInfoModel::determineRowsInPeriod() {
+    firstRowInPeriod_ = -1;
+    lastRowInPeriod_  = -1;
 
-void TimelineInfoModel::determineRowsInPeriod()
-{
-    firstRowInPeriod_=-1;
-    lastRowInPeriod_=-1;
-
-    if(!data_)
+    if (!data_)
         return;
 
-    for(unsigned int i=0; i < data_->size(); i++)
-    {
-        if(viewStartDateSec_ <= data_->start_[i])
-        {
-            firstRowInPeriod_=i;
+    for (unsigned int i = 0; i < data_->size(); i++) {
+        if (viewStartDateSec_ <= data_->start_[i]) {
+            firstRowInPeriod_ = i;
             break;
         }
-        if(i <  data_->size()-1 && viewStartDateSec_ < data_->start_[i+1])
-        {
-            firstRowInPeriod_=i+1;
+        if (i < data_->size() - 1 && viewStartDateSec_ < data_->start_[i + 1]) {
+            firstRowInPeriod_ = i + 1;
             break;
         }
     }
 
-    if(firstRowInPeriod_ != -11)
-    {
-        for(auto i=static_cast<unsigned int>(firstRowInPeriod_); i < data_->size(); i++)
-        {
-            if(viewEndDateSec_ <= data_->start_[i])
-            {
-                lastRowInPeriod_=i-1;
+    if (firstRowInPeriod_ != -11) {
+        for (auto i = static_cast<unsigned int>(firstRowInPeriod_); i < data_->size(); i++) {
+            if (viewEndDateSec_ <= data_->start_[i]) {
+                lastRowInPeriod_ = i - 1;
                 break;
             }
         }
     }
 }
 
-void TimelineInfoModel::clearData()
-{
+void TimelineInfoModel::clearData() {
     beginResetModel();
-    data_=nullptr;
-    firstRowInPeriod_=-1;
-    lastRowInPeriod_=-1;
+    data_             = nullptr;
+    firstRowInPeriod_ = -1;
+    lastRowInPeriod_  = -1;
     endResetModel();
 }
 
-bool TimelineInfoModel::hasData() const
-{
+bool TimelineInfoModel::hasData() const {
     return (data_ != nullptr);
 }
 
-int TimelineInfoModel::columnCount( const QModelIndex& /*parent */) const
-{
-     return 3;
+int TimelineInfoModel::columnCount(const QModelIndex& /*parent */) const {
+    return 3;
 }
 
-int TimelineInfoModel::rowCount( const QModelIndex& parent) const
-{
-    if(!hasData())
+int TimelineInfoModel::rowCount(const QModelIndex& parent) const {
+    if (!hasData())
         return 0;
 
-    //Parent is the root:
-    if(!parent.isValid())
-    {
+    // Parent is the root:
+    if (!parent.isValid()) {
         return static_cast<int>(data_->size());
     }
 
     return 0;
 }
 
-Qt::ItemFlags TimelineInfoModel::flags ( const QModelIndex & /*index*/) const
-{
+Qt::ItemFlags TimelineInfoModel::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
-{
-    if(!index.isValid() || !hasData())
-    {
+QVariant TimelineInfoModel::data(const QModelIndex& index, int role) const {
+    if (!index.isValid() || !hasData()) {
         return {};
     }
 
-    int row=index.row();
-    if(row < 0 || row >= static_cast<int>(data_->size()))
+    int row = index.row();
+    if (row < 0 || row >= static_cast<int>(data_->size()))
         return {};
 
-    if(role == Qt::DisplayRole)
-    {
-        if(index.column() == 0)
-        {          
+    if (role == Qt::DisplayRole) {
+        if (index.column() == 0) {
             return TimelineItem::toQDateTime(data_->start_[row]).toString("hh:mm:ss dd-MMM-yyyy");
         }
-        else if(index.column() == 1)
-        {            
-            if(VNState* vn=VNState::find(data_->status_[row]))
-            {
+        else if (index.column() == 1) {
+            if (VNState* vn = VNState::find(data_->status_[row])) {
                 return vn->name();
             }
         }
-        else if(index.column() == 2)
-        {
-            qint64 dSec=-1;
-            if(row != static_cast<int>(data_->size())-1)
-            {
-                dSec=data_->start_[row+1]-data_->start_[row];
+        else if (index.column() == 2) {
+            qint64 dSec = -1;
+            if (row != static_cast<int>(data_->size()) - 1) {
+                dSec = data_->start_[row + 1] - data_->start_[row];
             }
-            else
-            {
-                dSec=endDateSec_-data_->start_[row];
+            else {
+                dSec = endDateSec_ - data_->start_[row];
             }
 
-            if(dSec >=0)
-            {
+            if (dSec >= 0) {
                 return ViewerUtil::formatDuration(dSec);
             }
         }
     }
 
-    else if(role == Qt::BackgroundRole)
-    {
-       if(index.column() == 1)
-       {          
-            if(VNState* vn=VNState::find(data_->status_[row]))
-            {
+    else if (role == Qt::BackgroundRole) {
+        if (index.column() == 1) {
+            if (VNState* vn = VNState::find(data_->status_[row])) {
                 return vn->colour();
             }
-       }
+        }
     }
 
-    else if(role == Qt::UserRole)
-    {
-        if(firstRowInPeriod_!= -1)
-        {
-            if(row > firstRowInPeriod_ && (row < lastRowInPeriod_ || lastRowInPeriod_ == -1))
-            {
+    else if (role == Qt::UserRole) {
+        if (firstRowInPeriod_ != -1) {
+            if (row > firstRowInPeriod_ && (row < lastRowInPeriod_ || lastRowInPeriod_ == -1)) {
                 return 0;
             }
-            else if(row == firstRowInPeriod_ )
-            {
-                return (row==0)?0:1;
-
+            else if (row == firstRowInPeriod_) {
+                return (row == 0) ? 0 : 1;
             }
-            else if(row == lastRowInPeriod_ )
-            {
-                return (row==static_cast<int>(data_->size()-1))?0:2;
-
+            else if (row == lastRowInPeriod_) {
+                return (row == static_cast<int>(data_->size() - 1)) ? 0 : 2;
             }
-            else
-            {
+            else {
                 return 3;
             }
         }
@@ -218,51 +179,42 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
     return {};
 }
 
-QVariant TimelineInfoModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-    if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
-              return QAbstractItemModel::headerData( section, orient, role );
+QVariant TimelineInfoModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole))
+        return QAbstractItemModel::headerData(section, orient, role);
 
-    if(role == Qt::DisplayRole)
-    {
-        switch(section)
-        {
-        case 0:
-            return "Date";
-        case 1:
-            return "State";
-        case 2:
-            return "Duration in state";
-        default:
-            return {};
+    if (role == Qt::DisplayRole) {
+        switch (section) {
+            case 0:
+                return "Date";
+            case 1:
+                return "State";
+            case 2:
+                return "Duration in state";
+            default:
+                return {};
         }
     }
 
     return {};
 }
 
-QModelIndex TimelineInfoModel::index( int row, int column, const QModelIndex & parent ) const
-{
-    if(!hasData() || row < 0 || column < 0)
-    {
+QModelIndex TimelineInfoModel::index(int row, int column, const QModelIndex& parent) const {
+    if (!hasData() || row < 0 || column < 0) {
         return {};
     }
 
-    //When parent is the root this index refers to a node or server
-    if(!parent.isValid())
-    {
-        return createIndex(row,column);
+    // When parent is the root this index refers to a node or server
+    if (!parent.isValid()) {
+        return createIndex(row, column);
     }
 
     return {};
-
 }
 
-QModelIndex TimelineInfoModel::parent(const QModelIndex &/*child*/) const
-{
+QModelIndex TimelineInfoModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
-
 
 //=======================================================
 //
@@ -270,29 +222,27 @@ QModelIndex TimelineInfoModel::parent(const QModelIndex &/*child*/) const
 //
 //=======================================================
 
-bool TimelineInfoWidget::columnsAdjusted_=false;
+bool TimelineInfoWidget::columnsAdjusted_ = false;
 
-TimelineInfoWidget::TimelineInfoWidget(QWidget */*parent*/) :
-    ui_(new Ui::TimelineInfoWidget),
-    numOfRows_(0),
-    tlEndTime_(0)
-{
+TimelineInfoWidget::TimelineInfoWidget(QWidget* /*parent*/)
+    : ui_(new Ui::TimelineInfoWidget), numOfRows_(0), tlEndTime_(0) {
     ui_->setupUi(this);
 
-    //title
-    ui_->titleLabel->setProperty("fileInfo","1");
+    // title
+    ui_->titleLabel->setProperty("fileInfo", "1");
     ui_->titleLabel->setWordWrap(true);
     ui_->titleLabel->setMargin(2);
-    ui_->titleLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+    ui_->titleLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     ui_->titleLabel->setAutoFillBackground(true);
     ui_->titleLabel->setFrameShape(QFrame::StyledPanel);
-    ui_->titleLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+    ui_->titleLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::TextSelectableByKeyboard |
+                                             Qt::TextSelectableByMouse);
 
-    //Time tree
-    auto *delegate=new TimelineInfoDelegate(this);
+    // Time tree
+    auto* delegate = new TimelineInfoDelegate(this);
     ui_->timeTree->setItemDelegate(delegate);
 
-    model_=new TimelineInfoModel(this);
+    model_ = new TimelineInfoModel(this);
     ui_->timeTree->setModel(model_);
 
 #if 0
@@ -317,169 +267,162 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget */*parent*/) :
     TimelineInfoDailyDelegate *dailyDelegate=new TimelineInfoDailyDelegate(dailyModel_,this);
     ui_->dailyTree->setItemDelegate(dailyDelegate);
 #endif
-
 }
 
-void TimelineInfoWidget::clear()
-{
+void TimelineInfoWidget::clear() {
     host_.clear();
     port_.clear();
     itemIndex_ = -1;
     model_->clearData();
 }
 
-void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, int itemIndex,QDateTime viewStartDate,
-                              QDateTime viewEndDate)
-{
+void TimelineInfoWidget::load(QString host,
+                              QString port,
+                              TimelineData* tlData,
+                              int itemIndex,
+                              QDateTime viewStartDate,
+                              QDateTime viewEndDate) {
     Q_ASSERT(tlData);
 
-    host_=host;
-    port_=port;
-    data_=tlData->items()[itemIndex];
+    host_      = host;
+    port_      = port;
+    data_      = tlData->items()[itemIndex];
     itemIndex_ = itemIndex;
-    tlEndTime_=tlData->endTime();
+    tlEndTime_ = tlData->endTime();
 
-    QColor col(39,49,101);
-    QString title=Viewer::formatBoldText("Node: ",col) + QString::fromStdString(data_.path());
+    QColor col(39, 49, 101);
+    QString title = Viewer::formatBoldText("Node: ", col) + QString::fromStdString(data_.path());
 
     ui_->titleLabel->setText(title);
 
-    model_->resetData(&data_,viewStartDate.toMSecsSinceEpoch()/1000,
-                    viewEndDate.toMSecsSinceEpoch()/1000,tlData->endTime());
+    model_->resetData(
+        &data_, viewStartDate.toMSecsSinceEpoch() / 1000, viewEndDate.toMSecsSinceEpoch() / 1000, tlData->endTime());
 
-    ui_->dailyW->load(&data_,viewStartDate.toMSecsSinceEpoch()/1000,
-                      viewEndDate.toMSecsSinceEpoch()/1000,tlData->endTime());
+    ui_->dailyW->load(
+        &data_, viewStartDate.toMSecsSinceEpoch() / 1000, viewEndDate.toMSecsSinceEpoch() / 1000, tlData->endTime());
 
-    if(!columnsAdjusted_)
-    {
+    if (!columnsAdjusted_) {
         ui_->timeTree->resizeColumnToContents(0);
         ui_->timeTree->resizeColumnToContents(1);
-        columnsAdjusted_=true;
+        columnsAdjusted_ = true;
     }
 
-    int first=data_.firstInPeriod(viewStartDate,viewEndDate);
-    if(first != -1)
-        ui_->timeTree->setCurrentIndex(model_->index(first-1,0));
+    int first = data_.firstInPeriod(viewStartDate, viewEndDate);
+    if (first != -1)
+        ui_->timeTree->setCurrentIndex(model_->index(first - 1, 0));
 
-    //Set css for the text formatting
-    QString cssDoc="td {padding-left: 3px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #323232;} \
+    // Set css for the text formatting
+    QString cssDoc =
+        "td {padding-left: 3px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #323232;} \
                     td.title {padding-left: 2px; padding-top: 1px; padding-bottom: 1px;background-color: #e3e6f3; color: #323232;}";
 
     ui_->summaryTe->setReadOnly(false);
     ui_->summaryTe->document()->setDefaultStyleSheet(cssDoc);
 
-    //TextBrowser
+    // TextBrowser
     createSummary();
 }
 
-void TimelineInfoWidget::createSummary()
-{
+void TimelineInfoWidget::createSummary() {
     QString s;
 
-    s+="<table width=\'100%\'>";
+    s += "<table width=\'100%\'>";
 
-    s+=R"(<tr><td class='title' align='center' colspan='2' bgcolor=')"  + QColor(238,238,238).name() +
-            "\'><b>Statistics for the whole log period</b></td></tr>";
+    s += R"(<tr><td class='title' align='center' colspan='2' bgcolor=')" + QColor(238, 238, 238).name() +
+         "\'><b>Statistics for the whole log period</b></td></tr>";
 
-    createSummary(s,VNState::find("active"));
-    createSummary(s,VNState::find("submitted"));
-    createSummary(s,VNState::find("complete"));
-    createSummary(s,VNState::find("aborted"));
-    createSummary(s,VNState::find("queued"));
+    createSummary(s, VNState::find("active"));
+    createSummary(s, VNState::find("submitted"));
+    createSummary(s, VNState::find("complete"));
+    createSummary(s, VNState::find("aborted"));
+    createSummary(s, VNState::find("queued"));
 
-    s+="</table>";
+    s += "</table>";
 
     ui_->summaryTe->setHtml(s);
 }
 
-void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
-{
-    if(!state)
+void TimelineInfoWidget::createSummary(QString& txt, VNState* state) {
+    if (!state)
         return;
 
-    int num=0;
-    float mean=0.;
+    int num    = 0;
+    float mean = 0.;
     TimelineItemStats stats;
-    unsigned char statusId=state->ucId();
-    data_.durationStats(statusId,num,mean,stats,tlEndTime_);
+    unsigned char statusId = state->ucId();
+    data_.durationStats(statusId, num, mean, stats, tlEndTime_);
 
-    if(num <=0)
+    if (num <= 0)
         return;
 
-    txt+=R"(<tr><td class='title' bgcolor=')" + state->colour().name() + R"(' align='center' colspan='2' >)" +
-            Viewer::formatText(state->label(),state->fontColour()) + "</td></tr>";
+    txt += R"(<tr><td class='title' bgcolor=')" + state->colour().name() + R"(' align='center' colspan='2' >)" +
+           Viewer::formatText(state->label(), state->fontColour()) + "</td></tr>";
 
-    txt+=Viewer::formatTableRow("Number",QString::number(num),true);
-    txt+=Viewer::formatTableRow("Total duration",ViewerUtil::formatDuration(stats.total),true);
-    txt+=Viewer::formatTableRow("Minimum",ViewerUtil::formatDuration(stats.min),true);
-    txt+=Viewer::formatTableRow("Maximum",ViewerUtil::formatDuration(stats.max),true);
-    txt+=Viewer::formatTableRow("Mean",ViewerUtil::formatDuration(mean),true);
+    txt += Viewer::formatTableRow("Number", QString::number(num), true);
+    txt += Viewer::formatTableRow("Total duration", ViewerUtil::formatDuration(stats.total), true);
+    txt += Viewer::formatTableRow("Minimum", ViewerUtil::formatDuration(stats.min), true);
+    txt += Viewer::formatTableRow("Maximum", ViewerUtil::formatDuration(stats.max), true);
+    txt += Viewer::formatTableRow("Mean", ViewerUtil::formatDuration(mean), true);
 
-    if(num >=4 && stats.max-stats.min >= 3)
-    {
-        QPixmap pix=makeBoxPlot(state,num,mean,stats);
+    if (num >= 4 && stats.max - stats.min >= 3) {
+        QPixmap pix = makeBoxPlot(state, num, mean, stats);
         QByteArray byteArray;
         QBuffer buffer(&byteArray);
         pix.save(&buffer, "PNG");
 
-        txt+=R"(<tr><td align='center' colspan='2'><img src="data:image/png;base64,)" +
-            byteArray.toBase64() + "\"/></td></tr>";
+        txt += R"(<tr><td align='center' colspan='2'><img src="data:image/png;base64,)" + byteArray.toBase64() +
+               "\"/></td></tr>";
     }
 }
 
-QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int /*num*/,int /*mean*/,TimelineItemStats stats)
-{
-    int w=200;
-    int h=36;
-    int xPadding=10;
-    int extrH=12;
-    int extrTop=(h-extrH)/2;
-    int extrBottom=h-extrTop;
-    int boxH=20;
-    int boxTop=(h-boxH)/2;
-    int boxBottom=h-boxTop;
-    QColor col=state->colour();
+QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int /*num*/, int /*mean*/, TimelineItemStats stats) {
+    int w          = 200;
+    int h          = 36;
+    int xPadding   = 10;
+    int extrH      = 12;
+    int extrTop    = (h - extrH) / 2;
+    int extrBottom = h - extrTop;
+    int boxH       = 20;
+    int boxTop     = (h - boxH) / 2;
+    int boxBottom  = h - boxTop;
+    QColor col     = state->colour();
 
-    QPixmap pix(w,h);
-    pix.fill(QColor(243,243,243));
+    QPixmap pix(w, h);
+    pix.fill(QColor(243, 243, 243));
     QPainter painter(&pix);
-    painter.setPen(QPen(col.darker(140),2));
+    painter.setPen(QPen(col.darker(140), 2));
     painter.setBrush(col);
 
-    float xRate=static_cast<float>(w-2*xPadding)/static_cast<float>(stats.max-stats.min);
-    int x25=xPadding+static_cast<float>(stats.perc25-stats.min)*xRate;
-    int x50=xPadding+static_cast<float>(stats.median-stats.min)*xRate;
-    int x75=xPadding+static_cast<float>(stats.perc75-stats.min)*xRate;
+    float xRate = static_cast<float>(w - 2 * xPadding) / static_cast<float>(stats.max - stats.min);
+    int x25     = xPadding + static_cast<float>(stats.perc25 - stats.min) * xRate;
+    int x50     = xPadding + static_cast<float>(stats.median - stats.min) * xRate;
+    int x75     = xPadding + static_cast<float>(stats.perc75 - stats.min) * xRate;
 
-    painter.drawLine(QPoint(xPadding,extrTop),QPoint(xPadding,extrBottom));
-    painter.drawLine(QPoint(w-xPadding,extrTop),QPoint(w-xPadding,extrBottom));
-    painter.drawLine(QPoint(xPadding,h/2),QPoint(w-xPadding,h/2));
-    painter.fillRect(QRect(QPoint(x25,boxTop),QPoint(x75,boxBottom)),col.darker(110));
-    painter.fillRect(QRect(QPoint(x50-1,boxTop),QPoint(x50+1,boxBottom)),col.darker(120));
+    painter.drawLine(QPoint(xPadding, extrTop), QPoint(xPadding, extrBottom));
+    painter.drawLine(QPoint(w - xPadding, extrTop), QPoint(w - xPadding, extrBottom));
+    painter.drawLine(QPoint(xPadding, h / 2), QPoint(w - xPadding, h / 2));
+    painter.fillRect(QRect(QPoint(x25, boxTop), QPoint(x75, boxBottom)), col.darker(110));
+    painter.fillRect(QRect(QPoint(x50 - 1, boxTop), QPoint(x50 + 1, boxBottom)), col.darker(120));
     return pix;
 }
 
-void TimelineInfoWidget::readSettings(QSettings& settings)
-{
-    if(settings.contains("timeTreeColumnWidth"))
-    {
-        if(ViewerUtil::initTreeColumnWidth(settings,"timeTreeColumnWidth",ui_->timeTree))
-        {
-            columnsAdjusted_=true;
+void TimelineInfoWidget::readSettings(QSettings& settings) {
+    if (settings.contains("timeTreeColumnWidth")) {
+        if (ViewerUtil::initTreeColumnWidth(settings, "timeTreeColumnWidth", ui_->timeTree)) {
+            columnsAdjusted_ = true;
         }
     }
 
-    int idx=settings.value("tab",0).toInt();
-    if(idx >=0 && idx < ui_->tabWidget->count())
+    int idx = settings.value("tab", 0).toInt();
+    if (idx >= 0 && idx < ui_->tabWidget->count())
         ui_->tabWidget->setCurrentIndex(idx);
 
     ui_->dailyW->readSettings(settings);
 }
 
-void TimelineInfoWidget::writeSettings(QSettings& settings)
-{
-    ViewerUtil::saveTreeColumnWidth(settings,"timeTreeColumnWidth",ui_->timeTree);
-    settings.setValue("tab",ui_->tabWidget->currentIndex());
+void TimelineInfoWidget::writeSettings(QSettings& settings) {
+    ViewerUtil::saveTreeColumnWidth(settings, "timeTreeColumnWidth", ui_->timeTree);
+    settings.setValue("tab", ui_->tabWidget->currentIndex());
     ui_->dailyW->writeSettings(settings);
 }
 
@@ -489,74 +432,64 @@ void TimelineInfoWidget::writeSettings(QSettings& settings)
 //
 //=======================================================
 
-TimelineInfoDialog::TimelineInfoDialog(QWidget* parent) : QDialog(parent)
-{
+TimelineInfoDialog::TimelineInfoDialog(QWidget* parent) : QDialog(parent) {
     setWindowTitle(tr("ecFlowUI - Timeline details"));
 
-    auto *vb=new QVBoxLayout(this);
-    vb->setContentsMargins(4,4,4,4);
+    auto* vb = new QVBoxLayout(this);
+    vb->setContentsMargins(4, 4, 4, 4);
 
-    infoW_=new TimelineInfoWidget(this);
+    infoW_ = new TimelineInfoWidget(this);
     vb->addWidget(infoW_);
 
-    auto *buttonBox=new QDialogButtonBox(this);
+    auto* buttonBox = new QDialogButtonBox(this);
     vb->addWidget(buttonBox);
 
     buttonBox->addButton(QDialogButtonBox::Close);
 
-    connect(buttonBox,SIGNAL(rejected()),
-            this,SLOT(reject()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     readSettings();
 
     WidgetNameProvider::nameChildren(this);
 }
 
-TimelineInfoDialog::~TimelineInfoDialog()
-{
+TimelineInfoDialog::~TimelineInfoDialog() {
     writeSettings();
 }
 
-void TimelineInfoDialog::closeEvent(QCloseEvent * event)
-{
+void TimelineInfoDialog::closeEvent(QCloseEvent* event) {
     event->accept();
     infoW_->clear();
     writeSettings();
 }
 
-void TimelineInfoDialog::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void TimelineInfoDialog::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TimelineInfoDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TimelineInfoDialog")), QSettings::NativeFormat);
 
-    //We have to clear it so that should not remember all the previous values
+    // We have to clear it so that should not remember all the previous values
     settings.clear();
 
     settings.beginGroup("main");
-    settings.setValue("size",size());
+    settings.setValue("size", size());
 
     infoW_->writeSettings(settings);
 
     settings.endGroup();
 }
 
-void TimelineInfoDialog::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void TimelineInfoDialog::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TimelineInfoDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TimelineInfoDialog")), QSettings::NativeFormat);
 
     settings.beginGroup("main");
-    if(settings.contains("size"))
-    {
+    if (settings.contains("size")) {
         resize(settings.value("size").toSize());
     }
-    else
-    {
-        resize(QSize(480,420));
+    else {
+        resize(QSize(480, 420));
     }
 
     infoW_->readSettings(settings);

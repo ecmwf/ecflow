@@ -12,8 +12,8 @@
 #define VSSTATE_HPP_
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "SState.hpp"
 #include "VParam.hpp"
@@ -21,24 +21,23 @@
 class ServerHandler;
 class VProperty;
 
-class VSState : public VParam
-{
+class VSState : public VParam {
 public:
-	VSState(const std::string& name,SState::State);
-	explicit VSState(const std::string& name);
+    VSState(const std::string& name, SState::State);
+    explicit VSState(const std::string& name);
 
     static bool isRunningState(ServerHandler*);
-	static QString toName(ServerHandler*);
-	static QColor  toColour(ServerHandler* n);
-	static QColor  toFontColour(ServerHandler* n);
-	static VSState* toState(ServerHandler* n);
-	static VSState* find(const std::string& name);
-    
-    //Called from VConfigLoader
+    static QString toName(ServerHandler*);
+    static QColor toColour(ServerHandler* n);
+    static QColor toFontColour(ServerHandler* n);
+    static VSState* toState(ServerHandler* n);
+    static VSState* find(const std::string& name);
+
+    // Called from VConfigLoader
     static void load(VProperty* group);
 
 private:
-	static std::map<std::string,VSState*> items_;
+    static std::map<std::string, VSState*> items_;
 };
 
 #endif

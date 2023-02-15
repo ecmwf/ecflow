@@ -8,107 +8,92 @@
 //
 //============================================================================
 
+#include "AddLabelDialog.hpp"
+
 #include <QCloseEvent>
-#include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QSettings>
+#include <QVBoxLayout>
 
-#include "AddLabelDialog.hpp"
 #include "CommandHandler.hpp"
 #include "EditorInfoLabel.hpp"
 #include "SessionHandler.hpp"
 #include "VAttribute.hpp"
-
 #include "ui_AddLabelDialog.h"
 
-AddLabelDialog::AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent) :
-    QDialog(parent),
-    ui_(new Ui::AddLabelDialog),
-    info_(info)
-{
-    if(!info_ || !info_->isNode() || !info_->node())
-    {
+AddLabelDialog::AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent)
+    : QDialog(parent), ui_(new Ui::AddLabelDialog), info_(info) {
+    if (!info_ || !info_->isNode() || !info_->node()) {
         QDialog::reject();
         return;
     }
 
     ui_->setupUi(this);
 
-    QLayoutItem *item = nullptr;
-    item=ui_->grid->itemAtPosition(1,0);
+    QLayoutItem* item = nullptr;
+    item              = ui_->grid->itemAtPosition(1, 0);
     Q_ASSERT(item);
-    item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
+    item->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     Q_ASSERT(info_);
-    ui_->header->setInfo(QString::fromStdString(info_->path()),"Label");
+    ui_->header->setInfo(QString::fromStdString(info_->path()), "Label");
 
-    connect(ui_->buttonBox, SIGNAL(accepted()),
-            this, SLOT(accept()));
-    connect(ui_->buttonBox, SIGNAL(rejected()),
-            this, SLOT(reject()));
+    connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(ui_->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     ui_->nameLe->setText(labelName);
 
     readSettings();
 }
 
-void AddLabelDialog::accept()
-{
-    std::string val=ui_->valueTe->toPlainText().toStdString();
-    std::string name=ui_->nameLe->text().toStdString();
+void AddLabelDialog::accept() {
+    std::string val  = ui_->valueTe->toPlainText().toStdString();
+    std::string name = ui_->nameLe->text().toStdString();
 
     std::vector<std::string> cmd;
-    VAttribute::buildAlterCommand(cmd,"add","label", name, val);
-    CommandHandler::run(info_,cmd);
+    VAttribute::buildAlterCommand(cmd, "add", "label", name, val);
+    CommandHandler::run(info_, cmd);
 
     writeSettings();
     QDialog::accept();
 }
 
-void AddLabelDialog::reject()
-{
+void AddLabelDialog::reject() {
     writeSettings();
     QDialog::accept();
 }
 
-void AddLabelDialog::closeEvent(QCloseEvent* event)
-{
+void AddLabelDialog::closeEvent(QCloseEvent* event) {
     event->accept();
     writeSettings();
 }
 
-void AddLabelDialog::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void AddLabelDialog::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("AddLabelDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("AddLabelDialog")), QSettings::NativeFormat);
 
-    //We have to clear it so that should not remember all the previous values
+    // We have to clear it so that should not remember all the previous values
     settings.clear();
 
     settings.beginGroup("main");
-    settings.setValue("size",size());
+    settings.setValue("size", size());
     settings.endGroup();
 }
 
-void AddLabelDialog::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void AddLabelDialog::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("AddLabelDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("AddLabelDialog")), QSettings::NativeFormat);
 
     settings.beginGroup("main");
-    if(settings.contains("size"))
-    {
+    if (settings.contains("size")) {
         resize(settings.value("size").toSize());
     }
-    else
-    {
-        const int defaultWidth=310;
-        const int defaultHeight=200;
-        resize(QSize(defaultWidth,defaultHeight));
+    else {
+        const int defaultWidth  = 310;
+        const int defaultHeight = 200;
+        resize(QSize(defaultWidth, defaultHeight));
     }
 
     settings.endGroup();

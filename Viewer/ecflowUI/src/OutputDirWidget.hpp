@@ -13,8 +13,8 @@
 
 #include <QWidget>
 
-#include "VFile.hpp"
 #include "VDir.hpp"
+#include "VFile.hpp"
 
 class QModelIndex;
 class QTimer;
@@ -29,12 +29,11 @@ class DirWidgetState;
 class VReply;
 
 namespace Ui {
-    class OutputDirWidget;
+class OutputDirWidget;
 }
 
-class OutputDirWidget : public QWidget
-{
-Q_OBJECT
+class OutputDirWidget : public QWidget {
+    Q_OBJECT
     friend class DirWidgetState;
     friend class DirWidgetSuccessState;
     friend class DirWidgetFirstFailedState;
@@ -43,7 +42,7 @@ Q_OBJECT
     friend class DirWidgetDisabledState;
 
 public:
-    explicit OutputDirWidget(QWidget *parent);
+    explicit OutputDirWidget(QWidget* parent);
 
     void clear();
     void load(VReply* reply, const std::string& joboutFile);
@@ -60,7 +59,7 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
     void closeByButton();
-    void slotItemSelected(const QModelIndex& /*idx1*/,const QModelIndex& /*idx2*/);
+    void slotItemSelected(const QModelIndex& /*idx1*/, const QModelIndex& /*idx2*/);
 
 Q_SIGNALS:
     void updateRequested();
@@ -88,8 +87,8 @@ protected:
     OutputDirFetchInfo* fetchInfo_{nullptr};
 
 private:
-     void adjustCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);
-     void setCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);
+    void adjustCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);
+    void setCurrentSelection(const std::string& fPath, VFile::FetchMode fMode);
 };
 
 #endif // OUTPUTDIRWIDGET_HPP

@@ -12,10 +12,8 @@
 #define OUTPUTITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-
-#include "VFile.hpp"
 #include "VDir.hpp"
-
+#include "VFile.hpp"
 #include "ui_OutputItemWidget.h"
 
 class OutputDirProvider;
@@ -24,25 +22,23 @@ class OutputDirWidget;
 class VProperty;
 class QTimer;
 
-
-class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
-{
-Q_OBJECT
+class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget {
+    Q_OBJECT
 
 public:
-	explicit OutputItemWidget(QWidget *parent=nullptr);
-	~OutputItemWidget() override;
+    explicit OutputItemWidget(QWidget* parent = nullptr);
+    ~OutputItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
-	void clearContents() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
+    void clearContents() override;
 
-	//From VInfoPresenter
-	void infoReady(VReply*) override;
-	void infoFailed(VReply*) override;
-	void infoProgress(VReply*) override;
-    void infoProgressStart(const std::string& text,int max) override;
-    void infoProgressUpdate(const std::string& text,int value) override;
+    // From VInfoPresenter
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override;
+    void infoProgressStart(const std::string& text, int max) override;
+    void infoProgressUpdate(const std::string& text, int value) override;
     void infoProgressStop() override;
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
@@ -54,11 +50,11 @@ protected Q_SLOTS:
     void slotShowDir(bool);
     void adjustShowDirTb();
     void shrinkDirPanel();
-	void on_searchTb__clicked();
-	void on_gotoLineTb__clicked();
-	void on_reloadTb__clicked();
-	void on_fontSizeUpTb__clicked();
-	void on_fontSizeDownTb__clicked();
+    void on_searchTb__clicked();
+    void on_gotoLineTb__clicked();
+    void on_reloadTb__clicked();
+    void on_fontSizeUpTb__clicked();
+    void on_fontSizeDownTb__clicked();
     void on_toStartTb__clicked();
     void on_toEndTb__clicked();
     void on_toLineStartTb__clicked();
@@ -74,7 +70,7 @@ protected Q_SLOTS:
 
 protected:
     void updateState(const FlagSet<ChangeFlag>&) override;
-	void searchOnReload();
+    void searchOnReload();
     void reloadCurrentFile(bool wholeFile);
     void loadCurrentDirItemFile();
     bool isJoboutLoaded() const;
@@ -82,7 +78,7 @@ protected:
 
     OutputDirProvider* dirProvider_{nullptr};
 
-	bool userClickedReload_{false};
+    bool userClickedReload_{false};
     OutputFileFetchInfo* fetchInfo_{nullptr};
     bool submittedWarning_{false};
     VProperty* showDirProp_{nullptr};
@@ -92,4 +88,3 @@ protected:
 };
 
 #endif
-

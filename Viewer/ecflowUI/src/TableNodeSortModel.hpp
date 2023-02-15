@@ -18,22 +18,21 @@ class TableNodeModel;
 class NodeFilterDef;
 class ModelColumn;
 
-class TableNodeSortModel : public QSortFilterProxyModel
-{
+class TableNodeSortModel : public QSortFilterProxyModel {
     Q_OBJECT
 public:
-    TableNodeSortModel(TableNodeModel*,QObject *parent=nullptr);
+    TableNodeSortModel(TableNodeModel*, QObject* parent = nullptr);
     ~TableNodeSortModel() override;
 
-	//From QSortFilterProxyModel:
-	//we set the source model in the constructor. So this function should not do anything.
+    // From QSortFilterProxyModel:
+    // we set the source model in the constructor. So this function should not do anything.
     void setSourceModel(QAbstractItemModel*) override {}
 
-	VInfo_ptr nodeInfo(const QModelIndex&);
-	QModelIndex infoToIndex(VInfo_ptr);
-    QModelIndex nodeToIndex(const VNode *node);
+    VInfo_ptr nodeInfo(const QModelIndex&);
+    QModelIndex infoToIndex(VInfo_ptr);
+    QModelIndex nodeToIndex(const VNode* node);
     void selectionChanged(QModelIndexList lst);
-    void setSkipSort(bool b) {skipSort_=b;}
+    void setSkipSort(bool b) { skipSort_ = b; }
     void removeColumn(QString);
     ModelColumn* columns() const;
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
@@ -43,7 +42,7 @@ protected Q_SLOTS:
     void skipSortingEnd();
 
 protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
     TableNodeModel* nodeModel_;
     bool skipSort_;

@@ -12,10 +12,9 @@
 
 #include <QTreeView>
 
-class TreeView : public QTreeView
-{
+class TreeView : public QTreeView {
 public:
-	explicit TreeView(QWidget* parent=nullptr);
+    explicit TreeView(QWidget* parent = nullptr);
 };
 
 #endif /* VIEWER_SRC_TREEVIEW_HPP_ */

@@ -12,18 +12,17 @@
 
 #ifdef ECFLOW_LOGVIEW
 
-#include <string>
-#include <vector>
-#include <sstream>
+    #include <sstream>
+    #include <string>
+    #include <vector>
 
-#include <QDateTime>
-#include <QObject>
+    #include <QDateTime>
+    #include <QObject>
 
 class ServerHandler;
 class QLocalSocket;
 
-class LogViewerCom : public QObject
-{
+class LogViewerCom : public QObject {
 public:
     LogViewerCom();
 

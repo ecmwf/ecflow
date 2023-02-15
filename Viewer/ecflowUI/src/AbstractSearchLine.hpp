@@ -10,45 +10,44 @@
 #ifndef ABSTRACTSEARCHLINE_HPP_
 #define ABSTRACTSEARCHLINE_HPP_
 
-#include "ui_SearchLineWidget.h"
-
 #include <QWidget>
 
-class AbstractSearchLine : public QWidget, protected Ui::SearchLineWidget
-{
-   Q_OBJECT
+#include "ui_SearchLineWidget.h"
+
+class AbstractSearchLine : public QWidget, protected Ui::SearchLineWidget {
+    Q_OBJECT
 
 public:
-	explicit AbstractSearchLine(QWidget *parent=nullptr);
-	~AbstractSearchLine() override;
-	virtual void clear();
-	virtual bool isEmpty();
-	void selectAll();
+    explicit AbstractSearchLine(QWidget* parent = nullptr);
+    ~AbstractSearchLine() override;
+    virtual void clear();
+    virtual bool isEmpty();
+    void selectAll();
     void setConfirmSearch(bool);
-    bool confirmSearch() const {return confirmSearch_;}
+    bool confirmSearch() const { return confirmSearch_; }
     QString confirmSearchText() const;
 
-    bool caseSensitive()  {return caseSensitive_;}
-    bool wholeWords()     {return wholeWords_;}
-    bool highlightAll()   {return highlightAll_;}
+    bool caseSensitive() { return caseSensitive_; }
+    bool wholeWords() { return wholeWords_; }
+    bool highlightAll() { return highlightAll_; }
 
 public Q_SLOTS:
-	virtual void slotFind(QString)=0;
-	virtual void slotFindNext()=0;
-	virtual void slotFindPrev()=0;
-	virtual void slotClose();
-	virtual void on_actionCaseSensitive__toggled(bool);
-	virtual void on_actionWholeWords__toggled(bool);
-	virtual void on_actionHighlightAll__toggled(bool);
+    virtual void slotFind(QString) = 0;
+    virtual void slotFindNext()    = 0;
+    virtual void slotFindPrev()    = 0;
+    virtual void slotClose();
+    virtual void on_actionCaseSensitive__toggled(bool);
+    virtual void on_actionWholeWords__toggled(bool);
+    virtual void on_actionHighlightAll__toggled(bool);
 
 Q_SIGNALS:
-	void visibilityChanged();
+    void visibilityChanged();
 
 protected:
-	void updateButtons(bool);
-	void toDefaultState();
-	void hideEvent(QHideEvent* event) override;
-	void showEvent(QShowEvent* event) override;
+    void updateButtons(bool);
+    void toDefaultState();
+    void hideEvent(QHideEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 
     bool status_{true};
     bool caseSensitive_{false};
@@ -60,7 +59,7 @@ protected:
     QBrush redBrush_;
     QBrush greenBrush_;
 
-	bool confirmSearch_{false};
+    bool confirmSearch_{false};
 };
 
 #endif

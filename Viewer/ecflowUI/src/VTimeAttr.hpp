@@ -11,49 +11,47 @@
 #ifndef VTIME_HPP
 #define VTIME_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
+#include <vector>
 
 #include <QStringList>
-#include <vector>
 
 #include "CronAttr.hpp"
 #include "TimeAttr.hpp"
 #include "TodayAttr.hpp"
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class VTimeAttrType : public VAttributeType
-{
+class VTimeAttrType : public VAttributeType {
 public:
     explicit VTimeAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d,QStringList& data);
-    void encode(const ecf::Calendar& calendar, const ecf::TodayAttr& d,QStringList& data);
-    void encode(const ecf::Calendar& calendar, const ecf::CronAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d, QStringList& data);
+    void encode(const ecf::Calendar& calendar, const ecf::TodayAttr& d, QStringList& data);
+    void encode(const ecf::Calendar& calendar, const ecf::CronAttr& d, QStringList& data);
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,FreeIndex=2};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, FreeIndex = 2 };
 };
 
-class VTimeAttr : public VAttribute
-{
+class VTimeAttr : public VAttribute {
 
 public:
-    enum DataType {TimeData,TodayData,CronData};
+    enum DataType { TimeData, TodayData, CronData };
 
-    VTimeAttr(VNode *parent,const ecf::TimeAttr&,int index);
-    VTimeAttr(VNode *parent,const ecf::TodayAttr&,int index);
-    VTimeAttr(VNode *parent,const ecf::CronAttr&,int index);
+    VTimeAttr(VNode* parent, const ecf::TimeAttr&, int index);
+    VTimeAttr(VNode* parent, const ecf::TodayAttr&, int index);
+    VTimeAttr(VNode* parent, const ecf::CronAttr&, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
     static int totalNum(VNode* vnode);
 
 protected:

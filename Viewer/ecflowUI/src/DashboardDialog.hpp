@@ -16,31 +16,29 @@
 
 class DashboardWidget;
 
-class DashboardDialog : public QDialog, protected Ui::DashboardDialog
-{
-Q_OBJECT
+class DashboardDialog : public QDialog, protected Ui::DashboardDialog {
+    Q_OBJECT
 
 public:
-	explicit DashboardDialog(QWidget *parent=nullptr);
-	
-    void add(DashboardWidget*);
-	DashboardWidget* dashboardWidget() const {return dw_;} 
+    explicit DashboardDialog(QWidget* parent = nullptr);
 
-public Q_SLOTS:	
-	void reject() override;
-    void slotUpdateTitle(QString,QString);
+    void add(DashboardWidget*);
+    DashboardWidget* dashboardWidget() const { return dw_; }
+
+public Q_SLOTS:
+    void reject() override;
+    void slotUpdateTitle(QString, QString);
     void slotOwnerDelete();
-	
+
 Q_SIGNALS:
     void aboutToClose();
 
 protected:
-	void closeEvent(QCloseEvent * event) override;
+    void closeEvent(QCloseEvent* event) override;
     void readSettings();
     void writeSettings();
-    
-	DashboardWidget* dw_{nullptr};
-    
+
+    DashboardWidget* dw_{nullptr};
 };
 
 #endif

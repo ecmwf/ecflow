@@ -8,25 +8,22 @@
 //============================================================================
 
 #include "RichTextSearchLine.hpp"
-#include "RichTextSearchInterface.hpp"
 
 #include <cassert>
 
-RichTextSearchLine::RichTextSearchLine(QWidget *parent) :
-    TextEditSearchLine(parent)
-{
-    interface_=new RichTextSearchInterface;
+#include "RichTextSearchInterface.hpp"
+
+RichTextSearchLine::RichTextSearchLine(QWidget* parent) : TextEditSearchLine(parent) {
+    interface_ = new RichTextSearchInterface;
     TextEditSearchLine::setSearchInterface(interface_);
 }
 
-RichTextSearchLine::~RichTextSearchLine()
-{
+RichTextSearchLine::~RichTextSearchLine() {
     delete interface_;
 }
 
-void RichTextSearchLine::setEditor(QTextBrowser *e)
-{
-    auto *pti=static_cast<RichTextSearchInterface*>(interface_);
+void RichTextSearchLine::setEditor(QTextBrowser* e) {
+    auto* pti = static_cast<RichTextSearchInterface*>(interface_);
     assert(pti);
     pti->setEditor(e);
 }

@@ -12,48 +12,41 @@
 
 #include <QImage>
 #include <QPainter>
+
 #include "ViewerUtil.hpp"
 
-FontMetrics::FontMetrics(const QFont &font) :
-    QFontMetrics(font),
-    realHeight_(height()),
-    topPadding_(0),
-    bottomPadding_(0)
-{
+FontMetrics::FontMetrics(const QFont& font)
+    : QFontMetrics(font), realHeight_(height()), topPadding_(0), bottomPadding_(0) {
     computeRealHeight(font);
 }
 
-void FontMetrics::computeRealHeight(QFont f)
-{
+void FontMetrics::computeRealHeight(QFont f) {
     QFontMetrics fm(f);
-    QString txt="Ayfgl";
-    QImage img(ViewerUtil::textWidth(fm,txt)+6,fm.height(),QImage::Format_ARGB32_Premultiplied);
+    QString txt = "Ayfgl";
+    QImage img(ViewerUtil::textWidth(fm, txt) + 6, fm.height(), QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::white);
     QPainter p(&img);
     p.setPen(Qt::black);
     f.setBold(true);
     p.setFont(f);
-    p.drawText(QRect(0,0,img.width(),img.height()),Qt::AlignCenter,txt);
+    p.drawText(QRect(0, 0, img.width(), img.height()), Qt::AlignCenter, txt);
 
-    int minRow=img.height()+100;
-    int maxRow=-1;
-    for(int i=0; i < img.height(); i++)
-        for(int j=0; j < img.width(); j++)
-        {
-            QRgb c=img.pixel(j,i);
-            if(qRed(c) != 255 || qGreen(c) != 255 ||  qBlue(c) != 255)
-            {
-                if(i > maxRow)
-                    maxRow=i;
-                if(i < minRow)
-                    minRow=i;
+    int minRow = img.height() + 100;
+    int maxRow = -1;
+    for (int i = 0; i < img.height(); i++)
+        for (int j = 0; j < img.width(); j++) {
+            QRgb c = img.pixel(j, i);
+            if (qRed(c) != 255 || qGreen(c) != 255 || qBlue(c) != 255) {
+                if (i > maxRow)
+                    maxRow = i;
+                if (i < minRow)
+                    minRow = i;
             }
         }
 
-    if(minRow >=0 && maxRow < img.height())
-    {
-        realHeight_=maxRow-minRow+1;
-        topPadding_=minRow;
-        bottomPadding_=img.height()-1-maxRow;
+    if (minRow >= 0 && maxRow < img.height()) {
+        realHeight_    = maxRow - minRow + 1;
+        topPadding_    = minRow;
+        bottomPadding_ = img.height() - 1 - maxRow;
     }
 }

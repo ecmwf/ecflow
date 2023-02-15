@@ -9,24 +9,22 @@
 
 #include "TriggerCollector.hpp"
 
+#include <algorithm>
+
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VItem.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
 
-#include <algorithm>
-
 #define _UI_TRIGGERCOLLECTOR_DEBUG
 
-TriggerListCollector::~TriggerListCollector()
-{
+TriggerListCollector::~TriggerListCollector() {
     clear();
 }
 
-bool TriggerListCollector::add(VItem* t, VItem* dep,Mode mode)
-{
-    auto *item=new TriggerListItem(t,dep,mode) ;
+bool TriggerListCollector::add(VItem* t, VItem* dep, Mode mode) {
+    auto* item = new TriggerListItem(t, dep, mode);
     items_.push_back(item);
     return true;
 
@@ -39,14 +37,12 @@ bool TriggerListCollector::add(VItem* t, VItem* dep,Mode mode)
 #endif
 }
 
-void TriggerListCollector::setDependency(bool b)
-{
-    extended_=b;
+void TriggerListCollector::setDependency(bool b) {
+    extended_ = b;
     clear();
 }
 
-void TriggerListCollector::clear()
-{
+void TriggerListCollector::clear() {
     /*for(size_t i=0; i < items_.size(); i++)
     {
         delete items_[i];
@@ -54,47 +50,37 @@ void TriggerListCollector::clear()
     items_.clear();
 }
 
-
-bool TriggerChildCollector::add(VItem* t, VItem*,Mode)
-{
-    if(!t->isAncestor(node_))
-    {
+bool TriggerChildCollector::add(VItem* t, VItem*, Mode) {
+    if (!t->isAncestor(node_)) {
         // child_ is a kid of node_ whose trigger is outside its subtree
-        return collector_->add(t,child_,TriggerCollector::Child);
+        return collector_->add(t, child_, TriggerCollector::Child);
     }
     return false;
 }
 
-bool TriggerParentCollector::add(VItem* t, VItem*,Mode)
-{
-    return collector_->add(t,parent_,TriggerCollector::Parent);
+bool TriggerParentCollector::add(VItem* t, VItem*, Mode) {
+    return collector_->add(t, parent_, TriggerCollector::Parent);
 }
 
-bool TriggeredCollector::add(VItem* trigger, VItem*,Mode)
-{
-    if(VNode *n=trigger->isNode())
-    {
+bool TriggeredCollector::add(VItem* trigger, VItem*, Mode) {
+    if (VNode* n = trigger->isNode()) {
         n->addTriggeredData(node_);
     }
 
-    else if(VAttribute* a=trigger->isAttribute())
-    {
-        trigger->parent()->addTriggeredData(node_,a);
+    else if (VAttribute* a = trigger->isAttribute()) {
+        trigger->parent()->addTriggeredData(node_, a);
 
-//        if(a->type() && a->type()->name() == "event")
-//        {
-//            trigger->parent()->addTriggeredData(node_,a);
-//        }
+        //        if(a->type() && a->type()->name() == "event")
+        //        {
+        //            trigger->parent()->addTriggeredData(node_,a);
+        //        }
     }
     return false;
 }
 
-const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const
-{
-    if(modes_.empty())
-    {
-        for(auto dep : deps_)
-        {
+const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const {
+    if (modes_.empty()) {
+        for (auto dep : deps_) {
             modes_.insert(dep.mode());
         }
     }
@@ -105,98 +91,78 @@ const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const
 // TriggerTableCollector
 //=====================================
 
-TriggerTableCollector::~TriggerTableCollector()
-{
+TriggerTableCollector::~TriggerTableCollector() {
     clear();
 }
 
-bool TriggerTableCollector::add(VItem* trigger, VItem* dep,Mode mode)
-{
+bool TriggerTableCollector::add(VItem* trigger, VItem* dep, Mode mode) {
     Q_ASSERT(trigger);
 
-    TriggerTableItem *item=nullptr;
-    for(auto & i : items_)
-    {
-        if(i->item() == trigger)
-        {          
-            item=i;
+    TriggerTableItem* item = nullptr;
+    for (auto& i : items_) {
+        if (i->item() == trigger) {
+            item = i;
             break;
         }
     }
 
-    if(!item)
-    {        
-        item=new TriggerTableItem(trigger);
+    if (!item) {
+        item = new TriggerTableItem(trigger);
         items_.push_back(item);
     }
 
-    item->addDependency(dep,mode);
+    item->addDependency(dep, mode);
     return true;
 }
 
-void TriggerTableCollector::setDependency(bool b)
-{
-    extended_=b;
+void TriggerTableCollector::setDependency(bool b) {
+    extended_ = b;
     clear();
 }
 
-void TriggerTableCollector::clear()
-{
-    for(auto & item : items_)
-    {
+void TriggerTableCollector::clear() {
+    for (auto& item : items_) {
         delete item;
     }
     items_.clear();
 }
 
-bool TriggerTableCollector::contains(TriggerTableItem* item) const
-{
-    return (std::find(items_.begin(),items_.end(), item) != items_.end());
+bool TriggerTableCollector::contains(TriggerTableItem* item) const {
+    return (std::find(items_.begin(), items_.end(), item) != items_.end());
 }
 
-bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
-{
-    for(auto item : items_)
-    {
-        if(VItem* it=item->item())
-        {
-            if(VNode *n=it->isNode())
-            {
-                if(n == node)
+bool TriggerTableCollector::contains(const VNode* node, bool attrParents) const {
+    for (auto item : items_) {
+        if (VItem* it = item->item()) {
+            if (VNode* n = it->isNode()) {
+                if (n == node)
                     return true;
             }
-            else if(attrParents)
-            {
-                if (VAttribute *a=it->isAttribute())
-                    if(a->parent() == node)
+            else if (attrParents) {
+                if (VAttribute* a = it->isAttribute())
+                    if (a->parent() == node)
                         return true;
             }
         }
-
     }
 
     return false;
 }
 
-TriggerTableItem* TriggerTableCollector::find(const VItem* item) const
-{
-    for(auto i : items_)
-    {
-        if(i->item() == item)
+TriggerTableItem* TriggerTableCollector::find(const VItem* item) const {
+    for (auto i : items_) {
+        if (i->item() == item)
             return i;
     }
     return nullptr;
 }
 
-TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const
-{
-    if(!item)
+TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const {
+    if (!item)
         return nullptr;
 
-    for(auto i : items_)
-    {
-        if(item->sameContents(i->item()))
-        {
+    for (auto i : items_) {
+        if (item->sameContents(i->item())) {
             return i;
         }
     }

@@ -16,19 +16,18 @@
 class TimelineFileList;
 
 namespace Ui {
-    class TimelinePreLoadDialog;
+class TimelinePreLoadDialog;
 }
 
-class TimelinePreLoadDialog : public QDialog
-{
+class TimelinePreLoadDialog : public QDialog {
 public:
-    explicit TimelinePreLoadDialog(QWidget *parent=nullptr);
+    explicit TimelinePreLoadDialog(QWidget* parent = nullptr);
     ~TimelinePreLoadDialog() override;
 
     void init(const TimelineFileList& lst);
 
 protected:
-    //void closeEvent(QCloseEvent * event);
+    // void closeEvent(QCloseEvent * event);
     void readSettings();
     void writeSettings();
 

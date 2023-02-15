@@ -9,115 +9,90 @@
 //============================================================================
 
 #include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-
-#include "VNode.hpp"
-#include "UIDebug.hpp"
 
 #include <QDebug>
 
-//#define  _UI_VATTRIBUTE_DEBUG
+#include "UIDebug.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
 
+// #define  _UI_VATTRIBUTE_DEBUG
 
-VAttribute::VAttribute(VNode *parent,int index) :
-    VItem(parent),
-    index_(index)
-{
+VAttribute::VAttribute(VNode* parent, int index) : VItem(parent), index_(index) {
 }
 
-VAttribute::~VAttribute()
-= default;
+VAttribute::~VAttribute() = default;
 
-ServerHandler* VAttribute::server() const
-{
-    return (parent_)?parent_->server():nullptr;
+ServerHandler* VAttribute::server() const {
+    return (parent_) ? parent_->server() : nullptr;
 }
 
-
-VServer* VAttribute::root() const
-{
-    return (parent_)?parent_->root():nullptr;
+VServer* VAttribute::root() const {
+    return (parent_) ? parent_->root() : nullptr;
 }
 
-QString VAttribute::toolTip() const
-{
-    VAttributeType* t=type();
-    return (t)?(t->toolTip(data())):QString();
+QString VAttribute::toolTip() const {
+    VAttributeType* t = type();
+    return (t) ? (t->toolTip(data())) : QString();
 }
 
-QString VAttribute::definition() const
-{
-    VAttributeType* t=type();
-    return (t)?(t->definition(data())):QString();
+QString VAttribute::definition() const {
+    VAttributeType* t = type();
+    return (t) ? (t->definition(data())) : QString();
 }
 
-const std::string& VAttribute::typeName() const
-{
-    VAttributeType* t=type();
+const std::string& VAttribute::typeName() const {
+    VAttributeType* t = type();
     assert(t);
     static std::string e;
-    return (t)?(t->strName()):e;
+    return (t) ? (t->strName()) : e;
 }
 
-const std::string& VAttribute::subType() const
-{
+const std::string& VAttribute::subType() const {
     static std::string e;
     return e;
 }
 
-std::string VAttribute::fullPath() const
-{
-    return (parent_)?(parent_->fullPath() + ":" + strName()):"";
+std::string VAttribute::fullPath() const {
+    return (parent_) ? (parent_->fullPath() + ":" + strName()) : "";
 }
 
-bool VAttribute::sameContents(VItem* item) const
-{
-    if(!item)
+bool VAttribute::sameContents(VItem* item) const {
+    if (!item)
         return false;
 
-    if(VAttribute *a=item->isAttribute())
-    {
-        return a->parent() == parent() &&
-                a->type() == type() &&
-                a->name() == name();
+    if (VAttribute* a = item->isAttribute()) {
+        return a->parent() == parent() && a->type() == type() && a->name() == name();
     }
     return false;
 }
 
-QString VAttribute::name() const
-{  
-   return QString::fromStdString(strName());
+QString VAttribute::name() const {
+    return QString::fromStdString(strName());
 }
 
-std::string VAttribute::strName() const
-{
+std::string VAttribute::strName() const {
     static std::string eStr;
     return eStr;
 }
 
-bool VAttribute::value(const std::string& key,std::string& val) const
-{
-    int idx=type()->searchKeyToDataIndex(key);
-    if(idx != -1)
-    {
-        QStringList d=data();
-        val=d[idx].toStdString();
+bool VAttribute::value(const std::string& key, std::string& val) const {
+    int idx = type()->searchKeyToDataIndex(key);
+    if (idx != -1) {
+        QStringList d = data();
+        val           = d[idx].toStdString();
         return true;
     }
     return false;
 }
 
-bool VAttribute::sameAs(QStringList d) const
-{
-    if(d.count() >=2)
-    {
-        VAttributeType* t=type();
+bool VAttribute::sameAs(QStringList d) const {
+    if (d.count() >= 2) {
+        VAttributeType* t = type();
 
-        if(t->name() == d[0])
-        {
-            int idx=t->searchKeyToDataIndex("name");
-            if(idx != -1 && idx < d.count())
-            {
+        if (t->name() == d[0]) {
+            int idx = t->searchKeyToDataIndex("name");
+            if (idx != -1 && idx < d.count()) {
                 return name() == d[idx];
             }
         }
@@ -126,16 +101,16 @@ bool VAttribute::sameAs(QStringList d) const
 }
 
 void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
-                                    const std::string& action, const std::string& type,
-                                    const std::string& name,const std::string& value)
-{
+                                   const std::string& action,
+                                   const std::string& type,
+                                   const std::string& name,
+                                   const std::string& value) {
     cmd.emplace_back("ecflow_client");
     cmd.emplace_back("--alter");
     cmd.push_back(action);
     cmd.push_back(type);
 
-    if(!name.empty())
-    {
+    if (!name.empty()) {
         cmd.push_back(name);
         cmd.push_back(value);
     }
@@ -144,9 +119,9 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 }
 
 void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
-                                    const std::string& action, const std::string& type,
-                                    const std::string& value)
-{
+                                   const std::string& action,
+                                   const std::string& type,
+                                   const std::string& value) {
     cmd.emplace_back("ecflow_client");
     cmd.emplace_back("--alter");
     cmd.push_back(action);
@@ -155,4 +130,3 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 
     cmd.emplace_back("<full_name>");
 }
-
