@@ -17,7 +17,6 @@
 
 #include <cassert>
 #include <stdexcept>
-
 #include <unistd.h> // for gethostname
 
 #include "Ecf.hpp"

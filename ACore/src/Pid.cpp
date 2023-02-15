@@ -16,9 +16,9 @@
 #include "Pid.hpp"
 
 #include <stdexcept>
+#include <unistd.h> // for getpid
 
 #include <boost/lexical_cast.hpp>
-#include <unistd.h> // for getpid
 
 std::string Pid::getpid() {
     std::string pid;

@@ -17,10 +17,9 @@
 #include <cassert>
 #include <cerrno>  // for errno()
 #include <cstring> // for strerror()
+#include <pwd.h>   // for getpwuid()
 #include <sstream>
 #include <stdexcept>
-
-#include <pwd.h>    // for getpwuid()
 #include <unistd.h> // ofr getuid()
 
 namespace ecf {

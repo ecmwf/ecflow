@@ -14,9 +14,9 @@
 //============================================================================
 #include <fstream>
 #include <iostream>
+#include <stdlib.h>
 
 #include <boost/test/unit_test.hpp>
-#include <stdlib.h>
 
 #include "Defs.hpp"
 #include "DurationTimer.hpp"

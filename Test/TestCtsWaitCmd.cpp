@@ -14,10 +14,10 @@
 //============================================================================
 #include <fstream>
 #include <iostream>
+#include <stdlib.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
-#include <stdlib.h>
 
 #include "AssertTimer.hpp"
 #include "Defs.hpp"

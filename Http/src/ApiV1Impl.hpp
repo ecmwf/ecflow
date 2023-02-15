@@ -25,6 +25,7 @@
 #endif
 
 #include <httplib.h>
+
 #include <nlohmann/json.hpp>
 
 #include "ClientInvoker.hpp"

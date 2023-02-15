@@ -16,7 +16,6 @@
 #include "Passwd.hpp"
 
 #include <ctime>
-
 #include <unistd.h>
 
 double ecf_drand48();
