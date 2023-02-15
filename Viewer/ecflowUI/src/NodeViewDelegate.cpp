@@ -26,7 +26,9 @@ int NodeViewDelegate::lighter_ = 150;
 static std::vector<std::string> propVec;
 
 LabelStyle::LabelStyle(const std::string& prefix, bool alwaysEnabled)
-    : alwaysEnabled_(alwaysEnabled), enabled_(true), enabledBg_(true) {
+    : alwaysEnabled_(alwaysEnabled),
+      enabled_(true),
+      enabledBg_(true) {
     enabledProp_   = VConfig::instance()->find(prefix + "Enabled");
     enabledBgProp_ = VConfig::instance()->find(prefix + "BgEnabled");
     fontProp_      = VConfig::instance()->find(prefix + "FontColour");

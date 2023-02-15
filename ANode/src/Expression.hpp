@@ -37,7 +37,8 @@ public:
 
     PartExpression(const std::string& expression, bool and_type) : exp_(expression), type_((and_type) ? AND : OR) {}
     PartExpression(std::string&& expression, bool and_type)
-        : exp_(std::move(expression)), type_((and_type) ? AND : OR) {}
+        : exp_(std::move(expression)),
+          type_((and_type) ? AND : OR) {}
 
     PartExpression() : type_(default_expr_type()) {}
 

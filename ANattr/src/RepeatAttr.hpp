@@ -168,7 +168,11 @@ private:
     long valid_value(long value) const;
 
     RepeatDate(const std::string& name, int start, int end, int delta, long value)
-        : RepeatBase(name), start_(start), end_(end), delta_(delta), value_(value) {}
+        : RepeatBase(name),
+          start_(start),
+          end_(end),
+          delta_(delta),
+          value_(value) {}
 
     void update_repeat_genvar_value() const;
 
@@ -234,7 +238,9 @@ public:
 
 private:
     RepeatDateList(const std::string& variable, const std::vector<int>& l, int index)
-        : RepeatBase(variable), currentIndex_(index), list_(l) {}
+        : RepeatBase(variable),
+          currentIndex_(index),
+          list_(l) {}
 
     void update_repeat_genvar_value() const;
 
@@ -292,7 +298,11 @@ private:
     long valid_value(long value) const;
 
     RepeatInteger(const std::string& name, int start, int end, int delta, long value)
-        : RepeatBase(name), start_(start), end_(end), delta_(delta), value_(value) {}
+        : RepeatBase(name),
+          start_(start),
+          end_(end),
+          delta_(delta),
+          value_(value) {}
 
 private:
     int start_{0};
@@ -347,7 +357,9 @@ public:
 
 private:
     RepeatEnumerated(const std::string& variable, const std::vector<std::string>& theEnums, int index)
-        : RepeatBase(variable), currentIndex_(index), theEnums_(theEnums) {}
+        : RepeatBase(variable),
+          currentIndex_(index),
+          theEnums_(theEnums) {}
 
 private:
     int currentIndex_{0};
@@ -397,7 +409,9 @@ public:
 
 private:
     RepeatString(const std::string& variable, const std::vector<std::string>& theEnums, int index)
-        : RepeatBase(variable), currentIndex_(index), theStrings_(theEnums) {}
+        : RepeatBase(variable),
+          currentIndex_(index),
+          theStrings_(theEnums) {}
 
 private:
     int currentIndex_{0};

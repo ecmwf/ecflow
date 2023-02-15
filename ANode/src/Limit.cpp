@@ -36,7 +36,10 @@ Limit::Limit(const std::string& name, int limit) : n_(name), lim_(limit) {
 }
 
 Limit::Limit(const std::string& name, int limit, int value, const std::set<std::string>& paths, bool check)
-    : n_(name), lim_(limit), value_(value), paths_(paths) {
+    : n_(name),
+      lim_(limit),
+      value_(value),
+      paths_(paths) {
     if (check && !Str::valid_name(name)) {
         throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
     }

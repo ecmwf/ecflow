@@ -44,8 +44,9 @@ std::ostream& operator<<(std::ostream& stream, const OutputCacheItem& item) {
 //========================================================
 
 OutputCache::OutputCache(QObject* parent)
-    : QObject(parent), timeOut_(1000 * 15), // we check the state every 15 sec
-      maxAttachedPeriod_(1000 * 120)        // cache retention period is 2 min
+    : QObject(parent),
+      timeOut_(1000 * 15),           // we check the state every 15 sec
+      maxAttachedPeriod_(1000 * 120) // cache retention period is 2 min
 {
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(slotTimeOut()));

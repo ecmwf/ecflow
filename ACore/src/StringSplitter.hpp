@@ -42,7 +42,11 @@ class StringSplitter {
 
 public:
     explicit StringSplitter(boost::string_view src, boost::string_view sep = " \t")
-        : src_(src), rem_(src), sep_(sep), first_not_of_(0), finished_(false) {}
+        : src_(src),
+          rem_(src),
+          sep_(sep),
+          first_not_of_(0),
+          finished_(false) {}
 
     // this rules out temp strings, it also rules out char * because of two available overloads
     StringSplitter(const std::string&& src, boost::string_view sep) = delete;
@@ -52,7 +56,11 @@ public:
     // because string_view does not have a char array constructor!
     template <std::size_t N>
     explicit StringSplitter(const char (&sz)[N], boost::string_view sep = " \t")
-        : src_(sz), rem_(sz), sep_(sep), first_not_of_(0), finished_(false) {}
+        : src_(sz),
+          rem_(sz),
+          sep_(sep),
+          first_not_of_(0),
+          finished_(false) {}
 
     boost::string_view next() const;
     bool finished() const;

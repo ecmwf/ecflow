@@ -22,7 +22,9 @@
 #include "VReply.hpp"
 
 InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
-    : owner_(owner), reply_(new VReply(this)), taskType_(taskType) {
+    : owner_(owner),
+      reply_(new VReply(this)),
+      taskType_(taskType) {
     if (owner_)
         owner_->registerInfoProvider(this);
 }

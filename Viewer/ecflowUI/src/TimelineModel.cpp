@@ -258,8 +258,14 @@ void TimelineModel::setEndDate(QDateTime t) {
 //===========================================
 
 TimelineSortModel::TimelineSortModel(TimelineModel* tlModel, QObject* parent)
-    : QSortFilterProxyModel(parent), tlModel_(tlModel), skipSort_(false), sortMode_(PathSortMode), ascending_(true),
-      pathMatchMode_(StringMatchMode::WildcardMatch), taskFilter_(false), changeFilterMode_(NoChangeFilterMode) {
+    : QSortFilterProxyModel(parent),
+      tlModel_(tlModel),
+      skipSort_(false),
+      sortMode_(PathSortMode),
+      ascending_(true),
+      pathMatchMode_(StringMatchMode::WildcardMatch),
+      taskFilter_(false),
+      changeFilterMode_(NoChangeFilterMode) {
     Q_ASSERT(tlModel_);
 
     connect(tlModel_, SIGNAL(periodChanged()), this, SLOT(slotPeriodChanged()));

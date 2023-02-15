@@ -32,10 +32,23 @@
 // #define _UI_QABSTRACTNODEVIEW_DEBUG
 
 AbstractNodeView::AbstractNodeView(TreeNodeModel* model, QWidget* parent)
-    : QAbstractScrollArea(parent), model_(model), verticalScrollMode_(ScrollPerItem), rowCount_(0), maxRowWidth_(0),
-      topMargin_(4), leftMargin_(4), itemGap_(12), connectorGap_(1), expandConnectorLength_(20),
-      connectorColour_(Qt::black), drawConnector_(true), indentation_(0), autoExpandLeafNode_(true), lastViewedItem_(0),
-      noSelectionOnMousePress_(false), autoScroll_(true) {
+    : QAbstractScrollArea(parent),
+      model_(model),
+      verticalScrollMode_(ScrollPerItem),
+      rowCount_(0),
+      maxRowWidth_(0),
+      topMargin_(4),
+      leftMargin_(4),
+      itemGap_(12),
+      connectorGap_(1),
+      expandConnectorLength_(20),
+      connectorColour_(Qt::black),
+      drawConnector_(true),
+      indentation_(0),
+      autoExpandLeafNode_(true),
+      lastViewedItem_(0),
+      noSelectionOnMousePress_(false),
+      autoScroll_(true) {
     expandConnectorLength_ = itemGap_ - 2 * connectorGap_;
 
     setContextMenuPolicy(Qt::CustomContextMenu);

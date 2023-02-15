@@ -35,7 +35,8 @@ static LogTruncator* truncator = nullptr;
 //---------------------------------
 
 UiFunctionLog::UiFunctionLog(const std::string& server, const std::string& funcName)
-    : serverName_(server), funcName_(funcName) {
+    : serverName_(server),
+      funcName_(funcName) {
     init();
     UiLog(serverName_).dbg() << logEnter();
 }

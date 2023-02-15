@@ -512,8 +512,15 @@ NodePathItem::NodePathItem(BcWidget* owner,
                            QColor fontCol,
                            bool hasMenu,
                            bool current)
-    : owner_(owner), index_(index), text_(text), bgCol_(bgCol), fontCol_(fontCol), current_(current), hasMenu_(hasMenu),
-      visible_(false), enabled_(true) {
+    : owner_(owner),
+      index_(index),
+      text_(text),
+      bgCol_(bgCol),
+      fontCol_(fontCol),
+      current_(current),
+      hasMenu_(hasMenu),
+      visible_(false),
+      enabled_(true) {
     height(owner_->font());
 
     if (!disabledBgCol_.isValid()) {

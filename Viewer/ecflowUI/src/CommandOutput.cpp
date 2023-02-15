@@ -22,7 +22,11 @@ CommandOutputHandler* CommandOutputHandler::instance_ = nullptr;
 //==============================================
 
 CommandOutput::CommandOutput(QString cmd, QString cmdDef, QDateTime runTime)
-    : enabled_(true), command_(cmd), commandDef_(cmdDef), runTime_(runTime), status_(RunningStatus) {
+    : enabled_(true),
+      command_(cmd),
+      commandDef_(cmdDef),
+      runTime_(runTime),
+      status_(RunningStatus) {
 }
 
 void CommandOutput::appendOutput(QString txt, int maxSize, bool& trimmed) {

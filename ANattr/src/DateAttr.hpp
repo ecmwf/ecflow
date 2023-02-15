@@ -36,7 +36,9 @@ public:
     explicit DateAttr(const std::string&);  // will throw std::runtime_error for if invalid date
     DateAttr() = default;                   // for serialisation
     explicit DateAttr(const boost::gregorian::date& date)
-        : day_(date.day()), month_(date.month()), year_(date.year()) {} // for test
+        : day_(date.day()),
+          month_(date.month()),
+          year_(date.year()) {} // for test
 
     void print(std::string&) const;
     bool operator==(const DateAttr& rhs) const;

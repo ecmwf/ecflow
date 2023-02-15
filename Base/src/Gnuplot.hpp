@@ -48,7 +48,9 @@ private:
     struct SuiteLoad
     {
         explicit SuiteLoad(const std::string& name)
-            : suite_name_(name), request_per_second_(1), total_request_per_second_(1) {}
+            : suite_name_(name),
+              request_per_second_(1),
+              total_request_per_second_(1) {}
 
         std::string suite_name_;
         size_t request_per_second_;

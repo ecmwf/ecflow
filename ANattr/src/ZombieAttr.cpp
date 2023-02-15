@@ -40,7 +40,10 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t,
                        const std::vector<ecf::Child::CmdType>& c,
                        ecf::User::Action a,
                        int zombie_lifetime)
-    : child_cmds_(c), zombie_type_(t), action_(a), zombie_lifetime_(zombie_lifetime) {
+    : child_cmds_(c),
+      zombie_type_(t),
+      action_(a),
+      zombie_lifetime_(zombie_lifetime) {
     /// Server typically checks every 60 seconds, hence this is lowest valid value for
     if (zombie_lifetime_ <= 0) {
         // default constructor. Set defaults

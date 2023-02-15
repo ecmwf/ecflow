@@ -30,7 +30,8 @@ const GenericAttr& GenericAttr::EMPTY() {
 }
 
 GenericAttr::GenericAttr(const std::string& name, const std::vector<std::string>& values)
-    : name_(name), values_(values) {
+    : name_(name),
+      values_(values) {
     string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("GenericAttr::GenericAttr : Invalid generic name : " + msg);

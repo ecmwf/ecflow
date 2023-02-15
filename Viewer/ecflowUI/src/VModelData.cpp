@@ -68,8 +68,13 @@ int VModelServer::totalNodeNum() const {
 // It takes ownership of the filter
 
 VTreeServer::VTreeServer(ServerHandler* server, NodeFilterDef* filterDef, AttributeFilter* attrFilter)
-    : VModelServer(server), changeInfo_(new VTreeChangeInfo()), attrFilter_(attrFilter), firstScan_(true),
-      firstScanTryNo_(0), maxFirstScanTry_(10), expandState_(nullptr) {
+    : VModelServer(server),
+      changeInfo_(new VTreeChangeInfo()),
+      attrFilter_(attrFilter),
+      firstScan_(true),
+      firstScanTryNo_(0),
+      maxFirstScanTry_(10),
+      expandState_(nullptr) {
     tree_   = new VTree(this);
     filter_ = new TreeNodeFilter(filterDef, server_, tree_);
     // We has to observe the nodes of the server.
@@ -958,7 +963,12 @@ void VTableServer::clearForceShow(const VItem* item) {
 //==========================================
 
 VModelData::VModelData(NodeFilterDef* filterDef, AbstractNodeModel* model)
-    : QObject(model), serverNum_(0), serverFilter_(nullptr), filterDef_(filterDef), model_(model), active_(false) {
+    : QObject(model),
+      serverNum_(0),
+      serverFilter_(nullptr),
+      filterDef_(filterDef),
+      model_(model),
+      active_(false) {
     connect(filterDef_, SIGNAL(changed()), this, SLOT(slotFilterDefChanged()));
 
     connect(this, SIGNAL(filterDeleteBegin()), model_, SLOT(slotFilterDeleteBegin()));
@@ -1265,7 +1275,8 @@ void VModelData::slotServerRenamed(VModelServer* s, const std::string& oldName) 
 //==============================================================
 
 VTreeModelData::VTreeModelData(NodeFilterDef* filterDef, AttributeFilter* attrFilter, AbstractNodeModel* model)
-    : VModelData(filterDef, model), attrFilter_(attrFilter) {
+    : VModelData(filterDef, model),
+      attrFilter_(attrFilter) {
     // Attribute filter changes
     connect(attrFilter_, SIGNAL(changed()), this, SLOT(slotAttrFilterChanged()));
 }

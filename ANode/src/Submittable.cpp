@@ -1068,10 +1068,15 @@ void Submittable::set_genvar_ecfrid(const std::string& value) {
 // The false below is used as a dummy argument to call the Variable constructor that does not
 // Check the variable names. i.e we know they are valid
 SubGenVariables::SubGenVariables(const Submittable* sub)
-    : submittable_(sub), genvar_ecfjob_(Str::ECF_JOB(), "", false), genvar_ecfjobout_(Str::ECF_JOBOUT(), "", false),
-      genvar_ecftryno_(Str::ECF_TRYNO(), "", false), genvar_task_("TASK", "", false),
-      genvar_ecfpass_(Str::ECF_PASS(), "", false), genvar_ecfscript_(Str::ECF_SCRIPT(), "", false),
-      genvar_ecfname_(Str::ECF_NAME(), "", false), genvar_ecfrid_(Str::ECF_RID(), "", false) {
+    : submittable_(sub),
+      genvar_ecfjob_(Str::ECF_JOB(), "", false),
+      genvar_ecfjobout_(Str::ECF_JOBOUT(), "", false),
+      genvar_ecftryno_(Str::ECF_TRYNO(), "", false),
+      genvar_task_("TASK", "", false),
+      genvar_ecfpass_(Str::ECF_PASS(), "", false),
+      genvar_ecfscript_(Str::ECF_SCRIPT(), "", false),
+      genvar_ecfname_(Str::ECF_NAME(), "", false),
+      genvar_ecfrid_(Str::ECF_RID(), "", false) {
 }
 
 void SubGenVariables::update_generated_variables() const {

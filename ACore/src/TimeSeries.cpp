@@ -58,18 +58,27 @@ namespace ecf {
 TimeSeries::TimeSeries() = default;
 
 TimeSeries::TimeSeries(int hour, int minute, bool relative)
-    : start_(hour, minute), nextTimeSlot_(hour, minute), lastTimeSlot_(start_.duration()),
+    : start_(hour, minute),
+      nextTimeSlot_(hour, minute),
+      lastTimeSlot_(start_.duration()),
       relativeToSuiteStart_(relative) {
     testTimeSlot(start_);
 }
 
 TimeSeries::TimeSeries(const TimeSlot& t, bool relative)
-    : start_(t), nextTimeSlot_(t), lastTimeSlot_(t.duration()), relativeToSuiteStart_(relative) {
+    : start_(t),
+      nextTimeSlot_(t),
+      lastTimeSlot_(t.duration()),
+      relativeToSuiteStart_(relative) {
     testTimeSlot(start_);
 }
 
 TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative)
-    : start_(start), finish_(finish), incr_(incr), nextTimeSlot_(start), relativeToSuiteStart_(relative) {
+    : start_(start),
+      finish_(finish),
+      incr_(incr),
+      nextTimeSlot_(start),
+      relativeToSuiteStart_(relative) {
     testTimeSlot(start);
     testTimeSlot(finish);
     testTimeSlot(incr);

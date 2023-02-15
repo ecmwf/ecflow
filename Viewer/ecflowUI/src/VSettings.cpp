@@ -213,7 +213,8 @@ void VSettings::endGroup() {
 //======================================================
 
 VComboSettings::VComboSettings(const std::string& file, const std::string& qsFile)
-    : VSettings(file), qs_(QString::fromStdString(qsFile), QSettings::NativeFormat) {
+    : VSettings(file),
+      qs_(QString::fromStdString(qsFile), QSettings::NativeFormat) {
 #ifdef _UI_SETTINGS_DEBUG
     UiLog().dbg() << "VComboSettings --> fileName=" << qs_.fileName();
 #endif

@@ -69,10 +69,18 @@ const int defaultSubmitJobsInterval = 60;
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 ServerEnvironment::ServerEnvironment(int argc, char* argv[])
-    : serverHost_(host_name_.name()), serverPort_(0), checkPtInterval_(0),
-      checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()), submitJobsInterval_(defaultSubmitJobsInterval),
-      ecf_prune_node_log_(0), jobGeneration_(true), debug_(false), help_option_(false), version_option_(false),
-      checkMode_(ecf::CheckPt::ON_TIME), tcp_protocol_(boost::asio::ip::tcp::v4()) {
+    : serverHost_(host_name_.name()),
+      serverPort_(0),
+      checkPtInterval_(0),
+      checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
+      submitJobsInterval_(defaultSubmitJobsInterval),
+      ecf_prune_node_log_(0),
+      jobGeneration_(true),
+      debug_(false),
+      help_option_(false),
+      version_option_(false),
+      checkMode_(ecf::CheckPt::ON_TIME),
+      tcp_protocol_(boost::asio::ip::tcp::v4()) {
     Ecf::set_server(true);
 
     init(argc, argv, "server_environment.cfg");
@@ -82,10 +90,18 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[])
 
 // This is ONLY used in test
 ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file)
-    : serverHost_(host_name_.name()), serverPort_(0), checkPtInterval_(0),
-      checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()), submitJobsInterval_(defaultSubmitJobsInterval),
-      ecf_prune_node_log_(0), jobGeneration_(true), debug_(false), help_option_(false), version_option_(false),
-      checkMode_(ecf::CheckPt::ON_TIME), tcp_protocol_(boost::asio::ip::tcp::v4()) {
+    : serverHost_(host_name_.name()),
+      serverPort_(0),
+      checkPtInterval_(0),
+      checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
+      submitJobsInterval_(defaultSubmitJobsInterval),
+      ecf_prune_node_log_(0),
+      jobGeneration_(true),
+      debug_(false),
+      help_option_(false),
+      version_option_(false),
+      checkMode_(ecf::CheckPt::ON_TIME),
+      tcp_protocol_(boost::asio::ip::tcp::v4()) {
     Ecf::set_server(true);
 
     init(argc, argv, path_to_config_file);

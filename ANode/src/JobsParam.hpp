@@ -33,7 +33,9 @@ public:
     explicit JobsParam(bool createJobs = false) : createJobs_(createJobs) {}
 
     JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
-        : createJobs_(createJobs), spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval) {
+        : createJobs_(createJobs),
+          spawnJobs_(spawn_jobs),
+          submitJobsInterval_(submitJobsInterval) {
         if (!createJobs_)
             spawnJobs_ = false;
     }

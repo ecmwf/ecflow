@@ -20,7 +20,9 @@
 #include "VNode.hpp"
 
 TriggerTableModel::TriggerTableModel(Mode mode, QObject* parent)
-    : QAbstractItemModel(parent), tc_(nullptr), mode_(mode) {
+    : QAbstractItemModel(parent),
+      tc_(nullptr),
+      mode_(mode) {
 }
 
 TriggerTableModel::~TriggerTableModel() = default;

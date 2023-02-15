@@ -1852,7 +1852,8 @@ VariableHelper::VariableHelper(const AstVariable* astVariable) : astVariable_(as
 // ********** It is used to report errors and to Flag whether meter or event is used
 // ********** in a trigger expression for the simulator
 VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& errorMsg)
-    : astVariable_(astVariable), theReferenceNode_(nullptr) {
+    : astVariable_(astVariable),
+      theReferenceNode_(nullptr) {
     // for *this* constructor we want to report errors
     theReferenceNode_ = astVariable_->referencedNode(errorMsg);
     if (!theReferenceNode_) {

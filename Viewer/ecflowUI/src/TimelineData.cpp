@@ -36,7 +36,8 @@
 #endif
 
 TimelineItem::TimelineItem(const std::string& path, unsigned char status, unsigned int time, Type type)
-    : path_(path), type_(type) {
+    : path_(path),
+      type_(type) {
     add(status, time);
 }
 

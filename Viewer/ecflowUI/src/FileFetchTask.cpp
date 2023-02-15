@@ -65,7 +65,8 @@ void FileFetchLocalTask::run() {
 //=================================
 
 FileFetchTransferTask::FileFetchTransferTask(FetchQueueOwner* owner)
-    : QObject(nullptr), AbstractFetchTask("FileFetchTransfer", owner) {
+    : QObject(nullptr),
+      AbstractFetchTask("FileFetchTransfer", owner) {
 }
 
 void FileFetchTransferTask::stopTransfer() {
@@ -247,7 +248,8 @@ void FileFetchCacheTask::run() {
 //=================================
 
 FileFetchLogServerTask::FileFetchLogServerTask(FetchQueueOwner* owner)
-    : QObject(nullptr), AbstractFetchTask("FileFetchLogServer", owner) {
+    : QObject(nullptr),
+      AbstractFetchTask("FileFetchLogServer", owner) {
 }
 
 FileFetchLogServerTask::~FileFetchLogServerTask() {

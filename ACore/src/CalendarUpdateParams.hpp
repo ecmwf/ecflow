@@ -27,11 +27,16 @@ public:
     CalendarUpdateParams(const boost::posix_time::ptime& time_now,
                          const boost::posix_time::time_duration& serverPollPeriod,
                          bool serverRunning)
-        : timeNow_(time_now), serverPollPeriod_(serverPollPeriod), serverRunning_(serverRunning), forTest_(false) {}
+        : timeNow_(time_now),
+          serverPollPeriod_(serverPollPeriod),
+          serverRunning_(serverRunning),
+          forTest_(false) {}
 
     // For use in the simulator/ unit tests
     explicit CalendarUpdateParams(const boost::posix_time::time_duration& serverPollPeriod)
-        : timeNow_(boost::date_time::not_a_date_time), serverPollPeriod_(serverPollPeriod), serverRunning_(true),
+        : timeNow_(boost::date_time::not_a_date_time),
+          serverPollPeriod_(serverPollPeriod),
+          serverRunning_(true),
           forTest_(true) {}
 
     // For use in test
@@ -39,7 +44,10 @@ public:
                          const boost::posix_time::time_duration& serverPollPeriod,
                          bool serverRunning,
                          bool forTest)
-        : timeNow_(time_now), serverPollPeriod_(serverPollPeriod), serverRunning_(serverRunning), forTest_(forTest) {}
+        : timeNow_(time_now),
+          serverPollPeriod_(serverPollPeriod),
+          serverRunning_(serverRunning),
+          forTest_(forTest) {}
 
     const boost::posix_time::ptime& timeNow() const { return timeNow_; }
     const boost::posix_time::time_duration& serverPollPeriod() const { return serverPollPeriod_; }

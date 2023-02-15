@@ -29,7 +29,9 @@
 // #define _UI_STANDARDVIEW_DEBUG
 
 StandardView::StandardView(TreeNodeModel* model, QWidget* parent)
-    : AbstractNodeView(model, parent), expandIndicatorBoxWidth_(20), expandIndicatorWidth_(10) {
+    : AbstractNodeView(model, parent),
+      expandIndicatorBoxWidth_(20),
+      expandIndicatorWidth_(10) {
     // Overwrite some base class values
     drawConnector_ = false;
     indentation_   = 10;

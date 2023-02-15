@@ -88,7 +88,9 @@ bool LogLoadRequestSortModel::lessThan(const QModelIndex& left, const QModelInde
 //=====================================================
 
 LogLoadRequestModel::LogLoadRequestModel(QString dataName, QObject* parent)
-    : QAbstractItemModel(parent), dataName_(dataName), showColour_(true) {
+    : QAbstractItemModel(parent),
+      dataName_(dataName),
+      showColour_(true) {
 }
 
 LogLoadRequestModel::~LogLoadRequestModel() = default;
@@ -921,7 +923,11 @@ void LogRequestViewControlItem::adjustColumnWidth() {
 //=============================================
 
 LogRequestView::LogRequestView(LogRequestViewHandler* handler, QWidget* parent)
-    : QScrollArea(parent), handler_(handler), data_(nullptr), maxVal_(0), lastScanIndex_(0) {
+    : QScrollArea(parent),
+      handler_(handler),
+      data_(nullptr),
+      maxVal_(0),
+      lastScanIndex_(0) {
     Q_ASSERT(handler_);
     data_ = handler_->data_;
     Q_ASSERT(data_);

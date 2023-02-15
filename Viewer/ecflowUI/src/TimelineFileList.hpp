@@ -22,11 +22,20 @@ public:
                          unsigned int startTime,
                          unsigned int endTime,
                          qint64 size)
-        : loadable_(true), fileName_(fileName), startTime_(startTime), endTime_(endTime), size_(size),
+        : loadable_(true),
+          fileName_(fileName),
+          startTime_(startTime),
+          endTime_(endTime),
+          size_(size),
           uncompressedFile_(uncompressedFile) {}
 
     TimelineFileListItem(QString fileName, qint64 size, QString message = QString())
-        : loadable_(false), fileName_(fileName), startTime_(0), endTime_(0), size_(size), message_(message) {}
+        : loadable_(false),
+          fileName_(fileName),
+          startTime_(0),
+          endTime_(0),
+          size_(size),
+          message_(message) {}
 
     QString dataPath() const {
         return (!uncompressedFile_) ? (fileName_) : (QString::fromStdString(uncompressedFile_->path()));

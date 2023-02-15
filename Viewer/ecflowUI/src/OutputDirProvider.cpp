@@ -43,7 +43,8 @@ void OutputDirFetchTask::addTryLog(VReply* r, const std::string& txt) const {
 //=================================
 
 OutputDirFetchLogServerTask::OutputDirFetchLogServerTask(FetchQueueOwner* owner)
-    : QObject(nullptr), OutputDirFetchTask("DirFetchLogServer", owner) {
+    : QObject(nullptr),
+      OutputDirFetchTask("DirFetchLogServer", owner) {
 }
 
 OutputDirFetchLogServerTask::~OutputDirFetchLogServerTask() {
@@ -239,7 +240,8 @@ void OutputDirFetchLocalTask::run() {
 //=================================
 
 OutputDirFetchTransferTask::OutputDirFetchTransferTask(FetchQueueOwner* owner)
-    : QObject(nullptr), OutputDirFetchTask("DirFetchTransfer", owner) {
+    : QObject(nullptr),
+      OutputDirFetchTask("DirFetchTransfer", owner) {
 }
 
 OutputDirFetchTransferTask::~OutputDirFetchTransferTask() = default;

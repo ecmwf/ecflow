@@ -162,8 +162,14 @@ QModelIndex TimelineInfoDailyModel::parent(const QModelIndex& /*child*/) const {
 //======================================================================
 
 TimelineInfoDailyDelegate::TimelineInfoDailyDelegate(TimelineInfoDailyModel* model, QWidget* parent)
-    : QStyledItemDelegate(parent), model_(model), fm_(QFont()), borderPen_(QPen(QColor(216, 216, 216))), topPadding_(2),
-      bottomPadding_(2), startTime_(0, 0, 0), endTime_(23, 0, 0) {
+    : QStyledItemDelegate(parent),
+      model_(model),
+      fm_(QFont()),
+      borderPen_(QPen(QColor(216, 216, 216))),
+      topPadding_(2),
+      bottomPadding_(2),
+      startTime_(0, 0, 0),
+      endTime_(23, 0, 0) {
     Q_ASSERT(model_);
 
     fm_ = QFontMetrics(font_);
@@ -485,8 +491,13 @@ void TimelineInfoDailyDelegate::setPeriod(QTime t1, QTime t2) {
 //======================================================================
 
 TimelineInfoDailyView::TimelineInfoDailyView(QWidget* parent)
-    : QTreeView(parent), model_(nullptr), header_(nullptr), headerBeingAdjusted_(false), needItemsLayout_(false),
-      startTime_(QTime(0, 0, 0)), endTime_(QTime(23, 59, 59)) {
+    : QTreeView(parent),
+      model_(nullptr),
+      header_(nullptr),
+      headerBeingAdjusted_(false),
+      needItemsLayout_(false),
+      startTime_(QTime(0, 0, 0)),
+      endTime_(QTime(23, 59, 59)) {
     setObjectName("view");
     // setProperty("style","nodeView");
     // setProperty("view","table");

@@ -66,20 +66,24 @@ ClientInvoker::ClientInvoker() : clientEnv_(false), retry_connection_period_(RET
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
-    : clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
+    : clientEnv_(false),
+      retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug())
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
     set_hostport(host_port);
 }
 
 ClientInvoker::ClientInvoker(bool gui, const std::string& host, const std::string& port)
-    : clientEnv_(gui, host, port), retry_connection_period_(RETRY_CONNECTION_PERIOD), gui_(gui) {
+    : clientEnv_(gui, host, port),
+      retry_connection_period_(RETRY_CONNECTION_PERIOD),
+      gui_(gui) {
     if (clientEnv_.debug())
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
-    : clientEnv_(false, host, port), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
+    : clientEnv_(false, host, port),
+      retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug())
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
 }

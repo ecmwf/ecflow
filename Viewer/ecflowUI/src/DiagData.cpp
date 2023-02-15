@@ -26,7 +26,8 @@
 DiagData* DiagData::instance_ = nullptr;
 
 DiagDataServerItem::DiagDataServerItem(const std::string& host, const std::string& port, size_t colNum)
-    : host_(host), port_(port) {
+    : host_(host),
+      port_(port) {
     for (size_t i = 0; i < colNum; i++)
         data_.emplace_back();
 }

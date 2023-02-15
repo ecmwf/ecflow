@@ -17,7 +17,9 @@
 #include <QTreeView>
 
 VariableSearchLine::VariableSearchLine(QWidget* parent)
-    : AbstractSearchLine(parent), view_(nullptr), currentResultItem_(-1) {
+    : AbstractSearchLine(parent),
+      view_(nullptr),
+      currentResultItem_(-1) {
     label_->hide();
     closeTb_->hide();
 }

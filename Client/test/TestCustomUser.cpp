@@ -39,7 +39,8 @@ BOOST_AUTO_TEST_SUITE(ClientTestSuite)
 class Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env {
 public:
     Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env(const std::string& passwd_file)
-        : ecf_passwd_("ECF_CUSTOM_PASSWD="), ecf_user_("ECF_USER=") {
+        : ecf_passwd_("ECF_CUSTOM_PASSWD="),
+          ecf_user_("ECF_USER=") {
         ecf_passwd_ += passwd_file;
         auto* put = const_cast<char*>(ecf_passwd_.c_str());
         BOOST_CHECK_MESSAGE(putenv(put) == 0, "putenv failed for " << put);

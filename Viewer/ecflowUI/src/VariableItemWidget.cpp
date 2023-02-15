@@ -46,7 +46,12 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler* data,
                                        QString value,
                                        bool frozen,
                                        QWidget* parent)
-    : QDialog(parent), genVar_(false), data_(data), defineIndex_(defineIndex), oriName_(name), cleared_(false),
+    : QDialog(parent),
+      genVar_(false),
+      data_(data),
+      defineIndex_(defineIndex),
+      oriName_(name),
+      cleared_(false),
       suspended_(false) {
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
@@ -314,7 +319,10 @@ void VariablePropDialog::readSettings() {
 //======================================
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler* data, QWidget* parent)
-    : QDialog(parent), data_(data), cleared_(false), suspended_(false) {
+    : QDialog(parent),
+      data_(data),
+      cleared_(false),
+      suspended_(false) {
     setupUi(this);
 
     init();
@@ -330,7 +338,9 @@ VariableAddDialog::VariableAddDialog(VariableModelDataHandler* data, QWidget* pa
 }
 
 VariableAddDialog::VariableAddDialog(VariableModelDataHandler* data, QString name, QString value, QWidget* parent)
-    : QDialog(parent), data_(data), cleared_(false) {
+    : QDialog(parent),
+      data_(data),
+      cleared_(false) {
     setupUi(this);
 
     init();

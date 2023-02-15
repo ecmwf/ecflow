@@ -42,9 +42,19 @@ NodeTimelineHeader::NodeTimelineHeader(QTreeView *view) : TimelineHeader(view)
 #endif
 
 TimelineHeader::TimelineHeader(QTreeView* view)
-    : QHeaderView(Qt::Horizontal, view), view_(view), fm_(QFont()), timelineCol_(50, 50, 50), dateTextCol_(33, 95, 161),
-      timeTextCol_(30, 30, 30), timelineFrameBorderCol_(150, 150, 150), timelineFrameSize_(4), majorTickSize_(5),
-      zoomCol_(224, 236, 248, 190), inZoom_(false), zoomInAction_(nullptr), zoomOutAction_(nullptr)
+    : QHeaderView(Qt::Horizontal, view),
+      view_(view),
+      fm_(QFont()),
+      timelineCol_(50, 50, 50),
+      dateTextCol_(33, 95, 161),
+      timeTextCol_(30, 30, 30),
+      timelineFrameBorderCol_(150, 150, 150),
+      timelineFrameSize_(4),
+      majorTickSize_(5),
+      zoomCol_(224, 236, 248, 190),
+      inZoom_(false),
+      zoomInAction_(nullptr),
+      zoomOutAction_(nullptr)
 // submittedMaxDuration_(-1),
 // activeMaxDuration_(-1)
 {
@@ -388,7 +398,9 @@ void TimelineHeader::rerender() {
 //=================================================================
 
 MainTimelineHeader::MainTimelineHeader(QTreeView* view)
-    : TimelineHeader(view), submittedMaxDuration_(-1), activeMaxDuration_(-1) {
+    : TimelineHeader(view),
+      submittedMaxDuration_(-1),
+      activeMaxDuration_(-1) {
     Q_ASSERT(view_);
     columnType_ << OtherColumn;
     columnType_ << TimelineColumn;

@@ -23,7 +23,9 @@
 #include "VReply.hpp"
 
 LogProvider::LogProvider(InfoPresenter* owner, QObject* parent)
-    : QObject(parent), InfoProvider(owner, VTask::HistoryTask), fileWatcher_(nullptr) {
+    : QObject(parent),
+      InfoProvider(owner, VTask::HistoryTask),
+      fileWatcher_(nullptr) {
     // NOTE: fileWatcher_'s parent (if it exists) will be "this", so
     // fileWatcher_ will be automatically deleted in the destructor!
 }

@@ -30,7 +30,10 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid, bool positiveGain)
-    : gain_(0), state_change_no_(Ecf::incr_state_change_no()), hybrid_(hybrid), positiveGain_(positiveGain) {
+    : gain_(0),
+      state_change_no_(Ecf::incr_state_change_no()),
+      hybrid_(hybrid),
+      positiveGain_(positiveGain) {
     boost::gregorian::date theDate = time.date();
     day_                           = theDate.day();
     month_                         = theDate.month();
@@ -41,7 +44,12 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid, bool pos
 }
 
 ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)
-    : gain_(0), day_(day), month_(month), year_(year), state_change_no_(Ecf::incr_state_change_no()), hybrid_(hybrid) {
+    : gain_(0),
+      day_(day),
+      month_(month),
+      year_(year),
+      state_change_no_(Ecf::incr_state_change_no()),
+      hybrid_(hybrid) {
     // Will throw std::out_of_range exception
     DateAttr::checkDate(day, month, year, false /* for calendars we don't allow wild carding */);
 }

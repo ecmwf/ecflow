@@ -26,7 +26,12 @@ ServerItem::ServerItem(const std::string& name,
                        const std::string& user,
                        bool favourite,
                        bool ssl)
-    : name_(name), host_(host), port_(port), user_(user), favourite_(favourite), ssl_(ssl) {
+    : name_(name),
+      host_(host),
+      port_(port),
+      user_(user),
+      favourite_(favourite),
+      ssl_(ssl) {
 }
 
 ServerItem::~ServerItem() {

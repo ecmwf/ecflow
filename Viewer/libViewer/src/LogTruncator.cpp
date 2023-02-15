@@ -18,7 +18,11 @@
 #include "UiLog.hpp"
 
 LogTruncator::LogTruncator(QString path, int timeout, int sizeLimit, int lineNum, QObject* parent)
-    : QObject(parent), path_(path), timeout_(timeout), sizeLimit_(sizeLimit), lineNum_(lineNum) {
+    : QObject(parent),
+      path_(path),
+      timeout_(timeout),
+      sizeLimit_(sizeLimit),
+      lineNum_(lineNum) {
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(truncate()));
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)

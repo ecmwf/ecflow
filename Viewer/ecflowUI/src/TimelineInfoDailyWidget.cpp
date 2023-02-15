@@ -33,7 +33,10 @@
 #include "ui_TimelineInfoDailyWidget.h"
 
 TimelineInfoDailyWidget::TimelineInfoDailyWidget(QWidget* parent)
-    : ui_(new Ui::TimelineInfoDailyWidget), numOfRows_(0), tlEndTime_(0), ignoreTimeEdited_(false) {
+    : ui_(new Ui::TimelineInfoDailyWidget),
+      numOfRows_(0),
+      tlEndTime_(0),
+      ignoreTimeEdited_(false) {
     ui_->setupUi(this);
 
     ui_->zoomInTb->setDefaultAction(ui_->actionZoomIn);

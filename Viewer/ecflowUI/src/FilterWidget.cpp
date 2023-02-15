@@ -40,7 +40,10 @@ VParamFilterMenu::VParamFilterMenu(QMenu* parent,
                                    QString title,
                                    ItemMode itemMode,
                                    DecorMode decorMode)
-    : menu_(parent), filter_(filter), itemMode_(itemMode), decorMode_(decorMode) {
+    : menu_(parent),
+      filter_(filter),
+      itemMode_(itemMode),
+      decorMode_(decorMode) {
     buildTitle(title, parent);
 
     auto* acSep = new QAction(this);

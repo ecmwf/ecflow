@@ -38,8 +38,11 @@ ServerState::ServerState(const std::string& port) : server_state_(default_state(
 }
 
 ServerState::ServerState(const ServerState& rhs)
-    : jobSubmissionInterval_(rhs.jobSubmissionInterval_), server_state_(rhs.server_state_),
-      server_variables_(rhs.server_variables_), user_variables_(rhs.user_variables_), hostPort_(rhs.hostPort_),
+    : jobSubmissionInterval_(rhs.jobSubmissionInterval_),
+      server_state_(rhs.server_state_),
+      server_variables_(rhs.server_variables_),
+      user_variables_(rhs.user_variables_),
+      hostPort_(rhs.hostPort_),
       jobGeneration_(rhs.jobGeneration_) {
 }
 

@@ -32,8 +32,13 @@ using namespace boost;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file_name)
-    : parsing_node_string_(false), infile_(file_name), defsfile_(defsfile), defsParser_(this), lineNumber_(0),
-      file_type_(PrintStyle::DEFS), defs_as_string_(Str::EMPTY()) {
+    : parsing_node_string_(false),
+      infile_(file_name),
+      defsfile_(defsfile),
+      defsParser_(this),
+      lineNumber_(0),
+      file_type_(PrintStyle::DEFS),
+      defs_as_string_(Str::EMPTY()) {
     if (!infile_.ok()) {
         std::stringstream ss;
         ss << "DefsStructureParser::DefsStructureParser: Unable to open file! " << infile_.file_name() << "\n\n";
@@ -43,8 +48,13 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file
 }
 
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str, bool)
-    : parsing_node_string_(false), infile_(""), defsfile_(defsfile), defsParser_(this), lineNumber_(0),
-      file_type_(PrintStyle::DEFS), defs_as_string_(str) {
+    : parsing_node_string_(false),
+      infile_(""),
+      defsfile_(defsfile),
+      defsParser_(this),
+      lineNumber_(0),
+      file_type_(PrintStyle::DEFS),
+      defs_as_string_(str) {
     if (defs_as_string_.empty()) {
         std::stringstream ss;
         ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
@@ -54,8 +64,13 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str,
 }
 
 DefsStructureParser::DefsStructureParser(const std::string& defs_node_string)
-    : parsing_node_string_(true), infile_(""), defsfile_(nullptr), defsParser_(this, true /* only parse nodes */),
-      lineNumber_(0), file_type_(PrintStyle::MIGRATE), defs_as_string_(defs_node_string) {
+    : parsing_node_string_(true),
+      infile_(""),
+      defsfile_(nullptr),
+      defsParser_(this, true /* only parse nodes */),
+      lineNumber_(0),
+      file_type_(PrintStyle::MIGRATE),
+      defs_as_string_(defs_node_string) {
     if (defs_as_string_.empty()) {
         std::stringstream ss;
         ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";

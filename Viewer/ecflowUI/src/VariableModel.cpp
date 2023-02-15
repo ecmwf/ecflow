@@ -33,7 +33,8 @@ QColor VariableModel::blockFgCol_ = QColor(255, 255, 255);
 //=======================================================================
 
 VariableModel::VariableModel(VariableModelDataHandler* data, QObject* parent)
-    : QAbstractItemModel(parent), data_(data) {
+    : QAbstractItemModel(parent),
+      data_(data) {
     connect(data_, SIGNAL(reloadBegin()), this, SLOT(slotReloadBegin()));
 
     connect(data_, SIGNAL(reloadEnd()), this, SLOT(slotReloadEnd()));
@@ -466,7 +467,10 @@ void VariableModel::slotDataChanged(int block) {
 //=======================================================================
 
 VariableSortModel::VariableSortModel(VariableModel* varModel, QObject* parent)
-    : QSortFilterProxyModel(parent), varModel_(varModel), showShadowed_(true), matchMode_(FilterMode),
+    : QSortFilterProxyModel(parent),
+      varModel_(varModel),
+      showShadowed_(true),
+      matchMode_(FilterMode),
       ignoreDuplicateNames_(false) {
     QSortFilterProxyModel::setSourceModel(varModel_);
     setDynamicSortFilter(true);

@@ -24,7 +24,12 @@ protected:
     Submittable(const std::string& name, bool check) : Node(name, check) {}
     Submittable() = default;
     Submittable(const Submittable& rhs)
-        : Node(rhs), paswd_(rhs.paswd_), rid_(rhs.rid_), abr_(rhs.abr_), tryNo_(rhs.tryNo_), state_change_no_(0) {}
+        : Node(rhs),
+          paswd_(rhs.paswd_),
+          rid_(rhs.rid_),
+          abr_(rhs.abr_),
+          tryNo_(rhs.tryNo_),
+          state_change_no_(0) {}
 
     Submittable& operator=(const Submittable&);
 

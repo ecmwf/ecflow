@@ -1834,8 +1834,14 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent* e) {
 //==========================================================================
 
 TextPagerLineNumberArea::TextPagerLineNumberArea(TextPagerEdit* editor)
-    : QWidget(editor), textEditor_(editor), digits_(6), rightMargin_(3), bgCol_(232, 231, 230), fontCol_(220, 220, 200),
-      separatorCol_(220, 220, 200), currentCol_(212, 212, 255) {
+    : QWidget(editor),
+      textEditor_(editor),
+      digits_(6),
+      rightMargin_(3),
+      bgCol_(232, 231, 230),
+      fontCol_(220, 220, 200),
+      separatorCol_(220, 220, 200),
+      currentCol_(212, 212, 255) {
     Q_ASSERT(textEditor_);
 
     if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaBackground"))

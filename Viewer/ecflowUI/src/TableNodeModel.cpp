@@ -44,7 +44,9 @@ VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct) {
 //=======================================================
 
 TableNodeModel::TableNodeModel(ServerFilter* serverFilter, NodeFilterDef* filterDef, QObject* parent)
-    : AbstractNodeModel(parent), data_(nullptr), columns_(nullptr) {
+    : AbstractNodeModel(parent),
+      data_(nullptr),
+      columns_(nullptr) {
     columns_ = ModelColumn::def("table_columns");
 
     Q_ASSERT(columns_);

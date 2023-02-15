@@ -19,8 +19,15 @@
 #include "VModelData.hpp"
 
 NodeWidget::NodeWidget(const std::string& type, ServerFilter* serverFilter, QWidget* parent)
-    : DashboardWidget(type, parent), serverFilter_(serverFilter), model_(nullptr), view_(nullptr), icons_(nullptr),
-      atts_(nullptr), filterDef_(nullptr), states_(nullptr), broadcastSelection_(true) {
+    : DashboardWidget(type, parent),
+      serverFilter_(serverFilter),
+      model_(nullptr),
+      view_(nullptr),
+      icons_(nullptr),
+      atts_(nullptr),
+      filterDef_(nullptr),
+      states_(nullptr),
+      broadcastSelection_(true) {
     // Define the icon filter for the model. It controls what icons
     // are displayed next to the nodes. This is exposed via a menu.
     icons_ = new IconFilter;

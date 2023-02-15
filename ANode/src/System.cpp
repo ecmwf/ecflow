@@ -48,7 +48,12 @@ struct Process
 {
 public:
     Process(const std::string& absPath, const std::string& cmdToSpawn, System::CmdType cmd_type, pid_t pid)
-        : absNodePath_(absPath), cmd_(cmdToSpawn), cmd_type_(cmd_type), have_status_(0), pid_(pid), status_(0) {}
+        : absNodePath_(absPath),
+          cmd_(cmdToSpawn),
+          cmd_type_(cmd_type),
+          have_status_(0),
+          pid_(pid),
+          status_(0) {}
 
     std::string absNodePath_;  // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
     std::string cmd_;          // the command that was spawned

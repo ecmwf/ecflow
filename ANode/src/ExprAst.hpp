@@ -563,7 +563,9 @@ private:
 class AstVariable : public AstLeaf {
 public:
     AstVariable(const std::string& nodePath, const std::string& variablename)
-        : parentNode_(nullptr), nodePath_(nodePath), name_(variablename) {}
+        : parentNode_(nullptr),
+          nodePath_(nodePath),
+          name_(variablename) {}
 
     std::string name() const override { return name_; }
     bool is_attribute() const override { return true; }

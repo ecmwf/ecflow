@@ -36,7 +36,9 @@ int JobProfiler::task_threshold_default() {
 
 // =================================================================================
 JobProfiler::JobProfiler(Task* node, JobsParam& jobsParam, size_t threshold)
-    : node_(node), jobsParam_(jobsParam), start_time_(boost::posix_time::microsec_clock::universal_time()),
+    : node_(node),
+      jobsParam_(jobsParam),
+      start_time_(boost::posix_time::microsec_clock::universal_time()),
       threshold_(threshold) {
     // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
     // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60

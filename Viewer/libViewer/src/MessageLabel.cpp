@@ -175,7 +175,9 @@ void MessageLabelProgWidget::showDelayedProgress() {
 class MessageLabelDefData {
 public:
     MessageLabelDefData(QString iconPath, QString title, QColor bg, QColor border)
-        : title_(title), bg_(bg.name()), border_(border.name()) {
+        : title_(title),
+          bg_(bg.name()),
+          border_(border.name()) {
         int id    = IconProvider::add(iconPath, iconPath);
         pix_      = IconProvider::pixmap(id, 16);
         pixSmall_ = IconProvider::pixmap(id, 12);

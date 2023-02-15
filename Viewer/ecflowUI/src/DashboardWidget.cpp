@@ -21,7 +21,11 @@ static QString
 static QString tooltipMaxUnchk("Maximise panel");
 
 DashboardWidget::DashboardWidget(const std::string& type, QWidget* parent)
-    : QWidget(parent), type_(type), acceptSetCurrent_(false), ignoreMaximisedChange_(false), bcWidget_(nullptr),
+    : QWidget(parent),
+      type_(type),
+      acceptSetCurrent_(false),
+      ignoreMaximisedChange_(false),
+      bcWidget_(nullptr),
       inDialog_(false) {
     // detach
     detachedAction_ = new QAction("Detached", this);

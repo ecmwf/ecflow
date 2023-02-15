@@ -29,7 +29,11 @@
 #include "ViewerUtil.hpp"
 
 NodeQueryOptionEdit::NodeQueryOptionEdit(QString optionId, QGridLayout* grid, QWidget* parent)
-    : QObject(parent), optionId_(optionId), initIsOn_(false), parent_(parent), grid_(grid) {
+    : QObject(parent),
+      optionId_(optionId),
+      initIsOn_(false),
+      parent_(parent),
+      grid_(grid) {
     connect(this, SIGNAL(changed()), parent_, SLOT(slotOptionEditChanged()));
 }
 
@@ -130,7 +134,9 @@ NodeQueryListOptionEdit::NodeQueryListOptionEdit(NodeQueryOption* option,
                                                  CustomListWidget* list,
                                                  QToolButton* tb,
                                                  QWidget* parent)
-    : NodeQueryOptionEdit(option->name(), nullptr, parent), list_(list), resetTb_(tb) {
+    : NodeQueryOptionEdit(option->name(), nullptr, parent),
+      list_(list),
+      resetTb_(tb) {
     option_ = static_cast<NodeQueryListOption*>(option);
     Q_ASSERT(option_);
 

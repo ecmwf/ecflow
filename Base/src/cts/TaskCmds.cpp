@@ -550,7 +550,8 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
                        const std::string& process_or_remote_id,
                        int try_no,
                        const std::string& expression)
-    : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no), expression_(expression) {
+    : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
+      expression_(expression) {
     // Parse expression to make sure its valid
     static_cast<void>(Expression::parse(expression, "CtsWaitCmd:")); // will throw for errors
 }
@@ -643,7 +644,8 @@ AbortCmd::AbortCmd(const std::string& pathToTask,
                    const std::string& process_or_remote_id,
                    int try_no,
                    const std::string& reason)
-    : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no), reason_(reason) {
+    : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
+      reason_(reason) {
     if (!reason_.empty()) {
         // Do not use "\n" | ';' in Submittable::abr_, as this can mess up, --migrate output
         // Which would then affect --load.

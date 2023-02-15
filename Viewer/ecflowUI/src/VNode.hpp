@@ -43,8 +43,14 @@ public:
 class VNodeChange {
 public:
     VNodeChange()
-        : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1), nodeNum_(-1), nodeAddAt_(-1), nodeRemoveAt_(-1),
-          ignore_(false), rescan_(false) {}
+        : cachedAttrNum_(-1),
+          attrNum_(-1),
+          cachedNodeNum_(-1),
+          nodeNum_(-1),
+          nodeAddAt_(-1),
+          nodeRemoveAt_(-1),
+          ignore_(false),
+          rescan_(false) {}
     int cachedAttrNum_;
     int attrNum_;
     int cachedNodeNum_;

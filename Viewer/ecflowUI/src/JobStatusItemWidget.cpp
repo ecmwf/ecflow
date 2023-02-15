@@ -21,7 +21,11 @@
 #include "VReply.hpp"
 
 JobStatusItemWidget::JobStatusItemWidget(QWidget* parent)
-    : CodeItemWidget(parent), timeout_(3000), timeoutCount_(0), maxTimeoutCount_(10), taskMode_(NoTask),
+    : CodeItemWidget(parent),
+      timeout_(3000),
+      timeoutCount_(0),
+      maxTimeoutCount_(10),
+      taskMode_(NoTask),
       nodeStatusMode_(UnsetCommandMode) {
     commandTb_->show();
     commandTb_->setText(tr("Execute status command"));

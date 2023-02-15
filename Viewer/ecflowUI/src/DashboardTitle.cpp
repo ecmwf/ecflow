@@ -24,7 +24,11 @@ int DashboardTitle::lighter_ = 150;
 // #define _UI_DASHBOARDTITLE_DEBUG
 
 DashboardTitle::DashboardTitle(ServerFilter* filter, Dashboard* parent)
-    : QObject(parent), dashboard_(parent), filter_(filter), maxPixWidth_(0), current_(false) {
+    : QObject(parent),
+      dashboard_(parent),
+      filter_(filter),
+      maxPixWidth_(0),
+      current_(false) {
     filter_->addObserver(this);
 }
 

@@ -38,7 +38,10 @@ Gnuplot::Gnuplot(const std::string& log_file,
                  const std::string& host,
                  const std::string& port,
                  size_t no_of_suites_to_plot)
-    : log_file_(log_file), host_(host), port_(port), no_of_suites_to_plot_(no_of_suites_to_plot) {
+    : log_file_(log_file),
+      host_(host),
+      port_(port),
+      no_of_suites_to_plot_(no_of_suites_to_plot) {
     if (!fs::exists(log_file)) {
         std::stringstream ss;
         ss << "Gnuplot::Gnuplot: The log file " << log_file << " does not exist\n";

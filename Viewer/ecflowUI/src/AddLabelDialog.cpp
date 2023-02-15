@@ -22,7 +22,9 @@
 #include "ui_AddLabelDialog.h"
 
 AddLabelDialog::AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent)
-    : QDialog(parent), ui_(new Ui::AddLabelDialog), info_(info) {
+    : QDialog(parent),
+      ui_(new Ui::AddLabelDialog),
+      info_(info) {
     if (!info_ || !info_->isNode() || !info_->node()) {
         QDialog::reject();
         return;

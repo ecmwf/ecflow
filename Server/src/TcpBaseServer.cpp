@@ -24,7 +24,10 @@ using namespace std;
 using namespace ecf;
 
 TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : server_(server), io_service_(io_service), serverEnv_(serverEnv), acceptor_(io_service) {
+    : server_(server),
+      io_service_(io_service),
+      serverEnv_(serverEnv),
+      acceptor_(io_service) {
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::endpoint endpoint(serverEnv.tcp_protocol(), serverEnv.port());
     acceptor_.open(endpoint.protocol());

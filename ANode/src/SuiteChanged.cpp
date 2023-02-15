@@ -25,7 +25,9 @@
 namespace ecf {
 
 SuiteChanged::SuiteChanged(suite_ptr s)
-    : suite_(s), state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) {
+    : suite_(s),
+      state_change_no_(Ecf::state_change_no()),
+      modify_change_no_(Ecf::modify_change_no()) {
 }
 
 SuiteChanged::~SuiteChanged() {
@@ -42,7 +44,9 @@ SuiteChanged::~SuiteChanged() {
 
 // ============================================================================
 SuiteChanged0::SuiteChanged0(node_ptr s)
-    : node_(s), suite_(s->suite()), state_change_no_(Ecf::state_change_no()),
+    : node_(s),
+      suite_(s->suite()),
+      state_change_no_(Ecf::state_change_no()),
       modify_change_no_(Ecf::modify_change_no()) {
 }
 
@@ -62,7 +66,9 @@ SuiteChanged0::~SuiteChanged0() {
 
 // ============================================================================
 SuiteChangedPtr::SuiteChangedPtr(Node* s)
-    : node_(s), suite_(s->suite()), state_change_no_(Ecf::state_change_no()),
+    : node_(s),
+      suite_(s->suite()),
+      state_change_no_(Ecf::state_change_no()),
       modify_change_no_(Ecf::modify_change_no()) {
 }
 
@@ -81,7 +87,9 @@ SuiteChangedPtr::~SuiteChangedPtr() {
 //================================================================
 
 SuiteChanged1::SuiteChanged1(Suite* s)
-    : suite_(s), state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) {
+    : suite_(s),
+      state_change_no_(Ecf::state_change_no()),
+      modify_change_no_(Ecf::modify_change_no()) {
 }
 
 SuiteChanged1::~SuiteChanged1() {

@@ -23,7 +23,10 @@
 class Pass_wd {
 public:
     Pass_wd(const std::string& user, const std::string& host, const std::string& port, const std::string& passwd)
-        : user_(user), host_(host), port_(port), passwd_(passwd) {}
+        : user_(user),
+          host_(host),
+          port_(port),
+          passwd_(passwd) {}
     ~Pass_wd() = default;
 
     bool operator==(const Pass_wd& rhs) const {

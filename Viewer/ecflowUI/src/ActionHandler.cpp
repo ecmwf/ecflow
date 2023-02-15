@@ -44,7 +44,9 @@
 #define _UI_ACTIONHANDLER_DEBUG
 
 ActionHandler::ActionHandler(QObject* actionSender, QWidget* menuParent)
-    : QObject(actionSender), actionSender_(actionSender), menuParent_(menuParent) {
+    : QObject(actionSender),
+      actionSender_(actionSender),
+      menuParent_(menuParent) {
     connect(this, SIGNAL(viewCommand(VInfo_ptr, QString)), actionSender_, SLOT(slotViewCommand(VInfo_ptr, QString)));
 
     connect(this,

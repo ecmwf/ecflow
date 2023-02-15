@@ -16,7 +16,10 @@
 #include "ViewerUtil.hpp"
 
 FontMetrics::FontMetrics(const QFont& font)
-    : QFontMetrics(font), realHeight_(height()), topPadding_(0), bottomPadding_(0) {
+    : QFontMetrics(font),
+      realHeight_(height()),
+      topPadding_(0),
+      bottomPadding_(0) {
     computeRealHeight(font);
 }
 

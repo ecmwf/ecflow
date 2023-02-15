@@ -45,7 +45,9 @@ class SuiteFilterItem {
 
 public:
     SuiteFilterItem(const std::string& name, bool loaded, bool filtered)
-        : name_(name), loaded_(loaded), filtered_(filtered) {}
+        : name_(name),
+          loaded_(loaded),
+          filtered_(filtered) {}
 
     SuiteFilterItem(const SuiteFilterItem& other);
 

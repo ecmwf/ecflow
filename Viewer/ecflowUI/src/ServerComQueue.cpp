@@ -28,10 +28,19 @@
 // ServerComQueue notifies the ServerHandler about it.
 
 ServerComQueue::ServerComQueue(ServerHandler* server, ClientInvoker* client)
-    : QObject(server), server_(server), client_(client), comThread_(nullptr), timeout_(5), ctStartTimeout_(1000),
+    : QObject(server),
+      server_(server),
+      client_(client),
+      comThread_(nullptr),
+      timeout_(5),
+      ctStartTimeout_(1000),
       ctStartWaitTimeout_(500), // wait() is a blocking call, so it should be short
-      startTimeoutTryCnt_(0), ctMaxStartTimeoutTryCnt_(4), state_(NoState), // the queue is enabled but not running
-      taskStarted_(false), taskIsBeingFinished_(false), taskIsBeingFailed_(false) {
+      startTimeoutTryCnt_(0),
+      ctMaxStartTimeoutTryCnt_(4),
+      state_(NoState), // the queue is enabled but not running
+      taskStarted_(false),
+      taskIsBeingFinished_(false),
+      taskIsBeingFailed_(false) {
     timer_ = new QTimer(this);
     timer_->setInterval(timeout_);
 

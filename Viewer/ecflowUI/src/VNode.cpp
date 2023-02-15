@@ -153,13 +153,15 @@ AttributeFilter
 //=================================================
 
 VNode::VNode(VNode* parent, node_ptr node)
-    : VItem(parent), node_(node),
+    : VItem(parent),
+      node_(node),
 // parent_(parent),
 #if 0
     attrNum_(-1),
     cachedAttrNum_(-1),
 #endif
-      index_(-1), data_(nullptr) {
+      index_(-1),
+      data_(nullptr) {
     if (parent_)
         parent_->addChild(this);
 
@@ -1082,7 +1084,10 @@ void VNode::print() {
 //=================================================
 
 VServer::VServer(ServerHandler* server)
-    : VNode(nullptr, node_ptr()), server_(server), totalNum_(0), triggeredScanned_(false) {
+    : VNode(nullptr, node_ptr()),
+      server_(server),
+      totalNum_(0),
+      triggeredScanned_(false) {
     // Attributes are not scannedfor servers
     Q_ASSERT(attr_.empty());
 }

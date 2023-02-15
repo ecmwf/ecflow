@@ -80,7 +80,11 @@ static inline bool matchSection(const TextPagerSection* section, const TextPager
 struct Chunk
 {
     Chunk()
-        : previous(nullptr), next(nullptr), from(-1), length(0), firstLineIndex(-1)
+        : previous(nullptr),
+          next(nullptr),
+          from(-1),
+          length(0),
+          firstLineIndex(-1)
 #ifndef TEXTDOCUMENT_LINENUMBER_CACHE
           ,
           lines(-1)
@@ -138,7 +142,10 @@ struct DocumentCommand
     enum Type { None, Inserted, Removed };
 
     DocumentCommand(Type t, int pos = -1, const QString& string = QString())
-        : type(t), position(pos), text(string), joinStatus(NoJoin) {}
+        : type(t),
+          position(pos),
+          text(string),
+          joinStatus(NoJoin) {}
 
     const Type type;
     int position;
@@ -154,18 +161,28 @@ struct TextDocumentPrivate : public QObject
     Q_OBJECT
 public:
     TextDocumentPrivate(TextPagerDocument* doc)
-        : q(doc), first(nullptr), last(nullptr),
+        : q(doc),
+          first(nullptr),
+          last(nullptr),
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-          cachedChunk(nullptr), cachedChunkPos(-1),
+          cachedChunk(nullptr),
+          cachedChunkPos(-1),
 #endif
 #ifndef NO_TEXTDOCUMENT_READ_CACHE
           cachePos(-1),
 #endif
-          documentSize(0), saveState(NotSaving), findState(NotFinding), ownDevice(false), modified(false),
-          deviceMode(TextPagerDocument::Sparse), chunkSize(64 * 1024), // chunkSize(1024*64), //chunkSize(16384),
+          documentSize(0),
+          saveState(NotSaving),
+          findState(NotFinding),
+          ownDevice(false),
+          modified(false),
+          deviceMode(TextPagerDocument::Sparse),
+          chunkSize(64 * 1024), // chunkSize(1024*64), //chunkSize(16384),
           // undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
           // collapseInsertUndo(false),
-          hasChunksWithLineNumbers(false), options(TextPagerDocument::DefaultOptions), readWriteLock(nullptr),
+          hasChunksWithLineNumbers(false),
+          options(TextPagerDocument::DefaultOptions),
+          readWriteLock(nullptr),
           cursorCommand(false) {
         first = last = new Chunk;
     }
@@ -262,7 +279,12 @@ private:
 class TextDocumentIterator {
 public:
     TextDocumentIterator(const TextDocumentPrivate* d, int p)
-        : doc(d), pos(p), min(0), max(-1), convert(false), newline('\n') {
+        : doc(d),
+          pos(p),
+          min(0),
+          max(-1),
+          convert(false),
+          newline('\n') {
         Q_ASSERT(doc);
 
         end_ = end();

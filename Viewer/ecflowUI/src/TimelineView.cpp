@@ -45,8 +45,15 @@ static std::vector<std::string> propVec;
 //======================================================================
 
 TimelineDelegate::TimelineDelegate(TimelineModel* model, QWidget* parent)
-    : QStyledItemDelegate(parent), model_(model), fm_(QFont()), borderPen_(QPen(QColor(216, 216, 216))), topPadding_(2),
-      bottomPadding_(2), submittedMaxDuration_(-1), activeMaxDuration_(-1), submittedMaxTextWidth_(-1),
+    : QStyledItemDelegate(parent),
+      model_(model),
+      fm_(QFont()),
+      borderPen_(QPen(QColor(216, 216, 216))),
+      topPadding_(2),
+      bottomPadding_(2),
+      submittedMaxDuration_(-1),
+      activeMaxDuration_(-1),
+      submittedMaxTextWidth_(-1),
       activeMaxTextWidth_(-1) {
     Q_ASSERT(model_);
 
@@ -581,8 +588,15 @@ int TimelineDelegate::getDurationMaxTextWidth(int duration) const {
 //======================================================================
 
 TimelineView::TimelineView(TimelineSortModel* model, QWidget* parent)
-    : QTreeView(parent), model_(model), header_(nullptr), headerBeingAdjusted_(false), needItemsLayout_(false),
-      prop_(nullptr), setCurrentIsRunning_(false), viewMode_(TimelineMode), durationColumnWidthInitialised_(false) {
+    : QTreeView(parent),
+      model_(model),
+      header_(nullptr),
+      headerBeingAdjusted_(false),
+      needItemsLayout_(false),
+      prop_(nullptr),
+      setCurrentIsRunning_(false),
+      viewMode_(TimelineMode),
+      durationColumnWidthInitialised_(false) {
     setObjectName("view");
     // setProperty("style","nodeView");
     // setProperty("view","table");

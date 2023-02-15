@@ -19,7 +19,10 @@ struct GraphLayoutNode
 {
     GraphLayoutNode(int width, int height) : width_(width), height_(height) {}
     GraphLayoutNode(GraphLayoutNode* n)
-        : width_(n->width_), height_(n->height_), parents_(n->parents_), children_(n->children_) {}
+        : width_(n->width_),
+          height_(n->height_),
+          parents_(n->parents_),
+          children_(n->children_) {}
 
     bool hasParents() const { return parents_.size() > 0; }
     bool hasChildren() const { return children_.size() > 0; }

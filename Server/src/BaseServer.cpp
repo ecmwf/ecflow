@@ -43,9 +43,13 @@ using namespace ecf;
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
 BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : io_service_(io_service), signals_(io_service), defs_(Defs::create()), // ECFLOW-182
-      traverser_(this, io_service, serverEnv), checkPtSaver_(this, io_service, &serverEnv),
-      serverState_(SState::HALTED), serverEnv_(serverEnv) {
+    : io_service_(io_service),
+      signals_(io_service),
+      defs_(Defs::create()), // ECFLOW-182
+      traverser_(this, io_service, serverEnv),
+      checkPtSaver_(this, io_service, &serverEnv),
+      serverState_(SState::HALTED),
+      serverEnv_(serverEnv) {
     if (serverEnv_.debug())
         cout << "-->Server::server starting server on port " << serverEnv.port() << endl;
 

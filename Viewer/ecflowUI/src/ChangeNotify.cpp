@@ -50,7 +50,10 @@ ChangeNotifyDialog* ChangeNotify::dialog_ = nullptr;
 //==============================================
 
 ChangeNotify::ChangeNotify(const std::string& id)
-    : id_(id), data_(new VNodeList()), model_(new ChangeNotifyModel()), proxyModel_(new QSortFilterProxyModel())
+    : id_(id),
+      data_(new VNodeList()),
+      model_(new ChangeNotifyModel()),
+      proxyModel_(new QSortFilterProxyModel())
 
 {
     model_->resetData(data_);

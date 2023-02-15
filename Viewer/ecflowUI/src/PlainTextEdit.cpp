@@ -23,8 +23,11 @@
 #include "ViewerUtil.hpp"
 
 PlainTextEdit::PlainTextEdit(QWidget* parent)
-    : QPlainTextEdit(parent), numAreaBgCol_(232, 231, 230), numAreaFontCol_(102, 102, 102),
-      numAreaSeparatorCol_(210, 210, 210), numAreaCurrentCol_(212, 212, 255) {
+    : QPlainTextEdit(parent),
+      numAreaBgCol_(232, 231, 230),
+      numAreaFontCol_(102, 102, 102),
+      numAreaSeparatorCol_(210, 210, 210),
+      numAreaCurrentCol_(212, 212, 255) {
     lineNumArea_ = new LineNumberArea(this);
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));

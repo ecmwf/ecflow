@@ -22,7 +22,9 @@
 // #include "UserMessage.hpp"
 
 TextEditSearchLine::TextEditSearchLine(QWidget* parent)
-    : AbstractSearchLine(parent), interface_(nullptr), lastFindSuccessful_(false) {
+    : AbstractSearchLine(parent),
+      interface_(nullptr),
+      lastFindSuccessful_(false) {
     connect(matchModeCb_, SIGNAL(currentIndexChanged(int)), this, SLOT(matchModeChanged(int)));
 }
 

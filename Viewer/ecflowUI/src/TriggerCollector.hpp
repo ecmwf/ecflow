@@ -64,7 +64,9 @@ protected:
 class TriggerChildCollector : public TriggerCollector {
 public:
     TriggerChildCollector(VItem* n, VItem* child, TriggerCollector* collector)
-        : node_(n), child_(child), collector_(collector) {}
+        : node_(n),
+          child_(child),
+          collector_(collector) {}
 
     bool add(VItem*, VItem*, Mode) override;
 

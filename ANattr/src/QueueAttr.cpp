@@ -41,7 +41,8 @@ QueueAttr& QueueAttr::EMPTY1() {
 }
 
 QueueAttr::QueueAttr(const std::string& name, const std::vector<std::string>& theQueue)
-    : theQueue_(theQueue), name_(name) {
+    : theQueue_(theQueue),
+      name_(name) {
     string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("QueueAttr::QueueAttr: Invalid queue name : " + msg);

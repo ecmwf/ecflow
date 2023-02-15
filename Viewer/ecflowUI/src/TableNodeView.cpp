@@ -39,8 +39,14 @@
 #define _UI_TABLENODEVIEW_DEBUG
 
 TableNodeView::TableNodeView(TableNodeSortModel* model, NodeFilterDef* filterDef, QWidget* parent)
-    : QTreeView(parent), NodeViewBase(filterDef), model_(model), needItemsLayout_(false), prop_(nullptr),
-      setCurrentIsRunning_(false), setCurrentAfterUpdateIsRunning_(false), autoScrollToSelection_(true) {
+    : QTreeView(parent),
+      NodeViewBase(filterDef),
+      model_(model),
+      needItemsLayout_(false),
+      prop_(nullptr),
+      setCurrentIsRunning_(false),
+      setCurrentAfterUpdateIsRunning_(false),
+      autoScrollToSelection_(true) {
     setObjectName("view");
     setProperty("style", "nodeView");
     setProperty("view", "table");

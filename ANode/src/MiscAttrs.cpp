@@ -32,7 +32,10 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 MiscAttrs::MiscAttrs(const MiscAttrs& rhs)
-    : zombies_(rhs.zombies_), verifys_(rhs.verifys_), queues_(rhs.queues_), generics_(rhs.generics_) {
+    : zombies_(rhs.zombies_),
+      verifys_(rhs.verifys_),
+      queues_(rhs.queues_),
+      generics_(rhs.generics_) {
 }
 
 MiscAttrs::~MiscAttrs() = default;

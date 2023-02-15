@@ -48,10 +48,21 @@
 //=======================================================
 
 TimelineWidget::TimelineWidget(QWidget* /*parent*/)
-    : ui_(new Ui::TimelineWidget), maxReadSize_(100 * 1024 * 1024), logMode_(LatestMode), data_(nullptr),
-      filterTriggeredByEnter_(false), filterTriggerLimit_(200000), ignoreTimeEdited_(false), beingCleared_(false),
-      typesDetermined_(false), treeOrderDetermined_(false), localLog_(true), logLoaded_(false), logTransferred_(false),
-      fileTransfer_(nullptr), detached_(false) {
+    : ui_(new Ui::TimelineWidget),
+      maxReadSize_(100 * 1024 * 1024),
+      logMode_(LatestMode),
+      data_(nullptr),
+      filterTriggeredByEnter_(false),
+      filterTriggerLimit_(200000),
+      ignoreTimeEdited_(false),
+      beingCleared_(false),
+      typesDetermined_(false),
+      treeOrderDetermined_(false),
+      localLog_(true),
+      logLoaded_(false),
+      logTransferred_(false),
+      fileTransfer_(nullptr),
+      detached_(false) {
     ui_->setupUi(this);
 
     // message label

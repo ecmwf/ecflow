@@ -29,7 +29,8 @@ VariableEditorWidget::VariableEditorWidget(QWidget* parent) : QWidget(parent) {
 }
 
 VariableEditor::VariableEditor(VInfo_ptr info, QWidget* parent)
-    : AttributeEditor(info, "variable", parent), readOnly_(false) {
+    : AttributeEditor(info, "variable", parent),
+      readOnly_(false) {
     w_ = new VariableEditorWidget(this);
     addForm(w_);
 

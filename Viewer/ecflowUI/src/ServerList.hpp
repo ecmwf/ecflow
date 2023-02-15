@@ -35,7 +35,9 @@ class ServerListTmpItem {
 public:
     ServerListTmpItem() = default;
     ServerListTmpItem(const std::string& name, const std::string& host, const std::string& port)
-        : name_(name), host_(host), port_(port) {}
+        : name_(name),
+          host_(host),
+          port_(port) {}
     explicit ServerListTmpItem(ServerItem* item);
     ServerListTmpItem(const ServerListTmpItem&) = default;
 
@@ -54,7 +56,9 @@ public:
     enum ChangeType { AddedChange, RemovedChange, MatchChange, SetSysChange, UnsetSysChange };
 
     ServerListSyncChangeItem(const ServerListTmpItem& sys, const ServerListTmpItem& local, ChangeType type)
-        : sys_(sys), local_(local), type_(type) {}
+        : sys_(sys),
+          local_(local),
+          type_(type) {}
 
     const ServerListTmpItem& sys() const { return sys_; }
     const ServerListTmpItem& local() const { return local_; }

@@ -103,7 +103,8 @@ unsigned int Ecf::incr_modify_change_no() {
 // =======================================================
 
 EcfPreserveChangeNo::EcfPreserveChangeNo()
-    : state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) {
+    : state_change_no_(Ecf::state_change_no()),
+      modify_change_no_(Ecf::modify_change_no()) {
 }
 
 EcfPreserveChangeNo::~EcfPreserveChangeNo() {

@@ -17,7 +17,9 @@
 // #define SUITEMODEL_UI_DEBUG_
 
 SuiteModel::SuiteModel(QObject* parent)
-    : QAbstractItemModel(parent), presentCol_(QColor(1, 128, 73)), notPresentCol_(QColor(255, 0, 0)) {
+    : QAbstractItemModel(parent),
+      presentCol_(QColor(1, 128, 73)),
+      notPresentCol_(QColor(255, 0, 0)) {
 }
 
 SuiteModel::~SuiteModel() {

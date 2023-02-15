@@ -39,7 +39,10 @@ InLimit::InLimit(const std::string& name,
                  bool limit_this_node_only,
                  bool limit_submission,
                  bool check)
-    : n_(name), path_(pathToNode), tokens_(tokens), limit_this_node_only_(limit_this_node_only),
+    : n_(name),
+      path_(pathToNode),
+      tokens_(tokens),
+      limit_this_node_only_(limit_this_node_only),
       limit_submission_(limit_submission) {
     if (check && !Str::valid_name(name)) {
         throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);

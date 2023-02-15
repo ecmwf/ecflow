@@ -775,12 +775,22 @@ std::string Suite::find_node_path(const std::string& type, const std::string& no
 // The false below is used as a dummy argument to call the Variable constructor that does not
 // check the variable names. i.e we know they are valid
 SuiteGenVariables::SuiteGenVariables(const Suite* s)
-    : suite_(s), genvar_suite_("SUITE", "", false), genvar_ecf_time_("ECF_TIME", "", false),
-      genvar_time_("TIME", "", false), genvar_yyyy_("YYYY", "", false), genvar_dow_("DOW", "", false),
-      genvar_doy_("DOY", "", false), genvar_date_("DATE", "", false), genvar_day_("DAY", "", false),
-      genvar_dd_("DD", "", false), genvar_mm_("MM", "", false), genvar_month_("MONTH", "", false),
-      genvar_ecf_date_("ECF_DATE", "", false), genvar_ecf_clock_("ECF_CLOCK", "", false),
-      genvar_ecf_julian_("ECF_JULIAN", "", false), force_update_(false) {
+    : suite_(s),
+      genvar_suite_("SUITE", "", false),
+      genvar_ecf_time_("ECF_TIME", "", false),
+      genvar_time_("TIME", "", false),
+      genvar_yyyy_("YYYY", "", false),
+      genvar_dow_("DOW", "", false),
+      genvar_doy_("DOY", "", false),
+      genvar_date_("DATE", "", false),
+      genvar_day_("DAY", "", false),
+      genvar_dd_("DD", "", false),
+      genvar_mm_("MM", "", false),
+      genvar_month_("MONTH", "", false),
+      genvar_ecf_date_("ECF_DATE", "", false),
+      genvar_ecf_clock_("ECF_CLOCK", "", false),
+      genvar_ecf_julian_("ECF_JULIAN", "", false),
+      force_update_(false) {
 }
 
 void SuiteGenVariables::update_generated_variables() const {

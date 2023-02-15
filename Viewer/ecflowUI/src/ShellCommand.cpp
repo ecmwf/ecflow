@@ -28,7 +28,10 @@ bool ShellCommand::envChecked_    = false;
 bool ShellCommand::envHasToBeSet_ = false;
 
 ShellCommand::ShellCommand(const std::string& cmdStr, const std::string& cmdDefStr, bool addToDialog)
-    : QObject(nullptr), proc_(nullptr), commandDef_(QString::fromStdString(cmdDefStr)), addToDialog_(addToDialog) {
+    : QObject(nullptr),
+      proc_(nullptr),
+      commandDef_(QString::fromStdString(cmdDefStr)),
+      addToDialog_(addToDialog) {
     QString cmdIn = QString::fromStdString(cmdStr);
 
     // A valid shell command must start with "sh "

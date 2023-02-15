@@ -78,12 +78,36 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
 #endif
 
 ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction, QWidget* parent)
-    : QWidget(parent), refreshAction_(refreshAction), server_(nullptr), fontServer_(QFont()), fontPeriod_(QFont()),
-      fontLast_(QFont()), fmServer_(QFont()), fmServerReal_(QFont()), fmPeriod_(QFont()), fmLast_(QFont()),
-      periodTextWidth_(0), periodTextWidthMin_(0), periodDummyText_(" D=300s "), periodDummyFullText_(" D=300s d=99s"),
-      currentComponent_(NoComponent), progRectHeight_(2), serverRectHeight_(10), serverYPadding_(2), prop_(nullptr),
-      mode_(NoMode), noBlinkLimit_(15), hasInfo_(false), inRefresh_(true), userInitiatedRefresh_(false),
-      showLastAutoRefresh_(true), total_(-1), period_(-1), toNext_(-1), drift_(-1), needBorder_(true) {
+    : QWidget(parent),
+      refreshAction_(refreshAction),
+      server_(nullptr),
+      fontServer_(QFont()),
+      fontPeriod_(QFont()),
+      fontLast_(QFont()),
+      fmServer_(QFont()),
+      fmServerReal_(QFont()),
+      fmPeriod_(QFont()),
+      fmLast_(QFont()),
+      periodTextWidth_(0),
+      periodTextWidthMin_(0),
+      periodDummyText_(" D=300s "),
+      periodDummyFullText_(" D=300s d=99s"),
+      currentComponent_(NoComponent),
+      progRectHeight_(2),
+      serverRectHeight_(10),
+      serverYPadding_(2),
+      prop_(nullptr),
+      mode_(NoMode),
+      noBlinkLimit_(15),
+      hasInfo_(false),
+      inRefresh_(true),
+      userInitiatedRefresh_(false),
+      showLastAutoRefresh_(true),
+      total_(-1),
+      period_(-1),
+      toNext_(-1),
+      drift_(-1),
+      needBorder_(true) {
     Q_ASSERT(refreshAction_);
 
     // The icon for the round refresh button

@@ -39,7 +39,12 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,
                              AttributeFilter* atts,
                              IconFilter* icons,
                              QObject* parent)
-    : AbstractNodeModel(parent), data_(nullptr), atts_(atts), icons_(icons), serverToolTip_(true), nodeToolTip_(true),
+    : AbstractNodeModel(parent),
+      data_(nullptr),
+      atts_(atts),
+      icons_(icons),
+      serverToolTip_(true),
+      nodeToolTip_(true),
       attributeToolTip_(true) {
     // Create the data handler for the tree model.
     data_ = new VTreeModelData(filterDef, atts_, this);

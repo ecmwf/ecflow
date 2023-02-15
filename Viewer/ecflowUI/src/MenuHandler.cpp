@@ -720,8 +720,16 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu) {
 // ------------------------
 
 MenuItem::MenuItem(const std::string& name)
-    : name_(name), id_(idCnt_++), hidden_(false), multiSelect_(true), visibleCondition_(nullptr),
-      enabledCondition_(nullptr), questionCondition_(nullptr), isSubMenu_(false), isDivider_(false), isCustom_(false) {
+    : name_(name),
+      id_(idCnt_++),
+      hidden_(false),
+      multiSelect_(true),
+      visibleCondition_(nullptr),
+      enabledCondition_(nullptr),
+      questionCondition_(nullptr),
+      isSubMenu_(false),
+      isDivider_(false),
+      isCustom_(false) {
     if (name == "-") {
         isDivider_ = true;
     }

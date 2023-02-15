@@ -61,7 +61,11 @@ bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const {
 }
 
 NodeQuery::NodeQuery(const std::string& name, bool ignoreMaxNum)
-    : name_(name), advanced_(false), caseSensitive_(false), maxNum_(defaultMaxNum_), ignoreMaxNum_(ignoreMaxNum) {
+    : name_(name),
+      advanced_(false),
+      caseSensitive_(false),
+      maxNum_(defaultMaxNum_),
+      ignoreMaxNum_(ignoreMaxNum) {
 #ifdef _UI_NODEQUERY_DEBUG
     UI_FUNCTION_LOG
 #endif

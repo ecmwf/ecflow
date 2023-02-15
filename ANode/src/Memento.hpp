@@ -391,7 +391,9 @@ private:
 class NodeQueueIndexMemento : public Memento {
 public:
     NodeQueueIndexMemento(const std::string& name, int index, const std::vector<NState::State>& state_vec)
-        : name_(name), state_vec_(state_vec), index_(index) {}
+        : name_(name),
+          state_vec_(state_vec),
+          index_(index) {}
     NodeQueueIndexMemento() = default;
 
 private:
@@ -710,7 +712,10 @@ public:
                        const std::string& process_or_remote_id,
                        const std::string& abortedReason,
                        int tryNo)
-        : paswd_(jobsPassword), rid_(process_or_remote_id), abr_(abortedReason), tryNo_(tryNo) {}
+        : paswd_(jobsPassword),
+          rid_(process_or_remote_id),
+          abr_(abortedReason),
+          tryNo_(tryNo) {}
     SubmittableMemento() = default;
 
 private:

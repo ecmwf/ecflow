@@ -40,7 +40,12 @@ Client::Client(boost::asio::io_service& io_service,
                const std::string& host,
                const std::string& port,
                int timeout)
-    : stopped_(false), host_(host), port_(port), connection_(io_service), deadline_(io_service), timeout_(timeout) {
+    : stopped_(false),
+      host_(host),
+      port_(port),
+      connection_(io_service),
+      deadline_(io_service),
+      timeout_(timeout) {
     /// Avoid sending a NULL request to the server
     if (!cmd_ptr.get())
         throw std::runtime_error("Client::Client: No request specified !");

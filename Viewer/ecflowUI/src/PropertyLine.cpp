@@ -905,7 +905,8 @@ void ComboMultiPropertyLine::setEnabledEditable(bool b) {
 //=========================================================================
 
 SoundComboPropertyLine::SoundComboPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
-    : ComboPropertyLine(guiProp, addLabel, parent), playTb_(nullptr) {
+    : ComboPropertyLine(guiProp, addLabel, parent),
+      playTb_(nullptr) {
     playTb_ = new QToolButton(parent);
     playTb_->setObjectName(prop_->name());
 

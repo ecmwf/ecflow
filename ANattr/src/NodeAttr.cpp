@@ -53,7 +53,10 @@ const Label& Label::EMPTY() {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Event::Event(int number, const std::string& eventName, bool iv, bool check_name)
-    : n_(eventName), number_(number), v_(iv), iv_(iv) {
+    : n_(eventName),
+      number_(number),
+      v_(iv),
+      iv_(iv) {
     if (!eventName.empty() && check_name) {
         string msg;
         if (!Str::valid_name(eventName, msg)) {
@@ -225,7 +228,11 @@ bool Event::isValidState(const std::string& state) {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Meter::Meter(const std::string& name, int min, int max, int colorChange, int value, bool check)
-    : min_(min), max_(max), v_(value), cc_(colorChange), n_(name) {
+    : min_(min),
+      max_(max),
+      v_(value),
+      cc_(colorChange),
+      n_(name) {
     if (check) {
         if (!Str::valid_name(name)) {
             throw std::runtime_error("Meter::Meter: Invalid Meter name: " + name);
@@ -327,7 +334,10 @@ std::string Meter::dump() const {
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 Label::Label(const std::string& name, const std::string& value, const std::string& new_value, bool check_name)
-    : n_(name), v_(value), new_v_(new_value), state_change_no_(0) {
+    : n_(name),
+      v_(value),
+      new_v_(new_value),
+      state_change_no_(0) {
     if (check_name && !Str::valid_name(n_)) {
         throw std::runtime_error("Label::Label: Invalid Label name :" + n_);
     }

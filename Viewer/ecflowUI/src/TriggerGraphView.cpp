@@ -98,7 +98,9 @@ private:
 //=============================================================
 
 TriggerGraphNodeItem::TriggerGraphNodeItem(int index, VItem* item, TriggerGraphView* view)
-    : index_(index), item_(item), view_(view) {
+    : index_(index),
+      item_(item),
+      view_(view) {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setZValue(10.);
 }
@@ -210,7 +212,9 @@ TriggerGraphEdgeItem::TriggerGraphEdgeItem(TriggerGraphNodeItem* from,
                                            TriggerCollector::Mode mode,
                                            VItem* trigger,
                                            TriggerGraphView* view)
-    : from_(from), to_(to), view_(view) {
+    : from_(from),
+      to_(to),
+      view_(view) {
     triggers_.push_back(trigger);
     modes_.push_back(mode);
     throughs_.push_back(through);

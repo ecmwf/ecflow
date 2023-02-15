@@ -23,7 +23,9 @@ namespace ecf {
 class AssertTimer {
 public:
     explicit AssertTimer(int t, bool doAssert = true)
-        : timeConstraint_(t), doAssert_(doAssert), start_time_(Calendar::second_clock_time()) {}
+        : timeConstraint_(t),
+          doAssert_(doAssert),
+          start_time_(Calendar::second_clock_time()) {}
     ~AssertTimer();
 
     int timeConstraint() const { return timeConstraint_; }

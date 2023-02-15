@@ -39,7 +39,8 @@
 class VariableParser : public Parser {
 public:
     explicit VariableParser(DefsStructureParser* p, bool parsing_defs = false)
-        : Parser(p), parsing_defs_(parsing_defs) {}
+        : Parser(p),
+          parsing_defs_(parsing_defs) {}
     const char* keyword() const override { return "edit"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 

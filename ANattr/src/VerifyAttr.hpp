@@ -24,7 +24,10 @@
 class VerifyAttr {
 public:
     VerifyAttr(NState::State state, int expected, int actual = 0)
-        : state_(state), expected_(expected), actual_(actual), state_change_no_(0) {}
+        : state_(state),
+          expected_(expected),
+          actual_(actual),
+          state_change_no_(0) {}
     VerifyAttr() = default;
 
     bool operator==(const VerifyAttr& rhs) const;

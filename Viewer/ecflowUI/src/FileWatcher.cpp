@@ -11,7 +11,8 @@
 #include "FileWatcher.hpp"
 
 FileWatcher::FileWatcher(const std::string& filePath, qint64 offset, QObject* parent)
-    : QFileSystemWatcher(parent), offset_(offset) {
+    : QFileSystemWatcher(parent),
+      offset_(offset) {
     connect(this, SIGNAL(fileChanged(QString)), this, SLOT(slotChanged(QString)));
 
     file_.setFileName(QString::fromStdString(filePath));

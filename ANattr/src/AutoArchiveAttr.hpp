@@ -29,9 +29,13 @@ class AutoArchiveAttr {
 public:
     AutoArchiveAttr() = default;
     AutoArchiveAttr(int hour, int minute, bool relative, bool idle = false)
-        : time_(hour, minute), relative_(relative), idle_(idle) {}
+        : time_(hour, minute),
+          relative_(relative),
+          idle_(idle) {}
     AutoArchiveAttr(const TimeSlot& ts, bool relative, bool idle = false)
-        : time_(ts), relative_(relative), idle_(idle) {}
+        : time_(ts),
+          relative_(relative),
+          idle_(idle) {}
     AutoArchiveAttr(int days, bool idle = false) : time_(TimeSlot(days * 24, 0)), days_(true), idle_(idle) {}
 
     void print(std::string&) const;

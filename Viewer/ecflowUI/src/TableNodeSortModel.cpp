@@ -15,7 +15,9 @@
 #include "TableNodeModel.hpp"
 
 TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel, QObject* parent)
-    : QSortFilterProxyModel(parent), nodeModel_(nodeModel), skipSort_(false) {
+    : QSortFilterProxyModel(parent),
+      nodeModel_(nodeModel),
+      skipSort_(false) {
     Q_ASSERT(nodeModel_);
     connect(nodeModel_, SIGNAL(skipSortingBegin()), this, SLOT(skipSortingBegin()));
     connect(nodeModel_, SIGNAL(skipSortingEnd()), this, SLOT(skipSortingEnd()));

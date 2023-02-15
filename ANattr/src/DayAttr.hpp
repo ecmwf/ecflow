@@ -35,7 +35,8 @@ public:
     explicit DayAttr(Day_t day) : day_(day) {}
     explicit DayAttr(const std::string& str) : day_(DayAttr::getDay(str)) {}
     explicit DayAttr(const boost::gregorian::date& date)
-        : day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())), date_(date) {}
+        : day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())),
+          date_(date) {}
 
     void print(std::string&) const;
     bool operator==(const DayAttr& rhs) const;

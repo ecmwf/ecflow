@@ -100,7 +100,9 @@ EcfFile::EcfFile(Node* t,
                  const std::string& pathToEcfFileOrCommand,
                  EcfFile::Origin script_origin,
                  EcfFile::EcfFileSearchAlgorithm search_algo)
-    : node_(t), script_path_or_cmd_(pathToEcfFileOrCommand), script_origin_(script_origin),
+    : node_(t),
+      script_path_or_cmd_(pathToEcfFileOrCommand),
+      script_origin_(script_origin),
       ecf_file_search_algorithm_(search_algo) {
     node_->findParentUserVariableValue(Str::ECF_MICRO(), ecfMicroCache_);
     if (ecfMicroCache_.empty() || ecfMicroCache_.size() != 1) {
@@ -1385,7 +1387,10 @@ const std::string& EcfFile::get_extn() const {
 // =======================================================================================
 
 PreProcessor::PreProcessor(EcfFile* ecfile, const char* error_context)
-    : ecfile_(ecfile), error_context_(error_context), ecf_micro_(ecfile->ecfMicroCache_), jobLines_(ecfile->jobLines_) {
+    : ecfile_(ecfile),
+      error_context_(error_context),
+      ecf_micro_(ecfile->ecfMicroCache_),
+      jobLines_(ecfile->jobLines_) {
     pp_nopp_ = ecf_micro_;
     pp_nopp_ += T_NOOP;
     pp_comment_ = ecf_micro_;
@@ -1829,7 +1834,9 @@ bool EcfFile::file_exists(const std::string& ecf_include) const {
 // **********************************************************************************
 
 IncludeFileCache::IncludeFileCache(const std::string& path)
-    : path_(path), fp_(path.c_str(), std::ios_base::in), no_of_lines_(0) {
+    : path_(path),
+      fp_(path.c_str(), std::ios_base::in),
+      no_of_lines_(0) {
 }
 
 IncludeFileCache::~IncludeFileCache() {

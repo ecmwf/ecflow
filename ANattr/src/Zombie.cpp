@@ -40,9 +40,16 @@ Zombie::Zombie(ecf::Child::ZombieType zombie_type,
                int try_no,
                const std::string& host,
                const std::string& user_cmd)
-    : try_no_(try_no), zombie_type_(zombie_type), last_child_cmd_(cmd), path_to_task_(pathToTask),
-      jobs_password_(jobsPassword), process_or_remote_id_(process_or_remote_id), user_cmd_(user_cmd), host_(host),
-      attr_(attr), creation_time_(Calendar::second_clock_time()) {
+    : try_no_(try_no),
+      zombie_type_(zombie_type),
+      last_child_cmd_(cmd),
+      path_to_task_(pathToTask),
+      jobs_password_(jobsPassword),
+      process_or_remote_id_(process_or_remote_id),
+      user_cmd_(user_cmd),
+      host_(host),
+      attr_(attr),
+      creation_time_(Calendar::second_clock_time()) {
 }
 
 Zombie::Zombie() = default;

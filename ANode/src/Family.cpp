@@ -192,7 +192,9 @@ std::string Family::find_node_path(const std::string& type, const std::string& n
 // ================================================================
 
 FamGenVariables::FamGenVariables(const Family* f)
-    : family_(f), genvar_family_("FAMILY", "", false), genvar_family1_("FAMILY1", "", false) {
+    : family_(f),
+      genvar_family_("FAMILY", "", false),
+      genvar_family1_("FAMILY1", "", false) {
 }
 
 void FamGenVariables::update_generated_variables() const {

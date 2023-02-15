@@ -29,7 +29,10 @@ ClientSuites::ClientSuites(Defs* defs,
                            bool auto_add_new_suites,
                            const std::vector<std::string>& suites,
                            const std::string& user)
-    : defs_(defs), user_(user), handle_(handle), auto_add_new_suites_(auto_add_new_suites) {
+    : defs_(defs),
+      user_(user),
+      handle_(handle),
+      auto_add_new_suites_(auto_add_new_suites) {
     for (const std::string& s : suites) {
         add_suite(s);
     }

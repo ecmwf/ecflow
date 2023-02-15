@@ -29,7 +29,10 @@ static QList<AttributeEditor*> editors;
 #endif
 
 AttributeEditor::AttributeEditor(VInfo_ptr info, QString type, QWidget* parent)
-    : QDialog(parent), info_(info), form_(nullptr), type_(type) {
+    : QDialog(parent),
+      info_(info),
+      form_(nullptr),
+      type_(type) {
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
 

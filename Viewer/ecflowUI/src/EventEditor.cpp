@@ -36,7 +36,9 @@ EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent) {
 }
 
 EventEditor::EventEditor(VInfo_ptr info, QWidget* parent)
-    : AttributeEditor(info, "event", parent), model_(nullptr), scanned_(false) {
+    : AttributeEditor(info, "event", parent),
+      model_(nullptr),
+      scanned_(false) {
     w_ = new EventEditorWidget(this);
     addForm(w_);
 

@@ -24,8 +24,14 @@
 #include "ViewerUtil.hpp"
 
 VProperty::VProperty(const std::string& name)
-    : strName_(name), name_(QString::fromStdString(name)), parent_(nullptr), master_(nullptr), useMaster_(false),
-      type_(StringType), guiType_(StringGui), link_(nullptr) {
+    : strName_(name),
+      name_(QString::fromStdString(name)),
+      parent_(nullptr),
+      master_(nullptr),
+      useMaster_(false),
+      type_(StringType),
+      guiType_(StringGui),
+      link_(nullptr) {
 }
 
 VProperty::~VProperty() {

@@ -225,7 +225,9 @@ QModelIndex TimelineInfoModel::parent(const QModelIndex& /*child*/) const {
 bool TimelineInfoWidget::columnsAdjusted_ = false;
 
 TimelineInfoWidget::TimelineInfoWidget(QWidget* /*parent*/)
-    : ui_(new Ui::TimelineInfoWidget), numOfRows_(0), tlEndTime_(0) {
+    : ui_(new Ui::TimelineInfoWidget),
+      numOfRows_(0),
+      tlEndTime_(0) {
     ui_->setupUi(this);
 
     // title

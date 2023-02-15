@@ -54,7 +54,11 @@ public:
 
     LogRequestItem() : global_(false), type_(OtherCmd), counter_(0) {}
     LogRequestItem(const std::string& name, Type type, const std::string& pattern, bool global = false)
-        : global_(global), name_(name), type_(type), pattern_(pattern), counter_(0) {}
+        : global_(global),
+          name_(name),
+          type_(type),
+          pattern_(pattern),
+          counter_(0) {}
 
     const LogLoadStatItem& periodStat() const { return periodStat_; }
     void computeStat(size_t startIndex, size_t endIndex);

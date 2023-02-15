@@ -28,7 +28,9 @@ using namespace boost;
 namespace po = boost::program_options;
 
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force)
-    : createNodesAsNeeded_(createNodesAsNeeded), force_(force), pathToNode_(node_path) {
+    : createNodesAsNeeded_(createNodesAsNeeded),
+      force_(force),
+      pathToNode_(node_path) {
     if (!client_defs.get()) {
         throw std::runtime_error("ReplaceNodeCmd::ReplaceNodeCmd: client definition is empty");
     }
@@ -59,7 +61,10 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
                                bool createNodesAsNeeded,
                                const std::string& path_to_defs,
                                bool force)
-    : createNodesAsNeeded_(createNodesAsNeeded), force_(force), pathToNode_(node_path), path_to_defs_(path_to_defs) {
+    : createNodesAsNeeded_(createNodesAsNeeded),
+      force_(force),
+      pathToNode_(node_path),
+      path_to_defs_(path_to_defs) {
     // Parse the file and load the defs file into memory.
     std::string errMsg, warningMsg;
     defs_ptr client_defs = Defs::create();

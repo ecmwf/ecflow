@@ -43,7 +43,8 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
                          bool print,
                          bool stats,
                          const std::vector<std::pair<std::string, std::string>>& client_env)
-    : force_(force), defs_filename_(defs_filename) {
+    : force_(force),
+      defs_filename_(defs_filename) {
     if (defs_filename_.empty()) {
         std::stringstream ss;
         ss << "LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n" << LoadDefsCmd::desc();

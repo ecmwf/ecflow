@@ -15,7 +15,11 @@
 #include "Zombie.hpp"
 
 VTask::VTask(Type t, VTaskObserver* obs)
-    : type_(t), status_(NOSTATUS), targetPath_("/"), node_(nullptr), reply_(nullptr) {
+    : type_(t),
+      status_(NOSTATUS),
+      targetPath_("/"),
+      node_(nullptr),
+      reply_(nullptr) {
     if (obs)
         observers_.push_back(obs);
     reply_ = new VReply();

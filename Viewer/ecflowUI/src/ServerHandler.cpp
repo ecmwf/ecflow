@@ -59,10 +59,22 @@ ServerHandler::ServerHandler(const std::string& name,
                              const std::string& port,
                              const std::string& user,
                              bool ssl)
-    : name_(name), host_(host), port_(port), user_(user), ssl_(ssl), client_(nullptr), updating_(false),
-      communicating_(false), vRoot_(nullptr), suiteFilter_(new SuiteFilter()), comQueue_(nullptr),
-      activity_(NoActivity), compatibility_(CanBeCompatible), // not yet known!
-      connectState_(new ConnectState()), prevServerState_(SState::RUNNING), conf_(nullptr) {
+    : name_(name),
+      host_(host),
+      port_(port),
+      user_(user),
+      ssl_(ssl),
+      client_(nullptr),
+      updating_(false),
+      communicating_(false),
+      vRoot_(nullptr),
+      suiteFilter_(new SuiteFilter()),
+      comQueue_(nullptr),
+      activity_(NoActivity),
+      compatibility_(CanBeCompatible), // not yet known!
+      connectState_(new ConnectState()),
+      prevServerState_(SState::RUNNING),
+      conf_(nullptr) {
     if (localHostName_.empty()) {
         localHostName_ = boost::asio::ip::host_name();
     }

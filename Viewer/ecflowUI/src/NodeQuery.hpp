@@ -30,7 +30,9 @@ class NodeQueryAttrGroup {
 
 public:
     NodeQueryAttrGroup(QString name, QList<VAttributeType*> types, QList<NodeQueryOption*> options)
-        : name_(name), types_(types), options_(options) {}
+        : name_(name),
+          types_(types),
+          options_(options) {}
 
     QString name() const { return name_; }
     virtual bool hasType(VAttributeType* t) const { return types_.contains(t); }

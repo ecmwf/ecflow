@@ -37,8 +37,13 @@ using namespace ecf;
 
 //-------------------------------------------------------------------------------------
 CheckPtSaver::CheckPtSaver(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment* serverEnv)
-    : server_(s), timer_(io, boost::posix_time::seconds(0)), firstTime_(true), running_(false), serverEnv_(serverEnv),
-      state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) {
+    : server_(s),
+      timer_(io, boost::posix_time::seconds(0)),
+      firstTime_(true),
+      running_(false),
+      serverEnv_(serverEnv),
+      state_change_no_(Ecf::state_change_no()),
+      modify_change_no_(Ecf::modify_change_no()) {
 #ifdef DEBUG_CHECKPT
     std::cout << "      CheckPtSaver::CheckPtSaver period = " << serverEnv_->checkPtInterval() << "\n";
 #endif

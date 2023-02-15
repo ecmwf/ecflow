@@ -19,7 +19,10 @@
 InfoPanelHandler* InfoPanelHandler::instance_ = nullptr;
 
 InfoPanelDef::InfoPanelDef(const std::string& name)
-    : name_(name), hidden_(false), visibleCondition_(nullptr), enabledCondition_(nullptr) {
+    : name_(name),
+      hidden_(false),
+      visibleCondition_(nullptr),
+      enabledCondition_(nullptr) {
 }
 
 InfoPanelHandler::InfoPanelHandler() = default;

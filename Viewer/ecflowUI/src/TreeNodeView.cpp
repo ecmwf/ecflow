@@ -43,8 +43,15 @@
 #define _UI_TREENODEVIEW_DEBUG
 
 TreeNodeView::TreeNodeView(AbstractNodeView* view, TreeNodeModel* model, NodeFilterDef* filterDef, QWidget* parent)
-    : QObject(parent), NodeViewBase(filterDef), view_(view), model_(model), needItemsLayout_(false), prop_(nullptr),
-      setCurrentIsRunning_(false), setCurrentFromExpandIsRunning_(false), canRegainCurrentFromExpand_(true),
+    : QObject(parent),
+      NodeViewBase(filterDef),
+      view_(view),
+      model_(model),
+      needItemsLayout_(false),
+      prop_(nullptr),
+      setCurrentIsRunning_(false),
+      setCurrentFromExpandIsRunning_(false),
+      canRegainCurrentFromExpand_(true),
       inStartUp_(true) {
     Q_ASSERT(view_);
 

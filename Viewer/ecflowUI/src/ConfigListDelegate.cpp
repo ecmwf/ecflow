@@ -23,7 +23,11 @@
 //========================================================
 
 ConfigListDelegate::ConfigListDelegate(int iconSize, int maxWidth, QWidget* parent)
-    : QStyledItemDelegate(parent), iconSize_(iconSize), maxTextWidth_(maxWidth), margin_(2), gap_(5) {
+    : QStyledItemDelegate(parent),
+      iconSize_(iconSize),
+      maxTextWidth_(maxWidth),
+      margin_(2),
+      gap_(5) {
 }
 
 void ConfigListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {

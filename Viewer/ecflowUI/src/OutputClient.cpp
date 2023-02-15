@@ -16,7 +16,12 @@
 #include "UiLog.hpp"
 
 OutputClient::OutputClient(const std::string& host, const std::string& portStr, QObject* parent)
-    : QObject(parent), soc_(nullptr), host_(host), portStr_(portStr), port_(19999), timeout_(3000) {
+    : QObject(parent),
+      soc_(nullptr),
+      host_(host),
+      portStr_(portStr),
+      port_(19999),
+      timeout_(3000) {
     if (!portStr_.empty())
         port_ = atoi(portStr.c_str());
 

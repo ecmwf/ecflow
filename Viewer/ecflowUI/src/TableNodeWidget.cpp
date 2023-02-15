@@ -27,7 +27,9 @@
 #include "WidgetNameProvider.hpp"
 
 TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter, bool interactive, QWidget* parent)
-    : NodeWidget("table", serverFilter, parent), sortModel_(nullptr), acAutoScroll_(nullptr) {
+    : NodeWidget("table", serverFilter, parent),
+      sortModel_(nullptr),
+      acAutoScroll_(nullptr) {
     // Init qt-creator form
     setupUi(this);
 

@@ -139,7 +139,8 @@ void ServerDialogChecker::error(QString msg) {
 //======================================
 
 ServerAddDialog::ServerAddDialog(QWidget* parent)
-    : QDialog(parent), ServerDialogChecker(tr("Cannot create new server!")) {
+    : QDialog(parent),
+      ServerDialogChecker(tr("Cannot create new server!")) {
     setupUi(this);
 
     // nameEdit->setText();
@@ -218,7 +219,9 @@ ServerEditDialog::ServerEditDialog(QString name,
                                    bool favourite,
                                    bool ssl,
                                    QWidget* parent)
-    : QDialog(parent), ServerDialogChecker(tr("Cannot modify server!")), oriName_(name) {
+    : QDialog(parent),
+      ServerDialogChecker(tr("Cannot modify server!")),
+      oriName_(name) {
     setupUi(this);
 
     nameEdit->setText(name);
@@ -294,7 +297,9 @@ bool ServerEditDialog::isSsl() const {
 //======================================
 
 ServerListDialog::ServerListDialog(Mode mode, ServerFilter* filter, QWidget* parent)
-    : QDialog(parent), filter_(filter), mode_(mode) {
+    : QDialog(parent),
+      filter_(filter),
+      mode_(mode) {
     setupUi(this);
 
     QString wt = windowTitle();

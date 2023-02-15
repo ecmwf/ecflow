@@ -16,7 +16,8 @@
 #include "ServerEnvironment.hpp"
 
 SslServer::SslServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : BaseServer(io_service, serverEnv), server_(this, io_service, serverEnv) {
+    : BaseServer(io_service, serverEnv),
+      server_(this, io_service, serverEnv) {
 }
 
 const std::string& SslServer::ssl() const {

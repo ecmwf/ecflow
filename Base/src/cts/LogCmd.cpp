@@ -38,7 +38,9 @@ LogCmd::LogCmd() : get_last_n_lines_(Log::get_last_n_lines_default()) {
 }
 
 LogCmd::LogCmd(const std::string& path)
-    : api_(NEW), get_last_n_lines_(Log::get_last_n_lines_default()), new_path_(path) {
+    : api_(NEW),
+      get_last_n_lines_(Log::get_last_n_lines_default()),
+      new_path_(path) {
     // ECFLOW-154, If path to new log file is specified, it should only be checked by the server,
     //             as that could be on a different machine.
     // ECFLOW-174, Never get the full log, as this can make server consume to much memory

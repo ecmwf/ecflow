@@ -41,12 +41,15 @@ using namespace boost::posix_time;
 // ************************************************************************
 
 NodeTreeTraverser::NodeTreeTraverser(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment& serverEnv)
-    : server_(s), serverEnv_(serverEnv), timer_(io, boost::posix_time::seconds(0)),
+    : server_(s),
+      serverEnv_(serverEnv),
+      timer_(io, boost::posix_time::seconds(0)),
       interval_(0, 0, serverEnv_.submitJobsInterval(), 0),
 #ifdef DEBUG_TRAVERSER
       count_(0),
 #endif
-      firstTime_(true), running_(false) {
+      firstTime_(true),
+      running_(false) {
 #ifdef DEBUG_TRAVERSER
     std::cout << "NodeTreeTraverser::NodeTreeTraverser period = " << serverEnv_.submitJobsInterval() << "\n";
 #endif

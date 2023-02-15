@@ -18,7 +18,9 @@
 #include "VSettings.hpp"
 
 CustomCommand::CustomCommand(const std::string& name, const std::string& command, bool context)
-    : name_(name), command_(command), inContextMenu_(context) {
+    : name_(name),
+      command_(command),
+      inContextMenu_(context) {
 }
 
 void CustomCommand::set(const std::string& name, const std::string& command, bool context) {

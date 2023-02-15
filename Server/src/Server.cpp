@@ -14,5 +14,6 @@
 #include "Server.hpp"
 
 Server::Server(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : BaseServer(io_service, serverEnv), tcp_server_(this, io_service, serverEnv) {
+    : BaseServer(io_service, serverEnv),
+      tcp_server_(this, io_service, serverEnv) {
 }

@@ -37,7 +37,12 @@ struct Token
           const std::string& description_,
           const std::chrono::system_clock::time_point& expires_,
           const std::chrono::system_clock::time_point& revoked_)
-        : hash(hash_), salt(salt_), method(method_), description(description_), expires(expires_), revoked(revoked_) {}
+        : hash(hash_),
+          salt(salt_),
+          method(method_),
+          description(description_),
+          expires(expires_),
+          revoked(revoked_) {}
 };
 
 class TokenStorage {

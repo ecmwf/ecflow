@@ -56,7 +56,10 @@ class QLabel;
 struct LogLoadRequestModelDataItem
 {
     LogLoadRequestModelDataItem(QString name, float percentage, bool checked, int rank)
-        : name_(name), percentage_(percentage), checked_(checked), rank_(rank) {}
+        : name_(name),
+          percentage_(percentage),
+          checked_(checked),
+          rank_(rank) {}
 
     QString name_;
     float percentage_;
@@ -68,7 +71,10 @@ struct LogLoadRequestModelDataItem
 struct LogLoadSuiteModelDataItem
 {
     LogLoadSuiteModelDataItem(QString suiteName, float percentage, bool checked, int rank)
-        : suiteName_(suiteName), percentage_(percentage), checked_(checked), rank_(rank) {}
+        : suiteName_(suiteName),
+          percentage_(percentage),
+          checked_(checked),
+          rank_(rank) {}
 
     QString suiteName_;
     float percentage_;

@@ -1811,7 +1811,9 @@ AlterCmd::AlterCmd(const std::vector<std::string>& paths,
                    const std::string& attrType,
                    const std::string& name,
                    const std::string& value)
-    : paths_(paths), name_(name), value_(value) {
+    : paths_(paths),
+      name_(name),
+      value_(value) {
     if (alterType == "add") {
 
         add_attr_type_ = get_add_attr_type(attrType);

@@ -41,8 +41,14 @@ namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
 SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
-    : defs_filename_(defs_filename), foundTasks_(false), foundCrons_(false), foundTime_(false),
-      hasTimeDependencies_(false), has_end_clock_(false), max_sim_duration_(hours(24)), max_suite_duration_(hours(24)),
+    : defs_filename_(defs_filename),
+      foundTasks_(false),
+      foundCrons_(false),
+      foundTime_(false),
+      hasTimeDependencies_(false),
+      has_end_clock_(false),
+      max_sim_duration_(hours(24)),
+      max_suite_duration_(hours(24)),
       ci_(hours(1)) {
 }
 

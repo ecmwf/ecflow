@@ -420,7 +420,8 @@ void NodeFilter::clearForceShowNode() {
 //============================================
 
 TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def, ServerHandler* server, VTree* tree)
-    : NodeFilter(def, server), tree_(tree) {
+    : NodeFilter(def, server),
+      tree_(tree) {
 }
 
 void TreeNodeFilter::clear() {
