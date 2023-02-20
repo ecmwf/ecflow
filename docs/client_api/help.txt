@@ -2,9 +2,9 @@
 Ecflow client commands:
 
   abort                   child  Mark task as aborted. For use in the '.ecf' script file *only*
-  add                     user   add variables i.e name=value name1=value1
+  add                     user   add variables i.e. name=value name1=value1
   alter                   user   Alter the node according to the options.
-  archive                 user   Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).
+  archive                 user   Archives suite or family nodes *IF* they have child nodes (otherwise does nothing).
   begin                   user   Begin playing the definition in the server.
   ch_add                  user   Add a set of suites, to an existing handle.
   ch_auto_add             user   Change an existing handle so that new suites can be added automatically.
@@ -20,7 +20,7 @@ Ecflow client commands:
   debug                   user   Dump out client environment settings for debug
   debug_server_off        user   Disables debug output from the server
   debug_server_on         user   Enables debug output from the server
-  delete                  user   Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.
+  delete                  user   Deletes the specified node(s) or _ALL_ existing definitions( i.e. delete all suites) in the server.
   edit_history            user   Returns the edit history associated with a Node.
   edit_script             user   Allows user to edit, pre-process and submit the script.
   event                   child  Change event. For use in the '.ecf' script file *only*
@@ -34,7 +34,7 @@ Ecflow client commands:
   halt                    user   Stop server communication with jobs, and new job scheduling.
   help                    user   Produce help message
   host                    user   host: If specified will override the environment variable ECF_HOST and default host, localhost
-  init                    child  Mark task as started(active). For use in the '.ecf' script file *only*
+  init                    child  Mark task as started (active). For use in the '.ecf' script file *only*
   job_gen                 user   Job submission for chosen Node *based* on dependencies.
   kill                    user   Kills the job associated with the node.
   label                   child  Change Label. For use in the '.ecf' script file *only*
@@ -53,12 +53,12 @@ Ecflow client commands:
   reloadcustompasswdfile  user   Reload the server custom password file. For those user's who don't use login name
   reloadpasswdfile        user   Reload the server password file. To be used when ALL users have a password
   reloadwsfile            user   Reload the white list file.
-  remove                  user   remove variables i.e name name2
+  remove                  user   remove variables i.e. name name2
   replace                 user   Replaces a node in the server, with the given path
   requeue                 user   Re queues the specified node(s)
   restart                 user   Start job scheduling, communication with jobs, and respond to all requests.
   restore                 user   Manually restore archived nodes.
-  restore_from_checkpt    user   Ask the server to load the definition from an check pt file.
+  restore_from_checkpt    user   Ask the server to load the definition from a check pt file.
   resume                  user   Resume the given node. This allows job generation for the given node, or any child node.
   rid                     user   rid: If specified will override the environment variable ECF_RID, Can only be used for child commands
   run                     user   Ignore triggers, limits, time or date dependencies, just run the Task.

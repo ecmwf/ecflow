@@ -53,7 +53,7 @@ Some pages about some specific details about the CLI can be find here:
         
     * - :ref:`archive_cli` 
       - :term:`user command`
-      - Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).                
+      - Archives suite or family nodes *IF* they have child nodes (otherwise does nothing).
         
     * - :ref:`begin_cli` 
       - :term:`user command`
@@ -173,7 +173,7 @@ Some pages about some specific details about the CLI can be find here:
         
     * - :ref:`init_cli` 
       - :term:`child command`
-      - Mark task as started(active). For use in the '.ecf' script file *only*                
+      - Mark task as started (active). For use in the '.ecf' script file *only*
         
     * - :ref:`job_gen_cli` 
       - :term:`user command`

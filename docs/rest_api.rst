@@ -422,7 +422,7 @@ The API has following endpoints.
      - POST
      - Create a new node attribute
      - {"type":"...","name":"...","value":"..."}
-     - {"message": "Attribute added succesfully"}
+     - {"message": "Attribute added successfully"}
    * - 12
      - /v1/suites/{node_path}/attributes
      - GET
@@ -440,7 +440,7 @@ The API has following endpoints.
      - DELETE
      - Delete node attribute
      - {"type":"..","name":"..."}
-     - {"message":""Attribute deleted succesfully"}
+     - {"message":""Attribute deleted successfully"}
    * - 15
      - /v1/suites/{node_path}/script
      - GET
@@ -749,7 +749,7 @@ To run swagger ui in a container, use the following Containerfile:
 Implementation Details
 ----------------------
 
-Bsaically the API is a wrapper that transforms requests in web-syntax to
+Basically the API is a wrapper that transforms requests in web-syntax to
 ecflow syntax, and similarly transforming the results from plain-text to
 valid json.
 
@@ -822,7 +822,7 @@ HTTP server and deals with all the HTTP specific things. The latter
 (ApiV1Impl) contains all business logic: contacting ecflow server and
 formulating requests/responses.
 
-Compiled succesfully with following compilers (CMAKE_BUILD_TYPE=Debug):
+Compiled successfully with following compilers (CMAKE_BUILD_TYPE=Debug):
 
 -  gnu
 

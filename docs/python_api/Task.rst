@@ -12,7 +12,7 @@ Creates a :term:`task` :term:`node`. Task is a child of a :py:class:`ecflow.Suit
 Multiple Tasks can be added, however the task names must be unique for a given parent.
 Note case is significant. Only Tasks can be submitted. A job inside a Task :term:`ecf script` (i.e .ecf file)
 should generally be re-entrant since a Task may be automatically submitted more than once if it aborts.
-There are serveral ways of adding a task, see examples below
+There are several ways of adding a task, see examples below
 
 Constructor::
 

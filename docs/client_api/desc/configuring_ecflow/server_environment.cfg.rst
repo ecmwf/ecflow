@@ -144,7 +144,7 @@ The example below shows some of the default variables you can configure.
     
     #  ******************************************************************
     #  * define variables used for url command.
-    #  * Provides DEFAULT can be overriden by user variables
+    #  * Provides DEFAULT can be overridden by user variables
     #  ******************************************************************
     ECF_URL_CMD    = ${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%
     ECF_URL_BASE   = https://confluence.ecmwf.int
