@@ -178,7 +178,7 @@ contain any information in itself. REST API does not support JWT's.
 
 To authenticate the token, the API needs to have a local database of
 valid tokens. Currently the only supported database backend is file in
-json format. The API will search the token from current working diretory
+json format. The API will search the token from current working directory
 with name "api-tokens.json". Location can be changed with environment
 variable ``ECF_API_TOKEN_FILE``. The API will automatically check the file
 for changes every 20 seconds.

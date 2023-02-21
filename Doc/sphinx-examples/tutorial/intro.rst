@@ -29,4 +29,4 @@ to define suites to the ecFlow server. See :ref:`python_api`.
 
    The following tutorial will show examples in plain text and python.
    Although plain text is fine for simple suites, it is recommended that you use python.
-   Later tutorial examples use conditional statements availble through the python interface like 'if' and looping constructs.
+   Later tutorial examples use conditional statements available through the python interface like 'if' and looping constructs.
