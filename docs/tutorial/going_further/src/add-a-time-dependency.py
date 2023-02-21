@@ -27,7 +27,7 @@ def create_family_f2():
         Task(
             "t3", Date("1.*.*"), Time("12:00")
         ),  # Date(day,month,year) - * means every day,month,year
-        Task("t4", Time("+00:02")),  # + means realative to suite begin/requeue time
+        Task("t4", Time("+00:02")),  # + means relative to suite begin/requeue time
         Task("t5", Time("00:02")),
     )  # 2 minutes past midnight
 

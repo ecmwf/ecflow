@@ -26,7 +26,7 @@ import ecflow
 
 def delete_variables_affecting_job_generation(node):
     """delete customer related ECF variables, these will point to directories
-    that don't exist. Its ok we will regenerate our own local ones"""
+    that don't exist. It is ok we will regenerate our own local ones"""
     var = node.find_variable("ECF_HOME")
     if not var.empty():
         node.delete_variable("ECF_HOME")

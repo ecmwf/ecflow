@@ -858,7 +858,7 @@
       This is similar to %VAR% but if VAR is not found in the :term:`suite definition` then 'replacement' is used.
       
    directives
-      Directives start with a % charater. This is referred to as :term:`ECF_MICRO` character.
+      Directives start with a % character. This is referred to as :term:`ECF_MICRO` character.
       
       The directives are used in two main context.
       
@@ -881,7 +881,7 @@
       
             port=%ECF_PORT       # error issued since '%' micro character are not paired.
          
-           However an uneven number of micro character are allowed, **If** the line begins with '#' comment charcter. 
+           However an uneven number of micro character are allowed, **If** the line begins with '#' comment character.
       
            ::
       

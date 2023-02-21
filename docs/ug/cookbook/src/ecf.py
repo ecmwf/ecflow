@@ -499,7 +499,7 @@ class Variables(Attribute):
     syntax """
     
     def _set_tvar(self, key, val):        
-        """ facilitate to load a ecflow suite to SMS, translating
+        """ facilitate to load an ecflow suite to SMS, translating
         variable names"""
         keyt, valt = translate(str(key), str(val))
         if self.data is None:

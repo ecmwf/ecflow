@@ -18,7 +18,7 @@ paradigm.
 
 .. code-block:: python
 
-    defs = ecflow.Defs()  # create a empy defs
+    defs = ecflow.Defs()  # create a empty defs
     suite = defs.add_suite("s1")  # create a suite 's1' and add to defs
     task = suite.add_task("t1")  # create a task 't1' and add to suite
     task.add_trigger("t2 == active)")  # mismatched brackets

@@ -330,7 +330,7 @@ const char* DefsDoc::task_doc() {
            "Multiple Tasks can be added, however the task names must be unique for a given parent.\n"
            "Note case is significant. Only Tasks can be submitted. A job inside a Task `ecf script`_ (i.e .ecf file)\n"
            "should generally be re-entrant since a Task may be automatically submitted more than once if it aborts.\n"
-           "There are serveral ways of adding a task, see examples below\n"
+           "There are several ways of adding a task, see examples below\n"
            "\nConstructor::\n\n"
            "  Task(name, Attributes)\n"
            "     string name : The Task name.Name must consist of alpha numeric characters or\n"

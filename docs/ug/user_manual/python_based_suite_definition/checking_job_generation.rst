@@ -42,7 +42,7 @@ where the jobs are generated to a user-specified directory. i.e.
 '/tmp/ECF_NAME.job0'.
 
 .. code-block:: python
-   :caption: Generated jobs to a user specfied directory
+   :caption: Generated jobs to a user specified directory
 
    job_ctrl = ecflow.JobGenCtrl()
    job_ctrl.set_dir_for_job_generation("/tmp")  # generate jobs file under this directory

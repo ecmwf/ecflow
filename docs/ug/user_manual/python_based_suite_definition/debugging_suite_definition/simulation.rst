@@ -72,7 +72,7 @@ This python segment shows how to load a text-based suite
 definition(cron.def) and simulate it in python.
 
 .. code-block:: python
-   :caption: How to simulate a text based definitio
+   :caption: How to simulate a text based definition
 
    import ecflow
 

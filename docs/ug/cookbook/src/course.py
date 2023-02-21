@@ -116,7 +116,7 @@ class FallBack(GenericFamily):
 
 
 class DailyInc(GenericFamily):
-    """anopther method to have daily repeat increment, with aborted tasks"""
+    """another method to have daily repeat increment, with aborted tasks"""
 
     def main(self, node=None):
         return (
@@ -165,7 +165,7 @@ class Consume(GenericFamily):
                 _kind(1, 0),
                 _leaf("produce", self.init, self.stop, self.step),
             ),
-            # serialy produced, create a new task for each step ###
+            # serially produced, create a new task for each step ###
             Family("produce1")
             .add(
                 _kind(1, 0),
@@ -281,7 +281,7 @@ class Barber(GenericFamily):
         )
 
     def _client(self, node, position):
-        """python version of the family created initialy
+        """python version of the family created initially
         attention: raw definition file is located in passby task wrapper"""
         path = node.fullname() + "/limits"
         fam = (
