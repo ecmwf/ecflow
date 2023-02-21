@@ -810,7 +810,7 @@
 
      * ECF_HOME
       
-       Thirdly it searchs for the script in reverse order using ECF_HOME (i.e like ECF_FILES) 
+       Thirdly it searches for the script in reverse order using ECF_HOME (i.e like ECF_FILES)
            
       If this fails, than the :term:`task` is placed into the :term:`aborted` state.  
       We can check that file can be located before loading the suites into the server.
@@ -995,7 +995,7 @@
       This is a generated :term:`variable`. The default value is %.
       This variable is used in :term:`variable substitution` during command invocation and 
       default directive character during :term:`pre-processing`. 
-      It can be overriden, but must be replaced by a single character.
+      It can be overridden, but must be replaced by a single character.
       
    ECF_NAME
       This is a generated :term:`variable`. It defines the path name of the task.

@@ -129,9 +129,9 @@ A task should abort as close to the problem as possible:
   consumption threshold, a kill request from the server (kill -2),
   or a 'command line' kill from the (root) user.
 
-* loosing the traping capability is easy: 
+* loosing the trapping capability is easy: 
 
-  * traping inheritance between the main ksh script and ksh function
+  * trapping inheritance between the main ksh script and ksh function
     is system dependent. To maintain deterministic behaviour, do not
     hesitate to repeat trap setting::
   
@@ -236,7 +236,7 @@ locally and remotely. They are:
 
   * tune submission timeout according to submit user and remote destination,
 
-  * use a submition utility according to the remote system, or even
+  * use a submission utility according to the remote system, or even
     the way we want the job to be submitted there: nohup,
     standalone, rsh, ssh, ecrcmd
 
@@ -302,7 +302,7 @@ preprocessing directives (include, manual, end, nopp) in task wrappers.
 * micro may change trough the job thanks to the directive
   %ecf_micro::
 
-    %ecf_micro ^ # change micro to exponant character
+    %ecf_micro ^ # change micro to exponent character
     ^include "standalone_script.pl"
     ^ecf_micro % # revert back to original character
 
