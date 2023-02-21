@@ -46,7 +46,7 @@ Adding Repeats
    f6 = s1.add_family("f6")
    f6.add_repeat(
       RepeatDateList("YMD", [20130101, 20130102, 20130103])
-   )  # arbitary date list
+   )  # arbitrary date list
    add_tasks(f6)
 
 The following examples show alternative styles that produces the same definition:

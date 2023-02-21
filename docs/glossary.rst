@@ -65,7 +65,7 @@
          ecflow_client --load=<check_point_file> print check_only
       
    child command
-      Child commands (or task requests) are called from within the :term:`ecf script` files. The table also includes the default action(from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
+      Child commands (or task requests) are called from within the :term:`ecf script` files. The table also includes the default action (from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
 
       .. list-table:: 
          :header-rows: 1
@@ -305,7 +305,7 @@
       :term:`child command` causes a state change in the :term:`suite definition`.
       
    directives
-      Directives appear in a ecf script. (i.e. typically .ecf file, but could be .py file).Directives start with a % charater. This is referred to as :term:`ECF_MICRO` character.
+      Directives appear in a ecf script. (i.e. typically .ecf file, but could be .py file).Directives start with a % character. This is referred to as :term:`ECF_MICRO` character.
       
       The directives are used in two main context.
       
@@ -328,7 +328,7 @@
       
                port=%ECF_PORT       # error issued since '%' micro character are not paired.
          
-           However an uneven number of micro character are allowed, **If** the line begins with '#' comment charcter. 
+           However an uneven number of micro character are allowed, **If** the line begins with '#' comment character.
       
            .. code-block:: shell
       
@@ -446,7 +446,7 @@
       
       The differences, however, includes the addition of “C” like pre-processing :term:`directives` and ecFlow :term:`variable`\ s.
       Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
-      the :term:`ecflow_server` is aware when the job starts(i.e changes state to :term:`active`) and finishes (i.e changes state to :term:`complete`)
+      the :term:`ecflow_server` is aware when the job starts (i.e changes state to :term:`active`) and finishes (i.e changes state to :term:`complete`)
        
    ECF_DUMMY_TASK
       This is a user variable that can be added to :term:`task` to indicate that there is no
@@ -638,7 +638,7 @@
          endfamily
 
    ECF_OUT
-      This is user/suite variable that specifies a directory PATH. It controls the location of job output(stdout and stderr of the process) on a remote file system. It provides an alternate location for the job and cmd output files. If it exists, it is used as a base for :term:`ECF_JOBOUT`, but it is also used to search for the output by ecFlow, when asked by :term:`ecflow_ui`/:term:`ecflow_client`. If the output is in ECF_OUT/ECF_NAME.ECF_TRYNO  it is returned, otherwise ECF_HOME/ECF_NAME.ECF_TRYNO is used.
+      This is user/suite variable that specifies a directory PATH. It controls the location of job output (stdout and stderr of the process) on a remote file system. It provides an alternate location for the job and cmd output files. If it exists, it is used as a base for :term:`ECF_JOBOUT`, but it is also used to search for the output by ecFlow, when asked by :term:`ecflow_ui`/:term:`ecflow_client`. If the output is in ECF_OUT/ECF_NAME.ECF_TRYNO  it is returned, otherwise ECF_HOME/ECF_NAME.ECF_TRYNO is used.
 
       The user must ensure that all the directories exists, including :term:`suite`/:term:`family`. If this is not done, you may well find task remains stuck in a submitted state. At ECMWF our submission scripts will ensure that directories exists.
 

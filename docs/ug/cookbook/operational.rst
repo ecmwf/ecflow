@@ -71,11 +71,11 @@ logsvr.pl.
 
 * it is configured to deliver files under specific directories, 
 
-* configration variables are
+* configuration variables are
 
   * LOGPORT # 9316 
   * LOGPATH # <path1>:<path2>:<path3>
-  * LOGMAP  # mapping betwen requested path and real actual location
+  * LOGMAP  # mapping between requested path and real actual location
 
   As an example, with two possible storage destination:
 
@@ -343,7 +343,7 @@ preprocessing directives (include, manual, end, nopp) in task wrappers.
 
   .. code-block:: shell
 
-    %ecf_micro ^ # change micro to exponant character
+    %ecf_micro ^ # change micro to exponent character
     ^include "standalone_script.pl"
     ^ecf_micro % # revert back to original character
 

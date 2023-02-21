@@ -36,7 +36,7 @@ The table below shows the pre-processor symbols that ecFlow understands.  Notice
    * - %include filename
      - Include the contents of the file filename into the output. Notice that since the $CWD of ecFlow can be anywhere, the only form that can be safely used must start with a slash '/'.
    * - %includeonce filename
-     - nclude the contents of file filename into the output ONCE. if the filename is encountered again as **%includeonce**, then it is ignored. (Same three formats for filename as for plain **%include**)
+     - Include the contents of file filename into the output ONCE. if the filename is encountered again as **%includeonce**, then it is ignored. (Same three formats for filename as for plain **%include**)
    * - %includenopp filename
      - Same as %include, but the file is not interpreted at all. This allows you to test the filename separately with ease. (Same three formats for filename as for plain **%include**.)
    * - %comment

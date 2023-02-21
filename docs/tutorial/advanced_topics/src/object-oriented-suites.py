@@ -42,7 +42,7 @@ class BaseSuiteBuilder(object):
         if len(job_check_result) != 0:
             print("Job creation failed\n" + job_check_result)
 
-        # Check trigger expressions and limit references"
+        # Check trigger expressions and limit references
         print(self.defs.check())
 
         # Allows definition creation to be separated from the load

@@ -145,7 +145,7 @@ Let us modify the definition file to add a :term:`family` **f2**. For brevity we
                date 1.*.*              # Date(day,month,year) - * means every day,month,year
                time 12:00              # Time is not considered until date is free
          task t4
-               time +00:02.            # + means realative to suite begin/requeue time
+               time +00:02.            # + means relative to suite begin/requeue time
          task t5
                time 00:02              # 2 minutes past midnight
       endfamily
