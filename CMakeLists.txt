@@ -60,6 +60,7 @@ option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely linked" OFF  )
 option( ENABLE_HTTP                "Enable HTTP server (experimental)" ON  )
+option( ENABLE_UDP                 "Enable UDP server (experimental)" OFF )
 option( ENABLE_DOCS                "Enable Documentation" OFF )
 
 # =========================================================================================
@@ -362,6 +363,10 @@ endif()
 
 if (ENABLE_HTTP)
     add_subdirectory( Http )
+endif()
+
+if (ENABLE_UDP)
+  add_subdirectory( Udp )
 endif()
 
 # =========================================================================================

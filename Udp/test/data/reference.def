@@ -1,0 +1,21 @@
+ 
+#
+# The defs used to test ecflow_udp
+#
+
+suite s1
+  family f2
+    event event_at_f2
+    label label_at_f2 ""
+    meter meter_at_f2 0 100 80
+    family f3
+      event event_at_f3
+      label label_at_f3 ""
+      meter meter_at_f3 0 100 80
+      task t4
+        event event_at_t4
+        label label_at_t4 ""
+        meter meter_at_t4 0 100 80
+    endfamily
+  endfamily
+endsuite
