@@ -7,20 +7,18 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <cassert>
-#include <QMessageBox>
-
-
 #include "SessionDialog.hpp"
-#include "ui_SessionDialog.h"
+
+#include <cassert>
+
+#include <QMessageBox>
 
 #include "DirectoryHandler.hpp"
 #include "SessionRenameDialog.hpp"
+#include "ui_SessionDialog.h"
 
-
-SessionDialog::SessionDialog(QWidget *parent) : QDialog(parent)
-{
-    //ui->setupUi(this);
+SessionDialog::SessionDialog(QWidget* parent) : QDialog(parent) {
+    // ui->setupUi(this);
     setupUi(this);
 
     savedSessionsList_->setHeaderLabel("Sessions");
@@ -30,224 +28,198 @@ SessionDialog::SessionDialog(QWidget *parent) : QDialog(parent)
 
     // what was saved last time?
     std::string lastSessionName = SessionHandler::instance()->lastSessionName();
-    int index = SessionHandler::instance()->indexFromName(lastSessionName);
+    int index                   = SessionHandler::instance()->indexFromName(lastSessionName);
     if (index != -1)
-        savedSessionsList_->setCurrentItem(savedSessionsList_->topLevelItem(index));  // select this one in the table
-
+        savedSessionsList_->setCurrentItem(savedSessionsList_->topLevelItem(index)); // select this one in the table
 
     if (SessionHandler::instance()->loadLastSessionAtStartup())
         restoreLastSessionCb_->setCheckState(Qt::Checked);
     else
         restoreLastSessionCb_->setCheckState(Qt::Unchecked);
 
-
-    newButton_->setVisible(false);  // XXX TODO: enable New Session functionality
+    newButton_->setVisible(false); // XXX TODO: enable New Session functionality
 
     // ensure the correct state of the Save button
     on_sessionNameEdit__textChanged();
     setButtonsEnabledStatus();
 }
 
-SessionDialog::~SessionDialog()
-{
-	//delete ui;
+SessionDialog::~SessionDialog() {
+    // delete ui;
 }
 
-void SessionDialog::refreshListOfSavedSessions()
-{
+void SessionDialog::refreshListOfSavedSessions() {
 
-	//sessionsTable_->clearContents();
-	savedSessionsList_->clear();
+    // sessionsTable_->clearContents();
+    savedSessionsList_->clear();
 
-	// get the list of existing sessions
-	int numSessions = SessionHandler::instance()->numSessions();
-	for (int i = 0; i < numSessions; i++)
-	{
-		SessionItem *s = SessionHandler::instance()->sessionFromIndex(i);
-		addSessionToTable(s);
-	}
+    // get the list of existing sessions
+    int numSessions = SessionHandler::instance()->numSessions();
+    for (int i = 0; i < numSessions; i++) {
+        SessionItem* s = SessionHandler::instance()->sessionFromIndex(i);
+        addSessionToTable(s);
+    }
 }
 
-void SessionDialog::addSessionToTable(SessionItem *s)
-{
+void SessionDialog::addSessionToTable(SessionItem* s) {
     QStringList lst;
     lst << QString::fromStdString(s->name());
-    auto *item = new QTreeWidgetItem(lst);
+    auto* item = new QTreeWidgetItem(lst);
     savedSessionsList_->addTopLevelItem(item);
 }
 
-
-std::string SessionDialog::selectedSessionName()
-{
-    QTreeWidgetItem *ci = savedSessionsList_->currentItem();
-	if (ci)
+std::string SessionDialog::selectedSessionName() {
+    QTreeWidgetItem* ci = savedSessionsList_->currentItem();
+    if (ci)
         return ci->text(0).toStdString();
-	else
-		return "";
+    else
+        return "";
 }
-
-
 
 // ---------------------------------------------------------------------------------------------
 // setButtonsEnabledStatus
 // - checks which session has been chosen and enables/disables the action buttons appropriately
 // ---------------------------------------------------------------------------------------------
 
-void SessionDialog::setButtonsEnabledStatus()
-{
-	std::string name = selectedSessionName();
+void SessionDialog::setButtonsEnabledStatus() {
+    std::string name = selectedSessionName();
 
-	// if somehow no session is selected, then we need different logic
-	if (name.empty())
-	{
-		cloneButton_   ->setEnabled(false);
-		deleteButton_  ->setEnabled(false);
-		renameButton_  ->setEnabled(false);
-		switchToButton_->setEnabled(false);
-	}
-	else
-	{
-		// the default session is special and cannot be deleted or renamed
-		bool enable = (name == "default") ? false : true;
-		deleteButton_  ->setEnabled(enable);
-		renameButton_  ->setEnabled(enable);
-		switchToButton_->setEnabled(true);  // always available for a valid session
-		cloneButton_   ->setEnabled(true);
-	}
+    // if somehow no session is selected, then we need different logic
+    if (name.empty()) {
+        cloneButton_->setEnabled(false);
+        deleteButton_->setEnabled(false);
+        renameButton_->setEnabled(false);
+        switchToButton_->setEnabled(false);
+    }
+    else {
+        // the default session is special and cannot be deleted or renamed
+        bool enable = (name == "default") ? false : true;
+        deleteButton_->setEnabled(enable);
+        renameButton_->setEnabled(enable);
+        switchToButton_->setEnabled(true); // always available for a valid session
+        cloneButton_->setEnabled(true);
+    }
 }
 
-
-bool SessionDialog::validSaveName(const std::string &name)
-{
-/*
-	QString boxName(QObject::tr("Save session"));
-	// name empty?
-	if (name.empty())
-	{
-		QMessageBox::critical(0,boxName, tr("Please enter a name for the session"));
-		return false;
-	}
+bool SessionDialog::validSaveName(const std::string& name) {
+    /*
+            QString boxName(QObject::tr("Save session"));
+            // name empty?
+            if (name.empty())
+            {
+                    QMessageBox::critical(0,boxName, tr("Please enter a name for the session"));
+                    return false;
+            }
 
 
-	// is there already a session with this name?
-	bool sessionWithThisName = (SessionHandler::instance()->find(name) != NULL);
+            // is there already a session with this name?
+            bool sessionWithThisName = (SessionHandler::instance()->find(name) != NULL);
 
-	if (sessionWithThisName)
-	{
-		QMessageBox::critical(0,boxName, tr("A session with that name already exists - please choose another name"));
-		return false;
-	}
-	else
-	{
-		return true;
-	}*/
-	return true;
+            if (sessionWithThisName)
+            {
+                    QMessageBox::critical(0,boxName, tr("A session with that name already exists - please choose another
+       name")); return false;
+            }
+            else
+            {
+                    return true;
+            }*/
+    return true;
 }
 
-void SessionDialog::on_sessionNameEdit__textChanged()
-{
-	 // only allow to save a non-empty session name
-//	saveButton_->setEnabled(!sessionNameEdit_->text().isEmpty());
+void SessionDialog::on_sessionNameEdit__textChanged() {
+    // only allow to save a non-empty session name
+    //	saveButton_->setEnabled(!sessionNameEdit_->text().isEmpty());
 }
 
-void SessionDialog::on_savedSessionsList__currentRowChanged(int currentRow)
-{
-	setButtonsEnabledStatus();
+void SessionDialog::on_savedSessionsList__currentRowChanged(int currentRow) {
+    setButtonsEnabledStatus();
 }
 
-void SessionDialog::on_cloneButton__clicked()
-{
-	std::string sessionName = selectedSessionName();
-	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+void SessionDialog::on_cloneButton__clicked() {
+    std::string sessionName = selectedSessionName();
+    assert(!sessionName.empty()); // it should not be possible for the name to be empty
 
-	SessionRenameDialog renameDialog;
-	renameDialog.exec();
+    SessionRenameDialog renameDialog;
+    renameDialog.exec();
 
-	int result = renameDialog.result();
-	if (result == QDialog::Accepted)
-	{
-		std::string newName = renameDialog.newName();
-		SessionHandler::instance()->copySession(sessionName, newName);
-		refreshListOfSavedSessions();
-	}
+    int result = renameDialog.result();
+    if (result == QDialog::Accepted) {
+        std::string newName = renameDialog.newName();
+        SessionHandler::instance()->copySession(sessionName, newName);
+        refreshListOfSavedSessions();
+    }
 }
 
-void SessionDialog::on_deleteButton__clicked()
-{
-	std::string sessionName = selectedSessionName();
-	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+void SessionDialog::on_deleteButton__clicked() {
+    std::string sessionName = selectedSessionName();
+    assert(!sessionName.empty()); // it should not be possible for the name to be empty
 
-	QString message = tr("Are you sure that you want to delete the session '") + QString::fromStdString(sessionName) + tr("'' from disk?");
-	if(QMessageBox::question(nullptr,tr("Confirm: remove session"),
-		message,
-		QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
-	{
-		SessionHandler::instance()->remove(sessionName);
-		refreshListOfSavedSessions();
-	}
+    QString message = tr("Are you sure that you want to delete the session '") + QString::fromStdString(sessionName) +
+                      tr("'' from disk?");
+    if (QMessageBox::question(nullptr,
+                              tr("Confirm: remove session"),
+                              message,
+                              QMessageBox::Ok | QMessageBox::Cancel,
+                              QMessageBox::Cancel) == QMessageBox::Ok) {
+        SessionHandler::instance()->remove(sessionName);
+        refreshListOfSavedSessions();
+    }
 }
 
+void SessionDialog::on_renameButton__clicked() {
+    std::string sessionName = selectedSessionName();
+    assert(!sessionName.empty()); // it should not be possible for the name to be empty
 
-void SessionDialog::on_renameButton__clicked()
-{
-	std::string sessionName = selectedSessionName();
-	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+    SessionItem* item = SessionHandler::instance()->find(sessionName);
+    assert(item); // it should not be possible for the name to be empty
 
-	SessionItem *item = SessionHandler::instance()->find(sessionName);
-	assert(item);  // it should not be possible for the name to be empty
+    SessionRenameDialog renameDialog;
+    renameDialog.exec();
 
-	SessionRenameDialog renameDialog;
-	renameDialog.exec();
-
-	int result = renameDialog.result();
-	if (result == QDialog::Accepted)
-	{
-		std::string newName = renameDialog.newName();
-		SessionHandler::instance()->rename(item, newName);
-		refreshListOfSavedSessions();
-	}
+    int result = renameDialog.result();
+    if (result == QDialog::Accepted) {
+        std::string newName = renameDialog.newName();
+        SessionHandler::instance()->rename(item, newName);
+        refreshListOfSavedSessions();
+    }
 }
 
+void SessionDialog::on_switchToButton__clicked() {
+    std::string sessionName = selectedSessionName();
+    assert(!sessionName.empty()); // it should not be possible for the name to be empty
 
-void SessionDialog::on_switchToButton__clicked()
-{
-	std::string sessionName = selectedSessionName();
-	assert(!sessionName.empty());  // it should not be possible for the name to be empty
+    SessionItem* item = SessionHandler::instance()->find(sessionName);
+    assert(item); // it should not be possible for the name to be empty
 
-	SessionItem *item = SessionHandler::instance()->find(sessionName);
-	assert(item);  // it should not be possible for the name to be empty
+    SessionHandler::instance()->current(item); // set this session as the current one
 
-	SessionHandler::instance()->current(item);  // set this session as the current one
+    if (restoreLastSessionCb_->checkState() == Qt::Checked) // save details of the selected session?
+        SessionHandler::instance()->saveLastSessionName();
+    else
+        SessionHandler::instance()->removeLastSessionName(); // no, so we can delete the file
 
-	if (restoreLastSessionCb_->checkState() == Qt::Checked)  // save details of the selected session?
-		SessionHandler::instance()->saveLastSessionName();
-	else
-		SessionHandler::instance()->removeLastSessionName();  // no, so we can delete the file
-
-	accept();  // close the dialogue and continue loading the main user interface
+    accept(); // close the dialogue and continue loading the main user interface
 }
 
+void SessionDialog::on_saveButton__clicked() {
+    /*
+            std::string name = sessionNameEdit_->text().toStdString();
 
-void SessionDialog::on_saveButton__clicked()
-{
-/*
-	std::string name = sessionNameEdit_->text().toStdString();
-
-	if (validSaveName(name))
-	{
-		SessionItem* newSession = SessionHandler::instance()->copySession(SessionHandler::instance()->current(), name);
-		if (newSession)
-		{
-			//SessionHandler::instance()->add(name);
-			refreshListOfSavedSessions();
-			SessionHandler::instance()->current(newSession);
-			QMessageBox::information(0,tr("Session"), tr("Session saved"));
-		}
-		else
-		{
-			QMessageBox::critical(0,tr("Session"), tr("Failed to save session"));
-		}
-		close();
-	}*/
+            if (validSaveName(name))
+            {
+                    SessionItem* newSession =
+       SessionHandler::instance()->copySession(SessionHandler::instance()->current(), name); if (newSession)
+                    {
+                            //SessionHandler::instance()->add(name);
+                            refreshListOfSavedSessions();
+                            SessionHandler::instance()->current(newSession);
+                            QMessageBox::information(0,tr("Session"), tr("Session saved"));
+                    }
+                    else
+                    {
+                            QMessageBox::critical(0,tr("Session"), tr("Failed to save session"));
+                    }
+                    close();
+            }*/
 }
-

@@ -14,23 +14,21 @@
 
 class InfoPanelItem;
 
-class OverviewProvider : public InfoProvider
-{
+class OverviewProvider : public InfoProvider {
 public:
-	explicit OverviewProvider(InfoPresenter* owner);
+    explicit OverviewProvider(InfoPresenter* owner);
 
-	//From VInfoVisitor
-	void visit(VInfoServer*) override;
-	void visit(VInfoNode*) override;
-	void visit(VInfoAttribute*) override;
+    // From VInfoVisitor
+    void visit(VInfoServer*) override;
+    void visit(VInfoNode*) override;
+    void visit(VInfoAttribute*) override;
 
-	//From VTaskObserver
-	void taskChanged(VTask_ptr) override;
+    // From VTaskObserver
+    void taskChanged(VTask_ptr) override;
 
 protected:
-	void serverInfo(VInfoServer*,std::stringstream& f);
-	void nodeInfo(VInfoNode*,std::stringstream& f);
-
+    void serverInfo(VInfoServer*, std::stringstream& f);
+    void nodeInfo(VInfoNode*, std::stringstream& f);
 };
 
 #endif

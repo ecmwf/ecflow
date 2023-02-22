@@ -15,10 +15,11 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "DurationTimer.hpp"
+
 #include <iostream>
 
 using namespace ecf;
 
 ScopedDurationTimer::~ScopedDurationTimer() {
-    std::cout << msg_ << " " << (double)elapsed().total_milliseconds()/(double)1000 << "s\n";
- }
+    std::cout << msg_ << " " << (double)elapsed().total_milliseconds() / (double)1000 << "s\n";
+}

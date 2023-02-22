@@ -15,27 +15,22 @@
 
 #define UI_FILEPROVIDER_TASK_DEBUG__
 
-GenFileProvider::GenFileProvider(GenFileReceiver* provider) :
-    reply_(new VReply()), provider_(provider)
-{
-    fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);    
+GenFileProvider::GenFileProvider(GenFileReceiver* provider) : reply_(new VReply()), provider_(provider) {
+    fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
 }
 
-GenFileProvider::~GenFileProvider()
-{
+GenFileProvider::~GenFileProvider() {
     if (reply_) {
         delete reply_;
     }
 }
 
-void GenFileProvider::clear()
-{
+void GenFileProvider::clear() {
     reply_->reset();
     filesToFetch_.clear();
 }
 
-void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths)
-{
+void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths) {
     reply_->reset();
 
     filesToFetch_ = fPaths;
@@ -46,11 +41,12 @@ void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths)
     Q_ASSERT(fetchQueue_->isEmpty());
 
     // we assume we have one task per path
-    for (auto p: filesToFetch_) {
-        AbstractFetchTask* t=nullptr;
+    for (auto p : filesToFetch_) {
+        AbstractFetchTask* t = nullptr;
         if (VConfig::instance()->proxychainsUsed()) {
             t = makeFetchTask("file_transfer");
-        } else {
+        }
+        else {
             t = makeFetchTask("file_local");
         }
         Q_ASSERT(t);
@@ -62,14 +58,13 @@ void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths)
 
     Q_ASSERT(fetchQueue_->size() == filesToFetch_.size());
 
-//#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+    // #ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-//#endif
+    // #endif
     fetchQueue_->run();
 }
 
-void GenFileProvider::fetchFile(const std::string& fPath)
-{
+void GenFileProvider::fetchFile(const std::string& fPath) {
     filesToFetch_ = {fPath};
 
     // Update the fetch tasks and process them. The queue runs until any task can fetch
@@ -77,11 +72,12 @@ void GenFileProvider::fetchFile(const std::string& fPath)
     fetchQueue_->clear();
     fetchQueue_->setPolicy(FetchQueue::RunUntilFirstSucceeded);
     Q_ASSERT(fetchQueue_->isEmpty());
-    AbstractFetchTask* t=nullptr;
-//    UiLog().dbg() << UI_FN_INFO << "proxychains=" << VConfig::instance()->proxychainsUsed();
+    AbstractFetchTask* t = nullptr;
+    //    UiLog().dbg() << UI_FN_INFO << "proxychains=" << VConfig::instance()->proxychainsUsed();
     if (VConfig::instance()->proxychainsUsed()) {
         t = makeFetchTask("file_transfer");
-    } else {
+    }
+    else {
         t = makeFetchTask("file_local");
     }
     Q_ASSERT(t);
@@ -97,18 +93,17 @@ void GenFileProvider::fetchFile(const std::string& fPath)
     fetchQueue_->run();
 }
 
-void GenFileProvider::fetchQueueSucceeded()
-{
+void GenFileProvider::fetchQueueSucceeded() {
     provider_->fileFetchFinished(reply_);
     reply_->reset();
     filesToFetch_.clear();
 }
 
-void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*)
-{
+void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*) {
     if (fetchQueue_->policy() == FetchQueue::RunAll && !reply_->tmpFiles().empty()) {
         fetchQueueSucceeded();
-    } else {
+    }
+    else {
         if (reply_->errorText().empty()) {
             reply_->setErrorText("Failed to fetch file(s)!");
         }
@@ -118,12 +113,10 @@ void GenFileProvider::fetchQueueFinished(const std::string& /*filePath*/, VNode*
     }
 }
 
-GenFileReceiver::GenFileReceiver()
-{
+GenFileReceiver::GenFileReceiver() {
     fetchManager_ = new GenFileProvider(this);
 }
 
-GenFileReceiver::~GenFileReceiver()
-{
+GenFileReceiver::~GenFileReceiver() {
     delete fetchManager_;
 }

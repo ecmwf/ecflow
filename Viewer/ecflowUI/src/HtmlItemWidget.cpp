@@ -13,14 +13,12 @@
 #include <QDebug>
 #include <QFontDatabase>
 
-HtmlItemWidget::HtmlItemWidget(QWidget *parent) :
-  QWidget(parent)
-{
+HtmlItemWidget::HtmlItemWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
 
     externalTb_->hide();
 
-    fileLabel_->setProperty("fileInfo","1");
+    fileLabel_->setProperty("fileInfo", "1");
 
     searchLine_->setEditor(textEdit_);
     searchLine_->setVisible(false);
@@ -30,16 +28,12 @@ HtmlItemWidget::HtmlItemWidget(QWidget *parent) :
     textEdit_->setReadOnly(true);
 }
 
-HtmlItemWidget::~HtmlItemWidget()
-= default;
+HtmlItemWidget::~HtmlItemWidget() = default;
 
-void HtmlItemWidget::removeSpacer()
-{
-    //Remove the first spacer item!!
-    for(int i=0; horizontalLayout->count(); i++)
-    {
-        if(QSpacerItem* sp=horizontalLayout->itemAt(i)->spacerItem())
-        {
+void HtmlItemWidget::removeSpacer() {
+    // Remove the first spacer item!!
+    for (int i = 0; horizontalLayout->count(); i++) {
+        if (QSpacerItem* sp = horizontalLayout->itemAt(i)->spacerItem()) {
             horizontalLayout->takeAt(i);
             delete sp;
             break;
@@ -47,20 +41,16 @@ void HtmlItemWidget::removeSpacer()
     }
 }
 
-void HtmlItemWidget::on_searchTb__clicked()
-{
+void HtmlItemWidget::on_searchTb__clicked() {
     searchLine_->setVisible(true);
     searchLine_->setFocus();
     searchLine_->selectAll();
 }
 
-
-void HtmlItemWidget::on_fontSizeUpTb__clicked()
-{
+void HtmlItemWidget::on_fontSizeUpTb__clicked() {
     textEdit_->slotZoomIn();
 }
 
-void HtmlItemWidget::on_fontSizeDownTb__clicked()
-{
+void HtmlItemWidget::on_fontSizeDownTb__clicked() {
     textEdit_->slotZoomOut();
 }

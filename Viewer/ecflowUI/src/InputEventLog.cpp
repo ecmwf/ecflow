@@ -9,8 +9,6 @@
 
 #include "InputEventLog.hpp"
 
-#include "DirectoryHandler.hpp"
-
 #include <QAction>
 #include <QApplication>
 #include <QCloseEvent>
@@ -23,151 +21,126 @@
 #include <QMouseEvent>
 #include <QTabBar>
 
+#include "DirectoryHandler.hpp"
 #include "LogTruncator.hpp"
 #include "TimeStamp.hpp"
 #include "UiLog.hpp"
 
-InputEventLog* InputEventLog::instance_=nullptr;
-static bool firstStart=true;
+InputEventLog* InputEventLog::instance_ = nullptr;
+static bool firstStart                  = true;
 
-static QString objectPath(QObject *obj)
-{
+static QString objectPath(QObject* obj) {
     QString res;
-    for(; obj; obj = obj->parent())
-    {
+    for (; obj; obj = obj->parent()) {
         if (!res.isEmpty())
             res.prepend("/");
-        QString s=obj->objectName();
-        //QString cn(obj->metaObject()->className());
-        if(s.isEmpty()) s="?";
-        //res.prepend("[" + cn + "]" +s);
+        QString s = obj->objectName();
+        // QString cn(obj->metaObject()->className());
+        if (s.isEmpty())
+            s = "?";
+        // res.prepend("[" + cn + "]" +s);
         res.prepend(s);
     }
     return res;
 }
 
-InputEventLog::InputEventLog(QObject* parent) : QObject(parent)
-{
-    QString path=QString::fromStdString(DirectoryHandler::uiEventLogFileName());
-    outFile_=new QFile(path);
+InputEventLog::InputEventLog(QObject* parent) : QObject(parent) {
+    QString path = QString::fromStdString(DirectoryHandler::uiEventLogFileName());
+    outFile_     = new QFile(path);
 
-    truncator_=new LogTruncator(path,86400*1000,5*1024*1024,2000,this);
-    connect(truncator_,SIGNAL(truncateBegin()),this,SLOT(truncateLogBegin()));
-    connect(truncator_,SIGNAL(truncateEnd()),this,SLOT(truncateLogEnd()));
+    truncator_   = new LogTruncator(path, 86400 * 1000, 5 * 1024 * 1024, 2000, this);
+    connect(truncator_, SIGNAL(truncateBegin()), this, SLOT(truncateLogBegin()));
+    connect(truncator_, SIGNAL(truncateEnd()), this, SLOT(truncateLogEnd()));
 }
 
-InputEventLog::~InputEventLog()
-{
+InputEventLog::~InputEventLog() {
     outFile_->close();
     delete outFile_;
 }
 
-InputEventLog* InputEventLog::instance()
-{
-    if(!instance_)
-        instance_=new InputEventLog(nullptr);
+InputEventLog* InputEventLog::instance() {
+    if (!instance_)
+        instance_ = new InputEventLog(nullptr);
     return instance_;
 }
 
-void InputEventLog::start()
-{
+void InputEventLog::start() {
     Q_ASSERT(!paused_);
 
-    if(out_.device())
+    if (out_.device())
         return;
 
-    QFile::OpenMode mode=(firstStart)?QFile::WriteOnly:QFile::Append;
-    if(outFile_->open(mode))
-    {
-        firstStart=false;
+    QFile::OpenMode mode = (firstStart) ? QFile::WriteOnly : QFile::Append;
+    if (outFile_->open(mode)) {
+        firstStart = false;
         out_.setDevice(outFile_);
         qApp->removeEventFilter(this);
         qApp->installEventFilter(this);
     }
-    else
-    {
+    else {
         QFileInfo info(*outFile_);
         UiLog().err() << "InputEventLog --> cannot open log file for writing: " << info.absoluteFilePath();
     }
 }
 
-void InputEventLog::stop()
-{
+void InputEventLog::stop() {
     qApp->removeEventFilter(this);
     outFile_->close();
     out_.setDevice(nullptr);
 }
 
-void InputEventLog::truncateLogBegin()
-{
-    paused_=(out_.device() != nullptr);
+void InputEventLog::truncateLogBegin() {
+    paused_ = (out_.device() != nullptr);
     stop();
 }
 
-void InputEventLog::truncateLogEnd()
-{
-    if(paused_)
-    {
-        paused_=false;
+void InputEventLog::truncateLogEnd() {
+    if (paused_) {
+        paused_ = false;
         start();
     }
 }
 
-bool InputEventLog::eventFilter(QObject *obj, QEvent *event)
-{
-    if(out_.device())
-    {
-        //out_ << event->type() << " " << obj->objectName() << " " << obj->metaObject()->className() << "\n";
-        //out_.flush();
+bool InputEventLog::eventFilter(QObject* obj, QEvent* event) {
+    if (out_.device()) {
+        // out_ << event->type() << " " << obj->objectName() << " " << obj->metaObject()->className() << "\n";
+        // out_.flush();
 
-        if(event->type() == QEvent::MouseButtonPress)
-        {
-            logMousePress(obj,static_cast<QMouseEvent*>(event));
+        if (event->type() == QEvent::MouseButtonPress) {
+            logMousePress(obj, static_cast<QMouseEvent*>(event));
         }
-        else if(event->type() == QEvent::MouseButtonRelease)
-        {
-            logMouseRelease(obj,static_cast<QMouseEvent*>(event));
+        else if (event->type() == QEvent::MouseButtonRelease) {
+            logMouseRelease(obj, static_cast<QMouseEvent*>(event));
         }
-        else if(event->type() == QEvent::Close)
-        {
-            logClose(obj,static_cast<QCloseEvent*>(event));
+        else if (event->type() == QEvent::Close) {
+            logClose(obj, static_cast<QCloseEvent*>(event));
         }
-        else if(event->type() == QEvent::ContextMenu)
-        {
-            logContextMenu(obj,static_cast<QContextMenuEvent*>(event));
+        else if (event->type() == QEvent::ContextMenu) {
+            logContextMenu(obj, static_cast<QContextMenuEvent*>(event));
         }
     }
 
-    return QObject::eventFilter(obj,event);
+    return QObject::eventFilter(obj, event);
 }
 
-void InputEventLog::logMousePress(QObject* obj,QMouseEvent *event)
-{
+void InputEventLog::logMousePress(QObject* obj, QMouseEvent* event) {
     QString cn(obj->metaObject()->className());
-    if(cn != "QWidgetWindow" && cn != "QMenuBar" &&
-       cn != "QToolBar" && cn != "MainWindow" && cn != "QScrollBar" )
-    {
+    if (cn != "QWidgetWindow" && cn != "QMenuBar" && cn != "QToolBar" && cn != "MainWindow" && cn != "QScrollBar") {
         std::string s;
         ecf::TimeStamp::now_in_brief(s);
         out_ << s.c_str() << "mp " << cn << " " << objectPath(obj);
 
-        if(cn == "QTabBar")
-        {
-            if(auto* t=static_cast<QTabBar*>(obj))
-            {
-                int idx=t->tabAt(event->pos());
-                if(idx >=0)
-                {
+        if (cn == "QTabBar") {
+            if (auto* t = static_cast<QTabBar*>(obj)) {
+                int idx = t->tabAt(event->pos());
+                if (idx >= 0) {
                     out_ << " tab=" << t->tabText(idx);
                 }
             }
         }
-        else if(cn == "QMenu")
-        {
-            if(auto* m=static_cast<QMenu*>(obj))
-            {
-                if(QAction* ac=m->actionAt(event->pos()))
-                {
+        else if (cn == "QMenu") {
+            if (auto* m = static_cast<QMenu*>(obj)) {
+                if (QAction* ac = m->actionAt(event->pos())) {
                     out_ << " ac=" << ac->objectName();
                 }
             }
@@ -177,18 +150,14 @@ void InputEventLog::logMousePress(QObject* obj,QMouseEvent *event)
     }
 }
 
-void InputEventLog::logMouseRelease(QObject* obj,QMouseEvent *event)
-{
+void InputEventLog::logMouseRelease(QObject* obj, QMouseEvent* event) {
     QString cn(obj->metaObject()->className());
-    if(cn == "QMenu")
-    {
+    if (cn == "QMenu") {
         std::string s;
         ecf::TimeStamp::now_in_brief(s);
         out_ << s.c_str() << "mr " << cn << " " << objectPath(obj);
-        if(auto* m=static_cast<QMenu*>(obj))
-        {
-            if(QAction* ac=m->actionAt(event->pos()))
-            {
+        if (auto* m = static_cast<QMenu*>(obj)) {
+            if (QAction* ac = m->actionAt(event->pos())) {
                 out_ << " ac=" << ac->objectName();
             }
         }
@@ -197,11 +166,9 @@ void InputEventLog::logMouseRelease(QObject* obj,QMouseEvent *event)
     }
 }
 
-void InputEventLog::logClose(QObject* obj,QCloseEvent *)
-{
+void InputEventLog::logClose(QObject* obj, QCloseEvent*) {
     QString cn(obj->metaObject()->className());
-    if(cn != "QWidgetWindow" && cn != "QTipLabel")
-    {
+    if (cn != "QWidgetWindow" && cn != "QTipLabel") {
         std::string s;
         ecf::TimeStamp::now_in_brief(s);
         out_ << s.c_str() << "cl " << cn << " " << objectPath(obj) << "\n";
@@ -209,11 +176,9 @@ void InputEventLog::logClose(QObject* obj,QCloseEvent *)
     }
 }
 
-void InputEventLog::logContextMenu(QObject* obj,QContextMenuEvent*)
-{
+void InputEventLog::logContextMenu(QObject* obj, QContextMenuEvent*) {
     QString cn(obj->metaObject()->className());
-    if(cn != "QWidgetWindow")
-    {
+    if (cn != "QWidgetWindow") {
         std::string s;
         ecf::TimeStamp::now_in_brief(s);
         out_ << s.c_str() << "cm " << cn << " " << objectPath(obj) << "\n";

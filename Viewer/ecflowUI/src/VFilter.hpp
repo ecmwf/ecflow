@@ -16,10 +16,9 @@
 #include <QObject>
 #include <QStringList>
 
+#include "Node.hpp"
 #include "VInfo.hpp"
 #include "VParam.hpp"
-
-#include "Node.hpp"
 
 class NodeQuery;
 class NodeFilterEngine;
@@ -34,34 +33,33 @@ class VTree;
 
 #include <boost/property_tree/ptree.hpp>
 
-class VParamSet : public QObject
-{
-Q_OBJECT
+class VParamSet : public QObject {
+    Q_OBJECT
 
 public:
-	VParamSet();
+    VParamSet();
     ~VParamSet() override = default;
 
-    const std::vector<VParam*>& all() const {return all_;}
-    const std::vector<VParam*>& current() const {return current_;}
+    const std::vector<VParam*>& all() const { return all_; }
+    const std::vector<VParam*>& current() const { return current_; }
     QStringList currentAsList() const;
-    void setCurrent(const std::vector<VParam*>&,bool broadcast=true);
-    void setCurrent(const std::vector<std::string>&,bool broadcast=true);
-    void setCurrent(QStringList,bool broadcast=true);
+    void setCurrent(const std::vector<VParam*>&, bool broadcast = true);
+    void setCurrent(const std::vector<std::string>&, bool broadcast = true);
+    void setCurrent(QStringList, bool broadcast = true);
 
-    bool isEmpty() const {return empty_;}
-    bool isComplete() const { return complete_;}
-	bool isSet(const std::string&) const;
-	bool isSet(VParam*) const;
+    bool isEmpty() const { return empty_; }
+    bool isComplete() const { return complete_; }
+    bool isSet(const std::string&) const;
+    bool isSet(VParam*) const;
 
-	void writeSettings(VSettings* vs);
+    void writeSettings(VSettings* vs);
     void virtual readSettings(VSettings* vs);
 
 Q_SIGNALS:
-	void changed();
+    void changed();
 
 protected:
-	void init(const std::vector<VParam*>& items);
+    void init(const std::vector<VParam*>& items);
     void addToCurrent(VParam*);
 
     std::vector<VParam*> all_;
@@ -70,24 +68,22 @@ protected:
     std::string settingsIdV0_;
 
 private:
-     void clearCurrent();
+    void clearCurrent();
 
-     std::vector<int> currentCache_; //we use to speed up the check in isSet()
-     bool empty_{true};
-     bool complete_{false};
+    std::vector<int> currentCache_; // we use to speed up the check in isSet()
+    bool empty_{true};
+    bool complete_{false};
 };
 
-class NodeStateFilter : public VParamSet
-{
+class NodeStateFilter : public VParamSet {
 public:
-	NodeStateFilter();
+    NodeStateFilter();
 };
 
-class AttributeFilter : public VParamSet
-{
+class AttributeFilter : public VParamSet {
 public:
-	AttributeFilter();
-    bool matchForceShowAttr(const VNode*,VAttributeType*) const;
+    AttributeFilter();
+    bool matchForceShowAttr(const VNode*, VAttributeType*) const;
     void setForceShowAttr(VAttribute* a);
     void clearForceShowAttr();
     void updateForceShowAttr();
@@ -100,77 +96,72 @@ private:
     VInfo_ptr forceShowAttr_;
 };
 
-class IconFilter : public VParamSet
-{
+class IconFilter : public VParamSet {
 public:
     IconFilter();
     void readSettings(VSettings* vs) override;
 };
 
-
 class TreeNodeFilter;
 class TableNodeFilter;
 
-class NodeFilterDef : public QObject
-{
-Q_OBJECT
+class NodeFilterDef : public QObject {
+    Q_OBJECT
 
-friend class  TreeNodeFilter;
-friend class  TableNodeFilter;
+    friend class TreeNodeFilter;
+    friend class TableNodeFilter;
 
 public:
-	enum Scope {NodeStateScope,GeneralScope};
-	NodeFilterDef(ServerFilter*,Scope);
-	~NodeFilterDef() override;
+    enum Scope { NodeStateScope, GeneralScope };
+    NodeFilterDef(ServerFilter*, Scope);
+    ~NodeFilterDef() override;
 
-	NodeStateFilter* nodeState() const {return nodeState_;}
+    NodeStateFilter* nodeState() const { return nodeState_; }
 
-	const std::string& exprStr() const {return exprStr_;}
-	NodeQuery* query() const;
-	void setQuery(NodeQuery*);
+    const std::string& exprStr() const { return exprStr_; }
+    NodeQuery* query() const;
+    void setQuery(NodeQuery*);
     void serverRemoved(const std::string& serverName);
     void serverRenamed(const std::string& newName, const std::string& oldName);
 
-	void writeSettings(VSettings *vs);
-	void readSettings(VSettings *vs);
+    void writeSettings(VSettings* vs);
+    void readSettings(VSettings* vs);
 
 Q_SIGNALS:
-	void changed();
+    void changed();
 
 protected:
-    ServerFilter *serverFilter_{nullptr};
+    ServerFilter* serverFilter_{nullptr};
     std::string exprStr_{"state = all"};
-    NodeStateFilter *nodeState_{nullptr};
-	std::string nodePath_;
-	std::string nodeType_;
+    NodeStateFilter* nodeState_{nullptr};
+    std::string nodePath_;
+    std::string nodeType_;
     NodeQuery* query_{nullptr};
 
-	//AttributeFilter *attribute_;
-	//std::string nodeType_;
-	//std::string nodeName_;
+    // AttributeFilter *attribute_;
+    // std::string nodeType_;
+    // std::string nodeName_;
 };
 
-
-class NodeFilter
-{
+class NodeFilter {
     friend class NodeFilterEngine;
     friend class VTreeServer;
 
 public:
-    enum MatchMode {NoneMatch,AllMatch,VectorMatch};
+    enum MatchMode { NoneMatch, AllMatch, VectorMatch };
 
-    NodeFilter(NodeFilterDef* def,ServerHandler*);
-	virtual ~NodeFilter();
-    NodeFilter(const NodeFilter&) = delete;
+    NodeFilter(NodeFilterDef* def, ServerHandler*);
+    virtual ~NodeFilter();
+    NodeFilter(const NodeFilter&)            = delete;
     NodeFilter& operator=(const NodeFilter&) = delete;
 
     virtual void clear();
-    virtual bool isNull()=0;
-    virtual bool isComplete()=0;
-    virtual int  matchCount() const = 0;
-    virtual bool update()=0;
+    virtual bool isNull()          = 0;
+    virtual bool isComplete()      = 0;
+    virtual int matchCount() const = 0;
+    virtual bool update()          = 0;
 
-    VNode* forceShowNode() const {return forceShowNode_;}
+    VNode* forceShowNode() const { return forceShowNode_; }
     void setForceShowNode(VNode*);
     void clearForceShowNode();
 
@@ -180,39 +171,36 @@ protected:
     std::set<std::string> type_;
     MatchMode matchMode_{VectorMatch};
     std::vector<VNode*> match_;
-    ServerHandler * server_{nullptr};
+    ServerHandler* server_{nullptr};
     VNode* forceShowNode_{nullptr};
 };
 
-class TreeNodeFilter : public NodeFilter
-{
+class TreeNodeFilter : public NodeFilter {
 public:
-    explicit TreeNodeFilter(NodeFilterDef* def,ServerHandler*,VTree*);
+    explicit TreeNodeFilter(NodeFilterDef* def, ServerHandler*, VTree*);
 
     void clear() override;
     bool isNull() override;
     bool isComplete() override;
-    int  matchCount() const override {return 0;}
+    int matchCount() const override { return 0; }
     bool update() override;
-    bool update(const std::vector<VNode*>& topChange,
-                std::vector<VNode*>& topFilterChange);
+    bool update(const std::vector<VNode*>& topChange, std::vector<VNode*>& topFilterChange);
 
 private:
-	bool filterState(VNode* node,VParamSet* stateFilter);
-    bool collectTopFilterChange(VNode* n,std::vector<VNode*>& topFilterChange);
+    bool filterState(VNode* node, VParamSet* stateFilter);
+    bool collectTopFilterChange(VNode* n, std::vector<VNode*>& topFilterChange);
 
     VTree* tree_;
 };
 
-class TableNodeFilter : public NodeFilter
-{
+class TableNodeFilter : public NodeFilter {
 public:
-    explicit TableNodeFilter(NodeFilterDef* def,ServerHandler*);
+    explicit TableNodeFilter(NodeFilterDef* def, ServerHandler*);
 
-	void clear() override;
+    void clear() override;
     bool isNull() override;
     bool isComplete() override;
-    int  matchCount() const override {return matchCount_;}
+    int matchCount() const override { return matchCount_; }
     bool update() override;
     int indexOf(const VNode*) const;
     VNode* nodeAt(int index) const;

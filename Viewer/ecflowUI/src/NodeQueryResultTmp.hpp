@@ -10,23 +10,24 @@
 #ifndef VIEWER_SRC_NODEQUERYRESULTTMP_HPP_
 #define VIEWER_SRC_NODEQUERYRESULTTMP_HPP_
 
+#include <memory>
+
 #include <QString>
 #include <QStringList>
-#include <memory>
 
 class VNode;
 
 struct NodeQueryResultTmp;
 typedef std::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
 
-struct  NodeQueryResultTmp
+struct NodeQueryResultTmp
 {
-	NodeQueryResultTmp()= default;
-    NodeQueryResultTmp(VNode *node) : node_(node) {}
-    NodeQueryResultTmp(VNode *node,QStringList attr) : node_(node), attr_(attr) {}
+    NodeQueryResultTmp() = default;
+    NodeQueryResultTmp(VNode* node) : node_(node) {}
+    NodeQueryResultTmp(VNode* node, QStringList attr) : node_(node), attr_(attr) {}
 
-	VNode* node_{nullptr};
-	QStringList attr_;
+    VNode* node_{nullptr};
+    QStringList attr_;
 };
 
 #endif /* VIEWER_SRC_NODEQUERYRESULTTMP_HPP_ */

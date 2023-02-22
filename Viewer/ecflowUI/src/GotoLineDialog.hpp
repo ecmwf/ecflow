@@ -14,24 +14,20 @@
 
 using namespace std;
 
-
-class GotoLineDialog : public QDialog, private Ui::GotoLineDialogQ
-{
+class GotoLineDialog : public QDialog, private Ui::GotoLineDialogQ {
     Q_OBJECT
 
 public:
-    explicit GotoLineDialog(QWidget *parent = nullptr);
+    explicit GotoLineDialog(QWidget* parent = nullptr);
     ~GotoLineDialog() override;
     void setupUIBeforeShow();
 
 Q_SIGNALS:
-    void gotoLine(int line);   // emitted when the user says 'ok'
-
+    void gotoLine(int line); // emitted when the user says 'ok'
 
 public Q_SLOTS:
     void doneIt();
     void setButtonStatus();
-
 };
 
 #endif

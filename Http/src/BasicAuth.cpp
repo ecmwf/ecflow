@@ -22,9 +22,9 @@
 #include "Str.hpp"
 
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
-   const std::string decoded = base64_decode(token);
-   std::vector<std::string> elems;
-   ecf::Str::split(decoded, elems, ":");
+    const std::string decoded = base64_decode(token);
+    std::vector<std::string> elems;
+    ecf::Str::split(decoded, elems, ":");
 
-   return std::make_pair(elems[0], PasswordEncryption::encrypt(elems[1], elems[0]));
+    return std::make_pair(elems[0], PasswordEncryption::encrypt(elems[1], elems[0]));
 }

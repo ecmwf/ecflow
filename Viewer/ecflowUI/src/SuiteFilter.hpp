@@ -40,92 +40,93 @@ private:
 
 #endif
 
-class SuiteFilterItem
-{
-   friend class SuiteFilter;
+class SuiteFilterItem {
+    friend class SuiteFilter;
+
 public:
-    SuiteFilterItem(const std::string& name,bool loaded, bool filtered) :
-             name_(name), loaded_(loaded), filtered_(filtered) {}
+    SuiteFilterItem(const std::string& name, bool loaded, bool filtered)
+        : name_(name),
+          loaded_(loaded),
+          filtered_(filtered) {}
 
-	SuiteFilterItem(const SuiteFilterItem& other);
+    SuiteFilterItem(const SuiteFilterItem& other);
 
-    bool operator!=(const SuiteFilterItem& rhs) const {return name_ != rhs.name_ || loaded_ != rhs.loaded_ ||
-                filtered_ != rhs.filtered_;}
+    bool operator!=(const SuiteFilterItem& rhs) const {
+        return name_ != rhs.name_ || loaded_ != rhs.loaded_ || filtered_ != rhs.filtered_;
+    }
 
-    const std::string& name() const {return name_;}
-    bool loaded() const {return loaded_;}
-    bool filtered() const {return filtered_;}
+    const std::string& name() const { return name_; }
+    bool loaded() const { return loaded_; }
+    bool filtered() const { return filtered_; }
 
 protected:
-	std::string name_;
+    std::string name_;
     bool loaded_;
-	bool filtered_;
+    bool filtered_;
 };
 
-class SuiteFilter
-{
+class SuiteFilter {
 public:
     SuiteFilter() = default;
-	~SuiteFilter();
+    ~SuiteFilter();
 
-	enum ChangeFlag {AutoAddChanged=1,EnabledChanged=2,ItemChanged=4};
+    enum ChangeFlag { AutoAddChanged = 1, EnabledChanged = 2, ItemChanged = 4 };
 
-    friend std::ostream& operator<< ( std::ostream& aStream, const SuiteFilter& obj);
+    friend std::ostream& operator<<(std::ostream& aStream, const SuiteFilter& obj);
 
-	SuiteFilter* clone();
+    SuiteFilter* clone();
 
     std::vector<std::string> filter() const;
     std::vector<std::string> loaded() const;
-    const std::vector<SuiteFilterItem>& items() const {return items_;}
+    const std::vector<SuiteFilterItem>& items() const { return items_; }
 
-	int count() const {return static_cast<int>(items_.size());}
-	void setFiltered(int index,bool val);
+    int count() const { return static_cast<int>(items_.size()); }
+    void setFiltered(int index, bool val);
     bool isOnlyOneFiltered(const std::string& oneSuite) const;
-    bool isLoadedInitialised() const {return loadedInitialised_;}
-    bool autoAddNewSuites() const {return autoAddNew_;}
-	bool isEnabled() const {return enabled_;}
+    bool isLoadedInitialised() const { return loadedInitialised_; }
+    bool autoAddNewSuites() const { return autoAddNew_; }
+    bool isEnabled() const { return enabled_; }
 
-    void setLoadedInitialised(bool b) {loadedInitialised_=b;}
-    void setAutoAddNewSuites(bool b) {autoAddNew_=b;}
-	void setEnabled(bool b) {enabled_=b;}
+    void setLoadedInitialised(bool b) { loadedInitialised_ = b; }
+    void setAutoAddNewSuites(bool b) { autoAddNew_ = b; }
+    void setEnabled(bool b) { enabled_ = b; }
     void selectOnlyOne(const std::string& oneSuite);
     void selectAll();
-	void unselectAll();
+    void unselectAll();
     bool removeUnloaded();
     bool hasUnloaded() const;
 
     bool sameAs(const SuiteFilter*) const;
     bool sameAsLoadedIgnored(const SuiteFilter*) const;
     bool merge(const SuiteFilter*);
-	bool update(SuiteFilter*);
-    bool setLoaded(const std::vector<std::string>& loaded,bool checkDiff=true);
-	bool loadedSameAs(const std::vector<std::string>& loaded) const;
-	const FlagSet<ChangeFlag>& changeFlags() {return changeFlags_;}
+    bool update(SuiteFilter*);
+    bool setLoaded(const std::vector<std::string>& loaded, bool checkDiff = true);
+    bool loadedSameAs(const std::vector<std::string>& loaded) const;
+    const FlagSet<ChangeFlag>& changeFlags() { return changeFlags_; }
 
-	bool hasObserver() const {return !observers_.empty();}
-	void addObserver(SuiteFilterObserver*);
-	void removeObserver(SuiteFilterObserver*);
+    bool hasObserver() const { return !observers_.empty(); }
+    void addObserver(SuiteFilterObserver*);
+    void removeObserver(SuiteFilterObserver*);
 
-	void readSettings(VSettings *vs);
-	void writeSettings(VSettings *vs);
+    void readSettings(VSettings* vs);
+    void writeSettings(VSettings* vs);
 
-    static const std::string dummySuite() {return dummySuite_;}
+    static const std::string dummySuite() { return dummySuite_; }
 
 private:
-	void clear();
-	void adjust();
+    void clear();
+    void adjust();
     void broadcastChange();
     bool adjustLoaded(const std::vector<std::string>& loaded);
     void adjustFiltered(const std::vector<std::string>& filtered);
 
     std::vector<SuiteFilterItem> items_;
     bool autoAddNew_{false};
-	bool enabled_{false};
+    bool enabled_{false};
     bool loadedInitialised_{false};
-	FlagSet<ChangeFlag> changeFlags_;
-	std::vector<SuiteFilterObserver*> observers_;
+    FlagSet<ChangeFlag> changeFlags_;
+    std::vector<SuiteFilterObserver*> observers_;
     static std::string dummySuite_;
 };
-
 
 #endif

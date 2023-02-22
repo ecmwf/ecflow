@@ -12,18 +12,17 @@
 
 #include <QComboBox>
 
-class NodeQueryCombo : public QComboBox
-{
-Q_OBJECT
+class NodeQueryCombo : public QComboBox {
+    Q_OBJECT
 
 public:
-	explicit NodeQueryCombo(QWidget* parent=nullptr);
+    explicit NodeQueryCombo(QWidget* parent = nullptr);
 
 protected Q_SLOTS:
-	void slotCurrentChanged(int current);
+    void slotCurrentChanged(int current);
 
 Q_SIGNALS:
-	void changed(QString);
+    void changed(QString);
 };
 
 #endif /* VIEWER_SRC_NODEQUERYCOMBO_HPP_ */

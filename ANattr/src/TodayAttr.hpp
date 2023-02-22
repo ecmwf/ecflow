@@ -3,14 +3,14 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #30 $ 
+// Revision    : $Revision: #30 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : The Today attribute is heavily tied to the begin command
 //               Real Clock:
@@ -30,8 +30,8 @@
 //                                                 begin:
 //                                                 V
 // checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-//         isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff  *once* free we stay free (single slot *only*)
-//         begin:
+//         isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff  *once* free we stay free (single slot
+//         *only*) begin:
 //          V
 //   Today  ======================0=====================0=================
 //                               10:00              Midnight
@@ -64,7 +64,7 @@
 ///                                               isFree:ffffffffffffffff
 ///                                               Begin:
 ///                                               V
-///checkForReque:hhhhhhhhhhhhhhhhhrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+/// checkForReque:hhhhhhhhhhhhhhhhhrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 ///       isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff
 ///       begin :
 ///        V
@@ -86,89 +86,105 @@
 
 class DateAttr; // Used in Why
 class DayAttr;  // Used in Why
-namespace ecf { class Calendar;} // forward declare class
+namespace ecf {
+class Calendar;
+} // namespace ecf
 
 namespace ecf {
 
 // Use compiler ,  destructor, assignment, copy constructor
-class TodayAttr  {
+class TodayAttr {
 public:
-   explicit TodayAttr(const std::string&);
-	TodayAttr() = default;
-	TodayAttr(int hour, int minute, bool relative = false ) : ts_(hour, minute,relative) {}
-	explicit TodayAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative) {}
- 	explicit TodayAttr(const TimeSeries& ts) : ts_(ts)  {}
-	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
-		: ts_(start,finish,incr,relative) {}
+    explicit TodayAttr(const std::string&);
+    TodayAttr() = default;
+    TodayAttr(int hour, int minute, bool relative = false) : ts_(hour, minute, relative) {}
+    explicit TodayAttr(const TimeSlot& t, bool relative = false) : ts_(t, relative) {}
+    explicit TodayAttr(const TimeSeries& ts) : ts_(ts) {}
+    TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
+        : ts_(start, finish, incr, relative) {}
 
-	void print(std::string&) const;
-	bool operator==(const TodayAttr& rhs) const;
-   bool operator<(const TodayAttr& rhs) const { return ts_ < rhs.ts_; }
-	bool structureEquals(const TodayAttr& rhs) const;
+    void print(std::string&) const;
+    bool operator==(const TodayAttr& rhs) const;
+    bool operator<(const TodayAttr& rhs) const { return ts_ < rhs.ts_; }
+    bool structureEquals(const TodayAttr& rhs) const;
 
-	/// This can set attribute as free, once free its stays free, until re-queue/reset
-	void calendarChanged( const ecf::Calendar& c );
-	void resetRelativeDuration();
+    /// This can set attribute as free, once free its stays free, until re-queue/reset
+    void calendarChanged(const ecf::Calendar& c);
+    void resetRelativeDuration();
 
-	void reset_only() { clearFree(); ts_.reset_only();}
-	void reset(const ecf::Calendar& c) { clearFree(); ts_.reset(c);}       // updates state_change_no_
-	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true)
-	{ clearFree(); ts_.requeue(c,reset_next_time_slot);} // updates state_change_no_
+    void reset_only() {
+        clearFree();
+        ts_.reset_only();
+    }
+    void reset(const ecf::Calendar& c) {
+        clearFree();
+        ts_.reset(c);
+    } // updates state_change_no_
+    void requeue(const ecf::Calendar& c, bool reset_next_time_slot = true) {
+        clearFree();
+        ts_.requeue(c, reset_next_time_slot);
+    } // updates state_change_no_
 
-	void miss_next_time_slot(); // updates state_change_no_
-	void setFree();               // ensures that isFree() always returns true, updates state_change_no_
-	bool isSetFree() const { return free_; }
+    void miss_next_time_slot(); // updates state_change_no_
+    void setFree();             // ensures that isFree() always returns true, updates state_change_no_
+    bool isSetFree() const { return free_; }
 
-	// This is used when we have a *single* today attribute
-   //  single-slot   is free, if calendar time >= today_time
-   //  (range)       is free, if calendar time == (one of the time ranges)
-   bool isFree(const ecf::Calendar&) const;
+    // This is used when we have a *single* today attribute
+    //  single-slot   is free, if calendar time >= today_time
+    //  (range)       is free, if calendar time == (one of the time ranges)
+    bool isFree(const ecf::Calendar&) const;
 
-   // This is used when we have a *multiple* today attribute
-   // (single | range) is free, if calendar time == (one of the time ranges)
-   // if timer *expired* returns false
-   //     task t1
-   //        today 09:00
-   //        today 10:00
-   // If current times is 11:00, then we will return false.
-   // since both 09:00 and 10:00 have expired
-   // Multiple single today, should behave like a today with a range.
-   bool isFreeMultipleContext(const ecf::Calendar& c) const { return ts_.isFree(c); }
+    // This is used when we have a *multiple* today attribute
+    // (single | range) is free, if calendar time == (one of the time ranges)
+    // if timer *expired* returns false
+    //     task t1
+    //        today 09:00
+    //        today 10:00
+    // If current times is 11:00, then we will return false.
+    // since both 09:00 and 10:00 have expired
+    // Multiple single today, should behave like a today with a range.
+    bool isFreeMultipleContext(const ecf::Calendar& c) const { return ts_.isFree(c); }
 
+    bool checkForRequeue(const ecf::Calendar& c,
+                         const TimeSlot& the_min,
+                         const TimeSlot& the_max,
+                         bool cmd_context = false) const {
+        return ts_.checkForRequeue(c, the_min, the_max, cmd_context);
+    }
+    void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const { ts_.min_max_time_slots(the_min, the_max); }
+    bool why(const ecf::Calendar&,
+             const std::vector<DayAttr>&,
+             const std::vector<DateAttr>&,
+             std::string& theReasonWhy) const;
+    bool checkInvariants(std::string& errormsg) const { return ts_.checkInvariants(errormsg); }
 
-   bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max, bool cmd_context = false) const
-	{ return ts_.checkForRequeue(c,the_min,the_max,cmd_context);}
-	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {ts_.min_max_time_slots(the_min,the_max);}
- 	bool why(const ecf::Calendar&,const std::vector<DayAttr>&,const std::vector<DateAttr>&, std::string& theReasonWhy) const;
- 	bool checkInvariants(std::string& errormsg) const { return ts_.checkInvariants(errormsg);}
+    // The state_change_no is never reset. Must be incremented if it can affect equality
+    // Note: changes in state of ts_, i.e affect the equality operator (used in test)
+    //       must be captured. i.e things like relative duration & next_time_slot are
+    //       reported by the Why command, & hence need to be synced.
+    unsigned int state_change_no() const { return state_change_no_; }
 
-	// The state_change_no is never reset. Must be incremented if it can affect equality
- 	// Note: changes in state of ts_, i.e affect the equality operator (used in test)
- 	//       must be captured. i.e things like relative duration & next_time_slot are
- 	//       reported by the Why command, & hence need to be synced.
- 	unsigned int state_change_no() const { return state_change_no_; }
+    std::string name() const; // for display/GUI
+    std::string toString() const;
+    void write(std::string&) const;
+    std::string dump() const;
 
- 	std::string name() const; // for display/GUI
-   std::string toString() const;
-   void write(std::string&) const;
- 	std::string dump() const;
-
-	// access
-	const TimeSeries& time_series() const { return ts_; }
+    // access
+    const TimeSeries& time_series() const { return ts_; }
 
 private:
-	void clearFree();             // resets the free flag, updates state_change_no_
-	bool is_free(const ecf::Calendar&) const; // ignores free_
+    void clearFree();                         // resets the free flag, updates state_change_no_
+    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
-	TimeSeries   ts_;
-	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
-	bool         free_{false};         // persisted for use by why() on client side && for state changes
+    TimeSeries ts_;
+    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+    bool free_{false};                // persisted for use by why() on client side && for state changes
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar );
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
-}
+} // namespace ecf
 #endif

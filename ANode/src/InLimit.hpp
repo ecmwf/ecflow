@@ -15,9 +15,13 @@
 // Description :
 //============================================================================
 
-#include "LimitFwd.hpp"
-namespace cereal { class access; }
+#include <string>
 
+#include "LimitFwd.hpp"
+
+namespace cereal {
+class access;
+}
 
 // Inlimit. Multiple inlimits on same Node are logically ANDED
 //    inlimit    limitName     // This will consume one token in the limit <limitName>
@@ -31,49 +35,53 @@ namespace cereal { class access; }
 // Inlimit of the same name specified on a task take priority over the family
 class InLimit {
 public:
-   explicit InLimit(const std::string& limit_name,                                // referenced limit
-           const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
-           int tokens = 1,                                                        // tokens to consume in the Limit
-           bool limit_this_node_only = false,                                     // if true limit this node only
-           bool limit_submission = false,                                         // limit submission only
-           bool check = true                                                      // disable name checking
-           );
-   InLimit()= default;
+    explicit InLimit(const std::string& limit_name, // referenced limit
+                     const std::string& path_to_node_with_referenced_limit =
+                         std::string(),                 // if empty, search for limit up parent hierarchy
+                     int tokens                = 1,     // tokens to consume in the Limit
+                     bool limit_this_node_only = false, // if true limit this node only
+                     bool limit_submission     = false, // limit submission only
+                     bool check                = true   // disable name checking
+    );
+    InLimit() = default;
 
-   void print(std::string&) const;
-   bool operator==(const InLimit& rhs) const;
-   bool operator<(const InLimit& rhs) const { return n_ < rhs.name();}
+    void print(std::string&) const;
+    bool operator==(const InLimit& rhs) const;
+    bool operator<(const InLimit& rhs) const { return n_ < rhs.name(); }
 
-   const std::string& name() const { return  n_;}         // must be defined
-   const std::string& pathToNode() const { return path_;} // can be empty,the node referenced by the In-Limit, this should hold the Limit.
-   int tokens() const { return tokens_;}
+    const std::string& name() const { return n_; } // must be defined
+    const std::string& pathToNode() const {
+        return path_;
+    } // can be empty,the node referenced by the In-Limit, this should hold the Limit.
+    int tokens() const { return tokens_; }
 
-   bool limit_submission() const { return limit_submission_;}
-   bool limit_this_node_only() const { return limit_this_node_only_;}
-   bool incremented() const { return incremented_;} // only used with limit_this_node_only
-   void set_incremented(bool f) { incremented_ = f;}
+    bool limit_submission() const { return limit_submission_; }
+    bool limit_this_node_only() const { return limit_this_node_only_; }
+    bool incremented() const { return incremented_; } // only used with limit_this_node_only
+    void set_incremented(bool f) { incremented_ = f; }
 
-   std::string toString() const;
-
-private:
-   void write(std::string&) const;
-
-   void limit( limit_ptr l) { limit_ = std::weak_ptr<Limit>(l);}
-   Limit* limit() const { return limit_.lock().get();}  // can return NULL
-   friend class InLimitMgr;
+    std::string toString() const;
 
 private:
-   std::weak_ptr<Limit>   limit_;                        // NOT persisted since computed on the fly
-   std::string            n_;
-   std::string            path_;
-   int                    tokens_{1};
-   bool                   limit_this_node_only_{false};  // default is false,if True, will consume one token(s) only, regardless of number of children
-   bool                   limit_submission_{false};      // limit submission only
-   bool                   incremented_{false};           // state
+    void write(std::string&) const;
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar);
+    void limit(limit_ptr l) { limit_ = std::weak_ptr<Limit>(l); }
+    Limit* limit() const { return limit_.lock().get(); } // can return NULL
+    friend class InLimitMgr;
+
+private:
+    std::weak_ptr<Limit> limit_; // NOT persisted since computed on the fly
+    std::string n_;
+    std::string path_;
+    int tokens_{1};
+    bool limit_this_node_only_{
+        false}; // default is false,if True, will consume one token(s) only, regardless of number of children
+    bool limit_submission_{false}; // limit submission only
+    bool incremented_{false};      // state
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar);
 };
 
 #endif

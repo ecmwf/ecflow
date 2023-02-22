@@ -10,86 +10,92 @@
 #ifndef INFOPANELITEM_HPP_
 #define INFOPANELITEM_HPP_
 
+#include <string>
+
+#include <QString>
+
 #include "FlagSet.hpp"
+#include "InfoPresenter.hpp"
 #include "NodeObserver.hpp"
 #include "VInfo.hpp"
-#include "InfoPresenter.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
-
-#include <string>
-#include <QString>
 
 class QWidget;
 class InfoPanel;
 class InfoProvider;
 class VComboSettings;
 
-//This is the (abstract) base class to represent one tab in the info panel.
-//It cannot be inheried from QObject beacuse we would end up with double inheritance since
-//all the derived calsses are inherited from QObject!!
+// This is the (abstract) base class to represent one tab in the info panel.
+// It cannot be inheried from QObject beacuse we would end up with double inheritance since
+// all the derived calsses are inherited from QObject!!
 
-class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
-{
-friend class InfoPanel;
+class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver {
+    friend class InfoPanel;
 
 public:
-    InfoPanelItem() :  unselectedFlags_(KeepContents) {}
-	~InfoPanelItem() override;
+    InfoPanelItem() : unselectedFlags_(KeepContents) {}
+    ~InfoPanelItem() override;
 
-    enum ChangeFlag {ActiveChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
+    enum ChangeFlag {
+        ActiveChanged    = 1,
+        SelectedChanged  = 2,
+        SuspendedChanged = 4,
+        FrozenChanged    = 8,
+        DetachedChanged  = 16
+    };
     typedef FlagSet<ChangeFlag> ChangeFlags;
 
-    //What to do when the item is unselected
-    enum UnselectedFlag {KeepContents=1,KeepActivity=2};
+    // What to do when the item is unselected
+    enum UnselectedFlag { KeepContents = 1, KeepActivity = 2 };
     typedef FlagSet<UnselectedFlag> UnselectedFlags;
 
-	virtual void reload(VInfo_ptr info)=0;
-	virtual QWidget* realWidget()=0;
-	virtual void clearContents()=0;
+    virtual void reload(VInfo_ptr info) = 0;
+    virtual QWidget* realWidget()       = 0;
+    virtual void clearContents()        = 0;
     virtual bool hasSameContents(VInfo_ptr info);
     void setOwner(InfoPanel*);
 
     virtual void setActive(bool);
-    void setSelected(bool,VInfo_ptr);
-    void setSuspended(bool,VInfo_ptr);
-	void setFrozen(bool);
+    void setSelected(bool, VInfo_ptr);
+    void setSuspended(bool, VInfo_ptr);
+    void setFrozen(bool);
     void setDetached(bool, bool update);
 
-    bool isSuspended() const {return suspended_;}
-    bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}
+    bool isSuspended() const { return suspended_; }
+    bool keepServerDataOnLoad() const { return keepServerDataOnLoad_; }
     virtual void notifyInfoChanged(const std::string& /*path*/) {}
     virtual void rerender() {}
 
-	//From VTaskObserver
+    // From VTaskObserver
     void taskChanged(VTask_ptr) override {}
 
-	//From NodeObserver
-	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
-	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override {}
 
     virtual void writeSettings(VComboSettings*) {}
     virtual void readSettings(VComboSettings*) {}
 
 protected:
-	void adjust(VInfo_ptr);
+    void adjust(VInfo_ptr);
     void linkSelected(const std::string& path);
     void linkSelected(VInfo_ptr);
-    void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
-    void relayDashboardCommand(VInfo_ptr info,QString cmd);
+    void relayInfoPanelCommand(VInfo_ptr info, QString cmd);
+    void relayDashboardCommand(VInfo_ptr info, QString cmd);
 
     void clear();
-    virtual void updateState(const ChangeFlags&)=0;
+    virtual void updateState(const ChangeFlags&) = 0;
 
-	//Notifications about the server changes
-	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
+    // Notifications about the server changes
+    virtual void defsChanged(const std::vector<ecf::Aspect::Type>&) = 0;
     virtual void connectStateChanged() {}
     virtual void suiteFilterChanged() {}
     virtual void serverSyncFinished() {}
-	
-	//Notifications about the node changes
-	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
-	
+
+    // Notifications about the node changes
+    virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) = 0;
+
     InfoPanel* owner_{nullptr};
     bool active_{false};
     bool selected_{false};
@@ -100,33 +106,31 @@ protected:
     bool useAncestors_{false};
     bool handleAnyChange_{false};
 
-    //do not reload the server data when a new info object is loaded. This
-    //only makes sense if the this sever-related item(tab) is alawys visible
-    //whatever node is selected!!!
+    // do not reload the server data when a new info object is loaded. This
+    // only makes sense if the this sever-related item(tab) is alawys visible
+    // whatever node is selected!!!
     bool keepServerDataOnLoad_{false};
 };
 
-class InfoPanelItemFactory
-{
+class InfoPanelItemFactory {
 public:
-	explicit InfoPanelItemFactory(const std::string&);
+    explicit InfoPanelItemFactory(const std::string&);
     virtual ~InfoPanelItemFactory() = default;
 
-    virtual InfoPanelItem* make() = 0;
+    virtual InfoPanelItem* make()   = 0;
     static InfoPanelItem* create(const std::string& name);
 
 private:
-	explicit InfoPanelItemFactory(const InfoPanelItemFactory&) = delete;
-	InfoPanelItemFactory& operator=(const InfoPanelItemFactory&) = delete;
-
+    explicit InfoPanelItemFactory(const InfoPanelItemFactory&)   = delete;
+    InfoPanelItemFactory& operator=(const InfoPanelItemFactory&) = delete;
 };
 
-template<class T>
-class InfoPanelItemMaker : public InfoPanelItemFactory
-{
+template <class T>
+class InfoPanelItemMaker : public InfoPanelItemFactory {
     InfoPanelItem* make() override { return new T(); }
+
 public:
-	explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
+    explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
 };
 
 #endif

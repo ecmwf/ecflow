@@ -12,25 +12,23 @@
 #define MESSAGEITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-
 #include "ui_MessageItemWidget.h"
 
 class LogModel;
 
-class MessageItemWidget : public QWidget, public InfoPanelItem, protected Ui::MessageItemWidget
-{
+class MessageItemWidget : public QWidget, public InfoPanelItem, protected Ui::MessageItemWidget {
     Q_OBJECT
 public:
-	explicit MessageItemWidget(QWidget *parent=nullptr);
+    explicit MessageItemWidget(QWidget* parent = nullptr);
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-	//From VInfoPresenter
-	void infoReady(VReply*) override;
-	void infoFailed(VReply*) override;
-	void infoProgress(VReply*) override;
+    // From VInfoPresenter
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override;
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
@@ -40,11 +38,10 @@ protected Q_SLOTS:
     void on_actionCopyRow__triggered();
 
 protected:
-    void updateState(const ChangeFlags&) override {}	
+    void updateState(const ChangeFlags&) override {}
     void toClipboard(QString txt) const;
 
     LogModel* model_;
 };
 
 #endif
-

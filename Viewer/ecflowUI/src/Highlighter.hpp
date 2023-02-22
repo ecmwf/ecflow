@@ -11,28 +11,28 @@
 #ifndef HIGHLIGHTER_HPP_
 #define HIGHLIGHTER_HPP_
 
-#include <QtGlobal>
 #include <string>
+
 #include <QSyntaxHighlighter>
+#include <QtGlobal>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-#include <QRegExp>
+    #include <QRegExp>
 #endif
 #include <QRegularExpression>
 
-class Highlighter : public QSyntaxHighlighter
-{
+class Highlighter : public QSyntaxHighlighter {
 public:
-	Highlighter(QTextDocument *parent,QString id);
+    Highlighter(QTextDocument* parent, QString id);
     static void init(const std::string& parFile);
     void toHtml(QString& html);
 
 protected:
-	void highlightBlock(const QString &text) override;
-	void addRule(QString,QTextCharFormat);
+    void highlightBlock(const QString& text) override;
+    void addRule(QString, QTextCharFormat);
 
 private:
-	void load(QString);
+    void load(QString);
 
     struct HighlightingRule
     {
@@ -44,8 +44,8 @@ private:
         QTextCharFormat format;
     };
 
-	QList<HighlightingRule> rules_;
-	static std::string parFile_;
+    QList<HighlightingRule> rules_;
+    static std::string parFile_;
 };
 
 #endif

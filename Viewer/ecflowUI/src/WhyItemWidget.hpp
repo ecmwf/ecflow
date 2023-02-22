@@ -13,25 +13,24 @@
 
 #include <QPlainTextEdit>
 
-#include "InfoPanelItem.hpp"
 #include "HtmlItemWidget.hpp"
+#include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
 class VNode;
 
-class WhyItemWidget : public HtmlItemWidget, public InfoPanelItem
-{
-Q_OBJECT
+class WhyItemWidget : public HtmlItemWidget, public InfoPanelItem {
+    Q_OBJECT
 
 public:
-	explicit WhyItemWidget(QWidget *parent=nullptr);
-	~WhyItemWidget() override;
+    explicit WhyItemWidget(QWidget* parent = nullptr);
+    ~WhyItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-    //From VInfoPresenter
+    // From VInfoPresenter
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;
     void infoProgress(VReply*) override {}
@@ -49,11 +48,10 @@ protected:
 private:
     void load();
     QString why() const;
-    QString makeHtml(const std::vector<std::string>&,const std::vector<std::string>&) const;
+    QString makeHtml(const std::vector<std::string>&, const std::vector<std::string>&) const;
     QString makeHtml(const std::vector<std::string>&) const;
 
-    QMap<QString,QString> stateMap_;
+    QMap<QString, QString> stateMap_;
 };
 
 #endif
-

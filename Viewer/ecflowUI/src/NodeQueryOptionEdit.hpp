@@ -11,8 +11,8 @@
 #ifndef NODEQUERYOPTIONEDIT_HPP
 #define NODEQUERYOPTIONEDIT_HPP
 
-#include <QObject>
 #include <QDateTime>
+#include <QObject>
 
 class CustomListWidget;
 class NodeQuery;
@@ -34,22 +34,21 @@ class QSpinBox;
 class QToolButton;
 class QWidget;
 
-class NodeQueryOptionEdit : public QObject
-{
-Q_OBJECT
+class NodeQueryOptionEdit : public QObject {
+    Q_OBJECT
 public:
-    NodeQueryOptionEdit(QString optionId,QGridLayout* grid,QWidget *parent);
+    NodeQueryOptionEdit(QString optionId, QGridLayout* grid, QWidget* parent);
 
     void setQuery(NodeQuery*);
-    QString optionId() const {return optionId_;}
-    virtual void setVisible(bool)=0;
+    QString optionId() const { return optionId_; }
+    virtual void setVisible(bool) = 0;
     virtual void clear() {}
 
 Q_SIGNALS:
     void changed();
 
 protected:
-    virtual void init(NodeQueryOption*)=0;
+    virtual void init(NodeQueryOption*) = 0;
 
     QString optionId_;
     bool initIsOn_;
@@ -57,11 +56,10 @@ protected:
     QGridLayout* grid_;
 };
 
-class NodeQueryStringOptionEdit : public  NodeQueryOptionEdit
-{
-Q_OBJECT
+class NodeQueryStringOptionEdit : public NodeQueryOptionEdit {
+    Q_OBJECT
 public:
-    NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent, bool sameRow);
+    NodeQueryStringOptionEdit(NodeQueryOption* option, QGridLayout* grid, QWidget* parent, bool sameRow);
     void setVisible(bool) override;
     void clear() override;
 
@@ -70,22 +68,21 @@ protected Q_SLOTS:
     void slotMatchChanged(int val);
 
 protected:
-    void init(NodeQueryOption* o) override {initInternal(o);}
+    void init(NodeQueryOption* o) override { initInternal(o); }
 
 private:
     void initInternal(NodeQueryOption*);
 
     QLabel* label_{nullptr};
     StringMatchCombo* matchCb_{nullptr};
-    QLineEdit *le_{nullptr};
+    QLineEdit* le_{nullptr};
     NodeQueryStringOption* option_{nullptr};
 };
 
-class NodeQueryListOptionEdit : public  NodeQueryOptionEdit
-{
-Q_OBJECT
+class NodeQueryListOptionEdit : public NodeQueryOptionEdit {
+    Q_OBJECT
 public:
-    NodeQueryListOptionEdit(NodeQueryOption* option,CustomListWidget* cl,QToolButton*,QWidget*);
+    NodeQueryListOptionEdit(NodeQueryOption* option, CustomListWidget* cl, QToolButton*, QWidget*);
     void setVisible(bool) override {}
     void clear() override;
 
@@ -93,28 +90,27 @@ protected Q_SLOTS:
     void slotListChanged();
 
 protected:
-    void init(NodeQueryOption* o) override {initInternal(o);}
+    void init(NodeQueryOption* o) override { initInternal(o); }
 
 private:
     void initInternal(NodeQueryOption*);
 
     CustomListWidget* list_{nullptr};
-    QToolButton *resetTb_{nullptr};
+    QToolButton* resetTb_{nullptr};
     NodeQueryListOption* option_{nullptr};
 };
 
-class NodeQueryComboOptionEdit : public  NodeQueryOptionEdit
-{
-Q_OBJECT
+class NodeQueryComboOptionEdit : public NodeQueryOptionEdit {
+    Q_OBJECT
 public:
-    NodeQueryComboOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget*);
+    NodeQueryComboOptionEdit(NodeQueryOption* option, QGridLayout* grid, QWidget*);
     void setVisible(bool) override;
 
 protected Q_SLOTS:
     void slotCbChanged(int);
 
 protected:
-    void init(NodeQueryOption* o) override {initInternal(o);}
+    void init(NodeQueryOption* o) override { initInternal(o); }
 
 private:
     void initInternal(NodeQueryOption*);
@@ -124,11 +120,10 @@ private:
     NodeQueryComboOption* option_{nullptr};
 };
 
-class NodeQueryPeriodOptionEdit : public NodeQueryOptionEdit
-{
-Q_OBJECT
+class NodeQueryPeriodOptionEdit : public NodeQueryOptionEdit {
+    Q_OBJECT
 public:
-    NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget *parent);
+    NodeQueryPeriodOptionEdit(NodeQueryOption* option, QGridLayout* grid, QWidget* parent);
     void setVisible(bool) override;
 
 protected Q_SLOTS:
@@ -140,7 +135,7 @@ protected Q_SLOTS:
     void slotToChanged(QDateTime);
 
 protected:
-    void init(NodeQueryOption* o) override {initInternal(o);}
+    void init(NodeQueryOption* o) override { initInternal(o); }
 
 private:
     void initInternal(NodeQueryOption*);
@@ -156,4 +151,3 @@ private:
 };
 
 #endif // NODEQUERYOPTIONEDIT_HPP
-

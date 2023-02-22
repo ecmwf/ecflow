@@ -40,275 +40,267 @@ class VTableServer;
 class VTree;
 class VTreeNode;
 
-class VTreeChangeInfo
-{
+class VTreeChangeInfo {
 public:
     VTreeChangeInfo() = default;
     void addStateChange(const VNode*);
-    const std::vector<VNode*> stateChangeSuites() const { return stateSuites_;}
-    void clear() {stateSuites_.clear();}
+    const std::vector<VNode*> stateChangeSuites() const { return stateSuites_; }
+    void clear() { stateSuites_.clear(); }
 
 protected:
     std::vector<VNode*> stateSuites_;
 };
 
+class VModelServer : public QObject, public ServerObserver, public NodeObserver {
+    Q_OBJECT
 
-class VModelServer : public QObject, public ServerObserver, public NodeObserver
-{
-Q_OBJECT
-
-friend class VModelData;
-friend class VTableModelData;
-friend class VTreeModelData;
+    friend class VModelData;
+    friend class VTableModelData;
+    friend class VTreeModelData;
 
 public:
-    explicit VModelServer(ServerHandler *server);
+    explicit VModelServer(ServerHandler* server);
     ~VModelServer() override;
 
-    ServerHandler* realServer() const {return server_;}
+    ServerHandler* realServer() const { return server_; }
 
     int totalNodeNum() const;
     virtual int nodeNum() const = 0;
-    virtual void reload()=0;
-    //virtual void filterChanged()=0;
-    bool inScan() const {return inScan_;}
-    virtual NodeFilter* filter() const=0;
+    virtual void reload()       = 0;
+    // virtual void filterChanged()=0;
+    bool inScan() const { return inScan_; }
+    virtual NodeFilter* filter() const = 0;
 
-    //Performance hack to avoid casts
-    virtual VTreeServer* treeServer() const {return nullptr;}
-    virtual VTableServer* tableServer() const {return nullptr;}
+    // Performance hack to avoid casts
+    virtual VTreeServer* treeServer() const { return nullptr; }
+    virtual VTableServer* tableServer() const { return nullptr; }
 
-    virtual void refreshServerNode()=0;
+    virtual void refreshServerNode() = 0;
 
 Q_SIGNALS:
     void dataChanged(VModelServer*);
-	void beginServerScan(VModelServer*,int);
-	void endServerScan(VModelServer*,int);
-	void beginServerClear(VModelServer*,int);
-	void endServerClear(VModelServer*,int);
+    void beginServerScan(VModelServer*, int);
+    void endServerScan(VModelServer*, int);
+    void beginServerClear(VModelServer*, int);
+    void endServerClear(VModelServer*, int);
     void serverRenamed(VModelServer*, const std::string& /*oldName*/);
 
-	void rerender();
+    void rerender();
 
 protected:
-	ServerHandler *server_;
+    ServerHandler* server_;
     bool inScan_;
 };
 
-class VTreeServer : public VModelServer
-{
-Q_OBJECT
+class VTreeServer : public VModelServer {
+    Q_OBJECT
 
 public:
-     VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,AttributeFilter *attrFilter);
-	 ~VTreeServer() override;
+    VTreeServer(ServerHandler* server, NodeFilterDef* filterDef, AttributeFilter* attrFilter);
+    ~VTreeServer() override;
 
-     void reload() override;
-     void filterChanged();
-     int nodeNum() const override;
-     NodeFilter* filter() const override;
-     VTree* tree() const {return tree_;}
-     VTreeServer* treeServer() const override {return const_cast<VTreeServer*>(this);}
-     void attrFilterChanged();
-     void setForceShowNode(const VNode* node);
-     void setForceShowAttribute(const VAttribute* node);
-     void setForceShow(const VItem* item);
-     void clearForceShow(const VItem*);
-     bool isFirstScan() const {return firstScan_;}     
-     ExpandState* expandState() const {return expandState_;}
-     void setExpandState(ExpandState*);
-     void deleteExpandState();
-     void refreshServerNode() override;
+    void reload() override;
+    void filterChanged();
+    int nodeNum() const override;
+    NodeFilter* filter() const override;
+    VTree* tree() const { return tree_; }
+    VTreeServer* treeServer() const override { return const_cast<VTreeServer*>(this); }
+    void attrFilterChanged();
+    void setForceShowNode(const VNode* node);
+    void setForceShowAttribute(const VAttribute* node);
+    void setForceShow(const VItem* item);
+    void clearForceShow(const VItem*);
+    bool isFirstScan() const { return firstScan_; }
+    ExpandState* expandState() const { return expandState_; }
+    void setExpandState(ExpandState*);
+    void deleteExpandState();
+    void refreshServerNode() override;
 
-     //From ServerObserver
-	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
-     void notifyServerDelete(ServerHandler*) override;
-	 void notifyBeginServerClear(ServerHandler* server) override;
-	 void notifyEndServerClear(ServerHandler* server) override;
-	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
-	 void notifyEndServerScan(ServerHandler* server) override;
-	 void notifyServerConnectState(ServerHandler* server) override;
-	 void notifyServerActivityChanged(ServerHandler* server) override;
-	 void notifyEndServerSync(ServerHandler* server) override;
-     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
+    // From ServerObserver
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+    void notifyServerDelete(ServerHandler*) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler* server, const VServerChange&) override;
+    void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerActivityChanged(ServerHandler* server) override;
+    void notifyEndServerSync(ServerHandler* server) override;
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
-	 //From NodeObserver
-	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
-	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
 
 Q_SIGNALS:
-     void beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
-     void endAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
-     void nodeChanged(VTreeServer*,const VTreeNode*);
-     void attributesChanged(VTreeServer*,const VTreeNode*);
-     void beginFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
-     void endFilterUpdateRemove(VTreeServer*,const VTreeNode*,int);
-     void beginFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
-     void endFilterUpdateAdd(VTreeServer*,const VTreeNode*,int);
-     void beginFilterUpdateRemoveTop(VTreeServer*,int);
-     void endFilterUpdateRemoveTop(VTreeServer*,int);
-     void beginFilterUpdateInsertTop(VTreeServer*,int);
-     void endFilterUpdateInsertTop(VTreeServer*,int);
+    void beginAddRemoveAttributes(VTreeServer*, const VTreeNode*, int, int);
+    void endAddRemoveAttributes(VTreeServer*, const VTreeNode*, int, int);
+    void nodeChanged(VTreeServer*, const VTreeNode*);
+    void attributesChanged(VTreeServer*, const VTreeNode*);
+    void beginFilterUpdateRemove(VTreeServer*, const VTreeNode*, int);
+    void endFilterUpdateRemove(VTreeServer*, const VTreeNode*, int);
+    void beginFilterUpdateAdd(VTreeServer*, const VTreeNode*, int);
+    void endFilterUpdateAdd(VTreeServer*, const VTreeNode*, int);
+    void beginFilterUpdateRemoveTop(VTreeServer*, int);
+    void endFilterUpdateRemoveTop(VTreeServer*, int);
+    void beginFilterUpdateInsertTop(VTreeServer*, int);
+    void endFilterUpdateInsertTop(VTreeServer*, int);
 
 private:
-     void updateFilter(const std::vector<VNode*>& suitesChanged);
-     void adjustFirstScan();
+    void updateFilter(const std::vector<VNode*>& suitesChanged);
+    void adjustFirstScan();
 
-     VTree* tree_;
-     VTreeChangeInfo* changeInfo_;
-     AttributeFilter *attrFilter_;
-     TreeNodeFilter* filter_;
-     bool firstScan_;
-     int firstScanTryNo_;
-     int maxFirstScanTry_;
-     ExpandState* expandState_;
+    VTree* tree_;
+    VTreeChangeInfo* changeInfo_;
+    AttributeFilter* attrFilter_;
+    TreeNodeFilter* filter_;
+    bool firstScan_;
+    int firstScanTryNo_;
+    int maxFirstScanTry_;
+    ExpandState* expandState_;
 };
 
-class VTableServer : public VModelServer
-{
- Q_OBJECT
+class VTableServer : public VModelServer {
+    Q_OBJECT
 public:
-	 VTableServer(ServerHandler *server,NodeFilterDef* filterDef);
-	 ~VTableServer() override;
+    VTableServer(ServerHandler* server, NodeFilterDef* filterDef);
+    ~VTableServer() override;
 
-     void reload() override;
-     void filterChanged() {}
-     int nodeNum() const override;
-     VNode* nodeAt(int) const;
-     int indexOf(const VNode* node) const;
-     NodeFilter* filter() const override;
-     VTableServer* tableServer() const override {return const_cast<VTableServer*>(this);}
-     void setForceShowNode(const VNode* node);
-     void setForceShowAttribute(const VAttribute* node);
-     void clearForceShow(const VItem*);
-     void refreshServerNode() override {}
+    void reload() override;
+    void filterChanged() {}
+    int nodeNum() const override;
+    VNode* nodeAt(int) const;
+    int indexOf(const VNode* node) const;
+    NodeFilter* filter() const override;
+    VTableServer* tableServer() const override { return const_cast<VTableServer*>(this); }
+    void setForceShowNode(const VNode* node);
+    void setForceShowAttribute(const VAttribute* node);
+    void clearForceShow(const VItem*);
+    void refreshServerNode() override {}
 
-	 //From ServerObserver
-     void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
-     void notifyServerDelete(ServerHandler*) override;
-	 void notifyBeginServerClear(ServerHandler* server) override;
-     void notifyEndServerClear(ServerHandler* server) override;
-     void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
-	 void notifyEndServerScan(ServerHandler* server) override;
-	 void notifyServerConnectState(ServerHandler* server) override;
-	 void notifyServerActivityChanged(ServerHandler* server) override;
-	 void notifyEndServerSync(ServerHandler* server) override;
-     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
+    // From ServerObserver
+    void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
+    void notifyServerDelete(ServerHandler*) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler* server, const VServerChange&) override;
+    void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerActivityChanged(ServerHandler* server) override;
+    void notifyEndServerSync(ServerHandler* server) override;
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
-	 //From NodeObserver
-	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
-	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
 
 Q_SIGNALS:
-     void nodeChanged(VTableServer*,const VNode*);
-     void updateBegin();
-     void updateEnd();
+    void nodeChanged(VTableServer*, const VNode*);
+    void updateBegin();
+    void updateEnd();
 
 private:
-     TableNodeFilter* filter_;
+    TableNodeFilter* filter_;
 };
 
-//This class defines the data a given Node Model (Tree or Table) displays. The
-//node models can only access data through this interface. The class internally stores
-//a vector of VModelServer objects each representing a server the model displays.
+// This class defines the data a given Node Model (Tree or Table) displays. The
+// node models can only access data through this interface. The class internally stores
+// a vector of VModelServer objects each representing a server the model displays.
 
-class VModelData : public QObject, public ServerFilterObserver
-{
-Q_OBJECT
+class VModelData : public QObject, public ServerFilterObserver {
+    Q_OBJECT
 
 public:
-	enum ModelType {TreeModel,TableModel};
+    enum ModelType { TreeModel, TableModel };
 
-	VModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
-	~VModelData() override;
+    VModelData(NodeFilterDef* filterDef, AbstractNodeModel* model);
+    ~VModelData() override;
 
     void setActive(bool);
     void clear();
-	void reset(ServerFilter* servers);
+    void reset(ServerFilter* servers);
 
     void reload();
 
-	int count() const {return static_cast<int>(servers_.size());}
-	int  indexOfServer(void*) const;
+    int count() const { return static_cast<int>(servers_.size()); }
+    int indexOfServer(void*) const;
     ServerHandler* serverHandler(void*) const;
     ServerHandler* serverHandler(int) const;
-	VModelServer* server(int) const;
+    VModelServer* server(int) const;
     VModelServer* server(const void*) const;
     VModelServer* server(const std::string&) const;
     VModelServer* server(ServerHandler*) const;
-	int indexOfServer(ServerHandler* s) const;
-	int numOfNodes(int) const;
+    int indexOfServer(ServerHandler* s) const;
+    int numOfNodes(int) const;
     bool isFilterComplete() const;
     bool isFilterNull() const;
     virtual void deleteExpandState() {}
 
-	//From ServerFilterObserver
-	void notifyServerFilterAdded(ServerItem*) override;
-	void notifyServerFilterRemoved(ServerItem*) override;
-	void notifyServerFilterChanged(ServerItem*) override;
-	void notifyServerFilterDelete() override;
+    // From ServerFilterObserver
+    void notifyServerFilterAdded(ServerItem*) override;
+    void notifyServerFilterRemoved(ServerItem*) override;
+    void notifyServerFilterChanged(ServerItem*) override;
+    void notifyServerFilterDelete() override;
 
 public Q_SLOTS:
     void slotFilterDefChanged();
     void slotServerRenamed(VModelServer*, const std::string& /*oldName*/);
 
 Q_SIGNALS:
-    //void filterChanged();
-	void filterDeleteBegin();
-	void filterDeleteEnd();
+    // void filterChanged();
+    void filterDeleteBegin();
+    void filterDeleteEnd();
     void serverAddBegin(int);
-	void serverAddEnd();
-    void serverRemoveBegin(VModelServer*,int);
+    void serverAddEnd();
+    void serverRemoveBegin(VModelServer*, int);
     void serverRemoveEnd(int);
     void updateBegin();
     void updateEnd();
 
 protected:
-	void init();
+    void init();
     void addToServers(VModelServer* s);
-    virtual void add(ServerHandler*)=0;
+    virtual void add(ServerHandler*) = 0;
     virtual void connectToModel(VModelServer* d);
 
-	std::vector<VModelServer*> servers_;
-    int serverNum_; //we cachec servers_.size() for performance reasons
-	ServerFilter *serverFilter_;
-	NodeFilterDef* filterDef_;
-	AbstractNodeModel* model_;
+    std::vector<VModelServer*> servers_;
+    int serverNum_; // we cachec servers_.size() for performance reasons
+    ServerFilter* serverFilter_;
+    NodeFilterDef* filterDef_;
+    AbstractNodeModel* model_;
     bool active_;
 };
 
-class VTreeModelData : public VModelData
-{
+class VTreeModelData : public VModelData {
     Q_OBJECT
 
 public:
-    VTreeModelData(NodeFilterDef* filterDef,AttributeFilter* attrFilter,AbstractNodeModel* model);
+    VTreeModelData(NodeFilterDef* filterDef, AttributeFilter* attrFilter, AbstractNodeModel* model);
     void deleteExpandState() override;
 
 protected Q_SLOTS:
     void slotAttrFilterChanged();
 
 protected:
-    void add(ServerHandler *server) override;
+    void add(ServerHandler* server) override;
     void connectToModel(VModelServer* d) override;
 
-    AttributeFilter *attrFilter_;
+    AttributeFilter* attrFilter_;
 };
 
-class VTableModelData : public VModelData
-{
+class VTableModelData : public VModelData {
 public:
-	VTableModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
+    VTableModelData(NodeFilterDef* filterDef, AbstractNodeModel* model);
 
-	int numOfFiltered(int index) const;
+    int numOfFiltered(int index) const;
     VNode* nodeAt(int totalRow);
-    int position(const VNode *node) const;
-    int position(VTableServer*,const VNode *node) const;
+    int position(const VNode* node) const;
+    int position(VTableServer*, const VNode* node) const;
     int position(VTableServer* server);
-    bool position(VTableServer* server,int& start,int& count);
+    bool position(VTableServer* server, int& start, int& count);
 
 protected:
-    void add(ServerHandler *server) override;
+    void add(ServerHandler* server) override;
     void connectToModel(VModelServer* d) override;
 };
 

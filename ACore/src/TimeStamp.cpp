@@ -20,30 +20,39 @@ namespace TimeStamp {
 
 namespace {
 
-struct regular {
-  static constexpr char const *format = "[%H:%M:%S %-e.%-m.%Y] ";
-  static constexpr size_t size = 23;
+struct regular
+{
+    static constexpr char const* format = "[%H:%M:%S %-e.%-m.%Y] ";
+    static constexpr size_t size        = 23;
 };
 
-struct brief {
-  static constexpr char const *format = "[%H:%M:%S %-e.%-m] ";
-  static constexpr size_t size = 18;
+struct brief
+{
+    static constexpr char const* format = "[%H:%M:%S %-e.%-m] ";
+    static constexpr size_t size        = 18;
 };
 
-template <typename FMT = regular> std::string format_now() {
-  std::time_t now = std::time(nullptr);
-  char buffer[FMT::size];
-  std::strftime(buffer, sizeof(buffer), FMT::format, std::localtime(&now));
-  return buffer;
+template <typename FMT = regular>
+std::string format_now() {
+    std::time_t now = std::time(nullptr);
+    char buffer[FMT::size];
+    std::strftime(buffer, sizeof(buffer), FMT::format, std::localtime(&now));
+    return buffer;
 }
 
 } // namespace
 
-std::string now() { return format_now(); }
+std::string now() {
+    return format_now();
+}
 
-void now(std::string &time_stamp) { time_stamp = format_now(); }
+void now(std::string& time_stamp) {
+    time_stamp = format_now();
+}
 
-void now_in_brief(std::string &time_stamp) { time_stamp = format_now<brief>(); }
+void now_in_brief(std::string& time_stamp) {
+    time_stamp = format_now<brief>();
+}
 
 } // namespace TimeStamp
 } // namespace ecf

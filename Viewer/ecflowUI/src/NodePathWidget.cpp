@@ -20,176 +20,156 @@
 #include <QToolButton>
 #include <QVector>
 
-#include "VNode.hpp"
-#include "VProperty.hpp"
 #include "Palette.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
-#include "ViewerUtil.hpp"
 #include "VNState.hpp"
+#include "VNode.hpp"
+#include "VProperty.hpp"
 #include "VSState.hpp"
 #include "VSettings.hpp"
+#include "ViewerUtil.hpp"
 
 static std::vector<std::string> propVec;
 
 QColor NodePathItem::disabledBgCol_;
 QColor NodePathItem::disabledBorderCol_;
 QColor NodePathItem::disabledFontCol_;
-int NodePathItem::triLen_=10;
-int NodePathItem::height_=0;
-int NodePathItem::hPadding_=2;
-int NodePathItem::vPadding_=0;
+int NodePathItem::triLen_   = 10;
+int NodePathItem::height_   = 0;
+int NodePathItem::hPadding_ = 2;
+int NodePathItem::vPadding_ = 0;
 
-//#define _UI_NODEPATHWIDGET_DEBUG
+// #define _UI_NODEPATHWIDGET_DEBUG
 
-BcWidget::BcWidget(QWidget* parent) : 
-    QWidget(parent),
-    font_(QFont())
-{
-    font_=QFont();
-    font_.setPointSize(font_.pointSize()-1);
+BcWidget::BcWidget(QWidget* parent) : QWidget(parent), font_(QFont()) {
+    font_ = QFont();
+    font_.setPointSize(font_.pointSize() - 1);
     QFontMetrics fm(font_);
 
-    itemHeight_=NodePathItem::height(font_);
-    height_=itemHeight_+2*vMargin_;
-    
+    itemHeight_ = NodePathItem::height(font_);
+    height_     = itemHeight_ + 2 * vMargin_;
+
     setMouseTracking(true);
-    
-    //Property
-    if(propVec.empty())
-    {
+
+    // Property
+    if (propVec.empty()) {
         propVec.emplace_back("view.common.node_style");
         propVec.emplace_back("view.common.node_gradient");
     }
 
-    prop_=new PropertyMapper(propVec,this);
-   
+    prop_ = new PropertyMapper(propVec, this);
+
     updateSettings();
 
-    setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-    setMinimumSize(width_,height_);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    setMinimumSize(width_, height_);
 
-    ellipsisItem_ = new NodePathEllipsisItem(this);
-    ellipsisItem_->visible_=false;
+    ellipsisItem_           = new NodePathEllipsisItem(this);
+    ellipsisItem_->visible_ = false;
 
-    reset(items_,100);
+    reset(items_, 100);
 
-    //setAutoFillBackground(true);
-    //QPalette pal=palette();
-    //pal.setColor(QPalette::Window,Qt::transparent);
-    //setPalette(pal);
+    // setAutoFillBackground(true);
+    // QPalette pal=palette();
+    // pal.setColor(QPalette::Window,Qt::transparent);
+    // setPalette(pal);
 }
 
-BcWidget::~BcWidget()
-{
+BcWidget::~BcWidget() {
     delete prop_;
     delete ellipsisItem_;
-}    
+}
 
-void BcWidget::notifyChange(VProperty*)
-{
+void BcWidget::notifyChange(VProperty*) {
     updateSettings();
-}    
-    
-void BcWidget::updateSettings()
-{
-    if(VProperty *p=prop_->find("view.common.node_gradient"))
-        useGrad_=p->value().toBool();
-}    
+}
 
-bool BcWidget::isFull() const
-{
+void BcWidget::updateSettings() {
+    if (VProperty* p = prop_->find("view.common.node_gradient"))
+        useGrad_ = p->value().toBool();
+}
+
+bool BcWidget::isFull() const {
     return !elided_ && !ellipsisItem_->visible_;
 }
 
-void BcWidget::clear()
-{
+void BcWidget::clear() {
     items_.clear();
-    reset(items_,100);
+    reset(items_, 100);
 }
 
-void BcWidget::resetBorder(int idx)
-{
-    if(idx >=0 && idx < items_.count())
-    {
+void BcWidget::resetBorder(int idx) {
+    if (idx >= 0 && idx < items_.count()) {
         items_.at(idx)->resetBorder(idx == hovered_);
         updatePixmap(idx);
         update();
     }
 }
 
-void BcWidget::reset(QString txt, int maxWidth)
-{
-    maxWidth_=maxWidth;
-    hovered_=-1;
-    ellipsisItem_->visible_=false;
-    elided_=false;
+void BcWidget::reset(QString txt, int maxWidth) {
+    maxWidth_               = maxWidth;
+    hovered_                = -1;
+    ellipsisItem_->visible_ = false;
+    elided_                 = false;
 
     QFontMetrics fm(font_);
-    int xp=hMargin_;
-    int yp=vMargin_;
+    int xp = hMargin_;
+    int yp = vMargin_;
 
-    if(!txt.isEmpty())
-    {
-        text_=txt;
+    if (!txt.isEmpty()) {
+        text_ = txt;
     }
-    else
-    {
-        text_="No selection";
+    else {
+        text_ = "No selection";
     }
 
-    int len=ViewerUtil::textWidth(fm,text_);
-    textRect_=QRect(xp,yp,len,itemHeight_);
-    width_=xp+len+4;
+    int len   = ViewerUtil::textWidth(fm, text_);
+    textRect_ = QRect(xp, yp, len, itemHeight_);
+    width_    = xp + len + 4;
 
     crePixmap();
-    resize(width_,height_);
+    resize(width_, height_);
     update();
 }
 
-void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
-{
-    if(idx >=0 && idx < items_.count())
-    {                
-        bool newText=(text != items_.at(idx)->text_);
-        items_[idx]->reset(text,bgCol,fontCol,idx == hovered_);
+void BcWidget::reset(int idx, QString text, QColor bgCol, QColor fontCol) {
+    if (idx >= 0 && idx < items_.count()) {
+        bool newText = (text != items_.at(idx)->text_);
+        items_[idx]->reset(text, bgCol, fontCol, idx == hovered_);
 
-        if(newText)
-           reset(items_,maxWidth_);
-        else
-        {
-            updatePixmap(idx); 
+        if (newText)
+            reset(items_, maxWidth_);
+        else {
+            updatePixmap(idx);
             update();
-        }    
+        }
     }
-}    
-    
-void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
-{
+}
+
+void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "BcWidget::reset -->";
     UiLog().dbg() << "   maxWidth=" << maxWidth;
 #endif
 
-    maxWidth_=maxWidth;
-    items_=items;
-    hovered_=-1;
-    ellipsisItem_->visible_=false;
-    elided_=false;
+    maxWidth_               = maxWidth;
+    items_                  = items;
+    hovered_                = -1;
+    ellipsisItem_->visible_ = false;
+    elided_                 = false;
 
     QFontMetrics fm(font_);
-    int xp=hMargin_;
-    int yp=vMargin_;
+    int xp = hMargin_;
+    int yp = vMargin_;
 
-    if(items_.count() ==0)
-    {
-        int len=ViewerUtil::textWidth(fm,text_);
-        textRect_=QRect(xp,yp,len,itemHeight_);
-        width_=xp+len+4;
+    if (items_.count() == 0) {
+        int len   = ViewerUtil::textWidth(fm, text_);
+        textRect_ = QRect(xp, yp, len, itemHeight_);
+        width_    = xp + len + 4;
     }
-    else
-    {
+    else {
         //
         // xp is the top right corner of the shape (so it is not the rightmost edge)
         //
@@ -206,165 +186,146 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
         //  ********
         //
 
-        NodePathItem *lastItem=items_[items_.count()-1];
+        NodePathItem* lastItem = items_[items_.count() - 1];
         Q_ASSERT(lastItem);
-        int maxRedTextLen=0;
+        int maxRedTextLen = 0;
 
-        //Defines the shapes and positions for all the items
-        for(int i=0; i < items_.count(); i++)
-        {
-            xp=items_[i]->adjust(xp,yp);
-           
-            if(i != items_.count()-1)
-            {
-                xp+=gap_;
-                int tl=items_[i]->textLen();
-                if(tl > maxRedTextLen)
-                    maxRedTextLen=tl;
+        // Defines the shapes and positions for all the items
+        for (int i = 0; i < items_.count(); i++) {
+            xp = items_[i]->adjust(xp, yp);
+
+            if (i != items_.count() - 1) {
+                xp += gap_;
+                int tl = items_[i]->textLen();
+                if (tl > maxRedTextLen)
+                    maxRedTextLen = tl;
             }
         }
 
-        //The total width
-        width_=xp+NodePathItem::triLen_+hMargin_;
+        // The total width
+        width_ = xp + NodePathItem::triLen_ + hMargin_;
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   full width=" << width_;
 #endif
 
-        //maxWidth-=2*hMargin_;
+        // maxWidth-=2*hMargin_;
 
-        //If the total width is too big we try to use elidedtext in the items
+        // If the total width is too big we try to use elidedtext in the items
         //(with the execption of the last item)
-        int redTextLen=0;
-        if(width_ > maxWidth)
-        {
+        int redTextLen = 0;
+        if (width_ > maxWidth) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   try elided text";
 #endif
-            //Try different elided text lengths
-            for(int i=20; i >= 3; i--)
-            {
+            // Try different elided text lengths
+            for (int i = 20; i >= 3; i--) {
                 QString t;
-                for(int j=0; j < i; j++)
-                {
-                    t+="A";
+                for (int j = 0; j < i; j++) {
+                    t += "A";
                 }
-                t+="...";
+                t += "...";
 
-                //We only check the elided texts that are shorter then the max text len
-                redTextLen=ViewerUtil::textWidth(fm,t);
-                if(redTextLen < maxRedTextLen)
-                {
-                    //Estimate the total size with the elided text items
-                    xp=hMargin_;
-                    int estWidth=estimateWidth(0,xp,redTextLen);
+                // We only check the elided texts that are shorter then the max text len
+                redTextLen = ViewerUtil::textWidth(fm, t);
+                if (redTextLen < maxRedTextLen) {
+                    // Estimate the total size with the elided text items
+                    xp           = hMargin_;
+                    int estWidth = estimateWidth(0, xp, redTextLen);
 
-                    //if the size fits into maxWidth we adjust all the items
-                    if(estWidth < maxWidth)
-                    {
-                        int xp=hMargin_;
-                        width_ = adjustItems(0,xp,yp,redTextLen);
-                        elided_=true;
+                    // if the size fits into maxWidth we adjust all the items
+                    if (estWidth < maxWidth) {
+                        int xp  = hMargin_;
+                        width_  = adjustItems(0, xp, yp, redTextLen);
+                        elided_ = true;
 
-                        Q_ASSERT(width_== estWidth);
-                        Q_ASSERT(width_ <  maxWidth);
-                        break; //This breaks the whole for loop
+                        Q_ASSERT(width_ == estWidth);
+                        Q_ASSERT(width_ < maxWidth);
+                        break; // This breaks the whole for loop
                     }
                 }
             }
         }
 
-        //If the total width is still too big we start hiding items from the left
-        //and insert an ellipsis item to the front.
-        int xpAfterEllipsis=0;
-        if(width_ > maxWidth)
-        {
+        // If the total width is still too big we start hiding items from the left
+        // and insert an ellipsis item to the front.
+        int xpAfterEllipsis = 0;
+        if (width_ > maxWidth) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   insert ellipsis to front + remove items";
             UiLog().dbg() << "     redTextLen=" << redTextLen;
 #endif
-            Q_ASSERT(elided_==false);
+            Q_ASSERT(elided_ == false);
 
-            //width_=maxWidth;
+            // width_=maxWidth;
 
-            xp=hMargin_;
-            ellipsisItem_->visible_=true;
-            ellipsisItem_->adjust(xp,yp);
-            xp=ellipsisItem_->estimateRightPos(xp);
-            xpAfterEllipsis=xp+gap_;
-            bool fitOk=false;
-            int estWidth=0;
-            for(int i=0; i < items_.count()-1; i++)
-            {
-                xp=xpAfterEllipsis;
-                items_[i]->visible_=false;
+            xp                      = hMargin_;
+            ellipsisItem_->visible_ = true;
+            ellipsisItem_->adjust(xp, yp);
+            xp              = ellipsisItem_->estimateRightPos(xp);
+            xpAfterEllipsis = xp + gap_;
+            bool fitOk      = false;
+            int estWidth    = 0;
+            for (int i = 0; i < items_.count() - 1; i++) {
+                xp                  = xpAfterEllipsis;
+                items_[i]->visible_ = false;
 #ifdef _UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "     omit item " << i;
 #endif
-                estWidth=estimateWidth(i+1,xp,redTextLen);
+                estWidth = estimateWidth(i + 1, xp, redTextLen);
 #ifdef _UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "     estWidth " << estWidth;
-#endif                
-                if(estWidth  < maxWidth)
-                {
-                    fitOk=true;
+#endif
+                if (estWidth < maxWidth) {
+                    fitOk = true;
                     break;
                 }
             }
 
-            if(fitOk)
-            {                
-                xp=xpAfterEllipsis;
-                width_=adjustVisibleItems(0,xp,yp,redTextLen);
+            if (fitOk) {
+                xp     = xpAfterEllipsis;
+                width_ = adjustVisibleItems(0, xp, yp, redTextLen);
                 Q_ASSERT(width_ == estWidth);
                 Q_ASSERT(width_ < maxWidth);
             }
-            else
-            {
-                xp=xpAfterEllipsis;           
-                xp=lastItem->estimateRightPos(xp);
-                estWidth=xp+NodePathItem::triLen_+hMargin_;
-                if(estWidth < maxWidth)
-                {
-                    xp=xpAfterEllipsis;
-                    xp=lastItem->adjust(xp,yp);
-                    width_=xp+NodePathItem::triLen_+hMargin_;
+            else {
+                xp       = xpAfterEllipsis;
+                xp       = lastItem->estimateRightPos(xp);
+                estWidth = xp + NodePathItem::triLen_ + hMargin_;
+                if (estWidth < maxWidth) {
+                    xp     = xpAfterEllipsis;
+                    xp     = lastItem->adjust(xp, yp);
+                    width_ = xp + NodePathItem::triLen_ + hMargin_;
                     Q_ASSERT(width_ == estWidth);
                     Q_ASSERT(width_ < maxWidth);
                 }
-
             }
         }
 
-        //If the total width is still too big we try to use elidedtext in the last item
+        // If the total width is still too big we try to use elidedtext in the last item
         //(at this point all the other items are hidden)
-        if(width_ > maxWidth)
-        {
-            int len=lastItem->textLen();
+        if (width_ > maxWidth) {
+            int len = lastItem->textLen();
 
-            //Try different elided text lengths
-            for(int i=30; i >= 3; i--)
-            {
+            // Try different elided text lengths
+            for (int i = 30; i >= 3; i--) {
                 QString t;
-                for(int j=0; j < i; j++)
-                {
-                    t+="A";
+                for (int j = 0; j < i; j++) {
+                    t += "A";
                 }
-                t+="...";
+                t += "...";
 
-                //We only check the elided texts that are shorter then the max text len
-                redTextLen=ViewerUtil::textWidth(fm,t);
-                if(redTextLen < len)
-                {
-                    //Estimate the total size with the elided text item
-                    xp=xpAfterEllipsis;
-                    xp=lastItem->estimateRightPos(xp,redTextLen);
-                    int estWidth=xp+NodePathItem::triLen_+hMargin_;
-                    if(estWidth < maxWidth)
-                    {
-                        xp=xpAfterEllipsis;
-                        xp=lastItem->adjust(xp,yp,redTextLen);
-                        width_=xp+NodePathItem::triLen_+hMargin_;
+                // We only check the elided texts that are shorter then the max text len
+                redTextLen = ViewerUtil::textWidth(fm, t);
+                if (redTextLen < len) {
+                    // Estimate the total size with the elided text item
+                    xp           = xpAfterEllipsis;
+                    xp           = lastItem->estimateRightPos(xp, redTextLen);
+                    int estWidth = xp + NodePathItem::triLen_ + hMargin_;
+                    if (estWidth < maxWidth) {
+                        xp     = xpAfterEllipsis;
+                        xp     = lastItem->adjust(xp, yp, redTextLen);
+                        width_ = xp + NodePathItem::triLen_ + hMargin_;
                         Q_ASSERT(width_ == estWidth);
                         Q_ASSERT(width_ < maxWidth);
                         break;
@@ -373,152 +334,125 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth)
             }
         }
 
-        //If the total width is still too big we also hide the last item and
-        //only show the ellipsis item
-        if(width_ > maxWidth)
-        {
-            lastItem->visible_=false;
-            width_=maxWidth;
+        // If the total width is still too big we also hide the last item and
+        // only show the ellipsis item
+        if (width_ > maxWidth) {
+            lastItem->visible_ = false;
+            width_             = maxWidth;
         }
     }
 
     crePixmap();
-    
-    resize(width_,height_);
+
+    resize(width_, height_);
 
     update();
-}  
-
-int BcWidget::estimateWidth(int startIndex,int xp,int redTextLen)
-{
-    for(int i=startIndex; i < items_.count(); i++)
-    {
-        if(i != items_.count()-1)
-        {
-            xp=items_[i]->estimateRightPos(xp,redTextLen);
-            xp+=gap_;
-        }
-        else
-            xp=items_[i]->estimateRightPos(xp);
-    }
-
-    return xp+NodePathItem::triLen_+hMargin_;
 }
 
-int BcWidget::adjustItems(int startIndex,int xp,int yp,int redTextLen)
-{
-    for(int i=startIndex; i < items_.count(); i++)
-    {
-        if(i != items_.count()-1)
-        {
-            xp=items_[i]->adjust(xp,yp,redTextLen);
-            xp+=gap_;
+int BcWidget::estimateWidth(int startIndex, int xp, int redTextLen) {
+    for (int i = startIndex; i < items_.count(); i++) {
+        if (i != items_.count() - 1) {
+            xp = items_[i]->estimateRightPos(xp, redTextLen);
+            xp += gap_;
         }
         else
-            xp=items_[i]->adjust(xp,yp);
+            xp = items_[i]->estimateRightPos(xp);
     }
 
-    return xp+NodePathItem::triLen_+hMargin_;
+    return xp + NodePathItem::triLen_ + hMargin_;
 }
 
-int BcWidget::adjustVisibleItems(int startIndex,int xp,int yp,int redTextLen)
-{
-    for(int i=startIndex; i < items_.count(); i++)
-    {
-        if(items_[i]->visible_)
-        {
-            if(i != items_.count()-1)
-            {
-                xp=items_[i]->adjust(xp,yp,redTextLen);
-                xp+=gap_;
+int BcWidget::adjustItems(int startIndex, int xp, int yp, int redTextLen) {
+    for (int i = startIndex; i < items_.count(); i++) {
+        if (i != items_.count() - 1) {
+            xp = items_[i]->adjust(xp, yp, redTextLen);
+            xp += gap_;
+        }
+        else
+            xp = items_[i]->adjust(xp, yp);
+    }
+
+    return xp + NodePathItem::triLen_ + hMargin_;
+}
+
+int BcWidget::adjustVisibleItems(int startIndex, int xp, int yp, int redTextLen) {
+    for (int i = startIndex; i < items_.count(); i++) {
+        if (items_[i]->visible_) {
+            if (i != items_.count() - 1) {
+                xp = items_[i]->adjust(xp, yp, redTextLen);
+                xp += gap_;
             }
             else
-                xp=items_[i]->adjust(xp,yp);
+                xp = items_[i]->adjust(xp, yp);
         }
     }
-    return xp+NodePathItem::triLen_+hMargin_;
+    return xp + NodePathItem::triLen_ + hMargin_;
 }
 
-void BcWidget::adjustSize(int maxWidth)
-{
-    if(isFull())
-    {
-        if(width_ > maxWidth)
-           reset(items_,maxWidth);
+void BcWidget::adjustSize(int maxWidth) {
+    if (isFull()) {
+        if (width_ > maxWidth)
+            reset(items_, maxWidth);
     }
-    else
-    {
-        reset(items_,maxWidth);
+    else {
+        reset(items_, maxWidth);
     }
 }
 
-void BcWidget::crePixmap()
-{        
-    pix_=QPixmap(width_,height_);
+void BcWidget::crePixmap() {
+    pix_ = QPixmap(width_, height_);
     pix_.fill(Qt::transparent);
 
     QPainter painter(&pix_);
-    painter.setRenderHints(QPainter::Antialiasing,true);
-    
+    painter.setRenderHints(QPainter::Antialiasing, true);
+
     painter.setFont(font_);
 
-    if(items_.count() == 0)
-    {
-        if(isEnabled())
+    if (items_.count() == 0) {
+        if (isEnabled())
             painter.setPen(textCol_);
         else
             painter.setPen(textDisabledCol_);
 
-        painter.drawText(textRect_,Qt::AlignHCenter | Qt::AlignVCenter, text_);
+        painter.drawText(textRect_, Qt::AlignHCenter | Qt::AlignVCenter, text_);
     }
-    else
-    {    
-        for(int i=0; i < items_.count(); i++)
-        {
-            items_.at(i)->enabled_=isEnabled();
-            items_.at(i)->draw(&painter,useGrad_,gradLighter_);
+    else {
+        for (int i = 0; i < items_.count(); i++) {
+            items_.at(i)->enabled_ = isEnabled();
+            items_.at(i)->draw(&painter, useGrad_, gradLighter_);
         }
-    } 
-    
-    if(ellipsisItem_->visible_)
-    {
-        ellipsisItem_->enabled_=isEnabled();
-        ellipsisItem_->draw(&painter,false,gradLighter_);
-    }    
-}  
+    }
 
-void BcWidget::updatePixmap(int idx)
-{
-    if(idx >=0 && idx < items_.count())
-    {
-         QPainter painter(&pix_);
-         painter.setRenderHints(QPainter::Antialiasing,true);
-         painter.setFont(font_);
-         items_.at(idx)->draw(&painter,useGrad_,gradLighter_);
-    }        
-}    
-
-void BcWidget::paintEvent(QPaintEvent*)
-{
-    QPainter painter(this);
-    painter.drawPixmap(0,0,pix_);    
+    if (ellipsisItem_->visible_) {
+        ellipsisItem_->enabled_ = isEnabled();
+        ellipsisItem_->draw(&painter, false, gradLighter_);
+    }
 }
 
-void BcWidget::mouseMoveEvent(QMouseEvent *event)
-{   
-    for(int i=0; i < items_.count(); i++)
-    {
-        if(items_.at(i)->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
-        {
-            if(hovered_ == -1)
-            {
-                hovered_=i;
+void BcWidget::updatePixmap(int idx) {
+    if (idx >= 0 && idx < items_.count()) {
+        QPainter painter(&pix_);
+        painter.setRenderHints(QPainter::Antialiasing, true);
+        painter.setFont(font_);
+        items_.at(idx)->draw(&painter, useGrad_, gradLighter_);
+    }
+}
+
+void BcWidget::paintEvent(QPaintEvent*) {
+    QPainter painter(this);
+    painter.drawPixmap(0, 0, pix_);
+}
+
+void BcWidget::mouseMoveEvent(QMouseEvent* event) {
+    for (int i = 0; i < items_.count(); i++) {
+        if (items_.at(i)->shape_.containsPoint(event->pos(), Qt::OddEvenFill)) {
+            if (hovered_ == -1) {
+                hovered_ = i;
                 resetBorder(i);
             }
-            else if(hovered_ != i)
-            {
-                int prev=hovered_;
-                hovered_=i;
+            else if (hovered_ != i) {
+                int prev = hovered_;
+                hovered_ = i;
                 resetBorder(prev);
                 resetBorder(i);
             }
@@ -527,48 +461,39 @@ void BcWidget::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    if(hovered_ != -1)
-    {
-        int prev=hovered_;
-        hovered_=-1;
+    if (hovered_ != -1) {
+        int prev = hovered_;
+        hovered_ = -1;
         resetBorder(prev);
     }
 
     QWidget::mouseMoveEvent(event);
 }
 
-void BcWidget::mousePressEvent(QMouseEvent *event)
-{   
-	if(event->button() != Qt::RightButton && event->button() != Qt::LeftButton)
-		return;
+void BcWidget::mousePressEvent(QMouseEvent* event) {
+    if (event->button() != Qt::RightButton && event->button() != Qt::LeftButton)
+        return;
 
-	for(int i=0; i < items_.count(); i++)
-    {
-        if(items_[i]->visible_ &&
-           items_[i]->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
-		{
-			if(event->button() == Qt::RightButton)
-			{
-				Q_EMIT menuSelected(i,event->pos());
-				return;
-			}
-			else if(event->button() == Qt::LeftButton)
-			{
-				Q_EMIT itemSelected(i);
-				return;
-			}
-        }    
+    for (int i = 0; i < items_.count(); i++) {
+        if (items_[i]->visible_ && items_[i]->shape_.containsPoint(event->pos(), Qt::OddEvenFill)) {
+            if (event->button() == Qt::RightButton) {
+                Q_EMIT menuSelected(i, event->pos());
+                return;
+            }
+            else if (event->button() == Qt::LeftButton) {
+                Q_EMIT itemSelected(i);
+                return;
+            }
+        }
     }
 
     QWidget::mousePressEvent(event);
-}    
+}
 
-void BcWidget::changeEvent(QEvent* event)
-{
-    if(event->type() == QEvent::EnabledChange)
-    {
+void BcWidget::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::EnabledChange) {
         crePixmap();
-//TODO: Will update be called automatically?
+        // TODO: Will update be called automatically?
     }
 
     QWidget::changeEvent(event);
@@ -580,177 +505,162 @@ void BcWidget::changeEvent(QEvent* event)
 //
 //=====================================================
 
-NodePathItem::NodePathItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
-    owner_(owner),
-    index_(index),
-    text_(text),
-    bgCol_(bgCol),
-    fontCol_(fontCol),
-    current_(current),
-    hasMenu_(hasMenu),
-    visible_(false),
-    enabled_(true)
-{
+NodePathItem::NodePathItem(BcWidget* owner,
+                           int index,
+                           QString text,
+                           QColor bgCol,
+                           QColor fontCol,
+                           bool hasMenu,
+                           bool current)
+    : owner_(owner),
+      index_(index),
+      text_(text),
+      bgCol_(bgCol),
+      fontCol_(fontCol),
+      current_(current),
+      hasMenu_(hasMenu),
+      visible_(false),
+      enabled_(true) {
     height(owner_->font());
 
-    if(!disabledBgCol_.isValid())
-    {
-        disabledBgCol_=QColor(200,200,200);
-        disabledBorderCol_=QColor(170,170,170);
-        disabledFontCol_=QColor(40,40,40);
+    if (!disabledBgCol_.isValid()) {
+        disabledBgCol_     = QColor(200, 200, 200);
+        disabledBorderCol_ = QColor(170, 170, 170);
+        disabledFontCol_   = QColor(40, 40, 40);
     }
 
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
-    grad_.setStart(0,0);
-    grad_.setFinalStop(0,1);
-}    
+    grad_.setStart(0, 0);
+    grad_.setFinalStop(0, 1);
+}
 
-int NodePathItem::height(QFont f)
-{
-    if(height_==0)
-    {       
+int NodePathItem::height(QFont f) {
+    if (height_ == 0) {
         QFontMetrics fm(f);
-        height_=fm.height()+2*vPadding_;
+        height_ = fm.height() + 2 * vPadding_;
     }
     return height_;
 }
 
-void NodePathItem::setCurrent(bool)
-{
+void NodePathItem::setCurrent(bool) {
 }
 
-int NodePathItem::textLen() const
-{
+int NodePathItem::textLen() const {
     QFontMetrics fm(owner_->font());
-    return ViewerUtil::textWidth(fm,text_);
+    return ViewerUtil::textWidth(fm, text_);
 }
 
-void NodePathItem::makeShape(int xp,int yp,int len)
-{
+void NodePathItem::makeShape(int xp, int yp, int len) {
     QVector<QPoint> vec;
-    vec << QPoint(0,0);
-    vec << QPoint(len+triLen_,0);
-    vec << QPoint(len+2*triLen_,height_/2);
-    vec << QPoint(len+triLen_,height_);
-    vec << QPoint(0,height_);
-    vec << QPoint(triLen_,height_/2);
+    vec << QPoint(0, 0);
+    vec << QPoint(len + triLen_, 0);
+    vec << QPoint(len + 2 * triLen_, height_ / 2);
+    vec << QPoint(len + triLen_, height_);
+    vec << QPoint(0, height_);
+    vec << QPoint(triLen_, height_ / 2);
 
-    shape_=QPolygon(vec).translated(xp,yp);
+    shape_    = QPolygon(vec).translated(xp, yp);
 
-    textRect_=QRect(xp+triLen_+hPadding_,yp,len,height_);
+    textRect_ = QRect(xp + triLen_ + hPadding_, yp, len, height_);
 }
 
-int NodePathItem::adjust(int xp,int yp,int elidedLen)
-{
-    visible_=true;
+int NodePathItem::adjust(int xp, int yp, int elidedLen) {
+    visible_ = true;
 
     QFontMetrics fm(owner_->font());
     int len = 0;
-    if(elidedLen == 0)
-    {
-        elidedText_=QString();
-        len=ViewerUtil::textWidth(fm,text_);
+    if (elidedLen == 0) {
+        elidedText_ = QString();
+        len         = ViewerUtil::textWidth(fm, text_);
     }
-    else
-    {
-        elidedText_=fm.elidedText(text_,Qt::ElideRight,elidedLen);
-        len=ViewerUtil::textWidth(fm,elidedText_);
+    else {
+        elidedText_ = fm.elidedText(text_, Qt::ElideRight, elidedLen);
+        len         = ViewerUtil::textWidth(fm, elidedText_);
     }
 
-    borderCol_=bgCol_.darker(125);
+    borderCol_ = bgCol_.darker(125);
 
-    makeShape(xp,yp,len);
+    makeShape(xp, yp, len);
 
-    return rightPos(xp,len);
+    return rightPos(xp, len);
 }
 
-
-//It returns the x position of the top right corner!
-int NodePathItem::rightPos(int xp,int len) const
-{
-    return xp+len+triLen_;
+// It returns the x position of the top right corner!
+int NodePathItem::rightPos(int xp, int len) const {
+    return xp + len + triLen_;
 }
 
-
-//It returns the x position of the top right corner!
-int NodePathItem::estimateRightPos(int xp,int elidedLen)
-{
+// It returns the x position of the top right corner!
+int NodePathItem::estimateRightPos(int xp, int elidedLen) {
     QFontMetrics fm(owner_->font());
     int len = 0;
 
-    if(elidedLen==0)
-        len=ViewerUtil::textWidth(fm,text_);
+    if (elidedLen == 0)
+        len = ViewerUtil::textWidth(fm, text_);
     else
-        len=ViewerUtil::textWidth(fm, fm.elidedText(text_,Qt::ElideRight,elidedLen));
+        len = ViewerUtil::textWidth(fm, fm.elidedText(text_, Qt::ElideRight, elidedLen));
 
-    return rightPos(xp,len);
+    return rightPos(xp, len);
 }
 
-void NodePathItem::resetBorder(bool hovered)
-{
-    if(!hovered)
-        borderCol_=bgCol_.darker(125);
+void NodePathItem::resetBorder(bool hovered) {
+    if (!hovered)
+        borderCol_ = bgCol_.darker(125);
     else
-        borderCol_=bgCol_.darker(240);
+        borderCol_ = bgCol_.darker(240);
 }
 
-void NodePathItem::reset(QString text,QColor bgCol,QColor fontCol,bool hovered)
-{
-    text_=text;
-    bgCol_=bgCol;
-    fontCol_=fontCol;
+void NodePathItem::reset(QString text, QColor bgCol, QColor fontCol, bool hovered) {
+    text_    = text;
+    bgCol_   = bgCol;
+    fontCol_ = fontCol;
 
-    if(!hovered)
-        borderCol_=bgCol_.darker(125);
+    if (!hovered)
+        borderCol_ = bgCol_.darker(125);
     else
-        borderCol_=bgCol_.darker(240);
+        borderCol_ = bgCol_.darker(240);
 }
 
-void NodePathItem::draw(QPainter  *painter,bool useGrad,int /*lighter*/)
-{    
-    if(!visible_)
+void NodePathItem::draw(QPainter* painter, bool useGrad, int /*lighter*/) {
+    if (!visible_)
         return;
 
     QColor border, bg, fontCol;
-    if(enabled_)
-    {
-        border=borderCol_;
-        bg=bgCol_;
-        fontCol=fontCol_;        
+    if (enabled_) {
+        border  = borderCol_;
+        bg      = bgCol_;
+        fontCol = fontCol_;
     }
-    else
-    {
-        border=disabledBorderCol_;
-        bg=disabledBgCol_;
-        fontCol=disabledFontCol_;
+    else {
+        border  = disabledBorderCol_;
+        bg      = disabledBgCol_;
+        fontCol = disabledFontCol_;
     }
 
-    QBrush bgBrush;       
-    if(useGrad)
-    {        
+    QBrush bgBrush;
+    if (useGrad) {
         QColor bgLight;
-        Palette::statusColours(bg,bgLight,border);
+        Palette::statusColours(bg, bgLight, border);
 
-        //QColor bgLight=bg.lighter(lighter);
-        grad_.setColorAt(0,bgLight);
-        grad_.setColorAt(1,bg);
-        bgBrush=QBrush(grad_);
+        // QColor bgLight=bg.lighter(lighter);
+        grad_.setColorAt(0, bgLight);
+        grad_.setColorAt(1, bg);
+        bgBrush = QBrush(grad_);
     }
     else
-        bgBrush=QBrush(bg);
-    
-    painter->setPen(QPen(border,0));
+        bgBrush = QBrush(bg);
+
+    painter->setPen(QPen(border, 0));
     painter->setBrush(bgBrush);
     painter->drawPolygon(shape_);
 
     /*if(current_)
     {
-    	painter->setPen(QPen(borderCol_,0));
+        painter->setPen(QPen(borderCol_,0));
     }*/
 
     painter->setPen(fontCol);
-    painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,(elidedText_.isEmpty())?text_:elidedText_);
-    
+    painter->drawText(textRect_, Qt::AlignVCenter | Qt::AlignHCenter, (elidedText_.isEmpty()) ? text_ : elidedText_);
 }
 
 //=====================================================
@@ -759,24 +669,22 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int /*lighter*/)
 //
 //=====================================================
 
-//It returns the x position of the top right corner!
-int NodePathServerItem::rightPos(int xp,int len) const
-{
-    return xp+len;
+// It returns the x position of the top right corner!
+int NodePathServerItem::rightPos(int xp, int len) const {
+    return xp + len;
 }
 
-void NodePathServerItem::makeShape(int xp,int yp,int len)
-{
+void NodePathServerItem::makeShape(int xp, int yp, int len) {
     QVector<QPoint> vec;
-    vec << QPoint(0,0);
-    vec << QPoint(len,0);
-    vec << QPoint(len+triLen_,height_/2);
-    vec << QPoint(len,height_);
-    vec << QPoint(0,height_);
+    vec << QPoint(0, 0);
+    vec << QPoint(len, 0);
+    vec << QPoint(len + triLen_, height_ / 2);
+    vec << QPoint(len, height_);
+    vec << QPoint(0, height_);
 
-    shape_=QPolygon(vec).translated(xp,yp);
+    shape_    = QPolygon(vec).translated(xp, yp);
 
-    textRect_=QRect(xp+hPadding_,yp,len,height_);
+    textRect_ = QRect(xp + hPadding_, yp, len, height_);
 }
 
 //=====================================================
@@ -785,10 +693,9 @@ void NodePathServerItem::makeShape(int xp,int yp,int len)
 //
 //=====================================================
 
-NodePathEllipsisItem::NodePathEllipsisItem(BcWidget* owner) :
-    NodePathItem(owner,-1,QString(QChar(0x2026)),QColor(240,240,240),QColor(Qt::black),false,false)
-{
-    borderCol_=QColor(190,190,190);
+NodePathEllipsisItem::NodePathEllipsisItem(BcWidget* owner)
+    : NodePathItem(owner, -1, QString(QChar(0x2026)), QColor(240, 240, 240), QColor(Qt::black), false, false) {
+    borderCol_ = QColor(190, 190, 190);
 }
 
 //=============================================================
@@ -797,128 +704,108 @@ NodePathEllipsisItem::NodePathEllipsisItem(BcWidget* owner) :
 //
 //=============================================================
 
-NodePathWidget::NodePathWidget(QWidget *parent) :
-  QWidget(parent)
-{
-	layout_=new QHBoxLayout(this);
-	layout_->setSpacing(0);
-    layout_->setContentsMargins(2,2,3,2);
-	setLayout(layout_);
+NodePathWidget::NodePathWidget(QWidget* parent) : QWidget(parent) {
+    layout_ = new QHBoxLayout(this);
+    layout_->setSpacing(0);
+    layout_->setContentsMargins(2, 2, 3, 2);
+    setLayout(layout_);
 
-    bc_=new BcWidget(this);
+    bc_ = new BcWidget(this);
     layout_->addWidget(bc_);
-    
-    connect(bc_,SIGNAL(itemSelected(int)),
-             this,SLOT(slotNodeSelected(int)));
-    connect(bc_,SIGNAL(menuSelected(int,QPoint)),
-             this,SLOT(slotMenuSelected(int,QPoint)));
+
+    connect(bc_, SIGNAL(itemSelected(int)), this, SLOT(slotNodeSelected(int)));
+    connect(bc_, SIGNAL(menuSelected(int, QPoint)), this, SLOT(slotMenuSelected(int, QPoint)));
 
     setAutoFillBackground(true);
 
-    //We make the background transparent
-    QPalette pal=palette();
-    pal.setColor(QPalette::Window,Qt::transparent);
+    // We make the background transparent
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, Qt::transparent);
     setPalette(pal);
 }
 
-NodePathWidget::~NodePathWidget()
-{
-	clear(true);
+NodePathWidget::~NodePathWidget() {
+    clear(true);
 }
 
-void NodePathWidget::useTransparentBg(bool b)
-{
-    QPalette pal=palette();
+void NodePathWidget::useTransparentBg(bool b) {
+    QPalette pal = palette();
 
-    if(b)
-    {
-        pal.setColor(QPalette::Window,Qt::transparent);
+    if (b) {
+        pal.setColor(QPalette::Window, Qt::transparent);
         bc_->setTextColour(Qt::white);
-        bc_->setTextDisabledColour(QColor(220,220,220));
+        bc_->setTextDisabledColour(QColor(220, 220, 220));
     }
-    else
-    {
-        pal.setColor(QPalette::Window,Qt::white);
+    else {
+        pal.setColor(QPalette::Window, Qt::white);
         bc_->setTextColour(Qt::black);
-        bc_->setTextDisabledColour(QColor(60,60,60));
+        bc_->setTextDisabledColour(QColor(60, 60, 60));
     }
     setPalette(pal);
 }
 
-void NodePathWidget::clear(bool detachObservers)
-{
+void NodePathWidget::clear(bool detachObservers) {
     setEnabled(true);
 
-    if(detachObservers && info_ && info_->server())
-	{
-		info_->server()->removeNodeObserver(this);
-		info_->server()->removeServerObserver(this);
-	}
+    if (detachObservers && info_ && info_->server()) {
+        info_->server()->removeNodeObserver(this);
+        info_->server()->removeServerObserver(this);
+    }
 
-    if(detachObservers && info_)
-    {
+    if (detachObservers && info_) {
         info_->removeObserver(this);
     }
 
-    if(info_)
+    if (info_)
         info_->removeObserver(this);
 
     info_.reset();
-    
+
     clearItems();
 
     setEnabled(true);
 }
 
-void NodePathWidget::clearItems()
-{
+void NodePathWidget::clearItems() {
     bc_->clear();
 
-    int cnt=nodeItems_.count();
-    for(int i=0; i < cnt; i++)
-    {
+    int cnt = nodeItems_.count();
+    for (int i = 0; i < cnt; i++) {
         delete nodeItems_.takeLast();
     }
     nodeItems_.clear();
 }
 
-void NodePathWidget::setMode(Mode mode)
-{
-    if(mode_ != mode)
-    {
-        mode_=mode;
-        VInfo_ptr info=info_;
+void NodePathWidget::setMode(Mode mode) {
+    if (mode_ != mode) {
+        mode_          = mode;
+        VInfo_ptr info = info_;
         clear(true);
         setPath(info);
     }
 }
 
-void NodePathWidget::slotContextMenu(const QPoint& /*pos*/)
-{
+void NodePathWidget::slotContextMenu(const QPoint& /*pos*/) {
 }
 
-void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer)
-{
-    ServerHandler* server=nullptr;
+void NodePathWidget::adjust(VInfo_ptr info, ServerHandler** serverOut, bool& sameServer) {
+    ServerHandler* server = nullptr;
 
-  	//Check if there is data in info
-    if(info)
-  	{
-        server=info->server();
+    // Check if there is data in info
+    if (info) {
+        server     = info->server();
 
-  		sameServer=(info_)?(info_->server() == server):false;
+        sameServer = (info_) ? (info_->server() == server) : false;
 
-  		//Handle observers
-  		if(!sameServer)
-  		{
-  			if(info_ && info_->server())
-  			{
-  				info_->server()->removeServerObserver(this);
-  				info_->server()->removeNodeObserver(this);
-  			}
+        // Handle observers
+        if (!sameServer) {
+            if (info_ && info_->server()) {
+                info_->server()->removeServerObserver(this);
+                info_->server()->removeNodeObserver(this);
+            }
 
-  			info->server()->addServerObserver(this);
-  			info->server()->addNodeObserver(this);
+            info->server()->addServerObserver(this);
+            info->server()->addNodeObserver(this);
 
 #if 0
   			if(server)
@@ -935,82 +822,71 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
                 reloadTb_->setEnabled(false);
   			}
 #endif
-  		}
-  	}
-  	//If the there is no data we clean everything and return
-  	else
-  	{
-  	  	if(info_ && info_->server())
-  	  	{
-  	  		info_->server()->removeServerObserver(this);
-  	  		info_->server()->removeNodeObserver(this);
-  	  	}
+        }
+    }
+    // If the there is no data we clean everything and return
+    else {
+        if (info_ && info_->server()) {
+            info_->server()->removeServerObserver(this);
+            info_->server()->removeNodeObserver(this);
+        }
 #if 0
         reloadTb_->setToolTip("");
         reloadTb_->setEnabled(false);
 #endif
-  	}
+    }
 
-    //Set the info
-    if(info_)
-    {
+    // Set the info
+    if (info_) {
         info_->removeObserver(this);
     }
 
-    info_=info;
+    info_ = info;
 
-    if(info_)
-    {
+    if (info_) {
         info_->addObserver(this);
     }
 
-  	*serverOut=server;
+    *serverOut = server;
 }
 
-
-void NodePathWidget::reset()
-{
-	setPath(info_);
+void NodePathWidget::reset() {
+    setPath(info_);
 }
 
-
-void NodePathWidget::setPath(VInfo_ptr info)
-{
+void NodePathWidget::setPath(VInfo_ptr info) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::setPath -->";
 #endif
 
     setEnabled(true);
 
-  	ServerHandler *server=nullptr;
-  	bool sameServer=false;
+    ServerHandler* server = nullptr;
+    bool sameServer       = false;
 
-  	VInfo_ptr info_ori=info_;
+    VInfo_ptr info_ori    = info_;
 
-  	adjust(info,&server,sameServer);
+    adjust(info, &server, sameServer);
 
-    if(!info_ || !info_->server())
-  	{
-  		clear();
-  		return;
-  	}
-  	else
-    {    
+    if (!info_ || !info_->server()) {
+        clear();
+        return;
+    }
+    else {
         clearItems();
     }
-      
+
     //------------------------------------
     // Only text is displayed
     //------------------------------------
 
-    if(mode_ == TextMode)
-    {
-        info_=info;
+    if (mode_ == TextMode) {
+        info_ = info;
         QString pt;
-        if(info_)
-            pt=QString::fromStdString(info_->path());
+        if (info_)
+            pt = QString::fromStdString(info_->path());
 
-        bc_->reset(pt,bcWidth());
+        bc_->reset(pt, bcWidth());
         return;
     }
 
@@ -1020,76 +896,68 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
     Q_ASSERT(mode_ == GuiMode);
 
-	//Get the node list including the server
-  	std::vector<VNode*> lst;
-  	if(info_->node())
-  	{
-  		lst=info_->node()->ancestors(VNode::ParentToChildSort);
-  	}
+    // Get the node list including the server
+    std::vector<VNode*> lst;
+    if (info_->node()) {
+        lst = info_->node()->ancestors(VNode::ParentToChildSort);
+    }
 
-	//--------------------------------------------
-	// Reset/rebuild the contents
-	//--------------------------------------------
+    //--------------------------------------------
+    // Reset/rebuild the contents
+    //--------------------------------------------
 
-	for(unsigned int i=0; i < lst.size(); i++)
-	{
-		//---------------------------
-		// Create node/server item
-		//---------------------------
+    for (unsigned int i = 0; i < lst.size(); i++) {
+        //---------------------------
+        // Create node/server item
+        //---------------------------
 
-		QColor col;
-		QString name;
-		NodePathItem* nodeItem=nullptr;
+        QColor col;
+        QString name;
+        NodePathItem* nodeItem = nullptr;
 
-		VNode *n=lst.at(i);
-		col=n->stateColour(); 
+        VNode* n               = lst.at(i);
+        col                    = n->stateColour();
 #ifdef _UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   state=" << n->stateName();
 #endif
-		QColor fontCol=n->stateFontColour();
-		name=n->name();
-        bool hasChildren=(n->numOfChildren() >0);
+        QColor fontCol   = n->stateFontColour();
+        name             = n->name();
+        bool hasChildren = (n->numOfChildren() > 0);
 
-        if(i==0)
-        {
-            nodeItem=new NodePathServerItem(bc_,i,name,col,fontCol,hasChildren,(i == lst.size()-1)?true:false);
+        if (i == 0) {
+            nodeItem =
+                new NodePathServerItem(bc_, i, name, col, fontCol, hasChildren, (i == lst.size() - 1) ? true : false);
         }
-        else
-        {
-            nodeItem=new NodePathItem(bc_,i,name,col,fontCol,hasChildren,(i == lst.size()-1)?true:false);
+        else {
+            nodeItem = new NodePathItem(bc_, i, name, col, fontCol, hasChildren, (i == lst.size() - 1) ? true : false);
         }
         nodeItems_ << nodeItem;
-	}
+    }
 
-    bc_->reset(nodeItems_,bcWidth());
+    bc_->reset(nodeItems_, bcWidth());
 
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- setPath";
 #endif
 }
 
-int NodePathWidget::bcWidth()
-{
-    //return width()-reloadTb_->width()-5;
-    return width()-5;
+int NodePathWidget::bcWidth() {
+    // return width()-reloadTb_->width()-5;
+    return width() - 5;
 }
 
-void  NodePathWidget::slotNodeSelected(int idx)
-{
+void NodePathWidget::slotNodeSelected(int idx) {
     Q_ASSERT(mode_ == GuiMode);
-    if(idx != -1)
-	{
-		Q_EMIT selected(nodeAt(idx));
-	}
+    if (idx != -1) {
+        Q_EMIT selected(nodeAt(idx));
+    }
 }
 
-void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
-{
+void NodePathWidget::slotMenuSelected(int idx, QPoint bcPos) {
     Q_ASSERT(mode_ == GuiMode);
-    if(idx != -1)
-	{
-        loadMenu(bc_->mapToGlobal(bcPos),nodeAt(idx));
-	}
+    if (idx != -1) {
+        loadMenu(bc_->mapToGlobal(bcPos), nodeAt(idx));
+    }
 }
 
 //-------------------------------------------------------------------------------------------
@@ -1100,77 +968,68 @@ void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
 // server                              node's parent 		           node (=info_)
 //--------------------------------------------------------------------------------------------
 
-VInfo_ptr NodePathWidget::nodeAt(int idx)
-{
+VInfo_ptr NodePathWidget::nodeAt(int idx) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::nodeAt idx=" << idx;
 #endif
 
     Q_ASSERT(mode_ == GuiMode);
-    if(mode_ == TextMode)
-    {
+    if (mode_ == TextMode) {
         return {};
     }
 
-    if (info_ && info_->server())
-    {
-        if(VNode *n=info_->node()->ancestorAt(idx,VNode::ParentToChildSort))
-        {
-            if(n == info_->node())
+    if (info_ && info_->server()) {
+        if (VNode* n = info_->node()->ancestorAt(idx, VNode::ParentToChildSort)) {
+            if (n == info_->node())
                 return info_;
-            else if(n->isServer())
+            else if (n->isServer())
                 return VInfoServer::create(n->server());
             else
                 return VInfoNode::create(n);
         }
     }
 
-	return {};
+    return {};
 }
 
-void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
-{
+void NodePathWidget::loadMenu(const QPoint& pos, VInfo_ptr p) {
     Q_ASSERT(mode_ == GuiMode);
-    if(mode_ == TextMode)
+    if (mode_ == TextMode)
         return;
 
-    if(p && p->node())
-	{
-		QList<QAction*> acLst;
-		VNode* node=p->node();
+    if (p && p->node()) {
+        QList<QAction*> acLst;
+        VNode* node = p->node();
 
-        for(int i=0; i < node->numOfChildren(); i++)
-		{
-			auto *ac=new QAction(node->childAt(i)->name(),this);
-			ac->setData(i);
-			acLst << ac;
-		}
+        for (int i = 0; i < node->numOfChildren(); i++) {
+            auto* ac = new QAction(node->childAt(i)->name(), this);
+            ac->setData(i);
+            acLst << ac;
+        }
 
-		if(acLst.count() > 0)
-		{
+        if (acLst.count() > 0) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
             UiLog().info() << "NodePathWidget::loadMenu";
 #endif
-            
-            if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
-			{
-				int idx=ac->data().toInt();
-				VInfo_ptr res=VInfoNode::create(node->childAt(idx));
-				Q_EMIT selected(res);
-			}
-	    }
 
-	    Q_FOREACH(QAction* ac,acLst)
-		{
-			delete ac;
-		}
-	}
+            if (QAction* ac = QMenu::exec(acLst, pos, acLst.front(), this)) {
+                int idx       = ac->data().toInt();
+                VInfo_ptr res = VInfoNode::create(node->childAt(idx));
+                Q_EMIT selected(res);
+            }
+        }
+
+        Q_FOREACH (QAction* ac, acLst) {
+            delete ac;
+        }
+    }
 }
 
-void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
-{
+void NodePathWidget::notifyBeginNodeChange(const VNode* node,
+                                           const std::vector<ecf::Aspect::Type>& aspect,
+                                           const VNodeChange&) {
     Q_ASSERT(mode_ == GuiMode);
-    if(mode_ == TextMode)
+    if (mode_ == TextMode)
         return;
 
 #if 0
@@ -1178,97 +1037,79 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		return;
 #endif
 
-	//Check if there is data in info
-    if(info_ && !info_->isServer() && info_->node())
-	{
-		//TODO: MAKE IT SAFE!!!!
+    // Check if there is data in info
+    if (info_ && !info_->isServer() && info_->node()) {
+        // TODO: MAKE IT SAFE!!!!
 
-		//State changed
-		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::STATE) != aspect.end() ||
-		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
-		{
-			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
-            for(int i=0; i < static_cast<int>(nodes.size()); i++)
-			{
-                if(nodes[i] == node)
-				{
-                    if(i < nodeItems_.count())
-					{						
-                        bc_->reset(i,node->name(),node->stateColour(),node->stateFontColour());
-					}
-					return;
-				}
-			}
-		}
+        // State changed
+        if (std::find(aspect.begin(), aspect.end(), ecf::Aspect::STATE) != aspect.end() ||
+            std::find(aspect.begin(), aspect.end(), ecf::Aspect::SUSPENDED) != aspect.end()) {
+            std::vector<VNode*> nodes = info_->node()->ancestors(VNode::ParentToChildSort);
+            for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
+                if (nodes[i] == node) {
+                    if (i < nodeItems_.count()) {
+                        bc_->reset(i, node->name(), node->stateColour(), node->stateFontColour());
+                    }
+                    return;
+                }
+            }
+        }
 
-		//A child was removed or added
-		else if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
-		{
-			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
-			for(auto & i : nodes)
-			{
-				if(node == i)
-				{
-					//Reload everything
-					setPath(info_);
-				}
-			}
-		}
-	}
+        // A child was removed or added
+        else if (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_NODE) != aspect.end()) {
+            std::vector<VNode*> nodes = info_->node()->ancestors(VNode::ParentToChildSort);
+            for (auto& i : nodes) {
+                if (node == i) {
+                    // Reload everything
+                    setPath(info_);
+                }
+            }
+        }
+    }
 }
 
-void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>& aspect)
-{
+void NodePathWidget::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& aspect) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyDefsChanged -->";
 #endif
 
     Q_ASSERT(mode_ == GuiMode);
-    if(mode_ == TextMode)
+    if (mode_ == TextMode)
         return;
 #if 0
     if(!active_)
 		return;
 #endif
 
-    //Check if there is data in info
-    if(info_ && info_->server()  && info_->server() == server)
-	{
+    // Check if there is data in info
+    if (info_ && info_->server() && info_->server() == server) {
         UiLog().dbg() << "Server change";
 
-        //State changed
-        for(auto it : aspect)
-        {
-            if(it == ecf::Aspect::STATE || it == ecf::Aspect::SERVER_STATE)
-            {
+        // State changed
+        for (auto it : aspect) {
+            if (it == ecf::Aspect::STATE || it == ecf::Aspect::SERVER_STATE) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "   update server item";
 #endif
-                if(nodeItems_.count() > 0)
-                {
-                    bc_->reset(0,server->vRoot()->name(),
-						                server->vRoot()->stateColour(),
-										server->vRoot()->stateFontColour());
+                if (nodeItems_.count() > 0) {
+                    bc_->reset(
+                        0, server->vRoot()->name(), server->vRoot()->stateColour(), server->vRoot()->stateFontColour());
                 }
-
             }
         }
-	}
+    }
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- notifyDefsChanged";
 #endif
 }
 
-//This must be called at the beginning of a reset
-void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
-{
+// This must be called at the beginning of a reset
+void NodePathWidget::notifyBeginServerClear(ServerHandler* server) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyBeginServerClear -->";
 #endif
-    if(info_)
-    {
-        if(info_->server() && info_->server() == server)
-        {
+    if (info_) {
+        if (info_->server() && info_->server() == server) {
             setEnabled(false);
         }
     }
@@ -1277,16 +1118,13 @@ void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
 #endif
 }
 
-//This must be called at the end of a reset
-void NodePathWidget::notifyEndServerScan(ServerHandler* server)
-{
+// This must be called at the end of a reset
+void NodePathWidget::notifyEndServerScan(ServerHandler* server) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyEndServerScan -->";
 #endif
-    if(info_)
-    {
-        if(info_->server() && info_->server() == server)
-        {
+    if (info_) {
+        if (info_->server() && info_->server() == server) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   setEnabled(true)";
 #endif
@@ -1295,14 +1133,14 @@ void NodePathWidget::notifyEndServerScan(ServerHandler* server)
 #ifdef _UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   regainData";
 #endif
-            //We try to ressurect the info. We have to do it explicitly because it is not guaranteed that
-            //notifyEndServerScan() will be first called on the VInfo then on the breadcrumbs. So it
-            //is possible that the node still exists but it is still set to NULL in VInfo.
+            // We try to ressurect the info. We have to do it explicitly because it is not guaranteed that
+            // notifyEndServerScan() will be first called on the VInfo then on the breadcrumbs. So it
+            // is possible that the node still exists but it is still set to NULL in VInfo.
             info_->regainData();
 
-            //If the info is not available dataLost() must have already been called and
-            //the breadcrumbs were reset!
-            if(!info_)
+            // If the info is not available dataLost() must have already been called and
+            // the breadcrumbs were reset!
+            if (!info_)
                 return;
 
             Q_ASSERT(info_->server() && info_->node());
@@ -1319,43 +1157,35 @@ void NodePathWidget::notifyEndServerScan(ServerHandler* server)
 #endif
 }
 
-void NodePathWidget::notifyServerDelete(ServerHandler* server)
-{
-    if(info_ && info_->server() ==  server)
-	{
-		//We do not want to detach ourselves as an observer the from the server. When this function is
-		//called the server actually loops through its observers and notify them.
-		clear(false);
-	}
+void NodePathWidget::notifyServerDelete(ServerHandler* server) {
+    if (info_ && info_->server() == server) {
+        // We do not want to detach ourselves as an observer the from the server. When this function is
+        // called the server actually loops through its observers and notify them.
+        clear(false);
+    }
 }
 
-void NodePathWidget::notifyServerConnectState(ServerHandler* server)
-{
-    //TODO: we need to indicate the state here!
-    if(info_ && info_->server() ==  server)
-    {
+void NodePathWidget::notifyServerConnectState(ServerHandler* server) {
+    // TODO: we need to indicate the state here!
+    if (info_ && info_->server() == server) {
         reset();
     }
 }
 
-void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
-{
-    //reset();
+void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/) {
+    // reset();
 }
 
-void NodePathWidget::notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/)
-{
-     reset();
+void NodePathWidget::notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/) {
+    reset();
 }
 
-void NodePathWidget::notifyDataLost(VInfo* info)
-{
+void NodePathWidget::notifyDataLost(VInfo* info) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyDataLost -->";
 #endif
 
-    if(info_ && info_.get() == info)
-    {
+    if (info_ && info_.get() == info) {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   clear(true)";
 #endif
@@ -1366,57 +1196,46 @@ void NodePathWidget::notifyDataLost(VInfo* info)
 #endif
 }
 
-void  NodePathWidget::slotRefreshServer()
-{
+void NodePathWidget::slotRefreshServer() {
     Q_ASSERT(mode_ == GuiMode);
-    if(mode_ == TextMode)
+    if (mode_ == TextMode)
         return;
 
-    if(info_ && info_->server())
-	{
-		info_->server()->refresh();
-	}
+    if (info_ && info_->server()) {
+        info_->server()->refresh();
+    }
 }
 
-void NodePathWidget::rerender()
-{
-	reset();
+void NodePathWidget::rerender() {
+    reset();
 }
 
-void NodePathWidget::paintEvent(QPaintEvent *)
-{
-     QStyleOption opt;
-     opt.initFrom(this);
-     QPainter p(this);
-     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+void NodePathWidget::paintEvent(QPaintEvent*) {
+    QStyleOption opt;
+    opt.initFrom(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
-void NodePathWidget::resizeEvent(QResizeEvent *)
-{
+void NodePathWidget::resizeEvent(QResizeEvent*) {
     bc_->adjustSize(bcWidth());
 }
 
-void NodePathWidget::writeSettings(VSettings *vs)
-{
-	vs->beginGroup("breadcrumbs");
-    vs->put("mode",(mode_==TextMode)?"text":"gui");
-	vs->endGroup();
+void NodePathWidget::writeSettings(VSettings* vs) {
+    vs->beginGroup("breadcrumbs");
+    vs->put("mode", (mode_ == TextMode) ? "text" : "gui");
+    vs->endGroup();
 }
 
-void NodePathWidget::readSettings(VSettings* vs)
-{
-	vs->beginGroup("breadcrumbs");
-    auto modeStr=vs->get<std::string>("mode","");
+void NodePathWidget::readSettings(VSettings* vs) {
+    vs->beginGroup("breadcrumbs");
+    auto modeStr = vs->get<std::string>("mode", "");
 
-    if(modeStr == "text")
-    {
+    if (modeStr == "text") {
         setMode(TextMode);
     }
-    else
-    {
+    else {
         setMode(GuiMode);
     }
-	vs->endGroup();
+    vs->endGroup();
 }
-
-

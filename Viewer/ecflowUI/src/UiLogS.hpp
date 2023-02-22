@@ -14,20 +14,16 @@
 
 class ServerHandler;
 
-#define UI_FUNCTION_LOG_S(server) UiFunctionLogS __fclog(server,BOOST_CURRENT_FUNCTION);
+#define UI_FUNCTION_LOG_S(server) UiFunctionLogS __fclog(server, BOOST_CURRENT_FUNCTION);
 
-class UiFunctionLogS : public UiFunctionLog
-{
+class UiFunctionLogS : public UiFunctionLog {
 public:
-    UiFunctionLogS(ServerHandler* server,const std::string& funcName);
+    UiFunctionLogS(ServerHandler* server, const std::string& funcName);
 };
 
-class UiLogS : public UiLog
-{
+class UiLogS : public UiLog {
 public:
-   UiLogS(ServerHandler* server);
+    UiLogS(ServerHandler* server);
 };
-
 
 #endif // UILOG_HPP
-

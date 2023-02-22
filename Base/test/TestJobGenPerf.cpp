@@ -14,24 +14,23 @@
 #include <string>
 #include <vector>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
 #include "Defs.hpp"
-#include "Task.hpp"
-#include "Str.hpp"
 #include "File.hpp"
-#include "Log.hpp"
+#include "JobProfiler.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "JobProfiler.hpp"
+#include "Log.hpp"
+#include "Str.hpp"
+#include "Task.hpp"
 #include "Variable.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 using namespace std;
 using namespace ecf;
 namespace fs = boost::filesystem;
 
-//#define DEBUG 1
+// #define DEBUG 1
 
 // This relies on Pyext/samples/TestJobGenPerf.py to make any defs amenable
 // for this test program.
@@ -57,10 +56,10 @@ namespace fs = boost::filesystem;
 //  - re-arrange search for generation variables, most common first
 //  - replace ecffile_->countEcfMicro _. EcfFile::countEcfMicro(..) remove reference since function is static
 //
-//time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def : submitted 5808 out of 7941( fastest of 10 attempts)
+// time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def : submitted 5808 out of 7941( fastest of 10 attempts)
 // - ECFLOW-1244: real: 2.84s user: 2.41s sys: 0.40s
 //
-//perf stat -r 10 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+// perf stat -r 10 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
 // Performance counter stats for 'Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
 //
 //       2908.895909      task-clock (msec)         #    0.933 CPUs utilized            ( +-  1.02% )
@@ -81,109 +80,112 @@ namespace fs = boost::filesystem;
 //
 //       3.118979324 seconds time elapsed                                          ( +-  2.80% )
 
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        cout << "TestJobGenPerf.cpp --> " << argv[0] << "\n";
+        cout << "Expect single argument which is path to a defs file\n";
+        return 1;
+    }
 
-
-int main(int argc, char* argv[])
-{
-   if (argc != 2) {
-      cout << "TestJobGenPerf.cpp --> " << argv[0] << "\n";
-      cout << "Expect single argument which is path to a defs file\n";
-      return 1;
-   }
-
-   // delete the log file if it exists.
-   std::string log_path = File::test_data("Base/test/TestJobGenPerf.log","Base");
-   fs::remove(log_path);
-   std::string path = argv[1];
+    // delete the log file if it exists.
+    std::string log_path = File::test_data("Base/test/TestJobGenPerf.log", "Base");
+    fs::remove(log_path);
+    std::string path = argv[1];
 
 #ifdef DEBUG
-   cout << "Loading file " << path << " log file " << log_path  << "\n";
+    cout << "Loading file " << path << " log file " << log_path << "\n";
 #endif
-   Defs defs;
-   std::string errorMsg,warningMsg;
-   if (!defs.restore(path,errorMsg,warningMsg)) {
-      cout << errorMsg << "\n";
-      cout << warningMsg << "\n";
-      return 1;
-   }
+    Defs defs;
+    std::string errorMsg, warningMsg;
+    if (!defs.restore(path, errorMsg, warningMsg)) {
+        cout << errorMsg << "\n";
+        cout << warningMsg << "\n";
+        return 1;
+    }
 
-//   std::vector<std::string> suites_to_remove;
-//   suites_to_remove.push_back("codes_ui");
-//   suites_to_remove.push_back("libemos_test");
-//   suites_to_remove.push_back("metview");
-//   suites_to_remove.push_back("ecflow");
-//   suites_to_remove.push_back("mir_bundle");
-//#ifdef DEBUG
-//   cout << "remove dodgy suites, these are based on localhost\n";
-//#endif
-//   for(size_t i = 0; i < suites_to_remove.size(); ++i) {
-//      suite_ptr suite = defs.findSuite(suites_to_remove[i]);
-//      if (suite) suite->remove();
-//   }
-//   cout << defs ;
-//   exit(0);
+    //   std::vector<std::string> suites_to_remove;
+    //   suites_to_remove.push_back("codes_ui");
+    //   suites_to_remove.push_back("libemos_test");
+    //   suites_to_remove.push_back("metview");
+    //   suites_to_remove.push_back("ecflow");
+    //   suites_to_remove.push_back("mir_bundle");
+    // #ifdef DEBUG
+    //   cout << "remove dodgy suites, these are based on localhost\n";
+    // #endif
+    //   for(size_t i = 0; i < suites_to_remove.size(); ++i) {
+    //      suite_ptr suite = defs.findSuite(suites_to_remove[i]);
+    //      if (suite) suite->remove();
+    //   }
+    //   cout << defs ;
+    //   exit(0);
 
-   // Check number of tasks, if the submitted output below is too low
-   std::vector<Task*> tasks;
-   defs.getAllTasks(tasks);
+    // Check number of tasks, if the submitted output below is too low
+    std::vector<Task*> tasks;
+    defs.getAllTasks(tasks);
 
-//#ifdef DEBUG
-//   cout << "Total number of tasks: " << tasks.size() << "\n";
-//   cout << "begin-all\n";
-//#endif
+    // #ifdef DEBUG
+    //    cout << "Total number of tasks: " << tasks.size() << "\n";
+    //    cout << "begin-all\n";
+    // #endif
 
-   defs.beginAll();
+    defs.beginAll();
 
-//#ifdef DEBUG
-//   cout << "Free all dependencies, free suspended time and trigger dependencies\n";
-//#endif
+    // #ifdef DEBUG
+    //    cout << "Free all dependencies, free suspended time and trigger dependencies\n";
+    // #endif
 
-   std::vector<node_ptr> all_nodes;
-   defs.get_all_nodes(all_nodes);
-   for(size_t i = 0; i < all_nodes.size(); ++i) {
-      if (all_nodes[i]->isSuspended())  all_nodes[i]->resume();
-      all_nodes[i]->freeTrigger();
-      all_nodes[i]->freeHoldingDateDependencies();
-      all_nodes[i]->freeHoldingTimeDependencies();
+    std::vector<node_ptr> all_nodes;
+    defs.get_all_nodes(all_nodes);
+    for (size_t i = 0; i < all_nodes.size(); ++i) {
+        if (all_nodes[i]->isSuspended())
+            all_nodes[i]->resume();
+        all_nodes[i]->freeTrigger();
+        all_nodes[i]->freeHoldingDateDependencies();
+        all_nodes[i]->freeHoldingTimeDependencies();
 
-      const std::vector<InLimit>& inlimits = all_nodes[i]->inlimits();
-      for(const auto&  inlim: inlimits)  all_nodes[i]->deleteInlimit( inlim.name());
+        const std::vector<InLimit>& inlimits = all_nodes[i]->inlimits();
+        for (const auto& inlim : inlimits)
+            all_nodes[i]->deleteInlimit(inlim.name());
 
-      if (all_nodes[i]->state() == NState::COMPLETE && all_nodes[i]->isTask()) {
-         all_nodes[i]->set_state(NState::QUEUED);
-      }
-   }
+        if (all_nodes[i]->state() == NState::COMPLETE && all_nodes[i]->isTask()) {
+            all_nodes[i]->set_state(NState::QUEUED);
+        }
+    }
 
+    // Create a new log, file, place after begin to avoid queued state
+    TestLog test_log(log_path); // will create log file, and destroy log and remove file at end of scope
 
-   // Create a new log, file, place after begin to avoid queued state
-   TestLog test_log(log_path); // will create log file, and destroy log and remove file at end of scope
+    // This controls the log output when job generation > submitJobsInterval
+    JobProfiler::set_task_threshold(100); // 100ms where 1000ms is one second
 
-   // This controls the log output when job generation > submitJobsInterval
-   JobProfiler::set_task_threshold(100); // 100ms where 1000ms is one second
+    JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false /* spawn jobs */);
+    Jobs job(&defs);
+    if (!job.generate(jobParam))
+        cout << " generate failed: " << jobParam.getErrorMsg();
+    cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
-   JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false/* spawn jobs */);
-   Jobs job(&defs);
-   if (!job.generate( jobParam )) cout << " generate failed: " << jobParam.getErrorMsg();
-   cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
+    if (jobParam.submitted().size() != tasks.size()) {
+        for (size_t i = 0; i < tasks.size(); i++) {
+            if (tasks[i]->state() != NState::SUBMITTED &&
+                tasks[i]->findVariable("ECF_DUMMY_TASK") == Variable::EMPTY()) {
+                // We are NOT a dummy task
+                cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
 
-   if ( jobParam.submitted().size() != tasks.size()) {
-	   for(size_t i = 0; i < tasks.size(); i++) {
-		   if (tasks[i]->state() != NState::SUBMITTED && tasks[i]->findVariable("ECF_DUMMY_TASK") == Variable::EMPTY()) {
-			   // We are NOT a dummy task
-			   cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
+                Node* parent = tasks[i]->parent();
+                while (parent) {
+                    cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state())
+                         << "\n";
+                    parent = parent->parent();
+                }
 
-			   Node* parent = tasks[i]->parent();
-			   while (parent) {
-				   cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
-				   parent = parent->parent();
-			   }
+                std::vector<std::string> theReasonWhy;
+                tasks[i]->bottom_up_why(theReasonWhy, false /*html tags*/);
+                for (const auto& r : theReasonWhy) {
+                    cout << "  Reason: " << r << "\n";
+                }
+            }
+        }
+    }
 
-			   std::vector<std::string> theReasonWhy;
-			   tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
-			   for(const auto & r : theReasonWhy) {  cout << "  Reason: " << r << "\n";}
-		   }
-	   }
-   }
-
-   return 0;
+    return 0;
 }

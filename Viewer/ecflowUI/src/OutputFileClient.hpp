@@ -17,12 +17,11 @@
 
 class OutputVersionClient;
 
-class OutputFileClient : public OutputClient
-{
-	Q_OBJECT
+class OutputFileClient : public OutputClient {
+    Q_OBJECT
 
 public:
-    OutputFileClient(const std::string& host,const std::string& port,QObject *parent);
+    OutputFileClient(const std::string& host, const std::string& port, QObject* parent);
 
     VFile_ptr result() const;
     void clearResult();
@@ -40,42 +39,41 @@ protected Q_SLOTS:
     void slotVersionError(QString);
 
 private:
-	OutputFileClient(const OutputClient&);
-	OutputFileClient& operator=(const OutputClient&);
+    OutputFileClient(const OutputClient&);
+    OutputFileClient& operator=(const OutputClient&);
     void estimateExpectedSize();
     bool parseResultHeader(char* buf, quint64& len);
     bool getHeaderValue(char* buf, quint64 len, int pos1, int& pos2, std::string& val);
-    enum RequestType {GetRequest, GetFRequest, DeltaRequest, NoRequest};
+    enum RequestType { GetRequest, GetFRequest, DeltaRequest, NoRequest };
 
     qint64 total_{0};
     qint64 expected_{0};
-	VFile_ptr out_;
+    VFile_ptr out_;
     VDir_ptr dir_;
     qint64 lastProgress_{0};
     bool readStarted_{false};
     const QString progressUnits_{"MB"};
-    const qint64 progressChunk_{1024*1024};
+    const qint64 progressChunk_{1024 * 1024};
     OutputVersionClient* versionClient_{nullptr};
 
     RequestType reqType_{NoRequest};
     size_t deltaPos_{0};
     unsigned int remoteModTime_{0};
-    std::string  remoteCheckSum_;
+    std::string remoteCheckSum_;
 };
 
-class OutputVersionClient : public OutputClient
-{
+class OutputVersionClient : public OutputClient {
     Q_OBJECT
 
 public:
     using OutputClient::OutputClient;
-    OutputVersionClient(const OutputClient&) = delete;
+    OutputVersionClient(const OutputClient&)            = delete;
     OutputVersionClient& operator=(const OutputClient&) = delete;
     void getVersion();
-    int version() const {return version_;}
+    int version() const { return version_; }
 
-    enum VersionStatus {VersionNotFetched, VersionBeingFetched, VersionFailedToFetch, VersionFetched};
-    VersionStatus versionStatus() const {return versionStatus_;}
+    enum VersionStatus { VersionNotFetched, VersionBeingFetched, VersionFailedToFetch, VersionFetched };
+    VersionStatus versionStatus() const { return versionStatus_; }
 
 protected Q_SLOTS:
     void slotError(QAbstractSocket::SocketError err) override;
@@ -88,10 +86,9 @@ protected:
 private:
     void buildVersion();
 
-
     size_t dataSize_;
     static constexpr size_t maxDataSize_{64};
-    char data_[maxDataSize_+1];
+    char data_[maxDataSize_ + 1];
     int version_{0};
     VersionStatus versionStatus_{VersionNotFetched};
 };

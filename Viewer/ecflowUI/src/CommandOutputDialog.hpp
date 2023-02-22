@@ -17,8 +17,7 @@
 
 class ShellCommand;
 
-class CommandOutputDialog : public QDialog, protected Ui::CommandOutputDialog
-{
+class CommandOutputDialog : public QDialog, protected Ui::CommandOutputDialog {
     Q_OBJECT
 
 public:
@@ -29,10 +28,10 @@ protected Q_SLOTS:
     void reject() override;
 
 protected:
-    explicit CommandOutputDialog(QWidget *parent = nullptr);
+    explicit CommandOutputDialog(QWidget* parent = nullptr);
     ~CommandOutputDialog() override;
 
-    void closeEvent(QCloseEvent * event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     void readSettings();

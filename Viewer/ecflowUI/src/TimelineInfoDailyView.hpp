@@ -10,15 +10,14 @@
 #ifndef TIMELINEINFODIALYVIEW_HPP
 #define TIMELINEINFODIALYVIEW_HPP
 
+#include <QAbstractItemModel>
 #include <QDialog>
+#include <QPen>
 #include <QSettings>
+#include <QStyleOptionViewItem>
+#include <QStyledItemDelegate>
 #include <QTreeView>
 #include <QWidget>
-#include <QSettings>
-#include <QAbstractItemModel>
-#include <QPen>
-#include <QStyledItemDelegate>
-#include <QStyleOptionViewItem>
 
 #include "TimelineData.hpp"
 #include "VProperty.hpp"
@@ -29,29 +28,26 @@ class TimelineItem;
 class VNState;
 class NodeTimelineHeader;
 
-
-class TimelineInfoDailyModel : public QAbstractItemModel
-{
+class TimelineInfoDailyModel : public QAbstractItemModel {
 public:
-    explicit TimelineInfoDailyModel(QObject *parent=nullptr);
+    explicit TimelineInfoDailyModel(QObject* parent = nullptr);
     ~TimelineInfoDailyModel() override;
 
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    Qt::ItemFlags flags ( const QModelIndex & index) const override;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex&, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
 
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
-    QModelIndex parent (const QModelIndex & ) const override;
+    QModelIndex index(int, int, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex&) const override;
 
-    TimelineItem* data() const {return data_;}
-    void load(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
-                 unsigned int endDateSec);
+    TimelineItem* data() const { return data_; }
+    void load(TimelineItem*, unsigned int viewStartDateSec, unsigned int viewEndDateSec, unsigned int endDateSec);
     void clearData();
     bool hasData() const;
-    unsigned int endDateSec() const {return endDateSec_;}
+    unsigned int endDateSec() const { return endDateSec_; }
 
 protected:
     TimelineItem* data_{nullptr};
@@ -61,32 +57,30 @@ protected:
     unsigned int endDateSec_{0};
 };
 
-class TimelineInfoDailyDelegate : public QStyledItemDelegate, public VPropertyObserver
-{
+class TimelineInfoDailyDelegate : public QStyledItemDelegate, public VPropertyObserver {
 
 public:
-    explicit TimelineInfoDailyDelegate(TimelineInfoDailyModel* model,QWidget *parent);
+    explicit TimelineInfoDailyDelegate(TimelineInfoDailyModel* model, QWidget* parent);
     ~TimelineInfoDailyDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     void notifyChange(VProperty* p) override;
 
     void setStartTime(QTime);
     void setEndTime(QTime);
-    void setPeriod(QTime t1,QTime t2);
-    //void setMaxDurations(int submittedDuration,int activeDuration);
+    void setPeriod(QTime t1, QTime t2);
+    // void setMaxDurations(int submittedDuration,int activeDuration);
 
-//Q_SIGNALS:
-//    void sizeHintChangedGlobal();
+    // Q_SIGNALS:
+    //     void sizeHintChangedGlobal();
 
 protected:
     void updateSettings();
-    void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex& index) const;
-    void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
-    int timeToPos(QRect r,unsigned int time) const;
+    void renderTimeline(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    void drawCell(QPainter* painter, QRect r, QColor fillCol, bool hasGrad, bool lighter) const;
+    int timeToPos(QRect r, unsigned int time) const;
 
     TimelineInfoDailyModel* model_;
     PropertyMapper* prop_;
@@ -98,61 +92,55 @@ protected:
     QTime startTime_;
     QTime endTime_;
 
-    //int submittedMaxDuration_;
-    //int activeMaxDuration_;
-    //int durationMaxTextWidth_;
+    // int submittedMaxDuration_;
+    // int activeMaxDuration_;
+    // int durationMaxTextWidth_;
 };
 
-class TimelineInfoDailyView : public QTreeView
-{
-Q_OBJECT
+class TimelineInfoDailyView : public QTreeView {
+    Q_OBJECT
 
 public:
-    explicit TimelineInfoDailyView(QWidget *parent=nullptr);
+    explicit TimelineInfoDailyView(QWidget* parent = nullptr);
     ~TimelineInfoDailyView() override;
 
     void rerender();
 
     void setStartTime(QTime);
     void setEndTime(QTime);
-    void setPeriod(QTime t1,QTime t2);
-    void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
-    void load(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
-                                    unsigned int endDateSec);
+    void setPeriod(QTime t1, QTime t2);
+    void setZoomActions(QAction* zoomInAction, QAction* zoomOutAction);
+    void load(TimelineItem* data, unsigned int viewStartDateSec, unsigned int viewEndDateSec, unsigned int endDateSec);
 
     void readSettings(QSettings&);
     void writeSettings(QSettings&);
 
 protected Q_SLOTS:
-    //void slotDoubleClickItem(const QModelIndex&);
-    //void slotContextMenu(const QPoint &position);
-    //void slotHeaderContextMenu(const QPoint &position);
-    //void slotSizeHintChangedGlobal();
-    //void slotRerender();
-    void periodSelectedInHeader(QTime t1,QTime t2);
-    //void slotHzScrollbar(int,int);
-    //void adjustHeader();
+    // void slotDoubleClickItem(const QModelIndex&);
+    // void slotContextMenu(const QPoint &position);
+    // void slotHeaderContextMenu(const QPoint &position);
+    // void slotSizeHintChangedGlobal();
+    // void slotRerender();
+    void periodSelectedInHeader(QTime t1, QTime t2);
+    // void slotHzScrollbar(int,int);
+    // void adjustHeader();
 
 Q_SIGNALS:
-    void periodSelected(QTime,QTime);
-    void periodBeingZoomed(QTime,QTime);
+    void periodSelected(QTime, QTime);
+    void periodBeingZoomed(QTime, QTime);
 
 protected:
-    //QModelIndexList selectedList();
-    //void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
-    //void adjustBackground(QColor col);
-    //void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    //void setSortingEnabledNoExec(bool b);
-    //void showDetails(const QModelIndex& indexClicked);
-    //void lookup(const QModelIndex&);
-    //void copyPath(const QModelIndex&);
-    //void updateDurations();
-    //int computeMaxDuration(QString);
+    // QModelIndexList selectedList();
+    // void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint
+    // widgetPos,QWidget *widget); void adjustBackground(QColor col); void selectionChanged(const QItemSelection
+    // &selected, const QItemSelection &deselected); void setSortingEnabledNoExec(bool b); void showDetails(const
+    // QModelIndex& indexClicked); void lookup(const QModelIndex&); void copyPath(const QModelIndex&); void
+    // updateDurations(); int computeMaxDuration(QString);
 
     TimelineInfoDailyModel* model_;
     NodeTimelineHeader* header_;
     bool headerBeingAdjusted_;
-    TimelineInfoDailyDelegate *delegate_;
+    TimelineInfoDailyDelegate* delegate_;
     bool needItemsLayout_;
     bool setCurrentIsRunning_;
     QDateTime startDate_;
@@ -160,6 +148,5 @@ protected:
     QTime startTime_;
     QTime endTime_;
 };
-
 
 #endif // TIMELINEINFODAILYVIEW_HPP

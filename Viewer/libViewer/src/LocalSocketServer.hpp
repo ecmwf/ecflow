@@ -14,15 +14,14 @@
 
 class QLocalServer;
 
-class LocalSocketServer : public QObject
-{
+class LocalSocketServer : public QObject {
     Q_OBJECT
 
 public:
-    LocalSocketServer(QString serverId,QObject *parent);
+    LocalSocketServer(QString serverId, QObject* parent);
     ~LocalSocketServer() override;
 
-    static QString generateServerName(QString serverId,qint64 pid);
+    static QString generateServerName(QString serverId, qint64 pid);
     QString serverName();
 
 protected Q_SLOTS:

@@ -1,5 +1,283 @@
 
-set(viewer_srcs   
+set(viewer_srcs
+    # HEADERS
+    AboutDialog.hpp
+    AbstractNodeModel.hpp
+    AbstractNodeView.hpp
+    AbstractSearchLine.hpp
+    AbstractTextEditSearchInterface.hpp
+    ActionHandler.hpp
+    AddLabelDialog.hpp
+    AddModelColumnDialog.hpp
+    Animation.hpp
+    AstCollateVNodesVisitor.hpp
+    AttributeEditor.hpp
+    AttributeEditorFactory.hpp
+    CaseSensitiveButton.hpp
+    ChangeNotify.hpp
+    ChangeNotifyDialog.hpp
+    ChangeNotifyEditor.hpp
+    ChangeNotifyModel.hpp
+    ChangeNotifyWidget.hpp
+    ClockWidget.hpp
+    CodeItemWidget.hpp
+    ComboMulti.hpp
+    CommandDesignerWidget.hpp
+    CommandHandler.hpp
+    CommandOutput.hpp
+    CommandOutputDialog.hpp
+    CommandOutputWidget.hpp
+    CompactView.hpp
+    ConfigListDelegate.hpp
+    ConnectState.hpp
+    CustomCommandDialog.hpp
+    CustomCommandHandler.hpp
+    CustomListWidget.hpp
+    CustomTabWidget.hpp
+    Dashboard.hpp
+    DashboardDialog.hpp
+    DashboardDock.hpp
+    DashboardTitle.hpp
+    DashboardWidget.hpp
+    DiagData.hpp
+    EditItemWidget.hpp
+    EditProvider.hpp
+    EditorInfoLabel.hpp
+    EventEditor.hpp
+    ExpandState.hpp
+    ExpandStateNode.hpp
+    FetchTask.hpp
+    FileFetchTask.hpp
+    FileInfoLabel.hpp
+    FileWatcher.hpp
+    FilterWidget.hpp
+    FlagSet.hpp
+    FontMetrics.hpp
+    GenFileProvider.hpp
+    GotoLineDialog.hpp
+    Highlighter.hpp
+    HistoryItemWidget.hpp
+    HtmlEdit.hpp
+    HtmlItemWidget.hpp
+    InfoPanel.hpp
+    InfoPanelHandler.hpp
+    InfoPanelItem.hpp
+    InfoPresenter.hpp
+    InfoProvider.hpp
+    InputEventLog.hpp
+    JobItemWidget.hpp
+    JobStatusItemWidget.hpp
+    LabelEditor.hpp
+    LimitEditor.hpp
+    LineEdit.hpp
+    LogProvider.hpp
+    LogViewerCom.hpp
+    MainWindow.hpp
+    ManualItemWidget.hpp
+    MenuConfigDialog.hpp
+    MenuHandler.hpp
+    MessageItemWidget.hpp
+    MeterEditor.hpp
+    ModelColumn.hpp
+    NodeExpression.hpp
+    NodeFilterDialog.hpp
+    NodeObserver.hpp
+    NodePanel.hpp
+    NodePathWidget.hpp
+    NodeQuery.hpp
+    NodeQueryCombo.hpp
+    NodeQueryEditor.hpp
+    NodeQueryEngine.hpp
+    NodeQueryHandler.hpp
+    NodeQueryOption.hpp
+    NodeQueryOptionEdit.hpp
+    NodeQueryResult.hpp
+    NodeQueryResultModel.hpp
+    NodeQueryResultTmp.hpp
+    NodeQueryResultView.hpp
+    NodeQueryViewDelegate.hpp
+    NodeSearchWidget.hpp
+    NodeSearchWindow.hpp
+    NodeViewBase.hpp
+    NodeViewDelegate.hpp
+    NodeWidget.hpp
+    OneLineTextEdit.hpp
+    OutputBrowser.hpp
+    OutputCache.hpp
+    OutputClient.hpp
+    OutputDirClient.hpp
+    OutputDirProvider.hpp
+    OutputDirWidget.hpp
+    OutputFetchInfo.hpp
+    OutputFileClient.hpp
+    OutputFileProvider.hpp
+    OutputItemWidget.hpp
+    OutputModel.hpp
+    OverviewItemWidget.hpp
+    OverviewProvider.hpp
+    PlainTextEdit.hpp
+    PlainTextSearchInterface.hpp
+    PlainTextSearchLine.hpp
+    PropertyDialog.hpp
+    PropertyEditor.hpp
+    PropertyLine.hpp
+    PropertyMapper.hpp
+    RectMetrics.hpp
+    RepeatEditor.hpp
+    RichTextEdit.hpp
+    RichTextSearchInterface.hpp
+    RichTextSearchLine.hpp
+    SaveSessionAsDialog.hpp
+    ScriptItemWidget.hpp
+    ServerComInfoWidget.hpp
+    ServerComObserver.hpp
+    ServerComQueue.hpp
+    ServerComThread.hpp
+    ServerDefsAccess.hpp
+    ServerFilter.hpp
+    ServerHandler.hpp
+    ServerItem.hpp
+    ServerList.hpp
+    ServerListDialog.hpp
+    ServerListSyncWidget.hpp
+    ServerLoadItemWidget.hpp
+    ServerObserver.hpp
+    ServerSettingsItemWidget.hpp
+    SessionDialog.hpp
+    SessionHandler.hpp
+    SessionRenameDialog.hpp
+    ShellCommand.hpp
+    ShortcutHelpDialog.hpp
+    Sound.hpp
+    Spline.hpp
+    StandardView.hpp
+    StringMatchCombo.hpp
+    StringMatchMode.hpp
+    SuiteFilter.hpp
+    SuiteFilterObserver.hpp
+    SuiteItemWidget.hpp
+    SuiteModel.hpp
+    TabWidget.hpp
+    TableFilterWidget.hpp
+    TableNodeModel.hpp
+    TableNodeSortModel.hpp
+    TableNodeView.hpp
+    TableNodeViewDelegate.hpp
+    TableNodeWidget.hpp
+    TextEditSearchLine.hpp
+    TextFilterHandler.hpp
+    TextFilterHandlerDialog.hpp
+    TextFilterWidget.hpp
+    TimelineData.hpp
+    TimelineFileList.hpp
+    TimelineHeaderView.hpp
+    TimelineInfoDailyView.hpp
+    TimelineInfoDailyWidget.hpp
+    TimelineInfoDelegate.hpp
+    TimelineInfoWidget.hpp
+    TimelineItemWidget.hpp
+    TimelineModel.hpp
+    TimelinePreLoadDialog.hpp
+    TimelineView.hpp
+    TimelineWidget.hpp
+    TreeNodeModel.hpp
+    TreeNodeView.hpp
+    TreeNodeViewDelegate.hpp
+    TreeNodeWidget.hpp
+    TreeView.hpp
+    TriggerCollector.hpp
+    TriggerEditor.hpp
+    TriggerGraphLayoutBuilder.hpp
+    TriggerGraphModel.hpp
+    TriggerGraphView.hpp
+    TriggerGraphWidget.hpp
+    TriggerItemWidget.hpp
+    TriggerTableModel.hpp
+    TriggerTableView.hpp
+    TriggerTableWidget.hpp
+    TriggerTextWidget.hpp
+    TriggerViewDelegate.hpp
+    TriggeredScanner.hpp
+    UiLogS.hpp
+    UpdateTimer.hpp
+    VAttribute.hpp
+    VAttributeType.hpp
+    VAutoArchiveAttr.hpp
+    VAutoCancelAttr.hpp
+    VAutoRestoreAttr.hpp
+    VConfig.hpp
+    VConfigLoader.hpp
+    VDateAttr.hpp
+    VDir.hpp
+    VEventAttr.hpp
+    VFile.hpp
+    VFileInfo.hpp
+    VFileTransfer.hpp
+    VFileUncompress.hpp
+    VFilter.hpp
+    VGenVarAttr.hpp
+    VIcon.hpp
+    VInfo.hpp
+    VItem.hpp
+    VItemPathParser.hpp
+    VLabelAttr.hpp
+    VLateAttr.hpp
+    VLimitAttr.hpp
+    VLimiterAttr.hpp
+    VMeterAttr.hpp
+    VModelData.hpp
+    VNState.hpp
+    VNode.hpp
+    VNodeList.hpp
+    VNodeMover.hpp
+    VNodeStateDiag.hpp
+    VParam.hpp
+    VProperty.hpp
+    VQueueAttr.hpp
+    VRepeatAttr.hpp
+    VReply.hpp
+    VReportMaker.hpp
+    VSState.hpp
+    VServerSettings.hpp
+    VSettings.hpp
+    VSettingsLoader.hpp
+    VTask.hpp
+    VTaskNode.hpp
+    VTaskObserver.hpp
+    VTimeAttr.hpp
+    VTree.hpp
+    VTriggerAttr.hpp
+    VUserVarAttr.hpp
+    VariableEditor.hpp
+    VariableItemWidget.hpp
+    VariableModel.hpp
+    VariableModelData.hpp
+    VariableModelDataObserver.hpp
+    VariableSearchLine.hpp
+    VariableView.hpp
+    Viewer.hpp
+    ViewerUtil.hpp
+    WhyItemWidget.hpp
+    WidgetNameProvider.hpp
+    WmWorkspaceHandler.hpp
+    ZombieItemWidget.hpp
+    ZombieModel.hpp
+    TextPager/TextCodecWrapper.hpp
+    TextPager/TextPagerCursor.hpp
+    TextPager/TextPagerCursor_p.hpp
+    TextPager/TextPagerDocument.hpp
+    TextPager/TextPagerDocument_p.hpp
+    TextPager/TextPagerEdit.hpp
+    TextPager/TextPagerEdit_p.hpp
+    TextPager/TextPagerLayout_p.hpp
+    TextPager/TextPagerSearchHighlighter.hpp
+    TextPager/TextPagerSearchInterface.hpp
+    TextPager/TextPagerSection.hpp
+    TextPager/TextPagerSection_p.hpp
+    TextPager/TextPagerWidget.hpp
+    TextPager/WeakPointer.hpp
+    TextPager/syntaxhighlighter.hpp
+    # SOURCES
     ViewerMain.cpp
     AboutDialog.cpp
     AbstractNodeModel.cpp
@@ -487,8 +765,16 @@ set(viewer_wrap_ui_files
 )
 
 if(ECFLOW_LOGVIEW)
-    list(APPEND viewer_srcs LogLoadWidget.cpp LogLoadView.cpp)
-    list(APPEND viewer_moc_files LogLoadWidget.hpp LogLoadView.hpp)
+    list(APPEND viewer_srcs
+      # HEADERS
+      LogLoadWidget.hpp
+      LogLoadView.hpp
+      # SOURCES
+      LogLoadWidget.cpp
+      LogLoadView.cpp)
+    list(APPEND viewer_moc_files
+      LogLoadWidget.hpp
+      LogLoadView.hpp)
 endif()
 
 #set(wrap_ui_files
@@ -546,6 +832,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
          ${OPENSSL_LIBRARIES}
 )
 
+target_clangformat(ecflow_ui.x)
 
 if(0)
 set(logviewer_srcs
@@ -597,4 +884,6 @@ if(${build_ecflow_ui_log})
              ${ECFLOW_QT_LIBRARIES}
         DEFINITIONS MAIN_LOG
     )
+
+    target_clangformat(ecflow_ui_log)
 endif()

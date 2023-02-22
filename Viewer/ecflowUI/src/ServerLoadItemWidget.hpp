@@ -20,10 +20,9 @@ class VNode;
 class LogLoadWidget;
 class MessageLabel;
 
-class ServerLoadItemWidget : public QWidget, public InfoPanelItem
-{
+class ServerLoadItemWidget : public QWidget, public InfoPanelItem {
 public:
-    explicit ServerLoadItemWidget(QWidget *parent=nullptr);
+    explicit ServerLoadItemWidget(QWidget* parent = nullptr);
     ~ServerLoadItemWidget() override;
 
     void reload(VInfo_ptr) override;
@@ -53,5 +52,3 @@ private:
 };
 
 #endif // SERVERLOADITEMWIDGET_HPP
-
-

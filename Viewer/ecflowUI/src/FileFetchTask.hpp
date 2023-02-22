@@ -10,29 +10,27 @@
 #ifndef FILEFETCHTASK_HPP
 #define FILEFETCHTASK_HPP
 
-#include <map>
 #include <deque>
+#include <map>
 
 #include <QObject>
 
-#include "VFile.hpp"
 #include "FetchTask.hpp"
+#include "VFile.hpp"
 
 class FileProvider;
 class OutputFileClient;
 class VFileTransfer;
 class VReply;
 
-class FileFetchLocalTask : public AbstractFetchTask
-{
+class FileFetchLocalTask : public AbstractFetchTask {
 public:
     FileFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
-class FileFetchTransferTask : public QObject, public AbstractFetchTask
-{
-Q_OBJECT
+class FileFetchTransferTask : public QObject, public AbstractFetchTask {
+    Q_OBJECT
 public:
     FileFetchTransferTask(FetchQueueOwner* owner);
     void run() override;
@@ -41,25 +39,23 @@ public:
 
 protected Q_SLOTS:
     void transferFinished();
-    void transferProgress(QString,int);
+    void transferProgress(QString, int);
     void transferFailed(QString);
 
 protected:
     void stopTransfer();
 
-    VFileTransfer *transfer_{nullptr};
+    VFileTransfer* transfer_{nullptr};
 };
 
-class FileFetchCacheTask : public AbstractFetchTask
-{
+class FileFetchCacheTask : public AbstractFetchTask {
 public:
     FileFetchCacheTask(FetchQueueOwner* owner);
     void run() override;
 };
 
-class FileFetchLogServerTask : public QObject, public AbstractFetchTask
-{
-Q_OBJECT
+class FileFetchLogServerTask : public QObject, public AbstractFetchTask {
+    Q_OBJECT
 public:
     FileFetchLogServerTask(FetchQueueOwner* owner);
     ~FileFetchLogServerTask();
@@ -69,13 +65,13 @@ public:
 
 protected Q_SLOTS:
     void clientFinished();
-    void clientProgress(QString,int);
+    void clientProgress(QString, int);
     void clientError(QString);
 
 protected:
     void deleteClient();
 
-    OutputFileClient *client_{nullptr};
+    OutputFileClient* client_{nullptr};
 };
 
 #endif // FILEFETCHTASK_HPP

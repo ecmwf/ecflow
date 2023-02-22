@@ -11,25 +11,24 @@
 #ifndef VIEWER_SRC_CASESENSITIVEBUTTON_HPP_
 #define VIEWER_SRC_CASESENSITIVEBUTTON_HPP_
 
-#include <QToolButton>
-
 #include <map>
 
-class CaseSensitiveButton : public QToolButton
-{
-Q_OBJECT
+#include <QToolButton>
+
+class CaseSensitiveButton : public QToolButton {
+    Q_OBJECT
 
 public:
-	explicit CaseSensitiveButton(QWidget* parent=nullptr);
+    explicit CaseSensitiveButton(QWidget* parent = nullptr);
 
 protected Q_SLOTS:
-	void slotClicked(bool);
+    void slotClicked(bool);
 
 Q_SIGNALS:
-	void changed(bool);
+    void changed(bool);
 
 private:
-	std::map<bool,QString> tooltip_;
+    std::map<bool, QString> tooltip_;
 };
 
 #endif /* VIEWER_SRC_CASESENSITIVEBUTTON_HPP_ */

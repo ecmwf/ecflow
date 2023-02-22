@@ -23,8 +23,9 @@
 // ===========================================================================
 class GlossaryDoc : private boost::noncopyable {
 public:
-   static const char* list();
+    static const char* list();
+
 private:
-   GlossaryDoc()= default;
+    GlossaryDoc() = default;
 };
 #endif

@@ -8,133 +8,119 @@
 //
 //============================================================================
 
-#include <fstream>
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include "LogProvider.hpp"
 
+#include <fstream>
+
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
+#include "File.hpp"
 #include "FileWatcher.hpp"
+#include "ServerHandler.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
-#include "ServerHandler.hpp"
-#include "File.hpp"
 
-
-LogProvider::LogProvider(InfoPresenter* owner,QObject* parent) :
-	QObject(parent),
-	InfoProvider(owner,VTask::HistoryTask),
-    fileWatcher_(nullptr)
-{
-    //NOTE: fileWatcher_'s parent (if it exists) will be "this", so
-	//fileWatcher_ will be automatically deleted in the destructor!
+LogProvider::LogProvider(InfoPresenter* owner, QObject* parent)
+    : QObject(parent),
+      InfoProvider(owner, VTask::HistoryTask),
+      fileWatcher_(nullptr) {
+    // NOTE: fileWatcher_'s parent (if it exists) will be "this", so
+    // fileWatcher_ will be automatically deleted in the destructor!
 }
 
-void LogProvider::clear()
-{
-	stopWatchFile();
-	InfoProvider::clear();
+void LogProvider::clear() {
+    stopWatchFile();
+    InfoProvider::clear();
 }
 
-void LogProvider::setAutoUpdate(bool autoUpdate)
-{
+void LogProvider::setAutoUpdate(bool autoUpdate) {
     InfoProvider::setAutoUpdate(autoUpdate);
 
-    if(active_)
-    {
-        if(!autoUpdate_)
-        {
+    if (active_) {
+        if (!autoUpdate_) {
             stopWatchFile();
         }
-        else
-        {
-            if(!inAutoUpdate_)
+        else {
+            if (!inAutoUpdate_)
                 fetchFile();
         }
     }
-    else
-    {
+    else {
         stopWatchFile();
     }
 }
 
-void LogProvider::visit(VInfoServer*)
-{
-	fetchFile();
+void LogProvider::visit(VInfoServer*) {
+    fetchFile();
 }
 
-void LogProvider::fetchFile()
-{
-    if(!active_)
-		return;
+void LogProvider::fetchFile() {
+    if (!active_)
+        return;
 
-	stopWatchFile();
+    stopWatchFile();
 
-	//Reset the reply
-	reply_->reset();
+    // Reset the reply
+    reply_->reset();
 
-    if(!info_)
-	{
-	   owner_->infoFailed(reply_);
-	   return;
-	}
+    if (!info_) {
+        owner_->infoFailed(reply_);
+        return;
+    }
 
-	ServerHandler* server=info_->server();
+    ServerHandler* server = info_->server();
 
-	//Get the filename
-	std::string fileName=server->vRoot()->genVariable("ECF_LOG");
+    // Get the filename
+    std::string fileName = server->vRoot()->genVariable("ECF_LOG");
 
-	fetchFile(server,fileName);
+    fetchFile(server, fileName);
 }
 
-void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
-{
-	if(!server)
-    {
-    	owner_->infoFailed(reply_);
-    	return;
+void LogProvider::fetchFile(ServerHandler* server, const std::string& fileName) {
+    if (!server) {
+        owner_->infoFailed(reply_);
+        return;
     }
 
-	//Set the filename in reply
-	reply_->fileName(fileName);
+    // Set the filename in reply
+    reply_->fileName(fileName);
 
-	//No filename is available
-	if(fileName.empty())
-	{
-		reply_->setErrorText("Variable ECF_LOG is not defined!");
-		owner_->infoFailed(reply_);
-	}
-
-    //First we try to read the file directly from the disk
-    //if(server->readFromDisk())
-    {
-    	size_t file_size = 0;
-    	std::string err_msg;
-    	reply_->text( ecf::File::get_last_n_lines(fileName,100,file_size,err_msg));
-    	if(err_msg.empty())
-    	{
-    		reply_->fileReadMode(VReply::LocalReadMode);
-
-    		if(autoUpdate_)
-    			inAutoUpdate_=true;
-
-    		owner_->infoReady(reply_);
-
-    		//Try to track the changes in the log file
-    		watchFile(fileName,file_size);
-    		return;
-    	}
+    // No filename is available
+    if (fileName.empty()) {
+        reply_->setErrorText("Variable ECF_LOG is not defined!");
+        owner_->infoFailed(reply_);
     }
 
-    //Finally we try the server
+    // First we try to read the file directly from the disk
+    // if(server->readFromDisk())
+    {
+        size_t file_size = 0;
+        std::string err_msg;
+        reply_->text(ecf::File::get_last_n_lines(fileName, 100, file_size, err_msg));
+        if (err_msg.empty()) {
+            reply_->fileReadMode(VReply::LocalReadMode);
+
+            if (autoUpdate_)
+                inAutoUpdate_ = true;
+
+            owner_->infoReady(reply_);
+
+            // Try to track the changes in the log file
+            watchFile(fileName, file_size);
+            return;
+        }
+    }
+
+    // Finally we try the server
     reply_->fileReadMode(VReply::ServerReadMode);
 
-    //Define a task for getting the info from the server.
-    task_=VTask::create(taskType_,server->vRoot(),this);
+    // Define a task for getting the info from the server.
+    task_ = VTask::create(taskType_, server->vRoot(), this);
 
-    //Run the task in the server. When it finish taskFinished() is called. The text returned
-    //in the reply will be prepended to the string we generated above.
+    // Run the task in the server. When it finish taskFinished() is called. The text returned
+    // in the reply will be prepended to the string we generated above.
     server->run(task_);
 
 #if 0
@@ -143,55 +129,45 @@ void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
 #endif
 }
 
-void LogProvider::watchFile(const std::string& fileName,size_t offset)
-{
-	if(autoUpdate_)
-	{
-		assert(fileWatcher_ == nullptr);
-		fileWatcher_=new FileWatcher(fileName,offset,this);
+void LogProvider::watchFile(const std::string& fileName, size_t offset) {
+    if (autoUpdate_) {
+        assert(fileWatcher_ == nullptr);
+        fileWatcher_ = new FileWatcher(fileName, offset, this);
 
-		connect(fileWatcher_,SIGNAL(linesAppended(QStringList)),
-			this,SLOT(slotLinesAppend(QStringList)));
+        connect(fileWatcher_, SIGNAL(linesAppended(QStringList)), this, SLOT(slotLinesAppend(QStringList)));
 
-		inAutoUpdate_=true;
-	}
+        inAutoUpdate_ = true;
+    }
 }
 
-void LogProvider::stopWatchFile()
-{
-	if(fileWatcher_)
-	{
-		delete fileWatcher_;
-		fileWatcher_=nullptr;
-	}
+void LogProvider::stopWatchFile() {
+    if (fileWatcher_) {
+        delete fileWatcher_;
+        fileWatcher_ = nullptr;
+    }
 
-	inAutoUpdate_=false;
+    inAutoUpdate_ = false;
 }
 
-void LogProvider::slotLinesAppend(QStringList lst)
-{
-	//Check if the task is already running
-	if(task_)
-	{
-		task_->status(VTask::CANCELLED);
-		task_.reset();
-	}
+void LogProvider::slotLinesAppend(QStringList lst) {
+    // Check if the task is already running
+    if (task_) {
+        task_->status(VTask::CANCELLED);
+        task_.reset();
+    }
 
-	//Reset the reply
-	reply_->reset();
+    // Reset the reply
+    reply_->reset();
 
-	if(!info_)
-	{
-		owner_->infoFailed(reply_);
-	}
+    if (!info_) {
+        owner_->infoFailed(reply_);
+    }
 
-	std::vector<std::string> vec;
-	Q_FOREACH(QString s,lst)
-	{
-		vec.push_back(s.toStdString());
-	}
+    std::vector<std::string> vec;
+    Q_FOREACH (QString s, lst) {
+        vec.push_back(s.toStdString());
+    }
 
-	reply_->setTextVec(vec);
-	owner_->infoAppended(reply_);
+    reply_->setTextVec(vec);
+    owner_->infoAppended(reply_);
 }
-

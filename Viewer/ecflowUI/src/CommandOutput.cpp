@@ -13,7 +13,7 @@
 #include "CommandOutputDialog.hpp"
 #include "VConfig.hpp"
 
-CommandOutputHandler* CommandOutputHandler::instance_=nullptr;
+CommandOutputHandler* CommandOutputHandler::instance_ = nullptr;
 
 //===============================================
 //
@@ -21,72 +21,65 @@ CommandOutputHandler* CommandOutputHandler::instance_=nullptr;
 //
 //==============================================
 
-CommandOutput::CommandOutput(QString cmd,QString cmdDef,QDateTime runTime) :
-    enabled_(true), command_(cmd), commandDef_(cmdDef),
-    runTime_(runTime), status_(RunningStatus)
-{
-
+CommandOutput::CommandOutput(QString cmd, QString cmdDef, QDateTime runTime)
+    : enabled_(true),
+      command_(cmd),
+      commandDef_(cmdDef),
+      runTime_(runTime),
+      status_(RunningStatus) {
 }
 
-void CommandOutput::appendOutput(QString txt,int maxSize,bool& trimmed)
-{
-    output_+=txt;
-    trimmed=false;
-    if(output_.size() > maxSize)
-    {
-        output_=output_.right(maxSize-100);
-        trimmed=true;
+void CommandOutput::appendOutput(QString txt, int maxSize, bool& trimmed) {
+    output_ += txt;
+    trimmed = false;
+    if (output_.size() > maxSize) {
+        output_ = output_.right(maxSize - 100);
+        trimmed = true;
     }
 }
 
-void CommandOutput::appendError(QString txt,int maxSize,bool& trimmed)
-{
-    error_+=txt;
-    trimmed=false;
-    if(error_.size() > maxSize)
-    {
-        error_=error_.right(maxSize-100);
-        trimmed=true;
+void CommandOutput::appendError(QString txt, int maxSize, bool& trimmed) {
+    error_ += txt;
+    trimmed = false;
+    if (error_.size() > maxSize) {
+        error_  = error_.right(maxSize - 100);
+        trimmed = true;
     }
 }
 
-QString CommandOutput::statusStr() const
-{
+QString CommandOutput::statusStr() const {
     static QString finishedStr("finished");
     static QString failedStr("failed");
     static QString runningStr("running");
 
-    switch(status_)
-    {
-    case FinishedStatus:
-        return finishedStr;
-    case FailedStatus:
-        return failedStr;
-    case RunningStatus:
-        return runningStr;
-    default:
-        return {};
+    switch (status_) {
+        case FinishedStatus:
+            return finishedStr;
+        case FailedStatus:
+            return failedStr;
+        case RunningStatus:
+            return runningStr;
+        default:
+            return {};
     }
 
     return {};
 }
 
-QColor CommandOutput::statusColour() const
-{
-    static QColor redColour(255,0,0);
-    static QColor greenColour(9,160,63);
-    static QColor blackColour(0,0,0);
+QColor CommandOutput::statusColour() const {
+    static QColor redColour(255, 0, 0);
+    static QColor greenColour(9, 160, 63);
+    static QColor blackColour(0, 0, 0);
 
-    switch(status_)
-    {
-    case CommandOutput::FinishedStatus:
-        return blackColour;
-    case CommandOutput::FailedStatus:
-        return redColour;
-    case CommandOutput::RunningStatus:
-        return greenColour;
-    default:
-        return blackColour;
+    switch (status_) {
+        case CommandOutput::FinishedStatus:
+            return blackColour;
+        case CommandOutput::FailedStatus:
+            return redColour;
+        case CommandOutput::RunningStatus:
+            return greenColour;
+        default:
+            return blackColour;
     }
 
     return blackColour;
@@ -98,80 +91,67 @@ QColor CommandOutput::statusColour() const
 //
 //===============================================
 
-CommandOutputHandler::CommandOutputHandler(QObject* parent) :
-    QObject(parent)
-{
+CommandOutputHandler::CommandOutputHandler(QObject* parent) : QObject(parent) {
     showDialogStdOutProp_ = VConfig::instance()->find("view.shellCommand.showPopupOnStdOut");
     showDialogStdErrProp_ = VConfig::instance()->find("view.shellCommand.showPopupOnStdErr");
 }
 
-CommandOutputHandler* CommandOutputHandler::instance()
-{
-    if(!instance_)
-        instance_=new CommandOutputHandler(nullptr);
+CommandOutputHandler* CommandOutputHandler::instance() {
+    if (!instance_)
+        instance_ = new CommandOutputHandler(nullptr);
 
     return instance_;
 }
 
-int CommandOutputHandler::indexOfItem(CommandOutput_ptr item) const
-{
-    if(!item)
+int CommandOutputHandler::indexOfItem(CommandOutput_ptr item) const {
+    if (!item)
         return -1;
 
-    for(int i=0; i < items_.count(); i++)
-    {
-        if(item.get() == items_[i].get())
+    for (int i = 0; i < items_.count(); i++) {
+        if (item.get() == items_[i].get())
             return i;
     }
 
     return -1;
 }
 
-void CommandOutputHandler::appendOutput(CommandOutput_ptr item,QString txt)
-{
-    if(item)
-    {
-        bool trimmed=false;
-        item->appendOutput(txt,maxOutputSize_,trimmed);
+void CommandOutputHandler::appendOutput(CommandOutput_ptr item, QString txt) {
+    if (item) {
+        bool trimmed = false;
+        item->appendOutput(txt, maxOutputSize_, trimmed);
         if (needToShowStdOut()) {
             CommandOutputDialog::showDialog();
         }
-        if(trimmed==false)
-            Q_EMIT itemOutputAppend(item,txt);
+        if (trimmed == false)
+            Q_EMIT itemOutputAppend(item, txt);
         else
             Q_EMIT itemOutputReload(item);
     }
 }
 
-void CommandOutputHandler::appendError(CommandOutput_ptr item,QString txt)
-{
-    if(item)
-    {
-        bool trimmed=false;
-        item->appendError(txt,maxErrorSize_,trimmed);
+void CommandOutputHandler::appendError(CommandOutput_ptr item, QString txt) {
+    if (item) {
+        bool trimmed = false;
+        item->appendError(txt, maxErrorSize_, trimmed);
         if (needToShowStdErr()) {
             CommandOutputDialog::showDialog();
         }
-        if(trimmed==false)
-            Q_EMIT itemErrorAppend(item,txt);
+        if (trimmed == false)
+            Q_EMIT itemErrorAppend(item, txt);
         else
             Q_EMIT itemErrorReload(item);
     }
 }
 
-void CommandOutputHandler::finished(CommandOutput_ptr item)
-{
-    if(item)
-    {
+void CommandOutputHandler::finished(CommandOutput_ptr item) {
+    if (item) {
         item->setStatus(CommandOutput::FinishedStatus);
         Q_EMIT itemStatusChanged(item);
     }
 }
 
-void CommandOutputHandler::failed(CommandOutput_ptr item)
-{
-    if(item)
-    {
+void CommandOutputHandler::failed(CommandOutput_ptr item) {
+    if (item) {
         item->setStatus(CommandOutput::FailedStatus);
         Q_EMIT itemStatusChanged(item);
         if (needToShowStdErr()) {
@@ -180,14 +160,11 @@ void CommandOutputHandler::failed(CommandOutput_ptr item)
     }
 }
 
-CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDateTime runTime, CreateContext context)
-{
-    if( (needToShowStdOut() && context == StdOutContext) ||
-        (needToShowStdErr() && context == StdErrContext) ) {
+CommandOutput_ptr CommandOutputHandler::addItem(QString cmd, QString cmdDef, QDateTime runTime, CreateContext context) {
+    if ((needToShowStdOut() && context == StdOutContext) || (needToShowStdErr() && context == StdErrContext)) {
         CommandOutputDialog::showDialog();
     }
-    CommandOutput_ptr item=
-            CommandOutput_ptr(new CommandOutput(cmd,cmdDef,runTime));
+    CommandOutput_ptr item = CommandOutput_ptr(new CommandOutput(cmd, cmdDef, runTime));
     Q_EMIT itemAddBegin();
     items_ << item;
     checkItems();
@@ -195,24 +172,20 @@ CommandOutput_ptr CommandOutputHandler::addItem(QString cmd,QString cmdDef,QDate
     return item;
 }
 
-void CommandOutputHandler::checkItems()
-{
-    Q_ASSERT(maxNum_ >0);
-    while(items_.count() > maxNum_)
-    {
+void CommandOutputHandler::checkItems() {
+    Q_ASSERT(maxNum_ > 0);
+    while (items_.count() > maxNum_) {
         Q_ASSERT(items_.count() > 0);
-        CommandOutput_ptr item=items_.first();
+        CommandOutput_ptr item = items_.first();
         item->setEnabled(false);
         items_.remove(0);
     }
 }
 
-bool CommandOutputHandler::needToShowStdOut()
-{
-     return (showDialogStdOutProp_)?(showDialogStdOutProp_->value().toBool()):true;
+bool CommandOutputHandler::needToShowStdOut() {
+    return (showDialogStdOutProp_) ? (showDialogStdOutProp_->value().toBool()) : true;
 }
 
-bool CommandOutputHandler::needToShowStdErr()
-{
-     return (showDialogStdErrProp_)?(showDialogStdErrProp_->value().toBool()):true;
+bool CommandOutputHandler::needToShowStdErr() {
+    return (showDialogStdErrProp_) ? (showDialogStdErrProp_->value().toBool()) : true;
 }

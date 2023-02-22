@@ -11,22 +11,20 @@
 #define FLAGSET_HPP_
 
 template <class T>
-class FlagSet
-{
+class FlagSet {
 public:
-    FlagSet()= default;
-    FlagSet(T t)  {set(t);}
+    FlagSet() = default;
+    FlagSet(T t) { set(t); }
 
-    void clear() {flags_=0;}
-    void set(T flag ) { flags_ |= (1 << flag); }
-    void unset(T flag ) { flags_ &= ~ (1 << flag); }
+    void clear() { flags_ = 0; }
+    void set(T flag) { flags_ |= (1 << flag); }
+    void unset(T flag) { flags_ &= ~(1 << flag); }
     bool isSet(T flag) const { return (flags_ >> flag) & 1; }
-    bool isEmpty() const {return flags_==0;}
-    bool sameAs(T flag) const {return flags_ == flag;}
+    bool isEmpty() const { return flags_ == 0; }
+    bool sameAs(T flag) const { return flags_ == flag; }
 
 private:
     int flags_{0};
-
 };
 
 #endif // FLAGSET_HPP_

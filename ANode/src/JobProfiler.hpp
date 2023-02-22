@@ -29,26 +29,26 @@ namespace ecf {
 
 class JobProfiler {
 private:
-  JobProfiler(const JobProfiler&) = delete;
-  const JobProfiler& operator=(const JobProfiler&) = delete;
+    JobProfiler(const JobProfiler&)                  = delete;
+    const JobProfiler& operator=(const JobProfiler&) = delete;
+
 public:
-   // Note: 1000 milliseconds = 1 second
-   JobProfiler(Task*,JobsParam&,size_t threshold /* expected to be milli seconds */);
-   ~JobProfiler();
+    // Note: 1000 milliseconds = 1 second
+    JobProfiler(Task*, JobsParam&, size_t threshold /* expected to be milli seconds */);
+    ~JobProfiler();
 
-   static void set_task_threshold(size_t threshold);
-   static size_t task_threshold();
+    static void set_task_threshold(size_t threshold);
+    static size_t task_threshold();
 
-   static int task_threshold_default();
+    static int task_threshold_default();
 
 private:
-   Task* node_;
-   JobsParam& jobsParam_;
-   boost::posix_time::ptime start_time_;
-   size_t threshold_;
+    Task* node_;
+    JobsParam& jobsParam_;
+    boost::posix_time::ptime start_time_;
+    size_t threshold_;
 };
 
-}
-
+} // namespace ecf
 
 #endif

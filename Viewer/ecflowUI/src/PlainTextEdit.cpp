@@ -9,104 +9,90 @@
 
 #include "PlainTextEdit.hpp"
 
-#include "GotoLineDialog.hpp"
-
-#include <QtGlobal>
-#include <QScrollBar>
 #include <QDebug>
 #include <QFile>
 #include <QPainter>
+#include <QScrollBar>
 #include <QTextBlock>
 #include <QWheelEvent>
+#include <QtGlobal>
 
-#include "VConfig.hpp"
+#include "GotoLineDialog.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
 #include "ViewerUtil.hpp"
 
-
-PlainTextEdit::PlainTextEdit(QWidget * parent) :
-    QPlainTextEdit(parent),
-    numAreaBgCol_(232,231,230),
-    numAreaFontCol_(102,102,102),
-    numAreaSeparatorCol_(210,210,210),
-    numAreaCurrentCol_(212,212,255)
-{
+PlainTextEdit::PlainTextEdit(QWidget* parent)
+    : QPlainTextEdit(parent),
+      numAreaBgCol_(232, 231, 230),
+      numAreaFontCol_(102, 102, 102),
+      numAreaSeparatorCol_(210, 210, 210),
+      numAreaCurrentCol_(212, 212, 255) {
     lineNumArea_ = new LineNumberArea(this);
 
-    connect(this,SIGNAL(blockCountChanged(int)),
-    		this,SLOT(updateLineNumberAreaWidth(int)));
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
 
-    connect(this,SIGNAL(updateRequest(QRect,int)),
-    		this,SLOT(updateLineNumberArea(QRect,int)));
+    connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
 
-    connect(this,SIGNAL(cursorPositionChanged()),
-    		lineNumArea_,SLOT(update()));
+    connect(this, SIGNAL(cursorPositionChanged()), lineNumArea_, SLOT(update()));
 
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaBackground"))
+        numAreaBgCol_ = p->value().value<QColor>();
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaBackground"))
-        numAreaBgCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaFontColour"))
+        numAreaFontCol_ = p->value().value<QColor>();
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaFontColour"))
-        numAreaFontCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaSeparator"))
+        numAreaSeparatorCol_ = p->value().value<QColor>();
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaSeparator"))
-        numAreaSeparatorCol_=p->value().value<QColor>();
-
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaCurrent"))
-        numAreaCurrentCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaCurrent"))
+        numAreaCurrentCol_ = p->value().value<QColor>();
 
     updateLineNumberAreaWidth(0);
 
     setFont(ViewerUtil::findMonospaceFont());
 }
 
-PlainTextEdit::~PlainTextEdit()
-{
+PlainTextEdit::~PlainTextEdit() {
     if (gotoLineDialog_)
-    	delete gotoLineDialog_;
+        delete gotoLineDialog_;
 
-    if(fontProp_)
-    	fontProp_->removeObserver(this);
+    if (fontProp_)
+        fontProp_->removeObserver(this);
 }
 
-bool PlainTextEdit::setHyperlinkEnabled(bool h)
-{
+bool PlainTextEdit::setHyperlinkEnabled(bool h) {
     hyperlinkEnabled_ = h;
     setMouseTracking(h);
     return true;
 }
 
-void PlainTextEdit::setShowLineNumbers(bool b)
-{
-	showLineNum_ = b;
-	lineNumArea_->setVisible(b);
-	updateLineNumberAreaWidth(0);
+void PlainTextEdit::setShowLineNumbers(bool b) {
+    showLineNum_ = b;
+    lineNumArea_->setVisible(b);
+    updateLineNumberAreaWidth(0);
 }
 
-void PlainTextEdit::toDocStart()
-{
-    QTextCursor cursor=textCursor();
+void PlainTextEdit::toDocStart() {
+    QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::Start);
     setTextCursor(cursor);
 }
 
-void PlainTextEdit::toDocEnd()
-{
-    QTextCursor cursor=textCursor();
+void PlainTextEdit::toDocEnd() {
+    QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::End);
     setTextCursor(cursor);
 }
 
-void PlainTextEdit::toLineStart()
-{
-    QTextCursor cursor=textCursor();
+void PlainTextEdit::toLineStart() {
+    QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::StartOfLine);
     setTextCursor(cursor);
 }
 
-void PlainTextEdit::toLineEnd()
-{
-    QTextCursor cursor=textCursor();
+void PlainTextEdit::toLineEnd() {
+    QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::EndOfLine);
     setTextCursor(cursor);
 }
@@ -117,20 +103,19 @@ void PlainTextEdit::toLineEnd()
 //  - note that the first row and column are (1,1)
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::cursorRowCol(int *row, int *col)
-{
+void PlainTextEdit::cursorRowCol(int* row, int* col) {
     const QTextCursor cursor = textCursor();
 
     QTextBlock cb, b;
     int column = 0, line = 1;
-    cb = cursor.block();
+    cb     = cursor.block();
     column = (cursor.position() - cb.position()) + 1;
 
     // find the line number - is there a better way than this?
 
-    for (b = document()->begin(); b != document()->end(); b = b.next())
-    {
-        if( b==cb ) break;
+    for (b = document()->begin(); b != document()->end(); b = b.next()) {
+        if (b == cb)
+            break;
         line++;
     }
 
@@ -138,16 +123,14 @@ void PlainTextEdit::cursorRowCol(int *row, int *col)
     *col = column;
 }
 
-
 // ---------------------------------------------------------------------------
 // TextEdit::characterBehindCursor
 // returns the character to the left of the text cursor
 // ---------------------------------------------------------------------------
 
-QChar PlainTextEdit::characterBehindCursor(QTextCursor *cursor)
-{
+QChar PlainTextEdit::characterBehindCursor(QTextCursor* cursor) {
     QTextCursor docTextCursor = textCursor();
-    QTextCursor *theCursor = (cursor == nullptr) ? &docTextCursor : cursor;
+    QTextCursor* theCursor    = (cursor == nullptr) ? &docTextCursor : cursor;
     return document()->characterAt(theCursor->position() - 1);
 }
 
@@ -157,16 +140,15 @@ QChar PlainTextEdit::characterBehindCursor(QTextCursor *cursor)
 // yes - all this code to do that!
 // ---------------------------------------------------------------------------
 
-int PlainTextEdit::numLinesSelected()
-{
-    QTextCursor cursor = textCursor();   // get the document's cursor
-    int selStart = cursor.selectionStart();
-    int selEnd   = cursor.selectionEnd();
-    QTextBlock bStart = document()->findBlock(selStart);
-    QTextBlock bEnd   = document()->findBlock(selEnd);
-    int lineStart = bStart.firstLineNumber();
-    int lineEnd   = bEnd.firstLineNumber();
-    int numLines = (lineEnd - lineStart) + 1;
+int PlainTextEdit::numLinesSelected() {
+    QTextCursor cursor = textCursor(); // get the document's cursor
+    int selStart       = cursor.selectionStart();
+    int selEnd         = cursor.selectionEnd();
+    QTextBlock bStart  = document()->findBlock(selStart);
+    QTextBlock bEnd    = document()->findBlock(selEnd);
+    int lineStart      = bStart.firstLineNumber();
+    int lineEnd        = bEnd.firstLineNumber();
+    int numLines       = (lineEnd - lineStart) + 1;
 
     return numLines;
 }
@@ -177,14 +159,11 @@ int PlainTextEdit::numLinesSelected()
 // maximum number of digits we need to display.
 // ---------------------------------------------------------------------------
 
-int PlainTextEdit::lineNumberAreaWidth()
-{
-    if (showLineNumbers())
-    {
+int PlainTextEdit::lineNumberAreaWidth() {
+    if (showLineNumbers()) {
         int digits = 1;
-        int max = qMax(1, blockCount());
-        while (max >= 10)
-        {
+        int max    = qMax(1, blockCount());
+        while (max >= 10) {
             max /= 10;
             ++digits;
         }
@@ -193,8 +172,7 @@ int PlainTextEdit::lineNumberAreaWidth()
 
         return space;
     }
-    else
-    {
+    else {
         return 0;
     }
 }
@@ -205,11 +183,9 @@ int PlainTextEdit::lineNumberAreaWidth()
 // the new number of lines (blocks).
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::updateLineNumberAreaWidth(int)
-{
+void PlainTextEdit::updateLineNumberAreaWidth(int) {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
-
 
 // ---------------------------------------------------------------------------
 // TextEdit::updateLineNumberArea
@@ -217,8 +193,7 @@ void PlainTextEdit::updateLineNumberAreaWidth(int)
 // widget stays in sync with it.
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::updateLineNumberArea(const QRect &rect, int dy)
-{
+void PlainTextEdit::updateLineNumberArea(const QRect& rect, int dy) {
     if (dy)
         lineNumArea_->scroll(0, dy);
     else
@@ -228,32 +203,27 @@ void PlainTextEdit::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
-
 // ---------------------------------------------------------------------------
 // TextEdit::resizeEvent
 // called when a resize event is triggered. Reset the size of the line widget.
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::resizeEvent(QResizeEvent *e)
-{
+void PlainTextEdit::resizeEvent(QResizeEvent* e) {
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
     lineNumArea_->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-
 // ---------------------------------------------------------------------------
 // TextEdit::focusInEvent
 // called when the widget gains input focus
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::focusInEvent(QFocusEvent *event)
-{
+void PlainTextEdit::focusInEvent(QFocusEvent* event) {
     Q_EMIT focusRegained();
     QPlainTextEdit::focusInEvent(event);
 }
-
 
 // ---------------------------------------------------------------------------
 // TextEdit::focusOutEvent
@@ -261,8 +231,7 @@ void PlainTextEdit::focusInEvent(QFocusEvent *event)
 
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::focusOutEvent(QFocusEvent *event)
-{
+void PlainTextEdit::focusOutEvent(QFocusEvent* event) {
     Q_EMIT focusLost();
     QPlainTextEdit::focusOutEvent(event);
 }
@@ -273,149 +242,139 @@ void PlainTextEdit::focusOutEvent(QFocusEvent *event)
 // actually draw the numbers on the widget.
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
-{
+void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent* event) {
     int currentRow = 0, currentCol = 0;
-    cursorRowCol (&currentRow, &currentCol);  // get the current line number so we can highlight it
-
+    cursorRowCol(&currentRow, &currentCol); // get the current line number so we can highlight it
 
     QPainter painter(lineNumArea_);
-    painter.fillRect(event->rect(), numAreaBgCol_);  // light grey background
+    painter.fillRect(event->rect(), numAreaBgCol_); // light grey background
 
     painter.setPen(QPen(numAreaSeparatorCol_));
-    painter.drawLine(event->rect().topRight(),event->rect().bottomRight());
+    painter.drawLine(event->rect().topRight(), event->rect().bottomRight());
 
     QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
-    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int) blockBoundingRect(block).height();
+    int blockNumber  = block.blockNumber();
+    int top          = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
+    int bottom       = top + (int)blockBoundingRect(block).height();
     QFont fontNormal(font());   // the font to use for most line numbers
-    QFont fontBold(fontNormal);  // the font to use for the current line number
+    QFont fontBold(fontNormal); // the font to use for the current line number
     fontBold.setBold(true);
-    //painter.setPen(Qt::blue);
+    // painter.setPen(Qt::blue);
     painter.setPen(numAreaFontCol_);
 
     painter.setFont(fontNormal);
 
-    while (block.isValid() && top <= event->rect().bottom())
-    {
-        if (block.isVisible() && bottom >= event->rect().top())
-        {
+    while (block.isValid() && top <= event->rect().bottom()) {
+        if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
 
-            if (blockNumber == currentRow-1)  // is this the current line?
+            if (blockNumber == currentRow - 1) // is this the current line?
             {
                 painter.setFont(fontBold);
-                painter.fillRect(0, top, lineNumArea_->width()-rightMargin_, fontMetrics().height(), numAreaCurrentCol_);  // highlight the background
+                painter.fillRect(0,
+                                 top,
+                                 lineNumArea_->width() - rightMargin_,
+                                 fontMetrics().height(),
+                                 numAreaCurrentCol_); // highlight the background
             }
 
+            painter.drawText(0,
+                             top,
+                             lineNumArea_->width() - rightMargin_,
+                             fontMetrics().height(), // draw the line number
+                             Qt::AlignRight,
+                             number);
 
-            painter.drawText(0, top, lineNumArea_->width()-rightMargin_, fontMetrics().height(),  // draw the line number
-                             Qt::AlignRight, number);
-
-
-            if (blockNumber == currentRow-1)  // is this the current line?
+            if (blockNumber == currentRow - 1) // is this the current line?
             {
-                painter.setFont(fontNormal);  // reset the font to normal
+                painter.setFont(fontNormal); // reset the font to normal
             }
         }
 
-        block = block.next();
-        top = bottom;
-        bottom = top + (int) blockBoundingRect(block).height();
+        block  = block.next();
+        top    = bottom;
+        bottom = top + (int)blockBoundingRect(block).height();
         ++blockNumber;
     }
 }
 
+QString PlainTextEdit::emptyString_; // used as a default argument to findString()
 
-QString PlainTextEdit::emptyString_ ;  // used as a default argument to findString()
+bool PlainTextEdit::findString(const QString& s, QTextDocument::FindFlags flags, bool replace, const QString& r) {
 
-bool PlainTextEdit::findString(const QString &s,QTextDocument::FindFlags flags, bool replace, const QString &r)
-{
+    lastFindString_ = s;     // store for repeat searches
+    lastFindFlags_  = flags; // store for repeat searches
+    bool found      = false;
 
-    lastFindString_ = s;      // store for repeat searches
-    lastFindFlags_  = flags;  // store for repeat searches
-    bool found = false;
-
-    if (find(s,flags))  // find and select the string - were we successful?
+    if (find(s, flags)) // find and select the string - were we successful?
     {
-        //statusMessage("", 0);
+        // statusMessage("", 0);
         found = true;
     }
-    else    // did not find the string
+    else // did not find the string
     {
-        if (true)  // 'wraparound' search - on by default, we can add a user option if it might be useful to turn it off
+        if (true) // 'wraparound' search - on by default, we can add a user option if it might be useful to turn it off
         {
-            QTextCursor original_cursor = textCursor();   // get the document's cursor
+            QTextCursor original_cursor = textCursor(); // get the document's cursor
             QTextCursor cursor(original_cursor);
 
-            if (flags & QTextDocument::FindBackward)        // move to the start or end of the document to continue the search
+            if (flags & QTextDocument::FindBackward) // move to the start or end of the document to continue the search
                 cursor.movePosition(QTextCursor::End);
             else
                 cursor.movePosition(QTextCursor::Start);
 
-            setTextCursor(cursor);              // send the cursor back to the document
+            setTextCursor(cursor); // send the cursor back to the document
 
-            if (find(s,flags))                  // search again, from the new position
+            if (find(s, flags)) // search again, from the new position
             {
-                //statusMessage("", 0);
+                // statusMessage("", 0);
                 found = true;
             }
-            else
-            {
-                setTextCursor(original_cursor);  // not found - restore the cursor to its original position
+            else {
+                setTextCursor(original_cursor); // not found - restore the cursor to its original position
             }
         }
     }
 
-
-    if (found)
-    {
-        if (replace)
-        {
+    if (found) {
+        if (replace) {
             // perform the 'replace'
-            insertPlainText (r);
-            
+            insertPlainText(r);
+
             // highlight the replaced text - the current text cursor will be
             // at the end of the replaced text, so we move it back to the start
             // (anchored so that the text is selected)
-            QTextCursor cursor = textCursor();   // get the document's cursor
+            QTextCursor cursor = textCursor(); // get the document's cursor
             cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, r.length());
-            setTextCursor(cursor);               // send the cursor back to the document
+            setTextCursor(cursor); // send the cursor back to the document
         }
         ensureCursorVisible();
     }
 
-    else
-    {
-        //statusMessage(tr("Searched whole file, string not found"), 5000);
+    else {
+        // statusMessage(tr("Searched whole file, string not found"), 5000);
     }
 
     return found;
 }
-
 
 // ---------------------------------------------------------------------------
 // TextEdit::gotoLine
 // triggered when the user asks to bring up the 'go to line' dialog
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::gotoLine()
-{
+void PlainTextEdit::gotoLine() {
     // create the dialog if it does not already exist
 
-    if (!gotoLineDialog_) 
-    {
+    if (!gotoLineDialog_) {
         gotoLineDialog_ = new GotoLineDialog(this);
 
         connect(gotoLineDialog_, SIGNAL(gotoLine(int)), this, SLOT(gotoLine(int)));
     }
 
-
     // if created, set it up and display it
 
-    if (gotoLineDialog_) 
-    {
+    if (gotoLineDialog_) {
         gotoLineDialog_->show();
         gotoLineDialog_->raise();
         gotoLineDialog_->activateWindow();
@@ -428,29 +387,24 @@ void PlainTextEdit::gotoLine()
 // triggered from the GotoLine dialog when the user wants to go to that line
 // ---------------------------------------------------------------------------
 
-void PlainTextEdit::gotoLine(int line)
-{
+void PlainTextEdit::gotoLine(int line) {
     int bn = 0;
     QTextBlock b;
 
-    if (line <= document()->blockCount())
-    {
-        for (b = document()->begin(); b != document()->end(); b = b.next())
-        {
-            if (bn == line-1)
-            {
-                QTextCursor cursor = textCursor();   // get the document's cursor
-                cursor.setPosition (b.position());               // set it to the right position
-                cursor.select(QTextCursor::LineUnderCursor);     // select the whole line
-                setTextCursor(cursor);               // send the cursor back to the document
+    if (line <= document()->blockCount()) {
+        for (b = document()->begin(); b != document()->end(); b = b.next()) {
+            if (bn == line - 1) {
+                QTextCursor cursor = textCursor();           // get the document's cursor
+                cursor.setPosition(b.position());            // set it to the right position
+                cursor.select(QTextCursor::LineUnderCursor); // select the whole line
+                setTextCursor(cursor);                       // send the cursor back to the document
                 break;
             }
             bn++;
         }
     }
-    
-    else
-    {
+
+    else {
         // line number outside range of line numbers
         // TODO: disable the 'ok' button if the number is out of range
     }
@@ -460,103 +414,87 @@ void PlainTextEdit::gotoLine(int line)
 // Fontsize management
 //---------------------------------------------
 
-void PlainTextEdit::setFontProperty(VProperty* p)
-{
-	fontProp_=p;
-	fontProp_->addObserver(this);
-	updateFont();
+void PlainTextEdit::setFontProperty(VProperty* p) {
+    fontProp_ = p;
+    fontProp_->addObserver(this);
+    updateFont();
 }
 
-void PlainTextEdit::wheelEvent(QWheelEvent *event)
-{
-	int fps=font().pointSize();
+void PlainTextEdit::wheelEvent(QWheelEvent* event) {
+    int fps = font().pointSize();
 
-	if(isReadOnly())
-	{
-		QPlainTextEdit::wheelEvent(event);
-		if(font().pointSize() != fps)
-			fontSizeChangedByZoom();
-	}
-	//For readOnly document the zoom does not work so we
-	//need this custom code!
-	else
-	{
-		if(event->modifiers() & Qt::ControlModifier)
-		{
+    if (isReadOnly()) {
+        QPlainTextEdit::wheelEvent(event);
+        if (font().pointSize() != fps)
+            fontSizeChangedByZoom();
+    }
+    // For readOnly document the zoom does not work so we
+    // need this custom code!
+    else {
+        if (event->modifiers() & Qt::ControlModifier) {
             auto delta = event->angleDelta();
             if (delta.y() < 0)
-	        	slotZoomOut();
+                slotZoomOut();
             else if (delta.y() > 0)
-	            slotZoomIn();
-	        return;
-		}
+                slotZoomIn();
+            return;
+        }
 
-		QPlainTextEdit::wheelEvent(event);
-	}
+        QPlainTextEdit::wheelEvent(event);
+    }
 }
 
-void PlainTextEdit::slotZoomIn()
-{
+void PlainTextEdit::slotZoomIn() {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 1, 1)
-	zoomIn();
+    zoomIn();
 #else
-	QFont f=font();
-	int fps=f.pointSize();
-	f.setPointSize(fps+1);
-	setFont(f);
+    QFont f = font();
+    int fps = f.pointSize();
+    f.setPointSize(fps + 1);
+    setFont(f);
 #endif
-	fontSizeChangedByZoom();
+    fontSizeChangedByZoom();
 }
 
-void PlainTextEdit::slotZoomOut()
-{
-	int oriSize=font().pointSize();
+void PlainTextEdit::slotZoomOut() {
+    int oriSize = font().pointSize();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 1, 1)
-	zoomOut();
+    zoomOut();
 #else
-	QFont f=font();
-	int fps=f.pointSize();
-	if(fps > 1)
-	{
-		f.setPointSize(fps-1);
-		setFont(f);
-	}
+    QFont f = font();
+    int fps = f.pointSize();
+    if (fps > 1) {
+        f.setPointSize(fps - 1);
+        setFont(f);
+    }
 #endif
 
-	if(font().pointSize() != oriSize)
-		fontSizeChangedByZoom();
+    if (font().pointSize() != oriSize)
+        fontSizeChangedByZoom();
 }
 
-void PlainTextEdit::fontSizeChangedByZoom()
-{
-	if(fontProp_)
-		fontProp_->setValue(font());
+void PlainTextEdit::fontSizeChangedByZoom() {
+    if (fontProp_)
+        fontProp_->setValue(font());
 }
 
-void PlainTextEdit::updateFont()
-{
-	if(fontProp_)
-	{
-		auto f=fontProp_->value().value<QFont>();
-		if(font() != f)
-			setFont(f);
-	}
+void PlainTextEdit::updateFont() {
+    if (fontProp_) {
+        auto f = fontProp_->value().value<QFont>();
+        if (font() != f)
+            setFont(f);
+    }
 }
 
-void PlainTextEdit::notifyChange(VProperty* p)
-{
-	if(fontProp_ ==p)
-	{
-		setFont(p->value().value<QFont>());
-	}
+void PlainTextEdit::notifyChange(VProperty* p) {
+    if (fontProp_ == p) {
+        setFont(p->value().value<QFont>());
+    }
 }
 
-
-void PlainTextEdit::mousePressEvent(QMouseEvent *e)
-{
-    if (hyperlinkEnabled_)
-    {
+void PlainTextEdit::mousePressEvent(QMouseEvent* e) {
+    if (hyperlinkEnabled_) {
         // left button only - if pressed, we just store the link that was clicked on
         // - we don't want to do anything until the mouse button has been released and
         // we know it hasd not been moved away from the hyperlinked text
@@ -570,17 +508,13 @@ void PlainTextEdit::mousePressEvent(QMouseEvent *e)
     QPlainTextEdit::mousePressEvent(e);
 }
 
-void PlainTextEdit::mouseReleaseEvent(QMouseEvent *e)
-{
-    if (hyperlinkEnabled_)
-    {
+void PlainTextEdit::mouseReleaseEvent(QMouseEvent* e) {
+    if (hyperlinkEnabled_) {
         // only activate the hyperlink if the user releases the left mouse button on the
         // same link they were on when they pressed the button
 
-        if ((e->button() & Qt::LeftButton) && !currentLink_.isEmpty())
-        {
-            if (currentLink_ == anchorAt(e->pos()))
-            {
+        if ((e->button() & Qt::LeftButton) && !currentLink_.isEmpty()) {
+            if (currentLink_ == anchorAt(e->pos())) {
                 Q_EMIT hyperlinkActivated(currentLink_);
                 UiLog().dbg() << "clicked:" << currentLink_;
             }
@@ -590,19 +524,14 @@ void PlainTextEdit::mouseReleaseEvent(QMouseEvent *e)
     QPlainTextEdit::mouseReleaseEvent(e);
 }
 
-
-void PlainTextEdit::mouseMoveEvent(QMouseEvent *e)
-{
-    if (hyperlinkEnabled_)
-    {
+void PlainTextEdit::mouseMoveEvent(QMouseEvent* e) {
+    if (hyperlinkEnabled_) {
         QString thisAnchor = anchorAt(e->pos());
 
-        if (!thisAnchor.isEmpty())
-        {
+        if (!thisAnchor.isEmpty()) {
             viewport()->setCursor(Qt::PointingHandCursor);
         }
-        else
-        {
+        else {
             viewport()->unsetCursor();
         }
     }
@@ -610,8 +539,7 @@ void PlainTextEdit::mouseMoveEvent(QMouseEvent *e)
     QPlainTextEdit::mouseMoveEvent(e);
 }
 
-void PlainTextEdit::keyPressEvent(QKeyEvent *e)
-{
+void PlainTextEdit::keyPressEvent(QKeyEvent* e) {
     // In read-only mode this set of actions is mapped to a set
     // of non standard key-sequences (hard-coded by Qt). It causes
     // confusion, because the large text viewer uses the standard key-sequences
@@ -624,37 +552,42 @@ void PlainTextEdit::keyPressEvent(QKeyEvent *e)
             }
             e->accept();
             return;
-        } else if (e == QKeySequence::MoveToEndOfDocument) {
+        }
+        else if (e == QKeySequence::MoveToEndOfDocument) {
             if (verticalScrollBar()) {
                 verticalScrollBar()->setValue(verticalScrollBar()->maximum());
             }
             e->accept();
             return;
-        } else if (e == QKeySequence::MoveToStartOfLine) {
+        }
+        else if (e == QKeySequence::MoveToStartOfLine) {
             auto cursor = textCursor();
             cursor.movePosition(QTextCursor::StartOfLine);
             setTextCursor(cursor);
             e->accept();
             return;
-        } else if (e == QKeySequence::MoveToEndOfLine) {
+        }
+        else if (e == QKeySequence::MoveToEndOfLine) {
             auto cursor = textCursor();
             cursor.movePosition(QTextCursor::EndOfLine);
             setTextCursor(cursor);
             e->accept();
             return;
-        } else if (e == QKeySequence::MoveToNextPage) {
+        }
+        else if (e == QKeySequence::MoveToNextPage) {
             if (verticalScrollBar()) {
                 verticalScrollBar()->triggerAction(QAbstractSlider::SliderPageStepAdd);
             }
             e->accept();
             return;
-        } else if (e == QKeySequence::MoveToPreviousPage) {
+        }
+        else if (e == QKeySequence::MoveToPreviousPage) {
             if (verticalScrollBar()) {
                 verticalScrollBar()->triggerAction(QAbstractSlider::SliderPageStepSub);
             }
             e->accept();
             return;
         }
-     }
-     QPlainTextEdit::keyPressEvent(e);
+    }
+    QPlainTextEdit::keyPressEvent(e);
 }

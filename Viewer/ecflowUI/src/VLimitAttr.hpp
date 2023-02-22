@@ -11,9 +11,10 @@
 #ifndef VLIMITATTR_HPP
 #define VLIMITATTR_HPP
 
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
 
 #include "LimitFwd.hpp"
 #include "VAttribute.hpp"
@@ -23,23 +24,21 @@ class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class VLimitAttrType : public VAttributeType
-{
+class VLimitAttrType : public VAttributeType {
 public:
     explicit VLimitAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(limit_ptr,QStringList&) const;
+    void encode(limit_ptr, QStringList&) const;
 
 private:
-     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2,MaxIndex=3};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, ValueIndex = 2, MaxIndex = 3 };
 };
 
-class VLimitAttr : public VAttribute
-{
+class VLimitAttr : public VAttribute {
 
 public:
-    VLimitAttr(VNode *parent,limit_ptr,int index);
+    VLimitAttr(VNode* parent, limit_ptr, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
@@ -48,8 +47,7 @@ public:
     void removePaths(const std::vector<std::string>& paths);
     void resetPaths();
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif // VLIMITATTR_HPP
-

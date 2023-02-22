@@ -12,26 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <QtGlobal>
+#include "TextPagerEdit.hpp"
+
+#include <algorithm>
+#include <cmath>
+
+#include <QGuiApplication>
 #include <QScrollArea>
 #include <QScrollBar>
-#include <QGuiApplication>
 #include <QVariant>
-#include "TextPagerEdit.hpp"
-#include "TextPagerEdit_p.hpp"
+#include <QtGlobal>
+
 #include "TextPagerCursor_p.hpp"
 #include "TextPagerDocument_p.hpp"
+#include "TextPagerEdit_p.hpp"
 #include "TextPagerSearchHighlighter.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "ViewerUtil.hpp"
 
-#include <algorithm>
-#include <cmath>
-
-//#define _UI_TEXTPAGER_DEBUG
-//#define DEBUG_TEXTPAGER_LASTPAGESIZE
-//#define DEBUG_TEXTPAGER
+// #define _UI_TEXTPAGER_DEBUG
+// #define DEBUG_TEXTPAGER_LASTPAGESIZE
+// #define DEBUG_TEXTPAGER
 
 #ifdef DEBUG_TEXTPAGER
 bool doLog = false;
@@ -42,13 +44,10 @@ QString logFileName;
     Constructs an empty TextPagerEdit with parent \a parent.
 */
 
-TextPagerEdit::TextPagerEdit(QWidget *parent) :
-   QAbstractScrollArea(parent),
-   d(new TextEditPrivate(this))
-{
+TextPagerEdit::TextPagerEdit(QWidget* parent) : QAbstractScrollArea(parent), d(new TextEditPrivate(this)) {
     viewport()->setCursor(Qt::IBeamCursor);
 
-    setProperty("pager","1");
+    setProperty("pager", "1");
 
 #ifdef DEBUG_TEXTPAGER
     if (logFileName.isEmpty())
@@ -61,15 +60,15 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
 
     setDocument(new TextPagerDocument(this));
     setViewportMargins(0, 0, 0, 0);
-    struct {
+    struct
+    {
         QString text;
-        const char *member;
+        const char* member;
         QKeySequence::StandardKey key;
-    } shortcuts[] = {
-        { tr("Copy"), SLOT(copy()), QKeySequence::Copy },
-        { tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll },
-        { QString(), nullptr, QKeySequence::UnknownKey } };
-    for (int i=0; shortcuts[i].member; ++i) {
+    } shortcuts[] = {{tr("Copy"), SLOT(copy()), QKeySequence::Copy},
+                     {tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll},
+                     {QString(), nullptr, QKeySequence::UnknownKey}};
+    for (int i = 0; shortcuts[i].member; ++i) {
         d->actions[i] = new QAction(shortcuts[i].text, this);
         d->actions[i]->setShortcutContext(Qt::WidgetShortcut);
         d->actions[i]->setShortcut(QKeySequence(shortcuts[i].key));
@@ -77,27 +76,24 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
         connect(d->actions[i], SIGNAL(triggered(bool)), this, shortcuts[i].member);
         addAction(d->actions[i]);
     }
-    //connect(this, SIGNAL(undoAvailableChanged(bool)), d->actions[UndoAction], SLOT(setEnabled(bool)));
-    //connect(this, SIGNAL(redoAvailableChanged(bool)), d->actions[RedoAction], SLOT(setEnabled(bool)));
-    //d->actions[UndoAction]->setEnabled(false);
-    //d->actions[RedoAction]->setEnabled(false);
+    // connect(this, SIGNAL(undoAvailableChanged(bool)), d->actions[UndoAction], SLOT(setEnabled(bool)));
+    // connect(this, SIGNAL(redoAvailableChanged(bool)), d->actions[RedoAction], SLOT(setEnabled(bool)));
+    // d->actions[UndoAction]->setEnabled(false);
+    // d->actions[RedoAction]->setEnabled(false);
     setContextMenuPolicy(Qt::ActionsContextMenu);
-    //setCursorVisible(true); // starts blinking
+    // setCursorVisible(true); // starts blinking
     connect(this, SIGNAL(selectionChanged()), d, SLOT(onSelectionChanged()));
-
 
     setReadOnly(true);
 
-    searchHighlight_=new TextPagerSearchHighlighter(this);
+    searchHighlight_ = new TextPagerSearchHighlighter(this);
 }
-
 
 /*!
     returns the current cursor position
 */
 
-int TextPagerEdit::cursorPosition() const
-{
+int TextPagerEdit::cursorPosition() const {
     return d->textCursor.position();
 }
 
@@ -106,12 +102,11 @@ int TextPagerEdit::cursorPosition() const
     margin on each side (if possible)
 */
 
-void TextPagerEdit::ensureCursorVisible(const TextPagerCursor &cursor, int linesMargin)
-{
+void TextPagerEdit::ensureCursorVisible(const TextPagerCursor& cursor, int linesMargin) {
     linesMargin = qMin(d->visibleLines, linesMargin); // ### could this be a problem down at the bottom of the document?
     Q_ASSERT(cursor.document() == document());
     TextPagerCursor above = cursor;
-    for (int i=0; i<linesMargin; ++i) {
+    for (int i = 0; i < linesMargin; ++i) {
         if (!above.movePosition(TextPagerCursor::Up))
             break;
     }
@@ -121,13 +116,13 @@ void TextPagerEdit::ensureCursorVisible(const TextPagerCursor &cursor, int lines
     }
 
     TextPagerCursor below = cursor;
-    for (int i=0; i<linesMargin; ++i) {
+    for (int i = 0; i < linesMargin; ++i) {
         if (!below.movePosition(TextPagerCursor::Down))
             break;
     }
 
     if (below.position() > d->lastVisibleCharacter) {
-        for (int i=0; i<d->visibleLines; ++i) {
+        for (int i = 0; i < d->visibleLines; ++i) {
             below.movePosition(TextPagerCursor::Up);
             d->updateViewportPosition(below.position(), TextPagerLayout::Forward);
         }
@@ -138,8 +133,7 @@ void TextPagerEdit::ensureCursorVisible(const TextPagerCursor &cursor, int lines
     returns the QAction * for \a type.
 */
 
-QAction *TextPagerEdit::action(ActionType type) const
-{
+QAction* TextPagerEdit::action(ActionType type) const {
     return d->actions[type];
 }
 
@@ -147,13 +141,12 @@ QAction *TextPagerEdit::action(ActionType type) const
     Called when the textEdit is deleted
 */
 
-TextPagerEdit::~TextPagerEdit()
-{
+TextPagerEdit::~TextPagerEdit() {
     if (d->document) {
-        Q_FOREACH(SyntaxHighlighter *syntaxHighlighter, d->syntaxHighlighters) {
+        Q_FOREACH (SyntaxHighlighter* syntaxHighlighter, d->syntaxHighlighters) {
             if (syntaxHighlighter->parent() == this)
                 disconnect(syntaxHighlighter, nullptr, d, nullptr);
-            syntaxHighlighter->d->textEdit = nullptr;
+            syntaxHighlighter->d->textEdit   = nullptr;
             syntaxHighlighter->d->textLayout = nullptr;
         }
         disconnect(d->document, nullptr, this, nullptr);
@@ -164,14 +157,15 @@ TextPagerEdit::~TextPagerEdit()
         if (d->document->parent() == this) {
             delete d->document;
             d->document = nullptr;
-        } else {
+        }
+        else {
             d->document->d->textEditDestroyed(this);
         }
         // to make sure we don't do anything drastic on shutdown
     }
     delete d;
 
-    if(fontProp_)
+    if (fontProp_)
         fontProp_->removeObserver(this);
 }
 
@@ -181,9 +175,7 @@ TextPagerEdit::~TextPagerEdit()
     \sa setDocument
 */
 
-
-TextPagerDocument *TextPagerEdit::document() const
-{
+TextPagerDocument* TextPagerEdit::document() const {
     return d->document;
 }
 
@@ -195,8 +187,7 @@ TextPagerDocument *TextPagerEdit::document() const
     \sa document
 */
 
-void TextPagerEdit::setDocument(TextPagerDocument *doc)
-{
+void TextPagerEdit::setDocument(TextPagerDocument* doc) {
     if (doc == d->document)
         return;
 
@@ -213,19 +204,19 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
 
     d->sections.clear();
     d->buffer.clear();
-    d->sectionsDirty = true;
-    d->document = doc;
+    d->sectionsDirty  = true;
+    d->document       = doc;
     d->sectionPressed = nullptr;
-    d->layoutDirty = true;
+    d->layoutDirty    = true;
     qDeleteAll(d->unusedTextLayouts);
     d->unusedTextLayouts.clear();
     qDeleteAll(d->textLayouts);
     d->textLayouts.clear();
     viewport()->setCursor(Qt::IBeamCursor);
     viewport()->setMouseTracking(true);
-    d->sectionCount = 0;
+    d->sectionCount        = 0;
 
-    d->textCursor = TextPagerCursor(doc);
+    d->textCursor          = TextPagerCursor(doc);
     d->textCursor.textEdit = this;
 
     /*connect(d->document->d, SIGNAL(undoRedoCommandInserted(DocumentCommand *)),
@@ -238,12 +229,10 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
             d, SLOT(onDocumentCommandRemoved(DocumentCommand *)));
     connect(d->document->d, SIGNAL(undoRedoCommandTriggered(DocumentCommand *, bool)),
             d, SLOT(onDocumentCommandTriggered(DocumentCommand *, bool)));*/
-   
-    connect(d->document, SIGNAL(charactersAdded(int, int)),
-            d, SLOT(onCharactersAddedOrRemoved(int, int)));
-    connect(d->document, SIGNAL(charactersRemoved(int, int)),
-            d, SLOT(onCharactersAddedOrRemoved(int, int)));
-    
+
+    connect(d->document, SIGNAL(charactersAdded(int, int)), d, SLOT(onCharactersAddedOrRemoved(int, int)));
+    connect(d->document, SIGNAL(charactersRemoved(int, int)), d, SLOT(onCharactersAddedOrRemoved(int, int)));
+
     /*connect(d->document, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
     connect(d->document, SIGNAL(undoAvailableChanged(bool)),
             this, SIGNAL(undoAvailableChanged(bool)));
@@ -252,10 +241,14 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
 
     connect(d->document, SIGNAL(documentSizeChanged(int)), d, SLOT(onDocumentSizeChanged(int)));
     connect(d->document, SIGNAL(destroyed(QObject*)), d, SLOT(onDocumentDestroyed()));
-    connect(d->document->d, SIGNAL(sectionFormatChanged(TextPagerSection *)),
-            d, SLOT(onTextSectionFormatChanged(TextPagerSection *)));
-    connect(d->document->d, SIGNAL(sectionCursorChanged(TextPagerSection *)),
-            d, SLOT(onTextSectionCursorChanged(TextPagerSection *)));
+    connect(d->document->d,
+            SIGNAL(sectionFormatChanged(TextPagerSection*)),
+            d,
+            SLOT(onTextSectionFormatChanged(TextPagerSection*)));
+    connect(d->document->d,
+            SIGNAL(sectionCursorChanged(TextPagerSection*)),
+            d,
+            SLOT(onTextSectionCursorChanged(TextPagerSection*)));
 
     d->onDocumentSizeChanged(d->document->documentSize());
 
@@ -267,8 +260,7 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
     \sa setCursorWidth
 */
 
-int TextPagerEdit::cursorWidth() const
-{
+int TextPagerEdit::cursorWidth() const {
     return d->cursorWidth;
 }
 
@@ -279,8 +271,7 @@ int TextPagerEdit::cursorWidth() const
     \sa setCursorVisible
 */
 
-void TextPagerEdit::setCursorWidth(int cw)
-{
+void TextPagerEdit::setCursorWidth(int cw) {
     Q_ASSERT(d->cursorWidth > 0);
     d->cursorWidth = cw;
     viewport()->update();
@@ -296,7 +287,7 @@ void TextPagerEdit::setCursorWidth(int cw)
 #if 0
 bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTextCodec *codec)
 {
-#ifdef DEBUG_TEXTPAGER
+    #ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile f(logFileName);
         f.open(QIODevice::WriteOnly);
@@ -307,15 +298,14 @@ bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTe
             ds << QString::fromLatin1(dev->metaObject()->className());
         }
     }
-#endif
+    #endif
     //we have to check to font here because the initial setting in setFontProperty doe not have any effect
     updateFont();
     return d->document->load(dev, mode, codec);
 }
 #endif
 
-bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode, TextCodecWrapper codec)
-{
+bool TextPagerEdit::load(const QString& file, TextPagerDocument::DeviceMode mode, TextCodecWrapper codec) {
 #ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile f(logFileName);
@@ -326,34 +316,23 @@ bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode
 #endif
 
     UiLog().dbg() << "TextPagerEdit::load fileName" << file;
-    //we have to check to font here because the initial setting in setFontProperty doe not have any effect
+    // we have to check to font here because the initial setting in setFontProperty doe not have any effect
     updateFont();
-    bool ret=d->document->load(file, mode, codec);
+    bool ret = d->document->load(file, mode, codec);
     UiLog().dbg() << "  cursor: " << textCursor().position();
     return ret;
 }
 
-void TextPagerEdit::setText(const QString &txt)
-{
-    //we have to check to font here because the initial setting in setFontProperty doe not have any effect
+void TextPagerEdit::setText(const QString& txt) {
+    // we have to check to font here because the initial setting in setFontProperty doe not have any effect
     updateFont();
     d->document->setText(txt);
 }
 
-enum SelectionAddStatus {
-    Invalid,
-    Before,
-    After,
-    Success
-};
+enum SelectionAddStatus { Invalid, Before, After, Success };
 
-
-
-
-
-static inline SelectionAddStatus addSelection(int layoutStart, int layoutLength,
-                                              const TextPagerCursor &cursor, QTextLayout::FormatRange *format)
-{
+static inline SelectionAddStatus
+addSelection(int layoutStart, int layoutLength, const TextPagerCursor& cursor, QTextLayout::FormatRange* format) {
     Q_ASSERT(format);
     if (!cursor.hasSelection())
         return Invalid;
@@ -362,14 +341,12 @@ static inline SelectionAddStatus addSelection(int layoutStart, int layoutLength,
     if (cursor.selectionStart() > layoutStart + layoutLength)
         return After;
 
-    format->start = qMax(0, cursor.selectionStart() - layoutStart);
-    format->length = qMin(layoutLength - format->start,
-                          cursor.selectionEnd() - layoutStart - format->start);
+    format->start  = qMax(0, cursor.selectionStart() - layoutStart);
+    format->length = qMin(layoutLength - format->start, cursor.selectionEnd() - layoutStart - format->start);
     return Success;
 }
 
-void TextPagerEdit::paintEvent(QPaintEvent *e)
-{
+void TextPagerEdit::paintEvent(QPaintEvent* e) {
     d->updateScrollBarPosition();
     d->relayout();
     if (d->updateScrollBarPageStepPending) {
@@ -384,15 +361,15 @@ void TextPagerEdit::paintEvent(QPaintEvent *e)
     p.setFont(font());
     QVector<QTextLayout::FormatRange> selections;
     selections.reserve(d->extraSelections.size() + 1);
-    int textLayoutOffset = d->viewportPosition;
+    int textLayoutOffset            = d->viewportPosition;
 
-    const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : nullptr;
-    int extraSelectionIndex = 0;
+    const QTextLayout* cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : nullptr;
+    int extraSelectionIndex         = 0;
     QTextLayout::FormatRange selectionRange;
     selectionRange.start = -1;
-    Q_FOREACH(QTextLayout *l, d->textLayouts) {
+    Q_FOREACH (QTextLayout* l, d->textLayouts) {
         const int textSize = l->text().size();
-        const QRect r = l->boundingRect().toRect();
+        const QRect r      = l->boundingRect().toRect();
         if (r.intersects(er)) {
             const QBrush background = d->blockFormats.value(l).background();
             if (background.style() != Qt::NoBrush) {
@@ -405,19 +382,19 @@ void TextPagerEdit::paintEvent(QPaintEvent *e)
             int lowestIncompleteSelection = -1;
             while (extraSelectionIndex < d->extraSelections.size()) {
                 QTextLayout::FormatRange range;
-                const SelectionAddStatus s = ::addSelection(textLayoutOffset, textSize,
-                                                            d->extraSelections.at(extraSelectionIndex).
-                                                            cursor, &range);
+                const SelectionAddStatus s = ::addSelection(
+                    textLayoutOffset, textSize, d->extraSelections.at(extraSelectionIndex).cursor, &range);
                 if (s == Success) {
                     range.format = d->extraSelections.at(extraSelectionIndex).format;
                     selections.append(range);
 
-                    const TextPagerCursor &cursor = d->extraSelections.at(extraSelectionIndex).cursor;
-                    int lastPos = cursor.position() + cursor.selectionSize();
-                    if (lastPos > textLayoutOffset+textSize && lowestIncompleteSelection < 0) {
+                    const TextPagerCursor& cursor = d->extraSelections.at(extraSelectionIndex).cursor;
+                    int lastPos                   = cursor.position() + cursor.selectionSize();
+                    if (lastPos > textLayoutOffset + textSize && lowestIncompleteSelection < 0) {
                         lowestIncompleteSelection = extraSelectionIndex;
                     }
-                } else if (s == After) {
+                }
+                else if (s == After) {
                     break;
                 }
                 ++extraSelectionIndex;
@@ -432,7 +409,6 @@ void TextPagerEdit::paintEvent(QPaintEvent *e)
                 p.fillRect(r, QColor(216,228,239));  // highlight the current line
             }*/
 
-
             if (selectionRange.start != -1) {
                 // The last range in the vector has priority, that
                 // should probably be the real selection
@@ -444,34 +420,30 @@ void TextPagerEdit::paintEvent(QPaintEvent *e)
             if (!selections.isEmpty())
                 selections.clear();
             if (cursorLayout == l) {
-                cursorLayout->drawCursor(&p, QPoint(0, 0), d->textCursor.position() - textLayoutOffset,
-                                         d->cursorWidth);
+                cursorLayout->drawCursor(&p, QPoint(0, 0), d->textCursor.position() - textLayoutOffset, d->cursorWidth);
             }
-        } else if (r.top() > er.bottom()) {
+        }
+        else if (r.top() > er.bottom()) {
             break;
         }
         textLayoutOffset += l->text().size() + 1;
     }
 
-
-    //paintLineNumberArea(e);
+    // paintLineNumberArea(e);
 }
 
-void TextPagerEdit::scrollContentsBy(int dx, int dy)
-{
+void TextPagerEdit::scrollContentsBy(int dx, int dy) {
     Q_UNUSED(dx);
     Q_UNUSED(dy);
-//    viewport()->update();
+    //    viewport()->update();
     viewport()->scroll(dx, dy); // seems to jitter more
 }
 
-int TextPagerEdit::viewportPosition() const
-{
+int TextPagerEdit::viewportPosition() const {
     return d->viewportPosition;
 }
 
-void TextPagerEdit::mousePressEvent(QMouseEvent *e)
-{
+void TextPagerEdit::mousePressEvent(QMouseEvent* e) {
     d->inMouseEvent = true;
     if (e->button() == Qt::LeftButton) {
 #ifdef DEBUG_TEXTPAGER
@@ -486,7 +458,8 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
             d->tripleClickTimer.stop();
             d->textCursor.movePosition(TextPagerCursor::StartOfBlock);
             d->textCursor.movePosition(TextPagerCursor::EndOfBlock, TextPagerCursor::KeepAnchor);
-        } else {
+        }
+        else {
             const bool shift = e->modifiers() & Qt::ShiftModifier;
             if (!shift) {
                 clearSelection();
@@ -500,8 +473,8 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
 
         e->accept();
 
-        //The cursor changed so wee need to update the selected line number
-        if(lineNumArea_ && showLineNum_)
+        // The cursor changed so wee need to update the selected line number
+        if (lineNumArea_ && showLineNum_)
             lineNumArea_->update();
     }
     else {
@@ -509,8 +482,7 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
     }
 }
 
-void TextPagerEdit::mouseDoubleClickEvent(QMouseEvent *e)
-{
+void TextPagerEdit::mouseDoubleClickEvent(QMouseEvent* e) {
     if (e->button() == Qt::LeftButton) {
 #ifdef DEBUG_TEXTPAGER
         if (doLog) {
@@ -523,8 +495,7 @@ void TextPagerEdit::mouseDoubleClickEvent(QMouseEvent *e)
         const int pos = textPositionAt(e->pos());
         if (pos == d->textCursor.position()) {
             d->tripleClickTimer.start(qApp->doubleClickInterval(), d);
-            if (d->document->isWordCharacter(d->textCursor.cursorCharacter(),
-                                             d->textCursor.position())) {
+            if (d->document->isWordCharacter(d->textCursor.cursorCharacter(), d->textCursor.position())) {
                 // ### this is not quite right
                 d->textCursor.movePosition(TextPagerCursor::StartOfWord);
                 d->textCursor.movePosition(TextPagerCursor::EndOfWord, TextPagerCursor::KeepAnchor);
@@ -535,11 +506,11 @@ void TextPagerEdit::mouseDoubleClickEvent(QMouseEvent *e)
     }
 }
 
-void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
-{
+void TextPagerEdit::mouseMoveEvent(QMouseEvent* e) {
     if (e->buttons() == Qt::NoButton) {
         d->updateCursorPosition(e->pos());
-    } else if (e->buttons() == Qt::LeftButton && d->document->documentSize()) {
+    }
+    else if (e->buttons() == Qt::LeftButton && d->document->documentSize()) {
 #ifdef DEBUG_TEXTPAGER
         if (doLog) {
             QFile file(logFileName);
@@ -548,7 +519,7 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
             ds << int(e->type()) << e->pos() << e->button() << e->buttons() << e->modifiers();
         }
 #endif
-        const QRect r = viewport()->rect();
+        const QRect r    = viewport()->rect();
         d->lastMouseMove = e->pos();
         e->accept();
         if (e->y() < r.top()) {
@@ -557,21 +528,23 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
                 d->autoScrollTimer.stop();
                 return;
             }
-        } else if (e->y() > r.bottom()) {
+        }
+        else if (e->y() > r.bottom()) {
             if (d->atEnd()) {
                 d->updateHorizontalPosition();
                 d->autoScrollTimer.stop();
                 return;
             }
-        } else {
+        }
+        else {
             int pos = textPositionAt(QPoint(qBound(0, d->lastMouseMove.x(), r.right()), d->lastMouseMove.y()));
             if (pos == -1)
                 pos = d->document->documentSize();
             d->autoScrollTimer.stop();
             setCursorPosition(pos, TextPagerCursor::KeepAnchor);
 
-            //The cursor changed so wee need to update the selected line number
-            if(lineNumArea_ && showLineNum_)
+            // The cursor changed so wee need to update the selected line number
+            if (lineNumArea_ && showLineNum_)
                 lineNumArea_->update();
 
             return;
@@ -588,17 +561,18 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
         d->autoScrollLines = 1 + ((100 - timeout) / 30);
         if (d->autoScrollTimer.isActive()) {
             d->pendingTimeOut = timeout;
-        } else {
+        }
+        else {
             d->pendingTimeOut = -1;
             d->autoScrollTimer.start(timeout, d);
         }
-    } else {
+    }
+    else {
         QAbstractScrollArea::mouseMoveEvent(e);
     }
 }
 
-void TextPagerEdit::mouseReleaseEvent(QMouseEvent *e)
-{
+void TextPagerEdit::mouseReleaseEvent(QMouseEvent* e) {
     d->inMouseEvent = false;
     if (e->button() == Qt::LeftButton) {
 #ifdef DEBUG_TEXTPAGER
@@ -616,13 +590,13 @@ void TextPagerEdit::mouseReleaseEvent(QMouseEvent *e)
             Q_EMIT sectionClicked(d->sectionPressed, e->pos());
         }
         d->sectionPressed = nullptr;
-    } else {
+    }
+    else {
         QAbstractScrollArea::mouseReleaseEvent(e);
     }
 }
 
-void TextPagerEdit::resizeEvent(QResizeEvent *e)
-{
+void TextPagerEdit::resizeEvent(QResizeEvent* e) {
 #ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile file(logFileName);
@@ -632,183 +606,160 @@ void TextPagerEdit::resizeEvent(QResizeEvent *e)
     }
 #endif
     QAbstractScrollArea::resizeEvent(e);
-    if(e->oldSize().height() != e->size().height())
+    if (e->oldSize().height() != e->size().height())
         d->adjustVerticalScrollBar();
     d->updateScrollBarPageStepPending = true;
-    d->layoutDirty = true;
+    d->layoutDirty                    = true;
 }
 
-int TextPagerEdit::textPositionAt(const QPoint &pos) const
-{
+int TextPagerEdit::textPositionAt(const QPoint& pos) const {
     if (!viewport()->rect().contains(pos))
         return -1;
 
-    QPoint realPos=pos;
-    realPos+=QPoint(horizontalScrollBar()->value(),0);
+    QPoint realPos = pos;
+    realPos += QPoint(horizontalScrollBar()->value(), 0);
 
-    //Adjust the horizontal position
-  /*  if(pos.x()  > horizontalScrollBar()->value()+viewport()->rect().width())
-    {
-        int hval=realCrect.left()-r.width()/2;
-        horizontalScrollBar()->setValue((hval < horizontalScrollBar()->maximum())?
-                                            hval:
-                                            horizontalScrollBar()->maximum());
-    }
-    else if(realCrect.right() < horizontalScrollBar()->value())
-    {
-        int hval=realCrect.left()-r.width()/2;
-        horizontalScrollBar()->setValue((hval > horizontalScrollBar()->minimum())?
-                                            hval:
-                                            horizontalScrollBar()->minimum());
-    }
-}*/
-
-
-
-
-
+    // Adjust the horizontal position
+    /*  if(pos.x()  > horizontalScrollBar()->value()+viewport()->rect().width())
+      {
+          int hval=realCrect.left()-r.width()/2;
+          horizontalScrollBar()->setValue((hval < horizontalScrollBar()->maximum())?
+                                              hval:
+                                              horizontalScrollBar()->maximum());
+      }
+      else if(realCrect.right() < horizontalScrollBar()->value())
+      {
+          int hval=realCrect.left()-r.width()/2;
+          horizontalScrollBar()->setValue((hval > horizontalScrollBar()->minimum())?
+                                              hval:
+                                              horizontalScrollBar()->minimum());
+      }
+  }*/
 
     return d->textPositionAt(realPos);
 }
 
-bool TextPagerEdit::readOnly() const
-{
+bool TextPagerEdit::readOnly() const {
     return d->readOnly;
 }
 
-void TextPagerEdit::setReadOnly(bool rr)
-{
+void TextPagerEdit::setReadOnly(bool rr) {
     d->readOnly = rr;
 
     setCursorVisible(!rr);
 
-  /*  //d->actions[PasteAction]->setEnabled(!rr);
-    //d->actions[CutAction]->setEnabled(!rr);
-    //d->actions[PasteAction]->setVisible(!rr);
-    //d->actions[CutAction]->setVisible(!rr);
+    /*  //d->actions[PasteAction]->setEnabled(!rr);
+      //d->actions[CutAction]->setEnabled(!rr);
+      //d->actions[PasteAction]->setVisible(!rr);
+      //d->actions[CutAction]->setVisible(!rr);
 
-    const bool redoWasAvailable = isRedoAvailable();
-    const bool undoWasAvailable = isUndoAvailable();
+      const bool redoWasAvailable = isRedoAvailable();
+      const bool undoWasAvailable = isUndoAvailable();
 
-   // d->actions[UndoAction]->setEnabled(!rr);
-  //  d->actions[RedoAction]->setEnabled(!rr);
-   // d->actions[UndoAction]->setVisible(!rr);
-   // d->actions[RedoAction]->setVisible(!rr);
+     // d->actions[UndoAction]->setEnabled(!rr);
+    //  d->actions[RedoAction]->setEnabled(!rr);
+     // d->actions[UndoAction]->setVisible(!rr);
+     // d->actions[RedoAction]->setVisible(!rr);
 
 
-    if (undoWasAvailable != isUndoAvailable())
-        Q_EMIT undoAvailableChanged(!undoWasAvailable);
-    if (redoWasAvailable != isRedoAvailable())
-        Q_EMIT redoAvailableChanged(!redoWasAvailable);
-        */
+      if (undoWasAvailable != isUndoAvailable())
+          Q_EMIT undoAvailableChanged(!undoWasAvailable);
+      if (redoWasAvailable != isRedoAvailable())
+          Q_EMIT redoAvailableChanged(!redoWasAvailable);
+          */
 }
 
-bool TextPagerEdit::lineBreaking() const
-{
+bool TextPagerEdit::lineBreaking() const {
     return d->lineBreaking;
 }
 
-void TextPagerEdit::setLineBreaking(bool lineBreaking)
-{
+void TextPagerEdit::setLineBreaking(bool lineBreaking) {
     if (d->lineBreaking != lineBreaking) {
         d->lineBreaking = lineBreaking;
-        d->layoutDirty = true;
+        d->layoutDirty  = true;
         viewport()->update();
     }
 }
 
-
-int TextPagerEdit::maximumSizeCopy() const
-{
+int TextPagerEdit::maximumSizeCopy() const {
     return d->maximumSizeCopy;
 }
 
-void TextPagerEdit::setMaximumSizeCopy(int max)
-{
+void TextPagerEdit::setMaximumSizeCopy(int max) {
     d->maximumSizeCopy = qMax(0, max);
     d->updateCopyAndCutEnabled();
 }
 
-QRect TextPagerEdit::cursorBlockRect(const TextPagerCursor &textCursor) const
-{
-    if (const QTextLayout *l = d->layoutForPosition(textCursor.position())) {
+QRect TextPagerEdit::cursorBlockRect(const TextPagerCursor& textCursor) const {
+    if (const QTextLayout* l = d->layoutForPosition(textCursor.position())) {
         return l->boundingRect().toRect();
     }
     return {};
 }
 
-QRect TextPagerEdit::cursorRect(const TextPagerCursor &textCursor) const
-{
+QRect TextPagerEdit::cursorRect(const TextPagerCursor& textCursor) const {
     int offset = -1;
     if (d->layoutForPosition(textCursor.position(), &offset)) {
         ASSUME(offset != -1);
         QTextLine line = d->lineForPosition(textCursor.position());
 
-        //if line is empty line.cursorToX() crashes. A qt bug?
-        if(line.isValid()) {
-        	qreal x = line.cursorToX(offset);
-        	return { static_cast<int>(x), static_cast<int>(line.y()), d->cursorWidth, static_cast<int>(line.height()) };
+        // if line is empty line.cursorToX() crashes. A qt bug?
+        if (line.isValid()) {
+            qreal x = line.cursorToX(offset);
+            return {static_cast<int>(x), static_cast<int>(line.y()), d->cursorWidth, static_cast<int>(line.height())};
         }
     }
     return {};
 }
 
-int TextPagerEdit::lineNumber(int position) const
-{
+int TextPagerEdit::lineNumber(int position) const {
     return d->document->lineNumber(position);
 }
 
-int TextPagerEdit::columnNumber(int position) const
-{
+int TextPagerEdit::columnNumber(int position) const {
     TextPagerCursor cursor(this, position);
     return cursor.isNull() ? -1 : cursor.columnNumber();
 }
 
-int TextPagerEdit::lineNumber(const TextPagerCursor &cursor) const
-{
-    return cursor.document() == d->document
-        ? d->document->lineNumber(cursor.position()) : -1;
+int TextPagerEdit::lineNumber(const TextPagerCursor& cursor) const {
+    return cursor.document() == d->document ? d->document->lineNumber(cursor.position()) : -1;
 }
 
-int TextPagerEdit::columnNumber(const TextPagerCursor &cursor) const
-{
-    return cursor.document() == d->document
-        ? cursor.columnNumber() : -1;
+int TextPagerEdit::columnNumber(const TextPagerCursor& cursor) const {
+    return cursor.document() == d->document ? cursor.columnNumber() : -1;
 }
 
-void TextPagerEdit::wheelEvent(QWheelEvent *e)
-{
+void TextPagerEdit::wheelEvent(QWheelEvent* e) {
     auto delta = e->angleDelta();
-    if (delta.y() != 0 ) {
+    if (delta.y() != 0) {
         d->scrollLines(3 * (delta.y() > 0 ? -1 : 1));
-    } else {
+    }
+    else {
         QAbstractScrollArea::wheelEvent(e);
     }
 
-    if(e->modifiers() & Qt::ControlModifier)
-    {
+    if (e->modifiers() & Qt::ControlModifier) {
         if (delta.y() < 0)
-    	   zoomOut();
+            zoomOut();
         else if (delta.y() > 0)
-    	   zoomIn();
-    	return;
-     }
+            zoomIn();
+        return;
+    }
 }
 
-void TextPagerEdit::changeEvent(QEvent *e)
-{
+void TextPagerEdit::changeEvent(QEvent* e) {
     if (e->type() == QEvent::FontChange) {
         d->font = font();
-        Q_FOREACH(QTextLayout *l, d->textLayouts) {
+        Q_FOREACH (QTextLayout* l, d->textLayouts) {
             l->setFont(d->font);
         }
-        Q_FOREACH(QTextLayout *l, d->unusedTextLayouts) {
+        Q_FOREACH (QTextLayout* l, d->unusedTextLayouts) {
             l->setFont(d->font);
         }
-      
+
         d->adjustVerticalScrollBar();
-        
-        if(lineNumArea_ && showLineNum_)
+
+        if (lineNumArea_ && showLineNum_)
             lineNumArea_->updateWidth();
 
         d->layoutDirty = true;
@@ -816,8 +767,7 @@ void TextPagerEdit::changeEvent(QEvent *e)
     }
 }
 
-void TextPagerEdit::keyPressEvent(QKeyEvent *e)
-{
+void TextPagerEdit::keyPressEvent(QKeyEvent* e) {
 #ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile file(logFileName);
@@ -834,8 +784,7 @@ void TextPagerEdit::keyPressEvent(QKeyEvent *e)
     }
 }
 
-void TextPagerEdit::keyReleaseEvent(QKeyEvent *e)
-{
+void TextPagerEdit::keyReleaseEvent(QKeyEvent* e) {
 #ifdef DEBUG_TEXTPAGER
     if (doLog) { // ### does it make any sense to replay these? Probably not
         QFile file(logFileName);
@@ -847,37 +796,33 @@ void TextPagerEdit::keyReleaseEvent(QKeyEvent *e)
     QAbstractScrollArea::keyReleaseEvent(e);
 }
 
-void TextPagerEdit::setCursorPosition(int pos, TextPagerCursor::MoveMode mode)
-{
+void TextPagerEdit::setCursorPosition(int pos, TextPagerCursor::MoveMode mode) {
     d->textCursor.setPosition(pos, mode);
 }
 
-bool TextPagerEdit::moveCursorPosition(TextPagerCursor::MoveOperation op, TextPagerCursor::MoveMode mode, int n)
-{
+bool TextPagerEdit::moveCursorPosition(TextPagerCursor::MoveOperation op, TextPagerCursor::MoveMode mode, int n) {
     return d->textCursor.movePosition(op, mode, n);
 }
 
-void TextPagerEdit::copy(QClipboard::Mode mode)
-{
+void TextPagerEdit::copy(QClipboard::Mode mode) {
     if (d->textCursor.selectionSize() <= d->maximumSizeCopy) {
         QApplication::clipboard()->setText(selectedText(), mode);
     }
 }
 
-bool TextPagerEdit::cursorVisible() const
-{
+bool TextPagerEdit::cursorVisible() const {
     return d->cursorBlinkTimer.isActive();
 }
 
-void TextPagerEdit::setCursorVisible(bool cc)
-{
+void TextPagerEdit::setCursorVisible(bool cc) {
     if (cc == d->cursorBlinkTimer.isActive())
         return;
 
     d->cursorVisible = cc;
     if (cc) {
         d->cursorBlinkTimer.start(QApplication::cursorFlashTime(), d);
-    } else {
+    }
+    else {
         d->cursorBlinkTimer.stop();
     }
     const QRect r = cursorRect(d->textCursor) & viewport()->rect();
@@ -886,26 +831,22 @@ void TextPagerEdit::setCursorVisible(bool cc)
     }
 }
 
-void TextPagerEdit::clearSelection()
-{
+void TextPagerEdit::clearSelection() {
     if (!d->textCursor.hasSelection())
         return;
 
     d->textCursor.clearSelection();
 }
 
-QString TextPagerEdit::selectedText() const
-{
+QString TextPagerEdit::selectedText() const {
     return d->textCursor.selectedText();
 }
 
-bool TextPagerEdit::hasSelection() const
-{
+bool TextPagerEdit::hasSelection() const {
     return d->textCursor.hasSelection();
 }
 
-void TextPagerEdit::selectAll()
-{
+void TextPagerEdit::selectAll() {
     TextPagerCursor cursor(d->document);
     Q_ASSERT(cursor.position() == 0);
     cursor.movePosition(TextPagerCursor::End, TextPagerCursor::KeepAnchor);
@@ -913,95 +854,87 @@ void TextPagerEdit::selectAll()
     Q_EMIT selectionChanged();
 }
 
-QString TextPagerEdit::read(int pos, int size) const
-{
+QString TextPagerEdit::read(int pos, int size) const {
     return d->document->read(pos, size);
 }
 
-QChar TextPagerEdit::readCharacter(int index) const
-{
+QChar TextPagerEdit::readCharacter(int index) const {
     return d->document->readCharacter(index);
 }
 
-void TextEditPrivate::onDocumentSizeChanged(int size)
-{
+void TextEditPrivate::onDocumentSizeChanged(int size) {
     adjustVerticalScrollBar();
-    
+
     /*int s=findLastPageSize();
-    
+
     qDebug() << "lat page position" << s;
-    
+
     if(s != -1)
-       textEdit->verticalScrollBar()->setRange(0, s); 
+       textEdit->verticalScrollBar()->setRange(0, s);
     else
-       textEdit->verticalScrollBar()->setRange(0, qMax(0, size)); 
-    
-    
+       textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
+
+
     //textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
 //    qDebug() << findLastPageSize();
     maxViewportPosition = textEdit->verticalScrollBar()->maximum();
     updateScrollBarPageStepPending = true;*/
 }
 
+void TextEditPrivate::adjustVerticalScrollBar() {
+    int s    = findLastPageSize();
 
-void TextEditPrivate::adjustVerticalScrollBar()
-{
-    int s=findLastPageSize();
-    
-    int size=(document != nullptr)?(document->documentSize()):0;
-  
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE    
+    int size = (document != nullptr) ? (document->documentSize()) : 0;
+
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
     qDebug() << "last page position" << s;
-#endif    
-    if(s == 0) {
+#endif
+    if (s == 0) {
         textEdit->verticalScrollBar()->hide();
         textEdit->verticalScrollBar()->setEnabled(false);
-    } else {
+    }
+    else {
         textEdit->verticalScrollBar()->setEnabled(true);
         textEdit->verticalScrollBar()->show();
- 
-        if(s != -1)
-            textEdit->verticalScrollBar()->setRange(0, s); 
+
+        if (s != -1)
+            textEdit->verticalScrollBar()->setRange(0, s);
         else
-            textEdit->verticalScrollBar()->setRange(0, qMax(0, size)); 
+            textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
     }
-    
-    //textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
-//    qDebug() << findLastPageSize();
-    maxViewportPosition = textEdit->verticalScrollBar()->maximum();
+
+    // textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
+    //    qDebug() << findLastPageSize();
+    maxViewportPosition            = textEdit->verticalScrollBar()->maximum();
     updateScrollBarPageStepPending = true;
 }
 
-void TextEditPrivate::updateCopyAndCutEnabled()
-{
+void TextEditPrivate::updateCopyAndCutEnabled() {
     const bool wasEnabled = actions[TextPagerEdit::CopyAction]->isEnabled();
-    const bool enable = qAbs(textCursor.position() - textCursor.anchor()) <= maximumSizeCopy;
+    const bool enable     = qAbs(textCursor.position() - textCursor.anchor()) <= maximumSizeCopy;
     actions[TextPagerEdit::CopyAction]->setEnabled(enable);
-    //actions[TextPagerEdit::CutAction]->setEnabled(enable);
+    // actions[TextPagerEdit::CutAction]->setEnabled(enable);
     if (wasEnabled != enable) {
         Q_EMIT textEdit->copyAvailable(enable);
     }
 }
 
-void TextPagerEdit::takeSyntaxHighlighter(SyntaxHighlighter *highlighter)
-{
+void TextPagerEdit::takeSyntaxHighlighter(SyntaxHighlighter* highlighter) {
     Q_ASSERT(highlighter);
     const bool found = d->syntaxHighlighters.removeOne(highlighter);
     Q_ASSERT(found);
     Q_UNUSED(found);
-    highlighter->d->textEdit = nullptr;
+    highlighter->d->textEdit   = nullptr;
     highlighter->d->textLayout = nullptr;
     disconnect(highlighter, nullptr, d, nullptr);
 }
 
-void TextPagerEdit::removeSyntaxHighlighter(SyntaxHighlighter *highlighter)
-{
+void TextPagerEdit::removeSyntaxHighlighter(SyntaxHighlighter* highlighter) {
     takeSyntaxHighlighter(highlighter);
     delete highlighter;
 }
 
-void TextPagerEdit::addSyntaxHighlighter(SyntaxHighlighter *highlighter)
-{
+void TextPagerEdit::addSyntaxHighlighter(SyntaxHighlighter* highlighter) {
     Q_ASSERT(highlighter);
     if (highlighter->textEdit() != this) {
         if (highlighter->textEdit()) {
@@ -1012,28 +945,26 @@ void TextPagerEdit::addSyntaxHighlighter(SyntaxHighlighter *highlighter)
         }
         d->syntaxHighlighters.append(highlighter);
         connect(highlighter, SIGNAL(destroyed(QObject*)), d, SLOT(onSyntaxHighlighterDestroyed(QObject*)));
-        highlighter->d->textEdit = this;
+        highlighter->d->textEdit   = this;
         highlighter->d->textLayout = d;
-        d->layoutDirty = true;
+        d->layoutDirty             = true;
         viewport()->update();
     }
 }
 
-void TextPagerEdit::clearSyntaxHighlighters()
-{
-    Q_FOREACH(SyntaxHighlighter *highlighter, d->syntaxHighlighters) {
+void TextPagerEdit::clearSyntaxHighlighters() {
+    Q_FOREACH (SyntaxHighlighter* highlighter, d->syntaxHighlighters) {
         if (highlighter->parent() == this) {
             removeSyntaxHighlighter(highlighter);
-        } else {
+        }
+        else {
             takeSyntaxHighlighter(highlighter);
         }
     }
     Q_ASSERT(d->syntaxHighlighters.isEmpty());
 }
 
-
-void TextEditPrivate::onSyntaxHighlighterDestroyed(QObject *o)
-{
+void TextEditPrivate::onSyntaxHighlighterDestroyed(QObject* o) {
     const bool found = syntaxHighlighters.removeOne(static_cast<SyntaxHighlighter*>(o));
     Q_ASSERT(found);
     Q_UNUSED(found);
@@ -1041,18 +972,16 @@ void TextEditPrivate::onSyntaxHighlighterDestroyed(QObject *o)
     textEdit->viewport()->update();
 }
 
-QList<SyntaxHighlighter*> TextPagerEdit::syntaxHighlighters() const
-{
+QList<SyntaxHighlighter*> TextPagerEdit::syntaxHighlighters() const {
     return d->syntaxHighlighters;
 }
 
-static inline bool compareExtraSelection(const TextPagerEdit::ExtraSelection &left, const TextPagerEdit::ExtraSelection &right)
-{
+static inline bool compareExtraSelection(const TextPagerEdit::ExtraSelection& left,
+                                         const TextPagerEdit::ExtraSelection& right) {
     return left.cursor < right.cursor;
 }
 
-void TextPagerEdit::setExtraSelections(const QList<ExtraSelection> &selections)
-{
+void TextPagerEdit::setExtraSelections(const QList<ExtraSelection>& selections) {
     d->extraSelections = selections;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     std::sort(d->extraSelections.begin(), d->extraSelections.end(), compareExtraSelection);
@@ -1063,13 +992,11 @@ void TextPagerEdit::setExtraSelections(const QList<ExtraSelection> &selections)
     viewport()->update();
 }
 
-QList<TextPagerEdit::ExtraSelection> TextPagerEdit::extraSelections() const
-{
+QList<TextPagerEdit::ExtraSelection> TextPagerEdit::extraSelections() const {
     return d->extraSelections;
 }
 
-void TextEditPrivate::onTextSectionRemoved(TextPagerSection *section)
-{
+void TextEditPrivate::onTextSectionRemoved(TextPagerSection* section) {
     Q_ASSERT(section);
     if (!dirtyForSection(section))
         return;
@@ -1083,26 +1010,23 @@ void TextEditPrivate::onTextSectionRemoved(TextPagerSection *section)
     }
 }
 
-void TextEditPrivate::onTextSectionAdded(TextPagerSection *section)
-{
+void TextEditPrivate::onTextSectionAdded(TextPagerSection* section) {
     dirtyForSection(section);
     updateCursorPosition(lastHoverPos);
     sectionsDirty = true;
 }
 
-void TextEditPrivate::onScrollBarValueChanged(int value)
-{
+void TextEditPrivate::onScrollBarValueChanged(int value) {
     if (blockScrollBarUpdate || value == requestedScrollBarPosition || value == viewportPosition)
         return;
     requestedScrollBarPosition = value;
-    layoutDirty = true;
+    layoutDirty                = true;
     textEdit->viewport()->update();
 
     Q_EMIT scrollBarChanged();
 }
 
-void TextEditPrivate::onScrollBarActionTriggered(int action)
-{
+void TextEditPrivate::onScrollBarActionTriggered(int action) {
     // IR: see comment at the top of cursorMoveKeyEventReadOnly().
     // Also: added code to handle SliderPageStepAdd and SliderPageStepSub because
     // these cases were not handled well by default. These cases occur when the user clicks inside
@@ -1110,46 +1034,53 @@ void TextEditPrivate::onScrollBarActionTriggered(int action)
     // identical to a page up/down operation.
 
     switch (action) {
-    case QAbstractSlider::SliderSingleStepAdd:
-        scrollLines(1); requestedScrollBarPosition = -1; break;
-    case QAbstractSlider::SliderSingleStepSub:
-        scrollLines(-1); requestedScrollBarPosition = -1; break;
-    case QAbstractSlider::SliderPageStepAdd:
-        scrollLines(qMax(1, visibleLines - 1)); requestedScrollBarPosition = -1; break;
-    case QAbstractSlider::SliderPageStepSub:
-        scrollLines(-qMax(1, visibleLines - 2)); requestedScrollBarPosition = -1; break;
-    default: break;
+        case QAbstractSlider::SliderSingleStepAdd:
+            scrollLines(1);
+            requestedScrollBarPosition = -1;
+            break;
+        case QAbstractSlider::SliderSingleStepSub:
+            scrollLines(-1);
+            requestedScrollBarPosition = -1;
+            break;
+        case QAbstractSlider::SliderPageStepAdd:
+            scrollLines(qMax(1, visibleLines - 1));
+            requestedScrollBarPosition = -1;
+            break;
+        case QAbstractSlider::SliderPageStepSub:
+            scrollLines(-qMax(1, visibleLines - 2));
+            requestedScrollBarPosition = -1;
+            break;
+        default:
+            break;
     }
 
     Q_EMIT scrollBarChanged();
 }
 
-void TextEditPrivate::updateScrollBar()
-{
+void TextEditPrivate::updateScrollBar() {
     Q_ASSERT(!textEdit->verticalScrollBar()->isSliderDown());
     if (pendingScrollBarUpdate) {
-        const bool old = blockScrollBarUpdate;
+        const bool old       = blockScrollBarUpdate;
         blockScrollBarUpdate = true;
         textEdit->verticalScrollBar()->setValue(viewportPosition);
-        blockScrollBarUpdate = old;
-        pendingScrollBarUpdate  = false;
+        blockScrollBarUpdate   = old;
+        pendingScrollBarUpdate = false;
 
         Q_EMIT scrollBarChanged();
     }
 }
 
-void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count)
-{
+void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count) {
     Q_ASSERT(count >= 0);
     Q_UNUSED(count);
 
     textCursor.clearSelection();
 
-    if(textCursor.position() > document->documentSize())
+    if (textCursor.position() > document->documentSize())
         textCursor.setPosition(0);
 
-//    UiLog().dbg() <<
-//              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " << textCursor.position();
+    //    UiLog().dbg() <<
+    //              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " << textCursor.position();
 
     /*if (from > qMin(bufferPosition + buffer.size(), layoutEnd)) {
         return;
@@ -1159,73 +1090,69 @@ void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count)
     textEdit->viewport()->update();
 }
 
-void TextPagerEdit::ensureCursorVisible()
-{
+void TextPagerEdit::ensureCursorVisible() {
     if (d->textCursor.position() < d->viewportPosition) {
         d->updateViewportPosition(qMax(0, d->textCursor.position() - 1), TextPagerLayout::Backward);
-    } else if (d->textCursor.position() > d->layoutEnd) {
+    }
+    else if (d->textCursor.position() > d->layoutEnd) {
         d->updateViewportPosition(d->textCursor.position(), TextPagerLayout::Backward);
         viewport()->update();
-    } else {
-        const QRect r = viewport()->rect();
+    }
+    else {
+        const QRect r   = viewport()->rect();
         QRect realCrect = cursorRect(d->textCursor);
-        QRect crect = realCrect;
+        QRect crect     = realCrect;
         crect.setLeft(r.left());
         crect.setRight(r.right());
         // ### what if the cursor is out of bounds horizontally?
 
-        //qDebug() << "ensureCursorVisible" << r << crect << cursorRect(d->textCursor) << horizontalScrollBar()->value() << horizontalScrollBar()->maximum() <<  d->widest;
+        // qDebug() << "ensureCursorVisible" << r << crect << cursorRect(d->textCursor) <<
+        // horizontalScrollBar()->value() << horizontalScrollBar()->maximum() <<  d->widest;
         if (!r.contains(crect)) {
             if (r.intersects(crect)) {
                 int scroll;
                 if (d->autoScrollLines != 0) {
                     scroll = d->autoScrollLines;
-                } else {
+                }
+                else {
                     scroll = (crect.top() < r.top() ? -1 : 1);
                 }
                 d->scrollLines(scroll);
-            } else {
+            }
+            else {
                 d->updateViewportPosition(d->textCursor.position(), TextPagerLayout::Backward);
             }
             viewport()->update();
         }
 
-        //Adjust the horizontal position
-        if(realCrect.left() > horizontalScrollBar()->value()+r.width())
-        {
-            int hval=realCrect.left()-r.width()/2;
-            horizontalScrollBar()->setValue((hval < horizontalScrollBar()->maximum())?
-                                                hval:
-                                                horizontalScrollBar()->maximum());
+        // Adjust the horizontal position
+        if (realCrect.left() > horizontalScrollBar()->value() + r.width()) {
+            int hval = realCrect.left() - r.width() / 2;
+            horizontalScrollBar()->setValue(
+                (hval < horizontalScrollBar()->maximum()) ? hval : horizontalScrollBar()->maximum());
         }
-        else if(realCrect.right() < horizontalScrollBar()->value())
-        {
-            int hval=realCrect.left()-r.width()/2;
-            horizontalScrollBar()->setValue((hval > horizontalScrollBar()->minimum())?
-                                                hval:
-                                                horizontalScrollBar()->minimum());
+        else if (realCrect.right() < horizontalScrollBar()->value()) {
+            int hval = realCrect.left() - r.width() / 2;
+            horizontalScrollBar()->setValue(
+                (hval > horizontalScrollBar()->minimum()) ? hval : horizontalScrollBar()->minimum());
         }
     }
 }
 
-//textEdit->horizontalScrollBar()->setPageStep(s.width());
-//textEdit->horizontalScrollBar()->setMaximum(qMax(0, widest - s.width()));
+// textEdit->horizontalScrollBar()->setPageStep(s.width());
+// textEdit->horizontalScrollBar()->setMaximum(qMax(0, widest - s.width()));
 
-
-TextPagerCursor &TextPagerEdit::textCursor()
-{
+TextPagerCursor& TextPagerEdit::textCursor() {
     return d->textCursor;
 }
 
-const TextPagerCursor &TextPagerEdit::textCursor() const
-{
+const TextPagerCursor& TextPagerEdit::textCursor() const {
     return d->textCursor;
 }
 
-void TextPagerEdit::setTextCursor(const TextPagerCursor &textCursor)
-{
-    const bool doEmit = (d->textCursor != textCursor);
-    d->textCursor = textCursor;
+void TextPagerEdit::setTextCursor(const TextPagerCursor& textCursor) {
+    const bool doEmit      = (d->textCursor != textCursor);
+    d->textCursor          = textCursor;
     d->textCursor.textEdit = this;
     if (doEmit) {
         ensureCursorVisible();
@@ -1234,16 +1161,14 @@ void TextPagerEdit::setTextCursor(const TextPagerCursor &textCursor)
     }
 }
 
-TextPagerCursor TextPagerEdit::cursorForPosition(const QPoint &pos) const
-{
+TextPagerCursor TextPagerEdit::cursorForPosition(const QPoint& pos) const {
     const int idx = textPositionAt(pos);
     if (idx == -1)
         return TextPagerCursor();
     return TextPagerCursor(this, idx);
 }
 
-TextPagerSection *TextPagerEdit::sectionAt(const QPoint &pos) const
-{
+TextPagerSection* TextPagerEdit::sectionAt(const QPoint& pos) const {
     Q_ASSERT(d->document);
     int textPos = textPositionAt(pos);
     if (textPos == -1)
@@ -1251,17 +1176,16 @@ TextPagerSection *TextPagerEdit::sectionAt(const QPoint &pos) const
     return d->document->d->sectionAt(textPos, this);
 }
 
-QList<TextPagerSection*> TextPagerEdit::sections(int from, int size, TextPagerSection::TextSectionOptions opt) const
-{
+QList<TextPagerSection*> TextPagerEdit::sections(int from, int size, TextPagerSection::TextSectionOptions opt) const {
     Q_ASSERT(d->document);
     QList<TextPagerSection*> sections = d->document->d->getSections(from, size, opt, this);
     return sections;
 }
 
-TextPagerSection *TextPagerEdit::insertTextSection(int pos, int size, const QTextCharFormat &format, const QVariant &data)
-{
+TextPagerSection*
+TextPagerEdit::insertTextSection(int pos, int size, const QTextCharFormat& format, const QVariant& data) {
     Q_ASSERT(d->document);
-    TextPagerSection *section = d->document->insertTextSection(pos, size, format, data);
+    TextPagerSection* section = d->document->insertTextSection(pos, size, format, data);
     if (section) {
         section->d.textEdit = this;
         section->d.priority = 100;
@@ -1269,35 +1193,34 @@ TextPagerSection *TextPagerEdit::insertTextSection(int pos, int size, const QTex
     return section;
 }
 
-void TextEditPrivate::updateHorizontalPosition()
-{
+void TextEditPrivate::updateHorizontalPosition() {
     const QRect r = textEdit->viewport()->rect();
-    const QPoint p(qBound(0, lastMouseMove.x(), r.right()),
-                   qBound(0, lastMouseMove.y(), r.bottom()));
+    const QPoint p(qBound(0, lastMouseMove.x(), r.right()), qBound(0, lastMouseMove.y(), r.bottom()));
     int pos = textPositionAt(p);
     if (pos == -1)
         pos = document->documentSize() - 1;
     textEdit->setCursorPosition(pos, TextPagerCursor::KeepAnchor);
 }
 
-void TextEditPrivate::updateScrollBarPosition()
-{
+void TextEditPrivate::updateScrollBarPosition() {
     if (requestedScrollBarPosition == -1) {
         return;
-    } else if (requestedScrollBarPosition == viewportPosition) {
+    }
+    else if (requestedScrollBarPosition == viewportPosition) {
         requestedScrollBarPosition = -1;
         return;
     }
 
-    const int req = requestedScrollBarPosition;
+    const int req              = requestedScrollBarPosition;
     requestedScrollBarPosition = -1;
 
-    Direction direction = Forward;
+    Direction direction        = Forward;
     if (lastRequestedScrollBarPosition != -1 && lastRequestedScrollBarPosition != req) {
         if (lastRequestedScrollBarPosition > req) {
             direction = Backward;
         }
-    } else if (req < viewportPosition) {
+    }
+    else if (req < viewportPosition) {
         direction = Backward;
     }
 
@@ -1306,8 +1229,7 @@ void TextEditPrivate::updateScrollBarPosition()
     updateViewportPosition(req, direction);
 }
 
-void TextEditPrivate::updateScrollBarPageStep()
-{
+void TextEditPrivate::updateScrollBarPageStep() {
     if (lines.isEmpty()) {
         textEdit->verticalScrollBar()->setPageStep(1);
         return;
@@ -1316,24 +1238,20 @@ void TextEditPrivate::updateScrollBarPageStep()
     textEdit->verticalScrollBar()->setPageStep(visibleCharacters);
 }
 
-void TextEditPrivate::onDocumentDestroyed()
-{
+void TextEditPrivate::onDocumentDestroyed() {
     document = nullptr;
     textEdit->setDocument(new TextPagerDocument(this)); // there should always be a document
 }
 
-void TextEditPrivate::scrollLines(int lines)
-{
+void TextEditPrivate::scrollLines(int lines) {
     // IR: see comment at the top of cursorMoveKeyEventReadOnly().
 
-    int pos = viewportPosition;
+    int pos           = viewportPosition;
     const Direction d = (lines < 0 ? Backward : Forward);
-    const int add = lines < 0 ? -1 : 1;
+    const int add     = lines < 0 ? -1 : 1;
 
     while (pos + add >= 0 && pos + add < document->documentSize()) {
-        if (d == Forward &&
-            (lines - add == 0) &&
-            bufferReadCharacter(pos) == '\n') {
+        if (d == Forward && (lines - add == 0) && bufferReadCharacter(pos) == '\n') {
             // When iterating forwards, be sure not to skip over blank lines
             // (ie. lines containing only '\n') by just ignoring them here
             // - updateViewportPosition automatically takes us one index past
@@ -1347,7 +1265,8 @@ void TextEditPrivate::scrollLines(int lines)
             // scrolling down 5 lines actually scrolls down 4 lines, and scrolling up 5
             // lines does indeed scroll up 5 lines.
             break;
-        } else {
+        }
+        else {
             pos += add;
             if (bufferReadCharacter(pos) == '\n') {
                 if ((lines -= add) == 0) {
@@ -1359,11 +1278,11 @@ void TextEditPrivate::scrollLines(int lines)
     updateViewportPosition(pos, d);
 }
 
-void TextEditPrivate::timerEvent(QTimerEvent *e)
-{
+void TextEditPrivate::timerEvent(QTimerEvent* e) {
     if (e->timerId() == tripleClickTimer.timerId()) {
         tripleClickTimer.stop();
-    } else if (e->timerId() == autoScrollTimer.timerId()) {
+    }
+    else if (e->timerId() == autoScrollTimer.timerId()) {
         if (pendingTimeOut != -1) {
             autoScrollTimer.start(pendingTimeOut, this);
             pendingTimeOut = -1;
@@ -1375,36 +1294,36 @@ void TextEditPrivate::timerEvent(QTimerEvent *e)
             scrollLines(-LineCount);
             if (atBeginning())
                 autoScrollTimer.stop();
-        } else {
+        }
+        else {
             Q_ASSERT(lastMouseMove.y() > r.bottom());
             scrollLines(LineCount);
             if (atEnd())
                 autoScrollTimer.stop();
         }
-        const QPoint p(qBound(0, lastMouseMove.x(), r.right()),
-                       qBound(0, lastMouseMove.y(), r.bottom()));
+        const QPoint p(qBound(0, lastMouseMove.x(), r.right()), qBound(0, lastMouseMove.y(), r.bottom()));
         int pos = textPositionAt(p);
         if (pos == -1)
             pos = document->documentSize() - 1;
         textEdit->setCursorPosition(pos, TextPagerCursor::KeepAnchor);
-    } else if (e->timerId() == cursorBlinkTimer.timerId()) {
+    }
+    else if (e->timerId() == cursorBlinkTimer.timerId()) {
         cursorVisible = !cursorVisible;
         const QRect r = textEdit->cursorRect(textCursor) & textEdit->viewport()->rect();
         if (!r.isNull())
             textEdit->viewport()->update(r);
-    } else {
+    }
+    else {
         Q_ASSERT(0);
     }
 }
 
-static inline bool compareTextSectionByPriority(const TextPagerSection *left, const TextPagerSection *right)
-{
+static inline bool compareTextSectionByPriority(const TextPagerSection* left, const TextPagerSection* right) {
     return left->priority() > right->priority();
 }
 
-void TextEditPrivate::updateCursorPosition(const QPoint &pos)
-{
-    lastHoverPos = pos;
+void TextEditPrivate::updateCursorPosition(const QPoint& pos) {
+    lastHoverPos      = pos;
     const int textPos = textPositionAt(pos);
     if (textPos != -1) {
         QList<TextPagerSection*> hovered = textEdit->sections(textPos, 1, TextPagerSection::IncludePartial);
@@ -1413,7 +1332,7 @@ void TextEditPrivate::updateCursorPosition(const QPoint &pos)
 #else
         qSort(hovered.begin(), hovered.end(), compareTextSectionByPriority);
 #endif
-        Q_FOREACH(TextPagerSection *section, hovered) {
+        Q_FOREACH (TextPagerSection* section, hovered) {
             if (section->hasCursor()) {
                 delete sectionCursor;
                 sectionCursor = new QCursor(section->cursor());
@@ -1429,20 +1348,17 @@ void TextEditPrivate::updateCursorPosition(const QPoint &pos)
         sectionCursor = nullptr;
     }
 
-    //To notify the line num area widget!
+    // To notify the line num area widget!
     Q_EMIT scrollBarChanged();
 }
 
-bool TextEditPrivate::isSectionOnScreen(const TextPagerSection *section) const
-{
+bool TextEditPrivate::isSectionOnScreen(const TextPagerSection* section) const {
     Q_ASSERT(section->document() == document);
-    return (::matchSection(section, textEdit)
-            && section->position() <= layoutEnd
-            && section->position() + section->size() >= viewportPosition);
+    return (::matchSection(section, textEdit) && section->position() <= layoutEnd &&
+            section->position() + section->size() >= viewportPosition);
 }
 
-void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
-{
+void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent* e) {
     // IR: changed MoveToPreviousPage from visibleLines to (visibleLines-2) because:
     // the scrollLines routine does not perform consistently between page up and page down;
     // performing a page down followed by a page up does not get you back to where you started.
@@ -1451,29 +1367,36 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
     // ensure that the user does not miss any lines of text when they page up and down through
     // the document. The same change was made in onScrollBarActionTriggered.
 
-
     if (1) {
         if (e == QKeySequence::MoveToNextLine) {
             scrollLines(1);
-        } else if (e == QKeySequence::MoveToPreviousLine) {
+        }
+        else if (e == QKeySequence::MoveToPreviousLine) {
             scrollLines(-1);
-        } else if (e == QKeySequence::MoveToStartOfDocument) {
+        }
+        else if (e == QKeySequence::MoveToStartOfDocument) {
             textEdit->verticalScrollBar()->setValue(0);
-        } else if (e == QKeySequence::MoveToEndOfDocument) {
+        }
+        else if (e == QKeySequence::MoveToEndOfDocument) {
             textEdit->verticalScrollBar()->setValue(textEdit->verticalScrollBar()->maximum());
-        } else if (e == QKeySequence::MoveToNextPage) {
+        }
+        else if (e == QKeySequence::MoveToNextPage) {
             scrollLines(qMax(1, visibleLines - 1));
-        } else if (e == QKeySequence::MoveToPreviousPage) {
+        }
+        else if (e == QKeySequence::MoveToPreviousPage) {
             scrollLines(-qMax(1, visibleLines - 2));
-        } else if (e == QKeySequence::MoveToStartOfLine) {
+        }
+        else if (e == QKeySequence::MoveToStartOfLine) {
             textCursor.movePosition(TextPagerCursor::StartOfLine);
             e->accept();
             return;
-        } else if (e == QKeySequence::MoveToEndOfLine) {
+        }
+        else if (e == QKeySequence::MoveToEndOfLine) {
             textCursor.movePosition(TextPagerCursor::EndOfLine);
             e->accept();
             return;
-        } else {
+        }
+        else {
             e->ignore();
             return;
         }
@@ -1483,16 +1406,15 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
     textCursor.setPosition(viewportPosition);
 }
 
-void TextEditPrivate::relayout()
-{
+void TextEditPrivate::relayout() {
     const QSize s = textEdit->viewport()->size();
 
-    int widestOri=widest;
+    int widestOri = widest;
 
-    widest=-1;
+    widest        = -1;
     relayoutByGeometry(s.height());
-    if(widest == -1)
-        widest=widestOri;
+    if (widest == -1)
+        widest = widestOri;
 
     textEdit->horizontalScrollBar()->setPageStep(s.width());
     textEdit->horizontalScrollBar()->setMaximum(qMax(0, widest - s.width()));
@@ -1501,31 +1423,28 @@ void TextEditPrivate::relayout()
 #endif
 }
 
-bool TextEditPrivate::dirtyForSection(TextPagerSection *section)
-{
+bool TextEditPrivate::dirtyForSection(TextPagerSection* section) {
     if (isSectionOnScreen(section)) {
         layoutDirty = true;
         textEdit->viewport()->update();
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
 
-void TextEditPrivate::onTextSectionFormatChanged(TextPagerSection *section)
-{
+void TextEditPrivate::onTextSectionFormatChanged(TextPagerSection* section) {
     dirtyForSection(section);
 }
 
-void TextEditPrivate::onTextSectionCursorChanged(TextPagerSection *section)
-{
+void TextEditPrivate::onTextSectionCursorChanged(TextPagerSection* section) {
     if (isSectionOnScreen(section)) {
         updateCursorPosition(lastHoverPos);
     }
 }
 
-void TextEditPrivate::onSelectionChanged()
-{
+void TextEditPrivate::onSelectionChanged() {
     if (inMouseEvent && textCursor.hasSelection() && QApplication::clipboard()->supportsSelection()) {
         textEdit->copy(QClipboard::Selection);
     }
@@ -1536,16 +1455,13 @@ void TextEditPrivate::onSelectionChanged()
     updateCopyAndCutEnabled();
 }
 
-bool TextEditPrivate::canInsertFromMimeData(const QMimeData *data) const
-{
+bool TextEditPrivate::canInsertFromMimeData(const QMimeData* data) const {
     return data->hasText();
 }
 
-
-//Find the viewport position for the end of the document supposing the the last line 
-//is exactly located at the bottom of the viewport.
-int TextEditPrivate::findLastPageSize() const
-{
+// Find the viewport position for the end of the document supposing the the last line
+// is exactly located at the bottom of the viewport.
+int TextEditPrivate::findLastPageSize() const {
     if (!document || document->documentSize() == 0)
         return -1;
 
@@ -1553,159 +1469,156 @@ int TextEditPrivate::findLastPageSize() const
     qDebug() << "TextEditPrivate::findLastPageSize -->";
 #endif
     TextEditPrivate p(textEdit);
-    p.font=textEdit->font();
-    p.viewportPosition = 0;
-    p.document = document;
+    p.font                 = textEdit->font();
+    p.viewportPosition     = 0;
+    p.document             = document;
     const int documentSize = document->documentSize();
-    p.maxViewportPosition = documentSize;
+    p.maxViewportPosition  = documentSize;
 
-    //The viewport height (including the height of the horizontal slider)
-    int vh=p.textEdit->viewport()->height(); //-p.textEdit->horizontalScrollBar()->height();
+    // The viewport height (including the height of the horizontal slider)
+    int vh = p.textEdit->viewport()->height(); //-p.textEdit->horizontalScrollBar()->height();
 
-    //Max 1.5*MinimumBufferSize can be kept in the buffer after the viewportPosition
-    int maxCharNum=p.MinimumBufferSize*1.5-200;
+    // Max 1.5*MinimumBufferSize can be kept in the buffer after the viewportPosition
+    int maxCharNum = p.MinimumBufferSize * 1.5 - 200;
 
-    //We use the lastpage cache to find a better start position
+    // We use the lastpage cache to find a better start position
 
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
-    qDebug() << "  lastPageCache height:" << lastPage.height << "position:"  <<   lastPage.position <<
-                "documentSize:" << lastPage.documentSize << "widest:" << lastPage.widest;
+    qDebug() << "  lastPageCache height:" << lastPage.height << "position:" << lastPage.position
+             << "documentSize:" << lastPage.documentSize << "widest:" << lastPage.widest;
 #endif
 
-    if(lastPage.documentSize != documentSize)
-    {
+    if (lastPage.documentSize != documentSize) {
         lastPage.clear();
         lastPage.documentSize = documentSize;
     }
 
-    Direction sizeChangeDir=Forward;
-    if(lastPage.height != -1) {
-        if(lastPage.height > vh) {
-            maxCharNum=documentSize-lastPage.position+1;
-            sizeChangeDir=Backward;
-        } else if(lastPage.height< vh) {
-            maxCharNum=documentSize-lastPage.position+1000;
-            sizeChangeDir=Backward;
-        } else {
+    Direction sizeChangeDir = Forward;
+    if (lastPage.height != -1) {
+        if (lastPage.height > vh) {
+            maxCharNum    = documentSize - lastPage.position + 1;
+            sizeChangeDir = Backward;
+        }
+        else if (lastPage.height < vh) {
+            maxCharNum    = documentSize - lastPage.position + 1000;
+            sizeChangeDir = Backward;
+        }
+        else {
             return lastPage.position;
         }
     }
 
-    lastPage.height=vh;
+    lastPage.height = vh;
 
-    Q_ASSERT(maxCharNum>=0);
+    Q_ASSERT(maxCharNum >= 0);
 
-    int start = documentSize-maxCharNum;
-    if(start < 0) start=0;
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
+    int start = documentSize - maxCharNum;
+    if (start < 0)
+        start = 0;
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
     QTime tm;
     tm.start();
-#endif    
-    
-    //Try to find the last page by iteration
-    int step=0;
-    const int maxStep=10;
-    bool reachedTop=(start == 0);
+#endif
 
-    while(step < maxStep) {
+    // Try to find the last page by iteration
+    int step          = 0;
+    const int maxStep = 10;
+    bool reachedTop   = (start == 0);
+
+    while (step < maxStep) {
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
         qDebug() << "  ITERATION STEP:" << step;
         qDebug() << "  start:" << start << "maxCharNum:" << maxCharNum;
 #endif
-        //We get the viewportPosition closest to start
-        p.updateViewportPosition(start,sizeChangeDir,false);
+        // We get the viewportPosition closest to start
+        p.updateViewportPosition(start, sizeChangeDir, false);
 
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
-        qDebug() << "  after updateviewport> start-viewportPos:" << start-p.viewportPosition;
+        qDebug() << "  after updateviewport> start-viewportPos:" << start - p.viewportPosition;
 #endif
-        //adjust the max number of characters
-        if(start > p.viewportPosition)
-            maxCharNum+=(start-p.viewportPosition)+1;
+        // adjust the max number of characters
+        if (start > p.viewportPosition)
+            maxCharNum += (start - p.viewportPosition) + 1;
 
-        //Relayout using the max number of characters
+        // Relayout using the max number of characters
         p.relayoutByPosition(maxCharNum);
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE     
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
         qDebug() << "  vh:" << vh << "fontSize:" << font.pointSize();
         qDebug() << "  viewport size" << textEdit->viewport()->size();
-        qDebug() << "  layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize << "viewportPosition:" << p.viewportPosition << p.contentRect;
+        qDebug() << "  layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize
+                 << "viewportPosition:" << p.viewportPosition << p.contentRect;
         qDebug() << "  bottom:" << p.textLayouts.last()->boundingRect().bottom();
-#endif  
-   
-        //The end of the layout should be the end of the document
-        if(p.layoutEnd == documentSize && p.textLayouts.count() >0) {
-   
-            int top=p.textLayouts.last()->boundingRect().bottom()+4-vh;
-            int pos=documentSize-p.textLayouts.last()->text().size();
-           
-            for(int i=p.textLayouts.count()-2; i >=0; i--) {
-          
-                if(p.textLayouts.at(i)->boundingRect().top() <= top) {
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
+#endif
+
+        // The end of the layout should be the end of the document
+        if (p.layoutEnd == documentSize && p.textLayouts.count() > 0) {
+
+            int top = p.textLayouts.last()->boundingRect().bottom() + 4 - vh;
+            int pos = documentSize - p.textLayouts.last()->text().size();
+
+            for (int i = p.textLayouts.count() - 2; i >= 0; i--) {
+
+                if (p.textLayouts.at(i)->boundingRect().top() <= top) {
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
                     qDebug() << "  find position:" << pos; // << "line:" << p.document->lineNumber(pos);
 #endif
-                    p.updateViewportPosition(pos, Backward,false);
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
-                    qDebug() << "  viewPortPosition:" << p.viewportPosition << "time:" << tm.elapsed(); // << "line:" << p.document->lineNumber(p.viewportPosition);
+                    p.updateViewportPosition(pos, Backward, false);
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+                    qDebug() << "  viewPortPosition:" << p.viewportPosition
+                             << "time:" << tm.elapsed(); // << "line:" << p.document->lineNumber(p.viewportPosition);
 #endif
-                    lastPage.position=p.viewportPosition;
-                    lastPage.widest=p.widest;
+                    lastPage.position = p.viewportPosition;
+                    lastPage.widest   = p.widest;
                     return p.viewportPosition;
                 }
-                pos-=p.textLayouts.at(i)->text().size();
+                pos -= p.textLayouts.at(i)->text().size();
             }
         }
-        //We could not find the last page. We try again from a larger number of characters from the
-        //end of the document
+        // We could not find the last page. We try again from a larger number of characters from the
+        // end of the document
         step++;
-        maxCharNum+=1000;
-        start = documentSize-maxCharNum;
+        maxCharNum += 1000;
+        start = documentSize - maxCharNum;
 
-        if(start < 0 && reachedTop)
+        if (start < 0 && reachedTop)
             break;
 
-        if(start < 0)
-        {
-            reachedTop=true;
-            start=0;
+        if (start < 0) {
+            reachedTop = true;
+            start      = 0;
         }
     }
 
     lastPage.clear();
 
-    //the whole text is in the viewport, no vertical scrollbar is needed
-    if(reachedTop)
+    // the whole text is in the viewport, no vertical scrollbar is needed
+    if (reachedTop)
         return -1;
 
-    //If we are here we the last page position will be the end of the document and there will be
-    //a white space block after the last row in the editor.
-    //TODO: improve it!
+    // If we are here we the last page position will be the end of the document and there will be
+    // a white space block after the last row in the editor.
+    // TODO: improve it!
     return documentSize;
 }
 
-
-void TextEditPrivate::toDocStart()
-{
-     textCursor.movePosition(TextPagerCursor::Start);
+void TextEditPrivate::toDocStart() {
+    textCursor.movePosition(TextPagerCursor::Start);
 }
 
-void TextEditPrivate::toDocEnd()
-{
+void TextEditPrivate::toDocEnd() {
     textCursor.movePosition(TextPagerCursor::End);
 }
 
-void TextEditPrivate::toLineStart()
-{
+void TextEditPrivate::toLineStart() {
     textCursor.movePosition(TextPagerCursor::StartOfLine);
 }
 
-void TextEditPrivate::toLineEnd()
-{
+void TextEditPrivate::toLineEnd() {
     textCursor.movePosition(TextPagerCursor::EndOfLine);
 }
 
-void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
-{
+void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter* h) {
     if (h && h->textEdit() == this) {
         if (d->syntaxHighlighters.size() == 1)
             return;
@@ -1717,44 +1630,39 @@ void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
     }
 }
 
-
-void TextPagerEdit::setEnableSearchHighlighter(bool b)
-{
-    useSearchHighlight_=b;
-    if(useSearchHighlight_) {
-    	setSyntaxHighlighter(searchHighlight_);
-    } else {
-    	//searchHighlight_ can only be deleted when the editor is deleted.
-    	//Because clearSyntaxHighlighters() deletes the highlighters  we need to use
-    	//takeSyntaxHighlighter() instead.
-        if(d->syntaxHighlighters.contains(searchHighlight_)) {
+void TextPagerEdit::setEnableSearchHighlighter(bool b) {
+    useSearchHighlight_ = b;
+    if (useSearchHighlight_) {
+        setSyntaxHighlighter(searchHighlight_);
+    }
+    else {
+        // searchHighlight_ can only be deleted when the editor is deleted.
+        // Because clearSyntaxHighlighters() deletes the highlighters  we need to use
+        // takeSyntaxHighlighter() instead.
+        if (d->syntaxHighlighters.contains(searchHighlight_)) {
             takeSyntaxHighlighter(searchHighlight_);
             d->layoutDirty = true;
             viewport()->update();
-            //clearSyntaxHighlighters();
+            // clearSyntaxHighlighters();
         }
     }
 }
 
-void TextPagerEdit::clearSearchHighlighter()
-{
+void TextPagerEdit::clearSearchHighlighter() {
     searchHighlight_->clear();
 }
 
-void TextPagerEdit::setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode)
-{
-    searchHighlight_->reset(txt,mode,useSearchHighlight_);
+void TextPagerEdit::setSearchHighlighter(QString txt, TextPagerDocument::FindMode mode) {
+    searchHighlight_->reset(txt, mode, useSearchHighlight_);
 }
 
-void TextPagerEdit::setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode)
-{
-    searchHighlight_->reset(rx,mode,useSearchHighlight_);
+void TextPagerEdit::setSearchHighlighter(QRegExp rx, TextPagerDocument::FindMode mode) {
+    searchHighlight_->reset(rx, mode, useSearchHighlight_);
 }
 
-void TextPagerEdit::gotoLine(int lineNum)
-{
-    TextPagerCursor cursor=d->document->findLine(lineNum,textCursor());
-    if(!cursor.isNull())
+void TextPagerEdit::gotoLine(int lineNum) {
+    TextPagerCursor cursor = d->document->findLine(lineNum, textCursor());
+    if (!cursor.isNull())
         setTextCursor(cursor);
 }
 
@@ -1762,182 +1670,160 @@ void TextPagerEdit::gotoLine(int lineNum)
 // Navigation
 //---------------------------------------------
 
-void TextPagerEdit::toDocStart()
-{
+void TextPagerEdit::toDocStart() {
     d->toDocStart();
 }
 
-void TextPagerEdit::toDocEnd()
-{
+void TextPagerEdit::toDocEnd() {
     d->toDocEnd();
 }
 
-void TextPagerEdit::toLineStart()
-{
+void TextPagerEdit::toLineStart() {
     d->toLineStart();
 }
 
-void TextPagerEdit::toLineEnd()
-{
+void TextPagerEdit::toLineEnd() {
     d->toLineEnd();
 }
-
 
 //---------------------------------------------
 // Fontsize management
 //---------------------------------------------
 
-void TextPagerEdit::setFontProperty(VProperty* p)
-{
-	fontProp_=p;
-	fontProp_->addObserver(this);
-	updateFont();
+void TextPagerEdit::setFontProperty(VProperty* p) {
+    fontProp_ = p;
+    fontProp_->addObserver(this);
+    updateFont();
 }
 
-void TextPagerEdit::zoomIn()
-{
-	QFont f=font();
-	int fps=f.pointSize();
-	f.setPointSize(fps+1);
-	setFont(f);
+void TextPagerEdit::zoomIn() {
+    QFont f = font();
+    int fps = f.pointSize();
+    f.setPointSize(fps + 1);
+    setFont(f);
 
-	fontSizeChangedByZoom();
+    fontSizeChangedByZoom();
 }
 
-void TextPagerEdit::zoomOut()
-{
-	int oriSize=font().pointSize();
+void TextPagerEdit::zoomOut() {
+    int oriSize = font().pointSize();
 
-	QFont f=font();
-	int fps=f.pointSize();
-	if(fps > 1)
-	{
-		f.setPointSize(fps-1);
-		setFont(f);
-	}
+    QFont f     = font();
+    int fps     = f.pointSize();
+    if (fps > 1) {
+        f.setPointSize(fps - 1);
+        setFont(f);
+    }
 
-	if(font().pointSize() != oriSize)
-		fontSizeChangedByZoom();
+    if (font().pointSize() != oriSize)
+        fontSizeChangedByZoom();
 }
 
-void TextPagerEdit::fontSizeChangedByZoom()
-{
-	if(fontProp_)
-		fontProp_->setValue(font());
+void TextPagerEdit::fontSizeChangedByZoom() {
+    if (fontProp_)
+        fontProp_->setValue(font());
 }
 
-void TextPagerEdit::updateFont()
-{
-	if(fontProp_)
-	{
-		QFont f=fontProp_->value().value<QFont>();
-		if(font() != f)
-			setFont(f);
-	}
+void TextPagerEdit::updateFont() {
+    if (fontProp_) {
+        QFont f = fontProp_->value().value<QFont>();
+        if (font() != f)
+            setFont(f);
+    }
 }
 
-void TextPagerEdit::notifyChange(VProperty* p)
-{
-	if(fontProp_ ==p)
-	{
-		setFont(p->value().value<QFont>());
-	}
+void TextPagerEdit::notifyChange(VProperty* p) {
+    if (fontProp_ == p) {
+        setFont(p->value().value<QFont>());
+    }
 }
 
-void TextPagerEdit::updateLineNumberArea()
-{
-    if(lineNumArea_ && showLineNum_)
+void TextPagerEdit::updateLineNumberArea() {
+    if (lineNumArea_ && showLineNum_)
         lineNumArea_->update();
 }
 
-void TextPagerEdit::setShowLineNumbers(bool b)
-{
-    showLineNum_=b;
-    if(lineNumArea_)
-    {
+void TextPagerEdit::setShowLineNumbers(bool b) {
+    showLineNum_ = b;
+    if (lineNumArea_) {
         lineNumArea_->setVisible(b);
-        //Initialise the width
+        // Initialise the width
         lineNumArea_->updateWidth();
     }
 }
 
-void TextPagerEdit::setLineNumberArea(TextPagerLineNumberArea *a)
-{
-	lineNumArea_=a;
-	connect(d,SIGNAL(scrollBarChanged()),
-			lineNumArea_,SLOT(update()));
+void TextPagerEdit::setLineNumberArea(TextPagerLineNumberArea* a) {
+    lineNumArea_ = a;
+    connect(d, SIGNAL(scrollBarChanged()), lineNumArea_, SLOT(update()));
 
-    //Initialise the width
+    // Initialise the width
     lineNumArea_->updateWidth();
 }
 
-void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
-{
-    if(!lineNumArea_ || !showLineNum_)
-    	return;
+void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent* e) {
+    if (!lineNumArea_ || !showLineNum_)
+        return;
 
     QPainter painter(lineNumArea_);
     const QRect er = e->rect();
-    //painter.translate(-horizontalScrollBar()->value(), 0);
-    //painter.setFont(font());
+    // painter.translate(-horizontalScrollBar()->value(), 0);
+    // painter.setFont(font());
 
     QVector<QTextLayout::FormatRange> selections;
     selections.reserve(d->extraSelections.size() + 1);
     int textLayoutOffset = d->viewportPosition;
 
-    QRect numRect=er;
+    QRect numRect        = er;
 
-    //Background and border
+    // Background and border
     painter.fillRect(numRect, lineNumArea_->bgColour());
     painter.setPen(QPen(lineNumArea_->separatorColour()));
-    painter.drawLine(lineNumArea_->width()-1,er.y(),lineNumArea_->width()-1,er.bottom());
+    painter.drawLine(lineNumArea_->width() - 1, er.y(), lineNumArea_->width() - 1, er.bottom());
 
-    int numWidth=lineNumArea_->width()-lineNumArea_->rightMargin();
+    int numWidth = lineNumArea_->width() - lineNumArea_->rightMargin();
 
     QFont fontNormal(font());   // the font to use for most line numbers
-    QFont fontBold(fontNormal);  // the font to use for the current line number
+    QFont fontBold(fontNormal); // the font to use for the current line number
     fontBold.setBold(true);
     painter.setPen(lineNumArea_->fontColour());
     painter.setFont(fontNormal);
 
-    int cursorPos=d->textCursor.position();
-    bool last = d->document->documentSize() == d->textCursor.position();
+    int cursorPos = d->textCursor.position();
+    bool last     = d->document->documentSize() == d->textCursor.position();
 
-    //const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : 0;
-    //int extraSelectionIndex = 0;
+    // const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : 0;
+    // int extraSelectionIndex = 0;
     QTextLayout::FormatRange selectionRange;
     selectionRange.start = -1;
-    int maxLineNum=-1;
-    Q_FOREACH(QTextLayout *l, d->textLayouts) {
+    int maxLineNum       = -1;
+    Q_FOREACH (QTextLayout* l, d->textLayouts) {
         const int textSize = l->text().size();
-        const QRect r = l->boundingRect().toRect();
+        const QRect r      = l->boundingRect().toRect();
         if (r.intersects(er)) {
 
-        	const int lineNum=lineNumber(textLayoutOffset)+1;
-            maxLineNum=lineNum;
-            QRect lRect(0,r.y(),numWidth,r.height());
+            const int lineNum = lineNumber(textLayoutOffset) + 1;
+            maxLineNum        = lineNum;
+            QRect lRect(0, r.y(), numWidth, r.height());
 
-        	// is this the current line?
-            if(cursorPos >= textLayoutOffset &&
-               (cursorPos <= textLayoutOffset+textSize || (last && textLayoutOffset+textSize+1 == cursorPos)))
-        	{
-        		painter.setFont(fontBold);
-                painter.fillRect(lRect, lineNumArea_->currentColour());  // highlight the background
-        	    painter.drawText(lRect,QString::number(lineNum),Qt::AlignRight|Qt::AlignVCenter);
-        	    painter.setFont(fontNormal);
-        	}
-        	else
-        	{        		
-        		painter.drawText(lRect,QString::number(lineNum),Qt::AlignRight|Qt::AlignVCenter);
-        	}
-
-        } else if (r.top() > er.bottom()) {
+            // is this the current line?
+            if (cursorPos >= textLayoutOffset &&
+                (cursorPos <= textLayoutOffset + textSize || (last && textLayoutOffset + textSize + 1 == cursorPos))) {
+                painter.setFont(fontBold);
+                painter.fillRect(lRect, lineNumArea_->currentColour()); // highlight the background
+                painter.drawText(lRect, QString::number(lineNum), Qt::AlignRight | Qt::AlignVCenter);
+                painter.setFont(fontNormal);
+            }
+            else {
+                painter.drawText(lRect, QString::number(lineNum), Qt::AlignRight | Qt::AlignVCenter);
+            }
+        }
+        else if (r.top() > er.bottom()) {
             break;
         }
         textLayoutOffset += textSize + 1;
     }
 
-    if(maxLineNum != -1)
+    if (maxLineNum != -1)
         lineNumArea_->updateWidth(maxLineNum);
 }
 
@@ -1947,56 +1833,52 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
 //
 //==========================================================================
 
-TextPagerLineNumberArea::TextPagerLineNumberArea(TextPagerEdit *editor) :
-    QWidget(editor), textEditor_ (editor), digits_(6), rightMargin_(3),
-    bgCol_(232,231,230), fontCol_(220,220,200), separatorCol_(220,220,200),
-    currentCol_(212,212,255)
-{
+TextPagerLineNumberArea::TextPagerLineNumberArea(TextPagerEdit* editor)
+    : QWidget(editor),
+      textEditor_(editor),
+      digits_(6),
+      rightMargin_(3),
+      bgCol_(232, 231, 230),
+      fontCol_(220, 220, 200),
+      separatorCol_(220, 220, 200),
+      currentCol_(212, 212, 255) {
     Q_ASSERT(textEditor_);
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaBackground"))
-        bgCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaBackground"))
+        bgCol_ = p->value().value<QColor>();
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaFontColour"))
-        fontCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaFontColour"))
+        fontCol_ = p->value().value<QColor>();
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaSeparator"))
-        separatorCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaSeparator"))
+        separatorCol_ = p->value().value<QColor>();
 
-    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaCurrent"))
-        currentCol_=p->value().value<QColor>();
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaCurrent"))
+        currentCol_ = p->value().value<QColor>();
 
     editor->setLineNumberArea(this);
 }
 
-void TextPagerLineNumberArea::updateWidth(int maxLineNum)
-{
-    if(maxLineNum == -1 || pow(10,digits_)-1 < maxLineNum)
-    {
+void TextPagerLineNumberArea::updateWidth(int maxLineNum) {
+    if (maxLineNum == -1 || pow(10, digits_) - 1 < maxLineNum) {
         setFixedWidth(computeWidth(maxLineNum));
     }
 }
 
-int TextPagerLineNumberArea::computeWidth(int maxLineNum) const
-{
-    if(maxLineNum > 0)
-    {
-        int maxDigits=1;
-        int mx = maxLineNum;
-        while ( mx >= 10)
-        {
-           mx /= 10;
-           ++maxDigits;
+int TextPagerLineNumberArea::computeWidth(int maxLineNum) const {
+    if (maxLineNum > 0) {
+        int maxDigits = 1;
+        int mx        = maxLineNum;
+        while (mx >= 10) {
+            mx /= 10;
+            ++maxDigits;
         }
 
-        if(maxDigits > digits_)
-            digits_=maxDigits;
+        if (maxDigits > digits_)
+            digits_ = maxDigits;
     }
 
-    return  (textEditor_)?(3 + ViewerUtil::textWidth(textEditor_->fontMetrics(),QLatin1Char('9')) * digits_ + rightMargin_):3+rightMargin_;
-
+    return (textEditor_)
+               ? (3 + ViewerUtil::textWidth(textEditor_->fontMetrics(), QLatin1Char('9')) * digits_ + rightMargin_)
+               : 3 + rightMargin_;
 }
-
-
-
-

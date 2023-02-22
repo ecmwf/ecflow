@@ -17,11 +17,10 @@
 class QTimer;
 class PropertyMapper;
 
-class ClockWidget : public QLabel, public VPropertyObserver
-{
+class ClockWidget : public QLabel, public VPropertyObserver {
     Q_OBJECT
 public:
-    ClockWidget(QWidget* parent=nullptr);
+    ClockWidget(QWidget* parent = nullptr);
     ~ClockWidget() override;
 
     void notifyChange(VProperty*) override;
@@ -37,7 +36,6 @@ protected:
     QTimer* timer_;
     bool showSec_{false};
     const int timeoutInMs_{1000};
-
 };
 
 #endif // CLOCKWIDGET_HPP

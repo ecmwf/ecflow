@@ -11,29 +11,27 @@
 #ifndef TRIGGERVIEWDELEGATE_HPP
 #define TRIGGERVIEWDELEGATE_HPP
 
+#include <string>
+
 #include <QBrush>
 #include <QMap>
 #include <QPen>
-#include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
+#include <QStyledItemDelegate>
 
 #include "TreeNodeViewDelegate.hpp"
 #include "VProperty.hpp"
 
-#include <string>
-
-class TriggerViewDelegate : public TreeNodeViewDelegate
-{
+class TriggerViewDelegate : public TreeNodeViewDelegate {
 public:
-    explicit TriggerViewDelegate(QWidget *parent=nullptr);
+    explicit TriggerViewDelegate(QWidget* parent = nullptr);
 
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-    void setRenderSeparatorLine(bool v) {renderSeparatorLine_ = v;}
+    void setRenderSeparatorLine(bool v) { renderSeparatorLine_ = v; }
 
 protected:
-    bool renderSeparatorLine_ {false};
+    bool renderSeparatorLine_{false};
     QPen borderPen_;
 };
 

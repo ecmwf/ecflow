@@ -62,7 +62,9 @@ set_target_properties(ecflow3 PROPERTIES
                              PREFIX ""
                              INSTALL_RPATH ""
                      )
-                     
+
+target_clangformat(ecflow3)
+
 # =====================================================================
 # tests 
 

@@ -4,14 +4,14 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #4 $ 
+// Revision    : $Revision: #4 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 //    The tasks send by the ECF will have GENERATED PASSWORD that is not
@@ -32,14 +32,13 @@
 
 class Passwd {
 public:
-
-	/// generate a random password
-	static std::string generate();
+    /// generate a random password
+    static std::string generate();
 
 private:
-	Passwd() = delete;
-	Passwd(const Passwd&) = delete;
-	const Passwd& operator=(const Passwd&) = delete;
+    Passwd()                               = delete;
+    Passwd(const Passwd&)                  = delete;
+    const Passwd& operator=(const Passwd&) = delete;
 };
 
 #endif

@@ -16,19 +16,16 @@
 
 class AbstractTextSearchInterface;
 
-class PlainTextSearchLine : public TextEditSearchLine
-{
+class PlainTextSearchLine : public TextEditSearchLine {
 public:
-	explicit PlainTextSearchLine(QWidget *parent=nullptr);
-	~PlainTextSearchLine() override;
-	void setEditor(QPlainTextEdit*);
+    explicit PlainTextSearchLine(QWidget* parent = nullptr);
+    ~PlainTextSearchLine() override;
+    void setEditor(QPlainTextEdit*);
 
 private:
-	//The interface is set internally
+    // The interface is set internally
     void setSearchInterface(AbstractTextSearchInterface*) {}
-
 };
-
 
 #if 0
 class PlainTextSearchLine : public AbstractSearchLine
@@ -64,6 +61,5 @@ protected:
 	QColor highlightColour_;
 };
 #endif
-
 
 #endif

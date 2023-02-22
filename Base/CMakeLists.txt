@@ -4,6 +4,23 @@
  #    find src -name \*.cpp >> CMakeLists.txt
  # =======================================================
  list( APPEND srcs
+ # HEADERS
+ src/AbstractClientEnv.hpp
+ src/AbstractServer.hpp
+ src/Client.hpp
+ src/ClientToServerRequest.hpp
+ src/Cmd.hpp
+ src/Connection.hpp
+ src/Gnuplot.hpp
+ src/Openssl.hpp
+ src/ServerReply.hpp
+ src/ServerToClientResponse.hpp
+ src/ssl_connection.hpp
+ src/SslClient.hpp
+ src/Stats.hpp
+ src/WhyCmd.hpp
+ src/ZombieCtrl.hpp
+ # SOURCES
  src/ZombieCtrl.cpp
  src/Stats.cpp
  src/Client.cpp
@@ -91,8 +108,12 @@ target_include_directories(base PUBLIC src
                               ../Base/src/cts
                               ../Base/src/stc )
 
+target_clangformat(base)
+
 
 list( APPEND test_srcs
+   test/MockServer.hpp
+   test/TestHelper.hpp
    test/TestAlterCmd.cpp
    test/TestArchiveAndRestoreCmd.cpp
    test/TestClientHandleCmd.cpp
@@ -127,13 +148,14 @@ ecbuild_add_test( TARGET       u_base
                   TEST_DEPENDS u_aparser
                   )
 
-                  
-if (ENABLE_ALL_TESTS)
+target_clangformat(u_base)
+
+ if (ENABLE_ALL_TESTS)
    ecbuild_add_test( TARGET       perf_job_gen 
                      SOURCES      test/TestJobGenPerf.cpp
                      LIBS         base nodeattr node core pthread                                    
                      INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   )
-endif()
-                  
+   target_clangformat(perf_job_gen)
+ endif()

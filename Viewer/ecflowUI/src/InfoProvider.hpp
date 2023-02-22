@@ -11,52 +11,51 @@
 #define INFOPROVIDER_HPP_
 
 #include "FlagSet.hpp"
-#include "VInfo.hpp"
 #include "InfoPresenter.hpp"
+#include "VInfo.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
 class InfoPanelItem;
 
-class InfoProvider : public VTaskObserver, public VInfoVisitor
-{
+class InfoProvider : public VTaskObserver, public VInfoVisitor {
 public:
-	InfoProvider(InfoPresenter* owner,VTask::Type);
-	~InfoProvider() override;
-    InfoProvider(const InfoProvider&) = delete;
+    InfoProvider(InfoPresenter* owner, VTask::Type);
+    ~InfoProvider() override;
+    InfoProvider(const InfoProvider&)            = delete;
     InfoProvider& operator=(const InfoProvider&) = delete;
 
-	void info(VInfo_ptr);
-	void command(VTask::Type);
-	virtual void clear();
+    void info(VInfo_ptr);
+    void command(VTask::Type);
+    virtual void clear();
 
     void setActive(bool);
     virtual void setAutoUpdate(bool);
-    bool autoUpdate() const {return autoUpdate_;}
-	bool inAutoUpdate() const {return inAutoUpdate_;}
+    bool autoUpdate() const { return autoUpdate_; }
+    bool inAutoUpdate() const { return inAutoUpdate_; }
 
-	//From VInfoVisitor
-	void visit(VInfoServer*) override;
-	void visit(VInfoNode*) override;
+    // From VInfoVisitor
+    void visit(VInfoServer*) override;
+    void visit(VInfoNode*) override;
     void visit(VInfoAttribute*) override {}
 
-	//From VTaskObserver
-	void taskChanged(VTask_ptr) override;
+    // From VTaskObserver
+    void taskChanged(VTask_ptr) override;
 
 protected:
-    virtual void handleFileNotDefined(VReply *reply);
-	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
+    virtual void handleFileNotDefined(VReply* reply);
+    virtual bool handleFileMissing(const std::string& fileName, VReply* reply);
     virtual void optionsChanged() {}
 
     InfoPresenter* owner_{nullptr};
-	VInfo_ptr info_;
-	VTask_ptr task_;
+    VInfo_ptr info_;
+    VTask_ptr task_;
     VReply* reply_{nullptr};
-	VTask::Type taskType_;
+    VTask::Type taskType_;
     std::string fileVarName_;
     std::string fileSuffix_;
-	std::string fileNotDefinedText_;
-	std::string fileMissingText_;
+    std::string fileNotDefinedText_;
+    std::string fileMissingText_;
     bool active_{false};
     bool autoUpdate_{false};
     bool inAutoUpdate_{false};
@@ -65,71 +64,63 @@ private:
     void clearInternal();
 };
 
-class JobProvider : public InfoProvider
-{
+class JobProvider : public InfoProvider {
 public:
-	 explicit JobProvider(InfoPresenter* owner);
+    explicit JobProvider(InfoPresenter* owner);
+
 protected:
-	 bool handleFileMissing(const std::string& fileName,VReply *reply) override;
+    bool handleFileMissing(const std::string& fileName, VReply* reply) override;
 };
 
-class JobStatusFileProvider : public InfoProvider
-{
+class JobStatusFileProvider : public InfoProvider {
 public:
-     explicit JobStatusFileProvider(InfoPresenter* owner);
+    explicit JobStatusFileProvider(InfoPresenter* owner);
+
 protected:
-     bool handleFileMissing(const std::string& fileName,VReply *reply) override;
+    bool handleFileMissing(const std::string& fileName, VReply* reply) override;
 };
 
-class JobStatusProvider : public InfoProvider
-{
+class JobStatusProvider : public InfoProvider {
 public:
-     explicit JobStatusProvider(InfoPresenter* owner);
+    explicit JobStatusProvider(InfoPresenter* owner);
 };
 
-
-class ManualProvider : public InfoProvider
-{
+class ManualProvider : public InfoProvider {
 public:
-	 explicit ManualProvider(InfoPresenter* owner);
+    explicit ManualProvider(InfoPresenter* owner);
 };
 
-class MessageProvider : public InfoProvider
-{
+class MessageProvider : public InfoProvider {
 public:
-	 explicit MessageProvider(InfoPresenter* owner);
+    explicit MessageProvider(InfoPresenter* owner);
 };
 
-class ScriptProvider : public InfoProvider
-{
+class ScriptProvider : public InfoProvider {
 public:
-	 explicit ScriptProvider(InfoPresenter* owner);
+    explicit ScriptProvider(InfoPresenter* owner);
+
 protected:
-     void visit(VInfoNode* info) override;
+    void visit(VInfoNode* info) override;
 };
 
-class HistoryProvider : public InfoProvider
-{
+class HistoryProvider : public InfoProvider {
 public:
-	 explicit HistoryProvider(InfoPresenter* owner);
+    explicit HistoryProvider(InfoPresenter* owner);
 };
 
-class SuiteProvider : public InfoProvider
-{
+class SuiteProvider : public InfoProvider {
 public:
-	 explicit SuiteProvider(InfoPresenter* owner);
+    explicit SuiteProvider(InfoPresenter* owner);
 };
 
-class ZombieProvider : public InfoProvider
-{
+class ZombieProvider : public InfoProvider {
 public:
-	 explicit ZombieProvider(InfoPresenter* owner);
+    explicit ZombieProvider(InfoPresenter* owner);
 };
 
-class WhyProvider : public InfoProvider
-{
+class WhyProvider : public InfoProvider {
 public:
-     explicit WhyProvider(InfoPresenter* owner);
+    explicit WhyProvider(InfoPresenter* owner);
 };
 
 #endif

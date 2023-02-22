@@ -15,33 +15,31 @@
 #ifndef TEXTPAGERLAYOUT_P_HPP_
 #define TEXTPAGERLAYOUT_P_HPP_
 
-#include <QList>
-#include <QTextLayout>
-#include <QRect>
-#include <QString>
-#include <QSize>
-#include <QTextLine>
 #include <QKeyEvent>
+#include <QList>
+#include <QRect>
+#include <QSize>
+#include <QString>
+#include <QTextLayout>
+#include <QTextLine>
 #ifndef QT_NO_DEBUG_STREAM
-#include <QDebug>
+    #include <QDebug>
 #endif
 #include "TextPagerDocument.hpp"
 #include "TextPagerEdit.hpp"
-#include "syntaxhighlighter.hpp"
 #include "WeakPointer.hpp"
+#include "syntaxhighlighter.hpp"
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug &operator<<(QDebug &str, const QTextLine &line);
+QDebug& operator<<(QDebug& str, const QTextLine& line);
 #endif
 
-class TextDocumentBuffer
-{
+class TextDocumentBuffer {
 public:
-    TextDocumentBuffer(TextPagerDocument *doc) : document(doc), bufferPosition(0) {}
+    TextDocumentBuffer(TextPagerDocument* doc) : document(doc), bufferPosition(0) {}
     virtual ~TextDocumentBuffer() = default;
 
-    inline QString bufferRead(int from, int size) const
-    {
+    inline QString bufferRead(int from, int size) const {
         Q_ASSERT(document);
         if (from < bufferPosition || from + size > bufferPosition + buffer.size()) {
             return document->read(from, size);
@@ -53,69 +51,64 @@ public:
         Q_ASSERT(document);
         if (index >= bufferPosition && index < bufferPosition + buffer.size()) {
             return buffer.at(index - bufferPosition);
-        } else {
+        }
+        else {
             Q_ASSERT(index >= 0 && index < document->documentSize()); // what if index == documentSize?
             return document->readCharacter(index);
         }
     }
 
-    TextPagerDocument *document;
+    TextPagerDocument* document;
     int bufferPosition;
     QString buffer;
 };
 
 class TextPagerEdit;
-class TextPagerLayout : public TextDocumentBuffer
-{
+class TextPagerLayout : public TextDocumentBuffer {
 public:
     enum { MinimumBufferSize = 90000, LeftMargin = 3 };
-    TextPagerLayout(TextPagerDocument *doc = nullptr)
-        : TextDocumentBuffer(doc)
-    {
-    }
+    TextPagerLayout(TextPagerDocument* doc = nullptr) : TextDocumentBuffer(doc) {}
 
-    ~TextPagerLayout() override
-    {
+    ~TextPagerLayout() override {
         qDeleteAll(textLayouts);
         qDeleteAll(unusedTextLayouts);
     }
 
-    TextPagerEdit *textEdit{nullptr};
+    TextPagerEdit* textEdit{nullptr};
     QList<SyntaxHighlighter*> syntaxHighlighters;
-    int viewportPosition{0}, layoutEnd{-1}, viewport{-1}, visibleLines{-1},
-        lastVisibleCharacter{-1}, lastBottomMargin{0}, widest{-1}, maxViewportPosition{0};
+    int viewportPosition{0}, layoutEnd{-1}, viewport{-1}, visibleLines{-1}, lastVisibleCharacter{-1},
+        lastBottomMargin{0}, widest{-1}, maxViewportPosition{0};
     bool layoutDirty{true}, sectionsDirty{true}, lineBreaking{false}, suppressTextEditUpdates{false};
     QList<QTextLayout*> textLayouts, unusedTextLayouts;
     QHash<QTextLayout*, QTextBlockFormat> blockFormats;
     QList<TextPagerEdit::ExtraSelection> extraSelections;
-    QList<QPair<int, QTextLine> > lines; // int is start position of line in document coordinates
-    QRect contentRect; // contentRect means the laid out area, not just the area currently visible
-    QList<TextPagerSection*> sections; // these are all the sections in the buffer. Some might be before the current viewport
+    QList<QPair<int, QTextLine>> lines; // int is start position of line in document coordinates
+    QRect contentRect;                  // contentRect means the laid out area, not just the area currently visible
+    QList<TextPagerSection*>
+        sections; // these are all the sections in the buffer. Some might be before the current viewport
     QFont font;
 
-    QList<TextPagerSection*> relayoutCommon(); // should maybe be smarter about MinimumScreenSize. Detect it based on font and viewport size
+    QList<TextPagerSection*>
+    relayoutCommon(); // should maybe be smarter about MinimumScreenSize. Detect it based on font and viewport size
     void relayoutByPosition(int size);
     void relayoutByGeometry(int height);
     virtual void relayout();
 
     int viewportWidth() const;
 
-    int doLayout(int index, QList<TextPagerSection*> *sections);
+    int doLayout(int index, QList<TextPagerSection*>* sections);
 
-    QTextLine lineForPosition(int pos, int *offsetInLine = nullptr,
-                              int *lineIndex = nullptr, bool *lastLine = nullptr) const;
-    QTextLayout *layoutForPosition(int pos, int *offset = nullptr, int *index = nullptr) const;
+    QTextLine
+    lineForPosition(int pos, int* offsetInLine = nullptr, int* lineIndex = nullptr, bool* lastLine = nullptr) const;
+    QTextLayout* layoutForPosition(int pos, int* offset = nullptr, int* index = nullptr) const;
 
-    int textPositionAt(const QPoint &pos) const;
+    int textPositionAt(const QPoint& pos) const;
     inline int bufferOffset() const { return viewportPosition - bufferPosition; }
 
     QString dump() const;
 
-    enum Direction {
-        Forward = 0,
-        Backward = TextPagerDocument::FindBackward
-    };
-    void updateViewportPosition(int pos, Direction direction,bool applyIt=true);
+    enum Direction { Forward = 0, Backward = TextPagerDocument::FindBackward };
+    void updateViewportPosition(int pos, Direction direction, bool applyIt = true);
 };
 
 #endif

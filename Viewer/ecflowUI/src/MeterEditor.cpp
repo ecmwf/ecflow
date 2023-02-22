@@ -15,38 +15,36 @@
 
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
+#include "SessionHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
-#include "SessionHandler.hpp"
 
-MeterEditorWidget::MeterEditorWidget(QWidget* parent) : QWidget(parent)
-{
+MeterEditorWidget::MeterEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
 }
 
-MeterEditor::MeterEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"meter",parent), oriVal_(0)
-{
-    w_=new MeterEditorWidget(this);
+MeterEditor::MeterEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "meter", parent), oriVal_(0) {
+    w_ = new MeterEditorWidget(this);
     addForm(w_);
 
-    VAttribute* a=info_->attribute();
+    VAttribute* a = info_->attribute();
 
     Q_ASSERT(a);
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "meter");
 
-    if(a->data().count() < 5)
+    if (a->data().count() < 5)
         return;
 
-    oriVal_=a->data().at(2).toInt();
-    int min=a->data().at(3).toInt();
-    int max=a->data().at(4).toInt();
+    oriVal_ = a->data().at(2).toInt();
+    int min = a->data().at(3).toInt();
+    int max = a->data().at(4).toInt();
 
-    if(min > max || oriVal_ < min || oriVal_ > max)
+    if (min > max || oriVal_ < min || oriVal_ > max)
         return;
 
     w_->nameLabel_->setText(a->data().at(1));
-    w_->valueSpin_->setRange(min,max);
+    w_->valueSpin_->setRange(min, max);
     w_->valueSpin_->setValue(oriVal_);
 
     w_->minLabel_->setText(a->data().at(3));
@@ -55,81 +53,68 @@ MeterEditor::MeterEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,
 
     w_->valueSpin_->setFocus();
 
-    header_->setInfo(QString::fromStdString(info_->path()),"Meter");
+    header_->setInfo(QString::fromStdString(info_->path()), "Meter");
 
-    connect(w_->valueSpin_,SIGNAL(valueChanged(int)),
-            this,SLOT(slotValueChanged(int)));
+    connect(w_->valueSpin_, SIGNAL(valueChanged(int)), this, SLOT(slotValueChanged(int)));
 
     checkButtonStatus();
 
     readSettings();
 }
 
-MeterEditor::~MeterEditor()
-{
+MeterEditor::~MeterEditor() {
     writeSettings();
 }
 
-void MeterEditor::apply()
-{
-    std::string val=QString::number(w_->valueSpin_->value()).toStdString();
-    std::string name=w_->nameLabel_->text().toStdString();
+void MeterEditor::apply() {
+    std::string val  = QString::number(w_->valueSpin_->value()).toStdString();
+    std::string name = w_->nameLabel_->text().toStdString();
 
     std::vector<std::string> cmd;
-    VAttribute::buildAlterCommand(cmd,"change","meter",name,val);
-    CommandHandler::run(info_,cmd);
+    VAttribute::buildAlterCommand(cmd, "change", "meter", name, val);
+    CommandHandler::run(info_, cmd);
 }
 
-void MeterEditor::resetValue()
-{
+void MeterEditor::resetValue() {
     w_->valueSpin_->setValue(oriVal_);
     checkButtonStatus();
 }
 
-void MeterEditor::slotValueChanged(int)
-{
+void MeterEditor::slotValueChanged(int) {
     checkButtonStatus();
 }
 
-bool MeterEditor::isValueChanged()
-{
+bool MeterEditor::isValueChanged() {
     return (oriVal_ != w_->valueSpin_->value());
 }
 
-void MeterEditor::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void MeterEditor::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("MeterEditor")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("MeterEditor")), QSettings::NativeFormat);
 
-    //We have to clear it so that should not remember all the previous values
+    // We have to clear it so that should not remember all the previous values
     settings.clear();
 
     settings.beginGroup("main");
-    settings.setValue("size",size());
+    settings.setValue("size", size());
     settings.endGroup();
 }
 
-void MeterEditor::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void MeterEditor::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("MeterEditor")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("MeterEditor")), QSettings::NativeFormat);
 
     settings.beginGroup("main");
-    if(settings.contains("size"))
-    {
+    if (settings.contains("size")) {
         resize(settings.value("size").toSize());
     }
-    else
-    {
-        resize(QSize(310,200));
+    else {
+        resize(QSize(310, 200));
     }
 
     settings.endGroup();
 }
 
 static AttributeEditorMaker<MeterEditor> makerStr("meter");
-

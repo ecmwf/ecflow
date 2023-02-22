@@ -12,21 +12,21 @@
 
 #include <string>
 #include <vector>
+
 #include "Aspect.hpp"
 
 class ServerHandler;
 class VServerChange;
 
-class ServerObserver
-{
+class ServerObserver {
 public:
-    ServerObserver() = default;
-    virtual ~ServerObserver() = default;
-	virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)=0;
-	virtual void notifyServerDelete(ServerHandler* server)=0;
+    ServerObserver()                                                                               = default;
+    virtual ~ServerObserver()                                                                      = default;
+    virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) = 0;
+    virtual void notifyServerDelete(ServerHandler* server)                                         = 0;
     virtual void notifyBeginServerClear(ServerHandler*) {}
     virtual void notifyEndServerClear(ServerHandler*) {}
-    virtual void notifyBeginServerScan(ServerHandler*,const VServerChange&) {}
+    virtual void notifyBeginServerScan(ServerHandler*, const VServerChange&) {}
     virtual void notifyEndServerScan(ServerHandler*) {}
     virtual void notifyServerConnectState(ServerHandler*) {}
     virtual void notifyServerActivityChanged(ServerHandler*) {}
@@ -34,6 +34,5 @@ public:
     virtual void notifyEndServerSync(ServerHandler*) {}
     virtual void notifyServerRenamed(ServerHandler*, const std::string& /*oldName*/) {}
 };
-
 
 #endif

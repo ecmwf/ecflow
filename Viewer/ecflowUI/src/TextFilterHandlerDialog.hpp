@@ -17,12 +17,11 @@
 
 class TextFilterItem;
 
-class TextFilterAddDialog : public QDialog, private Ui::TextFilterAddDialog
-{
-Q_OBJECT
+class TextFilterAddDialog : public QDialog, private Ui::TextFilterAddDialog {
+    Q_OBJECT
 
 public:
-    explicit TextFilterAddDialog(QWidget* parent=nullptr);
+    explicit TextFilterAddDialog(QWidget* parent = nullptr);
     void init(const TextFilterItem& item);
 
 public Q_SLOTS:
@@ -32,13 +31,12 @@ protected:
     TextFilterItem item();
 };
 
-class TextFilterEditDialog : public TextFilterAddDialog
-{
-Q_OBJECT
+class TextFilterEditDialog : public TextFilterAddDialog {
+    Q_OBJECT
 
 public:
-    explicit TextFilterEditDialog(QWidget* parent=nullptr);
-    void init(int itemIndex,const TextFilterItem& item);
+    explicit TextFilterEditDialog(QWidget* parent = nullptr);
+    void init(int itemIndex, const TextFilterItem& item);
 
 public Q_SLOTS:
     void accept() override;
@@ -47,16 +45,15 @@ protected:
     int itemIndex_{-1};
 };
 
-class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDialog
-{
+class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDialog {
     Q_OBJECT
 
 public:
-    explicit TextFilterHandlerDialog(QWidget *parent = nullptr);
+    explicit TextFilterHandlerDialog(QWidget* parent = nullptr);
     ~TextFilterHandlerDialog() override;
 
-    void setItemToSaveAs(QString name,QString filter,bool matched,bool caseSensitive);
-    int applyIndex() const {return applyIndex_;}
+    void setItemToSaveAs(QString name, QString filter, bool matched, bool caseSensitive);
+    int applyIndex() const { return applyIndex_; }
 
 protected Q_SLOTS:
     void on_actionAdd__triggered();
@@ -79,4 +76,3 @@ private:
 };
 
 #endif // TEXTFILTERHANDLERDIALOG_HPP
-

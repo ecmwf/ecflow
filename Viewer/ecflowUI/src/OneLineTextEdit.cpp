@@ -10,58 +10,53 @@
 
 #include "OneLineTextEdit.hpp"
 
-#include "Highlighter.hpp"
-
 #include <QApplication>
 #include <QDebug>
 #include <QStyle>
-//#include <QStyleOptionFrameV3>
 
-OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QTextEdit(parent)
-{
-	setReadOnly(true);
-	setWordWrapMode(QTextOption::NoWrap);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+#include "Highlighter.hpp"
+// #include <QStyleOptionFrameV3>
 
-	document()->setDocumentMargin(2);
+OneLineTextEdit::OneLineTextEdit(QWidget* parent) : QTextEdit(parent) {
+    setReadOnly(true);
+    setWordWrapMode(QTextOption::NoWrap);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-	QFont f;
-	QFontMetrics fm(f);
+    document()->setDocumentMargin(2);
 
-	int h=fm.height()+fm.leading() + 1 +6;
+    QFont f;
+    QFontMetrics fm(f);
 
-	setFixedHeight(h);
+    int h = fm.height() + fm.leading() + 1 + 6;
 
-    //The document becomes the owner of the highlighter
-    new Highlighter(document(),"query");
+    setFixedHeight(h);
+
+    // The document becomes the owner of the highlighter
+    new Highlighter(document(), "query");
 }
 
-QSize OneLineTextEdit::sizeHint() const
-{
+QSize OneLineTextEdit::sizeHint() const {
     return QTextEdit::sizeHint();
-	/*
-	QFontMetrics fm(font());
-    QStyleOptionFrameV3 opt;
-    QString text = document()->toHtml();
+    /*
+    QFontMetrics fm(font());
+QStyleOptionFrameV3 opt;
+QString text = document()->toHtml();
 
-    int h = qMax(fm.height(), 14) + 4;
-    int w = fm.width(text) + 4;
+int h = qMax(fm.height(), 14) + 4;
+int w = fm.width(text) + 4;
 
-    opt.initFrom(this);
+opt.initFrom(this);
 
-    return style()->sizeFromContents(
-        QStyle::CT_LineEdit,
-        &opt,
-        QSize(w, h).expandedTo(QApplication::globalStrut()),
-        this
-    );*/
+return style()->sizeFromContents(
+    QStyle::CT_LineEdit,
+    &opt,
+    QSize(w, h).expandedTo(QApplication::globalStrut()),
+    this
+);*/
 }
 
-void OneLineTextEdit::mousePressEvent(QMouseEvent *e)
-{
-	Q_EMIT clicked();
+void OneLineTextEdit::mousePressEvent(QMouseEvent* e) {
+    Q_EMIT clicked();
 }
-
-

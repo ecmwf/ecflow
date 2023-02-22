@@ -11,40 +11,39 @@
 #ifndef VAUTORESTOREATTR_HPP
 #define VAUTORESTOREATTR_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-#include "AutoRestoreAttr.hpp"
-
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
+
+#include "AutoRestoreAttr.hpp"
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class VAutoRestoreAttrType : public VAttributeType
-{
+class VAutoRestoreAttrType : public VAttributeType {
 public:
     explicit VAutoRestoreAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(ecf::AutoRestoreAttr*,QStringList&) const;
+    void encode(ecf::AutoRestoreAttr*, QStringList&) const;
 
 private:
-    enum DataIndex {TypeIndex=0,ValueIndex=1};
+    enum DataIndex { TypeIndex = 0, ValueIndex = 1 };
 };
 
-class VAutoRestoreAttr : public VAttribute
-{
+class VAutoRestoreAttr : public VAttribute {
 
 public:
-    VAutoRestoreAttr(VNode *parent);
+    VAutoRestoreAttr(VNode* parent);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif // VAUTORESTOREATTR_HPP

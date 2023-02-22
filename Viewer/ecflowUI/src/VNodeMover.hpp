@@ -13,8 +13,7 @@
 
 #include "VInfo.hpp"
 
-class VNodeMover
-{
+class VNodeMover {
 public:
     static bool hasMarkedForMove();
     static void markNodeForMove(VInfo_ptr markedNode);

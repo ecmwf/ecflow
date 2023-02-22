@@ -14,7 +14,6 @@
 #include <QTreeView>
 
 #include "NodeViewBase.hpp"
-
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
@@ -28,12 +27,11 @@ class TreeNodeModel;
 class StandardNodeViewDelegategate;
 class VTreeNode;
 
-class TreeNodeView : public QObject, public NodeViewBase, public VPropertyObserver
-{
-Q_OBJECT
+class TreeNodeView : public QObject, public NodeViewBase, public VPropertyObserver {
+    Q_OBJECT
 
 public:
-    TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
+    TreeNodeView(AbstractNodeView* view, TreeNodeModel* model, NodeFilterDef* filterDef, QWidget* parent = nullptr);
     ~TreeNodeView() override;
 
     void reload() override;
@@ -50,9 +48,9 @@ public:
     void writeSettings(VSettings*) override {}
 
 public Q_SLOTS:
-    void slotContextMenu(const QPoint &position);
+    void slotContextMenu(const QPoint& position);
     void slotCommandShortcut();
-    void slotViewCommand(VInfo_ptr,QString);
+    void slotViewCommand(VInfo_ptr, QString);
 #if 0
     void slotSaveExpand();
     void slotRestoreExpand();
@@ -65,19 +63,23 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
     void slotDoubleClickItem(const QModelIndex&);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
-    void infoPanelCommand(VInfo_ptr,QString);
-    void dashboardCommand(VInfo_ptr,QString);
+    void infoPanelCommand(VInfo_ptr, QString);
+    void dashboardCommand(VInfo_ptr, QString);
 
 protected:
     QModelIndexList selectedList();
-    void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+    void handleContextMenu(QModelIndex indexClicked,
+                           QModelIndexList indexLst,
+                           QPoint globalPos,
+                           QPoint widgetPos,
+                           QWidget* widget);
 
-    void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
-    void restoreExpand(ExpandNode *expand,const VNode* node);
+    void saveExpand(ExpandNode* parentExpand, const QModelIndex& idx);
+    void restoreExpand(ExpandNode* expand, const VNode* node);
     void expandTo(const QModelIndex& idxTo);
     void saveExpandAll(const QModelIndex& idx);
     void saveCollapseAll(const QModelIndex& idx);
@@ -94,12 +96,12 @@ protected:
     void adjustNodeToolTip(bool);
     void adjustAttributeToolTip(bool);
 
-    AbstractNodeView *view_;
+    AbstractNodeView* view_;
     TreeNodeModel* model_;
     ActionHandler* actionHandler_;
     bool needItemsLayout_;
     PropertyMapper* prop_;
-    QMap<QString,QString> styleSheet_;
+    QMap<QString, QString> styleSheet_;
     bool setCurrentIsRunning_;
     bool setCurrentFromExpandIsRunning_;
     bool canRegainCurrentFromExpand_;
@@ -108,6 +110,3 @@ protected:
 };
 
 #endif
-
-
-

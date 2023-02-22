@@ -14,9 +14,7 @@
 
 #include "UiLog.hpp"
 
-HtmlEdit::HtmlEdit(QWidget * parent) :
-    QTextBrowser(parent)
-{
+HtmlEdit::HtmlEdit(QWidget* parent) : QTextBrowser(parent) {
 #if 0
     QFont f("Courier");
     //QFont f("Monospace");
@@ -28,9 +26,8 @@ HtmlEdit::HtmlEdit(QWidget * parent) :
 #endif
 }
 
-HtmlEdit::~HtmlEdit()
-{
-    if(fontProp_)
+HtmlEdit::~HtmlEdit() {
+    if (fontProp_)
         fontProp_->removeObserver(this);
 }
 
@@ -38,42 +35,35 @@ HtmlEdit::~HtmlEdit()
 // Fontsize management
 //---------------------------------------------
 
-void HtmlEdit::setFontProperty(VProperty* p)
-{
-    fontProp_=p;
+void HtmlEdit::setFontProperty(VProperty* p) {
+    fontProp_ = p;
     fontProp_->addObserver(this);
     updateFont();
 }
 
-void HtmlEdit::wheelEvent(QWheelEvent *event)
-{
-    int fps=font().pointSize();
+void HtmlEdit::wheelEvent(QWheelEvent* event) {
+    int fps = font().pointSize();
 
     QTextBrowser::wheelEvent(event);
-    if(font().pointSize() != fps)
+    if (font().pointSize() != fps)
         fontSizeChangedByZoom();
 }
 
-void HtmlEdit::fontSizeChangedByZoom()
-{
-    if(fontProp_)
+void HtmlEdit::fontSizeChangedByZoom() {
+    if (fontProp_)
         fontProp_->setValue(font());
 }
 
-void HtmlEdit::updateFont()
-{
-    if(fontProp_)
-    {
-        auto f=fontProp_->value().value<QFont>();
-        if(font() != f)
+void HtmlEdit::updateFont() {
+    if (fontProp_) {
+        auto f = fontProp_->value().value<QFont>();
+        if (font() != f)
             setFont(f);
     }
 }
 
-void HtmlEdit::notifyChange(VProperty* p)
-{
-    if(fontProp_ ==p)
-    {
+void HtmlEdit::notifyChange(VProperty* p) {
+    if (fontProp_ == p) {
         setFont(p->value().value<QFont>());
     }
 }

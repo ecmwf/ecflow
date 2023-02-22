@@ -11,37 +11,39 @@
 #ifndef VIEWER_SRC_ABSTRACTTEXTEDITSEARCHINTERFACE_HPP_
 #define VIEWER_SRC_ABSTRACTTEXTEDITSEARCHINTERFACE_HPP_
 
+#include <QColor>
+#include <QTextCursor>
+#include <QTextDocument>
+
 #include "StringMatchMode.hpp"
 #include "VProperty.hpp"
 
-#include <QColor>
-#include <QTextDocument>
-#include <QTextCursor>
-
-class AbstractTextEditSearchInterface
-{
+class AbstractTextEditSearchInterface {
 public:
-	AbstractTextEditSearchInterface();
-    virtual ~AbstractTextEditSearchInterface() = default;
+    AbstractTextEditSearchInterface();
+    virtual ~AbstractTextEditSearchInterface()               = default;
 
-	virtual bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
-							 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode)=0;
-	virtual void automaticSearchForKeywords(bool)=0;
-	virtual void refreshSearch()=0;
-    virtual void clearHighlights()=0;
-    virtual void disableHighlights()=0;
-	virtual void enableHighlights()=0;
-	virtual bool highlightsNeedSearch()=0;
-	virtual void gotoLastLine()=0;
+    virtual bool findString(QString str,
+                            bool highlightAll,
+                            QTextDocument::FindFlags findFlags,
+                            QTextCursor::MoveOperation move,
+                            int iteration,
+                            StringMatchMode::Mode matchMode) = 0;
+    virtual void automaticSearchForKeywords(bool)            = 0;
+    virtual void refreshSearch()                             = 0;
+    virtual void clearHighlights()                           = 0;
+    virtual void disableHighlights()                         = 0;
+    virtual void enableHighlights()                          = 0;
+    virtual bool highlightsNeedSearch()                      = 0;
+    virtual void gotoLastLine()                              = 0;
 
 protected:
-	static QColor highlightColour_;
-	VProperty *vpPerformAutomaticSearch_;
-	VProperty *vpAutomaticSearchMode_;
-	VProperty *vpAutomaticSearchText_;
-	VProperty *vpAutomaticSearchFrom_;
-	VProperty *vpAutomaticSearchCase_;
+    static QColor highlightColour_;
+    VProperty* vpPerformAutomaticSearch_;
+    VProperty* vpAutomaticSearchMode_;
+    VProperty* vpAutomaticSearchText_;
+    VProperty* vpAutomaticSearchFrom_;
+    VProperty* vpAutomaticSearchCase_;
 };
-
 
 #endif /* VIEWER_SRC_ABSTRACTTEXTEDITSEARCHINTERFACE_HPP_ */

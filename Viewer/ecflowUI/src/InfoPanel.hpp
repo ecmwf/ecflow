@@ -16,7 +16,6 @@
 #include "ServerObserver.hpp"
 #include "VInfo.hpp"
 #include "VProperty.hpp"
-
 #include "ui_InfoPanel.h"
 
 class QMenu;
@@ -28,73 +27,72 @@ class InfoPanelDef;
 class InfoPanelItem;
 class PropertyMapper;
 
-class InfoPanelItemHandler
-{
-friend class InfoPanel;
+class InfoPanelItemHandler {
+    friend class InfoPanel;
 
 public:
-	InfoPanelItemHandler(InfoPanelDef* def,InfoPanelItem* item) :
-		def_(def), item_(item) {}
+    InfoPanelItemHandler(InfoPanelDef* def, InfoPanelItem* item) : def_(def), item_(item) {}
 
-	bool match(const std::vector<InfoPanelDef*>& defs) const;
-	InfoPanelItem* item() const {return item_;}
-	QWidget* widget();
-	InfoPanelDef* def() const {return def_;}
+    bool match(const std::vector<InfoPanelDef*>& defs) const;
+    InfoPanelItem* item() const { return item_; }
+    QWidget* widget();
+    InfoPanelDef* def() const { return def_; }
 
 protected:
-    void addToTab(QTabWidget *, bool);
+    void addToTab(QTabWidget*, bool);
 
 private:
-	InfoPanelDef* def_;
-	InfoPanelItem* item_;
+    InfoPanelDef* def_;
+    InfoPanelItem* item_;
 };
 
-
-class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObserver,
-                  public VPropertyObserver, private Ui::InfoPanel
-{
+class InfoPanel : public DashboardWidget,
+                  public ServerObserver,
+                  public VInfoObserver,
+                  public VPropertyObserver,
+                  private Ui::InfoPanel {
     Q_OBJECT
 
 public:
-    explicit InfoPanel(QWidget* parent=nullptr);
-	~InfoPanel() override;
-	bool frozen() const;
+    explicit InfoPanel(QWidget* parent = nullptr);
+    ~InfoPanel() override;
+    bool frozen() const;
     void clear();
-	void setCurrent(const std::string& name);
+    void setCurrent(const std::string& name);
     void linkSelected(VInfo_ptr);
-    void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
-    void relayDashboardCommand(VInfo_ptr info,QString cmd);
+    void relayInfoPanelCommand(VInfo_ptr info, QString cmd);
+    void relayDashboardCommand(VInfo_ptr info, QString cmd);
 
     void populateDialog() override;
     void notifyChange(VProperty* p) override;
 
-    //From DashboardWidget
+    // From DashboardWidget
     void populateDockTitleBar(DashboardDockTitleWidget*) override;
     void reload() override {}
-	void rerender() override;
+    void rerender() override;
     void writeSettings(VComboSettings*) override;
     void readSettings(VComboSettings*) override;
     void writeSettingsForDialog() override;
     void readSettingsForDialog() override;
 
-	//From VInfoObserver
+    // From VInfoObserver
     void notifyDelete(VInfo*) override {}
-	void notifyDataLost(VInfo*) override;
+    void notifyDataLost(VInfo*) override;
 
-	//From ServerObserver
-	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
-	void notifyServerDelete(ServerHandler* server) override;
-	void notifyBeginServerClear(ServerHandler* server) override;
+    // From ServerObserver
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+    void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
     void notifyEndServerClear(ServerHandler*) override {}
-    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
-	void notifyEndServerScan(ServerHandler* server) override;
-	void notifyServerConnectState(ServerHandler* server) override;
-	void notifyServerSuiteFilterChanged(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler*, const VServerChange&) override {}
+    void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerSuiteFilterChanged(ServerHandler* server) override;
     void notifyEndServerSync(ServerHandler* server) override;
 
 public Q_SLOTS:
-	void slotReload(VInfo_ptr node);
-	void setCurrentSelection(VInfo_ptr node) override {slotReload(node);}
+    void slotReload(VInfo_ptr node);
+    void setCurrentSelection(VInfo_ptr node) override { slotReload(node); }
 
 protected Q_SLOTS:
     void slotReloadFromBc(VInfo_ptr node);
@@ -103,7 +101,7 @@ protected Q_SLOTS:
     void on_actionFrozen__toggled(bool b);
 
 Q_SIGNALS:
-	void selectionChanged(VInfo_ptr);
+    void selectionChanged(VInfo_ptr);
 
 protected:
     void detachedChanged() override;
@@ -112,23 +110,23 @@ private:
     void localClear();
     bool reset(VInfo_ptr node);
     bool reloadCore(VInfo_ptr node);
-	void adjustInfo(VInfo_ptr node);
+    void adjustInfo(VInfo_ptr node);
     void adjustTabs(VInfo_ptr node);
-	InfoPanelItemHandler* findHandler(QWidget* w);
-	InfoPanelItemHandler* findHandler(InfoPanelDef*);
-	InfoPanelItem* findItem(QWidget* w);
-	InfoPanelItemHandler* createHandler(InfoPanelDef*);
-	void clearTab();
-	void updateTitle();
+    InfoPanelItemHandler* findHandler(QWidget* w);
+    InfoPanelItemHandler* findHandler(InfoPanelDef*);
+    InfoPanelItem* findItem(QWidget* w);
+    InfoPanelItemHandler* createHandler(InfoPanelDef*);
+    void clearTab();
+    void updateTitle();
     QMenu* buildOptionsMenu();
     bool isTabTitleVisible();
     void setTabTitleVisible(bool);
 
-	QList<InfoPanelItemHandler*> items_;
-	VInfo_ptr info_;
+    QList<InfoPanelItemHandler*> items_;
+    VInfo_ptr info_;
     VInfo_ptr lastBroadcastInfo_;
-	bool tabBeingCleared_;
-	bool tabBeingAdjusted_;
+    bool tabBeingCleared_;
+    bool tabBeingAdjusted_;
     PropertyMapper* prop_{nullptr};
 };
 

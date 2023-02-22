@@ -19,30 +19,28 @@ class VSettings;
 
 #include <boost/property_tree/ptree.hpp>
 
-class ServerFilterObserver
-{
+class ServerFilterObserver {
 public:
-    virtual ~ServerFilterObserver() = default;
-	virtual void notifyServerFilterAdded(ServerItem*)=0;
-	virtual void notifyServerFilterRemoved(ServerItem*)=0;
-	virtual void notifyServerFilterChanged(ServerItem*)=0;
-	virtual void notifyServerFilterDelete()=0;
+    virtual ~ServerFilterObserver()                     = default;
+    virtual void notifyServerFilterAdded(ServerItem*)   = 0;
+    virtual void notifyServerFilterRemoved(ServerItem*) = 0;
+    virtual void notifyServerFilterChanged(ServerItem*) = 0;
+    virtual void notifyServerFilterDelete()             = 0;
 };
 
-class ServerFilter : public ServerItemObserver
-{
+class ServerFilter : public ServerItemObserver {
 public:
-	ServerFilter();
-	~ServerFilter() override;
+    ServerFilter();
+    ~ServerFilter() override;
 
-	enum ChangeAspect {Reset,Added,Removed};
+    enum ChangeAspect { Reset, Added, Removed };
 
-	const std::vector<ServerItem*>& items() const {return items_;}
-    int  itemCount() const {return static_cast<int>(items_.size());}
+    const std::vector<ServerItem*>& items() const { return items_; }
+    int itemCount() const { return static_cast<int>(items_.size()); }
     void serverNames(std::vector<std::string>&) const;
 
-	void addServer(ServerItem*,bool broadcast=true);
-	void removeServer(ServerItem*);
+    void addServer(ServerItem*, bool broadcast = true);
+    void removeServer(ServerItem*);
     bool isFiltered(ServerItem*) const;
     bool isFiltered(ServerHandler*) const;
     bool isFiltered(const std::string& serverName) const;
@@ -53,7 +51,7 @@ public:
     void addObserver(ServerFilterObserver*);
     void removeObserver(ServerFilterObserver*);
 
-    //From ServerItemObserver
+    // From ServerItemObserver
     void notifyServerItemChanged(ServerItem*) override;
     void notifyServerItemDeletion(ServerItem*) override;
 
@@ -63,8 +61,8 @@ protected:
     void broadcastChange(ServerItem*);
 
 private:
-	std::vector<ServerItem*> items_;
-	std::vector<ServerFilterObserver*> observers_;
+    std::vector<ServerItem*> items_;
+    std::vector<ServerFilterObserver*> observers_;
 };
 
 #endif

@@ -14,37 +14,40 @@
 //============================================================================
 
 #include "Connection.hpp"
-#include "Log.hpp"
+
 #include "Ecf.hpp"
+#include "Log.hpp"
 
 connection::~connection() {
 #ifdef DEBUG_CONNECTION
-   if (Ecf::server()) std::cout << "SERVER: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
-   else               std::cout << "CLIENT: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
+    if (Ecf::server())
+        std::cout << "SERVER: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
+    else
+        std::cout << "CLIENT: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
 #endif
 }
 
-connection::connection(boost::asio::io_service& io_service): socket_(io_service)
-{
+connection::connection(boost::asio::io_service& io_service) : socket_(io_service) {
 #ifdef DEBUG_CONNECTION
-   if (Ecf::server()) std::cout << "SERVER: Connection::connection\n";
-   else               std::cout << "CLIENT: Connection::connection\n";
+    if (Ecf::server())
+        std::cout << "SERVER: Connection::connection\n";
+    else
+        std::cout << "CLIENT: Connection::connection\n";
 #endif
 }
 
-void connection::log_error(const char* msg)
-{
-   const char* in_context = ", in client";
-   if (Ecf::server()) in_context = ", in server";
-   ecf::LogToCout logToCout;
-   LOG(ecf::Log::ERR, msg << in_context);
+void connection::log_error(const char* msg) {
+    const char* in_context = ", in client";
+    if (Ecf::server())
+        in_context = ", in server";
+    ecf::LogToCout logToCout;
+    LOG(ecf::Log::ERR, msg << in_context);
 }
 
-void connection::log_archive_error(const char* msg,const std::exception& ae,const std::string& data)
-{
-   const char* in_context = ", in client";
-   if (Ecf::server()) in_context = ", in server";
-   ecf::LogToCout logToCout;
-   LOG(ecf::Log::ERR, msg << ae.what() << in_context << " data:\n" << data);
+void connection::log_archive_error(const char* msg, const std::exception& ae, const std::string& data) {
+    const char* in_context = ", in client";
+    if (Ecf::server())
+        in_context = ", in server";
+    ecf::LogToCout logToCout;
+    LOG(ecf::Log::ERR, msg << ae.what() << in_context << " data:\n" << data);
 }
-

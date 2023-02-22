@@ -15,17 +15,20 @@
 #ifndef TEXTPAGERSECTION_P_HPP_
 #define TEXTPAGERSECTION_P_HPP_
 
-#include <QObject>
 #include <QCoreApplication>
+#include <QObject>
 class TextPagerSection;
-class TextSectionManager : public QObject
-{
+class TextSectionManager : public QObject {
     Q_OBJECT
 public:
-    static TextSectionManager *instance() { static auto *inst = new TextSectionManager; return inst; }
+    static TextSectionManager* instance() {
+        static auto* inst = new TextSectionManager;
+        return inst;
+    }
 Q_SIGNALS:
-    void sectionFormatChanged(TextPagerSection *section);
-    void sectionCursorChanged(TextPagerSection *section);
+    void sectionFormatChanged(TextPagerSection* section);
+    void sectionCursorChanged(TextPagerSection* section);
+
 private:
     TextSectionManager() : QObject(QCoreApplication::instance()) {}
     friend class TextPagerSection;

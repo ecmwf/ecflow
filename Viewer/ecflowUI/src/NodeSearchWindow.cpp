@@ -8,64 +8,56 @@
 //
 //============================================================================
 
+#include "NodeSearchWindow.hpp"
+
 #include <QCloseEvent>
 #include <QDebug>
 #include <QSettings>
 
-#include "NodeSearchWindow.hpp"
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
 #include "WidgetNameProvider.hpp"
 
-NodeSearchWindow::NodeSearchWindow(QWidget *parent) :
-     QMainWindow(parent)
-{
+NodeSearchWindow::NodeSearchWindow(QWidget* parent) : QMainWindow(parent) {
     setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);
 
-    QString wt=windowTitle() + "  -  " + QString::fromStdString(VConfig::instance()->appLongName());
-	setWindowTitle(wt);
+    QString wt = windowTitle() + "  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
 
-    connect(queryWidget_,SIGNAL(closeClicked()),
-            this,SLOT(closeIt()));
+    connect(queryWidget_, SIGNAL(closeClicked()), this, SLOT(closeIt()));
 
-    //Read the qt settings
+    // Read the qt settings
     readSettings();
 
     WidgetNameProvider::nameChildren(this);
 }
 
-NodeSearchWindow::~NodeSearchWindow()
-= default;
+NodeSearchWindow::~NodeSearchWindow() = default;
 
-NodeSearchWidget* NodeSearchWindow::queryWidget() const
-{
-	return queryWidget_;
+NodeSearchWidget* NodeSearchWindow::queryWidget() const {
+    return queryWidget_;
 }
 
-void NodeSearchWindow::closeEvent(QCloseEvent * event)
-{
-	queryWidget_->slotStop(); //The search thread might be running!!
-	event->accept();
-	writeSettings();
+void NodeSearchWindow::closeEvent(QCloseEvent* event) {
+    queryWidget_->slotStop(); // The search thread might be running!!
+    event->accept();
+    writeSettings();
 }
 
-void NodeSearchWindow::keyReleaseEvent(QKeyEvent *event)
-{
-    if(event->key() == Qt::Key_Return)
+void NodeSearchWindow::keyReleaseEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Return)
         queryWidget_->slotFind();
     QMainWindow::keyReleaseEvent(event);
 }
 
-void NodeSearchWindow::closeIt()
-{
+void NodeSearchWindow::closeIt() {
     writeSettings();
     close();
 }
 
-void NodeSearchWindow::slotOwnerDelete()
-{
+void NodeSearchWindow::slotOwnerDelete() {
     close();
     deleteLater();
 }
@@ -74,37 +66,33 @@ void NodeSearchWindow::slotOwnerDelete()
 // Settings read/write
 //------------------------------------------
 
-void NodeSearchWindow::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void NodeSearchWindow::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeSearchDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeSearchDialog")), QSettings::NativeFormat);
 
-	//We have to clear it so that should not remember all the previous values
-	settings.clear();
+    // We have to clear it so that should not remember all the previous values
+    settings.clear();
 
-	settings.beginGroup("main");
-    settings.setValue("geometry",saveGeometry());
+    settings.beginGroup("main");
+    settings.setValue("geometry", saveGeometry());
     queryWidget_->writeSettings(settings);
-	settings.endGroup();
+    settings.endGroup();
 }
 
-void NodeSearchWindow::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void NodeSearchWindow::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeSearchDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeSearchDialog")), QSettings::NativeFormat);
 
-	settings.beginGroup("main");
-    if(settings.contains("geometry")) {
+    settings.beginGroup("main");
+    if (settings.contains("geometry")) {
         restoreGeometry(settings.value("geometry").toByteArray());
     }
     else {
-	  	resize(QSize(550,540));
-	}
+        resize(QSize(550, 540));
+    }
 
     queryWidget_->readSettings(settings);
-	settings.endGroup();
+    settings.endGroup();
 }

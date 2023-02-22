@@ -8,23 +8,20 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include "UserMessage.hpp"
+
 #include <iostream>
 
 #include <QMessageBox>
 
-#include "UserMessage.hpp"
-
 #include "UiLog.hpp"
 
-bool UserMessage::echoToCout_ = true;  // XXX should be false to start with
+bool UserMessage::echoToCout_ = true; // XXX should be false to start with
 
-UserMessage::UserMessage()
-= default;
+UserMessage::UserMessage()    = default;
 
-void UserMessage::message(MessageType type, bool popup, const std::string& message)
-{
-    if (echoToCout_)
-    {
+void UserMessage::message(MessageType type, bool popup, const std::string& message) {
+    if (echoToCout_) {
 #if 0
         switch (type)
         {
@@ -38,59 +35,74 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
         std::cout << message << std::endl;
 #endif
 
-        switch (type)
-        {
-        case DBG:   UiLog().dbg() << message; break;
-        case INFO:  UiLog().info() << message ; break;
-        case WARN:  UiLog().warn() << message; break;
-        case ERROR: UiLog().err() << message; break;
-        default:   break;
+        switch (type) {
+            case DBG:
+                UiLog().dbg() << message;
+                break;
+            case INFO:
+                UiLog().info() << message;
+                break;
+            case WARN:
+                UiLog().warn() << message;
+                break;
+            case ERROR:
+                UiLog().err() << message;
+                break;
+            default:
+                break;
         }
     }
 
-    if (popup)
-    {
+    if (popup) {
         QMessageBox::Icon icon;
         QString title;
-        switch (type)
-        {
-            case INFO:  icon = QMessageBox::Information; title="Info"; break;
-            case WARN:  icon = QMessageBox::Warning;     title="Warning";    break;
-            case ERROR: icon = QMessageBox::Critical;    title="Error";   break;
-            case DBG:   icon = QMessageBox::NoIcon;      title="Debug";   break;
-            default:    icon = QMessageBox::NoIcon;      title="Info";     break;
+        switch (type) {
+            case INFO:
+                icon  = QMessageBox::Information;
+                title = "Info";
+                break;
+            case WARN:
+                icon  = QMessageBox::Warning;
+                title = "Warning";
+                break;
+            case ERROR:
+                icon  = QMessageBox::Critical;
+                title = "Error";
+                break;
+            case DBG:
+                icon  = QMessageBox::NoIcon;
+                title = "Debug";
+                break;
+            default:
+                icon  = QMessageBox::NoIcon;
+                title = "Info";
+                break;
         }
-        title="ecFlowUI - " + title;
+        title        = "ecFlowUI - " + title;
         QString qmsg = QString::fromStdString(message);
 
         QMessageBox box(icon, title, qmsg);
         box.exec();
     }
-
 }
 
-bool UserMessage::confirm(const std::string& message)
-{
+bool UserMessage::confirm(const std::string& message) {
     bool ok = true;
     QMessageBox msgBox;
     msgBox.setText(QString::fromStdString(message));
     msgBox.setTextFormat(Qt::RichText);
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    if (msgBox.exec() == QMessageBox::Cancel)
-    {
-        ok=false;
+    if (msgBox.exec() == QMessageBox::Cancel) {
+        ok = false;
     }
     return ok;
 }
 
-
-void UserMessage::debug(const std::string& message)
-{
+void UserMessage::debug(const std::string& message) {
     UiLog().dbg() << message;
 }
 
-std::string UserMessage::toString(int v)
-{
+std::string UserMessage::toString(int v) {
     return QString::number(v).toStdString();
 }

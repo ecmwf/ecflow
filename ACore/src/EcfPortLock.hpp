@@ -18,68 +18,71 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <iostream>
+#include <sstream>
+
+#include <boost/lexical_cast.hpp>
+
+#include "File.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/operations.hpp"
-#include <boost/lexical_cast.hpp>
-#include <sstream>
-#include <iostream>
-#include "File.hpp"
 
 namespace ecf {
 
-class EcfPortLock  {
+class EcfPortLock {
 public:
+    static bool is_free(int port, bool debug = false) {
+        std::string the_port = boost::lexical_cast<std::string>(port);
+        if (boost::filesystem::exists(port_file(the_port))) {
+            if (debug)
+                std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";
+            return false;
+        }
+        if (debug)
+            std::cout << "  EcfPortLock::is_free(" << port << ") returning TRUE\n ";
+        return true;
+    }
 
-   static bool is_free(int port, bool debug = false)
-   {
-      std::string the_port = boost::lexical_cast<std::string>(port);
-      if (boost::filesystem::exists(port_file(the_port))) {
-         if (debug) std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";
-         return false;
-      }
-      if (debug) std::cout << "  EcfPortLock::is_free(" << port << ") returning TRUE\n ";
-      return true;
-   }
+    static void create(const std::string& the_port) {
+        std::string the_file = port_file(the_port);
+        //      std::cout << "EcfPortLock::create " << the_file << "
+        //      ---------------------------------------------------\n";
+        std::string errorMsg;
+        if (!ecf::File::create(the_file, "", errorMsg)) {
+            std::stringstream sb;
+            sb << "EcfPortLock::create_free_port_file : could not create file " << the_file;
+            throw std::runtime_error(sb.str());
+        }
+    }
 
-   static void create(const std::string& the_port)
-   {
-      std::string the_file = port_file( the_port );
-//      std::cout << "EcfPortLock::create " << the_file << " ---------------------------------------------------\n";
-      std::string errorMsg;
-      if (!ecf::File::create(the_file,"",errorMsg)) {
-         std::stringstream sb;
-         sb << "EcfPortLock::create_free_port_file : could not create file " << the_file;
-         throw std::runtime_error(sb.str());
-      }
-   }
-
-   static void remove(const std::string& the_port)
-   {
-      std::string the_file = port_file(the_port);
-//      std::cout << "EcfPortLock::remove " << the_file << " --------------------------------------------------\n";
-      boost::filesystem::remove(the_file);
-   }
+    static void remove(const std::string& the_port) {
+        std::string the_file = port_file(the_port);
+        //      std::cout << "EcfPortLock::remove " << the_file << "
+        //      --------------------------------------------------\n";
+        boost::filesystem::remove(the_file);
+    }
 
 private:
-   EcfPortLock() = delete;
-   EcfPortLock(const EcfPortLock&) = delete;
-   const EcfPortLock& operator=(const EcfPortLock&) = delete;
+    EcfPortLock()                                    = delete;
+    EcfPortLock(const EcfPortLock&)                  = delete;
+    const EcfPortLock& operator=(const EcfPortLock&) = delete;
 
-   static std::string port_file(const std::string& the_port)
-   {
-      // We need the *SAME* location so that different process find the same file.
-      // When going across compiler the root_build_dir is not sufficient
-      char* ecf_port_lock_dir = getenv("ECF_PORT_LOCK_DIR");
-      std::string path;
-      if (ecf_port_lock_dir) path = ecf_port_lock_dir;
-      else                   path = File::root_source_dir();
+    static std::string port_file(const std::string& the_port) {
+        // We need the *SAME* location so that different process find the same file.
+        // When going across compiler the root_build_dir is not sufficient
+        char* ecf_port_lock_dir = getenv("ECF_PORT_LOCK_DIR");
+        std::string path;
+        if (ecf_port_lock_dir)
+            path = ecf_port_lock_dir;
+        else
+            path = File::root_source_dir();
 
-      path += "/";
-      path += the_port;
-      path += ".lock";
+        path += "/";
+        path += the_port;
+        path += ".lock";
 
-      return path;
-   }
+        return path;
+    }
 };
-}
+} // namespace ecf
 #endif

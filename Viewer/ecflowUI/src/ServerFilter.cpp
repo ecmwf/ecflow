@@ -12,8 +12,8 @@
 #include "ServerHandler.hpp"
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
-#include "VSettings.hpp"
 #include "SessionHandler.hpp"
+#include "VSettings.hpp"
 
 //==============================================
 //
@@ -21,205 +21,168 @@
 //
 //==============================================
 
-ServerFilter::ServerFilter()
-= default;
+ServerFilter::ServerFilter() = default;
 
-ServerFilter::~ServerFilter()
-{
-	std::vector<ServerFilterObserver*> obsCopy=observers_;
-	for(auto it=obsCopy.begin(); it != obsCopy.end(); ++it)
-	{
-		(*it)->notifyServerFilterDelete();
-	}
+ServerFilter::~ServerFilter() {
+    std::vector<ServerFilterObserver*> obsCopy = observers_;
+    for (auto it = obsCopy.begin(); it != obsCopy.end(); ++it) {
+        (*it)->notifyServerFilterDelete();
+    }
 
-	for(auto it=items_.begin(); it != items_.end(); ++it)
-	{
-		(*it)->removeObserver(this);
-	}
+    for (auto it = items_.begin(); it != items_.end(); ++it) {
+        (*it)->removeObserver(this);
+    }
 }
 
-void ServerFilter::serverNames(std::vector<std::string>& vec) const
-{
-	for(auto item : items_)
-	{
-		vec.push_back(item->name());
-	}
+void ServerFilter::serverNames(std::vector<std::string>& vec) const {
+    for (auto item : items_) {
+        vec.push_back(item->name());
+    }
 }
 
-void ServerFilter::addServer(ServerItem *item,bool broadcast)
-{
-	if(item && ServerList::instance()->find(item->name()) == item)
-	{
-		//ServerFilterItem* s=new ServerFilterItem(item->name(),item->host(),item->port());
-		//ServerItem* s=new ServerFilterItem(item->name());
+void ServerFilter::addServer(ServerItem* item, bool broadcast) {
+    if (item && ServerList::instance()->find(item->name()) == item) {
+        // ServerFilterItem* s=new ServerFilterItem(item->name(),item->host(),item->port());
+        // ServerItem* s=new ServerFilterItem(item->name());
 
-		items_.push_back(item);
+        items_.push_back(item);
 
-		item->addObserver(this);
+        item->addObserver(this);
 
-		if(broadcast)
-			broadcastAdd(item);
-	}
+        if (broadcast)
+            broadcastAdd(item);
+    }
 }
 
-void ServerFilter::removeServer(ServerItem *server)
-{
-	if(!server) return;
+void ServerFilter::removeServer(ServerItem* server) {
+    if (!server)
+        return;
 
-	auto it=std::find(items_.begin(),items_.end(),server);
-	if(it != items_.end())
-	{
-		//Remove the item from the filter. This should come
-	    //first because the observers update themselves according to the
-		//contents of items_!!!!
-		items_.erase(it);
+    auto it = std::find(items_.begin(), items_.end(), server);
+    if (it != items_.end()) {
+        // Remove the item from the filter. This should come
+        // first because the observers update themselves according to the
+        // contents of items_!!!!
+        items_.erase(it);
 
-		//Notifies the view about the changes
-		broadcastRemove(server);
+        // Notifies the view about the changes
+        broadcastRemove(server);
 
-		//Remove the filter from the observers
-		server->removeObserver(this);
-	}
+        // Remove the filter from the observers
+        server->removeObserver(this);
+    }
 }
 
-void ServerFilter::notifyServerItemChanged(ServerItem *server)
-{
-	if(isFiltered(server))
-		broadcastChange(server);
+void ServerFilter::notifyServerItemChanged(ServerItem* server) {
+    if (isFiltered(server))
+        broadcastChange(server);
 }
 
-//Do not remove the observer in this method!!
-void ServerFilter::notifyServerItemDeletion(ServerItem *server)
-{
-	if(!server) return;
+// Do not remove the observer in this method!!
+void ServerFilter::notifyServerItemDeletion(ServerItem* server) {
+    if (!server)
+        return;
 
-	auto it=std::find(items_.begin(),items_.end(),server);
-	if(it != items_.end())
-	{
-		items_.erase(it);
+    auto it = std::find(items_.begin(), items_.end(), server);
+    if (it != items_.end()) {
+        items_.erase(it);
 
-		//Notifies the view about the changes
-		broadcastRemove(server);
-	}
+        // Notifies the view about the changes
+        broadcastRemove(server);
+    }
 }
 
-bool ServerFilter::isFiltered(ServerItem* item) const
-{
-	for(auto it : items_)
-	{
-		if(it == item)
-			return true;
-	}
-	return false;
-}
-
-bool ServerFilter::isFiltered(ServerHandler* server) const
-{
-    for(auto item : items_)
-    {
-        if(item->serverHandler() == server)
+bool ServerFilter::isFiltered(ServerItem* item) const {
+    for (auto it : items_) {
+        if (it == item)
             return true;
     }
     return false;
 }
 
-bool ServerFilter::isFiltered(const std::string& serverName) const
-{
-    for(auto item : items_)
-    {
-        if(item->serverHandler()->name() == serverName)
+bool ServerFilter::isFiltered(ServerHandler* server) const {
+    for (auto item : items_) {
+        if (item->serverHandler() == server)
             return true;
     }
     return false;
 }
 
-void ServerFilter::writeSettings(VSettings* vs) const
-{
-	std::vector<std::string> array;
-	for(auto item : items_)
-	{
-		array.push_back(item->name());
-	}
-
-	vs->put("server",array);
+bool ServerFilter::isFiltered(const std::string& serverName) const {
+    for (auto item : items_) {
+        if (item->serverHandler()->name() == serverName)
+            return true;
+    }
+    return false;
 }
 
-void ServerFilter::readSettings(VSettings* vs)
-{
-	items_.clear();
+void ServerFilter::writeSettings(VSettings* vs) const {
+    std::vector<std::string> array;
+    for (auto item : items_) {
+        array.push_back(item->name());
+    }
 
-	std::vector<std::string> array;
-	vs->get("server",array);
+    vs->put("server", array);
+}
 
-	for(auto it = array.begin(); it != array.end(); ++it)
-	{
-		std::string name=*it;
-		if(ServerItem* s=ServerList::instance()->find(name))
-		{
-			addServer(s,true);
-		}
-		// special case - if we're starting a temporary session for looking at one
-		// particular server, then we need to replace the placeholder server alias
-		// with the one we actually want to look at
-		else if (name == "SERVER_ALIAS_PLACEHOLDER")
-		{
-			SessionItem *session = SessionHandler::instance()->current();
-			if (session->temporary())
-			{
-				std::string alias = session->temporaryServerAlias();
-				if (ServerItem* s=ServerList::instance()->find(alias))
-				{
-					addServer(s,true);
-				}
-			}
-		}
-	}
+void ServerFilter::readSettings(VSettings* vs) {
+    items_.clear();
+
+    std::vector<std::string> array;
+    vs->get("server", array);
+
+    for (auto it = array.begin(); it != array.end(); ++it) {
+        std::string name = *it;
+        if (ServerItem* s = ServerList::instance()->find(name)) {
+            addServer(s, true);
+        }
+        // special case - if we're starting a temporary session for looking at one
+        // particular server, then we need to replace the placeholder server alias
+        // with the one we actually want to look at
+        else if (name == "SERVER_ALIAS_PLACEHOLDER") {
+            SessionItem* session = SessionHandler::instance()->current();
+            if (session->temporary()) {
+                std::string alias = session->temporaryServerAlias();
+                if (ServerItem* s = ServerList::instance()->find(alias)) {
+                    addServer(s, true);
+                }
+            }
+        }
+    }
 }
 
 //===========================================================
 // Observers
 //===========================================================
 
-void ServerFilter::broadcastAdd(ServerItem *server)
-{
-	for(auto it=observers_.begin(); it != observers_.end(); ++it)
-	{
-		(*it)->notifyServerFilterAdded(server);
-	}
+void ServerFilter::broadcastAdd(ServerItem* server) {
+    for (auto it = observers_.begin(); it != observers_.end(); ++it) {
+        (*it)->notifyServerFilterAdded(server);
+    }
 }
 
-void ServerFilter::broadcastRemove(ServerItem *server)
-{
-	for(auto it=observers_.begin(); it != observers_.end(); ++it)
-	{
-		(*it)->notifyServerFilterRemoved(server);
-	}
+void ServerFilter::broadcastRemove(ServerItem* server) {
+    for (auto it = observers_.begin(); it != observers_.end(); ++it) {
+        (*it)->notifyServerFilterRemoved(server);
+    }
 }
 
-void ServerFilter::broadcastChange(ServerItem *server)
-{
-	for(auto it=observers_.begin(); it != observers_.end(); ++it)
-	{
-		(*it)->notifyServerFilterChanged(server);
-	}
+void ServerFilter::broadcastChange(ServerItem* server) {
+    for (auto it = observers_.begin(); it != observers_.end(); ++it) {
+        (*it)->notifyServerFilterChanged(server);
+    }
 }
 
-void ServerFilter::addObserver(ServerFilterObserver* o)
-{
-	auto it=std::find(observers_.begin(),observers_.end(),o);
-	if(it == observers_.end())
-	{
-		observers_.push_back(o);
-	}
+void ServerFilter::addObserver(ServerFilterObserver* o) {
+    auto it = std::find(observers_.begin(), observers_.end(), o);
+    if (it == observers_.end()) {
+        observers_.push_back(o);
+    }
 }
 
-void ServerFilter::removeObserver(ServerFilterObserver* o)
-{
-	auto it=std::find(observers_.begin(),observers_.end(),o);
-	if(it != observers_.end())
-	{
-		observers_.erase(it);
-	}
+void ServerFilter::removeObserver(ServerFilterObserver* o) {
+    auto it = std::find(observers_.begin(), observers_.end(), o);
+    if (it != observers_.end()) {
+        observers_.erase(it);
+    }
 }
-
-

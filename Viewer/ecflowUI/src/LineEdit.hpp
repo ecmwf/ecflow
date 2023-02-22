@@ -16,13 +16,12 @@
 class QLabel;
 class QToolButton;
 
-class LineEdit : public QLineEdit
-{
-Q_OBJECT
+class LineEdit : public QLineEdit {
+    Q_OBJECT
 
 public:
-	explicit LineEdit (QWidget *parent=nullptr);
-	void setDecoration(QPixmap);
+    explicit LineEdit(QWidget* parent = nullptr);
+    void setDecoration(QPixmap);
 
 public Q_SLOTS:
     void slotClear();
@@ -31,12 +30,11 @@ Q_SIGNALS:
     void textCleared();
 
 protected:
-	void adjustSize();
-	void resizeEvent(QResizeEvent*) override;
+    void adjustSize();
+    void resizeEvent(QResizeEvent*) override;
 
-	QToolButton *clearTb_;
-	QLabel*	iconLabel_{nullptr};
+    QToolButton* clearTb_;
+    QLabel* iconLabel_{nullptr};
 };
-
 
 #endif

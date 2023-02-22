@@ -4,23 +4,22 @@
 #include <QComboBox>
 #include <QItemDelegate>
 
-class ComboMulti: public QComboBox
-{
-Q_OBJECT;
+class ComboMulti : public QComboBox {
+    Q_OBJECT;
 
 public:
-    enum Mode {BasicMode,FilterMode};
+    enum Mode { BasicMode, FilterMode };
 
-    enum CustomItemRole {SelectRole = Qt::UserRole+1};
+    enum CustomItemRole { SelectRole = Qt::UserRole + 1 };
 
-	explicit ComboMulti(QWidget *widget = nullptr);
+    explicit ComboMulti(QWidget* widget = nullptr);
     ~ComboMulti() override;
-    bool eventFilter(QObject *object, QEvent *event) override;
-    void paintEvent(QPaintEvent *) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
+    void paintEvent(QPaintEvent*) override;
     void setDisplayText(QString text);
     QString displayText() const;
-    bool hasSelection() const {return !selection_.isEmpty();}
-    QStringList selection() const {return selection_;}
+    bool hasSelection() const { return !selection_.isEmpty(); }
+    QStringList selection() const { return selection_; }
     QStringList all() const;
     QStringList selectionData() const;
     void selectSoleItem();
@@ -33,39 +32,35 @@ public Q_SLOTS:
     void clearSelection();
 
 Q_SIGNALS:
-	void selectionChanged();
+    void selectionChanged();
 
 private:
     Mode mode_{BasicMode};
     bool elide_{false};
-	QString dpyText_;
+    QString dpyText_;
     QStringList selection_;
 };
 
-class ComboMultiDelegate : public QItemDelegate
-{
-Q_OBJECT
+class ComboMultiDelegate : public QItemDelegate {
+    Q_OBJECT
 
 public:
-    explicit ComboMultiDelegate(QObject *parent);
+    explicit ComboMultiDelegate(QObject* parent);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & option,
-              const QModelIndex & index ) const override;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-    void setEditorData(QWidget *editor,const QModelIndex &index) const override;
-    void setModelData(QWidget *editor, QAbstractItemModel *model,const QModelIndex &index) const override;
-    void updateEditorGeometry(QWidget *editor,const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+    void
+    updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 protected Q_SLOTS:
     void slotEdited(int);
 
 Q_SIGNALS:
-     void itemChecked() const;
+    void itemChecked() const;
 };
 
-
 #endif
-

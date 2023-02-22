@@ -9,20 +9,19 @@
 //============================================================================
 
 #include "VItem.hpp"
+
 #include "VNode.hpp"
 
-bool VItem::isAncestor(const VItem* n) const
-{
-    if(n == this)
+bool VItem::isAncestor(const VItem* n) const {
+    if (n == this)
         return true;
 
-    VNode* nd=parent();
-    while(nd)
-    {
-        if(const_cast<VItem*>(n) == nd)
+    VNode* nd = parent();
+    while (nd) {
+        if (const_cast<VItem*>(n) == nd)
             return true;
 
-        nd=nd->parent();
+        nd = nd->parent();
     }
     return false;
 }

@@ -30,7 +30,7 @@ namespace TimeStamp {
 ///  - "[05:26:20 17.1.2023] "
 ///
 std::string now();
-void now(std::string &);
+void now(std::string&);
 
 /// Generate a 'brief' time stamp.
 ///
@@ -41,7 +41,7 @@ void now(std::string &);
 ///  - "[05:26:20 29.10] "
 ///  - "[05:26:20 17.1] "
 ///
-void now_in_brief(std::string &);
+void now_in_brief(std::string&);
 
 } // namespace TimeStamp
 } // namespace ecf

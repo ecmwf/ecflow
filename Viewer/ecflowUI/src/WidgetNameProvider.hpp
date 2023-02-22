@@ -20,8 +20,7 @@ class QTabBar;
 class QTabWidget;
 class QWidget;
 
-class WidgetNameProvider
-{
+class WidgetNameProvider {
 public:
     static void nameChildren(QWidget* w);
 
@@ -35,4 +34,3 @@ private:
 };
 
 #endif // WIDGETNAME_HPP
-

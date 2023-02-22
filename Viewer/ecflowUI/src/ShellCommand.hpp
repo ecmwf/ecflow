@@ -10,26 +10,24 @@
 #ifndef SHELLCOMMAND_HPP
 #define SHELLCOMMAND_HPP
 
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include <QDateTime>
 #include <QObject>
-
 #include <QProcess>
 
 #include "CommandOutput.hpp"
 
-class ShellCommand : public QObject
-{
+class ShellCommand : public QObject {
     Q_OBJECT
 public:
-    static ShellCommand* run(const std::string&,const std::string&, bool addToDialog =  true);
+    static ShellCommand* run(const std::string&, const std::string&, bool addToDialog = true);
 
     QString command() const;
-    QString commandDef() const {return commandDef_;}
-    QDateTime startTime() const {return startTime_;}
+    QString commandDef() const { return commandDef_; }
+    QDateTime startTime() const { return startTime_; }
 
 protected Q_SLOTS:
     void procFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -37,9 +35,9 @@ protected Q_SLOTS:
     void slotStdError();
 
 protected:
-    ShellCommand(const std::string&,const std::string&, bool);
+    ShellCommand(const std::string&, const std::string&, bool);
 
-    QProcess *proc_;
+    QProcess* proc_;
     QString command_;
     QString commandDef_;
     QDateTime startTime_;

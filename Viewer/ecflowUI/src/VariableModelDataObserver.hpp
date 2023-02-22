@@ -12,12 +12,11 @@
 
 class VariableModelDataHandler;
 
-class VariableModelDataObserver
-{
+class VariableModelDataObserver {
 public:
-      VariableModelDataObserver() = default;
-      virtual void notifyCleared(VariableModelDataHandler*)=0;
-      virtual void notifyUpdated(VariableModelDataHandler*)=0;
+    VariableModelDataObserver()                           = default;
+    virtual void notifyCleared(VariableModelDataHandler*) = 0;
+    virtual void notifyUpdated(VariableModelDataHandler*) = 0;
 };
 
 #endif // VARIABLEMODELDATAOBSERVER_HPP

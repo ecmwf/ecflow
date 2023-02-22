@@ -14,22 +14,20 @@
 
 class LogModel;
 
-class LogView : public QTreeView
-{
+class LogView : public QTreeView {
     Q_OBJECT
 public:
-    LogView(QWidget* parent=nullptr);
-    void setLogModel(LogModel* );
+    LogView(QWidget* parent = nullptr);
+    void setLogModel(LogModel*);
     void setModel(QAbstractItemModel*) override;
 
 public Q_SLOTS:
-    //void setHighlightPeriod(qint64,qint64,qint64);
+    // void setHighlightPeriod(qint64,qint64,qint64);
     void scrolltToHighlightPeriod();
     void rerender();
 
 protected:
     LogModel* logModel_{nullptr};
-
 };
 
 #endif // LOGVIEW_HPP

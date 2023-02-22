@@ -3,14 +3,14 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        : Log
 // Author      : Avi
-// Revision    : $Revision: #31 $ 
+// Revision    : $Revision: #31 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : Simple singleton implementation of log
 //
@@ -30,11 +30,13 @@
 // Hence we use another level of indirection, so that we able to close the
 // log file, and hence can ensure that it gets written to disk
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <vector>
+#include <fstream>
 #include <memory>
 #include <string>
-#include <fstream>
+#include <vector>
+
 #include <boost/lambda/lambda.hpp>
+
 #include "DurationTimer.hpp"
 
 namespace ecf {
@@ -43,101 +45,103 @@ class LogImpl;
 
 class Log {
 public:
-   enum LogType { MSG, LOG, ERR, WAR, DBG, OTH };
-   static void create(const std::string& filename);
-   static void destroy();
-   static Log* instance() { return instance_;}
+    enum LogType { MSG, LOG, ERR, WAR, DBG, OTH };
+    static void create(const std::string& filename);
+    static void destroy();
+    static Log* instance() { return instance_; }
 
-   /// If file is closed will open it
-   /// Outputs t the file a message of type XXX:[HH:MM:SS D.M.YYYY] message
-   /// where XXX is one of the LogType
-   ///
-   /// If the message has multiple newlines these are split
-   /// LogType ERR,WAR,DBG will create a time stamp, otherwise the last cached
-   /// time stamp is used.
-   bool log(LogType,const std::string& message);
+    /// If file is closed will open it
+    /// Outputs t the file a message of type XXX:[HH:MM:SS D.M.YYYY] message
+    /// where XXX is one of the LogType
+    ///
+    /// If the message has multiple newlines these are split
+    /// LogType ERR,WAR,DBG will create a time stamp, otherwise the last cached
+    /// time stamp is used.
+    bool log(LogType, const std::string& message);
 
-   /// Single line message is placed in log file without a newline
-   bool log_no_newline(LogType,const std::string& message);
+    /// Single line message is placed in log file without a newline
+    bool log_no_newline(LogType, const std::string& message);
 
-   /// Append to log file file and add newline
-   bool append(const std::string& message);
+    /// Append to log file file and add newline
+    bool append(const std::string& message);
 
-   /// Set the time stamp once for each request.
-   void cache_time_stamp();
+    /// Set the time stamp once for each request.
+    void cache_time_stamp();
 
-   /// Return the last cached time stamp. Used for time stamping edit history
-   const std::string& get_cached_time_stamp() const;
+    /// Return the last cached time stamp. Used for time stamping edit history
+    const std::string& get_cached_time_stamp() const;
 
-   /// returns the contents of the log file, or the last n lines
-   /// Will throw an std::runtime_error if the log file cannot be opened
-   /// Will close the file.
-   static int get_last_n_lines_default() { return 100;}
-   std::string contents(int get_last_n_lines);
+    /// returns the contents of the log file, or the last n lines
+    /// Will throw an std::runtime_error if the log file cannot be opened
+    /// Will close the file.
+    static int get_last_n_lines_default() { return 100; }
+    std::string contents(int get_last_n_lines);
 
-   /// Will call flush and close the file. See notes above
-   void flush();
+    /// Will call flush and close the file. See notes above
+    void flush();
 
-   /// will flush the log file without closing it.
-   void flush_only();
+    /// will flush the log file without closing it.
+    void flush_only();
 
-   /// clear the log file. Required for testing
-   void clear();
+    /// clear the log file. Required for testing
+    void clear();
 
-   /// Close the existing log file, and new start writing to the new location
-   void new_path(const std::string& the_new_path);
+    /// Close the existing log file, and new start writing to the new location
+    void new_path(const std::string& the_new_path);
 
-   /// Returns the current log file path name
-   std::string path() const;
+    /// Returns the current log file path name
+    std::string path() const;
 
-   /// Errors in opening or writing to log file
-   const std::string& log_error() const { return log_error_;}
+    /// Errors in opening or writing to log file
+    const std::string& log_error() const { return log_error_; }
 
-   // returns vec = MSG, LOG, ERR, WAR, DBG, OTH
-   static void get_log_types(std::vector<std::string>&);
-
-private:
-	/// If writing to the log fails, close log file and re-create it.
-   std::string handle_write_failure();
-
-   /// make sure path is not a directory & path has a parent directory.
-   /// Will throw std::runtime_error for errors
-   static void check_new_path(const std::string& new_path);
-
-   void create_logimpl();
+    // returns vec = MSG, LOG, ERR, WAR, DBG, OTH
+    static void get_log_types(std::vector<std::string>&);
 
 private:
-  Log(const Log&) = delete;
-  const Log& operator=(const Log&) = delete;
+    /// If writing to the log fails, close log file and re-create it.
+    std::string handle_write_failure();
+
+    /// make sure path is not a directory & path has a parent directory.
+    /// Will throw std::runtime_error for errors
+    static void check_new_path(const std::string& new_path);
+
+    void create_logimpl();
 
 private:
-   explicit Log(const std::string& fileName);
-   static Log* instance_;
+    Log(const Log&)                  = delete;
+    const Log& operator=(const Log&) = delete;
 
-   std::unique_ptr<LogImpl> logImpl_;
-   std::string fileName_;
-   std::string log_error_;
+private:
+    explicit Log(const std::string& fileName);
+    static Log* instance_;
+
+    std::unique_ptr<LogImpl> logImpl_;
+    std::string fileName_;
+    std::string log_error_;
 };
 
 // Flush log on destruction
 class LogFlusher {
 public:
-   LogFlusher()= default;
-   ~LogFlusher();
+    LogFlusher() = default;
+    ~LogFlusher();
+
 private:
-   LogFlusher(const  LogFlusher&) = delete;
-   const  LogFlusher& operator=(const LogFlusher&) = delete;
+    LogFlusher(const LogFlusher&)                  = delete;
+    const LogFlusher& operator=(const LogFlusher&) = delete;
 };
 
 class LogTimer {
 public:
-   LogTimer(const char* msg) : msg_(msg) {}
-   ~LogTimer();
+    LogTimer(const char* msg) : msg_(msg) {}
+    ~LogTimer();
+
 private:
-   const char* msg_;
-   DurationTimer timer_;
-   LogTimer (const   LogTimer&) = delete;
-   const LogTimer& operator=(const LogTimer&) = delete;
+    const char* msg_;
+    DurationTimer timer_;
+    LogTimer(const LogTimer&)                  = delete;
+    const LogTimer& operator=(const LogTimer&) = delete;
 };
 
 /// The LogImpl allows the ofstream object to be closed, and so provide strongest
@@ -146,75 +150,78 @@ private:
 /// the log file
 class LogImpl {
 public:
-   explicit LogImpl(const std::string& filename);
-   ~LogImpl();
+    explicit LogImpl(const std::string& filename);
+    ~LogImpl();
 
-   bool log(Log::LogType lt,const std::string& message)            { return do_log(lt,message,true); }
-   bool log_no_newline(Log::LogType lt,const std::string& message) { return do_log(lt,message,false); }
-   bool append(const std::string& message);
+    bool log(Log::LogType lt, const std::string& message) { return do_log(lt, message, true); }
+    bool log_no_newline(Log::LogType lt, const std::string& message) { return do_log(lt, message, false); }
+    bool append(const std::string& message);
 
-   void create_time_stamp();
-   const std::string& get_cached_time_stamp() const { return time_stamp_;}
+    void create_time_stamp();
+    const std::string& get_cached_time_stamp() const { return time_stamp_; }
 
-   void flush();
-   const std::ofstream& stream() const { return file_;}
-   const std::string& log_open_error() const { return log_open_error_;}
-private:
-   bool do_log(Log::LogType,const std::string& message, bool newline);
+    void flush();
+    const std::ofstream& stream() const { return file_; }
+    const std::string& log_open_error() const { return log_open_error_; }
 
 private:
-  LogImpl(const LogImpl&) = delete;
-  const LogImpl& operator=(const LogImpl&) = delete;
+    bool do_log(Log::LogType, const std::string& message, bool newline);
 
 private:
-   std::string time_stamp_;
-   std::string log_type_and_time_stamp_; // re-use memory
-   std::string log_open_error_;
-   mutable std::ofstream file_;
-   unsigned int count_{0};
+    LogImpl(const LogImpl&)                  = delete;
+    const LogImpl& operator=(const LogImpl&) = delete;
+
+private:
+    std::string time_stamp_;
+    std::string log_type_and_time_stamp_; // re-use memory
+    std::string log_open_error_;
+    mutable std::ofstream file_;
+    unsigned int count_{0};
 };
 
 /// Utility class used for test, since server assumes log is always present
 class TestLog {
 public:
-	TestLog(const std::string& log_path);
-	~TestLog();
-private:
-	std::string log_path_;
-};
+    TestLog(const std::string& log_path);
+    ~TestLog();
 
+private:
+    std::string log_path_;
+};
 
 /// Utility class used for debug. Enables log file messages to be written to standard out
 class LogToCout {
 public:
-   LogToCout()   { flag_ = true;}
-   ~LogToCout()  { flag_ = false;}
-   static bool ok() { return flag_;}
+    LogToCout() { flag_ = true; }
+    ~LogToCout() { flag_ = false; }
+    static bool ok() { return flag_; }
+
 private:
-   LogToCout(const LogToCout&) = delete;
-   const LogToCout& operator=(const LogToCout&) = delete;
-   static bool flag_;
+    LogToCout(const LogToCout&)                  = delete;
+    const LogToCout& operator=(const LogToCout&) = delete;
+    static bool flag_;
 };
 
-bool log(Log::LogType,const std::string& message);
-bool log_no_newline(Log::LogType,const std::string& message);
+bool log(Log::LogType, const std::string& message);
+bool log_no_newline(Log::LogType, const std::string& message);
 bool log_append(const std::string& message);
-void log_assert(char const* expr,char const* file, long line, const std::string& message);
+void log_assert(char const* expr, char const* file, long line, const std::string& message);
 
 // allow user to do the following:
 // LOG(Log::WAR,"this is " << path << " ok ");
 //
 // helper, see STRINGIZE() macro
 template <typename Functor>
-std::string stringize_f(Functor const & f) {
-   std::ostringstream out;
-   f(out);
-   return out.str();
+std::string stringize_f(Functor const& f) {
+    std::ostringstream out;
+    f(out);
+    return out.str();
 }
-#define STRINGIZE(EXPRESSION)  (ecf::stringize_f(boost::lambda::_1 << EXPRESSION))
+#define STRINGIZE(EXPRESSION) (ecf::stringize_f(boost::lambda::_1 << EXPRESSION))
 #define LOG(level, EXPRESSION) ecf::log(level, STRINGIZE(EXPRESSION))
-#define LOG_ASSERT(expr,EXPRESSION) ((expr)? (static_cast<void>(0)): ecf::log_assert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
+#define LOG_ASSERT(expr, EXPRESSION) \
+    ((expr) ? (static_cast<void>(0)) : ecf::log_assert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
 
-}
+} // namespace ecf
 
 #endif

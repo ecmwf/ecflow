@@ -13,11 +13,11 @@
 
 #include <deque>
 #include <map>
-#include <string>
 #include <sstream>
+#include <string>
 
-#include "VFile.hpp"
 #include "VDir.hpp"
+#include "VFile.hpp"
 
 class AbstractFetchTask;
 class FetchQueue;
@@ -26,53 +26,56 @@ class ServerHandler;
 class VNode;
 class VReply;
 
-class FetchTaskFactory
-{
+class FetchTaskFactory {
 public:
     explicit FetchTaskFactory(const std::string&);
-    virtual ~FetchTaskFactory() = default;
+    virtual ~FetchTaskFactory()                             = default;
 
-    virtual  AbstractFetchTask* make(FetchQueueOwner* owner) = 0;
+    virtual AbstractFetchTask* make(FetchQueueOwner* owner) = 0;
     static AbstractFetchTask* create(const std::string& name, FetchQueueOwner* owner);
 
 private:
-    explicit FetchTaskFactory(const FetchTaskFactory&) = delete;
+    explicit FetchTaskFactory(const FetchTaskFactory&)   = delete;
     FetchTaskFactory& operator=(const FetchTaskFactory&) = delete;
-
 };
 
-template<class T>
-class FetchTaskMaker : public FetchTaskFactory
-{
+template <class T>
+class FetchTaskMaker : public FetchTaskFactory {
     AbstractFetchTask* make(FetchQueueOwner* owner) override { return new T(owner); }
+
 public:
     explicit FetchTaskMaker(const std::string& name) : FetchTaskFactory(name) {}
 };
 
-
-class AbstractFetchTask
-{
+class AbstractFetchTask {
     friend class FetchQueue;
+
 public:
-    enum Status {NoStatus, SucceededStatus, FinishedStatus, FailedStatus, RunningStatus};
-    enum RunCondition {NoCondition, RunIfPrevFailed};
-    AbstractFetchTask(const std::string& name, FetchQueueOwner *owner) : name_(name), owner_(owner) {}
+    enum Status { NoStatus, SucceededStatus, FinishedStatus, FailedStatus, RunningStatus };
+    enum RunCondition { NoCondition, RunIfPrevFailed };
+    AbstractFetchTask(const std::string& name, FetchQueueOwner* owner) : name_(name), owner_(owner) {}
     virtual ~AbstractFetchTask() = default;
-    virtual void run()=0;
+    virtual void run()           = 0;
     virtual void stop() {}
     virtual void clear();
-    const std::string& name() const {return name_;}
-    VNode* node() const {return node_;}
-    const std::string filePath() const {return filePath_;}
-    void setRunCondition(RunCondition c) {runCondition_ = c;}
+    const std::string& name() const { return name_; }
+    VNode* node() const { return node_; }
+    const std::string filePath() const { return filePath_; }
+    void setRunCondition(RunCondition c) { runCondition_ = c; }
     bool checRunCondition(AbstractFetchTask* prev) const;
-    void setAppendResult(bool b) {appendResult_ = b;}
-    void reset(const std::string& filePath) {filePath_ = filePath;}
-    void reset(ServerHandler* server,VNode* node,const std::string& filePath);
-    void reset(ServerHandler* server,VNode* node,const std::string& filePath,size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache);
-    void setDeltaPos(size_t deltaPos) {deltaPos_=deltaPos;}
-    void setUseCache(bool useCache) {useCache_=useCache;}
-    void setUseMetaData(bool b) {useMetaData_ = b;}
+    void setAppendResult(bool b) { appendResult_ = b; }
+    void reset(const std::string& filePath) { filePath_ = filePath; }
+    void reset(ServerHandler* server, VNode* node, const std::string& filePath);
+    void reset(ServerHandler* server,
+               VNode* node,
+               const std::string& filePath,
+               size_t deltaPos,
+               unsigned int modTime,
+               const std::string& checkSum,
+               bool useCache);
+    void setDeltaPos(size_t deltaPos) { deltaPos_ = deltaPos; }
+    void setUseCache(bool useCache) { useCache_ = useCache; }
+    void setUseMetaData(bool b) { useMetaData_ = b; }
     std::string print() const;
 
 protected:
@@ -82,7 +85,7 @@ protected:
     void setQueue(FetchQueue*);
 
     std::string name_;
-    FetchQueueOwner *owner_{nullptr};
+    FetchQueueOwner* owner_{nullptr};
     FetchQueue* queue_{nullptr};
     Status status_{NoStatus};
     RunCondition runCondition_{NoCondition};
@@ -105,19 +108,21 @@ protected:
 //  - RunAll: runs all the tasks
 // If all the tasks were run fetchQueueFinished() is called on the owner.
 
-class FetchQueue
-{
+class FetchQueue {
 public:
-    enum Policy {RunUntilFirstSucceeded, RunAll};
-    FetchQueue(Policy policy, FetchQueueOwner *owner) : policy_(policy), owner_(owner) {}
+    enum Policy { RunUntilFirstSucceeded, RunAll };
+    FetchQueue(Policy policy, FetchQueueOwner* owner) : policy_(policy), owner_(owner) {}
     void add(AbstractFetchTask* t);
     void run();
     void clear();
-    Policy policy() const {return policy_;}
-    void setPolicy(Policy p) {clear(); policy_=p;}
-    bool isEmpty() const {return queue_.empty();}
-    std::size_t size() const {return queue_.size();}
-    FetchQueueOwner* owner() const {return owner_;}
+    Policy policy() const { return policy_; }
+    void setPolicy(Policy p) {
+        clear();
+        policy_ = p;
+    }
+    bool isEmpty() const { return queue_.empty(); }
+    std::size_t size() const { return queue_.size(); }
+    FetchQueueOwner* owner() const { return owner_; }
     std::string print() const;
 
     void taskSucceeded(AbstractFetchTask*);
@@ -125,31 +130,30 @@ public:
     void taskFailed(AbstractFetchTask*);
 
 private:
-    enum Status {IdleState, RunningState};
+    enum Status { IdleState, RunningState };
     void next();
-    void finish(AbstractFetchTask* lastTask=nullptr);
+    void finish(AbstractFetchTask* lastTask = nullptr);
 
     Policy policy_{RunUntilFirstSucceeded};
-    FetchQueueOwner *owner_{nullptr};
+    FetchQueueOwner* owner_{nullptr};
     std::deque<AbstractFetchTask*> queue_;
     Status status_{IdleState};
 };
 
-class FetchQueueOwner
-{
+class FetchQueueOwner {
 public:
     FetchQueueOwner() = default;
     virtual ~FetchQueueOwner();
     virtual void clear();
-    virtual VReply* theReply() const=0;
-    virtual VFile_ptr findInCache(const std::string& /*fileName*/) {return nullptr;}
+    virtual VReply* theReply() const = 0;
+    virtual VFile_ptr findInCache(const std::string& /*fileName*/) { return nullptr; }
     virtual void addToCache(VFile_ptr) {}
-    virtual void fetchQueueSucceeded() = 0;
-    virtual void fetchQueueFinished(const std::string& filePath, VNode* n=nullptr) = 0;
+    virtual void fetchQueueSucceeded()                                               = 0;
+    virtual void fetchQueueFinished(const std::string& filePath, VNode* n = nullptr) = 0;
     virtual void progressStart(const std::string& /*msg*/, int /*max*/) {}
     virtual void progressUpdate(const std::string& /*msg*/, int /*value*/) {}
     virtual void progressStop() {}
-    virtual VDir_ptr dirToFile(const std::string& /*fileName*/) const {return nullptr;}
+    virtual VDir_ptr dirToFile(const std::string& /*fileName*/) const { return nullptr; }
     bool isEmpty() const;
 
 protected:
@@ -160,10 +164,7 @@ protected:
     std::map<std::string, std::deque<AbstractFetchTask*>> unusedTasks_;
 };
 
-
-std::ostream&  operator <<(std::ostream &,AbstractFetchTask*);
-std::ostream&  operator <<(std::ostream &,FetchQueue*);
+std::ostream& operator<<(std::ostream&, AbstractFetchTask*);
+std::ostream& operator<<(std::ostream&, FetchQueue*);
 
 #endif // OUTPUTFETCHTASK_HPP
-
-

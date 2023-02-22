@@ -12,10 +12,9 @@
 
 class ServerHandler;
 
-class ServerComObserver
-{
+class ServerComObserver {
 public:
-    ServerComObserver() = default;
+    ServerComObserver()          = default;
     virtual ~ServerComObserver() = default;
 
     virtual void notifyRefreshTimerStarted(ServerHandler*) {}
@@ -26,4 +25,3 @@ public:
 };
 
 #endif // SERVERCOMOBSERVER_HPP
-

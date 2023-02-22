@@ -27,23 +27,20 @@
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 
-TriggerTableView::TriggerTableView(QWidget* parent) :
-    QTreeView(parent)
-{
-    setProperty("view","trigger");
+TriggerTableView::TriggerTableView(QWidget* parent) : QTreeView(parent) {
+    setProperty("view", "trigger");
 
-    actionHandler_=new ActionHandler(this,this);
+    actionHandler_ = new ActionHandler(this, this);
 
-    //Set the model
+    // Set the model
     setTableModel(model_);
 
-    //Create delegate to the view
-    delegate_=new TriggerViewDelegate(this);
+    // Create delegate to the view
+    delegate_ = new TriggerViewDelegate(this);
     delegate_->setRenderSeparatorLine(true);
     setItemDelegate(delegate_);
 
-    connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
-            this,SLOT(slotSizeHintChangedGlobal()));
+    connect(delegate_, SIGNAL(sizeHintChangedGlobal()), this, SLOT(slotSizeHintChangedGlobal()));
 
     setHeaderHidden(true);
     setRootIsDecorated(false);
@@ -54,217 +51,177 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     //!!!!We need to do it because:
-    //The background colour between the view's left border and the nodes cannot be
-    //controlled by delegates or stylesheets. It always takes the QPalette::Highlight
-    //colour from the palette. Here we set this to transparent so that Qt could leave
-    //this area empty and we will fill it appropriately in our delegate.
-    QPalette pal=palette();
-    pal.setColor(QPalette::Highlight,QColor(128,128,128,0));//Qt::transparent);
+    // The background colour between the view's left border and the nodes cannot be
+    // controlled by delegates or stylesheets. It always takes the QPalette::Highlight
+    // colour from the palette. Here we set this to transparent so that Qt could leave
+    // this area empty and we will fill it appropriately in our delegate.
+    QPalette pal = palette();
+    pal.setColor(QPalette::Highlight, QColor(128, 128, 128, 0)); // Qt::transparent);
     setPalette(pal);
 
-    //Context menu
+    // Context menu
     enableContextMenu(true);
 
-    //Selection
-    connect(this,SIGNAL(clicked(const QModelIndex&)),
-            this,SLOT(slotSelectItem(const QModelIndex&)));
+    // Selection
+    connect(this, SIGNAL(clicked(const QModelIndex&)), this, SLOT(slotSelectItem(const QModelIndex&)));
 
-    connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
-            this,SLOT(slotDoubleClickItem(const QModelIndex&)));
-
+    connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(slotDoubleClickItem(const QModelIndex&)));
 }
 
-TriggerTableView::~TriggerTableView()
-{
+TriggerTableView::~TriggerTableView() {
     delete actionHandler_;
 }
 
-void TriggerTableView::enableOneRowMode()
-{
+void TriggerTableView::enableOneRowMode() {
     int h = delegate_->nodeBoxHeight();
-    setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-    setFixedHeight(h+2);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    setFixedHeight(h + 2);
 }
 
-//We should only call it once!!!
-void TriggerTableView::setTableModel(TriggerTableModel* model)
-{
-    Q_ASSERT(model_==nullptr);
-    model_=model;
-    QTreeView::setModel(model);  
+// We should only call it once!!!
+void TriggerTableView::setTableModel(TriggerTableModel* model) {
+    Q_ASSERT(model_ == nullptr);
+    model_ = model;
+    QTreeView::setModel(model);
 }
 
-void TriggerTableView::enableContextMenu(bool enable)
-{
-    if (enable)
-    {
+void TriggerTableView::enableContextMenu(bool enable) {
+    if (enable) {
         setContextMenuPolicy(Qt::CustomContextMenu);
 
-        connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-                            this, SLOT(slotContextMenu(const QPoint &)));
+        connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotContextMenu(const QPoint&)));
     }
-    else
-    {
+    else {
         setContextMenuPolicy(Qt::NoContextMenu);
 
-        disconnect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-                            this, SLOT(slotContextMenu(const QPoint &)));
+        disconnect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotContextMenu(const QPoint&)));
     }
 }
 
-
-//Collects the selected list of indexes
-QModelIndexList TriggerTableView::selectedList()
-{
+// Collects the selected list of indexes
+QModelIndexList TriggerTableView::selectedList() {
     QModelIndexList lst;
-    Q_FOREACH(QModelIndex idx,selectedIndexes())
-    {
-        if(idx.column() == 0)
+    Q_FOREACH (QModelIndex idx, selectedIndexes()) {
+        if (idx.column() == 0)
             lst << idx;
     }
     return lst;
 }
 
 // this is called even if the user clicks outside of the node list to deselect all
-void TriggerTableView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
-{
-    QModelIndexList lst=selectedIndexes();
-    if(lst.count() > 0)
-    {
-        TriggerTableItem* item=model_->indexToItem(lst.front());
-        if(item && item->item())
-        {
+void TriggerTableView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+    QModelIndexList lst = selectedIndexes();
+    if (lst.count() > 0) {
+        TriggerTableItem* item = model_->indexToItem(lst.front());
+        if (item && item->item()) {
             Q_EMIT selectionChanged(item);
         }
     }
 
     QTreeView::selectionChanged(selected, deselected);
 
-    //Q_EMIT selectionChanged();
+    // Q_EMIT selectionChanged();
 }
 
-void TriggerTableView::slotSelectItem(const QModelIndex&)
-{
-    QModelIndexList lst=selectedIndexes();
+void TriggerTableView::slotSelectItem(const QModelIndex&) {
+    QModelIndexList lst = selectedIndexes();
 
-    if(lst.count() > 0)
-    {
-        TriggerTableItem* item=model_->indexToItem(lst.front());
-        if(item && item->item())
-        {
+    if (lst.count() > 0) {
+        TriggerTableItem* item = model_->indexToItem(lst.front());
+        if (item && item->item()) {
             Q_EMIT clicked(item);
         }
     }
 }
 
-void TriggerTableView::setCurrentItem(TriggerTableItem* item)
-{
-    QModelIndex idx=model_->itemToIndex(item);
-    if(idx.isValid())
-    {
+void TriggerTableView::setCurrentItem(TriggerTableItem* item) {
+    QModelIndex idx = model_->itemToIndex(item);
+    if (idx.isValid()) {
         setCurrentIndex(idx);
     }
 }
 
-void TriggerTableView::slotDoubleClickItem(const QModelIndex& index)
-{    
-    VInfo_ptr info=model_->nodeInfo(index);
-    if(info)
-    {
+void TriggerTableView::slotDoubleClickItem(const QModelIndex& index) {
+    VInfo_ptr info = model_->nodeInfo(index);
+    if (info) {
         Q_EMIT linkSelected(info);
     }
 }
 
-void TriggerTableView::slotContextMenu(const QPoint &position)
-{
-    QModelIndexList lst=selectedList();
-    //QModelIndex index=indexAt(position);
-    QPoint scrollOffset(horizontalScrollBar()->value(),verticalScrollBar()->value());
+void TriggerTableView::slotContextMenu(const QPoint& position) {
+    QModelIndexList lst = selectedList();
+    // QModelIndex index=indexAt(position);
+    QPoint scrollOffset(horizontalScrollBar()->value(), verticalScrollBar()->value());
 
-    handleContextMenu(indexAt(position),lst,mapToGlobal(position),position+scrollOffset,this);
+    handleContextMenu(indexAt(position), lst, mapToGlobal(position), position + scrollOffset, this);
 }
 
-
-void TriggerTableView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
-{
-    //Node actions
-    if(indexClicked.isValid())   //indexLst[0].isValid() && indexLst[0].column() == 0)
+void TriggerTableView::handleContextMenu(QModelIndex indexClicked,
+                                         QModelIndexList indexLst,
+                                         QPoint globalPos,
+                                         QPoint widgetPos,
+                                         QWidget* widget) {
+    // Node actions
+    if (indexClicked.isValid()) // indexLst[0].isValid() && indexLst[0].column() == 0)
     {
         std::vector<VInfo_ptr> nodeLst;
-        for(int i=0; i < indexLst.count(); i++)
-        {
-            VInfo_ptr info=model_->nodeInfo(indexLst[i]);
-            if(info && !info->isEmpty())
+        for (int i = 0; i < indexLst.count(); i++) {
+            VInfo_ptr info = model_->nodeInfo(indexLst[i]);
+            if (info && !info->isEmpty())
                 nodeLst.push_back(info);
         }
 
-        actionHandler_->contextMenu(nodeLst,globalPos);
+        actionHandler_->contextMenu(nodeLst, globalPos);
     }
 
-    //Desktop actions
-    else
-    {
-    }
+    // Desktop actions
+    else {}
 }
 
-void TriggerTableView::slotCommandShortcut()
-{
+void TriggerTableView::slotCommandShortcut() {
     if (auto* sc = static_cast<QShortcut*>(QObject::sender())) {
-        QModelIndexList indexLst=selectedList();
+        QModelIndexList indexLst = selectedList();
         std::vector<VInfo_ptr> nodeLst;
-        for(int i=0; i < indexLst.count(); i++)
-        {
-            VInfo_ptr info=model_->nodeInfo(indexLst[i]);
-            if(info && !info->isEmpty())
+        for (int i = 0; i < indexLst.count(); i++) {
+            VInfo_ptr info = model_->nodeInfo(indexLst[i]);
+            if (info && !info->isEmpty())
                 nodeLst.push_back(info);
         }
         actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }
 }
 
-void TriggerTableView::slotViewCommand(VInfo_ptr info,QString cmd)
-{
-    if(cmd == "lookup")
-    {
+void TriggerTableView::slotViewCommand(VInfo_ptr info, QString cmd) {
+    if (cmd == "lookup") {
         Q_EMIT linkSelected(info);
     }
 
-    else if(cmd ==  "edit")
-    {
-        if(info && info->isAttribute())
-        {
-            AttributeEditor::edit(info,this);
+    else if (cmd == "edit") {
+        if (info && info->isAttribute()) {
+            AttributeEditor::edit(info, this);
         }
     }
 }
 
-void TriggerTableView::reload()
-{
-    //model_->reload();
-    //expandAll();
+void TriggerTableView::reload() {
+    // model_->reload();
+    // expandAll();
 }
 
-void TriggerTableView::rerender()
-{
-    if(needItemsLayout_)
-    {
+void TriggerTableView::rerender() {
+    if (needItemsLayout_) {
         doItemsLayout();
-        needItemsLayout_=false;
+        needItemsLayout_ = false;
     }
-    else
-    {
+    else {
         viewport()->update();
     }
 }
 
-void TriggerTableView::slotRerender()
-{
+void TriggerTableView::slotRerender() {
     rerender();
 }
 
-
-void TriggerTableView::slotSizeHintChangedGlobal()
-{
-    needItemsLayout_=true;
+void TriggerTableView::slotSizeHintChangedGlobal() {
+    needItemsLayout_ = true;
 }
-

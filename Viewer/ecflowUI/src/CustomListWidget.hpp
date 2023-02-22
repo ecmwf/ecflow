@@ -12,30 +12,26 @@
 
 #include <QListWidget>
 
-class CustomListWidget : public QListWidget
-{
-Q_OBJECT
+class CustomListWidget : public QListWidget {
+    Q_OBJECT
 
 public:
-	explicit CustomListWidget(QWidget* parent=nullptr);
+    explicit CustomListWidget(QWidget* parent = nullptr);
 
-	void addItems(QStringList lst,bool checkState);
-	void addItems(QStringList lst,bool checkState,QList<QColor>);
-	QStringList selection() const;
-	bool hasSelection() const;
+    void addItems(QStringList lst, bool checkState);
+    void addItems(QStringList lst, bool checkState, QList<QColor>);
+    QStringList selection() const;
+    bool hasSelection() const;
     void setSelectionWithList(QStringList sel);
 
 public Q_SLOTS:
-	void clearSelection();
+    void clearSelection();
 
 protected Q_SLOTS:
-	void slotItemChanged(QListWidgetItem*);
+    void slotItemChanged(QListWidgetItem*);
 
 Q_SIGNALS:
     void itemSelectionChanged();
-
-
 };
-
 
 #endif /* VIEWER_SRC_CUSTOMLISTWIDGET_HPP_ */

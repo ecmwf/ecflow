@@ -19,25 +19,28 @@ class ClientInvoker;
 
 class ZombieUtil {
 private:
-  ZombieUtil(const ZombieUtil&) = delete;
-  const ZombieUtil& operator=(const ZombieUtil&) = delete;
+    ZombieUtil(const ZombieUtil&)                  = delete;
+    const ZombieUtil& operator=(const ZombieUtil&) = delete;
+
 public:
-   static void test_clean_up(int timeout);
-   static int do_zombie_user_action(ecf::User::Action uc,
-                                    int expected_action_cnt,
-                                    int max_time_to_wait,
-                                    bool fail_if_to_long = true);
+    static void test_clean_up(int timeout);
+    static int do_zombie_user_action(ecf::User::Action uc,
+                                     int expected_action_cnt,
+                                     int max_time_to_wait,
+                                     bool fail_if_to_long = true);
 };
 
 class TestClean {
 private:
-  TestClean(const TestClean&) = delete;
-  const TestClean& operator=(const TestClean&) = delete;
+    TestClean(const TestClean&)                  = delete;
+    const TestClean& operator=(const TestClean&) = delete;
+
 public:
-   explicit TestClean(int timeout = 25) : timeout_(timeout)  { ZombieUtil::test_clean_up(timeout);}
-   ~TestClean() { ZombieUtil::test_clean_up(timeout_);}
+    explicit TestClean(int timeout = 25) : timeout_(timeout) { ZombieUtil::test_clean_up(timeout); }
+    ~TestClean() { ZombieUtil::test_clean_up(timeout_); }
+
 private:
-   int timeout_;
+    int timeout_;
 };
 
 #endif

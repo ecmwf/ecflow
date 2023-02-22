@@ -10,133 +10,113 @@
 
 #include "TextPagerSearchHighlighter.hpp"
 
+#include <QDebug>
+
 #include "VConfig.hpp"
 #include "VProperty.hpp"
 
-#include <QDebug>
+QColor TextPagerSearchHighlighter::bgColour_ = QColor(200, 255, 200);
 
-QColor TextPagerSearchHighlighter::bgColour_=QColor(200, 255, 200);
+TextPagerSearchHighlighter::TextPagerSearchHighlighter(QObject* parent) : SyntaxHighlighter(parent) {
+    if (VProperty* p = VConfig::instance()->find("panel.search.highlightColour")) {
+        bgColour_ = p->value().value<QColor>();
+    }
 
-TextPagerSearchHighlighter::TextPagerSearchHighlighter(QObject *parent) :
-  SyntaxHighlighter(parent)
- {
-	if(VProperty *p=VConfig::instance()->find("panel.search.highlightColour"))
-	{
-		bgColour_=p->value().value<QColor>();
-	}
+    format_.setBackground(Qt::yellow);
 
-	format_.setBackground(Qt::yellow);
-
-	rx_=QRegExp("(server)");
- }
-
-//from QRegExp
-bool TextPagerSearchHighlighter::isWordCharacter(const QChar& ch) const
-{
-	return ch.isLetterOrNumber() || ch.isMark() || ch == QLatin1Char('_');
+    rx_ = QRegExp("(server)");
 }
 
-void TextPagerSearchHighlighter::highlightBlock(const QString &string)
-{
-	if(string.simplified().isEmpty())
-		return;
-
-	if(mode_ == RegexpMode)
-	{
-        if(rx_.isEmpty()) return;
-        int index=0;
-		while((index = rx_.indexIn(string, index)) != -1) {
-
-			if(rx_.matchedLength() == 0)
-				return;
-			setFormat(index, rx_.matchedLength(), format_);
-			index+=rx_.matchedLength();
-		}
-	}
-	else if(mode_ == TextMode)
-	{
-        if(text_.isEmpty()) return;
-        int index=0;
-		while((index = string.indexOf(text_,index,
-			   caseSensitive_?Qt::CaseSensitive:Qt::CaseInsensitive)) != -1)
-		{
-			bool found=true;
-			if(wholeWords_)
-			{
-				if(index>0)
-					found=!isWordCharacter(string.at(index-1));
-				if(found && index + text_.size() < string.size())
-					found=!isWordCharacter(string.at(index+text_.size()));
-			}
-			if(found)
-				setFormat(index, text_.size(), format_);
-
-			index+=string.size();
-		}
-	}
+// from QRegExp
+bool TextPagerSearchHighlighter::isWordCharacter(const QChar& ch) const {
+    return ch.isLetterOrNumber() || ch.isMark() || ch == QLatin1Char('_');
 }
 
-void TextPagerSearchHighlighter::reset(QString txt,TextPagerDocument::FindMode mode,bool apply)
-{
-	bool changed=false;
-	if(mode_ != TextMode)
-	{
-		mode_=TextMode;
-		rx_=QRegExp();
-		changed=true;
-	}
+void TextPagerSearchHighlighter::highlightBlock(const QString& string) {
+    if (string.simplified().isEmpty())
+        return;
 
-	if(txt != text_)
-	{
-		text_=txt;
-		changed=true;
-	}
+    if (mode_ == RegexpMode) {
+        if (rx_.isEmpty())
+            return;
+        int index = 0;
+        while ((index = rx_.indexIn(string, index)) != -1) {
 
-	bool cs=mode & TextPagerDocument::FindCaseSensitively;
-	if(cs != caseSensitive_)
-	{
-		caseSensitive_=cs;
-		changed=true;
-	}
+            if (rx_.matchedLength() == 0)
+                return;
+            setFormat(index, rx_.matchedLength(), format_);
+            index += rx_.matchedLength();
+        }
+    }
+    else if (mode_ == TextMode) {
+        if (text_.isEmpty())
+            return;
+        int index = 0;
+        while ((index = string.indexOf(text_, index, caseSensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive)) != -1) {
+            bool found = true;
+            if (wholeWords_) {
+                if (index > 0)
+                    found = !isWordCharacter(string.at(index - 1));
+                if (found && index + text_.size() < string.size())
+                    found = !isWordCharacter(string.at(index + text_.size()));
+            }
+            if (found)
+                setFormat(index, text_.size(), format_);
 
-	bool ww=mode & TextPagerDocument::FindWholeWords;
-	if(ww != wholeWords_)
-	{
-		wholeWords_=ww;
-		changed=true;
-	}
-
-	if(changed && apply)
-		rehighlight();
-
+            index += string.size();
+        }
+    }
 }
 
-void TextPagerSearchHighlighter::reset(QRegExp rx,TextPagerDocument::FindMode mode,bool apply)
-{
-	bool changed=false;
-	if(mode_ != RegexpMode)
-	{
-		mode_=RegexpMode;
-		text_.clear();
-		changed=true;
-	}
+void TextPagerSearchHighlighter::reset(QString txt, TextPagerDocument::FindMode mode, bool apply) {
+    bool changed = false;
+    if (mode_ != TextMode) {
+        mode_   = TextMode;
+        rx_     = QRegExp();
+        changed = true;
+    }
 
-	if(rx_.pattern() != rx.pattern() || rx_.caseSensitivity() != rx.caseSensitivity() ||
-	   rx_.patternSyntax() !=  rx.patternSyntax())
-	{
-		rx_=rx;
-		changed=true;
-	}
+    if (txt != text_) {
+        text_   = txt;
+        changed = true;
+    }
 
-	if(changed && apply)
-		rehighlight();
+    bool cs = mode & TextPagerDocument::FindCaseSensitively;
+    if (cs != caseSensitive_) {
+        caseSensitive_ = cs;
+        changed        = true;
+    }
+
+    bool ww = mode & TextPagerDocument::FindWholeWords;
+    if (ww != wholeWords_) {
+        wholeWords_ = ww;
+        changed     = true;
+    }
+
+    if (changed && apply)
+        rehighlight();
 }
 
-void TextPagerSearchHighlighter::clear()
-{
-    rx_=QRegExp();
+void TextPagerSearchHighlighter::reset(QRegExp rx, TextPagerDocument::FindMode mode, bool apply) {
+    bool changed = false;
+    if (mode_ != RegexpMode) {
+        mode_ = RegexpMode;
+        text_.clear();
+        changed = true;
+    }
+
+    if (rx_.pattern() != rx.pattern() || rx_.caseSensitivity() != rx.caseSensitivity() ||
+        rx_.patternSyntax() != rx.patternSyntax()) {
+        rx_     = rx;
+        changed = true;
+    }
+
+    if (changed && apply)
+        rehighlight();
+}
+
+void TextPagerSearchHighlighter::clear() {
+    rx_ = QRegExp();
     text_.clear();
     rehighlight();
 }
-
-

@@ -15,33 +15,29 @@
 #ifndef TEXTPAGERCURSOR_HPP__
 #define TEXTPAGERCURSOR_HPP__
 
-#include <QString>
 #include <QKeyEvent>
 #include <QSize>
+#include <QString>
 #include <QTextLine>
 
 class TextPagerEdit;
 class TextPagerLayout;
 class TextPagerDocument;
 struct TextCursorSharedPrivate;
-class TextPagerCursor
-{
+class TextPagerCursor {
 public:
     TextPagerCursor();
-    explicit TextPagerCursor(const TextPagerDocument *document, int pos = 0, int anchor = -1);
-    explicit TextPagerCursor(const TextPagerEdit *document, int pos = 0, int anchor = -1);
-    TextPagerCursor(const TextPagerCursor &cursor);
-    TextPagerCursor &operator=(const TextPagerCursor &other);
+    explicit TextPagerCursor(const TextPagerDocument* document, int pos = 0, int anchor = -1);
+    explicit TextPagerCursor(const TextPagerEdit* document, int pos = 0, int anchor = -1);
+    TextPagerCursor(const TextPagerCursor& cursor);
+    TextPagerCursor& operator=(const TextPagerCursor& other);
     ~TextPagerCursor();
 
-    TextPagerDocument *document() const;
+    TextPagerDocument* document() const;
     bool isNull() const;
     inline bool isValid() const { return !isNull(); }
 
-    enum MoveMode {
-        MoveAnchor,
-        KeepAnchor
-    };
+    enum MoveMode { MoveAnchor, KeepAnchor };
 
     void setPosition(int pos, MoveMode mode = MoveAnchor);
     int position() const;
@@ -86,11 +82,7 @@ public:
 
     bool movePosition(MoveOperation op, MoveMode = MoveAnchor, int n = 1);
 
-    enum SelectionType {
-        WordUnderCursor,
-        LineUnderCursor,
-        BlockUnderCursor
-    };
+    enum SelectionType { WordUnderCursor, LineUnderCursor, BlockUnderCursor };
 
     void select(SelectionType selection);
 
@@ -109,32 +101,33 @@ public:
     bool atStart() const;
     bool atEnd() const;
 
-    bool operator!=(const TextPagerCursor &rhs) const;
-    bool operator<(const TextPagerCursor &rhs) const;
-    bool operator<=(const TextPagerCursor &rhs) const;
-    bool operator==(const TextPagerCursor &rhs) const;
-    bool operator>=(const TextPagerCursor &rhs) const;
-    bool operator>(const TextPagerCursor &rhs) const;
+    bool operator!=(const TextPagerCursor& rhs) const;
+    bool operator<(const TextPagerCursor& rhs) const;
+    bool operator<=(const TextPagerCursor& rhs) const;
+    bool operator==(const TextPagerCursor& rhs) const;
+    bool operator>=(const TextPagerCursor& rhs) const;
+    bool operator>(const TextPagerCursor& rhs) const;
 
-    bool isCopyOf(const TextPagerCursor &other) const;
+    bool isCopyOf(const TextPagerCursor& other) const;
 
     int columnNumber() const;
     int lineNumber() const;
+
 private:
-    bool cursorMoveKeyEvent(QKeyEvent *e);
+    bool cursorMoveKeyEvent(QKeyEvent* e);
     void cursorChanged(bool ensureCursorVisible);
     void detach();
     bool ref();
     bool deref();
 
-    TextCursorSharedPrivate *d{nullptr};
-    TextPagerEdit *textEdit{nullptr};
+    TextCursorSharedPrivate* d{nullptr};
+    TextPagerEdit* textEdit{nullptr};
     friend class TextPagerEdit;
     friend class TextLayoutCacheManager;
     friend class TextPagerDocument;
     friend struct TextDocumentPrivate;
 };
 
-QDebug operator<<(QDebug dbg, const TextPagerCursor &cursor);
+QDebug operator<<(QDebug dbg, const TextPagerCursor& cursor);
 
 #endif

@@ -7,52 +7,47 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <QtGlobal>
-#include <QShortcut>
-#include <QMenu>
-#include <QShowEvent>
 #include "AbstractSearchLine.hpp"
+
+#include <QMenu>
+#include <QShortcut>
+#include <QShowEvent>
+#include <QtGlobal>
+
 #include "IconProvider.hpp"
 #include "ViewerUtil.hpp"
 
-AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
-  QWidget(parent)
-{
-	setupUi(this);
+AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-	confirmSearchLabel_->hide();
-	confirmSearchLabel_->setShowTypeTitle(false);
+    confirmSearchLabel_->hide();
+    confirmSearchLabel_->setShowTypeTitle(false);
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-	searchLine_->setPlaceholderText(tr("Find"));
-	label_->hide();
+    searchLine_->setPlaceholderText(tr("Find"));
+    label_->hide();
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-	searchLine_->setClearButtonEnabled(true);
+    searchLine_->setClearButtonEnabled(true);
 #endif
 
-	connect(searchLine_, SIGNAL(textChanged(QString)),
-		this, SLOT(slotFind(QString)));
+    connect(searchLine_, SIGNAL(textChanged(QString)), this, SLOT(slotFind(QString)));
 
-	connect(searchLine_, SIGNAL( returnPressed()),
-		this, SLOT(slotFindNext()));
+    connect(searchLine_, SIGNAL(returnPressed()), this, SLOT(slotFindNext()));
 
-	connect(actionNext_,SIGNAL(triggered()),
-		this, SLOT(slotFindNext()));
+    connect(actionNext_, SIGNAL(triggered()), this, SLOT(slotFindNext()));
 
-	connect(actionPrev_,SIGNAL(triggered()),
-		this, SLOT(slotFindPrev()));
+    connect(actionPrev_, SIGNAL(triggered()), this, SLOT(slotFindPrev()));
 
-	connect(closeTb_,SIGNAL(clicked()),
-		this, SLOT(slotClose()));
+    connect(closeTb_, SIGNAL(clicked()), this, SLOT(slotClose()));
 
-	nextTb_->setDefaultAction(actionNext_);
-	prevTb_->setDefaultAction(actionPrev_);
+    nextTb_->setDefaultAction(actionNext_);
+    prevTb_->setDefaultAction(actionPrev_);
 
-    oriBrush_=QBrush(searchLine_->palette().brush(QPalette::Base));
-    redBrush_=ViewerUtil::lineEditRedBg();
-    greenBrush_=ViewerUtil::lineEditGreenBg();
+    oriBrush_   = QBrush(searchLine_->palette().brush(QPalette::Base));
+    redBrush_   = ViewerUtil::lineEditRedBg();
+    greenBrush_ = ViewerUtil::lineEditGreenBg();
 
 #if 0
     oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
@@ -61,153 +56,132 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 #endif
 
     QIcon icon;
-    icon.addPixmap(QPixmap(":/viewer/close_grey.svg"),QIcon::Normal);
-    icon.addPixmap(QPixmap(":/viewer/close_red.svg"),QIcon::Active);
+    icon.addPixmap(QPixmap(":/viewer/close_grey.svg"), QIcon::Normal);
+    icon.addPixmap(QPixmap(":/viewer/close_red.svg"), QIcon::Active);
     closeTb_->setIcon(icon);
 
-	// for the 'find next' functionality, although Qt (at the time of writing) uses
-	// both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
-	// we have to add CTRL-G ourselves.
+    // for the 'find next' functionality, although Qt (at the time of writing) uses
+    // both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
+    // we have to add CTRL-G ourselves.
 
-	QKeySequence ctrlg(tr("Ctrl+G"));
-    auto *shortcut = new QShortcut(ctrlg, parent); // should be destroyed by parent
+    QKeySequence ctrlg(tr("Ctrl+G"));
+    auto* shortcut = new QShortcut(ctrlg, parent); // should be destroyed by parent
     connect(shortcut, SIGNAL(activated()), this, SLOT(slotFindNext()));
 
-	setFocusProxy(searchLine_);
+    setFocusProxy(searchLine_);
 
-	// set the menu on the Options toolbutton
-	auto *menu=new QMenu(this);
-	menu->addAction(actionCaseSensitive_);
-	menu->addAction(actionWholeWords_);
-	menu->addAction(actionHighlightAll_);
-	optionsTb_->setMenu(menu);
+    // set the menu on the Options toolbutton
+    auto* menu = new QMenu(this);
+    menu->addAction(actionCaseSensitive_);
+    menu->addAction(actionWholeWords_);
+    menu->addAction(actionHighlightAll_);
+    optionsTb_->setMenu(menu);
 
-    matchModeCb_->setMatchMode(StringMatchMode(StringMatchMode::ContainsMatch));  // set the default match mode
-    //matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
+    matchModeCb_->setMatchMode(StringMatchMode(StringMatchMode::ContainsMatch)); // set the default match mode
+    // matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
 
     setConfirmSearch(false);
 }
 
-AbstractSearchLine::~AbstractSearchLine()
-= default;
+AbstractSearchLine::~AbstractSearchLine() = default;
 
-void AbstractSearchLine::clear()
-{
-	//clearRequested();
-	searchLine_->clear();
+void AbstractSearchLine::clear() {
+    // clearRequested();
+    searchLine_->clear();
 }
 
-bool AbstractSearchLine::isEmpty()
-{
-	return searchLine_->text().isEmpty();
+bool AbstractSearchLine::isEmpty() {
+    return searchLine_->text().isEmpty();
 }
 
-void AbstractSearchLine::selectAll()
-{
-	searchLine_->selectAll();
+void AbstractSearchLine::selectAll() {
+    searchLine_->selectAll();
 }
 
-void AbstractSearchLine::toDefaultState()
-{
-	QPalette p=searchLine_->palette();
-    p.setBrush(QPalette::Base,oriBrush_);
-	searchLine_->setPalette(p);
+void AbstractSearchLine::toDefaultState() {
+    QPalette p = searchLine_->palette();
+    p.setBrush(QPalette::Base, oriBrush_);
+    searchLine_->setPalette(p);
 }
 
-void AbstractSearchLine::updateButtons(bool found)
-{
-	status_=found;
+void AbstractSearchLine::updateButtons(bool found) {
+    status_ = found;
 
-	if(searchLine_->text().isEmpty())
-	{
-	  	QPalette p=searchLine_->palette();
-        p.setBrush(QPalette::Base,oriBrush_);
-		searchLine_->setPalette(p);
-	}
-	else
-	{
-		if(!found)
-		{
-			QPalette p=searchLine_->palette();
-            p.setBrush(QPalette::Base,redBrush_);
-			searchLine_->setPalette(p);
-		}
-		else
-		{
-			QPalette p=searchLine_->palette();
-            p.setBrush(QPalette::Base,greenBrush_);
-			searchLine_->setPalette(p);
-		}
-	}
+    if (searchLine_->text().isEmpty()) {
+        QPalette p = searchLine_->palette();
+        p.setBrush(QPalette::Base, oriBrush_);
+        searchLine_->setPalette(p);
+    }
+    else {
+        if (!found) {
+            QPalette p = searchLine_->palette();
+            p.setBrush(QPalette::Base, redBrush_);
+            searchLine_->setPalette(p);
+        }
+        else {
+            QPalette p = searchLine_->palette();
+            p.setBrush(QPalette::Base, greenBrush_);
+            searchLine_->setPalette(p);
+        }
+    }
 }
 
-void AbstractSearchLine::slotClose()
-{
-	hide();
+void AbstractSearchLine::slotClose() {
+    hide();
 }
 
-void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b)
-{
+void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b) {
     caseSensitive_ = b;
 }
 
-void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
-{
+void AbstractSearchLine::on_actionWholeWords__toggled(bool b) {
     wholeWords_ = b;
 }
 
-void AbstractSearchLine::on_actionHighlightAll__toggled(bool b)
-{
+void AbstractSearchLine::on_actionHighlightAll__toggled(bool b) {
     highlightAll_ = b;
 }
 
-void AbstractSearchLine::setConfirmSearch(bool confirmSearch)
-{
-	confirmSearch_=confirmSearch;
-	//confirmSearchLabel_->setVisible(confirmSearch_);
+void AbstractSearchLine::setConfirmSearch(bool confirmSearch) {
+    confirmSearch_ = confirmSearch;
+    // confirmSearchLabel_->setVisible(confirmSearch_);
 
-	if(confirmSearch_)
-	{
-		//confirmSearchLabel_->showWarning("Large file mode");
-		if(searchLine_->text().isEmpty())
-		{
-			status_=false;
-			toDefaultState();
-		}
+    if (confirmSearch_) {
+        // confirmSearchLabel_->showWarning("Large file mode");
+        if (searchLine_->text().isEmpty()) {
+            status_ = false;
+            toDefaultState();
+        }
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-		searchLine_->setPlaceholderText(tr("Find   (you need to hit enter to start search)"));
+        searchLine_->setPlaceholderText(tr("Find   (you need to hit enter to start search)"));
 #endif
-	}
-	else
-	{
+    }
+    else {
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-		searchLine_->setPlaceholderText(tr("Find"));
+        searchLine_->setPlaceholderText(tr("Find"));
 #endif
-	}
+    }
 
-	searchLine_->setToolTip(confirmSearchText());
+    searchLine_->setToolTip(confirmSearchText());
 }
 
-QString AbstractSearchLine::confirmSearchText() const
-{
-	return (confirmSearch_)?
-		"Search works in <b>large file mode</b>. After typing in the search term <b>press enter</b> or use the arrows to start search!":
-			"Search works in <b> continuous mode</b>. As you type in a new character the search starts immediately.";
-
+QString AbstractSearchLine::confirmSearchText() const {
+    return (confirmSearch_) ? "Search works in <b>large file mode</b>. After typing in the search term <b>press "
+                              "enter</b> or use the arrows to start search!"
+                            : "Search works in <b> continuous mode</b>. As you type in a new character the search "
+                              "starts immediately.";
 }
 
-void AbstractSearchLine::hideEvent(QHideEvent* event)
-{
-	QWidget::hideEvent(event);
-	Q_EMIT visibilityChanged();
+void AbstractSearchLine::hideEvent(QHideEvent* event) {
+    QWidget::hideEvent(event);
+    Q_EMIT visibilityChanged();
 }
 
-void AbstractSearchLine::showEvent(QShowEvent* event)
-{
-	QWidget::showEvent(event);
-    if(!event->spontaneous())
+void AbstractSearchLine::showEvent(QShowEvent* event) {
+    QWidget::showEvent(event);
+    if (!event->spontaneous())
         slotFind(searchLine_->text());
-    //refreshSearch();
+    // refreshSearch();
     Q_EMIT visibilityChanged();
 }

@@ -14,31 +14,31 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-//#include <boost/timer/timer.hpp>
+// #include <boost/timer/timer.hpp>
 
-#include "TcpBaseServer.hpp"
 #include "Connection.hpp"
+#include "TcpBaseServer.hpp"
 class Server;
 
 class TcpServer : public TcpBaseServer {
 public:
-   /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-   explicit TcpServer(Server*,boost::asio::io_service& io_service,ServerEnvironment&);
-   ~TcpServer() = default;
+    /// Constructor opens the acceptor and starts waiting for the first incoming connection.
+    explicit TcpServer(Server*, boost::asio::io_service& io_service, ServerEnvironment&);
+    ~TcpServer() = default;
 
 private:
-   /// Handle completion of a accept operation.
-   void handle_accept(const boost::system::error_code& e, connection_ptr conn);
+    /// Handle completion of a accept operation.
+    void handle_accept(const boost::system::error_code& e, connection_ptr conn);
 
-   /// Handle completion of a write operation.
-   void handle_write(const boost::system::error_code& e, connection_ptr conn);
+    /// Handle completion of a write operation.
+    void handle_write(const boost::system::error_code& e, connection_ptr conn);
 
-   /// Handle completion of a read operation.
-   void handle_read(const boost::system::error_code& e, connection_ptr conn);
+    /// Handle completion of a read operation.
+    void handle_read(const boost::system::error_code& e, connection_ptr conn);
 
-   void start_accept();
+    void start_accept();
 
-   //boost::timer::cpu_timer timer_; // time_cmds for debug
+    // boost::timer::cpu_timer timer_; // time_cmds for debug
 };
 
 #endif

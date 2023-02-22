@@ -8,51 +8,45 @@
 //
 //============================================================================
 
-#include <algorithm>
-
 #include "CustomCommandHandler.hpp"
-#include "SessionHandler.hpp"
+
+#include <algorithm>
 
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
+#include "SessionHandler.hpp"
 #include "VSettings.hpp"
 
-
-CustomCommand::CustomCommand(const std::string &name, const std::string &command, bool context) :
-    name_(name), command_(command), inContextMenu_(context)
-{
+CustomCommand::CustomCommand(const std::string& name, const std::string& command, bool context)
+    : name_(name),
+      command_(command),
+      inContextMenu_(context) {
 }
 
-
-void CustomCommand::set(const std::string &name, const std::string &command, bool context)
-{
-	name_          = name;
-	command_       = command;
-	inContextMenu_ = context;
+void CustomCommand::set(const std::string& name, const std::string& command, bool context) {
+    name_          = name;
+    command_       = command;
+    inContextMenu_ = context;
 }
 
-
-void CustomCommand::save(VSettings *vs) const
-{
-    vs->put("name",    name());
+void CustomCommand::save(VSettings* vs) const {
+    vs->put("name", name());
     vs->put("command", command());
     vs->put("context", contextString());
 }
 
-CustomCommandHandler::CustomCommandHandler()
-= default;
+CustomCommandHandler::CustomCommandHandler() = default;
 
-void CustomCommandHandler::init()
-{
+void CustomCommandHandler::init() {
     readSettings();
 }
 
-CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
-{
+CustomCommand*
+CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context) {
     assert(index >= 0);
     assert(index < static_cast<int>(items_.size()));
 
-    CustomCommand *item = nullptr;
+    CustomCommand* item = nullptr;
 
     // already in the list - just update it
     item = items_[index];
@@ -63,152 +57,129 @@ CustomCommand* CustomCommandHandler::replace(int index, const std::string& name,
     return item;
 }
 
-CustomCommand* CustomCommandHandler::replace(int index, const CustomCommand &cmd)
-{
+CustomCommand* CustomCommandHandler::replace(int index, const CustomCommand& cmd) {
     return replace(index, cmd.name(), cmd.command(), cmd.inContextMenu());
 }
 
-
-
-void CustomCommandHandler::remove(int index)
-{
+void CustomCommandHandler::remove(int index) {
     assert(index >= 0);
     assert(index < static_cast<int>(items_.size()));
 
-    items_.erase(items_.begin()+index);
+    items_.erase(items_.begin() + index);
 
     writeSettings();
 }
 
-CustomCommand* CustomCommandHandler::duplicate(int index)
-{
+CustomCommand* CustomCommandHandler::duplicate(int index) {
     assert(index >= 0);
     assert(index < static_cast<int>(items_.size()));
 
-    CustomCommand *item = items_[index];
+    CustomCommand* item = items_[index];
     std::string postfix("_1");
     std::string newName = item->name() + postfix;
 
     // ensure we are creating a unique new name - if we find an existing item with the same name, add another postfix
-    while(find(newName) != nullptr)
+    while (find(newName) != nullptr)
         newName += postfix;
 
-    CustomCommand*newCmd = add(newName, item->command(), item->inContextMenu(), false);
+    CustomCommand* newCmd = add(newName, item->command(), item->inContextMenu(), false);
 
     writeSettings();
 
     return newCmd;
 }
 
-void CustomCommandHandler::swapCommandsByIndex(int i1, int i2)
-{
+void CustomCommandHandler::swapCommandsByIndex(int i1, int i2) {
     assert(i1 >= 0);
     assert(i1 < static_cast<int>(items_.size()));
     assert(i2 >= 0);
     assert(i2 < static_cast<int>(items_.size()));
 
-    CustomCommand *temp = items_[i2];
-    items_[i2] = items_[i1];
-    items_[i1] = temp;
+    CustomCommand* temp = items_[i2];
+    items_[i2]          = items_[i1];
+    items_[i1]          = temp;
 }
 
-
-CustomCommand* CustomCommandHandler::find(const std::string& name) const
-{
-    for(auto item : items_)
-    {
-        if(item->name() == name)
+CustomCommand* CustomCommandHandler::find(const std::string& name) const {
+    for (auto item : items_) {
+        if (item->name() == name)
             return item;
     }
     return nullptr;
 }
 
-
 // find the index of the command which has the given name; -1 if not found
-int CustomCommandHandler::findIndexFromName(const std::string& name) const
-{
+int CustomCommandHandler::findIndexFromName(const std::string& name) const {
     int i = 0;
-    for(auto item : items_)
-    {
-        if(item->name() == name)
+    for (auto item : items_) {
+        if (item->name() == name)
             return i;
         i++;
     }
-    return -1;  // it was not found
+    return -1; // it was not found
 }
 
-
-void CustomCommandHandler::writeSettings()
-{
+void CustomCommandHandler::writeSettings() {
     std::vector<VSettings> vsItems;
-    std::string dummyFileName="dummy";
-    std::string key="commands";
+    std::string dummyFileName    = "dummy";
+    std::string key              = "commands";
 
     std::string settingsFilePath = settingsFile();
     VSettings vs(settingsFilePath);
 
-    for(int i = 0; i < numCommands(); i++)
-    {
+    for (int i = 0; i < numCommands(); i++) {
         VSettings vsThisItem(dummyFileName);
-        CustomCommand *cmd = commandFromIndex(i);
+        CustomCommand* cmd = commandFromIndex(i);
         cmd->save(&vsThisItem);
         vsItems.push_back(vsThisItem);
     }
-    vs.put(key,vsItems);
+    vs.put(key, vsItems);
     vs.write();
 }
 
-void CustomCommandHandler::readSettings()
-{   
+void CustomCommandHandler::readSettings() {
     std::string settingsFilePath = settingsFile();
     VSettings vs(settingsFilePath);
 
-    bool ok = vs.read(false);  // false means we don't abort if the file is not there
+    bool ok = vs.read(false); // false means we don't abort if the file is not there
 
-    if(ok)
-    {
+    if (ok) {
         std::vector<VSettings> commands;
         vs.get("commands", commands);
 
-        for (auto & i : commands)
-        {
-            VSettings *vsCommand = &i;
-            std::string emptyDefault="";
-            std::string name    = vsCommand->get("name",    emptyDefault);
-            std::string command = vsCommand->get("command", emptyDefault);
-            std::string context = vsCommand->get("context", emptyDefault);
-            add(name, command, stringToBool(context), false);  // add it to our in-memory list
+        for (auto& i : commands) {
+            VSettings* vsCommand     = &i;
+            std::string emptyDefault = "";
+            std::string name         = vsCommand->get("name", emptyDefault);
+            std::string command      = vsCommand->get("command", emptyDefault);
+            std::string context      = vsCommand->get("context", emptyDefault);
+            add(name, command, stringToBool(context), false); // add it to our in-memory list
         }
     }
 }
 
-bool CustomCommandHandler::stringToBool(std::string &str)
-{
+bool CustomCommandHandler::stringToBool(std::string& str) {
     bool result = (!str.empty() && str == "yes");
     return result;
 }
-
 
 // -------------------------
 // CustomSavedCommandHandler
 // -------------------------
 
-CustomSavedCommandHandler* CustomSavedCommandHandler::instance_=nullptr;
+CustomSavedCommandHandler* CustomSavedCommandHandler::instance_ = nullptr;
 
-
-CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
-{
-    if(!instance_)
-    {
-        instance_=new CustomSavedCommandHandler();
+CustomSavedCommandHandler* CustomSavedCommandHandler::instance() {
+    if (!instance_) {
+        instance_ = new CustomSavedCommandHandler();
     }
 
     return instance_;
 }
 
-CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
-{
-    auto *item=new CustomCommand(name, command, context);
+CustomCommand*
+CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings) {
+    auto* item = new CustomCommand(name, command, context);
     items_.push_back(item);
 
     if (saveSettings)
@@ -217,41 +188,35 @@ CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std
     return item;
 }
 
-std::string CustomSavedCommandHandler::settingsFile()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+std::string CustomSavedCommandHandler::settingsFile() {
+    SessionItem* cs = SessionHandler::instance()->current();
     return cs->savedCustomCommandsFile();
 }
-
 
 // ---------------------------
 // CustomCommandHistoryHandler
 // ---------------------------
 
+CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance_ = nullptr;
 
-CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance_=nullptr;
-
-CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance()
-{
-    if(!instance_)
-    {
-        instance_=new CustomCommandHistoryHandler();
+CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance() {
+    if (!instance_) {
+        instance_ = new CustomCommandHistoryHandler();
     }
 
     return instance_;
 }
 
-
-CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
-{
+CustomCommand*
+CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings) {
     int index = findIndexFromName(name);
 
-    if (index == -1)  // not already in the list
+    if (index == -1) // not already in the list
     {
-        auto *item=new CustomCommand(name, command, context);
-        items_.push_front(item);  // add it to the front
+        auto* item = new CustomCommand(name, command, context);
+        items_.push_front(item); // add it to the front
 
-        if(static_cast<int>(items_.size()) > maxCommands_)  // too many commands?
+        if (static_cast<int>(items_.size()) > maxCommands_) // too many commands?
         {
             items_.pop_back(); // remove the last item
         }
@@ -261,26 +226,22 @@ CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const s
 
         return item;
     }
-    else
-    {
+    else {
         return commandFromIndex(index);
     }
-
 }
 
-std::string CustomCommandHistoryHandler::settingsFile()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+std::string CustomCommandHistoryHandler::settingsFile() {
+    SessionItem* cs = SessionHandler::instance()->current();
     return cs->recentCustomCommandsFile();
 }
-
 
 /*
 void NodeQueryHandler::add(NodeQuery* item,bool saveToFile)
 {
-	items_.push_back(item);
-	if(saveToFile)
-		save(item);
+        items_.push_back(item);
+        if(saveToFile)
+                save(item);
 }
 
 
@@ -300,14 +261,11 @@ void NodeQueryHandler::save()
 
 void NodeQueryHandler::save(NodeQuery *item)
 {
-	std::string f=DirectoryHandler::concatenate(dirPath_,item->name() + "." + suffix_);
-	VSettings vs(f);
-	item->save(&vs);
-	vs.write();
+        std::string f=DirectoryHandler::concatenate(dirPath_,item->name() + "." + suffix_);
+        VSettings vs(f);
+        item->save(&vs);
+        vs.write();
 
 }
 
 */
-
-
-

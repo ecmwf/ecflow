@@ -23,86 +23,94 @@ class ServerHandler;
 class VTableModelData;
 class VTableServer;
 
-class TableNodeModel : public AbstractNodeModel
-{
-Q_OBJECT
+class TableNodeModel : public AbstractNodeModel {
+    Q_OBJECT
 
-  friend class TableNodeSortModel;
-  
+    friend class TableNodeSortModel;
+
 public:
-  TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent=nullptr);
+    TableNodeModel(ServerFilter* serverFilter, NodeFilterDef* filterDef, QObject* parent = nullptr);
 
-  int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
-  int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
-  
-  QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
-  QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
-  
-  QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
-  QModelIndex parent (const QModelIndex & ) const override;
-  
-  VInfo_ptr nodeInfo(const QModelIndex&) override;
-  void selectionChanged(QModelIndexList lst);
-  
-  VModelData* getData() const override;
-  void removeColumn(QString);
-  ModelColumn* columns() const {return columns_;}
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-  //To speed up identifying a column. The mapping here must match the definition of
-  //"table_columns" in ecflowview_view_conf.json !!!
-  enum ColumnType {InvalidColumn=-1, PathColumn=0,StatusColumn=1,TypeColumn=2,TriggerColumn=3,
-           LabelColumn=4, EventColumn=5, MeterColumn=6, StatusChangeColumn=7,
-           ExtraColumn = 8 };
-   
+    QVariant data(const QModelIndex&, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
+
+    QModelIndex index(int, int, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex&) const override;
+
+    VInfo_ptr nodeInfo(const QModelIndex&) override;
+    void selectionChanged(QModelIndexList lst);
+
+    VModelData* getData() const override;
+    void removeColumn(QString);
+    ModelColumn* columns() const { return columns_; }
+
+    // To speed up identifying a column. The mapping here must match the definition of
+    //"table_columns" in ecflowview_view_conf.json !!!
+    enum ColumnType {
+        InvalidColumn      = -1,
+        PathColumn         = 0,
+        StatusColumn       = 1,
+        TypeColumn         = 2,
+        TriggerColumn      = 3,
+        LabelColumn        = 4,
+        EventColumn        = 5,
+        MeterColumn        = 6,
+        StatusChangeColumn = 7,
+        ExtraColumn        = 8
+    };
+
 public Q_SLOTS:
-  void slotServerAddBegin(int) override;
-  void slotServerAddEnd() override;
-  void slotServerRemoveBegin(VModelServer* server,int) override;
-  void slotServerRemoveEnd(int) override;
-  
-  void slotDataChanged(VModelServer*) override {}
-  void slotNodeChanged(VTableServer*,const VNode*);
-  void slotAttributesChanged(VModelServer*,const VNode*) {}
-  void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int) {}
-  void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int) {}
-  
-  void slotBeginServerScan(VModelServer* server,int) override;
-  void slotEndServerScan(VModelServer* server,int) override;
-  void slotBeginServerClear(VModelServer* server,int) override;
-  void slotEndServerClear(VModelServer* server,int) override;
+    void slotServerAddBegin(int) override;
+    void slotServerAddEnd() override;
+    void slotServerRemoveBegin(VModelServer* server, int) override;
+    void slotServerRemoveEnd(int) override;
 
-  void slotAppendColumnBegin();
-  void slotAppendColumnEnd();
-  void slotAddColumnsBegin(int,int);
-  void slotAddColumnsEnd(int,int);
-  void slotChangeColumnBegin(int idx);
-  void slotChangeColumnEnd(int idx);
-  void slotRemoveColumnsBegin(int,int);
-  void slotRemoveColumnsEnd(int,int);
+    void slotDataChanged(VModelServer*) override {}
+    void slotNodeChanged(VTableServer*, const VNode*);
+    void slotAttributesChanged(VModelServer*, const VNode*) {}
+    void slotBeginAddRemoveAttributes(VModelServer*, const VNode*, int, int) {}
+    void slotEndAddRemoveAttributes(VModelServer*, const VNode*, int, int) {}
+
+    void slotBeginServerScan(VModelServer* server, int) override;
+    void slotEndServerScan(VModelServer* server, int) override;
+    void slotBeginServerClear(VModelServer* server, int) override;
+    void slotEndServerClear(VModelServer* server, int) override;
+
+    void slotAppendColumnBegin();
+    void slotAppendColumnEnd();
+    void slotAddColumnsBegin(int, int);
+    void slotAddColumnsEnd(int, int);
+    void slotChangeColumnBegin(int idx);
+    void slotChangeColumnEnd(int idx);
+    void slotRemoveColumnsBegin(int, int);
+    void slotRemoveColumnsEnd(int, int);
 
 Q_SIGNALS:
-  void filterChangeBegun();
-  void filterChangeEnded();
-  void skipSortingBegin();
-  void skipSortingEnd();
+    void filterChangeBegun();
+    void filterChangeEnded();
+    void skipSortingBegin();
+    void skipSortingEnd();
 
 protected:
-  bool isServer(const QModelIndex &) const {return false;}
-  ServerHandler* indexToRealServer(const QModelIndex &) const {return nullptr;}
-  VModelServer* indexToServer(const QModelIndex &) const {return nullptr;}
-  QModelIndex serverToIndex(ServerHandler*) const override {return {};}
-  
-  QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;
-  QModelIndex nodeToIndex(const VNode*,int column=0) const override;
-  VNode* indexToNode( const QModelIndex & index) const;
-  
-  QModelIndex attributeToIndex(const VAttribute* a, int column=0) const override;
-  
-  QVariant nodeData(const QModelIndex& index,int role) const;
-  
-  VTableModelData* data_;
-  ModelColumn* columns_;
-  int diagPixId_;
+    bool isServer(const QModelIndex&) const { return false; }
+    ServerHandler* indexToRealServer(const QModelIndex&) const { return nullptr; }
+    VModelServer* indexToServer(const QModelIndex&) const { return nullptr; }
+    QModelIndex serverToIndex(ServerHandler*) const override { return {}; }
+
+    QModelIndex nodeToIndex(VTableServer* server, const VNode* node, int column) const;
+    QModelIndex nodeToIndex(const VNode*, int column = 0) const override;
+    VNode* indexToNode(const QModelIndex& index) const;
+
+    QModelIndex attributeToIndex(const VAttribute* a, int column = 0) const override;
+
+    QVariant nodeData(const QModelIndex& index, int role) const;
+
+    VTableModelData* data_;
+    ModelColumn* columns_;
+    int diagPixId_;
 };
 
 #endif

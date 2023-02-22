@@ -17,21 +17,22 @@
 // of a command.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-namespace  ecf {
+namespace ecf {
 
 class CmdContext {
 public:
-   CmdContext();
-   ~CmdContext();
+    CmdContext();
+    ~CmdContext();
 
-   static bool in_command() { return in_command_; }
+    static bool in_command() { return in_command_; }
 
 private:
-  CmdContext(const CmdContext&) = delete;
-  const CmdContext& operator=(const CmdContext&) = delete;
+    CmdContext(const CmdContext&)                  = delete;
+    const CmdContext& operator=(const CmdContext&) = delete;
+
 private:
-   static bool in_command_;
+    static bool in_command_;
 };
-}
+} // namespace ecf
 
 #endif

@@ -14,16 +14,14 @@
 #include "CmdContext.hpp"
 
 namespace ecf {
-bool CmdContext::in_command_ =  false;
+bool CmdContext::in_command_ = false;
 
-CmdContext::CmdContext()
-{
-   in_command_ = true;
+CmdContext::CmdContext() {
+    in_command_ = true;
 }
 
-CmdContext::~CmdContext()
-{
-   in_command_ = false;
+CmdContext::~CmdContext() {
+    in_command_ = false;
 }
 
-}
+} // namespace ecf

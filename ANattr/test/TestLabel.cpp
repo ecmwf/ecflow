@@ -13,8 +13,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include <boost/test/unit_test.hpp>
 
@@ -24,60 +24,62 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
+BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
 
-BOOST_AUTO_TEST_CASE( test_label_parsing )
-{
-   cout << "ANattr:: ...test_label_parsing\n";
-   {
-      std::string line = "label name \"value\"";
-      std::vector<string> linetokens;
-      Str::split(line,linetokens);
+BOOST_AUTO_TEST_CASE(test_label_parsing) {
+    cout << "ANattr:: ...test_label_parsing\n";
+    {
+        std::string line = "label name \"value\"";
+        std::vector<string> linetokens;
+        Str::split(line, linetokens);
 
-      Label label;
-      label.parse(line,linetokens, false);
+        Label label;
+        label.parse(line, linetokens, false);
 
-      Label expected("name","value");
-      BOOST_CHECK_MESSAGE(label == expected,"Expected " << expected.toString() << " but found " << label.toString());
-      BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),"Expected " << expected.dump() << " but found " << label.dump());
-   }
-   {
-      std::string line = R"(label name "value\nvalue")";
-      std::vector<string> linetokens;
-      Str::split(line,linetokens);
+        Label expected("name", "value");
+        BOOST_CHECK_MESSAGE(label == expected, "Expected " << expected.toString() << " but found " << label.toString());
+        BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),
+                            "Expected " << expected.dump() << " but found " << label.dump());
+    }
+    {
+        std::string line = R"(label name "value\nvalue")";
+        std::vector<string> linetokens;
+        Str::split(line, linetokens);
 
-      Label label;
-      label.parse(line,linetokens, false);
+        Label label;
+        label.parse(line, linetokens, false);
 
-      Label expected("name","value\nvalue");
-      BOOST_CHECK_MESSAGE(label == expected,"Expected " << expected.toString() << " but found " << label.toString());
-      BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),"Expected " << expected.dump() << " but found " << label.dump());
-   }
-   {
-      std::string line = "label name \"value that is multiple token !!!! 23445 !^ & * ( )\"";
-      std::vector<string> linetokens;
-      Str::split(line,linetokens);
+        Label expected("name", "value\nvalue");
+        BOOST_CHECK_MESSAGE(label == expected, "Expected " << expected.toString() << " but found " << label.toString());
+        BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),
+                            "Expected " << expected.dump() << " but found " << label.dump());
+    }
+    {
+        std::string line = "label name \"value that is multiple token !!!! 23445 !^ & * ( )\"";
+        std::vector<string> linetokens;
+        Str::split(line, linetokens);
 
-      Label label;
-      label.parse(line,linetokens, false);
+        Label label;
+        label.parse(line, linetokens, false);
 
-      Label expected("name","value that is multiple token !!!! 23445 !^ & * ( )");
-      BOOST_CHECK_MESSAGE(label == expected,"Expected " << expected.toString() << " but found " << label.toString());
-      BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),"Expected " << expected.dump() << " but found " << label.dump());
-   }
-   {
-      std::string line = R"(label name "value\n that\n is\n multiple\n token\n and\n new\n \nlines")";
-      std::vector<string> linetokens;
-      Str::split(line,linetokens);
+        Label expected("name", "value that is multiple token !!!! 23445 !^ & * ( )");
+        BOOST_CHECK_MESSAGE(label == expected, "Expected " << expected.toString() << " but found " << label.toString());
+        BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),
+                            "Expected " << expected.dump() << " but found " << label.dump());
+    }
+    {
+        std::string line = R"(label name "value\n that\n is\n multiple\n token\n and\n new\n \nlines")";
+        std::vector<string> linetokens;
+        Str::split(line, linetokens);
 
-      Label label;
-      label.parse(line,linetokens, false);
+        Label label;
+        label.parse(line, linetokens, false);
 
-      Label expected("name","value\n that\n is\n multiple\n token\n and\n new\n \nlines");
-      BOOST_CHECK_MESSAGE(label == expected,"Expected " << expected.toString() << " but found " << label.toString());
-      BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),"Expected " << expected.dump() << " but found " << label.dump());
-   }
+        Label expected("name", "value\n that\n is\n multiple\n token\n and\n new\n \nlines");
+        BOOST_CHECK_MESSAGE(label == expected, "Expected " << expected.toString() << " but found " << label.toString());
+        BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),
+                            "Expected " << expected.dump() << " but found " << label.dump());
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

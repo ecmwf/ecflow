@@ -11,12 +11,13 @@
 #ifndef VEVENT_HPP
 #define VEVENT_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
+
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
@@ -24,28 +25,26 @@ class VNode;
 
 class Event;
 
-class VEventAttrType : public VAttributeType
-{
+class VEventAttrType : public VAttributeType {
 public:
     explicit VEventAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(const Event&,QStringList&) const;
+    void encode(const Event&, QStringList&) const;
 
 private:
-     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, ValueIndex = 2 };
 };
 
-class VEventAttr : public VAttribute
-{
+class VEventAttr : public VAttribute {
 public:
-    VEventAttr(VNode *parent,const Event&,int index);
+    VEventAttr(VNode* parent, const Event&, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif // VEVENT_HPP

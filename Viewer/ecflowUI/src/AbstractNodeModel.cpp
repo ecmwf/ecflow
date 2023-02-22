@@ -11,7 +11,6 @@
 
 #include <QDebug>
 
-
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "ServerItem.hpp"
@@ -19,26 +18,22 @@
 #include "VModelData.hpp"
 #include "VNState.hpp"
 
+AbstractNodeModel::AbstractNodeModel(QObject* parent)
+    : QAbstractItemModel(parent)
 
-AbstractNodeModel::AbstractNodeModel(QObject *parent) :
-   QAbstractItemModel(parent)
-   
 {
-	//At this point the model is not active and it cannot see its data!
+    // At this point the model is not active and it cannot see its data!
 }
 
-AbstractNodeModel::~AbstractNodeModel()
-{
-	clean();
+AbstractNodeModel::~AbstractNodeModel() {
+    clean();
 }
 
-void AbstractNodeModel::active(bool active)
-{
-	if(active_ != active)
-	{
-		active_=active;
+void AbstractNodeModel::active(bool active) {
+    if (active_ != active) {
+        active_ = active;
 
-		beginResetModel();
+        beginResetModel();
 
         getData()->setActive(active_);
 
@@ -60,87 +55,76 @@ void AbstractNodeModel::active(bool active)
 			data()->clear(); //clean();
 		}
 #endif
-		endResetModel();
+        endResetModel();
 
-		//After finishing reset the view will automatically be notified about
-		//the changes. Also the filter model will be notified!
-	}
+        // After finishing reset the view will automatically be notified about
+        // the changes. Also the filter model will be notified!
+    }
 }
 
-//Called when the list of servers to be displayed has changed.
-//void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
+// Called when the list of servers to be displayed has changed.
+// void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
 //{
 //	if(active_)
 //		reload();
-//}
+// }
 
-void AbstractNodeModel::init()
-{
-	/*ServerFilter *filter=config_->serverFilter();
-	for(unsigned int i=0; i < filter->items().size(); i++)
-	{
-		if(ServerHandler *server=filter->items().at(i)->serverHandler())
-		{
-		    //The model has to observe the nodes o the server.
-		    server->addNodeObserver(this);
+void AbstractNodeModel::init() {
+    /*ServerFilter *filter=config_->serverFilter();
+    for(unsigned int i=0; i < filter->items().size(); i++)
+    {
+            if(ServerHandler *server=filter->items().at(i)->serverHandler())
+            {
+                //The model has to observe the nodes o the server.
+                server->addNodeObserver(this);
 
-		    //The model stores the servers it has to deal with in a local object.
-		    servers_->add(server,makeFilter());
-		}
-	}*/
+                //The model stores the servers it has to deal with in a local object.
+                servers_->add(server,makeFilter());
+            }
+    }*/
 }
 
-void AbstractNodeModel::clean()
-{
-	/*for(int i=0; i < servers_->count(); i++)
-	{
-		if(ServerHandler *s=servers_->server(i))
-		{
-			s->removeNodeObserver(this);
-		}
-	}
+void AbstractNodeModel::clean() {
+    /*for(int i=0; i < servers_->count(); i++)
+    {
+            if(ServerHandler *s=servers_->server(i))
+            {
+                    s->removeNodeObserver(this);
+            }
+    }
 
-	servers_->clear();*/
+    servers_->clear();*/
 }
 
-//TODO!!!!!
+// TODO!!!!!
 
-//Should be reviewed what it is actually doing!!!!!!!!!!!!!!!!!
-void AbstractNodeModel::reload()
-{
-	if(active_)
-	{
-		beginResetModel();
-		//data_->reload();
-		//clean();
-		//init();
-		//resetStateFilter(false); //do not emit change signal
-		endResetModel();
-	}
+// Should be reviewed what it is actually doing!!!!!!!!!!!!!!!!!
+void AbstractNodeModel::reload() {
+    if (active_) {
+        beginResetModel();
+        // data_->reload();
+        // clean();
+        // init();
+        // resetStateFilter(false); //do not emit change signal
+        endResetModel();
+    }
 }
 
-
-bool AbstractNodeModel::hasData() const
-{
+bool AbstractNodeModel::hasData() const {
     return (active_ && getData()->count() > 0);
 }
 
-void AbstractNodeModel::dataIsAboutToChange()
-{
-	beginResetModel();
+void AbstractNodeModel::dataIsAboutToChange() {
+    beginResetModel();
 }
 
-void AbstractNodeModel::slotFilterDeleteBegin()
-{
-	beginResetModel();
+void AbstractNodeModel::slotFilterDeleteBegin() {
+    beginResetModel();
 }
 
-
-void  AbstractNodeModel::slotFilterDeleteEnd()
-{
-	endResetModel();
+void AbstractNodeModel::slotFilterDeleteEnd() {
+    endResetModel();
 }
-
 
 //----------------------------------------------
 //
@@ -148,28 +132,22 @@ void  AbstractNodeModel::slotFilterDeleteEnd()
 //
 //----------------------------------------------
 
-QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int /*column*/) const
-{
-	if(info)
-	{
-		if(info->isServer())
-		{
-			if(ServerHandler *s=info->server())
-			{
-				return serverToIndex(s);
-			}
-		}
-        else if(info->isNode())
-        {
-            VNode* n=info->node();
-            return nodeToIndex(n);  
+QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info, int /*column*/) const {
+    if (info) {
+        if (info->isServer()) {
+            if (ServerHandler* s = info->server()) {
+                return serverToIndex(s);
+            }
         }
-        else if(info->isAttribute())
-        {
-            VAttribute* a=info->attribute();
-            return attributeToIndex(a);     
+        else if (info->isNode()) {
+            VNode* n = info->node();
+            return nodeToIndex(n);
         }
-	}
+        else if (info->isAttribute()) {
+            VAttribute* a = info->attribute();
+            return attributeToIndex(a);
+        }
+    }
 
-	return {};
+    return {};
 }

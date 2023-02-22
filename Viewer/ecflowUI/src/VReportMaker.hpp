@@ -13,26 +13,24 @@
 
 #include <QObject>
 
+#include "InfoPresenter.hpp"
 #include "VFile.hpp"
 #include "VInfo.hpp"
-#include "InfoPresenter.hpp"
 
 class OutputFileProvider;
 
-class VReportMaker : public InfoPresenter, public QObject
-{
+class VReportMaker : public InfoPresenter, public QObject {
 public:
     static void sendReport(VInfo_ptr);
 
-    //From VInfoPresenter
+    // From VInfoPresenter
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;
 
 protected:
-     VReportMaker(QObject* parent=nullptr);
-     void run(VInfo_ptr);
-     void sendJiraReport(VFile_ptr file);
+    VReportMaker(QObject* parent = nullptr);
+    void run(VInfo_ptr);
+    void sendJiraReport(VFile_ptr file);
 };
-
 
 #endif // VREPORTMAKER_HPP

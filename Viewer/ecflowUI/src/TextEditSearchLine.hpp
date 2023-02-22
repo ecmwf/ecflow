@@ -18,43 +18,46 @@
 
 class AbstractTextEditSearchInterface;
 
-class TextEditSearchLine : public AbstractSearchLine
-{
-	Q_OBJECT
+class TextEditSearchLine : public AbstractSearchLine {
+    Q_OBJECT
 
 public:
-	 explicit TextEditSearchLine(QWidget *parent);
-	~TextEditSearchLine() override;
-	void setSearchInterface(AbstractTextEditSearchInterface*);
-	void searchOnReload(bool userClickedReload);
-    bool hasInterface() const {return interface_ != nullptr;}
+    explicit TextEditSearchLine(QWidget* parent);
+    ~TextEditSearchLine() override;
+    void setSearchInterface(AbstractTextEditSearchInterface*);
+    void searchOnReload(bool userClickedReload);
+    bool hasInterface() const { return interface_ != nullptr; }
 
 public Q_SLOTS:
-	void slotFind(QString) override;
-	void slotFindNext() override;
-	void slotFindPrev() override;
-	void slotFindNext(bool) {slotFindNext();}
-	void slotFindPrev(bool) {slotFindPrev();}
-	void matchModeChanged(int newIndex);
-	void on_actionCaseSensitive__toggled(bool) override;
-	void on_actionWholeWords__toggled(bool) override;
-	void on_actionHighlightAll__toggled(bool) override;
-	void slotClose() override;
-	void slotHighlight();
+    void slotFind(QString) override;
+    void slotFindNext() override;
+    void slotFindPrev() override;
+    void slotFindNext(bool) { slotFindNext(); }
+    void slotFindPrev(bool) { slotFindPrev(); }
+    void matchModeChanged(int newIndex);
+    void on_actionCaseSensitive__toggled(bool) override;
+    void on_actionWholeWords__toggled(bool) override;
+    void on_actionHighlightAll__toggled(bool) override;
+    void slotClose() override;
+    void slotHighlight();
 
 protected:
-	QTextDocument::FindFlags findFlags();
-	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, QTextCursor::MoveOperation move, int iteration);
-	void refreshSearch();
-	void highlightMatches(QString txt);
+    QTextDocument::FindFlags findFlags();
+    bool findString(QString str,
+                    bool highlightAll,
+                    QTextDocument::FindFlags extraFlags,
+                    QTextCursor::MoveOperation move,
+                    int iteration);
+    void refreshSearch();
+    void highlightMatches(QString txt);
     void clearHighlights();
     void disableHighlights();
-    bool lastFindSuccessful() {return lastFindSuccessful_;}
+    bool lastFindSuccessful() { return lastFindSuccessful_; }
 
     AbstractTextEditSearchInterface* interface_;
     QTimer highlightAllTimer_;
-	QColor highlightColour_;
-	bool lastFindSuccessful_;
+    QColor highlightColour_;
+    bool lastFindSuccessful_;
 };
 
 #endif /* VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_ */
