@@ -14,6 +14,8 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <string>
+
 struct Options
 {
     bool verbose{false};                                                        // ECF_RESTAPI_VERBOSE

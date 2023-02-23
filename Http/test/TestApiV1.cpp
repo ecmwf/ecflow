@@ -4,15 +4,16 @@
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
 
+#include <httplib.h>
+
 #include <boost/test/unit_test.hpp>
+#include <nlohmann/json.hpp>
 
 #include "Certificate.hpp"
 #include "HttpServer.hpp"
 #include "HttpServerException.hpp"
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
-#include "httplib.h"
-#include "nlohmann/json.hpp"
 
 BOOST_AUTO_TEST_SUITE(HttpTestSuite)
 

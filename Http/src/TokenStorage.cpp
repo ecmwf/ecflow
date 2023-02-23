@@ -18,6 +18,7 @@
 
     #include "TokenStorage.hpp"
 
+    #include <atomic> // shared mutex only with c++14
     #include <fstream>
     #include <iomanip>
     #include <sstream>
@@ -28,15 +29,11 @@
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
     #include <openssl/sha.h>
+    #include <shared_mutex>
 
     #include "HttpServerException.hpp"
     #include "Options.hpp"
     #include "Str.hpp"
-
-    // shared mutex only with c++14
-    #include <atomic>
-
-    #include <shared_mutex>
 
 std::shared_mutex m;
 using string                  = std::string;
