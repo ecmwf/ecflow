@@ -16,7 +16,8 @@
     #include <QRegExp>
 #endif
 #include <QRegularExpression>
-#include <ViewerUtil.hpp>
+
+#include "ViewerUtil.hpp"
 
 PlainTextSearchInterface::PlainTextSearchInterface() = default;
 
