@@ -18,6 +18,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "DefsDelta.hpp"
@@ -33,7 +34,6 @@
 #include "Serialization.hpp"
 #include "Str.hpp"
 #include "System.hpp"
-#include "boost/filesystem/operations.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;

@@ -12,8 +12,10 @@
 //
 // Description :
 //============================================================================
+
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "ClientToServerCmd.hpp"
@@ -23,7 +25,6 @@
 #include "ServerToClientCmd.hpp"
 #include "System.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

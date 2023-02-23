@@ -12,6 +12,8 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
@@ -20,7 +22,6 @@
 #include "PasswdFile.hpp"
 #include "SCPort.hpp"
 #include "User.hpp"
-#include "boost/filesystem/operations.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

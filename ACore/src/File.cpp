@@ -13,17 +13,14 @@
 // Description : This class is used as a helper class
 //============================================================================
 
+#include "File.hpp"
+
 #include <fstream>
 #include <stdexcept>
 
-#include "boost/filesystem.hpp"
-// #include <boost/token_functions.hpp>
-// #include <boost/algorithm/string/trim.hpp>
-// #include <boost/algorithm/string.hpp>
-// #include <boost/tokenizer.hpp>
+#include <boost/filesystem.hpp>
 
 #include "Ecf.hpp"
-#include "File.hpp"
 #include "Log.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"

@@ -13,12 +13,16 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include "ClientEnvironment.hpp"
 
 #include <cstdlib> // for getenv()
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "Ecf.hpp"
 #include "File.hpp"
@@ -27,9 +31,6 @@
 #include "Str.hpp"
 #include "TimeStamp.hpp"
 #include "Version.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/lexical_cast.hpp"
-
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"
 #endif

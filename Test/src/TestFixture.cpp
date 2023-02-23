@@ -19,6 +19,8 @@
 #include <fstream> // for ofstream
 #include <iostream>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
@@ -32,8 +34,6 @@
 #include "Str.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #ifdef DEBUG
 std::string rtt_filename = "rtt.dat";

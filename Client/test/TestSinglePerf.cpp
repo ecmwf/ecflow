@@ -13,9 +13,12 @@
 //
 // Description :
 //============================================================================
+
 #include <cstdlib> // getenv
 #include <fstream>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
@@ -31,8 +34,6 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

@@ -12,6 +12,7 @@
 //
 // Description : Encompasses functionality for plotting server load
 //============================================================================
+
 #include "Gnuplot.hpp"
 
 #include <cassert>
@@ -20,6 +21,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include <boost/filesystem/operations.hpp>
 #include <sys/stat.h> // for chmod
 
 #include "File.hpp"
@@ -27,7 +29,6 @@
 #include "Host.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;

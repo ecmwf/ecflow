@@ -16,6 +16,8 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -27,8 +29,6 @@
 #include "Task.hpp"
 #include "TestFixture.hpp"
 #include "VerifyAttr.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 using namespace std;
 using namespace ecf;

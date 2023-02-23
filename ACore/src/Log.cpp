@@ -12,6 +12,7 @@
 //
 // Description : Simple singleton implementation of log
 //============================================================================
+
 #include "Log.hpp"
 
 #include <cassert>
@@ -19,12 +20,13 @@
 #include <stdexcept>
 #include <vector>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include "File.hpp"
 #include "Indentor.hpp"
 #include "Str.hpp"
 #include "TimeStamp.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;

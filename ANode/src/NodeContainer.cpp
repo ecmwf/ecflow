@@ -20,6 +20,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
+
 #include "Defs.hpp"
 #include "DefsDelta.hpp"
 #include "Ecf.hpp"
@@ -35,7 +37,6 @@
 #include "Str.hpp"
 #include "SuiteChanged.hpp"
 #include "Task.hpp"
-#include "boost/filesystem/operations.hpp"
 #include "move_peer.hpp"
 
 namespace fs = boost::filesystem;

@@ -16,14 +16,14 @@
 #include <stdexcept>
 #include <string>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "DurationTimer.hpp"
 #include "File.hpp"
 #include "Log.hpp"
 #include "Pid.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 using namespace ecf;
 using namespace std;

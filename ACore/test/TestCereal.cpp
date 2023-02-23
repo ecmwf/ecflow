@@ -12,12 +12,13 @@
 //
 // Description
 //============================================================================
+
 #include <iostream>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "SerializationTest.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace ecf;
 using namespace boost;

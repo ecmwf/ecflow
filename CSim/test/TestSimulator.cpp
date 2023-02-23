@@ -17,13 +17,13 @@
 #include <iostream>
 #include <string>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "File.hpp"
 #include "Simulator.hpp"
 #include "System.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 namespace fs = boost::filesystem;
 

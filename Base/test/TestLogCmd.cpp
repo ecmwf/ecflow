@@ -12,6 +12,8 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -20,7 +22,6 @@
 #include "Log.hpp"
 #include "Str.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace boost;
 namespace fs = boost::filesystem;

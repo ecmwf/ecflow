@@ -12,6 +12,8 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -26,7 +28,6 @@
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -12,8 +12,10 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -23,7 +25,6 @@
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

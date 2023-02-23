@@ -12,6 +12,8 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "BlockClientZombieCmd.hpp"
@@ -28,7 +30,6 @@
 #include "StcCmd.hpp"
 #include "System.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

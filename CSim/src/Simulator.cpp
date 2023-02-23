@@ -16,6 +16,7 @@
 #include "Simulator.hpp"
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
+#include <boost/filesystem/operations.hpp>
 
 #include "Analyser.hpp"
 #include "CalendarUpdateParams.hpp"
@@ -28,7 +29,6 @@
 #include "Str.hpp"
 #include "Submittable.hpp"
 #include "Suite.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;

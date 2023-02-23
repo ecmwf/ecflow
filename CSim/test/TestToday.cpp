@@ -12,9 +12,11 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -24,7 +26,6 @@
 #include "Task.hpp"
 #include "TestUtil.hpp"
 #include "VerifyAttr.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

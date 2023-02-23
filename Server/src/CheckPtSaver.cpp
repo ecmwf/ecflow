@@ -12,7 +12,11 @@
 //
 // Description :
 //============================================================================
+
 #include "CheckPtSaver.hpp"
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "BaseServer.hpp"
 #include "CtsApi.hpp"
@@ -22,8 +26,6 @@
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
 #include "Str.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 // #define DEBUG_CHECKPT 1
 // #define DEBUG_CHECKPT_SAVE_ALLOWED 1

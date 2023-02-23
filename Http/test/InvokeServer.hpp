@@ -14,18 +14,20 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <iostream>
-#include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
 
-#include "TestHelper.hpp"
+#include <iostream>
+#include <thread>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/test/unit_test.hpp>
+
 #include "ClientInvoker.hpp"
-#include "Str.hpp"
 #include "EcfPortLock.hpp"
 #include "Host.hpp"
-#include "ServerEnvironment.hpp"
 #include "Server.hpp"
-#include <thread>
+#include "ServerEnvironment.hpp"
+#include "Str.hpp"
+#include "TestHelper.hpp"
 
 class InvokeServer {
 public:

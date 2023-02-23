@@ -12,8 +12,10 @@
 //
 // Description :
 //============================================================================
+
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
@@ -21,7 +23,6 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "WhiteListFile.hpp"
-#include "boost/filesystem/operations.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

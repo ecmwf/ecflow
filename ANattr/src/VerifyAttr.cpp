@@ -12,9 +12,12 @@
 //
 // Description :
 //============================================================================
+
 #include "VerifyAttr.hpp"
 
 #include <sstream>
+
+#include <boost/lexical_cast.hpp>
 
 #include "Ecf.hpp"
 #include "Indentor.hpp"
@@ -22,7 +25,6 @@
 #include "PrintStyle.hpp"
 #include "Serialization.hpp"
 #include "Str.hpp"
-#include "boost/lexical_cast.hpp"
 
 using namespace ecf;
 

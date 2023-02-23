@@ -12,8 +12,11 @@
 //
 // Description :
 //============================================================================
+
 #include <string>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 #include <sys/stat.h>
 
@@ -25,8 +28,6 @@
 #include "PrintStyle.hpp"
 #include "SCPort.hpp"
 #include "User.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

@@ -12,8 +12,10 @@
 //
 // Description :
 //============================================================================
+
 #include <string>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
@@ -23,7 +25,6 @@
 #include "MyDefsFixture.hpp"
 #include "SCPort.hpp"
 #include "Str.hpp"
-#include "boost/filesystem/operations.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
