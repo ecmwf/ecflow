@@ -16,9 +16,9 @@
 /// to Test Simulator. This is a separate exe
 //============================================================================
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>

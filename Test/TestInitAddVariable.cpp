@@ -12,9 +12,10 @@
 //
 // Description :
 //============================================================================
+
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
 
 #include <boost/test/unit_test.hpp>
 
