@@ -12,6 +12,7 @@
 #define ECFLOW_UDP_CLIENTAPI_HPP
 
 #include <memory>
+#include <stdexcept>
 
 // Forward Declaration
 class ClientInvoker;
