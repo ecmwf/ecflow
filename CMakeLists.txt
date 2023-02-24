@@ -32,7 +32,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 include( ecbuild_system NO_POLICY_SCOPE )
 
 ecbuild_requires_macro_version( 1.6 )
-set (CMAKE_CXX_STANDARD 17)
+include(CompilerOptions)
 
 ###############################################################################
 # local project
