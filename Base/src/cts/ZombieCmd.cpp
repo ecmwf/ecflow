@@ -224,7 +224,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
             desc.add_options()(CtsApi::zombieFailArg(),
                                po::value<vector<string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets to fail.\n"
-                               "Next time a child command(init,event,meter,label,abort,complete) which"
+                               "Next time a child command (init,event,meter,label,abort,complete) which "
                                "matches zombie, communicates with the server, will be set to fail.\n"
                                "Depending on the job setup this may force a abort, the abort will also fail.\n"
                                "Hence job structure should use 'set -e' in the error trapping functions to prevent\n"
@@ -238,7 +238,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
             desc.add_options()(CtsApi::zombieAdoptArg(),
                                po::value<vector<string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets to adopt.\n"
-                               "Next time a child command(init,event,meter,label,abort,complete,wait queue)\n"
+                               "Next time a child command (init,event,meter,label,abort,complete,wait queue) "
                                "communicates with the server, the password on the zombie is adopted by the task.\n"
                                "This is only allowed if the process id matches, otherwise an error is issued.\n"
                                "The zombie reference stored in the server is then deleted.\n"
@@ -251,7 +251,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                 CtsApi::zombieRemoveArg(),
                 po::value<vector<string>>()->multitoken(),
                 "Locates the task in the servers list of zombies, and removes it.\n"
-                "Since a job typically has many child commands(i.e init, complete, event, meter, label, wait, queue)\n"
+                "Since a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)\n"
                 "the zombie may reappear\n"
                 "  args = list of task paths, at least one expected\n"
                 "  --zombie_remove=/path/to/task  /path/to/task2");
