@@ -27,7 +27,7 @@ const char* ClientDoc::class_client() {
            "      int port     # The port on the server, must be unique to the server\n"
            "   )\n\n"
            "   Client(\n"
-           "      string host_port, # Expect's <host>:<port> || <host>@<port>\n"
+           "      string host_port, # Expects <host>:<port> || <host>@<port>\n"
            "   )\n\n"
            "The client reads in the following environment variables.\n"
            "For child commands,(i.e these are commands called in the .ecf/jobs files), these variables are used.\n"
@@ -74,7 +74,7 @@ const char* ClientDoc::set_host_port() {
            "      int port     # The port on the server, must be unique to the server\n"
            "   )\n\n"
            "   set_host_port(\n"
-           "      string host_port, # Expect's <host>:<port> or <host>@<port>\n"
+           "      string host_port, # Expects <host>:<port> or <host>@<port>\n"
            "   )\n\n"
            "Exceptions:\n\n"
            "- Raise a RuntimeError if the host or port is empty\n"
@@ -231,7 +231,7 @@ const char* ClientDoc::restart_server() {
            ".. code-block:: python\n\n"
            "   try:\n"
            "       ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)\n"
-           "       ci.retstart_server()\n"
+           "       ci.restart_server()\n"
            "   except RuntimeError, e:\n"
            "       print(str(e))\n";
 }
