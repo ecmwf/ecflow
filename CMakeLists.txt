@@ -60,6 +60,7 @@ option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely linked" OFF  )
 option( ENABLE_HTTP                "Enable HTTP server (experimental)" ON  )
+option( ENABLE_DOCS                "Enable Documentation" OFF )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -422,6 +423,13 @@ ecbuild_dont_pack( FILES
                    Pyext/samples/confluence_add_attachment.py
                    build_scripts/.pydevproject
 )
+
+# =========================================================================================
+# Documentation
+# =========================================================================================
+if (ENABLE_DOCS)
+  add_subdirectory(docs)
+endif()
 
 # =========================================================================================
 # final
