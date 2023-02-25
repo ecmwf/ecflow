@@ -68,7 +68,7 @@ public:
         Locking                   = 0x0040,
         DefaultOptions            = AutoDetectCarriageReturns
     };
-    Q_DECLARE_FLAGS(Options, Option);
+    Q_DECLARE_FLAGS(Options, Option)
 
     Options options() const;
     void setOptions(Options opt);
@@ -120,7 +120,7 @@ public:
         FindWrap            = 0x00010,
         FindAll             = 0x00020
     };
-    Q_DECLARE_FLAGS(FindMode, FindModeFlag);
+    Q_DECLARE_FLAGS(FindMode, FindModeFlag)
 
     int chunkSize() const;
     void setChunkSize(int pos);

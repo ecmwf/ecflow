@@ -5,7 +5,7 @@
 #include <QItemDelegate>
 
 class ComboMulti : public QComboBox {
-    Q_OBJECT;
+    Q_OBJECT
 
 public:
     enum Mode { BasicMode, FilterMode };
