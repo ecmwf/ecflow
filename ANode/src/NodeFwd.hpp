@@ -38,7 +38,7 @@ class Meter;
 class Repeat;
 class Variable;
 class Zombie;
-class NodeStats;
+struct NodeStats;
 class MiscAttrs;
 class VerifyAttr;
 class ZombieAttr;
