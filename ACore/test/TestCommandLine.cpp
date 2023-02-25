@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_SUITE(CoreTestSuite)
 static void doCheck(const std::vector<std::string>& theArgs) {
     CommandLine cl(theArgs);
 
-    BOOST_CHECK_MESSAGE(cl.size() == static_cast<int>(theArgs.size()), " argc incorrect");
+    BOOST_CHECK_MESSAGE(cl.size() == theArgs.size(), " argc incorrect");
 
-    for (int i = 0; i < cl.size(); i++) {
+    for (size_t i = 0; i < cl.size(); i++) {
         const auto& arg = cl.tokens()[i];
         BOOST_CHECK_MESSAGE(string(arg) == theArgs[i],
                             "Mismatch in args expected " << theArgs[i] << " but found " << arg);

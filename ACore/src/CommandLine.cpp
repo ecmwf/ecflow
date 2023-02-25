@@ -27,7 +27,7 @@ CommandLine::cl_t reconstruct_command_line(const CommandLine::tokens_t& tokens, 
 
 CommandLine::tokens_t reconstruct_tokens(int argc, const char** argv) {
     CommandLine::tokens_t tokens;
-    for (size_t i = 0; i < argc; ++i) {
+    for (int i = 0; i < argc; ++i) {
         tokens.push_back(argv[i]);
     }
     return tokens;

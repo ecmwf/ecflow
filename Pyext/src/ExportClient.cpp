@@ -91,7 +91,7 @@ int edit_script_submit(ClientInvoker* self,
     BoostPythonUtil::list_to_str_vec(name_values, namv);
     NameValueVec used_variables;
     char sep = '=';
-    for (int i = 0; i < namv.size(); ++i) {
+    for (size_t i = 0; i < namv.size(); ++i) {
         string::size_type pos = namv[i].find(sep);
         used_variables.push_back(std::make_pair(namv[i].substr(0, pos - 1), namv[i].substr(pos + 1, namv[i].length())));
     }

@@ -55,7 +55,7 @@ string hmac_sha256(const string& salt, const std::string& token) {
          hash,
          &hash_len);
     std::stringstream ss;
-    for (int i = 0; i < hash_len; i++) {
+    for (unsigned int i = 0; i < hash_len; i++) {
         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
     }
     return ss.str();
