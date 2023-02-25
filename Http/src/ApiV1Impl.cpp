@@ -223,7 +223,7 @@ std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request) {
         authenticate(request, ci.get()) == false) {
         throw HttpServerException(HttpStatusCode::client_error_unauthorized, "Unauthorized");
     }
-    return std::move(ci);
+    return ci;
 }
 
 std::unique_ptr<ClientInvoker> get_client(const json& j) {
@@ -236,7 +236,7 @@ std::unique_ptr<ClientInvoker> get_client(const json& j) {
     ci->set_child_timeout(j.value("ECF_TIMEOUT", 86400));
     ci->set_zombie_child_timeout(j.value("ECF_ZOMBIE_TIMEOUT", 43200));
 
-    return std::move(ci);
+    return ci;
 }
 
 node_ptr get_node(const std::string& path) {

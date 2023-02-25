@@ -42,7 +42,7 @@ std::unique_ptr<Certificate> create_certificate() {
         cert = std::make_unique<Certificate>(path_to_cert);
 
         setenv("ECF_API_CERT_DIRECTORY", path_to_cert.c_str(), 1);
-        return std::move(cert);
+        return cert;
     }
     return cert;
 }
@@ -55,7 +55,7 @@ std::unique_ptr<TokenFile> create_token_file() {
 
     auto tokenfile     = std::make_unique<TokenFile>(tokens_file);
     BOOST_TEST_MESSAGE("Token file " << tokens_file);
-    return std::move(tokenfile);
+    return tokenfile;
 }
 
 void start_api_server() {
@@ -82,7 +82,7 @@ std::unique_ptr<InvokeServer> start_ecflow_server() {
 
     BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << getenv("ECF_PORT"));
     BOOST_TEST_MESSAGE("ecflow server at localhost:" << getenv("ECF_PORT"));
-    return std::move(srv);
+    return srv;
 }
 
 struct SetupTest
