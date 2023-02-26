@@ -12,14 +12,35 @@
  src/Cmd.hpp
  src/Connection.hpp
  src/Gnuplot.hpp
- src/Openssl.hpp
  src/ServerReply.hpp
  src/ServerToClientResponse.hpp
- src/ssl_connection.hpp
- src/SslClient.hpp
  src/Stats.hpp
  src/WhyCmd.hpp
  src/ZombieCtrl.hpp
+ src/cts/ClientToServerCmd.hpp
+ src/cts/CtsApi.hpp
+ src/cts/CtsCmdRegistry.hpp
+ src/cts/EditHistoryMgr.hpp
+ src/cts/TaskApi.hpp
+ src/stc/BlockClientZombieCmd.hpp
+ src/stc/DefsCache.hpp
+ src/stc/DefsCmd.hpp
+ src/stc/ErrorCmd.hpp
+ src/stc/GroupSTCCmd.hpp
+ src/stc/PreAllocatedReply.hpp
+ src/stc/SClientHandleCmd.hpp
+ src/stc/SClientHandleSuitesCmd.hpp
+ src/stc/SNewsCmd.hpp
+ src/stc/SNodeCmd.hpp
+ src/stc/SServerLoadCmd.hpp
+ src/stc/SStatsCmd.hpp
+ src/stc/SStringCmd.hpp
+ src/stc/SStringVecCmd.hpp
+ src/stc/SSuitesCmd.hpp
+ src/stc/SSyncCmd.hpp
+ src/stc/ServerToClientCmd.hpp
+ src/stc/StcCmd.hpp
+ src/stc/ZombieGetCmd.hpp
  # SOURCES
  src/ZombieCtrl.cpp
  src/Stats.cpp
@@ -85,7 +106,12 @@
 )
 
 if(OPENSSL_FOUND)
-  list( APPEND srcs 
+  list( APPEND srcs
+     # HEADERS
+     src/Openssl.hpp
+     src/ssl_connection.hpp
+     src/SslClient.hpp
+     # SOURCES
      src/Openssl.cpp 
      src/ssl_connection.cpp
      src/SslClient.cpp
