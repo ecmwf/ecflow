@@ -194,7 +194,7 @@ int main(argc,argv) int argc; char **argv;
   }
 
   execl(shell,nameof(shell),"-x",infile,(char *)0);
-  /* if( !keep_file ) unlink(infile); 
-     fclose(fout); */
+  /* if( !keep_file ) unlink(infile); */
+  fclose(fout);
   exit(1);
 }
