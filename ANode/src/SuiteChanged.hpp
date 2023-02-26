@@ -73,7 +73,6 @@ public:
     ~SuiteChangedPtr();
 
 private:
-    Node* node_;
     Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
     unsigned int state_change_no_;
     unsigned int modify_change_no_;

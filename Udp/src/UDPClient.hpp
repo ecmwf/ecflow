@@ -28,8 +28,7 @@ public:
                       boost::asio::ip::udp::endpoint server_endpoint,
                       const std::string& request)
         : socket_(io_service),
-          server_endpoint_(std::move(server_endpoint)),
-          buffer_{} {
+          server_endpoint_(std::move(server_endpoint)) {
         // Open socket connection
         socket_.open(boost::asio::ip::udp::v4());
         // Start 'protocol'...
@@ -58,7 +57,6 @@ private:
     boost::asio::ip::udp::socket socket_;
 
     boost::asio::ip::udp::endpoint server_endpoint_;
-    std::array<char, 65'507> buffer_;
 };
 
 } // namespace internal_detail

@@ -66,8 +66,7 @@ SuiteChanged0::~SuiteChanged0() {
 
 // ============================================================================
 SuiteChangedPtr::SuiteChangedPtr(Node* s)
-    : node_(s),
-      suite_(s->suite()),
+    : suite_(s->suite()),
       state_change_no_(Ecf::state_change_no()),
       modify_change_no_(Ecf::modify_change_no()) {
 }
