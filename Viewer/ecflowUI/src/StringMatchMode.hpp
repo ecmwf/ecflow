@@ -22,7 +22,8 @@ public:
 
     explicit StringMatchMode(Mode m);
     explicit StringMatchMode(int);
-    StringMatchMode(const StringMatchMode& r) { mode_ = r.mode_; }
+    StringMatchMode(const StringMatchMode& r)            = default;
+    StringMatchMode& operator=(const StringMatchMode& r) = default;
 
     Mode mode() const { return mode_; }
     void setMode(Mode m) { mode_ = m; }

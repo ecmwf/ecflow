@@ -49,7 +49,8 @@ public:
           loaded_(loaded),
           filtered_(filtered) {}
 
-    SuiteFilterItem(const SuiteFilterItem& other);
+    SuiteFilterItem(const SuiteFilterItem& other)            = default;
+    SuiteFilterItem& operator=(const SuiteFilterItem& other) = default;
 
     bool operator!=(const SuiteFilterItem& rhs) const {
         return name_ != rhs.name_ || loaded_ != rhs.loaded_ || filtered_ != rhs.filtered_;

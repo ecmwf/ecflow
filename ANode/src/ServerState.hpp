@@ -33,7 +33,8 @@ class ServerState {
 public:
     ServerState();
     explicit ServerState(const std::string& port); // used in test to init server variables
-    ServerState(const ServerState&);
+    ServerState(const ServerState& other)            = default;
+    ServerState& operator=(const ServerState& other) = default;
 
     /// Check pointing, SAVES server variables, since they are visualised by client like ecflow_ui
     /// HOWEVER PrintStyle::MIGRATE does not save the server variables, since they should

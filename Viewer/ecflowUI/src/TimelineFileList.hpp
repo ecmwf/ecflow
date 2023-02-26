@@ -56,7 +56,9 @@ class TimelineFileList {
 public:
     TimelineFileList() = default;
     explicit TimelineFileList(QStringList exprLst);
-    TimelineFileList(const TimelineFileList& o) : items_(o.items()) {}
+    TimelineFileList(const TimelineFileList& o)            = default;
+    TimelineFileList& operator=(const TimelineFileList& o) = default;
+
     QList<TimelineFileListItem> items() const { return items_; }
     void clear() { items_.clear(); }
     int loadableCount() const;
