@@ -56,16 +56,18 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
     static const unsigned char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     unsigned char dtable[256], *out, *pos, block[4], tmp;
-    size_t i, count, olen;
+    size_t olen;
     int pad = 0;
 
     memset(dtable, 0x80, 256);
-    for (i = 0; i < sizeof(base64_table) - 1; i++)
+    for (size_t i = 0; i < sizeof(base64_table) - 1; i++) {
         dtable[base64_table[i]] = (unsigned char)i;
-    dtable['='] = 0;
+    }
+    int assignment     = '=';
+    dtable[assignment] = 0;
 
-    count       = 0;
-    for (i = 0; i < len; i++) {
+    size_t count       = 0;
+    for (size_t i = 0; i < len; i++) {
         if (dtable[src[i]] != 0x80)
             count++;
     }
@@ -79,7 +81,7 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
         return NULL;
 
     count = 0;
-    for (i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         tmp = dtable[src[i]];
         if (tmp == 0x80)
             continue;
