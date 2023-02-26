@@ -1746,7 +1746,7 @@ void ServerHandler::rename(const std::string& name) {
     broadcast(&ServerObserver::notifyServerRenamed, oldName);
 }
 
-void ServerHandler::confChanged(VServerSettings::Param par, VProperty* prop) {
+void ServerHandler::confChanged(VServerSettings::Param par, VProperty* /*prop*/) {
     switch (par) {
         case VServerSettings::AutoUpdate:
         case VServerSettings::UpdateRate:

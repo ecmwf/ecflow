@@ -356,7 +356,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role, VTree
     return {};
 }
 
-QVariant TreeNodeModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
+QVariant TreeNodeModel::headerData(const int /*section*/, const Qt::Orientation /*orient*/, const int /*role*/) const {
     // No header!!!
     return {};
 }
@@ -1144,7 +1144,7 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server, int) {
     }
 }
 // The server clear has finished. The tree is empty only containing the rootnode
-void TreeNodeModel::slotEndServerClear(VModelServer* server, int) {
+void TreeNodeModel::slotEndServerClear(VModelServer* /*server*/, int) {
     assert(active_ == true);
     endRemoveRows();
 }

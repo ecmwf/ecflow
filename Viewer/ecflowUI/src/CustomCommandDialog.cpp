@@ -9,7 +9,7 @@
 
 #include "CustomCommandDialog.hpp"
 
-CustomCommandDialog::CustomCommandDialog(QWidget* parent) {
+CustomCommandDialog::CustomCommandDialog(QWidget* /*parent*/) {
     setupUi(this);
 
     // when the user clicks the 'Run' button, we close the dialog with ACCEPT

@@ -621,7 +621,7 @@ void ChartView::adjustTimeAxis(qint64 periodInMs) {
         format = "dd MMM";
     }
 
-    if (QDateTimeAxis* ax = static_cast<QDateTimeAxis*>(chart()->axisX())) {
+    if (QDateTimeAxis* ax = static_cast<QDateTimeAxis*>(ViewerUtil::chartAxisX(chart()))) {
         ax->setFormat(format);
     }
 }
@@ -632,7 +632,7 @@ void ChartView::setCallout(qreal val) {
         scene()->addItem(callout_);
     }
 
-    if (auto* axisY = static_cast<QValueAxis*>(chart()->axisY())) {
+    if (auto* axisY = static_cast<QValueAxis*>(ViewerUtil::chartAxisY(chart()))) {
         qreal m = axisY->max();
         callout_->setAnchor(QPointF(val, m));
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
@@ -1222,11 +1222,14 @@ void LogRequestView::clearCharts() {
 
         // We do it in this way to get rid of error message:
         //"Cannot remove axis. Axis not found on the chart."
-        if (v->chart()->axes(Qt::Horizontal).contains(v->chart()->axisX()))
-            v->chart()->removeAxis(v->chart()->axisX());
-
-        if (v->chart()->axes(Qt::Vertical).contains(v->chart()->axisY()))
-            v->chart()->removeAxis(v->chart()->axisY());
+        auto *ax = ViewerUtil::chartAxisX(v->chart());
+        if (v->chart()->axes(Qt::Horizontal).contains(ax)) {
+            v->chart()->removeAxis(ax);
+        }
+        auto *ay = ViewerUtil::chartAxisY(v->chart());
+        if (v->chart()->axes(Qt::Vertical).contains(ay)) {
+            v->chart()->removeAxis(ay);
+        }
     }
     maxVal_ = 0;
 }
@@ -1286,12 +1289,17 @@ void LogRequestView::build(ChartView* view, QLineSeries* series, QString title, 
     chart->addSeries(series);
     chart->setTitle(title);
 
-    if (!chart->axisX()) {
+    if (ViewerUtil::chartAxisX(chart) == nullptr) {
         chart->legend()->hide();
         auto* axisX = new QDateTimeAxis;
         axisX->setTickCount(10);
         axisX->setFormat("HH dd/MM");
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        chart->addAxis(axisX, Qt::AlignBottom);
+        series->attachAxis(axisX);
+#else
         chart->setAxisX(axisX, series);
+#endif
         view->adjustTimeAxis(data_->period());
 
         auto* axisY = new QValueAxis;
@@ -1307,21 +1315,32 @@ void LogRequestView::build(ChartView* view, QLineSeries* series, QString title, 
 
         axisY->setTitleText(yTitle);
         axisY->setMin(0.);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        chart->addAxis(axisY, Qt::AlignLeft);
+        series->attachAxis(axisY);
+#else
         chart->setAxisY(axisY, series);
+#endif
         axisY->setMin(0.);
         axisY->setMax(maxVal);
     }
     else {
         chart->addSeries(series);
-        series->attachAxis(chart->axisX());
-        series->attachAxis(chart->axisY());
+        auto *ax = ViewerUtil::chartAxisX(chart);
+        if (ax != nullptr) {
+            series->attachAxis(ax);
+        }
+        ax = ViewerUtil::chartAxisY(chart);
+        if (ax != nullptr) {
+            series->attachAxis(ax);
+        }
     }
 }
 
 void LogRequestView::adjustMaxVal() {
     Q_FOREACH (ChartView* v, views_) {
         Q_ASSERT(v->chart());
-        if (auto* axisY = static_cast<QValueAxis*>(v->chart()->axisY())) {
+        if (auto* axisY = static_cast<QValueAxis*>(ViewerUtil::chartAxisY(v->chart()))) {
             axisY->setMax(maxVal_);
         }
     }
@@ -1654,24 +1673,41 @@ void LogTotalRequestView::addSuite(int idx) {
     data_->getSuiteTotalReq(idx, *series);
     chart = getChart(TotalChartType);
     chart->addSeries(series);
-    series->attachAxis(chart->axisX());
-    series->attachAxis(chart->axisY());
+    auto *ax = ViewerUtil::chartAxisX(chart);
+    auto *ay = ViewerUtil::chartAxisY(chart);
+    if (ax != nullptr) {
+        series->attachAxis(ax);
+    }
+    if (ay != nullptr) {
+        series->attachAxis(ay);
+    }
 
     auto* chSeries = new QLineSeries();
     chSeries->setName(suiteSeriesId(idx));
     data_->getSuiteChildReq(idx, *chSeries);
     chart = getChart(ChildChartType);
     chart->addSeries(chSeries);
-    chSeries->attachAxis(chart->axisX());
-    chSeries->attachAxis(chart->axisY());
-
+    ax = ViewerUtil::chartAxisX(chart);
+    ay = ViewerUtil::chartAxisY(chart);
+    if (ax != nullptr) {
+        chSeries->attachAxis(ax);
+    }
+    if (ay != nullptr) {
+        chSeries->attachAxis(ay);
+    }
     auto* usSeries = new QLineSeries();
     usSeries->setName(suiteSeriesId(idx));
     data_->getSuiteUserReq(idx, *usSeries);
     chart = getChart(UserChartType);
     chart->addSeries(usSeries);
-    usSeries->attachAxis(chart->axisX());
-    usSeries->attachAxis(chart->axisY());
+    ax = ViewerUtil::chartAxisX(chart);
+    ay = ViewerUtil::chartAxisY(chart);
+    if (ax != nullptr) {
+        usSeries->attachAxis(ax);
+    }
+    if (ay != nullptr) {
+        usSeries->attachAxis(ay);
+    }
 }
 
 void LogTotalRequestView::loadCore() {

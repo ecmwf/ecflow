@@ -57,6 +57,6 @@ return style()->sizeFromContents(
 );*/
 }
 
-void OneLineTextEdit::mousePressEvent(QMouseEvent* e) {
+void OneLineTextEdit::mousePressEvent(QMouseEvent* /*e*/) {
     Q_EMIT clicked();
 }

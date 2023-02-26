@@ -57,7 +57,7 @@ void VLimitAttrType::encode(limit_ptr lim, QStringList& data) const {
 //
 //=====================================================
 
-VLimitAttr::VLimitAttr(VNode* parent, limit_ptr lim, int index) : VAttribute(parent, index) {
+VLimitAttr::VLimitAttr(VNode* parent, limit_ptr /*lim*/, int index) : VAttribute(parent, index) {
     // name_=lim->name();
 }
 

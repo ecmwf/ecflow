@@ -265,8 +265,8 @@ void TableNodeView::slotContextMenu(const QPoint& position) {
 void TableNodeView::handleContextMenu(QModelIndex indexClicked,
                                       QModelIndexList indexLst,
                                       QPoint globalPos,
-                                      QPoint widgetPos,
-                                      QWidget* widget) {
+                                      QPoint /*widgetPos*/,
+                                      QWidget* /*widget*/) {
     // Node actions
     if (indexClicked.isValid() && indexClicked.column() == 0) // indexLst[0].isValid() && indexLst[0].column() == 0)
     {
@@ -299,7 +299,7 @@ void TableNodeView::slotCommandShortcut() {
     }
 }
 
-void TableNodeView::slotViewCommand(VInfo_ptr info, QString cmd) {
+void TableNodeView::slotViewCommand(VInfo_ptr /*info*/, QString /*cmd*/) {
 }
 
 void TableNodeView::rerender() {
@@ -581,7 +581,7 @@ void TableNodeHeader::showEvent(QShowEvent* e) {
     QHeaderView::showEvent(e);
 }
 
-void TableNodeHeader::slotSectionResized(int i) {
+void TableNodeHeader::slotSectionResized(int /*i*/) {
     /*for (int j=visualIndex(i);j<count();j++)
     {
         int logical = logicalIndex(j);
@@ -761,7 +761,11 @@ QRect cbRect(0,0,12,12);
 
     // Draw icon to the left of the text
     QVariant pixVa = model()->headerData(logicalIndex, Qt::Horizontal, Qt::DecorationRole);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (pixVa.typeId() == QMetaType::QPixmap) {
+#else
     if (pixVa.type() == QVariant::Pixmap) {
+#endif
         auto pix = pixVa.value<QPixmap>();
         int pixH = qMin(pix.height(), rect.height() - 2);
 
@@ -784,7 +788,13 @@ void TableNodeHeader::mousePressEvent(QMouseEvent* event) {
     while (it != customButton_.constEnd()) {
         if (it.value().rect_.contains(event->pos())) {
             UiLog().dbg() << "header " << it.key() << " clicked";
-            Q_EMIT customButtonClicked(it.value().id(), event->globalPos());
+
+            Q_EMIT customButtonClicked(it.value().id(),
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                event->globalPosition().toPoint());
+#else
+                event->globalPos());
+#endif
         }
         ++it;
     }

@@ -14,6 +14,7 @@
 #include <QImageReader>
 #include <QLinearGradient>
 #include <QPainter>
+#include <QtGlobal>
 
 #include "AbstractNodeModel.hpp"
 #include "Animation.hpp"
@@ -92,7 +93,11 @@ void TriggerViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         painter->setFont(font_);
 
         // Node
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (tVar.typeId() == QMetaType::QString) {
+#else
         if (tVar.type() == QVariant::String) {
+#endif
             QString text = index.data(Qt::DisplayRole).toString();
 
             // If the textalignment is AlignCenter the node is displayed
@@ -111,7 +116,11 @@ void TriggerViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         }
 
         // Render attributes
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        else if (tVar.typeId() == QMetaType::QStringList) {
+#else
         else if (tVar.type() == QVariant::StringList) {
+#endif
             QStringList lst = tVar.toStringList();
             if (lst.count() > 0) {
                 QMap<QString, AttributeRendererProc>::const_iterator it = attrRenderers_.find(lst.at(0));

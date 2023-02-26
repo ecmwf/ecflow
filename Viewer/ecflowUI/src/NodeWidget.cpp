@@ -135,7 +135,7 @@ void NodeWidget::slotInfoPanelAction() {
     }*/
 }
 
-void NodeWidget::updateActionState(VInfo_ptr info) {
+void NodeWidget::updateActionState(VInfo_ptr /*info*/) {
     /* std::vector<InfoPanelDef*> ids;
      InfoPanelHandler::instance()->visible(info,ids);
 

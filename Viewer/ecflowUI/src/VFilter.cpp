@@ -336,7 +336,7 @@ void IconFilter::readSettings(VSettings* vs) {
 // NodeFilterDef
 //==============================================
 
-NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter, Scope scope) : serverFilter_(serverFilter) {
+NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter, Scope /*scope*/) : serverFilter_(serverFilter) {
     nodeState_ = new NodeStateFilter;
     connect(nodeState_, SIGNAL(changed()), this, SIGNAL(changed()));
     query_ = new NodeQuery("tmp", true);

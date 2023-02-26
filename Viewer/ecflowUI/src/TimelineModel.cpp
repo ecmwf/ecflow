@@ -51,7 +51,7 @@ int TimelineModel::rowCount(const QModelIndex& parent) const {
     return 0;
 }
 
-Qt::ItemFlags TimelineModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags TimelineModel::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -231,7 +231,7 @@ QModelIndex TimelineModel::index(int row, int column, const QModelIndex& parent)
     return {};
 }
 
-QModelIndex TimelineModel::parent(const QModelIndex& child) const {
+QModelIndex TimelineModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 

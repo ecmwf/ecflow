@@ -61,8 +61,8 @@ void TriggerGraphWidget::setInfo(VInfo_ptr info, bool dependency) {
 
 void TriggerGraphWidget::adjust(VInfo_ptr info,
                                 bool dependency,
-                                TriggerTableCollector* tc1,
-                                TriggerTableCollector* tc2) {
+                                TriggerTableCollector* /*tc1*/,
+                                TriggerTableCollector* /*tc2*/) {
     if (!info) {
         clear();
     }
@@ -75,7 +75,7 @@ void TriggerGraphWidget::adjust(VInfo_ptr info,
     }
 }
 
-void TriggerGraphWidget::setTriggerCollector(TriggerTableCollector* tc1, TriggerTableCollector* tc2) {
+void TriggerGraphWidget::setTriggerCollector(TriggerTableCollector* /*tc1*/, TriggerTableCollector* /*tc2*/) {
     //    model_->setTriggerCollectors(tc1, tc2);
     //    triggerTc_ = tc1;
     //    triggeredTc_ = tc2;

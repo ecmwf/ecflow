@@ -134,8 +134,11 @@ void VProperty::setValue(const std::string& val) {
             value_      = str;
         }
     }
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (!defaultValue_.isNull()  && defaultValue_.typeId() != value_.typeId()) {
+#else
     if (!defaultValue_.isNull() && defaultValue_.type() != value_.type()) {
+#endif
         changed = true;
         value_  = defaultValue_;
         // An error message should be shown!
@@ -148,8 +151,11 @@ void VProperty::setValue(const std::string& val) {
 void VProperty::setValue(QVariant val) {
     if (master_ && useMaster_)
         return;
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (!defaultValue_.isNull()  && defaultValue_.typeId() != val.typeId()) {
+#else
     if (!defaultValue_.isNull() && defaultValue_.type() != val.type()) {
+#endif
         return;
     }
 

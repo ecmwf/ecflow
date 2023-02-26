@@ -54,7 +54,7 @@ int CommandOutputModel::rowCount(const QModelIndex& parent) const {
     return 0;
 }
 
-Qt::ItemFlags CommandOutputModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags CommandOutputModel::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -118,7 +118,7 @@ QModelIndex CommandOutputModel::index(int row, int column, const QModelIndex& pa
     return {};
 }
 
-QModelIndex CommandOutputModel::parent(const QModelIndex& child) const {
+QModelIndex CommandOutputModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 

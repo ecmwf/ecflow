@@ -34,7 +34,7 @@
 
 bool add = false;
 
-TextPagerWidget::TextPagerWidget(QWidget* parent)
+TextPagerWidget::TextPagerWidget(QWidget* /*parent*/)
 // : TextPagerEdit(parent),
 {
     auto* hb = new QHBoxLayout(this);

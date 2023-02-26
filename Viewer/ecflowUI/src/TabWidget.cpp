@@ -21,7 +21,7 @@
 
 #include "UserMessage.hpp"
 
-void IconTabBar::paintEvent(QPaintEvent* e) {
+void IconTabBar::paintEvent(QPaintEvent* /*e*/) {
     QStylePainter painter(this);
     for (int i = 0; i < count(); ++i) {
         QStyleOptionTab option;

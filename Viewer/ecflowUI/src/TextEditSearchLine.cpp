@@ -157,7 +157,7 @@ void TextEditSearchLine::clearHighlights() {
         interface_->clearHighlights();
 }
 
-void TextEditSearchLine::matchModeChanged(int notUsed) {
+void TextEditSearchLine::matchModeChanged(int /*notUsed*/) {
     if (matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
         actionWholeWords_->setEnabled(true);
     else

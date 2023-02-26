@@ -133,7 +133,7 @@ void RepeatEditor::buildList(VRepeatAttr* rep) {
     }
 }
 
-void RepeatEditor::slotSelectedInView(const QModelIndex& current, const QModelIndex& previous) {
+void RepeatEditor::slotSelectedInView(const QModelIndex& current, const QModelIndex& /*previous*/) {
     setValue(current.data().toString());
     checkButtonStatus();
 }

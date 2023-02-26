@@ -128,7 +128,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query, QStringList allServers) {
     }
 
     // Notify the servers that the search began
-    Q_FOREACH (ServerHandler* s, servers_) {
+    for(ServerHandler* s: servers_) {
         s->searchBegan();
     }
 
@@ -271,7 +271,7 @@ void NodeQueryEngine::broadcastChunk(bool force) {
 
 void NodeQueryEngine::slotFinished() {
     // Notify the servers that the search finished
-    Q_FOREACH (ServerHandler* s, servers_) {
+    for (ServerHandler* s: servers_) {
         s->searchFinished();
     }
 }

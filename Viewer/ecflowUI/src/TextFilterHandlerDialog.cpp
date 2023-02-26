@@ -219,7 +219,7 @@ void TextFilterHandlerDialog::on_actionAdd__triggered() {
         reloadTable();
 }
 
-void TextFilterHandlerDialog::on_table__doubleClicked(const QModelIndex& index) {
+void TextFilterHandlerDialog::on_table__doubleClicked(const QModelIndex& /*index*/) {
     editItem();
 }
 

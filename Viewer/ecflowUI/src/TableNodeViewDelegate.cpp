@@ -133,7 +133,12 @@ void TableNodeViewDelegate::paint(QPainter* painter,
     // Render attributes
     else if (id == "event" || id == "label" || id == "meter" || id == "trigger") {
         QVariant va = index.data(Qt::DisplayRole);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (va.typeId() == QMetaType::QStringList) {
+#else
         if (va.type() == QVariant::StringList) {
+#endif
             QStringList lst = va.toStringList();
             if (lst.count() > 0) {
                 QMap<QString, AttributeRendererProc>::const_iterator it = attrRenderers_.find(lst.at(0));
@@ -189,7 +194,12 @@ void TableNodeViewDelegate::renderNode(QPainter* painter,
     QList<QRect> pixRectLst;
 
     QVariant va = index.data(AbstractNodeModel::IconRole);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (va.typeId() == QMetaType::QVariantList) {
+#else
     if (va.type() == QVariant::List) {
+#endif
         QVariantList lst = va.toList();
         if (lst.count() > 0) {
             int xp = currentRight + nodeBox_->iconPreGap;

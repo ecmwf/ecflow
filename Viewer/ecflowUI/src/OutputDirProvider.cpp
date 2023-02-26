@@ -356,7 +356,7 @@ void OutputDirFetchTransferTask::parseLine(QString line) {
     if (lst.count() >= 3) {
         size_t mTime  = lst[0].toUInt();
         int fSize     = lst[1].toInt();
-        QString fName = line.mid(lst[0].count() + 1 + lst[1].count() + 1);
+        QString fName = line.mid(lst[0].size() + 1 + lst[1].size() + 1);
         // UiLog().dbg() << UI_FN_INFO << fName << " " << fSize << " " << mTime;
         dir_->addItem(fName.toStdString(), fSize, mTime);
     }

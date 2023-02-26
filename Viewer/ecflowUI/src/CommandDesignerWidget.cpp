@@ -244,7 +244,7 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem* item, bool showFull
     }
 }
 
-void CommandDesignerWidget::on_tabWidget__currentChanged(int index) {
+void CommandDesignerWidget::on_tabWidget__currentChanged(int /*index*/) {
     // bool onSaveTab = (index == TAB_SAVE);
     // saveCommandGroupBox_->setVisible(onSaveTab);
     // saveOptionsButton_->setVisible(!onSaveTab);

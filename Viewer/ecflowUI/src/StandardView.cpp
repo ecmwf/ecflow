@@ -346,7 +346,7 @@ void StandardView::paint(QPainter* painter, const QRegion& region) {
 }
 
 // Draw a whole row
-void StandardView::drawRow(QPainter* painter, int start, int xOffset, int& yp, std::vector<int>& indentVec) {
+void StandardView::drawRow(QPainter* painter, int start, int /*xOffset*/, int& yp, std::vector<int>& indentVec) {
     TreeNodeViewItem* item = &(viewItems_[start]);
 
     // Get the rowheight

@@ -249,7 +249,7 @@ QModelIndex ChangeNotifyEditorModel::index(int row, int column, const QModelInde
     return {};
 }
 
-QModelIndex ChangeNotifyEditorModel::parent(const QModelIndex& child) const {
+QModelIndex ChangeNotifyEditorModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 

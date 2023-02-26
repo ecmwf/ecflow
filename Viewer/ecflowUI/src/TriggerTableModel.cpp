@@ -70,7 +70,7 @@ int TriggerTableModel::rowCount(const QModelIndex& parent) const {
     return 0;
 }
 
-Qt::ItemFlags TriggerTableModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags TriggerTableModel::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -184,7 +184,7 @@ QModelIndex TriggerTableModel::index(int row, int column, const QModelIndex& par
     return {};
 }
 
-QModelIndex TriggerTableModel::parent(const QModelIndex& child) const {
+QModelIndex TriggerTableModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 

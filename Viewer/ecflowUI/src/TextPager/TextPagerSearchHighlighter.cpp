@@ -97,7 +97,7 @@ void TextPagerSearchHighlighter::reset(QString txt, TextPagerDocument::FindMode 
         rehighlight();
 }
 
-void TextPagerSearchHighlighter::reset(QRegExp rx, TextPagerDocument::FindMode mode, bool apply) {
+void TextPagerSearchHighlighter::reset(QRegExp rx, TextPagerDocument::FindMode /*mode*/, bool apply) {
     bool changed = false;
     if (mode_ != RegexpMode) {
         mode_ = RegexpMode;

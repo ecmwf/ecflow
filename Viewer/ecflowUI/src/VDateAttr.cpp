@@ -56,11 +56,11 @@ void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d, QStr
 //
 //=====================================================
 
-VDateAttr::VDateAttr(VNode* parent, const DateAttr& t, int index) : VAttribute(parent, index), dataType_(DateData) {
+VDateAttr::VDateAttr(VNode* parent, const DateAttr& /*t*/, int index) : VAttribute(parent, index), dataType_(DateData) {
     // name_=t.name();
 }
 
-VDateAttr::VDateAttr(VNode* parent, const DayAttr& t, int index) : VAttribute(parent, index), dataType_(DayData) {
+VDateAttr::VDateAttr(VNode* parent, const DayAttr& /*t*/, int index) : VAttribute(parent, index), dataType_(DayData) {
     // name_=t.name();
 }
 

@@ -89,7 +89,7 @@ public:
     // When it is called the observers are notified about the change in status.
     void status(Status s, bool broadcast = true);
 
-    void aborted(const std::string&, bool broadcast = true) {}
+    void aborted(const std::string&, bool /*broadcast*/ = true) {}
     void broadcast();
     void removeObserver(VTaskObserver*);
 

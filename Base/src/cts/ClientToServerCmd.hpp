@@ -48,7 +48,7 @@ public:
    /// the command we do not want logs all the paths, for each node.(performance bottleneck
    /// when dealing with thousands of paths)
    virtual void print(std::string& os) const = 0;
-   virtual void print(std::string& os, const std::string& path) const { print(os); }
+   virtual void print(std::string& os, const std::string& /*path*/) const { print(os); }
 
    /// Print the command without trailing <user>@<host>. Used by Group command, avoids duplicate user@host for each child command
    virtual void print_only(std::string& os ) const { return print(os); }
@@ -129,7 +129,7 @@ public:
    virtual void add_edit_history(Defs*) const;
 
    // used by group_cmd to postfix syncCmd on all user commands that modify defs
-   virtual void set_client_handle(int client_handle) {} // used by group_cmd
+   virtual void set_client_handle(int /*client_handle*/) {} // used by group_cmd
    virtual void set_group_cmd(const GroupCTSCmd*) {}
 
    // CLIENT side Parse and command construction, create can throw std::runtime_error for errors
@@ -195,7 +195,7 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar( CEREAL_NVP(cl_host_) );
    }
@@ -236,7 +236,7 @@ public:
 
 protected:
    /// Overridden to do nothing since Task based commands don't need _user_ based authentication
-   void setup_user_authentification(const std::string& user, const std::string& passwd) override{}
+   void setup_user_authentification(const std::string& /*user*/, const std::string& /*passwd*/) override{}
    bool setup_user_authentification(AbstractClientEnv&) override{return true;}
    void setup_user_authentification() override{}
 
@@ -258,7 +258,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< ClientToServerCmd >( this ),
           CEREAL_NVP(path_to_submittable_),
@@ -301,7 +301,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ));
       CEREAL_OPTIONAL_NVP(ar, var_to_add_, [this](){return !var_to_add_.empty(); }); // conditionally save
@@ -340,7 +340,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ));
       CEREAL_OPTIONAL_NVP(ar, var_to_del_, [this](){return !var_to_del_.empty(); }); // conditionally save
@@ -380,7 +380,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ),
          CEREAL_NVP(expression_));
@@ -417,7 +417,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ),
       CEREAL_NVP(reason_));
@@ -459,7 +459,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ), CEREAL_NVP(name_));
       CEREAL_OPTIONAL_NVP(ar, value_, [this](){return !value_;}); // conditionally save if value is false
@@ -501,7 +501,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ),
       CEREAL_NVP(name_),
@@ -545,7 +545,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ),
       CEREAL_NVP(name_),
@@ -598,7 +598,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< TaskCmd >( this ),
          CEREAL_NVP(name_),
@@ -652,7 +652,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< ClientToServerCmd >( this ), CEREAL_NVP(user_));
       CEREAL_OPTIONAL_NVP(ar, pswd_, [this](){return !pswd_.empty(); }); // conditionally save
@@ -681,7 +681,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ));
    }
@@ -742,7 +742,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_));
@@ -779,7 +779,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(mode_),
@@ -840,7 +840,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
@@ -914,7 +914,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
@@ -979,7 +979,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
@@ -1028,7 +1028,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(paths_),
@@ -1081,7 +1081,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
@@ -1129,7 +1129,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
@@ -1164,7 +1164,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(msg_));
@@ -1205,7 +1205,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(suiteName_),
@@ -1244,7 +1244,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(user_action_),
@@ -1294,7 +1294,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(paths_),
@@ -1334,7 +1334,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(absNodepath_),
@@ -1383,7 +1383,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(paths_),
@@ -1426,7 +1426,7 @@ private:
    // However its ONLY used on the client side, hence no need to serialise data members
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ));
    }
@@ -1471,7 +1471,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(force_),
@@ -1522,7 +1522,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(createNodesAsNeeded_),
@@ -1591,7 +1591,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(paths_),
@@ -1657,7 +1657,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(paths_),
@@ -1783,7 +1783,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(paths_),
@@ -1840,7 +1840,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(file_),
@@ -1915,7 +1915,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(edit_type_),
@@ -1960,7 +1960,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(source_),
@@ -2006,7 +2006,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(src_node_),
@@ -2056,7 +2056,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(query_type_),
@@ -2128,7 +2128,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar, std::uint32_t const /*version*/ )
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(cmdVec_),

@@ -299,7 +299,7 @@ int TreeNodeViewDelegate::nodeBoxHeight() {
     return nodeBox_->fullHeight;
 }
 
-QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex& index) const {
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex& /*index*/) const {
     return nodeBox_->sizeHintCache;
 }
 
@@ -310,7 +310,11 @@ void TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index, int& w, int
     h             = nodeBox_->fullHeight;
 
     // For nodes we compute the exact size of visual rect
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (tVar.typeId() == QMetaType::QString) {
+#else
     if (tVar.type() == QVariant::String) {
+#endif
         QString text = index.data(Qt::DisplayRole).toString();
         if (index.data(AbstractNodeModel::ServerRole).toInt() == 1) {
             widthHintServer(index, w, text);
@@ -322,7 +326,11 @@ void TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index, int& w, int
     // For attributes we do not need the exact width since they do not have children so
     // there is nothing on their right in the view. We compute their proper size when
     // they are first rendered. However the exact height must be known at this stage!
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    else if (tVar.typeId() == QMetaType::QStringList) {
+#else
     else if (tVar.type() == QVariant::StringList) {
+#endif
         // Each attribute has this height except the multiline labels
         h = attrBox_->fullHeight;
 
@@ -387,8 +395,11 @@ void TreeNodeViewDelegate::paintIt(QPainter* painter,
 
     QVariant tVar = index.data(Qt::DisplayRole);
     painter->setFont(font_);
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (tVar.typeId() == QMetaType::QString) {
+#else
     if (tVar.type() == QVariant::String) {
+#endif
         int width    = 0;
         QString text = index.data(Qt::DisplayRole).toString();
         if (index.data(AbstractNodeModel::ServerRole).toInt() == 1) {
@@ -401,7 +412,11 @@ void TreeNodeViewDelegate::paintIt(QPainter* painter,
         size = QSize(width, nodeBox_->fullHeight);
     }
     // Render attributes
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    else if (tVar.typeId() == QMetaType::QStringList) {
+#else
     else if (tVar.type() == QVariant::StringList) {
+#endif
         QStringList lst = tVar.toStringList();
         if (lst.count() > 0) {
             QMap<QString, AttributeRendererProc>::const_iterator it = attrRenderers_.find(lst.at(0));
@@ -489,7 +504,11 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
     QList<QRect> pixRectLst;
 
     QVariant va = index.data(AbstractNodeModel::IconRole);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (va.typeId() == QMetaType::QVariantList) {
+#else
     if (va.type() == QVariant::List) {
+#endif
         QVariantList lst = va.toList();
         if (lst.count() > 0) {
             int xp = currentRight + nodeBox_->iconPreGap;
@@ -592,40 +611,6 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
         currentRight = errRect.x() + errRect.width();
     }
 
-    // Update
-#if 0
-    bool hasUpdate=false;
-    ServerUpdateData updateData;
-    if(server)
-    {
-        hasUpdate=true;
-        updateData.br_=QRect(currentRight+3*offset,itemRect.y()-1,0,itemRect.height()+2);
-        updateData.prevTime_=server->secsSinceLastRefresh();
-        updateData.nextTime_=server->secsTillNextRefresh();
-        if(updateData.prevTime_ >=0)
-        {
-            if(updateData.nextTime_ >=0)
-            {
-                updateData.prevText_="-" + formatTime(updateData.prevTime_);
-                updateData.nextText_="+" +formatTime(updateData.nextTime_);
-                updateData.prog_=(static_cast<float>(updateData.prevTime_)/static_cast<float>(updateData.prevTime_+updateData.nextTime_));
-                updateData.br_.setWidth(fm.width("ABCDE")+fm.width(updateData.prevText_)+fm.width(updateData.nextText_)+2*offset);
-            }
-            else
-            {
-                updateData.prevText_="last update: " + formatTime(updateData.prevTime_);
-                updateData.prog_=0;
-                updateData.br_.setWidth(fm.width(updateData.prevText_));
-            }
-            currentRight=updateData.br_.right();
-         }
-        else
-        {
-            hasUpdate=false;
-        }
-    }
-#endif
-
     // Define clipping
     int rightPos           = currentRight + 1;
     totalWidth             = rightPos - option.rect.left();
@@ -714,7 +699,11 @@ int TreeNodeViewDelegate::renderNode(QPainter* painter,
     // get the colours
     QVariant bgVa  = index.data(Qt::BackgroundRole);
     bool hasRealBg = false;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (bgVa.typeId() == QMetaType::QVariantList) {
+#else
     if (bgVa.type() == QVariant::List) {
+#endif
         QVariantList lst = bgVa.toList();
         if (lst.count() == 2) {
             hasRealBg       = true;
@@ -830,7 +819,11 @@ int TreeNodeViewDelegate::renderNode(QPainter* painter,
     QList<QRect> pixRectLst;
 
     QVariant va = index.data(AbstractNodeModel::IconRole);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (va.typeId() == QMetaType::QVariantList) {
+#else
     if (va.type() == QVariant::List) {
+#endif
         QVariantList lst = va.toList();
         if (lst.count() > 0) {
             int xp = currentRight + nodeBox_->iconPreGap;
@@ -1309,7 +1302,11 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index, int height, QStrin
     }
     else {
         QVariant va = index.data(AbstractNodeModel::IconRole);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (va.typeId() == QMetaType::QVariantList) {
+#else
         if (va.type() == QVariant::List) {
+#endif
             QVariantList lst = va.toList();
             pixNum           = lst.count();
         }

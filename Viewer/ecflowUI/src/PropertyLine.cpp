@@ -12,6 +12,7 @@
 
 #include <cassert>
 
+#include <QtGlobal>
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
@@ -38,8 +39,12 @@ FontSizeSpin::FontSizeSpin(QWidget* parent) : QSpinBox(parent) {
 }
 
 void FontSizeSpin::setFamily(QString family) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
+    vals_ = QFontDatabase::pointSizes(family);
+#else
     QFontDatabase db;
     vals_ = db.pointSizes(family);
+#endif
     setRange(0, vals_.count() - 1);
 }
 
@@ -512,14 +517,18 @@ FontPropertyLine::FontPropertyLine(VProperty* guiProp, bool addLabel, QWidget* p
     auto* hb = new QHBoxLayout(holderW_);
     hb->setContentsMargins(0, 0, 0, 0);
 
-    QFontDatabase db;
-
     familyCb_ = new QComboBox(parent);
     familyCb_->setObjectName(prop_->name());
 
     hb->addWidget(familyCb_);
-    Q_FOREACH (QString s, db.families(QFontDatabase::Latin))
+#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
+    for (QString s: QFontDatabase::families(QFontDatabase::Latin)) {
+#else
+    QFontDatabase db;
+    for (QString s: db.families(QFontDatabase::Latin)) {
+#endif
         familyCb_->addItem(s);
+    }
 
     sizeSpin_ = new QSpinBox(parent);
     sizeSpin_->setRange(1, 200);
@@ -609,7 +618,7 @@ QVariant FontPropertyLine::currentValue() {
     return font_;
 }
 
-void FontPropertyLine::setEnabledEditable(bool b) {
+void FontPropertyLine::setEnabledEditable(bool /*b*/) {
     // tbEdit_->setEnabled(b);
 }
 
@@ -689,7 +698,7 @@ void IntPropertyLine::setEnabledEditable(bool b) {
 //
 //=========================================================================
 
-BoolPropertyLine::BoolPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
+BoolPropertyLine::BoolPropertyLine(VProperty* guiProp, bool /*addLabel*/, QWidget* parent)
     : PropertyLine(guiProp, false, parent) {
     cb_ = new QCheckBox(prop_->param("label"), parent);
     cb_->setObjectName(prop_->name());

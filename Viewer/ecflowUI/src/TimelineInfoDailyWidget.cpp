@@ -32,7 +32,7 @@
 #include "WidgetNameProvider.hpp"
 #include "ui_TimelineInfoDailyWidget.h"
 
-TimelineInfoDailyWidget::TimelineInfoDailyWidget(QWidget* parent)
+TimelineInfoDailyWidget::TimelineInfoDailyWidget(QWidget* /*parent*/)
     : ui_(new Ui::TimelineInfoDailyWidget),
       numOfRows_(0),
       tlEndTime_(0),

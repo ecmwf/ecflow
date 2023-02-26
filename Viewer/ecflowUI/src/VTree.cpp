@@ -55,7 +55,7 @@ VTreeNode* VTreeNode::findChild(const std::string& name) const {
 }
 
 int VTreeNode::indexOfChild(const VTreeNode* vn) const {
-    for (auto i = 0; i < children_.size(); i++) {
+    for (std::size_t i = 0; i < children_.size(); i++) {
         if (children_[i] == vn)
             return static_cast<int>(i);
     }

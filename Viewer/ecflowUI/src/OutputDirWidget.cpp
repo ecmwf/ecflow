@@ -530,7 +530,7 @@ bool OutputDirWidget::isNotInDisabledState() const {
 }
 
 // This slot is called when a file item is selected in the dir view
-void OutputDirWidget::slotItemSelected(const QModelIndex& currentIdx, const QModelIndex& /*idx2*/) {
+void OutputDirWidget::slotItemSelected(const QModelIndex& /*currentIdx*/, const QModelIndex& /*idx2*/) {
     if (!ignoreOutputSelection_) {
         Q_EMIT itemSelected();
     }

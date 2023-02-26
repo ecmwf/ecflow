@@ -138,7 +138,7 @@ public:
 
     /// Order the node using the second parameter
     virtual void order(Node* /*immediateChild*/, NOrder::Order) {}
-    virtual void move_peer(Node* src, Node* dest) {}
+    virtual void move_peer(Node* /*src*/, Node* /*dest*/) {}
 
     /// called when definition is restored from a file/checkpoint
     virtual void handle_migration(const ecf::Calendar&);
@@ -616,7 +616,7 @@ public:
 
     virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr(); }
     virtual node_ptr find_immediate_child(const boost::string_view&) const { return node_ptr(); }
-    virtual std::string find_node_path(const std::string& type, const std::string& name) const { return std::string(); }
+    virtual std::string find_node_path(const std::string& /*type*/, const std::string& /*name*/) const { return std::string(); }
     const Variable& findVariable(const std::string& name) const;
     std::string find_parent_variable_sub_value(const std::string& name) const;
     const Variable& find_parent_variable(const std::string& name) const;

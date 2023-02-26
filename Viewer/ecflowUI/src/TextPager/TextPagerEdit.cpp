@@ -522,14 +522,22 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent* e) {
         const QRect r    = viewport()->rect();
         d->lastMouseMove = e->pos();
         e->accept();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (e->position().y() < r.top()) {
+#else
         if (e->y() < r.top()) {
+#endif
             if (d->atBeginning()) {
                 d->updateHorizontalPosition();
                 d->autoScrollTimer.stop();
                 return;
             }
         }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        else if (e->position().y() > r.bottom()) {
+#else
         else if (e->y() > r.bottom()) {
+#endif
             if (d->atEnd()) {
                 d->updateHorizontalPosition();
                 d->autoScrollTimer.stop();
@@ -862,7 +870,7 @@ QChar TextPagerEdit::readCharacter(int index) const {
     return d->document->readCharacter(index);
 }
 
-void TextEditPrivate::onDocumentSizeChanged(int size) {
+void TextEditPrivate::onDocumentSizeChanged(int /*size*/) {
     adjustVerticalScrollBar();
 
     /*int s=findLastPageSize();
@@ -1070,7 +1078,7 @@ void TextEditPrivate::updateScrollBar() {
     }
 }
 
-void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count) {
+void TextEditPrivate::onCharactersAddedOrRemoved(int /*from*/, int count) {
     Q_ASSERT(count >= 0);
     Q_UNUSED(count);
 

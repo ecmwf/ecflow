@@ -54,7 +54,7 @@ void VEventAttrType::encode(const Event& e, QStringList& data) const {
 //
 //=====================================================
 
-VEventAttr::VEventAttr(VNode* parent, const Event& e, int index) : VAttribute(parent, index) {
+VEventAttr::VEventAttr(VNode* parent, const Event& /*e*/, int index) : VAttribute(parent, index) {
     // name_=e.name_or_number();
 }
 

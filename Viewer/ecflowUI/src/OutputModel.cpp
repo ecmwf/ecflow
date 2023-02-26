@@ -51,7 +51,7 @@ void OutputModel::clearData() {
     endResetModel();
 }
 
-int OutputModel::columnCount(const QModelIndex& parent) const {
+int OutputModel::columnCount(const QModelIndex& /*parent*/) const {
     return 6;
 }
 
@@ -182,7 +182,7 @@ QModelIndex OutputModel::index(int row, int column, const QModelIndex& parent) c
     return {};
 }
 
-QModelIndex OutputModel::parent(const QModelIndex& child) const {
+QModelIndex OutputModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 

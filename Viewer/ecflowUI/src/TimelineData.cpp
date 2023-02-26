@@ -46,7 +46,7 @@ void TimelineItem::add(unsigned char status, unsigned int time) {
     start_.push_back(time);
 }
 
-int TimelineItem::firstInPeriod(QDateTime startDt, QDateTime endDt) const {
+int TimelineItem::firstInPeriod(QDateTime startDt, QDateTime /*endDt*/) const {
     unsigned int start = fromQDateTime(startDt);
     unsigned int end   = fromQDateTime(startDt);
     for (size_t i = 0; i < start_.size(); i++) {
@@ -246,7 +246,7 @@ void TimelineData::loadMultiLogFile(const std::string& logFile,
 }
 
 void TimelineData::loadLogFileCore(const std::string& logFile,
-                                   size_t maxReadSize,
+                                   size_t /*maxReadSize*/,
                                    const std::vector<std::string>& suites,
                                    bool multi) {
     // Clear all collected data

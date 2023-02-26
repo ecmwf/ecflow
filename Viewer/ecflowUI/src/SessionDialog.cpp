@@ -101,7 +101,7 @@ void SessionDialog::setButtonsEnabledStatus() {
     }
 }
 
-bool SessionDialog::validSaveName(const std::string& name) {
+bool SessionDialog::validSaveName(const std::string& /*name*/) {
     /*
             QString boxName(QObject::tr("Save session"));
             // name empty?
@@ -132,7 +132,7 @@ void SessionDialog::on_sessionNameEdit__textChanged() {
     //	saveButton_->setEnabled(!sessionNameEdit_->text().isEmpty());
 }
 
-void SessionDialog::on_savedSessionsList__currentRowChanged(int currentRow) {
+void SessionDialog::on_savedSessionsList__currentRowChanged(int /*currentRow*/) {
     setButtonsEnabledStatus();
 }
 

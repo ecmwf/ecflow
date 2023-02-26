@@ -109,7 +109,7 @@ QRectF TriggerGraphNodeItem::boundingRect() const {
     return bRect_;
 }
 
-void TriggerGraphNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
+void TriggerGraphNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     // Init style option
     QStyleOptionViewItem opt;
     opt.rect        = bRect_.toRect();

@@ -338,7 +338,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
 // Draw a whole row starting at item "start".
 void CompactView::drawRow(QPainter* painter,
                           int start,
-                          int xOffset,
+                          int /*xOffset*/,
                           int& yp,
                           int& itemsInRow,
                           std::vector<int>& indentVec) {

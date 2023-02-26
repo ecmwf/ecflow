@@ -46,10 +46,10 @@ TextPagerCursor::MoveOperation TextPagerSearchInterface::translateCursorMoveOp(Q
 }
 
 bool TextPagerSearchInterface::findString(QString str,
-                                          bool highlightAll,
+                                          bool /*highlightAll*/,
                                           QTextDocument::FindFlags flags,
                                           QTextCursor::MoveOperation move,
-                                          int iteration,
+                                          int /*iteration*/,
                                           StringMatchMode::Mode matchMode) {
     if (!editor_)
         return false;

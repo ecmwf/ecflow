@@ -48,7 +48,7 @@ void VAutoCancelAttrType::encode(ecf::AutoCancelAttr* a, QStringList& data) cons
         std::string v = a->toString();
         QString s     = QString::fromStdString(v);
         if (s.startsWith(aStr)) {
-            data << s.mid(aStr.count());
+            data << s.mid(aStr.size());
         }
     }
 }

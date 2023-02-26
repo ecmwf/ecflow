@@ -159,8 +159,8 @@ void TriggerTableView::slotContextMenu(const QPoint& position) {
 void TriggerTableView::handleContextMenu(QModelIndex indexClicked,
                                          QModelIndexList indexLst,
                                          QPoint globalPos,
-                                         QPoint widgetPos,
-                                         QWidget* widget) {
+                                         QPoint /*widgetPos*/,
+                                         QWidget* /*widget*/) {
     // Node actions
     if (indexClicked.isValid()) // indexLst[0].isValid() && indexLst[0].column() == 0)
     {

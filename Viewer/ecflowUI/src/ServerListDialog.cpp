@@ -771,7 +771,7 @@ void ServerListModel::dataChangeFinished() {
     endResetModel();
 }
 
-int ServerListModel::columnCount(const QModelIndex& parent) const {
+int ServerListModel::columnCount(const QModelIndex& /*parent*/) const {
     return 8;
 }
 

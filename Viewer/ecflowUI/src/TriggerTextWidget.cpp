@@ -40,7 +40,7 @@ void TriggerTextWidget::reloadItem(TriggerTableItem* item) {
     setHtml(s);
 }
 
-QString TriggerTextWidget::makeHtml(TriggerTableItem* ti, QString directTitle, QString modeText) const {
+QString TriggerTextWidget::makeHtml(TriggerTableItem* ti, QString /*directTitle*/, QString /*modeText*/) const {
     QString s;
     const std::vector<TriggerDependencyItem>& items = ti->dependencies();
 

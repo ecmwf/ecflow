@@ -76,7 +76,7 @@ int TriggerGraphModel::rowCount(const QModelIndex& parent) const {
     return 0;
 }
 
-Qt::ItemFlags TriggerGraphModel::flags(const QModelIndex& index) const {
+Qt::ItemFlags TriggerGraphModel::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
@@ -188,7 +188,7 @@ QModelIndex TriggerGraphModel::index(int row, int column, const QModelIndex& par
     return {};
 }
 
-QModelIndex TriggerGraphModel::parent(const QModelIndex& child) const {
+QModelIndex TriggerGraphModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 
@@ -213,7 +213,7 @@ QModelIndex TriggerGraphModel::nodeToIndex(const VNode* node) const {
     return {};
 }
 
-QModelIndex TriggerGraphModel::itemToIndex(VItem* item) {
+QModelIndex TriggerGraphModel::itemToIndex(VItem* /*item*/) {
     //    if(item)
     //    {
     //         for(std::size_t i=0; i < tc_->items().size(); i++)
@@ -235,7 +235,7 @@ VItem* TriggerGraphModel::indexToItem(const QModelIndex& index) const {
     return items_[row];
 }
 
-void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&) {
+void TriggerGraphModel::nodeChanged(const VNode* /*node*/, const std::vector<ecf::Aspect::Type>&) {
     if (!hasData())
         return;
 

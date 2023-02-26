@@ -1292,7 +1292,7 @@ bool VServer::substituteVariableValue(std::string& val) const {
 
 // Clear the contents and get the number of children (suites)
 // the server contain. At this point we do not build the tree.
-void VServer::beginScan(VServerChange& change) {
+void VServer::beginScan(VServerChange& /*change*/) {
     // Clear the contents
     clear();
 
@@ -1392,7 +1392,7 @@ VNode* VServer::nodeAt(int idx) const {
 // Update
 //----------------------------------------------
 
-void VServer::beginUpdate(VNode* node, const std::vector<ecf::Aspect::Type>& aspect, VNodeChange& change) {
+void VServer::beginUpdate(VNode* node, const std::vector<ecf::Aspect::Type>& aspect, VNodeChange& /*change*/) {
 #if 0
     //If the number of nodes changed we need to rescan the whole server-tree
     if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
@@ -1452,7 +1452,7 @@ void VServer::beginUpdate(VNode* node, const std::vector<ecf::Aspect::Type>& asp
 // If anything does not match we return false that will call reset!!!
 //-------------------------------------------------------------------------------------------
 
-void VServer::endUpdate(VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change) {
+void VServer::endUpdate(VNode* /*node*/, const std::vector<ecf::Aspect::Type>& /*aspect*/, const VNodeChange& /*change*/) {
 }
 
 void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect) {

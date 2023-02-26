@@ -180,7 +180,7 @@ void ComboMultiDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 }
 
 QWidget*
-ComboMultiDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+ComboMultiDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto* editor = new QCheckBox(parent);
     return editor;
 }
@@ -207,7 +207,7 @@ void ComboMultiDelegate::setModelData(QWidget* editor, QAbstractItemModel* model
 
 void ComboMultiDelegate::updateEditorGeometry(QWidget* editor,
                                               const QStyleOptionViewItem& option,
-                                              const QModelIndex& index) const {
+                                              const QModelIndex& /*index*/) const {
     editor->setGeometry(option.rect);
 }
 

@@ -350,3 +350,25 @@ void ViewerUtil::showShortcutInContextMenu(QAction* ac) {
     ac->setShortcutVisibleInContextMenu(true);
 #endif
 }
+
+#ifdef ECFLOW_LOGVIEW
+QAbstractAxis* ViewerUtil::chartAxisX(QChart* chart)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    auto axLst = chart->axes(Qt::Horizontal);
+    return (axLst.size() > 0)?axLst[0]:nullptr;
+#else
+    return chart->axisX();
+#endif
+}
+
+QAbstractAxis* ViewerUtil::chartAxisY(QChart* chart)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    auto axLst = chart->axes(Qt::Vertical);
+    return (axLst.size() > 0)?axLst[0]:nullptr;
+#else
+    return chart->axisY();
+#endif
+}
+#endif

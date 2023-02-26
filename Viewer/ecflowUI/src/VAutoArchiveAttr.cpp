@@ -48,7 +48,7 @@ void VAutoArchiveAttrType::encode(ecf::AutoArchiveAttr* a, QStringList& data) co
         std::string v = a->toString();
         QString s     = QString::fromStdString(v);
         if (s.startsWith(aStr)) {
-            data << s.mid(aStr.count());
+            data << s.mid(aStr.size());
         }
     }
 }

@@ -392,7 +392,7 @@ void OutputFileClient::slotVersionFinished() {
     getFile(remoteFile_, deltaPos_, remoteModTime_, remoteCheckSum_);
 }
 
-void OutputFileClient::slotVersionError(QString errorText) {
+void OutputFileClient::slotVersionError(QString /*errorText*/) {
 #ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "errorText=" << errorText;
 #endif

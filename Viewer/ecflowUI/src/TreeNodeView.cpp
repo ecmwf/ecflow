@@ -148,7 +148,7 @@ QModelIndexList TreeNodeView::selectedList() {
 }
 
 // This slot is called when the selection changed in the view
-void TreeNodeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+void TreeNodeView::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/) {
 #ifdef _UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
@@ -282,8 +282,8 @@ void TreeNodeView::slotContextMenu(const QPoint& position) {
 void TreeNodeView::handleContextMenu(QModelIndex indexClicked,
                                      QModelIndexList indexLst,
                                      QPoint globalPos,
-                                     QPoint widgetPos,
-                                     QWidget* widget) {
+                                     QPoint /*widgetPos*/,
+                                     QWidget* /*widget*/) {
     // Node actions
     if (indexClicked.isValid() && indexClicked.column() == 0) // indexLst[0].isValid() && indexLst[0].column() == 0)
     {

@@ -50,7 +50,7 @@ void Animation::removeTarget(VNode* n) {
         QMovie::stop();
 }
 
-void Animation::renderFrame(int frame) {
+void Animation::renderFrame(int /*frame*/) {
     if (targets_.isEmpty())
         QMovie::stop();
 

@@ -66,7 +66,7 @@ AttributeEditor::~AttributeEditor() {
 #endif
 }
 
-void AttributeEditor::edit(VInfo_ptr info, QWidget* parent) {
+void AttributeEditor::edit(VInfo_ptr info, QWidget* /*parent*/) {
     Q_ASSERT(info);
     VAttribute* a = info->attribute();
     Q_ASSERT(a);
@@ -245,7 +245,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn,
     }
 }
 
-void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {
+void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& /*a*/) {
     if (info_ && info_->server() && info_->server() == server) {
         // TODO: implement
     }
