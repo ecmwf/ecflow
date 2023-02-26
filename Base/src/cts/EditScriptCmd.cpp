@@ -443,7 +443,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
 
             // Convert MAP to Vec
             NameValueVec used_variables_as_vec;
-            for (const std::pair<std::string, std::string>& pair : used_variables_as_map) {
+            for (const NameValueMap::value_type& pair : used_variables_as_map) {
                 used_variables_as_vec.push_back(std::make_pair(pair.first, pair.second));
             }
 

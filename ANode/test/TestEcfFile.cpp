@@ -873,7 +873,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
         suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
-        for (const std::pair<std::string, std::string>& p : expected_used_variables) {
+        for (const NameValueMap::value_type& p : expected_used_variables) {
             task_t1->addVariable(Variable(p.first, p.second));
         }
         suite->addTask(task_t1);
