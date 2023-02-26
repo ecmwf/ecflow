@@ -27,7 +27,6 @@ namespace ecf {
 template <class T>
 NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate) {
     // std::cout << "theComputedNodeState vec size = " << nodeVec.size() << " immediate  = " <<  immediate << "\n";
-    int unknownCount   = 0;
     int completeCount  = 0;
     int queuedCount    = 0;
     int submittedCount = 0;
@@ -63,7 +62,7 @@ NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate
                 completeCount++;
                 break;
             case NState::UNKNOWN:
-                unknownCount++;
+                // Does nothing...
                 break;
             default:
                 assert(false);

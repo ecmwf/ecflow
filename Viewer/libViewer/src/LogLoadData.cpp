@@ -122,10 +122,6 @@ bool sortVecFunction(const std::pair<size_t, size_t>& a, const std::pair<size_t,
 }
 
 LogLoadDataItem::LogLoadDataItem(const std::string& name) : name_(name) {
-    if (name == "") {
-        int i = 5;
-        i++;
-    }
     buildSubReq(subReq_);
 }
 
@@ -813,10 +809,6 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
     // uid specific data
     //---------------------------
     for (size_t i = uidData_.size(); i < uid_vec.size(); i++) {
-        if (uid_vec[i].name_.empty()) {
-            int gg = 22;
-            gg++;
-        }
         uidData_.emplace_back(uid_vec[i].name_);
         uidData_.back().init(time_.size() - 1);
     }

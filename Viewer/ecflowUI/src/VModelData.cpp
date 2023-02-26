@@ -1157,7 +1157,6 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item) {
     UiLog().dbg() << " server=" << item->longName();
 #endif
 
-    int i = 0;
     for (auto it = servers_.begin(); it != servers_.end(); ++it) {
         if ((*it)->server_ == item->serverHandler()) {
             int nodeNum = (*it)->nodeNum();
@@ -1183,7 +1182,6 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item) {
             }
             return;
         }
-        i++;
     }
 }
 

@@ -45,7 +45,6 @@ bool PlainTextSearchInterface::findString(QString str,
     QList<QTextEdit::ExtraSelection> extraSelections;
     bool found             = false;
     bool keepGoing         = true;
-    int numMatches         = 0;
 
     Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
@@ -97,7 +96,6 @@ bool PlainTextSearchInterface::findString(QString str,
                 highlight.cursor = cursor;
                 highlight.format.setBackground(highlightColour_);
                 extraSelections << highlight;
-                numMatches++;
             }
             else {
                 editor_->moveCursor(QTextCursor::End);

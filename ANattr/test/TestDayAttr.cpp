@@ -44,14 +44,14 @@ BOOST_AUTO_TEST_CASE(test_day_attr) {
     DayAttr day(DayAttr::WEDNESDAY);
     day.reset(calendar);
 
-    int day_changed = 0; // after midnight make sure we keep day_changed
+    // int day_changed = 0; // after midnight make sure we keep day_changed
     // day_changed = 0;  tuesday
     // day_changed = 1;  wednesday
     // day_changed = 3;  thursday
     for (int m = 1; m < 96; m++) {
         calendar.update(time_duration(hours(1)));
-        if (calendar.dayChanged())
-            day_changed++;
+        // if (calendar.dayChanged())
+        //     day_changed++;
 
         // cout << " day_changed(" << day_changed << ") calendar.day_of_week() = " <<  calendar.day_of_week() << "\n";
 

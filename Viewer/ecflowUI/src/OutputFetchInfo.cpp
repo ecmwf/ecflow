@@ -147,7 +147,6 @@ QString OutputFileFetchInfo::makeHtml(VReply* reply, VInfo_ptr info) {
 
     QString html;
 
-    int cnt = 1;
     for (const auto& it : reply->log()) {
         QString s = QString::fromStdString(it);
         if (s.startsWith("REMARK>")) {
@@ -167,7 +166,6 @@ QString OutputFileFetchInfo::makeHtml(VReply* reply, VInfo_ptr info) {
             QString path, msg;
             parseTry(s, path, msg);
             tries << msg;
-            cnt++;
             continue;
         }
         else
@@ -273,7 +271,6 @@ QString OutputDirFetchInfo::makeHtml(VReply* reply, VInfo_ptr /*info*/) {
     QString alg;
     QString html;
 
-    int cnt = 1;
     for (const auto& it : reply->log()) {
         QString s = QString::fromStdString(it);
         if (s.startsWith("REMARK>")) {
@@ -294,7 +291,6 @@ QString OutputDirFetchInfo::makeHtml(VReply* reply, VInfo_ptr /*info*/) {
             parseTry(s, path, msg);
             path = makeSearchPath(path);
             tries[path] << msg;
-            cnt++;
             continue;
         }
         else

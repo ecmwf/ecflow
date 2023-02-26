@@ -184,15 +184,6 @@ void NodeQueryResult::add(std::vector<VInfo_ptr> items) {
     if (items.size() == 0)
         return;
 
-    // Count the needed items
-    int num = 0;
-    for (auto& item : items) {
-        // assert(items.at(i) && items.at(i).get());
-        if (item->isServer() || item->isNode()) {
-            num++;
-        }
-    }
-
     Q_EMIT beginAppendRows(items.size());
 
     for (auto& item : items) {

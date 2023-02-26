@@ -501,19 +501,19 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
     cout << "ACore:: ...test_directory_traversal\n";
 
     int regular_file = 0;
-    int directory    = 0;
-    int symlink      = 0;
-    int other        = 0;
+    //    int directory    = 0;
+    //    int symlink      = 0;
+    //    int other        = 0;
 
     for (auto& entry : fs::directory_iterator(fs::current_path())) {
         if (is_regular_file(entry))
             regular_file++;
-        if (is_directory(entry))
-            directory++;
-        if (is_symlink(entry))
-            symlink++;
-        if (is_other(entry))
-            other++;
+        //        if (is_directory(entry))
+        //            directory++;
+        //        if (is_symlink(entry))
+        //            symlink++;
+        //        if (is_other(entry))
+        //            other++;
         //      cout << "name.path()            " << entry.path() << "\n";
         //      cout << "name.path().string()   " << entry.path().string() << "\n";
         //      cout << "name.path().filename() " << entry.path().filename() << "\n";
