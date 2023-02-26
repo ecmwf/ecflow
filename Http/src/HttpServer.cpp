@@ -157,7 +157,7 @@ void apply_listeners(httplib::Server& http_server) {
         }
     });
 
-    http_server.set_error_handler([&format](const httplib::Request& req, httplib::Response& res) {
+    http_server.set_error_handler([](const httplib::Request& req, httplib::Response& res) {
         if (opts.verbose)
             printf("error_handler called: Error: %d\n", res.status);
 
