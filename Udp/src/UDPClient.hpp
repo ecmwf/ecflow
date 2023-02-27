@@ -156,7 +156,7 @@ public:
         }
     }
 
-    void send(const data_t& data) { send(data.data(), data.size()); }
+    void send(const data_t& data) { send(data.data(), data.size() + 1); }
 
     void send(const void* buffer, size_t length) {
         ssize_t sent = ::sendto(socketfd_, buffer, length, 0, addr_->ai_addr, addr_->ai_addrlen);
