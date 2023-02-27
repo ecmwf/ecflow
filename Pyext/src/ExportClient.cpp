@@ -566,7 +566,7 @@ void export_Client() {
         .def("reload_passwd_file", &ClientInvoker::reloadpasswdfile, "reload the passwd file. <host>.<port>.ecf.passwd")
         .def("reload_custom_passwd_file",
              &ClientInvoker::reloadcustompasswdfile,
-             "reload the custom passwd file. <host>.<port>.ecf.cusom_passwd. For users using ECF_USER or --user or "
+             "reload the custom passwd file. <host>.<port>.ecf.custom_passwd. For users using ECF_USER or --user or "
              "set_user_name()")
         .def("requeue", &requeue, (bp::arg("abs_node_path"), bp::arg("option") = ""), ClientDoc::requeue())
         .def("requeue", &requeues, (bp::arg("paths"), bp::arg("option") = ""))

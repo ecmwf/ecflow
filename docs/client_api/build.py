@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 import os
 import re
+import pathlib
 
-RST_DIR = "api"
+RST_DIR = pathlib.Path(__file__).resolve().parent.joinpath("api")
 
 
 def build_rst(name):

@@ -2168,7 +2168,7 @@ Override the default(localhost and port 3141) and environment setting(ECF_HOST a
        )
     
        set_host_port(
-          string host_port, # Expect's <host>:<port> or <host>@<port>
+          string host_port, # Expects <host>:<port> or <host>@<port>
        )
     
     Exceptions:

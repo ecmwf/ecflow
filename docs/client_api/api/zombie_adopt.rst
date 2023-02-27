@@ -11,8 +11,7 @@ zombie_adopt
    ------------
    
    Locates the task in the servers list of zombies, and sets to adopt.
-   Next time a child command(init,event,meter,label,abort,complete,wait queue)
-   communicates with the server, the password on the zombie is adopted by the task.
+   Next time a child command (init,event,meter,label,abort,complete,wait queue) communicates with the server, the password on the zombie is adopted by the task.
    This is only allowed if the process id matches, otherwise an error is issued.
    The zombie reference stored in the server is then deleted.
      args = list of task paths, at least one expected

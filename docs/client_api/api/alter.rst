@@ -37,7 +37,7 @@ alter
    arg4 = new_value
           specifies the new value only used for 'change'/'add'
           values with spaces must be quoted
-   arg5 = paths : At lease one node path required.The paths must start with a leading '/' character
+   arg5 = paths : At least one node path required.The paths must start with a leading '/' character
    
    
    Usage:

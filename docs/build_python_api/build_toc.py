@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 import glob
 import os
-
+import pathlib
 import yaml
 
-RST_DIR = "rst"
+RST_DIR = pathlib.Path().joinpath("rst").absolute()
 
 
 def check_usage(names):

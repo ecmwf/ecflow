@@ -1,20 +1,16 @@
 
-.. _zombie_remove_cli:
+.. _password_cli:
 
-zombie_remove
-/////////////
+password
+////////
 
 ::
 
    
-   zombie_remove
-   -------------
+   password
+   --------
    
-   Locates the task in the servers list of zombies, and removes it.
-   Since a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)
-   the zombie may reappear
-     args = list of task paths, at least one expected
-     --zombie_remove=/path/to/task  /path/to/task2
+   password: The password to be used when contacting the server
    
    The client reads in the following environment variables. These are read by user and child command
    

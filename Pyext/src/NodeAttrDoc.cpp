@@ -177,7 +177,7 @@ const char* NodeAttrDoc::inlimit_doc() {
            "         task t1\n"
            "         task t2\n\n"
            "Here 'fast' is the name of :py:class:`ecflow.Limit` and the number defines the maximum number of tasks\n"
-           "that can run simultaneously using this limit. Thats why you do not need a `trigger`_\n"
+           "that can run simultaneously using this limit. That is why you do not need a `trigger`_\n"
            "between tasks 't1' and 't2'. There is no need to change the tasks. The jobs are\n"
            "created in the order they are defined\n"
            "\nConstructor::\n\n"
