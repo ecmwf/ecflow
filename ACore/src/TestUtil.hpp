@@ -37,6 +37,6 @@ std::string toString(const std::vector<std::string>& c) {
     std::copy(c.begin(), c.end(), std::ostream_iterator<std::string>(ss, ", "));
     return ss.str();
 }
-}; // namespace ecf
+} // namespace ecf
 
 #endif

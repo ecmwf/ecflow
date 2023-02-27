@@ -42,7 +42,7 @@ private:
     int x{2}, y{2};
     State state_{State::SUSPENDED};
 };
-CEREAL_CLASS_VERSION(MyClass, 1);
+CEREAL_CLASS_VERSION(MyClass, 1)
 
 class MyTop : public MyClass {
 public:
@@ -70,7 +70,7 @@ private:
     }
     int x_{1}, y_{1}, z_{1};
 };
-CEREAL_CLASS_VERSION(MyTop, 1);
+CEREAL_CLASS_VERSION(MyTop, 1)
 
 std::ostream& operator<<(std::ostream& os, MyTop const& m) {
     m.print(os);

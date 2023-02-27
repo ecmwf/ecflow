@@ -985,4 +985,4 @@ void Suite::serialize(Archive& ar, std::uint32_t const version) {
     }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Suite);
-CEREAL_REGISTER_TYPE(Suite);
+CEREAL_REGISTER_TYPE(Suite)

@@ -72,7 +72,6 @@ protected:
 class CustomSavedCommandHandler : public CustomCommandHandler {
 public:
     CustomSavedCommandHandler() = default;
-    ;
     CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings) override;
 
     static CustomSavedCommandHandler* instance();

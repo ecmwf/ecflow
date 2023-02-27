@@ -238,7 +238,7 @@ namespace cereal
       Example interface for versioning on a non-member serialize function:
 
       @code{cpp}
-      CEREAL_CLASS_VERSION( Mytype, 77 ); // register class version
+      CEREAL_CLASS_VERSION( Mytype, 77 ) // register class version
 
       template <class Archive>
       void serialize( Archive & ar, Mytype & t, const std::uint32_t version )

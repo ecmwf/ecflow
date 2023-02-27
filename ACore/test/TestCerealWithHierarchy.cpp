@@ -114,7 +114,7 @@ std::ostream& operator<<(std::ostream& os, CmdContainer const& m) {
     return os;
 }
 
-CEREAL_REGISTER_TYPE(Derived1);
+CEREAL_REGISTER_TYPE(Derived1)
 
 // =================================================================================
 

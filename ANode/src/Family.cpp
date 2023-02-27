@@ -230,4 +230,4 @@ void Family::serialize(Archive& ar, std::uint32_t const version) {
 }
 
 CEREAL_TEMPLATE_SPECIALIZE_V(Family);
-CEREAL_REGISTER_TYPE(Family);
+CEREAL_REGISTER_TYPE(Family)

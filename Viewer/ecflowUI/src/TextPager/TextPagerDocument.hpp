@@ -190,7 +190,7 @@ private:
     friend struct TextPagerSection;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::FindMode);
-Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::Options);
+Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::FindMode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::Options)
 
 #endif

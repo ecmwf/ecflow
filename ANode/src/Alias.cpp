@@ -167,4 +167,4 @@ void Alias::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Submittable>(this));
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Alias);
-CEREAL_REGISTER_TYPE(Alias);
+CEREAL_REGISTER_TYPE(Alias)

@@ -74,6 +74,6 @@ private:
     friend class TextPagerEdit;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerSection::TextSectionOptions);
+Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerSection::TextSectionOptions)
 
 #endif

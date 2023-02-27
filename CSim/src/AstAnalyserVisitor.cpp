@@ -60,7 +60,7 @@ void AstAnalyserVisitor::visitLeaf(AstLeaf*) {
 }
 void AstAnalyserVisitor::visitInteger(AstInteger*) {
 }
-void AstAnalyserVisitor::visitFunction(AstFunction*){};
+void AstAnalyserVisitor::visitFunction(AstFunction*){}
 void AstAnalyserVisitor::visitNodeState(AstNodeState*) {
 }
 void AstAnalyserVisitor::visitEventState(AstEventState*) {

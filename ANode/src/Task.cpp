@@ -965,4 +965,4 @@ void Task::serialize(Archive& ar, std::uint32_t const version) {
 }
 
 CEREAL_TEMPLATE_SPECIALIZE_V(Task);
-CEREAL_REGISTER_TYPE(Task);
+CEREAL_REGISTER_TYPE(Task)

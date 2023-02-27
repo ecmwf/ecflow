@@ -62,7 +62,6 @@ class MenuConfigDialog : public QDialog, private Ui::MenuConfigDialog {
 public:
     explicit MenuConfigDialog(QWidget* parent = nullptr);
     ~MenuConfigDialog() override = default;
-    ;
 
     void updateMenuTree(Menu* menu);
 
