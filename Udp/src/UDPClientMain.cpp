@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
         std::string port    = argv[2];
         std::string request = argv[3];
 
-        ecf::BaseUDPClient client(host, port);
+        ecf::UDPClient client(host, port);
         client.send(request);
     }
     catch (std::exception& e) {
