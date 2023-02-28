@@ -213,9 +213,6 @@ void TimelineData::loadLogFile(const std::string& logFile, size_t maxReadSize, c
     clear();
 
     maxReadSize_ = maxReadSize;
-    if (maxReadSize_ < 0)
-        maxReadSize_ = 0;
-
     fullRead_   = false;
     loadStatus_ = LoadNotTried;
     loadedAt_   = QDateTime::currentDateTime();

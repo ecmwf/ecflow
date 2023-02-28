@@ -392,8 +392,6 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged) {
     // if there was a state change during the sync
     if (suitesChanged.size() > 0 && !filter_->isNull() && !filter_->isComplete()) {
 #ifdef _UI_VMODELDATA_DEBUG
-        if (suitesChanged.size() < 0)
-            UiLogS(server_).dbg() << " suites changed:";
         for (auto i : suitesChanged)
             UiLogS(server_).dbg() << "  " << i->strName();
 #endif

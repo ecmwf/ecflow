@@ -101,7 +101,7 @@ void VParamSet::clearCurrent() {
 void VParamSet::addToCurrent(VParam* p) {
     current_.push_back(p);
     uint id = p->id();
-    UI_ASSERT(id >= 0 && id < currentCache_.size(), "id=" << id << " currentCache_.size()=" << currentCache_.size());
+    UI_ASSERT(id < currentCache_.size(), "id=" << id << " currentCache_.size()=" << currentCache_.size());
     currentCache_[id] = 1;
     empty_            = false;
     complete_         = (current_.size() == all_.size());

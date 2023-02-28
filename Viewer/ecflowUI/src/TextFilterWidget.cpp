@@ -216,13 +216,13 @@ void TextFilterWidget::buildMenu(QToolButton* tb) {
                 std::size_t pos = id[1].toInt();
                 TextFilterItem item("", "");
                 if (id[0] == "s") {
-                    if (pos >= 0 && TextFilterHandler::Instance()->items().size()) {
+                    if (TextFilterHandler::Instance()->items().size()) {
                         item = TextFilterHandler::Instance()->items()[pos];
                     }
                 }
 
                 else if (id[0] == "r") {
-                    if (pos >= 0 && TextFilterHandler::Instance()->latestItems().size()) {
+                    if (TextFilterHandler::Instance()->latestItems().size()) {
                         item = TextFilterHandler::Instance()->latestItems()[pos];
                     }
                 }

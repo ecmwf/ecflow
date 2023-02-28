@@ -333,7 +333,7 @@ void LogLoadDataItem::init(size_t num) {
 }
 
 void LogLoadDataItem::valuesAt(size_t idx, size_t& total, size_t& child, size_t& user) const {
-    if (idx >= 0 && idx < size()) {
+    if (idx < size()) {
         child = childReq_[idx];
         user  = userReq_[idx];
         total = child + user;
@@ -541,7 +541,7 @@ bool LogLoadData::indexOfTime(qint64 t, size_t& idx, size_t startIdx, qint64 tol
         if (tolerance <= 0)
             tolerance = 10 * 1000; // ms
 
-        for (size_t i = startIdx; i >= 0; i--) {
+        for (size_t i = startIdx; ; i--) {
             if (time_[i] <= t) {
                 qint64 nextDelta = t - time_[i];
                 qint64 prevDelta = (i < startIdx) ? (time_[i + 1] - t) : (nextDelta + 1);
@@ -744,28 +744,28 @@ void LogLoadData::getTotalReq(QLineSeries& series, int& maxVal) {
 }
 
 void LogLoadData::getSuiteChildReq(size_t idx, QLineSeries& series) {
-    if (idx >= 0 && idx < suites().size()) {
+    if (idx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[idx].childReq(), maxVal);
     }
 }
 
 void LogLoadData::getSuiteUserReq(size_t idx, QLineSeries& series) {
-    if (idx >= 0 && idx < suites().size()) {
+    if (idx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[idx].userReq(), maxVal);
     }
 }
 
 void LogLoadData::getSuiteTotalReq(size_t idx, QLineSeries& series) {
-    if (idx >= 0 && idx < suites().size()) {
+    if (idx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[idx].childReq(), suiteData_[idx].userReq(), maxVal);
     }
 }
 
 void LogLoadData::getSuiteSubReq(size_t suiteIdx, size_t subIdx, QLineSeries& series) {
-    if (suiteIdx >= 0 && suiteIdx < suites().size()) {
+    if (suiteIdx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[suiteIdx].subReq()[subIdx], maxVal);
     }
@@ -776,7 +776,7 @@ void LogLoadData::getSubReq(size_t subIdx, QLineSeries& series, int& maxVal) {
 }
 
 void LogLoadData::getUidTotalReq(size_t uidIdx, QLineSeries& series, int& maxVal) {
-    if (uidIdx >= 0 && uidIdx < uidData().size()) {
+    if (uidIdx < uidData().size()) {
         // the childreq  = 0 for the uidData!
         maxVal = 0;
         getSeries(series, uidData_[uidIdx].userReq(), maxVal);
@@ -784,7 +784,7 @@ void LogLoadData::getUidTotalReq(size_t uidIdx, QLineSeries& series, int& maxVal
 }
 
 void LogLoadData::getUidSubReq(size_t uidIdx, size_t subIdx, QLineSeries& series) {
-    if (uidIdx >= 0 && uidIdx < uidData().size()) {
+    if (uidIdx < uidData().size()) {
         int maxVal = 0;
         getSeries(series, uidData_[uidIdx].subReq()[subIdx], maxVal);
     }
@@ -937,8 +937,6 @@ void LogLoadData::loadLogFile(const std::string& logFile,
     parseHelper_ = LogDataParseHelper();
 
     maxReadSize_ = maxReadSize;
-    if (maxReadSize_ < 0)
-        maxReadSize_ = 0;
 
     fullRead_   = false;
     loadStatus_ = LoadNotTried;

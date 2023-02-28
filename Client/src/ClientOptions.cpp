@@ -211,7 +211,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         ss << print_variable_map(vm) << "\n";
         ss << "ClientOptions::parse: Arguments did not match any commands.\n";
         ss << "  argc=" << cl.size() << "\n";
-        for (int i = 0; i < cl.size(); i++) {
+        for (size_t i = 0; i < cl.size(); i++) {
             const std::string& arg = cl.tokens()[i];
             ss << "  arg" << i << "=" << arg;
 
