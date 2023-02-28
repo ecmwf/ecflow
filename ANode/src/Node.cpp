@@ -63,7 +63,8 @@ Node::Node(const std::string& n, bool check) : n_(n) {
 Node::Node() = default;
 
 Node::Node(const Node& rhs)
-    : parent_(nullptr),
+    : enable_shared_from_this(rhs),
+      parent_(nullptr),
       n_(rhs.n_),
       st_(rhs.st_),
       d_st_(rhs.d_st_),
