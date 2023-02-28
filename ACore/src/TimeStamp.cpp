@@ -22,13 +22,13 @@ namespace {
 
 struct regular
 {
-    static constexpr char const* format = "[%H:%M:%S %-e.%-m.%Y] ";
+    static constexpr char const* format = "[%H:%M:%S %d.%m.%Y] ";
     static constexpr size_t size        = 23;
 };
 
 struct brief
 {
-    static constexpr char const* format = "[%H:%M:%S %-e.%-m] ";
+    static constexpr char const* format = "[%H:%M:%S %d.%m] ";
     static constexpr size_t size        = 18;
 };
 

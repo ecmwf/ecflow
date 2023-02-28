@@ -56,6 +56,14 @@ const char* ECF_PASS = getenv("ECF_PASS");
 
 namespace {
 
+static void print_polling_interval_notification(long long sleeptime,
+                                                long long base_sleeptime,
+                                                long long drift,
+                                                long long max_sleeptime) {
+    const char* fmt = "Polling interval is now %lld (base: %lld drift: %lld max: %lld)\n";
+    printf(fmt, sleeptime, base_sleeptime, drift, max_sleeptime);
+}
+
 template <typename T>
 void trigger_defs_update(T&& func) {
     {
@@ -1225,11 +1233,8 @@ void update_defs_loop(int interval) {
 
                     sleeptime        = min(max_sleeptime, base_sleeptime + drift);
                     if (opts.verbose && sleeptime != previous_sleeptime) {
-                        printf("Polling interval is now %d (base: %d drift: %d max: %d)\n",
-                               sleeptime,
-                               base_sleeptime,
-                               drift,
-                               max_sleeptime);
+                        print_polling_interval_notification(
+                            sleeptime.count(), base_sleeptime.count(), drift.count(), max_sleeptime.count());
                     }
 
                     previous_sleeptime = sleeptime;
