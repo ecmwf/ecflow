@@ -72,7 +72,7 @@ void Stats::update_for_serialisation() {
             case 30:
             case 60: {
                 ss << " ";
-                /* [[fallthrough]] */
+                [[fallthrough]];
             }
             case 1: {
                 ss << request_per_second;

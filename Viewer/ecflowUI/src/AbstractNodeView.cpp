@@ -1163,6 +1163,7 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
                 switch (static_cast<const QKeyEvent*>(event)->key()) {
                     case Qt::Key_Backtab:
                         modifiers = modifiers & ~Qt::ShiftModifier; // special case for backtab
+                        [[fallthrough]];
                     case Qt::Key_Down:
                     case Qt::Key_Up:
                     case Qt::Key_Left:
