@@ -79,7 +79,7 @@ QStringList VAutoCancelAttr::data(bool /*firstLine*/) const {
 
 void VAutoCancelAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
     if (node_ptr node = vnode->node()) {
-        if (ecf::AutoCancelAttr* a = node->get_autocancel()) {
+        if (ecf::AutoCancelAttr* found = node->get_autocancel(); found) {
             vec.push_back(new VAutoCancelAttr(vnode));
         }
     }

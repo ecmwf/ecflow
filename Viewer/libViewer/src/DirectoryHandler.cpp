@@ -87,7 +87,7 @@ void DirectoryHandler::init(const std::string& exeStr) {
         }
         else {
             // the config dir was copied from v4
-            if (char* confCh = getenv("ECFLOWUI_CONFIG_DIR_COPIED")) {
+            if (char* confCh = getenv("ECFLOWUI_CONFIG_DIR_COPIED"); confCh) {
                 firstStartUp = true;
             }
         }

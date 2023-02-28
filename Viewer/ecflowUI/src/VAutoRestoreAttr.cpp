@@ -79,7 +79,7 @@ QStringList VAutoRestoreAttr::data(bool /*firstLine*/) const {
 
 void VAutoRestoreAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
     if (node_ptr node = vnode->node()) {
-        if (ecf::AutoRestoreAttr* a = node->get_autorestore()) {
+        if (ecf::AutoRestoreAttr* found = node->get_autorestore(); found) {
             vec.push_back(new VAutoRestoreAttr(vnode));
         }
     }

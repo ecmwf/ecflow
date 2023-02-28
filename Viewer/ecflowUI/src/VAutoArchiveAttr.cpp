@@ -79,7 +79,7 @@ QStringList VAutoArchiveAttr::data(bool /*firstLine*/) const {
 
 void VAutoArchiveAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
     if (node_ptr node = vnode->node()) {
-        if (ecf::AutoArchiveAttr* a = node->get_autoarchive()) {
+        if (ecf::AutoArchiveAttr* found = node->get_autoarchive(); found) {
             vec.push_back(new VAutoArchiveAttr(vnode));
         }
     }

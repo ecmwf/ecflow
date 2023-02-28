@@ -33,7 +33,7 @@ VConfig::VConfig() {
     appLongName_ = appName_ + " (" + ecf::Version::raw() + ")";
 
     // detect if the ui is to run via proxichains
-    if (char* sp = getenv("ECFLOWUI_USE_PROXYCHAINS")) {
+    if (char* variable = getenv("ECFLOWUI_USE_PROXYCHAINS"); variable) {
         proxychainsUsed_ = true;
     }
 }
