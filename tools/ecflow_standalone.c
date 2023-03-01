@@ -84,7 +84,7 @@ char *nameof(char *name) {
   return s;
 }
 
-int main(argc,argv) int argc; char **argv;
+int main(int argc, char** argv)
 {
   char *infile = NULL;             /* Temporary input file        */
   char *outfile= "/dev/null";      /* Output file (def /dev/null) */

@@ -51,8 +51,6 @@ if (HAVE_WARNINGS)
   # Silence compiler warnings
   # n.b. All these extra compiler options should be removed, and the compiler warnings properly silenced
   add_compile_options(
-    # C-related warnings
-    $<$<AND:$<COMPILE_LANGUAGE:C>,$<C_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<C_COMPILER_VERSION>,15.0.0>>:-Wno-deprecated-non-prototype>
     # C++-related warnings
     ## GCC
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wno-array-bounds>
