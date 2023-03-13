@@ -122,7 +122,7 @@ public:
         boost::asio::async_read(
             socket_,
             boost::asio::buffer(inbound_header_),
-            [this, &t, handler](const boost::system::error_code& error, std::size_t transferred_bytes) {
+            [this, &t, handler](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 this->handle_read_header(error, t, handler);
             });
     }
@@ -157,6 +157,7 @@ private:
             }
 
             // Start an asynchronous call to receive the data.
+            inbound_data_.resize(inbound_data_size);
             boost::asio::async_read(
                 socket_,
                 boost::asio::buffer(inbound_data_),
