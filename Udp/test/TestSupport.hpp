@@ -185,9 +185,9 @@ public:
 private:
     template <typename V>
     static std::string
-    format_request(const std::string& path, const std::string& type, const std::string& name, V value) {
+    format_request(const std::string& path, const std::string& command, const std::string& name, V value) {
         std::ostringstream os;
-        os << R"-({"method": "put", "data": {"type": ")-" << type << R"-(", "path": ")-" << path << R"-(", "name": ")-"
+        os << R"-({"method": "put", "payload": {"command": ")-" << command << R"-(", "path": ")-" << path << R"-(", "name": ")-"
            << name << R"-(", "value": ")-" << value << R"-("}})-";
         return os.str();
     }
