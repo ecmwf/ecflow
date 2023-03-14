@@ -14,15 +14,10 @@
 
 namespace ecf {
 
-namespace /* __anonymous__ */ {
-
-void update_attribute(const ClientInvoker& invoker,
-                      const std::string& path,
-                      const std::string& type,
-                      const std::string& name,
-                      const std::string& value) {
+template <typename F>
+void ClientAPI::try_invoke(F f) const {
     try {
-        invoker.alter(path, "change", type, name, value);
+        f(invoker_);
     }
     catch (std::runtime_error& e) {
         throw ClientAPIException(std::string("Client error detected: ") + e.what());
@@ -32,31 +27,40 @@ void update_attribute(const ClientInvoker& invoker,
     }
 }
 
-} // namespace
-
 ClientAPI::ClientAPI() : invoker_(std::make_unique<ClientInvoker>()) {
 }
 
 ClientAPI::~ClientAPI() = default;
 
-void ClientAPI::set_authentication(const std::string& username, const std::string& password) {
-    invoker_->set_user_name(username);
-    invoker_->set_password(password);
+void ClientAPI::child_set_remote_id(const std::string& pid) {
+    invoker_->set_child_pid(pid);
 }
 
-void ClientAPI::update_meter(const std::string& path, const std::string& name, const std::string& value) const {
-    update_attribute(*invoker_, path, "meter", name, value);
+void ClientAPI::child_set_password(const std::string& password) {
+    invoker_->set_child_password(password);
 }
 
-void ClientAPI::update_label(const std::string& path, const std::string& name, const std::string& value) const {
-    update_attribute(*invoker_, path, "label", name, value);
+void ClientAPI::child_set_try_no(int try_no) {
+    invoker_->set_child_try_no(try_no);
 }
 
-void ClientAPI::clear_event(const std::string& path, const std::string& name) const {
-    update_attribute(*invoker_, path, "event", name, "clear");
+void ClientAPI::child_update_meter(const std::string& path, const std::string& name, const std::string& value) const {
+    invoker_->set_child_path(path);
+    try_invoke([name, value](const auto& invoker) { invoker->meterTask(name, value); });
 }
-void ClientAPI::set_event(const std::string& path, const std::string& name) const {
-    update_attribute(*invoker_, path, "event", name, "set");
+
+void ClientAPI::child_update_label(const std::string& path, const std::string& name, const std::string& value) const {
+    invoker_->set_child_path(path);
+    try_invoke([name, value](const auto& invoker) { invoker->labelTask(name, std::vector<std::string>{value}); });
+}
+
+void ClientAPI::child_clear_event(const std::string& path, const std::string& name) const {
+    invoker_->set_child_path(path);
+    try_invoke([name](const auto& invoker) { invoker->eventTask(name, "clear"); });
+}
+void ClientAPI::child_set_event(const std::string& path, const std::string& name) const {
+    invoker_->set_child_path(path);
+    try_invoke([name](const auto& invoker) { invoker->eventTask(name, "set"); });
 }
 
 } // namespace ecf

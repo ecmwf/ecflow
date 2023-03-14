@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 // Forward Declaration
 class ClientInvoker;
@@ -31,15 +32,26 @@ struct ClientAPIException : public std::runtime_error
 class ClientAPI {
 public:
     ClientAPI();
+    ClientAPI(const ClientAPI&) = delete;
+    ClientAPI(ClientAPI&&)      = delete;
     ~ClientAPI();
 
-    void set_authentication(const std::string& username, const std::string& password);
+    /// Define the Remote Id (i.e. ECF_RID) for a child Task request
+    void child_set_remote_id(const std::string& pid);
+    /// Define the Password (i.e. ECF_PASS) for a child Task request
+    void child_set_password(const std::string& password);
+    /// Define the Try Number (i.e. ECF_TRYNO) for a child Task request
+    void child_set_try_no(int try_no);
 
-    void update_meter(const std::string& path, const std::string& name, const std::string& value) const;
-    void update_label(const std::string& path, const std::string& name, const std::string& value) const;
+    // Notice that, in the following functions, path represents ECF_NAME for a Task request
+    void child_update_meter(const std::string& path, const std::string& name, const std::string& value) const;
+    void child_update_label(const std::string& path, const std::string& name, const std::string& value) const;
+    void child_clear_event(const std::string& path, const std::string& name) const;
+    void child_set_event(const std::string& path, const std::string& name) const;
 
-    void clear_event(const std::string& path, const std::string& name) const;
-    void set_event(const std::string& path, const std::string& name) const;
+private:
+    template <typename F>
+    void try_invoke(F f) const;
 
 private:
     std::unique_ptr<ClientInvoker> invoker_;
