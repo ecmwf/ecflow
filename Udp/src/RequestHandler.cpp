@@ -44,7 +44,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const { client.update_meter(path_, name_, std::to_string(value_)); };
+    void actually_execute(ClientAPI& client) const { client.child_update_meter(path_, name_, std::to_string(value_)); };
 
     static constexpr const char* COMMAND_TAG = "meter";
 
@@ -61,7 +61,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{std::move(value)} {};
-    void actually_execute(ClientAPI& client) const { client.update_label(path_, name_, value_); };
+    void actually_execute(ClientAPI& client) const { client.child_update_label(path_, name_, value_); };
 
     static constexpr const char* COMMAND_TAG = "label";
 
@@ -80,10 +80,10 @@ public:
           value_{value} {};
     void actually_execute(ClientAPI& client) const {
         if (value_) {
-            client.set_event(path_, name_);
+            client.child_set_event(path_, name_);
         }
         else {
-            client.clear_event(path_, name_);
+            client.child_clear_event(path_, name_);
         }
     };
 
@@ -215,9 +215,7 @@ public:
             // process "header"
             if (request.contains("header")) {
                 nlohmann::json header = request.at("header");
-                std::string username  = header.at("username");
-                std::string password  = header.at("password");
-                client_.set_authentication(username, password);
+                configure_authentication(header);
             }
 
             // process "data"
@@ -247,59 +245,21 @@ public:
         TRACE_NFO("JSONRequestHandler", "request handled successfully");
     }
 
-    void handle_update(const nlohmann::json& data) {
-        std::string type = data.at("type");
+    void configure_authentication(const nlohmann::json& header) {
+        for (const auto& [key, value] : header.items()) {
 
-        if (type == "label") {
-            handle_update_label(data);
-        }
-        else if (type == "meter") {
-            handle_update_meter(data);
-        }
-        else if (type == "event") {
-            handle_update_event(data);
-        }
-        else {
-            TRACE_NFO("JSONRequestHandler", "unknown update type detected: '", type, "'")
-        }
-    }
-
-private:
-    void handle_update_label(const nlohmann::json& data) {
-        std::string path  = data.at("path");
-        std::string name  = data.at("name");
-        std::string value = data.at("value");
-
-        TRACE_NFO("JSONRequestHandler", "request to update label '", name, "' at '", path, "' to value '", value, "'")
-
-        client_.update_label(path, name, value);
-    }
-
-    void handle_update_meter(const nlohmann::json& data) {
-        std::string path  = data.at("path");
-        std::string name  = data.at("name");
-        std::string value = data.at("value");
-
-        TRACE_NFO("JSONRequestHandler", "request to update meter '", name, "' at '", path, "' to value '", value, "'")
-
-        client_.update_meter(path, name, value);
-    }
-
-    void handle_update_event(const nlohmann::json& data) {
-        std::string path  = data.at("path");
-        std::string name  = data.at("name");
-        std::string value = data.at("value");
-
-        TRACE_NFO("JSONRequestHandler", "request to update event '", name, "' at '", path, "' to value '", value, "'")
-
-        if (value == "set") {
-            client_.set_event(path, name);
-        }
-        else if (value == "clear") {
-            client_.clear_event(path, name);
-        }
-        else {
-            TRACE_ERR("RequestHandler", "unexpected event value found: '", value, "'");
+            if (key == "task_rid") {
+                client_.child_set_remote_id(value);
+            }
+            else if (key == "task_password") {
+                client_.child_set_password(value);
+            }
+            else if (key == "task_try_no") {
+                client_.child_set_try_no(value);
+            }
+            else {
+                TRACE_ERR("JSONRequestHandler", "unknown header: ", key, ", ignored.")
+            }
         }
     }
 
