@@ -15,8 +15,6 @@
 
 #include <iostream>
 
-#include <boost/bind.hpp>
-
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
 #include "SslServer.hpp"
@@ -61,7 +59,7 @@ void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connect
         // Read and interpret message from the client
         conn->socket().async_handshake(
             boost::asio::ssl::stream_base::server,
-            boost::bind(&SslTcpServer::handle_handshake, this, boost::asio::placeholders::error, conn));
+            [this, conn](const boost::system::error_code& error) { this->handle_handshake(error, conn); });
     }
     else {
         if (serverEnv_.debug())
@@ -91,8 +89,9 @@ void SslTcpServer::handle_handshake(const boost::system::error_code& e, ssl_conn
         // Successfully accepted a new connection. Determine what the
         // client sent to us. The connection::async_read() function will
         // automatically. serialise the inbound_request_ data structure for us.
-        new_conn->async_read(inbound_request_,
-                             boost::bind(&SslTcpServer::handle_read, this, boost::asio::placeholders::error, new_conn));
+        new_conn->async_read(inbound_request_, [this, new_conn](const boost::system::error_code& error) {
+            this->handle_read(error, new_conn);
+        });
     }
     else {
         // An error occurred.
@@ -112,12 +111,12 @@ void SslTcpServer::handle_read(const boost::system::error_code& e, ssl_connectio
 
         // Always *Reply* back to the client, Otherwise client will get EOF
         conn->async_write(outbound_response_,
-                          boost::bind(&SslTcpServer::handle_write, this, boost::asio::placeholders::error, conn));
+                          [this, conn](const boost::system::error_code& error) { this->handle_write(error, conn); });
     }
     else {
         handle_read_error(e); // populates outbound_response_
         conn->async_write(outbound_response_,
-                          boost::bind(&SslTcpServer::handle_write, this, boost::asio::placeholders::error, conn));
+                          [this, conn](const boost::system::error_code& error) { this->handle_write(error, conn); });
     }
 }
 

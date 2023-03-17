@@ -18,8 +18,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/bind.hpp>
-
 #include "StcCmd.hpp"
 
 #ifdef DEBUG_PERF
@@ -111,8 +109,10 @@ bool Client::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_ite
         deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
         boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
-        connection_.socket_ll().async_connect(
-            endpoint, boost::bind(&Client::handle_connect, this, boost::asio::placeholders::error, endpoint_iterator));
+        connection_.socket_ll().async_connect(endpoint,
+                                              [this, endpoint_iterator](const boost::system::error_code& error) {
+                                                  this->handle_connect(error, endpoint_iterator);
+                                              });
     }
     else {
         // ran out of end points
@@ -194,7 +194,7 @@ void Client::start_write() {
     deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
     connection_.async_write(outbound_request_,
-                            boost::bind(&Client::handle_write, this, boost::asio::placeholders::error));
+                            [this](const boost::system::error_code& error) { this->handle_write(error); });
 }
 
 void Client::handle_write(const boost::system::error_code& e) {
@@ -238,7 +238,7 @@ void Client::start_read() {
     deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
     connection_.async_read(inbound_response_,
-                           boost::bind(&Client::handle_read, this, boost::asio::placeholders::error));
+                           [this](const boost::system::error_code& error) { this->handle_read(error); });
 }
 
 void Client::handle_read(const boost::system::error_code& e) {

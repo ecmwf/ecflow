@@ -19,7 +19,6 @@
 #include <cstdlib> // for getenv()
 #include <iostream>
 
-#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
