@@ -4,7 +4,7 @@
 
 set(LIB_TARGET libecflow_udp)
 
-list(APPEND ${LIB_TARGET}_srcs
+set(${LIB_TARGET}_srcs
   # HEADERS
   src/ClientAPI.hpp
   src/RequestHandler.hpp
@@ -42,7 +42,7 @@ target_clangformat(${LIB_TARGET})
 
 set(SERVER_TARGET ecflow_udp)
 
-list(APPEND ${SERVER_TARGET}_srcs
+set(${SERVER_TARGET}_srcs
   # SOURCES
   src/UDPServerMain.cpp
 )
@@ -62,25 +62,20 @@ target_clangformat(${SERVER_TARGET})
 
 
 # ==============================================================================
-# ECFLOW UDP Client(s)
+# ECFLOW UDP Client
 
 set(CLIENT_TARGET ecflow_udp_client)
 
-list(APPEND ${CLIENT_TARGET}_srcs
+set(${CLIENT_TARGET}_srcs
   # HEADERS
   src/UDPClient.hpp
   # SOURCES
   src/UDPClientMain.cpp
 )
 
-# ==============================================================================
-# ECFLOW UDP Client(s) -- Based on Boost.ASIO
-
 ecbuild_add_executable(
-  TARGET ${CLIENT_TARGET}_boost
+  TARGET ${CLIENT_TARGET}
   SOURCES ${${CLIENT_TARGET}_srcs}
-  DEFINITIONS
-    ECFLOW_UDP_CLIENT_BASED_ON_BOOST_ASIO
   INCLUDES
     src
   LIBS
@@ -88,32 +83,11 @@ ecbuild_add_executable(
     Boost::boost
     Boost::filesystem
 )
-set_target_properties(${CLIENT_TARGET}_boost PROPERTIES
+set_target_properties(${CLIENT_TARGET} PROPERTIES
   INSTALL_RPATH ""
 )
 
-target_clangformat(${CLIENT_TARGET}_boost)
-
-# ==============================================================================
-# ECFLOW UDP Client(s) -- Based on ecKit
-
-ecbuild_add_executable(
-  TARGET ${CLIENT_TARGET}_eckit
-  SOURCES ${${CLIENT_TARGET}_srcs}
-  DEFINITIONS
-    ECFLOW_UDP_CLIENT_BASED_ON_ECKIT
-  INCLUDES
-    src
-  LIBS
-    pthread
-    Boost::boost
-    Boost::filesystem
-)
-set_target_properties(${CLIENT_TARGET}_eckit PROPERTIES
-  INSTALL_RPATH ""
-)
-
-target_clangformat(${CLIENT_TARGET}_eckit)
+target_clangformat(${CLIENT_TARGET})
 
 # ==============================================================================
 # ECFLOW UDP Test(s)
