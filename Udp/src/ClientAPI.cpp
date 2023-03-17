@@ -32,6 +32,29 @@ ClientAPI::ClientAPI() : invoker_(std::make_unique<ClientInvoker>()) {
 
 ClientAPI::~ClientAPI() = default;
 
+void ClientAPI::user_set_name(const std::string& username) {
+    invoker_->set_user_name(username);
+}
+
+void ClientAPI::user_set_password(const std::string& password) {
+    invoker_->set_password(password);
+}
+
+void ClientAPI::user_update_meter(const std::string& path, const std::string& name, const std::string& value) const {
+    try_invoke([&path, &name, &value](const auto& invoker) { invoker->alter(path, "change", "meter", name, value); });
+}
+
+void ClientAPI::user_update_label(const std::string& path, const std::string& name, const std::string& value) const {
+    try_invoke([&path, &name, &value](const auto& invoker) { invoker->alter(path, "change", "label", name, value); });
+}
+
+void ClientAPI::user_clear_event(const std::string& path, const std::string& name) const {
+    try_invoke([&path, &name](const auto& invoker) { invoker->alter(path, "change", "event", name, "clear"); });
+}
+void ClientAPI::user_set_event(const std::string& path, const std::string& name) const {
+    try_invoke([&path, &name](const auto& invoker) { invoker->alter(path, "change", "event", name, "set"); });
+}
+
 void ClientAPI::child_set_remote_id(const std::string& pid) {
     invoker_->set_child_pid(pid);
 }

@@ -159,21 +159,21 @@ public:
         : BaseMockServer<MockUDPServer>("localhost", port, ecflow_port) {}
 
     void update_label(const std::string& path, const std::string& name, const std::string& value) {
-        auto request = format_request(path, "label", name, value);
+        auto request = format_request(path, "alter_label", name, value);
         send(request);
     }
 
     void update_meter(const std::string& path, const std::string& name, int value) {
-        auto request = format_request(path, "meter", name, value);
+        auto request = format_request(path, "alter_meter", name, value);
         send(request);
     }
 
     void clear_event(const std::string& path, const std::string& name) {
-        auto request = format_request(path, "event", name, "clear");
+        auto request = format_request(path, "alter_event", name, "0");
         send(request);
     }
     void set_event(const std::string& path, const std::string& name) {
-        auto request = format_request(path, "event", name, "set");
+        auto request = format_request(path, "alter_event", name, "1");
         send(request);
     }
 
@@ -186,10 +186,20 @@ private:
     template <typename V>
     static std::string
     format_request(const std::string& path, const std::string& command, const std::string& name, V value) {
-        std::ostringstream os;
-        os << R"-({"method": "put", "payload": {"command": ")-" << command << R"-(", "path": ")-" << path << R"-(", "name": ")-"
-           << name << R"-(", "value": ")-" << value << R"-("}})-";
-        return os.str();
+        std::ostringstream oss;
+        // clang-format off
+        oss << R"({)"
+                << R"("method":"put",)"
+                << R"("payload":)"
+                << R"({)"
+                    << R"("command":")" << command << R"(",)"
+                    << R"("path":")" << path << R"(",)"
+                    << R"("name":")" << name << R"(",)"
+                    << R"("value":")"<< value << R"(")"
+                << R"(})"
+            << R"(})";
+        // clang-format on
+        return oss.str();
     }
 
     static void sendRequest(uint16_t port, const std::string& request) {

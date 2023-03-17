@@ -36,6 +36,17 @@ public:
     ClientAPI(ClientAPI&&)      = delete;
     ~ClientAPI();
 
+    /// Define the User Name
+    void user_set_name(const std::string& username);
+
+    /// Define the User Password
+    void user_set_password(const std::string& password);
+
+    void user_update_meter(const std::string& path, const std::string& name, const std::string& value) const;
+    void user_update_label(const std::string& path, const std::string& name, const std::string& value) const;
+    void user_clear_event(const std::string& path, const std::string& name) const;
+    void user_set_event(const std::string& path, const std::string& name) const;
+
     /// Define the Remote Id (i.e. ECF_RID) for a child Task request
     void child_set_remote_id(const std::string& pid);
     /// Define the Password (i.e. ECF_PASS) for a child Task request

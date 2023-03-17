@@ -37,14 +37,72 @@ public:
     void execute(ClientAPI& client) final { static_cast<COMMAND*>(this)->actually_execute(client); }
 };
 
-/// The `command` to update an ecFlow meter (issued by an ecFlow task)
-class CommandUpdateMeter : public DefaultCommand<CommandUpdateMeter> {
+/// The `command` to update an ecFlow meter (issued by an ecFlow user)
+class CommandUserAlterMeter : public DefaultCommand<CommandUserAlterMeter> {
 public:
-    explicit CommandUpdateMeter(std::string path, std::string name, int value)
+    explicit CommandUserAlterMeter(std::string path, std::string name, int value)
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const { client.child_update_meter(path_, name_, std::to_string(value_)); };
+    void actually_execute(ClientAPI& client) const { client.user_update_meter(path_, name_, std::to_string(value_)); };
+
+    static constexpr const char* COMMAND_TAG = "alter_meter";
+
+private:
+    std::string path_;
+    std::string name_;
+    int value_;
+};
+
+/// The `command` to update an ecFlow label (issued by an ecFlow user)
+class CommandUserAlterLabel : public DefaultCommand<CommandUserAlterLabel> {
+public:
+    explicit CommandUserAlterLabel(std::string path, std::string name, std::string value)
+        : path_{std::move(path)},
+          name_{std::move(name)},
+          value_{std::move(value)} {};
+    void actually_execute(ClientAPI& client) const { client.user_update_label(path_, name_, value_); };
+
+    static constexpr const char* COMMAND_TAG = "alter_label";
+
+private:
+    std::string path_;
+    std::string name_;
+    std::string value_;
+};
+
+/// The `command` to update an ecFlow event (issued by an ecFlow user)
+class CommandUserAlterEvent : public DefaultCommand<CommandUserAlterEvent> {
+public:
+    explicit CommandUserAlterEvent(std::string path, std::string name, bool value)
+        : path_{std::move(path)},
+          name_{std::move(name)},
+          value_{value} {};
+    void actually_execute(ClientAPI& client) const {
+        if (value_) {
+            client.user_set_event(path_, name_);
+        }
+        else {
+            client.user_clear_event(path_, name_);
+        }
+    };
+
+    static constexpr const char* COMMAND_TAG = "alter_event";
+
+private:
+    std::string path_;
+    std::string name_;
+    bool value_;
+};
+
+/// The `command` to update an ecFlow meter (issued by an ecFlow child process)
+class CommandChildUpdateMeter : public DefaultCommand<CommandChildUpdateMeter> {
+public:
+    explicit CommandChildUpdateMeter(std::string path, std::string name, int value)
+        : path_{std::move(path)},
+          name_{std::move(name)},
+          value_{value} {};
+    void actually_execute(ClientAPI& client) const { client.user_update_meter(path_, name_, std::to_string(value_)); };
 
     static constexpr const char* COMMAND_TAG = "meter";
 
@@ -54,14 +112,14 @@ private:
     int value_;
 };
 
-/// The `command` to update an ecFlow label (issued by an ecFlow task)
-class CommandUpdateLabel : public DefaultCommand<CommandUpdateLabel> {
+/// The `command` to update an ecFlow label (issued by an ecFlow child process)
+class CommandChildUpdateLabel : public DefaultCommand<CommandChildUpdateLabel> {
 public:
-    explicit CommandUpdateLabel(std::string path, std::string name, std::string value)
+    explicit CommandChildUpdateLabel(std::string path, std::string name, std::string value)
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{std::move(value)} {};
-    void actually_execute(ClientAPI& client) const { client.child_update_label(path_, name_, value_); };
+    void actually_execute(ClientAPI& client) const { client.user_update_label(path_, name_, value_); };
 
     static constexpr const char* COMMAND_TAG = "label";
 
@@ -71,10 +129,10 @@ private:
     std::string value_;
 };
 
-/// The `command` to update an ecFlow event (issued by an ecFlow task)
-class CommandUpdateEvent : public DefaultCommand<CommandUpdateEvent> {
+/// The `command` to update an ecFlow event (issued by an ecFlow child process)
+class CommandChildUpdateEvent : public DefaultCommand<CommandChildUpdateEvent> {
 public:
-    explicit CommandUpdateEvent(std::string path, std::string name, bool value)
+    explicit CommandChildUpdateEvent(std::string path, std::string name, bool value)
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
@@ -121,27 +179,27 @@ public:
     virtual Command build(nlohmann::json obj) = 0;
 };
 
-/// The builder for a `command` to update an ecFlow label
-class CommandUpdateLabelBuilder : public CommandBuilder {
+/// The builder for a `command` to update an ecFlow label (issued by an ecFlow user)
+class CommandUserAlterLabelBuilder : public CommandBuilder {
 public:
-    const char* name() override { return CommandUpdateLabel::COMMAND_TAG; };
+    const char* name() override { return CommandUserAlterLabel::COMMAND_TAG; };
     Command build(nlohmann::json obj) override {
-        assert(obj.at("command") == CommandUpdateLabel::COMMAND_TAG);
+        assert(obj.at("command") == name());
 
         std::string name  = obj.at("name");
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
-        return Command::make_command<CommandUpdateLabel>(path, name, value);
+        return Command::make_command<CommandUserAlterLabel>(path, name, value);
     }
 };
 
-/// The builder for a `command` to update an ecFlow meter
-class CommandUpdateMeterBuilder : public CommandBuilder {
+/// The builder for a `command` to update an ecFlow meter (issued by an ecFlow user)
+class CommandUserAlterMeterBuilder : public CommandBuilder {
 public:
-    const char* name() override { return CommandUpdateMeter::COMMAND_TAG; };
+    const char* name() override { return CommandUserAlterMeter::COMMAND_TAG; };
     Command build(nlohmann::json obj) override {
-        assert(obj.at("command") == CommandUpdateMeter::COMMAND_TAG);
+        assert(obj.at("command") == name());
 
         std::string name  = obj.at("name");
         std::string path  = obj.at("path");
@@ -149,16 +207,16 @@ public:
 
         auto meter_value  = boost::lexical_cast<int>(value);
 
-        return Command::make_command<CommandUpdateMeter>(path, name, meter_value);
+        return Command::make_command<CommandUserAlterMeter>(path, name, meter_value);
     }
 };
 
-/// The builder for a `command` to update an ecFlow event
-class CommandUpdateEventBuilder : public CommandBuilder {
+/// The builder for a `command` to update an ecFlow event (issued by an ecFlow user)
+class CommandUserAlterEventBuilder : public CommandBuilder {
 public:
-    const char* name() override { return CommandUpdateEvent::COMMAND_TAG; };
+    const char* name() override { return CommandUserAlterEvent::COMMAND_TAG; };
     Command build(nlohmann::json obj) override {
-        assert(obj.at("command") == CommandUpdateEvent::COMMAND_TAG);
+        assert(obj.at("command") == name());
 
         std::string name  = obj.at("name");
         std::string path  = obj.at("path");
@@ -175,7 +233,65 @@ public:
             throw std::runtime_error("Unexpected Event value");
         }
 
-        return Command::make_command<CommandUpdateEvent>(path, name, event_value);
+        return Command::make_command<CommandUserAlterEvent>(path, name, event_value);
+    }
+};
+
+/// The builder for a `command` to update an ecFlow label (issued by an ecFlow child process)
+class CommandChildUpdateLabelBuilder : public CommandBuilder {
+public:
+    const char* name() override { return CommandChildUpdateLabel::COMMAND_TAG; };
+    Command build(nlohmann::json obj) override {
+        assert(obj.at("command") == name());
+
+        std::string name  = obj.at("name");
+        std::string path  = obj.at("path");
+        std::string value = obj.at("value");
+
+        return Command::make_command<CommandChildUpdateLabel>(path, name, value);
+    }
+};
+
+/// The builder for a `command` to update an ecFlow meter (issued by an ecFlow child process)
+class CommandChildUpdateMeterBuilder : public CommandBuilder {
+public:
+    const char* name() override { return CommandChildUpdateMeter::COMMAND_TAG; };
+    Command build(nlohmann::json obj) override {
+        assert(obj.at("command") == name());
+
+        std::string name  = obj.at("name");
+        std::string path  = obj.at("path");
+        std::string value = obj.at("value");
+
+        auto meter_value  = boost::lexical_cast<int>(value);
+
+        return Command::make_command<CommandChildUpdateMeter>(path, name, meter_value);
+    }
+};
+
+/// The builder for a `command` to update an ecFlow event (issued by an ecFlow child process)
+class CommandChildUpdateEventBuilder : public CommandBuilder {
+public:
+    const char* name() override { return CommandChildUpdateEvent::COMMAND_TAG; };
+    Command build(nlohmann::json obj) override {
+        assert(obj.at("command") == name());
+
+        std::string name  = obj.at("name");
+        std::string path  = obj.at("path");
+        std::string value = obj.at("value");
+
+        bool event_value;
+        if (value == "1") {
+            event_value = true;
+        }
+        else if (value == "0") {
+            event_value = false;
+        }
+        else {
+            throw std::runtime_error("Unexpected Event value");
+        }
+
+        return Command::make_command<CommandChildUpdateEvent>(path, name, event_value);
     }
 };
 
@@ -183,9 +299,12 @@ public:
 class CommandFactory {
 public:
     CommandFactory() : builders_{} {
-        builders_.push_back(std::make_unique<CommandUpdateLabelBuilder>());
-        builders_.push_back(std::make_unique<CommandUpdateMeterBuilder>());
-        builders_.push_back(std::make_unique<CommandUpdateEventBuilder>());
+        builders_.push_back(std::make_unique<CommandUserAlterLabelBuilder>());
+        builders_.push_back(std::make_unique<CommandUserAlterMeterBuilder>());
+        builders_.push_back(std::make_unique<CommandUserAlterEventBuilder>());
+        builders_.push_back(std::make_unique<CommandChildUpdateLabelBuilder>());
+        builders_.push_back(std::make_unique<CommandChildUpdateMeterBuilder>());
+        builders_.push_back(std::make_unique<CommandChildUpdateEventBuilder>());
     };
 
     Command make_command_from(nlohmann::json obj) {
@@ -248,7 +367,13 @@ public:
     void configure_authentication(const nlohmann::json& header) {
         for (const auto& [key, value] : header.items()) {
 
-            if (key == "task_rid") {
+            if (key == "user_name") {
+                client_.user_set_name(value);
+            }
+            else if (key == "user_password") {
+                client_.user_set_password(value);
+            }
+            else if (key == "task_rid") {
                 client_.child_set_remote_id(value);
             }
             else if (key == "task_password") {
