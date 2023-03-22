@@ -20,7 +20,6 @@
 #include <mutex>
 #include <string>
 
-#include <nlohmann/json.hpp>
 #include <sys/time.h>
 
 #include "ApiV1Impl.hpp"
@@ -29,6 +28,7 @@
 #include "Options.hpp"
 #include "Str.hpp"
 #include "TypeToJson.hpp"
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 

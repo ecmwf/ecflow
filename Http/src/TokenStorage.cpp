@@ -25,7 +25,6 @@
     #include <thread>
 
     #include <boost/filesystem.hpp>
-    #include <nlohmann/json.hpp>
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
     #include <openssl/sha.h>
@@ -34,6 +33,7 @@
     #include "HttpServerException.hpp"
     #include "Options.hpp"
     #include "Str.hpp"
+    #include "nlohmann/json.hpp"
 
 std::shared_mutex m;
 using string                  = std::string;

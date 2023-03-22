@@ -21,7 +21,6 @@
 #include <thread>
 
 #include <condition_variable>
-#include <nlohmann/json.hpp>
 
 #include "BasicAuth.hpp"
 #include "Child.hpp"
@@ -36,6 +35,7 @@
 #include "Suite.hpp"
 #include "TokenStorage.hpp"
 #include "TypeToJson.hpp"
+#include "nlohmann/json.hpp"
 
 std::shared_ptr<Defs> defs_ = nullptr;
 

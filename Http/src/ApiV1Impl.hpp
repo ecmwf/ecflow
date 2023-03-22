@@ -24,11 +24,9 @@
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
 
-#include <httplib.h>
-
-#include <nlohmann/json.hpp>
-
 #include "ClientInvoker.hpp"
+#include "httplib.h"
+#include "nlohmann/json.hpp"
 
 void update_defs_loop(int interval);
 
