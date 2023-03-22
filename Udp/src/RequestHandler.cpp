@@ -248,6 +248,8 @@ public:
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
+        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to label ", path, ":", name, " to value: ", value);
+
         return Command::make_command<CommandChildUpdateLabel>(path, name, value);
     }
 };
@@ -264,6 +266,8 @@ public:
         std::string value = obj.at("value");
 
         auto meter_value  = boost::lexical_cast<int>(value);
+
+        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to meter ", path, ":", name, " to value: ", meter_value);
 
         return Command::make_command<CommandChildUpdateMeter>(path, name, meter_value);
     }
@@ -290,6 +294,8 @@ public:
         else {
             throw std::runtime_error("Unexpected Event value");
         }
+
+        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to event ", path, ":", name, " to value: ", event_value);
 
         return Command::make_command<CommandChildUpdateEvent>(path, name, event_value);
     }
@@ -397,6 +403,8 @@ private:
 
 void RequestHandler::handle(const RequestHandler::inbound_t& request) const {
     try {
+        TRACE_NFO("RequestHandler", "Processing request: ", request);
+
         nlohmann::json inbound = nlohmann::json::parse(request);
         JSONRequestHandler handler;
         handler.handle(inbound);
