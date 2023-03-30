@@ -16,6 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "AbstractClientEnv.hpp"
@@ -26,7 +27,6 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "Submittable.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace ecf;
 using namespace std;

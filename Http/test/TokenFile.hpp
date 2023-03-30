@@ -1,6 +1,8 @@
-#include <string>
+
 #include <ostream>
-#include <nlohmann/json.hpp>
+#include <string>
+
+#include "nlohmann/json.hpp"
 
 class TokenFile {
   public:
@@ -37,6 +39,6 @@ TokenFile::~TokenFile() {
 		std::cerr << "Failed to remove token file " << tokenfile_ << std::endl;
 	}
 	else {
-	    BOOST_TEST_MESSAGE("Removed token file " << tokenfile_);	
+	    BOOST_TEST_MESSAGE("Removed token file " << tokenfile_);
 	}
 }

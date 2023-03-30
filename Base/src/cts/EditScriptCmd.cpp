@@ -15,6 +15,8 @@
 
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
+
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "Alias.hpp"
@@ -25,7 +27,6 @@
 #include "JobsParam.hpp"
 #include "SuiteChanged.hpp"
 #include "Task.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace ecf;
 using namespace std;

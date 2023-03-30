@@ -10,10 +10,12 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <cstdlib> // for getenv
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -27,7 +29,6 @@
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
-#include "boost/filesystem/operations.hpp"
 // #include "PrintStyle.hpp"
 
 using namespace std;

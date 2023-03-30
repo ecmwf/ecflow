@@ -12,9 +12,11 @@
 //
 // Description :
 //============================================================================
+
 #include <cstdlib>
 #include <iostream>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -24,7 +26,6 @@
 #include "Log.hpp"
 #include "Server.hpp"
 #include "ServerEnvironment.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

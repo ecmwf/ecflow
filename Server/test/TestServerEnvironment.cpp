@@ -13,10 +13,12 @@
 //
 // Description :
 //============================================================================
+
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -28,7 +30,6 @@
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
 #include "Str.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

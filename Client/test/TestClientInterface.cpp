@@ -12,11 +12,13 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Child.hpp"
@@ -28,7 +30,6 @@
 #include "NState.hpp"
 #include "Submittable.hpp"
 #include "Suite.hpp"
-#include "boost/filesystem/operations.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

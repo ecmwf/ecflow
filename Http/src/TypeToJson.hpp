@@ -17,30 +17,30 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <AutoArchiveAttr.hpp>
-#include <AutoCancelAttr.hpp>
-#include <AutoRestoreAttr.hpp>
-#include <ClockAttr.hpp>
-#include <CronAttr.hpp>
-#include <DateAttr.hpp>
-#include <DayAttr.hpp>
-#include <Expression.hpp>
-#include <Flag.hpp>
-#include <GenericAttr.hpp>
-#include <InLimit.hpp>
-#include <LateAttr.hpp>
-#include <Limit.hpp>
-#include <LimitFwd.hpp>
-#include <NodeAttr.hpp>
-#include <QueueAttr.hpp>
-#include <RepeatAttr.hpp>
-#include <Stats.hpp>
-#include <TimeAttr.hpp>
-#include <TimeSlot.hpp>
-#include <TodayAttr.hpp>
-#include <Variable.hpp>
-#include <ZombieAttr.hpp>
-#include <nlohmann/json.hpp>
+#include "AutoArchiveAttr.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoRestoreAttr.hpp"
+#include "ClockAttr.hpp"
+#include "CronAttr.hpp"
+#include "DateAttr.hpp"
+#include "DayAttr.hpp"
+#include "Expression.hpp"
+#include "Flag.hpp"
+#include "GenericAttr.hpp"
+#include "InLimit.hpp"
+#include "LateAttr.hpp"
+#include "Limit.hpp"
+#include "LimitFwd.hpp"
+#include "NodeAttr.hpp"
+#include "QueueAttr.hpp"
+#include "RepeatAttr.hpp"
+#include "Stats.hpp"
+#include "TimeAttr.hpp"
+#include "TimeSlot.hpp"
+#include "TodayAttr.hpp"
+#include "Variable.hpp"
+#include "ZombieAttr.hpp"
+#include "nlohmann/json.hpp"
 
 void to_json(nlohmann::json&, const Meter&);
 void to_json(nlohmann::json&, const Label&);

@@ -12,16 +12,17 @@
 //
 // Description :
 //============================================================================
+
 #include <fstream>
 #include <string>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "boost/filesystem/operations.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

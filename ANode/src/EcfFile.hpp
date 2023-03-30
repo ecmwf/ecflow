@@ -14,11 +14,13 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <fstream>
 #include <memory>
 
+#include <boost/filesystem/path.hpp>
+
 #include "NodeFwd.hpp"
-#include "boost/filesystem/path.hpp"
 
 // This class is used to minimise file I/0.
 // When job processing the same include file can be opened and closed many time

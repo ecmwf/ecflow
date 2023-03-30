@@ -15,11 +15,14 @@
 /// Use this class to test single simulation of definition file that we want to add
 /// to Test Simulator. This is a separate exe
 //============================================================================
+
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -31,8 +34,6 @@
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 using namespace std;
 using namespace ecf;

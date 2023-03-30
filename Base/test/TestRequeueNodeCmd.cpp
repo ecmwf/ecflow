@@ -12,6 +12,8 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "CalendarUpdateParams.hpp"
@@ -23,7 +25,6 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

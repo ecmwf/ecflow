@@ -21,7 +21,7 @@
 // #include <pwd.h> /* getpwdid */
 // #include <sys/types.h>
 // #include <unistd.h>
-// #include <stdio.h>
+// #include <cstdio>
 //
 // using namespace std;
 // using namespace ecf;

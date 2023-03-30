@@ -14,9 +14,11 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <iostream>
 
 #include <boost/core/noncopyable.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientInvoker.hpp"
@@ -24,7 +26,6 @@
 #include "Host.hpp"
 #include "Str.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 class InvokeServer : private boost::noncopyable {
 public:

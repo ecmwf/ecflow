@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+
 #include "EcfFile.hpp"
 
 #include <cerrno>
@@ -20,6 +21,7 @@
 #include <stdexcept>
 
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <sys/stat.h>
 #include <sys/wait.h> // for waitpid
 
@@ -29,7 +31,6 @@
 #include "Log.hpp"
 #include "Str.hpp"
 #include "Submittable.hpp"
-#include "boost/filesystem/operations.hpp"
 
 // #define DEBUG_ECF_ 1
 // #define DEBUG_PRE_PROCESS 1

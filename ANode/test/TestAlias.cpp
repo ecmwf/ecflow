@@ -10,8 +10,11 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <iostream>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Alias.hpp"
@@ -21,8 +24,6 @@
 #include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

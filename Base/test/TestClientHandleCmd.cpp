@@ -12,12 +12,13 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
 #include "Suite.hpp"
 #include "TestHelper.hpp"
-#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace ecf;

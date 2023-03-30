@@ -12,10 +12,13 @@
 //
 // Description :
 //============================================================================
+
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -28,8 +31,6 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "VerifyAttr.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 using namespace std;
 using namespace ecf;

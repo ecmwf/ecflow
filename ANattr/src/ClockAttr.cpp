@@ -15,12 +15,13 @@
 
 #include "ClockAttr.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include "Calendar.hpp"
 #include "DateAttr.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "Serialization.hpp"
-#include "boost/lexical_cast.hpp"
 
 using namespace std;
 using namespace ecf;

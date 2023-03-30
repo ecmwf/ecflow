@@ -12,9 +12,11 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "AutoArchiveAttr.hpp"
@@ -27,7 +29,6 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
-#include "boost/filesystem/operations.hpp"
 
 // #include "PrintStyle.hpp"
 

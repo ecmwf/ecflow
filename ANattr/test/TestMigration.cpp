@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "AutoArchiveAttr.hpp"
@@ -35,7 +36,6 @@
 #include "Variable.hpp"
 #include "VerifyAttr.hpp"
 #include "ZombieAttr.hpp"
-#include "boost/filesystem/operations.hpp"
 #include "cereal_boost_time.hpp"
 
 using namespace std;
