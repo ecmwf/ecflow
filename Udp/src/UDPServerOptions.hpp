@@ -38,12 +38,12 @@ public:
 
     bool get_option(const std::string& option) const { return variables.count(option) > 0; }
 
-    template <typename U, typename = std::enable_if_t<!std::is_same_v<bool, U>, void>>
+    template <typename U, std::enable_if_t<!std::is_same_v<bool, U>, bool> = true>
     const U& get_option(const std::string& option) const {
         return variables[option].template as<U>();
     }
 
-    template <typename U, typename = std::enable_if_t<!std::is_same_v<bool, U>, void>>
+    template <typename U, std::enable_if_t<!std::is_same_v<bool, U>, bool> = true>
     std::optional<U> get_optional_option(const std::string& option) const {
         if (variables.count(option) > 0) {
             return variables[option].template as<U>();

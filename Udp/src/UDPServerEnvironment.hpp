@@ -35,7 +35,7 @@ public:
         return found != std::end(environment_);
     }
 
-    template <typename U, typename = std::enable_if_t<!std::is_same_v<bool, U>, void>>
+    template <typename U, std::enable_if_t<!std::is_same_v<bool, U>, bool> = true>
     std::optional<U> get_variable(const std::string& key) const {
         auto found = environment_.find(key);
         if (found != std::end(environment_)) {
