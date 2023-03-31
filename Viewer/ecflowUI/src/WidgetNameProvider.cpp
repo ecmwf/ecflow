@@ -49,12 +49,12 @@ void WidgetNameProvider::nameChildren(QWidget* w) {
 }
 
 void WidgetNameProvider::nameButtons(QList<QAction*> acLst) {
-    for (QAction* ac: acLst) {
+    for (QAction* ac : acLst) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        for (QObject* obj: ac->associatedObjects()) {
+        for (QObject* obj : ac->associatedObjects()) {
             auto w = qobject_cast<QWidget*>(obj);
 #else
-        for (QWidget* w: ac->associatedWidgets()) {
+        for (QWidget* w : ac->associatedWidgets()) {
 #endif
             if (w->objectName().isEmpty()) {
                 w->setObjectName(ac->objectName());

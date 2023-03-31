@@ -1452,7 +1452,9 @@ void VServer::beginUpdate(VNode* node, const std::vector<ecf::Aspect::Type>& asp
 // If anything does not match we return false that will call reset!!!
 //-------------------------------------------------------------------------------------------
 
-void VServer::endUpdate(VNode* /*node*/, const std::vector<ecf::Aspect::Type>& /*aspect*/, const VNodeChange& /*change*/) {
+void VServer::endUpdate(VNode* /*node*/,
+                        const std::vector<ecf::Aspect::Type>& /*aspect*/,
+                        const VNodeChange& /*change*/) {
 }
 
 void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect) {

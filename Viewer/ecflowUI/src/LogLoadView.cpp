@@ -1222,11 +1222,11 @@ void LogRequestView::clearCharts() {
 
         // We do it in this way to get rid of error message:
         //"Cannot remove axis. Axis not found on the chart."
-        auto *ax = ViewerUtil::chartAxisX(v->chart());
+        auto* ax = ViewerUtil::chartAxisX(v->chart());
         if (v->chart()->axes(Qt::Horizontal).contains(ax)) {
             v->chart()->removeAxis(ax);
         }
-        auto *ay = ViewerUtil::chartAxisY(v->chart());
+        auto* ay = ViewerUtil::chartAxisY(v->chart());
         if (v->chart()->axes(Qt::Vertical).contains(ay)) {
             v->chart()->removeAxis(ay);
         }
@@ -1326,7 +1326,7 @@ void LogRequestView::build(ChartView* view, QLineSeries* series, QString title, 
     }
     else {
         chart->addSeries(series);
-        auto *ax = ViewerUtil::chartAxisX(chart);
+        auto* ax = ViewerUtil::chartAxisX(chart);
         if (ax != nullptr) {
             series->attachAxis(ax);
         }
@@ -1673,8 +1673,8 @@ void LogTotalRequestView::addSuite(int idx) {
     data_->getSuiteTotalReq(idx, *series);
     chart = getChart(TotalChartType);
     chart->addSeries(series);
-    auto *ax = ViewerUtil::chartAxisX(chart);
-    auto *ay = ViewerUtil::chartAxisY(chart);
+    auto* ax = ViewerUtil::chartAxisX(chart);
+    auto* ay = ViewerUtil::chartAxisY(chart);
     if (ax != nullptr) {
         series->attachAxis(ax);
     }

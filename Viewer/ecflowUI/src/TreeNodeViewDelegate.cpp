@@ -1303,7 +1303,7 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index, int height, QStrin
     else {
         QVariant va = index.data(AbstractNodeModel::IconRole);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    if (va.typeId() == QMetaType::QVariantList) {
+        if (va.typeId() == QMetaType::QVariantList) {
 #else
         if (va.type() == QVariant::List) {
 #endif

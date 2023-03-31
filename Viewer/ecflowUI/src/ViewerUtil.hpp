@@ -19,7 +19,7 @@
 #include <QString>
 
 #ifdef ECFLOW_LOGVIEW
-#include <QtCharts>
+    #include <QtCharts>
 #endif
 
 class QAction;
@@ -52,7 +52,7 @@ public:
     static QString wildcardToRegex(const QString&);
     static QFont findMonospaceFont();
     static QIcon makeExpandIcon(bool targetOnRight);
-    static void showShortcutInContextMenu(QAction*);  
+    static void showShortcutInContextMenu(QAction*);
 #ifdef ECFLOW_LOGVIEW
     static QAbstractAxis* chartAxisX(QChart* chart);
     static QAbstractAxis* chartAxisY(QChart* chart);
