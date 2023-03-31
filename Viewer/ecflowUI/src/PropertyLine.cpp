@@ -12,7 +12,6 @@
 
 #include <cassert>
 
-#include <QtGlobal>
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
@@ -27,6 +26,7 @@
 #include <QPalette>
 #include <QPushButton>
 #include <QToolButton>
+#include <QtGlobal>
 
 #include "ComboMulti.hpp"
 #include "Sound.hpp"
@@ -522,10 +522,10 @@ FontPropertyLine::FontPropertyLine(VProperty* guiProp, bool addLabel, QWidget* p
 
     hb->addWidget(familyCb_);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
-    for (QString s: QFontDatabase::families(QFontDatabase::Latin)) {
+    for (QString s : QFontDatabase::families(QFontDatabase::Latin)) {
 #else
     QFontDatabase db;
-    for (QString s: db.families(QFontDatabase::Latin)) {
+    for (QString s : db.families(QFontDatabase::Latin)) {
 #endif
         familyCb_->addItem(s);
     }

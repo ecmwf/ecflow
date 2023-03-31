@@ -179,8 +179,9 @@ void ComboMultiDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
     style->drawControl(QStyle::CE_CheckBox, &opt, painter);
 }
 
-QWidget*
-ComboMultiDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
+QWidget* ComboMultiDelegate::createEditor(QWidget* parent,
+                                          const QStyleOptionViewItem& /*option*/,
+                                          const QModelIndex& /*index*/) const {
     auto* editor = new QCheckBox(parent);
     return editor;
 }

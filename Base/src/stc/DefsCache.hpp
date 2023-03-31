@@ -15,6 +15,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/core/noncopyable.hpp>
+
 #include "NodeFwd.hpp"
 
 //================================================================================
@@ -47,23 +48,23 @@
 //================================================================================
 class DefsCache : private boost::noncopyable {
 public:
-   // Server side
-   static void update_cache_if_state_changed(Defs* defs);
-   static void update_cache( Defs* defs );
+    // Server side
+    static void update_cache_if_state_changed(Defs* defs);
+    static void update_cache(Defs* defs);
 
-   // Client side
-   static defs_ptr restore_defs_from_string(const std::string&);
-   static defs_ptr restore_defs_from_string(); // used in test
+    // Client side
+    static defs_ptr restore_defs_from_string(const std::string&);
+    static defs_ptr restore_defs_from_string(); // used in test
 
 private:
-   friend class SSyncCmd;
-   friend class DefsCmd;
+    friend class SSyncCmd;
+    friend class DefsCmd;
 
-   DefsCache() = delete;
-   ~DefsCache() = delete;
-   static std::string full_server_defs_as_string_;
-   static unsigned int state_change_no_;        // detect state change in defs across clients
-   static unsigned int modify_change_no_;       // detect state change in defs across clients
+    DefsCache()  = delete;
+    ~DefsCache() = delete;
+    static std::string full_server_defs_as_string_;
+    static unsigned int state_change_no_;  // detect state change in defs across clients
+    static unsigned int modify_change_no_; // detect state change in defs across clients
 };
 
 #endif

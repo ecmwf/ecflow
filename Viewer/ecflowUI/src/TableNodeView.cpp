@@ -791,9 +791,9 @@ void TableNodeHeader::mousePressEvent(QMouseEvent* event) {
 
             Q_EMIT customButtonClicked(it.value().id(),
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-                event->globalPosition().toPoint());
+                                       event->globalPosition().toPoint());
 #else
-                event->globalPos());
+                                       event->globalPos());
 #endif
         }
         ++it;

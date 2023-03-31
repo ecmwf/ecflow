@@ -7,6 +7,9 @@
 #  cd $WK/ANode/parser                      
 #  find test -name \*.cpp | sort   
 list( APPEND test_srcs
+   # HEADERS
+   test/PersistHelper.hpp
+   # SOURCES
    test/PersistHelper.cpp
    test/TestAutoAddExterns.cpp
    test/TestDefsStructurePersistAndReload.cpp
@@ -28,6 +31,7 @@ ecbuild_add_test( TARGET       u_aparser
                   DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_anode
                 )
+target_clangformat(u_aparser)
 
 if (ENABLE_ALL_TESTS)
 	#
@@ -47,6 +51,7 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS}
                       DEFINITIONS ${BOOST_TEST_DYN_LINK}
                     )
+	target_clangformat(perf_aparser)
 
 	#
 	# Timer for arbitary defs file,  
@@ -65,7 +70,7 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS} 
                       DEFINITIONS ${BOOST_TEST_DYN_LINK}
                     )
-
+    target_clangformat(perf_aparser_timer)
 	#
 	# Tests parser for a single defs file.  
 	#
@@ -82,4 +87,6 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS} 
                       DEFINITIONS ${BOOST_TEST_DYN_LINK}
                    )
+	target_clangformat(perf_aparser_only)
+
 endif()

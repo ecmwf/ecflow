@@ -29,6 +29,9 @@ add_subdirectory( parser )
 #file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
  
 list( APPEND test_srcs
+# HEADERS
+test/MyDefsFixture.hpp
+# SOURCES
 test/Test_ECFLOW-195.cpp
 test/Test_ECFLOW-247.cpp
 test/Test_ECFLOW-417.cpp

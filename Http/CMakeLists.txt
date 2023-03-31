@@ -50,7 +50,8 @@ target_clangformat(libhttp)
 # EXE ecflow_http, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
 ecbuild_add_executable( TARGET   ecflow_http
-                        SOURCES  src/HttpMain.cpp
+                        SOURCES
+                          src/HttpMain.cpp
                         LIBS     libhttp libclient ${OPENSSL_LIBRARIES}
                         INCLUDES ${Boost_INCLUDE_DIRS} ../cpp-httplib
                       )
@@ -83,7 +84,12 @@ target_clangformat(ecflow_http)
 if (ENABLE_HTTP AND ENABLE_SERVER)
 
   list(APPEND test_srcs
-       test/TestApiV1.cpp
+      # HEADERS
+      test/Certificate.hpp
+      test/InvokeServer.hpp
+      test/TokenFile.hpp
+      # SOURCES
+      test/TestApiV1.cpp
   )
 
   if (OPENSSL_FOUND)
