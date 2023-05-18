@@ -20,15 +20,15 @@ The build of ecFlow UDP server can be enabled (ON) or disabled (OFF) using cmake
 When the ecFlow UDP server is enabled, the build produces the following additional executables:
 
 - **ecflow_udp**, the actual ecFlow UDP server
-- **ecflow_udp_client_boost**, an ecFlow UDP client implemented based on Boost.ASIO
-- **ecflow_udp_client_eckit**, an ecFlow UDP client implemented based on Linux facilities (as per `ecKit UDPClient.cc`)
+- **ecflow_udp_client**, an ecFlow UDP client capable of sending a text payload to the UDP server
 
 When launched, the server will by default listen to port 8080. This can be changed with command line option ``-p``,
 ``--port``. The option ``--verbose`` can be used to enable logging output.
 
 .. Important::
 
-    The communication, including passwords, between the ecFlow UDP server and the ecFlow server is done in clear text.
+    The communication between the ecFlow UDP server and the ecFlow server is done in clear text. At the moment,
+    no encryption is applied to the exchanged information.
 
 Starting ecFlow UDP server
 --------------------------
@@ -37,7 +37,7 @@ The ecFlow UDP server is started with the following command:
 
 .. code-block:: shell
 
-  ecflow_udp --verbose
+  ecflow_udp --verbose [--port <ecflow-udp-port>]
 
 By default the ecFlow UDP server expects ecFlow server to be available at localhost:3141. This can be changed by
 customizing the environment variables ``ECF_HOST`` and ``ECF_PORT`` before starting the ecFlow UDP server, or by
@@ -86,17 +86,17 @@ where the authentication takes place considering the available mechanisms (e.g w
 password based authentication).
 
 
-ecFlow UDP API Documentation
---------------------
+ecFlow UDP Requests
+-------------------
 
-The current implementation of ecFlow UDP allows the following operations:
+The current implementation of ecFlow UDP allows the following task requests:
 
- - update the value of a meter
- - update the value of a label
- - set/clear an event
+- update the value of a meter
+- update the value of a label
+- set/clear an event
 
 Each of the operations can be triggered be sending a JSON-formatted request to ecFlow UDP server.
-The following sections present the description of the request format. Note that the header field is not mandatory.
+The following sections present the description of the request format.
 
 Update meter value
 ~~~~~~~~~~~~~~~~~~
@@ -105,14 +105,17 @@ Update meter value
 
     {
         "method": "put",
+        "version: "1",
         "header": {
-            "username": "user",
-            "password": "<salted password>"}, // openssl passwd --salt <username> <password>
-        "data": {
-            "type": "meter",
-            "path": "</path/to/node>",
-            "name": "<meter name>",
-            "value": "<new value>"            // must a valid, in range, value
+            "task_rid": "<task-remote-identifier>",
+            "task_password": "<task-password>"},
+            "task_try_no": "<task-try-number>"}
+        },
+        "payload": {
+            "command": "meter",
+            "path": "</path/to/task>",
+            "name": "<meter-name>",
+            "value": "<new-meter-value>"
         }
     }
 
@@ -123,14 +126,17 @@ Update label value
 
     {
         "method": "put",
+        "version: "1",
         "header": {
-            "username": "user",
-            "password": "<salted password>"}, // openssl passwd --salt <username> <password>
-        "data": {
-            "type": "label",
-            "path": "</path/to/node>",
-            "name": "<label name>",
-            "value": "<new value>"
+            "task_rid": "<task-remote-identifier>",
+            "task_password": "<task-password>"},
+            "task_try_no": "<task-try-number>"}
+        },
+        "payload": {
+            "command": "label",
+            "path": "</path/to/task>",
+            "name": "<label-name>",
+            "value": "<new-label-value>"
         }
     }
 
@@ -141,13 +147,16 @@ Set/clear event value
 
     {
         "method": "put",
+        "version: "1",
         "header": {
-            "username": "user",
-            "password": "<salted password>"}, // openssl passwd --salt <username> <password>
-        "data": {
-            "type": "event",
-            "path": "</path/to/node>",
-            "name": "<event name>",
-            "value": "<set, clear>"
+            "task_rid": "<task-remote-identifier>",
+            "task_password": "<task-password>"},
+            "task_try_no": "<task-try-number>"}
+        },
+        "payload": {
+            "command": "event",
+            "path": "</path/to/task>",
+            "name": "<event-name>",
+            "value": "<new-event-value>" // the value is either 1 to set or 0 to clear the event
         }
     }
