@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
+#include "ClientInvoker.hpp"
 #include "ClientOptions.hpp"
 #include "PasswordEncryption.hpp"
 
@@ -37,6 +38,24 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
 
     std::string actual_password = environment.get_user_password(expected_username);
     BOOST_REQUIRE(expected_password == actual_password);
+}
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_handle_command_line_with_even_quotes) {
+    CommandLine cl{R"(ecflow_client --alter=change variable VARIABLE "some long value string" /path/to/task)"};
+
+    BOOST_REQUIRE(cl.tokens().size() == 6);
+    BOOST_REQUIRE(cl.tokens()[0] == "ecflow_client");
+    BOOST_REQUIRE(cl.tokens()[4] == "some long value string");
+    BOOST_REQUIRE(cl.tokens()[5] == "/path/to/task");
+}
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_handle_command_line_with_uneven_quotes) {
+    CommandLine cl{R"(ecflow_client --alter=change variable VARIABLE 'some long value string" "/path/to/task')"};
+
+    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 6);
+    BOOST_REQUIRE(cl.tokens()[0] == "ecflow_client");
+    BOOST_REQUIRE(cl.tokens()[4] == "some long value string");
+    BOOST_REQUIRE(cl.tokens()[5] == "/path/to/task");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

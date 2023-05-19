@@ -59,6 +59,16 @@ using namespace ecf;
 using namespace boost::posix_time;
 
 // ==================================================================================
+// class CommandLine
+
+CommandLine::CommandLine(const std::string& cl) : tokens_{boost::program_options::split_unix(cl)} {
+}
+
+const CommandLine::tokens_t& CommandLine::tokens() const {
+    return tokens_;
+}
+
+// ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker() : clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug())
@@ -249,6 +259,10 @@ int ClientInvoker::invoke(int argc, char* argv[]) const {
     if (res == 1 && on_error_throw_exception_)
         throw std::runtime_error(server_reply_.error_msg());
     return res;
+}
+
+int ClientInvoker::invoke(const CommandLine& cl) const {
+    return invoke(cl.tokens());
 }
 
 int ClientInvoker::invoke(const std::string& arg) const {
