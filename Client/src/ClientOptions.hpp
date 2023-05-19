@@ -26,6 +26,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "CtsCmdRegistry.hpp"
 class ClientEnvironment;
+class CommandLine;
 
 class ClientOptions {
 public:
@@ -38,7 +39,7 @@ public:
 
     /// parse the arguments and create the client request that is to be sent
     /// to the server. Will throw std::runtime_error if invalid arguments specified
-    Cmd_ptr parse(int argc, char* argv[], ClientEnvironment*) const;
+    Cmd_ptr parse(const CommandLine& cl, ClientEnvironment*) const;
 
 private:
     void show_help(const std::string& help_cmd) const;

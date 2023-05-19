@@ -23,6 +23,7 @@
 
 #include "Child.hpp"
 #include "ClientEnvironment.hpp"
+#include "CommandLine.hpp"
 #include "Ecf.hpp"
 #include "PasswordEncryption.hpp"
 #include "Str.hpp"
@@ -81,7 +82,7 @@ ClientOptions::~ClientOptions() {
     delete desc_;
 }
 
-Cmd_ptr ClientOptions::parse(int argc, char* argv[], ClientEnvironment* env) const {
+Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) const {
     // We expect two hyphen/minus, However sometime we get a weird/rogue kind of hyphen
     // This rogue hyphen can mess up the parsing.
     // # ecflow_client ––group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 2 of them
@@ -95,11 +96,7 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[], ClientEnvironment* env) con
     // The correct hyphen has:
     //   dec:45 hex:2D oct:55 -
     if (env->debug()) {
-        cout << "  ClientOptions::parse argc=" << argc;
-        for (int i = 0; i < argc; i++) {
-            cout << "  arg" << i << "=" << argv[i];
-        }
-        cout << "\n";
+        cout << "  ClientOptions::parse " << cl << "\n";
         std::cout << "  help column width = " << po::options_description::m_default_line_length + 80 << "\n";
     }
 
@@ -110,8 +107,10 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[], ClientEnvironment* env) con
     //       To avoid negative numbers from being treated as option use, we need to change command line style:
     //       po::command_line_style::unix_style ^ po::command_line_style::allow_short
     boost::program_options::variables_map vm;
-    po::store(po::parse_command_line(
-                  argc, argv, *desc_, po::command_line_style::unix_style ^ po::command_line_style::allow_short),
+    po::store(po::command_line_parser(cl.tokens())
+                  .options(*desc_)
+                  .style(po::command_line_style::unix_style ^ po::command_line_style::allow_short)
+                  .run(),
               vm);
     po::notify(vm);
 
@@ -205,17 +204,17 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[], ClientEnvironment* env) con
         std::stringstream ss;
         ss << print_variable_map(vm) << "\n";
         ss << "ClientOptions::parse: Arguments did not match any commands.\n";
-        ss << "  argc=" << argc << "\n";
-        for (int i = 0; i < argc; i++) {
-            ss << "  arg" << i << "=" << argv[i];
+        ss << "  argc=" << cl.size() << "\n";
+        for (int i = 0; i < cl.size(); i++) {
+            const std::string& arg = cl.tokens()[i];
+            ss << "  arg" << i << "=" << arg;
 
-            std::string str = argv[i];
-            for (size_t s = 0; s < str.size(); s++) {
-                if (static_cast<int>(str[s]) < 0 || static_cast<int>(str[s]) > 127) {
+            for (size_t s = 0; s < arg.size(); s++) {
+                if (static_cast<int>(arg[s]) < 0 || static_cast<int>(arg[s]) > 127) {
                     ss << "\nUnrecognised character not in ASCII range(0-127) " << std::dec << "dec("
-                       << static_cast<int>(str[s]) << ") char:" << str[s];
-                    ss << " found at index " << s << " for string '" << str << "'\n";
-                    if (static_cast<int>(str[s]) == -30)
+                       << static_cast<int>(arg[s]) << ") char:" << arg[s];
+                    ss << " found at index " << s << " for string '" << arg << "'\n";
+                    if (static_cast<int>(arg[s]) == -30)
                         ss << "check for bad hyphen/minus";
                     throw std::runtime_error(ss.str());
                 }

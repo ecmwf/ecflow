@@ -11,8 +11,8 @@
 
 #include <algorithm>
 
-#include "ArgvCreator.hpp"
 #include "ClientInvoker.hpp"
+#include "CommandLine.hpp"
 #include "Defs.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
@@ -136,11 +136,11 @@ void ServerComThread::run() {
 
                     // call the client invoker with the saved command
                     else {
-                        ArgvCreator argvCreator(command_);
+                        CommandLine cl(command_);
 #ifdef _UI_SERVERCOMTHREAD_DEBUG
-                        UiLog(serverName_).dbg() << " args=" << argvCreator.toString();
+                        UiLog(serverName_).dbg() << " args=" << cl;
 #endif
-                        ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                        ci_->invoke(cl);
                     }
                     break;
                 }

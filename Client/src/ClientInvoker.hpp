@@ -27,39 +27,7 @@
 #include "ServerReply.hpp"
 #include "TaskApi.hpp"
 
-/**
- * CommandLine is a thin wrapper/container for the contents of an ecFlow client command line.
- *
- * Note: This class is related to class ArgvCreator, which takes the vector of the command
- * line tokens and converts them into argc+argv.
- *
- * TODO: [MB] Merge CommandLine+ArgvCreator
- * TODO: [MB] Remove ArgvCreator, by using po::command_line_parser(command_line.tokens()) in ClientOptions::parse
- */
-class CommandLine {
-public:
-    using command_line_t = std::string;
-    using tokens_t = std::vector<std::string>;
-
-public:
-    /**
-     * Create a Command Line instance based on a single sequence of characters,
-     * considering that it might include single/double quotes.
-     *
-     * @param cl the command line as a sequence of characters
-     */
-    explicit CommandLine(const command_line_t& cl);
-
-    /**
-     * Access the sequence of tokens composing the command line.
-     *
-     * @return the command line tokens
-     */
-    [[nodiscard]] const tokens_t& tokens() const;
-
-private:
-    tokens_t tokens_;
-};
+class CommandLine;
 
 /// Invokes the client depending on the arguments
 /// This has been separated from main, to allow us to invoke the client
@@ -434,7 +402,7 @@ public:
                            bool run   = true); // ecFlowview SUBMIT_FILE
 
 private:
-    int get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) const;
+    int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
     int invoke(const std::string& arg) const;
