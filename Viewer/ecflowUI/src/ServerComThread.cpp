@@ -49,6 +49,7 @@ void ServerComThread::task(VTask_ptr task) {
         if (taskType_ != VTask::LogOutTask) {
 
             command_  = task->command();
+            commandAsStr_  = task->commandAsStr();
             params_   = task->params();
             contents_ = task->contents();
             vars_     = task->vars();
