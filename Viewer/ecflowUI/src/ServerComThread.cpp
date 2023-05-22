@@ -48,11 +48,11 @@ void ServerComThread::task(VTask_ptr task) {
 
         if (taskType_ != VTask::LogOutTask) {
 
-            command_  = task->command();
-            commandAsStr_  = task->commandAsStr();
-            params_   = task->params();
-            contents_ = task->contents();
-            vars_     = task->vars();
+            command_      = task->command();
+            commandAsStr_ = task->commandAsStr();
+            params_       = task->params();
+            contents_     = task->contents();
+            vars_         = task->vars();
             nodePath_.clear();
             nodePath_ = task->targetPath();
             zombie_   = task->zombie();
@@ -129,9 +129,10 @@ void ServerComThread::run() {
                     if (!commandAsStr_.empty()) {
                         CommandLine cl(commandAsStr_);
                         ci_->invoke(cl);
-                    // the command is already tokenised. We only call it when the command
-                    // arguments are correctly identified (e.g. when come from a dialog).
-                    } else {
+                        // the command is already tokenised. We only call it when the command
+                        // arguments are correctly identified (e.g. when come from a dialog).
+                    }
+                    else {
                         // special treatment for variable add/change to allow values with "--"  characters.
                         // See issue ECFLOW-1414. The command_ string is supposed to contain these values:
                         // ecflow_client --alter change variable NAME VALUE PATH

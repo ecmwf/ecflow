@@ -664,7 +664,7 @@ void ServerHandler::runCommand(const std::string& cmd) {
     }
 
     // Shell command - we should not reach this point
-    if (cmd.size() >=2 && cmd.substr(0,2) == "sh") {
+    if (cmd.size() >= 2 && cmd.substr(0, 2) == "sh") {
         return;
     }
 

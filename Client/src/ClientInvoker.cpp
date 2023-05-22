@@ -201,7 +201,7 @@ int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) co
         }
         else {
             ss << Ecf::CLIENT_NAME() << ": Caught exception whilst parsing arguments:\n" << e.what() << "\n";
-            ss << cl <<"\n";
+            ss << cl << "\n";
         }
         server_reply_.set_error_msg(ss.str());
         if (on_error_throw_exception_)
