@@ -76,6 +76,7 @@ private:
     ClientInvoker* ci_{nullptr};
     VTask::Type taskType_{VTask::NoTask};
     std::vector<std::string> command_;
+    std::string commandAsStr_;
     std::map<std::string, std::string> params_;
     std::vector<std::string> contents_;
     NameValueVec vars_;

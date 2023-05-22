@@ -146,9 +146,9 @@ protected:
     void logoutAndDelete();
     void queueLoggedOut();
 
-    // Only friend classes can access it. Practically it means we
-    // we can only run it through CommandHandler!!!
+    // We should only be able to run runCommand through CommandHandler!!!
     void runCommand(const std::vector<std::string>& cmd);
+    void runCommand(const std::string& cmd);
 
     void connectToServer();
     void setCommunicatingStatus(bool c) { communicating_ = c; }

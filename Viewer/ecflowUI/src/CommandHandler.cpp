@@ -122,18 +122,21 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
         UiLog().dbg() << " final command: " << realCommand;
 
         // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
-        std::string alterToReplace("alter=");
-        std::string alterToReplaceBy("alter ");
-        ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
+//        std::string alterToReplace("alter=");
+//        std::string alterToReplaceBy("alter ");
+//        ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
 
+        // we do not try to tokenise the command but leave the parsing to the
+        // client. It can properly handle the quoted arguments.
         // get the command into the right format by first splitting into tokens
         // and then converting to argc, argv format
-        std::vector<std::string> strs;
-        std::string delimiters(" ");
-        ecf::Str::split(realCommand, strs, delimiters);
+//        std::vector<std::string> strs;
+//        std::string delimiters(" ");
+//        ecf::Str::split(realCommand, strs, delimiters);
 
         // set up and run the thread for server communication
-        serverHandler->runCommand(strs);
+//        serverHandler->runCommand(strs);
+         serverHandler->runCommand(realCommand);
     }
 }
 
@@ -190,10 +193,12 @@ void CommandHandler::run(VInfo_ptr info, const std::vector<std::string>& cmd) {
 }
 
 void CommandHandler::run(VInfo_ptr info, const std::string& cmd) {
-    std::vector<std::string> commands;
+//    std::vector<std::string> commands;
 
-    ecf::Str::split(cmd, commands);
-    run(info, commands);
+//    ecf::Str::split(cmd, commands);
+//    run(info, commands);
+    std::vector<VInfo_ptr> infos = {info};
+    run(infos, cmd);
 }
 
 void CommandHandler::openLinkInBrowser(VInfo_ptr info) {
