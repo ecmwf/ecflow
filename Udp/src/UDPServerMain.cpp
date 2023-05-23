@@ -78,7 +78,11 @@ int main(int argc, char* argv[]) try {
     return EXIT_SUCCESS;
 }
 catch (ecf::InvalidCLIOption& e) {
-    std::cout << "Error: " << std::string("Unable to handle option: ") + e.what() << std::endl;
+    std::cout << "Error: Invalid CLI option detected: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+}
+catch (std::exception& e) {
+    std::cout << "Error: Unexpected problem detected: " << e.what() << std::endl;
     return EXIT_FAILURE;
 }
 catch (...) {
