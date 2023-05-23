@@ -32,7 +32,7 @@ ecbuild_add_library(
   PUBLIC_LIBS
     libclient
     pthread
-    OpenSSL::SSL
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Boost::boost
 )
 target_clangformat(${LIB_TARGET})
@@ -111,7 +111,7 @@ ecbuild_add_test(
     libclient
     Boost::boost
     Boost::unit_test_framework
-    OpenSSL::SSL
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS
     ${SERVER_TARGET}
   DEFINITIONS
