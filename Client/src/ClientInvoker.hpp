@@ -27,6 +27,8 @@
 #include "ServerReply.hpp"
 #include "TaskApi.hpp"
 
+class CommandLine;
+
 /// Invokes the client depending on the arguments
 /// This has been separated from main, to allow us to invoke the client
 /// from a test suite.
@@ -108,6 +110,7 @@ public:
     /// Will attempt to connect to the server a number of times. If this fails it will
     /// try the next server, and so on until a timeout period is reached.
     int invoke(int argc, char* argv[]) const;
+    int invoke(const CommandLine& cl) const;
 
     /// If testing, overwrite the task path set in the environment, required for
     /// testing the task based commands.
@@ -399,7 +402,7 @@ public:
                            bool run   = true); // ecFlowview SUBMIT_FILE
 
 private:
-    int get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) const;
+    int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
     int invoke(const std::string& arg) const;

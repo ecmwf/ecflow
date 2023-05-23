@@ -20,7 +20,6 @@
 #include <boost/asio/ip/host_name.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "ArgvCreator.hpp"
 #include "ChangeNotify.hpp"
 #include "ClientInvoker.hpp"
 #include "ConnectState.hpp"
@@ -648,6 +647,29 @@ void ServerHandler::runCommand(const std::vector<std::string>& cmd) {
 
     VTask_ptr task = VTask::create(VTask::CommandTask);
     task->command(cmd);
+    comQueue_->addTask(task);
+}
+
+// It is protected! Practically it means we
+// we can only run it through CommandHandler!!!
+void ServerHandler::runCommand(const std::string& cmd) {
+    if (isDisabled())
+        return;
+
+    // We do not know if the server is compatible
+    if (compatibility_ == CanBeCompatible) {
+        // aync - will call reset if successfull
+        checkServerVersion();
+        return;
+    }
+
+    // Shell command - we should not reach this point
+    if (cmd.size() >= 2 && cmd.substr(0, 2) == "sh") {
+        return;
+    }
+
+    VTask_ptr task = VTask::create(VTask::CommandTask);
+    task->commandAsStr(cmd);
     comQueue_->addTask(task);
 }
 

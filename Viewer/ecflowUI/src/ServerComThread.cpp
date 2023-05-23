@@ -11,8 +11,8 @@
 
 #include <algorithm>
 
-#include "ArgvCreator.hpp"
 #include "ClientInvoker.hpp"
+#include "CommandLine.hpp"
 #include "Defs.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
@@ -48,10 +48,11 @@ void ServerComThread::task(VTask_ptr task) {
 
         if (taskType_ != VTask::LogOutTask) {
 
-            command_  = task->command();
-            params_   = task->params();
-            contents_ = task->contents();
-            vars_     = task->vars();
+            command_      = task->command();
+            commandAsStr_ = task->commandAsStr();
+            params_       = task->params();
+            contents_     = task->contents();
+            vars_         = task->vars();
             nodePath_.clear();
             nodePath_ = task->targetPath();
             zombie_   = task->zombie();
@@ -122,25 +123,36 @@ void ServerComThread::run() {
                     // command finished!!!
 
                     UiLog(serverName_).dbg() << " COMMAND";
-                    // special treatment for variable add/change to allow values with "--"  characters.
-                    // See issue ECFLOW-1414. The command_ string is supposed to contain these values:
-                    // ecflow_client --alter change variable NAME VALUE PATH
-                    if (command_.size() >= 7 && command_[1] == "--alter" && command_[3] == "variable" &&
-                        (command_[2] == "change" || command_[2] == "add")) {
-                        std::vector<std::string> cmdPaths;
-                        for (size_t i = 6; i < command_.size(); i++) {
-                            cmdPaths.emplace_back(command_[i]);
-                        }
-                        ci_->alter(cmdPaths, command_[2], command_[3], command_[4], command_[5]);
-                    }
 
-                    // call the client invoker with the saved command
+                    // the commmand is a string. We leave the command parsing to the client.
+                    // This is the safest solution.
+                    if (!commandAsStr_.empty()) {
+                        CommandLine cl(commandAsStr_);
+                        ci_->invoke(cl);
+                        // the command is already tokenised. We only call it when the command
+                        // arguments are correctly identified (e.g. when come from a dialog).
+                    }
                     else {
-                        ArgvCreator argvCreator(command_);
+                        // special treatment for variable add/change to allow values with "--"  characters.
+                        // See issue ECFLOW-1414. The command_ string is supposed to contain these values:
+                        // ecflow_client --alter change variable NAME VALUE PATH
+                        if (command_.size() >= 7 && command_[1] == "--alter" && command_[3] == "variable" &&
+                            (command_[2] == "change" || command_[2] == "add")) {
+                            std::vector<std::string> cmdPaths;
+                            for (size_t i = 6; i < command_.size(); i++) {
+                                cmdPaths.emplace_back(command_[i]);
+                            }
+                            ci_->alter(cmdPaths, command_[2], command_[3], command_[4], command_[5]);
+                        }
+
+                        // call the client invoker with the saved command
+                        else {
+                            CommandLine cl(command_);
 #ifdef _UI_SERVERCOMTHREAD_DEBUG
-                        UiLog(serverName_).dbg() << " args=" << argvCreator.toString();
+                            UiLog(serverName_).dbg() << " args=" << cl;
 #endif
-                        ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                            ci_->invoke(cl);
+                        }
                     }
                     break;
                 }

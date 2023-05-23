@@ -21,8 +21,8 @@
 
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
-#include "ArgvCreator.hpp"
 #include "ClientToServerCmd.hpp"
+#include "CommandLine.hpp"
 #include "CtsApi.hpp"
 #include "CtsCmdRegistry.hpp"
 #include "ErrorCmd.hpp"
@@ -117,16 +117,15 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         std::copy(subCmdArgs.begin(), subCmdArgs.end(), std::back_inserter(theArgs));
 
         // Create a Argv array from a vector of strings
-        ArgvCreator argvCreator(theArgs);
+        CommandLine cl(theArgs);
 
         if (clientEnv->debug()) {
-            cout << "  PROCESSING COMMAND = '" << subCmd << "' argc(" << argvCreator.argc() << ")";
-            cout << argvCreator.toString() << "\n";
+            cout << "  PROCESSING COMMAND = '" << subCmd << "' " << cl << "\n";
         }
 
         // Treat each sub command  separately
         boost::program_options::variables_map group_vm;
-        po::store(po::parse_command_line(argvCreator.argc(), argvCreator.argv(), desc), group_vm);
+        po::store(po::command_line_parser(cl.tokens()).options(desc).run(), group_vm);
         po::notify(group_vm);
 
         Cmd_ptr childCmd;

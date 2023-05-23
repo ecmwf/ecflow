@@ -75,6 +75,7 @@ public:
     const std::string& param(const std::string& key) const;
     const std::map<std::string, std::string>& params() const { return params_; }
     const std::vector<std::string>& command() const { return command_; }
+    const std::string& commandAsStr() const { return commandAsStr_; }
     const std::vector<std::string>& contents() const { return contents_; }
     const NameValueVec& vars() const { return vars_; }
     VReply* reply() const { return reply_; }
@@ -82,6 +83,7 @@ public:
 
     void param(const std::string& key, const std::string& val) { params_[key] = val; }
     void command(const std::vector<std::string>& cmd) { command_ = cmd; }
+    void commandAsStr(const std::string& cmd) { commandAsStr_ = cmd; }
     void contents(const std::vector<std::string>& c) { contents_ = c; }
     void vars(const NameValueVec& v) { vars_ = v; }
     void setZombie(const Zombie&);
@@ -104,6 +106,7 @@ protected:
     Status status_;
     std::map<std::string, std::string> params_;
     std::vector<std::string> command_;
+    std::string commandAsStr_;
     std::vector<std::string> contents_;
     NameValueVec vars_;
     std::string targetPath_;

@@ -34,6 +34,7 @@ target_include_directories(core PUBLIC src
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
    target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY_RELEASE}
                               ${Boost_DATE_TIME_LIBRARY_RELEASE}
+                              ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE}
                               ${Boost_SYSTEM_LIBRARY_RELEASE}
                               ${CRYPT_LIB}
                            )   
@@ -41,6 +42,7 @@ else()
    # for boost version 1.69 or greater Boost.System is now header-only.
    target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY_RELEASE}
                               ${Boost_DATE_TIME_LIBRARY_RELEASE}
+                              ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE}
                               ${CRYPT_LIB}
                            )   
 endif()             

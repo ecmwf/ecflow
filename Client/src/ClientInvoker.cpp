@@ -24,10 +24,8 @@
 #ifdef ECF_OPENSSL
     #include "SslClient.hpp"
 #endif
-#include "ArgvCreator.hpp"
 #include "ClientEnvironment.hpp"
-#include "ClientOptions.hpp"
-#include "ClientToServerCmd.hpp"
+#include "CommandLine.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Ecf.hpp"
@@ -174,20 +172,21 @@ void ClientInvoker::set_connection_attempts(unsigned int attempts) {
         connection_attempts_ = 1;
 }
 
-int ClientInvoker::get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) const {
+int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const {
     try {
         // read in program option, and construct the client to server commands from them.
         // This will extract host/port from the environment/ args
         // This will throw std::runtime_error for invalid arguments or options
-        cts_cmd = args_.parse(argc, argv, &clientEnv_);
+        cts_cmd = args_.parse(cl, &clientEnv_);
 
         // For --help and --debug, --load defs check_only no command is created
         // When testInterface avoid writing to standard out.
         if (!cts_cmd.get()) {
             if (!testInterface_ && clientEnv_.debug()) {
                 cout << "args: ";
-                for (int x = 0; x < argc; x++)
-                    cout << argv[x] << " ";
+                for (const auto& token : cl.tokens()) {
+                    cout << token << " ";
+                }
                 cout << "\n";
             }
         }
@@ -195,17 +194,14 @@ int ClientInvoker::get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) c
     }
     catch (std::exception& e) {
         stringstream ss;
-        if (argc == 1) {
+        if (cl.size() == 1) {
             ss << Ecf::CLIENT_NAME() << ": No options specified\n";
             ss << "Usage: " << Ecf::CLIENT_NAME() << " [OPTION]...\n";
             ss << "Try '" << Ecf::CLIENT_NAME() << " --help' for list of options\n";
         }
         else {
             ss << Ecf::CLIENT_NAME() << ": Caught exception whilst parsing arguments:\n" << e.what() << "\n";
-            ss << "args: ";
-            for (int x = 0; x < argc; x++)
-                ss << argv[x] << " ";
-            ss << "\n";
+            ss << cl << "\n";
         }
         server_reply_.set_error_msg(ss.str());
         if (on_error_throw_exception_)
@@ -220,6 +216,10 @@ int ClientInvoker::get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) c
 }
 
 int ClientInvoker::invoke(int argc, char* argv[]) const {
+    return invoke(CommandLine(argc, argv));
+}
+
+int ClientInvoker::invoke(const CommandLine& cl) const {
     // Allow request to logged & allow logging of round trip time, Hence must be placed *before* RoundTripRecorder
     RequestLogger request_logger(this);
 
@@ -237,7 +237,7 @@ int ClientInvoker::invoke(int argc, char* argv[]) const {
     server_reply_.get_error_msg().clear();
 
     Cmd_ptr cts_cmd;
-    if (get_cmd_from_args(argc, argv, cts_cmd) == 1)
+    if (get_cmd_from_args(cl, cts_cmd) == 1)
         return 1;
     if (!cts_cmd)
         return 0; // For --help and --debug, --load defs check_only,  no command is created
@@ -258,11 +258,7 @@ int ClientInvoker::invoke(const std::string& arg) const {
 }
 
 int ClientInvoker::invoke(const std::vector<std::string>& args) const {
-    std::vector<std::string> theArgs;
-    theArgs.emplace_back("ClientInvoker");
-    std::copy(args.begin(), args.end(), std::back_inserter(theArgs));
-    ArgvCreator argvCreator(theArgs);
-    return invoke(argvCreator.argc(), argvCreator.argv());
+    return invoke(CommandLine(args));
 }
 
 int ClientInvoker::invoke(Cmd_ptr cts_cmd) const {
