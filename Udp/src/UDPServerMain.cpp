@@ -15,6 +15,19 @@
 #include "Trace.hpp"
 #include "UDPServer.hpp"
 #include "UDPServerOptions.hpp"
+#include "ecflow_version.h"
+
+static std::string ecflow_udp_server_version() {
+#ifdef DEBUG
+    const std::string TAG = " (debug) ";
+#else
+    const std::string TAG = " ";
+#endif
+
+    std::ostringstream oss;
+    oss << "Ecflow UDP" << TAG << "version(" << ECFLOW_RELEASE << "." << ECFLOW_MAJOR << "." << ECFLOW_MINOR << ")";
+    return oss.str();
+}
 
 static void run_server(uint16_t port) {
     ecf::RequestHandler handler;
@@ -49,12 +62,12 @@ int main(int argc, char* argv[]) try {
     ecf::UDPServerOptions options(argc, const_cast<const char**>(argv));
 
     if (options.has_help()) {
+        std::cout << std::endl << "  ecFlow UDP" << std::endl << std::endl;
         std::cout << options.get_description() << std::endl;
         return EXIT_SUCCESS;
     }
     if (options.has_version()) {
-        // TODO: actually display version!...
-        std::cout << "version!" << std::endl;
+        std::cout << ecflow_udp_server_version() << std::endl;
         return EXIT_SUCCESS;
     }
 

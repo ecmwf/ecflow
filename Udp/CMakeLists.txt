@@ -52,6 +52,7 @@ ecbuild_add_executable(
   SOURCES ${${SERVER_TARGET}_srcs}
   INCLUDES
     src
+    ../ACore/src   # Needed only to #include "ecflow_version.h"
   LIBS
     ${LIB_TARGET}
 )
