@@ -125,6 +125,6 @@ ecbuild_add_test(
     "PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}"
 )
 
-target_clangformat(${TEST_TARGET})
+target_clangformat(${TEST_TARGET} CONDITION ENABLE_TESTS)
 
 file(COPY test/data/reference.def DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_sandbox/data)

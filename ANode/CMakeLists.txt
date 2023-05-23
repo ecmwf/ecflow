@@ -86,7 +86,7 @@ ecbuild_add_test(TARGET  u_anode
                  TEST_DEPENDS u_anattr
                  )
 
-target_clangformat(u_anode)
+target_clangformat(u_anode CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS)
 	list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
@@ -97,5 +97,5 @@ if (ENABLE_ALL_TESTS)
                       DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_anattr
                     )
-  target_clangformat(u_anode_stest)
+  target_clangformat(u_anode_stest CONDITION ENABLE_TESTS)
 endif()

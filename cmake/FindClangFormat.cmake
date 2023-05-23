@@ -1,13 +1,11 @@
-# ============================================================================
 #
-# Copyright 2009-2023 ECMWF.
+# Copyright 2023- ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #
-# ============================================================================
 
 #
 # ClangFormat.cmake allows to easily setup source code formatting
@@ -18,7 +16,7 @@
 #
 # And then configure each project target with:
 #
-#   target_clangformat(<TARGET>)
+#   target_clangformat(<TARGET> [CONDITION <CONDITION>])
 #
 # This will automatically create the following targets:
 #
@@ -27,22 +25,35 @@
 #                               (n.b. only files declared as target sources are formatted;
 #                                     #include files are not considered unless explicitly listed as target sources)
 #
+# If CONDITION is supplied and evaluates to FALSE, these targets will not be created
+#
 
-function(target_clangformat target)
+function(target_clangformat TARGET)
+
+  set(options "")
+  set(single_value_args CONDITION)
+  set(multi_value_args "")
+  cmake_parse_arguments( ARGS "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN} )
+
+  # Skip setup if condition supplied and FALSE
+  if (NOT ${ARGS_CONDITION})
+    return()
+  endif()
+
   # Skip setup if clang-format is not available...
   if (NOT CLANGFORMAT_EXE)
     return()
   endif ()
 
   # Collect list of target sources sources
-  get_target_property(target_sources ${target} SOURCES)
+  get_target_property(target_sources ${TARGET} SOURCES)
   foreach (clangformat_source ${target_sources})
     get_filename_component(clangformat_source ${clangformat_source} ABSOLUTE)
     list(APPEND clangformat_sources ${clangformat_source})
   endforeach ()
 
   # Define name of specific format target
-  get_target_property(target_name ${target} NAME)
+  get_target_property(target_name ${TARGET} NAME)
   set(format_target clangformat_${target_name})
 
   # Add custom specific format target
@@ -53,7 +64,7 @@ function(target_clangformat target)
     -i
     ${clangformat_sources}
     COMMENT
-    "Formating with ${CLANGFORMAT_EXE} ..."
+    "Formatting '${TARGET}' with ${CLANGFORMAT_EXE} ..."
     )
 
   # Wire up dependencies to main format target
@@ -92,6 +103,7 @@ find_program(CLANGFORMAT_EXE
   clang-format-13
   clang-format-14
   clang-format-15
+  clang-format-16
   PATHS
   /usr/bin
   /usr/local/opt/llvm/bin

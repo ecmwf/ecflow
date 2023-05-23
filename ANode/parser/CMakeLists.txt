@@ -31,7 +31,7 @@ ecbuild_add_test( TARGET       u_aparser
                   DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_anode
                 )
-target_clangformat(u_aparser)
+target_clangformat(u_aparser CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS)
 	#
@@ -51,7 +51,7 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS}
                       DEFINITIONS ${BOOST_TEST_DYN_LINK}
                     )
-	target_clangformat(perf_aparser)
+	target_clangformat(perf_aparser CONDITION ENABLE_TESTS)
 
 	#
 	# Timer for arbitary defs file,  
@@ -70,7 +70,7 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS} 
                       DEFINITIONS ${BOOST_TEST_DYN_LINK}
                     )
-    target_clangformat(perf_aparser_timer)
+    target_clangformat(perf_aparser_timer CONDITION ENABLE_TESTS)
 	#
 	# Tests parser for a single defs file.  
 	#
@@ -87,6 +87,6 @@ if (ENABLE_ALL_TESTS)
                                ${Boost_INCLUDE_DIRS} 
                       DEFINITIONS ${BOOST_TEST_DYN_LINK}
                    )
-	target_clangformat(perf_aparser_only)
+	target_clangformat(perf_aparser_only CONDITION ENABLE_TESTS)
 
 endif()

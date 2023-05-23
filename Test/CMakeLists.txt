@@ -71,7 +71,7 @@ if (ENABLE_ALL_TESTS)
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
 	                  TEST_DEPENDS s_client
 	                )
-	target_clangformat(s_test)
+	target_clangformat(s_test CONDITION ENABLE_TESTS)
    
 	ecbuild_add_test( TARGET       s_test_zombies
 	                  SOURCES      ./TestZombies.cpp
@@ -81,7 +81,7 @@ if (ENABLE_ALL_TESTS)
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
 	                  TEST_DEPENDS s_test
 	                )
-	target_clangformat(s_test_zombies)
+	target_clangformat(s_test_zombies CONDITION ENABLE_TESTS)
 	
    
 	# This test runs forever, hence not suitable for unit test.                          

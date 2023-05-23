@@ -56,7 +56,7 @@ ecbuild_add_test( TARGET       c_csim
                   TEST_DEPENDS u_base
                  )
 
-target_clangformat(c_csim)
+target_clangformat(c_csim CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS)
 	ecbuild_add_test( TARGET        c_csim_single
@@ -68,5 +68,5 @@ if (ENABLE_ALL_TESTS)
                       DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                  )
-  target_clangformat(c_csim_single)
+  target_clangformat(c_csim_single CONDITION ENABLE_TESTS)
 endif()

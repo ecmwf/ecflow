@@ -28,4 +28,4 @@ ecbuild_add_test( TARGET       u_anattr
                   TEST_DEPENDS u_acore
                  )
 
-target_clangformat(u_anattr)
+target_clangformat(u_anattr CONDITION ENABLE_TESTS)

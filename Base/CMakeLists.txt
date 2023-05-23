@@ -174,7 +174,7 @@ ecbuild_add_test( TARGET       u_base
                   TEST_DEPENDS u_aparser
                   )
 
-target_clangformat(u_base)
+target_clangformat(u_base CONDITION ENABLE_TESTS)
 
  if (ENABLE_ALL_TESTS)
    ecbuild_add_test( TARGET       perf_job_gen 
@@ -183,5 +183,5 @@ target_clangformat(u_base)
                      INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   )
-   target_clangformat(perf_job_gen)
+   target_clangformat(perf_job_gen CONDITION ENABLE_TESTS)
  endif()

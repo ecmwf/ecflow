@@ -104,7 +104,7 @@ ecbuild_add_test( TARGET       u_server
                   TEST_DEPENDS u_base
               )
 
-target_clangformat(u_server)
+target_clangformat(u_server CONDITION ENABLE_TESTS)
 
 # ===================================================================
 # install

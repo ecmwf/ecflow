@@ -132,7 +132,7 @@ ecbuild_add_test( TARGET       s_client
                   TEST_DEPENDS u_base
                  )
 
-target_clangformat(s_client)
+target_clangformat(s_client CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# 
@@ -150,7 +150,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
                       TEST_DEPENDS u_base
                 )
 
-  target_clangformat(perf_test_large_defs)
+  target_clangformat(perf_test_large_defs CONDITION ENABLE_TESTS)
 
 	# 
 	# test migration
@@ -166,7 +166,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
                       TEST_DEPENDS u_base
                     )
 
-  target_clangformat(m_test_migration)
+  target_clangformat(m_test_migration CONDITION ENABLE_TESTS)
 
 endif()
 

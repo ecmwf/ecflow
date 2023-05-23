@@ -57,4 +57,4 @@ ecbuild_add_test( TARGET   u_acore
                   DEFINITIONS ${BOOST_TEST_DYN_LINK}
                 )
 
-target_clangformat(u_acore)
+target_clangformat(u_acore CONDITION ENABLE_TESTS)
