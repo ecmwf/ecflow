@@ -16,7 +16,7 @@
 #include "UDPServer.hpp"
 #include "UDPServerOptions.hpp"
 
-static void run_server(uint16_t port, bool verbose) {
+static void run_server(uint16_t port) {
     ecf::RequestHandler handler;
     ecf::UDPServer server{handler, port};
     server.run();
@@ -30,7 +30,7 @@ static int launch_server(const ecf::UDPServerOptions& options) {
     TRACE_NFO("UDPServerMain", "starting server on port ", port)
 
     try {
-        run_server(static_cast<uint16_t>(port), verbose);
+        run_server(static_cast<uint16_t>(port));
     }
     catch (const std::exception& e) {
         TRACE_FATAL("UDPServerMain", e.what())
