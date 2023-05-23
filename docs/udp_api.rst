@@ -82,7 +82,7 @@ Authentication
 --------------
 
 ecFlow UDP forwards basic authentication information, as part of the request, to the ecFlow server
-where the authentication takes place considering the available mechanisms (e.g while lists files,
+where the authentication takes place considering the available mechanisms (e.g whitelist files,
 password based authentication).
 
 
