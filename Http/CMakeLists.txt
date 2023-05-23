@@ -108,7 +108,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
                       TEST_DEPENDS u_base s_client
    )
 
-    target_clangformat(s_http)
+    target_clangformat(s_http CONDITION ENABLE_TESTS)
   else()
     message(WARNING "SSL not enabled - will not run HTTP server tests")
   endif()
