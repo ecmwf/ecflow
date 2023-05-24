@@ -8,6 +8,7 @@
  src/AbstractClientEnv.hpp
  src/AbstractServer.hpp
  src/Client.hpp
+ src/ClientOptionsParser.hpp
  src/ClientToServerRequest.hpp
  src/Cmd.hpp
  src/Connection.hpp
@@ -45,6 +46,7 @@
  src/ZombieCtrl.cpp
  src/Stats.cpp
  src/Client.cpp
+ src/ClientOptionsParser.cpp
  src/ServerReply.cpp
  src/Connection.cpp
  src/stc/BlockClientZombieCmd.cpp
