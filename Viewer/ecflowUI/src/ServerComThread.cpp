@@ -129,13 +129,15 @@ void ServerComThread::run() {
                     if (!commandAsStr_.empty()) {
                         CommandLine cl(commandAsStr_);
                         ci_->invoke(cl);
-                        // the command is already tokenised. We only call it when the command
-                        // arguments are correctly identified (e.g. when come from a dialog).
+                    // the command is already tokenised. We only call it when the command
+                    // arguments are correctly identified (e.g. when come from a dialog)
+                    // with exception of --alter (see below).
                     }
                     else {
                         // special treatment for variable add/change to allow values with "--"  characters.
                         // See issue ECFLOW-1414. The command_ string is supposed to contain these values:
                         // ecflow_client --alter change variable NAME VALUE PATH
+                        // TODO: remove this code when the cli allows having values starting with "--"
                         if (command_.size() >= 7 && command_[1] == "--alter" && command_[3] == "variable" &&
                             (command_[2] == "change" || command_[2] == "add")) {
                             std::vector<std::string> cmdPaths;

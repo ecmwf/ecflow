@@ -10,6 +10,8 @@
 
 #include "CommandHandler.hpp"
 
+#include <boost/program_options/parsers.hpp>
+
 // #include "File.hpp"
 // #include "NodeFwd.hpp"
 // #include "ArgvCreator.hpp"
@@ -121,8 +123,28 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
 
         UiLog().dbg() << " final command: " << realCommand;
 
-        // set up and run the thread for server communication
-        serverHandler->runCommand(realCommand);
+        // Ideally we should pass the cmd string staight to the client. However, as a
+        // temporary solution to both:
+        // - fix ECFLOW-1879
+        // - allow values stating with -- (douboe dash) for --alter (see ECFLOW-1414)
+        // we add a tokenisation here for alter.
+        // TODO: remove this code when the cli allows having values starting with --
+        if (realCommand.find("ecflow_client --alter") == 0) {
+            // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
+            std::string alterToReplace("ecflow_client --alter=");
+            std::string alterToReplaceBy("ecflow_client --alter ");
+            ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
+
+            // tokinise --alter
+            auto cmdVec = boost::program_options::split_unix(realCommand, " \t", "'\"", "\\");
+            UiLog().dbg() << " tokenized command: " << cmdVec;
+
+            // set up and run the thread for server communication
+            serverHandler->runCommand(cmdVec);
+        } else {
+            // set up and run the thread for server communication
+            serverHandler->runCommand(realCommand);
+        }
     }
 }
 
