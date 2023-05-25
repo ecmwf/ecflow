@@ -11,25 +11,23 @@
 //
 //============================================================================
 
-#include "ui_TriggerEditorWidget.h"
-
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
+#include "ui_TriggerEditorWidget.h"
 
 class LabelEditor;
 
-class TriggerEditorWidget :  public QWidget, protected Ui::TriggerEditorWidget
-{
-friend class TriggerEditor;
+class TriggerEditorWidget : public QWidget, protected Ui::TriggerEditorWidget {
+    friend class TriggerEditor;
+
 public:
-    TriggerEditorWidget(QWidget *parent=nullptr);
+    TriggerEditorWidget(QWidget* parent = nullptr);
 };
 
-class TriggerEditor : public AttributeEditor
-{
-Q_OBJECT
+class TriggerEditor : public AttributeEditor {
+    Q_OBJECT
 public:
-    TriggerEditor(VInfo_ptr,QWidget* parent=nullptr);
+    TriggerEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~TriggerEditor() override;
 
 protected Q_SLOTS:
@@ -48,4 +46,3 @@ protected:
 };
 
 #endif // TRIGGEREDITOR_HPP
-

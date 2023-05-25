@@ -7,16 +7,14 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <iostream>
-
 #include "UIDebug.hpp"
 
+#include <iostream>
 
-void UIDebug::uiAssert(char const* expr, char const* file, long line, const std::string& message)
-{
-	std::stringstream ss;
-	ss << "ASSERT failure: " << expr << " at " << file << ":" << line << " " << message;
-	std::string assert_msg = ss.str();
-	std::cerr << assert_msg << "\n";
-	exit(1);
+void UIDebug::uiAssert(char const* expr, char const* file, long line, const std::string& message) {
+    std::stringstream ss;
+    ss << "ASSERT failure: " << expr << " at " << file << ":" << line << " " << message;
+    std::string assert_msg = ss.str();
+    std::cerr << assert_msg << "\n";
+    exit(1);
 }

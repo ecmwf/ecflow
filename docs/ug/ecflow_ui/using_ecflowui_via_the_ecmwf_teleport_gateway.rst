@@ -100,7 +100,7 @@ System server lists via proxychains (only in version >= 5.9.0)
 When using ecflowUI outside ECMWF the :ref:`system server list
 files <system_server_list_files_in_ecflowui>`
 are not automatically accessible and you need to configure them
-manually. However, when it is done they will automatically transferred
+manually. However, when it is done they will be automatically transferred
 from the remote SOCKS host and loaded on each start-up. To define the
 system server lists probably the best option is to set **Tools >**
 **Preferences > Server settings > System server list.** The paths

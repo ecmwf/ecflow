@@ -20,16 +20,16 @@
 
 class DefsStateParser : public Parser {
 public:
-   explicit DefsStateParser(DefsStructureParser* p) : Parser(p){}
-   bool doParse(const std::string& line,std::vector<std::string>& lineTokens) override;
-   const char* keyword() const override { return "defs_state"; }
+    explicit DefsStateParser(DefsStructureParser* p) : Parser(p) {}
+    bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
+    const char* keyword() const override { return "defs_state"; }
 };
 
 class HistoryParser : public Parser {
 public:
-   explicit HistoryParser(DefsStructureParser* p) : Parser(p){}
-   bool doParse(const std::string& line,std::vector<std::string>& lineTokens) override;
-   const char* keyword() const override { return "history"; }
+    explicit HistoryParser(DefsStructureParser* p) : Parser(p) {}
+    bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
+    const char* keyword() const override { return "history"; }
 };
 
 #endif

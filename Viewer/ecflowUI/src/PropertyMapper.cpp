@@ -13,45 +13,35 @@
 #include "UIDebug.hpp"
 #include "VConfig.hpp"
 
-PropertyMapper::PropertyMapper(const std::vector<std::string>&  names,VPropertyObserver* obs) : obs_(obs)
-{
-	for(const auto & name : names)
-	{
-		if(VProperty* p=VConfig::instance()->find(name))
-		{
-			p->addObserver(obs);
-			props_.push_back(p);
-		}
-	}
-}
-
-PropertyMapper::~PropertyMapper()
-{
-	for(auto it=props_.begin(); it != props_.end(); ++it)
-	{
-		(*it)->removeObserver(obs_);
-	}
-}
-
-VProperty* PropertyMapper::find(const std::string& path,bool failOnError) const
-{
-	for(auto prop : props_)
-	{
-		if(prop->path() == path)
-			return prop;
-	}
-
-    if(failOnError)
-        UI_ASSERT(0,"Could not find property=" + path);
-
-	return nullptr;
-}
-
-void PropertyMapper::initObserver(VPropertyObserver *obs) const
-{
-    for(auto prop : props_)
-    {
-        obs->notifyChange(prop);
+PropertyMapper::PropertyMapper(const std::vector<std::string>& names, VPropertyObserver* obs) : obs_(obs) {
+    for (const auto& name : names) {
+        if (VProperty* p = VConfig::instance()->find(name)) {
+            p->addObserver(obs);
+            props_.push_back(p);
+        }
     }
 }
 
+PropertyMapper::~PropertyMapper() {
+    for (auto it = props_.begin(); it != props_.end(); ++it) {
+        (*it)->removeObserver(obs_);
+    }
+}
+
+VProperty* PropertyMapper::find(const std::string& path, bool failOnError) const {
+    for (auto prop : props_) {
+        if (prop->path() == path)
+            return prop;
+    }
+
+    if (failOnError)
+        UI_ASSERT(0, "Could not find property=" + path);
+
+    return nullptr;
+}
+
+void PropertyMapper::initObserver(VPropertyObserver* obs) const {
+    for (auto prop : props_) {
+        obs->notifyChange(prop);
+    }
+}

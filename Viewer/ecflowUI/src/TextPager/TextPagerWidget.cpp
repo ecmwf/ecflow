@@ -8,88 +8,80 @@
 //
 //============================================================================
 
-#include <QWidget>
-#include <QString>
-#include <QFont>
-#include <QMainWindow>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QApplication>
-#include <QEvent>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QLabel>
-#include <QPlainTextEdit>
-#include <QShortcut>
-#include <QMenu>
-#include <QMenuBar>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QInputDialog>
-
-#include "TextCodecWrapper.hpp"
 #include "TextPagerWidget.hpp"
 
+#include <QApplication>
+#include <QEvent>
+#include <QFileDialog>
+#include <QFont>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QPlainTextEdit>
+#include <QShortcut>
+#include <QSpinBox>
+#include <QString>
+#include <QVBoxLayout>
+#include <QWidget>
+
 #include "GotoLineDialog.hpp"
+#include "TextCodecWrapper.hpp"
 
 bool add = false;
 
-TextPagerWidget::TextPagerWidget(QWidget *parent)
-   // : TextPagerEdit(parent),
+TextPagerWidget::TextPagerWidget(QWidget* /*parent*/)
+// : TextPagerEdit(parent),
 {
-	auto* hb=new QHBoxLayout(this);
-	hb->setContentsMargins(0,0,0,0);
-	hb->setSpacing(0);
+    auto* hb = new QHBoxLayout(this);
+    hb->setContentsMargins(0, 0, 0, 0);
+    hb->setSpacing(0);
 
-	textEditor_=new TextPagerEdit(this);
-	lineNumArea_ = new TextPagerLineNumberArea(textEditor_);
+    textEditor_  = new TextPagerEdit(this);
+    lineNumArea_ = new TextPagerLineNumberArea(textEditor_);
 
-	hb->addWidget(lineNumArea_);
-	hb->addWidget(textEditor_,1);
+    hb->addWidget(lineNumArea_);
+    hb->addWidget(textEditor_, 1);
 
-	setAttribute(Qt::WA_MouseTracking);
+    setAttribute(Qt::WA_MouseTracking);
 }
 
-void TextPagerWidget::clear()
-{
-	textEditor_->document()->clear();
+void TextPagerWidget::clear() {
+    textEditor_->document()->clear();
 }
 
-bool TextPagerWidget::load(const QString &fileName, TextPagerDocument::DeviceMode mode)
-{
+bool TextPagerWidget::load(const QString& fileName, TextPagerDocument::DeviceMode mode) {
     return textEditor_->load(fileName, mode, TextCodecWrapper());
 }
 
-void TextPagerWidget::setText(const QString &txt)
-{
-	textEditor_->setText(txt);
+void TextPagerWidget::setText(const QString& txt) {
+    textEditor_->setText(txt);
 }
 
-void TextPagerWidget::setFontProperty(VProperty* p)
-{
-	textEditor_->setFontProperty(p);
+void TextPagerWidget::setFontProperty(VProperty* p) {
+    textEditor_->setFontProperty(p);
 }
 
-void TextPagerWidget::zoomIn()
-{
-	textEditor_->zoomIn();
+void TextPagerWidget::zoomIn() {
+    textEditor_->zoomIn();
 }
 
-void TextPagerWidget::zoomOut()
-{
-	textEditor_->zoomOut();
+void TextPagerWidget::zoomOut() {
+    textEditor_->zoomOut();
 }
 // ---------------------------------------------------------------------------
 // TextEdit::gotoLine
 // triggered when the user asks to bring up the 'go to line' dialog
 // ---------------------------------------------------------------------------
 
-void TextPagerWidget::gotoLine()
-{
+void TextPagerWidget::gotoLine() {
     // create the dialog if it does not already exist
 
-    if (!gotoLineDialog_)
-    {
+    if (!gotoLineDialog_) {
         gotoLineDialog_ = new GotoLineDialog(this);
 
         connect(gotoLineDialog_, SIGNAL(gotoLine(int)), this, SLOT(gotoLine(int)));
@@ -97,8 +89,7 @@ void TextPagerWidget::gotoLine()
 
     // if created, set it up and display it
 
-    if (gotoLineDialog_)
-    {
+    if (gotoLineDialog_) {
         gotoLineDialog_->show();
         gotoLineDialog_->raise();
         gotoLineDialog_->activateWindow();
@@ -106,27 +97,22 @@ void TextPagerWidget::gotoLine()
     }
 }
 
-void TextPagerWidget::gotoLine(int line)
-{
+void TextPagerWidget::gotoLine(int line) {
     textEditor_->gotoLine(line);
-}    
+}
 
-void TextPagerWidget::toDocStart()
-{
+void TextPagerWidget::toDocStart() {
     textEditor_->toDocStart();
 }
 
-void TextPagerWidget::toDocEnd()
-{
+void TextPagerWidget::toDocEnd() {
     textEditor_->toDocEnd();
 }
 
-void TextPagerWidget::toLineStart()
-{
+void TextPagerWidget::toLineStart() {
     textEditor_->toLineStart();
 }
 
-void TextPagerWidget::toLineEnd()
-{
+void TextPagerWidget::toLineEnd() {
     textEditor_->toLineEnd();
 }

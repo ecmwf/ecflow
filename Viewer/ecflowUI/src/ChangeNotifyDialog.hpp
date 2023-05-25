@@ -11,17 +11,16 @@
 #ifndef CHANGENOTIFYDIALOG_HPP_
 #define CHANGENOTIFYDIALOG_HPP_
 
-#include <QtGlobal>
 #include <QDialog>
 #include <QLinearGradient>
 #include <QSettings>
 #include <QToolButton>
 #include <QWidget>
-
-#include "ui_ChangeNotifyDialog.h"
-#include "ui_ChangeNotifyDialogWidget.h"
+#include <QtGlobal>
 
 #include "VInfo.hpp"
+#include "ui_ChangeNotifyDialog.h"
+#include "ui_ChangeNotifyDialogWidget.h"
 
 class ChangeNotify;
 class VProperty;
@@ -31,12 +30,11 @@ class QButtonGroup;
 class QHBoxLayout;
 class QLabel;
 
-class ChangeNotifyDialogButton : public QToolButton
-{
-Q_OBJECT
+class ChangeNotifyDialogButton : public QToolButton {
+    Q_OBJECT
 
 public:
-    explicit ChangeNotifyDialogButton(QWidget* parent=nullptr);
+    explicit ChangeNotifyDialogButton(QWidget* parent = nullptr);
 
     void setNotifier(ChangeNotify*);
     void updateSettings();
@@ -50,17 +48,16 @@ protected:
     ChangeNotify* notifier_{nullptr};
 };
 
-class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget
-{
- Q_OBJECT
+class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget {
+    Q_OBJECT
 
 public:
-	explicit ChangeNotifyDialogWidget(QWidget* parent=nullptr);
+    explicit ChangeNotifyDialogWidget(QWidget* parent = nullptr);
     ~ChangeNotifyDialogWidget() override = default;
 
-	void init(ChangeNotify*);
+    void init(ChangeNotify*);
     void updateSettings();
-	ChangeNotify* notifier() const {return notifier_;}
+    ChangeNotify* notifier() const { return notifier_; }
     void writeSettings(QSettings& settings);
     void readSettings(const QSettings& settings);
 
@@ -72,25 +69,24 @@ Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 
 protected:
-	ChangeNotify* notifier_{nullptr};
+    ChangeNotify* notifier_{nullptr};
 };
 
-class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
-{
-Q_OBJECT
+class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog {
+    Q_OBJECT
 
 public:
-	explicit ChangeNotifyDialog(QWidget *parent=nullptr);
-	~ChangeNotifyDialog() override;
+    explicit ChangeNotifyDialog(QWidget* parent = nullptr);
+    ~ChangeNotifyDialog() override;
 
     void add(ChangeNotify*);
     void setCurrent(ChangeNotify*);
-    void setEnabled(ChangeNotify*,bool b);
-	void updateSettings(ChangeNotify*);
+    void setEnabled(ChangeNotify*, bool b);
+    void updateSettings(ChangeNotify*);
 
 public Q_SLOTS:
-	void on_closePb__clicked(bool b);
-	void on_clearPb__clicked(bool b);
+    void on_closePb__clicked(bool b);
+    void on_clearPb__clicked(bool b);
 
 protected Q_SLOTS:
     void slotSelectionChanged(VInfo_ptr);
@@ -98,23 +94,23 @@ protected Q_SLOTS:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void slotButtonToggled(QAbstractButton*, bool);
 #else
-    void slotButtonToggled(int,bool);
+    void slotButtonToggled(int, bool);
 #endif
 
 protected:
     ChangeNotify* indexToNtf(int idx);
     int ntfToIndex(ChangeNotify* ntf);
-	void closeEvent(QCloseEvent*) override;
+    void closeEvent(QCloseEvent*) override;
     void clearCurrentData();
-	void writeSettings();
-	void readSettings();
+    void writeSettings();
+    void readSettings();
     void readNtfWidgetSettings(int tabIndex);
 
     QList<ChangeNotifyDialogWidget*> ntfWidgets_;
     QList<ChangeNotifyDialogButton*> ntfButtons_;
     QButtonGroup* buttonGroup_;
-	bool ignoreCurrentChange_{false};
-	QLinearGradient grad_;
+    bool ignoreCurrentChange_{false};
+    QLinearGradient grad_;
     QHBoxLayout* buttonHb_;
     VProperty* switchWsProp_{nullptr};
 };

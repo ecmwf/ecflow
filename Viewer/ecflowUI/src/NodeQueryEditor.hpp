@@ -11,40 +11,37 @@
 #ifndef NODEQUERYEDITOR_HPP_
 #define NODEQUERYEDITOR_HPP_
 
-#include "ui_NodeQueryEditor.h"
-#include "ui_NodeQuerySaveDialog.h"
-
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QWidget>
 
 #include "ServerFilter.hpp"
 #include "VInfo.hpp"
+#include "ui_NodeQueryEditor.h"
+#include "ui_NodeQuerySaveDialog.h"
 
 class NodeQuery;
 class NodeQueryDef;
 class NodeQueryListModel;
 class NodeQueryOptionEdit;
 
-class NodeQuerySaveDialog : public QDialog, protected Ui::NodeQuerySaveDialog
-{
-Q_OBJECT
+class NodeQuerySaveDialog : public QDialog, protected Ui::NodeQuerySaveDialog {
+    Q_OBJECT
 
 public:
-    explicit NodeQuerySaveDialog(QWidget *parent = nullptr);
+    explicit NodeQuerySaveDialog(QWidget* parent = nullptr);
     ~NodeQuerySaveDialog() override = default;
     QString name() const;
 
 public Q_SLOTS:
-	void accept() override;
+    void accept() override;
 };
 
-class NodeQueryEditor : public QWidget, protected Ui::NodeQueryEditor, public ServerFilterObserver
-{
+class NodeQueryEditor : public QWidget, protected Ui::NodeQueryEditor, public ServerFilterObserver {
     Q_OBJECT
 
 public:
-    explicit NodeQueryEditor(QWidget *parent = nullptr);
+    explicit NodeQueryEditor(QWidget* parent = nullptr);
     ~NodeQueryEditor() override;
 
     void setServerFilter(ServerFilter*);
@@ -71,30 +68,30 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void slotOptionEditChanged();
     void slotServerCbChanged();
-	void slotRootNodeEdited(QString);
+    void slotRootNodeEdited(QString);
     void slotAttrPanelChanged();
-	void slotSaveQueryAs();
-	void slotAdvMode(bool b);
-	void slotMaxNum(int);
+    void slotSaveQueryAs();
+    void slotAdvMode(bool b);
+    void slotMaxNum(int);
     void slotCase(bool);
 
 Q_SIGNALS:
-	void queryEnabledChanged(bool);
+    void queryEnabledChanged(bool);
     void rerunRequested();
 
 private:
-	void updateServers();
-	void init();
-	void initAttr();
-	void updateQueryTe();
-	void checkGuiState();
+    void updateServers();
+    void init();
+    void initAttr();
+    void updateQueryTe();
+    void checkGuiState();
     void setAttributePanel(QStringList lst);
 
-	NodeQuery* query_{nullptr};
-	ServerFilter* serverFilter_{nullptr};
-	bool queryTeCanExpand_{false};
-	bool initIsOn_{false};
-	bool canBeRun_{false};
+    NodeQuery* query_{nullptr};
+    ServerFilter* serverFilter_{nullptr};
+    bool queryTeCanExpand_{false};
+    bool initIsOn_{false};
+    bool canBeRun_{false};
     bool filterMode_{false};
 
     NodeQueryOptionEdit* nameEdit_;
@@ -104,7 +101,7 @@ private:
     NodeQueryOptionEdit* flagEdit_;
     NodeQueryOptionEdit* periodEdit_;
     NodeQueryOptionEdit* attrEdit_;
-    QMap<QString,QList<NodeQueryOptionEdit*> > attr_;
+    QMap<QString, QList<NodeQueryOptionEdit*>> attr_;
     QString nodeTabText_;
     QString attrTabText_;
 };

@@ -25,7 +25,7 @@ The table below shows a list of generated variables.
      - Variable name
      - Explanation
      - Example
-   * - erver
+   * - server
      - ECF_TRIES
      - The default number of tries for each task
      - 2

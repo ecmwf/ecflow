@@ -16,17 +16,15 @@
 
 class AbstractTextSearchInterface;
 
-class RichTextSearchLine : public TextEditSearchLine
-{
+class RichTextSearchLine : public TextEditSearchLine {
 public:
-    explicit RichTextSearchLine(QWidget *parent=nullptr);
+    explicit RichTextSearchLine(QWidget* parent = nullptr);
     ~RichTextSearchLine() override;
     void setEditor(QTextBrowser*);
 
 private:
-    //The interface is set internally
+    // The interface is set internally
     void setSearchInterface(AbstractTextSearchInterface*) {}
-
 };
 
 #endif // RICHTEXTSEARCHLINE_HPP

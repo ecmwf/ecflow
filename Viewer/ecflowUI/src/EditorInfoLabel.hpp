@@ -13,11 +13,10 @@
 
 #include <QLabel>
 
-class EditorInfoLabel : public QLabel
-{
+class EditorInfoLabel : public QLabel {
 public:
-    explicit EditorInfoLabel(QWidget* parent=nullptr);
-    void setInfo(QString parent,QString type);
+    explicit EditorInfoLabel(QWidget* parent = nullptr);
+    void setInfo(QString parent, QString type);
 
     static QString formatKeyLabel(QString n);
     static QString formatNodeName(QString n);

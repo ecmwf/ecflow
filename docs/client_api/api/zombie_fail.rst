@@ -11,7 +11,7 @@ zombie_fail
    -----------
    
    Locates the task in the servers list of zombies, and sets to fail.
-   Next time a child command(init,event,meter,label,abort,complete) whichmatches zombie, communicates with the server, will be set to fail.
+   Next time a child command (init,event,meter,label,abort,complete) which matches zombie, communicates with the server, will be set to fail.
    Depending on the job setup this may force a abort, the abort will also fail.
    Hence job structure should use 'set -e' in the error trapping functions to prevent
    infinite recursion.

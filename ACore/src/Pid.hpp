@@ -19,17 +19,17 @@
 
 class Pid {
 public:
-   /// Returns the process pid as a string, otherwise throw exception(std::runtime_error)
-   static std::string getpid();
+    /// Returns the process pid as a string, otherwise throw exception(std::runtime_error)
+    static std::string getpid();
 
-   /// Return the a unique name based on process identifier,otherwise throw exception(std::runtime_error)
-   /// returns prefix + _ + getpid();
-   static std::string unique_name(const std:: string& prefix);
+    /// Return the a unique name based on process identifier,otherwise throw exception(std::runtime_error)
+    /// returns prefix + _ + getpid();
+    static std::string unique_name(const std::string& prefix);
 
 private:
-   Pid()= default;
-   Pid(const Pid&) = delete;
-   const Pid& operator=(const Pid&) = delete;
+    Pid()                            = default;
+    Pid(const Pid&)                  = delete;
+    const Pid& operator=(const Pid&) = delete;
 };
 
 #endif

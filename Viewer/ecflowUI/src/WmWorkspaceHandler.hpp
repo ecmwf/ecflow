@@ -12,14 +12,14 @@
 
 class QWidget;
 
-class WmWorkspaceHandler
-{
+class WmWorkspaceHandler {
 public:
-    static bool switchTo(QWidget* sourceWidget,QWidget* targetWidget);
+    static bool switchTo(QWidget* sourceWidget, QWidget* targetWidget);
+
 private:
     static bool hasCommand();
     static int workspaceId(int winId);
-    static void moveAndSwitchToWorkspace(int winId,int wsId);
+    static void moveAndSwitchToWorkspace(int winId, int wsId);
 
     static int commandTested_;
 };

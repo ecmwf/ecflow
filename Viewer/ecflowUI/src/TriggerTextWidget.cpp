@@ -15,64 +15,57 @@
 #include "TriggerCollector.hpp"
 #include "VItemPathParser.hpp"
 
-TriggerTextWidget::TriggerTextWidget(QWidget* parent) : QTextBrowser(parent)
-{
+TriggerTextWidget::TriggerTextWidget(QWidget* parent) : QTextBrowser(parent) {
     setOpenExternalLinks(false);
     setOpenLinks(false);
     setReadOnly(true);
 
-    setProperty("trigger","1");
+    setProperty("trigger", "1");
 
-    //Set css for the text formatting
+    // Set css for the text formatting
     QString cssDoc;
     QFile f(":/viewer/trigger.css");
-    //QTextStream in(&f);
-    if(f.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        cssDoc=QString(f.readAll());
+    // QTextStream in(&f);
+    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        cssDoc = QString(f.readAll());
     }
     f.close();
     document()->setDefaultStyleSheet(cssDoc);
 }
 
-void TriggerTextWidget::reloadItem(TriggerTableItem* item)
-{
-    QString s="<table width=\'100%\'>";
-    s+=makeHtml(item,"Triggers directly triggering the selected node","Triggers");
-    s+="</table>";
+void TriggerTextWidget::reloadItem(TriggerTableItem* item) {
+    QString s = "<table width=\'100%\'>";
+    s += makeHtml(item, "Triggers directly triggering the selected node", "Triggers");
+    s += "</table>";
     setHtml(s);
 }
 
-QString TriggerTextWidget::makeHtml(TriggerTableItem *ti,QString directTitle,QString modeText) const
-{
+QString TriggerTextWidget::makeHtml(TriggerTableItem* ti, QString /*directTitle*/, QString /*modeText*/) const {
     QString s;
-    const std::vector<TriggerDependencyItem>& items=ti->dependencies();
+    const std::vector<TriggerDependencyItem>& items = ti->dependencies();
 
-    for(auto item : items)
-    {
-        VItem *t=item.dep();
-        TriggerCollector::Mode mode=item.mode();
+    for (auto item : items) {
+        VItem* t                    = item.dep();
+        TriggerCollector::Mode mode = item.mode();
 
-        if(!t)
+        if (!t)
             continue;
 
-        s+="<tr><td>";
-        if(mode == TriggerCollector::Parent)
-           s+="parent";
+        s += "<tr><td>";
+        if (mode == TriggerCollector::Parent)
+            s += "parent";
         else
-           s+="child";
+            s += "child";
 
-        QString type=QString::fromStdString(t->typeName());
-        QString path=QString::fromStdString(t->fullPath());
-        QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+        QString type   = QString::fromStdString(t->typeName());
+        QString path   = QString::fromStdString(t->fullPath());
+        QString anchor = QString::fromStdString(VItemPathParser::encode(t->fullPath(), t->typeName()));
 
-        s+="  " + type;
-        //s+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
-        s+=" <a href=\'" + anchor + "\'>" + path +"</a>";
-        s+="</td></tr>";
+        s += "  " + type;
+        // s+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
+        s += " <a href=\'" + anchor + "\'>" + path + "</a>";
+        s += "</td></tr>";
     }
 
     return s;
 }
-
-

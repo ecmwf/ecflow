@@ -15,8 +15,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include "ServerToClientCmd.hpp"
 #include "Child.hpp"
+#include "ServerToClientCmd.hpp"
 
 //
 // This command send the zombie type to the client
@@ -25,28 +25,27 @@
 //
 class BlockClientZombieCmd final : public ServerToClientCmd {
 public:
-   explicit BlockClientZombieCmd(ecf::Child::ZombieType zt) :  zombie_type_(zt) {}
-   BlockClientZombieCmd() = default;
+    explicit BlockClientZombieCmd(ecf::Child::ZombieType zt) : zombie_type_(zt) {}
+    BlockClientZombieCmd() = default;
 
-   void init(ecf::Child::ZombieType zt) { zombie_type_ = zt; } // server context
-   ecf::Child::ZombieType zombie_type() const { return zombie_type_;}
+    void init(ecf::Child::ZombieType zt) { zombie_type_ = zt; } // server context
+    ecf::Child::ZombieType zombie_type() const { return zombie_type_; }
 
-   std::string print() const override;
-   bool equals(ServerToClientCmd*) const override;
-   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override; // client context
+    std::string print() const override;
+    bool equals(ServerToClientCmd*) const override;
+    bool
+    handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override; // client context
 
-   bool is_returnable_in_group_cmd() const override { return false; } /// used by group command
+    bool is_returnable_in_group_cmd() const override { return false; } /// used by group command
 
 private:
-   ecf::Child::ZombieType zombie_type_{ecf::Child::NOT_SET};
+    ecf::Child::ZombieType zombie_type_{ecf::Child::NOT_SET};
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class< ServerToClientCmd >( this ),
-         CEREAL_NVP(zombie_type_));
-   }
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
+        ar(cereal::base_class<ServerToClientCmd>(this), CEREAL_NVP(zombie_type_));
+    }
 };
 std::ostream& operator<<(std::ostream& os, const BlockClientZombieCmd&);
 #endif

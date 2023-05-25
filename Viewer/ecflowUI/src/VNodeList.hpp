@@ -11,90 +11,88 @@
 #ifndef VIEWER_SRC_VNODELIST_HPP_
 #define VIEWER_SRC_VNODELIST_HPP_
 
-#include "ServerObserver.hpp"
-#include "NodeObserver.hpp"
-
-#include <QObject>
-
 #include <map>
 #include <vector>
 
+#include <QObject>
+
+#include "NodeObserver.hpp"
+#include "ServerObserver.hpp"
+
 class VNodeList;
 
-class VNodeListItem
-{
-friend class VNodeList;
+class VNodeListItem {
+    friend class VNodeList;
 
 public:
-	explicit VNodeListItem(VNode* n);
-	VNode *node() const {return node_;}
-    ServerHandler* server() const {return server_;}
+    explicit VNodeListItem(VNode* n);
+    VNode* node() const { return node_; }
+    ServerHandler* server() const { return server_; }
     const std::string& serverName() const;
-	const std::string& path() const {return path_;}
-	QString time() const {return time_;}
-	bool sameAs(VNode *node) const;
-	void invalidateNode();
-	bool updateNode(ServerHandler*);
+    const std::string& path() const { return path_; }
+    QString time() const { return time_; }
+    bool sameAs(VNode* node) const;
+    void invalidateNode();
+    bool updateNode(ServerHandler*);
 
 protected:
     VNode* node_{nullptr};
     ServerHandler* server_{nullptr};
-	std::string path_;
-	QString time_;
+    std::string path_;
+    QString time_;
 };
 
-class VNodeList : public QObject, public ServerObserver, public NodeObserver
-{
- Q_OBJECT
+class VNodeList : public QObject, public ServerObserver, public NodeObserver {
+    Q_OBJECT
 
 public:
- 	explicit VNodeList(QObject* parent=nullptr);
- 	~VNodeList() override;
+    explicit VNodeList(QObject* parent = nullptr);
+    ~VNodeList() override;
 
- 	int size() const {return data_.size();}
- 	VNodeListItem* itemAt(int i);
- 	void add(VNode*);
- 	void remove(VNode*);
- 	void clear();
- 	bool contains(VNode*);
- 	void setMaxNum(int);
+    int size() const { return data_.size(); }
+    VNodeListItem* itemAt(int i);
+    void add(VNode*);
+    void remove(VNode*);
+    void clear();
+    bool contains(VNode*);
+    void setMaxNum(int);
 
-    //From ServerObserver
+    // From ServerObserver
     void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
- 	void notifyServerDelete(ServerHandler* server) override;
+    void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
- 	void notifyEndServerClear(ServerHandler* server) override;
- 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
+    void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler* server, const VServerChange&) override;
     void notifyEndServerScan(ServerHandler* server) override;
-    void notifyServerRenamed(ServerHandler* server,  const std::string& oldName) override;
+    void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
- 	//From NodeObserver
-    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
- 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
 
 Q_SIGNALS:
-     void beginAppendRow();
-     void endAppendRow();
-     void beginRemoveRow(int);
-     void endRemoveRow(int);
-     void beginRemoveRows(int,int);
-     void endRemoveRows(int,int);
-     void beginReset();
-     void endReset();
+    void beginAppendRow();
+    void endAppendRow();
+    void beginRemoveRow(int);
+    void endRemoveRow(int);
+    void beginRemoveRows(int, int);
+    void endRemoveRows(int, int);
+    void beginReset();
+    void endReset();
 
 protected:
-     void clearData(bool hideOnly);
-     void clear(ServerHandler*);
-     void serverClear(ServerHandler*);
-     void serverScan(ServerHandler*);
-     void attach(ServerHandler*);
-     void detach(ServerHandler*);
-     void detach(VNode*);
-     void trim();
+    void clearData(bool hideOnly);
+    void clear(ServerHandler*);
+    void serverClear(ServerHandler*);
+    void serverScan(ServerHandler*);
+    void attach(ServerHandler*);
+    void detach(ServerHandler*);
+    void detach(VNode*);
+    void trim();
 
-     std::vector<VNodeListItem*> data_;
-     std::map<ServerHandler*,int> serverCnt_;
-     int maxNum_{200};
+    std::vector<VNodeListItem*> data_;
+    std::map<ServerHandler*, int> serverCnt_;
+    int maxNum_{200};
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */

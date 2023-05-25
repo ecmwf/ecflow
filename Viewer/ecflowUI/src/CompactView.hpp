@@ -26,31 +26,30 @@ class TreeNodeModel;
 class GraphNodeViewItem;
 class QStyledItemDelegate;
 
-class CompactView : public AbstractNodeView
-{
+class CompactView : public AbstractNodeView {
 
 public:
-    explicit CompactView(TreeNodeModel* model,QWidget *parent=nullptr);
+    explicit CompactView(TreeNodeModel* model, QWidget* parent = nullptr);
     ~CompactView() override;
 
-    QRect visualRect(const QModelIndex &index) const override;
+    QRect visualRect(const QModelIndex& index) const override;
 
-protected:   
-    void paint(QPainter *painter,const QRegion& region) override;
-    void drawRow(QPainter* painter,int start,int xOffset,int &yp,int &itemsInRow,std::vector<int>&);
+protected:
+    void paint(QPainter* painter, const QRegion& region) override;
+    void drawRow(QPainter* painter, int start, int xOffset, int& yp, int& itemsInRow, std::vector<int>&);
 
-    void layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated) override;
+    void layout(int parentId, bool recursiveExpanding, bool afterIsUninitialized, bool preAllocated) override;
 
     int itemRow(int item) const override;
     int itemCountInRow(int start) const;
-    void rowProperties(int start,int& rowHeight,int &itemsInRow,std::vector<int>& indentVec) const;
-    int rowHeight(int start,int forward,int &itemsInRow) const;
-    void coordinateForItem(int item,int& itemY,int& itemRowHeight) const;
+    void rowProperties(int start, int& rowHeight, int& itemsInRow, std::vector<int>& indentVec) const;
+    int rowHeight(int start, int forward, int& itemsInRow) const;
+    void coordinateForItem(int item, int& itemY, int& itemRowHeight) const;
     int itemAtCoordinate(const QPoint& coordinate) const override;
-    int itemAtRowCoordinate(int start,int count,int xPos) const;
-    bool isPointInExpandIndicator(int,QPoint) const override {return false;}
+    int itemAtRowCoordinate(int start, int count, int xPos) const;
+    bool isPointInExpandIndicator(int, QPoint) const override { return false; }
 
-    int  firstVisibleItem(int &offset) const override;
+    int firstVisibleItem(int& offset) const override;
     void updateRowCount() override;
     void updateScrollBars() override;
     void updateViewport(const QRect rect) override;
@@ -67,4 +66,3 @@ private:
 };
 
 #endif // COMPACTVIEW_HPP
-

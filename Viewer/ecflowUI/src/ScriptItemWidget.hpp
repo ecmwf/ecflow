@@ -11,20 +11,19 @@
 #ifndef SCRIPTITEMWIDGET_HPP_
 #define SCRIPTITEMWIDGET_HPP_
 
-#include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
+#include "InfoPanelItem.hpp"
 
-class ScriptItemWidget : public CodeItemWidget, public InfoPanelItem
-{
+class ScriptItemWidget : public CodeItemWidget, public InfoPanelItem {
 public:
-	explicit ScriptItemWidget(QWidget *parent=nullptr);
-	~ScriptItemWidget() override;
+    explicit ScriptItemWidget(QWidget* parent = nullptr);
+    ~ScriptItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-    //From VInfoPresenter
+    // From VInfoPresenter
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;
     void infoProgress(VReply*) override;
@@ -38,4 +37,3 @@ protected:
 };
 
 #endif
-

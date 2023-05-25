@@ -229,7 +229,7 @@ To use the ecFlow :ref:`python_api` you need to add/change PYTHONPATH. 
 Installing ecFlow Python to a custom  directory
 -----------------------------------------------
 
-The default install for ecFlow will install python(if it was enabled)
+The default install for ecFlow will install python (if it was enabled)
 under the directory given to CMAKE_INSTALL_PREFIX.
 
 However, sometimes we may need to install the ecFlow python module to a

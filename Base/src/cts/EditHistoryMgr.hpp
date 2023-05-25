@@ -22,15 +22,15 @@
 class ClientToServerCmd;
 class AbstractServer;
 
-class EditHistoryMgr : private boost::noncopyable  {
+class EditHistoryMgr : private boost::noncopyable {
 public:
-   EditHistoryMgr(const ClientToServerCmd*,AbstractServer*);
-   ~EditHistoryMgr();
+    EditHistoryMgr(const ClientToServerCmd*, AbstractServer*);
+    ~EditHistoryMgr();
 
 private:
-   const ClientToServerCmd* cts_cmd_;
-   AbstractServer* as_;
-   mutable unsigned int state_change_no_;        // detect state change in defs
-   mutable unsigned int modify_change_no_;       // detect state change in defs
+    const ClientToServerCmd* cts_cmd_;
+    AbstractServer* as_;
+    mutable unsigned int state_change_no_;  // detect state change in defs
+    mutable unsigned int modify_change_no_; // detect state change in defs
 };
 #endif

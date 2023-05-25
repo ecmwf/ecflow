@@ -11,38 +11,36 @@
 #ifndef TABLENODEVIEWDELEGATE_HPP
 #define TABLENODEVIEWDELEGATE_HPP
 
+#include <string>
+
 #include <QBrush>
 #include <QMap>
 #include <QPen>
-#include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
+#include <QStyledItemDelegate>
 
 #include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
 
-#include <string>
-
 class ModelColumn;
 
-class TableNodeViewDelegate : public NodeViewDelegate
-{
- Q_OBJECT
+class TableNodeViewDelegate : public NodeViewDelegate {
+    Q_OBJECT
 public:
-    explicit TableNodeViewDelegate(QWidget *parent=nullptr);
+    explicit TableNodeViewDelegate(QWidget* parent = nullptr);
     ~TableNodeViewDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
-    void updateSettings() override {updateSettingsInternal();}
+    void updateSettings() override { updateSettingsInternal(); }
 
-    void renderNode(QPainter *painter,const QModelIndex& index,
-                                        const QStyleOptionViewItem& option,QString text) const;
+    void
+    renderNode(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option, QString text) const;
 
 private:
     void updateSettingsInternal();
@@ -52,4 +50,3 @@ private:
 };
 
 #endif // TABLENODEVIEWDELEGATE_HPP
-

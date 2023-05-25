@@ -9,159 +9,157 @@
 
 #include "ServerComThread.hpp"
 
-#include "Defs.hpp"
-#include "Suite.hpp"
-#include "ClientInvoker.hpp"
-#include "ArgvCreator.hpp"
+#include <algorithm>
 
-#include "ServerDefsAccess.hpp"
+#include "ClientInvoker.hpp"
+#include "CommandLine.hpp"
+#include "Defs.hpp"
 #include "ServerComQueue.hpp"
+#include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
+#include "Suite.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 
-#include <algorithm>
-
 #define _UI_SERVERCOMTHREAD_DEBUG
 
-ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
-        server_(server),
-        ci_(ci)
-{
+ServerComThread::ServerComThread(ServerHandler* server, ClientInvoker* ci) : server_(server), ci_(ci) {
     assert(server_);
 }
 
-ServerComThread::~ServerComThread()
-{
+ServerComThread::~ServerComThread() {
     detach();
 }
 
-void ServerComThread::task(VTask_ptr task)
-{
-    //do not execute thread if already running
+void ServerComThread::task(VTask_ptr task) {
+    // do not execute thread if already running
 
-    if(isRunning())
-    {
+    if (isRunning()) {
         UiLog(serverName_).err() << "ComThread::task - thread already running, will not execute command";
     }
-    else
-    {
-        //if(!server_ && server)
-        //    initObserver(server);
+    else {
+        // if(!server_ && server)
+        //     initObserver(server);
 
-        //We set the parameters needed to run the task. These members are not protected by
-        //a mutex, because apart from this function only run() can access them!!
-        serverName_=server_->longName();
-        taskType_=task->type();
+        // We set the parameters needed to run the task. These members are not protected by
+        // a mutex, because apart from this function only run() can access them!!
+        serverName_ = server_->longName();
+        taskType_   = task->type();
 
         if (taskType_ != VTask::LogOutTask) {
 
-            command_=task->command();
-            params_=task->params();
-            contents_=task->contents();
-            vars_=task->vars();
+            command_      = task->command();
+            commandAsStr_ = task->commandAsStr();
+            params_       = task->params();
+            contents_     = task->contents();
+            vars_         = task->vars();
             nodePath_.clear();
-            nodePath_=task->targetPath();
-            zombie_=task->zombie();
+            nodePath_ = task->targetPath();
+            zombie_   = task->zombie();
 
-            //Suite filter
-            hasSuiteFilter_=server_->suiteFilter()->isEnabled();
-            autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
-            if(hasSuiteFilter_)
-                filteredSuites_=server_->suiteFilter()->filter();
+            // Suite filter
+            hasSuiteFilter_   = server_->suiteFilter()->isEnabled();
+            autoAddNewSuites_ = server_->suiteFilter()->autoAddNewSuites();
+            if (hasSuiteFilter_)
+                filteredSuites_ = server_->suiteFilter()->filter();
             else
                 filteredSuites_.clear();
 
-            maxLineNum_=server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
+            maxLineNum_ = server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
         }
 
-        //Start the thread execution
+        // Start the thread execution
         start();
     }
 }
 
-void ServerComThread::run()
-{    
-    UiLog(serverName_).dbg() << "ComThread::run --> path="  <<  nodePath_;
+void ServerComThread::run() {
+    UiLog(serverName_).dbg() << "ComThread::run --> path=" << nodePath_;
 
-    //Init flags
-    rescanNeed_=false;
+    // Init flags
+    rescanNeed_    = false;
     bool isMessage = false;
     std::string errorString;
 
-    try
-    {
+    try {
         // define the tasks that will explicitly/implicitly call ci_->sync_local()
-        std::set<VTask::Type> sync_tasks = {VTask::CommandTask, VTask::SyncTask,
-                      VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask,
-                      VTask::JobStatusTask, VTask::PlugTask};
+        std::set<VTask::Type> sync_tasks = {VTask::CommandTask,
+                                            VTask::SyncTask,
+                                            VTask::WhySyncTask,
+                                            VTask::ScriptSubmitTask,
+                                            VTask::ZombieCommandTask,
+                                            VTask::JobStatusTask,
+                                            VTask::PlugTask};
 
         // this is called during reset - it requires a special treatment
-        if(taskType_  == VTask::ResetTask)
-        {
+        if (taskType_ == VTask::ResetTask) {
             UiLog(serverName_).dbg() << " RESET";
             reset();
         }
 
         // logout is also special!!!
-        else if(taskType_  == VTask::LogOutTask)
-        {
+        else if (taskType_ == VTask::LogOutTask) {
             UiLog(serverName_).dbg() << " LOGOUT";
             detach();
-            if(ci_->client_handle() > 0)
-            {
+            if (ci_->client_handle() > 0) {
                 ci_->ch1_drop();
             }
         }
 
         // this is very important to exclude non-compatible servers
-        else if(taskType_  == VTask::ServerVersionTask)
-        {
+        else if (taskType_ == VTask::ServerVersionTask) {
             UiLog(serverName_).dbg() << " SERVER_VERSION";
             ci_->server_version();
             UiLog(serverName_).dbg() << " SERVER_VERSION FINISHED";
         }
         // tasks that will explicitly/implicitly call ci_->sync_local()
-        else if(sync_tasks.find(taskType_) != sync_tasks.end())
-        {
-            //we need to lock the mutex on the defs
+        else if (sync_tasks.find(taskType_) != sync_tasks.end()) {
+            // we need to lock the mutex on the defs
             ServerDefsAccess defsAccess(server_);
 
-            switch(taskType_)
-            {
-                case VTask::CommandTask:
-                {
-                    //will automatically call ci_->sync_local() after the
-                    //command finished!!!
+            switch (taskType_) {
+                case VTask::CommandTask: {
+                    // will automatically call ci_->sync_local() after the
+                    // command finished!!!
 
                     UiLog(serverName_).dbg() << " COMMAND";
-                    //special treatment for variable add/change to allow values with "--"  characters.
-                    //See issue ECFLOW-1414. The command_ string is supposed to contain these values:
-                    //ecflow_client --alter change variable NAME VALUE PATH
-                    if(command_.size() >=7 && command_[1] == "--alter" && command_[3] == "variable" &&
-                       (command_[2] == "change" || command_[2] == "add"))
-                    {
-                        std::vector<std::string> cmdPaths;
-                        for(size_t i=6; i < command_.size(); i++) {
-                            cmdPaths.emplace_back(command_[i]);
-                        }
-                        ci_->alter(cmdPaths,command_[2],command_[3],command_[4],command_[5]);
-                    }
 
-                    // call the client invoker with the saved command
-                    else
-                    {
-                        ArgvCreator argvCreator(command_);
+                    // the commmand is a string. We leave the command parsing to the client.
+                    // This is the safest solution.
+                    if (!commandAsStr_.empty()) {
+                        CommandLine cl(commandAsStr_);
+                        ci_->invoke(cl);
+                    // the command is already tokenised. We only call it when the command
+                    // arguments are correctly identified (e.g. when come from a dialog)
+                    // with exception of --alter (see below).
+                    }
+                    else {
+                        // special treatment for variable add/change to allow values with "--"  characters.
+                        // See issue ECFLOW-1414. The command_ string is supposed to contain these values:
+                        // ecflow_client --alter change variable NAME VALUE PATH
+                        // TODO: remove this code when the cli allows having values starting with "--"
+                        if (command_.size() >= 7 && command_[1] == "--alter" && command_[3] == "variable" &&
+                            (command_[2] == "change" || command_[2] == "add")) {
+                            std::vector<std::string> cmdPaths;
+                            for (size_t i = 6; i < command_.size(); i++) {
+                                cmdPaths.emplace_back(command_[i]);
+                            }
+                            ci_->alter(cmdPaths, command_[2], command_[3], command_[4], command_[5]);
+                        }
+
+                        // call the client invoker with the saved command
+                        else {
+                            CommandLine cl(command_);
 #ifdef _UI_SERVERCOMTHREAD_DEBUG
-                        UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
+                            UiLog(serverName_).dbg() << " args=" << cl;
 #endif
-                        ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                            ci_->invoke(cl);
+                        }
                     }
                     break;
                 }
 
-                case VTask::SyncTask:
-                {
+                case VTask::SyncTask: {
                     UiLog(serverName_).dbg() << " SYNC";
                     UiLog(serverName_).dbg() << " sync begin";
                     ci_->sync_local();
@@ -169,92 +167,82 @@ void ServerComThread::run()
                     break;
                 }
 
-                case VTask::WhySyncTask:
-                {
+                case VTask::WhySyncTask: {
                     UiLog(serverName_).dbg() << " WHYSYNC";
-                    UiLog(serverName_).dbg() <<  "sync begin";
-                    ci_->sync_local(true); //sync_suite_clock
+                    UiLog(serverName_).dbg() << "sync begin";
+                    ci_->sync_local(true); // sync_suite_clock
                     UiLog(serverName_).dbg() << " sync end";
                     break;
                 }
 
-                case VTask::ScriptSubmitTask:
-                {
+                case VTask::ScriptSubmitTask: {
                     UiLog(serverName_).dbg() << " SCRIP SUBMIT";
-                    ci_->edit_script_submit(nodePath_, vars_, contents_,
-                        (params_["alias"]=="1")?true:false,
-                        (params_["run"] == "1")?true:false);
+                    ci_->edit_script_submit(nodePath_,
+                                            vars_,
+                                            contents_,
+                                            (params_["alias"] == "1") ? true : false,
+                                            (params_["run"] == "1") ? true : false);
                     break;
                 }
 
-                case VTask::ZombieCommandTask:
-                {
-                    std::string cmd=params_["command"];
+                case VTask::ZombieCommandTask: {
+                    std::string cmd = params_["command"];
                     UiLog(serverName_).dbg() << " ZOMBIE COMMAND " << cmd << " path=" << zombie_.path_to_task();
-                    if(cmd == "zombie_fob")
+                    if (cmd == "zombie_fob")
                         ci_->zombieFob(zombie_);
-                    else if(cmd == "zombie_fail")
+                    else if (cmd == "zombie_fail")
                         ci_->zombieFail(zombie_);
-                    else if(cmd == "zombie_adopt")
+                    else if (cmd == "zombie_adopt")
                         ci_->zombieAdopt(zombie_);
-                    else if(cmd == "zombie_block")
+                    else if (cmd == "zombie_block")
                         ci_->zombieBlock(zombie_);
-                    else if(cmd == "zombie_remove")
+                    else if (cmd == "zombie_remove")
                         ci_->zombieRemove(zombie_);
-                    else if(cmd == "zombie_kill")
+                    else if (cmd == "zombie_kill")
                         ci_->zombieKill(zombie_);
 
                     break;
                 }
-                case VTask::JobStatusTask:
-                {
+                case VTask::JobStatusTask: {
                     UiLog(serverName_).dbg() << " JOB STATUS";
                     ci_->status(nodePath_);
                     break;
                 }
-                case VTask::PlugTask:
-                {
+                case VTask::PlugTask: {
                     UiLog(serverName_).dbg() << " PLUG";
                     ci_->plug(params_["source"], params_["target"]);
                     break;
                 }
 
-                default:
-                {
+                default: {
                     Q_ASSERT(0);
                     exit(1);
-                 }
-
+                }
             }
 
-            //ci_->sync_local() was called!!
-            //If a rescan or fullscan is needed we have either added/remove nodes or deleted the defs.
-            //So there were significant changes.
+            // ci_->sync_local() was called!!
+            // If a rescan or fullscan is needed we have either added/remove nodes or deleted the defs.
+            // So there were significant changes.
 
-            //We detach the nodes currently available in defs, then we attach them again. We can still have nodes
-            //that were removed from the defs but are still attached. These will be detached when in ServerHandler we
-            //clear the tree. This tree contains shared pointers to the nodes, so when the tree is cleared
-            //the shared pointer are reset, the node descturctor is called and finally update_delete is called and
-            //we can detach the node.
+            // We detach the nodes currently available in defs, then we attach them again. We can still have nodes
+            // that were removed from the defs but are still attached. These will be detached when in ServerHandler we
+            // clear the tree. This tree contains shared pointers to the nodes, so when the tree is cleared
+            // the shared pointer are reset, the node descturctor is called and finally update_delete is called and
+            // we can detach the node.
 
-            if(rescanNeed_ || ci_->server_reply().full_sync())
-            {
+            if (rescanNeed_ || ci_->server_reply().full_sync()) {
                 UiLog(serverName_).dbg() << " rescan needed!";
                 detach(defsAccess.defs());
                 attach(defsAccess.defs());
             }
-
         }
 
         // all the other tasks - these will not call ci_->sync_local(()
-        else
-        {
+        else {
 
-            switch(taskType_)
-            {
+            switch (taskType_) {
 
-                case VTask::NewsTask:
-                {
+                case VTask::NewsTask: {
                     UiLog(serverName_).dbg() << " NEWS";
                     ci_->news_local();
                     break;
@@ -264,13 +252,13 @@ void ServerComThread::run()
                 case VTask::ManualTask:
                 case VTask::ScriptTask:
                 case VTask::OutputTask:
-                case VTask::JobStatusFileTask:
-                {
-                    UiLog(serverName_).dbg() << " FILE" << " " << params_["clientPar"];
-                    if(maxLineNum_ < 0)
-                        ci_->file(nodePath_,params_["clientPar"]);
+                case VTask::JobStatusFileTask: {
+                    UiLog(serverName_).dbg() << " FILE"
+                                             << " " << params_["clientPar"];
+                    if (maxLineNum_ < 0)
+                        ci_->file(nodePath_, params_["clientPar"]);
                     else
-                        ci_->file(nodePath_,params_["clientPar"],boost::lexical_cast<std::string>(maxLineNum_));
+                        ci_->file(nodePath_, params_["clientPar"], boost::lexical_cast<std::string>(maxLineNum_));
 
                     break;
                 }
@@ -283,7 +271,8 @@ void ServerComThread::run()
                 case VTask::StatsTask:
                     UiLog(serverName_).dbg() << " STATS";
                     ci_->stats();
-                    break;;
+                    break;
+                    ;
 
                 case VTask::HistoryTask:
                     UiLog(serverName_).dbg() << " SERVER LOG";
@@ -305,11 +294,9 @@ void ServerComThread::run()
                     ci_->suites();
                     break;
 
-                case VTask::SuiteAutoRegisterTask:
-                {
+                case VTask::SuiteAutoRegisterTask: {
                     UiLog(serverName_).dbg() << " SUITE AUTO REGISTER";
-                    if(hasSuiteFilter_)
-                    {
+                    if (hasSuiteFilter_) {
                         ci_->ch1_auto_add(autoAddNewSuites_);
                     }
                     break;
@@ -323,33 +310,30 @@ void ServerComThread::run()
                 default:
                     break;
 
-           } //switch
+            } // switch
 
-        } //if
+        } // if
 
-    } //try
+    } // try
 
-    catch(std::exception& e)
-    {
-        isMessage = true;
+    catch (std::exception& e) {
+        isMessage   = true;
         errorString = e.what();
     }
 
     // we can get an error string in two ways - either an exception is raised, or
     // the get_string() of the server reply is non-empty.
-    if (!isMessage && (taskType_ == VTask::CommandTask) && !(ci_->server_reply().get_string().empty()))
-    {
-        isMessage = true;
+    if (!isMessage && (taskType_ == VTask::CommandTask) && !(ci_->server_reply().get_string().empty())) {
+        isMessage   = true;
         errorString = ci_->server_reply().get_string();
     }
 
-    //we  failed or we have a string returned
-    if (isMessage)
-    {
+    // we  failed or we have a string returned
+    if (isMessage) {
         // note that we need to emit a signal rather than directly call a message function
         // because we can't call Qt widgets from a worker thread
 
-        UiLog(serverName_).dbg() << " thread failed: " <<  errorString;
+        UiLog(serverName_).dbg() << " thread failed: " << errorString;
         if (taskType_ == VTask::LogOutTask) {
             Q_EMIT logoutDone();
             return;
@@ -357,10 +341,10 @@ void ServerComThread::run()
 
         Q_EMIT failed(errorString);
 
-        //Reset flags
-        rescanNeed_=false;
+        // Reset flags
+        rescanNeed_ = false;
 
-        //This will stop the thread.
+        // This will stop the thread.
         return;
     }
 
@@ -369,12 +353,11 @@ void ServerComThread::run()
         return;
     }
 
+    // Reset flags
+    rescanNeed_ = false;
 
-    //Reset flags
-    rescanNeed_=false;
-
-    //Can we use it? We are in the thread!!!
-    //UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
+    // Can we use it? We are in the thread!!!
+    // UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
 
 #if 0
@@ -407,277 +390,248 @@ void ServerComThread::sync_local(bool sync_suite_clock)
 }
 #endif
 
-void ServerComThread::reset()
-{
+void ServerComThread::reset() {
     UiLog(serverName_).dbg() << "ComThread::reset -->";
 
-    //Lock the mutex on defs
+    // Lock the mutex on defs
     ServerDefsAccess defsAccess(server_);
 
-    //Detach the defs and the nodes from the observer
+    // Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
-
-    if(hasSuiteFilter_)
-    {
-        if(!filteredSuites_.empty())
-        {
+    if (hasSuiteFilter_) {
+        if (!filteredSuites_.empty()) {
             UiLog(serverName_).dbg() << " register suites=" << filteredSuites_;
 
-            // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and defs to the client
+            // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and
+            // defs to the client
             ci_->ch1_register(autoAddNewSuites_, filteredSuites_);
         }
-        //If the suite filter is empty
-        else
-        {
-            //Registering with empty set would lead to retrieve all server content,
-            //opposite of expected result. So we just register a dummy suite
-            //to achive the our goal: for an empty suite filter no suites are retrieved.
+        // If the suite filter is empty
+        else {
+            // Registering with empty set would lead to retrieve all server content,
+            // opposite of expected result. So we just register a dummy suite
+            // to achive the our goal: for an empty suite filter no suites are retrieved.
             UiLog(serverName_).dbg() << " register empty suite list";
 
-            // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and defs to the client
+            // This will DROP existing handle(when using ch1_register(..)) and RESET defs, and return a new handle, and
+            // defs to the client
             std::vector<std::string> fsl;
             fsl.push_back(SuiteFilter::dummySuite());
             ci_->ch1_register(autoAddNewSuites_, fsl);
         }
     }
-    else
-    {
+    else {
         UiLog(serverName_).dbg() << " drop handle";
         ci_->ch1_drop();
-        //if there was a handle to drop sync is done automatically
+        // if there was a handle to drop sync is done automatically
         if (!ci_->server_reply().full_sync()) {
-           ci_->reset();
-           UiLog(serverName_).dbg() << " sync begin";
-           ci_->sync_local();
-           UiLog(serverName_).dbg() << " sync end";
+            ci_->reset();
+            UiLog(serverName_).dbg() << " sync begin";
+            ci_->sync_local();
+            UiLog(serverName_).dbg() << " sync end";
         }
     }
 
-    //Attach the nodes to the observer
+    // Attach the nodes to the observer
     attach(defsAccess.defs());
 
     UiLog(serverName_).dbg() << "<-- ComThread::reset";
 }
 
-//This is an observer notification method!!
-void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
-{
-    //This function can only be called during a SYNC_LOCAl task!!!!
-    assert(taskType_ == VTask::CommandTask ||
-           taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask ||
+// This is an observer notification method!!
+void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types) {
+    // This function can only be called during a SYNC_LOCAl task!!!!
+    assert(taskType_ == VTask::CommandTask || taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask ||
            taskType_ == VTask::JobStatusTask || taskType_ == VTask::ScriptSubmitTask ||
            taskType_ == VTask::ZombieCommandTask);
 
-    std::vector<ecf::Aspect::Type> typesCopy=types;
+    std::vector<ecf::Aspect::Type> typesCopy = types;
 
     UiLog(serverName_).dbg() << "ComThread::update --> node: " << node->name();
     std::stringstream ss;
-    aspectToStr(ss,types);
+    aspectToStr(ss, types);
     UiLog(serverName_).dbg() << " aspects: " << ss.str();
 
-    //If a node was already requested to be added/deleted in the thread we do not go further. At the end of the sync
-    //we will regenerate everything (the tree as well in ServerHandle).
-    if(rescanNeed_)
-    {
+    // If a node was already requested to be added/deleted in the thread we do not go further. At the end of the sync
+    // we will regenerate everything (the tree as well in ServerHandle).
+    if (rescanNeed_) {
         UiLog(serverName_).dbg() << " rescanNeed already set";
         return;
     }
 
-    //This is a radical change
-    if((std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end()) ||
-       (std::find(types.begin(),types.end(),ecf::Aspect::ORDER)           != types.end()))
-    {
+    // This is a radical change
+    if ((std::find(types.begin(), types.end(), ecf::Aspect::ADD_REMOVE_NODE) != types.end()) ||
+        (std::find(types.begin(), types.end(), ecf::Aspect::ORDER) != types.end())) {
         UiLog(serverName_).dbg() << " emit rescanNeed()";
-        rescanNeed_=true;
+        rescanNeed_ = true;
 
-        //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
-        //it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
-        //reset update_delete() might be called, so it should not write any shared variables!
+        // We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+        // it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
+        // reset update_delete() might be called, so it should not write any shared variables!
         Q_EMIT rescanNeed();
 
         return;
     }
 
-    //This will notify SeverHandler
+    // This will notify SeverHandler
     UiLog(serverName_).dbg() << " emit nodeChanged()";
-    Q_EMIT nodeChanged(node,types);
+    Q_EMIT nodeChanged(node, types);
 }
 
-
-void ServerComThread::update(const Defs* /*dc*/, const std::vector<ecf::Aspect::Type>& types)
-{
-    std::vector<ecf::Aspect::Type> typesCopy=types;
+void ServerComThread::update(const Defs* /*dc*/, const std::vector<ecf::Aspect::Type>& types) {
+    std::vector<ecf::Aspect::Type> typesCopy = types;
 
     UiLog(serverName_).dbg() << "ComThread::update --> defs";
     std::stringstream ss;
-    aspectToStr(ss,types);
+    aspectToStr(ss, types);
     UiLog(serverName_).dbg() << " aspects: " << ss.str();
 
-    //If anything was requested to be deleted in the thread we do not go further
-    //because it will trigger a full rescan in ServerHandler!
-    if(rescanNeed_)
-    {
+    // If anything was requested to be deleted in the thread we do not go further
+    // because it will trigger a full rescan in ServerHandler!
+    if (rescanNeed_) {
         UiLog(serverName_).dbg() << " rescanNeed already set";
         return;
     }
 
-    //This is a radical change
-    if(std::find(types.begin(),types.end(),ecf::Aspect::ORDER) != types.end())
-    {
+    // This is a radical change
+    if (std::find(types.begin(), types.end(), ecf::Aspect::ORDER) != types.end()) {
         UiLog(serverName_).dbg() << " emit rescanNeed()";
-        rescanNeed_=true;
+        rescanNeed_ = true;
 
-        //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
-        //it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
-        //reset update_delete() might be called, so it should not write any shared variables!
+        // We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+        // it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
+        // reset update_delete() might be called, so it should not write any shared variables!
         Q_EMIT rescanNeed();
 
         return;
     }
 
-    //This will notify SeverHandler
+    // This will notify SeverHandler
     UiLog(serverName_).dbg() << " emit defsChanged()";
     Q_EMIT defsChanged(typesCopy);
 }
 
-void ServerComThread::update_delete(const Node* nc)
-{
-    auto *n=const_cast<Node*>(nc);
+void ServerComThread::update_delete(const Node* nc) {
+    auto* n = const_cast<Node*>(nc);
     n->detach(this);
 }
 
-//This only be called when ComThread is running or from the ComThread desctructor. So it is safe to set
-//rescanNeed in it.
-void ServerComThread::update_delete(const Defs* dc)
-{
+// This only be called when ComThread is running or from the ComThread desctructor. So it is safe to set
+// rescanNeed in it.
+void ServerComThread::update_delete(const Defs* dc) {
     UiLog(serverName_).dbg() << "ServerComThread::update_delete -->";
 
-    auto *d=const_cast<Defs*>(dc);
+    auto* d = const_cast<Defs*>(dc);
     d->detach(this);
 
-    //If we are in  a SYNC_LOCAl task!!!!
-    if(taskType_ == VTask::SyncTask)
-    {
-        //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
-        //it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
-        //reset update_delete() might be called, so it should not write any shared variables!
+    // If we are in  a SYNC_LOCAl task!!!!
+    if (taskType_ == VTask::SyncTask) {
+        // We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+        // it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
+        // reset update_delete() might be called, so it should not write any shared variables!
         Q_EMIT rescanNeed();
 
-        rescanNeed_=true;
+        rescanNeed_ = true;
     }
 }
 
-//Attach each node and the defs to the observer
-void ServerComThread::attach()
-{
-    ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+// Attach each node and the defs to the observer
+void ServerComThread::attach() {
+    ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr d = defsAccess.defs();
-    if(d == nullptr)
+    if (d == nullptr)
         return;
 
     attach(d);
 }
 
-//Attach  each node and the defs to the observer. The access to
-//the defs is safe so we do not need to set a mutex on it.
-void ServerComThread::attach(defs_ptr d)
-{
-    if(d == nullptr)
+// Attach  each node and the defs to the observer. The access to
+// the defs is safe so we do not need to set a mutex on it.
+void ServerComThread::attach(defs_ptr d) {
+    if (d == nullptr)
         return;
 
     d->attach(this);
 
-    const std::vector<suite_ptr> &suites = d->suiteVec();
-    for(const auto & suite : suites)
-    {
+    const std::vector<suite_ptr>& suites = d->suiteVec();
+    for (const auto& suite : suites) {
         attach(suite.get());
     }
 }
 
-//Attach a node to the observer
-void ServerComThread::attach(Node *node)
-{
+// Attach a node to the observer
+void ServerComThread::attach(Node* node) {
     std::vector<node_ptr> nodes;
     node->immediateChildren(nodes);
 
     node->attach(this);
 
-    for(auto it=nodes.begin(); it != nodes.end(); ++it)
-    {
+    for (auto it = nodes.begin(); it != nodes.end(); ++it) {
         attach((*it).get());
     }
 }
 
-//Detach each node and the defs from the observer
-void ServerComThread::detach()
-{
-    ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+// Detach each node and the defs from the observer
+void ServerComThread::detach() {
+    ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr d = defsAccess.defs();
-    if(d == nullptr)
+    if (d == nullptr)
         return;
 
     detach(d);
 }
 
-
-//Detach each node and the defs from the observer.  The access to
-//the defs is safe so we do not need to set a mutex on it.
-void ServerComThread::detach(defs_ptr d)
-{
-    if(d == nullptr)
+// Detach each node and the defs from the observer.  The access to
+// the defs is safe so we do not need to set a mutex on it.
+void ServerComThread::detach(defs_ptr d) {
+    if (d == nullptr)
         return;
 
     d->detach(this);
 
-    const std::vector<suite_ptr> &suites = d->suiteVec();
-    for(const auto & suite : suites)
-    {
+    const std::vector<suite_ptr>& suites = d->suiteVec();
+    for (const auto& suite : suites) {
         detach(suite.get());
     }
 }
 
-//Detach a node from the observer
-void ServerComThread::detach(Node *node)
-{
+// Detach a node from the observer
+void ServerComThread::detach(Node* node) {
     std::vector<node_ptr> nodes;
     node->immediateChildren(nodes);
 
     node->detach(this);
 
-    for(auto it=nodes.begin(); it != nodes.end(); ++it)
-    {
+    for (auto it = nodes.begin(); it != nodes.end(); ++it) {
         detach((*it).get());
     }
 }
 
-void ServerComThread::aspectToStr(std::stringstream& ss,const std::vector<ecf::Aspect::Type>& t) const
-{
-    for(auto it : t)
-    {
-        if(!ss.str().empty())
+void ServerComThread::aspectToStr(std::stringstream& ss, const std::vector<ecf::Aspect::Type>& t) const {
+    for (auto it : t) {
+        if (!ss.str().empty())
             ss << ",";
         ss << it;
     }
 }
 
-//performa a logout task without running a thread
-void ServerComThread::blockingLogout()
-{
+// performa a logout task without running a thread
+void ServerComThread::blockingLogout() {
     Q_ASSERT(isRunning() == false);
 
     UiLog(serverName_).dbg() << " LOGOUT";
     detach();
     ci_->set_auto_sync(false);
     try {
-        if(ci_->client_handle() > 0) {
+        if (ci_->client_handle() > 0) {
             ci_->ch1_drop();
         }
     }
-    catch(std::exception& e) {
+    catch (std::exception& e) {
         std::string errMsg = "Error during logout!";
-        if(e.what()) {
-            errMsg += " " +  std::string(e.what());
+        if (e.what()) {
+            errMsg += " " + std::string(e.what());
         }
         UiLog(serverName_).err() << errMsg;
     }

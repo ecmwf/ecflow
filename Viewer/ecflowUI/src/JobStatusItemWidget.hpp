@@ -11,54 +11,53 @@
 #ifndef JOBSTATUSITEMWIDGET_HPP
 #define JOBSTATUSITEMWIDGET_HPP
 
-#include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
+#include "InfoPanelItem.hpp"
 
 class MessageLabel;
 class QTimer;
 
-class JobStatusItemWidget : public CodeItemWidget, public InfoPanelItem
-{
+class JobStatusItemWidget : public CodeItemWidget, public InfoPanelItem {
     Q_OBJECT
 public:
-      explicit JobStatusItemWidget(QWidget *parent=nullptr);
-      ~JobStatusItemWidget() override;
+    explicit JobStatusItemWidget(QWidget* parent = nullptr);
+    ~JobStatusItemWidget() override;
 
-      void reload(VInfo_ptr) override;
-      QWidget* realWidget() override;
-      void clearContents() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
+    void clearContents() override;
 
-      //From VInfoPresenter
-      void infoReady(VReply*) override;
-      void infoFailed(VReply*) override;
-      void infoProgress(VReply*) override;
+    // From VInfoPresenter
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override;
 
-      void nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect) override;
-      void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
+    void nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect) override;
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
-      void fetchJobStatusFile();
+    void fetchJobStatusFile();
 
 protected:
-      void updateState(const ChangeFlags&) override;
-      void reloadRequested() override;
-      void commandRequested() override;
-      void startFileFetchTask();
-      void finishFileFetchTask();
-      void startStatusCommandTask();
-      bool checkStatusCommandTask(VReply* reply);
+    void updateState(const ChangeFlags&) override;
+    void reloadRequested() override;
+    void commandRequested() override;
+    void startFileFetchTask();
+    void finishFileFetchTask();
+    void startStatusCommandTask();
+    bool checkStatusCommandTask(VReply* reply);
 
-      enum TaskMode {NoTask, FetchFileTask, StatusCommandTask};
-      enum StatusCommandMode {UnsetCommandMode, EnabledCommandMode, DisabledCommandMode};
+    enum TaskMode { NoTask, FetchFileTask, StatusCommandTask };
+    enum StatusCommandMode { UnsetCommandMode, EnabledCommandMode, DisabledCommandMode };
 
-      InfoProvider* statusProvider_;
-      MessageLabel* statusCommandLabel_;
-      QTimer* timer_;
-      int timeout_;
-      int timeoutCount_;
-      int maxTimeoutCount_;
-      TaskMode taskMode_;
-      StatusCommandMode nodeStatusMode_;
+    InfoProvider* statusProvider_;
+    MessageLabel* statusCommandLabel_;
+    QTimer* timer_;
+    int timeout_;
+    int timeoutCount_;
+    int maxTimeoutCount_;
+    TaskMode taskMode_;
+    StatusCommandMode nodeStatusMode_;
 };
 
 #endif // JOBSTATUSITEMWIDGET_HPP

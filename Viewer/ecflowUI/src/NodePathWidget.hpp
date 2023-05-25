@@ -10,15 +10,15 @@
 #ifndef NODEPATHWIDGET_H
 #define NODEPATHWIDGET_H
 
-#include "NodeObserver.hpp"
-#include "ServerObserver.hpp"
-#include "VInfo.hpp"
-#include "VProperty.hpp"
+#include <string>
 
 #include <QLinearGradient>
 #include <QWidget>
 
-#include <string>
+#include "NodeObserver.hpp"
+#include "ServerObserver.hpp"
+#include "VInfo.hpp"
+#include "VProperty.hpp"
 
 class QAction;
 class QHBoxLayout;
@@ -34,33 +34,32 @@ class VSettings;
 class NodePathItem;
 class NodePathEllipsisItem;
 
-class BcWidget : public QWidget, public VPropertyObserver
-{
+class BcWidget : public QWidget, public VPropertyObserver {
 
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    explicit BcWidget(QWidget *parent=nullptr);
+    explicit BcWidget(QWidget* parent = nullptr);
     ~BcWidget() override;
-    
+
     void reset(QString txt, int maxWidth);
-    void reset(QList<NodePathItem*>,int);
-    void reset(int idx,QString text,QColor bgCol,QColor fontCol);
+    void reset(QList<NodePathItem*>, int);
+    void reset(int idx, QString text, QColor bgCol, QColor fontCol);
     void clear();
     void adjustSize(int);
-    QFont font() const {return font_;}
-    void setTextColour(QColor c) {textCol_=c;}
-    void setTextDisabledColour(QColor c) {textDisabledCol_=c;}
+    QFont font() const { return font_; }
+    void setTextColour(QColor c) { textCol_ = c; }
+    void setTextDisabledColour(QColor c) { textDisabledCol_ = c; }
 
     void notifyChange(VProperty*) override;
 
 Q_SIGNALS:
     void itemSelected(int);
-    void menuSelected(int,QPoint);
-    
+    void menuSelected(int, QPoint);
+
 protected:
     void paintEvent(QPaintEvent*) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void changeEvent(QEvent* event) override;
 
@@ -70,14 +69,14 @@ protected:
     void crePixmap();
     void updatePixmap(int);
     bool isFull() const;
-    int estimateWidth(int,int,int);
-    int adjustItems(int,int,int,int);
-    int adjustVisibleItems(int,int,int,int);
+    int estimateWidth(int, int, int);
+    int adjustItems(int, int, int, int);
+    int adjustVisibleItems(int, int, int, int);
 
     QFont font_;
-    QPixmap pix_;   
+    QPixmap pix_;
     int hMargin_{1};
-    int vMargin_{1};   
+    int vMargin_{1};
     int gap_{5};
     int width_{0};
     int maxWidth_{0};
@@ -86,10 +85,10 @@ protected:
     QString text_{"No selection"};
     QRect textRect_;
     QColor textCol_{Qt::white};
-    QColor textDisabledCol_{220,220,220};
+    QColor textDisabledCol_{220, 220, 220};
     QList<NodePathItem*> items_;
     NodePathEllipsisItem* ellipsisItem_;
-    
+
     PropertyMapper* prop_;
     bool useGrad_{true};
     int gradLighter_{150};
@@ -97,27 +96,26 @@ protected:
     bool elided_{false};
 };
 
-class NodePathItem 
-{
+class NodePathItem {
 
-friend class BcWidget;    
-    
+    friend class BcWidget;
+
 public:
-    NodePathItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current);
+    NodePathItem(BcWidget* owner, int index, QString text, QColor bgCol, QColor fontCol, bool hasMenu, bool current);
     virtual ~NodePathItem() = default;
 
     void setCurrent(bool);
-    virtual void draw(QPainter*,bool,int);
-    int adjust(int xp,int yp, int elidedLen=0);
-    int estimateRightPos(int xp,int elidedLen=0);
+    virtual void draw(QPainter*, bool, int);
+    int adjust(int xp, int yp, int elidedLen = 0);
+    int estimateRightPos(int xp, int elidedLen = 0);
     void resetBorder(bool hovered);
-    void reset(QString text,QColor bgCol,QColor fontCol,bool hovered);
+    void reset(QString text, QColor bgCol, QColor fontCol, bool hovered);
     int textLen() const;
     static int height(QFont);
 
 protected:
-    virtual void makeShape(int xp,int yp,int len);
-    virtual int rightPos(int xp,int len) const;
+    virtual void makeShape(int xp, int yp, int len);
+    virtual int rightPos(int xp, int len) const;
 
     BcWidget* owner_;
     int index_;
@@ -145,100 +143,102 @@ protected:
     static int vPadding_;
 };
 
-class NodePathServerItem : public NodePathItem
-{
+class NodePathServerItem : public NodePathItem {
 
-friend class BcWidget;
+    friend class BcWidget;
 
 public:
-    NodePathServerItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
-         NodePathItem(owner,index,text,bgCol,fontCol,hasMenu,current) {}
+    NodePathServerItem(BcWidget* owner,
+                       int index,
+                       QString text,
+                       QColor bgCol,
+                       QColor fontCol,
+                       bool hasMenu,
+                       bool current)
+        : NodePathItem(owner, index, text, bgCol, fontCol, hasMenu, current) {}
+
 protected:
-    void makeShape(int xp,int yp,int len) override;
-    int rightPos(int xp,int len) const override;
+    void makeShape(int xp, int yp, int len) override;
+    int rightPos(int xp, int len) const override;
 };
 
+class NodePathEllipsisItem : public NodePathItem {
 
-class NodePathEllipsisItem : public NodePathItem
-{
-
-friend class BcWidget;
+    friend class BcWidget;
 
 public:
     NodePathEllipsisItem(BcWidget* owner);
 };
 
-
-class NodePathWidget : public QWidget, public NodeObserver, public ServerObserver, public VInfoObserver
-{
-Q_OBJECT
+class NodePathWidget : public QWidget, public NodeObserver, public ServerObserver, public VInfoObserver {
+    Q_OBJECT
 
 public:
-	explicit NodePathWidget(QWidget* parent=nullptr);
-	~NodePathWidget() override;
+    explicit NodePathWidget(QWidget* parent = nullptr);
+    ~NodePathWidget() override;
 
-    enum Mode {TextMode,GuiMode};
+    enum Mode { TextMode, GuiMode };
 
-	void clear(bool detachObservers=true);
+    void clear(bool detachObservers = true);
     void setMode(Mode mode);
-    bool isGuiMode() const {return mode_==GuiMode;}
+    bool isGuiMode() const { return mode_ == GuiMode; }
     void useTransparentBg(bool b);
 
-	//From NodeObserver
-	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
-	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override {}
 
-	//From ServerObserver
-	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) override;
-	void notifyServerDelete(ServerHandler* server) override;
+    // From ServerObserver
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>&) override;
+    void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
     void notifyEndServerClear(ServerHandler*) override {}
-    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
+    void notifyBeginServerScan(ServerHandler*, const VServerChange&) override {}
     void notifyEndServerScan(ServerHandler* server) override;
-	void notifyServerConnectState(ServerHandler* server) override;
-	void notifyServerActivityChanged(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerActivityChanged(ServerHandler* server) override;
     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
-    //From VInfoObserver
+    // From VInfoObserver
     void notifyDelete(VInfo*) override {}
     void notifyDataLost(VInfo*) override;
 
-	void rerender();
+    void rerender();
 
-	void writeSettings(VSettings *vs);
-	void readSettings(VSettings *vs);
+    void writeSettings(VSettings* vs);
+    void readSettings(VSettings* vs);
 
 public Q_SLOTS:
-	void setPath(VInfo_ptr);
+    void setPath(VInfo_ptr);
 
 protected Q_SLOTS:
-	void slotContextMenu(const QPoint&);
-	void slotNodeSelected(int);
-	void slotMenuSelected(int,QPoint);
-	void slotRefreshServer();
+    void slotContextMenu(const QPoint&);
+    void slotNodeSelected(int);
+    void slotMenuSelected(int, QPoint);
+    void slotRefreshServer();
 
 Q_SIGNALS:
-	void selected(VInfo_ptr);
+    void selected(VInfo_ptr);
     void activeStateChanged();
 
 protected:
-	void clearItems();
-	void adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer);
-	void loadMenu(const QPoint& pos,VInfo_ptr p);
-	VInfo_ptr nodeAt(int);
-	void infoIndex(int idx);
-    void paintEvent(QPaintEvent *) override;
-    void resizeEvent(QResizeEvent *) override;
-	void reset();
+    void clearItems();
+    void adjust(VInfo_ptr info, ServerHandler** serverOut, bool& sameServer);
+    void loadMenu(const QPoint& pos, VInfo_ptr p);
+    VInfo_ptr nodeAt(int);
+    void infoIndex(int idx);
+    void paintEvent(QPaintEvent*) override;
+    void resizeEvent(QResizeEvent*) override;
+    void reset();
     void updateSettings();
     int bcWidth();
 
-	QList<NodePathItem*> nodeItems_;
-	
-	QHBoxLayout* layout_;
-	VInfo_ptr info_;
-	VInfo_ptr infoFull_;
-    BcWidget* bc_;     
+    QList<NodePathItem*> nodeItems_;
+
+    QHBoxLayout* layout_;
+    VInfo_ptr info_;
+    VInfo_ptr infoFull_;
+    BcWidget* bc_;
     Mode mode_{GuiMode};
 };
 

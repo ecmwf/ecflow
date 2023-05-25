@@ -15,11 +15,10 @@
 
 #include "VFile.hpp"
 
-class VFileUncompress
-{
+class VFileUncompress {
 public:
     static bool isCompressed(QString sourceFile);
-    static VFile_ptr uncompress(QString sourceFile, QString &errStr);
+    static VFile_ptr uncompress(QString sourceFile, QString& errStr);
 };
 
 #endif // VFILEUNCOMPRESS_HPP

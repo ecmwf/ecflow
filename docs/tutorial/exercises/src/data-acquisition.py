@@ -2,7 +2,7 @@ import os
 import ecflow
 
 defs = ecflow.Defs()
-suite = defs.add_suite("data_aquisition")
+suite = defs.add_suite("data_acquisition")
 suite.add_repeat(ecflow.RepeatDay(1))
 suite.add_variable("ECF_HOME", os.getenv("HOME") + "/course")
 suite.add_variable("ECF_INCLUDE", os.getenv("HOME") + "/course")

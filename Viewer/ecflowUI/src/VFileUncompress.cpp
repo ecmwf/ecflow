@@ -10,35 +10,31 @@
 
 #include "VFileUncompress.hpp"
 
-#include <QtGlobal>
+#include <QCursor>
 #include <QFileInfo>
 #include <QProcess>
-#include <QCursor>
+#include <QtGlobal>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include <QGuiApplication>
+    #include <QGuiApplication>
 #endif
 
 #include "UiLog.hpp"
 
-bool VFileUncompress::isCompressed(QString sourceFile)
-{
-    return sourceFile.endsWith(".gz",Qt::CaseInsensitive) ||
-            sourceFile.endsWith(".Z", Qt::CaseInsensitive);
+bool VFileUncompress::isCompressed(QString sourceFile) {
+    return sourceFile.endsWith(".gz", Qt::CaseInsensitive) || sourceFile.endsWith(".Z", Qt::CaseInsensitive);
 }
 
-VFile_ptr VFileUncompress::uncompress(QString sourceFile, QString& errStr)
-{
+VFile_ptr VFileUncompress::uncompress(QString sourceFile, QString& errStr) {
     QFileInfo info(sourceFile);
     QString suffix = info.suffix().toLower();
 
-    if(suffix != "gz" && suffix != "z")
-    {
+    if (suffix != "gz" && suffix != "z") {
         VFile_ptr z;
         return z;
     }
 
-    VFile_ptr targetFile = VFile::createTmpFile(true); //will be deleted automatically
+    VFile_ptr targetFile = VFile::createTmpFile(true); // will be deleted automatically
     QProcess proc;
     proc.setStandardOutputFile(QString::fromStdString(targetFile->path()));
 
@@ -48,29 +44,25 @@ VFile_ptr VFileUncompress::uncompress(QString sourceFile, QString& errStr)
 
     QString cmd;
 
-    if (suffix == "gz")
-    {
+    if (suffix == "gz") {
         cmd = "gunzip";
     }
-    else
-    {
+    else {
         cmd = "uncompress";
     }
 
-    proc.start("/bin/sh",
-        QStringList() <<  "-c" << cmd + " -c \'" + sourceFile  + "\' ");
+    proc.start("/bin/sh", QStringList() << "-c" << cmd + " -c \'" + sourceFile + "\' ");
 
-    if(!proc.waitForStarted(1000))
-    {
+    if (!proc.waitForStarted(1000)) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();
 #endif
         UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        errStr="Failed to start uncompressing using command:<br> \'" +
-                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+        errStr = "Failed to start uncompressing using command:<br> \'" + proc.program() + " " +
+                 proc.arguments().join(" ") + "\'";
 #else
-        errStr="Failed to start " + cmd  + " command!";
+        errStr = "Failed to start " + cmd + " command!";
 #endif
         targetFile.reset();
         return targetFile;
@@ -82,20 +74,19 @@ VFile_ptr VFileUncompress::uncompress(QString sourceFile, QString& errStr)
     QGuiApplication::restoreOverrideCursor();
 #endif
 
-    QString err=proc.readAllStandardError();
-    if(proc.exitStatus() != QProcess::NormalExit || !errStr.isEmpty())
-    {
+    QString err = proc.readAllStandardError();
+    if (proc.exitStatus() != QProcess::NormalExit || !errStr.isEmpty()) {
         UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        errStr="Failed to filter output file using command:<br> \'" +
-                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+        errStr = "Failed to filter output file using command:<br> \'" + proc.program() + " " +
+                 proc.arguments().join(" ") + "\'";
 #else
-        errStr="Failed to run " + cmd + " ommand!";
+        errStr = "Failed to run " + cmd + " ommand!";
 #endif
-        if(!errStr.isEmpty())
-            errStr+="<br>Error message: " + err;
+        if (!errStr.isEmpty())
+            errStr += "<br>Error message: " + err;
 
-        targetFile.reset(); //delete
+        targetFile.reset(); // delete
     }
 
     return targetFile;

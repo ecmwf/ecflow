@@ -11,23 +11,21 @@
 #ifndef JOBITEMWIDGET_HPP_
 #define JOBITEMWIDGET_HPP_
 
-#include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
+#include "InfoPanelItem.hpp"
+#include "ServerHandler.hpp"
 #include "VInfo.hpp"
 
-#include "ServerHandler.hpp"
-
-class JobItemWidget : public CodeItemWidget, public InfoPanelItem
-{
+class JobItemWidget : public CodeItemWidget, public InfoPanelItem {
 public:
-	explicit JobItemWidget(QWidget *parent=nullptr);
-	~JobItemWidget() override;
+    explicit JobItemWidget(QWidget* parent = nullptr);
+    ~JobItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-	//From VInfoPresenter
+    // From VInfoPresenter
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;
     void infoProgress(VReply*) override;
@@ -41,4 +39,3 @@ protected:
 };
 
 #endif
-

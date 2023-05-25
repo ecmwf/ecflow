@@ -10,31 +10,29 @@
 #ifndef TEXTFILTERWIDGET_HPP
 #define TEXTFILTERWIDGET_HPP
 
-#include "ui_TextFilterWidget.h"
-
-#include <QWidget>
 #include <QCompleter>
 #include <QToolButton>
+#include <QWidget>
 
 #include "TextFilterHandler.hpp"
+#include "ui_TextFilterWidget.h"
 
 class TextFilterCompleterModel;
 class VProperty;
 
-class TextFilterWidget : public QWidget, private Ui::TextFilterWidget
-{
-Q_OBJECT
+class TextFilterWidget : public QWidget, private Ui::TextFilterWidget {
+    Q_OBJECT
 
 public:
-    explicit TextFilterWidget(QWidget *parent=nullptr);
+    explicit TextFilterWidget(QWidget* parent = nullptr);
     ~TextFilterWidget() override = default;
 
-    enum FilterStatus {EditStatus,FoundStatus,NotFoundStatus};
-    void setStatus(FilterStatus,bool force=false);
+    enum FilterStatus { EditStatus, FoundStatus, NotFoundStatus };
+    void setStatus(FilterStatus, bool force = false);
 
     void setEditFocus();
-    void buildMenu(QToolButton *tb);
-    void setExternalButtons(QToolButton* statusTb,QToolButton* optionTb);
+    void buildMenu(QToolButton* tb);
+    void setExternalButtons(QToolButton* statusTb, QToolButton* optionTb);
     void setEnabledExternalButtons(bool);
     void setNumberOfLines(int);
     bool needNumberOfLines() const;
@@ -55,15 +53,15 @@ public Q_SLOTS:
     void slotStatusTb(bool);
 
 Q_SIGNALS:
-    void runRequested(QString,bool,bool);
+    void runRequested(QString, bool, bool);
     void clearRequested();
     void closeRequested();
     void hideRequested();
     void statusChanged(FilterStatus);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void showEvent(QShowEvent *) override;
+    void paintEvent(QPaintEvent*) override;
+    void showEvent(QShowEvent*) override;
 
 private:
     void init(const TextFilterItem& item);
@@ -72,8 +70,7 @@ private:
     void addCurrentToLatest();
     bool isCurrentSaved() const;
     void adjustToolTip();
-    void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,
-                        QString title,QString data);
+    void addMenuSection(QMenu* menu, const std::vector<TextFilterItem>& items, QString title, QString data);
 
     FilterStatus status_{EditStatus};
     QBrush oriBrush_;

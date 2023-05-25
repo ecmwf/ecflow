@@ -10,107 +10,99 @@
 
 #include "CommandHandler.hpp"
 
-//#include "File.hpp"
-//#include "NodeFwd.hpp"
-//#include "ArgvCreator.hpp"
-#include "Str.hpp"
+#include <boost/program_options/parsers.hpp>
+
+// #include "File.hpp"
+// #include "NodeFwd.hpp"
+// #include "ArgvCreator.hpp"
+#include <QMessageBox>
+#include <QString>
 
 #include "ActionHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ShellCommand.hpp"
+#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VAttribute.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
 
-#include <QMessageBox>
-#include <QString>
-
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-#include <QRegExp>
+    #include <QRegExp>
 #endif
+#include <map>
+
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-#include <map>
-
-//Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
-//The command is specified as a string.
+// Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
+// The command is specified as a string.
 
 std::string CommandHandler::executeCmd_ = "ecflow_client --run <full_name>";
-std::string CommandHandler::rerunCmd_ = "ecflow_client --force queued <full_name>";
-std::string CommandHandler::killCmd_ = "ecflow_client --kill <full_name>";
+std::string CommandHandler::rerunCmd_   = "ecflow_client --force queued <full_name>";
+std::string CommandHandler::killCmd_    = "ecflow_client --kill <full_name>";
 
-void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
-{
+void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
     UI_FUNCTION_LOG
 
     std::string realCommand(cmd);
     std::vector<ServerHandler*> targetServers;
 
-    if(realCommand.empty())
-    {
-        //UiLog().err() << " command is not recognised. Check the menu definition.";
-        UserMessage::message(UserMessage::ERROR, true, "command " + cmd +
-                             " is not recognised. Check the menu definition.");
+    if (realCommand.empty()) {
+        // UiLog().err() << " command is not recognised. Check the menu definition.";
+        UserMessage::message(
+            UserMessage::ERROR, true, "command " + cmd + " is not recognised. Check the menu definition.");
         return;
     }
 
     UiLog().dbg() << "command=" << cmd;
 
-    std::map<ServerHandler*,std::string> targetNodeNames;
-    std::map<ServerHandler*,std::string> targetNodeFullNames;
-    std::map<ServerHandler*,std::string> targetParentFullNames;
+    std::map<ServerHandler*, std::string> targetNodeNames;
+    std::map<ServerHandler*, std::string> targetNodeFullNames;
+    std::map<ServerHandler*, std::string> targetParentFullNames;
 
-    //Figure out what objects (node/server) the command should be applied to
-    for(auto & i : info)
-    {
+    // Figure out what objects (node/server) the command should be applied to
+    for (auto& i : info) {
         std::string nodeFullName;
         std::string nodeName;
         std::string parentFullName;
 
-        if(realCommand.find("<node_name>") != std::string::npos)
-        {
-            nodeName=i->name();
+        if (realCommand.find("<node_name>") != std::string::npos) {
+            nodeName = i->name();
         }
 
-        if(realCommand.find("<full_name>") != std::string::npos)
-        {
-            if(i->isNode())
+        if (realCommand.find("<full_name>") != std::string::npos) {
+            if (i->isNode())
                 nodeFullName = i->node()->absNodePath();
-            else if(i->isServer())
+            else if (i->isServer())
                 i->server()->longName();
-            else if(i->isAttribute())
+            else if (i->isAttribute())
                 parentFullName = i->node()->absNodePath();
         }
 
-        if(realCommand.find("<parent_name>") != std::string::npos)
-        {
-            if(i->isNode())
-            {
-                if(VNode *p=i->node()->parent())
+        if (realCommand.find("<parent_name>") != std::string::npos) {
+            if (i->isNode()) {
+                if (VNode* p = i->node()->parent())
                     parentFullName = p->absNodePath();
             }
-            else if(i->isAttribute())
-               parentFullName = i->node()->absNodePath();
+            else if (i->isAttribute())
+                parentFullName = i->node()->absNodePath();
         }
 
-        //Store the names per target servers
+        // Store the names per target servers
         targetNodeNames[i->server()] += " " + nodeName;
         targetNodeFullNames[i->server()] += " " + nodeFullName;
         targetParentFullNames[i->server()] += " " + parentFullName;
 
         // add this to our list of target servers?
-        if(std::find(targetServers.begin(), targetServers.end(), i->server()) == targetServers.end())
-        {
+        if (std::find(targetServers.begin(), targetServers.end(), i->server()) == targetServers.end()) {
             targetServers.push_back(i->server());
         }
     }
 
     // for each target server, construct and send its command
-    for(auto serverHandler : targetServers)
-    {
+    for (auto serverHandler : targetServers) {
         // replace placeholders with real node names
         std::string placeholder("<full_name>");
         ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
@@ -121,106 +113,96 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
         placeholder = "<parent_name>";
         ecf::Str::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
 
-        //Shell command
-        if(realCommand.find("sh ") == 0)
-        {
-            substituteVariables(realCommand,info);
+        // Shell command
+        if (realCommand.find("sh ") == 0) {
+            substituteVariables(realCommand, info);
             UiLog().dbg() << " final shell command: " << realCommand;
-            ShellCommand::run(realCommand,cmd);
+            ShellCommand::run(realCommand, cmd);
             return;
         }
 
         UiLog().dbg() << " final command: " << realCommand;
 
-        // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
-        std::string alterToReplace("alter=");
-        std::string alterToReplaceBy("alter ");
-        ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
+        // Ideally we should pass the cmd string staight to the client. However, as a
+        // temporary solution to both:
+        // - fix ECFLOW-1879
+        // - allow values stating with -- (douboe dash) for --alter (see ECFLOW-1414)
+        // we add a tokenisation here for alter.
+        // TODO: remove this code when the cli allows having values starting with --
+        if (realCommand.find("ecflow_client --alter") == 0) {
+            // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
+            std::string alterToReplace("ecflow_client --alter=");
+            std::string alterToReplaceBy("ecflow_client --alter ");
+            ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
 
-        // get the command into the right format by first splitting into tokens
-        // and then converting to argc, argv format
-        std::vector<std::string> strs;
-        std::string delimiters(" ");
-        ecf::Str::split(realCommand, strs, delimiters);
+            // tokinise --alter
+            auto cmdVec = boost::program_options::split_unix(realCommand, " \t", "'\"", "\\");
+            UiLog().dbg() << " tokenized command: " << cmdVec;
 
-        // set up and run the thread for server communication
-        serverHandler->runCommand(strs);
+            // set up and run the thread for server communication
+            serverHandler->runCommand(cmdVec);
+        } else {
+            // set up and run the thread for server communication
+            serverHandler->runCommand(realCommand);
+        }
     }
 }
 
-//Send a command to a server. The command is specified as a string vector, while the node or server for that
-//the command will be applied is specified in a VInfo object.
-void CommandHandler::run(VInfo_ptr info,const std::vector<std::string>& cmd)
-{
+// Send a command to a server. The command is specified as a string vector, while the node or server for that
+// the command will be applied is specified in a VInfo object.
+void CommandHandler::run(VInfo_ptr info, const std::vector<std::string>& cmd) {
     UI_FUNCTION_LOG
 
-    std::vector<std::string> realCommand=cmd;
+    std::vector<std::string> realCommand = cmd;
 
-    if(realCommand.empty())
-    {
-        //UiLog().err() << " command is not recognised!";
+    if (realCommand.empty()) {
+        // UiLog().err() << " command is not recognised!";
         UserMessage::message(UserMessage::ERROR, true, "command is not recognised.");
     }
 
     UiLog().dbg() << "command: " << commandToString(realCommand);
 
-    //Get the name of the object for that the command will be applied
+    // Get the name of the object for that the command will be applied
     std::string nodeFullName;
     std::string nodeName;
     ServerHandler* serverHandler = info->server();
 
-    if(info->isNode() || info->isAttribute())
-    {
+    if (info->isNode() || info->isAttribute()) {
         nodeFullName = info->node()->node()->absNodePath();
-        nodeName = info->node()->node()->name();
-        //UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+        nodeName     = info->node()->node()->name();
+        // UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " +
+        // info[i]->server()->longName() + ")");
     }
-    else if(info->isServer())
-    {
+    else if (info->isServer()) {
         nodeFullName = "/";
-        nodeName = "/";
-        //UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
+        nodeName     = "/";
+        // UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
     }
 
-    //Replace placeholders with real node names
-    for(std::size_t i=0; i < cmd.size(); i++)
-    {
-        if(realCommand[i]=="<full_name>")
-            realCommand[i]=nodeFullName;
-        else if(realCommand[i]=="<node_name>")
-            realCommand[i]=nodeName;
+    // Replace placeholders with real node names
+    for (std::size_t i = 0; i < cmd.size(); i++) {
+        if (realCommand[i] == "<full_name>")
+            realCommand[i] = nodeFullName;
+        else if (realCommand[i] == "<node_name>")
+            realCommand[i] = nodeName;
     }
 
     UiLog().dbg() << " final command: " << commandToString(realCommand);
-
-        // get the command into the right format by first splitting into tokens
-        // and then converting to argc, argv format
-
-        //std::vector<std::string> strs;
-        //std::string delimiters(" ");
-        //ecf::Str::split(realCommand, strs, delimiters);
 
     // set up and run the thread for server communication
     serverHandler->runCommand(realCommand);
 }
 
-void CommandHandler::run(VInfo_ptr info, const std::string& cmd)
-{
-    std::vector<std::string> commands;
-
-    ecf::Str::split(cmd, commands);
-    run(info, commands);
+void CommandHandler::run(VInfo_ptr info, const std::string& cmd) {
+    std::vector<VInfo_ptr> infos = {info};
+    run(infos, cmd);
 }
 
-void CommandHandler::openLinkInBrowser(VInfo_ptr info)
-{
-    if(info && info->isAttribute())
-    {
-        if(VAttribute* a = info->attribute())
-        {
+void CommandHandler::openLinkInBrowser(VInfo_ptr info) {
+    if (info && info->isAttribute()) {
+        if (VAttribute* a = info->attribute()) {
             std::string str_val;
-            if(a->value("label_value", str_val))
-            {
+            if (a->value("label_value", str_val)) {
                 QString s = QString::fromStdString(str_val);
                 QString url;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
@@ -231,36 +213,30 @@ void CommandHandler::openLinkInBrowser(VInfo_ptr info)
                 }
 #else
                 QRegExp rx("(http:\\/\\/\\S+|https:\\/\\/\\S+)");
-                if(rx.indexIn(s) >= 0)
-                {
-                    url=rx.cap(1);
+                if (rx.indexIn(s) >= 0) {
+                    url = rx.cap(1);
                 }
 #endif
-                if(!url.isEmpty())
-                {
+                if (!url.isEmpty()) {
                     QString browser;
-                    if(VProperty* prop=VConfig::instance()->find("menu.web.defaultBrowser"))
-                    {
+                    if (VProperty* prop = VConfig::instance()->find("menu.web.defaultBrowser")) {
                         browser = prop->valueAsString();
                     }
 
-                    if(browser.isEmpty())
+                    if (browser.isEmpty())
                         browser = "firefox";
 
-                    std::string cmd="sh " + browser.toStdString() + " " + url.toStdString();
+                    std::string cmd = "sh " + browser.toStdString() + " " + url.toStdString();
                     ShellCommand::run(cmd, cmd, false);
                 }
-
             }
         }
     }
 }
 
-void CommandHandler::executeAborted(const std::vector<VNode*>& nodes)
-{
+void CommandHandler::executeAborted(const std::vector<VNode*>& nodes) {
     std::vector<VInfo_ptr> info_vec;
-    for(size_t i=0; i < nodes.size(); i++)
-    {
+    for (size_t i = 0; i < nodes.size(); i++) {
         info_vec.push_back(VInfoNode::create(nodes[i]));
         assert(nodes[i]);
         assert(nodes[i]->isTask());
@@ -269,11 +245,9 @@ void CommandHandler::executeAborted(const std::vector<VNode*>& nodes)
     CommandHandler::run(info_vec, executeCmd_);
 }
 
-void CommandHandler::rerunAborted(const std::vector<VNode*>& nodes)
-{
+void CommandHandler::rerunAborted(const std::vector<VNode*>& nodes) {
     std::vector<VInfo_ptr> info_vec;
-    for(size_t i=0; i < nodes.size(); i++)
-    {
+    for (size_t i = 0; i < nodes.size(); i++) {
         info_vec.push_back(VInfoNode::create(nodes[i]));
         assert(nodes[i]);
         assert(nodes[i]->isTask());
@@ -282,21 +256,17 @@ void CommandHandler::rerunAborted(const std::vector<VNode*>& nodes)
     CommandHandler::run(info_vec, rerunCmd_);
 }
 
-bool CommandHandler::kill(const std::vector<VNode*>& nodes, bool confirm)
-{
+bool CommandHandler::kill(const std::vector<VNode*>& nodes, bool confirm) {
     std::vector<VInfo_ptr> info_vec;
-    for(size_t i=0; i < nodes.size(); i++)
-    {
+    for (size_t i = 0; i < nodes.size(); i++) {
         info_vec.push_back(VInfoNode::create(nodes[i]));
         assert(nodes[i]);
-        //assert(nodes[i]->isTask());
+        // assert(nodes[i]->isTask());
     }
 
-    if (confirm)
-    {
-        if (!ActionHandler::confirmCommand(info_vec, "Confirm <b>killing</b> of <full_name>",
-                                           "", killCmd_, info_vec.size()))
-        {
+    if (confirm) {
+        if (!ActionHandler::confirmCommand(
+                info_vec, "Confirm <b>killing</b> of <full_name>", "", killCmd_, info_vec.size())) {
             return false;
         }
     }
@@ -306,26 +276,23 @@ bool CommandHandler::kill(const std::vector<VNode*>& nodes, bool confirm)
     return true;
 }
 
-std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)
-{   
+std::string CommandHandler::commandToString(const std::vector<std::string>& cmd) {
     std::string s;
-    for(const auto & it : cmd)
-    {
-        if(!s.empty()) s+=" ";
-        s+=it;
+    for (const auto& it : cmd) {
+        if (!s.empty())
+            s += " ";
+        s += it;
     }
     return s;
 }
 
-void CommandHandler::substituteVariables(std::string& cmd,const std::vector<VInfo_ptr>& info)
-{
-   if(info.size() > 0)
-   {
-       VNode *n=info[0]->node();
-       if(!n || n->isAttribute())
+void CommandHandler::substituteVariables(std::string& cmd, const std::vector<VInfo_ptr>& info) {
+    if (info.size() > 0) {
+        VNode* n = info[0]->node();
+        if (!n || n->isAttribute())
             return;
 
-       //this can lock the mutex on the defs
-       n->substituteVariableValue(cmd);
-   }
+        // this can lock the mutex on the defs
+        n->substituteVariableValue(cmd);
+    }
 }

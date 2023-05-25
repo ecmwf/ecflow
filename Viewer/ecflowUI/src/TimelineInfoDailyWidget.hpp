@@ -23,29 +23,27 @@ class NodeTimelineHeader;
 class TimelineInfoDailyDelegate;
 
 namespace Ui {
-    class TimelineInfoDailyWidget;
+class TimelineInfoDailyWidget;
 }
 
-//the main widget containing all components
-class TimelineInfoDailyWidget : public QWidget
-{
-Q_OBJECT
+// the main widget containing all components
+class TimelineInfoDailyWidget : public QWidget {
+    Q_OBJECT
 
 public:
-    explicit TimelineInfoDailyWidget(QWidget *parent=nullptr);
+    explicit TimelineInfoDailyWidget(QWidget* parent = nullptr);
     ~TimelineInfoDailyWidget() override = default;
 
     void clear() {}
-    //void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
-    void load(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
-                 unsigned int endDateSec);
+    // void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
+    void load(TimelineItem*, unsigned int viewStartDateSec, unsigned int viewEndDateSec, unsigned int endDateSec);
 
     void readSettings(QSettings&);
     void writeSettings(QSettings&);
 
 protected Q_SLOTS:
-    void slotPeriodSelectedInView(QTime start,QTime end);
-    void slotPeriodBeingZoomedInView(QTime start,QTime end);
+    void slotPeriodSelectedInView(QTime start, QTime end);
+    void slotPeriodBeingZoomedInView(QTime start, QTime end);
     void slotStartChanged(const QTime&);
     void slotEndChanged(const QTime&);
     void slotResetStart();
@@ -67,9 +65,8 @@ private:
     int tlEndTime_;
     bool ignoreTimeEdited_;
 
-    //TimelineInfoDailyModel* dailyModel_;
-    //NodeTimelineHeader* dailyHeader_;
+    // TimelineInfoDailyModel* dailyModel_;
+    // NodeTimelineHeader* dailyHeader_;
 };
-
 
 #endif // TIMELINEINFODAILYWIDGET_HPP

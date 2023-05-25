@@ -23,138 +23,119 @@
 #include "ViewerUtil.hpp"
 #include "WidgetNameProvider.hpp"
 
-VProperty* PropertyDialog::prop_=nullptr;
+VProperty* PropertyDialog::prop_ = nullptr;
 
-PropertyDialog::PropertyDialog(QWidget* parent) :
-		QDialog(parent)
-{
-	setupUi(this);
+PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent) {
+    setupUi(this);
 
-	QString wt=windowTitle();
-	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
-	setWindowTitle(wt);
+    QString wt = windowTitle();
+    wt += "  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
 
-	QFont f;
-	f.setBold(true);
-	QFontMetrics fm(f);
-    int maxW=ViewerUtil::textWidth(fm,"Server options ATAT");
-	list_->setMaximumWidth(maxW+6);
-	list_->setFont(f);
+    QFont f;
+    f.setBold(true);
+    QFontMetrics fm(f);
+    int maxW = ViewerUtil::textWidth(fm, "Server options ATAT");
+    list_->setMaximumWidth(maxW + 6);
+    list_->setFont(f);
 
-	list_->setItemDelegate(new ConfigListDelegate(32,maxW,this));
+    list_->setItemDelegate(new ConfigListDelegate(32, maxW, this));
 
-	connect(list_,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            this, SLOT(slotChangePage(QListWidgetItem*,QListWidgetItem*)));
+    connect(list_,
+            SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+            this,
+            SLOT(slotChangePage(QListWidgetItem*, QListWidgetItem*)));
 
-	connect(buttonBox_,SIGNAL(clicked(QAbstractButton*)),
-			this,SLOT(slotButton(QAbstractButton*)));
+    connect(buttonBox_, SIGNAL(clicked(QAbstractButton*)), this, SLOT(slotButton(QAbstractButton*)));
 
-	build();
+    build();
 
-	readSettings();
+    readSettings();
 
-	if(list_->count() >0 && list_->currentRow() == -1)
-		list_->setCurrentRow(0);
+    if (list_->count() > 0 && list_->currentRow() == -1)
+        list_->setCurrentRow(0);
 
-    //Assign name to each object
+    // Assign name to each object
     WidgetNameProvider::nameChildren(this);
 }
 
-void PropertyDialog::closeEvent(QCloseEvent * event)
-{
-	event->accept();
-	writeSettings();
+void PropertyDialog::closeEvent(QCloseEvent* event) {
+    event->accept();
+    writeSettings();
 }
 
-//Build the property tree from the the definitions
-void PropertyDialog::build()
-{
-	if(prop_)
-	{
-		Q_FOREACH(VProperty* vPage,prop_->children())
-		{
-			  if(vPage->param("visible") == "false")
-                  continue;
-            
-			  QPixmap pix(32,32);
-			  QPixmap edPix;
-              QString iconStr=vPage->param("icon");
+// Build the property tree from the the definitions
+void PropertyDialog::build() {
+    if (prop_) {
+        Q_FOREACH (VProperty* vPage, prop_->children()) {
+            if (vPage->param("visible") == "false")
+                continue;
 
-              if(!iconStr.isEmpty())
-              {
-            	  IconProvider::add(":/viewer/" + iconStr,iconStr);
-            	  pix=IconProvider::pixmap(iconStr,32);
-            	  edPix=IconProvider::pixmap(iconStr,20);
-              }    
+            QPixmap pix(32, 32);
+            QPixmap edPix;
+            QString iconStr = vPage->param("icon");
 
-              auto* ed=new PropertyEditor(this);
-              ed->setObjectName(vPage->param("label"));
-              ed->edit(vPage,edPix);
+            if (!iconStr.isEmpty()) {
+                IconProvider::add(":/viewer/" + iconStr, iconStr);
+                pix   = IconProvider::pixmap(iconStr, 32);
+                edPix = IconProvider::pixmap(iconStr, 20);
+            }
 
-              addPage(ed,pix,vPage->param("label"));
-			  editors_ << ed;
-		}
-	}
+            auto* ed = new PropertyEditor(this);
+            ed->setObjectName(vPage->param("label"));
+            ed->edit(vPage, edPix);
+
+            addPage(ed, pix, vPage->param("label"));
+            editors_ << ed;
+        }
+    }
 }
 
-void PropertyDialog::apply()
-{
-	manageChange(true);
+void PropertyDialog::apply() {
+    manageChange(true);
 }
 
-void PropertyDialog::accept()
-{
-	manageChange(false);
-	writeSettings();
+void PropertyDialog::accept() {
+    manageChange(false);
+    writeSettings();
     QDialog::accept();
-}    
-
-
-void PropertyDialog::reject()
-{
-	writeSettings();
-	QDialog::reject();
 }
 
-void PropertyDialog::addPage(QWidget *w,QPixmap pix,QString txt)
-{
-	auto *item = new QListWidgetItem(list_);
+void PropertyDialog::reject() {
+    writeSettings();
+    QDialog::reject();
+}
+
+void PropertyDialog::addPage(QWidget* w, QPixmap pix, QString txt) {
+    auto* item = new QListWidgetItem(list_);
     item->setData(Qt::DecorationRole, pix);
-    item->setData(Qt::DisplayRole,txt);
+    item->setData(Qt::DisplayRole, txt);
     item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-	page_->addWidget(w);
+    page_->addWidget(w);
 }
 
-void PropertyDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)
-{
-     if (!current)
-         current = previous;
+void PropertyDialog::slotChangePage(QListWidgetItem* current, QListWidgetItem* previous) {
+    if (!current)
+        current = previous;
 
-     page_->setCurrentIndex(list_->row(current));
+    page_->setCurrentIndex(list_->row(current));
 }
 
-void PropertyDialog::slotButton(QAbstractButton* pb)
-{
-	if(buttonBox_->buttonRole(pb) == QDialogButtonBox::ApplyRole)
-	{
-		apply();
-	}
+void PropertyDialog::slotButton(QAbstractButton* pb) {
+    if (buttonBox_->buttonRole(pb) == QDialogButtonBox::ApplyRole) {
+        apply();
+    }
 }
 
-void PropertyDialog::showPage(QString path)
-{
-    QStringList lst=path.split(".");
-    if(lst.count() > 0)
-    {
-        QString pageName=lst[0];
-        for(int i=0; i < editors_.count(); i++)
-        {
-            PropertyEditor *ed=editors_[i];
-            if(VProperty* prop=ed->property())
-            {
-                if(prop->name() == pageName)
-                {
+void PropertyDialog::showPage(QString path) {
+    QStringList lst = path.split(".");
+    if (lst.count() > 0) {
+        QString pageName = lst[0];
+        for (int i = 0; i < editors_.count(); i++) {
+            PropertyEditor* ed = editors_[i];
+            if (VProperty* prop = ed->property()) {
+                if (prop->name() == pageName) {
                     list_->setCurrentRow(i);
                     return;
                 }
@@ -163,88 +144,74 @@ void PropertyDialog::showPage(QString path)
     }
 }
 
-void PropertyDialog::manageChange(bool inApply)
-{
-	bool hasChange=false;
-	Q_FOREACH(PropertyEditor* ed,editors_)
-	{
-		if(ed->applyChange())
-		{
-			hasChange=true;
-			VProperty* p=ed->property();
-			if(p && p->name() != "server")
-			{
-				if(inApply)
-					Q_EMIT configChanged();
-				else
-					configChanged_=true;
-			}
-		}
-	}
+void PropertyDialog::manageChange(bool inApply) {
+    bool hasChange = false;
+    Q_FOREACH (PropertyEditor* ed, editors_) {
+        if (ed->applyChange()) {
+            hasChange    = true;
+            VProperty* p = ed->property();
+            if (p && p->name() != "server") {
+                if (inApply)
+                    Q_EMIT configChanged();
+                else
+                    configChanged_ = true;
+            }
+        }
+    }
 
-	if(hasChange)
-		VConfig::instance()->saveSettings();
+    if (hasChange)
+        VConfig::instance()->saveSettings();
 }
 
-void PropertyDialog::load(VProperty* p)
-{
-    prop_=p;
+void PropertyDialog::load(VProperty* p) {
+    prop_ = p;
 }
 
-void PropertyDialog::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void PropertyDialog::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")), QSettings::NativeFormat);
 
-	//We have to clear it so that should not remember all the previous values
-	settings.clear();
+    // We have to clear it so that should not remember all the previous values
+    settings.clear();
 
-	settings.beginGroup("main");
-	settings.setValue("size",size());
+    settings.beginGroup("main");
+    settings.setValue("size", size());
 
     int idx = list_->currentRow();
     settings.setValue("current", idx);
-    if (idx>= 0 && idx < editors_.count()) {
+    if (idx >= 0 && idx < editors_.count()) {
         settings.setValue("currentPageTab", editors_[idx]->currentTopLevelTabIndex());
     }
-	settings.endGroup();
+    settings.endGroup();
 }
 
-void PropertyDialog::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void PropertyDialog::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("PropertyDialog")), QSettings::NativeFormat);
 
-	settings.beginGroup("main");
-	if(settings.contains("size"))
-	{
-		resize(settings.value("size").toSize());
-	}
-	else
-	{
-	  	resize(QSize(550,540));
-	}
+    settings.beginGroup("main");
+    if (settings.contains("size")) {
+        resize(settings.value("size").toSize());
+    }
+    else {
+        resize(QSize(550, 540));
+    }
 
-	if(settings.contains("current"))
-	{
-		int current=settings.value("current").toInt();
-        if(current >=0) {
-			list_->setCurrentRow(current);
+    if (settings.contains("current")) {
+        int current = settings.value("current").toInt();
+        if (current >= 0) {
+            list_->setCurrentRow(current);
             if (settings.contains("currentPageTab")) {
-                int currentPageTab=settings.value("currentPageTab").toInt();
-                if(currentPageTab >=0 && currentPageTab < editors_.count()) {
+                int currentPageTab = settings.value("currentPageTab").toInt();
+                if (currentPageTab >= 0 && currentPageTab < editors_.count()) {
                     editors_[current]->setCurrentTopLevelTabIndex(currentPageTab);
                 }
             }
         }
-
-	}
-	settings.endGroup();
+    }
+    settings.endGroup();
 }
-
 
 static SimpleLoader<PropertyDialog> loader("gui");

@@ -1,7 +1,7 @@
 # Note:
 # If new src or test cpp files are added make sure you touch this file
 #
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
+file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
 
 ecbuild_add_library( TARGET   nodeattr
                      NOINSTALL
@@ -14,6 +14,8 @@ target_include_directories(nodeattr PUBLIC src
                                            ../ACore/src 
                                            ${Boost_INCLUDE_DIRS})
 
+target_clangformat(nodeattr)
+
 
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 
@@ -25,3 +27,5 @@ ecbuild_add_test( TARGET       u_anattr
                   DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_acore
                  )
+
+target_clangformat(u_anattr CONDITION ENABLE_TESTS)

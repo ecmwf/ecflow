@@ -15,12 +15,11 @@
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
 #include "Highlighter.hpp"
+#include "SessionHandler.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
-#include "SessionHandler.hpp"
 
-TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent)
-{
+TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
 
 #if 0
@@ -30,126 +29,110 @@ TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent)
     item->setAlignment(Qt::AlignLeft|Qt::AlignTop);
 #endif
 
-    //The document becomes the owner of the highlighte
-    new Highlighter(te_->document(),"trigger");
+    // The document becomes the owner of the highlighte
+    new Highlighter(te_->document(), "trigger");
     te_->setShowLineNumbers(false);
 }
 
-TriggerEditor::TriggerEditor(VInfo_ptr info,QWidget* parent) : AttributeEditor(info,"trigger",parent)
-{
-    w_=new TriggerEditorWidget(this);
+TriggerEditor::TriggerEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "trigger", parent) {
+    w_ = new TriggerEditorWidget(this);
     addForm(w_);
 
-    VAttribute* a=info_->attribute();
+    VAttribute* a = info_->attribute();
 
     Q_ASSERT(a);
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "trigger");
 
-    //Data is built dynamically so we store it
-    QStringList data=a->data();
+    // Data is built dynamically so we store it
+    QStringList data = a->data();
 
-    if(data.count() != 3)
+    if (data.count() != 3)
         return;
 
-    QString txt=data[2];
+    QString txt = data[2];
 
-    oriText_=txt;
+    oriText_    = txt;
     w_->te_->setPlainText(txt);
 
     QString typeInHeader;
-    if(data[1]=="0")
-    {
-        typeInCmd_="trigger";
-        typeInHeader="Trigger";
+    if (data[1] == "0") {
+        typeInCmd_   = "trigger";
+        typeInHeader = "Trigger";
     }
-    else
-    {
-        typeInCmd_="complete";
-        typeInHeader="Complete";
+    else {
+        typeInCmd_   = "complete";
+        typeInHeader = "Complete";
     }
-    typeInHeader+=" expression";
+    typeInHeader += " expression";
 
-    header_->setInfo(QString::fromStdString(info_->path()),typeInHeader);
+    header_->setInfo(QString::fromStdString(info_->path()), typeInHeader);
 
-    connect(w_->te_,SIGNAL(textChanged()),
-            this,SLOT(slotValueChanged()));
+    connect(w_->te_, SIGNAL(textChanged()), this, SLOT(slotValueChanged()));
 
     checkButtonStatus();
 
     readSettings();
 }
 
-TriggerEditor::~TriggerEditor()
-{
+TriggerEditor::~TriggerEditor() {
     writeSettings();
 }
 
-void TriggerEditor::apply()
-{
-    if(typeInCmd_.isEmpty())
+void TriggerEditor::apply() {
+    if (typeInCmd_.isEmpty())
         return;
 
-    std::string txt=w_->te_->toPlainText().toStdString();
+    std::string txt = w_->te_->toPlainText().toStdString();
     std::vector<std::string> cmd;
-    VAttribute::buildAlterCommand(cmd,"change",typeInCmd_.toStdString(),txt);
-    CommandHandler::run(info_,cmd);
+    VAttribute::buildAlterCommand(cmd, "change", typeInCmd_.toStdString(), txt);
+    CommandHandler::run(info_, cmd);
 }
 
-void TriggerEditor::resetValue()
-{
+void TriggerEditor::resetValue() {
     w_->te_->setPlainText(oriText_);
     checkButtonStatus();
 }
 
-void TriggerEditor::slotValueChanged()
-{
+void TriggerEditor::slotValueChanged() {
     checkButtonStatus();
 }
 
-bool TriggerEditor::isValueChanged()
-{
+bool TriggerEditor::isValueChanged() {
     return (oriText_ != w_->te_->toPlainText());
 }
 
-void TriggerEditor::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void TriggerEditor::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TriggerEditor")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TriggerEditor")), QSettings::NativeFormat);
 
-    //We have to clear it so that should not remember all the previous values
+    // We have to clear it so that should not remember all the previous values
     settings.clear();
 
     settings.beginGroup("main");
-    settings.setValue("size",size());
-    settings.setValue("fontSize",w_->te_->font().pointSize());
+    settings.setValue("size", size());
+    settings.setValue("fontSize", w_->te_->font().pointSize());
     settings.endGroup();
 }
 
-void TriggerEditor::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void TriggerEditor::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TriggerEditor")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TriggerEditor")), QSettings::NativeFormat);
 
     settings.beginGroup("main");
-    if(settings.contains("size"))
-    {
+    if (settings.contains("size")) {
         resize(settings.value("size").toSize());
     }
-    else
-    {
-        resize(QSize(310,200));
+    else {
+        resize(QSize(310, 200));
     }
 
-    if(settings.contains("fontSize"))
-    {
-        QFont f=w_->te_->font();
-        int fSize=settings.value("fontSize").toInt();
-        if(fSize > 0 && fSize < 100)
+    if (settings.contains("fontSize")) {
+        QFont f   = w_->te_->font();
+        int fSize = settings.value("fontSize").toInt();
+        if (fSize > 0 && fSize < 100)
             f.setPointSize(fSize);
 
         w_->te_->setFont(f);
@@ -159,4 +142,3 @@ void TriggerEditor::readSettings()
 }
 
 static AttributeEditorMaker<TriggerEditor> makerStr("trigger");
-

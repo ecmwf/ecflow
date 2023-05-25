@@ -11,30 +11,29 @@
 #define SESSIONRENAMEDIALOG_HPP
 
 #include <QDialog>
-#include "ui_SessionRenameDialog.h"
 
 #include "SessionHandler.hpp"
+#include "ui_SessionRenameDialog.h"
 
 namespace Ui {
 class SessionRenameDialog;
 }
 
-class SessionRenameDialog : public QDialog, protected Ui::SessionRenameDialog
-{
+class SessionRenameDialog : public QDialog, protected Ui::SessionRenameDialog {
     Q_OBJECT
 
 public:
-    explicit SessionRenameDialog(QWidget *parent = nullptr);
+    explicit SessionRenameDialog(QWidget* parent = nullptr);
     ~SessionRenameDialog() override;
 
-	std::string newName() {return newName_;};
+    std::string newName() { return newName_; };
 
 public Q_SLOTS:
-	void on_buttonBox__accepted();
-	void on_buttonBox__rejected();
+    void on_buttonBox__accepted();
+    void on_buttonBox__rejected();
 
 private:
-	std::string newName_;
- };
+    std::string newName_;
+};
 
 #endif // SESSIONRENAMEDIALOG_HPP

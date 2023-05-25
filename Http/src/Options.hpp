@@ -14,15 +14,18 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-struct Options {
-  bool verbose{false};                        // ECF_RESTAPI_VERBOSE
-  bool no_ssl{false};                         // ECF_RESTAPI_NOSSL
-  int polling_interval{10};                   // ECF_RESTAPI_POLLING_INTERVAL
-  int port{8080};                             // ECF_RESTAPI_PORT
-  std::string ecflow_host{"localhost"};       // ECF_HOST
-  int ecflow_port{3141};                      // ECF_PORT
-  std::string tokens_file{"api-tokens.json"}; // ECF_RESTAPI_TOKENS_FILE
-  std::string cert_directory{std::string(getenv("HOME"))+"/.ecflowrc/ssl"}; // ECF_RESTAPI_CERT_DIRECTORY
-  int max_polling_interval{300};              // ECF_RESTAPI_MAX_POLLING_INTERVAL
+#include <string>
+
+struct Options
+{
+    bool verbose{false};                                                        // ECF_RESTAPI_VERBOSE
+    bool no_ssl{false};                                                         // ECF_RESTAPI_NOSSL
+    int polling_interval{10};                                                   // ECF_RESTAPI_POLLING_INTERVAL
+    int port{8080};                                                             // ECF_RESTAPI_PORT
+    std::string ecflow_host{"localhost"};                                       // ECF_HOST
+    int ecflow_port{3141};                                                      // ECF_PORT
+    std::string tokens_file{"api-tokens.json"};                                 // ECF_RESTAPI_TOKENS_FILE
+    std::string cert_directory{std::string(getenv("HOME")) + "/.ecflowrc/ssl"}; // ECF_RESTAPI_CERT_DIRECTORY
+    int max_polling_interval{300};                                              // ECF_RESTAPI_MAX_POLLING_INTERVAL
 };
 #endif

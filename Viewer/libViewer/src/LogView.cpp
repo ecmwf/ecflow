@@ -11,10 +11,8 @@
 
 #include "LogModel.hpp"
 
-LogView::LogView(QWidget *parent) :
-    QTreeView(parent)
-{
-    setProperty("log","1");
+LogView::LogView(QWidget* parent) : QTreeView(parent) {
+    setProperty("log", "1");
     setRootIsDecorated(false);
     setUniformRowHeights(true);
     setAlternatingRowColors(false);
@@ -22,20 +20,16 @@ LogView::LogView(QWidget *parent) :
     setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-void LogView::setLogModel(LogModel* logModel)
-{
-    logModel_=logModel;
+void LogView::setLogModel(LogModel* logModel) {
+    logModel_ = logModel;
     QTreeView::setModel(logModel_);
 
-    connect(logModel_,SIGNAL(rerender()),
-            this,SLOT(rerender()));
+    connect(logModel_, SIGNAL(rerender()), this, SLOT(rerender()));
 
-    connect(logModel_,SIGNAL(scrollToHighlightedPeriod()),
-            this,SLOT(scrolltToHighlightPeriod()));
+    connect(logModel_, SIGNAL(scrollToHighlightedPeriod()), this, SLOT(scrolltToHighlightPeriod()));
 }
 
-void LogView::setModel(QAbstractItemModel*)
-{
+void LogView::setModel(QAbstractItemModel*) {
     Q_ASSERT(0);
 }
 
@@ -51,15 +45,12 @@ void LogView::setHighlightPeriod(qint64 start,qint64 end,qint64 tolerance)
 }
 #endif
 
-void LogView::rerender()
-{
-     viewport()->update();
+void LogView::rerender() {
+    viewport()->update();
 }
 
-void LogView::scrolltToHighlightPeriod()
-{
-    QModelIndex idx=logModel_->highlightPeriodIndex();
-    if(idx.isValid())
-        scrollTo(idx,QAbstractItemView::PositionAtCenter);
+void LogView::scrolltToHighlightPeriod() {
+    QModelIndex idx = logModel_->highlightPeriodIndex();
+    if (idx.isValid())
+        scrollTo(idx, QAbstractItemView::PositionAtCenter);
 }
-

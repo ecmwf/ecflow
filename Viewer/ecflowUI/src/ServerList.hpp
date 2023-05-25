@@ -16,35 +16,34 @@
 #include <QDateTime>
 
 #include "GenFileProvider.hpp"
-#include "VProperty.hpp"
 #include "PropertyMapper.hpp"
+#include "VProperty.hpp"
 
 class ServerItem;
 class ServerList;
 class GenFileReceiver;
 
-
-class ServerListObserver
-{
+class ServerListObserver {
 public:
-    ServerListObserver() = default;
-    virtual ~ServerListObserver() = default;
-	virtual void notifyServerListChanged()=0;
-	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
+    ServerListObserver()                                       = default;
+    virtual ~ServerListObserver()                              = default;
+    virtual void notifyServerListChanged()                     = 0;
+    virtual void notifyServerListFavouriteChanged(ServerItem*) = 0;
 };
 
-class ServerListTmpItem
-{
+class ServerListTmpItem {
 public:
     ServerListTmpItem() = default;
-    ServerListTmpItem(const std::string& name,const std::string& host, const std::string& port) :
-        name_(name), host_(host), port_(port) {}
+    ServerListTmpItem(const std::string& name, const std::string& host, const std::string& port)
+        : name_(name),
+          host_(host),
+          port_(port) {}
     explicit ServerListTmpItem(ServerItem* item);
-    ServerListTmpItem(const ServerListTmpItem& ) = default;
+    ServerListTmpItem(const ServerListTmpItem&) = default;
 
-    const std::string& name() const {return name_;}
-    const std::string& host() const {return host_;}
-    const std::string& port() const {return port_;}
+    const std::string& name() const { return name_; }
+    const std::string& host() const { return host_; }
+    const std::string& port() const { return port_; }
 
 protected:
     std::string name_;
@@ -52,36 +51,36 @@ protected:
     std::string port_;
 };
 
-class ServerListSyncChangeItem
-{
+class ServerListSyncChangeItem {
 public:
-    enum ChangeType {AddedChange,RemovedChange,MatchChange,SetSysChange,UnsetSysChange};
+    enum ChangeType { AddedChange, RemovedChange, MatchChange, SetSysChange, UnsetSysChange };
 
-    ServerListSyncChangeItem(const ServerListTmpItem& sys,const ServerListTmpItem& local,ChangeType type) :
-       sys_(sys), local_(local), type_(type) {}
+    ServerListSyncChangeItem(const ServerListTmpItem& sys, const ServerListTmpItem& local, ChangeType type)
+        : sys_(sys),
+          local_(local),
+          type_(type) {}
 
-    const ServerListTmpItem& sys() const {return sys_;}
-    const ServerListTmpItem& local() const {return local_;}
-    ChangeType type() const {return type_;}
+    const ServerListTmpItem& sys() const { return sys_; }
+    const ServerListTmpItem& local() const { return local_; }
+    ChangeType type() const { return type_; }
 
     ServerListTmpItem sys_;
     ServerListTmpItem local_;
     ChangeType type_;
 };
 
-class ServerListSystemFileManager: public GenFileReceiver, public VPropertyObserver
-{
+class ServerListSystemFileManager : public GenFileReceiver, public VPropertyObserver {
 public:
     ServerListSystemFileManager() = default;
     ~ServerListSystemFileManager();
 
-    bool hasSyncChange() const {return !changedItems_.empty();}
-    bool hasInfo() const {return !changedItems_.empty() || !unfetchedFiles_.empty();}
-    QDateTime syncDate() const {return syncDate_;}
-    const std::vector<std::string>& files() const {return files_;}
-    const std::vector<std::string>& fetchedFiles() const {return fetchedFiles_;}
-    const std::vector<std::string>& unfetchedFiles() const {return unfetchedFiles_;}
-    const std::vector<ServerListSyncChangeItem*>&  changedItems() const {return changedItems_;}
+    bool hasSyncChange() const { return !changedItems_.empty(); }
+    bool hasInfo() const { return !changedItems_.empty() || !unfetchedFiles_.empty(); }
+    QDateTime syncDate() const { return syncDate_; }
+    const std::vector<std::string>& files() const { return files_; }
+    const std::vector<std::string>& fetchedFiles() const { return fetchedFiles_; }
+    const std::vector<std::string>& unfetchedFiles() const { return unfetchedFiles_; }
+    const std::vector<ServerListSyncChangeItem*>& changedItems() const { return changedItems_; }
 
     void sync();
     void clearChangeInfo();
@@ -97,11 +96,11 @@ protected:
     void concludeSync();
     void delayedFetchFiles(const std::vector<std::string>& paths);
     void loadFiles(const std::vector<std::string>& paths);
-    void loadFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec,
-                                            std::vector<std::string>& includedPaths);
+    void
+    loadFile(const std::string& fPath, std::vector<ServerListTmpItem>& sysVec, std::vector<std::string>& includedPaths);
     void loadPending();
 
-    enum State {EmptyState, FetchState, SyncedState};
+    enum State { EmptyState, FetchState, SyncedState };
     std::vector<std::string> files_;
     std::vector<std::string> fetchedFiles_;
     std::vector<std::string> unfetchedFiles_;
@@ -113,57 +112,68 @@ protected:
     State state_{EmptyState};
 };
 
-class ServerList
-{
+class ServerList {
     friend class ServerListSystemFileManager;
 
 public:
-    ServerList(const  ServerList&) = delete;
-    ServerList& operator=(const  ServerList&) = delete;
+    ServerList(const ServerList&)            = delete;
+    ServerList& operator=(const ServerList&) = delete;
 
-    int count() const {return static_cast<int>(items_.size());}
-	ServerItem* itemAt(int);
-	ServerItem* find(const std::string& name);
-	ServerItem* find(const std::string& name, const std::string& host, const std::string& port);
+    int count() const { return static_cast<int>(items_.size()); }
+    ServerItem* itemAt(int);
+    ServerItem* find(const std::string& name);
+    ServerItem* find(const std::string& name, const std::string& host, const std::string& port);
 
-	//Can be added or changed only via these static methods
-    ServerItem* add(const std::string& name,const std::string& host,const std::string& port, const std::string& user,
-                    bool favorite, bool ssl, bool saveIt);
-	void remove(ServerItem*);
-    ServerItem* reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port,
-               const std::string& user, bool ssl);
-	void setFavourite(ServerItem*,bool);
+    // Can be added or changed only via these static methods
+    ServerItem* add(const std::string& name,
+                    const std::string& host,
+                    const std::string& port,
+                    const std::string& user,
+                    bool favorite,
+                    bool ssl,
+                    bool saveIt);
+    void remove(ServerItem*);
+    ServerItem* reset(ServerItem*,
+                      const std::string& name,
+                      const std::string& host,
+                      const std::string& port,
+                      const std::string& user,
+                      bool ssl);
+    void setFavourite(ServerItem*, bool);
 
-	std::string uniqueName(const std::string&);
+    std::string uniqueName(const std::string&);
 
     void init();
-	void save();
-	void rescan();
+    void save();
+    void rescan();
     void syncSystemFiles();
-    ServerListSystemFileManager* systemFileManager() const {return sysFileManager_;}
+    ServerListSystemFileManager* systemFileManager() const { return sysFileManager_; }
 
-	void addObserver(ServerListObserver*);
-	void removeObserver(ServerListObserver*);
+    void addObserver(ServerListObserver*);
+    void removeObserver(ServerListObserver*);
 
-	static ServerList* instance();
+    static ServerList* instance();
 
 protected:
     ServerList();
     ~ServerList();
 
-	static ServerList* instance_;
+    static ServerList* instance_;
 
     bool load();
-    bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
-                        bool checkDuplicate,std::string& errStr);
+    bool checkItemToAdd(const std::string& name,
+                        const std::string& host,
+                        const std::string& port,
+                        bool checkDuplicate,
+                        std::string& errStr);
     void loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
                          std::vector<ServerListSyncChangeItem*>& changeVec);
-	void broadcastChanged();
-	void broadcastChanged(ServerItem*);
+    void broadcastChanged();
+    void broadcastChanged(ServerItem*);
 
-	std::vector<ServerItem*> items_;
+    std::vector<ServerItem*> items_;
     std::string localFile_;
-	std::vector<ServerListObserver*> observers_;
+    std::vector<ServerListObserver*> observers_;
     ServerListSystemFileManager* sysFileManager_{nullptr};
 };
 

@@ -10,6 +10,8 @@
 
 #include "TriggerGraphModel.hpp"
 
+#include <QDebug>
+
 #include "IconProvider.hpp"
 #include "ServerHandler.hpp"
 #include "TriggerGraphView.hpp"
@@ -18,218 +20,180 @@
 #include "VIcon.hpp"
 #include "VNode.hpp"
 
-#include <QDebug>
-
-TriggerGraphModel::TriggerGraphModel(Mode mode,QObject *parent) :
-          QAbstractItemModel(parent),
-          mode_(mode)
-{
+TriggerGraphModel::TriggerGraphModel(Mode mode, QObject* parent) : QAbstractItemModel(parent), mode_(mode) {
 }
 
-TriggerGraphModel::~TriggerGraphModel()
-= default;
+TriggerGraphModel::~TriggerGraphModel() = default;
 
-
-void TriggerGraphModel::clearData()
-{
+void TriggerGraphModel::clearData() {
     beginResetModel();
     items_.clear();
     endResetModel();
 }
 
-void TriggerGraphModel::setItems(const std::vector<TriggerGraphNodeItem*>& items)
-{
+void TriggerGraphModel::setItems(const std::vector<TriggerGraphNodeItem*>& items) {
     beginResetModel();
     items_.clear();
-    for(auto it: items) {
+    for (auto it : items) {
         items_.push_back(it->item());
     }
     endResetModel();
 }
 
-void TriggerGraphModel::appendItems(const std::vector<VItem*>& items)
-{
+void TriggerGraphModel::appendItems(const std::vector<VItem*>& items) {
     beginResetModel();
-    for(auto it: items) {
+    for (auto it : items) {
         items_.push_back(it);
     }
     endResetModel();
 }
 
-void TriggerGraphModel::beginUpdate()
-{
+void TriggerGraphModel::beginUpdate() {
     beginResetModel();
 }
 
-void TriggerGraphModel::endUpdate()
-{
+void TriggerGraphModel::endUpdate() {
     endResetModel();
 }
 
-bool TriggerGraphModel::hasData() const
-{
+bool TriggerGraphModel::hasData() const {
     return (!items_.empty());
 }
 
-int TriggerGraphModel::columnCount( const QModelIndex& /*parent */) const
-{
-     return 1;
+int TriggerGraphModel::columnCount(const QModelIndex& /*parent */) const {
+    return 1;
 }
 
-int TriggerGraphModel::rowCount( const QModelIndex& parent) const
-{
-    if(!hasData())
+int TriggerGraphModel::rowCount(const QModelIndex& parent) const {
+    if (!hasData())
         return 0;
 
-    //Parent is the root:
-    if(!parent.isValid() )
-    {
+    // Parent is the root:
+    if (!parent.isValid()) {
         return static_cast<int>(items_.size());
     }
 
     return 0;
 }
 
-Qt::ItemFlags TriggerGraphModel::flags ( const QModelIndex & index) const
-{
+Qt::ItemFlags TriggerGraphModel::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
-{
-    if(!index.isValid() || !hasData() || (role < Qt::UserRole &&
-        role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::TextAlignmentRole &&
-        role != Qt::ToolTipRole && role != Qt::ForegroundRole))
-    {
+QVariant TriggerGraphModel::data(const QModelIndex& index, int role) const {
+    if (!index.isValid() || !hasData() ||
+        (role < Qt::UserRole && role != Qt::DisplayRole && role != Qt::BackgroundRole &&
+         role != Qt::TextAlignmentRole && role != Qt::ToolTipRole && role != Qt::ForegroundRole)) {
         return {};
     }
 
-    VItem *t = items_[index.row()];
+    VItem* t = items_[index.row()];
     Q_ASSERT(t);
 
-    if(index.column() == 0)
-    {
+    if (index.column() == 0) {
         if (role == ServerRole) {
             return -1;
         }
 
-        if(VAttribute* a=t->isAttribute())
-        {
-            if(role == Qt::DisplayRole)
-            {
-                QStringList d=a->data();
-                if(VNode* pn=a->parent())
+        if (VAttribute* a = t->isAttribute()) {
+            if (role == Qt::DisplayRole) {
+                QStringList d = a->data();
+                if (VNode* pn = a->parent())
                     d.append(QString::fromStdString(pn->absNodePath()));
                 return d;
             }
-            else if(role ==  Qt::ToolTipRole)
-            {
+            else if (role == Qt::ToolTipRole) {
                 return a->toolTip();
             }
-
         }
-        else if(VNode* vnode=t->isNode())
-        {
-            if(role == Qt::DisplayRole)
-            {
+        else if (VNode* vnode = t->isNode()) {
+            if (role == Qt::DisplayRole) {
                 return QString::fromStdString(vnode->absNodePath());
             }
-            else if(role == Qt::BackgroundRole)
-            {
-                if(vnode->isSuspended())
-                {
+            else if (role == Qt::BackgroundRole) {
+                if (vnode->isSuspended()) {
                     QVariantList lst;
                     lst << vnode->stateColour() << vnode->realStateColour();
                     return lst;
                 }
                 else
-                    return vnode->stateColour() ;
+                    return vnode->stateColour();
             }
-            else if(role == Qt::ForegroundRole)
+            else if (role == Qt::ForegroundRole)
                 return vnode->stateFontColour();
 
-            else if(role == Qt::ToolTipRole)
-            {
-                QString txt=vnode->toolTip();
-                //txt+=VIcon::toolTip(vnode,icons_);
+            else if (role == Qt::ToolTipRole) {
+                QString txt = vnode->toolTip();
+                // txt+=VIcon::toolTip(vnode,icons_);
                 return txt;
             }
-            else if(role == IconRole)
-            {
-                return VIcon::pixmapList(vnode,nullptr);
+            else if (role == IconRole) {
+                return VIcon::pixmapList(vnode, nullptr);
             }
-            else if(role  == NodeTypeRole)
-            {
-                 if(vnode->isTask()) return 2;
-                 else if(vnode->isSuite()) return 0;
-                 else if(vnode->isFamily()) return 1;
-                 else if(vnode->isAlias()) return 3;
-                 return 0;
+            else if (role == NodeTypeRole) {
+                if (vnode->isTask())
+                    return 2;
+                else if (vnode->isSuite())
+                    return 0;
+                else if (vnode->isFamily())
+                    return 1;
+                else if (vnode->isAlias())
+                    return 3;
+                return 0;
             }
-            else if(role  == NodeTypeForegroundRole)
-            {
+            else if (role == NodeTypeForegroundRole) {
                 return vnode->typeFontColour();
             }
-            else if(role  == NodePointerRole)
-            {
-                 return QVariant::fromValue((void *) vnode);
+            else if (role == NodePointerRole) {
+                return QVariant::fromValue((void*)vnode);
             }
 
-            else if(role  == Qt::TextAlignmentRole)
-            {
-                return( mode_==NodeMode)?Qt::AlignCenter:Qt::AlignLeft;
+            else if (role == Qt::TextAlignmentRole) {
+                return (mode_ == NodeMode) ? Qt::AlignCenter : Qt::AlignLeft;
             }
-
         }
     }
 
-    //We express the table cell background colour through the UserRole. The
-    //BackgroundRole is already used for the node rendering
-//    if(role == Qt::UserRole && mode_ != NodeMode)
-//    {
-//        const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
-//        if(modes.find(TriggerCollector::Normal) != modes.end())
-//            return QVariant();
-//        else
-//            return QColor(233,242,247);
-//    }
+    // We express the table cell background colour through the UserRole. The
+    // BackgroundRole is already used for the node rendering
+    //    if(role == Qt::UserRole && mode_ != NodeMode)
+    //    {
+    //        const std::set<TriggerCollector::Mode>&  modes=items[row]->modes();
+    //        if(modes.find(TriggerCollector::Normal) != modes.end())
+    //            return QVariant();
+    //        else
+    //            return QColor(233,242,247);
+    //    }
 
     return {};
 }
 
-QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-    if ( orient != Qt::Horizontal)
-            return QAbstractItemModel::headerData( section, orient, role );
+QVariant TriggerGraphModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
+    if (orient != Qt::Horizontal)
+        return QAbstractItemModel::headerData(section, orient, role);
 
     return {};
 }
 
-QModelIndex TriggerGraphModel::index( int row, int column, const QModelIndex & parent ) const
-{
-    if(!hasData() || row < 0 || column < 0)
-    {
+QModelIndex TriggerGraphModel::index(int row, int column, const QModelIndex& parent) const {
+    if (!hasData() || row < 0 || column < 0) {
         return {};
     }
 
-    //When parent is the root this index refers to a node or server
-    if(!parent.isValid())
-    {
-        return createIndex(row,column);
+    // When parent is the root this index refers to a node or server
+    if (!parent.isValid()) {
+        return createIndex(row, column);
     }
 
     return {};
-
 }
 
-QModelIndex TriggerGraphModel::parent(const QModelIndex &child) const
-{
+QModelIndex TriggerGraphModel::parent(const QModelIndex& /*child*/) const {
     return {};
 }
 
-VInfo_ptr TriggerGraphModel::nodeInfo(const QModelIndex& index)
-{
-    if(VItem* t = indexToItem(index)) {
+VInfo_ptr TriggerGraphModel::nodeInfo(const QModelIndex& index) {
+    if (VItem* t = indexToItem(index)) {
         return VInfo::createFromItem(t);
     }
 
@@ -237,12 +201,11 @@ VInfo_ptr TriggerGraphModel::nodeInfo(const QModelIndex& index)
     return res;
 }
 
-QModelIndex TriggerGraphModel::nodeToIndex(const VNode *node) const
-{
+QModelIndex TriggerGraphModel::nodeToIndex(const VNode* node) const {
     if (!hasData() || !node)
         return {};
 
-    for (size_t i=0; i < items_.size(); i++) {
+    for (size_t i = 0; i < items_.size(); i++) {
         if (items_[i] == node)
             return index(i, 0);
     }
@@ -250,123 +213,113 @@ QModelIndex TriggerGraphModel::nodeToIndex(const VNode *node) const
     return {};
 }
 
-QModelIndex TriggerGraphModel::itemToIndex(VItem *item)
-{
-//    if(item)
-//    {
-//         for(std::size_t i=0; i < tc_->items().size(); i++)
-//             if(tc_->items()[i] == item)
-//                 return index(i,0);
-//    }
+QModelIndex TriggerGraphModel::itemToIndex(VItem* /*item*/) {
+    //    if(item)
+    //    {
+    //         for(std::size_t i=0; i < tc_->items().size(); i++)
+    //             if(tc_->items()[i] == item)
+    //                 return index(i,0);
+    //    }
 
     return {};
 }
 
-VItem* TriggerGraphModel::indexToItem(const QModelIndex& index) const
-{
-    if(!hasData() || !index.isValid())
+VItem* TriggerGraphModel::indexToItem(const QModelIndex& index) const {
+    if (!hasData() || !index.isValid())
         return nullptr;
 
-    int row=index.row();
-    if(row < 0 || row >= static_cast<int>(items_.size()))
+    int row = index.row();
+    if (row < 0 || row >= static_cast<int>(items_.size()))
         return nullptr;
 
     return items_[row];
-
 }
 
-void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&)
-{
-    if(!hasData())
+void TriggerGraphModel::nodeChanged(const VNode* /*node*/, const std::vector<ecf::Aspect::Type>&) {
+    if (!hasData())
         return;
 
-//    int num=tc_->items().size();
-//    for(int i=0; i < num; i++)
-//    {
-//        if(VItem* item=tc_->items()[i]->item())
-//        {
-//            if(VNode* n=item->isNode())
-//            {
-//                if(n == node)
-//                {
-//                    QModelIndex idx=index(i,0);
-//                    Q_EMIT dataChanged(idx,idx);
-//                }
-//            }
+    //    int num=tc_->items().size();
+    //    for(int i=0; i < num; i++)
+    //    {
+    //        if(VItem* item=tc_->items()[i]->item())
+    //        {
+    //            if(VNode* n=item->isNode())
+    //            {
+    //                if(n == node)
+    //                {
+    //                    QModelIndex idx=index(i,0);
+    //                    Q_EMIT dataChanged(idx,idx);
+    //                }
+    //            }
 
-//            else if(VAttribute* a=item->isAttribute())
-//            {
-//                if(a->parent() == node)
-//                {
-//                    QModelIndex idx=index(i,0);
-//                    Q_EMIT dataChanged(idx,idx);
-//                }
-//            }
-//        }
-//    }
+    //            else if(VAttribute* a=item->isAttribute())
+    //            {
+    //                if(a->parent() == node)
+    //                {
+    //                    QModelIndex idx=index(i,0);
+    //                    Q_EMIT dataChanged(idx,idx);
+    //                }
+    //            }
+    //        }
+    //    }
 }
 
-
-
-
-
-
-//TriggerGraphModel::TriggerGraphModel(Mode mode,QObject *parent) :
-//          QAbstractItemModel(parent),
-//          mode_(mode)
+// TriggerGraphModel::TriggerGraphModel(Mode mode,QObject *parent) :
+//           QAbstractItemModel(parent),
+//           mode_(mode)
 //{
-//}
+// }
 
-//TriggerGraphModel::~TriggerGraphModel()
+// TriggerGraphModel::~TriggerGraphModel()
 //= default;
 
-
-//void TriggerGraphModel::clearData()
+// void TriggerGraphModel::clearData()
 //{
-//    beginResetModel();
-//    if (node_) {
-//        delete node_;
-//        node_=nullptr;
-//    }
-//    triggerTc_=nullptr;
-//    triggeredTc_ = nullptr;
-//    endResetModel();
-//}
+//     beginResetModel();
+//     if (node_) {
+//         delete node_;
+//         node_=nullptr;
+//     }
+//     triggerTc_=nullptr;
+//     triggeredTc_ = nullptr;
+//     endResetModel();
+// }
 
-//void TriggerGraphModel::setNode(VInfo_ptr info)
+// void TriggerGraphModel::setNode(VInfo_ptr info)
 //{
-//    beginResetModel();
-//    if (node_) {
-//        delete node_;
-//    }
-//    node_= new TriggerTableItem(info->item());
-//    triggerTc_=nullptr;
-//    triggeredTc_ = nullptr;
-//    endResetModel();
-//}
+//     beginResetModel();
+//     if (node_) {
+//         delete node_;
+//     }
+//     node_= new TriggerTableItem(info->item());
+//     triggerTc_=nullptr;
+//     triggeredTc_ = nullptr;
+//     endResetModel();
+// }
 
-//void TriggerGraphModel::beginUpdate()
+// void TriggerGraphModel::beginUpdate()
 //{
-//    beginResetModel();
-//}
+//     beginResetModel();
+// }
 
-//void TriggerGraphModel::endUpdate()
+// void TriggerGraphModel::endUpdate()
 //{
-//    endResetModel();
-//}
+//     endResetModel();
+// }
 
 ////must be protected by beginUpdate()/endUpdate()
-//void TriggerGraphModel::setTriggerCollectors(TriggerTableCollector *triggerTc, TriggerTableCollector *triggeredTc)
+// void TriggerGraphModel::setTriggerCollectors(TriggerTableCollector *triggerTc, TriggerTableCollector *triggeredTc)
 //{
-//    triggerTc_ = triggerTc;
-//    triggeredTc_ = triggeredTc;
-//    Q_ASSERT(triggerTc_);
-//    Q_ASSERT(triggeredTc_);
-//}
+//     triggerTc_ = triggerTc;
+//     triggeredTc_ = triggeredTc;
+//     Q_ASSERT(triggerTc_);
+//     Q_ASSERT(triggeredTc_);
+// }
 
-//bool TriggerGraphModel::hasData() const
+// bool TriggerGraphModel::hasData() const
 //{
-//    return (node_ != nullptr);
+//     return (node_ != nullptr);
 ////        return false;
 
 ////    if(triggerTc_) {
@@ -376,25 +329,25 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 ////    return false;
 //}
 
-//bool TriggerGraphModel::hasTrigger() const
+// bool TriggerGraphModel::hasTrigger() const
 //{
-//    if (triggerTc_) {
-//        Q_ASSERT(node_);
-//        Q_ASSERT(triggeredTc_);
-//        return true;
-//    }
-//    return false;
-//}
+//     if (triggerTc_) {
+//         Q_ASSERT(node_);
+//         Q_ASSERT(triggeredTc_);
+//         return true;
+//     }
+//     return false;
+// }
 
-//int TriggerGraphModel::columnCount( const QModelIndex& /*parent */) const
+// int TriggerGraphModel::columnCount( const QModelIndex& /*parent */) const
 //{
-//     return 1;
-//}
+//      return 1;
+// }
 
-//int TriggerGraphModel::rowCount( const QModelIndex& parent) const
+// int TriggerGraphModel::rowCount( const QModelIndex& parent) const
 //{
-//    if(!hasData())
-//        return 0;
+//     if(!hasData())
+//         return 0;
 
 //    //Parent is the root:
 //    if(!parent.isValid() )
@@ -412,19 +365,19 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 //    return 0;
 //}
 
-//Qt::ItemFlags TriggerGraphModel::flags ( const QModelIndex & index) const
+// Qt::ItemFlags TriggerGraphModel::flags ( const QModelIndex & index) const
 //{
-//    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-//}
+//     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+// }
 
-//QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
+// QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
 //{
-//    if(!index.isValid() || !hasData() || (role < Qt::UserRole &&
-//        role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::TextAlignmentRole &&
-//        role != Qt::ToolTipRole && role != Qt::ForegroundRole))
-//    {
-//        return QVariant();
-//    }
+//     if(!index.isValid() || !hasData() || (role < Qt::UserRole &&
+//         role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::TextAlignmentRole &&
+//         role != Qt::ToolTipRole && role != Qt::ForegroundRole))
+//     {
+//         return QVariant();
+//     }
 
 //    TriggerTableItem *item = indexToItem(index);
 //    if (!item) {
@@ -523,20 +476,20 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 //    return QVariant();
 //}
 
-//QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
+// QVariant TriggerGraphModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 //{
-//    if ( orient != Qt::Horizontal)
-//            return QAbstractItemModel::headerData( section, orient, role );
+//     if ( orient != Qt::Horizontal)
+//             return QAbstractItemModel::headerData( section, orient, role );
 
 //    return QVariant();
 //}
 
-//QModelIndex TriggerGraphModel::index( int row, int column, const QModelIndex & parent ) const
+// QModelIndex TriggerGraphModel::index( int row, int column, const QModelIndex & parent ) const
 //{
-//    if(!hasData() || row < 0 || column < 0)
-//    {
-//        return {};
-//    }
+//     if(!hasData() || row < 0 || column < 0)
+//     {
+//         return {};
+//     }
 
 //    //When parent is the root this index refers to a node or server
 //    if(!parent.isValid())
@@ -548,25 +501,25 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 
 //}
 
-//QModelIndex TriggerGraphModel::parent(const QModelIndex &child) const
+// QModelIndex TriggerGraphModel::parent(const QModelIndex &child) const
 //{
-//    return {};
-//}
+//     return {};
+// }
 
-//VInfo_ptr TriggerGraphModel::nodeInfo(const QModelIndex& index)
+// VInfo_ptr TriggerGraphModel::nodeInfo(const QModelIndex& index)
 //{
-//    if(TriggerTableItem* t = indexToItem(index)) {
-//        return VInfo::createFromItem(t->item());
-//    }
+//     if(TriggerTableItem* t = indexToItem(index)) {
+//         return VInfo::createFromItem(t->item());
+//     }
 
 //    VInfo_ptr res;
 //    return res;
 //}
 
-//QModelIndex TriggerGraphModel::nodeToIndex(const VNode *node) const
+// QModelIndex TriggerGraphModel::nodeToIndex(const VNode *node) const
 //{
-//    if (!hasData() || !node)
-//        return {};
+//     if (!hasData() || !node)
+//         return {};
 
 //    if (node_->item() == node)
 //        return index(0, 0);
@@ -585,7 +538,7 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 //    return {};
 //}
 
-//QModelIndex TriggerGraphModel::itemToIndex(TriggerTableItem *item)
+// QModelIndex TriggerGraphModel::itemToIndex(TriggerTableItem *item)
 //{
 ////    if(item)
 ////    {
@@ -597,10 +550,10 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 //    return {};
 //}
 
-//TriggerTableItem* TriggerGraphModel::indexToItem(const QModelIndex& index) const
+// TriggerTableItem* TriggerGraphModel::indexToItem(const QModelIndex& index) const
 //{
-//    if(!hasData() || !index.isValid())
-//        return nullptr;
+//     if(!hasData() || !index.isValid())
+//         return nullptr;
 
 //    int row=index.row();
 //    if (row == 0) {
@@ -620,10 +573,10 @@ void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::As
 //    return nullptr;
 //}
 
-//void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&)
+// void TriggerGraphModel::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&)
 //{
-//    if(!hasData())
-//        return;
+//     if(!hasData())
+//         return;
 
 ////    int num=tc_->items().size();
 ////    for(int i=0; i < num; i++)

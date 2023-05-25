@@ -47,6 +47,7 @@ user
      msg                     user   Writes the input string to the log file.
      news                    user   Returns true if state of server definition changed.
      order                   user   Re-orders the nodes held by the server
+     password                user   password: The password to be used when contacting the server
      ping                    user   Check if server is running on given host/port. Result reported to standard output.
      plug                    user   Plug command is used to move nodes.
      port                    user   port: If specified will override the environment variable ECF_PORT and default port number of 3141

@@ -9,175 +9,147 @@
 
 #include "ChangeNotifyModel.hpp"
 
+#include <QDebug>
+
 #include "VNode.hpp"
 #include "VNodeList.hpp"
 
-#include <QDebug>
-
-ChangeNotifyModel::ChangeNotifyModel(QObject *parent) :
-     QAbstractItemModel(parent)
-{
+ChangeNotifyModel::ChangeNotifyModel(QObject* parent) : QAbstractItemModel(parent) {
 }
 
-ChangeNotifyModel::~ChangeNotifyModel()
-= default;
+ChangeNotifyModel::~ChangeNotifyModel() = default;
 
-VNodeList* ChangeNotifyModel::data()
-{
-	return data_;
+VNodeList* ChangeNotifyModel::data() {
+    return data_;
 }
 
-void ChangeNotifyModel::resetData(VNodeList *data)
-{
-	beginResetModel();
+void ChangeNotifyModel::resetData(VNodeList* data) {
+    beginResetModel();
 
-	data_=data;
+    data_ = data;
 
-	connect(data_,SIGNAL(beginAppendRow()),
-			this,SLOT(slotBeginAppendRow()));
+    connect(data_, SIGNAL(beginAppendRow()), this, SLOT(slotBeginAppendRow()));
 
-	connect(data_,SIGNAL(endAppendRow()),
-			this,SLOT(slotEndAppendRow()));
+    connect(data_, SIGNAL(endAppendRow()), this, SLOT(slotEndAppendRow()));
 
-	connect(data_,SIGNAL(beginRemoveRow(int)),
-			this,SLOT(slotBeginRemoveRow(int)));
+    connect(data_, SIGNAL(beginRemoveRow(int)), this, SLOT(slotBeginRemoveRow(int)));
 
-	connect(data_,SIGNAL(endRemoveRow(int)),
-			this,SLOT(slotEndRemoveRow(int)));
+    connect(data_, SIGNAL(endRemoveRow(int)), this, SLOT(slotEndRemoveRow(int)));
 
-	connect(data_,SIGNAL(beginRemoveRows(int,int)),
-			this,SLOT(slotBeginRemoveRows(int,int)));
+    connect(data_, SIGNAL(beginRemoveRows(int, int)), this, SLOT(slotBeginRemoveRows(int, int)));
 
-	connect(data_,SIGNAL(endRemoveRows(int,int)),
-			this,SLOT(slotEndRemoveRows(int,int)));
+    connect(data_, SIGNAL(endRemoveRows(int, int)), this, SLOT(slotEndRemoveRows(int, int)));
 
-	connect(data_,SIGNAL(beginReset()),
-			this,SLOT(slotBeginReset()));
+    connect(data_, SIGNAL(beginReset()), this, SLOT(slotBeginReset()));
 
-	connect(data_,SIGNAL(endReset()),
-			this,SLOT(slotEndReset()));
+    connect(data_, SIGNAL(endReset()), this, SLOT(slotEndReset()));
 
-	endResetModel();
+    endResetModel();
 }
 
-bool ChangeNotifyModel::hasData() const
-{
-	return (data_ && data_->size() >0);
+bool ChangeNotifyModel::hasData() const {
+    return (data_ && data_->size() > 0);
 }
 
-int ChangeNotifyModel::columnCount( const QModelIndex& /*parent */ ) const
-{
-   	 return 3;
+int ChangeNotifyModel::columnCount(const QModelIndex& /*parent */) const {
+    return 3;
 }
 
-int ChangeNotifyModel::rowCount( const QModelIndex& parent) const
-{
-	if(!hasData())
-		return 0;
+int ChangeNotifyModel::rowCount(const QModelIndex& parent) const {
+    if (!hasData())
+        return 0;
 
-	//Parent is the root:
-	if(!parent.isValid())
-	{
-		return data_->size();
-	}
+    // Parent is the root:
+    if (!parent.isValid()) {
+        return data_->size();
+    }
 
-	return 0;
+    return 0;
 }
 
+QVariant ChangeNotifyModel::data(const QModelIndex& index, int role) const {
+    if (!index.isValid() || !hasData()) {
+        return {};
+    }
+    int row = index.row();
+    if (row < 0 || row >= data_->size())
+        return {};
 
-QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
-{
-	if(!index.isValid() || !hasData())
-    {
-		return {};
-	}
-	int row=index.row();
-	if(row < 0 || row >= data_->size())
-		return {};
+    if (role == Qt::DisplayRole) {
+        VNodeListItem* item = data_->itemAt(row);
+        assert(item);
 
-	if(role == Qt::DisplayRole)
-	{
-		VNodeListItem *item=data_->itemAt(row);
-		assert(item);
+        switch (index.column()) {
+            case 0:
+                return QString::fromStdString(item->serverName());
+                break;
+            case 1:
+                return QString::fromStdString(item->path());
+                break;
+            case 2:
+                return item->time();
+                break;
+            default:
+                break;
+        }
+    }
 
-		switch(index.column())
-		{
-		case 0:
-            return QString::fromStdString(item->serverName());
-			break;
-		case 1:
-			return QString::fromStdString(item->path());
-			break;
-		case 2:
-			return item->time();
-			break;
-		default:
-			break;
-		}
-	}
-
-	return {};
-}
-
-QVariant ChangeNotifyModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
-      		  return QAbstractItemModel::headerData( section, orient, role );
-
-    if(role == Qt::DisplayRole || role== Qt::ToolTipRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("Server");
-   		case 1: return tr("Node");
-   		case 2: return tr("Time of change");
-   		default: return {};
-   		}
-   	}
     return {};
 }
 
-QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & parent ) const
-{
-	if(!hasData() || row < 0 || column < 0)
-	{
-		return {};
-	}
+QVariant ChangeNotifyModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole))
+        return QAbstractItemModel::headerData(section, orient, role);
 
-	//When parent is the root this index refers to a node or server
-	if(!parent.isValid())
-	{
-		return createIndex(row,column);
-	}
-
-	return {};
-
+    if (role == Qt::DisplayRole || role == Qt::ToolTipRole) {
+        switch (section) {
+            case 0:
+                return tr("Server");
+            case 1:
+                return tr("Node");
+            case 2:
+                return tr("Time of change");
+            default:
+                return {};
+        }
+    }
+    return {};
 }
 
-QModelIndex ChangeNotifyModel::parent(const QModelIndex &/*child*/) const
-{
-	return {};
+QModelIndex ChangeNotifyModel::index(int row, int column, const QModelIndex& parent) const {
+    if (!hasData() || row < 0 || column < 0) {
+        return {};
+    }
+
+    // When parent is the root this index refers to a node or server
+    if (!parent.isValid()) {
+        return createIndex(row, column);
+    }
+
+    return {};
 }
 
-VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const
-{
+QModelIndex ChangeNotifyModel::parent(const QModelIndex& /*child*/) const {
+    return {};
+}
+
+VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const {
     VInfo_ptr res;
 
-    if(!index.isValid() || !hasData())
-    {
+    if (!index.isValid() || !hasData()) {
         return res;
     }
 
-    int row=index.row();
-    if(row < 0 || row >= data_->size())
+    int row = index.row();
+    if (row < 0 || row >= data_->size())
         return res;
 
-    VNodeListItem *item=data_->itemAt(row);
+    VNodeListItem* item = data_->itemAt(row);
     Q_ASSERT(item);
-    VNode* vnode=item->node();
+    VNode* vnode = item->node();
     Q_ASSERT(vnode);
 
-    if(vnode->isServer())
+    if (vnode->isServer())
         return VInfoServer::create(vnode->server());
     else
         return VInfoNode::create(vnode);
@@ -185,45 +157,34 @@ VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const
     return res;
 }
 
-void ChangeNotifyModel::slotBeginAppendRow()
-{
-	beginInsertRows(QModelIndex(),data_->size(),data_->size());
+void ChangeNotifyModel::slotBeginAppendRow() {
+    beginInsertRows(QModelIndex(), data_->size(), data_->size());
 }
 
-void ChangeNotifyModel::slotEndAppendRow()
-{
-	endInsertRows();
+void ChangeNotifyModel::slotEndAppendRow() {
+    endInsertRows();
 }
 
-void ChangeNotifyModel::slotBeginRemoveRow(int row)
-{
-	beginRemoveRows(QModelIndex(),row,row);
+void ChangeNotifyModel::slotBeginRemoveRow(int row) {
+    beginRemoveRows(QModelIndex(), row, row);
 }
 
-void ChangeNotifyModel::slotEndRemoveRow(int /*row*/)
-{
-	endRemoveRows();
+void ChangeNotifyModel::slotEndRemoveRow(int /*row*/) {
+    endRemoveRows();
 }
 
-void ChangeNotifyModel::slotBeginRemoveRows(int rowStart,int rowEnd)
-{
-	beginRemoveRows(QModelIndex(),rowStart,rowEnd);
+void ChangeNotifyModel::slotBeginRemoveRows(int rowStart, int rowEnd) {
+    beginRemoveRows(QModelIndex(), rowStart, rowEnd);
 }
 
-void ChangeNotifyModel::slotEndRemoveRows(int,int)
-{
-	endRemoveRows();
+void ChangeNotifyModel::slotEndRemoveRows(int, int) {
+    endRemoveRows();
 }
 
-
-void ChangeNotifyModel::slotBeginReset()
-{
-	beginResetModel();
+void ChangeNotifyModel::slotBeginReset() {
+    beginResetModel();
 }
 
-void ChangeNotifyModel::slotEndReset()
-{
-	endResetModel();
+void ChangeNotifyModel::slotEndReset() {
+    endResetModel();
 }
-
-

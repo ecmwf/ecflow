@@ -9,53 +9,45 @@
 //============================================================================
 
 #include "VDateAttr.hpp"
-#include "VAttributeType.hpp"
-#include "VNode.hpp"
 
 #include "DateAttr.hpp"
 #include "DayAttr.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
 
 //================================
 // VDateAttrType
 //================================
 
-VDateAttrType::VDateAttrType() : VAttributeType("date")
-{
-    dataCount_=3;
-    searchKeyToData_["date_name"]=NameIndex;
-    searchKeyToData_["name"]=NameIndex;
-    scanProc_=VDateAttr::scan;
+VDateAttrType::VDateAttrType() : VAttributeType("date") {
+    dataCount_                    = 3;
+    searchKeyToData_["date_name"] = NameIndex;
+    searchKeyToData_["name"]      = NameIndex;
+    scanProc_                     = VDateAttr::scan;
 }
 
-QString VDateAttrType::toolTip(QStringList d) const
-{
-    QString t="<b>Type:</b> Date<br>";
-    if(d.count() == dataCount_)
-    {
-        t+="<b>Name:</b> " + d[NameIndex] +
-        "<br><b>Status: </b>" + ((d[FreeIndex] == "1")?"Free":"Holding");
+QString VDateAttrType::toolTip(QStringList d) const {
+    QString t = "<b>Type:</b> Date<br>";
+    if (d.count() == dataCount_) {
+        t += "<b>Name:</b> " + d[NameIndex] + "<br><b>Status: </b>" + ((d[FreeIndex] == "1") ? "Free" : "Holding");
     }
     return t;
 }
 
-QString VDateAttrType::definition(QStringList d) const
-{
+QString VDateAttrType::definition(QStringList d) const {
     QString t;
-    if(d.count() == dataCount_)
-    {
-        t=d[NameIndex];
+    if (d.count() == dataCount_) {
+        t = d[NameIndex];
     }
     return t;
 }
 
-void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data)
-{
-    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar)?"1":"0");
+void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d, QStringList& data) {
+    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar) ? "1" : "0");
 }
 
-void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data)
-{
-    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar)?"1":"0");
+void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d, QStringList& data) {
+    data << qName_ << QString::fromStdString(d.name()) << (d.isFree(calendar) ? "1" : "0");
 }
 
 //=====================================================
@@ -64,64 +56,49 @@ void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStri
 //
 //=====================================================
 
-VDateAttr::VDateAttr(VNode *parent,const DateAttr& t, int index) :
-    VAttribute(parent,index),
-    dataType_(DateData)
-{
-    //name_=t.name();
+VDateAttr::VDateAttr(VNode* parent, const DateAttr& /*t*/, int index) : VAttribute(parent, index), dataType_(DateData) {
+    // name_=t.name();
 }
 
-VDateAttr::VDateAttr(VNode *parent,const DayAttr& t, int index) :
-    VAttribute(parent,index),
-    dataType_(DayData)
-{
-    //name_=t.name();
+VDateAttr::VDateAttr(VNode* parent, const DayAttr& /*t*/, int index) : VAttribute(parent, index), dataType_(DayData) {
+    // name_=t.name();
 }
 
-VAttributeType* VDateAttr::type() const
-{
-    static VAttributeType* atype=VAttributeType::find("date");
+VAttributeType* VDateAttr::type() const {
+    static VAttributeType* atype = VAttributeType::find("date");
     return atype;
 }
 
-QStringList VDateAttr::data(bool /*firstLine*/) const
-{
-    static auto* atype=static_cast<VDateAttrType*>(type());
+QStringList VDateAttr::data(bool /*firstLine*/) const {
+    static auto* atype = static_cast<VDateAttrType*>(type());
     QStringList s;
-    if(parent_->node_)
-    {
+    if (parent_->node_) {
         const ecf::Calendar& calendar = parent_->calendar();
-        if(dataType_ == DateData)
-        {
-            const std::vector<DateAttr>& v=parent_->node_->dates();
-            if(index_ < static_cast<int>(v.size()))
-                atype->encode(calendar, v[index_],s);
+        if (dataType_ == DateData) {
+            const std::vector<DateAttr>& v = parent_->node_->dates();
+            if (index_ < static_cast<int>(v.size()))
+                atype->encode(calendar, v[index_], s);
         }
-        else if(dataType_ == DayData)
-        {
-            const std::vector<DayAttr>& v=parent_->node_->days();
-            if(index_ < static_cast<int>(v.size()))
-                atype->encode(calendar, v[index_],s);
+        else if (dataType_ == DayData) {
+            const std::vector<DayAttr>& v = parent_->node_->days();
+            if (index_ < static_cast<int>(v.size()))
+                atype->encode(calendar, v[index_], s);
         }
     }
     return s;
 }
 
-std::string VDateAttr::strName() const
-{
-    if(parent_->node_)
-    {
-        if(dataType_ == DateData)
-        {
-            const std::vector<DateAttr>& v=parent_->node_->dates();
-            if(index_ < static_cast<int>(v.size())) {
+std::string VDateAttr::strName() const {
+    if (parent_->node_) {
+        if (dataType_ == DateData) {
+            const std::vector<DateAttr>& v = parent_->node_->dates();
+            if (index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
             }
         }
-        else if(dataType_ == DayData)
-        {
-            const std::vector<DayAttr>& v=parent_->node_->days();
-            if(index_ < static_cast<int>(v.size())) {
+        else if (dataType_ == DayData) {
+            const std::vector<DayAttr>& v = parent_->node_->days();
+            if (index_ < static_cast<int>(v.size())) {
                 return v[index_].name();
             }
         }
@@ -129,23 +106,19 @@ std::string VDateAttr::strName() const
     return {};
 }
 
-void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-    if(vnode->node_)
-    {
-        const std::vector<DateAttr>& dateV=vnode->node_->dates();
-        const std::vector<DayAttr>& dayV=vnode->node_->days();
+void VDateAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
+    if (vnode->node_) {
+        const std::vector<DateAttr>& dateV = vnode->node_->dates();
+        const std::vector<DayAttr>& dayV   = vnode->node_->days();
 
-        auto n=static_cast<int>(dateV.size());
-        for(int i=0; i < n; i++)
-        {
-            vec.push_back(new VDateAttr(vnode,dateV[i],i));
+        auto n                             = static_cast<int>(dateV.size());
+        for (int i = 0; i < n; i++) {
+            vec.push_back(new VDateAttr(vnode, dateV[i], i));
         }
 
-        n=static_cast<int>(dayV.size());
-        for(int i=0; i < n; i++)
-        {
-            vec.push_back(new VDateAttr(vnode,dayV[i],i));
+        n = static_cast<int>(dayV.size());
+        for (int i = 0; i < n; i++) {
+            vec.push_back(new VDateAttr(vnode, dayV[i], i));
         }
     }
 }

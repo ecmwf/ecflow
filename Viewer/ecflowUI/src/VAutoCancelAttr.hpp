@@ -11,40 +11,39 @@
 #ifndef VAUTOCANCELATTR_HPP
 #define VAUTOCANCELATTR_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-#include "AutoCancelAttr.hpp"
-
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
+
+#include "AutoCancelAttr.hpp"
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
 class VNode;
 
-class VAutoCancelAttrType : public VAttributeType
-{
+class VAutoCancelAttrType : public VAttributeType {
 public:
     explicit VAutoCancelAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(ecf::AutoCancelAttr*,QStringList&) const;
+    void encode(ecf::AutoCancelAttr*, QStringList&) const;
 
 private:
-    enum DataIndex {TypeIndex=0,ValueIndex=1};
+    enum DataIndex { TypeIndex = 0, ValueIndex = 1 };
 };
 
-class VAutoCancelAttr : public VAttribute
-{
+class VAutoCancelAttr : public VAttribute {
 
 public:
-    VAutoCancelAttr(VNode *parent);
+    VAutoCancelAttr(VNode* parent);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif // VAUTOCANCELATTR_HPP

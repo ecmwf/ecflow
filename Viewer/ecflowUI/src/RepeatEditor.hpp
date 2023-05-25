@@ -11,65 +11,63 @@
 #ifndef REPEATEDITOR_HPP
 #define REPEATEDITOR_HPP
 
-#include "ui_RepeatEditorWidget.h"
+#include <QStringList>
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
-
-#include <QStringList>
+#include "ui_RepeatEditorWidget.h"
 
 class QModelIndex;
 class QStringListModel;
 class VRepeatAttr;
 class RepeatEditor;
 
-class RepeatEditorWidget :  public QWidget, protected Ui::RepeatEditorWidget
-{
-friend class RepeatEditor;
-friend class RepeatIntEditor;
-friend class RepeatStringEditor;
-friend class RepeatDateEditor;
+class RepeatEditorWidget : public QWidget, protected Ui::RepeatEditorWidget {
+    friend class RepeatEditor;
+    friend class RepeatIntEditor;
+    friend class RepeatStringEditor;
+    friend class RepeatDateEditor;
+
 public:
-    RepeatEditorWidget(QWidget *parent=nullptr);
+    RepeatEditorWidget(QWidget* parent = nullptr);
+
 protected:
     void hideRow(QWidget* w);
 };
 
-class RepeatEditor : public AttributeEditor
-{
-Q_OBJECT
+class RepeatEditor : public AttributeEditor {
+    Q_OBJECT
 
 public:
-    RepeatEditor(VInfo_ptr,QWidget* parent=nullptr);
+    RepeatEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~RepeatEditor() override;
 
 protected Q_SLOTS:
-    void slotSelectedInView(const QModelIndex&,const QModelIndex&);
+    void slotSelectedInView(const QModelIndex&, const QModelIndex&);
 
 protected:
-    void buildList(VRepeatAttr *rep);
+    void buildList(VRepeatAttr* rep);
     bool isListMode() const;
-    virtual void setValue(QString)=0;
+    virtual void setValue(QString) = 0;
     void readSettings();
     void writeSettings();
 
     RepeatEditorWidget* w_;
-    //VRepeat* repeat_;
+    // VRepeat* repeat_;
     QStringListModel* model_;
     QStringList modelData_;
     QString oriVal_;
 };
 
-class RepeatIntEditor : public RepeatEditor
-{
-Q_OBJECT
+class RepeatIntEditor : public RepeatEditor {
+    Q_OBJECT
 public:
-    RepeatIntEditor(VInfo_ptr,QWidget* parent=nullptr);
+    RepeatIntEditor(VInfo_ptr, QWidget* parent = nullptr);
 
 protected Q_SLOTS:
     void slotValueChanged(int);
 
-protected:    
+protected:
     void initSpinner();
     void apply() override;
     void setValue(QString val) override;
@@ -77,11 +75,10 @@ protected:
     bool isValueChanged() override;
 };
 
-class RepeatStringEditor : public RepeatEditor
-{
-Q_OBJECT
+class RepeatStringEditor : public RepeatEditor {
+    Q_OBJECT
 public:
-    RepeatStringEditor(VInfo_ptr,QWidget* parent=nullptr);
+    RepeatStringEditor(VInfo_ptr, QWidget* parent = nullptr);
 
 protected Q_SLOTS:
     void slotValueEdited(QString);
@@ -93,11 +90,10 @@ protected:
     bool isValueChanged() override;
 };
 
-class RepeatDateEditor : public RepeatEditor
-{
-Q_OBJECT
+class RepeatDateEditor : public RepeatEditor {
+    Q_OBJECT
 public:
-    RepeatDateEditor(VInfo_ptr,QWidget* parent=nullptr);
+    RepeatDateEditor(VInfo_ptr, QWidget* parent = nullptr);
 
 protected Q_SLOTS:
     void slotValueEdited(QString);
@@ -110,5 +106,3 @@ protected:
 };
 
 #endif // REPEATEDITOR_HPP
-
-

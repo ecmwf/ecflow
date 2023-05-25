@@ -1,4 +1,20 @@
 set(srcs
+    # HEADERS
+    DirectoryHandler.hpp
+    IconProvider.hpp
+    LocalSocketServer.hpp
+    LogConsumer.hpp
+    LogData.hpp
+    LogModel.hpp
+    LogTruncator.hpp
+    LogView.hpp
+    MessageLabel.hpp
+    Palette.hpp
+    TextFormat.hpp
+    UIDebug.hpp
+    UiLog.hpp
+    UserMessage.hpp
+    # SOURCES
     DirectoryHandler.cpp
     IconProvider.cpp
     LocalSocketServer.cpp
@@ -13,10 +29,14 @@ set(srcs
     UIDebug.cpp
     UiLog.cpp
     UserMessage.cpp   
-    )
+)
 
 if(ECFLOW_LOGVIEW)
-    list(APPEND srcs LogLoadData.cpp)
+    list(APPEND srcs
+      # HEADERS
+      LogLoadData.hpp
+      # SOURCES
+      LogLoadData.cpp)
 endif()
 
 if(ECFLOW_QT)
@@ -81,4 +101,4 @@ target_include_directories( viewer PRIVATE  .
                                             ${CMAKE_CURRENT_BINARY_DIR}
 ) 
 
-                    
+target_clangformat( viewer )

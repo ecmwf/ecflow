@@ -23,12 +23,11 @@ class TriggerViewDelegate;
 class TriggerTableItem;
 class TriggerTableModel;
 
-class TriggerTableView : public QTreeView
-{
-Q_OBJECT
+class TriggerTableView : public QTreeView {
+    Q_OBJECT
 
 public:
-    explicit TriggerTableView(QWidget *parent=nullptr);
+    explicit TriggerTableView(QWidget* parent = nullptr);
     ~TriggerTableView() override;
 
     void setTableModel(TriggerTableModel* model);
@@ -42,24 +41,28 @@ public:
 public Q_SLOTS:
     void slotSelectItem(const QModelIndex&);
     void slotDoubleClickItem(const QModelIndex&);
-    void slotContextMenu(const QPoint &position);
+    void slotContextMenu(const QPoint& position);
     void slotCommandShortcut();
-    void slotViewCommand(VInfo_ptr,QString);
+    void slotViewCommand(VInfo_ptr, QString);
     void slotRerender();
     void slotSizeHintChangedGlobal();
-    void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected) override;
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 
 Q_SIGNALS:
     void selectionChanged(TriggerTableItem*);
     void clicked(TriggerTableItem*);
     void linkSelected(VInfo_ptr);
     void selectionChanged();
-    void infoPanelCommand(VInfo_ptr,QString);
-    void dashboardCommand(VInfo_ptr,QString);
+    void infoPanelCommand(VInfo_ptr, QString);
+    void dashboardCommand(VInfo_ptr, QString);
 
 protected:
     QModelIndexList selectedList();
-    void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+    void handleContextMenu(QModelIndex indexClicked,
+                           QModelIndexList indexLst,
+                           QPoint globalPos,
+                           QPoint widgetPos,
+                           QWidget* widget);
 
     TriggerTableModel* model_{nullptr};
     ActionHandler* actionHandler_;
@@ -68,7 +71,7 @@ protected:
 
 private:
     // we enforce the usage of setTableModel()
-    void setModel(QAbstractItemModel*) override {assert(false);}
+    void setModel(QAbstractItemModel*) override { assert(false); }
 };
 
 #endif // TRIGGERTABLEVIEW_HPP

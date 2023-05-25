@@ -10,22 +10,24 @@
 #ifndef TRIGGERGRAPHLAYOUTBUILDER_HPP
 #define TRIGGERGRAPHLAYOUTBUILDER_HPP
 
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 class TriggerGraphLayoutNode;
 
 struct GraphLayoutNode
 {
     GraphLayoutNode(int width, int height) : width_(width), height_(height) {}
-    GraphLayoutNode(GraphLayoutNode* n) :
-        width_(n->width_), height_(n->height_),
-        parents_(n->parents_), children_(n->children_) {}
+    GraphLayoutNode(GraphLayoutNode* n)
+        : width_(n->width_),
+          height_(n->height_),
+          parents_(n->parents_),
+          children_(n->children_) {}
 
-    bool hasParents() const {return parents_.size() > 0;}
-    bool hasChildren() const {return children_.size() > 0;}
+    bool hasParents() const { return parents_.size() > 0; }
+    bool hasChildren() const { return children_.size() > 0; }
     int indexOfParent(int v) const {
-        for(std::size_t i=0; i < parents_.size(); i++) {
+        for (std::size_t i = 0; i < parents_.size(); i++) {
             if (parents_[i] == v)
                 return static_cast<int>(i);
         }
@@ -33,23 +35,22 @@ struct GraphLayoutNode
     }
 
     int indexOfChild(int v) const {
-        for(std::size_t i=0; i < children_.size(); i++) {
+        for (std::size_t i = 0; i < children_.size(); i++) {
             if (children_[i] == v)
                 return static_cast<int>(i);
         }
         return -1;
     }
 
-    int x_ {0};
-    int y_ {0};
-    int width_ {0};
-    int height_ {0};
+    int x_{0};
+    int y_{0};
+    int width_{0};
+    int height_{0};
     std::vector<int> parents_;
     std::vector<int> children_;
 };
 
-class GraphLayoutEdge
-{
+class GraphLayoutEdge {
 public:
     GraphLayoutEdge(int from, int to) : from_(from), to_(to) {}
 
@@ -65,32 +66,29 @@ struct SimpleGraphLayoutNode : GraphLayoutNode
     SimpleGraphLayoutNode(GraphLayoutNode* n) : GraphLayoutNode(n) {}
     SimpleGraphLayoutNode() : GraphLayoutNode(0, 0) {}
 
-    int arc_ {0};
-    int level_ {0};
-    int group_ {0};
-    bool visited_ {false};
-    bool managed_ {true};
-    bool dummy_ {false};
+    int arc_{0};
+    int level_{0};
+    int group_{0};
+    bool visited_{false};
+    bool managed_{true};
+    bool dummy_{false};
 };
 
-
-class GraphLayoutBuilder
-{
+class GraphLayoutBuilder {
 public:
-    GraphLayoutBuilder() = default;
-    virtual ~GraphLayoutBuilder() = default;
-    virtual void clear() =0;
-    virtual void build(std::vector<GraphLayoutNode*>&, std::vector<GraphLayoutEdge*>&, int focus) =0;
-    void setXMinGap(int v) {xMinGap_ = v;}
-    void setyMinGap(int v) {yMinGap_ = v;}
+    GraphLayoutBuilder()                                                                          = default;
+    virtual ~GraphLayoutBuilder()                                                                 = default;
+    virtual void clear()                                                                          = 0;
+    virtual void build(std::vector<GraphLayoutNode*>&, std::vector<GraphLayoutEdge*>&, int focus) = 0;
+    void setXMinGap(int v) { xMinGap_ = v; }
+    void setyMinGap(int v) { yMinGap_ = v; }
 
 protected:
-    int xMinGap_  {60};
-    int yMinGap_  {10};
+    int xMinGap_{60};
+    int yMinGap_{10};
 };
 
-class SimpleGraphLayoutBuilder : public GraphLayoutBuilder
-{
+class SimpleGraphLayoutBuilder : public GraphLayoutBuilder {
 public:
     SimpleGraphLayoutBuilder() = default;
     ~SimpleGraphLayoutBuilder() override;
@@ -100,14 +98,16 @@ public:
 protected:
     bool hasManagedParent(SimpleGraphLayoutNode*) const;
     bool hasManagedChild(SimpleGraphLayoutNode*) const;
-    int compute_level(SimpleGraphLayoutNode *item);
-    void compute_level_pass2(SimpleGraphLayoutNode *item);
+    int compute_level(SimpleGraphLayoutNode* item);
+    void compute_level_pass2(SimpleGraphLayoutNode* item);
     void set_arc(SimpleGraphLayoutNode* item, int arc);
-    int compute_arc(SimpleGraphLayoutNode *item);
-    void compute_y(
-            const std::vector<int>& nodes, const std::vector<int>& levels,
-            std::vector<int>& positions, int max_in_a_level, int no_levels,
-            int v_dist);
+    int compute_arc(SimpleGraphLayoutNode* item);
+    void compute_y(const std::vector<int>& nodes,
+                   const std::vector<int>& levels,
+                   std::vector<int>& positions,
+                   int max_in_a_level,
+                   int no_levels,
+                   int v_dist);
     void buildIt(bool dummy);
 
     int insertDummyNode(int parentIndex, int chIndex, int level);
@@ -116,8 +116,7 @@ protected:
     void printState(const std::vector<int>& nodes);
 
     std::vector<SimpleGraphLayoutNode*> nodes_;
-    int focus_ {0};
+    int focus_{0};
 };
-
 
 #endif // TRIGGERGRAPHLAYOUTBUILDER_HPP

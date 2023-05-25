@@ -11,31 +11,29 @@
 #ifndef TIMELINEINFODELEGATE_HPP
 #define TIMELINEINFODELEGATE_HPP
 
+#include <string>
+
 #include <QBrush>
 #include <QDateTime>
 #include <QPen>
-#include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
+#include <QStyledItemDelegate>
 
 #include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
 
-#include <string>
-
 class TimelineInfoDailyModel;
 
-class TimelineInfoDelegate : public NodeViewDelegate
-{
+class TimelineInfoDelegate : public NodeViewDelegate {
 public:
-    explicit TimelineInfoDelegate(QWidget *parent=nullptr);
+    explicit TimelineInfoDelegate(QWidget* parent = nullptr);
     ~TimelineInfoDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 protected:
-    void updateSettings() override {updateSettingsInternal();}
+    void updateSettings() override { updateSettingsInternal(); }
 
 private:
     void updateSettingsInternal();

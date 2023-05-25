@@ -10,11 +10,11 @@
 #ifndef TRIGGERGRAPHWIDGET_HPP
 #define TRIGGERGRAPHWIDGET_HPP
 
-#include "VInfo.hpp"
+#include <QWidget>
+
 #include "Aspect.hpp"
 #include "TriggerCollector.hpp"
-
-#include <QWidget>
+#include "VInfo.hpp"
 
 class TriggerTableItem;
 class TriggerTableCollector;
@@ -24,25 +24,23 @@ class QSlider;
 class QToolButton;
 
 namespace Ui {
-    class TriggerGraphWidget;
+class TriggerGraphWidget;
 }
 
 class TriggerGraphWidget;
 
-
-class TriggerGraphWidget : public QWidget
-{
+class TriggerGraphWidget : public QWidget {
     Q_OBJECT
 public:
-    explicit TriggerGraphWidget(QWidget *parent = nullptr);
+    explicit TriggerGraphWidget(QWidget* parent = nullptr);
     ~TriggerGraphWidget() override;
 
-    void clear(bool keepConfig=false);
+    void clear(bool keepConfig = false);
     void setInfo(VInfo_ptr info, bool dependency);
-    VInfo_ptr info() const {return info_;}
+    VInfo_ptr info() const { return info_; }
     bool dependency() const;
     void adjust(VInfo_ptr info, bool dependency, TriggerTableCollector* triggerTc1, TriggerTableCollector* tc2);
-    void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
+    void setTriggerCollector(TriggerTableCollector* tc1, TriggerTableCollector* tc2);
     void beginTriggerUpdate();
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
@@ -54,8 +52,8 @@ public:
     void writeSettings(VComboSettings* vs);
 
 Q_SIGNALS:
-    void infoPanelCommand(VInfo_ptr,QString);
-    void dashboardCommand(VInfo_ptr,QString);
+    void infoPanelCommand(VInfo_ptr, QString);
+    void dashboardCommand(VInfo_ptr, QString);
     void linkSelected(VInfo_ptr);
 
 protected Q_SLOTS:
@@ -67,15 +65,15 @@ private:
     Ui::TriggerGraphWidget* ui_;
 
 private:
-    void scan(bool dependency);   
+    void scan(bool dependency);
     void adjustButtons();
 
     VInfo_ptr info_;
-    TriggerTableCollector* triggerTc_ {nullptr};
-    TriggerTableCollector* triggeredTc_ {nullptr};
+    TriggerTableCollector* triggerTc_{nullptr};
+    TriggerTableCollector* triggeredTc_{nullptr};
     VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
-    QSlider* zoomSlider_ {nullptr};
+    QSlider* zoomSlider_{nullptr};
 };
 
 #endif // TRIGGERGRAPHWIDGET_HPP

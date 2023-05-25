@@ -12,12 +12,12 @@
 #define TIMELINEVIEW_HPP
 
 #include <QAction>
+#include <QDateTime>
 #include <QHeaderView>
+#include <QPen>
+#include <QStack>
 #include <QStyledItemDelegate>
 #include <QTreeView>
-#include <QPen>
-#include <QDateTime>
-#include <QStack>
 
 #include "VInfo.hpp"
 #include "VProperty.hpp"
@@ -33,18 +33,17 @@ class TimelineDelegate;
 class TimelineInfoDialog;
 class MainTimelineHeader;
 
-class TimelineView : public QTreeView,public VPropertyObserver
-{
-Q_OBJECT
+class TimelineView : public QTreeView, public VPropertyObserver {
+    Q_OBJECT
 
 public:
-    explicit TimelineView(TimelineSortModel* model,QWidget *parent=nullptr);
+    explicit TimelineView(TimelineSortModel* model, QWidget* parent = nullptr);
     ~TimelineView() override;
 
-    enum ViewMode {TimelineMode,DurationMode};
-    ViewMode viewMode() const {return viewMode_;}
+    enum ViewMode { TimelineMode, DurationMode };
+    ViewMode viewMode() const { return viewMode_; }
 
-    enum DurationViewMode {FirstDurationMode, MeanDurationMode};
+    enum DurationViewMode { FirstDurationMode, MeanDurationMode };
 
     void dataCleared();
     void rerender();
@@ -53,9 +52,9 @@ public:
     void setCurrentSelection(VInfo_ptr n);
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
-    void setPeriod(QDateTime t1,QDateTime t2);
-    void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
-    void setViewMode(ViewMode vm, bool force=false);
+    void setPeriod(QDateTime t1, QDateTime t2);
+    void setZoomActions(QAction* zoomInAction, QAction* zoomOutAction);
+    void setViewMode(ViewMode vm, bool force = false);
     void setDurationViewMode(DurationViewMode mode);
 
     void notifyChange(VProperty* p) override;
@@ -65,30 +64,33 @@ public:
 
 protected Q_SLOTS:
     void slotDoubleClickItem(const QModelIndex&);
-    void slotContextMenu(const QPoint &position);
-    void slotViewCommand(VInfo_ptr,QString);
-    void slotHeaderContextMenu(const QPoint &position);
+    void slotContextMenu(const QPoint& position);
+    void slotViewCommand(VInfo_ptr, QString);
+    void slotHeaderContextMenu(const QPoint& position);
     void slotSizeHintChangedGlobal();
     void slotRerender();
-    void periodSelectedInHeader(QDateTime t1,QDateTime t2);
-    void slotHzScrollbar(int,int);
+    void periodSelectedInHeader(QDateTime t1, QDateTime t2);
+    void slotHzScrollbar(int, int);
     void adjustHeader();
-
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
-    void infoPanelCommand(VInfo_ptr,QString);
-    void dashboardCommand(VInfo_ptr,QString);
-    void periodSelected(QDateTime,QDateTime);
-    void periodBeingZoomed(QDateTime,QDateTime);
+    void infoPanelCommand(VInfo_ptr, QString);
+    void dashboardCommand(VInfo_ptr, QString);
+    void periodSelected(QDateTime, QDateTime);
+    void periodBeingZoomed(QDateTime, QDateTime);
     void lookupRequested(QString);
     void copyPathRequested(QString);
 
 protected:
     QModelIndexList selectedList();
-    void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+    void handleContextMenu(QModelIndex indexClicked,
+                           QModelIndexList indexLst,
+                           QPoint globalPos,
+                           QPoint widgetPos,
+                           QWidget* widget);
     void adjustBackground(QColor col);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
     void setSortingEnabledNoExec(bool b);
     void showDetails(const QModelIndex& indexClicked);
     void lookup(const QModelIndex&);
@@ -102,7 +104,7 @@ protected:
     ActionHandler* actionHandler_;
     MainTimelineHeader* header_;
     bool headerBeingAdjusted_;
-    TimelineDelegate *delegate_;
+    TimelineDelegate* delegate_;
     bool needItemsLayout_;
     PropertyMapper* prop_;
     bool setCurrentIsRunning_;
@@ -114,39 +116,38 @@ protected:
     DurationViewMode durationViewMode_{FirstDurationMode};
 };
 
-
-class TimelineDelegate : public QStyledItemDelegate, public VPropertyObserver
-{
- Q_OBJECT
+class TimelineDelegate : public QStyledItemDelegate, public VPropertyObserver {
+    Q_OBJECT
 
 public:
-    explicit TimelineDelegate(TimelineModel* model,QWidget *parent);
+    explicit TimelineDelegate(TimelineModel* model, QWidget* parent);
     ~TimelineDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     void notifyChange(VProperty* p) override;
 
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
-    void setPeriod(QDateTime t1,QDateTime t2);
-    void setMaxDurations(int submittedDuration,int activeDuration);
-    void setUseMeanDuration(bool b) {useMeanDuration_ = b;}
+    void setPeriod(QDateTime t1, QDateTime t2);
+    void setMaxDurations(int submittedDuration, int activeDuration);
+    void setUseMeanDuration(bool b) { useMeanDuration_ = b; }
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
     void updateSettings();
-    void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
-    void renderSubmittedDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
-    void renderActiveDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
-    void renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect,int maxTextW) const;
-    void renderDuration(QPainter *painter, int val, int maxVal, QColor col, QRect rect,int maxTextW) const;
-    void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
-    int timeToPos(QRect r,unsigned int time) const;
+    void renderTimeline(QPainter* painter, const QStyleOptionViewItem& option, int) const;
+    void renderSubmittedDuration(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex&) const;
+    void renderActiveDuration(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex&) const;
+    void
+    renderDuration(QPainter* painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect, int maxTextW)
+        const;
+    void renderDuration(QPainter* painter, int val, int maxVal, QColor col, QRect rect, int maxTextW) const;
+    void drawCell(QPainter* painter, QRect r, QColor fillCol, bool hasGrad, bool lighter) const;
+    int timeToPos(QRect r, unsigned int time) const;
     int getDurationMaxTextWidth(int duration) const;
 
     TimelineModel* model_;
@@ -163,9 +164,6 @@ protected:
     int submittedMaxTextWidth_;
     int activeMaxTextWidth_;
     bool useMeanDuration_{false};
-
 };
 
 #endif // TIMELINEVIEW_HPP
-
-

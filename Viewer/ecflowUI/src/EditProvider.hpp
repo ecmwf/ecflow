@@ -10,25 +10,23 @@
 #ifndef EDITPROVIDER_HPP_
 #define EDITPROVIDER_HPP_
 
+#include "InfoProvider.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
-#include "InfoProvider.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
-class EditProvider : public InfoProvider
-{
+class EditProvider : public InfoProvider {
 public:
-	 explicit EditProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::OutputTask), preproc_(false) {}
+    explicit EditProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::OutputTask), preproc_(false) {}
 
-	 void visit(VInfoNode*) override;
-	 void submit(const std::vector<std::string>& txt,bool alias);
+    void visit(VInfoNode*) override;
+    void submit(const std::vector<std::string>& txt, bool alias);
 
-	 void preproc(bool b) {preproc_=b;}
+    void preproc(bool b) { preproc_ = b; }
 
 private:
-	 bool preproc_;
+    bool preproc_;
 };
 
 #endif

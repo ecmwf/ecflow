@@ -11,74 +11,78 @@
 #ifndef VPROPERTY_HPP_
 #define VPROPERTY_HPP_
 
+#include <vector>
+
 #include <QColor>
 #include <QFont>
 #include <QList>
 #include <QVariant>
 
-#include <vector>
-
 class VProperty;
 
-class VPropertyObserver
-{
+class VPropertyObserver {
 public:
-	VPropertyObserver() = default;
-	virtual ~VPropertyObserver() = default;
+    VPropertyObserver()                   = default;
+    virtual ~VPropertyObserver()          = default;
 
-	virtual void notifyChange(VProperty*)=0;
+    virtual void notifyChange(VProperty*) = 0;
 };
 
-class VPropertyVisitor
-{
+class VPropertyVisitor {
 public:
-    VPropertyVisitor() = default;
-    virtual ~VPropertyVisitor() = default;
-	virtual void visit(VProperty*)=0;
+    VPropertyVisitor()             = default;
+    virtual ~VPropertyVisitor()    = default;
+    virtual void visit(VProperty*) = 0;
 };
 
+// This class defines a property storing its value as a QVariant.
+// Properties are used to store the viewer's configuration. Editable properties
+// store all the information needed to display them in a property editor.
+// Properties can have children so trees can be built up from them.
 
-
-//This class defines a property storing its value as a QVariant.
-//Properties are used to store the viewer's configuration. Editable properties
-//store all the information needed to display them in a property editor.
-//Properties can have children so trees can be built up from them.
-
-class VProperty : public VPropertyObserver
-{
+class VProperty : public VPropertyObserver {
 public:
     explicit VProperty(const std::string& name);
     ~VProperty() override;
 
-    enum Type {StringType,IntType,BoolType,ColourType,FontType,SoundType};
+    enum Type { StringType, IntType, BoolType, ColourType, FontType, SoundType };
 
-    enum GuiType {StringGui,IntGui,BoolGui,ColourGui,FontGui,SoundGui,
-    			  StringComboGui,MultiStringComboGui,SoundComboGui};
+    enum GuiType {
+        StringGui,
+        IntGui,
+        BoolGui,
+        ColourGui,
+        FontGui,
+        SoundGui,
+        StringComboGui,
+        MultiStringComboGui,
+        SoundComboGui
+    };
 
-    QString name() const {return name_;}
-    const std::string& strName() const {return strName_;}
-    QVariant defaultValue() const {return defaultValue_;}
+    QString name() const { return name_; }
+    const std::string& strName() const { return strName_; }
+    QVariant defaultValue() const { return defaultValue_; }
     QVariant value() const;
     QString valueLabel() const;
     QString valueAsString() const;
     QString variantToString(QVariant) const;
     std::string valueAsStdString() const;
-    Type type() const {return type_;}
-    GuiType guiType() const {return guiType_;}
+    Type type() const { return type_; }
+    GuiType guiType() const { return guiType_; }
     QString param(QString name) const;
-    QColor paramToColour(QString name) {return toColour(param(name).toStdString()) ;}
+    QColor paramToColour(QString name) { return toColour(param(name).toStdString()); }
 
     void setDefaultValue(const std::string&);
     void setValue(const std::string&);
     void setValue(QVariant);
-    void setParam(QString,QString);
+    void setParam(QString, QString);
     void adjustAfterLoad();
 
     std::string path();
-    VProperty* parent() const {return parent_;}
-    void setParent(VProperty* p) {parent_=p;}
-    bool hasChildren() const {return children_.count() >0;}
-    QList<VProperty*> children() const {return children_;}
+    VProperty* parent() const { return parent_; }
+    void setParent(VProperty* p) { parent_ = p; }
+    bool hasChildren() const { return children_.count() > 0; }
+    QList<VProperty*> children() const { return children_; }
     void addChild(VProperty*);
     VProperty* findChild(QString name);
     VProperty* find(const std::string& fullPath);
@@ -87,14 +91,14 @@ public:
     bool changed() const;
     void collectLinks(std::vector<VProperty*>&);
 
-    void setLink(VProperty* p) {link_=p;}
-    VProperty* link() const {return link_;}
+    void setLink(VProperty* p) { link_ = p; }
+    VProperty* link() const { return link_; }
 
-    void setMaster(VProperty*,bool useMaster=false);
-    VProperty* master() const {return master_;}
+    void setMaster(VProperty*, bool useMaster = false);
+    VProperty* master() const { return master_; }
     void setUseMaster(bool);
-    bool useMaster() const {return useMaster_;}
-    VProperty *clone(bool addLink,bool setMaster,bool useMaster=false);
+    bool useMaster() const { return useMaster_; }
+    VProperty* clone(bool addLink, bool setMaster, bool useMaster = false);
 
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);
@@ -107,10 +111,10 @@ public:
     static bool isNumber(const std::string&);
     static bool isBool(const std::string&);
 
-    static QColor toColour(const std::string&) ;
-    static QFont  toFont(const std::string&);
-    static int    toNumber(const std::string&);
-    static bool   toBool(const std::string&);
+    static QColor toColour(const std::string&);
+    static QFont toFont(const std::string&);
+    static int toNumber(const std::string&);
+    static bool toBool(const std::string&);
 
     static QString toString(QColor col);
     static QString toString(QFont f);
@@ -119,10 +123,10 @@ private:
     void dispatchChange();
     VProperty* find(const std::vector<std::string>& pathVec);
 
-    std::string strName_; //The name of the property as an std::string
-    QString name_; //The name of the property. Used as an id.
-    QVariant defaultValue_; //The default value
-    QVariant value_; //The current value
+    std::string strName_;   // The name of the property as an std::string
+    QString name_;          // The name of the property. Used as an id.
+    QVariant defaultValue_; // The default value
+    QVariant value_;        // The current value
 
     VProperty* parent_;
     QList<VProperty*> children_;
@@ -131,9 +135,8 @@ private:
     bool useMaster_;
     Type type_;
     GuiType guiType_;
-    QMap<QString,QString> params_;
+    QMap<QString, QString> params_;
     VProperty* link_;
 };
-
 
 #endif

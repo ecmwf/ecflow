@@ -15,9 +15,8 @@
 class VNode;
 class VServer;
 
-class TriggeredScanner : public QObject
-{
-Q_OBJECT
+class TriggeredScanner : public QObject {
+    Q_OBJECT
 
 public:
     TriggeredScanner(QObject* parent) : QObject(parent), total_(0), current_(0), batchSize_(100) {}
@@ -33,7 +32,7 @@ Q_SIGNALS:
 private:
     void scan(VNode*);
     void updateProgress();
-    int  progress() const;
+    int progress() const;
 
     int total_;
     int current_;
@@ -41,4 +40,3 @@ private:
 };
 
 #endif // TRIGGEREDSCANNER_HPP
-

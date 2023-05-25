@@ -11,12 +11,13 @@
 #ifndef VLABEL_HPP
 #define VLABEL_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
-
-#include <QStringList>
 #include <string>
 #include <vector>
+
+#include <QStringList>
+
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
@@ -24,30 +25,28 @@ class VNode;
 
 class Label;
 
-class VLabelAttrType : public VAttributeType
-{
+class VLabelAttrType : public VAttributeType {
 public:
     explicit VLabelAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(const Label& label,QStringList& data,bool firstLine) const;
+    void encode(const Label& label, QStringList& data, bool firstLine) const;
     void encode_empty(QStringList& data) const;
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, ValueIndex = 2 };
 };
 
-class VLabelAttr : public VAttribute
-{
+class VLabelAttr : public VAttribute {
 public:
-    VLabelAttr(VNode *parent,const Label&,int index);
+    VLabelAttr(VNode* parent, const Label&, int index);
 
     int lineNum() const override;
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 };
 
 #endif // VLABEL_HPP

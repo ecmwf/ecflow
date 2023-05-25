@@ -26,20 +26,19 @@ class VNodeList;
 class QAbstractItemModel;
 class QSortFilterProxyModel;
 
-class ChangeNotify : public VPropertyObserver
-{
+class ChangeNotify : public VPropertyObserver {
 public:
-	explicit ChangeNotify(const std::string& id);
-    ChangeNotify(const ChangeNotify&) = delete;
+    explicit ChangeNotify(const std::string& id);
+    ChangeNotify(const ChangeNotify&)            = delete;
     ChangeNotify& operator=(const ChangeNotify&) = delete;
 
-	const std::string& id() const {return id_;}
-    VNodeList* data() const {return data_;}
-	VProperty* prop() const {return prop_;}
+    const std::string& id() const { return id_; }
+    VNodeList* data() const { return data_; }
+    VProperty* prop() const { return prop_; }
     ChangeNotifyModel* model() const;
-	QSortFilterProxyModel* proxyModel() const {return proxyModel_;}
-	bool isEnabled() const {return enabled_;}
-	void clearData();
+    QSortFilterProxyModel* proxyModel() const { return proxyModel_; }
+    bool isEnabled() const { return enabled_; }
+    void clearData();
 
     virtual QColor fillColour() const;
     virtual QColor textColour() const;
@@ -48,44 +47,43 @@ public:
     QString toolTip() const;
     QString widgetText() const;
 
-    static void showDialog(ChangeNotify* notifier=nullptr);
+    static void showDialog(ChangeNotify* notifier = nullptr);
 
-	//Form VPropertyObserver
-	void notifyChange(VProperty*) override;
+    // Form VPropertyObserver
+    void notifyChange(VProperty*) override;
 
-	static void add(const std::string&,VNode*,bool,bool);
-	static void remove(const std::string&,VNode*);
-	static void populate(ChangeNotifyWidget* w);
-    static void updateNotificationStateFromServer(const std::string& id,bool hasEnabledServer);
+    static void add(const std::string&, VNode*, bool, bool);
+    static void remove(const std::string&, VNode*);
+    static void populate(ChangeNotifyWidget* w);
+    static void updateNotificationStateFromServer(const std::string& id, bool hasEnabledServer);
 
-	//Called from VConfigLoader
-	static void load(VProperty* group);
+    // Called from VConfigLoader
+    static void load(VProperty* group);
 
 protected:
-	void add(VNode*,bool,bool);
-	void remove(VNode*);
-	void setEnabled(bool);
+    void add(VNode*, bool, bool);
+    void remove(VNode*);
+    void setEnabled(bool);
     void updateNotificationState(bool hasEnabledServer);
     void setProperty(VProperty* prop);
-	void loadServerSettings();
+    void loadServerSettings();
 
-	static ChangeNotify* find(const std::string&);
-	static ChangeNotifyDialog* dialog();
+    static ChangeNotify* find(const std::string&);
+    static ChangeNotifyDialog* dialog();
 
-	std::string id_;
+    std::string id_;
     bool enabled_{false};
     VNodeList* data_{nullptr};
     ChangeNotifyModel* model_{nullptr};
     QSortFilterProxyModel* proxyModel_{nullptr};
     VProperty* prop_{nullptr};
-    VProperty* propEnabled_{nullptr}; //central settings in config GUI
-	static ChangeNotifyDialog* dialog_;
+    VProperty* propEnabled_{nullptr}; // central settings in config GUI
+    static ChangeNotifyDialog* dialog_;
 };
 
-class AbortedNotify : public ChangeNotify
-{
+class AbortedNotify : public ChangeNotify {
 public:
-	explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
+    explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
     QColor fillColour() const override;
     QColor textColour() const override;
 };

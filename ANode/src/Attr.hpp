@@ -21,16 +21,17 @@
 namespace ecf {
 class Attr {
 public:
-   enum Type { UNKNOWN=0, EVENT=1, METER=2, LABEL=3, LIMIT=4, VARIABLE=5, ALL=6 };
+    enum Type { UNKNOWN = 0, EVENT = 1, METER = 2, LABEL = 3, LIMIT = 4, VARIABLE = 5, ALL = 6 };
 
     static const char* to_string(Attr::Type s);
     static Attr::Type to_attr(const std::string& attr);
     static bool is_valid(const std::string& state);
     static std::vector<std::string> all_attrs();
     static std::vector<Attr::Type> attrs();
+
 private:
-  Attr(const Attr&) = delete;
-  const Attr& operator=(const Attr&) = delete;
+    Attr(const Attr&)                  = delete;
+    const Attr& operator=(const Attr&) = delete;
 };
-}
+} // namespace ecf
 #endif

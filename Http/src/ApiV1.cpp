@@ -15,17 +15,20 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "ApiV1.hpp"
-#include "HttpServerException.hpp"
-#include "TypeToJson.hpp"
-#include <Defs.hpp>
-#include <mutex>
-#include <nlohmann/json.hpp>
-#include <string>
-#include <Str.hpp>
-#include "ApiV1Impl.hpp"
+
 #include <atomic>
+#include <mutex>
+#include <string>
+
 #include <sys/time.h>
+
+#include "ApiV1Impl.hpp"
+#include "Defs.hpp"
+#include "HttpServerException.hpp"
 #include "Options.hpp"
+#include "Str.hpp"
+#include "TypeToJson.hpp"
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
@@ -39,380 +42,410 @@ std::atomic<unsigned int> last_request_time(0);
 namespace {
 
 void set_cors(httplib::Response& response) {
-   response.set_header("Access-Control-Allow-Origin", "*");
-   response.set_header("Access-Control-Allow-Credentials", "true");
-   response.set_header("Access-Control-Allow-Headers", "*");
+    response.set_header("Access-Control-Allow-Origin", "*");
+    response.set_header("Access-Control-Allow-Credentials", "true");
+    response.set_header("Access-Control-Allow-Headers", "*");
 }
 
 void set_allowed_methods(httplib::Response& response, const std::string& methods) {
-   response.set_header("Allow", methods);
-   response.set_header("Access-Control-Allow-Methods", methods);
+    response.set_header("Allow", methods);
+    response.set_header("Access-Control-Allow-Methods", methods);
 }
 
 void handle_exception(const std::exception& e, const httplib::Request& request, httplib::Response& response) {
-   // Try to guess a bit more suitable return values
-   // based on client output
-   // TODO: should this actually be done? eg. do the status codes *only*
-   // reflect the API functionality or also the application (ecflow) server?
-   // if user requests an ecflow script and the script does not exists, should
-   // 404 be returned (even if the rest api path was correct)?
+    // Try to guess a bit more suitable return values
+    // based on client output
+    // TODO: should this actually be done? eg. do the status codes *only*
+    // reflect the API functionality or also the application (ecflow) server?
+    // if user requests an ecflow script and the script does not exists, should
+    // 404 be returned (even if the rest api path was correct)?
 
-   auto trimr = [](const std::string& str) -> std::string {
-       std::string copy = str;
-       copy.erase(copy.find_last_not_of(" \n\r") + 1, std::string::npos);
-       return copy;
-   };
+    auto trimr = [](const std::string& str) -> std::string {
+        std::string copy = str;
+        copy.erase(copy.find_last_not_of(" \n\r") + 1, std::string::npos);
+        return copy;
+    };
 
-   HttpStatusCode status_code = HttpStatusCode::client_error_bad_request;
+    HttpStatusCode status_code = HttpStatusCode::client_error_bad_request;
 
-   const std::string err = trimr(std::string(e.what()));
+    const std::string err      = trimr(std::string(e.what()));
 
-   if (err.find("authentication failed") != std::string::npos) {
-      status_code = HttpStatusCode::client_error_unauthorized;
-   } else if (err.find("Could not find") != std::string::npos) {
-      status_code = HttpStatusCode::client_error_not_found;
-   } else if (err.find("Cannot find") != std::string::npos) {
-      status_code = HttpStatusCode::client_error_not_found;
-   } else if (err.find("cannot be found") != std::string::npos && err.find("Could not find referenced node") == std::string::npos) {
-      status_code = HttpStatusCode::client_error_not_found;
-   } else if (err.find("No such file") != std::string::npos) {
-      status_code = HttpStatusCode::client_error_not_found;
-   } else if (err.find("Add Suite failed: A Suite of name") != std::string::npos) {
-      status_code = HttpStatusCode::client_error_conflict;
-   } else if (err.find("Ran out of end points") != std::string::npos) {
-      status_code = HttpStatusCode::server_error_bad_gateway;
-   } else if (err.find("Failed to connect to ") != std::string::npos) {
-      status_code = HttpStatusCode::server_error_bad_gateway;
-   } else if (err.find("Cannot replace node ") != std::string::npos) {
-      status_code = HttpStatusCode::server_error_bad_gateway;
-   }
+    if (err.find("authentication failed") != std::string::npos) {
+        status_code = HttpStatusCode::client_error_unauthorized;
+    }
+    else if (err.find("Could not find") != std::string::npos) {
+        status_code = HttpStatusCode::client_error_not_found;
+    }
+    else if (err.find("Cannot find") != std::string::npos) {
+        status_code = HttpStatusCode::client_error_not_found;
+    }
+    else if (err.find("cannot be found") != std::string::npos &&
+             err.find("Could not find referenced node") == std::string::npos) {
+        status_code = HttpStatusCode::client_error_not_found;
+    }
+    else if (err.find("No such file") != std::string::npos) {
+        status_code = HttpStatusCode::client_error_not_found;
+    }
+    else if (err.find("Add Suite failed: A Suite of name") != std::string::npos) {
+        status_code = HttpStatusCode::client_error_conflict;
+    }
+    else if (err.find("Ran out of end points") != std::string::npos) {
+        status_code = HttpStatusCode::server_error_bad_gateway;
+    }
+    else if (err.find("Failed to connect to ") != std::string::npos) {
+        status_code = HttpStatusCode::server_error_bad_gateway;
+    }
+    else if (err.find("Cannot replace node ") != std::string::npos) {
+        status_code = HttpStatusCode::server_error_bad_gateway;
+    }
 
-   json j;
-   j["code"] = status_code;
-   j["message"] = err;
-   j["path"] = request.path;
-   j["method"] = request.method;
-   if (request.body.empty() == false) {
-      j["body"] = request.body;
-   }
-   response.set_content(j.dump(), "application/json");
-   response.status = status_code;
-   set_cors(response);
+    json j;
+    j["code"]    = status_code;
+    j["message"] = err;
+    j["path"]    = request.path;
+    j["method"]  = request.method;
+    if (request.body.empty() == false) {
+        j["body"] = request.body;
+    }
+    response.set_content(j.dump(), "application/json");
+    response.status = status_code;
+    set_cors(response);
 }
 
 void handle_exception(const HttpServerException& e, const httplib::Request& request, httplib::Response& response) {
-   json j;
-   j["code"] = e.code();
-   j["message"] = e.what();
-   j["path"] = request.path;
-   j["method"] = request.method;
-   if (request.body.empty() == false) {
-      j["body"] = request.body;
-   }
+    json j;
+    j["code"]    = e.code();
+    j["message"] = e.what();
+    j["path"]    = request.path;
+    j["method"]  = request.method;
+    if (request.body.empty() == false) {
+        j["body"] = request.body;
+    }
 
-   response.set_content(j.dump(), "application/json");
-   response.status = e.code();
-   set_cors(response);
+    response.set_content(j.dump(), "application/json");
+    response.status = e.code();
+    set_cors(response);
 }
 
-
 void set_last_request_time() {
-   struct timeval curtime;
-   gettimeofday(&curtime, nullptr);
-   last_request_time = curtime.tv_sec;
+    struct timeval curtime;
+    gettimeofday(&curtime, nullptr);
+    last_request_time = curtime.tv_sec;
 }
 
 template <typename T>
 void trycatch(const httplib::Request& request, httplib::Response& response, T&& func) {
-   set_last_request_time();
-   try {
-      num_requests++;
-      func();
-   } catch (const HttpServerException& e) {
-      num_errors++;
-      handle_exception(e, request, response);
-   } catch (const std::exception& e) {
-      num_errors++;
-      handle_exception(e, request, response);
-   }
+    set_last_request_time();
+    try {
+        num_requests++;
+        func();
+    }
+    catch (const HttpServerException& e) {
+        num_errors++;
+        handle_exception(e, request, response);
+    }
+    catch (const std::exception& e) {
+        num_errors++;
+        handle_exception(e, request, response);
+    }
 }
 
 json filter_json(const json& j, const httplib::Request& r) {
 
-   const std::string path = r.get_param_value("filter");
-   if (path.empty()) return j;
+    const std::string path = r.get_param_value("filter");
+    if (path.empty())
+        return j;
 
-   // split filter path on dot, and reverse the elements
-   // the elements are consumed by the dive() function
+    // split filter path on dot, and reverse the elements
+    // the elements are consumed by the dive() function
 
-   std::vector<std::string> path_elems;
-   ecf::Str::split(path, path_elems, ".");
-   std::reverse(path_elems.begin(), path_elems.end());
+    std::vector<std::string> path_elems;
+    ecf::Str::split(path, path_elems, ".");
+    std::reverse(path_elems.begin(), path_elems.end());
 
-   if (path_elems.empty()) return j;
+    if (path_elems.empty())
+        return j;
 
-   // separate array name and index from a string
-   auto get_array_info = [](const std::string& str) {
-       auto start = str.find("["), stop = str.find("]") ;
-       const std::string key = str.substr(0, start);
-       const int index = std::stoi(str.substr(start + 1 , stop - start));
-       return std::make_pair(key, index);
-   };
+    // separate array name and index from a string
+    auto get_array_info = [](const std::string& str) {
+        auto start = str.find("["), stop = str.find("]");
+        const std::string key = str.substr(0, start);
+        const int index       = std::stoi(str.substr(start + 1, stop - start));
+        return std::make_pair(key, index);
+    };
 
-   // special case: filter is .[INDEX], means that we return the
-   // correct array element from root json element assuming it's an array
-   if (path_elems.size() == 1 && path_elems[0][0] == '[' && path_elems[0][path_elems[0].size()-1] == ']') {
-       const auto arr = get_array_info(path_elems[0]);
-       return j[arr.second];
-   }
+    // special case: filter is .[INDEX], means that we return the
+    // correct array element from root json element assuming it's an array
+    if (path_elems.size() == 1 && path_elems[0][0] == '[' && path_elems[0][path_elems[0].size() - 1] == ']') {
+        const auto arr = get_array_info(path_elems[0]);
+        return j[arr.second];
+    }
 
-   // recursively find the correct element inside json document
-   std::function<json(const json&, std::vector<std::string>&)> dive =
-     [&](const json& js, std::vector<std::string>& path_elems) -> json {
-       if (path_elems.empty()) return js;
+    // recursively find the correct element inside json document
+    std::function<json(const json&, std::vector<std::string>&)> dive =
+        [&](const json& js, std::vector<std::string>& path_elems) -> json {
+        if (path_elems.empty())
+            return js;
 
-       const auto elem = path_elems.back();
-       path_elems.pop_back();
+        const auto elem = path_elems.back();
+        path_elems.pop_back();
 
-       try {
-           if (elem.find("[") != std::string::npos && elem.find("]") != std::string::npos) {
-               const auto arr = get_array_info(elem);
-               return dive(js.at(arr.first)[arr.second], path_elems);
-           }
+        try {
+            if (elem.find("[") != std::string::npos && elem.find("]") != std::string::npos) {
+                const auto arr = get_array_info(elem);
+                return dive(js.at(arr.first)[arr.second], path_elems);
+            }
 
-           return dive(js.at(elem), path_elems);
-       } catch (const json::exception& e) {
-           // filter path is not found or some other problem with user given path
-           return json();
-       }
-   };
+            return dive(js.at(elem), path_elems);
+        }
+        catch (const json::exception& e) {
+            // filter path is not found or some other problem with user given path
+            return json();
+        }
+    };
 
-   return dive(j, path_elems);
+    return dive(j, path_elems);
 }
 
 void create(httplib::Server& http_server) {
-   if (opts.verbose) printf("Registering API location /v1\n");
+    if (opts.verbose)
+        printf("Registering API location /v1\n");
 
-   http_server.Get("/v1/suites", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         num_cached_requests++;
-         json j = filter_json(get_suites(), request);
+    http_server.Get("/v1/suites", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            num_cached_requests++;
+            json j          = filter_json(get_suites(), request);
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Post(R"(/v1/suites$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         add_suite(request, response);
-         set_cors(response);
-      });
-   });
+    http_server.Post(R"(/v1/suites$)", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            add_suite(request, response);
+            set_cors(response);
+        });
+    });
 
+    http_server.Options("/v1/suites", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            response.status = HttpStatusCode::success_no_content;
+            set_allowed_methods(response, "GET, POST, HEAD");
+            set_cors(response);
+        });
+    });
 
-   http_server.Options("/v1/suites", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, POST, HEAD");
-         set_cors(response);
-      });
-   });
+    /* ../tree */
 
-   /* ../tree */
+    http_server.Get("/v1/suites/tree", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            num_cached_requests++;
+            json j          = filter_json(get_sparser_node_tree("/"), request);
+            response.status = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Get("/v1/suites/tree", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         num_cached_requests++;
-         json j = filter_json(get_sparser_node_tree("/"), request);
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/tree$)",
+                        [](const httplib::Request& request, httplib::Response& response) {
+                            trycatch(request, response, [&]() {
+                                response.status = HttpStatusCode::success_no_content;
+                                set_allowed_methods(response, "GET, HEAD");
+                                set_cors(response);
+                            });
+                        });
 
-   http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/tree$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/tree$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            num_cached_requests++;
+                            const std::string path = request.matches[1];
+                            json j                 = filter_json(get_sparser_node_tree(path), request);
+                            response.status        = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-   http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/tree$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         num_cached_requests++;
-         const std::string path = request.matches[1];
-         json j = filter_json(get_sparser_node_tree(path), request);
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    /* ../definition */
 
-   /* ../definition */
+    http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)",
+                        [](const httplib::Request& request, httplib::Response& response) {
+                            trycatch(request, response, [&]() {
+                                response.status = HttpStatusCode::success_no_content;
+                                set_allowed_methods(response, "GET, PUT, DELETE, HEAD");
+                                set_cors(response);
+                            });
+                        });
 
-   http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, PUT, DELETE, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Delete(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)",
+                       [](const httplib::Request& request, httplib::Response& response) {
+                           trycatch(request, response, [&]() {
+                               const std::string path = request.matches[1];
+                               auto client            = get_client(request);
+                               client->delete_node(path);
 
-   http_server.Delete(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         const std::string path = request.matches[1];
-         auto client = get_client(request);
-         client->delete_node(path);
+                               json j;
+                               j["message"]    = "Node deleted successfully";
+                               response.status = HttpStatusCode::success_no_content;
+                               response.set_content(j.dump(), "application/json");
+                               set_cors(response);
+                           });
+                       });
 
-         json j;
-         j["message"] = "Node deleted successfully";
-         response.status = HttpStatusCode::success_no_content;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            json j          = update_node_definition(request);
 
-   http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = update_node_definition(request);
+                            response.status = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            num_cached_requests++;
+                            const std::string path = request.matches[1];
+                            json j                 = filter_json(get_node_definition(path), request);
 
-   http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)", [](const httplib::Request& request, httplib::Response& response) {
-       trycatch(request, response, [&]() {
-          num_cached_requests++;
-          const std::string path = request.matches[1];
-          json j = filter_json(get_node_definition(path), request);
+                            response.status        = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-          response.status = HttpStatusCode::success_ok;
-          response.set_content(j.dump(), "application/json");
-          set_cors(response);
-       });
-   });
+    /* .../status */
 
-   /* .../status */
+    http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)",
+                        [](const httplib::Request& request, httplib::Response& response) {
+                            trycatch(request, response, [&]() {
+                                response.status = HttpStatusCode::success_no_content;
+                                set_allowed_methods(response, "GET, PUT, HEAD");
+                                set_cors(response);
+                            });
+                        });
 
-   http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, PUT, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            num_cached_requests++;
+                            json j          = filter_json(get_node_status(request), request);
 
-   http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         num_cached_requests++;
-         json j = filter_json(get_node_status(request), request);
+                            response.status = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            json j          = update_node_status(request);
+                            response.status = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-   http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = update_node_status(request);
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    /* .../attributes */
 
+    http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
+                        [](const httplib::Request& request, httplib::Response& response) {
+                            trycatch(request, response, [&]() {
+                                response.status = HttpStatusCode::success_no_content;
+                                set_allowed_methods(response, "GET, PUT, POST, DELETE, HEAD");
+                                set_cors(response);
+                            });
+                        });
 
-   /* .../attributes */
+    http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            num_cached_requests++;
+                            const std::string path = request.matches[1];
+                            json j                 = filter_json(get_node_attributes(path), request);
 
-   http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, PUT, POST, DELETE, HEAD");
-         set_cors(response);
-      });
-   });
+                            response.status        = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-   http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-          num_cached_requests++;
-          const std::string path = request.matches[1];
-          json j = filter_json(get_node_attributes(path), request);
+    http_server.Post(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
+                     [](const httplib::Request& request, httplib::Response& response) {
+                         trycatch(request, response, [&]() {
+                             json j          = add_node_attribute(request);
+                             response.status = HttpStatusCode::success_created;
+                             response.set_content(j.dump(), "application/json");
+                             response.set_header("Location",
+                                                 "/v1/suites" + static_cast<std::string>(request.matches[1]) +
+                                                     "/attributes");
+                             set_cors(response);
+                         });
+                     });
 
-          response.status = HttpStatusCode::success_ok;
-          response.set_content(j.dump(), "application/json");
-          set_cors(response);
-      });
-   });
+    http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            json j          = update_node_attribute(request);
+                            response.status = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
+    http_server.Delete(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
+                       [](const httplib::Request& request, httplib::Response& response) {
+                           trycatch(request, response, [&]() {
+                               json j          = delete_node_attribute(request);
+                               response.status = HttpStatusCode::success_no_content;
+                               response.set_content(j.dump(), "application/json");
+                               set_cors(response);
+                           });
+                       });
 
-   http_server.Post(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = add_node_attribute(request);
-         response.status = HttpStatusCode::success_created;
-         response.set_content(j.dump(), "application/json");
-         response.set_header("Location", "/v1/suites" + static_cast<std::string> (request.matches[1]) + "/attributes");
-         set_cors(response);
-      });
-   });
+    /* .../script */
 
-   http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = update_node_attribute(request);
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/script$)",
+                        [](const httplib::Request& request, httplib::Response& response) {
+                            trycatch(request, response, [&]() {
+                                response.status = HttpStatusCode::success_no_content;
+                                set_allowed_methods(response, "GET, HEAD");
+                                set_cors(response);
+                            });
+                        });
 
-   http_server.Delete(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = delete_node_attribute(request);
-         response.status = HttpStatusCode::success_no_content;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/script$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            const std::string path = request.matches[1];
+                            auto client            = get_client(request);
 
+                            json j;
 
-   /* .../script */
+                            client->file(path, "script");
+                            j["script"] = client->server_reply().get_string();
 
-   http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/script$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, HEAD");
-         set_cors(response);
-      });
-   });
+                            try {
+                                client->file(path, "job");
+                                j["job"] = client->server_reply().get_string();
+                            }
+                            catch (const std::exception& e) {
+                                j["job"] = "";
+                            }
 
-   http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/script$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         const std::string path = request.matches[1];
-         auto client = get_client(request);
-
-         json j;
-
-         client->file(path, "script");
-         j["script"] = client->server_reply().get_string();
-
-         try {
-            client->file(path, "job");
-            j["job"] = client->server_reply().get_string();
-         } catch (const std::exception& e) {
-            j["job"] = "";
-         }
-
-         j = filter_json(j, request);
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+                            j               = filter_json(j, request);
+                            response.status = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 #if 0
    http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/script$)",
                    [](const httplib::Request& request, httplib::Response& response) {
@@ -425,186 +458,191 @@ void create(httplib::Server& http_server) {
                    });
 #endif
 
-   /* ../output */
+    /* ../output */
 
-   http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/output$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Options(R"(/v1/suites([A-Za-z0-9_\/\.]+)/output$)",
+                        [](const httplib::Request& request, httplib::Response& response) {
+                            trycatch(request, response, [&]() {
+                                response.status = HttpStatusCode::success_no_content;
+                                set_allowed_methods(response, "GET, HEAD");
+                                set_cors(response);
+                            });
+                        });
 
-   http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/output$)", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = filter_json(get_node_output(request), request);
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+    http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/output$)",
+                    [](const httplib::Request& request, httplib::Response& response) {
+                        trycatch(request, response, [&]() {
+                            json j          = filter_json(get_node_output(request), request);
+                            response.status = HttpStatusCode::success_ok;
+                            response.set_content(j.dump(), "application/json");
+                            set_cors(response);
+                        });
+                    });
 
-   /* /server */
+    /* /server */
 
-   http_server.Get("/v1/server/ping", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         auto client = get_client(request);
-         client->pingServer();
+    http_server.Get("/v1/server/ping", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            auto client = get_client(request);
+            client->pingServer();
 
-         json j;
-         j["host"] = client->host() + ":" + client->port();
-         j["round_trip_time"] = to_simple_string(client->round_trip_time());
-         j = filter_json(j, request);
+            json j;
+            j["host"]            = client->host() + ":" + client->port();
+            j["round_trip_time"] = to_simple_string(client->round_trip_time());
+            j                    = filter_json(j, request);
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status      = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Options("/v1/server/ping", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Options("/v1/server/ping", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            response.status = HttpStatusCode::success_no_content;
+            set_allowed_methods(response, "GET, HEAD");
+            set_cors(response);
+        });
+    });
 
-   http_server.Get("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         auto client = get_client(request);
+    http_server.Get("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            auto client = get_client(request);
 
-         client->stats_server();
-         json j = client->server_reply().stats();
-         j = filter_json(j, request);
+            client->stats_server();
+            json j          = client->server_reply().stats();
+            j               = filter_json(j, request);
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Put("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         const json payload = json::parse(request.body);
-         const std::string name = payload.at("action");
+    http_server.Put("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            const json payload     = json::parse(request.body);
+            const std::string name = payload.at("action");
 
-         auto client = get_client(request);
+            auto client            = get_client(request);
 
-         if (name == "reload_whitelist_file") {
-            client->reloadwsfile();
-         } else if (name == "reload_passwd_file") {
-            client->reloadpasswdfile();
-         } else if (name == "reload_custom_passwd_file") {
-            client->reloadcustompasswdfile();
-         } else {
-            throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid action: " + name);
-         }
+            if (name == "reload_whitelist_file") {
+                client->reloadwsfile();
+            }
+            else if (name == "reload_passwd_file") {
+                client->reloadpasswdfile();
+            }
+            else if (name == "reload_custom_passwd_file") {
+                client->reloadcustompasswdfile();
+            }
+            else {
+                throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid action: " + name);
+            }
 
-         json j;
-         j["message"] = "Server updated successfully";
+            json j;
+            j["message"]    = "Server updated successfully";
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Options("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, PUT, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Options("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            response.status = HttpStatusCode::success_no_content;
+            set_allowed_methods(response, "GET, PUT, HEAD");
+            set_cors(response);
+        });
+    });
 
-   http_server.Get("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         num_cached_requests++;
-         json j = filter_json(get_server_attributes(), request);
+    http_server.Get("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            num_cached_requests++;
+            json j          = filter_json(get_server_attributes(), request);
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Post("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = add_server_attribute(request);
+    http_server.Post("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            json j          = add_server_attribute(request);
 
-         response.status = HttpStatusCode::success_created;
-         response.set_content(j.dump(), "application/json");
-         response.set_header("Location", "/v1/server/attributes");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_created;
+            response.set_content(j.dump(), "application/json");
+            response.set_header("Location", "/v1/server/attributes");
+            set_cors(response);
+        });
+    });
 
-   http_server.Put("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = update_server_attribute(request);
+    http_server.Put("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            json j          = update_server_attribute(request);
 
-         response.status = HttpStatusCode::success_ok;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_ok;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Delete("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         json j = delete_server_attribute(request);
+    http_server.Delete("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            json j          = delete_server_attribute(request);
 
-         response.status = HttpStatusCode::success_no_content;
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            response.status = HttpStatusCode::success_no_content;
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Options("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, PUT, POST, DELETE, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Options("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            response.status = HttpStatusCode::success_no_content;
+            set_allowed_methods(response, "GET, PUT, POST, DELETE, HEAD");
+            set_cors(response);
+        });
+    });
 
-   http_server.Get("/v1/statistics", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_ok;
-         const std::time_t t = std::chrono::system_clock::to_time_t(api_startup);
-         char date[80];
-         const std::tm tm = *gmtime(&t);
-         strftime(date, 80, "%Y-%m-%dT%H:%M:%SZ", &tm);
+    http_server.Get("/v1/statistics", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            response.status     = HttpStatusCode::success_ok;
+            const std::time_t t = std::chrono::system_clock::to_time_t(api_startup);
+            char date[80];
+            const std::tm tm = *gmtime(&t);
+            strftime(date, 80, "%Y-%m-%dT%H:%M:%SZ", &tm);
 
-         json j = { {"num_requests", num_requests.load()},
-                    {"num_errors",num_errors.load()},
-                    {"num_cached_requests", num_cached_requests.load()},
-                    {"since", std::string(date)}
-         };
+            json j = {{"num_requests", num_requests.load()},
+                      {"num_errors", num_errors.load()},
+                      {"num_cached_requests", num_cached_requests.load()},
+                      {"since", std::string(date)}};
 
-         j = filter_json(j, request);
-         response.set_content(j.dump(), "application/json");
-         set_cors(response);
-      });
-   });
+            j      = filter_json(j, request);
+            response.set_content(j.dump(), "application/json");
+            set_cors(response);
+        });
+    });
 
-   http_server.Options("/v1/statistics", [](const httplib::Request& request, httplib::Response& response) {
-      trycatch(request, response, [&]() {
-         response.status = HttpStatusCode::success_no_content;
-         set_allowed_methods(response, "GET, HEAD");
-         set_cors(response);
-      });
-   });
+    http_server.Options("/v1/statistics", [](const httplib::Request& request, httplib::Response& response) {
+        trycatch(request, response, [&]() {
+            response.status = HttpStatusCode::success_no_content;
+            set_allowed_methods(response, "GET, HEAD");
+            set_cors(response);
+        });
+    });
 
-   api_startup = std::chrono::system_clock::now();
-   set_last_request_time();
+    api_startup = std::chrono::system_clock::now();
+    set_last_request_time();
 }
 
-}  // namespace
+} // namespace
 
 void ApiV1::create(httplib::Server& http_server) {
-   ::create(http_server);
-   update_defs_loop(opts.polling_interval);
+    ::create(http_server);
+    update_defs_loop(opts.polling_interval);
 
-   if (opts.verbose) printf("API v1 ready\n");
+    if (opts.verbose)
+        printf("API v1 ready\n");
 }

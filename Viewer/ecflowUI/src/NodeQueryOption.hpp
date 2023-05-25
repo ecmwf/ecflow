@@ -25,27 +25,26 @@ class NodeQueryStringOption;
 class NodeQueryListOption;
 class NodeQueryComboOption;
 
-class NodeQueryOption
-{
+class NodeQueryOption {
 public:
     NodeQueryOption(VProperty*);
     virtual ~NodeQueryOption() = default;
 
-    QString type() const {return type_;}
-    QString name() const {return name_;}
-    QString label() const {return label_;}
-    virtual QString valueAsString() const=0;
+    QString type() const { return type_; }
+    QString name() const { return name_; }
+    QString label() const { return label_; }
+    virtual QString valueAsString() const     = 0;
 
-    virtual void swap(const NodeQueryOption*)=0;
-    virtual QString query() const {return QString();}
-    virtual QString sqlQuery() const {return query();}
-    virtual QString query(QString /*op*/) const {return QString();}
-    virtual void load(VSettings*)=0;
-    virtual void save(VSettings*)=0;
+    virtual void swap(const NodeQueryOption*) = 0;
+    virtual QString query() const { return QString(); }
+    virtual QString sqlQuery() const { return query(); }
+    virtual QString query(QString /*op*/) const { return QString(); }
+    virtual void load(VSettings*) = 0;
+    virtual void save(VSettings*) = 0;
 
-    virtual NodeQueryStringOption* isString() const {return nullptr;}
-    virtual NodeQueryListOption* isList() const {return nullptr;}
-    virtual NodeQueryComboOption* isCombo() const {return nullptr;}
+    virtual NodeQueryStringOption* isString() const { return nullptr; }
+    virtual NodeQueryListOption* isList() const { return nullptr; }
+    virtual NodeQueryComboOption* isCombo() const { return nullptr; }
 
     static void build(NodeQuery*);
 
@@ -55,33 +54,32 @@ protected:
     QString label_;
     bool ignoreIfAny_;
 
-    //QStringList values_;
-    //QStringList valueLabels_;
+    // QStringList values_;
+    // QStringList valueLabels_;
 };
 
-class NodeQueryStringOption : public NodeQueryOption
-{
+class NodeQueryStringOption : public NodeQueryOption {
 public:
     NodeQueryStringOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
-    QString value() const {return value_;}
-    QString valueAsString() const override {return value();}
-    const StringMatchMode&  matchMode() const {return matchMode_;}
-    QString matchOperator() const {return QString::fromStdString(matchMode_.matchOperator());}
-    bool caseSensitive() const {return caseSensitive_;}
+    QString value() const { return value_; }
+    QString valueAsString() const override { return value(); }
+    const StringMatchMode& matchMode() const { return matchMode_; }
+    QString matchOperator() const { return QString::fromStdString(matchMode_.matchOperator()); }
+    bool caseSensitive() const { return caseSensitive_; }
 
-    void setValue(QString s) {value_=s;}
-    void setMatchMode(StringMatchMode::Mode m) {matchMode_.setMode(m);}
-    void setMatchMode(const StringMatchMode& m) {matchMode_=m;}
-    void setCaseSensitive(bool b) {caseSensitive_=b;}
+    void setValue(QString s) { value_ = s; }
+    void setMatchMode(StringMatchMode::Mode m) { matchMode_.setMode(m); }
+    void setMatchMode(const StringMatchMode& m) { matchMode_ = m; }
+    void setCaseSensitive(bool b) { caseSensitive_ = b; }
 
     QString query() const override;
     void load(VSettings*) override;
     void save(VSettings*) override;
 
-    NodeQueryStringOption* isString() const override {return const_cast<NodeQueryStringOption*>(this);}
+    NodeQueryStringOption* isString() const override { return const_cast<NodeQueryStringOption*>(this); }
 
 protected:
     QString value_;
@@ -92,8 +90,7 @@ protected:
     static bool defaultCaseSensitive_;
 };
 
-class NodeQueryListOption : public NodeQueryOption
-{
+class NodeQueryListOption : public NodeQueryOption {
 public:
     NodeQueryListOption(VProperty*);
 
@@ -103,13 +100,13 @@ public:
     void load(VSettings*) override;
     void save(VSettings*) override;
 
-    QString valueAsString() const override {return QString();}
-    QStringList values() const {return values_;}
-    QStringList valueLabels() const {return valueLabels_;}
-    void setSelection(QStringList lst) {selection_=lst;}
-    QStringList selection() const {return selection_;}
+    QString valueAsString() const override { return QString(); }
+    QStringList values() const { return values_; }
+    QStringList valueLabels() const { return valueLabels_; }
+    void setSelection(QStringList lst) { selection_ = lst; }
+    QStringList selection() const { return selection_; }
 
-    NodeQueryListOption* isList() const override {return const_cast<NodeQueryListOption*>(this);}
+    NodeQueryListOption* isList() const override { return const_cast<NodeQueryListOption*>(this); }
 
 protected:
     QStringList selection_;
@@ -117,8 +114,7 @@ protected:
     QStringList valueLabels_;
 };
 
-class NodeQueryComboOption : public NodeQueryOption
-{
+class NodeQueryComboOption : public NodeQueryOption {
 public:
     NodeQueryComboOption(VProperty*);
 
@@ -128,13 +124,13 @@ public:
     void load(VSettings*) override;
     void save(VSettings*) override;
 
-    QStringList values() const {return values_;}
-    QStringList valueLabels() const {return valueLabels_;}
+    QStringList values() const { return values_; }
+    QStringList valueLabels() const { return valueLabels_; }
     void setValue(QString);
-    QString value() const {return value_;}
-    QString valueAsString() const override {return value();}
-    
-    NodeQueryComboOption* isCombo() const override {return const_cast<NodeQueryComboOption*>(this);}
+    QString value() const { return value_; }
+    QString valueAsString() const override { return value(); }
+
+    NodeQueryComboOption* isCombo() const override { return const_cast<NodeQueryComboOption*>(this); }
 
 protected:
     QString value_;
@@ -142,8 +138,7 @@ protected:
     QStringList valueLabels_;
 };
 
-class NodeQueryPeriodOption : public NodeQueryOption
-{
+class NodeQueryPeriodOption : public NodeQueryOption {
 public:
     NodeQueryPeriodOption(VProperty*);
 
@@ -155,19 +150,19 @@ public:
     void save(VSettings*) override;
     void clear();
 
-    enum Mode {LastPeriodMode,FixedPeriodMode,OlderPeriodMode,NoMode};
-    Mode mode() const {return mode_;}
-    void setLastPeriod(int period,QString periodUnits);
-    void setOlderPeriod(int period,QString periodUnits);
-    void setPeriod(QDateTime,QDateTime);
-    int period() const {return period_;}
-    QString periodUnits() const {return periodUnits_;}
-    QDateTime fromDate() const {return fromDate_;}
-    QDateTime toDate() const {return toDate_;}
-    QString valueAsString() const override {return QString();}
+    enum Mode { LastPeriodMode, FixedPeriodMode, OlderPeriodMode, NoMode };
+    Mode mode() const { return mode_; }
+    void setLastPeriod(int period, QString periodUnits);
+    void setOlderPeriod(int period, QString periodUnits);
+    void setPeriod(QDateTime, QDateTime);
+    int period() const { return period_; }
+    QString periodUnits() const { return periodUnits_; }
+    QDateTime fromDate() const { return fromDate_; }
+    QDateTime toDate() const { return toDate_; }
+    QString valueAsString() const override { return QString(); }
 
 protected:
-    void setPeriod(Mode mode, int period,QString periodUnits);
+    void setPeriod(Mode mode, int period, QString periodUnits);
 
     Mode mode_{NoMode};
     QDateTime fromDate_;
@@ -177,4 +172,3 @@ protected:
 };
 
 #endif // NODEQUERYOPTION_HPP
-

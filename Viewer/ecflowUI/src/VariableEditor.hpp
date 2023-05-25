@@ -11,25 +11,23 @@
 #ifndef VARIABLEEDITOR_HPP
 #define VARIABLEEDITOR_HPP
 
-#include "ui_VariableEditorWidget.h"
-
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
+#include "ui_VariableEditorWidget.h"
 
 class VariableEditor;
 
-class VariableEditorWidget :  public QWidget, protected Ui::VariableEditorWidget
-{
-friend class VariableEditor;
+class VariableEditorWidget : public QWidget, protected Ui::VariableEditorWidget {
+    friend class VariableEditor;
+
 public:
-    VariableEditorWidget(QWidget *parent=nullptr);
+    VariableEditorWidget(QWidget* parent = nullptr);
 };
 
-class VariableEditor : public AttributeEditor
-{
-Q_OBJECT
+class VariableEditor : public AttributeEditor {
+    Q_OBJECT
 public:
-    VariableEditor(VInfo_ptr,QWidget* parent=nullptr);
+    VariableEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~VariableEditor() override;
 
 protected Q_SLOTS:

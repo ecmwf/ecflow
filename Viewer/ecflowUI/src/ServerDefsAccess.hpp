@@ -19,16 +19,15 @@ class ServerHandler;
 // - required for multi-threaded access
 // -------------------------------------------------------------------------
 
-class ServerDefsAccess
-{
+class ServerDefsAccess {
 public:
-	explicit ServerDefsAccess(ServerHandler *server);
-	~ServerDefsAccess();
+    explicit ServerDefsAccess(ServerHandler* server);
+    ~ServerDefsAccess();
 
-	defs_ptr defs();
+    defs_ptr defs();
 
 private:
-	ServerHandler *server_;
+    ServerHandler* server_;
 };
 
 #endif

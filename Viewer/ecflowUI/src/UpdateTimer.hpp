@@ -12,11 +12,10 @@
 
 #include <QTimer>
 
-class UpdateTimer : public QTimer
-{
+class UpdateTimer : public QTimer {
 public:
-    UpdateTimer(QObject* parent=nullptr) : QTimer(parent) {}
-    void drift(int,int);
+    UpdateTimer(QObject* parent = nullptr) : QTimer(parent) {}
+    void drift(int, int);
 };
 
 #endif // UPDATETIMER_HPP_

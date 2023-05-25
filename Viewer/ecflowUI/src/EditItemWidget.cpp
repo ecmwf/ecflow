@@ -11,11 +11,11 @@
 
 #include "EditProvider.hpp"
 #include "Highlighter.hpp"
+#include "MessageLabel.hpp"
 #include "PropertyMapper.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
-#include "MessageLabel.hpp"
 
 //========================================================
 //
@@ -23,118 +23,101 @@
 //
 //========================================================
 
-EditItemWidget::EditItemWidget(QWidget *parent) :
-   QWidget(parent)
-{
-	setupUi(this);
+EditItemWidget::EditItemWidget(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-	infoProvider_=new EditProvider(this);
+    infoProvider_ = new EditProvider(this);
 
-    //The document becomes the owner of the highlighter
-    new Highlighter(textEdit_->document(),"script");
+    // The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(), "script");
 
-	searchLine_->setEditor(textEdit_);
+    searchLine_->setEditor(textEdit_);
 
-	searchLine_->setVisible(false);
+    searchLine_->setVisible(false);
 
-	externTb_->hide();
+    externTb_->hide();
 
-	//connect(submitTb_,SIGNAL(clicked(bool)),
-	//		this,SLOT(on_submitTb__clicked(bool)));
+    // connect(submitTb_,SIGNAL(clicked(bool)),
+    //		this,SLOT(on_submitTb__clicked(bool)));
 
-    textEdit_->setProperty("edit","1");
-	textEdit_->setFontProperty(VConfig::instance()->find("panel.edit.font"));
+    textEdit_->setProperty("edit", "1");
+    textEdit_->setFontProperty(VConfig::instance()->find("panel.edit.font"));
 }
 
-QWidget* EditItemWidget::realWidget()
-{
-	return this;
+QWidget* EditItemWidget::realWidget() {
+    return this;
 }
 
-void EditItemWidget::reload(VInfo_ptr info)
-{
+void EditItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if(suspended_)
+    if (suspended_)
         return;
 
     clearContents();
-    info_=info;
+    info_ = info;
 
-    //Info must be a node
-    if(info_ && info_->isNode() && info_->node())
-    {
-        //Get file contents
-        auto* ep=static_cast<EditProvider*>(infoProvider_);
+    // Info must be a node
+    if (info_ && info_->isNode() && info_->node()) {
+        // Get file contents
+        auto* ep = static_cast<EditProvider*>(infoProvider_);
         ep->preproc(preproc());
         infoProvider_->info(info_);
     }
 }
 
-void EditItemWidget::clearContents()
-{
+void EditItemWidget::clearContents() {
     InfoPanelItem::clear();
     textEdit_->clear();
-	infoLabel_->clear();
-	infoLabel_->hide();
+    infoLabel_->clear();
+    infoLabel_->hide();
 }
 
-void EditItemWidget::infoReady(VReply* reply)
-{
-	infoLabel_->hide();
-	QString s=QString::fromStdString(reply->text());
-	textEdit_->setPlainText(s);
+void EditItemWidget::infoReady(VReply* reply) {
+    infoLabel_->hide();
+    QString s = QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
 }
 
-void EditItemWidget::infoFailed(VReply* reply)
-{
-	infoLabel_->showError(QString::fromStdString(reply->errorText()));
-	infoLabel_->show();
-	//UserMessage::message(UserMessage::ERROR, true, reply->errorText());
+void EditItemWidget::infoFailed(VReply* reply) {
+    infoLabel_->showError(QString::fromStdString(reply->errorText()));
+    infoLabel_->show();
+    // UserMessage::message(UserMessage::ERROR, true, reply->errorText());
 }
 
-void EditItemWidget::infoProgress(VReply*)
-{
-
+void EditItemWidget::infoProgress(VReply*) {
 }
 
-void EditItemWidget::on_preprocTb__toggled(bool)
-{
-	reload(info_);
+void EditItemWidget::on_preprocTb__toggled(bool) {
+    reload(info_);
 }
 
-void EditItemWidget::on_submitTb__clicked(bool)
-{
-	QStringList lst=textEdit_->toPlainText().split("\n");
-	std::vector<std::string> txt;
-	Q_FOREACH(QString s,lst)
-	{
-		txt.push_back(s.toStdString());
-	}
+void EditItemWidget::on_submitTb__clicked(bool) {
+    QStringList lst = textEdit_->toPlainText().split("\n");
+    std::vector<std::string> txt;
+    Q_FOREACH (QString s, lst) {
+        txt.push_back(s.toStdString());
+    }
 
-	auto* ep=static_cast<EditProvider*>(infoProvider_);
-	ep->submit(txt,alias());
+    auto* ep = static_cast<EditProvider*>(infoProvider_);
+    ep->submit(txt, alias());
 }
 
-void EditItemWidget::on_searchTb__clicked()
-{
-	searchLine_->setVisible(true);
-	searchLine_->setFocus();
-	searchLine_->selectAll();
+void EditItemWidget::on_searchTb__clicked() {
+    searchLine_->setVisible(true);
+    searchLine_->setFocus();
+    searchLine_->selectAll();
 }
 
-void EditItemWidget::on_gotoLineTb__clicked()
-{
-	textEdit_->gotoLine();
+void EditItemWidget::on_gotoLineTb__clicked() {
+    textEdit_->gotoLine();
 }
 
-bool EditItemWidget::alias() const
-{
+bool EditItemWidget::alias() const {
     return aliasCb_->isChecked();
 }
 
-bool EditItemWidget::preproc() const
-{
+bool EditItemWidget::preproc() const {
     return preprocTb_->isChecked();
 }
 
@@ -142,16 +125,14 @@ bool EditItemWidget::preproc() const
 // Fontsize management
 //-----------------------------------------
 
-void EditItemWidget::on_fontSizeUpTb__clicked()
-{
-	//We need to call a custom slot here instead of "zoomIn"!!!
-	textEdit_->slotZoomIn();
+void EditItemWidget::on_fontSizeUpTb__clicked() {
+    // We need to call a custom slot here instead of "zoomIn"!!!
+    textEdit_->slotZoomIn();
 }
 
-void EditItemWidget::on_fontSizeDownTb__clicked()
-{
-	//We need to call a custom slot here instead of "zoomOut"!!!
-	textEdit_->slotZoomOut();
+void EditItemWidget::on_fontSizeDownTb__clicked() {
+    // We need to call a custom slot here instead of "zoomOut"!!!
+    textEdit_->slotZoomOut();
 }
 
 static InfoPanelItemMaker<EditItemWidget> maker1("edit");

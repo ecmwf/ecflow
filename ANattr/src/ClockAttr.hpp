@@ -4,22 +4,26 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #18 $ 
+// Revision    : $Revision: #18 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 //============================================================================
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-namespace cereal { class access; }
+namespace cereal {
+class access;
+}
 
-namespace ecf { class Calendar;} // forward declare class that is in a namesapce
+namespace ecf {
+class Calendar;
+} // namespace ecf
 
 /// The clock attribute is defined on the suite ONLY
 /// Use default copy constructor and assignment operator, destructor
@@ -35,58 +39,58 @@ namespace ecf { class Calendar;} // forward declare class that is in a namesapce
 ///
 class ClockAttr {
 public:
-	/// The following constructor is used for test only. It allows us to
-	/// create a clock attribute initialised with given date and time
-   explicit ClockAttr(const boost::posix_time::ptime&, bool hybrid = false, bool positiveGain = true);
-	ClockAttr(int day, int month, int year, bool hybrid = false );
-	explicit ClockAttr(bool hybrid = false);
+    /// The following constructor is used for test only. It allows us to
+    /// create a clock attribute initialised with given date and time
+    explicit ClockAttr(const boost::posix_time::ptime&, bool hybrid = false, bool positiveGain = true);
+    ClockAttr(int day, int month, int year, bool hybrid = false);
+    explicit ClockAttr(bool hybrid = false);
 
-	void print(std::string&) const;
-	bool operator==(const ClockAttr& rhs) const;
+    void print(std::string&) const;
+    bool operator==(const ClockAttr& rhs) const;
 
-	void date(int day, int month, int year);
-	void set_gain(int hour,int min,bool positiveGain = true);
-	void set_gain_in_seconds(long theGain,bool positiveGain = true);
+    void date(int day, int month, int year);
+    void set_gain(int hour, int min, bool positiveGain = true);
+    void set_gain_in_seconds(long theGain, bool positiveGain = true);
 
- 	void hybrid( bool f );
- 	void set_end_clock() { end_clock_ = true;}
+    void hybrid(bool f);
+    void set_end_clock() { end_clock_ = true; }
 
- 	// clear local attributes so, than when we re-queue suite, we sync with computer clock
- 	void sync();
+    // clear local attributes so, than when we re-queue suite, we sync with computer clock
+    void sync();
 
-   void init_calendar(ecf::Calendar&);
-   void begin_calendar(ecf::Calendar&) const;
+    void init_calendar(ecf::Calendar&);
+    void begin_calendar(ecf::Calendar&) const;
 
-	// The state_change_no is never reset. Must be incremented if it can affect equality
- 	unsigned int state_change_no() const { return state_change_no_; }
+    // The state_change_no is never reset. Must be incremented if it can affect equality
+    unsigned int state_change_no() const { return state_change_no_; }
 
-	// access
-	int day() const { return day_; }
-	int month() const { return month_; }
-	int year() const { return year_; }
- 	long gain() const { return gain_;}
- 	bool positive_gain() const { return positiveGain_;}
- 	bool hybrid() const { return hybrid_;}
-	std::string toString() const;
-   boost::posix_time::ptime ptime() const;
-
-private:
-   void write(std::string& os) const;
+    // access
+    int day() const { return day_; }
+    int month() const { return month_; }
+    int year() const { return year_; }
+    long gain() const { return gain_; }
+    bool positive_gain() const { return positiveGain_; }
+    bool hybrid() const { return hybrid_; }
+    std::string toString() const;
+    boost::posix_time::ptime ptime() const;
 
 private:
-	long gain_{0};                 // in seconds
-	int day_{0};
-	int month_{0};
-	int year_{0};
+    void write(std::string& os) const;
 
-	unsigned int state_change_no_;  // *not* persisted, only used on server side
-	bool hybrid_{false};
-	bool positiveGain_{false};
-	bool end_clock_{false};        // *NOT* persisted, used for end clock, simulator only
+private:
+    long gain_{0}; // in seconds
+    int day_{0};
+    int month_{0};
+    int year_{0};
 
-   friend class cereal::access;
-	template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version );
+    unsigned int state_change_no_; // *not* persisted, only used on server side
+    bool hybrid_{false};
+    bool positiveGain_{false};
+    bool end_clock_{false}; // *NOT* persisted, used for end clock, simulator only
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

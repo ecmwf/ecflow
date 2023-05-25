@@ -15,19 +15,17 @@
 #ifndef TEXTPAGERSECTION_HPP__
 #define TEXTPAGERSECTION_HPP__
 
+#include <QCursor>
 #include <QString>
 #include <QTextCharFormat>
 #include <QVariant>
-#include <QCursor>
 
 class TextPagerDocument;
 class TextPagerEdit;
 struct TextPagerSection
 {
 public:
-    enum TextSectionOption {
-        IncludePartial = 0x01
-    };
+    enum TextSectionOption { IncludePartial = 0x01 };
     Q_DECLARE_FLAGS(TextSectionOptions, TextSectionOption);
 
     ~TextPagerSection();
@@ -35,34 +33,41 @@ public:
     int position() const { return d.position; }
     int size() const { return d.size; }
     QTextCharFormat format() const { return d.format; }
-    void setFormat(const QTextCharFormat &format);
+    void setFormat(const QTextCharFormat& format);
     QVariant data() const { return d.data; }
-    void setData(const QVariant &data) { d.data = data; }
-    TextPagerDocument *document() const { return d.document; }
-    TextPagerEdit *textEdit() const { return d.textEdit; }
+    void setData(const QVariant& data) { d.data = data; }
+    TextPagerDocument* document() const { return d.document; }
+    TextPagerEdit* textEdit() const { return d.textEdit; }
     QCursor cursor() const;
-    void setCursor(const QCursor &cursor);
+    void setCursor(const QCursor& cursor);
     void resetCursor();
     bool hasCursor() const;
     int priority() const { return d.priority; }
     void setPriority(int priority);
+
 private:
-    struct Data {
-        Data(int p, int s, TextPagerDocument *doc, const QTextCharFormat &f, const QVariant &d)
-            : position(p), size(s), priority(0), document(doc), textEdit(nullptr), format(f), data(d), hasCursor(false)
-        {}
+    struct Data
+    {
+        Data(int p, int s, TextPagerDocument* doc, const QTextCharFormat& f, const QVariant& d)
+            : position(p),
+              size(s),
+              priority(0),
+              document(doc),
+              textEdit(nullptr),
+              format(f),
+              data(d),
+              hasCursor(false) {}
         int position, size, priority;
-        TextPagerDocument *document;
-        TextPagerEdit *textEdit;
+        TextPagerDocument* document;
+        TextPagerEdit* textEdit;
         QTextCharFormat format;
         QVariant data;
         QCursor cursor;
         bool hasCursor;
     } d;
 
-    TextPagerSection(int pos, int size, TextPagerDocument *doc, const QTextCharFormat &format, const QVariant &data)
-        : d(pos, size, doc, format, data)
-    {}
+    TextPagerSection(int pos, int size, TextPagerDocument* doc, const QTextCharFormat& format, const QVariant& data)
+        : d(pos, size, doc, format, data) {}
 
     friend class TextPagerDocument;
     friend struct TextDocumentPrivate;
@@ -70,6 +75,5 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerSection::TextSectionOptions);
-
 
 #endif

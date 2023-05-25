@@ -16,37 +16,39 @@
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
 #include "VInfo.hpp"
-
 #include "ui_AttributeEditorDialog.h"
 
-class AttributeEditor : public QDialog, public ServerObserver,  public NodeObserver, public VInfoObserver, protected Ui::AttributeEditorDialog
-{
-Q_OBJECT
+class AttributeEditor : public QDialog,
+                        public ServerObserver,
+                        public NodeObserver,
+                        public VInfoObserver,
+                        protected Ui::AttributeEditorDialog {
+    Q_OBJECT
 
 public:
-    AttributeEditor(VInfo_ptr info,QString type,QWidget* parent);
+    AttributeEditor(VInfo_ptr info, QString type, QWidget* parent);
     ~AttributeEditor() override;
 
-    //From VInfoObserver
+    // From VInfoObserver
     void notifyDelete(VInfo*) override {}
     void notifyDataLost(VInfo*) override;
 
-    //From NodeObserver
-    void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) override;
-    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override {}
 
-    //From ServerObserver
+    // From ServerObserver
     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
     void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
     void notifyEndServerClear(ServerHandler*) override {}
-    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
+    void notifyBeginServerScan(ServerHandler*, const VServerChange&) override {}
     void notifyEndServerScan(ServerHandler* server) override;
     void notifyServerConnectState(ServerHandler* server) override;
     void notifyServerSuiteFilterChanged(ServerHandler*) override {}
     void notifyServerSyncFinished(ServerHandler*) {}
 
-    static void edit(VInfo_ptr info,QWidget *parent);
+    static void edit(VInfo_ptr info, QWidget* parent);
 
 public Q_SLOTS:
     void accept() override;
@@ -63,9 +65,9 @@ protected:
     void hideForm();
     void doNotUseReset();
     void disableCancel();
-    virtual void apply()=0;
-    virtual void resetValue()=0;
-    virtual bool isValueChanged()=0;
+    virtual void apply()          = 0;
+    virtual void resetValue()     = 0;
+    virtual bool isValueChanged() = 0;
     virtual void nodeChanged(const std::vector<ecf::Aspect::Type>&) {}
 
     VInfo_ptr info_;

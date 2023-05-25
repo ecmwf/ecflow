@@ -13,215 +13,213 @@
 // Description :
 //============================================================================
 
-#include <stdexcept>
 #include "Limit.hpp"
+
+#include <stdexcept>
+
+#include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"
-#include "Str.hpp"
-#include "Ecf.hpp"
-#include "Suite.hpp"
 #include "Serialization.hpp"
+#include "Str.hpp"
+#include "Suite.hpp"
 
 using namespace std;
 using namespace ecf;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-Limit::Limit(const std::string& name,int limit)
-: n_(name), lim_(limit)
-{
-   if ( !Str::valid_name( name ) ) {
-      throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
-   }
+Limit::Limit(const std::string& name, int limit) : n_(name), lim_(limit) {
+    if (!Str::valid_name(name)) {
+        throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
+    }
 }
 
-Limit::Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths, bool check)
-: n_(name),lim_(limit),value_(value),paths_(paths)
-{
-   if (check && !Str::valid_name( name ) ) {
-      throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
-   }
+Limit::Limit(const std::string& name, int limit, int value, const std::set<std::string>& paths, bool check)
+    : n_(name),
+      lim_(limit),
+      value_(value),
+      paths_(paths) {
+    if (check && !Str::valid_name(name)) {
+        throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
+    }
 }
 
-Limit::Limit(const Limit& rhs)
-: n_(rhs.n_),lim_(rhs.lim_),value_(rhs.value_),paths_(rhs.paths_)
-{
+Limit::Limit(const Limit& rhs) : n_(rhs.n_), lim_(rhs.lim_), value_(rhs.value_), paths_(rhs.paths_) {
 }
 
-bool Limit::operator==( const Limit& rhs ) const {
-   if ( value_ != rhs.value_ ) {
+bool Limit::operator==(const Limit& rhs) const {
+    if (value_ != rhs.value_) {
 #ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Limit::operator==value_(" << value_ << ") != rhs.value_(" << rhs.value_ << ") " << toString() << "   rhs(" << rhs.toString() << ")\n";
-      }
+        if (Ecf::debug_equality()) {
+            std::cout << "Limit::operator==value_(" << value_ << ") != rhs.value_(" << rhs.value_ << ") " << toString()
+                      << "   rhs(" << rhs.toString() << ")\n";
+        }
 #endif
-      return false;
-   }
-   if ( lim_ != rhs.lim_ ) {
+        return false;
+    }
+    if (lim_ != rhs.lim_) {
 #ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Limit::operator==( lim_ != rhs.lim_) " << toString() << "   rhs(" << rhs.toString() << ")\n";
-      }
+        if (Ecf::debug_equality()) {
+            std::cout << "Limit::operator==( lim_ != rhs.lim_) " << toString() << "   rhs(" << rhs.toString() << ")\n";
+        }
 #endif
-      return false;
-   }
-   if ( n_ != rhs.n_ ) {
+        return false;
+    }
+    if (n_ != rhs.n_) {
 #ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Limit::operator==( n_ != rhs.n_ ) " << toString() << "   rhs(" << rhs.toString() << ")\n";
-      }
+        if (Ecf::debug_equality()) {
+            std::cout << "Limit::operator==( n_ != rhs.n_ ) " << toString() << "   rhs(" << rhs.toString() << ")\n";
+        }
 #endif
-      return false;
-   }
-   if ( paths_ != rhs.paths_ ) {
+        return false;
+    }
+    if (paths_ != rhs.paths_) {
 #ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Limit::operator==( paths_ != rhs.paths_ ) " << toString() << "   rhs(" << rhs.toString() << ")\n";
-      }
+        if (Ecf::debug_equality()) {
+            std::cout << "Limit::operator==( paths_ != rhs.paths_ ) " << toString() << "   rhs(" << rhs.toString()
+                      << ")\n";
+        }
 #endif
-      return false;
-   }
-   return true;
+        return false;
+    }
+    return true;
 }
 
-void Limit::print( std::string& os ) const {
-   Indentor in;
-   Indentor::indent( os ); write(os);
-   if (!PrintStyle::defsStyle()) {
-      if (value_ != 0) {
-         os += " # "; os += boost::lexical_cast<std::string>(value_);
-         for(const auto & path : paths_) {
-            os += " "; os += path;
-         }
-      }
-   }
-   os += "\n";
+void Limit::print(std::string& os) const {
+    Indentor in;
+    Indentor::indent(os);
+    write(os);
+    if (!PrintStyle::defsStyle()) {
+        if (value_ != 0) {
+            os += " # ";
+            os += boost::lexical_cast<std::string>(value_);
+            for (const auto& path : paths_) {
+                os += " ";
+                os += path;
+            }
+        }
+    }
+    os += "\n";
 }
 
 std::string Limit::toString() const {
-   std::string ret;
-   write(ret);
-   return ret;
+    std::string ret;
+    write(ret);
+    return ret;
 }
 
-void Limit::write(std::string& ret) const
-{
-   ret += "limit ";
-   ret += n_;
-   ret += " ";
-   ret += boost::lexical_cast<std::string>(lim_);
+void Limit::write(std::string& ret) const {
+    ret += "limit ";
+    ret += n_;
+    ret += " ";
+    ret += boost::lexical_cast<std::string>(lim_);
 }
 
-void Limit::decrement( int tokens ,  const std::string& abs_node_path) {
+void Limit::decrement(int tokens, const std::string& abs_node_path) {
 
-   // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
-   // Note: we previously had 'if (value_ > 0) {
-   //       However if the user had manually changed the value_, then we could be left with paths_,  that would never have been cleared
-   if (delete_path(abs_node_path)) {
-      // delete_path() will increment state_change_no
-      value_ -= tokens;
-      if ( value_ < 0 ) {
-         value_ = 0;
-         paths_.clear();
-      }
-   }
+    // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume
+    // tokens = " << tokens << " path = " << abs_node_path << "\n"; Note: we previously had 'if (value_ > 0) {
+    //       However if the user had manually changed the value_, then we could be left with paths_,  that would never
+    //       have been cleared
+    if (delete_path(abs_node_path)) {
+        // delete_path() will increment state_change_no
+        value_ -= tokens;
+        if (value_ < 0) {
+            value_ = 0;
+            paths_.clear();
+        }
+    }
 
 #ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "Limit::decrement\n";
+    std::cout << "Limit::decrement\n";
 #endif
-   // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << "\n";
+    // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << "\n";
 }
 
-void Limit::increment( int tokens , const std::string& abs_node_path) {
-   // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
+void Limit::increment(int tokens, const std::string& abs_node_path) {
+    // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume
+    // tokens = " << tokens << " path = " << abs_node_path << "\n";
 
-   // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
-   // Note: previously we had:
-   //     if ( value_ < lim_ ) {
+    // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
+    // Note: previously we had:
+    //     if ( value_ < lim_ ) {
 
-   auto result = paths_.insert( abs_node_path );
-   if (result.second) {
-      value_ += tokens;
-      update_change_no();
-   }
+    auto result = paths_.insert(abs_node_path);
+    if (result.second) {
+        value_ += tokens;
+        update_change_no();
+    }
 
 #ifdef DEBUG_STATE_CHANGE_NO
-      std::cout << "Limit::increment\n";
+    std::cout << "Limit::increment\n";
 #endif
-   // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << "\n";
+    // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << "\n";
 }
 
-void Limit::setValue( int v )
-{
-   value_ = v;
-   if (value_ == 0) paths_.clear();
-   update_change_no();
+void Limit::setValue(int v) {
+    value_ = v;
+    if (value_ == 0)
+        paths_.clear();
+    update_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "   Limit::setValue() value_ = " << value_ << "\n";
-#endif
-}
-
-void Limit::setLimit(int v)
-{
-   lim_ = v;
-   update_change_no();
-
-#ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "   Limit::setLimit() lim_ = " << value_ << "\n";
+    std::cout << "   Limit::setValue() value_ = " << value_ << "\n";
 #endif
 }
 
-void Limit::set_paths(const std::set<std::string>& paths)
-{
-   paths_ = paths;
-   update_change_no();
-}
-
-void Limit::set_state(int limit, int value, const std::set<std::string>& paths)
-{
-   value_ = value;
-   lim_ = limit;
-   paths_ = paths;
-   update_change_no();
-}
-
-bool Limit::delete_path( const std::string& abs_node_path)
-{
-   auto i = paths_.find(abs_node_path);
-   if (i != paths_.end()) {
-      paths_.erase(i);
-      update_change_no();
-      return true;
-   }
+void Limit::setLimit(int v) {
+    lim_ = v;
+    update_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "Limit::delete_path() \n";
+    std::cout << "   Limit::setLimit() lim_ = " << value_ << "\n";
 #endif
-   return false;
+}
+
+void Limit::set_paths(const std::set<std::string>& paths) {
+    paths_ = paths;
+    update_change_no();
+}
+
+void Limit::set_state(int limit, int value, const std::set<std::string>& paths) {
+    value_ = value;
+    lim_   = limit;
+    paths_ = paths;
+    update_change_no();
+}
+
+bool Limit::delete_path(const std::string& abs_node_path) {
+    auto i = paths_.find(abs_node_path);
+    if (i != paths_.end()) {
+        paths_.erase(i);
+        update_change_no();
+        return true;
+    }
+
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Limit::delete_path() \n";
+#endif
+    return false;
 }
 
 void Limit::reset() {
-   paths_.clear();
-   setValue(0); // will increment state_change_no_
+    paths_.clear();
+    setValue(0); // will increment state_change_no_
 }
 
-void Limit::update_change_no()
-{
-   state_change_no_ = Ecf::incr_state_change_no();
-   if (node_) {
-      Suite* suite = node_->suite();
-      if (suite) suite->set_state_change_no(state_change_no_);
-   }
+void Limit::update_change_no() {
+    state_change_no_ = Ecf::incr_state_change_no();
+    if (node_) {
+        Suite* suite = node_->suite();
+        if (suite)
+            suite->set_state_change_no(state_change_no_);
+    }
 }
 
-
-
-template<class Archive>
-void Limit::serialize(Archive & ar)
-{
-   ar(CEREAL_NVP(n_),
-      CEREAL_NVP(lim_));
-   CEREAL_OPTIONAL_NVP(ar, value_,  [this](){return value_ !=0; });      // conditionally save
-   CEREAL_OPTIONAL_NVP(ar, paths_,  [this](){return !paths_.empty(); }); // conditionally save
+template <class Archive>
+void Limit::serialize(Archive& ar) {
+    ar(CEREAL_NVP(n_), CEREAL_NVP(lim_));
+    CEREAL_OPTIONAL_NVP(ar, value_, [this]() { return value_ != 0; });     // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, paths_, [this]() { return !paths_.empty(); }); // conditionally save
 }
 CEREAL_TEMPLATE_SPECIALIZE(Limit);

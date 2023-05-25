@@ -18,20 +18,19 @@
 class GenFileReceiver;
 class VReply;
 
-class GenFileProvider : public FetchQueueOwner
-{
+class GenFileProvider : public FetchQueueOwner {
 public:
     GenFileProvider(GenFileReceiver*);
     ~GenFileProvider();
-    GenFileProvider(const GenFileProvider&) = delete;
+    GenFileProvider(const GenFileProvider&)            = delete;
     GenFileProvider& operator=(const GenFileProvider&) = delete;
 
     void clear() override;
 
     virtual void fetchFile(const std::string&);
     virtual void fetchFiles(const std::vector<std::string>&);
-    const std::vector<std::string>& filesToFetch() const {return filesToFetch_;}
-    VReply* theReply() const override {return reply_;}
+    const std::vector<std::string>& filesToFetch() const { return filesToFetch_; }
+    VReply* theReply() const override { return reply_; }
     void fetchQueueSucceeded() override;
     void fetchQueueFinished(const std::string& filePath, VNode*) override;
 
@@ -41,20 +40,18 @@ protected:
     std::vector<std::string> filesToFetch_;
 };
 
-class GenFileReceiver
-{
+class GenFileReceiver {
 public:
     GenFileReceiver();
     virtual ~GenFileReceiver();
-    GenFileReceiver(const GenFileReceiver&) = delete;
+    GenFileReceiver(const GenFileReceiver&)            = delete;
     GenFileReceiver& operator=(const GenFileReceiver&) = delete;
 
-    virtual void fileFetchFinished(VReply*)=0;
-    virtual void fileFetchFailed(VReply*)=0;
+    virtual void fileFetchFinished(VReply*)            = 0;
+    virtual void fileFetchFailed(VReply*)              = 0;
 
 protected:
     GenFileProvider* fetchManager_{nullptr};
 };
-
 
 #endif // GENFILEPROVIDER_HPP

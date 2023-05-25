@@ -7,6 +7,15 @@
  
 # Excludes src/ClientMain.cpp
 list( APPEND srcs
+   # HEADERS
+   src/ClientCmdCache.hpp
+   src/ClientEnvironment.hpp
+   src/ClientInvoker.hpp
+   src/ClientOptions.hpp
+   src/Rtt.hpp
+   src/UrlCmd.hpp
+   # SOURCES
+   src/ClientCmdCache.cpp
    src/Rtt.cpp
    src/ClientEnvironment.cpp
    src/ClientInvoker.cpp
@@ -28,8 +37,8 @@ target_include_directories(libclient PUBLIC src
                                              ../Base/src
                                              ../Base/src/cts
                                              ../Base/src/stc  )
-                
-                
+
+target_clangformat(libclient)
 
 # ========================================================================
 # EXE ecflow_client, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
@@ -48,7 +57,9 @@ ecbuild_add_executable( TARGET   ecflow_client
 SET_TARGET_PROPERTIES(ecflow_client PROPERTIES 
                                     INSTALL_RPATH ""
                      )
-                         
+
+target_clangformat(ecflow_client)
+
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -71,6 +82,9 @@ SET_TARGET_PROPERTIES(ecflow_client PROPERTIES
 #  find test -name \*.cpp | sort     
 
 list( APPEND test_srcs
+    # HEADERS
+    test/InvokeServer.hpp
+    # SOURCES
     test/TestClientEnvironment.cpp
     test/TestClientOptions.cpp
     test/TestClientInterface.cpp
@@ -83,6 +97,9 @@ list( APPEND test_srcs
 
 if (ENABLE_SERVER)
     list(APPEND test_srcs
+        # HEADERS
+        test/SCPort.hpp
+        # SOURCES
         test/SCPort.cpp
         test/TestClientTimeout.cpp
         test/TestClientHandleCmd.cpp
@@ -115,6 +132,7 @@ ecbuild_add_test( TARGET       s_client
                   TEST_DEPENDS u_base
                  )
 
+target_clangformat(s_client CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# 
@@ -131,7 +149,9 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
                       DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                 )
- 
+
+  target_clangformat(perf_test_large_defs CONDITION ENABLE_TESTS)
+
 	# 
 	# test migration
 	#
@@ -145,6 +165,9 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
                       DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_base
                     )
+
+  target_clangformat(m_test_migration CONDITION ENABLE_TESTS)
+
 endif()
 
 # ===================================================================

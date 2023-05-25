@@ -11,26 +11,24 @@
 #ifndef METEREDITOR_HPP
 #define METEREDITOR_HPP
 
-#include "ui_MeterEditorWidget.h"
-
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
+#include "ui_MeterEditorWidget.h"
 
 class MeterEditor;
 
-class MeterEditorWidget :  public QWidget, protected Ui::MeterEditorWidget
-{
-friend class MeterEditor;
+class MeterEditorWidget : public QWidget, protected Ui::MeterEditorWidget {
+    friend class MeterEditor;
+
 public:
-    MeterEditorWidget(QWidget *parent=nullptr);
+    MeterEditorWidget(QWidget* parent = nullptr);
 };
 
-class MeterEditor : public AttributeEditor
-{
-Q_OBJECT
+class MeterEditor : public AttributeEditor {
+    Q_OBJECT
 
 public:
-    MeterEditor(VInfo_ptr,QWidget* parent=nullptr);
+    MeterEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~MeterEditor() override;
 
 protected Q_SLOTS:
@@ -48,5 +46,3 @@ protected:
 };
 
 #endif // METEREDITOR_HPP
-
-

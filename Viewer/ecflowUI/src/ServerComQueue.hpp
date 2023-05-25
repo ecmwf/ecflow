@@ -13,11 +13,11 @@
 #include <deque>
 #include <vector>
 
-#include "VTask.hpp"
-
-#include <QObject>
 #include <QElapsedTimer>
+#include <QObject>
 #include <QTimer>
+
+#include "VTask.hpp"
 
 class ClientInvoker;
 class NodeObserver;
@@ -29,39 +29,38 @@ class ServerComThread;
 // sending tasks to the ClientIvoker via the ServerComThread.
 // --------------------------------------------------------------
 
-class ServerComQueue : public QObject
-{
-Q_OBJECT
+class ServerComQueue : public QObject {
+    Q_OBJECT
 
 public:
-    ServerComQueue(ServerHandler *server,ClientInvoker* client);
+    ServerComQueue(ServerHandler* server, ClientInvoker* client);
 
     bool logout();
 
-	enum State {NoState,RunningState,SuspendedState,ResetState,DisabledState};
-	State state() const {return state_;}
+    enum State { NoState, RunningState, SuspendedState, ResetState, DisabledState };
+    State state() const { return state_; }
 
-	void addTask(VTask_ptr);
+    void addTask(VTask_ptr);
     void addNewsTask();
     void addNewsTask(const std::string& key, const std::string& value);
-	void addSyncTask();
-	void addSuiteListTask();
-	void addSuiteAutoRegisterTask();
+    void addSyncTask();
+    void addSuiteListTask();
+    void addSuiteAutoRegisterTask();
     void addServerVersionTask();
 
-	void enable();
-	void disable();
-	void start();
-	void suspend(bool);
-	bool prepareReset();
-	void reset();
-	bool isSuspended() const {return state_==SuspendedState;}
+    void enable();
+    void disable();
+    void start();
+    void suspend(bool);
+    bool prepareReset();
+    void reset();
+    bool isSuspended() const { return state_ == SuspendedState; }
 
 protected Q_SLOTS:
-	void slotRun();
+    void slotRun();
     void slotTaskStarted();
-	void slotTaskFinished();
-	void slotTaskFailed(std::string);
+    void slotTaskFinished();
+    void slotTaskFailed(std::string);
     void slotLogoutCheck();
     void slotLogoutDone();
 
@@ -71,29 +70,29 @@ protected:
     void stopTimer();
     void startCurrentTask();
     void endReset();
-	bool hasTask(VTask::Type t) const;
-	bool isNextTask(VTask::Type t) const;
+    bool hasTask(VTask::Type t) const;
+    bool isNextTask(VTask::Type t) const;
     void startLogout();
 
-	ServerHandler *server_;
-	ClientInvoker* client_;
-	ServerComThread *comThread_;
-	QTimer* timer_;
+    ServerHandler* server_;
+    ClientInvoker* client_;
+    ServerComThread* comThread_;
+    QTimer* timer_;
     int timeout_;
     QElapsedTimer ctStartTime_;
     int ctStartTimeout_;
     int ctStartWaitTimeout_;
     int startTimeoutTryCnt_;
     int ctMaxStartTimeoutTryCnt_;
-	std::deque<VTask_ptr> tasks_;
-	VTask_ptr current_;
-	State state_;  
+    std::deque<VTask_ptr> tasks_;
+    VTask_ptr current_;
+    State state_;
     bool taskStarted_;
     bool taskIsBeingFinished_;
-	bool taskIsBeingFailed_;
-    int logoutTryNo_ {0};
-    int maxLogoutTryNo_ {12};
-    int logoutInterval_ {10000};
+    bool taskIsBeingFailed_;
+    int logoutTryNo_{0};
+    int maxLogoutTryNo_{12};
+    int logoutInterval_{10000};
 };
 
 #endif

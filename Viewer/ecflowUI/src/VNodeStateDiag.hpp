@@ -13,8 +13,7 @@
 
 #include "VInfo.hpp"
 
-class VNodeStateDiag
-{
+class VNodeStateDiag {
 public:
     VNodeStateDiag(VInfo_ptr);
 };

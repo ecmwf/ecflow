@@ -15,46 +15,55 @@
 // Description :
 //============================================================================
 
-#include "TimeSlot.hpp"
 #include "NState.hpp"
+#include "TimeSlot.hpp"
 
-namespace ecf { class Calendar;} // forward declare class
+namespace ecf {
+class Calendar;
+} // namespace ecf
 
 namespace ecf {
 
 // Use compiler ,  destructor, assignment, copy constructor
-class AutoArchiveAttr  {
+class AutoArchiveAttr {
 public:
-   AutoArchiveAttr()= default;
-   AutoArchiveAttr(int hour, int minute, bool relative, bool idle=false) : time_(hour, minute), relative_(relative),idle_(idle) {}
-   AutoArchiveAttr(const TimeSlot& ts,   bool relative, bool idle=false) : time_(ts), relative_(relative),idle_(idle) {}
-   AutoArchiveAttr(int days,bool idle = false)  : time_( TimeSlot(days*24,0) ),  days_(true),idle_(idle) {}
+    AutoArchiveAttr() = default;
+    AutoArchiveAttr(int hour, int minute, bool relative, bool idle = false)
+        : time_(hour, minute),
+          relative_(relative),
+          idle_(idle) {}
+    AutoArchiveAttr(const TimeSlot& ts, bool relative, bool idle = false)
+        : time_(ts),
+          relative_(relative),
+          idle_(idle) {}
+    AutoArchiveAttr(int days, bool idle = false) : time_(TimeSlot(days * 24, 0)), days_(true), idle_(idle) {}
 
-   void print(std::string&) const;
-   bool operator==(const AutoArchiveAttr& rhs) const;
-   bool operator<(const AutoArchiveAttr& rhs) const { return time_ < rhs.time();}
-   bool isFree(const ecf::Calendar&, const std::pair<NState,boost::posix_time::time_duration>& last_state_and_change_duration) const;
+    void print(std::string&) const;
+    bool operator==(const AutoArchiveAttr& rhs) const;
+    bool operator<(const AutoArchiveAttr& rhs) const { return time_ < rhs.time(); }
+    bool isFree(const ecf::Calendar&,
+                const std::pair<NState, boost::posix_time::time_duration>& last_state_and_change_duration) const;
 
-   std::string toString() const;
+    std::string toString() const;
 
-   const TimeSlot& time() const { return time_;}
-   bool relative() const { return relative_; }
-   bool days() const { return days_; }
-   bool idle() const { return idle_; }
+    const TimeSlot& time() const { return time_; }
+    bool relative() const { return relative_; }
+    bool days() const { return days_; }
+    bool idle() const { return idle_; }
 
 private:
-   void write(std::string&) const;
+    void write(std::string&) const;
 
 private:
-   TimeSlot time_;
-   bool relative_{true};
-   bool days_{false};
-   bool idle_{false};
+    TimeSlot time_;
+    bool relative_{true};
+    bool days_{false};
+    bool idle_{false};
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version );
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
-}
+} // namespace ecf
 #endif

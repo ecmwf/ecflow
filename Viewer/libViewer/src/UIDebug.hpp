@@ -10,20 +10,17 @@
 #ifndef UIDEBUG_HPP_
 #define UIDEBUG_HPP_
 
+#include "Log.hpp" // from ACore
 
-#include "Log.hpp"  // from ACore
-
-
-class UIDebug
-{
+class UIDebug {
 public:
-    UIDebug() = default;
-   ~UIDebug() = default;
+    UIDebug()  = default;
+    ~UIDebug() = default;
 
-	static void uiAssert(char const* expr, char const* file, long line, const std::string& message);
+    static void uiAssert(char const* expr, char const* file, long line, const std::string& message);
 };
 
-
-#define UI_ASSERT(expr,EXPRESSION) ((expr)? ((void)0): UIDebug::uiAssert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
+#define UI_ASSERT(expr, EXPRESSION) \
+    ((expr) ? ((void)0) : UIDebug::uiAssert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
 
 #endif

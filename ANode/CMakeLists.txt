@@ -2,13 +2,14 @@
 # If new src or test cpp files are added make sure you touch this file
 #
 
-file( GLOB srcs       RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp"  )
-file( GLOB parser_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "parser/src/*.cpp"  )
+file(GLOB srcs
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    "src/*.cpp" "src/*.hpp" "parser/src/*.cpp" "parser/src/*.hpp")
 
 ecbuild_add_library( TARGET   node
                      NOINSTALL
                      TYPE     STATIC
-                     SOURCES  ${srcs} ${parser_src}
+                     SOURCES  ${srcs}
                     )
 target_link_libraries(node PRIVATE nodeattr core)
 target_include_directories(node PUBLIC ../ACore/src 
@@ -16,6 +17,7 @@ target_include_directories(node PUBLIC ../ACore/src
                                        src 
                                        parser/src)
 
+target_clangformat(node)
 
 add_subdirectory( parser )
 
@@ -27,6 +29,9 @@ add_subdirectory( parser )
 #file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
  
 list( APPEND test_srcs
+# HEADERS
+test/MyDefsFixture.hpp
+# SOURCES
 test/Test_ECFLOW-195.cpp
 test/Test_ECFLOW-247.cpp
 test/Test_ECFLOW-417.cpp
@@ -81,6 +86,8 @@ ecbuild_add_test(TARGET  u_anode
                  TEST_DEPENDS u_anattr
                  )
 
+target_clangformat(u_anode CONDITION ENABLE_TESTS)
+
 if (ENABLE_ALL_TESTS)
 	list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
 	ecbuild_add_test( TARGET       u_anode_stest
@@ -90,4 +97,5 @@ if (ENABLE_ALL_TESTS)
                       DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                       TEST_DEPENDS u_anattr
                     )
+  target_clangformat(u_anode_stest CONDITION ENABLE_TESTS)
 endif()

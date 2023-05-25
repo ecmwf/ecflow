@@ -11,20 +11,19 @@
 #define SAVESESSIONASDIALOG_HPP
 
 #include <QDialog>
-#include "ui_SaveSessionAsDialog.h"
 
 #include "SessionHandler.hpp"
+#include "ui_SaveSessionAsDialog.h"
 
 namespace Ui {
 class SaveSessionAsDialog;
 }
 
-class SaveSessionAsDialog : public QDialog, protected Ui::SaveSessionAsDialog
-{
+class SaveSessionAsDialog : public QDialog, protected Ui::SaveSessionAsDialog {
     Q_OBJECT
 
 public:
-    explicit SaveSessionAsDialog(QWidget *parent = nullptr);
+    explicit SaveSessionAsDialog(QWidget* parent = nullptr);
     ~SaveSessionAsDialog() override;
 
 public Q_SLOTS:
@@ -32,9 +31,9 @@ public Q_SLOTS:
     void on_sessionNameEdit__textChanged();
 
 private:
-    //Ui::SaveSessionAsDialog *ui;
-    void addSessionToTable(SessionItem *s);
-    bool validSaveName(const std::string &name);
+    // Ui::SaveSessionAsDialog *ui;
+    void addSessionToTable(SessionItem* s);
+    bool validSaveName(const std::string& name);
     void refreshListOfSavedSessions();
 };
 

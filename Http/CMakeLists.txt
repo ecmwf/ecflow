@@ -5,8 +5,19 @@
  #    find src -name \*.cpp --print
  # =======================================================
  
- # Excludes src/HttpServerMain.cpp
+ # Excludes src/HttpMain.cpp
 list( APPEND srcs
+   # HEADERS
+   src/ApiV1.hpp
+   src/ApiV1Impl.hpp
+   src/Base64.hpp
+   src/BasicAuth.hpp
+   src/HttpServer.hpp
+   src/HttpServerException.hpp
+   src/Options.hpp
+   src/TokenStorage.hpp
+   src/TypeToJson.hpp
+   # SOURCES
    src/HttpServer.cpp
    src/ApiV1.cpp
    src/ApiV1Impl.cpp
@@ -33,13 +44,14 @@ target_include_directories(libhttp PUBLIC src
                                              ../json
 )
 
-
+target_clangformat(libhttp)
 
 # ========================================================================
 # EXE ecflow_http, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
 ecbuild_add_executable( TARGET   ecflow_http
-                        SOURCES  src/HttpMain.cpp
+                        SOURCES
+                          src/HttpMain.cpp
                         LIBS     libhttp libclient ${OPENSSL_LIBRARIES}
                         INCLUDES ${Boost_INCLUDE_DIRS} ../cpp-httplib
                       )
@@ -52,7 +64,9 @@ ecbuild_add_executable( TARGET   ecflow_http
 SET_TARGET_PROPERTIES(ecflow_http PROPERTIES 
                                     INSTALL_RPATH ""
                      )
-                         
+
+target_clangformat(ecflow_http)
+
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -70,7 +84,12 @@ SET_TARGET_PROPERTIES(ecflow_http PROPERTIES
 if (ENABLE_HTTP AND ENABLE_SERVER)
 
   list(APPEND test_srcs
-       test/TestApiV1.cpp
+      # HEADERS
+      test/Certificate.hpp
+      test/InvokeServer.hpp
+      test/TokenFile.hpp
+      # SOURCES
+      test/TestApiV1.cpp
   )
 
   if (OPENSSL_FOUND)
@@ -89,6 +108,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
                       TEST_DEPENDS u_base s_client
    )
 
+    target_clangformat(s_http CONDITION ENABLE_TESTS)
   else()
     message(WARNING "SSL not enabled - will not run HTTP server tests")
   endif()

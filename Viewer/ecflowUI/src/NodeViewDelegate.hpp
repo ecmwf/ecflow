@@ -11,6 +11,8 @@
 #ifndef NODEVIEWDELEGATE_HPP_
 #define NODEVIEWDELEGATE_HPP_
 
+#include <string>
+
 #include <QBrush>
 #include <QLinearGradient>
 #include <QMap>
@@ -20,31 +22,35 @@
 
 #include "FontMetrics.hpp"
 #include "RectMetrics.hpp"
-#include "ViewerUtil.hpp"
 #include "VProperty.hpp"
-
-#include <string>
+#include "ViewerUtil.hpp"
 
 class PropertyMapper;
 
-//Base class for the node/attr renderer properties
+// Base class for the node/attr renderer properties
 struct BaseNodeDelegateBox
 {
-    BaseNodeDelegateBox() : sizeHintCache(QSize(10,10)), selectRm(2) {}
+    BaseNodeDelegateBox() : sizeHintCache(QSize(10, 10)), selectRm(2) {}
 
-    virtual ~BaseNodeDelegateBox() = default;
+    virtual ~BaseNodeDelegateBox()      = default;
 
-    virtual void adjust(const QFont& f)=0;
-    virtual QRect adjustTextRect(const QRect& rIn) const { QRect r=rIn; return r;}
-    virtual QRect adjustTextBgRect(const QRect& rIn) const { QRect r=rIn; return r;}
+    virtual void adjust(const QFont& f) = 0;
+    virtual QRect adjustTextRect(const QRect& rIn) const {
+        QRect r = rIn;
+        return r;
+    }
+    virtual QRect adjustTextBgRect(const QRect& rIn) const {
+        QRect r = rIn;
+        return r;
+    }
     virtual QRect adjustSelectionRect(const QRect& optRect) const {
-        QRect r=optRect;
-        r.adjust(leftMargin,1,-1,-1);
+        QRect r = optRect;
+        r.adjust(leftMargin, 1, -1, -1);
         return r;
     }
     virtual QRect adjustSelectionRectNonOpt(const QRect& optRect) const {
-        QRect r=optRect;
-        r.adjust(0,1,-1,-1);
+        QRect r = optRect;
+        r.adjust(0, 1, -1, -1);
         return r;
     }
 
@@ -58,13 +64,13 @@ struct BaseNodeDelegateBox
     int topPadding{0};
     int bottomPadding{0};
     int leftPadding{0};
-    int rightPadding{0};  
+    int rightPadding{0};
     QSize sizeHintCache;
     int spacing{2};
     RectMetrics selectRm;
 };
 
-//Node renderer properties
+// Node renderer properties
 struct NodeDelegateBox : public BaseNodeDelegateBox
 {
     NodeDelegateBox() = default;
@@ -74,59 +80,57 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
     int iconGap{2};
 
     void adjust(const QFont& f) override {
-         QFontMetrics fm(f);
-         fontHeight=fm.height();
-         height=fontHeight+topPadding+bottomPadding;
-         fullHeight=height+topMargin+bottomMargin;
-         sizeHintCache=QSize(100,fullHeight);
-         spacing=ViewerUtil::textWidth(fm,'A')*3/4;
+        QFontMetrics fm(f);
+        fontHeight    = fm.height();
+        height        = fontHeight + topPadding + bottomPadding;
+        fullHeight    = height + topMargin + bottomMargin;
+        sizeHintCache = QSize(100, fullHeight);
+        spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-         auto h=static_cast<int>(static_cast<float>(fm.height())*0.7);
-         iconSize=h;
-         if(iconSize % 2 == 1)
-             iconSize+=1;
+        auto h        = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize      = h;
+        if (iconSize % 2 == 1)
+            iconSize += 1;
 
-         iconGap=1;
-         if(iconSize > 16)
-             iconGap=2;
+        iconGap = 1;
+        if (iconSize > 16)
+            iconGap = 2;
 
-         iconPreGap=ViewerUtil::textWidth(fm,'A')/2;
-     }
+        iconPreGap = ViewerUtil::textWidth(fm, 'A') / 2;
+    }
 };
 
-//Attr renderer properties
+// Attr renderer properties
 struct AttrDelegateBox : public BaseNodeDelegateBox
 {
-    AttrDelegateBox() : iconSize(16), iconPreGap(2),
-       iconGap(2) {}
+    AttrDelegateBox() : iconSize(16), iconPreGap(2), iconGap(2) {}
 
     int iconSize;
     int iconPreGap;
     int iconGap;
 
     void adjust(const QFont& f) override {
-         QFontMetrics fm(f);
-         fontHeight=fm.height();
-         height=fontHeight+topPadding+bottomPadding;
-         fullHeight=height+topMargin+bottomMargin;
-         sizeHintCache=QSize(100,fullHeight);
-         spacing=ViewerUtil::textWidth(fm,'A')*3/4;
+        QFontMetrics fm(f);
+        fontHeight    = fm.height();
+        height        = fontHeight + topPadding + bottomPadding;
+        fullHeight    = height + topMargin + bottomMargin;
+        sizeHintCache = QSize(100, fullHeight);
+        spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
-         iconSize=h;
-         if(iconSize % 2 == 1)
-             iconSize+=1;
+        int h         = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize      = h;
+        if (iconSize % 2 == 1)
+            iconSize += 1;
 
-         iconGap=1;
-         if(iconSize > 16)
-             iconGap=2;
+        iconGap = 1;
+        if (iconSize > 16)
+            iconGap = 2;
 
-         iconPreGap=ViewerUtil::textWidth(fm,'A')/2;
-     }
+        iconPreGap = ViewerUtil::textWidth(fm, 'A') / 2;
+    }
 };
 
-class LabelStyle
-{
+class LabelStyle {
 public:
     LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
     void update();
@@ -137,115 +141,115 @@ public:
     QPen fontPen_;
     QBrush bgBrush_;
     QRegularExpression regex_;
-    VProperty *enabledProp_;
-    VProperty *enabledBgProp_;
-    VProperty *fontProp_;
-    VProperty *bgProp_;
-    VProperty *regexProp_;
+    VProperty* enabledProp_;
+    VProperty* enabledBgProp_;
+    VProperty* fontProp_;
+    VProperty* bgProp_;
+    VProperty* regexProp_;
 };
 
-
-class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
-{
+class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver {
 public:
-	explicit NodeViewDelegate(QWidget *parent=nullptr);
-	~NodeViewDelegate() override;
+    explicit NodeViewDelegate(QWidget* parent = nullptr);
+    ~NodeViewDelegate() override;
 
-	void notifyChange(VProperty*) override;
-    void setMaxLimitItems(int v) {maxLimitItems_=v;}
+    void notifyChange(VProperty*) override;
+    void setMaxLimitItems(int v) { maxLimitItems_ = v; }
 
 protected:
-	virtual void updateSettings()=0;
+    virtual void updateSettings() = 0;
     void addBaseSettings(std::vector<std::string>&);
     void updateBaseSettings();
 
-    void renderSelectionRect(QPainter* painter,QRect r) const;
+    void renderSelectionRect(QPainter* painter, QRect r) const;
 
-	virtual void renderStatus(QPainter *painter,const QModelIndex& index,
-                              const QStyleOptionViewItem& option) const;
+    virtual void renderStatus(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option) const;
 
-    typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItem& optio,QSize&) const;
+    typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter* painter,
+                                                            QStringList data,
+                                                            const QStyleOptionViewItem& optio,
+                                                            QSize&) const;
 
-    virtual void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderAutoArchive(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderAutoCancel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderAutoRestore(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderQueue(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderMeter(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderLabel(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderEvent(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderVar(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderGenvar(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderLimit(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderLimiter(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderTrigger(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderTime(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderDate(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderRepeat(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderLate(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void
+    renderAutoArchive(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void
+    renderAutoCancel(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void
+    renderAutoRestore(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderQueue(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
 
-    void labelSize(QStringList data,int& totalWidth,int& totalHeight) const;
+    void labelSize(QStringList data, int& totalWidth, int& totalHeight) const;
     int labelHeight(int) const;
-    void renderVarCore(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&,QColor) const;
+    void renderVarCore(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&, QColor) const;
 
-	QPen hoverPen_;
-	QBrush hoverBrush_;
-	QPen selectPen_;
-	QBrush selectBrush_;
-	QPen nodePen_;
-	QPen nodeSelectPen_;
-	QPixmap errPix_;
+    QPen hoverPen_;
+    QBrush hoverBrush_;
+    QPen selectPen_;
+    QBrush selectBrush_;
+    QPen nodePen_;
+    QPen nodeSelectPen_;
+    QPixmap errPix_;
 
-	QBrush lostConnectBgBrush_;
+    QBrush lostConnectBgBrush_;
     QBrush lostConnectBandBrush_;
     QBrush noConnectBgBrush_;
     QBrush noConnectBandBrush_;
 
-	QMap<QString,AttributeRendererProc> attrRenderers_;
+    QMap<QString, AttributeRendererProc> attrRenderers_;
 
-	PropertyMapper* prop_{nullptr};
-	QFont font_;
+    PropertyMapper* prop_{nullptr};
+    QFont font_;
     QFont attrFont_;
     NodeDelegateBox* nodeBox_{nullptr};
     AttrDelegateBox* attrBox_{nullptr};
 
-	bool useStateGrad_{true};
-	mutable QLinearGradient grad_;
-	static int lighter_;
+    bool useStateGrad_{true};
+    mutable QLinearGradient grad_;
+    static int lighter_;
     bool drawAttrSelectionRect_{false};
-    QBrush  eventFillBrush_;
-    QBrush  eventBgBrush_;
-    QBrush  meterFillBrush_;
-    QBrush  meterThresholdBrush_;
-    QBrush  limitFillBrush_;
-    QBrush  limitExtraFillBrush_;
+    QBrush eventFillBrush_;
+    QBrush eventBgBrush_;
+    QBrush meterFillBrush_;
+    QBrush meterThresholdBrush_;
+    QBrush limitFillBrush_;
+    QBrush limitExtraFillBrush_;
     QPixmap limitFillPix_;
     QPixmap limitEmptyPix_;
     QPixmap limitExtraFillPix_;
-    enum LimitShape {RectLimitShape,CircleLimitShape};
-    LimitShape  limitShape_{CircleLimitShape};
-    int maxLimitItems_ {-1};
-    QPen    repeatDayPen_;
-    QPen    repeatDatePen_;
-    QPen    repeatEnumPen_;
-    QPen    repeatIntPen_;
-    QPen    repeatStringPen_;
-    QBrush  triggerBgBrush_;
-    QPen    triggerBorderPen_;
-    QPen    triggerFontPen_;
-    QBrush  completeBgBrush_;
-    QPen    completeBorderPen_;
-    QPen    completeFontPen_;
-    QPen    holdingTimeFontPen_;
-    QPen    holdingDateFontPen_;
+    enum LimitShape { RectLimitShape, CircleLimitShape };
+    LimitShape limitShape_{CircleLimitShape};
+    int maxLimitItems_{-1};
+    QPen repeatDayPen_;
+    QPen repeatDatePen_;
+    QPen repeatEnumPen_;
+    QPen repeatIntPen_;
+    QPen repeatStringPen_;
+    QBrush triggerBgBrush_;
+    QPen triggerBorderPen_;
+    QPen triggerFontPen_;
+    QBrush completeBgBrush_;
+    QPen completeBorderPen_;
+    QPen completeFontPen_;
+    QPen holdingTimeFontPen_;
+    QPen holdingDateFontPen_;
 
     int holdingTimePixId_;
     int holdingDatePixId_;
 
-    enum LabelType {DefaultLabel, ErrorLabel, WarningLabel, InfoLabel};
+    enum LabelType { DefaultLabel, ErrorLabel, WarningLabel, InfoLabel };
     QMap<LabelType, LabelStyle*> labelStyle_;
 };
 
 #endif
-
-
-

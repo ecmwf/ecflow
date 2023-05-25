@@ -14,18 +14,16 @@
 #include <string>
 
 #include <QDateTime>
-#include <QProcess>
 #include <QElapsedTimer>
+#include <QProcess>
 
 #include "VFile.hpp"
 
-
-class VFileTransferCore : public QObject
-{
+class VFileTransferCore : public QObject {
     Q_OBJECT
 
 public:
-    VFileTransferCore(QObject* parent=nullptr);
+    VFileTransferCore(QObject* parent = nullptr);
     virtual ~VFileTransferCore();
 
     virtual void clear();
@@ -33,10 +31,10 @@ public:
     bool isActive() const;
     static QString socksPort();
     static QString socksUser();
-    VFile_ptr const result() {return fResult_;}
+    VFile_ptr const result() { return fResult_; }
 
 protected Q_SLOTS:
-    void slotProcFinished(int,QProcess::ExitStatus);
+    void slotProcFinished(int, QProcess::ExitStatus);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     void slotErrorOccurred(QProcess::ProcessError);
 #endif
@@ -51,7 +49,7 @@ protected:
     void transferIt();
     virtual QString buildCommand() = 0;
     QString stdErr();
-    virtual bool checkResults()=0;
+    virtual bool checkResults() = 0;
     static void socksRemoteUserAndHost(QString& user, QString& host);
     static QString buildSocksProxyJump();
 
@@ -69,20 +67,27 @@ protected:
     QElapsedTimer stopper_;
 };
 
-
-class VFileTransfer: public VFileTransferCore
-{
+class VFileTransfer : public VFileTransferCore {
 public:
-    enum ByteMode {AllBytes, BytesFromPos, LastBytes};
-    using  VFileTransferCore::VFileTransferCore;
+    enum ByteMode { AllBytes, BytesFromPos, LastBytes };
+    using VFileTransferCore::VFileTransferCore;
 
     void clear() override;
-    void transfer(QString sourceFile,QString host,QString remoteUid, ByteMode byteMode, size_t byteVal);
+    void transfer(QString sourceFile, QString host, QString remoteUid, ByteMode byteMode, size_t byteVal);
     void transferLocalViaSocks(QString sourceFile, ByteMode byteMode, size_t byteVal);
-    void transferLocalViaSocks(QString sourceFile, ByteMode byteMode, size_t byteVal, size_t remoteModTime, const std::string& remoteCheckSum);
+    void transferLocalViaSocks(QString sourceFile,
+                               ByteMode byteMode,
+                               size_t byteVal,
+                               size_t remoteModTime,
+                               const std::string& remoteCheckSum);
 
 protected:
-    void transferLocalViaSocks(QString sourceFile, ByteMode byteMode, size_t byteVal, bool useMetaData, size_t remoteModTime, const std::string& remoteCheckSum);
+    void transferLocalViaSocks(QString sourceFile,
+                               ByteMode byteMode,
+                               size_t byteVal,
+                               bool useMetaData,
+                               size_t remoteModTime,
+                               const std::string& remoteCheckSum);
     QString buildCommand() override;
     bool checkResults() override;
     bool readMetaData();
@@ -95,11 +100,10 @@ protected:
     std::string checkSum_;
 };
 
-class VDirTransfer: public VFileTransferCore
-{
+class VDirTransfer : public VFileTransferCore {
 public:
-    using  VFileTransferCore::VFileTransferCore;
-    void transfer(QString sourceFile,QString host,QString remoteUid);
+    using VFileTransferCore::VFileTransferCore;
+    void transfer(QString sourceFile, QString host, QString remoteUid);
     void transferLocalViaSocks(QString sourceFile);
 
 protected:

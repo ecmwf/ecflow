@@ -19,39 +19,38 @@
 class Dashboard;
 class ServerItem;
 
-class DashboardTitle : public QObject, public ServerFilterObserver, public ServerObserver
-{
-Q_OBJECT
+class DashboardTitle : public QObject, public ServerFilterObserver, public ServerObserver {
+    Q_OBJECT
 
-friend class Dashboard;
+    friend class Dashboard;
 
 public:
-    DashboardTitle(ServerFilter*,Dashboard *parent);
-	~DashboardTitle() override;
+    DashboardTitle(ServerFilter*, Dashboard* parent);
+    ~DashboardTitle() override;
 
-    Dashboard* dashboard() const {return dashboard_;}
-    QString title() const {return title_;}
-    QString tooltip() const {return tooltip_;}
-    QString desc() const {return desc_;}
-    QPixmap pix() const {return pix_;}
-    QPixmap descPix() const {return descPix_;}
+    Dashboard* dashboard() const { return dashboard_; }
+    QString title() const { return title_; }
+    QString tooltip() const { return tooltip_; }
+    QString desc() const { return desc_; }
+    QPixmap pix() const { return pix_; }
+    QPixmap descPix() const { return descPix_; }
     void setMaxPixWidth(int w);
     void setCurrent(bool b);
     int fullWidth() const;
 
-	void notifyServerFilterAdded(ServerItem* item) override;
-	void notifyServerFilterRemoved(ServerItem* item) override;
-	void notifyServerFilterChanged(ServerItem*) override;
-	void notifyServerFilterDelete() override;
+    void notifyServerFilterAdded(ServerItem* item) override;
+    void notifyServerFilterRemoved(ServerItem* item) override;
+    void notifyServerFilterChanged(ServerItem*) override;
+    void notifyServerFilterDelete() override;
 
-	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
-	void notifyServerDelete(ServerHandler* server) override;
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+    void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler*) override {}
-	void notifyEndServerClear(ServerHandler* server) override;
-    void notifyBeginServerScan(ServerHandler*,const VServerChange&) override {}
-	void notifyEndServerScan(ServerHandler* server) override;
-	void notifyServerConnectState(ServerHandler* server) override;
-	void notifyServerActivityChanged(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler*, const VServerChange&) override {}
+    void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerActivityChanged(ServerHandler* server) override;
     void notifyServerSuiteFilterChanged(ServerHandler*) override {}
     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
@@ -59,11 +58,11 @@ Q_SIGNALS:
     void changed(DashboardTitle*);
 
 private:
-	void clear();
+    void clear();
     void updateTitle();
 
     Dashboard* dashboard_;
-	ServerFilter* filter_;
+    ServerFilter* filter_;
     int maxPixWidth_;
     QPixmap pix_;
     QPixmap descPix_;

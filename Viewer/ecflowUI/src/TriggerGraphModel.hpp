@@ -14,55 +14,56 @@
 #include <QAbstractItemModel>
 #include <QColor>
 
-#include "VInfo.hpp"
-#include "TriggerCollector.hpp"
-
 #include "Aspect.hpp"
+#include "TriggerCollector.hpp"
+#include "VInfo.hpp"
 
 class NodeQueryResult;
 class TriggerGraphNodeItem;
 
-class TriggerGraphModel : public QAbstractItemModel
-{
+class TriggerGraphModel : public QAbstractItemModel {
 public:
-    enum Mode {TriggerMode,TriggeredMode,NodeMode};
+    enum Mode { TriggerMode, TriggeredMode, NodeMode };
 
-    explicit TriggerGraphModel(Mode mode,QObject *parent=nullptr);
+    explicit TriggerGraphModel(Mode mode, QObject* parent = nullptr);
     ~TriggerGraphModel() override;
 
-//    ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
-//    InfoRole = Qt::UserRole+5, LoadRole = Qt::UserRole+6,
-//    ConnectionRole = Qt::UserRole+7, ServerDataRole = Qt::UserRole+8,
-//    NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10,
-//    AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
-//    NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
-//    ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16,
-//    NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18,
-//    FailedSubmissionRole = Qt::UserRole + 19, LogErrorRole = Qt::UserRole + 20};
+    //    ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
+    //    InfoRole = Qt::UserRole+5, LoadRole = Qt::UserRole+6,
+    //    ConnectionRole = Qt::UserRole+7, ServerDataRole = Qt::UserRole+8,
+    //    NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10,
+    //    AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
+    //    NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
+    //    ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16,
+    //    NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18,
+    //    FailedSubmissionRole = Qt::UserRole + 19, LogErrorRole = Qt::UserRole + 20};
 
-    //The custom roles must have the same numerical value as in AbstractNodeModel.hpp because the
-    //core delegate was written to only handle the custom roles it defines!
-    enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
-                         ServerRole = Qt::UserRole+3,
-                         AttributeRole = Qt::UserRole+10,
-                         AttributeLineRole = Qt::UserRole+11,
-                         NodeTypeRole = Qt::UserRole + 13,
-                         NodeTypeForegroundRole = Qt::UserRole + 14,
-                         NodePointerRole = Qt::UserRole + 17};
+    // The custom roles must have the same numerical value as in AbstractNodeModel.hpp because the
+    // core delegate was written to only handle the custom roles it defines!
+    enum CustomItemRole {
+        FilterRole             = Qt::UserRole + 1,
+        IconRole               = Qt::UserRole + 2,
+        ServerRole             = Qt::UserRole + 3,
+        AttributeRole          = Qt::UserRole + 10,
+        AttributeLineRole      = Qt::UserRole + 11,
+        NodeTypeRole           = Qt::UserRole + 13,
+        NodeTypeForegroundRole = Qt::UserRole + 14,
+        NodePointerRole        = Qt::UserRole + 17
+    };
 
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    Qt::ItemFlags flags ( const QModelIndex & index) const override;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QVariant data(const QModelIndex&, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int, Qt::Orientation, int role = Qt::DisplayRole) const override;
 
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
-    QModelIndex parent (const QModelIndex & ) const override;
+    QModelIndex index(int, int, const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex&) const override;
 
-    //TriggerTableCollector* triggerCollector() const {return tc_;}
-//    void setTriggerCollectors(TriggerTableCollector *triggerTc,
-//                              TriggerTableCollector *triggeredTv);
+    // TriggerTableCollector* triggerCollector() const {return tc_;}
+    //    void setTriggerCollectors(TriggerTableCollector *triggerTc,
+    //                              TriggerTableCollector *triggeredTv);
 
     void setItems(const std::vector<TriggerGraphNodeItem*>&);
     void appendItems(const std::vector<VItem*>& items);
@@ -76,7 +77,7 @@ public:
 
     VItem* indexToItem(const QModelIndex&) const;
     VInfo_ptr nodeInfo(const QModelIndex&);
-    QModelIndex nodeToIndex(const VNode *node) const;
+    QModelIndex nodeToIndex(const VNode* node) const;
     QModelIndex itemToIndex(VItem*);
 
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
@@ -87,10 +88,10 @@ protected:
     Mode mode_;
 };
 
-//class TriggerGraphModel : public QAbstractItemModel
+// class TriggerGraphModel : public QAbstractItemModel
 //{
-//public:
-//    enum Mode {TriggerMode,TriggeredMode,NodeMode};
+// public:
+//     enum Mode {TriggerMode,TriggeredMode,NodeMode};
 
 //    explicit TriggerGraphModel(Mode mode,QObject *parent=nullptr);
 //    ~TriggerGraphModel() override;
@@ -145,10 +146,10 @@ protected:
 
 //    void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&);
 
-//protected:
-//    TriggerTableItem* node_ {nullptr};
-//    TriggerTableCollector* triggerTc_ {nullptr};
-//    TriggerTableCollector* triggeredTc_ {nullptr};
+// protected:
+//     TriggerTableItem* node_ {nullptr};
+//     TriggerTableCollector* triggerTc_ {nullptr};
+//     TriggerTableCollector* triggeredTc_ {nullptr};
 
 //    Mode mode_;
 //};

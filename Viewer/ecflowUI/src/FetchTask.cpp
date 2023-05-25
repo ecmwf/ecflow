@@ -13,27 +13,25 @@
 #include <cassert>
 #include <map>
 
-#include "UiLog.hpp"
 #include "UIDebug.hpp"
+#include "UiLog.hpp"
 
-//#define UI_FETCHTASK_DEBUG__
+// #define UI_FETCHTASK_DEBUG__
 
-static std::map<std::string,FetchTaskFactory*>* makers = nullptr;
+static std::map<std::string, FetchTaskFactory*>* makers = nullptr;
 
-FetchTaskFactory::FetchTaskFactory(const std::string& name)
-{
-    if(makers == nullptr)
-        makers = new std::map<std::string,FetchTaskFactory*>;
+FetchTaskFactory::FetchTaskFactory(const std::string& name) {
+    if (makers == nullptr)
+        makers = new std::map<std::string, FetchTaskFactory*>;
 
     // Put in reverse order...
     (*makers)[name] = this;
 }
 
-AbstractFetchTask* FetchTaskFactory::create(const std::string& name, FetchQueueOwner* owner)
-{
-    AbstractFetchTask* t=nullptr;
-    auto j = makers->find(name);
-    if(j != makers->end()) {
+AbstractFetchTask* FetchTaskFactory::create(const std::string& name, FetchQueueOwner* owner) {
+    AbstractFetchTask* t = nullptr;
+    auto j               = makers->find(name);
+    if (j != makers->end()) {
         t = (*j).second->make(owner);
     }
 
@@ -47,80 +45,75 @@ AbstractFetchTask* FetchTaskFactory::create(const std::string& name, FetchQueueO
 //
 //========================================
 
-void AbstractFetchTask::clear()
-{
-    queue_ = nullptr;
-    status_ = NoStatus;
+void AbstractFetchTask::clear() {
+    queue_        = nullptr;
+    status_       = NoStatus;
     runCondition_ = NoCondition;
-    server_=nullptr;
-    node_=nullptr;
+    server_       = nullptr;
+    node_         = nullptr;
     filePath_.clear();
-    deltaPos_=0;
-    useCache_=false;
+    deltaPos_ = 0;
+    useCache_ = false;
 }
 
-void AbstractFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath)
-{
-    server_=server;
-    node_=node;
-    filePath_=filePath;
+void AbstractFetchTask::reset(ServerHandler* server, VNode* node, const std::string& filePath) {
+    server_   = server;
+    node_     = node;
+    filePath_ = filePath;
 }
 
-void AbstractFetchTask::reset(ServerHandler* server,VNode* node,const std::string& filePath,
-           size_t deltaPos, unsigned int modTime, const std::string& checkSum, bool useCache)
-{
-    server_=server;
-    node_=node;
-    filePath_=filePath;
-    deltaPos_=deltaPos;
-    modTime_=modTime;
-    checkSum_=checkSum;
-    useCache_=useCache;
+void AbstractFetchTask::reset(ServerHandler* server,
+                              VNode* node,
+                              const std::string& filePath,
+                              size_t deltaPos,
+                              unsigned int modTime,
+                              const std::string& checkSum,
+                              bool useCache) {
+    server_   = server;
+    node_     = node;
+    filePath_ = filePath;
+    deltaPos_ = deltaPos;
+    modTime_  = modTime;
+    checkSum_ = checkSum;
+    useCache_ = useCache;
 }
 
-void AbstractFetchTask::setQueue(FetchQueue* q)
-{
+void AbstractFetchTask::setQueue(FetchQueue* q) {
     queue_ = q;
 }
 
-bool AbstractFetchTask::checRunCondition(AbstractFetchTask* prev) const
-{
+bool AbstractFetchTask::checRunCondition(AbstractFetchTask* prev) const {
     if (prev && runCondition_ == RunIfPrevFailed && prev->status_ == SucceededStatus) {
         return false;
     }
     return true;
 }
 
-void AbstractFetchTask::succeed()
-{
+void AbstractFetchTask::succeed() {
     status_ = SucceededStatus;
     if (queue_) {
         queue_->taskSucceeded(this);
     }
 }
 
-void AbstractFetchTask::finish()
-{
+void AbstractFetchTask::finish() {
     status_ = FinishedStatus;
     if (queue_) {
         queue_->taskFinished(this);
     }
 }
 
-void AbstractFetchTask::fail()
-{
+void AbstractFetchTask::fail() {
     status_ = FailedStatus;
     if (queue_) {
         queue_->taskFailed(this);
     }
 }
 
-std::string AbstractFetchTask::print() const
-{
-    return name_ + "[status=" + std::to_string(status_) + ",runCondition=" +  std::to_string(runCondition_) +
-            ",filePath=" + filePath_ + "]";
+std::string AbstractFetchTask::print() const {
+    return name_ + "[status=" + std::to_string(status_) + ",runCondition=" + std::to_string(runCondition_) +
+           ",filePath=" + filePath_ + "]";
 }
-
 
 //========================================
 //
@@ -128,35 +121,32 @@ std::string AbstractFetchTask::print() const
 //
 //========================================
 
-void FetchQueue::clear()
-{
+void FetchQueue::clear() {
     status_ = IdleState;
-    for (auto t: queue_) {
+    for (auto t : queue_) {
         t->stop();
         t->setQueue(nullptr);
     }
     queue_.clear();
 }
 
-void FetchQueue::add(AbstractFetchTask* t)
-{
+void FetchQueue::add(AbstractFetchTask* t) {
     assert(t);
     t->setQueue(this);
     queue_.push_back(t);
 }
 
-void FetchQueue::run()
-{
+void FetchQueue::run() {
     if (!queue_.empty()) {
         status_ = RunningState;
         queue_.front()->run();
-    } else {
+    }
+    else {
         finish();
     }
 }
 
-void FetchQueue::next()
-{
+void FetchQueue::next() {
 #ifdef UI_FETCHTASK_DEBUG__
     UiLog().dbg() << "OutputFetchQueue::next";
 #endif
@@ -172,74 +162,76 @@ void FetchQueue::next()
                     UiLog().dbg() << " skip current";
 #endif
                     next();
-                } else {
+                }
+                else {
 #ifdef UI_FETCHTASK_DEBUG__
                     UiLog().dbg() << " run current";
 #endif
                     current->run();
                 }
-            } else {
+            }
+            else {
                 finish(prev);
             }
-        } else {
+        }
+        else {
             finish();
         }
     }
 }
 
-void FetchQueue::finish(AbstractFetchTask* lastTask)
-{
+void FetchQueue::finish(AbstractFetchTask* lastTask) {
 #ifdef UI_FETCHTASK_DEBUG__
     UI_FN_DBG
 #endif
     clear();
     if (lastTask) {
         owner_->fetchQueueFinished(lastTask->filePath(), lastTask->node());
-    } else {
+    }
+    else {
         owner_->fetchQueueFinished({}, nullptr);
     }
 }
 
-void FetchQueue::taskSucceeded(AbstractFetchTask*)
-{
+void FetchQueue::taskSucceeded(AbstractFetchTask*) {
     if (status_ == RunningState) {
         if (policy_ == RunUntilFirstSucceeded) {
             clear();
             owner_->fetchQueueSucceeded();
-        } else {
+        }
+        else {
             next();
         }
     }
 }
 
-void FetchQueue::taskFinished(AbstractFetchTask*)
-{
+void FetchQueue::taskFinished(AbstractFetchTask*) {
     if (status_ == RunningState) {
         next();
-    } else {
+    }
+    else {
         clear();
     }
 }
 
-void FetchQueue::taskFailed(AbstractFetchTask*)
-{
+void FetchQueue::taskFailed(AbstractFetchTask*) {
 #ifdef UI_FETCHTASK_DEBUG__
     UI_FN_DBG
 #endif
     if (status_ == RunningState) {
         next();
-    } else {
+    }
+    else {
         clear();
     }
 }
 
-std::string FetchQueue::print() const
-{
+std::string FetchQueue::print() const {
     std::string s = "OutpuFetchQueue[";
-    for (auto t: queue_) {
+    for (auto t : queue_) {
         s += t->name() + ",";
     }
-    s[s.size()-1] = ']';
+    s[s.size() - 1] = ']';
     return s;
 }
 
@@ -249,15 +241,14 @@ std::string FetchQueue::print() const
 //
 //========================================
 
-FetchQueueOwner::~FetchQueueOwner()
-{
+FetchQueueOwner::~FetchQueueOwner() {
     if (fetchQueue_) {
         delete fetchQueue_;
         fetchQueue_ = nullptr;
     }
 
-    for (auto it: fetchTasks_) {
-        for(auto itV: it.second) {
+    for (auto it : fetchTasks_) {
+        for (auto itV : it.second) {
             delete itV;
         }
     }
@@ -265,18 +256,16 @@ FetchQueueOwner::~FetchQueueOwner()
     unusedTasks_.clear();
 }
 
-bool FetchQueueOwner::isEmpty() const
-{
-    return (fetchQueue_)?fetchQueue_->isEmpty():true;
+bool FetchQueueOwner::isEmpty() const {
+    return (fetchQueue_) ? fetchQueue_->isEmpty() : true;
 }
 
-void FetchQueueOwner::clear()
-{
+void FetchQueueOwner::clear() {
     // clear the queue and the fetch tasks
     if (fetchQueue_) {
         fetchQueue_->clear();
-        for (auto it: fetchTasks_) {
-            for(auto itV: it.second) {
+        for (auto it : fetchTasks_) {
+            for (auto itV : it.second) {
                 itV->clear();
             }
         }
@@ -284,15 +273,14 @@ void FetchQueueOwner::clear()
     unusedTasks_ = fetchTasks_;
 }
 
-AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name)
-{
+AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name) {
 #ifdef UI_FETCHTASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "unusedtasks";
-    for(auto t: unusedTasks_) {
+    for (auto t : unusedTasks_) {
         UiLog().dbg() << " " << t.first << " len=" << t.second.size();
     }
     UiLog().dbg() << UI_FN_INFO << "fetchTasks";
-    for(auto t: fetchTasks_) {
+    for (auto t : fetchTasks_) {
         UiLog().dbg() << " " << t.first << " len=" << t.second.size();
     }
 #endif
@@ -307,20 +295,17 @@ AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name)
 #ifdef UI_FETCHTASK_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "create object for name=" << name;
 #endif
-    AbstractFetchTask *t = FetchTaskFactory::create(name, this);
+    AbstractFetchTask* t = FetchTaskFactory::create(name, this);
     fetchTasks_[name].emplace_back(t);
     return t;
 }
 
-
-std::ostream&  operator <<(std::ostream &stream,AbstractFetchTask* t)
-{
+std::ostream& operator<<(std::ostream& stream, AbstractFetchTask* t) {
     stream << t->print();
     return stream;
 }
 
-std::ostream&  operator <<(std::ostream &stream,FetchQueue* q)
-{
+std::ostream& operator<<(std::ostream& stream, FetchQueue* q) {
     stream << q->print();
     return stream;
 }

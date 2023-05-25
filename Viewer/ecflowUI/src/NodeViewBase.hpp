@@ -10,8 +10,8 @@
 #ifndef NODEVIEWBASE_HPP_
 #define NODEVIEWBASE_HPP_
 
-#include "Viewer.hpp"
 #include "VInfo.hpp"
+#include "Viewer.hpp"
 
 class QWidget;
 class QObject;
@@ -21,25 +21,24 @@ class NodeFilterDef;
 class VSettings;
 class QModelIndex;
 
-class NodeViewBase
-{
+class NodeViewBase {
 public:
-        explicit NodeViewBase(NodeFilterDef*);
-        virtual ~NodeViewBase()= default;
+    explicit NodeViewBase(NodeFilterDef*);
+    virtual ~NodeViewBase()                       = default;
 
-		virtual void reload()=0;
-		virtual void rerender()=0;
-        virtual QWidget* realWidget()=0;
-        virtual QObject* realObject()=0;
-        virtual VInfo_ptr currentSelection()=0;
-		virtual void selectFirstServer()=0;
-        virtual void setCurrentSelection(VInfo_ptr n)=0;
+    virtual void reload()                         = 0;
+    virtual void rerender()                       = 0;
+    virtual QWidget* realWidget()                 = 0;
+    virtual QObject* realObject()                 = 0;
+    virtual VInfo_ptr currentSelection()          = 0;
+    virtual void selectFirstServer()              = 0;
+    virtual void setCurrentSelection(VInfo_ptr n) = 0;
 
-        virtual void readSettings(VSettings* vs)=0;
-        virtual void writeSettings(VSettings* vs)=0;
+    virtual void readSettings(VSettings* vs)      = 0;
+    virtual void writeSettings(VSettings* vs)     = 0;
 
 protected:
-		NodeFilterDef* filterDef_;
+    NodeFilterDef* filterDef_;
 };
 
 #endif

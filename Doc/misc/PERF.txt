@@ -140,7 +140,7 @@ kcachegrind callgrind.out.18473
 
 test job creation
 ==========================================================================
- - Note writing to scratch can be slow, this can be overriden by user specfiying
+ - Note writing to scratch can be slow, this can be overridden by user specfiying
  - thier own directory:
  
 export PYTHONPATH=/var/tmp/ma0/workspace/ecflow/Pyext/ecflow

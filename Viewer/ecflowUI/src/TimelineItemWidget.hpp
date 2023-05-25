@@ -11,18 +11,17 @@
 #ifndef TIMELINEITEMWIDGET_HPP
 #define TIMELINEITEMWIDGET_HPP
 
+#include <QWidget>
+
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
-
-#include <QWidget>
 
 class VNode;
 class TimelineWidget;
 
-class TimelineItemWidget : public QWidget, public InfoPanelItem
-{
+class TimelineItemWidget : public QWidget, public InfoPanelItem {
 public:
-    explicit TimelineItemWidget(QWidget *parent=nullptr);
+    explicit TimelineItemWidget(QWidget* parent = nullptr);
     ~TimelineItemWidget() override;
 
     void reload(VInfo_ptr) override;
@@ -41,6 +40,7 @@ protected:
     void updateState(const ChangeFlags&) override;
     void serverSyncFinished() override;
     void connectStateChanged() override;
+
 private:
     void load();
 
@@ -49,4 +49,3 @@ private:
 };
 
 #endif // TIMELINEITEMWIDGET_HPP
-

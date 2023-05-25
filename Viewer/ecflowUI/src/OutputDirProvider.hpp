@@ -13,31 +13,29 @@
 
 #include <QObject>
 
-#include "VFile.hpp"
-#include "VDir.hpp"
-#include "VInfo.hpp"
+#include "FetchTask.hpp"
 #include "InfoProvider.hpp"
+#include "VDir.hpp"
+#include "VFile.hpp"
+#include "VInfo.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
-
-#include "FetchTask.hpp"
 
 class OutputDirClient;
 class OutputDirProvider;
 class OutputDirFetchQueueManager;
 class VDirTransfer;
 
-class OutputDirFetchTask : public AbstractFetchTask
-{
+class OutputDirFetchTask : public AbstractFetchTask {
 public:
-    OutputDirFetchTask(const std::string& name,  FetchQueueOwner* owner);
+    OutputDirFetchTask(const std::string& name, FetchQueueOwner* owner);
+
 protected:
     void addTryLog(VReply* r, const std::string& txt) const;
 };
 
-class OutputDirFetchLogServerTask : public QObject, public OutputDirFetchTask
-{
-Q_OBJECT
+class OutputDirFetchLogServerTask : public QObject, public OutputDirFetchTask {
+    Q_OBJECT
 public:
     OutputDirFetchLogServerTask(FetchQueueOwner* owner);
     ~OutputDirFetchLogServerTask();
@@ -47,26 +45,23 @@ public:
 
 protected Q_SLOTS:
     void clientFinished();
-    void clientProgress(QString,int);
+    void clientProgress(QString, int);
     void clientError(QString);
 
 protected:
     void deleteClient();
 
-    OutputDirClient *client_{nullptr};
+    OutputDirClient* client_{nullptr};
 };
 
-
-class OutputDirFetchLocalTask : public OutputDirFetchTask
-{
+class OutputDirFetchLocalTask : public OutputDirFetchTask {
 public:
     OutputDirFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
-class OutputDirFetchTransferTask : public QObject, public OutputDirFetchTask
-{
-Q_OBJECT
+class OutputDirFetchTransferTask : public QObject, public OutputDirFetchTask {
+    Q_OBJECT
 public:
     OutputDirFetchTransferTask(FetchQueueOwner* owner);
     ~OutputDirFetchTransferTask();
@@ -76,33 +71,32 @@ public:
 
 protected Q_SLOTS:
     void transferFinished();
-    void transferProgress(QString,int);
+    void transferProgress(QString, int);
     void transferFailed(QString);
 
 protected:
     void stopTransfer();
     void parseLine(QString line);
 
-    VDirTransfer *transfer_{nullptr};
+    VDirTransfer* transfer_{nullptr};
     VDir_ptr dir_;
 };
-
 
 class OutputDirProvider : public InfoProvider //, public OutputFetchQueueOwner
 {
     friend class OutputDirFetchQueueManager;
 
 public:
-     explicit OutputDirProvider(InfoPresenter* owner);
-     ~OutputDirProvider();
-     OutputDirProvider(const OutputDirProvider&) = delete;
-     OutputDirProvider& operator=(const OutputDirProvider&) = delete;
+    explicit OutputDirProvider(InfoPresenter* owner);
+    ~OutputDirProvider();
+    OutputDirProvider(const OutputDirProvider&)            = delete;
+    OutputDirProvider& operator=(const OutputDirProvider&) = delete;
 
-	 void visit(VInfoNode*) override;
-	 void clear() override;
+    void visit(VInfoNode*) override;
+    void clear() override;
 
 private:
-      OutputDirFetchQueueManager* fetchManager_{nullptr};
+    OutputDirFetchQueueManager* fetchManager_{nullptr};
 };
 
 #endif /* VIEWER_SRC_OUTPUTDIRPROVIDER_HPP_ */

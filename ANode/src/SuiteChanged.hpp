@@ -4,14 +4,14 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #7 $ 
+// Revision    : $Revision: #7 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
@@ -33,59 +33,66 @@ namespace ecf {
 
 class SuiteChanged {
 private:
-  SuiteChanged(const SuiteChanged&) = delete;
-  const SuiteChanged& operator=(const SuiteChanged&) = delete;
+    SuiteChanged(const SuiteChanged&)                  = delete;
+    const SuiteChanged& operator=(const SuiteChanged&) = delete;
+
 public:
-   explicit SuiteChanged(suite_ptr s);
-	~SuiteChanged();
+    explicit SuiteChanged(suite_ptr s);
+    ~SuiteChanged();
+
 private:
-	weak_suite_ptr suite_;
-	unsigned int state_change_no_;
-	unsigned int modify_change_no_;
+    weak_suite_ptr suite_;
+    unsigned int state_change_no_;
+    unsigned int modify_change_no_;
 };
 
-class SuiteChanged0  {
+class SuiteChanged0 {
 private:
-  SuiteChanged0(const SuiteChanged0&) = delete;
-  const SuiteChanged0& operator=(const SuiteChanged0&) = delete;
+    SuiteChanged0(const SuiteChanged0&)                  = delete;
+    const SuiteChanged0& operator=(const SuiteChanged0&) = delete;
+
 public:
-   explicit SuiteChanged0(node_ptr s);
-	~SuiteChanged0();
+    explicit SuiteChanged0(node_ptr s);
+    ~SuiteChanged0();
+
 private:
-	weak_node_ptr node_;
-   Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
-	unsigned int state_change_no_;
-	unsigned int modify_change_no_;
+    weak_node_ptr node_;
+    Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
+    unsigned int state_change_no_;
+    unsigned int modify_change_no_;
 };
 
 // Faster than using node_ptr.
-class SuiteChangedPtr  {
+class SuiteChangedPtr {
 private:
-   SuiteChangedPtr(const SuiteChangedPtr&) = delete;
-  const  SuiteChangedPtr& operator=(const  SuiteChangedPtr&) = delete;
-public:
-   explicit SuiteChangedPtr(Node* s);
-   ~SuiteChangedPtr();
-private:
-   Node* node_;
-   Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
-   unsigned int state_change_no_;
-   unsigned int modify_change_no_;
-};
+    SuiteChangedPtr(const SuiteChangedPtr&)                  = delete;
+    const SuiteChangedPtr& operator=(const SuiteChangedPtr&) = delete;
 
+public:
+    explicit SuiteChangedPtr(Node* s);
+    ~SuiteChangedPtr();
+
+private:
+    Node* node_;
+    Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
+    unsigned int state_change_no_;
+    unsigned int modify_change_no_;
+};
 
 class SuiteChanged1 {
 private:
-  SuiteChanged1(const SuiteChanged1&) = delete;
-  const SuiteChanged1& operator=(const SuiteChanged1&) = delete;
+    SuiteChanged1(const SuiteChanged1&)                  = delete;
+    const SuiteChanged1& operator=(const SuiteChanged1&) = delete;
+
 public:
-   explicit SuiteChanged1(Suite* s);
-	~SuiteChanged1();
+    explicit SuiteChanged1(Suite* s);
+    ~SuiteChanged1();
+
 private:
-	Suite* suite_;
-	unsigned int state_change_no_;
-	unsigned int modify_change_no_;
+    Suite* suite_;
+    unsigned int state_change_no_;
+    unsigned int modify_change_no_;
 };
 
-}
+} // namespace ecf
 #endif

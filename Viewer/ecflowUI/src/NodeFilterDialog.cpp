@@ -8,111 +8,93 @@
 //
 //============================================================================
 
+#include "NodeFilterDialog.hpp"
+
 #include <QCloseEvent>
 #include <QDebug>
 #include <QSettings>
 
-#include "NodeFilterDialog.hpp"
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
 
-NodeFilterDialog::NodeFilterDialog(QWidget *parent) :
-    QDialog(parent)
-{
+NodeFilterDialog::NodeFilterDialog(QWidget* parent) : QDialog(parent) {
     setupUi(this);
 
-    //setAttribute(Qt::WA_DeleteOnClose);
+    // setAttribute(Qt::WA_DeleteOnClose);
     editor_->setFilterMode(true);
 
-	QString wt=windowTitle();
-	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
-	setWindowTitle(wt);
+    QString wt = windowTitle();
+    wt += "  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    setWindowTitle(wt);
 
-	connect(applyPb_,SIGNAL(clicked()),
-	    		this,SLOT(accept()));
+    connect(applyPb_, SIGNAL(clicked()), this, SLOT(accept()));
 
-    connect(cancelPb_,SIGNAL(clicked()),
-    		this,SLOT(reject()));
+    connect(cancelPb_, SIGNAL(clicked()), this, SLOT(reject()));
 
     leftVb_->addStretch(1);
 
-    //Read the qt settings
+    // Read the qt settings
     readSettings();
 }
 
-NodeFilterDialog::~NodeFilterDialog()
-= default;
+NodeFilterDialog::~NodeFilterDialog() = default;
 
-void NodeFilterDialog::setQuery(NodeQuery* q)
-{
-	editor_->setQuery(q);
+void NodeFilterDialog::setQuery(NodeQuery* q) {
+    editor_->setQuery(q);
 }
 
-NodeQuery* NodeFilterDialog::query() const
-{
-	return editor_->query();
+NodeQuery* NodeFilterDialog::query() const {
+    return editor_->query();
 }
 
-void NodeFilterDialog::setServerFilter(ServerFilter* sf)
-{
-	editor_->setServerFilter(sf);
+void NodeFilterDialog::setServerFilter(ServerFilter* sf) {
+    editor_->setServerFilter(sf);
 }
 
-void NodeFilterDialog::closeEvent(QCloseEvent * event)
-{
-	event->accept();
-	writeSettings();
+void NodeFilterDialog::closeEvent(QCloseEvent* event) {
+    event->accept();
+    writeSettings();
 }
 
-void NodeFilterDialog::accept()
-{
-	writeSettings();
+void NodeFilterDialog::accept() {
+    writeSettings();
     QDialog::accept();
 }
 
-
-void NodeFilterDialog::reject()
-{
-	writeSettings();
-	QDialog::reject();
+void NodeFilterDialog::reject() {
+    writeSettings();
+    QDialog::reject();
 }
 
 //------------------------------------------
 // Settings read/write
 //------------------------------------------
 
-void NodeFilterDialog::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void NodeFilterDialog::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeFilterDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeFilterDialog")), QSettings::NativeFormat);
 
-	//We have to clear it so that should not remember all the previous values
-	settings.clear();
+    // We have to clear it so that should not remember all the previous values
+    settings.clear();
 
-	settings.beginGroup("main");
-	settings.setValue("size",size());
-	settings.endGroup();
+    settings.beginGroup("main");
+    settings.setValue("size", size());
+    settings.endGroup();
 }
 
-void NodeFilterDialog::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void NodeFilterDialog::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeFilterDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("NodeFilterDialog")), QSettings::NativeFormat);
 
-	settings.beginGroup("main");
-	if(settings.contains("size"))
-	{
-		resize(settings.value("size").toSize());
-	}
-	else
-	{
-        resize(QSize(590,460));
-	}
+    settings.beginGroup("main");
+    if (settings.contains("size")) {
+        resize(settings.value("size").toSize());
+    }
+    else {
+        resize(QSize(590, 460));
+    }
 
-	settings.endGroup();
+    settings.endGroup();
 }
-

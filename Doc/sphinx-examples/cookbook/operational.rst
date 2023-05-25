@@ -41,7 +41,7 @@ For a maintenable operational suite, we recommand to:
   and the task may remain visible as submitted, from the ecFlow server
   side.
 
-* after seding the job complete command, the job may copy its output
+* after sending the job complete command, the job may copy its output
   to **ECF_HOST**, to enable direct access from ecFlow server.
 
   When a file is requested from the ecflow-server, it is limited to
@@ -63,11 +63,11 @@ logsvr.pl.
 
 * it is configured to deliver files under specific directories, 
 
-* configration variables are
+* configuration variables are
 
   * LOGPORT # 9316 
   * LOGPATH # <path1>:<path2>:<path3>
-  * LOGMAP  # mapping betwen requested path and real actual location
+  * LOGMAP  # mapping between requested path and real actual location
 
   As an example, with two possible storage destination::
 
@@ -106,7 +106,7 @@ System
 ======
 
 As soon as the basic principles of ecflow are understood and mastered,
-setting up a project with operational constaints may face serveral
+setting up a project with operational constraints may face several
 challenges:
 
 * I/O and disk access is critical for the server:
@@ -129,9 +129,9 @@ A task should abort as close to the problem as possible:
   consumption threshold, a kill request from the server (kill -2),
   or a 'command line' kill from the (root) user.
 
-* loosing the traping capability is easy: 
+* loosing the trapping capability is easy: 
 
-  * traping inheritance between the main ksh script and ksh function
+  * trapping inheritance between the main ksh script and ksh function
     is system dependent. To maintain deterministic behaviour, do not
     hesitate to repeat trap setting::
   
@@ -172,7 +172,7 @@ A task should abort as close to the problem as possible:
 * time stamps may be added on a per line bases with variable PS4
 
 * ECF_TRIES variables can be increased to allow multiple submission
-  attemps (some jobs may become more verbose on second submission, or
+  attempts (some jobs may become more verbose on second submission, or
   it can be a 'network glitch'
 
 =====================
@@ -236,7 +236,7 @@ locally and remotely. They are:
 
   * tune submission timeout according to submit user and remote destination,
 
-  * use a submition utility according to the remote system, or even
+  * use a submission utility according to the remote system, or even
     the way we want the job to be submitted there: nohup,
     standalone, rsh, ssh, ecrcmd
 
@@ -302,7 +302,7 @@ preprocessing directives (include, manual, end, nopp) in task wrappers.
 * micro may change trough the job thanks to the directive
   %ecf_micro::
 
-    %ecf_micro ^ # change micro to exponant character
+    %ecf_micro ^ # change micro to exponent character
     ^include "standalone_script.pl"
     ^ecf_micro % # revert back to original character
 
@@ -310,7 +310,7 @@ preprocessing directives (include, manual, end, nopp) in task wrappers.
    the task wrapper where it can be frequently used (date, perl)
 
 * %includenopp <file> is also a simple way to import a script that do
-  not contain ecFlow prepprocessing directive, and that may contain
+  not contain ecFlow preprocessing directive, and that may contain
   the micro '%' character
 
 ================

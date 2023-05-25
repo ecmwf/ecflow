@@ -14,8 +14,7 @@
 
 #include "VProperty.hpp"
 
-class HtmlEdit : public QTextBrowser, public VPropertyObserver
-{
+class HtmlEdit : public QTextBrowser, public VPropertyObserver {
 public:
     explicit HtmlEdit(QWidget* parent = nullptr);
     ~HtmlEdit() override;
@@ -25,14 +24,12 @@ public:
     void notifyChange(VProperty* p) override;
 
 protected:
-    void wheelEvent(QWheelEvent *event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
 private:
     void fontSizeChangedByZoom();
 
-    VProperty *fontProp_{nullptr};
+    VProperty* fontProp_{nullptr};
 };
 
 #endif // HTMLEDIT_HPP
-
-

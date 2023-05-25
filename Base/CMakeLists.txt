@@ -4,6 +4,44 @@
  #    find src -name \*.cpp >> CMakeLists.txt
  # =======================================================
  list( APPEND srcs
+ # HEADERS
+ src/AbstractClientEnv.hpp
+ src/AbstractServer.hpp
+ src/Client.hpp
+ src/ClientToServerRequest.hpp
+ src/Cmd.hpp
+ src/Connection.hpp
+ src/Gnuplot.hpp
+ src/ServerReply.hpp
+ src/ServerToClientResponse.hpp
+ src/Stats.hpp
+ src/WhyCmd.hpp
+ src/ZombieCtrl.hpp
+ src/cts/ClientToServerCmd.hpp
+ src/cts/CtsApi.hpp
+ src/cts/CtsCmdRegistry.hpp
+ src/cts/EditHistoryMgr.hpp
+ src/cts/TaskApi.hpp
+ src/stc/BlockClientZombieCmd.hpp
+ src/stc/DefsCache.hpp
+ src/stc/DefsCmd.hpp
+ src/stc/ErrorCmd.hpp
+ src/stc/GroupSTCCmd.hpp
+ src/stc/PreAllocatedReply.hpp
+ src/stc/SClientHandleCmd.hpp
+ src/stc/SClientHandleSuitesCmd.hpp
+ src/stc/SNewsCmd.hpp
+ src/stc/SNodeCmd.hpp
+ src/stc/SServerLoadCmd.hpp
+ src/stc/SStatsCmd.hpp
+ src/stc/SStringCmd.hpp
+ src/stc/SStringVecCmd.hpp
+ src/stc/SSuitesCmd.hpp
+ src/stc/SSyncCmd.hpp
+ src/stc/ServerToClientCmd.hpp
+ src/stc/StcCmd.hpp
+ src/stc/ZombieGetCmd.hpp
+ # SOURCES
  src/ZombieCtrl.cpp
  src/Stats.cpp
  src/Client.cpp
@@ -68,7 +106,12 @@
 )
 
 if(OPENSSL_FOUND)
-  list( APPEND srcs 
+  list( APPEND srcs
+     # HEADERS
+     src/Openssl.hpp
+     src/ssl_connection.hpp
+     src/SslClient.hpp
+     # SOURCES
      src/Openssl.cpp 
      src/ssl_connection.cpp
      src/SslClient.cpp
@@ -91,8 +134,12 @@ target_include_directories(base PUBLIC src
                               ../Base/src/cts
                               ../Base/src/stc )
 
+target_clangformat(base)
+
 
 list( APPEND test_srcs
+   test/MockServer.hpp
+   test/TestHelper.hpp
    test/TestAlterCmd.cpp
    test/TestArchiveAndRestoreCmd.cpp
    test/TestClientHandleCmd.cpp
@@ -127,13 +174,14 @@ ecbuild_add_test( TARGET       u_base
                   TEST_DEPENDS u_aparser
                   )
 
-                  
-if (ENABLE_ALL_TESTS)
+target_clangformat(u_base CONDITION ENABLE_TESTS)
+
+ if (ENABLE_ALL_TESTS)
    ecbuild_add_test( TARGET       perf_job_gen 
                      SOURCES      test/TestJobGenPerf.cpp
                      LIBS         base nodeattr node core pthread                                    
                      INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   )
-endif()
-                  
+   target_clangformat(perf_job_gen CONDITION ENABLE_TESTS)
+ endif()

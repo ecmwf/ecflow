@@ -11,12 +11,11 @@
 #ifndef RECTMETRICS_HPP
 #define RECTMETRICS_HPP
 
-class RectMetrics
-{
+class RectMetrics {
 public:
     RectMetrics(int penWidth);
-    int topOffset() const {return topOffset_;}
-    int bottomOffset() const {return bottomOffset_;}
+    int topOffset() const { return topOffset_; }
+    int bottomOffset() const { return bottomOffset_; }
 
 protected:
     int topOffset_;

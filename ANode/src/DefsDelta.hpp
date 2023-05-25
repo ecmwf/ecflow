@@ -3,14 +3,14 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #23 $ 
+// Revision    : $Revision: #23 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 // class DefsDelta: holds a list of incremental changes made in the server.
@@ -27,61 +27,62 @@
 // Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "NodeFwd.hpp"
-namespace cereal { class access; }
+namespace cereal {
+class access;
+}
 
 class DefsDelta {
 private:
-  DefsDelta(const DefsDelta&) = delete;
-  const DefsDelta& operator=(const DefsDelta&) = delete;
+    DefsDelta(const DefsDelta&)                  = delete;
+    const DefsDelta& operator=(const DefsDelta&) = delete;
+
 public:
-   ///=========================================================================
-	/// *Server side*
-	explicit DefsDelta(unsigned int client_state_change_no)
-	: client_state_change_no_(client_state_change_no) {}
+    ///=========================================================================
+    /// *Server side*
+    explicit DefsDelta(unsigned int client_state_change_no) : client_state_change_no_(client_state_change_no) {}
 
-	/// This class can be re-used hence init() should reset all data members
- 	void init(unsigned int client_state_change_no, bool sync_suite_clock);
+    /// This class can be re-used hence init() should reset all data members
+    void init(unsigned int client_state_change_no, bool sync_suite_clock);
 
- 	/// reclaim memory
- 	void cleanup() { std::vector<compound_memento_ptr>().swap(compound_mementos_);}
+    /// reclaim memory
+    void cleanup() { std::vector<compound_memento_ptr>().swap(compound_mementos_); }
 
- 	// ECFLOW-631, allow the suite calendar to be sync'ed, even if there are no other changes
- 	bool sync_suite_clock() const { return sync_suite_clock_;}
+    // ECFLOW-631, allow the suite calendar to be sync'ed, even if there are no other changes
+    bool sync_suite_clock() const { return sync_suite_clock_; }
 
-	/// Add the compound memento, ie. store all memento's for a *given* node.
- 	void add(compound_memento_ptr);
+    /// Add the compound memento, ie. store all memento's for a *given* node.
+    void add(compound_memento_ptr);
 
-   void set_server_state_change_no( unsigned int s) { server_state_change_no_ =  s ; }
-   void set_server_modify_change_no( unsigned int s) { server_modify_change_no_ =  s ; }
-   unsigned int get_server_state_change_no() const  { return server_state_change_no_;  }
-   unsigned int get_server_modify_change_no() const { return server_modify_change_no_; }
+    void set_server_state_change_no(unsigned int s) { server_state_change_no_ = s; }
+    void set_server_modify_change_no(unsigned int s) { server_modify_change_no_ = s; }
+    unsigned int get_server_state_change_no() const { return server_state_change_no_; }
+    unsigned int get_server_modify_change_no() const { return server_modify_change_no_; }
 
- 	///=========================================================================
- 	/// *Client side*
-	/// Applies the mementos to the client defs and record all changed nodes.
-   /// Can raise std::runtime_error.
- 	/// Note:: updating state_change_no() on the *client side*  has *no effect*
-	bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes, int client_handle) const;
+    ///=========================================================================
+    /// *Client side*
+    /// Applies the mementos to the client defs and record all changed nodes.
+    /// Can raise std::runtime_error.
+    /// Note:: updating state_change_no() on the *client side*  has *no effect*
+    bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes, int client_handle) const;
 
+    /// =========================================================================
+    // The client state change number. Used to determine what's changed
+    unsigned int client_state_change_no() const { return client_state_change_no_; }
 
-	/// =========================================================================
-	// The client state change number. Used to determine what's changed
-	unsigned int client_state_change_no() const { return  client_state_change_no_;}
-
-	/// return the number of compound mementos
-	size_t size() const { return compound_mementos_.size(); }
+    /// return the number of compound mementos
+    size_t size() const { return compound_mementos_.size(); }
 
 private:
-	bool sync_suite_clock_{false};         // *no* need to persist since only used on server side
-	unsigned int client_state_change_no_;  // *no* need to persist since only used on server side
+    bool sync_suite_clock_{false};        // *no* need to persist since only used on server side
+    unsigned int client_state_change_no_; // *no* need to persist since only used on server side
 
-   unsigned int server_state_change_no_{0};
-   unsigned int server_modify_change_no_{0};
-	std::vector<compound_memento_ptr> compound_mementos_;
+    unsigned int server_state_change_no_{0};
+    unsigned int server_modify_change_no_{0};
+    std::vector<compound_memento_ptr> compound_mementos_;
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version );
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 #endif

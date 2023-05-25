@@ -11,20 +11,19 @@
 #ifndef MANUALITEMWIDGET_HPP_
 #define MANUALITEMWIDGET_HPP_
 
-#include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
+#include "InfoPanelItem.hpp"
 
-class ManualItemWidget : public CodeItemWidget, public InfoPanelItem
-{
+class ManualItemWidget : public CodeItemWidget, public InfoPanelItem {
 public:
-	explicit ManualItemWidget(QWidget *parent=nullptr);
-	~ManualItemWidget() override;
+    explicit ManualItemWidget(QWidget* parent = nullptr);
+    ~ManualItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-    //From VInfoPresenter
+    // From VInfoPresenter
     void infoReady(VReply*) override;
     void infoFailed(VReply*) override;
     void infoProgress(VReply*) override;
@@ -38,4 +37,3 @@ protected:
 };
 
 #endif
-

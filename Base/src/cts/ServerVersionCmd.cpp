@@ -15,9 +15,9 @@
 //                It will allow new clients to ask OLD server their version numbers
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include "ClientToServerCmd.hpp"
-#include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
+#include "AbstractServer.hpp"
+#include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
 #include "Version.hpp"
 
@@ -26,59 +26,55 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-void ServerVersionCmd::print(std::string& os) const
-{
-   user_cmd(os,CtsApi::server_version());
+void ServerVersionCmd::print(std::string& os) const {
+    user_cmd(os, CtsApi::server_version());
 }
-void ServerVersionCmd::print_only(std::string& os) const
-{
-   os += CtsApi::server_version();
+void ServerVersionCmd::print_only(std::string& os) const {
+    os += CtsApi::server_version();
 }
 
-bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const
-{
-   auto* the_rhs = dynamic_cast< ServerVersionCmd* > ( rhs );
-   if ( !the_rhs ) return false;
-   return UserCmd::equals(rhs);
+bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const {
+    auto* the_rhs = dynamic_cast<ServerVersionCmd*>(rhs);
+    if (!the_rhs)
+        return false;
+    return UserCmd::equals(rhs);
 }
 
-const char* ServerVersionCmd::theArg() const
-{
-   return CtsApi::server_version_arg();
+const char* ServerVersionCmd::theArg() const {
+    return CtsApi::server_version_arg();
 }
 
-STC_Cmd_ptr ServerVersionCmd::doHandleRequest(AbstractServer* as) const
-{
-   as->update_stats().server_version_++;
-   return PreAllocatedReply::string_cmd(Version::raw());
+STC_Cmd_ptr ServerVersionCmd::doHandleRequest(AbstractServer* as) const {
+    as->update_stats().server_version_++;
+    return PreAllocatedReply::string_cmd(Version::raw());
 }
 
-static const char* arg_desc()
-{
-            /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-   return
-            "Returns the version number of the server\n"
-            "Usage:\n"
-            "  --server_version\n"
-            "    Writes the version to standard output\n"
-            ;
+static const char* arg_desc() {
+    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    return "Returns the version number of the server\n"
+           "Usage:\n"
+           "  --server_version\n"
+           "    Writes the version to standard output\n";
 }
 
-void ServerVersionCmd::addOption(boost::program_options::options_description& desc) const
-{
-   desc.add_options()(CtsApi::server_version_arg(),arg_desc());
+void ServerVersionCmd::addOption(boost::program_options::options_description& desc) const {
+    desc.add_options()(CtsApi::server_version_arg(), arg_desc());
 }
 
-void ServerVersionCmd::create(    Cmd_ptr& cmd,
-         boost::program_options::variables_map& vm,
-         AbstractClientEnv*  ace ) const
-{
-   if (ace->debug()) cout << "  ServerVersionCmd::create\n";
+void ServerVersionCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
+    if (ace->debug())
+        cout << "  ServerVersionCmd::create\n";
 
-   // testing client interface
-   if (ace->under_test())  return;
+    // testing client interface
+    if (ace->under_test())
+        return;
 
-   cmd = std::make_shared<ServerVersionCmd>();
+    cmd = std::make_shared<ServerVersionCmd>();
 }
 
-std::ostream& operator<<(std::ostream& os, const ServerVersionCmd& c) { std::string ret; c.print(ret); os << ret; return os;}
+std::ostream& operator<<(std::ostream& os, const ServerVersionCmd& c) {
+    std::string ret;
+    c.print(ret);
+    os << ret;
+    return os;
+}

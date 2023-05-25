@@ -9,52 +9,43 @@
 //============================================================================
 
 #include "VEventAttr.hpp"
-#include "VAttributeType.hpp"
-#include "VNode.hpp"
 
 #include "NodeAttr.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
 
 //================================
 // VEventAttrType
 //================================
 
-VEventAttrType::VEventAttrType() : VAttributeType("event")
-{
-    dataCount_=3;
-    searchKeyToData_["event_name"]=NameIndex;
-    searchKeyToData_["event_value"]=ValueIndex;
-    searchKeyToData_["name"]=NameIndex;
-    scanProc_=VEventAttr::scan;
+VEventAttrType::VEventAttrType() : VAttributeType("event") {
+    dataCount_                      = 3;
+    searchKeyToData_["event_name"]  = NameIndex;
+    searchKeyToData_["event_value"] = ValueIndex;
+    searchKeyToData_["name"]        = NameIndex;
+    scanProc_                       = VEventAttr::scan;
 }
 
-QString VEventAttrType::toolTip(QStringList d) const
-{
-    QString t="<b>Type:</b> Event<br>";
-    if(d.count() == dataCount_)
-    {
-        t+="<b>Name:</b> " + d[NameIndex] + "<br>";
-        t+="<b>Status:</b> ";
-        t+=(d[ValueIndex] == "1")?"set (true)":"clear (false)";
-
+QString VEventAttrType::toolTip(QStringList d) const {
+    QString t = "<b>Type:</b> Event<br>";
+    if (d.count() == dataCount_) {
+        t += "<b>Name:</b> " + d[NameIndex] + "<br>";
+        t += "<b>Status:</b> ";
+        t += (d[ValueIndex] == "1") ? "set (true)" : "clear (false)";
     }
     return t;
 }
 
-QString VEventAttrType::definition(QStringList d) const
-{
-    QString t="event";
-    if(d.count() == dataCount_)
-    {
-        t+=" " + d[NameIndex];
+QString VEventAttrType::definition(QStringList d) const {
+    QString t = "event";
+    if (d.count() == dataCount_) {
+        t += " " + d[NameIndex];
     }
     return t;
 }
 
-void VEventAttrType::encode(const Event& e,QStringList& data) const
-{
-    data << qName_ <<
-              QString::fromStdString(e.name_or_number()) <<
-              QString::number((e.value()==true)?1:0);
+void VEventAttrType::encode(const Event& e, QStringList& data) const {
+    data << qName_ << QString::fromStdString(e.name_or_number()) << QString::number((e.value() == true) ? 1 : 0);
 }
 
 //=====================================================
@@ -63,48 +54,39 @@ void VEventAttrType::encode(const Event& e,QStringList& data) const
 //
 //=====================================================
 
-VEventAttr::VEventAttr(VNode *parent,const Event& e, int index) : VAttribute(parent,index)
-{
-    //name_=e.name_or_number();
+VEventAttr::VEventAttr(VNode* parent, const Event& /*e*/, int index) : VAttribute(parent, index) {
+    // name_=e.name_or_number();
 }
 
-VAttributeType* VEventAttr::type() const
-{
-    static VAttributeType* atype=VAttributeType::find("event");
+VAttributeType* VEventAttr::type() const {
+    static VAttributeType* atype = VAttributeType::find("event");
     return atype;
 }
 
-QStringList VEventAttr::data(bool /*firstLine*/) const
-{
-    static auto* atype=static_cast<VEventAttrType*>(type());
+QStringList VEventAttr::data(bool /*firstLine*/) const {
+    static auto* atype = static_cast<VEventAttrType*>(type());
     QStringList s;
-    if(node_ptr node=parent_->node_)
-    {
-        const std::vector<Event>& v=parent_->node_->events();
-        atype->encode(v[index_],s);
+    if (node_ptr node = parent_->node_) {
+        const std::vector<Event>& v = parent_->node_->events();
+        atype->encode(v[index_], s);
     }
     return s;
 }
 
-std::string VEventAttr::strName() const
-{
-    if(parent_->node_)
-    {
-        const std::vector<Event>& v=parent_->node_->events();
+std::string VEventAttr::strName() const {
+    if (parent_->node_) {
+        const std::vector<Event>& v = parent_->node_->events();
         return v[index_].name_or_number();
     }
     return {};
 }
 
-void VEventAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-    if(vnode->node_)
-    {
-        const std::vector<Event>& v=vnode->node_->events();
-        auto n=static_cast<int>(v.size());
-        for(int i=0; i < n; i++)
-        {
-            vec.push_back(new VEventAttr(vnode,v[i],i));
+void VEventAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
+    if (vnode->node_) {
+        const std::vector<Event>& v = vnode->node_->events();
+        auto n                      = static_cast<int>(v.size());
+        for (int i = 0; i < n; i++) {
+            vec.push_back(new VEventAttr(vnode, v[i], i));
         }
     }
 }

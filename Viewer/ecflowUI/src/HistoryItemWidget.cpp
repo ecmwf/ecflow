@@ -9,39 +9,37 @@
 
 #include "HistoryItemWidget.hpp"
 
-#include <QtGlobal>
 #include <QAction>
 #include <QClipboard>
 #include <QHeaderView>
 #include <QItemSelectionModel>
+#include <QtGlobal>
 
-#include "LogProvider.hpp"
 #include "LogModel.hpp"
+#include "LogProvider.hpp"
 #include "VReply.hpp"
 
-static bool firstRun=true;
+static bool firstRun = true;
 
-HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
-{
-	setupUi(this);
+HistoryItemWidget::HistoryItemWidget(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-	searchTb_->setEnabled(false);
-	searchTb_->setVisible(false);
-	searchLine_->setVisible(false);
+    searchTb_->setEnabled(false);
+    searchTb_->setVisible(false);
+    searchLine_->setVisible(false);
 
-	infoProvider_=new LogProvider(this);
-	infoProvider_->setAutoUpdate(true);
+    infoProvider_ = new LogProvider(this);
+    infoProvider_->setAutoUpdate(true);
 
-	model_=new LogModel(this);
+    model_ = new LogModel(this);
 
-	treeView_->setProperty("log","1");
-	treeView_->setModel(model_);
-	treeView_->setItemDelegate(new LogDelegate(this));
+    treeView_->setProperty("log", "1");
+    treeView_->setModel(model_);
+    treeView_->setItemDelegate(new LogDelegate(this));
     treeView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    //make the horizontal scrollbar work
+    // make the horizontal scrollbar work
     treeView_->header()->setStretchLastSection(false);
-
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     treeView_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -49,71 +47,60 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 
     checkActionState();
 
-    //Define context menu
+    // Define context menu
     treeView_->addAction(actionCopyEntry_);
     treeView_->addAction(actionCopyRow_);
 }
 
-QWidget* HistoryItemWidget::realWidget()
-{
+QWidget* HistoryItemWidget::realWidget() {
     return this;
 }
 
-void HistoryItemWidget::reload(VInfo_ptr info)
-{
+void HistoryItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if(suspended_)
-    {
+    if (suspended_) {
         return;
     }
 
-	clearContents();    
+    clearContents();
 
-    if(info && info->server() && info->server()->isDisabled())
-    {
+    if (info && info->server() && info->server()->isDisabled()) {
         setEnabled(false);
         return;
     }
-    else
-    {
+    else {
         setEnabled(true);
     }
 
-    info_=info;
+    info_ = info;
 
-    if(info_)
-    {
+    if (info_) {
         infoProvider_->info(info_);
     }
 }
 
-void HistoryItemWidget::clearContents()
-{
+void HistoryItemWidget::clearContents() {
     InfoPanelItem::clear();
-	model_->clearData();
+    model_->clearData();
 }
 
-void HistoryItemWidget::infoReady(VReply* reply)
-{
+void HistoryItemWidget::infoReady(VReply* reply) {
     model_->resetData(reply->text());
     adjustColumnSize();
-    fileLabel_->update(reply,"(Last 100 lines)");
+    fileLabel_->update(reply, "(Last 100 lines)");
     treeView_->scrollTo(model_->lastIndex());
     checkActionState();
 }
 
-void HistoryItemWidget::infoProgress(VReply*)
-{
+void HistoryItemWidget::infoProgress(VReply*) {
 }
 
-void HistoryItemWidget::infoFailed(VReply*)
-{
+void HistoryItemWidget::infoFailed(VReply*) {
     checkActionState();
 }
 
-void HistoryItemWidget::infoAppended(VReply* reply)
-{
+void HistoryItemWidget::infoAppended(VReply* reply) {
     model_->appendData(reply->textVec());
     adjustColumnSize();
     treeView_->scrollTo(model_->lastIndex());
@@ -121,100 +108,84 @@ void HistoryItemWidget::infoAppended(VReply* reply)
     checkActionState();
 }
 
-void HistoryItemWidget::updateState(const ChangeFlags& flags)
-{
-    if(flags.isSet(SelectedChanged))
-    {
-        if(!selected_)
-        {
+void HistoryItemWidget::updateState(const ChangeFlags& flags) {
+    if (flags.isSet(SelectedChanged)) {
+        if (!selected_) {
             infoProvider_->setAutoUpdate(false);
             reloadTb_->setEnabled(false);
             return;
         }
     }
 
-    if(flags.isSet(SuspendedChanged))
-    {
-        //Suspend
-        if(suspended_)
-        {
+    if (flags.isSet(SuspendedChanged)) {
+        // Suspend
+        if (suspended_) {
             infoProvider_->setAutoUpdate(false);
             reloadTb_->setEnabled(false);
             return;
         }
-
     }
 
     checkActionState();
 }
 
-void HistoryItemWidget::checkActionState()
-{
-    if(suspended_)
+void HistoryItemWidget::checkActionState() {
+    if (suspended_)
         return;
 
-    if(infoProvider_->autoUpdate() == frozen_)
-	{
-		infoProvider_->setAutoUpdate(!frozen_);
-	}
-	reloadTb_->setEnabled(!infoProvider_->autoUpdate() || !infoProvider_->inAutoUpdate());
+    if (infoProvider_->autoUpdate() == frozen_) {
+        infoProvider_->setAutoUpdate(!frozen_);
+    }
+    reloadTb_->setEnabled(!infoProvider_->autoUpdate() || !infoProvider_->inAutoUpdate());
 }
 
-//Adjust column size if it is the first run
-void HistoryItemWidget::adjustColumnSize()
-{
-	if(firstRun && model_->hasData())
-	{
-	   firstRun=false;
-	   for(int i=0; i < model_->columnCount()-1; i++)
-	   {
-		   treeView_->resizeColumnToContents(i);
-	   }
-	}
+// Adjust column size if it is the first run
+void HistoryItemWidget::adjustColumnSize() {
+    if (firstRun && model_->hasData()) {
+        firstRun = false;
+        for (int i = 0; i < model_->columnCount() - 1; i++) {
+            treeView_->resizeColumnToContents(i);
+        }
+    }
 }
 
-void HistoryItemWidget::on_reloadTb__clicked(bool)
-{
-	if(info_ && info_.get())
-	{
-		infoProvider_->info(info_);
-	}
+void HistoryItemWidget::on_reloadTb__clicked(bool) {
+    if (info_ && info_.get()) {
+        infoProvider_->info(info_);
+    }
 }
 
-void HistoryItemWidget::on_actionCopyEntry__triggered()
-{
+void HistoryItemWidget::on_actionCopyEntry__triggered() {
     QString s;
     QModelIndexList lst = treeView_->selectionModel()->selectedRows(2);
-    for(int i=0; i < lst.count(); i++) {
+    for (int i = 0; i < lst.count(); i++) {
         s += model_->entryText(lst[i]);
-        if (i != lst.count()-1) {
+        if (i != lst.count() - 1) {
             s += "\n";
         }
     }
     toClipboard(s);
 }
 
-void HistoryItemWidget::on_actionCopyRow__triggered()
-{
+void HistoryItemWidget::on_actionCopyRow__triggered() {
     QString s;
     QModelIndexList lst = treeView_->selectionModel()->selectedRows();
-    for(int i=0; i < lst.count(); i++) {
+    for (int i = 0; i < lst.count(); i++) {
         s += model_->fullText(lst[i]);
-        if (i != lst.count()-1) {
+        if (i != lst.count() - 1) {
             s += "\n";
         }
     }
     toClipboard(s);
 }
 
-void HistoryItemWidget::toClipboard(QString txt) const
-{
+void HistoryItemWidget::toClipboard(QString txt) const {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    QClipboard* cb=QGuiApplication::clipboard();
+    QClipboard* cb = QGuiApplication::clipboard();
     cb->setText(txt, QClipboard::Clipboard);
     cb->setText(txt, QClipboard::Selection);
 #else
-    QClipboard* cb=QApplication::clipboard();
+    QClipboard* cb = QApplication::clipboard();
     cb->setText(txt, QClipboard::Clipboard);
     cb->setText(txt, QClipboard::Selection);
 #endif

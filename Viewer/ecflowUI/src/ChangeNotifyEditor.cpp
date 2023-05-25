@@ -10,359 +10,299 @@
 
 #include "ChangeNotifyEditor.hpp"
 
-#include "PropertyLine.hpp"
-#include "ViewerUtil.hpp"
-#include "VConfig.hpp"
-#include "VProperty.hpp"
+#include <cassert>
 
 #include <QDebug>
 #include <QVBoxLayout>
 
-#include <cassert>
+#include "PropertyLine.hpp"
+#include "VConfig.hpp"
+#include "VProperty.hpp"
+#include "ViewerUtil.hpp"
 
-ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
-{
-	setupUi(this);
+ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-	model_=new ChangeNotifyEditorModel(this);
+    model_ = new ChangeNotifyEditorModel(this);
 
-	tree_->setModel(model_);
+    tree_->setModel(model_);
 
-	connect(tree_,SIGNAL(activated(QModelIndex)),
-			this,SLOT(slotRowSelected(QModelIndex)));
+    connect(tree_, SIGNAL(activated(QModelIndex)), this, SLOT(slotRowSelected(QModelIndex)));
 
-	connect(tree_,SIGNAL(clicked(QModelIndex)),
-			this,SLOT(slotRowSelected(QModelIndex)));
+    connect(tree_, SIGNAL(clicked(QModelIndex)), this, SLOT(slotRowSelected(QModelIndex)));
 
-	assert(tab_->count()==0);
-	//assert(stacked_->count()==0);
+    assert(tab_->count() == 0);
+    // assert(stacked_->count()==0);
 
-	QFont f;
-	QFontMetrics fm(f);
-	//tree_->setFixedHeight((fm.height()+4)*5.5);
+    QFont f;
+    QFontMetrics fm(f);
+    // tree_->setFixedHeight((fm.height()+4)*5.5);
 
-    tree_->setFixedWidth(ViewerUtil::textWidth(fm, "Restartedaaa")+30);
+    tree_->setFixedWidth(ViewerUtil::textWidth(fm, "Restartedaaa") + 30);
 
-	//tab_->hide();
+    // tab_->hide();
 }
 
-void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidget *stackContents)
-{
-	PropertyLine* enabledLine=nullptr;
-	PropertyLine* popupLine=nullptr;
-	PropertyLine* soundLine=nullptr;
+void ChangeNotifyEditor::addRow(QString label, QList<PropertyLine*> lineLst, QWidget* stackContents) {
+    PropertyLine* enabledLine = nullptr;
+    PropertyLine* popupLine   = nullptr;
+    PropertyLine* soundLine   = nullptr;
 
-	QList<VProperty*> propLst;
-	Q_FOREACH(PropertyLine* pl,lineLst)
-	{
-		if(pl)
-		{
-			propLst << pl->property();
+    QList<VProperty*> propLst;
+    Q_FOREACH (PropertyLine* pl, lineLst) {
+        if (pl) {
+            propLst << pl->property();
 
-			if(pl->property()->name() == "enabled")
-			{
-				enabledLine=pl;
-			}
-			if(pl->property()->name() == "popup")
-			{
-				popupLine=pl;
-			}
-			if(pl->property()->name() == "sound")
-			{
-				soundLine=pl;
-			}
+            if (pl->property()->name() == "enabled") {
+                enabledLine = pl;
+            }
+            if (pl->property()->name() == "popup") {
+                popupLine = pl;
+            }
+            if (pl->property()->name() == "sound") {
+                soundLine = pl;
+            }
+        }
+    }
 
-		}
-	}
+    if (enabledLine) {
+        connect(
+            model_, SIGNAL(enabledChanged(VProperty*, QVariant)), enabledLine, SLOT(slotReset(VProperty*, QVariant)));
 
-	if(enabledLine)
-	{
-		connect(model_,SIGNAL(enabledChanged(VProperty*,QVariant)),
-				enabledLine,SLOT(slotReset(VProperty*,QVariant)));
+        connect(enabledLine, SIGNAL(changed(QVariant)), model_, SLOT(slotEnabledChanged(QVariant)));
 
-		connect(enabledLine,SIGNAL(changed(QVariant)),
-				model_,SLOT(slotEnabledChanged(QVariant)));
+        connect(enabledLine, SIGNAL(masterChanged(bool)), model_, SLOT(slotEnabledMasterChanged(bool)));
 
-		connect(enabledLine,SIGNAL(masterChanged(bool)),
-				model_,SLOT(slotEnabledMasterChanged(bool)));
+        if (popupLine) {
+            connect(enabledLine, SIGNAL(changed(QVariant)), popupLine, SLOT(slotEnabled(QVariant)));
+            // init
+            popupLine->slotEnabled(enabledLine->property()->value());
+        }
+        if (soundLine) {
+            connect(enabledLine, SIGNAL(changed(QVariant)), soundLine, SLOT(slotEnabled(QVariant)));
 
-		if(popupLine)
-		{
-			connect(enabledLine,SIGNAL(changed(QVariant)),
-					popupLine,SLOT(slotEnabled(QVariant)));
-			//init
-			popupLine->slotEnabled(enabledLine->property()->value());
-		}
-		if(soundLine)
-		{
-			connect(enabledLine,SIGNAL(changed(QVariant)),
-					soundLine,SLOT(slotEnabled(QVariant)));
+            // init
+            soundLine->slotEnabled(enabledLine->property()->value());
+        }
+    }
 
-			//init
-			soundLine->slotEnabled(enabledLine->property()->value());
-		}
-	}
+    model_->add(label, propLst);
 
-	model_->add(label,propLst);
+    auto* w  = new QWidget(this);
+    auto* vb = new QVBoxLayout();
+    vb->setContentsMargins(0, 5, 0, 5);
+    w->setLayout(vb);
+    vb->addWidget(stackContents);
+    vb->addStretch(1);
 
-	auto* w=new QWidget(this);
-	auto* vb=new QVBoxLayout();
-	vb->setContentsMargins(0,5,0,5);
-	w->setLayout(vb);
-	vb->addWidget(stackContents);
-	vb->addStretch(1);
+    // stacked_->addWidget(w);
+    tab_->addTab(w, label);
 
-	//stacked_->addWidget(w);
-	tab_->addTab(w,label);
+    tree_->setCurrentIndex(model_->index(0, 0));
 
-	tree_->setCurrentIndex(model_->index(0,0));
-
-	for(int i=0; i < model_->columnCount()-1; i++)
-	{
-		tree_->resizeColumnToContents(i);
-	}
+    for (int i = 0; i < model_->columnCount() - 1; i++) {
+        tree_->resizeColumnToContents(i);
+    }
 }
 
-void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx)
-{
-	//if(idx.row() == stacked_->currentIndex())
-	if(idx.row() == tab_->currentIndex())
-		return;
+void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx) {
+    // if(idx.row() == stacked_->currentIndex())
+    if (idx.row() == tab_->currentIndex())
+        return;
 
-	if(idx.row() >= 0 && idx.row() < tab_->count())
-	{
-		tab_->setCurrentIndex(idx.row());
-	}
+    if (idx.row() >= 0 && idx.row() < tab_->count()) {
+        tab_->setCurrentIndex(idx.row());
+    }
 
-	/*if(idx.row() >= 0 && idx.row() < stacked_->count())
-	{
-		stacked_->setCurrentIndex(idx.row());
-	}*/
-}
-
-ChangeNotifyEditorModel::ChangeNotifyEditorModel(QObject *parent) :
-     QAbstractItemModel(parent)
-{
-
-}
-
-ChangeNotifyEditorModel::~ChangeNotifyEditorModel()
-= default;
-
-void ChangeNotifyEditorModel::add(QString label,QList<VProperty*> propLst)
-{
-	beginResetModel();
-
-	ChangeNotifyEditorModelData d;
-
-	d.label_=label;
-
-	Q_FOREACH(VProperty* p,propLst)
-	{
-		if(p)
-		{
-			if(p->name() == "enabled")
-			{
-				d.enabled_=p;
-				d.enabledVal_=p->value().toBool();
-				d.enabledMaster_=(p->master() && p->useMaster());
-
-				//Get the description
-				if(p->parent())
-				{
-					if(VProperty* np=VConfig::instance()->find("notification."+ p->parent()->strName()))
-						d.desc_=np->param("description");
-				}
-			}
-		}
-	}
-
-	data_ << d;
-
-	endResetModel();
-}
-
-int ChangeNotifyEditorModel::columnCount( const QModelIndex& /*parent */ ) const
-{
-   	 return 2;
-}
-
-int ChangeNotifyEditorModel::rowCount( const QModelIndex& parent) const
-{
-	//Parent is the root:
-	if(!parent.isValid())
-	{
-		return data_.count();
-	}
-
-	return 0;
-}
-
-QVariant ChangeNotifyEditorModel::data( const QModelIndex& index, int role ) const
-{
-	if(!index.isValid())
+    /*if(idx.row() >= 0 && idx.row() < stacked_->count())
     {
-		return {};
-	}
-
-	int row=index.row();
-	if(row < 0 || row >= data_.count())
-		return {};
-
-	if(role == Qt::DisplayRole)
-	{
-		switch(index.column())
-		{
-		case 1:
-			return data_.at(row).label_;
-		case 2:
-			return data_.at(row).desc_;
-		default:
-			return {};
-		}
-	}
-
-	else if(role == Qt::CheckStateRole)
-	{
-		switch(index.column())
-		{
-			case 0:
-				return (data_.at(row).enabledVal_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
-			default:
-				return {};
-		}
-	}
-
-	return {};
+            stacked_->setCurrentIndex(idx.row());
+    }*/
 }
 
-bool ChangeNotifyEditorModel::setData(const QModelIndex& index,const QVariant& value, int role)
-{
-	if(index.column() == 0)
-	{
-		int row=index.row();
-		if(row <0 || row >= data_.count())
-			return false;
-
-		if(role == Qt::CheckStateRole)
-		{
-			bool checked=(value.toInt() == Qt::Checked)?true:false;
-			data_[row].enabledVal_=checked;
-			Q_EMIT dataChanged(index,index);
-			Q_EMIT enabledChanged(data_[row].enabled_,checked);
-			return true;
-		}
-	}
-
-	return false;
+ChangeNotifyEditorModel::ChangeNotifyEditorModel(QObject* parent) : QAbstractItemModel(parent) {
 }
 
+ChangeNotifyEditorModel::~ChangeNotifyEditorModel() = default;
 
-QVariant ChangeNotifyEditorModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-	if ( orient != Qt::Horizontal || role != Qt::DisplayRole)
-      		  return QAbstractItemModel::headerData( section, orient, role );
+void ChangeNotifyEditorModel::add(QString label, QList<VProperty*> propLst) {
+    beginResetModel();
 
-   	if(role == Qt::DisplayRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("E");
-   		case 1: return tr("Title");
-   		case 2: return tr("Description");
-   		default: return {};
-   		}
-   	}
+    ChangeNotifyEditorModelData d;
+
+    d.label_ = label;
+
+    Q_FOREACH (VProperty* p, propLst) {
+        if (p) {
+            if (p->name() == "enabled") {
+                d.enabled_       = p;
+                d.enabledVal_    = p->value().toBool();
+                d.enabledMaster_ = (p->master() && p->useMaster());
+
+                // Get the description
+                if (p->parent()) {
+                    if (VProperty* np = VConfig::instance()->find("notification." + p->parent()->strName()))
+                        d.desc_ = np->param("description");
+                }
+            }
+        }
+    }
+
+    data_ << d;
+
+    endResetModel();
+}
+
+int ChangeNotifyEditorModel::columnCount(const QModelIndex& /*parent */) const {
+    return 2;
+}
+
+int ChangeNotifyEditorModel::rowCount(const QModelIndex& parent) const {
+    // Parent is the root:
+    if (!parent.isValid()) {
+        return data_.count();
+    }
+
+    return 0;
+}
+
+QVariant ChangeNotifyEditorModel::data(const QModelIndex& index, int role) const {
+    if (!index.isValid()) {
+        return {};
+    }
+
+    int row = index.row();
+    if (row < 0 || row >= data_.count())
+        return {};
+
+    if (role == Qt::DisplayRole) {
+        switch (index.column()) {
+            case 1:
+                return data_.at(row).label_;
+            case 2:
+                return data_.at(row).desc_;
+            default:
+                return {};
+        }
+    }
+
+    else if (role == Qt::CheckStateRole) {
+        switch (index.column()) {
+            case 0:
+                return (data_.at(row).enabledVal_) ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+            default:
+                return {};
+        }
+    }
 
     return {};
 }
 
-QModelIndex ChangeNotifyEditorModel::index( int row, int column, const QModelIndex & parent ) const
-{
-	if(row < 0 || column < 0)
-	{
-		return {};
-	}
+bool ChangeNotifyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+    if (index.column() == 0) {
+        int row = index.row();
+        if (row < 0 || row >= data_.count())
+            return false;
 
-	//When parent is the root this index refers to a node or server
-	if(!parent.isValid())
-	{
-		return createIndex(row,column);
-	}
+        if (role == Qt::CheckStateRole) {
+            bool checked           = (value.toInt() == Qt::Checked) ? true : false;
+            data_[row].enabledVal_ = checked;
+            Q_EMIT dataChanged(index, index);
+            Q_EMIT enabledChanged(data_[row].enabled_, checked);
+            return true;
+        }
+    }
 
-	return {};
-
+    return false;
 }
 
-QModelIndex ChangeNotifyEditorModel::parent(const QModelIndex &child) const
-{
-	return {};
+QVariant ChangeNotifyEditorModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
+    if (orient != Qt::Horizontal || role != Qt::DisplayRole)
+        return QAbstractItemModel::headerData(section, orient, role);
+
+    if (role == Qt::DisplayRole) {
+        switch (section) {
+            case 0:
+                return tr("E");
+            case 1:
+                return tr("Title");
+            case 2:
+                return tr("Description");
+            default:
+                return {};
+        }
+    }
+
+    return {};
 }
 
-Qt::ItemFlags ChangeNotifyEditorModel::flags( const QModelIndex & index) const
-{
-	int row=index.row();
-	if(row >=0 && row <= data_.count() &&
-	   index.column() ==0 && data_.at(row).enabledMaster_)
-	{
-		return Qt::ItemIsUserCheckable| Qt::ItemIsSelectable;
-	}
+QModelIndex ChangeNotifyEditorModel::index(int row, int column, const QModelIndex& parent) const {
+    if (row < 0 || column < 0) {
+        return {};
+    }
 
-	Qt::ItemFlags defaultFlags=Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    // When parent is the root this index refers to a node or server
+    if (!parent.isValid()) {
+        return createIndex(row, column);
+    }
 
-	if(index.isValid() && index.column() ==0)
-		defaultFlags=defaultFlags | Qt::ItemIsUserCheckable;
-
-	return defaultFlags;
+    return {};
 }
 
-int ChangeNotifyEditorModel::lineToRow(PropertyLine* line) const
-{
-	for(int i=0; i < data_.count(); i++)
-	{
-		if(data_.at(i).enabled_ == line->property())
-		{
-			return i;
-		}
-	}
-	return -1;
+QModelIndex ChangeNotifyEditorModel::parent(const QModelIndex& /*child*/) const {
+    return {};
 }
 
+Qt::ItemFlags ChangeNotifyEditorModel::flags(const QModelIndex& index) const {
+    int row = index.row();
+    if (row >= 0 && row <= data_.count() && index.column() == 0 && data_.at(row).enabledMaster_) {
+        return Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
+    }
 
-void ChangeNotifyEditorModel::slotEnabledChanged(QVariant v)
-{
-	auto *line=static_cast<PropertyLine*>(sender());
-	assert(line);
+    Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
-	int row=lineToRow(line);
-	if(row != -1)
-	{
-		//We want to avoid circular dependencies (e.g. this function is triggered from
-		//setData. So we have to check if the value is different from the stored one!
-		if(data_.at(row).enabledVal_ != v.toBool())
-		{
-			data_[row].enabledVal_=v.toBool();
-				QModelIndex idx=index(row,0);
-				Q_EMIT dataChanged(idx,idx);
-		}
-	}
+    if (index.isValid() && index.column() == 0)
+        defaultFlags = defaultFlags | Qt::ItemIsUserCheckable;
+
+    return defaultFlags;
 }
 
-void ChangeNotifyEditorModel::slotEnabledMasterChanged(bool b)
-{
-	auto *line=static_cast<PropertyLine*>(sender());
-	assert(line);
-
-	int row=lineToRow(line);
-	if(row != -1)
-	{
-		QModelIndex idx=index(row,0);
-		data_[row].enabledMaster_=b;
-		if(b)
-		{
-			data_[row].enabledMaster_=b;
-		}
-		Q_EMIT dataChanged(idx,idx);
-	}
+int ChangeNotifyEditorModel::lineToRow(PropertyLine* line) const {
+    for (int i = 0; i < data_.count(); i++) {
+        if (data_.at(i).enabled_ == line->property()) {
+            return i;
+        }
+    }
+    return -1;
 }
 
+void ChangeNotifyEditorModel::slotEnabledChanged(QVariant v) {
+    auto* line = static_cast<PropertyLine*>(sender());
+    assert(line);
+
+    int row = lineToRow(line);
+    if (row != -1) {
+        // We want to avoid circular dependencies (e.g. this function is triggered from
+        // setData. So we have to check if the value is different from the stored one!
+        if (data_.at(row).enabledVal_ != v.toBool()) {
+            data_[row].enabledVal_ = v.toBool();
+            QModelIndex idx        = index(row, 0);
+            Q_EMIT dataChanged(idx, idx);
+        }
+    }
+}
+
+void ChangeNotifyEditorModel::slotEnabledMasterChanged(bool b) {
+    auto* line = static_cast<PropertyLine*>(sender());
+    assert(line);
+
+    int row = lineToRow(line);
+    if (row != -1) {
+        QModelIndex idx           = index(row, 0);
+        data_[row].enabledMaster_ = b;
+        if (b) {
+            data_[row].enabledMaster_ = b;
+        }
+        Q_EMIT dataChanged(idx, idx);
+    }
+}

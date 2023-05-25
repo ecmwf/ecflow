@@ -11,6 +11,8 @@
 #ifndef VIEWER_SRC_CONFIGLISTDELEGATE_HPP_
 #define VIEWER_SRC_CONFIGLISTDELEGATE_HPP_
 
+#include <string>
+
 #include <QBrush>
 #include <QMap>
 #include <QPen>
@@ -18,15 +20,11 @@
 
 #include "TreeView.hpp"
 
-#include <string>
-
-class ConfigListDelegate : public QStyledItemDelegate
-{
+class ConfigListDelegate : public QStyledItemDelegate {
 public:
-    explicit ConfigListDelegate(int,int,QWidget *parent=nullptr);
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
+    explicit ConfigListDelegate(int, int, QWidget* parent = nullptr);
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 protected:
     int iconSize_;

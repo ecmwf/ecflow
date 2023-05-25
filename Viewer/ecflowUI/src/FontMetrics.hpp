@@ -13,13 +13,12 @@
 
 #include <QFontMetrics>
 
-class FontMetrics : public QFontMetrics
-{
+class FontMetrics : public QFontMetrics {
 public:
-    FontMetrics(const QFont &font);
-    int realHeight() const {return realHeight_;}
-    int topPaddingForCentre() const {return topPadding_;}
-    int bottomPaddingForCentre() const {return bottomPadding_;}
+    FontMetrics(const QFont& font);
+    int realHeight() const { return realHeight_; }
+    int topPaddingForCentre() const { return topPadding_; }
+    int bottomPaddingForCentre() const { return bottomPadding_; }
 
 protected:
     int realHeight_;
@@ -29,6 +28,5 @@ protected:
 private:
     void computeRealHeight(QFont f);
 };
-
 
 #endif // FONTMETRICS_HPP

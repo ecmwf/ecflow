@@ -11,6 +11,8 @@
 #ifndef TREENODEVIEWDELEGATEBASE_HPP
 #define TREENODEVIEWDELEGATEBASE_HPP
 
+#include <string>
+
 #include <QBrush>
 #include <QMap>
 #include <QPainter>
@@ -19,8 +21,6 @@
 
 #include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
-
-#include <string>
 
 class AnimationHandler;
 class PropertyMapper;
@@ -31,25 +31,23 @@ class TreeNodeModel;
 class TreeNodeDelegateBox;
 class TreeAttrDelegateBox;
 
-class TreeNodeViewDelegate : public NodeViewDelegate
-{
-Q_OBJECT
+class TreeNodeViewDelegate : public NodeViewDelegate {
+    Q_OBJECT
 
 public:
-    explicit TreeNodeViewDelegate(TreeNodeModel* model, QWidget *parent=nullptr);
+    explicit TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent = nullptr);
     ~TreeNodeViewDelegate() override;
 
     bool isSingleHeight(int h) const;
 
-    //from baseclass
-    void paint(QPainter */*painter*/,const QStyleOptionViewItem &/*option*/,
-                   const QModelIndex& /*index*/) const override {}
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const override;
+    // from baseclass
+    void
+    paint(QPainter* /*painter*/, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const override {}
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-    //custom implementations
-    void paintIt(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index,QSize&) const;
-    void sizeHintCompute(const QModelIndex& index,int& w,int& h, bool compAttrWidth=false) const;
+    // custom implementations
+    void paintIt(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index, QSize&) const;
+    void sizeHintCompute(const QModelIndex& index, int& w, int& h, bool compAttrWidth = false) const;
 
     int nodeBoxHeight();
 
@@ -57,33 +55,35 @@ Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
-    void updateSettings() override {updateSettingsInternal();}
+    void updateSettings() override { updateSettingsInternal(); }
 
-    int renderServer(QPainter *painter,const QModelIndex& index,
-                        const QStyleOptionViewItem& option,QString text) const;
+    int
+    renderServer(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option, QString text) const;
 
-    int renderNode(QPainter *painter,const QModelIndex& index,
-                    const QStyleOptionViewItem& option,QString text) const;
+    int renderNode(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option, QString text) const;
 
-    void renderServerCell(QPainter *painter,const NodeShape& stateShape,
-                                            const NodeText& text,bool selected) const;
+    void renderServerCell(QPainter* painter, const NodeShape& stateShape, const NodeText& text, bool selected) const;
 
-    void renderNodeCell(QPainter *painter,const NodeShape& stateShape,const NodeShape &realShape,
-                       const NodeText& nodeText,const NodeText& typeText,bool selected) const;
+    void renderNodeCell(QPainter* painter,
+                        const NodeShape& stateShape,
+                        const NodeShape& realShape,
+                        const NodeText& nodeText,
+                        const NodeText& typeText,
+                        bool selected) const;
 
-    void renderNodeShape(QPainter* painter,const NodeShape& shape) const;
-    void renderTimer(QPainter *painter,QRect target, int remaining, int total) const;
-    void renderServerUpdate(QPainter* painter,const ServerUpdateData&) const;
+    void renderNodeShape(QPainter* painter, const NodeShape& shape) const;
+    void renderTimer(QPainter* painter, QRect target, int remaining, int total) const;
+    void renderServerUpdate(QPainter* painter, const ServerUpdateData&) const;
 
-    void widthHintServer(const QModelIndex& index,int& itemWidth,QString text) const;
-    int nodeWidth(const QModelIndex& index,int height, QString text) const;
+    void widthHintServer(const QModelIndex& index, int& itemWidth, QString text) const;
+    int nodeWidth(const QModelIndex& index, int height, QString text) const;
 
     void updateSettingsInternal();
 
     QString formatTime(int timeInSec) const;
-    QColor interpolate(QColor c1,QColor c2,float r) const;
+    QColor interpolate(QColor c1, QColor c2, float r) const;
 
-    enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
+    enum NodeStyle { ClassicNodeStyle, BoxAndTextNodeStyle };
 
     AnimationHandler* animation_{nullptr};
 
@@ -109,6 +109,3 @@ protected:
 };
 
 #endif // TREENODEVIEWDELEGATEBASE_HPP
-
-
-

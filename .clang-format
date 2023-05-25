@@ -1,0 +1,75 @@
+
+Standard: c++17
+
+# Indent with a certain number of spaces at a time (no tabs).
+IndentWidth: 4
+
+# Keep lines under a certain number of columns long.
+ColumnLimit: 120
+
+# Always break before braces
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+  AfterExternBlock: false # Keeps extern "C" blocks unindented.
+
+AlwaysBreakTemplateDeclarations: Yes
+
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: CurrentLine
+
+# Indent case labels.
+IndentCaseLabels: true
+
+# Right-align pointers and references
+PointerAlignment: Left
+
+# Align things as much as possible.
+AlignOperands: true
+AlignConsecutiveAssignments: AcrossEmptyLines
+AlignEscapedNewlines: Left
+AlignTrailingComments: true
+
+BinPackArguments: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: false
+
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: InlineOnly
+
+# Use N space negative offset for access modifiers
+AccessModifierOffset: -4
+
+AllowShortCaseLabelsOnASingleLine: false
+
+# Useful for spacing out functions in classes
+KeepEmptyLinesAtTheStartOfBlocks: true
+
+# Indent nested PP directives.
+IndentPPDirectives: BeforeHash
+
+# Preserve include blocks
+IncludeBlocks: Regroup
+IncludeCategories:
+  # By default, first include the 'main' header file related to source file
+  # Then include every 'system' headers (i.e. in <>)
+  - Regex:           '<[^Q][[:alnum:]]+(\.h)?>'
+    Priority:        10
+  # Then include '3rd party' headers 
+  - Regex:           '<[[:alnum:]/._]+>'
+    Priority:        20
+  # And finally, include every 'project' header
+  - Regex:           '.*'
+    Priority:        30

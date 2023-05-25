@@ -12,70 +12,69 @@
 #define TIMELINEHEADERVIEW_HPP
 
 #include <QAction>
+#include <QDateTime>
 #include <QHeaderView>
 #include <QPen>
-#include <QDateTime>
 #include <QStack>
 
 class QTreeView;
 
-class TimelineHeader : public QHeaderView
-{
-Q_OBJECT
+class TimelineHeader : public QHeaderView {
+    Q_OBJECT
 
 public:
-    enum ColumnType {TimelineColumn,DayColumn,OtherColumn};
+    enum ColumnType { TimelineColumn, DayColumn, OtherColumn };
 
-    explicit  TimelineHeader(QTreeView *view);
+    explicit TimelineHeader(QTreeView* view);
 
     QSize sizeHint() const override;
 
-    //void setStartDate(QDateTime);
-    //void setEndDate(QDateTime);
-    //void setPeriod(QDateTime t1,QDateTime t2);
-    //QDateTime startDate() const {return startDate_;}
-    //QDateTime endDate() const {return endDate_;}
-    void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
-    //void setMaxDurations(int submittedDuration,int activeDuration);
+    // void setStartDate(QDateTime);
+    // void setEndDate(QDateTime);
+    // void setPeriod(QDateTime t1,QDateTime t2);
+    // QDateTime startDate() const {return startDate_;}
+    // QDateTime endDate() const {return endDate_;}
+    void setZoomActions(QAction* zoomInAction, QAction* zoomOutAction);
+    // void setMaxDurations(int submittedDuration,int activeDuration);
     void viewModeChanged();
 
 protected Q_SLOTS:
     void slotZoomState(bool);
-    virtual void slotZoomOut(bool)=0;
+    virtual void slotZoomOut(bool) = 0;
 
 Q_SIGNALS:
-    void customButtonClicked(QString,QPoint);
-    //void periodSelected(QDateTime,QDateTime);
-    //void periodBeingZoomed(QDateTime,QDateTime);
+    void customButtonClicked(QString, QPoint);
+    // void periodSelected(QDateTime,QDateTime);
+    // void periodBeingZoomed(QDateTime,QDateTime);
 
 protected:
-    void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const=0;
+    void paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void renderTimeline(const QRect& rect, QPainter* painter, int logicalIndex) const = 0;
 
     QPoint realPos(QPoint pos) const;
 
-    //void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
-    int secToPosPeriod(qint64 t,QRect rect,qint64 period) const;
-    virtual int secToPos(qint64 t,QRect rect) const=0;
+    // void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
+    int secToPosPeriod(qint64 t, QRect rect, qint64 period) const;
+    virtual int secToPos(qint64 t, QRect rect) const = 0;
 
-    //QDateTime posToDate(QPoint pos) const;
-    //int dateToPos(QDateTime dt) const;
+    // QDateTime posToDate(QPoint pos) const;
+    // int dateToPos(QDateTime dt) const;
 
-    virtual bool isTimelineColumn(int index) const=0;
+    virtual bool isTimelineColumn(int index) const = 0;
     bool isColumnZoomable(QPoint pos) const;
-    virtual bool isColumnZoomableAtIndex(int index) const=0;
+    virtual bool isColumnZoomableAtIndex(int index) const = 0;
     void enableZoomActions(bool b);
-    virtual bool canBeZoomed() const=0;
+    virtual bool canBeZoomed() const = 0;
     bool isZoomEnabled() const;
     void setZoomDisabled();
-    virtual int zoomHistoryCount() const=0;
-    virtual void doZoom()=0;
-    virtual void beingZoomedCore()=0;
+    virtual int zoomHistoryCount() const = 0;
+    virtual void doZoom()                = 0;
+    virtual void beingZoomedCore()       = 0;
 
-    //void doPeriodZoom();
+    // void doPeriodZoom();
     void checkActionState();
     bool hasTimeColumn() const;
     bool hasZoomableColumn() const;
@@ -83,8 +82,8 @@ protected:
 
     QTreeView* view_;
     QList<ColumnType> columnType_;
-    //QDateTime startDate_;
-    //QDateTime endDate_;
+    // QDateTime startDate_;
+    // QDateTime endDate_;
     QFont font_;
     QFontMetrics fm_;
     QColor timelineCol_;
@@ -92,7 +91,7 @@ protected:
     QColor timeTextCol_;
     QColor timelineFrameBorderCol_;
     QBrush timelineBrush_;
-    //int timelineSection_;
+    // int timelineSection_;
     int timelineFrameSize_;
     int majorTickSize_;
 
@@ -100,16 +99,16 @@ protected:
     QPoint zoomStartPos_;
     QPoint zoomEndPos_;
     bool inZoom_;
-    //QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
+    // QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
     QCursor zoomCursor_;
     QAction* zoomInAction_;
     QAction* zoomOutAction_;
 
-    //int submittedMaxDuration_;
-    //int activeMaxDuration_;
+    // int submittedMaxDuration_;
+    // int activeMaxDuration_;
 
-    //QTime startTime_;
-    //QTime endTime_;
+    // QTime startTime_;
+    // QTime endTime_;
 };
 
 #if 0
@@ -126,33 +125,32 @@ public:
 };
 #endif
 
-class MainTimelineHeader : public TimelineHeader
-{
-Q_OBJECT
+class MainTimelineHeader : public TimelineHeader {
+    Q_OBJECT
 
 public:
-    explicit  MainTimelineHeader(QTreeView *view);
+    explicit MainTimelineHeader(QTreeView* view);
 
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
-    void setPeriod(QDateTime t1,QDateTime t2);
-    QDateTime startDate() const {return startDate_;}
-    QDateTime endDate() const {return endDate_;}
-    void setMaxDurations(int submittedDuration,int activeDuration);
+    void setPeriod(QDateTime t1, QDateTime t2);
+    QDateTime startDate() const { return startDate_; }
+    QDateTime endDate() const { return endDate_; }
+    void setMaxDurations(int submittedDuration, int activeDuration);
 
 protected Q_SLOTS:
     void slotZoomOut(bool) override;
 
 Q_SIGNALS:
-    void customButtonClicked(QString,QPoint);
-    void periodSelected(QDateTime,QDateTime);
-    void periodBeingZoomed(QDateTime,QDateTime);
+    void customButtonClicked(QString, QPoint);
+    void periodSelected(QDateTime, QDateTime);
+    void periodBeingZoomed(QDateTime, QDateTime);
 
 protected:
-    void renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const override;
+    void renderTimeline(const QRect& rect, QPainter* painter, int logicalIndex) const override;
 
-    void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
-    int secToPos(qint64 t,QRect rect) const override;
+    void setPeriodCore(QDateTime t1, QDateTime t2, bool addToHistory);
+    int secToPos(qint64 t, QRect rect) const override;
     QDateTime posToDate(QPoint pos) const;
     int dateToPos(QDateTime dt) const;
 
@@ -160,41 +158,40 @@ protected:
     void beingZoomedCore() override;
     bool isColumnZoomableAtIndex(int index) const override;
     bool canBeZoomed() const override;
-    int zoomHistoryCount() const override {return zoomHistory_.count();}
+    int zoomHistoryCount() const override { return zoomHistory_.count(); }
     bool isTimelineColumn(int index) const override;
 
     QDateTime startDate_;
     QDateTime endDate_;
-    QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
+    QStack<QPair<QDateTime, QDateTime>> zoomHistory_;
     int submittedMaxDuration_;
     int activeMaxDuration_;
 };
 
-class NodeTimelineHeader : public TimelineHeader
-{
-Q_OBJECT
+class NodeTimelineHeader : public TimelineHeader {
+    Q_OBJECT
 
 public:
-    explicit NodeTimelineHeader(QTreeView *view);
+    explicit NodeTimelineHeader(QTreeView* view);
 
     void setStartTime(QTime);
     void setEndTime(QTime);
-    void setPeriod(QTime t1,QTime t2);
-    QTime startTime() const {return startTime_;}
-    QTime endTime() const {return endTime_;}
+    void setPeriod(QTime t1, QTime t2);
+    QTime startTime() const { return startTime_; }
+    QTime endTime() const { return endTime_; }
 
 protected Q_SLOTS:
     void slotZoomOut(bool) override;
 
 Q_SIGNALS:
-    void customButtonClicked(QString,QPoint);
-    void periodSelected(QTime,QTime);
-    void periodBeingZoomed(QTime,QTime);
+    void customButtonClicked(QString, QPoint);
+    void periodSelected(QTime, QTime);
+    void periodBeingZoomed(QTime, QTime);
 
 protected:
-    void renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const override;
-    void setPeriodCore(QTime t1,QTime t2,bool addToHistory);
-    int secToPos(qint64 t,QRect rect) const override;
+    void renderTimeline(const QRect& rect, QPainter* painter, int logicalIndex) const override;
+    void setPeriodCore(QTime t1, QTime t2, bool addToHistory);
+    int secToPos(qint64 t, QRect rect) const override;
     QTime posToTime(QPoint pos) const;
     int dateToPos(QDateTime dt) const;
 
@@ -202,16 +199,12 @@ protected:
     void beingZoomedCore() override;
     bool isColumnZoomableAtIndex(int index) const override;
     bool canBeZoomed() const override;
-    int zoomHistoryCount() const override {return zoomHistory_.count();}
+    int zoomHistoryCount() const override { return zoomHistory_.count(); }
     bool isTimelineColumn(int index) const override;
 
-    QStack<QPair<QTime,QTime> > zoomHistory_;
+    QStack<QPair<QTime, QTime>> zoomHistory_;
     QTime startTime_;
     QTime endTime_;
 };
 
-
-
 #endif // TIMELINEHEADERVIEW_HPP
-
-

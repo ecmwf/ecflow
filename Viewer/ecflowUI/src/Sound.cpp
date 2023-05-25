@@ -10,26 +10,25 @@
 
 #include "Sound.hpp"
 
+#include <cassert>
+#include <cstdlib>
+
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 
-#include <cassert>
-#include <cstdlib>
+// #ifdef ECFLOW_QT5
+// #include <QSoundEffect>
+// #endif
 
-//#ifdef ECFLOW_QT5
-//#include <QSoundEffect>
-//#endif
-
+#include <regex>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
-#include <regex>
 
-Sound* Sound::instance_=nullptr;
-
+Sound* Sound::instance_ = nullptr;
 
 /*
     if(sound)
@@ -38,113 +37,94 @@ Sound* Sound::instance_=nullptr;
         if (system(soundCmd))
             UiLog().dbg() << "ChangeNotify:add() could not play sound alert";
 */
-//#ifdef ECFLOW_QT5
-//  QSoundEffect effect(dialog_);
-//  effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
-//  effect.setLoopCount(1);
-//  effect.setVolume(0.25f);
-//  effect.play();
-//#endif
+// #ifdef ECFLOW_QT5
+//   QSoundEffect effect(dialog_);
+//   effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
+//   effect.setLoopCount(1);
+//   effect.setVolume(0.25f);
+//   effect.play();
+// #endif
 
+Sound::Sound() {
+    sysDir_ = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "sounds");
 
-Sound::Sound()
-{
-	sysDir_=DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "sounds");
+    std::vector<std::string> res;
 
-	std::vector<std::string> res;
+    DirectoryHandler::findFiles(sysDir_, formats_, res);
 
-	DirectoryHandler::findFiles(sysDir_,formats_,res);
-
-	for(const auto & re : res)
-	{
-		sysSounds_.push_back(re);
-	}
+    for (const auto& re : res) {
+        sysSounds_.push_back(re);
+    }
 }
 
-Sound* Sound::instance()
-{
-	if(!instance_)
-		instance_=new Sound();
+Sound* Sound::instance() {
+    if (!instance_)
+        instance_ = new Sound();
 
-	return instance_;
+    return instance_;
 }
 
-void Sound::playSystem(const std::string& fName,int loopCount)
-{
-	std::string fullName=DirectoryHandler::concatenate(sysDir_, fName);
-	play(fullName,loopCount);
+void Sound::playSystem(const std::string& fName, int loopCount) {
+    std::string fullName = DirectoryHandler::concatenate(sysDir_, fName);
+    play(fullName, loopCount);
 }
 
-void Sound::play(const std::string& fName,int loopCount)
-{
-	assert(loopCount < 6);
+void Sound::play(const std::string& fName, int loopCount) {
+    assert(loopCount < 6);
 
-	time_t t=time(nullptr);
-	if(t < prevPlayedAt_+delay_)
-		return;
+    time_t t = time(nullptr);
+    if (t < prevPlayedAt_ + delay_)
+        return;
 
-	if(currentCmd_.empty())
-	{
+    if (currentCmd_.empty()) {}
+    else {
+        std::string cmd = currentCmd_;
+        boost::replace_first(cmd, "%FILE%", fName);
+        boost::replace_first(cmd, "%REPEAT%", boost::lexical_cast<std::string>(loopCount - 1));
+        if (system(cmd.c_str())) {
+            UiLog().dbg() << "Sound::play() could not play sound alert. Command: " << cmd;
+        }
+    }
 
-	}
-	else
-	{
-		std::string cmd=currentCmd_;
-		boost::replace_first(cmd,"%FILE%",fName);
-		boost::replace_first(cmd,"%REPEAT%",boost::lexical_cast<std::string>(loopCount-1));
-		if(system(cmd.c_str()))
-		{
-            UiLog().dbg() << "Sound::play() could not play sound alert. Command: " <<  cmd;
-		}
-	}
-
-	prevPlayedAt_=time(nullptr);
+    prevPlayedAt_ = time(nullptr);
 }
 
-void  Sound::setCurrentPlayer(const std::string& current)
-{
-	auto it=players_.find(current);
-	if(it != players_.end())
-	{
-		currentPlayer_=it->first;
-		currentCmd_=it->second;
-	}
-	else
-		assert(0);
+void Sound::setCurrentPlayer(const std::string& current) {
+    auto it = players_.find(current);
+    if (it != players_.end()) {
+        currentPlayer_ = it->first;
+        currentCmd_    = it->second;
+    }
+    else
+        assert(0);
 }
 
-bool Sound::isSoundFile(const std::string& fName) const
-{
-	const std::regex expr(formats_);
-	std::smatch what;
-	if(std::regex_match(fName, what,expr))
-       return true;
+bool Sound::isSoundFile(const std::string& fName) const {
+    const std::regex expr(formats_);
+    std::smatch what;
+    if (std::regex_match(fName, what, expr))
+        return true;
     return false;
 }
 
-void Sound::load(VProperty* prop)
-{
+void Sound::load(VProperty* prop) {
     UiLog().dbg() << "Sound:load() -- > begin";
 
-	if(prop->name() != "sound")
-	{
+    if (prop->name() != "sound") {
         UiLog().err() << "Sound:load() -- > no property found!";
-		return;
-	}
-    
-    Sound::instance_->prop_=prop;
-
-    if(VProperty *pp=prop->findChild("players"))
-    {
-    	Q_FOREACH(VProperty* p,pp->children())
-    	{
-    		Sound::instance_->players_[p->strName()]=p->param("command").toStdString();
-    	}
+        return;
     }
 
-    if(VProperty *pp=prop->findChild("player"))
-    {
-    	Sound::instance_->setCurrentPlayer(pp->valueAsStdString());
+    Sound::instance_->prop_ = prop;
+
+    if (VProperty* pp = prop->findChild("players")) {
+        Q_FOREACH (VProperty* p, pp->children()) {
+            Sound::instance_->players_[p->strName()] = p->param("command").toStdString();
+        }
+    }
+
+    if (VProperty* pp = prop->findChild("player")) {
+        Sound::instance_->setCurrentPlayer(pp->valueAsStdString());
     }
 
     UiLog().dbg() << "Sound:load() -- > end";

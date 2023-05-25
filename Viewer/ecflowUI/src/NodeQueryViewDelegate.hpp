@@ -11,40 +11,38 @@
 #ifndef VIEWER_SRC_NODEQUERYVIEWDELEGATE_HPP_
 #define VIEWER_SRC_NODEQUERYVIEWDELEGATE_HPP_
 
+#include <string>
+
 #include <QBrush>
 #include <QMap>
 #include <QPen>
-#include <QStyledItemDelegate>
 #include <QStyleOptionViewItem>
+#include <QStyledItemDelegate>
 
 #include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
 
-#include <string>
-
 class ModelColumn;
 
-class NodeQueryViewDelegate : public NodeViewDelegate
-{
+class NodeQueryViewDelegate : public NodeViewDelegate {
 public:
-    explicit NodeQueryViewDelegate(QWidget *parent=nullptr);
+    explicit NodeQueryViewDelegate(QWidget* parent = nullptr);
     ~NodeQueryViewDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 protected:
-    void updateSettings() override {updateSettingsInternal();}
+    void updateSettings() override { updateSettingsInternal(); }
 
-    void renderNode(QPainter *painter,const QModelIndex& index,
-                                        const QStyleOptionViewItem& option,QString text) const;
+    void
+    renderNode(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option, QString text) const;
+
 private:
     void updateSettingsInternal();
 
     ModelColumn* columns_{nullptr};
     QPen borderPen_;
-
 };
 
 #endif /* VIEWER_SRC_NODEQUERYVIEWDELEGATE_HPP_ */

@@ -9,134 +9,121 @@
 
 #include "WmWorkspaceHandler.hpp"
 
-#include <QtGlobal>
 #include <QDebug>
-#include <QWidget>
 #include <QProcess>
+#include <QWidget>
+#include <QtGlobal>
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QRegExp>
+    #include <QRegExp>
 #else
-#include <QtCore5Compat/QRegExp>
+    #include <QtCore5Compat/QRegExp>
 #endif
 
 #include "UiLog.hpp"
 
-int WmWorkspaceHandler::commandTested_=0;
+int WmWorkspaceHandler::commandTested_ = 0;
 
 #define UI_WMWORKSPACEHANDLER_DEBUG
 
-bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget,QWidget* targetWidget)
-{
+bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget, QWidget* targetWidget) {
 #ifdef UI_WMWORKSPACEHANDLER_DEBUG
     UI_FUNCTION_LOG
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    if(sourceWidget == nullptr || targetWidget ==nullptr)
+    if (sourceWidget == nullptr || targetWidget == nullptr)
         return false;
 
-    if(!hasCommand())
+    if (!hasCommand())
         return false;
 
     Q_ASSERT(sourceWidget);
     Q_ASSERT(targetWidget);
 
+    // Get the window ids
+    int sourceWinId = sourceWidget->winId();
+    int targetWinId = targetWidget->winId();
 
-    //Get the window ids
-    int sourceWinId=sourceWidget->winId();
-    int targetWinId=targetWidget->winId();
-
-#ifdef UI_WMWORKSPACEHANDLER_DEBUG
-    UiLog().dbg() << " sourceWinId=" << sourceWinId  << " targetWinId=" << targetWinId;
-#endif
-    if(sourceWinId != targetWinId)
-    {
-        //Get the virtual workspace id
-        int sourceWsId=workspaceId(sourceWinId);
-        int targetWsId=workspaceId(targetWinId);
-#ifdef UI_WMWORKSPACEHANDLER_DEBUG
-        UiLog().dbg() << " sourceWsId=" << sourceWsId  << " targetWsId=" << targetWsId;
-#endif
-        //move the source window to the target workspace
-        //and switch to this workspace
-        if(sourceWsId >=0 && targetWsId >=0 &&
-           sourceWsId !=targetWsId)
-        {
-           moveAndSwitchToWorkspace(sourceWinId,targetWsId);
-           return true;
+    #ifdef UI_WMWORKSPACEHANDLER_DEBUG
+    UiLog().dbg() << " sourceWinId=" << sourceWinId << " targetWinId=" << targetWinId;
+    #endif
+    if (sourceWinId != targetWinId) {
+        // Get the virtual workspace id
+        int sourceWsId = workspaceId(sourceWinId);
+        int targetWsId = workspaceId(targetWinId);
+    #ifdef UI_WMWORKSPACEHANDLER_DEBUG
+        UiLog().dbg() << " sourceWsId=" << sourceWsId << " targetWsId=" << targetWsId;
+    #endif
+        // move the source window to the target workspace
+        // and switch to this workspace
+        if (sourceWsId >= 0 && targetWsId >= 0 && sourceWsId != targetWsId) {
+            moveAndSwitchToWorkspace(sourceWinId, targetWsId);
+            return true;
         }
-   }
+    }
 #endif
 
     return false;
 }
 
-bool WmWorkspaceHandler::hasCommand()
-{
-    if(commandTested_ == 0)
-    {
-        commandTested_=2;
+bool WmWorkspaceHandler::hasCommand() {
+    if (commandTested_ == 0) {
+        commandTested_ = 2;
 
         QProcess proc;
-        proc.start("xdotool",QStringList() << "-v");
-        if(proc.waitForStarted(3000))
-        {
+        proc.start("xdotool", QStringList() << "-v");
+        if (proc.waitForStarted(3000)) {
             proc.waitForFinished(3000);
 
-            if(!proc.readAllStandardOutput().isEmpty() &&
-                proc.exitStatus() == QProcess::NormalExit)
-                commandTested_=1;
+            if (!proc.readAllStandardOutput().isEmpty() && proc.exitStatus() == QProcess::NormalExit)
+                commandTested_ = 1;
         }
     }
 
     Q_ASSERT(commandTested_ > 0);
-    return (commandTested_== 1);
+    return (commandTested_ == 1);
 }
 
-int WmWorkspaceHandler::workspaceId(int winId)
-{
+int WmWorkspaceHandler::workspaceId(int winId) {
     QProcess proc;
-    proc.start("xdotool",
-               QStringList() << "get_desktop_for_window" << QString::number(winId));
+    proc.start("xdotool", QStringList() << "get_desktop_for_window" << QString::number(winId));
 
-    if(!proc.waitForStarted(3000))
-    {
-        UI_FUNCTION_LOG     
+    if (!proc.waitForStarted(3000)) {
+        UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'" <<
-                         proc.program() << " " << proc.arguments().join(" ") << "\'";
+        UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'" << proc.program()
+                      << " " << proc.arguments().join(" ") << "\'";
 #else
         UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \
-                         \'xdotool get_desktop_for_window " << QString::number(winId) << "\'";
+                         \'xdotool get_desktop_for_window "
+                      << QString::number(winId) << "\'";
 #endif
         UiLog().err() << "   error: failed to start";
         return -1;
     }
 
     proc.waitForFinished(3000);
-    if(proc.exitStatus() == QProcess::NormalExit)
-    {
+    if (proc.exitStatus() == QProcess::NormalExit) {
         QString result(proc.readAllStandardOutput());
         QRegExp re("^\\d+\\n?$");
-        if(re.exactMatch(result))
+        if (re.exactMatch(result))
             return result.toInt();
-        else
-        {
+        else {
             UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'" << proc.program()
                           << " " << proc.arguments().join(" ") << "\'";
 #else
             UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'xdotools \
-                           xdotool get_desktop_for_window " << QString::number(winId) << "\'";
+                           xdotool get_desktop_for_window "
+                          << QString::number(winId) << "\'";
 #endif
 
             UiLog().err() << "   error: invalid id=" << result << " returned";
         }
     }
-    else
-    {
+    else {
         UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         UiLog().err() << " Failed to get workspace id for window=" << winId << " using command " << proc.program();
@@ -149,23 +136,20 @@ int WmWorkspaceHandler::workspaceId(int winId)
     return -1;
 }
 
-void WmWorkspaceHandler::moveAndSwitchToWorkspace(int winId,int wsId)
-{
+void WmWorkspaceHandler::moveAndSwitchToWorkspace(int winId, int wsId) {
     QProcess proc;
-    proc.start("xdotool",QStringList() << "set_desktop_for_window" <<
-               QString::number(winId) << QString::number(wsId));
+    proc.start("xdotool", QStringList() << "set_desktop_for_window" << QString::number(winId) << QString::number(wsId));
 
-    if(!proc.waitForStarted(3000))
+    if (!proc.waitForStarted(3000))
         return;
 
     proc.waitForFinished(3000);
-    if(proc.exitStatus() != QProcess::NormalExit)
-    {
+    if (proc.exitStatus() != QProcess::NormalExit) {
         return;
     }
 
     QProcess procSwitch;
-    procSwitch.start("xdotool",QStringList() << "set_desktop" << QString::number(wsId));
-    if(procSwitch.waitForStarted(3000))
+    procSwitch.start("xdotool", QStringList() << "set_desktop" << QString::number(wsId));
+    if (procSwitch.waitForStarted(3000))
         procSwitch.waitForFinished(3000);
 }

@@ -11,26 +11,25 @@
 #ifndef SOUND_HPP_
 #define SOUND_HPP_
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "VProperty.hpp"
 
-class Sound : public VPropertyObserver
-{
+class Sound : public VPropertyObserver {
 public:
     static Sound* instance();
 
-    const std::vector<std::string>& sysSounds() const {return sysSounds_;}
-    const std::string sysDir() const {return sysDir_;}
+    const std::vector<std::string>& sysSounds() const { return sysSounds_; }
+    const std::string sysDir() const { return sysDir_; }
 
-    void playSystem(const std::string&,int repeat);
-    void play(const std::string&,int repeat);
+    void playSystem(const std::string&, int repeat);
+    void play(const std::string&, int repeat);
     bool isSoundFile(const std::string& fName) const;
 
-    void notifyChange(VProperty*) override {};
+    void notifyChange(VProperty*) override{};
 
-    //Called from VConfigLoader
+    // Called from VConfigLoader
     static void load(VProperty* group);
 
 protected:
@@ -39,7 +38,7 @@ protected:
 
     static Sound* instance_;
 
-    std::map<std::string,std::string> players_;
+    std::map<std::string, std::string> players_;
     std::string currentPlayer_;
     std::string currentCmd_;
 

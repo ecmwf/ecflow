@@ -14,17 +14,15 @@
 #include <QMainWindow>
 
 #include "ServerFilter.hpp"
-
 #include "ui_NodeSearchWindow.h"
 
 class ServerFilter;
 
-class NodeSearchWindow : public QMainWindow, protected Ui::NodeSearchWindow
-{
+class NodeSearchWindow : public QMainWindow, protected Ui::NodeSearchWindow {
     Q_OBJECT
 
 public:
-    explicit NodeSearchWindow(QWidget *parent = nullptr);
+    explicit NodeSearchWindow(QWidget* parent = nullptr);
     ~NodeSearchWindow() override;
 
     NodeSearchWidget* queryWidget() const;
@@ -34,13 +32,12 @@ protected Q_SLOTS:
     void slotOwnerDelete();
 
 protected:
-	void closeEvent(QCloseEvent * event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
+    void closeEvent(QCloseEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
 
 private:
     void readSettings();
     void writeSettings();
 };
-
 
 #endif

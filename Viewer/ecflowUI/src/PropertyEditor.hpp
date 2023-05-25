@@ -21,24 +21,23 @@ class QTabWidget;
 class PropertyLine;
 class VProperty;
 
-class PropertyEditor : public QWidget, protected Ui::PropertyEditor
-{
-Q_OBJECT
+class PropertyEditor : public QWidget, protected Ui::PropertyEditor {
+    Q_OBJECT
 
 public:
-    explicit PropertyEditor(QWidget *parent=nullptr);
+    explicit PropertyEditor(QWidget* parent = nullptr);
     ~PropertyEditor() override;
 
-    void edit(VProperty*,QPixmap pixmap);
-    void edit(VProperty*,QString label);
+    void edit(VProperty*, QPixmap pixmap);
+    void edit(VProperty*, QString label);
     void empty();
     bool applyChange();
-    VProperty* property() const {return group_;}
+    VProperty* property() const { return group_; }
     int currentTopLevelTabIndex() const;
     void setCurrentTopLevelTabIndex(int idx);
 
 Q_SIGNALS:
-	void changed();
+    void changed();
 
 private:
     void clear();
@@ -46,16 +45,16 @@ private:
     void addRules();
     void addHelpers();
 
-    void addItem(VProperty*,QVBoxLayout*,QWidget*);
-    PropertyLine* addLine(VProperty* vProp,QGridLayout* grid,QWidget*);
-    void addGroup(VProperty*,QVBoxLayout*,QWidget*);
-    void addGrid(VProperty*,QVBoxLayout*,QWidget*);
-    void addGridRow(VProperty* prop,QGridLayout *grid,QWidget*);
-    void addNotification(VProperty* prop,QVBoxLayout*,QWidget*);
-    void addTabs(VProperty*,QVBoxLayout*,QWidget*);
-    void addTab(VProperty*,QTabWidget*);
-	void addNote(VProperty* vProp,QVBoxLayout*,QWidget*);
-	void addNote(VProperty* vProp,QGridLayout* layout,QWidget*);
+    void addItem(VProperty*, QVBoxLayout*, QWidget*);
+    PropertyLine* addLine(VProperty* vProp, QGridLayout* grid, QWidget*);
+    void addGroup(VProperty*, QVBoxLayout*, QWidget*);
+    void addGrid(VProperty*, QVBoxLayout*, QWidget*);
+    void addGridRow(VProperty* prop, QGridLayout* grid, QWidget*);
+    void addNotification(VProperty* prop, QVBoxLayout*, QWidget*);
+    void addTabs(VProperty*, QVBoxLayout*, QWidget*);
+    void addTab(VProperty*, QTabWidget*);
+    void addNote(VProperty* vProp, QVBoxLayout*, QWidget*);
+    void addNote(VProperty* vProp, QGridLayout* layout, QWidget*);
     QString buildNoteText(VProperty* vProp) const;
 
     VProperty* group_{nullptr};
@@ -67,6 +66,4 @@ private:
     QTabWidget* topLevelTabW_{nullptr};
 };
 
-
 #endif
-

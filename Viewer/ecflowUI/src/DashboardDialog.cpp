@@ -10,110 +10,95 @@
 
 #include "DashboardDialog.hpp"
 
-#include "DashboardWidget.hpp"
-#include "SessionHandler.hpp"
-#include "WidgetNameProvider.hpp"
-
 #include <QAbstractButton>
 #include <QCloseEvent>
 #include <QPushButton>
 #include <QSettings>
 
-DashboardDialog::DashboardDialog(QWidget *parent) :
-	QDialog(parent)
-{
-	setupUi(this);
+#include "DashboardWidget.hpp"
+#include "SessionHandler.hpp"
+#include "WidgetNameProvider.hpp"
 
-	setAttribute(Qt::WA_DeleteOnClose);
+DashboardDialog::DashboardDialog(QWidget* parent) : QDialog(parent) {
+    setupUi(this);
 
-	//Disable the default button
-	Q_FOREACH(QAbstractButton* b,buttonBox_->buttons())
-	{
-		if(QPushButton* pb=buttonBox_->button(buttonBox_->standardButton(b)) )
-			pb->setAutoDefault(false);
-	}
+    setAttribute(Qt::WA_DeleteOnClose);
 
-	readSettings();
+    // Disable the default button
+    Q_FOREACH (QAbstractButton* b, buttonBox_->buttons()) {
+        if (QPushButton* pb = buttonBox_->button(buttonBox_->standardButton(b)))
+            pb->setAutoDefault(false);
+    }
+
+    readSettings();
 
     WidgetNameProvider::nameChildren(this);
 }
 
-void DashboardDialog::add(DashboardWidget* dw)
-{
-	dw_=dw;
+void DashboardDialog::add(DashboardWidget* dw) {
+    dw_ = dw;
 
-	//The dialog takes ownership of the widget
-	dw_->setParent(this);
+    // The dialog takes ownership of the widget
+    dw_->setParent(this);
 
-	layout_->insertWidget(0,dw_,1);
+    layout_->insertWidget(0, dw_, 1);
 
-    connect(dw_,SIGNAL(titleUpdated(QString,QString)),
-            this,SLOT(slotUpdateTitle(QString,QString)));
+    connect(dw_, SIGNAL(titleUpdated(QString, QString)), this, SLOT(slotUpdateTitle(QString, QString)));
 
     dw_->populateDialog();
     dw_->readSettingsForDialog();
 }
 
-void DashboardDialog::reject()
-{
-    if(dw_)
+void DashboardDialog::reject() {
+    if (dw_)
         dw_->writeSettingsForDialog();
 
     writeSettings();
-	QDialog::reject();
+    QDialog::reject();
 }
 
-void DashboardDialog::closeEvent(QCloseEvent * event)
-{
-    if(dw_)
+void DashboardDialog::closeEvent(QCloseEvent* event) {
+    if (dw_)
         dw_->writeSettingsForDialog();
 
     Q_EMIT aboutToClose();
     event->accept();
-	writeSettings();
+    writeSettings();
 }
 
-void DashboardDialog::slotUpdateTitle(QString txt,QString /*type*/)
-{
+void DashboardDialog::slotUpdateTitle(QString txt, QString /*type*/) {
     setWindowTitle(txt.remove("<b>").remove("</b>"));
 }
 
-void DashboardDialog::slotOwnerDelete()
-{
-	this->deleteLater();
+void DashboardDialog::slotOwnerDelete() {
+    this->deleteLater();
 }
 
-void DashboardDialog::writeSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void DashboardDialog::writeSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("DashboardDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("DashboardDialog")), QSettings::NativeFormat);
 
-	//We have to clear it so that should not remember all the previous values
-	settings.clear();
+    // We have to clear it so that should not remember all the previous values
+    settings.clear();
 
-	settings.beginGroup("main");
-	settings.setValue("size",size());
-	settings.endGroup();
+    settings.beginGroup("main");
+    settings.setValue("size", size());
+    settings.endGroup();
 }
 
-void DashboardDialog::readSettings()
-{
-    SessionItem* cs=SessionHandler::instance()->current();
+void DashboardDialog::readSettings() {
+    SessionItem* cs = SessionHandler::instance()->current();
     Q_ASSERT(cs);
-    QSettings settings(QString::fromStdString(cs->qtSettingsFile("DashboardDialog")),
-                       QSettings::NativeFormat);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("DashboardDialog")), QSettings::NativeFormat);
 
-	settings.beginGroup("main");
-	if(settings.contains("size"))
-	{
-		resize(settings.value("size").toSize());
-	}
-	else
-	{
-	  	resize(QSize(520,500));
-	}
+    settings.beginGroup("main");
+    if (settings.contains("size")) {
+        resize(settings.value("size").toSize());
+    }
+    else {
+        resize(QSize(520, 500));
+    }
 
-	settings.endGroup();
+    settings.endGroup();
 }

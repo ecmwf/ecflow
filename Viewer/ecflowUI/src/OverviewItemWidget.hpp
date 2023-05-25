@@ -11,35 +11,33 @@
 #ifndef OVERVIEWITEMWIDGET_HPP_
 #define OVERVIEWITEMWIDGET_HPP_
 
-#include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
+#include "InfoPanelItem.hpp"
 
-class OverviewItemWidget : public CodeItemWidget, public InfoPanelItem
-{
+class OverviewItemWidget : public CodeItemWidget, public InfoPanelItem {
 public:
-	explicit OverviewItemWidget(QWidget *parent=nullptr);
-	~OverviewItemWidget() override;
+    explicit OverviewItemWidget(QWidget* parent = nullptr);
+    ~OverviewItemWidget() override;
 
-	void reload(VInfo_ptr) override;
-	QWidget* realWidget() override;
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
     void clearContents() override;
 
-	//From VInfoPresenter
-	void infoReady(VReply*) override;
-	void infoFailed(VReply*) override;
-	void infoProgress(VReply*) override;
+    // From VInfoPresenter
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override;
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
-	void connectStateChanged() override;
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
+    void connectStateChanged() override;
 
 protected:
-	void reload();
+    void reload();
     void updateState(const ChangeFlags&) override;
     void reloadRequested() override;
 
-	int lastScrollPos_{0};
+    int lastScrollPos_{0};
 };
 
 #endif
-

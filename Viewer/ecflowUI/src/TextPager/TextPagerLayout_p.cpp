@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "TextPagerLayout_p.hpp"
+
 #include <QtGlobal>
 
-#include "TextPagerLayout_p.hpp"
-#include "TextPagerEdit_p.hpp"
 #include "TextPagerDocument.hpp"
 #include "TextPagerEdit.hpp"
+#include "TextPagerEdit_p.hpp"
 
-int TextPagerLayout::viewportWidth() const
-{
+int TextPagerLayout::viewportWidth() const {
     if (!lineBreaking)
         return INT_MAX - 1024;
     return textEdit ? textEdit->viewport()->width() : viewport;
 }
 
-int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // index is in document coordinates
+int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // index is in document coordinates
 {
-    QTextLayout *textLayout = nullptr;
+    QTextLayout* textLayout = nullptr;
     if (!unusedTextLayouts.isEmpty()) {
         textLayout = unusedTextLayouts.takeLast();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
@@ -36,7 +36,8 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
 #else
         textLayout->clearAdditionalFormats();
 #endif
-    } else {
+    }
+    else {
         textLayout = new QTextLayout;
         textLayout->setCacheEnabled(true);
         textLayout->setFont(font);
@@ -46,11 +47,10 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
     }
     textLayouts.append(textLayout);
     if (index != 0 && bufferReadCharacter(index - 1) != '\n') {
-        qWarning() << index << viewportPosition << document->read(index - 1, 20)
-                   << bufferReadCharacter(index - 1);
+        qWarning() << index << viewportPosition << document->read(index - 1, 20) << bufferReadCharacter(index - 1);
     }
     Q_ASSERT(index == 0 || bufferReadCharacter(index - 1) == '\n');
-    const int max = bufferPosition + buffer.size();
+    const int max       = bufferPosition + buffer.size();
     const int lineStart = index;
     while (index < max && bufferReadCharacter(index) != '\n')
         ++index;
@@ -66,7 +66,7 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
     if (sections) {
         do {
             Q_ASSERT(!sections->isEmpty());
-            TextPagerSection *l = sections->first();
+            TextPagerSection* l = sections->first();
             Q_ASSERT(::matchSection(l, textEdit));
             Q_ASSERT(l->position() + l->size() >= lineStart);
             if (l->position() >= index) {
@@ -74,10 +74,15 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
             }
             // section is in this QTextLayout
             QTextLayout::FormatRange range;
-            range.start = qMax(0, l->position() - lineStart); // offset in QTextLayout
+            range.start  = qMax(0, l->position() - lineStart); // offset in QTextLayout
             range.length = qMin(l->position() + l->size(), index) - lineStart - range.start;
             range.format = l->format();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            formatMap.insert(l->priority(), range);
+#else
             formatMap.insertMulti(l->priority(), range);
+#endif
             if (l->position() + l->size() >= index) { // > ### ???
                 // means section didn't end here. It continues in the next QTextLayout
                 break;
@@ -87,11 +92,11 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
     }
     QList<QTextLayout::FormatRange> formats = formatMap.values();
 
-    int leftMargin = LeftMargin;
-    int rightMargin = 0;
-    int topMargin = 0;
-    int bottomMargin = 0;
-    Q_FOREACH(SyntaxHighlighter *syntaxHighlighter, syntaxHighlighters) {
+    int leftMargin                          = LeftMargin;
+    int rightMargin                         = 0;
+    int topMargin                           = 0;
+    int bottomMargin                        = 0;
+    Q_FOREACH (SyntaxHighlighter* syntaxHighlighter, syntaxHighlighters) {
         syntaxHighlighter->d->currentBlockPosition = lineStart;
         syntaxHighlighter->d->formatRanges.clear();
         syntaxHighlighter->d->currentBlock = string;
@@ -107,7 +112,6 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
                 topMargin = syntaxHighlighter->d->blockFormat.topMargin();
             if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockBottomMargin))
                 bottomMargin = syntaxHighlighter->d->blockFormat.bottomMargin();
-
         }
         syntaxHighlighter->d->previousBlockState = syntaxHighlighter->d->currentBlockState;
         if (!syntaxHighlighter->d->formatRanges.isEmpty())
@@ -121,7 +125,7 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
     textLayout->beginLayout();
     const int lineWidth = viewportWidth() - (leftMargin + rightMargin);
 
-    int localWidest = -1;
+    int localWidest     = -1;
     Q_FOREVER {
         QTextLine line = textLayout->createLine();
         if (!line.isValid()) {
@@ -141,16 +145,15 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
         lines.append(qMakePair(lineStart + line.textStart(), line));
     }
 
-    widest = qMax(widest, localWidest);
+    widest           = qMax(widest, localWidest);
     lastBottomMargin = bottomMargin;
 
     textLayout->endLayout();
 #ifndef QT_NO_DEBUG
-    for (int i=1; i<lines.size(); ++i) {
+    for (int i = 1; i < lines.size(); ++i) {
         Q_ASSERT(lines.at(i).first - (lines.at(i - 1).first + lines.at(i - 1).second.textLength()) <= 1);
     }
 #endif
-
 
     QRect r = textLayout->boundingRect().toRect();
     // this will actually take the entire width set in setLineWidth
@@ -158,39 +161,37 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
     r.setWidth(localWidest);
 
     contentRect |= r;
-    Q_ASSERT(!lineBreaking || contentRect.right() <= qint64(viewportWidth()) + LeftMargin
-             || viewportWidth() == -1);
+    Q_ASSERT(!lineBreaking || contentRect.right() <= qint64(viewportWidth()) + LeftMargin || viewportWidth() == -1);
 
-    Q_FOREACH(SyntaxHighlighter *syntaxHighlighter, syntaxHighlighters) {
+    Q_FOREACH (SyntaxHighlighter* syntaxHighlighter, syntaxHighlighters) {
         syntaxHighlighter->d->formatRanges.clear();
-        syntaxHighlighter->d->blockFormat = QTextBlockFormat();
+        syntaxHighlighter->d->blockFormat          = QTextBlockFormat();
         syntaxHighlighter->d->currentBlockPosition = -1;
     }
 
     return index;
 }
 
-int TextPagerLayout::textPositionAt(const QPoint &p) const
-{
+int TextPagerLayout::textPositionAt(const QPoint& p) const {
     QPoint pos = p;
     if (pos.x() >= 0 && pos.x() < LeftMargin)
         pos.rx() = LeftMargin; // clicking in the margin area should count as the first characters
 
     int textLayoutOffset = viewportPosition;
-    Q_FOREACH(const QTextLayout *l, textLayouts) {
-    	if(l->boundingRect().y() <= pos.y() && l->boundingRect().bottom() >=pos.y()) {
-    	//if (l->boundingRect().toRect().contains(pos)) {
+    Q_FOREACH (const QTextLayout* l, textLayouts) {
+        if (l->boundingRect().y() <= pos.y() && l->boundingRect().bottom() >= pos.y()) {
+            // if (l->boundingRect().toRect().contains(pos)) {
             const int lineCount = l->lineCount();
-            for (int i=0; i<lineCount; ++i) {
+            for (int i = 0; i < lineCount; ++i) {
                 const QTextLine line = l->lineAt(i);
                 if (line.y() <= pos.y() && pos.y() <= line.height() + line.y()) { // ### < ???
-                {
-                	if(pos.x() > l->boundingRect().right())
-                		pos.setX(l->boundingRect().right()-1);
+                    {
+                        if (pos.x() > l->boundingRect().right())
+                            pos.setX(l->boundingRect().right() - 1);
 
-                	return textLayoutOffset + line.xToCursor(qMax<int>(LeftMargin, pos.x()));
+                        return textLayoutOffset + line.xToCursor(qMax<int>(LeftMargin, pos.x()));
+                    }
                 }
-		}
             }
         }
         textLayoutOffset += l->text().size() + 1; // + 1 for newlines which aren't in the QTextLayout
@@ -198,50 +199,49 @@ int TextPagerLayout::textPositionAt(const QPoint &p) const
     return -1;
 }
 
-QList<TextPagerSection*> TextPagerLayout::relayoutCommon()
-{
-//    widest = -1; // ### should this be relative to current content or remember? What if you remove the line that was the widest?
+QList<TextPagerSection*> TextPagerLayout::relayoutCommon() {
+    //    widest = -1; // ### should this be relative to current content or remember? What if you remove the line that
+    //    was the widest?
     Q_ASSERT(layoutDirty);
     layoutDirty = false;
     Q_ASSERT(document);
     lines.clear();
     unusedTextLayouts = textLayouts;
     textLayouts.clear();
-    contentRect = QRect();
+    contentRect  = QRect();
     visibleLines = lastVisibleCharacter = -1;
 
-    Q_FOREACH(SyntaxHighlighter *syntaxHighlighter, syntaxHighlighters) {
+    Q_FOREACH (SyntaxHighlighter* syntaxHighlighter, syntaxHighlighters) {
         syntaxHighlighter->d->previousBlockState = syntaxHighlighter->d->currentBlockState = -1;
     }
 
-    if (viewportPosition < bufferPosition
-        || (bufferPosition + buffer.size() < document->documentSize()
-            && buffer.size() - bufferOffset() < MinimumBufferSize)) {
+    if (viewportPosition < bufferPosition || (bufferPosition + buffer.size() < document->documentSize() &&
+                                              buffer.size() - bufferOffset() < MinimumBufferSize)) {
         bufferPosition = qMax(0, viewportPosition - MinimumBufferSize);
-        buffer = document->read(bufferPosition, int(MinimumBufferSize * 2.5));
-        sections = document->d->getSections(bufferPosition, buffer.size(), TextPagerSection::IncludePartial, textEdit);
-    } else if (sectionsDirty) {
+        buffer         = document->read(bufferPosition, int(MinimumBufferSize * 2.5));
         sections = document->d->getSections(bufferPosition, buffer.size(), TextPagerSection::IncludePartial, textEdit);
     }
-    sectionsDirty = false;
+    else if (sectionsDirty) {
+        sections = document->d->getSections(bufferPosition, buffer.size(), TextPagerSection::IncludePartial, textEdit);
+    }
+    sectionsDirty              = false;
     QList<TextPagerSection*> l = sections;
     while (!l.isEmpty() && l.first()->position() + l.first()->size() < viewportPosition)
         l.takeFirst(); // could cache these as well
     return l;
 }
 
-void TextPagerLayout::relayoutByGeometry(int height)
-{
+void TextPagerLayout::relayoutByGeometry(int height) {
     if (!layoutDirty)
         return;
 
     QList<TextPagerSection*> l = relayoutCommon();
 
-    const int max = viewportPosition + buffer.size() - bufferOffset(); // in document coordinates
+    const int max              = viewportPosition + buffer.size() - bufferOffset(); // in document coordinates
     ASSUME(viewportPosition == 0 || bufferReadCharacter(viewportPosition - 1) == '\n');
 
     static const int extraLines = qMax(2, qgetenv("LAZYTEXTEDIT_EXTRA_LINES").toInt());
-    int index = viewportPosition;
+    int index                   = viewportPosition;
     while (index < max) {
         index = doLayout(index, l.isEmpty() ? nullptr : &l);
         Q_ASSERT(index == max || document->readCharacter(index - 1) == '\n');
@@ -249,35 +249,34 @@ void TextPagerLayout::relayoutByGeometry(int height)
         const int y = int(textLayouts.last()->boundingRect().bottom());
         if (y >= height) {
             if (visibleLines == -1) {
-                visibleLines = lines.size();
+                visibleLines         = lines.size();
                 lastVisibleCharacter = index;
-            } else if (lines.size() >= visibleLines + extraLines) {
+            }
+            else if (lines.size() >= visibleLines + extraLines) {
                 break;
             }
         }
     }
     if (visibleLines == -1) {
-        visibleLines = lines.size();
+        visibleLines         = lines.size();
         lastVisibleCharacter = index;
     }
-
 
     layoutEnd = qMin(index, max);
     qDeleteAll(unusedTextLayouts);
     unusedTextLayouts.clear();
     Q_ASSERT(viewportPosition < layoutEnd ||
              (viewportPosition == layoutEnd && viewportPosition == document->documentSize()));
-//    qDebug() << "layoutEnd" << layoutEnd << "viewportPosition" << viewportPosition;
+    //    qDebug() << "layoutEnd" << layoutEnd << "viewportPosition" << viewportPosition;
 }
 
-void TextPagerLayout::relayoutByPosition(int size)
-{
+void TextPagerLayout::relayoutByPosition(int size) {
     if (!layoutDirty)
         return;
 
     QList<TextPagerSection*> l = relayoutCommon();
 
-    const int max = viewportPosition + qMin(size, buffer.size() - bufferOffset());
+    const int max              = viewportPosition + qMin(size, buffer.size() - bufferOffset());
     Q_ASSERT(viewportPosition == 0 || bufferReadCharacter(viewportPosition - 1) == '\n');
     int index = viewportPosition;
     while (index < max) {
@@ -291,14 +290,12 @@ void TextPagerLayout::relayoutByPosition(int size)
              (viewportPosition == layoutEnd && viewportPosition == document->documentSize()));
 }
 
-void TextPagerLayout::relayout()
-{
-    //relayoutByPosition(2000); // ### totally arbitrary number
-    relayoutByPosition(1.5*MinimumBufferSize); 
+void TextPagerLayout::relayout() {
+    // relayoutByPosition(2000); // ### totally arbitrary number
+    relayoutByPosition(1.5 * MinimumBufferSize);
 }
 
-QTextLayout *TextPagerLayout::layoutForPosition(int pos, int *offset, int *index) const
-{
+QTextLayout* TextPagerLayout::layoutForPosition(int pos, int* offset, int* index) const {
     if (offset)
         *offset = -1;
     if (index)
@@ -309,9 +306,9 @@ QTextLayout *TextPagerLayout::layoutForPosition(int pos, int *offset, int *index
     }
 
     int textLayoutOffset = viewportPosition;
-    int i = 0;
+    int i                = 0;
 
-    Q_FOREACH(QTextLayout *l, textLayouts) {
+    Q_FOREACH (QTextLayout* l, textLayouts) {
         if (pos >= textLayoutOffset && pos <= l->text().size() + textLayoutOffset) {
             if (offset)
                 *offset = pos - textLayoutOffset;
@@ -325,8 +322,7 @@ QTextLayout *TextPagerLayout::layoutForPosition(int pos, int *offset, int *index
     return nullptr;
 }
 
-QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *lineIndex, bool *lastLine) const
-{
+QTextLine TextPagerLayout::lineForPosition(int pos, int* offsetInLine, int* lineIndex, bool* lastLine) const {
     if (offsetInLine)
         *offsetInLine = -1;
     if (lineIndex)
@@ -337,13 +333,13 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *line
     if (pos < viewportPosition || pos >= layoutEnd || textLayouts.isEmpty() || lines.isEmpty()) {
         return {};
     }
-    int layoutIndex = 0;
-    QTextLayout *layout = textLayouts.value(layoutIndex);
+    int layoutIndex     = 0;
+    QTextLayout* layout = textLayouts.value(layoutIndex);
     Q_ASSERT(layout);
-    for (int i=0; i<lines.size(); ++i) {
-        const QPair<int, QTextLine> &line = lines.at(i);
-        int lineEnd = line.first + line.second.textLength();
-        const bool last = line.second.lineNumber() + 1 == layout->lineCount();
+    for (int i = 0; i < lines.size(); ++i) {
+        const QPair<int, QTextLine>& line = lines.at(i);
+        int lineEnd                       = line.first + line.second.textLength();
+        const bool last                   = line.second.lineNumber() + 1 == layout->lineCount();
         if (last) {
             ++lineEnd;
             // 1 is for newline characters
@@ -362,12 +358,13 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *line
             if (lastLine)
                 *lastLine = last;
             return line.second;
-        } else if (!layout) {
+        }
+        else if (!layout) {
             break;
         }
     }
-    qWarning() << "Couldn't find a line for" << pos << "viewportPosition" << viewportPosition
-               << "layoutEnd" << layoutEnd;
+    qWarning() << "Couldn't find a line for" << pos << "viewportPosition" << viewportPosition << "layoutEnd"
+               << layoutEnd;
     Q_ASSERT(0);
     return {};
 }
@@ -376,24 +373,29 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *line
 // right direction and sets viewportPosition to that. Updates
 // scrollbars if this is a TextEditPrivate
 
-void TextPagerLayout::updateViewportPosition(int pos, Direction direction,bool applyIt)
-{
+void TextPagerLayout::updateViewportPosition(int pos, Direction direction, bool applyIt) {
     pos = qMin(pos, maxViewportPosition);
     if (document->documentSize() == 0) {
         viewportPosition = 0;
-    } else {
+    }
+    else {
         Q_ASSERT(document->documentSize() > 0);
-        int index = document->find('\n', qMax(0, pos + (direction == Backward ? -1 : 0)),
-                                   TextPagerDocument::FindMode(direction)).anchor();
+        int index =
+            document
+                ->find('\n', qMax(0, pos + (direction == Backward ? -1 : 0)), TextPagerDocument::FindMode(direction))
+                .anchor();
         if (index == -1) {
             if (direction == Backward) {
                 index = 0;
-            } else {
-                index = qMax(0, document->find('\n', document->documentSize() - 1, TextPagerDocument::FindBackward).position());
+            }
+            else {
+                index = qMax(
+                    0, document->find('\n', document->documentSize() - 1, TextPagerDocument::FindBackward).position());
                 // position after last newline in document
                 // if there is no newline put it at 0
             }
-        } else {
+        }
+        else {
             ++index;
         }
         Q_ASSERT(index != -1);
@@ -409,50 +411,46 @@ void TextPagerLayout::updateViewportPosition(int pos, Direction direction,bool a
     }
     layoutDirty = true;
 
-    if(applyIt) {
-    
+    if (applyIt) {
+
         if (textEdit && !suppressTextEditUpdates) {
             textEdit->viewport()->update();
-            auto *p = static_cast<TextEditPrivate*>(this);
+            auto* p                   = static_cast<TextEditPrivate*>(this);
             p->pendingScrollBarUpdate = true;
             p->updateCursorPosition(p->lastHoverPos);
             if (!textEdit->verticalScrollBar()->isSliderDown()) {
                 p->updateScrollBar();
             } // sliderReleased is connected to updateScrollBar()
         }
-    
+
         relayout();
-    }    
+    }
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug &operator<<(QDebug &str, const QTextLine &line)
-{
+QDebug& operator<<(QDebug& str, const QTextLine& line) {
     if (!line.isValid()) {
         str << "QTextLine() (invalid)";
         return str;
     }
-    str.space() << "lineNumber" << line.lineNumber()
-                << "textStart" << line.textStart()
-                << "textLength" << line.textLength()
-                << "position" << line.position();
+    str.space() << "lineNumber" << line.lineNumber() << "textStart" << line.textStart() << "textLength"
+                << line.textLength() << "position" << line.position();
     return str;
 }
 
-QString TextPagerLayout::dump() const
-{
+QString TextPagerLayout::dump() const {
     QString out;
     QTextStream ts(&out, QIODevice::WriteOnly);
-    ts << "viewportPosition " << viewportPosition
-       << " layoutEnd " << layoutEnd
-       << " viewportWidth " << viewportWidth() << '\n';
+    ts << "viewportPosition " << viewportPosition << " layoutEnd " << layoutEnd << " viewportWidth " << viewportWidth()
+       << '\n';
     for (auto layout : textLayouts) {
-        for (int j=0; j<layout->lineCount(); ++j) {
+        for (int j = 0; j < layout->lineCount(); ++j) {
             QTextLine line = layout->lineAt(j);
             ts << layout->text().mid(line.textStart(), line.textLength());
             if (j + 1 < layout->lineCount()) {
                 ts << "<linebreak>\n";
-            } else {
+            }
+            else {
                 ts << "\n";
             }
         }

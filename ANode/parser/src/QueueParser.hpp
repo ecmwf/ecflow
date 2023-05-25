@@ -17,9 +17,9 @@
 
 class QueueParser : public Parser {
 public:
-   explicit QueueParser(DefsStructureParser* p) : Parser(p){}
-   const char* keyword() const override { return "queue"; }
-   bool doParse( const std::string& line, std::vector<std::string >& lineTokens ) override;
+    explicit QueueParser(DefsStructureParser* p) : Parser(p) {}
+    const char* keyword() const override { return "queue"; }
+    bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };
 
 #endif

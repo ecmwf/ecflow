@@ -15,11 +15,10 @@
 
 class QTimer;
 
-class LogTruncator : public QObject
-{
+class LogTruncator : public QObject {
     Q_OBJECT
 public:
-    LogTruncator(QString, int,int,int,QObject* parent=nullptr);
+    LogTruncator(QString, int, int, int, QObject* parent = nullptr);
 
 protected Q_SLOTS:
     void truncate();
@@ -37,4 +36,3 @@ private:
 };
 
 #endif // LOGTRUNCATOR_HPP
-

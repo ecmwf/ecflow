@@ -10,16 +10,16 @@
 
 #include "AttributeEditor.hpp"
 
+#include <QPushButton>
+
 #include "AttributeEditorFactory.hpp"
 #include "ConnectState.hpp"
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
 #include "UiLogS.hpp"
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 #include "VConfig.hpp"
 #include "VRepeatAttr.hpp"
-
-#include <QPushButton>
 
 #define _USE_MODELESS_ATTRIBUTEDITOR
 #define _UI_ATTRIBUTEDITOR_DEBUG
@@ -28,8 +28,11 @@
 static QList<AttributeEditor*> editors;
 #endif
 
-AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : QDialog(parent), info_(info), form_(nullptr), type_(type)
-{    
+AttributeEditor::AttributeEditor(VInfo_ptr info, QString type, QWidget* parent)
+    : QDialog(parent),
+      info_(info),
+      form_(nullptr),
+      type_(type) {
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -41,21 +44,19 @@ AttributeEditor::AttributeEditor(VInfo_ptr info,QString type,QWidget* parent) : 
     auto attr = info_->attribute();
     Q_ASSERT(attr);
     messageLabel_->hide();
-    
-    attrData_=attr->data();
 
-    QString wt="Edit " + type;
-    wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+    attrData_  = attr->data();
+
+    QString wt = "Edit " + type;
+    wt += "  -  " + QString::fromStdString(VConfig::instance()->appLongName());
     setWindowTitle(wt);
 
     attachInfo();
 
-    connect(buttonBox_,SIGNAL(clicked(QAbstractButton*)),
-            this,SLOT(slotButton(QAbstractButton*)));
+    connect(buttonBox_, SIGNAL(clicked(QAbstractButton*)), this, SLOT(slotButton(QAbstractButton*)));
 }
 
-AttributeEditor::~AttributeEditor()
-{
+AttributeEditor::~AttributeEditor() {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
@@ -65,36 +66,30 @@ AttributeEditor::~AttributeEditor()
 #endif
 }
 
-void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
-{
+void AttributeEditor::edit(VInfo_ptr info, QWidget* /*parent*/) {
     Q_ASSERT(info);
-    VAttribute* a=info->attribute();
+    VAttribute* a = info->attribute();
     Q_ASSERT(a);
     auto aType = a->type();
     Q_ASSERT(aType);
 
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
-    Q_FOREACH(AttributeEditor* e,editors)
-    {
-        if((e->info_ && info) &&
-           *(e->info_.get()) == *(info.get()))
-        {
+    Q_FOREACH (AttributeEditor* e, editors) {
+        if ((e->info_ && info) && *(e->info_.get()) == *(info.get())) {
             e->raise();
             return;
         }
     }
 #endif
 
-    //For repeats we create an editor for each type
-    std::string typeStr=a->type()->strName();
-    if(a->type() == VAttributeType::find("repeat"))
-    {        
-        typeStr+="_" + a->subType();
+    // For repeats we create an editor for each type
+    std::string typeStr = a->type()->strName();
+    if (a->type() == VAttributeType::find("repeat")) {
+        typeStr += "_" + a->subType();
     }
 
-    //The edtior will be automatically deleted on close (Qt::WA_DeleteOnClose is set)
-    if(AttributeEditor* e=AttributeEditorFactory::create(typeStr,info,nullptr))
-    {
+    // The edtior will be automatically deleted on close (Qt::WA_DeleteOnClose is set)
+    if (AttributeEditor* e = AttributeEditorFactory::create(typeStr, info, nullptr)) {
 #ifdef _USE_MODELESS_ATTRIBUTEDITOR
         editors << e;
         e->show();
@@ -104,45 +99,37 @@ void AttributeEditor::edit(VInfo_ptr info,QWidget *parent)
     }
 }
 
-void AttributeEditor::addForm(QWidget* w)
-{
-    form_=w;
-    mainLayout_->insertWidget(3,w,1);
+void AttributeEditor::addForm(QWidget* w) {
+    form_ = w;
+    mainLayout_->insertWidget(3, w, 1);
 }
 
-void AttributeEditor::accept()
-{
+void AttributeEditor::accept() {
     apply();
     QDialog::accept();
 }
 
-void AttributeEditor::attachInfo()
-{
+void AttributeEditor::attachInfo() {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
 
-    if(info_)
-    {
-        if(info_->server())
-        {
+    if (info_) {
+        if (info_->server()) {
             info_->server()->addNodeObserver(this);
             info_->server()->addServerObserver(this);
         }
 
         info_->addObserver(this);
-    } 
+    }
 }
 
-void AttributeEditor::detachInfo()
-{
+void AttributeEditor::detachInfo() {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
-    if(info_)
-    {
-        if(info_->server())
-        {
+    if (info_) {
+        if (info_->server()) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
             UiLog().dbg() << " remove NodeObserver " << this;
 #endif
@@ -161,34 +148,29 @@ void AttributeEditor::detachInfo()
     messageLabel_->stopLoadLabel();
 }
 
-void AttributeEditor::slotButton(QAbstractButton* b)
-{
-    if(b && buttonBox_->buttonRole(b) == QDialogButtonBox::ResetRole)
+void AttributeEditor::slotButton(QAbstractButton* b) {
+    if (b && buttonBox_->buttonRole(b) == QDialogButtonBox::ResetRole)
         resetValue();
 }
 
-void AttributeEditor::checkButtonStatus()
-{
+void AttributeEditor::checkButtonStatus() {
     setResetStatus(isValueChanged());
     setSaveStatus(isValueChanged());
 }
 
-void AttributeEditor::setResetStatus(bool st)
-{
-    QPushButton *resetpb=buttonBox_->button(QDialogButtonBox::Reset);
+void AttributeEditor::setResetStatus(bool st) {
+    QPushButton* resetpb = buttonBox_->button(QDialogButtonBox::Reset);
     Q_ASSERT(resetpb);
     resetpb->setEnabled(st);
 }
 
-void AttributeEditor::setSaveStatus(bool st)
-{
-    QPushButton *savepb=buttonBox_->button(QDialogButtonBox::Save);
+void AttributeEditor::setSaveStatus(bool st) {
+    QPushButton* savepb = buttonBox_->button(QDialogButtonBox::Save);
     Q_ASSERT(savepb);
     savepb->setEnabled(st);
 }
 
-void AttributeEditor::setSuspended(bool st)
-{
+void AttributeEditor::setSuspended(bool st) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
     UiLog().dbg() << " status=" << st;
@@ -197,47 +179,44 @@ void AttributeEditor::setSuspended(bool st)
     Q_ASSERT(form_);
     form_->setEnabled(!st);
 
-    QPushButton *savePb=buttonBox_->button(QDialogButtonBox::Save);
+    QPushButton* savePb = buttonBox_->button(QDialogButtonBox::Save);
     Q_ASSERT(savePb);
     savePb->setEnabled(!st);
 
-    QPushButton *resetPb=buttonBox_->button(QDialogButtonBox::Reset);
+    QPushButton* resetPb = buttonBox_->button(QDialogButtonBox::Reset);
     Q_ASSERT(resetPb);
     resetPb->setEnabled(!st);
 }
 
-void AttributeEditor::notifyDataLost(VInfo* info)
-{
+void AttributeEditor::notifyDataLost(VInfo* info) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
-    if(info_ && info_.get() == info)
-    {
+    if (info_ && info_.get() == info) {
         detachInfo();
-        messageLabel_->showWarning("The parent node or the edited " + type_ + " <b>is not available</b> anymore! Please close the dialog!");
+        messageLabel_->showWarning("The parent node or the edited " + type_ +
+                                   " <b>is not available</b> anymore! Please close the dialog!");
         setSuspended(true);
     }
 }
 
-void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
-{
+void AttributeEditor::notifyBeginNodeChange(const VNode* vn,
+                                            const std::vector<ecf::Aspect::Type>& aspect,
+                                            const VNodeChange&) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
-    if(info_ && info_->node() && info_->node() == vn)
-    {
-        bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-        if(attrNumCh)
-        {
+    if (info_ && info_->node() && info_->node() == vn) {
+        bool attrNumCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+        if (attrNumCh) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
             UiLog().dbg() << " ADD_REMOVE_ATTR";
 #endif
-            //try to regain the data
+            // try to regain the data
             info_->regainData();
 
-            //If the attribute is not available dataLost() was already called.
-            if(!info_ || !info_->hasData())
-            {
+            // If the attribute is not available dataLost() was already called.
+            if (!info_ || !info_->hasData()) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";
 #endif
@@ -250,9 +229,9 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
 #if 0
             if(1)
             {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    #ifdef _UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";
-#endif
+    #endif
                 detachInfo();
                 messageLabel_->showWarning("The edited " + type_ +
                                            " <b>is not available</b> any more! Please close the dialog!");
@@ -260,29 +239,23 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn, const std::vector<e
             }
 #endif
         }
-        else
-        {          
+        else {
             nodeChanged(aspect);
         }
     }
 }
 
-void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)
-{
-    if(info_ && info_->server() && info_->server() == server)
-    {
-        //TODO: implement
-
+void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& /*a*/) {
+    if (info_ && info_->server() && info_->server() == server) {
+        // TODO: implement
     }
 }
 
-void AttributeEditor::notifyServerDelete(ServerHandler* server)
-{
+void AttributeEditor::notifyServerDelete(ServerHandler* server) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG_S(server)
 #endif
-    if(info_ && info_->server() == server)
-    {
+    if (info_ && info_->server() == server) {
         detachInfo();
         messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) +
                                    "</b> was removed from ecFlowUI! The edited " + type_ +
@@ -290,20 +263,19 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server)
         setSuspended(true);
     }
 }
-    
-//This must be called at the beginning of a reset
-void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
-{
+
+// This must be called at the beginning of a reset
+void AttributeEditor::notifyBeginServerClear(ServerHandler* server) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG_S(server)
 #endif
 
-    if(info_)
-    {
-        if(info_->server() && info_->server() == server)
-        {
-            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reloaded. \
-                   Until it is finished this " + type_ + " <b>cannot be modified</b>!");
+    if (info_) {
+        if (info_->server() && info_->server() == server) {
+            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) +
+                                       "</b> is being reloaded. \
+                   Until it is finished this " +
+                                       type_ + " <b>cannot be modified</b>!");
 
             messageLabel_->startLoadLabel();
 
@@ -313,27 +285,24 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server)
     }
 }
 
-//This must be called at the end of a reset
-void AttributeEditor::notifyEndServerScan(ServerHandler* server)
-{
+// This must be called at the end of a reset
+void AttributeEditor::notifyEndServerScan(ServerHandler* server) {
 #ifdef _UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG_S(server)
 #endif
 
-    if(info_)
-    {
-        if(info_->server() && info_->server() == server)
-        {
+    if (info_) {
+        if (info_->server() && info_->server() == server) {
             messageLabel_->hide();
             messageLabel_->clear();
 
-            //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
-            //that notifyEndServerScan() will be first called on other objects than AttributeEditor. So it
-            //is possible that the node exists but is still set to NULL in VInfo.
+            // We try to ressurect the info. We have to do it explicitly because it is not guaranteed
+            // that notifyEndServerScan() will be first called on other objects than AttributeEditor. So it
+            // is possible that the node exists but is still set to NULL in VInfo.
             info_->regainData();
 
-            //If the node is not available dataLost() was already called.
-            if(!info_ || !info_->hasData())
+            // If the node is not available dataLost() was already called.
+            if (!info_ || !info_->hasData())
                 return;
 
             Q_ASSERT(info_->server() && info_->node());
@@ -343,42 +312,38 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server)
     }
 }
 
-void AttributeEditor::notifyServerConnectState(ServerHandler* server)
-{
+void AttributeEditor::notifyServerConnectState(ServerHandler* server) {
     Q_ASSERT(server);
-    if(info_->server() && info_->server() == server)
-    {
-        switch(server->connectState()->state())
-        {
-        case ConnectState::Lost:
-            messageLabel_->showWarning("Connection lost to server <b>" + QString::fromStdString(server->name()) + "</b>. \
-                   Until it the connection regained this " + type_ + " <b>cannot be modified</b>!");
-            messageLabel_->stopLoadLabel();
-            setSuspended(true);
-            break;
-        case ConnectState::Normal:
-            messageLabel_->hide();
-            messageLabel_->clear();
-            messageLabel_->stopLoadLabel();
-            setSuspended(false);
-            break;
-        default:
-            break;
+    if (info_->server() && info_->server() == server) {
+        switch (server->connectState()->state()) {
+            case ConnectState::Lost:
+                messageLabel_->showWarning("Connection lost to server <b>" + QString::fromStdString(server->name()) +
+                                           "</b>. \
+                   Until it the connection regained this " +
+                                           type_ + " <b>cannot be modified</b>!");
+                messageLabel_->stopLoadLabel();
+                setSuspended(true);
+                break;
+            case ConnectState::Normal:
+                messageLabel_->hide();
+                messageLabel_->clear();
+                messageLabel_->stopLoadLabel();
+                setSuspended(false);
+                break;
+            default:
+                break;
         }
     }
 }
 
-void AttributeEditor::doNotUseReset()
-{
-    if(QPushButton *resetPb=buttonBox_->button(QDialogButtonBox::Reset))
-    {
+void AttributeEditor::doNotUseReset() {
+    if (QPushButton* resetPb = buttonBox_->button(QDialogButtonBox::Reset)) {
         resetPb->setEnabled(false);
         resetPb->hide();
     }
 }
 
-void AttributeEditor::disableCancel()
-{
-    if(QPushButton *cancelPb=buttonBox_->button(QDialogButtonBox::Cancel))
+void AttributeEditor::disableCancel() {
+    if (QPushButton* cancelPb = buttonBox_->button(QDialogButtonBox::Cancel))
         cancelPb->hide();
 }

@@ -9,6 +9,8 @@
 
 #include "TableFilterWidget.hpp"
 
+#include <cassert>
+
 #include <QDebug>
 #include <QMenu>
 #include <QToolButton>
@@ -21,91 +23,76 @@
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 
-#include <cassert>
+TableFilterWidget::TableFilterWidget(QWidget* parent) : QWidget(parent) {
+    setupUi(this);
 
-TableFilterWidget::TableFilterWidget(QWidget *parent) :
-   QWidget(parent)
-{
-	setupUi(this);
+    connect(queryTe_, SIGNAL(clicked()), this, SLOT(slotEdit()));
 
-	connect(queryTe_,SIGNAL(clicked()),
-			this,SLOT(slotEdit()));
+    numLabel_->hide();
 
-	numLabel_->hide();
+    slotTotalNumChanged(0);
 
-	slotTotalNumChanged(0);
-
-	//queryTe_->setFixedHeight(18);
+    // queryTe_->setFixedHeight(18);
 }
 
-void TableFilterWidget::slotEdit()
-{
-	assert(filterDef_);
-	assert(serverFilter_);
+void TableFilterWidget::slotEdit() {
+    assert(filterDef_);
+    assert(serverFilter_);
 
     // it is a blocking call
-	NodeFilterDialog d(this);
-	d.setServerFilter(serverFilter_);
-	d.setQuery(filterDef_->query());
-	if(d.exec() == QDialog::Accepted)
-	{
-		filterDef_->setQuery(d.query());
+    NodeFilterDialog d(this);
+    d.setServerFilter(serverFilter_);
+    d.setQuery(filterDef_->query());
+    if (d.exec() == QDialog::Accepted) {
+        filterDef_->setQuery(d.query());
         UiLog().dbg() << "new table query: " << filterDef_->query()->query();
-	}
+    }
 }
 
-void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
-{
-	filterDef_=def;
-	serverFilter_=sf;
+void TableFilterWidget::build(NodeFilterDef* def, ServerFilter* sf) {
+    filterDef_    = def;
+    serverFilter_ = sf;
 
-	connect(filterDef_,SIGNAL(changed()),
-			this,SLOT(slotDefChanged()));
+    connect(filterDef_, SIGNAL(changed()), this, SLOT(slotDefChanged()));
 
-	slotDefChanged();
+    slotDefChanged();
 }
 
-void TableFilterWidget::slotDefChanged()
-{
+void TableFilterWidget::slotDefChanged() {
     queryTe_->setHtml(filterDef_->query()->sqlQuery());
 }
 
-void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
-{
-	NodeQuery *q=filterDef_->query()->clone();
-	if(column == "status")
-	{
-		auto *menu=new QMenu(this);
-		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
+void TableFilterWidget::slotHeaderFilter(QString column, QPoint globalPos) {
+    NodeQuery* q = filterDef_->query()->clone();
+    if (column == "status") {
+        auto* menu = new QMenu(this);
+        // stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 
-		NodeStateFilter sf;
-        NodeQueryListOption* op=q->stateOption();
+        NodeStateFilter sf;
+        NodeQueryListOption* op = q->stateOption();
         Q_ASSERT(op);
-        //if(!op->selection().isEmpty())
+        // if(!op->selection().isEmpty())
         sf.setCurrent(op->selection());
 
-        //The menu takes ownership of it
-        new VParamFilterMenu(menu,&sf,"Status filter",
-                          VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
+        // The menu takes ownership of it
+        new VParamFilterMenu(menu, &sf, "Status filter", VParamFilterMenu::FilterMode, VParamFilterMenu::ColourDecor);
 
-		if(menu->exec(globalPos) != nullptr)
-		{
-            //if(sf.isComplete())
-            //   op->setSelection(QStringList());
-            //else
-                op->setSelection(sf.currentAsList());
+        if (menu->exec(globalPos) != nullptr) {
+            // if(sf.isComplete())
+            //    op->setSelection(QStringList());
+            // else
+            op->setSelection(sf.currentAsList());
 
-            //this will create deep copy so we can delet q in the end
+            // this will create deep copy so we can delet q in the end
             filterDef_->setQuery(q);
-		}
+        }
 
-		delete menu;
-	}
+        delete menu;
+    }
 
-	delete q;
+    delete q;
 }
 
-void TableFilterWidget::slotTotalNumChanged(int n)
-{
-	numLabel_->setText(tr("Total: ") + QString::number(n));
+void TableFilterWidget::slotTotalNumChanged(int n) {
+    numLabel_->setText(tr("Total: ") + QString::number(n));
 }

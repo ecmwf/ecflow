@@ -18,22 +18,21 @@
 class QCloseEvent;
 
 namespace Ui {
-    class AddLabelDialog;
+class AddLabelDialog;
 }
 
-class AddLabelDialog : public QDialog
-{
+class AddLabelDialog : public QDialog {
     Q_OBJECT
 
 public:
-    AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent=nullptr);
+    AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent = nullptr);
 
 protected Q_SLOTS:
-    void accept() override ;
-    void reject() override ;
+    void accept() override;
+    void reject() override;
 
 protected:
-    void closeEvent(QCloseEvent * event) override ;
+    void closeEvent(QCloseEvent* event) override;
     void writeSettings();
     void readSettings();
 

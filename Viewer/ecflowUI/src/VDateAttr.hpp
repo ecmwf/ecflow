@@ -11,11 +11,12 @@
 #ifndef VDATE_HPP
 #define VDATE_HPP
 
-#include "VAttribute.hpp"
-#include "VAttributeType.hpp"
+#include <vector>
 
 #include <QStringList>
-#include <vector>
+
+#include "VAttribute.hpp"
+#include "VAttributeType.hpp"
 
 class AttributeFilter;
 class VAttributeType;
@@ -24,35 +25,35 @@ class VNode;
 class DateAttr;
 class DayAttr;
 
-namespace ecf { class Calendar;} // forward declare class
+namespace ecf {
+class Calendar;
+} // namespace ecf
 
-class VDateAttrType : public VAttributeType
-{
+class VDateAttrType : public VAttributeType {
 public:
     explicit VDateAttrType();
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
-    void encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data);
-    void encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const DateAttr& d, QStringList& data);
+    void encode(const ecf::Calendar& calendar, const DayAttr& d, QStringList& data);
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1,FreeIndex=2};
+    enum DataIndex { TypeIndex = 0, NameIndex = 1, FreeIndex = 2 };
 };
 
-class VDateAttr : public VAttribute
-{
+class VDateAttr : public VAttribute {
 
 public:
-    enum DataType {DateData,DayData};
+    enum DataType { DateData, DayData };
 
-    VDateAttr(VNode *parent,const DateAttr&,int index);
-    VDateAttr(VNode *parent,const DayAttr&,int index);
+    VDateAttr(VNode* parent, const DateAttr&, int index);
+    VDateAttr(VNode* parent, const DayAttr&, int index);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
     std::string strName() const override;
 
-    static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
+    static void scan(VNode* vnode, std::vector<VAttribute*>& vec);
 
 protected:
     DataType dataType_;

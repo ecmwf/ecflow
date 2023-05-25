@@ -12,24 +12,24 @@
 
 #include <vector>
 
-class Spline
-{
+class Spline {
 public:
-    Spline(const std::vector<double>& x,
-           const std::vector<double>& y);
+    Spline(const std::vector<double>& x, const std::vector<double>& y);
     double eval(double x) const;
-    bool status() const {return status_;}
+    bool status() const { return status_; }
 
 private:
-    bool tdma( const std::vector<double> &a, const std::vector<double> &b,
-               const std::vector<double> &c, const std::vector<double> &d,
-               std::vector<double> &X );
+    bool tdma(const std::vector<double>& a,
+              const std::vector<double>& b,
+              const std::vector<double>& c,
+              const std::vector<double>& d,
+              std::vector<double>& X);
 
     std::vector<double> xp_;
     std::vector<double> yp_;
     // cubic polynomial coefficients
-    std::vector<double> coeffA_,coeffB_,coeffC_;
-    bool status_ {false};
+    std::vector<double> coeffA_, coeffB_, coeffC_;
+    bool status_{false};
 };
 
 #endif // SPLINE_HPP

@@ -10,22 +10,21 @@
 #ifndef VFILEINFO_H_
 #define VFILEINFO_H_
 
-#include <QFileInfo>
-
 #include <ctime>
 
-class VFileInfo : public QFileInfo
-{
+#include <QFileInfo>
+
+class VFileInfo : public QFileInfo {
 public:
-	explicit VFileInfo(const QString& file) : QFileInfo(file) {}
+    explicit VFileInfo(const QString& file) : QFileInfo(file) {}
 
-	QString formatSize() const;
-	QString formatModDate() const;
-	QString formatPermissions() const;
+    QString formatSize() const;
+    QString formatModDate() const;
+    QString formatPermissions() const;
 
-	static QString formatSize(unsigned int size);
-	static QString formatDate(const std::time_t& t);
-	static QString formatDateAgo(const std::time_t& t);
+    static QString formatSize(unsigned int size);
+    static QString formatDate(const std::time_t& t);
+    static QString formatDateAgo(const std::time_t& t);
 };
 
 #endif

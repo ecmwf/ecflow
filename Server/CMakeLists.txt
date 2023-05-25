@@ -5,6 +5,18 @@
  #    find src -name \*.cpp  -print | sort
  # =======================================================
 list( APPEND srcs
+   # HEADERS
+   src/BaseServer.hpp
+   src/CheckPtSaver.hpp
+   src/NodeTreeTraverser.hpp
+   src/Server.hpp
+   src/ServerEnvironment.hpp
+   src/ServerOptions.hpp
+   src/SslServer.hpp
+   src/SslTcpServer.hpp
+   src/TcpBaseServer.hpp
+   src/TcpServer.hpp
+   # SOURCES
    src/BaseServer.cpp
    src/CheckPtSaver.cpp
    src/NodeTreeTraverser.cpp
@@ -16,7 +28,11 @@ list( APPEND srcs
 )
 
 if (OPENSSL_FOUND)
-	list( APPEND srcs 
+	list( APPEND srcs
+          # HEADERS
+          src/SslServer.hpp
+          src/SslTcpServer.hpp
+          # SOURCES
           src/SslServer.cpp
           src/SslTcpServer.cpp
         )
@@ -38,6 +54,8 @@ target_include_directories(libserver PRIVATE src
                                              ../Base/src/stc 
 )
 
+target_clangformat(libserver)
+
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
@@ -55,7 +73,9 @@ ecbuild_add_executable( TARGET   ecflow_server
 SET_TARGET_PROPERTIES(ecflow_server PROPERTIES 
                                     INSTALL_RPATH ""
                      )
-                         
+
+target_clangformat(ecflow_server)
+
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -83,6 +103,8 @@ ecbuild_add_test( TARGET       u_server
                   DEFINITIONS  ${BOOST_TEST_DYN_LINK}
                   TEST_DEPENDS u_base
               )
+
+target_clangformat(u_server CONDITION ENABLE_TESTS)
 
 # ===================================================================
 # install

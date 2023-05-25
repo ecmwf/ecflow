@@ -15,58 +15,74 @@
 #ifndef TEXTPAGEREDIT_P_HPP__
 #define TEXTPAGEREDIT_P_HPP__
 
+#include <QAction>
 #include <QBasicTimer>
 #include <QPoint>
-#include <QAction>
 #include <QScrollArea>
 #include <QScrollBar>
-#include "TextPagerLayout_p.hpp"
-#include "TextPagerDocument_p.hpp"
+
 #include "TextPagerCursor.hpp"
+#include "TextPagerDocument_p.hpp"
 #include "TextPagerEdit.hpp"
+#include "TextPagerLayout_p.hpp"
 
 struct DocumentCommand;
-struct CursorData {
+struct CursorData
+{
     int position, anchor;
 };
 
-struct LastPageCache {
-    LastPageCache()= default;
-    void clear() {position=-1; height=-1; widest=-1; documentSize=-1;}
+struct LastPageCache
+{
+    LastPageCache() = default;
+    void clear() {
+        position     = -1;
+        height       = -1;
+        widest       = -1;
+        documentSize = -1;
+    }
     int position{-1};
     int height{-1};
     int widest{-1};
     int documentSize{-1};
 };
 
-class TextEditPrivate : public QObject, public TextPagerLayout
-{
+class TextEditPrivate : public QObject, public TextPagerLayout {
     Q_OBJECT
 public:
-    TextEditPrivate(TextPagerEdit *qptr)
-        : requestedScrollBarPosition(-1), lastRequestedScrollBarPosition(-1), cursorWidth(2),
-        sectionCount(0), maximumSizeCopy(50000), pendingTimeOut(-1), autoScrollLines(0),
-        readOnly(true), cursorVisible(false), blockScrollBarUpdate(false),
-        updateScrollBarPageStepPending(true), inMouseEvent(false), sectionPressed(nullptr),
-        pendingScrollBarUpdate(false), sectionCursor(nullptr)
-    {
+    TextEditPrivate(TextPagerEdit* qptr)
+        : requestedScrollBarPosition(-1),
+          lastRequestedScrollBarPosition(-1),
+          cursorWidth(2),
+          sectionCount(0),
+          maximumSizeCopy(50000),
+          pendingTimeOut(-1),
+          autoScrollLines(0),
+          readOnly(true),
+          cursorVisible(false),
+          blockScrollBarUpdate(false),
+          updateScrollBarPageStepPending(true),
+          inMouseEvent(false),
+          sectionPressed(nullptr),
+          pendingScrollBarUpdate(false),
+          sectionCursor(nullptr) {
         textEdit = qptr;
     }
 
-    bool canInsertFromMimeData(const QMimeData *data) const;
+    bool canInsertFromMimeData(const QMimeData* data) const;
     void updateHorizontalPosition();
     void updateScrollBarPosition();
     void updateScrollBarPageStep();
     void scrollLines(int lines);
-    void timerEvent(QTimerEvent *e) override;
-    void updateCursorPosition(const QPoint &pos);
+    void timerEvent(QTimerEvent* e) override;
+    void updateCursorPosition(const QPoint& pos);
     int findLastPageSize() const;
     bool atBeginning() const { return viewportPosition == 0; }
     bool atEnd() const { return textEdit->verticalScrollBar()->value() == textEdit->verticalScrollBar()->maximum(); }
-    bool dirtyForSection(TextPagerSection *section);
+    bool dirtyForSection(TextPagerSection* section);
     void updateCopyAndCutEnabled();
-    bool isSectionOnScreen(const TextPagerSection *section) const;
-    void cursorMoveKeyEventReadOnly(QKeyEvent *e);
+    bool isSectionOnScreen(const TextPagerSection* section) const;
+    void cursorMoveKeyEventReadOnly(QKeyEvent* e);
     void relayout() override; // from TextPagerLayout
     void adjustVerticalScrollBar();
 
@@ -74,28 +90,28 @@ public:
     void toDocEnd();
     void toLineStart();
     void toLineEnd();
-    
-    int requestedScrollBarPosition, lastRequestedScrollBarPosition, cursorWidth, sectionCount,
-        maximumSizeCopy, pendingTimeOut, autoScrollLines;
+
+    int requestedScrollBarPosition, lastRequestedScrollBarPosition, cursorWidth, sectionCount, maximumSizeCopy,
+        pendingTimeOut, autoScrollLines;
     bool readOnly, cursorVisible, blockScrollBarUpdate, updateScrollBarPageStepPending, inMouseEvent;
     QBasicTimer autoScrollTimer, cursorBlinkTimer;
-    QAction *actions[TextPagerEdit::SelectAllAction];
-    TextPagerSection *sectionPressed;
+    QAction* actions[TextPagerEdit::SelectAllAction];
+    TextPagerSection* sectionPressed;
     TextPagerCursor textCursor, dragOverrideCursor;
     QBasicTimer tripleClickTimer;
     bool pendingScrollBarUpdate;
-    QCursor *sectionCursor;
+    QCursor* sectionCursor;
     QPoint lastHoverPos, lastMouseMove;
-    QHash<DocumentCommand *, QPair<CursorData, CursorData> > undoRedoCommands;
+    QHash<DocumentCommand*, QPair<CursorData, CursorData>> undoRedoCommands;
     mutable LastPageCache lastPage;
 
 public Q_SLOTS:
-    void onSyntaxHighlighterDestroyed(QObject *o);
+    void onSyntaxHighlighterDestroyed(QObject* o);
     void onSelectionChanged();
-    void onTextSectionAdded(TextPagerSection *section);
-    void onTextSectionRemoved(TextPagerSection *section);
-    void onTextSectionFormatChanged(TextPagerSection *section);
-    void onTextSectionCursorChanged(TextPagerSection *section);
+    void onTextSectionAdded(TextPagerSection* section);
+    void onTextSectionRemoved(TextPagerSection* section);
+    void onTextSectionFormatChanged(TextPagerSection* section);
+    void onTextSectionCursorChanged(TextPagerSection* section);
     void updateScrollBar();
     void onDocumentDestroyed();
     void onDocumentSizeChanged(int size);
@@ -106,7 +122,6 @@ public Q_SLOTS:
     void onDocumentCommandRemoved(DocumentCommand *cmd);
     void onDocumentCommandTriggered(DocumentCommand *cmd, bool undo);
 #endif
-
 
     void onScrollBarValueChanged(int value);
     void onScrollBarActionTriggered(int action);

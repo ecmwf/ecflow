@@ -20,27 +20,27 @@
 ///================================================================================
 class SStringVecCmd final : public ServerToClientCmd {
 public:
-   explicit SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
-   SStringVecCmd() : ServerToClientCmd() {}
+    explicit SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
+    SStringVecCmd() : ServerToClientCmd() {}
 
-   void init(const std::vector<std::string>& s) { vec_ = s;}
-   const std::vector<std::string>& get_string_vec() const { return vec_;}
+    void init(const std::vector<std::string>& s) { vec_ = s; }
+    const std::vector<std::string>& get_string_vec() const { return vec_; }
 
-   std::string print() const override;
-   bool equals(ServerToClientCmd*) const override;
-   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
-   void cleanup() override { std::vector<std::string>().swap(vec_);} /// run in the server, after command send to client
+    std::string print() const override;
+    bool equals(ServerToClientCmd*) const override;
+    bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
+    void cleanup() override {
+        std::vector<std::string>().swap(vec_);
+    } /// run in the server, after command send to client
 
 private:
-   std::vector<std::string> vec_;
+    std::vector<std::string> vec_;
 
-   friend class cereal::access;
-   template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class< ServerToClientCmd >( this ),
-         CEREAL_NVP(vec_));
-   }
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
+        ar(cereal::base_class<ServerToClientCmd>(this), CEREAL_NVP(vec_));
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const SStringVecCmd&);

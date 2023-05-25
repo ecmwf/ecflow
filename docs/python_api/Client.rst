@@ -22,7 +22,7 @@ Class client provides an interface to communicate with the :term:`ecflow_server`
    )
 
    Client(
-      string host_port, # Expect's <host>:<port> || <host>@<port>
+      string host_port, # Expects <host>:<port> || <host>@<port>
    )
 
 The client reads in the following environment variables.
@@ -1757,7 +1757,7 @@ Usage:
 .. py:method:: Client.reload_custom_passwd_file( (Client)arg1) -> int :
    :module: ecflow
 
-reload the custom passwd file. <host>.<port>.ecf.cusom_passwd. For users using ECF_USER or --user or set_user_name()
+reload the custom passwd file. <host>.<port>.ecf.custom_passwd. For users using ECF_USER or --user or set_user_name()
 
 
 .. py:method:: Client.reload_passwd_file( (Client)arg1) -> int :
@@ -1901,7 +1901,7 @@ Usage:
 
    try:
        ci = Client()            # use default host(ECF_HOST) & port(ECF_PORT)
-       ci.retstart_server()
+       ci.restart_server()
    except RuntimeError, e:
        print(str(e))
 
@@ -2168,7 +2168,7 @@ Override the default(localhost and port 3141) and environment setting(ECF_HOST a
        )
     
        set_host_port(
-          string host_port, # Expect's <host>:<port> or <host>@<port>
+          string host_port, # Expects <host>:<port> or <host>@<port>
        )
     
     Exceptions:

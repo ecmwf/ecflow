@@ -10,20 +10,19 @@
 #ifndef USER_MESSAGE_HPP_
 #define USER_MESSAGE_HPP_
 
+#include <string>
+
 #include <QDebug>
 #include <QString>
 
-#include <string>
-
-class UserMessage
-{
-//Q_OBJECT
+class UserMessage {
+    // Q_OBJECT
 public:
     UserMessage();
 
-    enum MessageType {INFO, WARN, ERROR, DBG};  // note: cannot have DEBUG because of possible -DDEBUG in cpp!
+    enum MessageType { INFO, WARN, ERROR, DBG }; // note: cannot have DEBUG because of possible -DDEBUG in cpp!
 
-    static void setEchoToCout(bool toggle) {echoToCout_ = toggle;}
+    static void setEchoToCout(bool toggle) { echoToCout_ = toggle; }
     static void message(MessageType type, bool popup, const std::string& message);
     static bool confirm(const std::string& message);
 
@@ -32,9 +31,6 @@ public:
 
 private:
     static bool echoToCout_;
-
-
 };
-
 
 #endif

@@ -24,116 +24,110 @@
 class ServerHandler;
 class VNode;
 
-class NodeQueryResultItem
-{
-	friend class NodeQueryEngine;
-	friend class NodeQueryResult;
-	friend class NodeQueryResultModel;
-	friend class TriggerGraphModel;
+class NodeQueryResultItem {
+    friend class NodeQueryEngine;
+    friend class NodeQueryResult;
+    friend class NodeQueryResultModel;
+    friend class TriggerGraphModel;
 
 public:
-	NodeQueryResultItem() = default;
-	NodeQueryResultItem(VNode* node);
-	NodeQueryResultItem(NodeQueryResultTmp_ptr);
+    NodeQueryResultItem() = default;
+    NodeQueryResultItem(VNode* node);
+    NodeQueryResultItem(NodeQueryResultTmp_ptr);
 
-	void invalidateNode();
-	bool updateNode();
+    void invalidateNode();
+    bool updateNode();
 
-	QString serverStr() const;
-	QString pathStr() const;
-	QString typeStr() const;
-	QString stateStr() const;
-	QColor stateColour() const;
+    QString serverStr() const;
+    QString pathStr() const;
+    QString typeStr() const;
+    QString stateStr() const;
+    QColor stateColour() const;
     QString stateChangeTimeAsString() const;
     unsigned int stateChangeTime() const;
     QStringList attr() const;
-    bool hasAttribute() const {return attr_.count() > 0;}
+    bool hasAttribute() const { return attr_.count() > 0; }
 
 protected:
-	VNode* node_{nullptr};
-	ServerHandler* server_{nullptr};
-	QStringList attr_;
-	std::string path_;
+    VNode* node_{nullptr};
+    ServerHandler* server_{nullptr};
+    QStringList attr_;
+    std::string path_;
 };
 
 struct Pos
 {
-	Pos()= default;
-	int pos_{-1};
-	int cnt_{0};
+    Pos() = default;
+    int pos_{-1};
+    int cnt_{0};
 };
 
 struct NodeQueryResultBlock : public Pos
 {
-	NodeQueryResultBlock()= default;
-	void add(VNode*,int);
-	void clear();
-	bool find(const VNode* node,int &pos, int &cnt);
+    NodeQueryResultBlock() = default;
+    void add(VNode*, int);
+    void clear();
+    bool find(const VNode* node, int& pos, int& cnt);
 
-	ServerHandler* server_{nullptr};
-	QHash<VNode*,Pos> nodes_;
+    ServerHandler* server_{nullptr};
+    QHash<VNode*, Pos> nodes_;
 };
 
-
-class NodeQueryResult : public QObject, public ServerObserver, public NodeObserver
-{
- Q_OBJECT
+class NodeQueryResult : public QObject, public ServerObserver, public NodeObserver {
+    Q_OBJECT
 
 public:
- 	explicit NodeQueryResult(QObject* parent=nullptr);
- 	~NodeQueryResult() override;
+    explicit NodeQueryResult(QObject* parent = nullptr);
+    ~NodeQueryResult() override;
 
- 	int size() const {return data_.size();}
- 	NodeQueryResultItem* itemAt(int i);
- 	void clear();
+    int size() const { return data_.size(); }
+    NodeQueryResultItem* itemAt(int i);
+    void clear();
 
-    //From ServerObserver
+    // From ServerObserver
     void notifyDefsChanged(ServerHandler*, const std::vector<ecf::Aspect::Type>&) override {}
- 	void notifyServerDelete(ServerHandler* server) override;
+    void notifyServerDelete(ServerHandler* server) override;
     void notifyBeginServerClear(ServerHandler* server) override;
- 	void notifyEndServerClear(ServerHandler* server) override;
- 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
+    void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler* server, const VServerChange&) override;
     void notifyEndServerScan(ServerHandler* server) override;
     void notifyServerRenamed(ServerHandler* server, const std::string& oldName) override;
 
- 	//From NodeObserver
-    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
- 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+    // From NodeObserver
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&) override;
     void add(std::vector<VInfo_ptr>);
-    
-    
+
 public Q_SLOTS:
- 	void add(NodeQueryResultTmp_ptr);
- 	void add(QList<NodeQueryResultTmp_ptr> items);
+    void add(NodeQueryResultTmp_ptr);
+    void add(QList<NodeQueryResultTmp_ptr> items);
 
 Q_SIGNALS:
-     void beginAppendRow();
-     void endAppendRow();
-     void beginAppendRows(int);
-     void endAppendRows(int);
-     void beginRemoveRow(int);
-     void endRemoveRow(int);
-     void beginRemoveRows(int,int);
-     void endRemoveRows(int,int);
-     void beginReset();
-     void endReset();
-     void stateChanged(const VNode*,int,int);
+    void beginAppendRow();
+    void endAppendRow();
+    void beginAppendRows(int);
+    void endAppendRows(int);
+    void beginRemoveRow(int);
+    void endRemoveRow(int);
+    void beginRemoveRows(int, int);
+    void endRemoveRows(int, int);
+    void beginReset();
+    void endReset();
+    void stateChanged(const VNode*, int, int);
 
 protected:
-     void clearData(bool hideOnly);
-     void clear(ServerHandler*);
-     void serverClear(ServerHandler*);
-     void serverScan(ServerHandler*);
-     void attach(ServerHandler*);
-     void detach(ServerHandler*);
-     bool range(const VNode*,int&,int&);
-     //void detach(VNode*);
+    void clearData(bool hideOnly);
+    void clear(ServerHandler*);
+    void serverClear(ServerHandler*);
+    void serverScan(ServerHandler*);
+    void attach(ServerHandler*);
+    void detach(ServerHandler*);
+    bool range(const VNode*, int&, int&);
+    // void detach(VNode*);
 
-     std::vector<NodeQueryResultItem*> data_;
-     //std::map<ServerHandler*,int> serverCnt_;
-     std::map<ServerHandler*,NodeQueryResultBlock> blocks_;
+    std::vector<NodeQueryResultItem*> data_;
+    // std::map<ServerHandler*,int> serverCnt_;
+    std::map<ServerHandler*, NodeQueryResultBlock> blocks_;
 };
-
-
 
 #endif /* VIEWER_SRC_NODEQUERYRESULT_HPP_ */

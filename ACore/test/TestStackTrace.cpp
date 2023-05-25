@@ -1,34 +1,34 @@
 ////============================================================================
 //// Name        :
 //// Author      : Avi
-//// Revision    : $Revision: #8 $ 
+//// Revision    : $Revision: #8 $
 ////
 //// Copyright 2009- ECMWF.
-//// This software is licensed under the terms of the Apache Licence version 2.0 
-//// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-//// In applying this licence, ECMWF does not waive the privileges and immunities 
-//// granted to it by virtue of its status as an intergovernmental organisation 
-//// nor does it submit to any jurisdiction. 
+//// This software is licensed under the terms of the Apache Licence version 2.0
+//// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+//// In applying this licence, ECMWF does not waive the privileges and immunities
+//// granted to it by virtue of its status as an intergovernmental organisation
+//// nor does it submit to any jurisdiction.
 ////
 //// Description :
 ////============================================================================
-//#include <boost/test/unit_test.hpp>
-//#include "boost/filesystem/operations.hpp"
-//#include "boost/filesystem/path.hpp"
-//#include <iostream>
-//#include <fstream>
+// #include <boost/test/unit_test.hpp>
+// #include <boost/filesystem/operations.hpp>
+// #include <boost/filesystem/path.hpp>
+// #include <iostream>
+// #include <fstream>
 ////#include "StackTrace.hpp"
 //
 //
-//using namespace boost;
-//using namespace std;
-//using namespace ecf;
-//namespace fs = boost::filesystem;
+// using namespace boost;
+// using namespace std;
+// using namespace ecf;
+// namespace fs = boost::filesystem;
 //
-//BOOST_AUTO_TEST_SUITE( CoreTestSuite )
+// BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 //
-//class MyClass {
-//public:
+// class MyClass {
+// public:
 //    std::string MemFunc( const std::string &someParam )
 //    {
 //    	int depth = 5;
@@ -36,13 +36,13 @@
 //    }
 //};
 //
-//std::string func2( const char *something )
+// std::string func2( const char *something )
 //{
 //    MyClass a;
 //    return a.MemFunc( something );
 //}
 //
-//std::string func1( int param1, const std::string &param2 )
+// std::string func1( int param1, const std::string &param2 )
 //{
 //    return func2( param2.c_str() );
 //}
@@ -71,10 +71,11 @@
 ////		       "   CoreTestSuite::func1(int, std::string const&)\n"
 ////		       "   CoreTestSuite::test_stack_trace::test_method()\n";
 ////	}
-////    BOOST_CHECK_MESSAGE (traceback == expected,"Mismatch expected\n'" << expected << "'\n but found\n'" << traceback << "'");
+////    BOOST_CHECK_MESSAGE (traceback == expected,"Mismatch expected\n'" << expected << "'\n but found\n'" << traceback
+///<< "'");
 ////#endif
 ////}
 //
-//BOOST_AUTO_TEST_SUITE_END()
+// BOOST_AUTO_TEST_SUITE_END()
 //
 //

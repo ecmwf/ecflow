@@ -15,24 +15,24 @@
 
 class VProperty;
 
-class VConfigLoader 
-{
+class VConfigLoader {
 public:
     explicit VConfigLoader(const std::string& name);
-    virtual ~VConfigLoader(); 
+    virtual ~VConfigLoader();
 
     virtual void load(VProperty* group) = 0;
-    static bool process(const std::string& name,VProperty*);
-    
+    static bool process(const std::string& name, VProperty*);
+
 private:
     // No copy allowed
-    explicit VConfigLoader(const VConfigLoader&) = delete;
+    explicit VConfigLoader(const VConfigLoader&)   = delete;
     VConfigLoader& operator=(const VConfigLoader&) = delete;
 };
 
-template<class T>
+template <class T>
 class SimpleLoader : public VConfigLoader {
     void load(VProperty* prop) override { T::load(prop); }
+
 public:
     explicit SimpleLoader(const std::string& name) : VConfigLoader(name) {}
 };

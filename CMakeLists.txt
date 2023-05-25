@@ -25,8 +25,9 @@ endif()
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ) # Before project()  
 
 # this will generate variables, see ACore/ecflow_version.h.in
-project( ecflow LANGUAGES CXX VERSION 5.10.0 )
+project( ecflow LANGUAGES CXX VERSION 5.11.0 )
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 include( ecbuild_system NO_POLICY_SCOPE )
 
@@ -59,6 +60,8 @@ option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely linked" OFF  )
 option( ENABLE_HTTP                "Enable HTTP server (experimental)" ON  )
+option( ENABLE_UDP                 "Enable UDP server (experimental)" ON )
+option( ENABLE_DOCS                "Enable Documentation" OFF )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -175,6 +178,12 @@ if(ENABLE_HTTP AND NOT ENABLE_SERVER)
     set(ENABLE_HTTP OFF)
 endif()
 
+if(ENABLE_UDP AND NOT ENABLE_SERVER)
+    ecbuild_warn("ENABLE_SERVER is disabled, therefore UDP_SERVER will also be disabled")
+    set(ENABLE_UDP OFF)
+endif()
+
+
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
@@ -185,6 +194,7 @@ ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries available" )
 ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
+ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
 
 
 if (ENABLE_UI)
@@ -324,6 +334,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
 endif()
 
+# =========================================================================================
+# enable clang-format
+# =========================================================================================
+find_package(ClangFormat)
 
 # =========================================================================================
 # build source code
@@ -356,6 +370,10 @@ endif()
 
 if (ENABLE_HTTP)
     add_subdirectory( Http )
+endif()
+
+if (ENABLE_UDP)
+  add_subdirectory( Udp )
 endif()
 
 # =========================================================================================
@@ -417,6 +435,13 @@ ecbuild_dont_pack( FILES
                    Pyext/samples/confluence_add_attachment.py
                    build_scripts/.pydevproject
 )
+
+# =========================================================================================
+# Documentation
+# =========================================================================================
+if (ENABLE_DOCS)
+  add_subdirectory(docs)
+endif()
 
 # =========================================================================================
 # final

@@ -13,47 +13,37 @@
 
 #include "syntaxhighlighter.hpp"
 
-#include "TextPagerEdit.hpp"
 #include "TextPagerDocument.hpp"
-#include "TextPagerLayout_p.hpp"
 #include "TextPagerDocument_p.hpp"
+#include "TextPagerEdit.hpp"
+#include "TextPagerLayout_p.hpp"
 
-SyntaxHighlighter::SyntaxHighlighter(QObject *parent)
-    : QObject(parent), d(new Private)
-{
+SyntaxHighlighter::SyntaxHighlighter(QObject* parent) : QObject(parent), d(new Private) {
 }
 
-SyntaxHighlighter::SyntaxHighlighter(TextPagerEdit *parent)
-    : QObject(parent), d(new Private)
-{
+SyntaxHighlighter::SyntaxHighlighter(TextPagerEdit* parent) : QObject(parent), d(new Private) {
     if (parent) {
         parent->addSyntaxHighlighter(this);
     }
 }
 
-SyntaxHighlighter::~SyntaxHighlighter()
-{
+SyntaxHighlighter::~SyntaxHighlighter() {
     delete d;
 }
 
-void SyntaxHighlighter::setTextEdit(TextPagerEdit *doc)
-{
+void SyntaxHighlighter::setTextEdit(TextPagerEdit* doc) {
     Q_ASSERT(doc);
     doc->addSyntaxHighlighter(this);
 }
-TextPagerEdit *SyntaxHighlighter::textEdit() const
-{
+TextPagerEdit* SyntaxHighlighter::textEdit() const {
     return d->textEdit;
 }
 
-
-TextPagerDocument * SyntaxHighlighter::document() const
-{
+TextPagerDocument* SyntaxHighlighter::document() const {
     return d->textEdit ? d->textEdit->document() : nullptr;
 }
 
-void SyntaxHighlighter::rehighlight()
-{
+void SyntaxHighlighter::rehighlight() {
     if (d->textEdit) {
         Q_ASSERT(d->textLayout);
         d->textLayout->layoutDirty = true;
@@ -61,73 +51,63 @@ void SyntaxHighlighter::rehighlight()
     }
 }
 
-void SyntaxHighlighter::setFormat(int start, int count, const QTextCharFormat &format)
-{
+void SyntaxHighlighter::setFormat(int start, int count, const QTextCharFormat& format) {
     ASSUME(d->textEdit);
     Q_ASSERT(start >= 0);
     Q_ASSERT(start + count <= d->currentBlock.size());
     d->formatRanges.append(QTextLayout::FormatRange());
-    QTextLayout::FormatRange &range = d->formatRanges.last();
-    range.start = start;
-    range.length = count;
-    range.format = format;
+    QTextLayout::FormatRange& range = d->formatRanges.last();
+    range.start                     = start;
+    range.length                    = count;
+    range.format                    = format;
 }
 
-void SyntaxHighlighter::setFormat(int start, int count, const QColor &color)
-{
+void SyntaxHighlighter::setFormat(int start, int count, const QColor& color) {
     QTextCharFormat format;
     format.setForeground(color);
     setFormat(start, count, format);
 }
 
-void SyntaxHighlighter::setFormat(int start, int count, const QFont &font)
-{
+void SyntaxHighlighter::setFormat(int start, int count, const QFont& font) {
     QTextCharFormat format;
     format.setFont(font);
     setFormat(start, count, format);
 }
 
-QTextCharFormat SyntaxHighlighter::format(int pos) const
-{
+QTextCharFormat SyntaxHighlighter::format(int pos) const {
     QTextCharFormat ret;
-    Q_FOREACH(const QTextLayout::FormatRange &range, d->formatRanges) {
+    Q_FOREACH (const QTextLayout::FormatRange& range, d->formatRanges) {
         if (range.start <= pos && range.start + range.length > pos) {
             ret.merge(range.format);
-        } else if (range.start > pos) {
+        }
+        else if (range.start > pos) {
             break;
         }
     }
     return ret;
 }
 
-
-int SyntaxHighlighter::previousBlockState() const
-{
+int SyntaxHighlighter::previousBlockState() const {
     return d->previousBlockState;
 }
 
-int SyntaxHighlighter::currentBlockState() const
-{
+int SyntaxHighlighter::currentBlockState() const {
     return d->currentBlockState;
 }
 
-void SyntaxHighlighter::setCurrentBlockState(int s)
-{
+void SyntaxHighlighter::setCurrentBlockState(int s) {
     d->previousBlockState = d->currentBlockState;
-    d->currentBlockState = s; // ### These don't entirely follow QSyntaxHighlighter's behavior
+    d->currentBlockState  = s; // ### These don't entirely follow QSyntaxHighlighter's behavior
 }
 
-int SyntaxHighlighter::currentBlockPosition() const
-{
+int SyntaxHighlighter::currentBlockPosition() const {
     return d->currentBlockPosition;
 }
 
-QTextBlockFormat SyntaxHighlighter::blockFormat() const
-{
+QTextBlockFormat SyntaxHighlighter::blockFormat() const {
     return d->blockFormat;
 }
 
-void SyntaxHighlighter::setBlockFormat(const QTextBlockFormat &format)
-{
+void SyntaxHighlighter::setBlockFormat(const QTextBlockFormat& format) {
     d->blockFormat = format;
 }

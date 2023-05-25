@@ -10,63 +10,59 @@
 #ifndef VDIR_H
 #define VDIR_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <QDateTime>
 
-
-#include <memory>
-
-class VDirItem
-{
+class VDirItem {
 public:
-	std::string name_;
-  	//int mode_;
-  	//int uid_;
-    //int gid_;
-  	unsigned int size_;
-  	//int atime_;
-  	QDateTime mtime_;
-  	//int ctime_;
-  	std::string method_;
+    std::string name_;
+    // int mode_;
+    // int uid_;
+    // int gid_;
+    unsigned int size_;
+    // int atime_;
+    QDateTime mtime_;
+    // int ctime_;
+    std::string method_;
 };
 
-class VDir
-{
+class VDir {
 public:
-	explicit VDir(const std::string& path);
-	VDir(const std::string& path, const std::string& pattern);
-	~VDir();
+    explicit VDir(const std::string& path);
+    VDir(const std::string& path, const std::string& pattern);
+    ~VDir();
 
-    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode,TransferFetchMode};
+    enum FetchMode { NoFetchMode, LocalFetchMode, ServerFetchMode, LogServerFetchMode, TransferFetchMode };
 
-	const std::string& path() const {return path_;}
-    void path(const std::string& path,bool reload=true);
+    const std::string& path() const { return path_; }
+    void path(const std::string& path, bool reload = true);
 
-    const std::string& where() const {return where_;}
-    void where(const std::string& w) {where_=w;}
+    const std::string& where() const { return where_; }
+    void where(const std::string& w) { where_ = w; }
 
     std::string fullName(int row);
     int findByFullName(const std::string& fName);
-	int count() const {return static_cast<int>(items_.size());}
-	void clear();
-	void reload();
-	void addItem(const std::string&, unsigned int, unsigned int);
-	const std::vector<VDirItem*>& items() const {return items_;}
+    int count() const { return static_cast<int>(items_.size()); }
+    void clear();
+    void reload();
+    void addItem(const std::string&, unsigned int, unsigned int);
+    const std::vector<VDirItem*>& items() const { return items_; }
 
-    void setFetchDate(QDateTime d) {fetchDate_=d;}
-    QDateTime fetchDate() const {return fetchDate_;}
-    void setFetchMode(FetchMode m) {fetchMode_=m;}
-    FetchMode fetchMode() const {return fetchMode_;}
-    void setFetchModeStr(const std::string& fetchMethod) {fetchModeStr_=fetchMethod;}
-    const std::string& fetchModeStr() const {return fetchModeStr_;}
+    void setFetchDate(QDateTime d) { fetchDate_ = d; }
+    QDateTime fetchDate() const { return fetchDate_; }
+    void setFetchMode(FetchMode m) { fetchMode_ = m; }
+    FetchMode fetchMode() const { return fetchMode_; }
+    void setFetchModeStr(const std::string& fetchMethod) { fetchModeStr_ = fetchMethod; }
+    const std::string& fetchModeStr() const { return fetchModeStr_; }
 
 protected:
-	std::string path_;
-	std::string pattern_;
-	std::string where_;
-	std::vector<VDirItem*> items_;
+    std::string path_;
+    std::string pattern_;
+    std::string where_;
+    std::vector<VDirItem*> items_;
 
     FetchMode fetchMode_;
     std::string fetchModeStr_;

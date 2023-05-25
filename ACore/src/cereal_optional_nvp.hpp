@@ -37,73 +37,61 @@ struct B
 };
  */
 
-#include <type_traits> // for std::enable_if_t
-#include <cereal/details/traits.hpp>
 #include <cereal/cereal.hpp>
+#include <cereal/details/traits.hpp>
+#include <type_traits> // for std::enable_if_t
 
-namespace cereal
-{
-   class JSONInputArchive;
-   class XMLInputArchive;
+namespace cereal {
+class JSONInputArchive;
+class XMLInputArchive;
 
-   // Optionally load an NVP if its name equals to the current node's name
-   // Loading members should be done in the same order they were saved
-   // return true if NVP found
-   template <class Archive, class T>
-   typename std::enable_if_t<
-      traits::is_same_archive<Archive, JSONInputArchive>::value ||
-      traits::is_same_archive<Archive, XMLInputArchive>::value
-   , bool>
-   make_optional_nvp(Archive& ar, const char* name, T&& value)
-   {
-      const auto node_name = ar.getNodeName();
+// Optionally load an NVP if its name equals to the current node's name
+// Loading members should be done in the same order they were saved
+// return true if NVP found
+template <class Archive, class T>
+typename std::enable_if_t<traits::is_same_archive<Archive, JSONInputArchive>::value ||
+                              traits::is_same_archive<Archive, XMLInputArchive>::value,
+                          bool>
+make_optional_nvp(Archive& ar, const char* name, T&& value) {
+    const auto node_name = ar.getNodeName();
 
-      // if names are equal
-      if (node_name != nullptr &&
-         strcmp(name, node_name) == 0)
-      {
-         ar(make_nvp(name, std::forward<T>(value)));  // load the NVP. Advances to the next node
-         return true;
-      }
+    // if names are equal
+    if (node_name != nullptr && strcmp(name, node_name) == 0) {
+        ar(make_nvp(name, std::forward<T>(value))); // load the NVP. Advances to the next node
+        return true;
+    }
 
-      return false;
-   }
-
-
-   template <class Archive, class T>
-   void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value)
-   {
-      ar(make_nvp(name, std::forward<T>(value)));
-   }
-
-
-   // Saves NVP if predicate is true. Useful for avoiding splitting into save & load if also saving optionally.
-   template <class Archive, class T, class Predicate>
-   void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value, Predicate predicate)
-   {
-      if (predicate())
-         ar(make_nvp(name, std::forward<T>(value)));
-   }
-
-   template <class Archive, class T, class Predicate>
-   typename std::enable_if_t<
-      traits::is_same_archive<Archive, JSONInputArchive>::value ||
-      traits::is_same_archive<Archive, XMLInputArchive>::value
-   , bool>
-   make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
-   {
-      return make_optional_nvp(ar, name, std::forward<T>(value));
-   }
+    return false;
 }
 
+template <class Archive, class T>
+void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value) {
+    ar(make_nvp(name, std::forward<T>(value)));
+}
+
+// Saves NVP if predicate is true. Useful for avoiding splitting into save & load if also saving optionally.
+template <class Archive, class T, class Predicate>
+void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value, Predicate predicate) {
+    if (predicate())
+        ar(make_nvp(name, std::forward<T>(value)));
+}
+
+template <class Archive, class T, class Predicate>
+typename std::enable_if_t<traits::is_same_archive<Archive, JSONInputArchive>::value ||
+                              traits::is_same_archive<Archive, XMLInputArchive>::value,
+                          bool>
+make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate) {
+    return make_optional_nvp(ar, name, std::forward<T>(value));
+}
+} // namespace cereal
 
 // Macros for using the variable name as the NVP name
 #define EXPAND(x) x
 #define GET_CEREAL_OPTIONAL_NVP_MACRO(_1, _2, _3, NAME, ...) NAME
-#define CEREAL_OPTIONAL_NVP(...) EXPAND(GET_CEREAL_OPTIONAL_NVP_MACRO(__VA_ARGS__, CEREAL_OPTIONAL_NVP_3, CEREAL_OPTIONAL_NVP_2)(__VA_ARGS__))
+#define CEREAL_OPTIONAL_NVP(...) \
+    EXPAND(GET_CEREAL_OPTIONAL_NVP_MACRO(__VA_ARGS__, CEREAL_OPTIONAL_NVP_3, CEREAL_OPTIONAL_NVP_2)(__VA_ARGS__))
 
 #define CEREAL_OPTIONAL_NVP_2(ar, T) ::cereal::make_optional_nvp(ar, #T, T)
 #define CEREAL_OPTIONAL_NVP_3(ar, T, P) ::cereal::make_optional_nvp(ar, #T, T, P)
 
-
-#endif//cereal_optional_nvp_h
+#endif // cereal_optional_nvp_h

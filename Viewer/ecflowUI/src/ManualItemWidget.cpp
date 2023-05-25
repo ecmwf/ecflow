@@ -17,63 +17,55 @@
 #include "VConfig.hpp"
 #include "VReply.hpp"
 
-ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
-{
+ManualItemWidget::ManualItemWidget(QWidget* parent) : CodeItemWidget(parent) {
     fileLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
     textEdit_->setShowLineNumbers(false);
 
-    //The document becomes the owner of the highlighter
-    new Highlighter(textEdit_->document(),"manual");
+    // The document becomes the owner of the highlighter
+    new Highlighter(textEdit_->document(), "manual");
 
-    infoProvider_=new ManualProvider(this);
+    infoProvider_ = new ManualProvider(this);
 
-	//Editor font
-	textEdit_->setFontProperty(VConfig::instance()->find("panel.manual.font"));
+    // Editor font
+    textEdit_->setFontProperty(VConfig::instance()->find("panel.manual.font"));
 }
 
-ManualItemWidget::~ManualItemWidget()
-= default;
+ManualItemWidget::~ManualItemWidget() = default;
 
-QWidget* ManualItemWidget::realWidget()
-{
+QWidget* ManualItemWidget::realWidget() {
     return this;
 }
 
-void ManualItemWidget::reload(VInfo_ptr info)
-{
+void ManualItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if(suspended_)
+    if (suspended_)
         return;
 
     clearContents();
 
     messageLabel_->hide();
 
-    if(info && info->server() && info->server()->isDisabled())
-    {
+    if (info && info->server() && info->server()->isDisabled()) {
         setEnabled(false);
         return;
     }
-    else
-    {
+    else {
         setEnabled(true);
     }
 
-    info_=info;
+    info_ = info;
 
-    //Info must be a node
-    if(info_ && info_->isNode() && info_->node())
-    {
+    // Info must be a node
+    if (info_ && info_->isNode() && info_->node()) {
         reloadTb_->setEnabled(false);
         infoProvider_->info(info_);
     }
 }
 
-void ManualItemWidget::clearContents()
-{
+void ManualItemWidget::clearContents() {
     InfoPanelItem::clear();
     textEdit_->clear();
     messageLabel_->hide();
@@ -81,76 +73,60 @@ void ManualItemWidget::clearContents()
     clearCurrentFileName();
 }
 
-void ManualItemWidget::infoReady(VReply* reply)
-{
+void ManualItemWidget::infoReady(VReply* reply) {
     Q_ASSERT(reply);
-    QString s=QString::fromStdString(reply->text());
+    QString s = QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
 
-    if(reply->hasWarning())
-    {
-    	messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+    if (reply->hasWarning()) {
+        messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
     }
-    else if(reply->hasInfo())
-    {
-    	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+    else if (reply->hasInfo()) {
+        messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
-    else if(s.isEmpty())
-    {
-    	messageLabel_->showInfo("Manual is <b>not</b> available");
+    else if (s.isEmpty()) {
+        messageLabel_->showInfo("Manual is <b>not</b> available");
     }
 
     fileLabel_->update(reply);
-    reloadTb_->setEnabled(true);  
+    reloadTb_->setEnabled(true);
     setCurrentFileName(reply->fileName());
 }
 
-void ManualItemWidget::infoProgress(VReply* reply)
-{
-   // QString s=QString::fromStdString(reply->text());
+void ManualItemWidget::infoProgress(VReply* reply) {
+    // QString s=QString::fromStdString(reply->text());
     messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 }
 
-void ManualItemWidget::infoFailed(VReply* reply)
-{
-    QString s=QString::fromStdString(reply->errorText());
+void ManualItemWidget::infoFailed(VReply* reply) {
+    QString s = QString::fromStdString(reply->errorText());
     messageLabel_->showError(s);
-    textEdit_->setPlainText(
-"# You can create a man page with "
-"a file <node>.man located in <ECF_FILE> or as "
-"<ECF_HOME>/<ECF_NAME>.man");
+    textEdit_->setPlainText("# You can create a man page with "
+                            "a file <node>.man located in <ECF_FILE> or as "
+                            "<ECF_HOME>/<ECF_NAME>.man");
     reloadTb_->setEnabled(true);
 }
 
-void ManualItemWidget::reloadRequested()
-{
+void ManualItemWidget::reloadRequested() {
     reload(info_);
 }
 
-void ManualItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
-{
-    if(flags.isSet(SuspendedChanged))
-    {
-        //Suspend
-        if(suspended_)
-        {
+void ManualItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
+    if (flags.isSet(SuspendedChanged)) {
+        // Suspend
+        if (suspended_) {
             reloadTb_->setEnabled(false);
         }
-        //Resume
-        else
-        {
-            if(info_ && info_->node())
-            {
+        // Resume
+        else {
+            if (info_ && info_->node()) {
                 reloadTb_->setEnabled(true);
             }
-            else
-            {
+            else {
                 clearContents();
             }
         }
     }
 }
 
-
 static InfoPanelItemMaker<ManualItemWidget> maker1("manual");
-

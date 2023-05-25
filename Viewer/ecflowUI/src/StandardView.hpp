@@ -26,29 +26,28 @@ class TreeNodeModel;
 class GraphNodeViewItem;
 class QStyledItemDelegate;
 
-//Implements a standard tree view (similar to QTreeView) where there is
-//one item per row
+// Implements a standard tree view (similar to QTreeView) where there is
+// one item per row
 
-class StandardView : public AbstractNodeView
-{
+class StandardView : public AbstractNodeView {
 public:
-    explicit StandardView(TreeNodeModel* model,QWidget *parent=nullptr);
+    explicit StandardView(TreeNodeModel* model, QWidget* parent = nullptr);
     ~StandardView() override;
 
-    QRect visualRect(const QModelIndex &index) const override;
+    QRect visualRect(const QModelIndex& index) const override;
 
 protected:
-    void paint(QPainter *painter,const QRegion& region) override;
-    void drawRow(QPainter* painter,int start,int xOffset,int &yp,std::vector<int>&);
+    void paint(QPainter* painter, const QRegion& region) override;
+    void drawRow(QPainter* painter, int start, int xOffset, int& yp, std::vector<int>&);
 
-    void layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated) override;
+    void layout(int parentId, bool recursiveExpanding, bool afterIsUninitialized, bool preAllocated) override;
 
     int itemRow(int item) const override;
     int coordinateForItem(int item) const;
     int itemAtCoordinate(const QPoint& coordinate) const override;
-    bool isPointInExpandIndicator(int,QPoint) const override;
+    bool isPointInExpandIndicator(int, QPoint) const override;
 
-    int  firstVisibleItem(int &offset) const override;
+    int firstVisibleItem(int& offset) const override;
     void updateRowCount() override;
     void updateScrollBars() override;
     void updateViewport(const QRect rect) override;

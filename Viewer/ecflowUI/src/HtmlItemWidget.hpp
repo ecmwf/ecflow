@@ -15,12 +15,11 @@
 
 #include "ui_HtmlItemWidget.h"
 
-class HtmlItemWidget : public QWidget, protected Ui::HtmlItemWidget
-{
-Q_OBJECT
+class HtmlItemWidget : public QWidget, protected Ui::HtmlItemWidget {
+    Q_OBJECT
 
 public:
-    explicit HtmlItemWidget(QWidget *parent=nullptr);
+    explicit HtmlItemWidget(QWidget* parent = nullptr);
     ~HtmlItemWidget() override;
 
 protected Q_SLOTS:

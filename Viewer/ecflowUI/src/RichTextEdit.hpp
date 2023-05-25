@@ -14,9 +14,8 @@
 
 #include "VProperty.hpp"
 
-class RichTextEdit : public QTextBrowser, public VPropertyObserver
-{
-Q_OBJECT
+class RichTextEdit : public QTextBrowser, public VPropertyObserver {
+    Q_OBJECT
 
 public:
     explicit RichTextEdit(QWidget* parent = nullptr);
@@ -27,8 +26,8 @@ public:
     void notifyChange(VProperty* p) override;
 
 public Q_SLOTS:
-     void slotZoomIn();
-     void slotZoomOut();
+    void slotZoomIn();
+    void slotZoomOut();
 
 Q_SIGNALS:
     void fontSizeChangedByWheel();
@@ -36,8 +35,7 @@ Q_SIGNALS:
 private:
     void fontSizeChangedByZoom();
 
-    VProperty *fontProp_{nullptr};
+    VProperty* fontProp_{nullptr};
 };
-
 
 #endif // RICHTEXTEDIT_HPP

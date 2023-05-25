@@ -9,54 +9,46 @@
 //============================================================================
 
 #include "VAutoArchiveAttr.hpp"
-#include "VAttributeType.hpp"
-#include "VNode.hpp"
 
 #include "NodeAttr.hpp"
+#include "VAttributeType.hpp"
+#include "VNode.hpp"
 
 //================================
 // VAutoArchiveAttrType
 //================================
 
-VAutoArchiveAttrType::VAutoArchiveAttrType() : VAttributeType("autoarchive")
-{
-    dataCount_=2;
-    searchKeyToData_["autoarchive_value"]=ValueIndex;
-    scanProc_=VAutoArchiveAttr::scan;
+VAutoArchiveAttrType::VAutoArchiveAttrType() : VAttributeType("autoarchive") {
+    dataCount_                            = 2;
+    searchKeyToData_["autoarchive_value"] = ValueIndex;
+    scanProc_                             = VAutoArchiveAttr::scan;
 }
 
-QString VAutoArchiveAttrType::toolTip(QStringList d) const
-{
-    QString t="<b>Type:</b> Autoarchive<br>";
+QString VAutoArchiveAttrType::toolTip(QStringList d) const {
+    QString t = "<b>Type:</b> Autoarchive<br>";
 
-    if(d.count() == dataCount_)
-    {
-        t+="<b>Value:</b> " + d[ValueIndex];
+    if (d.count() == dataCount_) {
+        t += "<b>Value:</b> " + d[ValueIndex];
     }
     return t;
 }
 
-QString VAutoArchiveAttrType::definition(QStringList d) const
-{
-    QString t="autoarchive";
-    if(d.count() == dataCount_)
-    {
-        t+=" " + d[ValueIndex];
+QString VAutoArchiveAttrType::definition(QStringList d) const {
+    QString t = "autoarchive";
+    if (d.count() == dataCount_) {
+        t += " " + d[ValueIndex];
     }
     return t;
 }
 
-void VAutoArchiveAttrType::encode(ecf::AutoArchiveAttr *a,QStringList& data) const
-{
+void VAutoArchiveAttrType::encode(ecf::AutoArchiveAttr* a, QStringList& data) const {
     if (a) {
         data << qName_;
         QString aStr("autoarchive ");
         std::string v = a->toString();
-        QString s = QString::fromStdString(v);
-        if (s.startsWith(aStr))
-        {
-            data << s.mid(aStr.count());
-
+        QString s     = QString::fromStdString(v);
+        if (s.startsWith(aStr)) {
+            data << s.mid(aStr.size());
         }
     }
 }
@@ -67,34 +59,27 @@ void VAutoArchiveAttrType::encode(ecf::AutoArchiveAttr *a,QStringList& data) con
 //
 //=====================================================
 
-VAutoArchiveAttr::VAutoArchiveAttr(VNode *parent) : VAttribute(parent, 0)
-{
+VAutoArchiveAttr::VAutoArchiveAttr(VNode* parent) : VAttribute(parent, 0) {
 }
 
-VAttributeType* VAutoArchiveAttr::type() const
-{
-    static VAttributeType* atype=VAttributeType::find("autoarchive");
+VAttributeType* VAutoArchiveAttr::type() const {
+    static VAttributeType* atype = VAttributeType::find("autoarchive");
     return atype;
 }
 
-QStringList VAutoArchiveAttr::data(bool /*firstLine*/) const
-{
-    static auto* atype=static_cast<VAutoArchiveAttrType*>(type());
+QStringList VAutoArchiveAttr::data(bool /*firstLine*/) const {
+    static auto* atype = static_cast<VAutoArchiveAttrType*>(type());
     QStringList s;
-    if(node_ptr node=parent_->node())
-    {
-        ecf::AutoArchiveAttr* a =node->get_autoarchive();
-        atype->encode(a,s);
+    if (node_ptr node = parent_->node()) {
+        ecf::AutoArchiveAttr* a = node->get_autoarchive();
+        atype->encode(a, s);
     }
     return s;
 }
 
-void VAutoArchiveAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
-{
-    if(node_ptr node=vnode->node())
-    {
-        if(ecf::AutoArchiveAttr *a=node->get_autoarchive())
-        {
+void VAutoArchiveAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
+    if (node_ptr node = vnode->node()) {
+        if (ecf::AutoArchiveAttr* a = node->get_autoarchive()) {
             vec.push_back(new VAutoArchiveAttr(vnode));
         }
     }

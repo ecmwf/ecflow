@@ -23,27 +23,28 @@
 // manage the lifetime, to avoid valgrind complaining.
 // =========================================================================
 
-#include <string>
 #include <memory> // for unique_ptr
+#include <string>
 class AstTop;
 
 // reclaim memory allocated in map, Avoid valgrind errors
-class ExprDuplicate  {
+class ExprDuplicate {
 private:
-  ExprDuplicate(const ExprDuplicate&) = delete;
-  const ExprDuplicate& operator=(const ExprDuplicate&) = delete;
+    ExprDuplicate(const ExprDuplicate&)                  = delete;
+    const ExprDuplicate& operator=(const ExprDuplicate&) = delete;
+
 public:
-   ExprDuplicate() = default;
-   ~ExprDuplicate();
+    ExprDuplicate() = default;
+    ~ExprDuplicate();
 
-   // for debug only
-   static void dump(const std::string& msg );
+    // for debug only
+    static void dump(const std::string& msg);
 
-   // Find the expr in the map, if found returns a CLONED ast, else NULL
-   static std::unique_ptr<AstTop> find(const std::string& expr);
+    // Find the expr in the map, if found returns a CLONED ast, else NULL
+    static std::unique_ptr<AstTop> find(const std::string& expr);
 
-   // Add the expr to the map, the ast is cloned.
-   static void add(const std::string& expr,AstTop*);
+    // Add the expr to the map, the ast is cloned.
+    static void add(const std::string& expr, AstTop*);
 };
 
 #endif

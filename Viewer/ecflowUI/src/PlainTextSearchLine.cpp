@@ -8,29 +8,25 @@
 //============================================================================
 
 #include "PlainTextSearchLine.hpp"
-#include "PlainTextSearchInterface.hpp"
 
 #include <cassert>
 
-PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
-	TextEditSearchLine(parent)
-{
-	interface_=new PlainTextSearchInterface;
-	TextEditSearchLine::setSearchInterface(interface_);
+#include "PlainTextSearchInterface.hpp"
+
+PlainTextSearchLine::PlainTextSearchLine(QWidget* parent) : TextEditSearchLine(parent) {
+    interface_ = new PlainTextSearchInterface;
+    TextEditSearchLine::setSearchInterface(interface_);
 }
 
-PlainTextSearchLine::~PlainTextSearchLine()
-{
-	delete interface_;
+PlainTextSearchLine::~PlainTextSearchLine() {
+    delete interface_;
 }
 
-void PlainTextSearchLine::setEditor(QPlainTextEdit *e)
-{
-	auto *pti=static_cast<PlainTextSearchInterface*>(interface_);
-	assert(pti);
-	pti->setEditor(e);
+void PlainTextSearchLine::setEditor(QPlainTextEdit* e) {
+    auto* pti = static_cast<PlainTextSearchInterface*>(interface_);
+    assert(pti);
+    pti->setEditor(e);
 }
-
 
 #if 0
 PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :

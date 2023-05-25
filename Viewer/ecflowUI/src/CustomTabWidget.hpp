@@ -13,16 +13,14 @@
 
 #include <QTabWidget>
 
-class CustomTabWidget : public QTabWidget
-{
+class CustomTabWidget : public QTabWidget {
 public:
-	explicit CustomTabWidget(QWidget* parent=nullptr);
+    explicit CustomTabWidget(QWidget* parent = nullptr);
 
-	void setCustomIcon(int index, QPixmap pix);
+    void setCustomIcon(int index, QPixmap pix);
 
 protected:
-	QSize maxIconSize() const;
+    QSize maxIconSize() const;
 };
-
 
 #endif /* VIEWER_SRC_CUSTOMTABWIDGET_HPP_ */

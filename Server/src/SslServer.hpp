@@ -21,15 +21,15 @@
 
 class SslServer : public BaseServer {
 public:
-   /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-   explicit SslServer(boost::asio::io_service& io_service,ServerEnvironment&);
-   ~SslServer() override = default;
+    /// Constructor opens the acceptor and starts waiting for the first incoming connection.
+    explicit SslServer(boost::asio::io_service& io_service, ServerEnvironment&);
+    ~SslServer() override = default;
 
 private:
-   /// AbstractServer functions
-   const std::string& ssl() const override;
+    /// AbstractServer functions
+    const std::string& ssl() const override;
 
-   SslTcpServer server_;
+    SslTcpServer server_;
 };
 
 #endif
