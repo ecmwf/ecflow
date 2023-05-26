@@ -11,6 +11,7 @@
 #ifndef ECFLOW_UDP_UDPSERVERENVIRONMENT_HPP
 #define ECFLOW_UDP_UDPSERVERENVIRONMENT_HPP
 
+#include <optional>
 #include <string>
 #include <vector>
 
