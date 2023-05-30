@@ -115,7 +115,7 @@ ecbuild_add_test(
   DEPENDS
     ${SERVER_TARGET}
   DEFINITIONS
-    ECFLOW_UDP_CLIENT_BASED_ON_BOOST_ASIO
+    ${BOOST_TEST_DYN_LINK}
   INCLUDES
     src
     ../json
