@@ -19,7 +19,7 @@
 
 #include <sys/socket.h>
 #if defined(MSG_NOSIGNAL)
-// The MSG_NOSIGNAL flag should be made defined by <sys/socket.h>
+// The MSG_NOSIGNAL flag should be defined by <sys/socket.h>
 // (as per POSIX: https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/send.html),
 // but that is not always the case for OSX.
 //
