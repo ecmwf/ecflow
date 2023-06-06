@@ -899,10 +899,11 @@ AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type
 }
 
 void AlterCmd::createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const {
-    // options[0]  - add
-    // options[1]  - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
-    // options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name |
-    // path_to_limit ] options[3]  - variable_value
+    // options[0] - add
+    // options[1] - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
+    // options[2] - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name |
+    //                path_to_limit ]
+    // options[3] - variable_value
 
     AlterCmd::Add_attr_type theAttrType = get_add_attr_type(options[1]);
 
@@ -1110,9 +1111,11 @@ void AlterCmd::createDelete(Cmd_ptr& cmd,
                             const std::vector<std::string>& options,
                             const std::vector<std::string>& paths) const {
     // options[0] = delete
-    // options[1] = variable | time | today | date | day | cron | event | meter | label | trigger | complete | repeat |
-    // limit | limit_path | inlimit | zombie |late options[2] = name ( of object to be delete ) optional options[3] =
-    // limit_path (optional *ONLY* applicable for limit_path, specifies the path to be deleted
+    // options[1] = [ variable | time | today | date | day | cron | event | meter | label | trigger | complete |
+    //                repeat | limit | limit_path | inlimit | zombie | late ]
+    // options[2] = name ( of object to be deleted ) optional
+    // options[3] = limit_path (optional *ONLY* applicable for limit_path), specifies the path to be deleted
+
     AlterCmd::Delete_attr_type theAttrType = get_delete_attr_type(options[1]);
 
     // Generally an empty third argument means delete all attributes, otherwise delete the specific one.
@@ -1314,8 +1317,11 @@ AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& att
 
 void AlterCmd::createChange(Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const {
     // options[0] = change
-    // options[1] = variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger |
-    // complete | repeat | limit_max | limit_value | defstatus | late ] options[2] = name options[3] = value
+    // options[1] = [ variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger |
+    //                complete | repeat | limit_max | limit_value | defstatus | late ]
+    // options[2] = name
+    // options[3] = value
+
     AlterCmd::Change_attr_type theAttrType = get_change_attr_type(options[1]);
 
     std::string name, value;
@@ -1758,8 +1764,8 @@ void AlterCmd::create_flag(Cmd_ptr& cmd,
                            const std::vector<std::string>& paths,
                            bool flag) const {
     // options[0] = set_flag | clear_flag
-    // options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | late
-    // | message | complete | queue_limit | task_waiting | locked | zombie ]
+    // options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed |
+    //                late | message | complete | queue_limit | task_waiting | locked | zombie ]
 
     Flag::Type theFlagType = get_flag_type(options[1]);
     cmd                    = std::make_shared<AlterCmd>(paths, theFlagType, flag);
@@ -1784,9 +1790,9 @@ void AlterCmd::check_sort_attr_type(const std::string& attr_type) const {
 void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,
                                       const std::vector<std::string>& options,
                                       const std::vector<std::string>& paths) const {
-    // options[0]  - sort
-    // options[1]  - [ event | meter | label | limit | variable | all ]
-    // options[2]  - recursive
+    // options[0] - sort
+    // options[1] - [ event | meter | label | limit | variable | all ]
+    // options[2] - recursive
     std::stringstream ss;
     if (options.size() < 2) {
         ss << "AlterCmd: add: At least three arguments expected. Found " << (options.size() + paths.size()) << "\n"
