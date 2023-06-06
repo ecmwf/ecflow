@@ -83,7 +83,7 @@ ClientOptions::~ClientOptions() {
 }
 
 Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) const {
-    // We expect two hyphen/minus, However sometime we get a weird/rogue kind of hyphen
+    // We expect two hyphen/minus, However sometimes we get a weird/rogue kind of hyphen
     // This rogue hyphen can mess up the parsing.
     // # ecflow_client ––group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 2 of them
     // # ecflow_client –-group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 1 of them, i.e. first

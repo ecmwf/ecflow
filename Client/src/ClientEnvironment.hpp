@@ -88,7 +88,7 @@ public:
     static std::string portSpecified();
 
     // Set the rid. Only needed to override in regression test, to avoid interference
-    // May be need a better name, is really the process id of running job.
+    // Should use a better name, as this is really the Process identifier of the running job.
     // Needs to be the same value as supplied to child command init
     void set_remote_id(const std::string& rid) { remote_id_ = rid; }
 
