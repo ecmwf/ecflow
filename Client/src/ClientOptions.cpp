@@ -292,10 +292,38 @@ void ClientOptions::show_help(const std::string& help_cmd) const {
     }
 }
 
+namespace /* ___anonymous___ */ {
+
+struct CommandFilter
+{
+    static void filter(std::vector<boost::shared_ptr<po::option_description>>& options) {
+        // filter non-command options
+        std::vector<boost::shared_ptr<po::option_description>> filtered;
+        std::copy_if(std::begin(options), std::end(options), std::back_inserter(filtered), [](const auto& option) {
+            return CommandFilter::is_command(*option);
+        });
+        // consider only filtered options
+        std::swap(options, filtered);
+    }
+
+private:
+    static bool is_command(const po::option_description& option) {
+        auto is_cmd = [&option](const auto& unwanted) { return unwanted == option.long_name(); };
+        return std::find_if(std::begin(unwanted), std::end(unwanted), is_cmd) == std::end(unwanted);
+    }
+
+    constexpr static std::array unwanted{"add", "debug", "host", "password", "port", "rid", "ssl", "user"};
+};
+
+} // namespace
+
 void ClientOptions::show_all_commands(const char* title) const {
     cout << title << "\n";
     // take a copy, since we need to sort
     std::vector<boost::shared_ptr<po::option_description>> options = desc_->options();
+
+    // filter for real commands
+    CommandFilter::filter(options);
 
     // sort using long_name
     using opt_desc = boost::shared_ptr<po::option_description>;
@@ -323,6 +351,9 @@ void ClientOptions::show_cmd_summary(const char* title, const std::string& user_
 
     // take a copy, since we need to sort
     std::vector<boost::shared_ptr<po::option_description>> options = desc_->options();
+
+    // filter for real commands
+    CommandFilter::filter(options);
 
     // sort using long_name
     using opt_desc = boost::shared_ptr<po::option_description>;
