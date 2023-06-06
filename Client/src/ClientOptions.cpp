@@ -109,7 +109,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     boost::program_options::variables_map vm;
     po::store(po::command_line_parser(cl.tokens())
                   .options(*desc_)
-                  .style(po::command_line_style::unix_style ^ po::command_line_style::allow_short)
+                  .style(po::command_line_style::default_style)
                   .run(),
               vm);
     po::notify(vm);
