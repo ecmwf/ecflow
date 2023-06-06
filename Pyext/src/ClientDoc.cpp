@@ -62,8 +62,8 @@ const char* ClientDoc::class_client() {
 }
 
 const char* ClientDoc::set_host_port() {
-    return "Override the default(localhost and port 3141) and environment setting(ECF_HOST and ECF_PORT)\n\n"
-           "and set it explicitly::\n\n"
+    return "Explicitly set the host and port to be used by the client, overriding the default host name (localhost) "
+           "and port (3141) and the environment variables: ECF_HOST and ECF_PORT.\n\n"
            ".. code-block:: shell\n\n"
            "   set_host_port(\n"
            "      string host, # The server name. Cannot be empty.\n"
@@ -96,7 +96,7 @@ const char* ClientDoc::set_retry_connection_period() {
            "For the ping command this is hard wired as 1 second.\n"
            "This wait between connection attempts can be configured here.\n"
            "i.e This could be reduced to increase responsiveness.\n"
-           "Default: In debug this period is 1 second and in release mode 10 seconds::\n\n"
+           "Default: In debug this period is 1 second and in release mode 10 seconds.\n\n"
            ".. code-block:: shell\n\n"
            "   set_retry_connection_period(\n"
            "      int period # must be an integer >= 0\n"
@@ -1142,7 +1142,7 @@ const char* ClientDoc::force_state() {
            "   except RuntimeError, e:\n"
            "       print(str(e))\n"
            "\nEffect:\n\n"
-           "Lets see the effect of forcing complete on the following defs\n::\n\n"
+           "Lets see the effect of forcing complete on the following defs\n\n"
            ".. code-block:: shell\n\n"
            "   suite s1\n"
            "      task t1; time 10:00             # will complete straight away\n"
