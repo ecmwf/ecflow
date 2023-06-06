@@ -42,10 +42,7 @@ Some pages about some specific details about the CLI can be find here:
     * - :ref:`abort_cli` 
       - :term:`child command`
       - Mark task as aborted. For use in the '.ecf' script file *only*                
-        
-    * - :ref:`add_cli` 
-      - :term:`user command`
-      - add variables i.e name=value name1=value1                
+
         
     * - :ref:`alter_cli` 
       - :term:`user command`
@@ -102,11 +99,7 @@ Some pages about some specific details about the CLI can be find here:
     * - :ref:`complete_cli` 
       - :term:`child command`
       - Mark task as complete. For use in the '.ecf' script file *only*                
-        
-    * - :ref:`debug_cli` 
-      - :term:`user command`
-      - Dump out client environment settings for debug                
-        
+
     * - :ref:`debug_server_off_cli` 
       - :term:`user command`
       - Disables debug output from the server                
@@ -166,11 +159,7 @@ Some pages about some specific details about the CLI can be find here:
     * - :ref:`help_cli` 
       - :term:`user command`
       - Produce help message                
-        
-    * - :ref:`host_cli` 
-      - :term:`user command`
-      - host: If specified will override the environment variable ECF_HOST and default host, localhost                
-        
+
     * - :ref:`init_cli` 
       - :term:`child command`
       - Mark task as started (active). For use in the '.ecf' script file *only*
@@ -222,11 +211,7 @@ Some pages about some specific details about the CLI can be find here:
     * - :ref:`plug_cli` 
       - :term:`user command`
       - Plug command is used to move nodes.                
-        
-    * - :ref:`port_cli` 
-      - :term:`user command`
-      - port: If specified will override the environment variable ECF_PORT and default port number of 3141                
-        
+
     * - :ref:`query_cli` 
       - :term:`user command`
       - Query the status of attributes                
@@ -273,11 +258,7 @@ Some pages about some specific details about the CLI can be find here:
         
     * - :ref:`resume_cli` 
       - :term:`user command`
-      - Resume the given node. This allows job generation for the given node, or any child node.                
-        
-    * - :ref:`rid_cli` 
-      - :term:`user command`
-      - rid: If specified will override the environment variable ECF_RID, Can only be used for child commands                
+      - Resume the given node. This allows job generation for the given node, or any child node.
         
     * - :ref:`run_cli` 
       - :term:`user command`
@@ -297,11 +278,7 @@ Some pages about some specific details about the CLI can be find here:
         
     * - :ref:`shutdown_cli` 
       - :term:`user command`
-      - Stop server from scheduling new jobs.                
-        
-    * - :ref:`ssl_cli` 
-      - :term:`user command`
-      - ssl: If specified will override the environment variable ECF_SSL                
+      - Stop server from scheduling new jobs.
         
     * - :ref:`stats_cli` 
       - :term:`user command`
@@ -341,11 +318,7 @@ Some pages about some specific details about the CLI can be find here:
         
     * - :ref:`terminate_cli` 
       - :term:`user command`
-      - Terminate the server.                
-        
-    * - :ref:`user_cli` 
-      - :term:`user command`
-      - user: The user name to be used when contacting the server. Can only be used when password is also specified                
+      - Terminate the server.
         
     * - :ref:`version_cli` 
       - :term:`user command`
@@ -393,7 +366,6 @@ Some pages about some specific details about the CLI can be find here:
     :hidden:
 
     api/abort.rst
-    api/add.rst
     api/alter.rst
     api/archive.rst
     api/begin.rst
@@ -408,7 +380,6 @@ Some pages about some specific details about the CLI can be find here:
     api/checkJobGenOnly.rst
     api/check_pt.rst
     api/complete.rst
-    api/debug.rst
     api/debug_server_off.rst
     api/debug_server_on.rst
     api/delete.rst
@@ -424,7 +395,6 @@ Some pages about some specific details about the CLI can be find here:
     api/group.rst
     api/halt.rst
     api/help.rst
-    api/host.rst
     api/init.rst
     api/job_gen.rst
     api/kill.rst
@@ -438,7 +408,6 @@ Some pages about some specific details about the CLI can be find here:
     api/order.rst
     api/ping.rst
     api/plug.rst
-    api/port.rst
     api/query.rst
     api/queue.rst
     api/reloadcustompasswdfile.rst
@@ -451,13 +420,11 @@ Some pages about some specific details about the CLI can be find here:
     api/restore.rst
     api/restore_from_checkpt.rst
     api/resume.rst
-    api/rid.rst
     api/run.rst
     api/server_load.rst
     api/server_version.rst
     api/show.rst
     api/shutdown.rst
-    api/ssl.rst
     api/stats.rst
     api/stats_reset.rst
     api/stats_server.rst
@@ -468,7 +435,6 @@ Some pages about some specific details about the CLI can be find here:
     api/sync_clock.rst
     api/sync_full.rst
     api/terminate.rst
-    api/user.rst
     api/version.rst
     api/wait.rst
     api/why.rst
