@@ -173,7 +173,7 @@ private:
     bool denied_{false}; // ECF_DENIED.If the server denies the communication, then the child command can be set to fail
                          // immediately
     bool no_ecf_{false}; // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
-    bool debug_{false};  // For live debug, enabled by env variable ECF_CLIENT_DEBUG
+    bool debug_{false};  // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
     bool under_test_{false};     // Used in testing client interface
     bool host_file_read_{false}; // to ensure we read host file only once
     bool gui_{false};

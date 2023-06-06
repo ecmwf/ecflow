@@ -114,6 +114,11 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
               vm);
     po::notify(vm);
 
+    // If explicitly requested by user, set environment in DEBUG mode
+    if (vm.count("debug")) {
+        env->set_debug(true);
+    }
+
     // Check to see if host or port, specified. This will override the environment variables
     std::string host, port;
     if (vm.count("port")) {
@@ -188,11 +193,6 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         if (vm.count("help")) {
             string help_cmd = vm["help"].as<std::string>();
             show_help(help_cmd);
-            return client_request;
-        }
-
-        if (vm.count("debug")) {
-            cout << env->toString() << "\n";
             return client_request;
         }
 
