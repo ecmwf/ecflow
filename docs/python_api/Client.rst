@@ -1086,7 +1086,6 @@ Force a node(s) to a given state
     Effect:
     
     Lets see the effect of forcing complete on the following defs
-    ::
     
     .. code-block:: shell
     
@@ -2151,9 +2150,7 @@ Usage:
 .. py:method:: Client.set_host_port( (Client)arg1, (str)arg2, (str)arg3) -> None :
    :module: ecflow
 
-Override the default(localhost and port 3141) and environment setting(ECF_HOST and ECF_PORT)
-    
-    and set it explicitly::
+Explicitly set the host and port to be used by the client, overriding the default host name (localhost) and port (3141) and the environment variables: ECF_HOST and ECF_PORT.
     
     .. code-block:: shell
     
@@ -2204,7 +2201,7 @@ i.e. to get round glitches in the network.
 For the ping command this is hard wired as 1 second.
 This wait between connection attempts can be configured here.
 i.e This could be reduced to increase responsiveness.
-Default: In debug this period is 1 second and in release mode 10 seconds::
+Default: In debug this period is 1 second and in release mode 10 seconds.
 
 .. code-block:: shell
 
