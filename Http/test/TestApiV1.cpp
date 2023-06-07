@@ -238,10 +238,12 @@ bool check_for_element(const string& path, const string& key_name, const string&
         auto r = handle_response(request("get", path), HttpStatusCode::success_ok, true);
         auto j = json::parse(r.body);
 
-        if (j.is_null())
+        if (j.is_null()) {
             return false;
+        }
         else if (j.is_array() == false) {
-            j = {j};
+            j = json::array({j});
+            std::cout << "json is " << j << std::endl;
         }
 
         for (const auto& x : j) {
