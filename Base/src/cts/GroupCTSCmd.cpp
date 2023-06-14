@@ -21,6 +21,7 @@
 
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
+#include "ClientOptionsParser.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CommandLine.hpp"
 #include "CtsApi.hpp"
@@ -125,7 +126,17 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
 
         // Treat each sub command  separately
         boost::program_options::variables_map group_vm;
-        po::store(po::command_line_parser(cl.tokens()).options(desc).run(), group_vm);
+
+        // 1) Parse the CLI options
+        po::parsed_options parsed_options =
+            po::command_line_parser(cl.tokens())
+                .options(desc)
+                .style(po::command_line_style::unix_style ^ po::command_line_style::allow_short)
+                .extra_style_parser(ClientOptionsParser{})
+                .run();
+
+        // 2) Store the CLI options into the variable map
+        po::store(parsed_options, group_vm);
         po::notify(group_vm);
 
         Cmd_ptr childCmd;

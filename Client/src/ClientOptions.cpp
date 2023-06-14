@@ -23,6 +23,7 @@
 
 #include "Child.hpp"
 #include "ClientEnvironment.hpp"
+#include "ClientOptionsParser.hpp"
 #include "CommandLine.hpp"
 #include "Ecf.hpp"
 #include "PasswordEncryption.hpp"
@@ -107,11 +108,16 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     //       To avoid negative numbers from being treated as option use, we need to change command line style:
     //       po::command_line_style::unix_style ^ po::command_line_style::allow_short
     boost::program_options::variables_map vm;
-    po::store(po::command_line_parser(cl.tokens())
-                  .options(*desc_)
-                  .style(po::command_line_style::default_style)
-                  .run(),
-              vm);
+
+    // 1) Parse the CLI options
+    po::parsed_options parsed_options = po::command_line_parser(cl.tokens())
+                                            .options(*desc_)
+                                            .style(po::command_line_style::default_style)
+                                            .extra_style_parser(ClientOptionsParser{})
+                                            .run();
+
+    // 2) Store the CLI options into the variable map
+    po::store(parsed_options, vm);
     po::notify(vm);
 
     // If explicitly requested by user, set environment in DEBUG mode
