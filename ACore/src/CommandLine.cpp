@@ -44,7 +44,7 @@ CommandLine::CommandLine(int argc, const char** argv) : tokens_{impl_detail::rec
 CommandLine::CommandLine(std::string cl) : tokens_{boost::program_options::split_unix(cl)} {
 }
 
-CommandLine::CommandLine(tokens_t tokens) : tokens_{std::move(tokens)} {};
+CommandLine::CommandLine(tokens_t tokens) : tokens_{std::move(tokens)} {}
 
 CommandLine::cl_t CommandLine::original() const {
     return impl_detail::reconstruct_command_line(tokens_);

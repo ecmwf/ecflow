@@ -24,6 +24,6 @@ void Trace::store(const std::string& entry) const {
 Trace& getTrace() {
     static Trace instance;
     return instance;
-};
+}
 
 } // namespace ecf::log

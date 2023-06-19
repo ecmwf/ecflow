@@ -216,7 +216,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             ss << "  arg" << i << "=" << arg;
 
             for (size_t s = 0; s < arg.size(); s++) {
-                if (static_cast<int>(arg[s]) < 0 || static_cast<int>(arg[s]) > 127) {
+                if (static_cast<int>(arg[s]) < 0) {
                     ss << "\nUnrecognised character not in ASCII range(0-127) " << std::dec << "dec("
                        << static_cast<int>(arg[s]) << ") char:" << arg[s];
                     ss << " found at index " << s << " for string '" << arg << "'\n";
