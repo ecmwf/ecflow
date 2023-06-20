@@ -117,10 +117,13 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
 /* Wrapper for std::string /partio */
 
 inline std::string base64_decode(const std::string& encoded) {
-    size_t len;
+    size_t len         = 0;
     unsigned char* out = base64_decode(reinterpret_cast<const unsigned char*>(encoded.c_str()), encoded.size(), &len);
+    if (!out) {
+        throw std::runtime_error("Unable to decode base64");
+    }
 
-    const std::string decoded(reinterpret_cast<char*>(out), len);
+    std::string decoded(reinterpret_cast<char*>(out), len);
     free(out);
     return decoded;
 }
