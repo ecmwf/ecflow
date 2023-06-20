@@ -67,8 +67,10 @@ if (HAVE_WARNINGS)
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:-Wno-overloaded-virtual>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:-Wno-unused-parameter>
     ## Intel (Clang-based)
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:IntelLLVM>>:-Wno-deprecated-copy-with-user-provided-copy> # silence warnings in Qt5 related headers
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:IntelLLVM>>:-Wno-deprecated-declarations>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:IntelLLVM>>:-Wno-overloaded-virtual>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:IntelLLVM>>:-Wno-unused-parameter>
   )
 
 endif ()
