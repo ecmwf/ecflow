@@ -29,6 +29,11 @@ int integer_returning_function() {
     return 3;
 }
 
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 // *** This test does not seem work with address sanitiser ****
 BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
     char* test_me = getenv("ECF_TEST_SANITIZER_AS");
@@ -47,6 +52,15 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
     }
 }
 
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
     char* test_me = getenv("ECF_TEST_SANITIZER_AS");
     if (test_me) {
@@ -62,5 +76,9 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
         BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
     }
 }
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

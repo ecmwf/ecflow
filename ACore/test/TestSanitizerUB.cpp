@@ -34,6 +34,11 @@ Derived* getDerived() {
     return static_cast<Derived*>(new Base); // Error: invalid downcast
 }
 
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 BOOST_AUTO_TEST_CASE(test_sanitizer_invalid_object_size) {
     char* test_me = getenv("ECF_TEST_SANITIZER_UB");
     if (test_me) {
@@ -45,6 +50,10 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_invalid_object_size) {
         BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
     }
 }
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
 
 BOOST_AUTO_TEST_CASE(test_sanitizer_misaligned_structure_pointer_assignment) {
     char* test_me = getenv("ECF_TEST_SANITIZER_UB");
