@@ -40,7 +40,11 @@ if (HAVE_WARNINGS)
 
   ecbuild_add_c_flags(-Wall)
   ecbuild_add_c_flags(-Wextra)
-  ecbuild_add_c_flags(-Wpedantic)
+  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+    ecbuild_add_c_flags(-pedantic)
+  else()
+    ecbuild_add_c_flags(-Wpedantic)
+  endif()
 
   ecbuild_add_cxx_flags(-Wall)
   ecbuild_add_cxx_flags(-Wextra)
