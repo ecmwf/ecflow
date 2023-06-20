@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_command_line_with_10_args) {
 BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_even_quotes) {
     CommandLine cl{R"(ecflow_client --alter=change variable VARIABLE "some long value string" /path/to/task)"};
 
-    BOOST_REQUIRE_EQUAL(cl.size(), 6);
+    BOOST_REQUIRE_EQUAL(cl.size(), 6ul);
     BOOST_REQUIRE_EQUAL(cl.tokens()[0], "ecflow_client");
     BOOST_REQUIRE_EQUAL(cl.tokens()[4], "some long value string");
     BOOST_REQUIRE_EQUAL(cl.tokens()[5], "/path/to/task");
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_even_
 BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_uneven_quotes) {
     CommandLine cl{R"(ecflow_client --alter=change variable VARIABLE 'some long value string" "/path/to/task')"};
 
-    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 6);
+    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 6ul);
     BOOST_REQUIRE_EQUAL(cl.tokens()[0], "ecflow_client");
     BOOST_REQUIRE_EQUAL(cl.tokens()[4], "some long value string");
     BOOST_REQUIRE_EQUAL(cl.tokens()[5], "/path/to/task");
