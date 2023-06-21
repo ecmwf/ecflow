@@ -51,28 +51,34 @@ ClientOptions::ClientOptions() {
 
     // Allow the host,port and rid to be  overridden by the command line
     // This allows the jobs, which make other calls to ecflow_client from interfering with each other
+    // clang-format off
     desc_->add_options()(
         "rid",
         po::value<string>()->implicit_value(string("")),
-        "rid: If specified will override the environment variable ECF_RID, Can only be used for child commands");
+        "When specified overrides the environment variable ECF_RID. Can only be used for child commands.");
     desc_->add_options()(
         "port",
         po::value<string>()->implicit_value(string("")),
-        "port: If specified will override the environment variable ECF_PORT and default port number of 3141");
+        "When specified overrides the environment variable ECF_PORT and default port: '3141'");
     desc_->add_options()(
         "host",
         po::value<string>()->implicit_value(string("")),
-        "host: If specified will override the environment variable ECF_HOST and default host, localhost");
+        "When specified overrides the environment variable ECF_HOST and default host: 'localhost'");
     desc_->add_options()(
         "user",
         po::value<string>()->implicit_value(string("")),
-        "user: The user name to be used when contacting the server. Can only be used when password is also specified");
-    desc_->add_options()("password",
-                         po::value<string>()->implicit_value(string("")),
-                         "password: The password to be used when contacting the server");
+        "Specifies the user name used to contact the server. Must be used in combination with option --password.");
+    desc_->add_options()(
+        "password",
+        po::value<string>()->implicit_value(string("")),
+        "Specifies the password used to contact the server. Must be used in combination with option --user.");
 #ifdef ECF_OPENSSL
-    desc_->add_options()("ssl", "ssl: If specified will override the environment variable ECF_SSL");
+    desc_->add_options()(
+        "ssl",
+        "Enables the use of SSL when contacting the server.\n"
+        "When specified overrides the environment variable ECF_SSL.");
 #endif
+    // clang-format on
 }
 
 ClientOptions::~ClientOptions() {

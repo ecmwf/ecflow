@@ -400,7 +400,7 @@ const char* InitCmd::desc() {
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(InitCmd::arg(), po::value<string>(), InitCmd::desc())(
-        "add", po::value<vector<string>>()->multitoken(), "add variables i.e name=value name1=value1");
+        "add", po::value<vector<string>>()->multitoken(), "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
 }
 
 void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
