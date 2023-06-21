@@ -120,6 +120,7 @@ private:
     void show_user_commands_summary(std::ostream& os, std::string_view title) const;
     void show_command_help(std::ostream& os, const std::string& command) const;
     void show_all_commands(std::ostream& os, std::string_view title) const;
+    void show_all_options(std::ostream& os) const;
 
     template <typename PREDICATE>
     void show_command_summary(std::ostream& os, std::string_view title, PREDICATE select) const;
@@ -166,6 +167,8 @@ void Documentation::show_help(std::ostream& os) const {
     os << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
 
     show_all_commands(os, "Commands:");
+
+    show_all_options(os);
 }
 
 void Documentation::show_list_options(std::ostream& os) const {
@@ -264,6 +267,31 @@ void Documentation::show_all_commands(std::ostream& os, std::string_view title) 
         os << std::left << std::setw(max_width) << options[i]->long_name();
     }
     os << "\n\n";
+}
+
+void Documentation::show_all_options(std::ostream& os) const {
+    // take a copy, since we need to sort
+    options_t options = descriptions_.options();
+
+    // filter for real commands
+    CommandFilter::select_only_options(options);
+
+    // sort using long_name
+    sort_options_by_long_name(options);
+
+    os << "Generic Options:\n";
+
+    size_t max_width = get_options_max_width(options) + 2;
+    for (size_t i = 0; i < options.size(); i++) {
+        if (i == 0 || i % 8 == 0) {
+            os << "\n   ";
+        }
+        os << std::left << std::setw(max_width) << options[i]->long_name();
+    }
+
+    os << "\n\nThese options can be used in combination with the above commands to customise ecflow_client behaviour."
+          "\nUse ecflow_client --help=<option> to get more information."
+          "\n\n";
 }
 
 } // namespace
