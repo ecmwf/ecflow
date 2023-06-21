@@ -42,10 +42,6 @@ public:
     Cmd_ptr parse(const CommandLine& cl, ClientEnvironment*) const;
 
 private:
-    void show_help(const std::string& help_cmd) const;
-    void show_all_commands(const char* title) const;
-    void show_cmd_summary(const char* title, const std::string& user_or_child = "") const;
-
     CtsCmdRegistry cmdRegistry_;
     boost::program_options::options_description* desc_;
 };

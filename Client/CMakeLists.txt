@@ -12,6 +12,7 @@ list( APPEND srcs
    src/ClientEnvironment.hpp
    src/ClientInvoker.hpp
    src/ClientOptions.hpp
+   src/Help.hpp
    src/Rtt.hpp
    src/UrlCmd.hpp
    # SOURCES
@@ -19,6 +20,7 @@ list( APPEND srcs
    src/Rtt.cpp
    src/ClientEnvironment.cpp
    src/ClientInvoker.cpp
+   src/Help.cpp
    src/Rtt.cpp
    src/ClientOptions.cpp
    src/UrlCmd.cpp
