@@ -24,28 +24,30 @@ using options_t     = std::vector<boost::shared_ptr<boost::program_options::opti
 
 struct CommandFilter
 {
-    static void select_only_commands(options_t& options) {
-        select_by(options, [](const auto& option) { return !CommandFilter::is_option(option->long_name()); });
-    }
-
-    static void select_only_options(options_t& options) {
-        select_by(options, [](const auto& option) { return CommandFilter::is_option(option->long_name()); });
-    }
-
-    static bool is_option(const std::string& option) {
-        return std::find(std::begin(known_options), std::end(known_options), option) != std::end(known_options);
-    }
-
-private:
     template <typename PREDICATE>
     static void select_by(options_t& options, PREDICATE select) {
         // filter non-command options
         options_t filtered;
-        std::copy_if(std::begin(options), std::end(options), std::back_inserter(filtered), select);
+        std::copy_if(std::begin(options),
+                     std::end(options),
+                     std::back_inserter(filtered),
+                     [&select](const auto& description) { return select(description->long_name()); });
+
         // consider only filtered options
         std::swap(options, filtered);
     }
 
+    static bool is_option(const std::string& value) {
+        return std::find(std::begin(known_options), std::end(known_options), value) != std::end(known_options);
+    }
+
+    static bool is_user_command(const std::string& value) { return !is_option(value) && !is_task_command(value); }
+
+    static bool is_task_command(const std::string& value) { return ecf::Child::valid_child_cmd(value); }
+
+    static bool is_command(const std::string& value) { return is_task_command(value) || is_user_command(value); }
+
+private:
     constexpr static std::array known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user"};
 };
 
@@ -89,14 +91,14 @@ const char* client_task_env_description =
     "|              |          |           | allows the scripts to be tested independent of the server     |\n"
     "|--------------|----------|-----------|---------------------------------------------------------------|\n";
 
-size_t get_options_max_width(const options_t& options) {
+int get_options_max_width(const options_t& options) {
     size_t vec_size  = options.size();
     size_t max_width = 0;
     for (size_t i = 0; i < vec_size; i++) {
         max_width = std::max(max_width, options[i]->long_name().size());
     }
     max_width += 1;
-    return max_width;
+    return static_cast<int>(max_width);
 }
 
 void sort_options_by_long_name(options_t& options) {
@@ -118,12 +120,31 @@ private:
     void show_all_commands_summary(std::ostream& os, std::string_view title) const;
     void show_task_commands_summary(std::ostream& os, std::string_view title) const;
     void show_user_commands_summary(std::ostream& os, std::string_view title) const;
+    void show_options_summary(std::ostream& os, std::string_view title) const;
     void show_command_help(std::ostream& os, const std::string& command) const;
     void show_all_commands(std::ostream& os, std::string_view title) const;
     void show_all_options(std::ostream& os) const;
 
     template <typename PREDICATE>
-    void show_command_summary(std::ostream& os, std::string_view title, PREDICATE select) const;
+    void show_table(std::ostream& os, PREDICATE select, size_t columns) const;
+
+    template <typename PREDICATE>
+    void show_summary(std::ostream& os, PREDICATE select) const;
+
+    static std::string get_name_kind(const std::string& name) {
+        if (CommandFilter::is_option(name)) {
+            return "option  ";
+        }
+        else if (CommandFilter::is_task_command(name)) {
+            return "child   ";
+        }
+        else if (CommandFilter::is_user_command(name)) {
+            return "user    ";
+        }
+        else {
+            throw std::runtime_error("Unable to determine the kind of option/command");
+        }
+    }
 
 private:
     const descriptions_t& descriptions_;
@@ -148,6 +169,9 @@ void Documentation::show(std::ostream& os, const std::string& topic) const {
     }
     else if (topic == "user") {
         show_user_commands_summary(os, "\nEcflow user client commands:\n");
+    }
+    else if (topic == "option") {
+        show_options_summary(os, "\nEcflow generic options:\n");
     }
     else {
         show_command_help(os, topic);
@@ -176,47 +200,70 @@ void Documentation::show_list_options(std::ostream& os) const {
 }
 
 template <typename PREDICATE>
-void Documentation::show_command_summary(std::ostream& os, std::string_view title, PREDICATE select) const {
+void Documentation::show_table(std::ostream& os, PREDICATE select, size_t columns) const {
+    // take a copy, since we need to sort
+    options_t options = descriptions_.options();
+
+    // filter for real commands
+    CommandFilter::select_by(options, select);
+
+    // sort using long_name
+    sort_options_by_long_name(options);
+
+    size_t max_width = get_options_max_width(options);
+    for (size_t i = 0; i < options.size(); i++) {
+        if (i == 0 || i % columns == 0) {
+            os << "\n   ";
+        }
+        os << std::left << std::setw(max_width) << options[i]->long_name();
+    }
+    os << "\n\n";
+}
+
+template <typename PREDICATE>
+void Documentation::show_summary(std::ostream& os, PREDICATE select) const {
 
     // take a copy, since we need to sort
     options_t options = descriptions_.options();
 
     // filter for real commands
-    CommandFilter::select_only_commands(options);
+    CommandFilter::select_by(options, select);
 
     // sort using long_name
     sort_options_by_long_name(options);
 
-    os << title << "\n";
-    size_t max_width = get_options_max_width(options);
-    for (size_t i = 0; i < options.size(); i++) {
-        if (select(options[i]->long_name())) {
-            std::vector<std::string> lines;
-            ecf::Str::split(options[i]->description(), lines, "\n");
-            if (!lines.empty()) {
-                os << "  " << std::left << std::setw(max_width) << options[i]->long_name() << " ";
-                std::string_view kind = ecf::Child::valid_child_cmd(options[i]->long_name()) ? "child  " : "user   ";
-                os << kind;
-                os << lines[0] << "\n";
-            }
+    int max_width = get_options_max_width(options);
+    for (const auto& option : options) {
+        std::vector<std::string> lines;
+        ecf::Str::split(option->description(), lines, "\n");
+        if (!lines.empty()) {
+            std::string name = option->long_name();
+            os << "  " << std::left << std::setw(max_width) << name << " ";
+            os << Documentation::get_name_kind(name);
+            os << lines[0] << "\n";
         }
     }
     os << "\n";
 }
 
 void Documentation::show_all_commands_summary(std::ostream& os, std::string_view title) const {
-    auto select_all_commands = [](const std::string& command) { return true; };
-    show_command_summary(os, title, select_all_commands);
+    os << title << '\n';
+    show_summary(os, CommandFilter::is_command);
 }
 
 void Documentation::show_task_commands_summary(std::ostream& os, std::string_view title) const {
-    auto select_task_commands = [](const std::string& command) { return ecf::Child::valid_child_cmd(command); };
-    show_command_summary(os, title, select_task_commands);
+    os << title << '\n';
+    show_summary(os, CommandFilter::is_task_command);
 }
 
 void Documentation::show_user_commands_summary(std::ostream& os, std::string_view title) const {
-    auto select_user_commands = [](const std::string& command) { return !ecf::Child::valid_child_cmd(command); };
-    show_command_summary(os, title, select_user_commands);
+    os << title << '\n';
+    show_summary(os, CommandFilter::is_user_command);
+}
+
+void Documentation::show_options_summary(std::ostream& os, std::string_view title) const {
+    os << title << '\n';
+    show_summary(os, CommandFilter::is_option);
 }
 
 void Documentation::show_command_help(std::ostream& os, const std::string& command) const {
@@ -249,49 +296,13 @@ void Documentation::show_command_help(std::ostream& os, const std::string& comma
 }
 
 void Documentation::show_all_commands(std::ostream& os, std::string_view title) const {
-    // take a copy, since we need to sort
-    options_t options = descriptions_.options();
-
-    // filter for real commands
-    CommandFilter::select_only_commands(options);
-
-    // sort using long_name
-    sort_options_by_long_name(options);
-
     os << title << "\n";
-    size_t max_width = get_options_max_width(options);
-    for (size_t i = 0; i < options.size(); i++) {
-        if (i == 0 || i % 5 == 0) {
-            os << "\n   ";
-        }
-        os << std::left << std::setw(max_width) << options[i]->long_name();
-    }
-    os << "\n\n";
+    show_table(os, CommandFilter::is_command, 5);
 }
 
 void Documentation::show_all_options(std::ostream& os) const {
-    // take a copy, since we need to sort
-    options_t options = descriptions_.options();
-
-    // filter for real commands
-    CommandFilter::select_only_options(options);
-
-    // sort using long_name
-    sort_options_by_long_name(options);
-
     os << "Generic Options:\n";
-
-    size_t max_width = get_options_max_width(options) + 2;
-    for (size_t i = 0; i < options.size(); i++) {
-        if (i == 0 || i % 8 == 0) {
-            os << "\n   ";
-        }
-        os << std::left << std::setw(max_width) << options[i]->long_name();
-    }
-
-    os << "\n\nThese options can be used in combination with the above commands to customise ecflow_client behaviour."
-          "\nUse ecflow_client --help=<option> to get more information."
-          "\n\n";
+    show_table(os, CommandFilter::is_option, 8);
 }
 
 } // namespace

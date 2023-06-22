@@ -80,8 +80,6 @@ html_logo = ""
 
 highlight_language = "none"
 
-numfig = True
-
 rst_prolog = """
 .. role:: mval
 """
