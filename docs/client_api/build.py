@@ -64,6 +64,28 @@ def render_single_page_rst(name):
     return txt
 
 
+def render_user_option_rst():
+
+    title = f"user"
+    txt = f"""
+.. _user_cli:
+
+{title}
+{"/" * len(title)}
+
+::
+
+   
+   user
+   ----
+   
+   Specifies the user name used to contact the server. Must be used in combination with option --password.
+   
+   
+"""
+    return txt
+
+
 def render_index_rst():
     title = "Command line interface (CLI)"
     txt = f"""
@@ -176,6 +198,9 @@ if __name__ == "__main__":
 
     entries = load_options()
     for entry in entries:
-        content = render_single_page_rst(entry.name)
+        if entry.name == "user":
+            content = render_user_option_rst()
+        else:
+            content = render_single_page_rst(entry.name)
         with open(f"api/{entry.name}.rst", "w") as f:
             f.write(content)
