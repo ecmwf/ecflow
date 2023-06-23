@@ -146,6 +146,6 @@ void CtsCmdRegistry::addHelpOption(boost::program_options::options_description& 
     desc.add_options()("help,h", po::value<std::string>()->implicit_value(std::string("")), "Produce help message");
     desc.add_options()("version,v", "Show ecflow client version number, and version of the boost library used");
     desc.add_options()("debug,d",
-                       "Dump out client environment settings for debug\n"
-                       "Set environment variable ECF_DEBUG_CLIENT for additional debug");
+                       "Enables the display of client environment settings and execution details.\n"
+                       "Has the same effect as setting environment variable ECF_DEBUG_CLIENT.");
 }

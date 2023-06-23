@@ -14,18 +14,16 @@
 //============================================================================
 #include "ClientOptions.hpp"
 
-#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
-#include "Child.hpp"
 #include "ClientEnvironment.hpp"
 #include "ClientOptionsParser.hpp"
 #include "CommandLine.hpp"
-#include "Ecf.hpp"
+#include "Help.hpp"
 #include "PasswordEncryption.hpp"
 #include "Str.hpp"
 #include "TaskApi.hpp"
@@ -36,8 +34,6 @@ using namespace ecf;
 using namespace boost;
 namespace po = boost::program_options;
 
-static const char* client_env_description();
-static const char* client_task_env_description();
 static std::string print_variable_map(const boost::program_options::variables_map& vm);
 
 ClientOptions::ClientOptions() {
@@ -55,28 +51,34 @@ ClientOptions::ClientOptions() {
 
     // Allow the host,port and rid to be  overridden by the command line
     // This allows the jobs, which make other calls to ecflow_client from interfering with each other
+    // clang-format off
     desc_->add_options()(
         "rid",
         po::value<string>()->implicit_value(string("")),
-        "rid: If specified will override the environment variable ECF_RID, Can only be used for child commands");
+        "When specified overrides the environment variable ECF_RID. Can only be used for child commands.");
     desc_->add_options()(
         "port",
         po::value<string>()->implicit_value(string("")),
-        "port: If specified will override the environment variable ECF_PORT and default port number of 3141");
+        "When specified overrides the environment variable ECF_PORT and default port: '3141'");
     desc_->add_options()(
         "host",
         po::value<string>()->implicit_value(string("")),
-        "host: If specified will override the environment variable ECF_HOST and default host, localhost");
+        "When specified overrides the environment variable ECF_HOST and default host: 'localhost'");
     desc_->add_options()(
         "user",
         po::value<string>()->implicit_value(string("")),
-        "user: The user name to be used when contacting the server. Can only be used when password is also specified");
-    desc_->add_options()("password",
-                         po::value<string>()->implicit_value(string("")),
-                         "password: The password to be used when contacting the server");
+        "Specifies the user name used to contact the server. Must be used in combination with option --password.");
+    desc_->add_options()(
+        "password",
+        po::value<string>()->implicit_value(string("")),
+        "Specifies the password used to contact the server. Must be used in combination with option --user.");
 #ifdef ECF_OPENSSL
-    desc_->add_options()("ssl", "ssl: If specified will override the environment variable ECF_SSL");
+    desc_->add_options()(
+        "ssl",
+        "Enables the use of SSL when contacting the server.\n"
+        "When specified overrides the environment variable ECF_SSL.");
 #endif
+    // clang-format on
 }
 
 ClientOptions::~ClientOptions() {
@@ -190,15 +192,15 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     if (!cmdRegistry_.parse(client_request, vm, env)) {
 
         // The arguments did *NOT* match with any of the registered command.
-        // Hence if arguments don't match help, debug or version its an error
+        // Hence, if arguments don't match help, debug or version it's an error
         // Note: we did *NOT* check for a NULL client_request since *NOT* all
-        //       request need to create it. Some commands are client specific.
+        //       requests need to create it. Some commands are client specific.
         //       For example:
         //         --server_load         // this is sent to server
         //         --server_load=<path>  // no command returned, command executed by client
         if (vm.count("help")) {
-            string help_cmd = vm["help"].as<std::string>();
-            show_help(help_cmd);
+            string topic = vm["help"].as<std::string>();
+            std::cout << Help{*desc_, topic};
             return client_request;
         }
 
@@ -231,187 +233,6 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     }
 
     return client_request;
-}
-
-void ClientOptions::show_help(const std::string& help_cmd) const {
-    // WARNING: This assumes that there are no user/child commands with name 'summary','all','child','user'
-    if (help_cmd.empty()) {
-
-        cout << "\nClient/server based work flow package:\n\n";
-        cout << Version::description() << "\n\n";
-        cout << Ecf::CLIENT_NAME() << " provides the command line interface, for interacting with the server:\n";
-
-        cout << "Try:\n\n";
-        cout << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
-        cout << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
-        cout << "   " << Ecf::CLIENT_NAME() << " --help=child     # One line summary of child commands\n";
-        cout << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
-        cout << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
-
-        show_all_commands("Commands:");
-    }
-    else {
-        if (help_cmd == "all")
-            cout << *desc_ << "\n";
-        else if (help_cmd == "summary")
-            show_cmd_summary("\nEcflow client commands:\n");
-        else if (help_cmd == "child")
-            show_cmd_summary("\nEcflow child client commands:\n", "child");
-        else if (help_cmd == "user")
-            show_cmd_summary("\nEcflow user client commands:\n", "user");
-        else {
-            // Help on individual command
-            const po::option_description* od = desc_->find_nothrow(help_cmd,
-                                                                   true,  /*approx, will find nearest match*/
-                                                                   false, /*long_ignore_case = false*/
-                                                                   false  /*short_ignore_case = false*/
-            );
-            //               cout << "long_name = " << od.long_name() << "\n";
-            //               cout << "format_name = " << od.format_name() << "\n";
-            //               cout << "format_parameter = " << od.format_parameter() << "\n";
-            if (od) {
-                cout << "\n";
-                cout << od->long_name() << "\n";
-                for (size_t i = 0; i < od->long_name().size(); i++)
-                    cout << "-";
-                cout << "\n\n";
-                cout << od->description() << "\n\n";
-                cout << client_env_description();
-                if (od->long_name() == TaskApi::initArg() || od->long_name() == TaskApi::completeArg() ||
-                    od->long_name() == TaskApi::abortArg() || od->long_name() == TaskApi::waitArg() ||
-                    od->long_name() == TaskApi::eventArg() || od->long_name() == TaskApi::labelArg() ||
-                    od->long_name() == TaskApi::queue_arg() || od->long_name() == TaskApi::meterArg()) {
-                    cout << "\n";
-                    cout << client_task_env_description();
-                }
-            }
-            else {
-                show_all_commands("No matching command found, please choose from:");
-            }
-        }
-    }
-}
-
-void ClientOptions::show_all_commands(const char* title) const {
-    cout << title << "\n";
-    // take a copy, since we need to sort
-    std::vector<boost::shared_ptr<po::option_description>> options = desc_->options();
-
-    // sort using long_name
-    using opt_desc = boost::shared_ptr<po::option_description>;
-    std::sort(options.begin(), options.end(), [](const opt_desc& a, const opt_desc& b) {
-        return a->long_name() < b->long_name();
-    });
-
-    size_t vec_size  = options.size();
-    size_t max_width = 0;
-    for (size_t i = 0; i < vec_size; i++) {
-        max_width = std::max(max_width, options[i]->long_name().size());
-    }
-    max_width += 1;
-    for (size_t i = 0; i < vec_size; i++) {
-        if (i == 0 || i % 5 == 0)
-            cout << "\n   ";
-        cout << left << std::setw(max_width) << options[i]->long_name();
-    }
-    cout << "\n";
-}
-
-void ClientOptions::show_cmd_summary(const char* title, const std::string& user_or_child) const {
-    assert(user_or_child.empty() || user_or_child == "child" || user_or_child == "user");
-    cout << title << "\n";
-
-    // take a copy, since we need to sort
-    std::vector<boost::shared_ptr<po::option_description>> options = desc_->options();
-
-    // sort using long_name
-    using opt_desc = boost::shared_ptr<po::option_description>;
-    std::sort(options.begin(), options.end(), [](const opt_desc& a, const opt_desc& b) {
-        return a->long_name() < b->long_name();
-    });
-
-    size_t vec_size  = options.size();
-    size_t max_width = 0;
-    for (size_t i = 0; i < vec_size; i++) {
-        max_width = std::max(max_width, options[i]->long_name().size());
-    }
-    max_width += 1;
-    for (size_t i = 0; i < vec_size; i++) {
-
-        if (user_or_child == "child" && Child::valid_child_cmd(options[i]->long_name())) {
-            std::vector<std::string> lines;
-            Str::split(options[i]->description(), lines, "\n");
-            if (!lines.empty()) {
-                cout << "  " << left << std::setw(max_width) << options[i]->long_name() << " ";
-                cout << "child  ";
-                cout << lines[0] << "\n";
-            }
-        }
-        else if (user_or_child == "user" && !Child::valid_child_cmd(options[i]->long_name())) {
-            std::vector<std::string> lines;
-            Str::split(options[i]->description(), lines, "\n");
-            if (!lines.empty()) {
-                cout << "  " << left << std::setw(max_width) << options[i]->long_name() << " ";
-                cout << "user   ";
-                cout << lines[0] << "\n";
-            }
-        }
-        else if (user_or_child.empty()) {
-            std::vector<std::string> lines;
-            Str::split(options[i]->description(), lines, "\n");
-            if (!lines.empty()) {
-                cout << "  " << left << std::setw(max_width) << options[i]->long_name() << " ";
-                if (Child::valid_child_cmd(options[i]->long_name()))
-                    cout << "child  ";
-                else
-                    cout << "user   ";
-                cout << lines[0] << "\n";
-            }
-        }
-    }
-    cout << "\n";
-}
-
-const char* client_env_description() {
-    return "The client reads in the following environment variables. These are read by user and child command\n\n"
-           "|----------|----------|------------|-------------------------------------------------------------------|\n"
-           "| Name     |  Type    | Required   | Description                                                       |\n"
-           "|----------|----------|------------|-------------------------------------------------------------------|\n"
-           "| ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
-           "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
-#ifdef ECF_OPENSSL
-           "| ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |\n"
-#endif
-           "|----------|----------|------------|-------------------------------------------------------------------|"
-           "\n\n"
-           "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-           "  be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n";
-}
-
-const char* client_task_env_description() {
-    return "The following environment variables are specific to child commands.\n"
-           "The scripts should export the mandatory variables. Typically defined in the head/tail includes files\n\n"
-           "|--------------|----------|-----------|---------------------------------------------------------------|\n"
-           "| Name         |  Type    | Required  | Description                                                   |\n"
-           "|--------------|----------|-----------|---------------------------------------------------------------|\n"
-           "| ECF_NAME     | <string> | Mandatory | Full path name to the task                                    |\n"
-           "| ECF_PASS     | <string> | Mandatory | The jobs password, allocated by server, then used by server to|\n"
-           "|              |          |           | authenticate client request                                   |\n"
-           "| ECF_TRYNO    |  <int>   | Mandatory | The number of times the job has run. This is allocated by the |\n"
-           "|              |          |           | server, and used in job/output file name generation.          |\n"
-           "| ECF_RID      | <string> | Mandatory | The process identifier. Helps zombies identification and      |\n"
-           "|              |          |           | automated killing of running jobs                             |\n"
-           "| ECF_TIMEOUT  |  <int>   | optional  | Max time in *seconds* for client to deliver message to main   |\n"
-           "|              |          |           | server. The default is 24 hours                               |\n"
-           "| ECF_HOSTFILE | <string> | optional  | File that lists alternate hosts to try, if connection to main |\n"
-           "|              |          |           | host fails                                                    |\n"
-           "| ECF_DENIED   |  <any>   | optional  | Provides a way for child to exit with an error, if server     |\n"
-           "|              |          |           | denies connection. Avoids 24hr wait. Note: when you have      |\n"
-           "|              |          |           | hundreds of tasks, using this approach requires a lot of      |\n"
-           "|              |          |           | manual intervention to determine job status                   |\n"
-           "| NO_ECF       |  <any>   | optional  | If set exit's ecflow_client immediately with success. This    |\n"
-           "|              |          |           | allows the scripts to be tested independent of the server     |\n"
-           "|--------------|----------|-----------|---------------------------------------------------------------|\n";
 }
 
 static std::string print_variable_map(const boost::program_options::variables_map& vm) {

@@ -27,7 +27,15 @@ add_custom_command(
   COMMAND
     ${CMAKE_COMMAND} -E env "PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}"
         ${CMAKE_CURRENT_SOURCE_DIR}/client_api/build.py
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/client_api/api
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_BINARY_DIR}/client_api/api
+      ${CMAKE_CURRENT_SOURCE_DIR}/client_api/api
+  COMMAND
+    ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_BINARY_DIR}/client_api/index.rst
+      ${CMAKE_CURRENT_SOURCE_DIR}/client_api
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/client_api
   USES_TERMINAL
   DEPENDS ecflow_client
 )

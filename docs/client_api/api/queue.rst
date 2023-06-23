@@ -14,10 +14,10 @@ queue
    Hence the context is supplied via environment variables
      arg1(string) = queue-name:
      arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]
-        active: returns the first queued/aborted step, the return string is the queue  value from the definition
+        active: returns the first queued/aborted step, the return string is the queue value from the definition
         no_of_aborted: returns number of aborted steps as a string, i.e 10
         reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors
-     arg2(string) = step:  value returned from. step=$(ecflow_client --queue=queue_name active)
+     arg2(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)
                    This is only valid for complete and aborted steps
      arg4(string) = path: (optional). The path where the queue is defined.
                     By default we search for the queue up the node tree.
