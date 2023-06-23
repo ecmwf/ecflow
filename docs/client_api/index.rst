@@ -15,7 +15,7 @@ The very first argument to :term:`ecflow_client` specifies the command and must 
     ecflow_client --load=host1.3141.check
 
 The comprehensive :ref:`list of ecflow_client commands <ecflow_client_commands>` is presented below.
-These commands can be combined with the :ref:`ecflow_client options <ecflow_client_options>` to further customise the
+These commands can be combined with :ref:`ecflow_client common options <ecflow_client_options>` to further customise the
 :term:`ecflow_client` behaviour.
 
 The list of commands, amongst other details, can be displayed by using the option ``--help``.
@@ -364,7 +364,7 @@ Some pages about CLI specific details can be found here:
       - Locates the task in the servers list of zombies, and removes it.
 
 
-.. list-table:: List of options for `ecflow_client` commands
+.. list-table:: List of common options for `ecflow_client` commands
     :header-rows: 1
     :width: 100%
     :widths: 20 80
