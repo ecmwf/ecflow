@@ -12,6 +12,7 @@
 #define ECFLOW_UDP_TESTSUPPORT_HPP
 
 #include <memory>
+#include <thread>
 
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
