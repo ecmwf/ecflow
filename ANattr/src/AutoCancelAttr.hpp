@@ -15,6 +15,8 @@
 // Description :
 //============================================================================
 
+#include <cstdint>
+
 #include "TimeSlot.hpp"
 
 namespace ecf {
