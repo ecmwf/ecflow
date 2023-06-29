@@ -15,6 +15,7 @@
 // Description : A single or set of times
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <cstdint>
 #include <vector>
 
 #include <boost/date_time/posix_time/posix_time.hpp>

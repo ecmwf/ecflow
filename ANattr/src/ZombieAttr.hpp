@@ -14,6 +14,9 @@
 //
 // Description :
 //============================================================================
+
+#include <cstdint>
+
 #include "Child.hpp"
 #include "User.hpp"
 

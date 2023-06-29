@@ -20,6 +20,7 @@
 //    a mechanism to stop this, when reset is called, via server this is disabled
 //============================================================================
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 

@@ -15,6 +15,8 @@
 // Description :
 //============================================================================
 
+#include <cstdint>
+
 #include "NState.hpp"
 #include "TimeSlot.hpp"
 
