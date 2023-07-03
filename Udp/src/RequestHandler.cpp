@@ -102,7 +102,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const { client.user_update_meter(path_, name_, std::to_string(value_)); };
+    void actually_execute(ClientAPI& client) const { client.child_update_meter(path_, name_, std::to_string(value_)); };
 
     static constexpr const char* COMMAND_TAG = "meter";
 
@@ -119,7 +119,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{std::move(value)} {};
-    void actually_execute(ClientAPI& client) const { client.user_update_label(path_, name_, value_); };
+    void actually_execute(ClientAPI& client) const { client.child_update_label(path_, name_, value_); };
 
     static constexpr const char* COMMAND_TAG = "label";
 
