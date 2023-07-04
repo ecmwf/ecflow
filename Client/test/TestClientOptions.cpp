@@ -41,12 +41,26 @@ void test_alter(const CommandLine& cl, REQUIRE check) {
 
 BOOST_AUTO_TEST_SUITE(ClientTestSuite)
 
+BOOST_AUTO_TEST_CASE(test_is_able_to_process_regular_parameter) {
+
+    auto cl        = CommandLine(R"(executable --option)");
+
+    const auto& ts = cl.tokens();
+    for (size_t i = 0; i < ts.size(); ++i) {
+        std::cout << "ts[" << i << "] = [" << ts[i] << "]" << std::endl;
+    }
+
+    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 2ul);
+    BOOST_REQUIRE_EQUAL(cl.tokens()[0], "executable");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[1], "--option");
+}
+
 BOOST_AUTO_TEST_CASE(test_is_able_to_process_empty_parameter) {
     // Make command line
     auto cl = CommandLine(R"(   executable --option parameter  type name    ""   "   "   " value " "\"" /some/path  )");
 
     const auto& ts = cl.tokens();
-    for(size_t i = 0; i < ts.size(); ++i) {
+    for (size_t i = 0; i < ts.size(); ++i) {
         std::cout << "ts[" << i << "] = [" << ts[i] << "]" << std::endl;
     }
 

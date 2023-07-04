@@ -80,6 +80,7 @@ public:
     bool operator()(InputIterator& next, InputIterator end, Token& tok) {
         // Reset collected Token
         tok = Token();
+        bool valid = false;
 
         // Consume pre-separators, and handle the case where we reach the end of the iterable
         if (advance_separators(next, end)) {
@@ -116,6 +117,7 @@ public:
                     return true;
                 }
                 else {
+                    valid = true;
                     tok += *next;
                 }
             }
@@ -123,6 +125,7 @@ public:
                 in_quote = !in_quote;
             }
             else {
+                valid = true;
                 tok += *next;
             }
         }
@@ -133,7 +136,7 @@ public:
                 last_ = false;
                 return true;
             }
-            return false;
+            return valid;
         }
 
         return true;
