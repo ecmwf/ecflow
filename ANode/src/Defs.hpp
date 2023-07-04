@@ -22,6 +22,7 @@
 // Hence externs are *ONLY* used on the client side.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <cstdint>
 #include <iosfwd>
 #include <set>
 #include <vector>
