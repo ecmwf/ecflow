@@ -21,7 +21,47 @@
 #include "CommandLine.hpp"
 #include "PasswordEncryption.hpp"
 
+template <typename REQUIRE>
+void test_alter(const CommandLine& cl, REQUIRE check) {
+    std::cout << "Testing command line: " << cl.original() << std::endl;
+
+    ClientOptions options;
+    ClientEnvironment environment(false);
+    try {
+        auto base_command    = options.parse(cl, &environment);
+        auto derived_command = dynamic_cast<AlterCmd*>(base_command.get());
+
+        BOOST_REQUIRE(derived_command);
+        check(*derived_command, environment);
+    }
+    catch (boost::program_options::unknown_option& e) {
+        BOOST_FAIL(std::string("Unexpected exception caught: ") + e.what());
+    }
+}
+
 BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_process_empty_parameter) {
+    // Make command line
+    auto cl = CommandLine(R"(   executable --option parameter  type name    ""   "   "   " value " "\"" /some/path  )");
+
+    const auto& ts = cl.tokens();
+    for(size_t i = 0; i < ts.size(); ++i) {
+        std::cout << "ts[" << i << "] = [" << ts[i] << "]" << std::endl;
+    }
+
+    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 10ul);
+    BOOST_REQUIRE_EQUAL(cl.tokens()[0], "executable");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[1], "--option");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[2], "parameter");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[3], "type");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[4], "name");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[5], "");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[6], "   ");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[7], " value ");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[8], "\"");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[9], "/some/path");
+}
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
     const char* expected_username = "username";
@@ -43,103 +83,665 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
     BOOST_REQUIRE(expected_password == actual_password);
 }
 
-template <AlterCmd::Change_attr_type EXPECTED_TYPE>
-void test_handle_alter_change(const std::string& type,
-                              const std::string& name,
-                              const std::string& value,
-                              const std::string& path) {
-    auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "change", type, name, value, path);
+BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_change) {
 
-    ClientOptions options;
-    ClientEnvironment environment(false);
-    try {
-        auto base_command    = options.parse(cl, &environment);
-        auto derived_command = dynamic_cast<AlterCmd*>(base_command.get());
+    /*
+     * --alter change <type> <name> <value> <path> [<path>...]
+     * ************************************************************************************************************** */
 
-        BOOST_REQUIRE(derived_command);
-        BOOST_REQUIRE(derived_command->value() == value);
-        BOOST_REQUIRE(derived_command->name() == name);
-        BOOST_REQUIRE(derived_command->change_attr_type() == EXPECTED_TYPE);
-        BOOST_REQUIRE(derived_command->paths().size() == 1);
-        BOOST_REQUIRE(derived_command->paths()[0] == path);
-    }
-    catch (boost::program_options::unknown_option& e) {
-        BOOST_FAIL(std::string("Unexpected exception caught: ") + e.what());
-    }
-}
+    std::vector<std::vector<std::string>> paths_set = {
+        {"/node1"}, {"/node1", "/node2"}, {"/node1", "/node2", "/node3"}};
 
-template <AlterCmd::Add_attr_type EXPECTED_TYPE>
-void test_handle_alter_add(const std::string& type,
-                           const std::string& name,
-                           const std::string& value,
-                           const std::string& path) {
-    auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "add", type, name, value, path);
+    for (const auto& paths : paths_set) {
 
-    ClientOptions options;
-    ClientEnvironment environment(false);
-    try {
-        auto base_command    = options.parse(cl, &environment);
-        auto derived_command = dynamic_cast<AlterCmd*>(base_command.get());
-
-        BOOST_REQUIRE(derived_command);
-        BOOST_REQUIRE(derived_command->value() == value);
-        BOOST_REQUIRE(derived_command->name() == name);
-        BOOST_REQUIRE(derived_command->add_attr_type() == EXPECTED_TYPE);
-        BOOST_REQUIRE(derived_command->paths().size() == 1);
-        BOOST_REQUIRE(derived_command->paths()[0] == path);
-    }
-    catch (boost::program_options::unknown_option& e) {
-        BOOST_FAIL(std::string("Unexpected exception caught: ") + e.what());
-    }
-}
-
-template <AlterCmd::Delete_attr_type EXPECTED_TYPE>
-void test_handle_alter_delete(const std::string& type, const std::string& name, const std::string& path) {
-    auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", type, name, path);
-
-    ClientOptions options;
-    ClientEnvironment environment(false);
-    try {
-        auto base_command    = options.parse(cl, &environment);
-        auto derived_command = dynamic_cast<AlterCmd*>(base_command.get());
-
-        BOOST_REQUIRE(derived_command);
-        BOOST_REQUIRE(derived_command->value() == "");
-        BOOST_REQUIRE(derived_command->name() == name);
-        BOOST_REQUIRE(derived_command->delete_attr_type() == EXPECTED_TYPE);
-        BOOST_REQUIRE(derived_command->paths().size() == 1);
-        BOOST_REQUIRE(derived_command->paths()[0] == path);
-    }
-    catch (boost::program_options::unknown_option& e) {
-        BOOST_FAIL(std::string("Unexpected exception caught: ") + e.what());
-    }
-}
-
-BOOST_AUTO_TEST_CASE(test_is_able_handle_alter) {
-    std::vector<std::string> values = {"--dashes at beginning of value",
-                                       "a value with --dashes inside",
-                                       "    value starting with spaces",
-                                       "value ending with spaces      "};
-
-    for (const auto& value : values) {
         using Expected = AlterCmd::Change_attr_type;
-        test_handle_alter_change<Expected::VARIABLE>("variable", "name", value, "/path/to/node");
-        test_handle_alter_change<Expected::LABEL>("label", "name", value, "/path/to/node");
-        test_handle_alter_change<Expected::EVENT>("event", "name", value, "/path/to/node");
-    }
 
-    for (const auto& value : values) {
-        using Expected = AlterCmd::Add_attr_type;
-        test_handle_alter_add<Expected::ADD_VARIABLE>("variable", "name", value, "/path/to/node");
-        test_handle_alter_add<Expected::ADD_LABEL>("label", "name", value, "/path/to/node");
-    }
+        /*
+         * --alter change variable <name> <value> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
 
-    {
+        std::vector<std::string> variable_values = {"",
+                                                    "--dashes at beginning of value",
+                                                    "a value with --dashes inside",
+                                                    "    value starting with spaces",
+                                                    "value ending with spaces      ",
+                                                    "   some value surrounded by spaces      ",
+                                                    "/some/valid/path"};
+
+        for (const auto& value : variable_values) {
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "variable", "name", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::VARIABLE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "variable", "name", value, paths, "--debug");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::VARIABLE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), true);
+                });
+            }
+        }
+
+        /*
+         * --alter change label <name> <value> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        std::vector<std::string> label_values = {"",
+                                                 "--dashes at beginning of value",
+                                                 "a value with --dashes inside",
+                                                 "    value starting with spaces",
+                                                 "value ending with spaces      ",
+                                                 "   some value surrounded by spaces      ",
+                                                 "/some/valid/path"};
+
+        for (const auto& value : label_values) {
+            {
+                auto cl =
+                    CommandLine::make_command_line("ecflow_client", "--alter", "change", "label", "name", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::LABEL);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "label", "name", value, paths, "--debug");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::LABEL);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), true);
+                });
+            }
+        }
+
+        /*
+         * --alter change event <name> <value> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        // No value provided
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "change", "event", "name", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "change", "event", "name", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+        // Explicitly provided value
+        std::vector<std::string> event_values = {"set", "clear"};
+        for (const auto& value : event_values) {
+            {
+                auto cl =
+                    CommandLine::make_command_line("ecflow_client", "--alter", "change", "event", "name", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::EVENT);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "event", "name", value, paths, "--debug");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::EVENT);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), true);
+                });
+            }
+        }
+
+        /*
+         * --alter change meter <name> <value> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        std::vector<std::string> meter_values = {"0", "100"};
+        for (const auto& value : meter_values) {
+            {
+                auto cl =
+                    CommandLine::make_command_line("ecflow_client", "--alter", "change", "meter", "name", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::METER);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "meter", "name", value, paths, "--debug");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::METER);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), true);
+                });
+            }
+        }
+
+        /*
+         * --alter change clock_type ( hybrid | real ) <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        std::vector<std::string> clock_type_values = {"hybrid", "real"};
+        for (const auto& value : clock_type_values) {
+            {
+                auto cl =
+                    CommandLine::make_command_line("ecflow_client", "--alter", "change", "clock_type", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), value);
+                    BOOST_REQUIRE_EQUAL(command.value(), "");
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::CLOCK_TYPE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "clock_type", value, paths, "--port", "1234");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), value);
+                    BOOST_REQUIRE_EQUAL(command.value(), "");
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::CLOCK_TYPE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "1234");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+        }
+
+        /*
+         * --alter change clock_gain <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "change", "clock_gain", "2023.01.01", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "2023.01.01");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::CLOCK_GAIN);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line(
+                "ecflow_client", "--alter", "change", "clock_gain", "2023.01.01", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "2023.01.01");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::CLOCK_GAIN);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+
+        /*
+         * --alter change clock_sync <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "change", "clock_sync", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::CLOCK_SYNC);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "change", "clock_sync", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::CLOCK_SYNC);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+
+        /*
+         * --alter change late <value>  <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        std::vector<std::string> late_values = {"late -s +00:15  -a  20:00  -c +02:00"};
+        for (const auto& value : late_values) {
+            {
+                auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "change", "late", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), value);
+                    BOOST_REQUIRE_EQUAL(command.value(), "");
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::LATE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "change", "late", value, paths, "--debug");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), value);
+                    BOOST_REQUIRE_EQUAL(command.value(), "");
+                    BOOST_REQUIRE_EQUAL(command.change_attr_type(), Expected::LATE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), true);
+                });
+            }
+        }
+
+    } // paths
+}
+
+BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_add) {
+
+    /*
+     * --alter add <type> <name> <value> <path> [<path>...]
+     * ************************************************************************************************************** */
+
+    std::vector<std::vector<std::string>> paths_set = {
+        {"/node1"}, {"/node1", "/node2"}, {"/node1", "/node2", "/node3"}};
+
+    for (const auto& paths : paths_set) {
+
+        using Expected                           = AlterCmd::Add_attr_type;
+
+        std::vector<std::string> variable_values = {"",
+                                                    "--dashes at beginning of value",
+                                                    "a value with --dashes inside",
+                                                    "    value starting with spaces",
+                                                    "value ending with spaces      ",
+                                                    "   some value surrounded by spaces      ",
+                                                    "/some/valid/path"};
+
+        /*
+         * --alter add variable <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        for (const auto& value : variable_values) {
+            {
+                auto cl =
+                    CommandLine::make_command_line("ecflow_client", "--alter", "add", "variable", "name", value, paths);
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_VARIABLE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), false);
+                });
+            }
+            {
+                auto cl = CommandLine::make_command_line(
+                    "ecflow_client", "--alter", "add", "variable", "name", value, paths, "--debug");
+                test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                    BOOST_REQUIRE_EQUAL(command.name(), "name");
+                    BOOST_REQUIRE_EQUAL(command.value(), value);
+                    BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_VARIABLE);
+                    BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                    for (size_t i = 0; i < paths.size(); ++i) {
+                        BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                    }
+                    BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                    BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                    BOOST_REQUIRE_EQUAL(env.debug(), true);
+                });
+            }
+        }
+    } // paths
+}
+
+BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_delete) {
+    /*
+     * --alter delete <type> <name> <path> [<path>...]
+     * ************************************************************************************************************** */
+
+    std::vector<std::vector<std::string>> paths_set = {
+        {"/node1"}, {"/node1", "/node2"}, {"/node1", "/node2", "/node3"}};
+
+    for (const auto& paths : paths_set) {
+
         using Expected = AlterCmd::Delete_attr_type;
-        test_handle_alter_delete<Expected::DEL_VARIABLE>("variable", "name", "/path/to/node");
-        test_handle_alter_delete<Expected::DEL_LABEL>("label", "name", "/path/to/node");
-        test_handle_alter_delete<Expected::DEL_EVENT>("event", "name", "/path/to/node");
-    }
+
+        /*
+         * --alter delete <type> <name> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        // No explicit name, means delete all variables
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "delete", "variable", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_VARIABLE);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", "variable", "name", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_VARIABLE);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line(
+                "ecflow_client", "--alter", "delete", "variable", "name", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_VARIABLE);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+
+        /*
+         * --alter delete label <name> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        // No explicit name, means delete all labels
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", "label", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_LABEL);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", "label", "name", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_LABEL);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "delete", "label", "name", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_LABEL);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+
+        /*
+         * --alter delete event <name> <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        // No explicit name, means delete all events
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", "event", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", "event", "name", paths);
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "delete", "event", "name", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client",
+                                                     "--host=default",
+                                                     "--port",
+                                                     "8888",
+                                                     "--alter",
+                                                     "delete",
+                                                     "event",
+                                                     "name",
+                                                     paths,
+                                                     "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "default");
+                BOOST_REQUIRE_EQUAL(env.port(), "8888");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client",
+                                                     "--alter",
+                                                     "delete",
+                                                     "event",
+                                                     "name",
+                                                     paths,
+                                                     "--host",
+                                                     "default",
+                                                     "--debug",
+                                                     "--port",
+                                                     "8888");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "default");
+                BOOST_REQUIRE_EQUAL(env.port(), "8888");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "delete", "event", paths, "--debug");
+            test_alter(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "");
+                BOOST_REQUIRE_EQUAL(command.value(), "");
+                BOOST_REQUIRE_EQUAL(command.delete_attr_type(), Expected::DEL_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), true);
+            });
+        }
+    } // paths
 }
 
 BOOST_AUTO_TEST_SUITE_END()

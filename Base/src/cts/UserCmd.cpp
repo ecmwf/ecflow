@@ -227,8 +227,6 @@ void UserCmd::split_args_to_options_and_paths(const std::vector<std::string>& ar
     else {
         // Treat ':' is path as a option, TREAT '/path/to/node/withlimit:limit_name' as a option
         for (size_t i = 0; i < vec_size; i++) {
-            if (args[i].empty())
-                continue;
             if (args[i][0] == '/' && args[i].find(" ") == std::string::npos && args[i].find(":") == std::string::npos) {
                 paths.push_back(args[i]);
             }
