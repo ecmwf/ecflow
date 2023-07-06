@@ -26,6 +26,9 @@
 //
 // Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
+#include <cstdint>
+
 #include "NodeFwd.hpp"
 namespace cereal {
 class access;

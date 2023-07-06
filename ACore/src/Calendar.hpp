@@ -79,6 +79,7 @@
 //  Resolution: Will support 1 minute resolution:
 //============================================================================
 
+#include <cstdint>
 #include <boost/date_time/posix_time/posix_time.hpp>
 namespace cereal {
 class access;
