@@ -43,7 +43,7 @@ public:
      *
      * @param cl the command line as a sequence of characters
      */
-    explicit CommandLine(cl_t cl);
+    explicit CommandLine(const cl_t& cl);
 
     /**
      * Create a Command Line instance based on a sequence of tokens.
@@ -54,13 +54,23 @@ public:
 
     /**
      * Create a Command Line instance based on multiple tokens.
+     * Tokens can be either strings or collections of strings. In the latter case, the collection of strings are
+     * added to the command line element-by-element.
      *
      * @param tokens the command line as multiple tokens
      */
     template <typename... TOKENS>
     static CommandLine make_command_line(TOKENS... tokens) {
+        auto push = Overload{
+            [](std::vector<std::string>& collection, const std::vector<std::string>& tokens) {
+                std::copy(std::begin(tokens), std::end(tokens), std::back_inserter(collection));
+            },
+            [](std::vector<std::string>& collection, const std::string& token) {
+                collection.push_back(token);
+            }};
+
         std::vector<std::string> ts;
-        ((ts.push_back(tokens)), ...);
+        ((push(ts, tokens)), ...);
         return CommandLine(ts);
     }
 
@@ -90,6 +100,14 @@ public:
 
 private:
     tokens_t tokens_;
+
+    // Utility to allow the combination of multiple lambdas
+    template <typename... L>
+    struct Overload : L...
+    {
+        using L::operator()...;
+        constexpr explicit Overload(L... lambda) : L(std::move(lambda))... {}
+    };
 };
 
 #endif

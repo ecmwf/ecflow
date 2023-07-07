@@ -14,6 +14,14 @@
 
 namespace ecf {
 
+namespace {
+
+bool is_valid_path(const std::string& path) {
+    return !path.empty() && path[0] == '/';
+}
+
+} // namespace
+
 ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsParser::arguments_set_t& args) {
     option_set_t processed_options;
 
@@ -22,11 +30,11 @@ ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsP
     // special value parameters are handled correctly. For example,
     // values starting with --, such as "--hello".
     //
-    // The custom handling will consider that 5 positional values (not
+    // The custom handling will consider that 5+ positional values (not
     // to be confused with positional arguments) are provided with the
     // --alter option, as per one of the following forms:
-    //     1) --alter arg1 arg2 arg3 arg4 arg5
-    //     2) --alter=arg1 arg2 arg3 arg4 arg5
+    //     1) --alter arg1 arg2 arg3 (arg4) path [path [path [...]]]
+    //     2) --alter=arg1 arg2 arg3 (arg4) path [path [path [...]]]
 
     if (boost::algorithm::starts_with(args[0], "--alter")) {
 
@@ -49,15 +57,37 @@ ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsP
         // Discard the option at the front
         args.erase(args.begin());
 
-        for (size_t i = 1; i < 5 && !args.empty(); ++i) {
-            // Take each of the 5 mandatory positional values as an option value
+        // Collect (non path) positional arguments
+        const size_t maximum_positional_args = 4;
+        for (size_t i = 0; i < maximum_positional_args && !args.empty(); ++i) {
+            // Take each of the positional values as an option value
             std::string& arg = args.front();
+            // Once we find the first path argument we stop collecting arguments
+            if (is_valid_path(arg)) {
+                break;
+            }
             alter.value.push_back(arg);
             alter.original_tokens.push_back(arg);
 
-            // Remove the positional value
+            // Remove the argument value
             args.erase(args.begin());
         }
+
+        // Collect only paths
+        for (; !args.empty();) {
+            // Take each of the positional values as an option value
+            std::string& arg = args.front();
+            // Once we find a (non path) argument, we stop collections arguments
+            if (!is_valid_path(arg)) {
+                break;
+            }
+            alter.value.push_back(arg);
+            alter.original_tokens.push_back(arg);
+
+            // Remove the argument value
+            args.erase(args.begin());
+        }
+
         processed_options.push_back(alter);
     }
     return processed_options;
