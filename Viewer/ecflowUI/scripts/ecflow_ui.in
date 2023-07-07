@@ -249,7 +249,7 @@ ecFlowUI $version
     -ts <host> <port> : start a temporary session viewing the given server
     -pc4              : start the executable via the proxychains4 command
     -cmd <cmd>        : start the executable via the specified command
-    -confd <dir>      : start with the specified configuraton directory
+    -confd <dir>      : start with the specified configuration directory
     -h                : print this help message
 HEND
 
