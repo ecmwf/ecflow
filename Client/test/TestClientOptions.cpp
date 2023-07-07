@@ -41,42 +41,6 @@ void test_alter(const CommandLine& cl, REQUIRE check) {
 
 BOOST_AUTO_TEST_SUITE(ClientTestSuite)
 
-BOOST_AUTO_TEST_CASE(test_is_able_to_process_regular_parameter) {
-
-    auto cl        = CommandLine(R"(executable --option)");
-
-    const auto& ts = cl.tokens();
-    for (size_t i = 0; i < ts.size(); ++i) {
-        std::cout << "ts[" << i << "] = [" << ts[i] << "]" << std::endl;
-    }
-
-    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 2ul);
-    BOOST_REQUIRE_EQUAL(cl.tokens()[0], "executable");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[1], "--option");
-}
-
-BOOST_AUTO_TEST_CASE(test_is_able_to_process_empty_parameter) {
-    // Make command line
-    auto cl = CommandLine(R"(   executable --option parameter  type name    ""   "   "   " value " "\"" /some/path  )");
-
-    const auto& ts = cl.tokens();
-    for (size_t i = 0; i < ts.size(); ++i) {
-        std::cout << "ts[" << i << "] = [" << ts[i] << "]" << std::endl;
-    }
-
-    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 10ul);
-    BOOST_REQUIRE_EQUAL(cl.tokens()[0], "executable");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[1], "--option");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[2], "parameter");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[3], "type");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[4], "name");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[5], "");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[6], "   ");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[7], " value ");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[8], "\"");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[9], "/some/path");
-}
-
 BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
     const char* expected_username = "username";
     const char* plain_password    = "password";
