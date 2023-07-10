@@ -73,13 +73,17 @@ private:
         }
     }
 
+    std::vector<char> selected_quote_ = {};
+
+    bool in_quote() { return !selected_quote_.empty(); }
+
 public:
     void reset() { last_ = false; }
 
     template <typename InputIterator, typename Token>
     bool operator()(InputIterator& next, InputIterator end, Token& tok) {
         // Reset collected Token
-        tok = Token();
+        tok        = Token();
         bool valid = false;
 
         // Consume pre-separators, and handle the case where we reach the end of the iterable
@@ -93,12 +97,12 @@ public:
 
         // Otherwise, collect the token
         last_ = false;
-        for (bool in_quote = false; next != end; ++next) {
+        for (; next != end; ++next) {
             if (is_escape(*next)) {
                 do_escape(next, end, tok);
             }
             else if (is_separator(*next)) {
-                if (!in_quote) {
+                if (!in_quote()) {
                     // If we are not in quote, then we are done
                     ++next;
                     // The last character was a c, that means there is
@@ -122,7 +126,19 @@ public:
                 }
             }
             else if (is_quote(*next)) {
-                in_quote = !in_quote;
+
+                if (!in_quote()) {
+                    // Entering quoted sequence...
+                    selected_quote_.push_back(*next);
+                }
+                else if (selected_quote_.back() == *next) {
+                    // Matching quotation marks detected... Ending the quoted sequence!
+                    selected_quote_.pop_back();
+                }
+                else {
+                    // Unmatched quotation marks detected... Keep collecting the quoted sequence!
+                    tok += *next;
+                }
             }
             else {
                 valid = true;
@@ -136,9 +152,15 @@ public:
                 last_ = false;
                 return true;
             }
+            if (in_quote()) {
+                throw std::runtime_error("Unmatched quotation marks detected");
+            }
             return valid;
         }
 
+        if (in_quote()) {
+            throw std::runtime_error("Unmatched quotation marks detected");
+        }
         return true;
     }
 };

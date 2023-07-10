@@ -69,21 +69,32 @@ BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_even_
     BOOST_REQUIRE_EQUAL(cl.tokens()[5], "/path/to/task");
 }
 
-BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_uneven_quotes) {
-    CommandLine cl{R"(ecflow_client --alter=change variable VARIABLE 'some long value string" "/path/to/task')"};
+BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_incorrect_quotes) {
+    BOOST_REQUIRE_THROW(
+        CommandLine{R"(ecflow_client --alter=change variable name "some incorrectly ' quoted value" "/some/path)"},
+        std::runtime_error);
+}
 
-    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 6ul);
+BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_unmatched_quotes) {
+    BOOST_REQUIRE_THROW(CommandLine{R"(ecflow_client --alter=change variable name "some unclosed value /some/path)"},
+                        std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_command_line_with_matched_quotes) {
+    CommandLine cl{R"(ecflow_client --alter=change variable name "some correctly 'inner' quotes value" '/some/path')"};
+
+    BOOST_REQUIRE_EQUAL(cl.size(), 6ul);
     BOOST_REQUIRE_EQUAL(cl.tokens()[0], "ecflow_client");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[4], "some long value string");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[5], "/path/to/task");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[4], "some correctly 'inner' quotes value");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[5], "/some/path");
 }
 
 BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_single_option) {
     CommandLine cl{R"(executable --option)"};
 
-    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 2ul);
-    BOOST_REQUIRE_EQUAL(cl.tokens()[0], "executable");
-    BOOST_REQUIRE_EQUAL(cl.tokens()[1], "--option");
+    BOOST_CHECK_EQUAL(cl.tokens().size(), 2ul);
+    BOOST_CHECK_EQUAL(cl.tokens()[0], "executable");
+    BOOST_CHECK_EQUAL(cl.tokens()[1], "--option");
 }
 
 BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_empty_value_parameters) {
@@ -100,6 +111,19 @@ BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_empty_value_parameters)
     BOOST_REQUIRE_EQUAL(cl.tokens()[7], " value ");
     BOOST_REQUIRE_EQUAL(cl.tokens()[8], "\"");
     BOOST_REQUIRE_EQUAL(cl.tokens()[9], "/some/path");
+}
+
+BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_single_quotes_in_double_quotes) {
+    CommandLine cl{R"(ecflow_client --alter change variable name "'value'" /some/path  )"};
+
+    BOOST_REQUIRE_EQUAL(cl.tokens().size(), 7ul);
+    BOOST_REQUIRE_EQUAL(cl.tokens()[0], "ecflow_client");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[1], "--alter");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[2], "change");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[3], "variable");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[4], "name");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[5], "'value'");
+    BOOST_REQUIRE_EQUAL(cl.tokens()[6], "/some/path");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
