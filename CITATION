@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Bahra"
+    given-names: "Avi"
+  journal: "ECMWF Newsletter"
+  start: 30 # First page number
+  end: 32 # Last page number
+  title: "Managing work flows with ecFlow"
+  volume: 129
+  month: 10
+  year: 2011
+  publisher: "ECMWF"
+  keywords:
+    - newsletter
+  languages:
+    - en
+  doi: 10.21957/nr843dob
+  url: "https://www.ecmwf.int/en/elibrary/80182-managing-work-flows-ecflow"
