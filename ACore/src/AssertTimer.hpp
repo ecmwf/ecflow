@@ -19,7 +19,7 @@
 
 namespace ecf {
 
-// Local timer class used to ensure, job submission takes less than 60 seconds
+// Local timer class used to ensure a job submission takes less than 60 seconds
 class AssertTimer {
 public:
     explicit AssertTimer(int t, bool doAssert = true)
@@ -42,4 +42,5 @@ private:
 };
 
 } // namespace ecf
+
 #endif /* ASSERTTIMER_HPP_ */
