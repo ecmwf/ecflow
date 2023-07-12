@@ -11,7 +11,7 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 //
-// Description : Simple class the assert when time constraint not met
+// Description : Simple class the assert when a time constraint is not met
 //============================================================================
 #include "AssertTimer.hpp"
 
@@ -31,4 +31,5 @@ AssertTimer::~AssertTimer() {
         LOG_ASSERT(d < timeConstraint_, "AssertTimer::~AssertTimer()");
     }
 }
+
 } // namespace ecf
