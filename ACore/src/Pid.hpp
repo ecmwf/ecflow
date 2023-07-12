@@ -19,11 +19,12 @@
 
 class Pid {
 public:
-    /// Returns the process pid as a string, otherwise throw exception(std::runtime_error)
+    /// Returns the current Process ID (as a string);
+    /// otherwise, throws exception(std::runtime_error)
     static std::string getpid();
 
-    /// Return the a unique name based on process identifier,otherwise throw exception(std::runtime_error)
-    /// returns prefix + _ + getpid();
+    /// Returns a unique name, based on Process ID, composed of prefix + '_' + getpid();
+    /// otherwise, throws exception(std::runtime_error)
     static std::string unique_name(const std::string& prefix);
 
 private:
