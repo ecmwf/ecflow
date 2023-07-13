@@ -15,6 +15,7 @@
 // Description :
 //============================================================================
 
+#include <cstdint>
 #include <string>
 #include <vector>
 namespace cereal {

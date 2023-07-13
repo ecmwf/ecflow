@@ -56,24 +56,6 @@ const char* ECF_PASS = getenv("ECF_PASS");
 
 namespace {
 
-class Timer {
-public:
-    Timer() : Timer("") {}
-    Timer(const std::string& name) : name_(name) { clock_gettime(CLOCK_REALTIME, &start_ts); }
-    ~Timer() {
-        clock_gettime(CLOCK_REALTIME, &stop_ts);
-        int64_t start = start_ts.tv_sec * 1000000000 + start_ts.tv_nsec;
-        int64_t stop  = stop_ts.tv_sec * 1000000000 + stop_ts.tv_nsec;
-
-        printf("Timer %s %ld ms\n", name_.c_str(), (stop - start) / 1000 / 1000);
-    }
-
-private:
-    std::string name_;
-    timespec start_ts;
-    timespec stop_ts;
-};
-
 template <typename T>
 void trigger_defs_update(T&& func) {
     {
@@ -579,8 +561,6 @@ json update_node_definition(const httplib::Request& request) {
     // Support "partial node adding/replacement", meaning that
     // user can give us just the definition of a new task, and
     // we will add that to the suite.
-
-    // Timer t(path);
 
     // this takes a long time, but we need a copy as we are changing
     // the defs locally here
