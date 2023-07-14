@@ -55,8 +55,9 @@ SslClient::SslClient(boost::asio::io_service& io_service,
 
 #ifdef DEBUG_CLIENT
     std::cout << "   SslClient::SslClient() timeout(" << timeout_ << ") " << host_ << ":" << port_ << " ";
-    cmd_ptr->print(std::cout);
-    std::cout << std::endl;
+    std::string output;
+    cmd_ptr->print(output);
+    std::cout << output << std::endl;
 #endif
 
     outbound_request_.set_cmd(cmd_ptr);
@@ -269,7 +270,7 @@ void SslClient::start_read() {
     deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
     connection_.async_read(inbound_response_,
-                           [this](const boost::system::error_code& error) { this->handle_write(error); });
+                           [this](const boost::system::error_code& error) { this->handle_read(error); });
 }
 
 void SslClient::handle_read(const boost::system::error_code& e) {
