@@ -39,14 +39,16 @@ PlainTextWidget::PlainTextWidget(QWidget* /*parent*/)
             this, SLOT(slotFontSizeDown()));
 }
 
-void PlainTextWidget::setPlainText(QString t)
-{
+void PlainTextWidget::setPlainText(QString t) {
     ui_->textEdit->setPlainText(t);
 }
 
-void PlainTextWidget::setTitle(QString t)
-{
+void PlainTextWidget::setTitle(QString t) {
     ui_->titleLabel->setText(t);
+}
+
+void PlainTextWidget::setShowTitleLabel(bool b) {
+    ui_->titleLabel->setVisible(b);
 }
 
 void PlainTextWidget::slotSearch() {

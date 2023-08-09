@@ -26,6 +26,7 @@ public:
 
     void setPlainText(QString);
     void setTitle(QString);
+    void setShowTitleLabel(bool);
 
 protected Q_SLOTS:
     void slotSearch();
