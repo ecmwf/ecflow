@@ -118,6 +118,7 @@ set(viewer_srcs
     PlainTextEdit.hpp
     PlainTextSearchInterface.hpp
     PlainTextSearchLine.hpp
+    PlainTextWidget.hpp
     PropertyDialog.hpp
     PropertyEditor.hpp
     PropertyLine.hpp
@@ -393,6 +394,7 @@ set(viewer_srcs
     PlainTextEdit.cpp
     PlainTextSearchLine.cpp
     PlainTextSearchInterface.cpp
+    PlainTextWidget.cpp
     PropertyDialog.cpp
     PropertyEditor.cpp
     PropertyLine.cpp
@@ -621,6 +623,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputDirProvider.hpp
     OutputDirWidget.hpp
     PlainTextEdit.hpp
+    PlainTextWidget.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
@@ -728,6 +731,7 @@ set(viewer_wrap_ui_files
     OutputFetchInfo.ui
     OutputItemWidget.ui
     OutputDirWidget.ui
+    PlainTextWidget.ui
     PropertyDialog.ui
     PropertyEditor.ui
     RepeatEditorWidget.ui

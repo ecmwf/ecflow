@@ -21,6 +21,7 @@
 #include "FileInfoLabel.hpp"
 #include "IconProvider.hpp"
 #include "MainWindow.hpp"
+#include "PlainTextWidget.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "TextFormat.hpp"
@@ -81,8 +82,11 @@ TimelineWidget::TimelineWidget(QWidget* /*parent*/)
     model_->resetData(data_);
 
     view_ = new TimelineView(sortModel_, this);
+    errorLogTe_ = new PlainTextWidget(this);
 
+    ui_->viewHolderLayout->addWidget(errorLogTe_);
     ui_->viewHolderLayout->addWidget(view_);
+    errorLogTe_->hide();
 
     // ui_->view->setModel(model_);
 
@@ -426,6 +430,7 @@ void TimelineWidget::updateFilterTriggerMode() {
 void TimelineWidget::setAllVisible(bool b) {
     ui_->viewControl->setVisible(b);
     view_->setVisible(b);
+    errorLogTe_->hide();
 }
 
 void TimelineWidget::slotPeriodSelectedInView(QDateTime start, QDateTime end) {
@@ -917,10 +922,11 @@ void TimelineWidget::slotFileTransferFailed(QString err) {
         logTransferred_ = false;
         ui_->messageLabel->stopLoadLabel();
         logLoaded_ = false;
-        ui_->messageLabel->showError("Could not fetch log file from remote host! <br>" + err);
+        ui_->messageLabel->showError("Could not fetch log file from remote host! <br>");
         data_->clear();
         setAllVisible(false);
         updateInfoLabel();
+        showErrorLog(err);
     }
 }
 
@@ -1130,6 +1136,12 @@ void TimelineWidget::slotExpandFileInfo(bool st) {
     Q_ASSERT(expandFileInfoProp_);
     expandFileInfoProp_->setValue(st);
     ui_->logInfoLabel->setCompact(!st);
+}
+
+void TimelineWidget::showErrorLog(QString err)
+{
+    errorLogTe_->setVisible(true);
+    errorLogTe_->setPlainText(err);
 }
 
 void TimelineWidget::writeSettings(VComboSettings* vs) {
