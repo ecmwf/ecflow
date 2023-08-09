@@ -83,6 +83,7 @@ TimelineWidget::TimelineWidget(QWidget* /*parent*/)
 
     view_ = new TimelineView(sortModel_, this);
     errorLogTe_ = new PlainTextWidget(this);
+    errorLogTe_->setTitle("Error log");
 
     ui_->viewHolderLayout->addWidget(errorLogTe_);
     ui_->viewHolderLayout->addWidget(view_);
