@@ -853,13 +853,13 @@ json update_node_attribute(const httplib::Request& request) {
         const std::string value = payload.at("value");
 
         if (type == "event") {
-            if (value != "set" && value != "false" && value != "clear" && value != "false") {
+            if (value != "set" && value != "true" && value != "clear" && value != "false") {
                 throw HttpServerException(HttpStatusCode::client_error_bad_request,
                                           "'value' for event must be one of: set/true, clear/false");
             }
             client->child_event(name, (value == "true" || value == "set"));
         }
-        else if (name == "meter") {
+        else if (type == "meter") {
             client->child_meter(name, std::stoi(value));
         }
         else if (type == "label") {
