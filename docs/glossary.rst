@@ -461,7 +461,7 @@
 
    ECF_FETCH
       *Experimental*
-      This is used to specify a command, whose output can be used as a job script. The ecFlow server will run the command with popen. Hence create care needs to be taken not to doom the server, with command that can hang. As this could severely affect servers ability to schedule jobs.
+      This is used to specify a command, whose output can be used as a job script. The ecFlow server will run the command with popen. Hence great care needs to be taken not to doom the server, with command that can hang. As this could severely affect servers ability to schedule jobs.
 
       .. code-block:: shell
 
@@ -2019,4 +2019,3 @@
       * **ecf_pid_passwd**: Both PID and password mismatch. Re-queue & submit of active job?
 
       The type of the zombie is not fixed and may change.
-     
