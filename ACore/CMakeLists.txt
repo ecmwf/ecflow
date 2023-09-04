@@ -25,6 +25,7 @@ set(srcs
   src/ecflow/core/CalendarUpdateParams.hpp
   src/ecflow/core/CheckPt.hpp
   src/ecflow/core/Child.hpp
+  src/ecflow/core/Chrono.hpp
   src/ecflow/core/CommandLine.hpp
   src/ecflow/core/DState.hpp
   src/ecflow/core/DebugPerf.hpp
@@ -66,6 +67,7 @@ set(srcs
   src/ecflow/core/Cal.cpp
   src/ecflow/core/Calendar.cpp
   src/ecflow/core/Child.cpp
+  src/ecflow/core/Chrono.cpp
   src/ecflow/core/CommandLine.cpp
   src/ecflow/core/DState.cpp
   src/ecflow/core/DurationTimer.cpp
@@ -142,6 +144,7 @@ set(test_srcs
   test/TestCereal.cpp
   test/TestCerealOptionalNVP.cpp
   test/TestCerealWithHierarchy.cpp
+  test/TestChrono.cpp
   test/TestClassDataMemberInit.cpp
   test/TestCommandLine.cpp
   test/TestCore_main.cpp # contains main() function for test driver

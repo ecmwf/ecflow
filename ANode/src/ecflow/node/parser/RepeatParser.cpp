@@ -48,6 +48,26 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
+    else if (lineTokens[1] == "datetime") {
+        // repeat datetime VARIABLE yyyy-mm-ddTMM:HH:SS yyyy-mm-ddTMM:HH:SS [MM:HH[:SS]]
+        if (line_token_size < 5)
+            throw std::runtime_error(errorMsg);
+
+        string name      = lineTokens[2];
+        Instant startYMD = Instant::parse(lineTokens[3]);
+        Instant endYMD   = Instant::parse(lineTokens[4]);
+        Duration delta   = Duration{std::chrono::seconds{86400}}; // by default, consider delta = 24 hours
+        if (line_token_size >= 6) {
+            delta = Duration::parse(lineTokens[5]);
+        }
+        RepeatDateTime rep(name, startYMD, endYMD, delta);
+        ecf::Instant value;
+        if (get_value(lineTokens, value)) {
+            rep.set_value(coerce_from_instant(value));
+        }
+
+        nodeStack_top()->addRepeat(Repeat(rep));
+    }
     else if (lineTokens[1] == "datelist") {
 
         if (line_token_size < 4)
@@ -217,6 +237,25 @@ bool RepeatParser::get_value(const std::vector<std::string>& lineTokens, int& va
             if (lineTokens[i] == "#") {
                 // token after comment is the value
                 value = Extract::theInt(token_after_comment, "RepeatParser::doParse, could not extract repeat value");
+                return true;
+            }
+            else
+                token_after_comment = lineTokens[i];
+        }
+    }
+    return false;
+}
+
+bool RepeatParser::get_value(const std::vector<std::string>& lineTokens, Instant& value) const {
+    // state
+    if (rootParser()->get_file_type() != PrintStyle::DEFS) {
+        // search back for comment
+        // repeat integer VARIABLE start end [step] # value
+        std::string token_after_comment;
+        for (size_t i = lineTokens.size() - 1; i > 3; i--) {
+            if (lineTokens[i] == "#") {
+                // token after comment is the value
+                value = Instant::parse(token_after_comment);
                 return true;
             }
             else

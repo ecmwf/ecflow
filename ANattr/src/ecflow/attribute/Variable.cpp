@@ -119,3 +119,20 @@ void Variable::serialize(Archive& ar) {
     ar(CEREAL_NVP(n_), CEREAL_NVP(v_));
 }
 CEREAL_TEMPLATE_SPECIALIZE(Variable);
+
+/*
+ * VariableMap
+ * *********** */
+
+void VariableMap::set_value(const std::string& value) {
+    for (auto& variable : variables_) {
+        variable.set_value(value);
+    }
+}
+
+Variable& VariableMap::operator[](const std::string& name) {
+    if (auto found = index_.find(name); found != std::end(index_)) {
+        return variables_[found->second];
+    }
+    throw std::runtime_error("Variable not found in Map");
+}

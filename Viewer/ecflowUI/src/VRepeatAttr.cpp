@@ -16,6 +16,7 @@
 #include "VNode.hpp"
 
 std::string VRepeatDateAttr::subType_("date");
+std::string VRepeatDateTimeAttr::subType_("datetime");
 std::string VRepeatDateListAttr::subType_("datelist");
 std::string VRepeatIntAttr::subType_("integer");
 std::string VRepeatStringAttr::subType_("string");
@@ -133,7 +134,7 @@ QString VRepeatAttrType::definition(QStringList d) const {
 
         t += " " + subType;
 
-        if (subType == "integer" || subType == "date") {
+        if (subType == "integer" || subType == "date" || subType == "datetime") {
             t += " " + d[NameIndex];
             t += " " + d[StartIndex];
             t += " " + d[EndIndex];
@@ -159,8 +160,9 @@ void VRepeatAttrType::encode(const Repeat& r,
     // std::string type=VRepeat::type(r);
 
     data << qName_ << QString::fromStdString(type) << QString::fromStdString(r.name())
-         << QString::fromStdString(r.valueAsString()) << ra->startValue() << ra->endValue() << QString::number(r.step())
-         << allValues << QString::number(ra->currentPosition());
+         << QString::fromStdString(r.valueAsString()) << ra->startValue() << ra->endValue()
+         << QString::fromStdString(ecf::Duration::format(ecf::Duration{std::chrono::seconds{r.step()}})) << allValues
+         << QString::number(ra->currentPosition());
 }
 
 //=====================================================
@@ -213,6 +215,8 @@ void VRepeatAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
 
             if (r.repeatBase()->isDate())
                 a = new VRepeatDateAttr(vnode);
+            else if (r.repeatBase()->isDateTime())
+                a = new VRepeatDateTimeAttr(vnode);
             else if (r.repeatBase()->isDateList())
                 a = new VRepeatDateListAttr(vnode);
             else if (r.repeatBase()->isInteger())
@@ -303,6 +307,86 @@ int VRepeatDateAttr::currentPosition() const {
             return 0;
         else if (r.value() == r.end() ||
                  ecf_repeat_date_to_julian(r.value()) + r.step() > ecf_repeat_date_to_julian(r.end()))
+            return 2;
+        else
+            return 1;
+    }
+
+    return -1;
+}
+
+//=====================================================
+//
+// VRepeatDateTimeAttr
+//
+//=====================================================
+
+int VRepeatDateTimeAttr::endIndex() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        if (r.step() > 0) {
+            auto jStart = ecf::coerce_to_instant(r.start());
+            auto jEnd   = ecf::coerce_to_instant(r.end());
+
+            int index   = (jEnd - jStart).as_seconds().count() / r.step();
+            auto val    = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
+            while (val > jEnd && index >= 1) {
+                index--;
+                val = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
+            }
+            return index;
+        }
+    }
+    return 0;
+}
+
+int VRepeatDateTimeAttr::currentIndex() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        auto jStart     = ecf::coerce_to_instant(r.start());
+        auto jEnd       = ecf::coerce_to_instant(r.end());
+
+        int cur         = (jEnd - jStart).as_seconds().count() / r.step();
+        return cur;
+    }
+    return 0;
+}
+
+QString VRepeatDateTimeAttr::startValue() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        std::string s   = ecf::Instant::format(ecf::coerce_to_instant(r.start()));
+        return QString::fromStdString(s);
+    }
+    return {};
+}
+
+QString VRepeatDateTimeAttr::endValue() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        std::string s   = ecf::Instant::format(ecf::coerce_to_instant(r.end()));
+        return QString::fromStdString(s);
+    }
+    return {};
+}
+
+std::string VRepeatDateTimeAttr::value(int index) const {
+    std::stringstream ss;
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        ss << ecf::Instant::format(ecf::coerce_to_instant(r.start() + index * r.step()));
+    }
+    return ss.str();
+}
+
+int VRepeatDateTimeAttr::currentPosition() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        if (r.start() == r.end())
+            return -1;
+        else if (r.value() == r.start())
+            return 0;
+        else if (r.value() == r.end() || ecf::coerce_to_instant(r.value() + r.step()) > ecf::coerce_to_instant(r.end()))
             return 2;
         else
             return 1;
