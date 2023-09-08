@@ -5,10 +5,9 @@ complete
 
 Force a node to be complete if the trigger evaluates, without running any of the nodes.
 
-This allows you to have tasks in the suite which a run only if others
-fail. In practice the node would need to have a trigger also. This
-allows you to have **standby** nodes which may run depending on the
-success of other nodes.
+This allows the user to have tasks in the suite which run only in case others
+fail. In practice the node would need to also have a trigger. A complete
+enables making nodes **standby** depending on the success of other nodes.
 
 Here is an example where task **tt** does not run if task **t** meter is more than 120. If task **t** however completes, but the meter **step** is less that 120 the **standby** job will run.
 

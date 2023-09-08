@@ -164,9 +164,9 @@
 
   
    complete expression
-      Force a node to be complete **if** the expression evaluates, without running any of the nodes. 
-      
-      This allows you to have tasks in the suite which a run only if others fail. 
+      Force a node to be complete **if** the expression evaluates, without running any of the nodes.
+
+      This allows the user to have tasks in the suite which run only in case others fail.
       In practice the node would need to have a :term:`trigger` also. 
       
       .. list-table::
