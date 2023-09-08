@@ -23,11 +23,10 @@ necessary. This is useful when running a test suite not in real-time.
 
    Sample suite structure
 
-ecFlow can help in the monitoring of suites in many ways, beyond the indication of task status. For instance, the
-`late <https://confluence.ecmwf.int/display/ECFLOW/Late+Attribute>`__
-command in ecFlow can be used to highlight problems with time-critical
-scripts. The command will mark a node as late when certain conditions
-are met; such as submitted for too long, running for too long, or not
+ecFlow can help in the monitoring of suites in many ways, beyond the indication of task status.
+For instance, the :ref:`late<tutorial-late-attribute>` command in ecFlow can be used to
+highlight problems with time-critical scripts. The command will mark a node as late when
+certain conditions are met; such as submitted for too long, running for too long, or not
 active by a certain time. This is used in conjunction with a GUI to
 launch a pop-up window once a late condition is reached. To use this
 option you need to make sure that the GUI option "show/special/late

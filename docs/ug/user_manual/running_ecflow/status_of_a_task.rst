@@ -23,7 +23,7 @@ The status of a task can vary as follows (default colours are shown):
    --init**
 
 -  Before a job **ends** it may send other messages to ECFLOW such as
-   those shown below; These are referred to as `child commands <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__ :
+   those shown below; these are referred to as :term:`child commands<child command>`:
 
    .. code-block:: shell
 

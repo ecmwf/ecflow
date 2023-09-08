@@ -17,7 +17,8 @@ To use ecFLow you need to carry out a few steps
    special comments and manual sections that provide information for
    operators.
 
-The `child commands <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__ are a restricted set of client commands that communicate with the server. They inform the server when the job has started, completed, or set an **event**.
+The :term:`child commands<child command>` are a restricted set of client commands that communicate with the server.
+They inform the server when the job has started, completed, or set an **event**.
 
 Once these activities are done, the ecFlow server is started and the suite definition is loaded into the server.
 
@@ -39,9 +40,10 @@ The process of **job creation** includes:
 -  The steps above transform a '.ecf' script to a job file that can be
    submitted.
 
-The running jobs will communicate back to the server using `child commands <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__. This causes **status changes** on the **nodes** in the server and flags can be set to indicate various events.
+The running jobs will communicate back to the server using :term:`child commands<child command>`.
+This causes **status changes** on the **nodes** in the server and flags can be set to indicate various events.
   
-ecFLow has a specialised GUI client, called `ecflow_ui <https://confluence.ecmwf.int/display/ECFLOW/Using+ecflow_ui>`__. This is used to visualise and monitor:
+ecFLow has a specialised GUI client, called :term:`ecflow_ui`. This is used to visualise and monitor:
 
 -  The hierarchical structure of the **suite definition** (Suite,
    Family, Task's i.e. **nodes**)

@@ -19,4 +19,4 @@ overridden by:
    setting in the **"server_environment.config"** file.
 
 For the full list of environment variables used the server please see
-'ecflow_server' in the `Glossary <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__.
+'ecflow_server' in the :ref:`Glossary`.

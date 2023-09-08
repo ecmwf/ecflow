@@ -3,52 +3,24 @@
 Adding Triggers and Complete
 ////////////////////////////
 
-Triggers define a dependency on a
-`task <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-task>`__
-or
-`family <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-family>`__
-. There can be only one trigger dependency per
-`node <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-node>`__,
-but that can be a complex boolean expression of the
-`status <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-status>`__
-of several nodes. Triggers can not be added to the suite node. A node
-with a trigger can only be activated when its trigger has expired. A
-trigger holds the node as long as the trigger’s expression evaluation
-returns false.
+Triggers define a dependency on a :term:`task` or :term:`family`.
+There can be only one trigger dependency per :term:`node`, but that
+can be a complex boolean expression of the :term:`status` of several nodes.
+Triggers can not be added to the suite node. A node with a trigger can only
+be activated when its trigger has expired. A trigger holds the node as long
+as the trigger’s expression evaluation returns false.
 
-Trigger evaluation occurs whenever the `child
-command <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-child-command>`__
-communicates with the server. i.e. whenever there is a state change in
-the suite definition and at least once every 60 seconds. The keywords in
-trigger expressions are:
-`unknown <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-unknown>`__
-,
-`suspended <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-suspended>`__
-,
-`complete <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-complete>`__
-,
-`queued <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-queued>`__
-,
-`submitted <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-submitted>`__
-,
-`active <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-active>`__
-,
-`aborted <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-aborted>`__
-and **clear** and **set** for
-`event <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-event>`__
-status. Triggers can also reference Node attributes like
-`event <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-event>`__
-,
-`meter <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-meter>`__
-,
-`variable <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-variable>`__
-,
-`repeat <https://confluence.ecmwf.int/display/ECFLOW/Glossary#term-repeat>`__
-and generated variables and
-`limits <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__.
+Trigger evaluation occurs whenever the child :term:`task` communicates with the
+server i.e. whenever there is a state change in the suite definition and at
+least once every 60 seconds. The keywords in trigger expressions are:
+:term:`unknown`, :term:`suspended`, :term:`complete`, :term:`queued`,
+:term:`submitted`, :term:`active`, :term:`aborted` and **clear** and **set**
+for :term:`event` status. Triggers can also reference Node attributes like
+:term:`event`, :term:`meter`, :term:`variable`, :term:`repeat` and generated
+variables and :term:`limits<limit>`.
 Triggers can also reference the late flag on a node. Trigger evaluation
-for node attributes uses integer arithmetic. See
-`Glossary <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__
+for node attributes uses integer arithmetic.
+See the :ref:`Glossary` for more details.
 
 .. code-block:: python 
 

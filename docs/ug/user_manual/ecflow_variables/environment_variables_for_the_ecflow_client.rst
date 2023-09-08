@@ -10,4 +10,4 @@ Some of these variables must be set and exported before any of the
 the header of the task so that all tasks would have them correctly set.
 
 For a full list of environment variables used by ecflow_client please
-see the `Glossary <https://confluence.ecmwf.int/display/ECFLOW/Glossary>`__.
+see the :ref:`Glossary`.
