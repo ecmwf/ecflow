@@ -1,3 +1,4 @@
+cmake_options: -DBOOST_ROOT=/usr
 dependencies: |
   ecmwf/ecbuild
 dependency_branch: develop
