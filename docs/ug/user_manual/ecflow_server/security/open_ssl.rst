@@ -61,8 +61,9 @@ The following steps, show you how to create these files:
    .. warning::
 
       Although it was previously suggested to use 1024 bit RSA keys,
-      when using OpenSSL 1.1.1 these keys are regarded as unsecure
-      and therefore are automatically rejected.
+      when using OpenSSL with TLS Security Level set to 2 (typical of recent OSes)
+      these keys are regarded as unsecure and therefore are automatically rejected.
+
       The use of 2048 bit RSA keys is *strongly* recommended.
 
 -  If you want additional security. Create a file called
