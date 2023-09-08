@@ -228,7 +228,7 @@ void to_json(json& j, const Expression* a) {
 }
 
 void to_json(json& j, const Expression& a) {
-    const std::vector<PartExpression> exprs = a.expr();
+    const std::vector<PartExpression>& exprs = a.expr();
     std::vector<json> str;
 
     for (const auto& expr : exprs) {
