@@ -195,7 +195,10 @@ void start_server(httplib::Server& http_server) {
         printf("%s server listening on port %d\n", proto.c_str(), opts.port);
 
     try {
-        http_server.listen("0.0.0.0", opts.port);
+        bool ret = http_server.listen("0.0.0.0", opts.port);
+        if (ret == false) {
+            throw std::runtime_error("Failed to bind to port " + std::to_string(opts.port));
+        }
     }
     catch (const std::exception& e) {
         if (opts.verbose)
@@ -221,10 +224,12 @@ void HttpServer::run() {
         apply_listeners(dynamic_cast<httplib::Server&>(http_server));
         start_server(http_server);
     }
+    else
 #endif
+    {
+        httplib::Server http_server;
 
-    httplib::Server http_server;
-
-    apply_listeners(http_server);
-    start_server(http_server);
+        apply_listeners(http_server);
+        start_server(http_server);
+    }
 }
