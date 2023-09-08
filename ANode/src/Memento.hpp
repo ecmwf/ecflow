@@ -77,7 +77,7 @@ private:
 };
 
 // Used for storing all the memento's associated with a single node
-// This allow us to make only *ONE* call to find the node.
+// This allows to make only *ONE* call to find the node.
 // The mementos are then applied to this single node.
 class CompoundMemento {
 public:

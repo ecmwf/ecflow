@@ -24,10 +24,11 @@ using namespace ecf;
 using namespace std;
 
 bool GenericParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
-    // expect:
-    //    generic <key> <value1> <value2> .... # actual  i.e
-    //    generic fred va1 val2 #  sdsdsd
-    //    generic fred # sdsdsd
+    // expected format:
+    //    generic <key> <value1> <value2> .... # any comment after a first # is ignored
+    // examples:
+    //    generic fred va1 val2 # some comment
+    //    generic fred # another comment
     if (lineTokens.size() < 2)
         throw std::runtime_error("GenericParser::doParse: Invalid generic :" + line);
 
