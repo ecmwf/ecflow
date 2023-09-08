@@ -45,9 +45,6 @@ The node can be dependent because:
 The following sections discuss the different dependency types, and give
 examples of how to use them together.
 
-Table of contents
-=================
-
 .. toctree::
    :maxdepth: 1
 

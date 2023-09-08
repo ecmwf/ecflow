@@ -9,8 +9,7 @@ limitations on the use of this functionality, i.e.:
 * conditionals and looping structures are not allowed
 * families can only exist inside a suite or inside other families.
 
-Table of contents
-=================
+The following topics are covered:
 
 .. toctree::
    :maxdepth: 1
@@ -23,5 +22,3 @@ Table of contents
    label
    limit
    end_suite_family_task
-
-   
