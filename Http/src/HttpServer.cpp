@@ -49,7 +49,7 @@ void read_environment() {
         opts.tokens_file = std::string(getenv("ECF_RESTAPI_TOKENS_FILE"));
     }
     if (getenv("ECF_RESTAPI_CERT_DIRECTORY") != nullptr) {
-        opts.tokens_file = std::string(getenv("ECF_RESTAPI_CERT_DIRECTORY"));
+        opts.cert_directory = std::string(getenv("ECF_RESTAPI_CERT_DIRECTORY"));
     }
     if (getenv("ECF_RESTAPI_MAX_UPDATE_INTERVAL") != nullptr) {
         opts.max_polling_interval = atoi(getenv("ECF_RESTAPI_MAX_UPDATE_INTERVAL"));
