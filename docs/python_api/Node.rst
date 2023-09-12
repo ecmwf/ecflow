@@ -1092,7 +1092,7 @@ Find generated variable on the node only.  Returns a object
 .. py:method:: Node.find_generic( (Node)arg1, (str)arg2) -> Generic :
    :module: ecflow
 
-Find the generic on the node only. Returns a Generic object
+Find the :term:`generic` on the node only. Returns a Generic object
 
 
 .. py:method:: Node.find_label( (Node)arg1, (str)arg2) -> Label :
@@ -1146,7 +1146,7 @@ Find user variable on the node only.  Returns a object
 .. py:property:: Node.generics
    :module: ecflow
 
-Returns a list of `generic`_\ s
+Returns a list of :term:`generic`\ s
 
 
 .. py:method:: Node.get_abs_node_path( (Node)arg1) -> str :

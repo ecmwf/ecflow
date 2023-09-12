@@ -1039,7 +1039,15 @@
       For python see :py:class:`ecflow.Family`. For BNF see :token:`family`
       
       It serves as an intermediate :term:`node` in a :term:`suite definition`.
-      
+
+   generic
+      A generic attribute associates a name to a set of generic string values, and is used to gracefully indicate
+      the presence of unknown attributes in the suite definition.
+
+      This kind of attribute is used to allow the introduction of future attributes without requiring an API change.
+      When an older version of ecflow encounters a new/unknown attribute, the attribute is automatically converted
+      into a generic attribute.
+
    halted
       Is a :term:`ecflow_server` state. See :term:`server states`.
       

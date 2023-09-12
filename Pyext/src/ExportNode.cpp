@@ -700,7 +700,7 @@ void export_Node() {
         .def("find_generic",
              &Node::find_generic,
              return_value_policy<copy_const_reference>(),
-             "Find the generic on the node only. Returns a Generic object")
+             "Find the `generic`_ on the node only. Returns a Generic object")
         .def("find_limit", &Node::find_limit, "Find the `limit`_ on the node only. returns a limit ptr")
         .def("find_node_up_the_tree", &Node::find_node_up_the_tree, "Search immediate node, then up the node hierarchy")
         .def("get_state", &Node::state, "Returns the state of the node. This excludes the suspended state")
