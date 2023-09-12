@@ -20,98 +20,81 @@
 #include "SState.hpp"
 #include "User.hpp"
 
-using json = nlohmann::json;
-
-void to_json(json& j, const Meter& a) {
-    j = json({{"name", a.name()}, {"min", a.min()}, {"max", a.max()}, {"value", a.value()}});
+void to_json(ecf::ojson& j, const Meter& a) {
+    j = ecf::ojson({{"name", a.name()}, {"min", a.min()}, {"max", a.max()}, {"value", a.value()}});
 }
 
-void to_json(json& j, const Label& a) {
-    j = json({{"name", a.name()}, {"value", a.new_value().empty() ? a.value() : a.new_value()}});
+void to_json(ecf::ojson& j, const Label& a) {
+    j = ecf::ojson({{"name", a.name()}, {"value", a.new_value().empty() ? a.value() : a.new_value()}});
 }
 
-void to_json(json& j, const Variable& a) {
-    j = json({{"name", a.name()}, {"value", a.theValue()}, {"const", false}});
+void to_json(ecf::ojson& j, const ::Variable& a) {
+    j = ecf::ojson({{"name", a.name()}, {"value", a.theValue()}, {"const", false}});
 }
 
-void to_json(json& j, const Event& a) {
-    j = json({{"name", a.name()}, {"value", a.value()}, {"initial_value", a.initial_value()}});
+void to_json(ecf::ojson& j, const Event& a) {
+    j = ecf::ojson({{"name", a.name()}, {"value", a.value()}, {"initial_value", a.initial_value()}});
 }
 
-void to_json(json& j, const limit_ptr& a) {
-    j = json({{"name", a->name()}, {"value", a->value()}, {"limit", a->theLimit()}});
+void to_json(ecf::ojson& j, const limit_ptr& a) {
+    j = ecf::ojson({{"name", a->name()}, {"value", a->value()}, {"limit", a->theLimit()}});
 }
 
-void to_json(json& j, const InLimit& a) {
-    j = json({{"value", a.toString()}});
+void to_json(ecf::ojson& j, const InLimit& a) {
+    j = ecf::ojson({{"value", a.toString()}});
 }
 
-void to_json(json& j, const DateAttr& a) {
+void to_json(ecf::ojson& j, const DateAttr& a) {
     std::string value = a.toString();
     value             = value.substr(5, std::string::npos); // remove prefix "date "
-    j                 = json({{"value", value}, {"free", a.isSetFree()}});
+    j                 = ecf::ojson({{"value", value}, {"free", a.isSetFree()}});
 }
 
-void to_json(json& j, const DayAttr& a) {
+void to_json(ecf::ojson& j, const DayAttr& a) {
     std::string value = a.toString();
     value             = value.substr(4, std::string::npos); // remove prefix "day "
-    j                 = json({{"value", value}, {"free", a.isSetFree()}, {"expired", a.expired()}});
+    j                 = ecf::ojson({{"value", value}, {"free", a.isSetFree()}, {"expired", a.expired()}});
 }
 
-void ecf::to_json(json& j, const TimeAttr& a) {
-    std::string value = a.toString();
-    value             = value.substr(5, std::string::npos); // remove prefix "date "
-    j                 = json({{"value", value}});
-}
-
-void ecf::to_json(json& j, const TodayAttr& a) {
-    j = json(
-        {{"value", a.time_series().toString()}, {"free", a.isSetFree()}, {"expired", !a.time_series().is_valid()}});
-}
-
-void ecf::to_json(json& j, const CronAttr& a) {
-    std::string value = a.toString();
-    value             = value.substr(5, std::string::npos); // remove prefix "cron "
-    j                 = json({{"value", value}});
-}
-
-void to_json(json& j, const RepeatDateList& a) {
+void to_json(ecf::ojson& j, const RepeatDateList& a) {
     std::vector<std::string> lst;
     for (int i = 0; i < a.indexNum(); i++) {
         lst.push_back(a.value_as_string(i));
     }
-    j = json({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
+    j = ecf::ojson({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
 }
 
-void to_json(nlohmann::json& j, const RepeatDate& a) {
-    j = json({{"name", a.name()}, {"start", a.start()}, {"end", a.end()}, {"step", a.step()}, {"value", a.value()}});
+void to_json(ecf::ojson& j, const RepeatDate& a) {
+    j = ecf::ojson(
+        {{"name", a.name()}, {"start", a.start()}, {"end", a.end()}, {"step", a.step()}, {"value", a.value()}});
 }
 
-void to_json(nlohmann::json& j, const RepeatDay& a) {
-    j = json({{"name", a.name()}, {"value", a.value()}, {"valid", a.valid()}});
+void to_json(ecf::ojson& j, const RepeatDay& a) {
+    j = ecf::ojson({{"name", a.name()}, {"value", a.value()}, {"valid", a.valid()}});
 }
 
-void to_json(nlohmann::json& j, const RepeatInteger& a) {
-    j = json({{"name", a.name()}, {"start", a.start()}, {"end", a.end()}, {"step", a.step()}, {"value", a.value()}});
+void to_json(ecf::ojson& j, const RepeatInteger& a) {
+    j = ecf::ojson(
+        {{"name", a.name()}, {"start", a.start()}, {"end", a.end()}, {"step", a.step()}, {"value", a.value()}});
 }
 
-void to_json(nlohmann::json& j, const RepeatEnumerated& a) {
+void to_json(ecf::ojson& j, const RepeatEnumerated& a) {
     std::vector<std::string> lst;
     for (int i = 0; i < a.indexNum(); i++) {
         lst.push_back(a.value_as_string(i));
     }
-    j = json({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
+    j = ecf::ojson({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
 }
 
-void to_json(nlohmann::json& j, const RepeatString& a) {
+void to_json(ecf::ojson& j, const RepeatString& a) {
     std::vector<std::string> lst;
     for (int i = 0; i < a.indexNum(); i++) {
         lst.push_back(a.value_as_string(i));
     }
-    j = json({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
+    j = ecf::ojson({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
 }
 
-void to_json(nlohmann::json& j, const Repeat& a) {
+void to_json(ecf::ojson& j, const Repeat& a) {
     const RepeatBase* r = a.repeatBase();
 
     if (auto rr = dynamic_cast<const RepeatDate*>(r)) {
@@ -134,7 +117,7 @@ void to_json(nlohmann::json& j, const Repeat& a) {
     }
 }
 
-void to_json(nlohmann::json& j, const Stats& s) {
+void to_json(ecf::ojson& j, const Stats& s) {
     j["version"]                   = s.version_;
     j["status"]                    = SState::to_string(s.status_);
     j["host"]                      = s.host_;
@@ -220,16 +203,16 @@ void to_json(nlohmann::json& j, const Stats& s) {
     j["file_manual"]               = s.file_manual_;
 }
 
-void to_json(json& j, const Expression* a) {
+void to_json(ecf::ojson& j, const Expression* a) {
     if (a == nullptr)
         return;
 
     to_json(j, *a);
 }
 
-void to_json(json& j, const Expression& a) {
+void to_json(ecf::ojson& j, const Expression& a) {
     const std::vector<PartExpression>& exprs = a.expr();
-    std::vector<json> str;
+    std::vector<ecf::ojson> str;
 
     for (const auto& expr : exprs) {
         std::string typestr("FIRST");
@@ -238,7 +221,7 @@ void to_json(json& j, const Expression& a) {
         else if (expr.orExpr())
             typestr = "OR";
 
-        json jj = json::object({{"expression", expr.expression()}, {"type", typestr}});
+        ecf::ojson jj = ecf::ojson::object({{"expression", expr.expression()}, {"type", typestr}});
 
         str.push_back(jj);
     }
@@ -246,21 +229,59 @@ void to_json(json& j, const Expression& a) {
     std::string value;
     a.print(value, "complete");
     value = value.substr(11, value.size() - 12);
-    j     = json::object({{"free", a.isFree()}, {"expressions", str}, {"value", value}});
+    j     = ecf::ojson::object({{"free", a.isFree()}, {"expressions", str}, {"value", value}});
 }
 
-void ecf::to_json(json& j, const Flag& a) {
+void to_json(ecf::ojson& j, const ::QueueAttr& a) {
+    j["name"]  = a.name();
+    j["index"] = a.index();
+    j["value"] = a.value();
+    j["queue"] = a.list();
+}
+
+void to_json(ecf::ojson& j, const ::ZombieAttr& a) {
+    j["type"]           = ecf::Child::to_string(a.zombie_type());
+    j["action"]         = ecf::User::to_string(a.action());
+    j["child_commands"] = ecf::Child::to_string(a.child_cmds());
+    j["lifetime"]       = a.zombie_lifetime();
+}
+
+void to_json(ecf::ojson& j, const GenericAttr& a) {
+    j["name"]   = a.name();
+    j["values"] = const_cast<GenericAttr&>(a).values();
+}
+
+namespace ecf {
+
+void to_json(ecf::ojson& j, const ecf::TimeAttr& a) {
+    std::string value = a.toString();
+    value             = value.substr(5, std::string::npos); // remove prefix "date "
+    j                 = ecf::ojson({{"value", value}});
+}
+
+void to_json(ecf::ojson& j, const ecf::TodayAttr& a) {
+    j = ecf::ojson(
+        {{"value", a.time_series().toString()}, {"free", a.isSetFree()}, {"expired", !a.time_series().is_valid()}});
+}
+
+void to_json(ecf::ojson& j, const ecf::CronAttr& a) {
+    std::string value = a.toString();
+    value             = value.substr(5, std::string::npos); // remove prefix "cron "
+    j                 = ecf::ojson({{"value", value}});
+}
+
+void to_json(ecf::ojson& j, const ecf::Flag& a) {
     j["value"] = a.to_string();
 }
 
-void ecf::to_json(json& j, const LateAttr* a) {
+void to_json(ecf::ojson& j, const ecf::LateAttr* a) {
     if (a == nullptr)
         return;
 
     to_json(j, *a);
 }
 
-void ecf::to_json(json& j, const LateAttr& a) {
+void to_json(ecf::ojson& j, const ecf::LateAttr& a) {
     j["submitted"]            = a.submitted();
     j["active"]               = a.active();
     j["complete"]             = a.complete();
@@ -270,37 +291,18 @@ void ecf::to_json(json& j, const LateAttr& a) {
     j["value"]                = value;
 }
 
-void ecf::to_json(json& j, const TimeSlot& a) {
+void to_json(ecf::ojson& j, const ecf::TimeSlot& a) {
     j["value"] = a.toString();
 }
 
-void to_json(json& j, const ZombieAttr& a) {
-    j["type"]           = ecf::Child::to_string(a.zombie_type());
-    j["action"]         = ecf::User::to_string(a.action());
-    j["child_commands"] = ecf::Child::to_string(a.child_cmds());
-    j["lifetime"]       = a.zombie_lifetime();
-}
-
-void to_json(json& j, const QueueAttr& a) {
-    j["name"]  = a.name();
-    j["index"] = a.index();
-    j["value"] = a.value();
-    j["queue"] = a.list();
-}
-
-void to_json(json& j, const GenericAttr& a) {
-    j["name"]   = a.name();
-    j["values"] = const_cast<GenericAttr&>(a).values();
-}
-
-void ecf::to_json(json& j, const ecf::AutoCancelAttr* a) {
+void to_json(ecf::ojson& j, const ecf::AutoCancelAttr* a) {
     if (a == nullptr)
         return;
 
     to_json(j, *a);
 }
 
-void ecf::to_json(json& j, const ecf::AutoCancelAttr& a) {
+void to_json(ecf::ojson& j, const ecf::AutoCancelAttr& a) {
     j["relative"]     = a.relative();
     j["days"]         = a.days();
     j["time"]         = a.time();
@@ -308,27 +310,29 @@ void ecf::to_json(json& j, const ecf::AutoCancelAttr& a) {
     j["value"]        = value;
 }
 
-void ecf::to_json(json& j, const ecf::AutoRestoreAttr* a) {
+void to_json(ecf::ojson& j, const ecf::AutoRestoreAttr* a) {
     if (a == nullptr)
         return;
 
     to_json(j, *a);
 }
-void ecf::to_json(json& j, const ecf::AutoRestoreAttr& a) {
+void to_json(ecf::ojson& j, const ecf::AutoRestoreAttr& a) {
     std::string value = a.toString().substr(12, std::string::npos);
     j["value"]        = value;
 }
 
-void ecf::to_json(json& j, const ecf::AutoArchiveAttr* a) {
+void to_json(ecf::ojson& j, const ecf::AutoArchiveAttr* a) {
     if (a == nullptr)
         return;
 
     to_json(j, *a);
 }
-void ecf::to_json(json& j, const ecf::AutoArchiveAttr& a) {
+void to_json(ecf::ojson& j, const ecf::AutoArchiveAttr& a) {
     j["relative"]     = a.relative();
     j["days"]         = a.days();
     j["time"]         = a.time();
     std::string value = a.toString().substr(12, std::string::npos);
     j["value"]        = value;
 }
+
+} // namespace ecf

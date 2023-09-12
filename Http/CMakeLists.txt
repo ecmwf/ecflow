@@ -14,6 +14,7 @@ list( APPEND srcs
    src/BasicAuth.hpp
    src/HttpServer.hpp
    src/HttpServerException.hpp
+   src/JSON.hpp
    src/Options.hpp
    src/TokenStorage.hpp
    src/TypeToJson.hpp

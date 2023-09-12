@@ -34,38 +34,38 @@
 #endif
 
 #include "ClientInvoker.hpp"
+#include "JSON.hpp"
 #include "httplib.h"
-#include "nlohmann/json.hpp"
 
 void update_defs_loop(int interval);
 
 std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
-std::unique_ptr<ClientInvoker> get_client(const nlohmann::json& j);
+std::unique_ptr<ClientInvoker> get_client(const ecf::ojson& j);
 
-nlohmann::json get_sparser_node_tree(const std::string& path);
+ecf::ojson get_sparser_node_tree(const std::string& path);
 
 void add_suite(const httplib::Request& request, httplib::Response& response);
 
-nlohmann::json get_suites();
+ecf::ojson get_suites();
 
-nlohmann::json get_server_attributes();
-nlohmann::json add_server_attribute(const httplib::Request& request);
-nlohmann::json update_server_attribute(const httplib::Request& request);
-nlohmann::json delete_server_attribute(const httplib::Request& request);
+ecf::ojson get_server_attributes();
+ecf::ojson add_server_attribute(const httplib::Request& request);
+ecf::ojson update_server_attribute(const httplib::Request& request);
+ecf::ojson delete_server_attribute(const httplib::Request& request);
 
-nlohmann::json get_node_definition(const std::string& path);
-nlohmann::json update_node_definition(const httplib::Request& request);
+ecf::ojson get_node_definition(const std::string& path);
+ecf::ojson update_node_definition(const httplib::Request& request);
 
-nlohmann::json get_node_attributes(const std::string& path);
-nlohmann::json add_node_attribute(const httplib::Request& request);
-nlohmann::json update_node_attribute(const httplib::Request& request);
-nlohmann::json delete_node_attribute(const httplib::Request& request);
+ecf::ojson get_node_attributes(const std::string& path);
+ecf::ojson add_node_attribute(const httplib::Request& request);
+ecf::ojson update_node_attribute(const httplib::Request& request);
+ecf::ojson delete_node_attribute(const httplib::Request& request);
 
-nlohmann::json get_node_status(const httplib::Request& request);
-nlohmann::json update_node_status(const httplib::Request& request);
+ecf::ojson get_node_status(const httplib::Request& request);
+ecf::ojson update_node_status(const httplib::Request& request);
 
-nlohmann::json get_node_output(const httplib::Request& request);
+ecf::ojson get_node_output(const httplib::Request& request);
 
-nlohmann::json update_script_content(const httplib::Request& request);
+ecf::ojson update_script_content(const httplib::Request& request);
 
 #endif

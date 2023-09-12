@@ -28,6 +28,7 @@
 #include "Flag.hpp"
 #include "GenericAttr.hpp"
 #include "InLimit.hpp"
+#include "JSON.hpp"
 #include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "LimitFwd.hpp"
@@ -40,44 +41,42 @@
 #include "TodayAttr.hpp"
 #include "Variable.hpp"
 #include "ZombieAttr.hpp"
-#include "nlohmann/json.hpp"
 
-void to_json(nlohmann::json&, const Meter&);
-void to_json(nlohmann::json&, const Label&);
-void to_json(nlohmann::json&, const Variable&);
-void to_json(nlohmann::json&, const Event&);
-void to_json(nlohmann::json&, const limit_ptr&);
-void to_json(nlohmann::json&, const InLimit&);
-void to_json(nlohmann::json&, const DateAttr&);
-void to_json(nlohmann::json&, const DayAttr&);
-void to_json(nlohmann::json&, const RepeatDate&);
-void to_json(nlohmann::json&, const RepeatDay&);
-void to_json(nlohmann::json&, const RepeatDateList&);
-void to_json(nlohmann::json&, const RepeatInteger&);
-void to_json(nlohmann::json&, const RepeatEnumerated&);
-void to_json(nlohmann::json&, const RepeatString&);
-void to_json(nlohmann::json&, const Repeat&);
-void to_json(nlohmann::json&, const Stats&);
-void to_json(nlohmann::json&, const Expression*);
-void to_json(nlohmann::json&, const Expression&);
-void to_json(nlohmann::json&, const QueueAttr&);
-void to_json(nlohmann::json&, const ZombieAttr&);
-void to_json(nlohmann::json&, const GenericAttr&);
-
+void to_json(ecf::ojson&, const ::Meter&);
+void to_json(ecf::ojson&, const ::Label&);
+void to_json(ecf::ojson&, const ::Variable&);
+void to_json(ecf::ojson&, const ::Event&);
+void to_json(ecf::ojson&, const ::limit_ptr&);
+void to_json(ecf::ojson&, const ::InLimit&);
+void to_json(ecf::ojson&, const ::DateAttr&);
+void to_json(ecf::ojson&, const ::DayAttr&);
+void to_json(ecf::ojson&, const ::RepeatDate&);
+void to_json(ecf::ojson&, const ::RepeatDay&);
+void to_json(ecf::ojson&, const ::RepeatDateList&);
+void to_json(ecf::ojson&, const ::RepeatInteger&);
+void to_json(ecf::ojson&, const ::RepeatEnumerated&);
+void to_json(ecf::ojson&, const ::RepeatString&);
+void to_json(ecf::ojson&, const ::Repeat&);
+void to_json(ecf::ojson&, const ::Stats&);
+void to_json(ecf::ojson&, const ::Expression*);
+void to_json(ecf::ojson&, const ::Expression&);
+void to_json(ecf::ojson&, const ::QueueAttr&);
+void to_json(ecf::ojson&, const ::ZombieAttr&);
+void to_json(ecf::ojson&, const ::GenericAttr&);
 namespace ecf {
-void to_json(nlohmann::json&, const TimeAttr&);
-void to_json(nlohmann::json&, const TodayAttr&);
-void to_json(nlohmann::json&, const CronAttr&);
-void to_json(nlohmann::json&, const Flag&);
-void to_json(nlohmann::json&, const LateAttr*);
-void to_json(nlohmann::json&, const LateAttr&);
-void to_json(nlohmann::json&, const TimeSlot&);
-void to_json(nlohmann::json&, const AutoCancelAttr*);
-void to_json(nlohmann::json&, const AutoCancelAttr&);
-void to_json(nlohmann::json&, const AutoArchiveAttr*);
-void to_json(nlohmann::json&, const AutoArchiveAttr&);
-void to_json(nlohmann::json&, const AutoRestoreAttr*);
-void to_json(nlohmann::json&, const AutoRestoreAttr&);
-} // namespace ecf
+void to_json(ecf::ojson&, const ecf::TimeAttr&);
+void to_json(ecf::ojson&, const ecf::TodayAttr&);
+void to_json(ecf::ojson&, const ecf::CronAttr&);
+void to_json(ecf::ojson&, const ecf::Flag&);
+void to_json(ecf::ojson&, const ecf::LateAttr*);
+void to_json(ecf::ojson&, const ecf::LateAttr&);
+void to_json(ecf::ojson&, const ecf::TimeSlot&);
+void to_json(ecf::ojson&, const ecf::AutoCancelAttr*);
+void to_json(ecf::ojson&, const ecf::AutoCancelAttr&);
+void to_json(ecf::ojson&, const ecf::AutoArchiveAttr*);
+void to_json(ecf::ojson&, const ecf::AutoArchiveAttr&);
+void to_json(ecf::ojson&, const ecf::AutoRestoreAttr*);
+void to_json(ecf::ojson&, const ecf::AutoRestoreAttr&);
+}
 
 #endif

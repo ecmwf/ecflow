@@ -17,8 +17,8 @@
 #include <boost/program_options.hpp>
 
 #include "ApiV1.hpp"
+#include "JSON.hpp"
 #include "Options.hpp"
-#include "nlohmann/json.hpp"
 
 Options opts;
 
@@ -142,7 +142,7 @@ void apply_listeners(httplib::Server& http_server) {
         catch (const std::exception& e) {
             if (opts.verbose)
                 printf("Exception: Error 500: %s\n", e.what());
-            nlohmann::json j;
+            ecf::ojson j;
             j["status"]  = res.status;
             j["message"] = e.what();
             j["path"]    = req.path;
@@ -168,7 +168,7 @@ void apply_listeners(httplib::Server& http_server) {
         // registered endpoints
 
         if (res.body.empty()) {
-            nlohmann::json j;
+            ecf::ojson j;
             j["path"]   = req.path;
             j["status"] = res.status;
             res.set_content(j.dump(), "application/json");

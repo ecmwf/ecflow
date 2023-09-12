@@ -31,13 +31,12 @@
     #include <shared_mutex>
 
     #include "HttpServerException.hpp"
+    #include "JSON.hpp"
     #include "Options.hpp"
     #include "Str.hpp"
-    #include "nlohmann/json.hpp"
 
 std::shared_mutex m;
 using string                  = std::string;
-using json                    = nlohmann::json;
 std::atomic<bool> initialized = false;
 extern Options opts;
 
@@ -154,7 +153,7 @@ bool TokenStorage::verify(const std::string& token) const {
 
 std::vector<Token> ReadTokens(const std::string& filename) {
     std::ifstream ifs(filename);
-    json j = json::parse(ifs);
+    ecf::ojson j = ecf::ojson::parse(ifs);
     std::vector<Token> new_tokens;
 
     /* Read a token from json file.
@@ -235,7 +234,7 @@ void TokenStorage::ReadStorage() {
         catch (const fs::filesystem_error& e) {
             printf("ERROR: API token file (%s) read failed: %s\n", opts.tokens_file.c_str(), e.what());
         }
-        catch (const json::exception& e) {
+        catch (const ecf::ojson::exception& e) {
             printf("ERROR: API token file (%s) parse failed: %s\n", opts.tokens_file.c_str(), e.what());
         }
         initialized = true;
