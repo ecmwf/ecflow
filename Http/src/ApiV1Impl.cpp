@@ -282,10 +282,9 @@ ecf::ojson get_node_status(const httplib::Request& request) {
 }
 
 template <typename T>
-void apply_recursively_to_parent(ecf::ojson& j, const Node* node, T&& func) {
-    if (node != nullptr) {
-        func(j, node);
-        apply_recursively_to_parent(j, node->parent(), func);
+void apply_to_parents(const Node* node, T&& func) {
+    for (const Node* up = node; up != nullptr; up = up->parent()) {
+        func(up);
     }
 }
 
@@ -381,93 +380,52 @@ ecf::ojson get_server_attributes() {
     return j;
 }
 
-ecf::ojson get_generated_variables(node_ptr& node) {
-
-    static const std::vector<std::string> suite_gen_variables{"DATE",
-                                                              "DAY",
-                                                              "DD",
-                                                              "DOW",
-                                                              "DOY",
-                                                              "ECF_CLOCK",
-                                                              "ECF_DATE",
-                                                              "ECF_JULIAN",
-                                                              "ECF_TIME",
-                                                              "MM",
-                                                              "MONTH",
-                                                              "SUITE",
-                                                              "TIME",
-                                                              "YYYY"};
-    static const std::vector<std::string> family_gen_variables{"FAMILY", "FAMILY1"};
-    static const std::vector<std::string> task_gen_variables{
-        "ECF_JOB", "ECF_JOBOUT", "ECF_NAME", "ECF_PASS", "ECF_RID", "ECF_SCRIPT", "ECF_TRYNO", "TASK"};
-
-    std::vector<Variable> ret;
-
-    if (node->isSuite()) {
-        for (const auto& v : suite_gen_variables) {
-            ret.emplace_back(node->findGenVariable(v));
-        }
-    }
-    else if (node->isFamily()) {
-        for (const auto& v : family_gen_variables) {
-            ret.emplace_back(node->findGenVariable(v));
-        }
-    }
-    else if (node->isTask()) {
-        for (const auto& v : task_gen_variables) {
-            ret.emplace_back(node->findGenVariable(v));
-        }
-    }
-
-    ecf::ojson j = ret;
-    for (auto& v : j) {
-        v["const"] = true;
-    }
-
-    return j;
-}
-
 ecf::ojson get_node_attributes(const std::string& path) {
     ecf::ojson j;
 
-    node_ptr node      = get_node(path);
+    node_ptr node    = get_node(path);
 
-    j["meters"]        = node->meters();
-    j["limits"]        = node->limits();
-    j["inlimits"]      = node->inlimits();
-    j["events"]        = node->events();
-    j["variables"]     = node->variables();
-    j["labels"]        = node->labels();
-    j["dates"]         = node->dates();
-    j["days"]          = node->days();
-    j["crons"]         = node->crons();
-    j["times"]         = node->timeVec();
-    j["todays"]        = node->todayVec();
-    j["repeat"]        = node->repeat();
-    j["path"]          = path;
-    j["trigger"]       = node->get_trigger();
-    j["complete"]      = node->get_complete();
-    j["flag"]          = node->get_flag();
-    j["late"]          = node->get_late();
-    j["zombies"]       = node->zombies();
-    j["generics"]      = node->generics();
-    j["queues"]        = node->queues();
-    j["autocancel"]    = node->get_autocancel();
-    j["autoarchive"]   = node->get_autoarchive();
-    j["autorestore"]   = node->get_autorestore();
+    j["meters"]      = node->meters();
+    j["limits"]      = node->limits();
+    j["inlimits"]    = node->inlimits();
+    j["events"]      = node->events();
+    j["variables"]   = node->variables();
+    j["labels"]      = node->labels();
+    j["dates"]       = node->dates();
+    j["days"]        = node->days();
+    j["crons"]       = node->crons();
+    j["times"]       = node->timeVec();
+    j["todays"]      = node->todayVec();
+    j["repeat"]      = node->repeat();
+    j["path"]        = path;
+    j["trigger"]     = node->get_trigger();
+    j["complete"]    = node->get_complete();
+    j["flag"]        = node->get_flag();
+    j["late"]        = node->get_late();
+    j["zombies"]     = node->zombies();
+    j["generics"]    = node->generics();
+    j["queues"]      = node->queues();
+    j["autocancel"]  = node->get_autocancel();
+    j["autoarchive"] = node->get_autoarchive();
+    j["autorestore"] = node->get_autorestore();
 
-    auto gen_variables = get_generated_variables(node);
+    {
+        // Collect 'normal' variables
+        auto vars = node->variables();
+        // ... and generated variables
+        node->gen_variables(vars);
 
-    for (const auto& v : gen_variables) {
-        j["variables"].push_back(v);
+        j["variables"] = vars;
     }
-    auto parent = node->parent();
 
-    if (parent != nullptr) {
-        ecf::ojson js;
-        apply_recursively_to_parent(js, parent, [](ecf::ojson& j, const Node* n) { j[n->name()] = n->variables(); });
-        j["inherited_variables"] = js;
-    }
+    apply_to_parents(node->parent(), [&j](const Node* n) {
+        // Collect 'normal' variables
+        auto vars = n->variables();
+        // ... and generated variables
+        n->gen_variables(vars);
+
+        j["inherited_variables"][n->name()] = vars;
+    });
 
     auto server_variables = get_defs()->server().server_variables();
     auto user_variables   = get_defs()->server().user_variables();
