@@ -1001,6 +1001,10 @@
       When an older version of ecflow encounters a new/unknown attribute, the attribute is automatically converted
       into a generic attribute.
 
+      .. warning::
+
+         The user is strongly advised not to include generic attributes in suite definitions.
+
    halted
       Is a :term:`ecflow_server` state. See :term:`server states`.
       
