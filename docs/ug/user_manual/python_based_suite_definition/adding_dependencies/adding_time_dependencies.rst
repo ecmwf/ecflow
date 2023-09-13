@@ -27,9 +27,9 @@ The following suite definition is **NOT** a real design, it just demonstrates al
          Task(
                "time",
                Time("+00:30"),  # 30 minutes after suite has begun
-               Time("+00:30 20:00 01:00"),  # 00:30,01:30,02:30....07:30 after suite start
+               Time("+00:30 20:00 01:00"),  # 00:30,01:30,02:30....19:30 after suite start
                Time(0, 59, True),  # 00:59 - 59 minutes past midnight
-               Time(TimeSlot(20, 10)),  # 20:10 - 10 minutes pas eight
+               Time(TimeSlot(20, 10)),  # 20:10 - 10 minutes past eight
                Time(
                   TimeSlot(20, 20), True
                ),  # +20:20 - 20 minutes and 20 hours, after suite start
@@ -51,7 +51,7 @@ The following suite definition is **NOT** a real design, it just demonstrates al
    )
 
 
-The following show alternative example that produces the same definition:
+The following shows an alternative example that produces the same definition:
 
 .. code-block:: python
 
