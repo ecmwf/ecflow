@@ -63,6 +63,14 @@ void to_json(ecf::ojson& j, const RepeatDate& a) {
         {{"name", a.name()}, {"start", a.start()}, {"end", a.end()}, {"step", a.step()}, {"value", a.value()}});
 }
 
+void to_json(ecf::ojson& j, const RepeatDateTime& a) {
+    j = ecf::ojson({{"name", a.name()},
+                    {"start", ecf::Instant::format(a.start_instant())},
+                    {"end", ecf::Instant::format(a.end_instant())},
+                    {"step", ecf::Duration::format(a.step_duration())},
+                    {"value", ecf::Instant::format(a.value_instant())}});
+}
+
 void to_json(ecf::ojson& j, const RepeatDay& a) {
     j = ecf::ojson({{"name", a.name()}, {"value", a.value()}, {"valid", a.valid()}});
 }
@@ -88,27 +96,31 @@ void to_json(ecf::ojson& j, const RepeatString& a) {
     j = ecf::ojson({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
 }
 
-void to_json(ecf::ojson& j, const Repeat& a) {
-    const RepeatBase* r = a.repeatBase();
+namespace {
 
-    if (auto rr = dynamic_cast<const RepeatDate*>(r)) {
-        return to_json(j, *rr);
+template <typename T, typename... Rest>
+void repeat_to_json(ecf::ojson& j, const RepeatBase* b) {
+    if (auto rr = dynamic_cast<const T*>(b)) {
+        to_json(j, *rr);
+        return;
     }
-    if (auto rr = dynamic_cast<const RepeatDateList*>(r)) {
-        return to_json(j, *rr);
+
+    if constexpr (sizeof...(Rest) >= 1) {
+        repeat_to_json<Rest...>(j, b);
     }
-    if (auto rr = dynamic_cast<const RepeatInteger*>(r)) {
-        return to_json(j, *rr);
-    }
-    if (auto rr = dynamic_cast<const RepeatDay*>(r)) {
-        return to_json(j, *rr);
-    }
-    if (auto rr = dynamic_cast<const RepeatString*>(r)) {
-        return to_json(j, *rr);
-    }
-    if (auto rr = dynamic_cast<const RepeatEnumerated*>(r)) {
-        return to_json(j, *rr);
-    }
+}
+
+} // namespace
+
+void to_json(ecf::ojson& j, const Repeat& a) {
+    const RepeatBase* b = a.repeatBase();
+    repeat_to_json<RepeatDate,
+                   RepeatDateTime,
+                   RepeatDateList,
+                   RepeatInteger,
+                   RepeatDay,
+                   RepeatString,
+                   RepeatEnumerated>(j, b);
 }
 
 void to_json(ecf::ojson& j, const Stats& s) {

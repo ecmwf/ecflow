@@ -211,6 +211,11 @@ public:
     const Variable& find_gen_variable(const std::string& name) const override;
     void update_repeat_genvar() const override;
 
+    const ecf::Instant& start_instant() const { return start_; }
+    const ecf::Instant& end_instant() const { return end_; }
+    const ecf::Duration& step_duration() const { return delta_; }
+    const ecf::Instant& value_instant() const { return value_; }
+
     int start() const override { return coerce_from_instant(start_); }
     int end() const override { return coerce_from_instant(end_); }
     int step() const override { return delta_.as_seconds().count(); }
