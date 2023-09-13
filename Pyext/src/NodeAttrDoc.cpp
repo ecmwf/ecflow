@@ -225,8 +225,8 @@ const char* NodeAttrDoc::event_doc() {
            ".. code-block:: python\n\n"
            "   event = Event(2,'event_name')\n"
            "   task.add_event(event)\n"
-           "   task1.add_event('2')          # create a event '1' and add to the task\n"
-           "   task2.add_event('name')       # create a event 'name' and add to task\n\n"
+           "   task1.add_event('2')          # create an event '2' and add to the task\n"
+           "   task2.add_event('name')       # create an event 'name' and add to task\n\n"
            "   # Events can be created in the Task constructor, like any other attribute\n"
            "   t = Task('t3',\n"
            "            Event(2,'event_name'))\n";
