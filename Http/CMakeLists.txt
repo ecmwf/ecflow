@@ -31,6 +31,7 @@ list( APPEND srcs
 # so if we have OpenSSL enabled and the version is less than this,
 # we should disable SSL capabilities from the HTTP server
 
+set(OPENSSL_VERSION_MAJOR 0)
 if (OPENSSL_FOUND)
     if (NOT
         (OPENSSL_VERSION_MAJOR GREATER_EQUAL 1 AND
@@ -39,6 +40,7 @@ if (OPENSSL_FOUND)
 
         ecbuild_warn("HTTP_SERVER requires at least OpenSSL 1.1.1 for https support (have version ${OPENSSL_VERSION}) - disabling https in HTTP server")
         remove_definitions( -DECF_OPENSSL )
+        set(DISABLED_SSL_IN_HTTP_SERVER 1)
     endif()
 endif()
 
@@ -110,7 +112,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       test/TestApiV1.cpp
   )
 
-  if (OPENSSL_FOUND)
+  if (OPENSSL_FOUND AND NOT DISABLED_SSL_IN_HTTP_SERVER)
 
     ecbuild_add_test( TARGET       s_http
                       SOURCES      ${test_srcs}
