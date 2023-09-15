@@ -26,6 +26,23 @@ list( APPEND srcs
    src/TypeToJson.cpp
    src/TokenStorage.cpp
 )
+
+# cpp-httplib requires at least OpenSSL 1.1.1 for https support
+# so if we have OpenSSL enabled and the version is less than this,
+# we should disable SSL capabilities from the HTTP server
+
+if (OPENSSL_FOUND)
+    if (NOT
+        (OPENSSL_VERSION_MAJOR GREATER_EQUAL 1 AND
+         OPENSSL_VERSION_MINOR GREATER_EQUAL 1 AND
+         OPENSSL_VERSION_FIX GREATER_EQUAL 1))
+
+        ecbuild_warn("HTTP_SERVER requires at least OpenSSL 1.1.1 for https support (have version ${OPENSSL_VERSION}) - disabling https in HTTP server")
+        remove_definitions( -DECF_OPENSSL )
+    endif()
+endif()
+
+
 ecbuild_add_library( TARGET libhttp
                      NOINSTALL
                      TYPE     STATIC
