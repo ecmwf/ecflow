@@ -40,15 +40,16 @@ if (HAVE_WARNINGS)
 
   ecbuild_add_c_flags(-Wall)
   ecbuild_add_c_flags(-Wextra)
-  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
-    ecbuild_add_c_flags(-pedantic)
+  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "IntelLLVM")
+   ecbuild_add_c_flags(-pedantic)
+   ecbuild_add_cxx_flags(-pedantic)
   else()
     ecbuild_add_c_flags(-Wpedantic)
+    ecbuild_add_cxx_flags(-Wpedantic)
   endif()
 
   ecbuild_add_cxx_flags(-Wall)
   ecbuild_add_cxx_flags(-Wextra)
-  ecbuild_add_cxx_flags(-Wpedantic)
 
   # Silence compiler warnings
   # n.b. All these extra compiler options should be removed, and the compiler warnings properly silenced
