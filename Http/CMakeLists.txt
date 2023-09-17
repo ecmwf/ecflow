@@ -31,7 +31,6 @@ list( APPEND srcs
 # so if we have OpenSSL enabled and the version is less than this,
 # we should disable SSL capabilities from the HTTP server
 
-set(OPENSSL_VERSION_MAJOR 0)
 if (OPENSSL_FOUND)
     if (NOT
         (OPENSSL_VERSION_MAJOR GREATER_EQUAL 1 AND
@@ -134,7 +133,6 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
   endif()
 
 endif()
-
 
 # ===================================================================
 # install
