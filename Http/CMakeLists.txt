@@ -31,7 +31,6 @@ list( APPEND srcs
 # so if we have OpenSSL enabled and the version is less than this,
 # we should disable SSL capabilities from the HTTP server
 
-set(OPENSSL_VERSION_MAJOR 0)
 if (OPENSSL_FOUND)
     if (OPENSSL_VERSION VERSION_LESS 1.1.1)
         ecbuild_warn("HTTP_SERVER requires at least OpenSSL 1.1.1 for https support (have version ${OPENSSL_VERSION}) - disabling https in HTTP server")
