@@ -1302,6 +1302,36 @@ std::string AstInteger::why_expression(bool /*html*/) const {
     return expression();
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+
+void AstInstant::accept(ExprAstVisitor& v) {
+    v.visitInstant(this); // Not calling base
+}
+
+AstInstant* AstInstant::clone() const {
+    auto* ast = new AstInstant(value_);
+    return ast;
+}
+
+std::ostream& AstInstant::print(std::ostream& os) const {
+    Indentor in;
+    return Indentor::indent(os) << "# Instant " << value_ << "\n";
+}
+
+void AstInstant::print_flat(std::ostream& os, bool /*add_bracket*/) const {
+    os << value_;
+}
+
+std::string AstInstant::expression() const {
+    std::stringstream ss;
+    ss << value_;
+    return ss.str();
+}
+
+std::string AstInstant::why_expression(bool /*html*/) const {
+    return expression();
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 
 void AstNodeState::accept(ExprAstVisitor& v) {
@@ -1993,6 +2023,9 @@ std::ostream& operator<<(std::ostream& os, const AstLeaf& d) {
     return d.print(os);
 }
 std::ostream& operator<<(std::ostream& os, const AstInteger& d) {
+    return d.print(os);
+}
+std::ostream& operator<<(std::ostream& os, const AstInstant& d) {
     return d.print(os);
 }
 std::ostream& operator<<(std::ostream& os, const AstNodeState& d) {

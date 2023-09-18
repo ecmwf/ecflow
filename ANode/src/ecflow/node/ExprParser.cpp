@@ -130,6 +130,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
     static const int root_path_ID       = 62;
     static const int parent_variable_ID = 63;
 
+    static const int datetime_ID = 64;
+
     template <typename ScannerT>
     struct definition
     {
@@ -200,6 +202,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
         rule<ScannerT> not_r, less_than_comparable, expression, andExpr, operators;
         rule<ScannerT> nodestate, equality_comparible, and_or, nodepath;
+
+        rule<ScannerT, parser_tag<datetime_ID>> datetime;
 
         //        ‘*’   Zero or more
         //        ‘!’   Zero or one
@@ -285,8 +289,9 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                 str_p("cal::date_to_julian") >> discard_node_d[ch_p('(')] >> cal_argument >> discard_node_d[ch_p(')')];
             cal_julian_to_date =
                 str_p("cal::julian_to_date") >> discard_node_d[ch_p('(')] >> cal_argument >> discard_node_d[ch_p(')')];
+            datetime = leaf_node_d[lexeme_d[repeat_p(8)[digit_p] >> 'T' >> repeat_p(6)[digit_p]]];
 
-            calc_factor = integer | basic_variable_path |
+            calc_factor = datetime | integer | basic_variable_path |
                           discard_node_d[ch_p('(')] >> calc_expression >> discard_node_d[ch_p(')')] | flag_path |
                           parent_variable | root_node_d[operators] >> calc_factor | cal_date_to_julian |
                           cal_julian_to_date;
@@ -345,6 +350,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
             BOOST_SPIRIT_DEBUG_NODE(calc_expression);
             BOOST_SPIRIT_DEBUG_NODE(calc_term);
             BOOST_SPIRIT_DEBUG_NODE(compare_expression);
+            BOOST_SPIRIT_DEBUG_NODE(datetime);
         };
 
         rule<ScannerT> const& start() const { return expression; }
@@ -417,6 +423,8 @@ static void populate_rule_names() {
         rule_names[ExpressionGrammer::basic_variable_path_ID] = "basic_variable_path_ID";
         rule_names[ExpressionGrammer::parent_variable_ID]     = "parent_variable_ID";
         rule_names[ExpressionGrammer::compare_expression_ID]  = "compare_expression_ID";
+
+        rule_names[ExpressionGrammer::datetime_ID] = "datetime";
     }
 }
 
@@ -448,7 +456,7 @@ bool ExprParser::doParse(std::string& errorMsg) {
     ExpressionGrammer grammer;
     BOOST_SPIRIT_DEBUG_NODE(grammer);
 
-    // Use parser that generates a abstract syntax tree
+    // Use parser to generates a Boost.Spirit Abstract Syntax Tree (AST)
     tree_parse_info<> info = ast_parse(expr_.c_str(), grammer, space_p);
     if (info.full) {
 
@@ -460,8 +468,8 @@ bool ExprParser::doParse(std::string& errorMsg) {
 #if defined(PRINT_TREE)
         print(info, expr_, rule_names);
 #endif
-        // Spirit has created a AST for us. However it is not use able as is
-        // we will traverse the AST and create our OWN
+        // Boost.Spirit has created an AST for us.
+        // However, it is not usable as is, so we will traverse the AST and create our OWN `Ast*` classes.
         ast_.reset(createTopAst(info, expr_, rule_names, errorMsg));
         if (ast_.get() && errorMsg.empty()) {
             ExprDuplicate::add(expr_, ast_.get());
@@ -766,6 +774,12 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
         assert(thevalue == Event::CLEAR());
         return new AstEventState(false);
     }
+    else if (i->value.id() == ExpressionGrammer::datetime_ID) {
+
+        string thevalue(std::begin(i->value), std::end(i->value));
+        ecf::Instant instant = Instant::parse(thevalue);
+        return new AstInstant(instant);
+    }
     else if (i->value.id() == ExpressionGrammer::integer_ID) {
 
         string thevalue(i->value.begin(), i->value.end());
@@ -1029,7 +1043,13 @@ AstTop* createTopAst(tree_parse_info<> info,
 #endif
 
     std::unique_ptr<AstTop> ast = std::make_unique<AstTop>();
-    (void)doCreateAst(info.trees.begin(), rule_names, ast.get());
+    try {
+        (void)doCreateAst(info.trees.begin(), rule_names, ast.get());
+    }
+    catch (std::runtime_error& error) {
+        error_msg = error.what();
+        return nullptr;
+    }
 
     if (!ast->is_valid_ast(error_msg)) {
         return nullptr;

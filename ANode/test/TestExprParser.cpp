@@ -33,122 +33,130 @@ BOOST_AUTO_TEST_SUITE(T_ExprParser)
 BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
     std::cout << "ANode:: ...test_expression_parser_basic\n";
 
+    using namespace std::string_literals;
+
     // This must be nicely formatted, i.e. AST is nicely space formatted otherwise it will fail the test
-    // This test ENSURES the the AST matches the expression. (i.e by getting AST to print the expression)
-    // Note: we can use NOT,eq,ne,le,ge, or brackets
+    // This test ENSURES that the AST matches the expression. (i.e. by getting AST to print the expression)
+    // Note: we can use NOT,eq,ne,le,ge or brackets
     //       we can't use a:event_name  ==> a:event_name == set
-    std::vector<std::string> vec;
-    vec.emplace_back("a == complete");
-    vec.emplace_back("a != complete");
-    vec.emplace_back("a:value == 10");
-    vec.emplace_back("a:value != 10");
-    vec.emplace_back("a:value >= 10");
-    vec.emplace_back("a:value <= 10");
-    vec.emplace_back("a:value > 10");
-    vec.emplace_back("a:value < 10");
-    vec.emplace_back("1 == 1");
-    vec.emplace_back("1 == 0");
-    vec.emplace_back("a:event_name == set");
-    vec.emplace_back("a:event_name != set");
-    vec.emplace_back("a:event_name == clear");
-    vec.emplace_back("a:event_name != clear");
-    vec.emplace_back("../a/b:eventname == set");
-    vec.emplace_back("../a/b:eventname == clear");
-    vec.emplace_back("../a/b:eventname != clear");
-    vec.emplace_back("../a:event_name >= 10");
-    vec.emplace_back("a == unknown and b != complete");
-    vec.emplace_back("a == unknown or b != complete");
-    vec.emplace_back("a == complete and b == complete or c == complete");
-    vec.emplace_back("! a == unknown");
-    vec.emplace_back("/mc/main:YMD <= /mc/main/ref:MC_STOP");
-    vec.emplace_back("! ../../../prod2diss/operation_is_late:yes == set or ! a == complete");
-    vec.emplace_back("./a:YMD - ./b:YMD < 5");
-    vec.emplace_back("./a:YMD + ./b:YMD < 5");
-    vec.emplace_back("./a:YMD / ./b:YMD < 5");
-    vec.emplace_back("./a:YMD * ./b:YMD < 5");
-    vec.emplace_back("./a:YMD % ./b:YMD < 5");
-    vec.emplace_back("inigroup:YMD == ! 1");
-    vec.emplace_back("inigroup:YMD == ! 0");
-    vec.emplace_back("comp == complete and notready == complete"); // ECFLOW-493
-    vec.emplace_back("comp == complete and not ready == complete");
-    vec.emplace_back(
-        "comp == complete and ! ready == complete"); // we now store the not from the parse, for test comparison
-    vec.emplace_back("comp == complete and ~ ready == complete");
+    std::vector expressions = {
+        "a == complete"s,
+        "a != complete"s,
+        "a:value == 10"s,
+        "a:value != 10"s,
+        "a:value >= 10"s,
+        "a:value <= 10"s,
+        "a:value > 10"s,
+        "a:value < 10"s,
+        "1 == 1"s,
+        "1 == 0"s,
+        "a:event_name == set"s,
+        "a:event_name != set"s,
+        "a:event_name == clear"s,
+        "a:event_name != clear"s,
+        "../a/b:eventname == set"s,
+        "../a/b:eventname == clear"s,
+        "../a/b:eventname != clear"s,
+        "../a:event_name >= 10"s,
+        "a == unknown and b != complete"s,
+        "a == unknown or b != complete"s,
+        "a == complete and b == complete or c == complete"s,
+        "! a == unknown"s,
+        "/mc/main:YMD <= /mc/main/ref:MC_STOP"s,
+        "! ../../../prod2diss/operation_is_late:yes == set or ! a == complete"s,
+        "./a:YMD - ./b:YMD < 5"s,
+        "./a:YMD + ./b:YMD < 5"s,
+        "./a:YMD / ./b:YMD < 5"s,
+        "./a:YMD * ./b:YMD < 5"s,
+        "./a:YMD % ./b:YMD < 5"s,
+        "inigroup:YMD == ! 1"s,
+        "inigroup:YMD == ! 0"s,
+        "comp == complete and notready == complete"s, // ECFLOW-493
+        "comp == complete and not ready == complete"s,
+        "comp == complete and ! ready == complete"s, // we now store the not from the parse, for test comparison
+        "comp == complete and ~ ready == complete"s,
+        ":VAR == 1"s,
+        ":VAR == /mc/main/ref:MC_STOP"s,
+        ":YMD - :YMD < 5"s,
+        ":YMD + :YMD < 5"s,
+        ":YMD / :YMD < 5"s,
+        ":YMD * :YMD < 5"s,
+        ":YMD % :YMD < 5"s,
+        ":VARIABLE == 20230101T000000"s,
+        ":VARIABLE >= 20230101T000000"s,
+        ":VARIABLE <= 20230101T000000"s,
+        ":VARIABLE + 3 <= 19700101T000000"s,
+        ":VARIABLE <= 19700101T000000 + 3"s};
 
-    vec.emplace_back(":VAR == 1");
-    vec.emplace_back(":VAR == /mc/main/ref:MC_STOP");
-    vec.emplace_back(":YMD - :YMD < 5");
-    vec.emplace_back(":YMD + :YMD < 5");
-    vec.emplace_back(":YMD / :YMD < 5");
-    vec.emplace_back(":YMD * :YMD < 5");
-    vec.emplace_back(":YMD % :YMD < 5");
+    for (const auto& expression : expressions) {
 
-    for (const auto& i : vec) {
-
-        PartExpression part(i);
-        string parseErrorMsg;
-        std::unique_ptr<AstTop> ast = part.parseExpressions(parseErrorMsg);
-        BOOST_REQUIRE_MESSAGE(ast.get(), "Failed to parse\n" << i << "  " << parseErrorMsg);
+        PartExpression part(expression);
+        std::string error;
+        auto ast = part.parseExpressions(error);
+        BOOST_REQUIRE_MESSAGE(ast.get(), "Failed to parse\n" << expression << "  " << error);
 
         std::stringstream s2;
         ast->print_flat(s2);
-        std::string ast_expr = s2.str();
-        BOOST_CHECK_MESSAGE(i == ast_expr, " Failed\n'" << i << "' != '" << ast_expr << "'");
+        std::string actual_expression = s2.str();
+        BOOST_CHECK_MESSAGE(expression == actual_expression,
+                            " Failed\n'" << expression << "' != '" << actual_expression << "'");
 
         std::string why;
         ast->why(why);
-        // cout << "why: " << vec[i] << " -> " << why << "\n";
         if (ast->evaluate()) {
-            BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << i);
+            BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << expression);
         }
         else {
-            BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << i);
+            BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << expression);
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_brackets) {
-    std::cout << "ANode:: ...test_expression_parser_basic_with_brackets\n";
+BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
+    std::cout << "ANode:: ...test_expression_parser_basic_with_braces\n";
+
+    using namespace std::string_literals;
 
     // This must be nicely formatted, i.e. AST is nicely space formatted otherwise it will fail the test
-    // This test ENSURES the the AST matches the expression. (i.e by getting AST to print the expression)
+    // This test ENSURES that the AST matches the expression. (i.e. by getting AST to print the expression)
     // Note: we can use NOT,eq,ne,le,ge,
     //       we can't use a:event_name  ==> a:event_name == set
-    std::vector<std::string> vec;
-    vec.emplace_back("((a == complete) and (b == complete))");
-    vec.emplace_back("(((a == complete) or (b == complete)) and (c == complete))");
-    vec.emplace_back("((a == complete) and ((b == complete) or (nodepath:eventname == set)))");
-    vec.emplace_back("((a == complete) and ((b == complete) or ((a == complete) and (b == complete))))");
-    vec.emplace_back("! ((a == unknown))");
-    vec.emplace_back("((t:step + 20) >= (t:step1 - 20))");
-    vec.emplace_back("(((/o/main/12/an/slwet == complete) and ((/o/main/12/an/4dvar/ifstraj:finalwave == set) or "
-                     "(/o/main/12/an/4dvar == complete))) or (/o/main/12/an == complete))");
-    vec.emplace_back("((obs:YMD <= (main:YMD + 1)) and ((../make/setup == complete) and (obs:YMD <= /o/lag:YMD)))");
-    vec.emplace_back(
-        "(((stage == complete) or (./stage:YMD > ./retrieve:YMD)) and ((./retrieve:YMD - ./load:YMD) < 5))");
-    vec.emplace_back("((./a:YMD - ./b:YMD) < 5)");
-    vec.emplace_back("((:YMD + :YMD) < 5)");
+    std::vector expressions = {
+        "((a == complete) and (b == complete))"s,
+        "(((a == complete) or (b == complete)) and (c == complete))"s,
+        "((a == complete) and ((b == complete) or (nodepath:eventname == set)))"s,
+        "((a == complete) and ((b == complete) or ((a == complete) and (b == complete))))"s,
+        "! ((a == unknown))"s,
+        "((t:step + 20) >= (t:step1 - 20))"s,
+        "(((/o/main/12/an/slwet == complete) and ((/o/main/12/an/4dvar/ifstraj:finalwave == set) or (/o/main/12/an/4dvar == complete))) or (/o/main/12/an == complete))"s,
+        "((obs:YMD <= (main:YMD + 1)) and ((../make/setup == complete) and (obs:YMD <= /o/lag:YMD)))"s,
+        "(((stage == complete) or (./stage:YMD > ./retrieve:YMD)) and ((./retrieve:YMD - ./load:YMD) < 5))"s,
+        "((./a:YMD - ./b:YMD) < 5)"s,
+        "((:YMD + :YMD) < 5)"s,
+        "((:YMD + :YMD) < 5)"s,
+        "((:VARIABLE == 19700101T123456) and (b == complete))"s,
+        "((:VARIABLE < 19700101T123456) and (b == complete))"s};
 
-    for (const auto& i : vec) {
+    for (const auto& expression : expressions) {
 
-        PartExpression part(i);
-        string parseErrorMsg;
-        std::unique_ptr<AstTop> ast = part.parseExpressions(parseErrorMsg);
-        BOOST_REQUIRE_MESSAGE(ast.get(), "Failed to parse " << i << "  " << parseErrorMsg);
+        PartExpression part(expression);
+        std::string error;
+        std::unique_ptr<AstTop> ast = part.parseExpressions(error);
+        BOOST_REQUIRE_MESSAGE(ast.get(), "Failed to parse " << expression << "  " << error);
 
         std::stringstream s2;
         ast->print_flat(s2, true /*add_brackets*/);
-        std::string ast_expr = s2.str();
-        BOOST_CHECK_MESSAGE(i == ast_expr, " Failed '" << i << "' != '" << ast_expr << "'");
+        std::string actual_expression = s2.str();
+        BOOST_CHECK_MESSAGE(expression == actual_expression,
+                            " Failed '" << expression << "' != '" << actual_expression << "'");
 
         std::string why;
         ast->why(why);
-        // cout << "why: " << vec[i] << " -> " << why << "\n";
         if (ast->evaluate()) {
-            BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << i);
+            BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << expression);
         }
         else {
-            BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << i);
+            BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << expression);
         }
     }
 }
@@ -415,6 +423,10 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap[":YMD * :YMD <= 5"]             = std::make_pair(AstLessEqual::stype(), true);
     exprMap[":YMD + 1 == 1"]                = std::make_pair(AstEqual::stype(), true);
 
+    exprMap[":VAR == 20000101T235959"] = std::make_pair(AstEqual::stype(), false);
+    exprMap[":VAR <= 20000101T235959"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":VAR >= 20000101T235959"] = std::make_pair(AstGreaterEqual::stype(), false);
+
     int parse_failure = 0;
     int ast_failure   = 0;
     // std::pair<string, std::pair<string,bool> > p;
@@ -677,64 +689,65 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
 
 BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
     std::cout << "ANode:: ...test_parser_bad_expressions\n";
-    vector<string> exprvec;
-    exprvec.emplace_back("/s/f/t<flag>restored");
-    exprvec.emplace_back("a <= complete");
-    exprvec.emplace_back("a >= complete");
-    exprvec.emplace_back("a = complete");
-    exprvec.emplace_back("a e complete");
-    exprvec.emplace_back("a=complete");
-    exprvec.emplace_back("a ! complete");
-    exprvec.emplace_back("a==complet e");
-    exprvec.emplace_back("a eq complet e");
-    exprvec.emplace_back("a::eventname");
-    exprvec.emplace_back("a:eventname =  set");
-    exprvec.emplace_back("a:eventname == ");
-    exprvec.emplace_back("a:eventname !  set");
-    exprvec.emplace_back("a:eventname ! = set");
-    exprvec.emplace_back("a:eventname %");
-    exprvec.emplace_back("a:event <= set");
-    exprvec.emplace_back("a:event >= set");
-    exprvec.emplace_back("a:event >= clear");
-    exprvec.emplace_back("a:event >= fred");
-    exprvec.emplace_back("a:metername  100");
-    exprvec.emplace_back(". == complete");
-    exprvec.emplace_back("/ == complete");
-    exprvec.emplace_back(". == error");
-    exprvec.emplace_back("./ == error");
-    exprvec.emplace_back(".a == error");
-    exprvec.emplace_back(".a == unknown");
-    exprvec.emplace_back(".a/. == unknown");
-    exprvec.emplace_back(".. == unknown");
-    exprvec.emplace_back(".a/b == queued");
-    exprvec.emplace_back("./a/b/ == active");
-    exprvec.emplace_back("..a == complete");
-    exprvec.emplace_back(".../a == complete");
-    exprvec.emplace_back("../.../a == complete");
-    exprvec.emplace_back(".. /a == complete");
-    exprvec.emplace_back("../.. /a == complete");
-    exprvec.emplace_back("../../.a == complete");
-    exprvec.emplace_back("..a/b == aborted");
-    exprvec.emplace_back("..a/b/c == aborted");
-    exprvec.emplace_back("a == complete and");
-    exprvec.emplace_back("a %");
-    exprvec.emplace_back("(a == complete   b == complete)");
-    exprvec.emplace_back("a == complete and  b == complete)");
-    exprvec.emplace_back("(a == complete and  b == complete");
-    exprvec.emplace_back("(a = complete and b = complete or c = complete)");
-    exprvec.emplace_back("(a erro complete and b == complete) or nodepath:eventname");
-    exprvec.emplace_back("(a == complete and b == complete or (a == complete and b == complete)");
-    // triggers that dont make sense in the operational suites.
-    exprvec.emplace_back("../../../legA/fc/pf/01 eq complete eq complete");
 
-    exprvec.emplace_back("/mofc/mon/hind/14/back == complete or %s:DOW ne 5"); // ECFLOW-888
+    std::vector expressions = {"/s/f/t<flag>restored"s,
+                               "a <= complete"s,
+                               "a >= complete"s,
+                               "a = complete"s,
+                               "a e complete"s,
+                               "a=complete"s,
+                               "a ! complete"s,
+                               "a==complet e"s,
+                               "a eq complet e"s,
+                               "a::eventname"s,
+                               "a:eventname =  set"s,
+                               "a:eventname == "s,
+                               "a:eventname !  set"s,
+                               "a:eventname ! = set"s,
+                               "a:eventname %"s,
+                               "a:event <= set"s,
+                               "a:event >= set"s,
+                               "a:event >= clear"s,
+                               "a:event >= fred"s,
+                               "a:metername  100"s,
+                               ". == complete"s,
+                               "/ == complete"s,
+                               ". == error"s,
+                               "./ == error"s,
+                               ".a == error"s,
+                               ".a == unknown"s,
+                               ".a/. == unknown"s,
+                               ".. == unknown"s,
+                               ".a/b == queued"s,
+                               "./a/b/ == active"s,
+                               "..a == complete"s,
+                               ".../a == complete"s,
+                               "../.../a == complete"s,
+                               ".. /a == complete"s,
+                               "../.. /a == complete"s,
+                               "../../.a == complete"s,
+                               "..a/b == aborted"s,
+                               "..a/b/c == aborted"s,
+                               "a == complete and"s,
+                               "a %"s,
+                               "(a == complete   b == complete)"s,
+                               "a == complete and  b == complete)"s,
+                               "(a == complete and  b == complete"s,
+                               "(a = complete and b = complete or c = complete)"s,
+                               "(a erro complete and b == complete) or nodepath:eventname"s,
+                               "(a == complete and b == complete or (a == complete and b == complete)"s,
+                               // triggers that don't make sense in the operational suites
+                               "../../../legA/fc/pf/01 eq complete eq complete"s,
+                               "/mofc/mon/hind/14/back == complete or %s:DOW ne 5"s, // ECFLOW-888
+                               ":VAR eq 20001332T257890"s};
 
-    for (const string& expr : exprvec) {
+    for (const auto& expression : expressions) {
 
         // std::cout << "parsing expression " << expr << "\n";
-        ExprParser theExprParser(expr);
-        std::string errorMsg;
-        BOOST_CHECK_MESSAGE(!theExprParser.doParse(errorMsg), expr << " expected to fail ");
+        ExprParser theExprParser(expression);
+        std::string error;
+        auto actual = theExprParser.doParse(error);
+        BOOST_CHECK_MESSAGE(!actual, expression << " expected to fail ");
     }
 }
 

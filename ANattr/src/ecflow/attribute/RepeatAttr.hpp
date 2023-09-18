@@ -27,8 +27,8 @@
 #include <sstream>
 #include <vector>
 
-#include "ecflow/core/Chrono.hpp"
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Chrono.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.
@@ -203,7 +203,10 @@ private:
 
 class RepeatDateTime final : public RepeatBase {
 public:
-    RepeatDateTime(const std::string& variable, const std::string& start, const std::string& end, const std::string& delta = "24:00:00");
+    RepeatDateTime(const std::string& variable,
+                   const std::string& start,
+                   const std::string& end,
+                   const std::string& delta = "24:00:00");
     RepeatDateTime(const std::string& variable, ecf::Instant start, ecf::Instant end, ecf::Duration delta);
     RepeatDateTime() = default;
 

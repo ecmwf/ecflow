@@ -328,8 +328,8 @@ int VRepeatDateTimeAttr::endIndex() const {
             auto jStart = ecf::coerce_to_instant(r.start());
             auto jEnd   = ecf::coerce_to_instant(r.end());
 
-            int index   = (jEnd - jStart).as_seconds().count() / r.step();
-            auto val    = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
+            int index = (jEnd - jStart).as_seconds().count() / r.step();
+            auto val  = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
             while (val > jEnd && index >= 1) {
                 index--;
                 val = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
@@ -346,7 +346,7 @@ int VRepeatDateTimeAttr::currentIndex() const {
         auto jStart     = ecf::coerce_to_instant(r.start());
         auto jEnd       = ecf::coerce_to_instant(r.end());
 
-        int cur         = (jEnd - jStart).as_seconds().count() / r.step();
+        int cur = (jEnd - jStart).as_seconds().count() / r.step();
         return cur;
     }
     return 0;
