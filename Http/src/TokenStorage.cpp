@@ -142,7 +142,7 @@ bool TokenStorage::verify(const std::string& token) const {
         if (hashed == t.hash && (t.expires.time_since_epoch().count() == 0 || t.expires > now) &&
             (t.revoked.time_since_epoch().count() == 0 || t.revoked > now)) {
             if (opts.verbose)
-                printf("Token for '%s' authenticated succesfully\n", t.description.c_str());
+                printf("Token for '%s' authenticated successfully\n", t.description.c_str());
             return true;
         }
         // printf("%s %s %s to %s should be %s\n", t.method.c_str(), t.salt.c_str(), token.c_str(), hashed.c_str(),
