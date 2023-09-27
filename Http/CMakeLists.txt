@@ -32,11 +32,7 @@ list( APPEND srcs
 # we should disable SSL capabilities from the HTTP server
 
 if (OPENSSL_FOUND)
-    if (NOT
-        (OPENSSL_VERSION_MAJOR GREATER_EQUAL 1 AND
-         OPENSSL_VERSION_MINOR GREATER_EQUAL 1 AND
-         OPENSSL_VERSION_FIX GREATER_EQUAL 1))
-
+    if (OPENSSL_VERSION VERSION_LESS 1.1.1)
         ecbuild_warn("HTTP_SERVER requires at least OpenSSL 1.1.1 for https support (have version ${OPENSSL_VERSION}) - disabling https in HTTP server")
         remove_definitions( -DECF_OPENSSL )
         set(DISABLED_SSL_IN_HTTP_SERVER 1)
@@ -58,7 +54,7 @@ target_include_directories(libhttp PUBLIC src
                                              ../Base/src
                                              ../Base/src/cts
                                              ../Base/src/stc
-					     ../Client/src
+                                             ../Client/src
                                              ../cpp-httplib
                                              ../json
 )
