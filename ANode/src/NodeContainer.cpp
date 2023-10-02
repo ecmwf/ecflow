@@ -140,20 +140,18 @@ void NodeContainer::requeue(Requeue_args& args) {
     if (args.clear_suspended_in_child_nodes_ >= 0)
         args.clear_suspended_in_child_nodes_++;
 
-    // If the defstatus is complete, don't bother logging the state change in the re-queue
-    // When we have several thousands children (as in operations), we will end up
-    // changing state to queue, then again changing it back to complete.
-    // To avoid this problem we don't bother logging state change for re-queue
-    // See: ECFLOW-1239
-    if (d_st_ == DState::COMPLETE)
-        args.log_state_changes_ = false;
+    // If the node `default status` == COMPLETE, we don't log the change of state when re-queueing the descendants.
+    // Without this optimization, all children would change state to QUEUED, and eventually change back to COMPLETE.
+    // This avoids flooding the log with unnecessary messages regarding several thousand children
+    // (e.g. as it happens in operations). See ECFLOW-1239 for details.
+    bool log_state_changes_descendents = (d_st_ != DState::COMPLETE);
 
     Node::Requeue_args largs(args.requeue_t,
                              true /* reset repeats, Moot for tasks */,
                              args.clear_suspended_in_child_nodes_,
                              args.reset_next_time_slot_,
                              true /* reset relative duration */,
-                             args.log_state_changes_);
+                             log_state_changes_descendents);
 
     for (const auto& n : nodes_) {
         n->requeue(largs);
