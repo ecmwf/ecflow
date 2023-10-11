@@ -13,9 +13,9 @@
 
 import os
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
-                   Event, Meter, Label, Queue, RepeatInteger, RepeatEnumerated, RepeatDate,RepeatDateList, RepeatString, \
-                   TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, Late, \
-                   DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
+                   Event, Meter, Label, Queue, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatDateTime, \
+                   RepeatDateList, RepeatString, TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, \
+                   Late, DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
 import ecflow_test_util as Test
 
 if __name__ == "__main__":
@@ -132,6 +132,11 @@ if __name__ == "__main__":
     task.add_repeat( RepeatDate("date", 20100111, 20100115,2) ).add_variable("W","j")
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
+
+    task.add_repeat(RepeatDateTime("datetime", "20100111T000000", "20100115T000000", "48:00:00")).add_variable("W", "j")
+    task.delete_repeat()
+    repeat = task.get_repeat();
+    assert repeat.empty(), "Expected no repeat"
 
     task.add_repeat( RepeatDateList("date",[20100111, 20100115]) ).add_variable("W","j")
     task.delete_repeat()      
@@ -324,4 +329,3 @@ if __name__ == "__main__":
         count += 1;
 
     print("All Tests pass")
-    

@@ -258,6 +258,10 @@ node_ptr add_repeat_date(node_ptr self, const RepeatDate& d) {
     self->addRepeat(d);
     return self;
 }
+node_ptr add_repeat_datetime(node_ptr self, const RepeatDateTime& d) {
+    self->addRepeat(d);
+    return self;
+}
 node_ptr add_repeat_date_list(node_ptr self, const RepeatDateList& d) {
     self->addRepeat(d);
     return self;
@@ -613,6 +617,7 @@ void export_Node() {
         .def("add_autorestore", &add_autorestore1)
         .def("add_verify", &Node::addVerify, DefsDoc::add_verify_doc())
         .def("add_repeat", &add_repeat_date, DefsDoc::add_repeat_date_doc())
+        .def("add_repeat", &add_repeat_datetime, DefsDoc::add_repeat_datetime_doc())
         .def("add_repeat", &add_repeat_date_list, DefsDoc::add_repeat_date_list_doc())
         .def("add_repeat", &add_repeat_integer, DefsDoc::add_repeat_integer_doc())
         .def("add_repeat", &add_repeat_string, DefsDoc::add_repeat_string_doc())

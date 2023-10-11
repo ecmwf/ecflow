@@ -404,6 +404,11 @@ if __name__ == "__main__":
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
+    task.add_repeat(ecflow.RepeatDateTime("datetime", "20100111T000000", "20100115T000000", "48:00:00"))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
+    task.delete_repeat()
+    repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
+
     task.add_repeat(ecflow.RepeatDateList("date",[20100111, 20100115]))
     repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
@@ -757,4 +762,3 @@ if __name__ == "__main__":
 
 
     print("All Tests pass")
-    

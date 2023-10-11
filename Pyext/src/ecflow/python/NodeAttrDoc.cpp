@@ -520,6 +520,32 @@ const char* NodeAttrDoc::repeat_date_doc() {
            "            RepeatDate('YMD', 20050130, 20050203 ))\n";
 }
 
+const char* NodeAttrDoc::repeat_datetime_doc() {
+    return "Allows a `node`_ to be repeated based on date+time instants (using yyyymmddTHHMMSS format).\n\n"
+           "A node can only have one `repeat`_.\n"
+           "The repeat name can be referenced in `trigger`_ expressions.\n"
+           "The trigger expression referencing a RepeatDate will use date arithmetic\n"
+           "Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer\n\n"
+           "   trigger /suite/family:YMD + 1 > 20190101\n"
+           "\nConstructor::\n\n"
+           "   RepeatDateTime(variable, start, end[, step])\n"
+           "      string variable:     The name of the repeat. The Repeat can referenced in\n"
+           "                           in trigger expressions using the variable name\n"
+           "      int start:           Start date+time instant, formatted as yyyymmddTHHMMSS\n"
+           "      int end:             End date+time instant, formatted as yyyymmddTHHMMSS\n"
+           "      int step:            The increment duration used to update the instant when iterating\n"
+           "                           Formatted as HH:MM.SS, if not provided default delta is '24:00:00'.\n"
+           "\nException:\n\n"
+           "- Throws a RuntimeError if start/end are not valid date+time instants\n"
+           "- Throws a RuntimeError if delta is not a valid duration\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   rep = RepeatDateTime('DATETIME', '20050130T000000', '20050203T000000')\n"
+           "   rep = RepeatDateTime('DATETIME', '20050130T000000', '20050203T000000', '48:00:00')\n"
+           "   t = Task('t1',\n"
+           "            RepeatDateTime('DATETIME', '20050130T000000', '20050203T120000', '1:00:00'))\n";
+}
+
 const char* NodeAttrDoc::repeat_date_list_doc() {
     return "Allows a `node`_ to be repeated using arbitrary list of yyyymmdd integers\n\n"
            "A node can only have one `repeat`_.\n"

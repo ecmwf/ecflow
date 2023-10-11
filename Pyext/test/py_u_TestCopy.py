@@ -287,6 +287,12 @@ if __name__ == "__main__":
     repeat = task_copy.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
     task = ecflow.Task("task")
+    task.add_repeat(ecflow.RepeatDateTime("datetime", "20100111T000000", "20100115T000000", "48:00:00"))
+    task_copy = copy.copy(task)
+    task_copy.delete_repeat()
+    repeat = task_copy.get_repeat(); assert repeat.empty(), "Expected no repeat"
+
+    task = ecflow.Task("task")
     task.add_repeat(ecflow.RepeatDateList("date", [20100111, 20100115]))
     task_copy = copy.copy(task)
     task_copy.delete_repeat()      
@@ -507,4 +513,3 @@ if __name__ == "__main__":
     assert len(list(s1.zombies)) == 0, "Expected zero zombie attributes but found " + str(len(list(s1.zombies)))
 
     print("All Tests pass")
-    

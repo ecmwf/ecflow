@@ -745,6 +745,25 @@ const char* DefsDoc::add_repeat_date_doc() {
            "            RepeatDate('YMD',20100111,20100115))\n";
 }
 
+const char* DefsDoc::add_repeat_datetime_doc() {
+    return "Add a RepeatDateTime attribute. See :py:class:`ecflow.RepeatDateTime`\n\n"
+           "A node can only have one repeat.\n"
+           "When a RepeatDateTime is used in a trigger expression, the arithmetic value of the Repeat decays to second.\n"
+           "For example, the expression `/suite/family:DATETIME + 1` is evaluated as the number of seconds represented "
+           "by `/suite/family:DT` (since the reference epoch, i.e. 19700101T000000) plus 1."
+           "The result is an integer.\n\n"
+           "   trigger /suite/family:DT + 1 > 123456\n"
+           "\nException:\n\n"
+           "- Throws a RuntimeError if more than one repeat is added\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "  t1 = Task('t1')\n"
+           "  t1.add_repeat(RepeatDateTime('DT', '20100111T120000', '20100115T000000', '12:00:00'))\n\n"
+           "  # we can also create a repeat in Task constructor like any other attribute\n"
+           "  t2 = Task('t2',\n"
+           "            RepeatDateTime('DT', '20100101T000000', '20100115T000000', '1:00:00'))\n";
+}
+
 const char* DefsDoc::add_repeat_date_list_doc() {
     return "Add a RepeatDateList attribute. See :py:class:`ecflow.RepeatDateList`\n\n"
            "A node can only have one repeat\n"

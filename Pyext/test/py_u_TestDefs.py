@@ -19,7 +19,7 @@ print(ecflow.Defs.__doc__)
     
 from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
-                   RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
+                   RepeatString, RepeatDate, RepeatDateTime, RepeatInteger, RepeatDay, RepeatEnumerated, \
                    Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build,Ecf
 import ecflow_test_util as Test
 
@@ -137,10 +137,13 @@ if __name__ == "__main__":
     task3.add_verify( Verify(State.complete, 1) )
     task3.add_autocancel( Autocancel(20,10,False) )
     task3.add_label( Label("label_name","label_value") )
-    
+
     task3_1 = family.add_task("t3_1")
     task3_1.add_repeat( RepeatDate("testDate",20100111,20100115) )
-    
+
+    task3_2 = family.add_task("t3_2")
+    task3_2.add_repeat(RepeatDateTime("testDateTime", "20100111T000000", "20100115T000000"))
+
 
     task4 = family.add_task("t4")
     task4.add_repeat( RepeatInteger("testInteger",0,100,2) )

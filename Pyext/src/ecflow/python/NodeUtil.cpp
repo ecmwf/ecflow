@@ -127,6 +127,8 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg) {
         self->addZombie(extract<ZombieAttr>(arg));
     else if (extract<RepeatDate>(arg).check())
         self->addRepeat(Repeat(extract<RepeatDate>(arg)));
+    else if (extract<RepeatDateTime>(arg).check())
+        self->addRepeat(Repeat(extract<RepeatDateTime>(arg)));
     else if (extract<RepeatDateList>(arg).check())
         self->addRepeat(Repeat(extract<RepeatDateList>(arg)));
     else if (extract<RepeatInteger>(arg).check())

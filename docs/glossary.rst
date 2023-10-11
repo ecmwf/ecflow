@@ -1772,6 +1772,7 @@
       - :term:`repeat` *enumerated*: use the index values as integers. See example below
       - :term:`repeat` *integer*: use the implicit integer values
       - :term:`repeat` *date*: use the date values as integers. Use of plus/minus on repeat date variable uses date arithmetic
+      - :term:`repeat` *datetime*: use the date+time instant values as integers. Use of plus/minus on repeat datetime variable uses second arithmetic
       - :term:`limit`: the limit value is used as an integer. This allows a degree of prioritisation amongst tasks under a limit
       - :term:`late`: the value is stored in a flag, and is a simple boolean. Used to signify when a task is late.
        
