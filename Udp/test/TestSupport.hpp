@@ -26,6 +26,7 @@
 #include "Host.hpp"
 #include "Node.hpp"
 #include "NodeAttr.hpp"
+#include "Str.hpp"
 #include "UDPClient.hpp"
 
 namespace bp = boost::process;
@@ -75,7 +76,7 @@ public:
     explicit MockServer(port_t port) : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
 
     void load_definition(const std::string& defs) const {
-        ClientInvoker client(host(), port());
+        ClientInvoker client(ecf::Str::LOCALHOST(), port());
         auto error = client.loadDefs(defs);
         BOOST_REQUIRE_MESSAGE(!error, "unable to load definitions");
         std::cout << "   MOCK: reference ecFlow suite has been loaded" << std::endl;
@@ -99,7 +100,7 @@ public:
 private:
     node_ptr get_node_at(const std::string& path) const {
         std::cout << "   Creating ecflow_client connected to " << host() << ":" << port() << std::endl;
-        ClientInvoker client(host(), port());
+        ClientInvoker client(ecf::Str::LOCALHOST(), port());
 
         // load all definitions
         std::shared_ptr<Defs> defs = nullptr;
@@ -137,12 +138,11 @@ public:
         invoke_command += std::to_string(port);
         invoke_command += " -d &";
 
-        std::cout << "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command
-                  << std::endl;
+        std::cout << "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command << std::endl;
 
         bp::child child(invoke_command);
 
-        ClientInvoker client(host, port);
+        ClientInvoker client(ecf::Str::LOCALHOST(), port);
         if (!client.wait_for_server_reply(5)) {
             BOOST_REQUIRE_MESSAGE(false, "could not launch ecflow server");
         }
