@@ -137,7 +137,8 @@ public:
         invoke_command += std::to_string(port);
         invoke_command += " -d &";
 
-        std::cout << "Launching ecflow_server, invoking: " << invoke_command << std::endl;
+        std::cout << "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command
+                  << std::endl;
 
         bp::child child(invoke_command);
 
@@ -234,7 +235,7 @@ public:
         invoke_command += std::to_string(ecflow_port);
         invoke_command += " --verbose";
 
-        std::cout << "   Launching ecflow_udp, invoking: " << invoke_command << std::endl;
+        std::cout << "   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command << std::endl;
 
         bp::child server(invoke_command);
 
