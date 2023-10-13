@@ -255,17 +255,13 @@ public:
  */
 struct EnableServersFixture
 {
-    EnableServersFixture()
-        : ecflow_server(get_ecflow_server_port()),
-          ecflow_udp(get_ecflow_udp_port(), get_ecflow_server_port()) {
-        // Load 'reference' suite for tests...
-        ecflow_server.load_definition("data/reference.def");
-    }
+    EnableServersFixture() : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
     ~EnableServersFixture() = default;
 
     ecf::test::MockServer ecflow_server;
     ecf::test::MockUDPServer ecflow_udp;
 
+private:
     static MockServer::port_t get_ecflow_server_port() {
         MockServer::port_t selected_port = 3199;
         std::cout << "   Attempting to use port: " << selected_port << std::endl;
@@ -278,6 +274,13 @@ struct EnableServersFixture
         return selected_port;
     }
     static MockServer::port_t get_ecflow_udp_port() { return 3198; }
+
+    EnableServersFixture(MockServer::port_t ecflow_server_port, MockServer::port_t ecflow_udp_port)
+        : ecflow_server(ecflow_server_port),
+          ecflow_udp(ecflow_udp_port, ecflow_server_port) {
+        // Load 'reference' suite for tests...
+        ecflow_server.load_definition("data/reference.def");
+    }
 };
 
 } // namespace ecf::test
