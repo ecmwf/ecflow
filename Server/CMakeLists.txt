@@ -94,15 +94,22 @@ target_clangformat(ecflow_server)
 # ================================================================================                         
 # TEST
 # libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
-ecbuild_add_test( TARGET       u_server
-                  SOURCES      test/TestServerEnvironment.cpp 
-                               test/TestServer1.cpp
-                  INCLUDES     src ${Boost_INCLUDE_DIRS}
-                  LIBS         libserver ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                  TEST_DEPENDS u_base
-              )
+ecbuild_add_test(
+  TARGET
+    u_server
+  INCLUDES
+    src
+  SOURCES
+    test/TestServerEnvironment.cpp
+    test/TestServer1.cpp
+  LIBS
+    libserver
+    Boost::unit_test_framework
+    Boost::test_exec_monitor
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  TEST_DEPENDS
+    u_base
+)
 
 target_clangformat(u_server CONDITION ENABLE_TESTS)
 
