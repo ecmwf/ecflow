@@ -42,8 +42,8 @@ public:
     friend Instant operator-(const Instant& rhs, const Duration& lhs);
     friend Duration operator-(const Instant& rhs, const Instant& lhs);
 
-    friend Instant ecf::coerce_to_instant(long value);
-    friend long ecf::coerce_from_instant(const Instant& value);
+    friend Instant coerce_to_instant(long value);
+    friend long coerce_from_instant(const Instant& value);
 
 private:
     instant_t instant_;
