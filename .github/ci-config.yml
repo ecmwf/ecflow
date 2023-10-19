@@ -1,0 +1,5 @@
+cmake_options: -DBOOST_ROOT=/usr -DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 -DENABLE_STATIC_BOOST_LIBS=OFF
+dependencies: |
+  ecmwf/ecbuild
+dependency_branch: develop
+parallelism_factor: 8
