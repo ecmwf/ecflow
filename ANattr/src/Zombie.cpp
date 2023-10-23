@@ -16,6 +16,7 @@
 #include "Zombie.hpp"
 
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Serialization.hpp"
 
 using namespace ecf;
@@ -278,11 +279,11 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
         type_width              = std::max(type_width, z.type_str().size());
         password_width          = std::max(password_width, z.jobs_password().size());
         rid_width               = std::max(rid_width, z.process_or_remote_id().size());
-        std::string no_of_calls = boost::lexical_cast<std::string>(z.calls());
+        std::string no_of_calls = ecf::convert_to<std::string>(z.calls());
         calls_width             = std::max(calls_width, no_of_calls.size());
         host_width              = std::max(host_width, z.host().size());
 
-        std::string try_no_int  = boost::lexical_cast<std::string>(z.try_no());
+        std::string try_no_int  = ecf::convert_to<std::string>(z.try_no());
         tryno_width             = std::max(tryno_width, try_no_int.size());
         child_type_width        = std::max(child_type_width, Child::to_string(z.last_child_cmd()).size());
         user_action_width       = std::max(user_action_width, z.user_action_str().size());

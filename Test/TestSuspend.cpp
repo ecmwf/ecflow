@@ -18,10 +18,10 @@
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "AssertTimer.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
         family_ptr fam = suite->add_family("family");
         int taskSize   = 2; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task                  = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task                  = fam->add_task("t" + ecf::convert_to<std::string>(i));
 
             boost::posix_time::ptime time1 = theLocalTime + minutes(1 + i);
             task->addTime(ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
 
         family_ptr fam = suite->add_family("family");
         for (int i = 0; i < 2; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // task should complete 1 times
 
             boost::posix_time::ptime time3 = theLocalTime + minutes(1 + i);

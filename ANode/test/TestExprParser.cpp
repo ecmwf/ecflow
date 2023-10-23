@@ -17,6 +17,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "ExprAst.hpp"
 #include "ExprParser.hpp"
@@ -578,7 +579,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
     boost::gregorian::date endDate(2017, 12, 31);
     while (startDate != endDate) {
         long julian_day                    = startDate.julian_day();
-        std::string str_julian_day         = boost::lexical_cast<std::string>(julian_day);
+        std::string str_julian_day         = ecf::convert_to<std::string>(julian_day);
         std::string eight_digit_iso_string = to_iso_string(startDate);
         string expr                  = str_julian_day + " ==  cal::date_to_julian(" + eight_digit_iso_string + ")";
         exprMap[expr]                = std::make_pair(AstEqual::stype(), true);

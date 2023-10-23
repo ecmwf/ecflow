@@ -22,6 +22,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DefsDelta.hpp"
 #include "Ecf.hpp"
@@ -346,11 +347,11 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord) {
         case NOrder::ALPHA: {
             std::sort(nodes_.begin(), nodes_.end(), [](const node_ptr& a, const node_ptr& b) {
                 try {
-                    int a_as_int = boost::lexical_cast<int>(a->name());
-                    int b_as_int = boost::lexical_cast<int>(b->name());
+                    int a_as_int = ecf::convert_to<int>(a->name());
+                    int b_as_int = ecf::convert_to<int>(b->name());
                     return a_as_int < b_as_int;
                 }
-                catch (boost::bad_lexical_cast&) {
+                catch (const ecf::bad_conversion&) {
                 }
 
                 return Str::caseInsLess(a->name(), b->name());

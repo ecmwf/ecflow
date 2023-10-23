@@ -15,8 +15,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
 #include <unordered_map>
+
+#include "Converter.hpp"
 
 namespace ecf {
 
@@ -40,7 +41,7 @@ public:
     std::optional<U> get_variable(const std::string& key) const {
         auto found = environment_.find(key);
         if (found != std::end(environment_)) {
-            return boost::lexical_cast<U>(found->second);
+            return ecf::convert_to<U>(found->second);
         }
         return {};
     }

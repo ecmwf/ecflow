@@ -10,8 +10,6 @@
 
 #include "VInfo.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"

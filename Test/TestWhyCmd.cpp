@@ -12,16 +12,17 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "AssertTimer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -321,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
         fam->addInLimit(InLimit("disk", pathToLimit, 50));
         int taskSize = 6;
         for (int i = 0; i < taskSize; i++) {
-            fam->addTask(Task::create("t" + boost::lexical_cast<std::string>(i)));
+            fam->addTask(Task::create("t" + ecf::convert_to<std::string>(i)));
         }
     }
 

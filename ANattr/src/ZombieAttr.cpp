@@ -18,10 +18,10 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/token_functions.hpp>
 #include <boost/tokenizer.hpp>
 
+#include "Converter.hpp"
 #include "Indentor.hpp"
 #include "Serialization.hpp"
 #include "Str.hpp"
@@ -111,7 +111,7 @@ void ZombieAttr::write(std::string& ret) const {
     ret += Str::COLON();
     ret += Child::to_string(child_cmds_);
     ret += Str::COLON();
-    ret += boost::lexical_cast<std::string>(zombie_lifetime_);
+    ret += ecf::convert_to<std::string>(zombie_lifetime_);
 }
 
 bool ZombieAttr::fob(ecf::Child::CmdType child_cmd) const {
@@ -269,9 +269,9 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     int zombie_lifetime = -1;
     if (!lifetime.empty()) {
         try {
-            zombie_lifetime = boost::lexical_cast<int>(lifetime);
+            zombie_lifetime = ecf::convert_to<int>(lifetime);
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             throw std::runtime_error("ZombieAttr::create failed: Zombie life time must be convertible to an integer " +
                                      lifetime + string(":") + string_to_parse);
         }

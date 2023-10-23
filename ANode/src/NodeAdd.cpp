@@ -12,13 +12,13 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
+#include <stdexcept>
 
 #include "AutoArchiveAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoRestoreAttr.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Expression.hpp"
 #include "LateAttr.hpp"
@@ -72,7 +72,7 @@ void Node::add_variable_bypass_name_check(const std::string& name, const std::st
 }
 
 void Node::add_variable_int(const std::string& name, int some_int) {
-    std::string value = boost::lexical_cast<std::string>(some_int);
+    std::string value = ecf::convert_to<std::string>(some_int);
     add_variable(name, value);
 }
 

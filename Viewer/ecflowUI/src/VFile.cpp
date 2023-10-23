@@ -16,10 +16,10 @@
 #include <iostream>
 #include <unistd.h>
 
-#include <boost/lexical_cast.hpp>
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "Converter.hpp"
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 
@@ -329,7 +329,7 @@ int VFile::numberOfLines() const {
 void VFile::print() {
     std::string str = " VFile storage=" + std::to_string(storageMode_) + " ";
     if (storageMode_ == MemoryStorage) {
-        str += "memory size:" + boost::lexical_cast<std::string>(dataSize_);
+        str += "memory size:" + ecf::convert_to<std::string>(dataSize_);
     }
     else {
         str += "disk path: " + path_;

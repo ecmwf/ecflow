@@ -17,8 +17,7 @@
 
 #include <sstream>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "NState.hpp"
@@ -42,7 +41,7 @@ void VerifyAttr::print(std::string& os) const {
     os += toString();
     if (!PrintStyle::defsStyle()) {
         os += " # ";
-        os += boost::lexical_cast<std::string>(actual_);
+        os += ecf::convert_to<std::string>(actual_);
     }
     os += "\n";
 }

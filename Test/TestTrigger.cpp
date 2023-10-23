@@ -19,9 +19,9 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -76,10 +76,9 @@ BOOST_AUTO_TEST_CASE(test_triggers_and_meters) {
 
         int taskSize = 9; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i * 10 + 10));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i * 10 + 10));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
-            task->add_trigger(taskName + Str::COLON() + meterName + " ge " +
-                              boost::lexical_cast<std::string>(i * 10 + 10));
+            task->add_trigger(taskName + Str::COLON() + meterName + " ge " + ecf::convert_to<std::string>(i * 10 + 10));
         }
     }
 
@@ -125,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_triggers_with_limits) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 1));
         int taskSize = 10;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
 
@@ -133,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_triggers_with_limits) {
         fam2->addVerify(VerifyAttr(NState::COMPLETE, 1));
         fam2->add_trigger("/test_triggers_with_limits:limit > 1");
         for (int i = 0; i < 3; i++) {
-            task_ptr task = fam2->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam2->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
     }

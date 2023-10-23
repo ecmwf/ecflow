@@ -1,14 +1,14 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #80 $ 
+// Revision    : $Revision: #80 $
 //
 // Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : This is used to INVOKE a SINGLE test.
 //               Making it easier for Easier for debugging and development
@@ -18,7 +18,6 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #define BOOST_TEST_MODULE TEST_SINGLE
 #include <boost/test/included/unit_test.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -26,6 +25,7 @@
 #include "TestFixture.hpp"
 #include "ServerTestHarness.hpp"
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( test_stress )
       suite_ptr suite = theDefs.add_suite( test_name );
       family_ptr fam = suite->add_family("family");
       for(int i=0; i < no_of_tasks_to_run ; i++) {
-         task_ptr t = fam->add_task ( "t" + boost::lexical_cast<std::string>(i) );
+         task_ptr t = fam->add_task ( "t" + ecf::convert_to<std::string>(i) );
          t->addRepeat(RepeatDay(1));
          t->addEvent(Event("event"));
          t->addLabel(Label("name","value"));
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE( test_stress )
 ///   6000               37                     900
 //void time_for_tasks(int tasks) {
 //
-//   std::string test_name = "test_stress_" + boost::lexical_cast<std::string>(tasks);
+//   std::string test_name = "test_stress_" + ecf::convert_to<std::string>(tasks);
 //   cout << "Test:: ..." << test_name  << flush;
 //
 //   Defs theDefs;
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE( test_stress )
 //      suite_ptr suite = theDefs.add_suite( test_name );
 //      family_ptr fam = suite->add_family("fam" );
 //      for(int i = 0; i < tasks; i++) {
-//         fam->add_task( "t" +   boost::lexical_cast<std::string>(i));
+//         fam->add_task( "t" + ecf::convert_to<std::string>(i));
 //      }
 //      //      suite->addRepeat( RepeatDate("YMD",19000101,99991201,1) );
 //   }

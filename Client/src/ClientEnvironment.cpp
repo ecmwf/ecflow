@@ -22,8 +22,8 @@
 #include <stdexcept>
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "File.hpp"
 #include "Host.hpp"
@@ -162,9 +162,9 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
     if (the_port.empty())
         throw std::runtime_error("ClientEnvironment::set_host_port: Empty port specified ?");
     try {
-        boost::lexical_cast<int>(the_port);
+        ecf::convert_to<int>(the_port);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("ClientEnvironment::set_host_port: Invalid port number " + the_port);
     }
 
@@ -291,7 +291,7 @@ void ClientEnvironment::read_environment_variables() {
     char* debug_level = getenv("ECF_DEBUG_LEVEL");
     if (debug_level) {
         try {
-            Ecf::set_debug_level(boost::lexical_cast<unsigned int>(debug_level));
+            Ecf::set_debug_level(ecf::convert_to<unsigned int>(debug_level));
         }
         catch (...) {
             throw std::runtime_error("The environment variable ECF_DEBUG_LEVEL must be an unsigned integer.");

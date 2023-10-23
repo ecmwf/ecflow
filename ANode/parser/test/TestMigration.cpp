@@ -12,11 +12,13 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Flag.hpp"
@@ -531,11 +533,11 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning2) {
     // Create edit history for today, this should not be affected by pruning
     date todays_date_in_utc = day_clock::universal_day();
     std::string history     = "MSG:[07:36:05 ";
-    history += boost::lexical_cast<string>(todays_date_in_utc.day());
+    history += ecf::convert_to<std::string>(todays_date_in_utc.day());
     history += ".";
-    history += boost::lexical_cast<string>(todays_date_in_utc.month());
+    history += ecf::convert_to<std::string>(todays_date_in_utc.month());
     history += ".";
-    history += boost::lexical_cast<string>(todays_date_in_utc.year());
+    history += ecf::convert_to<std::string>(todays_date_in_utc.year());
     history += "] --requeue force /s1  :maj";
 
     Defs defs;

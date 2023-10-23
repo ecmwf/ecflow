@@ -19,11 +19,11 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "AssertTimer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -72,10 +72,10 @@ BOOST_AUTO_TEST_CASE(test_handle) {
     Defs theDefs;
     {
         for (int s = 0; s < 7; s++) {
-            suite_ptr suite = theDefs.add_suite("s" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs.add_suite("s" + ecf::convert_to<std::string>(s));
             suite->addDefStatus(DState::SUSPENDED); // NO NEED to run jobs for this test:
             for (int t = 0; t < 2; t++) {
-                suite->add_task("t" + boost::lexical_cast<std::string>(t));
+                suite->add_task("t" + ecf::convert_to<std::string>(t));
             }
         }
     }
@@ -225,10 +225,10 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
     Defs theDefs;
     {
         for (int s = 0; s < 7; s++) {
-            suite_ptr suite = theDefs.add_suite("s" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs.add_suite("s" + ecf::convert_to<std::string>(s));
             suite->addDefStatus(DState::SUSPENDED);
             for (int t = 0; t < 2; t++) {
-                suite->add_task("t" + boost::lexical_cast<std::string>(t));
+                suite->add_task("t" + ecf::convert_to<std::string>(t));
             }
         }
     }
@@ -363,10 +363,10 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
     defs_ptr theDefs = Defs::create();
     {
         for (int s = 0; s < 3; s++) {
-            suite_ptr suite = theDefs->add_suite("s" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs->add_suite("s" + ecf::convert_to<std::string>(s));
             suite->addDefStatus(DState::SUSPENDED); // NO NEED to run jobs for this test:
             for (int t = 0; t < 2; t++) {
-                suite->add_task("t" + boost::lexical_cast<std::string>(t));
+                suite->add_task("t" + ecf::convert_to<std::string>(t));
             }
         }
     }

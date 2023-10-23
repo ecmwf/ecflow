@@ -12,10 +12,10 @@
 //
 // Description :
 //============================================================================
+
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "ExprAst.hpp"
 #include "LateAttr.hpp"
@@ -55,7 +55,7 @@ bool Node::set_event(const std::string& event_name_or_number, bool value) {
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
     if (event_name_or_number.find_first_of(Str::NUMERIC()) == 0) {
         try {
-            auto eventNumber = boost::lexical_cast<int>(event_name_or_number);
+            auto eventNumber = ecf::convert_to<int>(event_name_or_number);
             for (size_t i = 0; i < theSize; i++) {
                 if (events_[i].number() == eventNumber) {
                     events_[i].set_value(value);
@@ -63,7 +63,7 @@ bool Node::set_event(const std::string& event_name_or_number, bool value) {
                 }
             }
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
         }
     }
     return false;
@@ -86,7 +86,7 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number) {
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
     if (event_name_or_number.find_first_of(Str::NUMERIC()) == 0) {
         try {
-            auto eventNumber = boost::lexical_cast<int>(event_name_or_number);
+            auto eventNumber = ecf::convert_to<int>(event_name_or_number);
             for (size_t i = 0; i < theSize; i++) {
                 if (events_[i].number() == eventNumber) {
                     events_[i].usedInTrigger(true);
@@ -95,7 +95,7 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number) {
                 }
             }
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
         }
     }
     return false;
@@ -144,9 +144,9 @@ bool Node::set_meter_used_in_trigger(const std::string& meter_name) {
 void Node::changeMeter(const std::string& meter_name, const std::string& value) {
     int theValue = 0;
     try {
-        theValue = boost::lexical_cast<int>(value);
+        theValue = ecf::convert_to<int>(value);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("Node::changeMeter expected integer value but found " + value);
     }
     changeMeter(meter_name, theValue);
@@ -195,9 +195,9 @@ void Node::increment_repeat() {
 void Node::changeLimitMax(const std::string& name, const std::string& maxValue) {
     int theValue = 0;
     try {
-        theValue = boost::lexical_cast<int>(maxValue);
+        theValue = ecf::convert_to<int>(maxValue);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("Node::changeLimitMax expected integer value but found " + maxValue);
     }
     changeLimitMax(name, theValue);
@@ -213,9 +213,9 @@ void Node::changeLimitMax(const std::string& name, int maxValue) {
 void Node::changeLimitValue(const std::string& name, const std::string& value) {
     int theValue = 0;
     try {
-        theValue = boost::lexical_cast<int>(value);
+        theValue = ecf::convert_to<int>(value);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("Node::changeLimitValue expected integer value but found " + value);
     }
     changeLimitValue(name, theValue);

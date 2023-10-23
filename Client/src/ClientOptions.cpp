@@ -12,17 +12,18 @@
 //
 // Description : Delegates argument parsing to the registered commands
 //============================================================================
+
 #include "ClientOptions.hpp"
 
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
 #include "ClientEnvironment.hpp"
 #include "ClientOptionsParser.hpp"
 #include "CommandLine.hpp"
+#include "Converter.hpp"
 #include "Help.hpp"
 #include "PasswordEncryption.hpp"
 #include "Str.hpp"
@@ -134,9 +135,9 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         if (env->debug())
             std::cout << "  port " << port << " overridden at the command line\n";
         try {
-            boost::lexical_cast<int>(port);
+            ecf::convert_to<int>(port);
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (ecf::bad_conversion& e) {
             std::stringstream ss;
             ss << "ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer";
             throw std::runtime_error(ss.str());

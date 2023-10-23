@@ -21,10 +21,10 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "JobProfiler.hpp"
 #include "Log.hpp"
@@ -152,7 +152,7 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
     assert(!ecf_passwd_file_.empty());         // expect name of form "ecf.passwd"
     assert(!ecf_passwd_custom_file_.empty());  // expect name of form "ecf.custom_passwd"
 
-    std::string port = boost::lexical_cast<std::string>(serverPort_);
+    std::string port = ecf::convert_to<std::string>(serverPort_);
 
     // If path is absolute leave as is
     if (ecf_checkpt_file_ == Ecf::CHECKPT())
@@ -367,7 +367,7 @@ std::pair<std::string, std::string> ServerEnvironment::hostPort() const {
 }
 
 std::string ServerEnvironment::the_port() const {
-    return boost::lexical_cast<std::string>(serverPort_);
+    return ecf::convert_to<std::string>(serverPort_);
 }
 
 void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string>>& theRetVec) const {
@@ -382,7 +382,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     theRetVec.emplace_back(std::string("ECF_LOG"), Log::instance()->path());
     theRetVec.emplace_back(std::string("ECF_CHECK"), ecf_checkpt_file_);
     theRetVec.emplace_back(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_);
-    theRetVec.emplace_back(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_));
+    theRetVec.emplace_back(std::string("ECF_INTERVAL"), ecf::convert_to<std::string>(submitJobsInterval_));
 
     // These variable are read in from the environment, but are not exposed
     // since they only affect the server
@@ -660,9 +660,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (serverPort) {
         std::string port = serverPort;
         try {
-            serverPort_ = boost::lexical_cast<int>(port);
+            serverPort_ = ecf::convert_to<int>(port);
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "ServerEnvironment::read_environment_variables(): ECF_PORT is defined(" << port
                << ") but value is *not* convertible to an integer\n";
@@ -673,9 +673,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (checkPtInterval) {
         std::string interval = checkPtInterval;
         try {
-            checkPtInterval_ = boost::lexical_cast<int>(interval);
+            checkPtInterval_ = ecf::convert_to<int>(interval);
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "ServerEnvironment::read_environment_variables(): ECF_CHECKINTERVAL is defined(" << interval
                << ") but value is *not* convertible to an integer\n";
@@ -717,9 +717,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     char* ecf_prune_node_log = getenv("ECF_PRUNE_NODE_LOG");
     if (ecf_prune_node_log) {
         try {
-            ecf_prune_node_log_ = boost::lexical_cast<int>(ecf_prune_node_log);
+            ecf_prune_node_log_ = ecf::convert_to<int>(ecf_prune_node_log);
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "ServerEnviroment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an integer, "
                   "But found: "
@@ -742,7 +742,7 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (threshold) {
         std::string task_threshold = threshold;
         try {
-            JobProfiler::set_task_threshold(boost::lexical_cast<int>(task_threshold));
+            JobProfiler::set_task_threshold(ecf::convert_to<int>(task_threshold));
         }
         catch (...) {
             std::stringstream ss;

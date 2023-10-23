@@ -50,7 +50,7 @@ std::string SCPort::next() {
             std::cout << " seed_port=ECF_FREE_PORT=(" << ECF_FREE_PORT << ")";
         std::string port = ECF_FREE_PORT;
         try {
-            thePort_ = boost::lexical_cast<int>(port);
+            thePort_ = ecf::convert_to<int>(port);
         }
         catch (...) {
             std::cout << "SCPort::next()  ECF_FREE_PORT(" << ECF_FREE_PORT << ") not convertible to an integer\n";

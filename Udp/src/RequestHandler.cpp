@@ -13,10 +13,10 @@
 #include <string>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
 #include <nlohmann/json.hpp>
 
 #include "ClientAPI.hpp"
+#include "Converter.hpp"
 #include "Trace.hpp"
 
 namespace ecf {
@@ -205,7 +205,7 @@ public:
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
-        auto meter_value  = boost::lexical_cast<int>(value);
+        auto meter_value  = ecf::convert_to<int>(value);
 
         return Command::make_command<CommandUserAlterMeter>(path, name, meter_value);
     }
@@ -265,7 +265,7 @@ public:
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
-        auto meter_value  = boost::lexical_cast<int>(value);
+        auto meter_value  = ecf::convert_to<int>(value);
 
         TRACE_NFO("CommandChildUpdateLabelBuilder", "update to meter ", path, ":", name, " to value: ", meter_value);
 

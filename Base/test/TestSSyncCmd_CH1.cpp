@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Family.hpp"
 #include "Limit.hpp"
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_SUITE(BaseTestSuite)
 
 static defs_ptr create_client_defs(defs_ptr defs) {
     for (size_t j = 0; j < 5; j++) {
-        suite_ptr suite = defs->add_suite("s" + boost::lexical_cast<std::string>(j));
+        suite_ptr suite = defs->add_suite("s" + ecf::convert_to<std::string>(j));
         family_ptr f    = suite->add_family("f");
         f->add_task("t");
         if (j == 0) {

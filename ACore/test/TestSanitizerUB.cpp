@@ -14,7 +14,6 @@
 //============================================================================
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace boost;

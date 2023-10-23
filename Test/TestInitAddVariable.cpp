@@ -19,6 +19,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 1));
         task_ptr t1 = fam->add_task("t1");
         t1->addVerify(VerifyAttr(NState::COMPLETE, 1));
-        t1->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval()));
+        t1->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval()));
 
         task_ptr t2 = fam->add_task("t2");
         t2->add_trigger("t1 == active and ./t1:NAME1 == 1 and ./t1:NAME2 == 2");

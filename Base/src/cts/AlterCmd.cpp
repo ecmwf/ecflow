@@ -15,11 +15,10 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "ExprAst.hpp"
@@ -678,9 +677,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::ADD_LIMIT: {
                     int int_value = 0;
                     try {
-                        int_value = boost::lexical_cast<int>(value_);
+                        int_value = ecf::convert_to<int>(value_);
                     }
-                    catch (boost::bad_lexical_cast&) {
+                    catch (const ecf::bad_conversion&) {
                         std::stringstream mss;
                         mss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" << value_
                             << "' to be convertible to an integer";
@@ -698,9 +697,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     int token_value = 1;
                     if (!value_.empty()) {
                         try {
-                            token_value = boost::lexical_cast<int>(value_);
+                            token_value = ecf::convert_to<int>(value_);
                         }
-                        catch (boost::bad_lexical_cast&) {
+                        catch (const ecf::bad_conversion&) {
                             ss << "AlterCmd: add_inlimit expected '" << value_ << "' to be convertible to an integer";
                             throw std::runtime_error(ss.str());
                         }
@@ -1051,9 +1050,9 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         case AlterCmd::ADD_LIMIT: {
             int int_value = 0;
             try {
-                int_value = boost::lexical_cast<int>(value);
+                int_value = ecf::convert_to<int>(value);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 ss << "AlterCmd add_limit expected value(" << value << ") to be convertible to an integer\n";
                 throw std::runtime_error(ss.str());
             }
@@ -1073,9 +1072,9 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             int token_value = 1;
             if (!value.empty()) {
                 try {
-                    token_value = boost::lexical_cast<int>(value);
+                    token_value = ecf::convert_to<int>(value);
                 }
-                catch (boost::bad_lexical_cast&) {
+                catch (const ecf::bad_conversion&) {
                     ss << "AlterCmd add inlimit expected optional limit token '" << value
                        << "' to be convertible to an integer\n";
                     throw std::runtime_error(ss.str());
@@ -1613,9 +1612,9 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
 
         case AlterCmd::CLOCK_GAIN: {
             try {
-                boost::lexical_cast<int>(name);
+                ecf::convert_to<int>(name);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 ss << "AlterCmd:change  clock_gain expected '" << name << "' to be convertible to an integer\n";
                 throw std::runtime_error(ss.str());
             }
@@ -1632,9 +1631,9 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
             }
             // The name could be an integer
             try {
-                boost::lexical_cast<int>(name);
+                ecf::convert_to<int>(name);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 // name is not an integer, check name is valid
                 Event check_name(name); // will throw if name is not valid
             }
@@ -1644,9 +1643,9 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
         case AlterCmd::METER: {
             Meter check(name, 0, 100); // Check meter name , by creating a meter
             try {
-                boost::lexical_cast<int>(value);
+                ecf::convert_to<int>(value);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 ss << "AlterCmd change meter : " << value << " to be convertible to an integer\n";
                 throw std::runtime_error(ss.str());
             }
@@ -1703,9 +1702,9 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
         case AlterCmd::LIMIT_MAX: {
             int limit = 0;
             try {
-                limit = boost::lexical_cast<int>(value);
+                limit = ecf::convert_to<int>(value);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 ss << "AlterCmd: change: limit-max: expected " << value << " to be convertible to an integer\n";
                 throw std::runtime_error(ss.str());
             }
@@ -1715,9 +1714,9 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
 
         case AlterCmd::LIMIT_VAL: {
             try {
-                boost::lexical_cast<int>(value);
+                ecf::convert_to<int>(value);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 ss << "AlterCmd: change: limit_value: expected " << value << " to be convertible to an integer\n";
                 throw std::runtime_error(ss.str());
             }

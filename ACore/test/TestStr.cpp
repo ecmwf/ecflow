@@ -12,15 +12,12 @@
 //
 // Description :
 //============================================================================
+
 #include <algorithm>
 #include <iostream>
 #include <string>
-// #include <fstream>
 
 #include <boost/test/unit_test.hpp>
-// #include <boost/timer/timer.hpp>
-// #include <boost/lexical_cast.hpp>
-// #include <boost/algorithm/string.hpp>
 
 #include "Str.hpp"
 #include "StringSplitter.hpp"
@@ -719,10 +716,10 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //{
 //	// 12.2
 //	try {
-//		int number = boost::lexical_cast< int >( str );
+//		int number = ecf::convert_to<int>( str );
 //		numberRes.push_back( number );
 //	}
-//	catch ( boost::bad_lexical_cast& ) {
+//	catch (const ecf::bad_conversion&) {
 //		stringRes.push_back( str );
 //	}
 // }
@@ -734,10 +731,10 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //	// 0.6
 //	if ( str.find_first_of( Str::NUMERIC(), 0 ) == 0 ) {
 //		try {
-//			int number = boost::lexical_cast< int >( str );
+//			int number = ecf::convert_to<int>( str );
 //			numberRes.push_back( number );
 //		}
-//		catch ( boost::bad_lexical_cast& ) {
+//		catch (const ecf::bad_conversion&) {
 //			stringRes.push_back( str );
 //		}
 //	}
@@ -772,7 +769,7 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //  	std::vector<int> expectedNumberRes;
 //	for(size_t i=0; i < the_size; i++) { stringTokens.push_back("astring");}
 //	for(size_t i=0; i < the_size; i++) {
-//		numberTokens.push_back(boost::lexical_cast<string>(i));
+//		numberTokens.push_back(ecf::convert_to<std::string>(i));
 //		expectedNumberRes.push_back(i);
 //    }
 //
@@ -865,9 +862,9 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //    {
 //       boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
 //       elapsed for(size_t i =0; i < the_size; i++) {
-//          std::string s = boost::lexical_cast<std::string>(i);
+//          std::string s = ecf::convert_to<std::string>(i);
 //       }
-//       cout << "Time for int to string using boost::lexical_cast  elapsed time = " <<
+//       cout << "Time for int to string using ecf::convert_to elapsed time = " <<
 //       timer.format(3,Str::cpu_timer_format()) << "\n";
 //    }
 // }

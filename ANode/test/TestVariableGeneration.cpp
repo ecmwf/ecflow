@@ -10,12 +10,13 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Cal.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Str.hpp"
@@ -100,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
     findParentVariableValue(t, "YMD_MM", "1");
     findParentVariableValue(t, "YMD_DD", "1");
     findParentVariableValue(t, "YMD_DOW", "4");
-    findParentVariableValue(t, "YMD_JULIAN", boost::lexical_cast<std::string>(Cal::date_to_julian(20090101)));
+    findParentVariableValue(t, "YMD_JULIAN", ecf::convert_to<std::string>(Cal::date_to_julian(20090101)));
     findParentVariableValue(t, "RepeatInteger", "10");
 }
 

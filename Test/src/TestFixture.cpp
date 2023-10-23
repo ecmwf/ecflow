@@ -21,7 +21,6 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
 #include "CtsApi.hpp"
@@ -185,7 +184,7 @@ void TestFixture::init(const std::string& project_test_dir) {
         // Note: linux64 and linux64intel, can run on same machine, on different workspace
         // Hence the lock file is not sufficient. Hence we will make a client server call.
         cout << "Find free port to start server, starting with port " << port_ << "\n";
-        auto the_port = boost::lexical_cast<int>(port_);
+        auto the_port = ecf::convert_to<int>(port_);
         while (!EcfPortLock::is_free(the_port))
             the_port++;
         port_ = ClientInvoker::find_free_port(the_port, true /*show debug output */);
@@ -202,7 +201,7 @@ void TestFixture::init(const std::string& project_test_dir) {
         std::string theServerInvokePath = File::find_ecf_server_path();
         assert(!theServerInvokePath.empty());
         theServerInvokePath += " --port=" + port_;
-        theServerInvokePath += " --ecfinterval=" + boost::lexical_cast<std::string>(job_submission_interval());
+        theServerInvokePath += " --ecfinterval=" + ecf::convert_to<std::string>(job_submission_interval());
         theServerInvokePath += "&";
         if (system(theServerInvokePath.c_str()) != 0)
             assert(false); // " Server invoke failed "
@@ -442,6 +441,6 @@ int TestFixture::server_version() {
     // Could 4.0.8rc1
     Str::replace_all(the_server_version_str, "rc1", "");
     Str::replace_all(the_server_version_str, "rc2", "");
-    auto the_server_version = boost::lexical_cast<int>(the_server_version_str);
+    auto the_server_version = ecf::convert_to<int>(the_server_version_str);
     return the_server_version;
 }

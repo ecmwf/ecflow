@@ -19,8 +19,9 @@
 #include <string>
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include "Converter.hpp"
 
 // #define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
 #ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
@@ -187,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
     std::string path     = rootPath;
     std::string dir      = "dir";
     for (int i = 0; i < 6; i++) {
-        path += "/" + dir + boost::lexical_cast<std::string>(i);
+        path += "/" + dir + ecf::convert_to<std::string>(i);
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/dir5
     //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/dir5
@@ -243,7 +244,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
 
     // Remove the test dir. Comment out for debugging
     for (int i = 0; i < 6; i++) {
-        path = rootPath + "/" + dir + boost::lexical_cast<std::string>(i);
+        path = rootPath + "/" + dir + ecf::convert_to<std::string>(i);
         BOOST_CHECK_MESSAGE(File::removeDir(path), "Failed to remove dir " << path);
     }
 }
@@ -262,7 +263,7 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
         if (i == 5)
             path += "/task";
         else
-            path += "/" + dir + boost::lexical_cast<std::string>(i);
+            path += "/" + dir + ecf::convert_to<std::string>(i);
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/task
     //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/task

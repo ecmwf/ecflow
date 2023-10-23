@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <stdexcept>
 
 #include <boost/algorithm/string/trim.hpp>
@@ -19,6 +20,7 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
@@ -237,9 +239,9 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
         int value = Log::get_last_n_lines_default();
         if (args.size() == 2) {
             try {
-                value = boost::lexical_cast<int>(args[1]);
+                value = ecf::convert_to<int>(args[1]);
             }
-            catch (boost::bad_lexical_cast& e) {
+            catch (const ecf::bad_conversion&) {
                 throw std::runtime_error("LogCmd: Second argument must be a integer, i.e. --log get 100\n");
             }
         }

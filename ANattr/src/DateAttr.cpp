@@ -21,6 +21,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Extract.hpp"
 #include "Indentor.hpp"
@@ -255,21 +256,21 @@ void DateAttr::write(std::string& ret) const {
     if (day_ == 0)
         ret += "*.";
     else {
-        ret += boost::lexical_cast<std::string>(day_);
+        ret += ecf::convert_to<std::string>(day_);
         ret += ".";
     }
 
     if (month_ == 0)
         ret += "*.";
     else {
-        ret += boost::lexical_cast<std::string>(month_);
+        ret += ecf::convert_to<std::string>(month_);
         ret += ".";
     }
 
     if (year_ == 0)
         ret += "*";
     else
-        ret += boost::lexical_cast<std::string>(year_);
+        ret += ecf::convert_to<std::string>(year_);
 }
 
 std::string DateAttr::dump() const {

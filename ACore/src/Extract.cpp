@@ -18,7 +18,8 @@
 #include <stdexcept>
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-#include <boost/lexical_cast.hpp>
+
+#include "Converter.hpp"
 
 // #define DEBUG_PARSER 1
 
@@ -73,9 +74,9 @@ bool Extract::split_get_second(const std::string& str, std::string& ret, char se
 int Extract::theInt(const std::string& token, const std::string& errorMsg) {
     int the_int = -1;
     try {
-        the_int = boost::lexical_cast<int>(token);
+        the_int = ecf::convert_to<int>(token);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error(errorMsg);
     }
     return the_int;

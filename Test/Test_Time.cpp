@@ -22,6 +22,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -237,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_time_relative_time_series) {
         suite_ptr suite = theDefs.add_suite("test_time_relative_time_series");
         ClockAttr clockAttr(Calendar::second_clock_time(), false);
         suite->addClock(clockAttr);
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval() - 2));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() - 2));
 
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t");
@@ -339,7 +340,7 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
         suite_ptr suite                      = theDefs.add_suite("test_single_real_time_near_midnight");
         ClockAttr clockAttr(clock_start, false);
         suite->addClock(clockAttr);
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<string>(TestFixture::job_submission_interval() * 2));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2));
 
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t");
@@ -401,7 +402,7 @@ BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
         boost::posix_time::ptime clock_start = first_time - minutes(1);
 
         suite_ptr suite                      = theDefs.add_suite("test_time_real_series_near_midnight");
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<string>(TestFixture::job_submission_interval() * 2));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2));
 
         ClockAttr clockAttr(clock_start, false);
         suite->addClock(clockAttr);

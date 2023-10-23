@@ -17,6 +17,7 @@
 
 #include <stdexcept>
 
+#include "Converter.hpp"
 #include "DefsStructureParser.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"
@@ -59,9 +60,9 @@ bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& li
             if (lineTokens.size() >= 4) {
                 if (lineTokens[2] == "#") {
                     try {
-                        actual = boost::lexical_cast<int>(lineTokens[3]);
+                        actual = ecf::convert_to<int>(lineTokens[3]);
                     }
-                    catch (boost::bad_lexical_cast& e) { /* ignore could be other comment */
+                    catch (const ecf::bad_conversion&) { /* ignore could be other comment */
                     }
                 }
             }

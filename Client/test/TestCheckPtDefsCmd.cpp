@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt) {
                               "Expected " << expected_no_of_suites << " suites, after restoreDefsFromCheckPt but found "
                                           << theClient.defs()->suiteVec().size() << "\n");
 
-        std::string suite = "/s" + boost::lexical_cast<std::string>(i);
+        std::string suite = "/s" + ecf::convert_to<std::string>(i);
         BOOST_REQUIRE_MESSAGE(theClient.delete_node(suite) == 0,
                               "Expected delete single suite to succeed\n"
                                   << theClient.errorMsg());

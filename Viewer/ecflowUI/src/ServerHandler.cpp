@@ -18,7 +18,6 @@
 #include <QMetaType>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio/ip/host_name.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "ChangeNotify.hpp"
 #include "ClientInvoker.hpp"
@@ -817,7 +816,7 @@ void ServerHandler::slotNodeChanged(const Node* nc, std::vector<ecf::Aspect::Typ
     UiLogS(this).dbg() << "ServerHandler::slotNodeChanged - node: " + nc->name();
 
     // for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-    // UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+    //     UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ecf::convert_to<std::string>(*it));
 
     // This can happen if we initiated a reset while we sync in the thread
     if (vRoot_->isEmpty()) {
@@ -900,7 +899,7 @@ void ServerHandler::broadcast(NoMethodV1 proc,
 void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect) {
     UiLog().dbg() << "ServerHandler::slotDefsChanged -->";
     // for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-    //	UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+    //     UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ecf::convert_to<std::string>(*it));
 
     // Begin update for the VNode
     // VNodeChange change;

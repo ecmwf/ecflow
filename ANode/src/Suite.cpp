@@ -18,8 +18,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "DefsDelta.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
@@ -493,9 +492,9 @@ void Suite::changeClockGain(const std::string& gain) {
     // See: ISSUES on Suite::changeClockType
     long theGain = 0;
     try {
-        theGain = boost::lexical_cast<long>(gain);
+        theGain = ecf::convert_to<long>(gain);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("Suite::changeClockGain: value '" + gain +
                                  "' is not convertible to an long, for suite " + name());
     }
@@ -851,9 +850,9 @@ void SuiteGenVariables::update_generated_variables() const {
     if (suite_->cal_.dayChanged() || genvar_yyyy_.theValue().empty() || force_update_) {
 
         force_update_ = false;
-        genvar_yyyy_.set_value(boost::lexical_cast<std::string>(suite_->cal_.year()));
-        genvar_dow_.set_value(boost::lexical_cast<std::string>(suite_->cal_.day_of_week()));
-        genvar_doy_.set_value(boost::lexical_cast<std::string>(suite_->cal_.day_of_year()));
+        genvar_yyyy_.set_value(ecf::convert_to<std::string>(suite_->cal_.year()));
+        genvar_dow_.set_value(ecf::convert_to<std::string>(suite_->cal_.day_of_week()));
+        genvar_doy_.set_value(ecf::convert_to<std::string>(suite_->cal_.day_of_year()));
         // cout << "genvar_yyyy_ = " << genvar_yyyy_.theValue() << "\n";
         // cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
         // cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
@@ -917,7 +916,7 @@ void SuiteGenVariables::update_generated_variables() const {
         genvar_ecf_clock_.set_value(buffer);
         // cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
 
-        genvar_ecf_julian_.set_value(boost::lexical_cast<std::string>(suite_->cal_.suiteTime().date().julian_day()));
+        genvar_ecf_julian_.set_value(ecf::convert_to<std::string>(suite_->cal_.suiteTime().date().julian_day()));
     }
 }
 

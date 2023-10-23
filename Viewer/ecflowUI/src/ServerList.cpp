@@ -20,8 +20,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "DirectoryHandler.hpp"
 #include "MainWindow.hpp"
 #include "ServerItem.hpp"
@@ -494,9 +494,9 @@ bool ServerList::checkItemToAdd(const std::string& name,
     }
 
     try {
-        boost::lexical_cast<int>(port);
+        ecf::convert_to<int>(port);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
         errStr = "Invalid port number: " + port;
         return false;
     }

@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QResizeEvent>
 
+#include "Converter.hpp"
 #include "Dashboard.hpp"
 #include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
@@ -317,7 +318,7 @@ void NodePanel::writeSettings(VComboSettings* vs) {
             vs->beginGroup(id);
             nw->writeSettings(vs);
             vs->endGroup();
-            // pt.add_child("tab_"+ boost::lexical_cast<std::string>(i),ptTab);
+            // pt.add_child("tab_"+   ecf::convert_to<std::string>(i),ptTab);
         }
     }
 }
@@ -362,5 +363,5 @@ void NodePanel::readSettings(VComboSettings* vs) {
 }
 
 std::string NodePanel::tabSettingsId(int i) {
-    return "tab_" + boost::lexical_cast<std::string>(i);
+    return "tab_" + ecf::convert_to<std::string>(i);
 }

@@ -13,9 +13,10 @@
 //
 // Description : This class is used as a helper class
 //============================================================================
+
 #include "Str.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include "Converter.hpp"
 
 using namespace std;
 
@@ -529,9 +530,9 @@ bool Str::valid_name(const std::string& name) {
 int Str::to_int(const std::string& the_str, int error_return) {
     if (the_str.find_first_of(Str::NUMERIC(), 0) != std::string::npos) {
         try {
-            return boost::lexical_cast<int>(the_str);
+            return ecf::convert_to<int>(the_str);
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
         }
     }
     return error_return;

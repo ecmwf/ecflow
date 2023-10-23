@@ -12,11 +12,13 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Str.hpp"
@@ -79,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_simple_cmd) {
     {
         std::string varValue;
         if (t1->findParentUserVariableValue(Str::ECF_TRIES(), varValue)) {
-            auto ecf_tries = boost::lexical_cast<int>(varValue);
+            auto ecf_tries = ecf::convert_to<int>(varValue);
             while (true) {
                 TestHelper::invokeRequest(
                     &defs,

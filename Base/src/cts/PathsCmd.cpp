@@ -18,6 +18,7 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
@@ -47,7 +48,7 @@ std::string PathsCmd::print_short() const {
     my_print_only(os, paths);
     if (paths_.size() > 1) {
         os += " : truncated : ";
-        os += boost::lexical_cast<std::string>(paths_.size() - 1);
+        os += ecf::convert_to<std::string>(paths_.size() - 1);
         os += " paths *not* shown";
     }
     return os;

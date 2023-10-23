@@ -13,6 +13,7 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "Converter.hpp"
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
@@ -26,7 +27,6 @@
 #include <regex>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/lexical_cast.hpp>
 
 Sound* Sound::instance_ = nullptr;
 
@@ -80,7 +80,7 @@ void Sound::play(const std::string& fName, int loopCount) {
     else {
         std::string cmd = currentCmd_;
         boost::replace_first(cmd, "%FILE%", fName);
-        boost::replace_first(cmd, "%REPEAT%", boost::lexical_cast<std::string>(loopCount - 1));
+        boost::replace_first(cmd, "%REPEAT%", ecf::convert_to<std::string>(loopCount - 1));
         if (system(cmd.c_str())) {
             UiLog().dbg() << "Sound::play() could not play sound alert. Command: " << cmd;
         }

@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
+#include "Converter.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -29,7 +29,7 @@ bool SClientHandleCmd::equals(ServerToClientCmd* rhs) const {
 std::string SClientHandleCmd::print() const {
     string os;
     os += "cmd:SClientHandleCmd [ ";
-    os += boost::lexical_cast<string>(handle_);
+    os += ecf::convert_to<std::string>(handle_);
     os += " ]";
     return os;
 }

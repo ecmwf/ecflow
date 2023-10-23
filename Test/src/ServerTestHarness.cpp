@@ -21,6 +21,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "AssertTimer.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Ecf.hpp"
@@ -326,7 +327,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
 #ifdef DEBUG_DIFF
             {
                 counter++;
-                std::string filename = dump_defs_filename + boost::lexical_cast<std::string>(counter);
+                std::string filename = dump_defs_filename + ecf::convert_to<std::string>(counter);
                 std::ofstream theFile(filename.c_str());
 
                 std::vector<Task*> tasks;
@@ -524,7 +525,7 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const {
         int delta = abs(max - min) / 10;
         for (int i = min + delta; i <= max; i = i + delta) {
             templateEcfFile += " ";
-            templateEcfFile += boost::lexical_cast<std::string>(i);
+            templateEcfFile += ecf::convert_to<std::string>(i);
         }
         templateEcfFile += "\n";
         templateEcfFile += "do\n";

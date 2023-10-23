@@ -16,14 +16,14 @@
 //               as each new object is created we add it here, to test
 //               Serialisation read/write and migration of previous fixtures
 //============================================================================
-#include <algorithm> //for for_each()
 
-#include <boost/lexical_cast.hpp>
+#include <algorithm>
 
 #include "Alias.hpp"
 #include "AutoArchiveAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoRestoreAttr.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Expression.hpp"
 #include "Family.hpp"
@@ -208,9 +208,9 @@ private:
             std::string labelName = "labelName";
             std::string limitName = "limitName";
             if (i != 0) {
-                fname += boost::lexical_cast<std::string>(i);
-                tname += boost::lexical_cast<std::string>(i);
-                labelName += boost::lexical_cast<std::string>(i);
+                fname += ecf::convert_to<std::string>(i);
+                tname += ecf::convert_to<std::string>(i);
+                labelName += ecf::convert_to<std::string>(i);
             }
 
             family_ptr fam = suite->add_family(fname);
@@ -251,13 +251,13 @@ private:
             nodes_to_restore.emplace_back("/EmptySuite");
             task->add_autorestore(ecf::AutoRestoreAttr(nodes_to_restore));
             if (i == 2) {
-                std::string compExpr = "../familyName" + boost::lexical_cast<std::string>(i - 1);
-                compExpr += "/taskName" + boost::lexical_cast<std::string>(i - 1);
+                std::string compExpr = "../familyName" + ecf::convert_to<std::string>(i - 1);
+                compExpr += "/taskName" + ecf::convert_to<std::string>(i - 1);
                 compExpr += ":myMeter ge 10";
                 task->add_complete(compExpr);
 
-                std::string expression = "../familyName" + boost::lexical_cast<std::string>(i - 1);
-                expression += "/taskName" + boost::lexical_cast<std::string>(i - 1);
+                std::string expression = "../familyName" + ecf::convert_to<std::string>(i - 1);
+                expression += "/taskName" + ecf::convert_to<std::string>(i - 1);
                 expression += " == complete";
                 task->add_trigger(expression);
             }

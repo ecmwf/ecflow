@@ -19,6 +19,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Simulator.hpp"
@@ -26,8 +27,6 @@
 #include "Task.hpp"
 #include "TestUtil.hpp"
 #include "VerifyAttr.hpp"
-
-// #include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -67,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 4)); // verify family repeats 2 times
         int taskSize = 2;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr t = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr t = fam->add_task("t" + ecf::convert_to<std::string>(i));
             t->addVerify(VerifyAttr(NState::COMPLETE, 4)); // Each task should run 4 times
         }
         //		cout << theDefs << "\n";

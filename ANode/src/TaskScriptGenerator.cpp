@@ -18,8 +18,8 @@
 #include <stdexcept>
 
 #include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "File.hpp"
 #include "QueueAttr.hpp"
@@ -201,7 +201,7 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const {
         content += "for i in";
         for (int i = m.min(); i <= m.max(); i = i + 1) {
             content += " ";
-            content += boost::lexical_cast<std::string>(i);
+            content += ecf::convert_to<std::string>(i);
         }
         content += "\n";
         content += "do\n";

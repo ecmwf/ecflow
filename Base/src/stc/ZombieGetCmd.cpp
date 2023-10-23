@@ -16,9 +16,8 @@
 
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
-
 #include "AbstractServer.hpp"
+#include "Converter.hpp"
 
 using namespace std;
 using namespace boost;
@@ -43,7 +42,7 @@ bool ZombieGetCmd::equals(ServerToClientCmd* rhs) const {
 std::string ZombieGetCmd::print() const {
     string os;
     os += "cmd:ZombieGetCmd [ ";
-    os += boost::lexical_cast<std::string>(zombies_.size());
+    os += ecf::convert_to<std::string>(zombies_.size());
     os += " ]";
     return os;
 }

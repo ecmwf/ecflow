@@ -24,7 +24,7 @@
 
 #include "BasicAuth.hpp"
 #include "Child.hpp"
-#include "ClientInvoker.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DefsStructureParser.hpp"
 #include "Family.hpp"
@@ -104,11 +104,11 @@ std::string json_type_to_string(const ecf::ojson& j) {
         case ecf::ojson::value_t::discarded:
             return "discarded";
         case ecf::ojson::value_t::number_integer:
-            return std::to_string(j.get<int>());
+            return ecf::convert_to<std::string>(j.get<int>());
         case ecf::ojson::value_t::number_unsigned:
-            return std::to_string(j.get<unsigned int>());
+            return ecf::convert_to<std::string>(j.get<unsigned int>());
         case ecf::ojson::value_t::number_float:
-            return std::to_string(j.get<double>());
+            return ecf::convert_to<std::string>(j.get<double>());
         default:
             return std::string();
     }

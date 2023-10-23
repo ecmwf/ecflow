@@ -17,7 +17,7 @@
 
 #include <sstream>
 
-#include <boost/lexical_cast.hpp>
+#include "Converter.hpp"
 
 std::string CtsApi::to_string(const std::vector<std::string>& vec) {
     std::string ret;
@@ -107,7 +107,7 @@ CtsApi::ch_register(int client_handle, bool auto_add_new_suites, const std::vect
     retVec.reserve(suites.size() + 1);
     std::string ret = "--ch_register=";
     if (client_handle != 0) {
-        ret += boost::lexical_cast<std::string>(client_handle);
+        ret += ecf::convert_to<std::string>(client_handle);
         retVec.push_back(ret);
         if (auto_add_new_suites)
             retVec.emplace_back("true");
@@ -139,7 +139,7 @@ const char* CtsApi::ch_suites_arg() {
 
 std::string CtsApi::ch_drop(int client_handle) {
     std::string ret = "--ch_drop=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     return ret;
 }
 const char* CtsApi::ch_drop_arg() {
@@ -162,7 +162,7 @@ std::vector<std::string> CtsApi::ch_add(int client_handle, const std::vector<std
     std::vector<std::string> retVec;
     retVec.reserve(suites.size() + 1);
     std::string ret = "--ch_add=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     retVec.push_back(ret);
     for (const auto& suite : suites) {
         retVec.push_back(suite);
@@ -177,7 +177,7 @@ std::vector<std::string> CtsApi::ch_remove(int client_handle, const std::vector<
     std::vector<std::string> retVec;
     retVec.reserve(suites.size() + 1);
     std::string ret = "--ch_rem=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     retVec.push_back(ret);
     for (const auto& suite : suites) {
         retVec.push_back(suite);
@@ -192,7 +192,7 @@ std::vector<std::string> CtsApi::ch_auto_add(int client_handle, bool auto_add_ne
     std::vector<std::string> retVec;
     retVec.reserve(2);
     std::string ret = "--ch_auto_add=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     retVec.push_back(ret);
     if (auto_add_new_suites)
         retVec.emplace_back("true");
@@ -209,10 +209,10 @@ CtsApi::sync(unsigned int client_handle, unsigned int state_change_no, unsigned 
     std::vector<std::string> retVec;
     retVec.reserve(3);
     std::string ret = "--sync=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     retVec.push_back(ret);
-    retVec.push_back(boost::lexical_cast<std::string>(state_change_no));
-    retVec.push_back(boost::lexical_cast<std::string>(modify_change_no));
+    retVec.push_back(ecf::convert_to<std::string>(state_change_no));
+    retVec.push_back(ecf::convert_to<std::string>(modify_change_no));
     return retVec;
 }
 const char* CtsApi::syncArg() {
@@ -224,10 +224,10 @@ CtsApi::sync_clock(unsigned int client_handle, unsigned int state_change_no, uns
     std::vector<std::string> retVec;
     retVec.reserve(3);
     std::string ret = "--sync_clock=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     retVec.push_back(ret);
-    retVec.push_back(boost::lexical_cast<std::string>(state_change_no));
-    retVec.push_back(boost::lexical_cast<std::string>(modify_change_no));
+    retVec.push_back(ecf::convert_to<std::string>(state_change_no));
+    retVec.push_back(ecf::convert_to<std::string>(modify_change_no));
     return retVec;
 }
 const char* CtsApi::sync_clock_arg() {
@@ -236,7 +236,7 @@ const char* CtsApi::sync_clock_arg() {
 
 std::string CtsApi::sync_full(unsigned int client_handle) {
     std::string ret = "--sync_full=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     return ret;
 }
 const char* CtsApi::sync_full_arg() {
@@ -248,10 +248,10 @@ CtsApi::news(unsigned int client_handle, unsigned int state_change_no, unsigned 
     std::vector<std::string> retVec;
     retVec.reserve(3);
     std::string ret = "--news=";
-    ret += boost::lexical_cast<std::string>(client_handle);
+    ret += ecf::convert_to<std::string>(client_handle);
     retVec.push_back(ret);
-    retVec.push_back(boost::lexical_cast<std::string>(state_change_no));
-    retVec.push_back(boost::lexical_cast<std::string>(modify_change_no));
+    retVec.push_back(ecf::convert_to<std::string>(state_change_no));
+    retVec.push_back(ecf::convert_to<std::string>(modify_change_no));
     return retVec;
 }
 const char* CtsApi::newsArg() {
@@ -838,12 +838,12 @@ std::string CtsApi::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int
     if (check_pt_interval != 0) {
         if (m != ecf::CheckPt::UNDEFINED)
             ret += ":";
-        ret += boost::lexical_cast<std::string>(check_pt_interval);
+        ret += ecf::convert_to<std::string>(check_pt_interval);
     }
     else {
         if (m == ecf::CheckPt::UNDEFINED && check_pt_save_time_alarm != 0) {
             ret += "alarm:";
-            ret += boost::lexical_cast<std::string>(check_pt_save_time_alarm);
+            ret += ecf::convert_to<std::string>(check_pt_save_time_alarm);
         }
     }
     return ret;
