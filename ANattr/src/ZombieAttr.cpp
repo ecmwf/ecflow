@@ -18,6 +18,7 @@
 #include <cassert>
 #include <stdexcept>
 
+#include <boost/type_traits.hpp>
 #include <boost/token_functions.hpp>
 #include <boost/tokenizer.hpp>
 
