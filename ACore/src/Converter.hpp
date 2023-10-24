@@ -36,41 +36,38 @@ inline static auto try_lexical_convert(From&& v) {
     }
 }
 
-template <typename To>
+}
+
+template <typename From, typename To>
 struct converter_traits
 {
-    template <typename From>
     inline static auto convert(From&& v) {
-        return try_lexical_convert<To>(std::forward<From>(v));
+        return details::try_lexical_convert<To>(std::forward<From>(v));
     }
 };
 
 template <>
-struct converter_traits<std::string>
+struct converter_traits<char, std::string>
 {
-    template <typename From>
-    inline static auto convert(From&& v) {
-
-        if constexpr (std::is_same_v<From, char>) {
-            return std::string{v};
-        }
-        else if constexpr (std::is_same_v<std::remove_cv_t<From>, const char*>) {
-            return std::string(v);
-        }
-        else if constexpr (std::is_integral_v<From> || std::is_floating_point_v<From>) {
-            return std::to_string(v);
-        }
-
-        return try_lexical_convert<std::string>(std::forward<From>(v));
-    }
+    inline static auto convert(char v) { return std::string{v}; }
 };
 
-} // namespace details
+template <>
+struct converter_traits<const char*, std::string>
+{
+    inline static auto convert(const char* v) { return std::string{v}; }
+};
+
+template <typename From>
+struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is_floating_point_v<From>,std::string>>
+{
+    inline static auto convert(From&& v) { return std::to_string(v); }
+};
 
 template <typename To, typename From>
-inline auto convert_to(From v) {
+inline auto convert_to(From&& v) {
     using namespace ecf::details;
-    return converter_traits<To>::convert(v);
+    return converter_traits<From, To>::convert(std::forward<From>(v));
 }
 
 } // namespace ecf
