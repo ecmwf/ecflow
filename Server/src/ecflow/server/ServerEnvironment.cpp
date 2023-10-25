@@ -13,13 +13,12 @@
 #include <cstdlib> // for getenv()
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
@@ -32,7 +31,6 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 
 static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     switch (mode) {

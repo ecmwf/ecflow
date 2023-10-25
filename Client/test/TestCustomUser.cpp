@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
@@ -18,7 +17,6 @@
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/User.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

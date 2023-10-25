@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
@@ -19,7 +18,6 @@
 #include "ecflow/node/Defs.hpp"
 
 using namespace boost;
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

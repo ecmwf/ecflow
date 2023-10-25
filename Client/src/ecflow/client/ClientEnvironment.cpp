@@ -15,8 +15,6 @@
 #include <iterator>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
@@ -29,7 +27,6 @@
     #include "ecflow/base/Openssl.hpp"
 #endif
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 using namespace boost;

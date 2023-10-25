@@ -20,7 +20,6 @@
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "httplib.h"
-#include "nlohmann/json.hpp"
 
 BOOST_AUTO_TEST_SUITE(HttpTestSuite)
 
@@ -35,8 +34,6 @@ std::unique_ptr<Certificate> create_certificate() {
     const char* cert_dir = getenv("ECF_API_CERT_DIRECTORY");
     const std::string path_to_cert =
         (cert_dir == nullptr) ? std::string(getenv("HOME")) + "/.ecflowrc/ssl/" : std::string(cert_dir);
-
-    namespace fs = boost::filesystem;
 
     std::unique_ptr<Certificate> cert;
 
@@ -56,8 +53,6 @@ std::unique_ptr<Certificate> create_certificate() {
 }
 
 std::unique_ptr<TokenFile> create_token_file() {
-    namespace fs = boost::filesystem;
-
     fs::path cwd(fs::current_path());
     string tokens_file = cwd.string() + "/api-tokens.json";
 

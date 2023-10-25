@@ -12,13 +12,12 @@
 
 #include <sstream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 
 // #define _UI_SETTINGS_DEBUG
@@ -69,9 +68,8 @@ void VSettings::clear() {
 
 bool VSettings::fileExists() const {
     if (!file_.empty()) {
-        namespace fs = boost::filesystem;
-        fs::path boostpath(file_);
-        return fs::exists(boostpath);
+        fs::path path(file_);
+        return fs::exists(path);
     }
     return false;
 }

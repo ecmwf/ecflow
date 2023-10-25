@@ -11,7 +11,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
@@ -27,7 +26,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(NodeTestSuite)
 

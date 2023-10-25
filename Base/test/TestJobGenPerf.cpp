@@ -12,9 +12,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
@@ -27,7 +24,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // #define DEBUG 1
 

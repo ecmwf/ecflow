@@ -12,8 +12,6 @@
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #define BOOST_TEST_MODULE TEST_ZOMBIES
 #include <boost/test/included/unit_test.hpp>
 
@@ -34,7 +32,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
 ///
 /// \note This is used to INVOKE a SINGLE test.

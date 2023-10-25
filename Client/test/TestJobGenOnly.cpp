@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "ecflow/core/File.hpp"
@@ -20,7 +19,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(ClientTestSuite)
 

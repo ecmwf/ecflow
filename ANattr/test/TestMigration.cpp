@@ -9,7 +9,6 @@
  */
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
@@ -37,7 +36,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-namespace fs = boost::filesystem;
 
 // #define UPDATE_TESTS 1
 
@@ -331,12 +329,12 @@ BOOST_AUTO_TEST_CASE(test_day_migration) {
     }
 
     // remove the generated filea, comment out to debug.
-    boost::filesystem::remove("test_day_migration");
-    boost::filesystem::remove("test_day_migration_def");
-    boost::filesystem::remove("test_day_migration_free");
-    boost::filesystem::remove("test_day_migration_expired");
-    boost::filesystem::remove("test_day_migration_free_and_expired");
-    boost::filesystem::remove("test_day_migration_free_expired_date");
+    fs::remove("test_day_migration");
+    fs::remove("test_day_migration_def");
+    fs::remove("test_day_migration_free");
+    fs::remove("test_day_migration_expired");
+    fs::remove("test_day_migration_free_and_expired");
+    fs::remove("test_day_migration_free_expired_date");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

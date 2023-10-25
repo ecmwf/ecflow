@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
@@ -24,7 +23,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-namespace fs = boost::filesystem;
 
 // #define UPDATE_TESTS 1
 

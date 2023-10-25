@@ -13,8 +13,6 @@
 #include <string>
 
 #include <boost/chrono.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
@@ -34,7 +32,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;

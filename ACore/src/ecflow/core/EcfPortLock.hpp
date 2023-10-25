@@ -21,9 +21,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/operations.hpp>
-
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 
@@ -33,7 +30,7 @@ class EcfPortLock {
 public:
     static bool is_free(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
-        if (boost::filesystem::exists(port_file(the_port))) {
+        if (fs::exists(port_file(the_port))) {
             if (debug)
                 std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";
             return false;
@@ -59,7 +56,7 @@ public:
         std::string the_file = port_file(the_port);
         //      std::cout << "EcfPortLock::remove " << the_file << "
         //      --------------------------------------------------\n";
-        boost::filesystem::remove(the_file);
+        fs::remove(the_file);
     }
 
 private:

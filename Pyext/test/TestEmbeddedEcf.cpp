@@ -15,12 +15,8 @@
 #include <stdexcept>
 // #include <boost/python.hpp>
 // #include <boost/detail/lightweight_test.hpp>
-// #include <boost/filesystem/operations.hpp>
-// #include <boost/filesystem/path.hpp>
 // #include <iostream>
 //
-// namespace fs     = boost::filesystem;
-// namespace python = boost::python;
 //
 //// init_defs is defined in BOOST_PYTHON_MODULE(_defs) in file EcfDefsExt.cpp
 //// However we need definition here. Hence expanded the pertinent contents of

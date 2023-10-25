@@ -9,8 +9,6 @@
  */
 
 // #include <boost/test/unit_test.hpp>
-// #include <boost/filesystem/operations.hpp>
-// #include <boost/filesystem/path.hpp>
 // #include <iostream>
 // #include <fstream>
 ////#include "StackTrace.hpp"
@@ -19,7 +17,6 @@
 // using namespace boost;
 // using namespace std;
 // using namespace ecf;
-// namespace fs = boost::filesystem;
 //
 // BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 //

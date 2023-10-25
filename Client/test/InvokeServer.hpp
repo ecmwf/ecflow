@@ -14,7 +14,6 @@
 #include <iostream>
 
 #include <boost/core/noncopyable.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
@@ -110,16 +109,16 @@ private:
         /// Remove check pt and backup check pt file, else server will load it & remove log file
         ecf::Host h;
         if (remove_checkpt_file_before_server_start) {
-            boost::filesystem::remove(h.ecf_checkpt_file(port));
-            boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
+            fs::remove(h.ecf_checkpt_file(port));
+            fs::remove(h.ecf_backup_checkpt_file(port));
         }
-        boost::filesystem::remove(h.ecf_log_file(port));
+        fs::remove(h.ecf_log_file(port));
 
         // start the server in the background
         std::string theServerInvokePath = ecf::File::find_ecf_server_path();
         BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(),
                               "InvokeServer::doStart: The server program could not be found");
-        BOOST_REQUIRE_MESSAGE(boost::filesystem::exists(theServerInvokePath),
+        BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath),
                               "InvokeServer::doStart: server exe does not exist at:" << theServerInvokePath);
 
         // Create a port file. To avoid creating multiple servers on the same port number
@@ -165,17 +164,17 @@ private:
         // Remove generated file comment for debug
         ecf::Host h;
         if (remove_log_file_after_server_exit) {
-            boost::filesystem::remove(h.ecf_log_file(port));
-            BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)),
+            fs::remove(h.ecf_log_file(port));
+            BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_log_file(port)),
                                 "log file " << h.ecf_log_file(port) << " not deleted\n");
         }
 
         if (remove_checkpt_file_after_server_exit) {
-            boost::filesystem::remove(h.ecf_checkpt_file(port));
-            boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
-            BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_checkpt_file(port)),
+            fs::remove(h.ecf_checkpt_file(port));
+            fs::remove(h.ecf_backup_checkpt_file(port));
+            BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_checkpt_file(port)),
                                 "file " << h.ecf_checkpt_file(port) << " not deleted\n");
-            BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_backup_checkpt_file(port)),
+            BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_backup_checkpt_file(port)),
                                 "file " << h.ecf_backup_checkpt_file(port) << " not deleted\n");
         }
     }

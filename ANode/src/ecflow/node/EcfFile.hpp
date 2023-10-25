@@ -14,8 +14,7 @@
 #include <fstream>
 #include <memory>
 
-#include <boost/filesystem/path.hpp>
-
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 // This class is used to minimise file I/0.
@@ -163,7 +162,7 @@ private:
     bool
     do_popen(const std::string& the_cmd, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
 
-    boost::filesystem::path file_creation_path() const;
+    fs::path file_creation_path() const;
     std::string script_or_job_path() const;
 
     bool extract_ecfmicro(const std::string& line, std::string& ecfmicro, std::string& error_msg) const;

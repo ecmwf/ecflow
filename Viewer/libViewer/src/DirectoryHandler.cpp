@@ -13,8 +13,6 @@
 #include <regex>
 
 #include <QFile>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 
 #include "UiLog.hpp"
@@ -44,25 +42,25 @@ DirectoryHandler::DirectoryHandler() = default;
 // -----------------------------------------------------------------------------
 
 void DirectoryHandler::init(const std::string& exeStr) {
-    boost::filesystem::path configDir;
+    fs::path configDir;
 
     // The location of the config dir is specified by the user
     // This could be the case for a ui test! In this case we
     // must not use the rcDir!
     if (char* confCh = getenv("ECFLOWUI_CONFIG_DIR")) {
         std::string confStr(confCh);
-        configDir = boost::filesystem::path(confStr);
+        configDir = fs::path(confStr);
     }
     // By default the config dir is .ecflow_ui_v5 in $HOME,
     // in this case we might import older settings from $HOME/.ecflowrc
     else if (char* h = getenv("HOME")) {
         std::string home(h);
-        boost::filesystem::path homeDir(home);
+        fs::path homeDir(home);
 
-        configDir = boost::filesystem::path(homeDir);
+        configDir = fs::path(homeDir);
         configDir /= ".ecflow_ui_v5";
 
-        boost::filesystem::path rcDir = homeDir;
+        fs::path rcDir = homeDir;
         rcDir /= ".ecflowrc";
         rcDir_ = rcDir.string();
     }
@@ -70,13 +68,13 @@ void DirectoryHandler::init(const std::string& exeStr) {
     // Sets configDir_ and creates it if it does not exist
     if (!configDir.string().empty()) {
         configDir_ = configDir.string();
-        if (!boost::filesystem::exists(configDir)) {
+        if (!fs::exists(configDir)) {
             firstStartUp = true;
 
             try {
-                boost::filesystem::create_directory(configDir);
+                fs::create_directory(configDir);
             }
-            catch (const boost::filesystem::filesystem_error& err) {
+            catch (const fs::filesystem_error& err) {
                 UserMessage::message(
                     UserMessage::ERROR,
                     true,
@@ -96,14 +94,14 @@ void DirectoryHandler::init(const std::string& exeStr) {
         exit(1);
     }
 
-    boost::filesystem::path lgvConfigDir = configDir;
+    fs::path lgvConfigDir = configDir;
     lgvConfigDir /= "logviewer";
     logviewerConfigDir_ = lgvConfigDir.string();
-    if (!boost::filesystem::exists(lgvConfigDir)) {
+    if (!fs::exists(lgvConfigDir)) {
         try {
-            boost::filesystem::create_directory(lgvConfigDir);
+            fs::create_directory(lgvConfigDir);
         }
-        catch (const boost::filesystem::filesystem_error& err) {
+        catch (const fs::filesystem_error& err) {
             UserMessage::message(
                 UserMessage::ERROR,
                 true,
@@ -113,14 +111,14 @@ void DirectoryHandler::init(const std::string& exeStr) {
     }
 
     // Sets paths in the system directory
-    boost::filesystem::path exePath(exeStr);
+    fs::path exePath(exeStr);
 
     // If the executable path does not exist we
     // will use  the value of the ECFLOW_SHARED_DIR macro to get
     // the location of the "share/ecflow" dir.
-    if (!boost::filesystem::exists(exePath)) {
-        boost::filesystem::path shareDir(ECFLOW_SHARED_DIR);
-        if (!boost::filesystem::exists(shareDir)) {
+    if (!fs::exists(exePath)) {
+        fs::path shareDir(ECFLOW_SHARED_DIR);
+        if (!fs::exists(shareDir)) {
             UserMessage::message(
                 UserMessage::ERROR,
                 true,
@@ -128,7 +126,7 @@ void DirectoryHandler::init(const std::string& exeStr) {
             exit(0);
         }
 
-        boost::filesystem::path etcDir = shareDir;
+        fs::path etcDir = shareDir;
         etcDir /= "etc";
 
         shareDir_ = shareDir.string();
@@ -139,18 +137,18 @@ void DirectoryHandler::init(const std::string& exeStr) {
         exeDir_ = exePath.parent_path().string();
 
         // TODO: make it work when we run it from within "bin"
-        boost::filesystem::path shareDir = exePath.parent_path().parent_path();
+        fs::path shareDir = exePath.parent_path().parent_path();
         shareDir /= "share";
         shareDir /= "ecflow";
 
         // In some debugging environments the exe might be another level deeper
-        if (!boost::filesystem::exists(shareDir)) {
+        if (!fs::exists(shareDir)) {
             shareDir = exePath.parent_path().parent_path().parent_path();
             shareDir /= "share";
             shareDir /= "ecflow";
         }
 
-        boost::filesystem::path etcDir = shareDir;
+        fs::path etcDir = shareDir;
         etcDir /= "etc";
 
         shareDir_ = shareDir.string();
@@ -163,20 +161,20 @@ void DirectoryHandler::init(const std::string& exeStr) {
     }
     else if (char* h = getenv("TMPDIR")) {
         tmpDir_ = std::string(h);
-        boost::filesystem::path tmp(tmpDir_);
+        fs::path tmp(tmpDir_);
         tmp /= "ecflow_ui.tmp";
         tmpDir_ = tmp.string();
-        if (!boost::filesystem::exists(tmp)) {
+        if (!fs::exists(tmp)) {
             UiLog().warn()
                 << "ECFLOWUI_TMPDIR env variable is not defined. ecFlowUI creates its tmp direcoty in TMPDIR as "
                 << tmp.string();
 
             try {
-                if (boost::filesystem::create_directory(tmp)) {
+                if (fs::create_directory(tmp)) {
                     UiLog().dbg() << "Tmp dir created: " << tmpDir_;
                 }
             }
-            catch (const boost::filesystem::filesystem_error& e) {
+            catch (const fs::filesystem_error& e) {
                 UserMessage::message(
                     UserMessage::ERROR, true, "Creating tmp directory failed:" + std::string(e.what()));
             }
@@ -200,7 +198,7 @@ void DirectoryHandler::init(const std::string& exeStr) {
         uiEventLogFile_ = std::string(h);
     }
     else {
-        boost::filesystem::path tmp(tmpDir_);
+        fs::path tmp(tmpDir_);
         tmp /= "ecflowui_uilog.txt";
         uiEventLogFile_ = tmp.string();
     }
@@ -210,16 +208,16 @@ void DirectoryHandler::init(const std::string& exeStr) {
         socketDir_ = std::string(h);
     }
     else {
-        boost::filesystem::path tmp(tmpDir_);
+        fs::path tmp(tmpDir_);
         // tmp /= "sockets";
         socketDir_ = tmp.string();
     }
 }
 
 std::string DirectoryHandler::concatenate(const std::string& path1, const std::string& path2) {
-    boost::filesystem::path p1(path1);
-    boost::filesystem::path p2(path2);
-    boost::filesystem::path result = p1 /= p2;
+    fs::path p1(path1);
+    fs::path p2(path2);
+    fs::path result = p1 /= p2;
     return result.string();
 }
 
@@ -227,12 +225,12 @@ void DirectoryHandler::findDirContents(const std::string& dirPath,
                                        const std::string& filterStr,
                                        FileType type,
                                        std::vector<std::string>& res) {
-    boost::filesystem::path path(dirPath);
-    boost::filesystem::directory_iterator it(path), eod;
+    fs::path path(dirPath);
+    fs::directory_iterator it(path), eod;
 
     const std::regex expr(filterStr);
 
-    BOOST_FOREACH (boost::filesystem::path const& p, std::make_pair(it, eod)) {
+    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
         std::smatch what;
         std::string fileName = p.filename().string();
 
@@ -258,11 +256,11 @@ void DirectoryHandler::findDirs(const std::string& dirPath,
 
 bool DirectoryHandler::createDir(const std::string& path) {
     // Create configDir if if does not exist
-    if (!boost::filesystem::exists(path)) {
+    if (!fs::exists(path)) {
         try {
-            boost::filesystem::create_directory(path);
+            fs::create_directory(path);
         }
-        catch (const boost::filesystem::filesystem_error& err) {
+        catch (const fs::filesystem_error& err) {
             UserMessage::message(UserMessage::ERROR, true, "Could not create dir: " + path + " reason: " + err.what());
             return false;
         }
@@ -277,14 +275,14 @@ bool DirectoryHandler::isFirstStartUp() {
 
 // Return a unique non-existing tmp filename
 std::string DirectoryHandler::tmpFileName() {
-    boost::filesystem::path tmp(tmpDir_);
-    if (boost::filesystem::exists(tmp)) {
+    fs::path tmp(tmpDir_);
+    if (fs::exists(tmp)) {
         try {
-            boost::filesystem::path model = tmp;
+            fs::path model = tmp;
             model /= "%%%%-%%%%-%%%%-%%%%";
-            return boost::filesystem::unique_path(model).string();
+            return fs::unique_path(model).string();
         }
-        catch (const boost::filesystem::filesystem_error& err) {
+        catch (const fs::filesystem_error& err) {
             UiLog().warn() << "Could not generate tmp filename! Reason: " << err.what();
         }
     }
@@ -298,17 +296,17 @@ std::string DirectoryHandler::tmpFileName() {
 // -----------------------------------------------------
 
 bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& destDir, std::string& errorMessage) {
-    boost::filesystem::path src(srcDir);
-    boost::filesystem::path dest(destDir);
+    fs::path src(srcDir);
+    fs::path dest(destDir);
 
     // does the source directory exist (and is a directory)?
-    if (!boost::filesystem::exists(src) || !boost::filesystem::is_directory(src)) {
+    if (!fs::exists(src) || !fs::is_directory(src)) {
         errorMessage = "Source directory (" + srcDir + ") does not exist";
         return false;
     }
 
     // create the destination directory if it does not already exist
-    if (!boost::filesystem::exists(dest)) {
+    if (!fs::exists(dest)) {
         bool created = createDir(dest.string());
         if (!created) {
             errorMessage = "Could not create destination directory (" + destDir + ")";
@@ -318,8 +316,8 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
 
     // go through all the files/dirs in the dir
     bool ok = true;
-    boost::filesystem::directory_iterator it(src), eod;
-    BOOST_FOREACH (boost::filesystem::path const& p, std::make_pair(it, eod)) {
+    fs::directory_iterator it(src), eod;
+    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
         std::string fileName = p.filename().string();
         std::string srcFile  = p.string();
 
@@ -327,17 +325,17 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
         {
             // The original boost based copy implementation did not work with newer compilers,
             // so we opted for a Qt based implementation. See ECFLOW-1207
-            boost::filesystem::path destPath = dest / p.filename();
-            std::string destFile             = destPath.string();
+            fs::path destPath    = dest / p.filename();
+            std::string destFile = destPath.string();
             if (!copyFile(srcFile, destFile, errorMessage))
                 return false;
 
 #if 0
             try
             {
-                boost::filesystem::copy_file(p, dest / p.filename());
+                fs::copy_file(p, dest / p.filename());
             }
-            catch (const boost::filesystem::filesystem_error& err)
+            catch (const fs::filesystem_error& err)
             {
                 errorMessage = "Could not copy file " + fileName + " to " + destDir + "; reason: " + err.what();
                 return false;
@@ -346,7 +344,7 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
         }
         else if (is_directory(p)) // directory? then copy it recursively
         {
-            boost::filesystem::path destSubDir(destDir);
+            fs::path destSubDir(destDir);
             destSubDir /= p.filename();
             ok = ok && copyDir(p.string(), destSubDir.string(), errorMessage);
         }
@@ -362,10 +360,10 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
 
 bool DirectoryHandler::removeDir(const std::string& dir, std::string& errorMessage) {
     try {
-        boost::filesystem::path d(dir);
+        fs::path d(dir);
         remove_all(d);
     }
-    catch (const boost::filesystem::filesystem_error& err) {
+    catch (const fs::filesystem_error& err) {
         errorMessage = "Could not remove directory " + dir + "; reason: " + err.what();
         return false;
     }
@@ -380,11 +378,11 @@ bool DirectoryHandler::removeDir(const std::string& dir, std::string& errorMessa
 
 bool DirectoryHandler::renameDir(const std::string& dir, const std::string& newName, std::string& errorMessage) {
     try {
-        boost::filesystem::path d1(dir);
-        boost::filesystem::path d2(newName);
+        fs::path d1(dir);
+        fs::path d2(newName);
         rename(d1, d2);
     }
-    catch (const boost::filesystem::filesystem_error& err) {
+    catch (const fs::filesystem_error& err) {
         errorMessage = "Could not rename directory " + dir + "; reason: " + err.what();
         return false;
     }
@@ -422,14 +420,14 @@ bool DirectoryHandler::copyFile(const std::string& srcFile, std::string& destFil
     return true;
 
 #if 0
-    boost::filesystem::path src(srcFile);
-    boost::filesystem::path dest(destFile);
+    fs::path src(srcFile);
+    fs::path dest(destFile);
 
     try
     {
-        boost::filesystem::copy_file(src, dest,  boost::filesystem::copy_option::overwrite_if_exists);
+        fs::copy_file(src, dest,  fs::copy_option::overwrite_if_exists);
     }
-    catch (const boost::filesystem::filesystem_error& err)
+    catch (const fs::filesystem_error& err)
     {
         errorMessage = "Could not copy file " + srcFile + " to " + destFile + "; reason: " + err.what();
         return false;
@@ -446,10 +444,10 @@ bool DirectoryHandler::copyFile(const std::string& srcFile, std::string& destFil
 
 bool DirectoryHandler::removeFile(const std::string& path, std::string& errorMessage) {
     try {
-        boost::filesystem::path f(path);
+        fs::path f(path);
         remove(f);
     }
-    catch (const boost::filesystem::filesystem_error& err) {
+    catch (const fs::filesystem_error& err) {
         errorMessage = "Could not remove file " + path + "; reason: " + err.what();
         return false;
     }

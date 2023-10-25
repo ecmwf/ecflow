@@ -10,8 +10,7 @@
 
 #include "VConfig.hpp"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include <QDebug>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
@@ -21,6 +20,7 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
@@ -52,8 +52,6 @@ VConfig* VConfig::instance() {
 }
 
 void VConfig::init(const std::string& parDirPath) {
-    namespace fs = boost::filesystem;
-
     fs::path parDir(parDirPath);
 
     if (fs::exists(parDir) && fs::is_directory(parDir)) {
@@ -315,7 +313,7 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
         read_json(parFile, pt);
     }
     catch (const boost::property_tree::json_parser::json_parser_error& e) {
-        if (boost::filesystem::exists(parFile)) {
+        if (fs::exists(parFile)) {
             std::string errorMessage = e.what();
             UserMessage::message(UserMessage::ERROR,
                                  true,

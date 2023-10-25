@@ -11,13 +11,11 @@
 #include <iostream>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

@@ -11,8 +11,6 @@
 #include <iostream>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "PersistHelper.hpp"
@@ -21,9 +19,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
-// #include "ecflow/core/PrintStyle.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
@@ -34,8 +30,7 @@ std::vector<std::string> defs_with_expected_warnings() {
 BOOST_AUTO_TEST_SUITE(ParserTestSuite)
 
 void test_defs(const std::string& directory, bool pass) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));
@@ -173,8 +168,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_defs_state) {
 }
 
 void test_node_defs(const std::string& directory, bool pass) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));

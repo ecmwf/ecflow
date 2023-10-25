@@ -13,8 +13,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -30,10 +28,8 @@
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/System.hpp"
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // #define DEBUG_TASK_LOCATION 1
 

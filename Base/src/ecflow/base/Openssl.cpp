@@ -14,14 +14,11 @@
 #include <cstdlib> // getenv
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 
 using namespace std;
-namespace fs = boost::filesystem;
 
 namespace ecf {
 

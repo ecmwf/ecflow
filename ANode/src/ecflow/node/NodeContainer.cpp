@@ -35,7 +35,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/move_peer.hpp"
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 
@@ -1326,7 +1325,7 @@ void NodeContainer::remove_archived_files() {
     the_archive_path.erase(the_archive_path.begin() + check_pos, the_archive_path.end());
 
     // Find *all* archived files in ECF_HOME
-    std::vector<boost::filesystem::path> archived_file_vec;
+    std::vector<fs::path> archived_file_vec;
     File::find_files_with_extn(ecf_home, ".check", archived_file_vec);
     if (archived_file_vec.empty())
         return;

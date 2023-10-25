@@ -15,7 +15,6 @@
 #include <thread>
 
 #include <boost/asio.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/process.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -131,8 +130,7 @@ public:
         std::string invoke_command = ecf::File::find_ecf_server_path();
 
         BOOST_REQUIRE_MESSAGE(!invoke_command.empty(), "The server program could not be found");
-        BOOST_REQUIRE_MESSAGE(boost::filesystem::exists(invoke_command),
-                              "Server exe does not exist at:" << invoke_command);
+        BOOST_REQUIRE_MESSAGE(fs::exists(invoke_command), "Server exe does not exist at:" << invoke_command);
 
         invoke_command += " --port ";
         invoke_command += std::to_string(port);
@@ -156,7 +154,7 @@ public:
                                   host + '.' + std::to_string(port) + ".ecf.check.b",
                                   host + '.' + std::to_string(port) + ".ecf.log"};
         for (const auto& t : temporaries) {
-            boost::filesystem::remove(t);
+            fs::remove(t);
         }
     }
 };

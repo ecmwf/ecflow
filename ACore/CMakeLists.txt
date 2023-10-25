@@ -34,6 +34,7 @@ set(srcs
   src/ecflow/core/Extract.hpp
   src/ecflow/core/File.hpp
   src/ecflow/core/File_r.hpp
+  src/ecflow/core/Filesystem.hpp
   src/ecflow/core/Host.hpp
   src/ecflow/core/Indentor.hpp
   src/ecflow/core/Log.hpp
@@ -74,6 +75,7 @@ set(srcs
   src/ecflow/core/Extract.cpp
   src/ecflow/core/File.cpp
   src/ecflow/core/File_r.cpp
+  src/ecflow/core/Filesystem.cpp
   src/ecflow/core/Host.cpp
   src/ecflow/core/Indentor.cpp
   src/ecflow/core/Log.cpp

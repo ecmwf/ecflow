@@ -15,16 +15,13 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeStamp.hpp"
 
 using namespace std;
-namespace fs = boost::filesystem;
 
 namespace ecf {
 

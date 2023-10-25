@@ -20,7 +20,8 @@
 #include <vector>
 
 #include <boost/core/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
+
+#include "ecflow/core/Filesystem.hpp"
 
 namespace ecf {
 
@@ -74,34 +75,34 @@ public:
     /// recursively look for a file, given a starting directory
     /// Return the first file that matches
     /// return true if file found false otherwise
-    static bool find(const boost::filesystem::path& dir_path, // from this directory downwards
-                     const std::string& file_name,            // search for this name,
-                     boost::filesystem::path& path_found      // placing path here if found
+    static bool find(const fs::path& dir_path,     // from this directory downwards
+                     const std::string& file_name, // search for this name,
+                     fs::path& path_found          // placing path here if found
     );
 
     /// recursively look for a file, given a starting directory
     /// Returns _ALL_ files that match
-    static void findAll(const boost::filesystem::path& dir_path,          // from this directory downwards
-                        const std::string& file_name,                     // search for this name,
-                        std::vector<boost::filesystem::path>& paths_found // placing path here if found
+    static void findAll(const fs::path& dir_path,          // from this directory downwards
+                        const std::string& file_name,      // search for this name,
+                        std::vector<fs::path>& paths_found // placing path here if found
     );
 
     /// Find all files with given extension must include leading .
-    static void find_files_with_extn(const boost::filesystem::path& dir_path, // In this directory
-                                     const std::string& extn,                 // find files matching this extension
-                                     std::vector<boost::filesystem::path>& paths_found // placing path here if found
+    static void find_files_with_extn(const fs::path& dir_path,          // In this directory
+                                     const std::string& extn,           // find files matching this extension
+                                     std::vector<fs::path>& paths_found // placing path here if found
     );
 
     /// recursively look for a file, given a starting directory and path token
     /// Returns the first match found
-    static std::string findPath(const boost::filesystem::path& dir_path, // from this directory downwards
-                                const std::string& file_name,            // search for this name,
-                                const std::string& leafDir               // path must contain this string
+    static std::string findPath(const fs::path& dir_path,     // from this directory downwards
+                                const std::string& file_name, // search for this name,
+                                const std::string& leafDir    // path must contain this string
     );
 
-    static std::string findPath(const boost::filesystem::path& dir_path, // from this directory downwards
-                                const std::string& file_name,            // search for this name,
-                                const std::vector<std::string>& tokens   // path must contain all these tokens
+    static std::string findPath(const fs::path& dir_path,              // from this directory downwards
+                                const std::string& file_name,          // search for this name,
+                                const std::vector<std::string>& tokens // path must contain all these tokens
     );
 
     /// Create missing directories. This is *NOT* the same as boost::create_directories
@@ -148,7 +149,7 @@ public:
     forwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn);
 
     // Remove a directory recursively ****
-    static bool removeDir(const boost::filesystem::path& p);
+    static bool removeDir(const fs::path& p);
 
     // Locate the path to the server exe
     static std::string find_ecf_server_path();

@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
 #include <sys/stat.h> // for chmod
 
 #include "ecflow/core/File.hpp"
@@ -26,7 +25,6 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace std;
-namespace fs = boost::filesystem;
 
 namespace ecf {
 

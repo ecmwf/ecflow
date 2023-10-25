@@ -11,7 +11,6 @@
 #include "ecflow/simulator/Simulator.hpp"
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-#include <boost/filesystem/operations.hpp>
 
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
@@ -29,7 +28,6 @@ using namespace boost::gregorian;
 using namespace boost::posix_time;
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // #define DEBUG_LONG_RUNNING_SUITES 1
 

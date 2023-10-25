@@ -12,10 +12,8 @@
 
 #include <memory>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "UiLog.hpp"
+#include "ecflow/core/Filesystem.hpp"
 
 #define _UI_OUTPUTDIRCLIENT_DEBUG
 
@@ -99,7 +97,7 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err) {
 }
 
 void OutputDirClient::getDir(const std::string& name) {
-    boost::filesystem::path fp(name);
+    fs::path fp(name);
     std::string dirName = fp.parent_path().string();
 
     remoteFile_ = name;
@@ -137,9 +135,9 @@ void OutputDirClient::parseData() {
         in >> mode >> uid >> gid >> size >> atime >> mtime >> ctime >> name;
 
         if (!name.isEmpty()) {
-            boost::filesystem::path p(name.toStdString());
+            fs::path p(name.toStdString());
             std::string fileDirName = p.parent_path().string();
-            std::string fileName    = p.leaf().string();
+            std::string fileName    = p.filename().string();
 
             // Adjust the path in the dir
             if (dir_->path() != fileDirName) {
