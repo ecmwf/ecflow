@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE TestCore
 //============================================================================
 // Name        : Request
 // Author      : Avi
