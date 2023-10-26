@@ -251,7 +251,7 @@ public:
     /// Find all environment variables, in the input string and substitute.
     /// with correspondingly named variable value.
     /// i.e search for ${ENV} and replace
-    bool variable_dollar_subsitution(std::string& cmd);
+    bool variable_dollar_subsitution(std::string& cmd) const;
 
     /// Resolve inlimit references to limits, and check trigger and complete expression
     virtual bool check(std::string& errorMsg, std::string& warningMsg) const;

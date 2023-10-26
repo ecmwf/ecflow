@@ -135,6 +135,8 @@ public:
     static void extract_used_variables(NameValueMap& used_variables_as_map,
                                        const std::vector<std::string>& script_lines);
 
+    static std::vector<std::string> get_ecf_include_paths(const EcfFile& ecf);
+
 private:
     friend class PreProcessor;
     enum Type { SCRIPT, INCLUDE, MANUAL, COMMENT };

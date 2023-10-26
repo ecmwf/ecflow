@@ -1650,4 +1650,50 @@ BOOST_AUTO_TEST_CASE(test_ecf_micro_with_comments_ECFLOW_1686) {
     basic_test_template("test_ecf_micro_with_comments_ECFLOW_1686", ecf_file, expected_job_file_contents);
 }
 
+BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include_with_dollar) {
+    Defs d;
+    suite_ptr s = d.add_suite("suite");                      // suite suite
+    s->add_variable("CORE", "/path/to/core");                //   edit CORE /path/to/core
+    s->add_variable("ECF_INCLUDE", "$CORE/%SUITE%/include"); //   edit ECF_INCLUDE $CORE/include
+    task_ptr t1 = s->add_task("t1");                         //   task t1
+
+    std::string ecf_file_location;
+    EcfFile ecf(t1.get(), ecf_file_location);
+
+    auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
+}
+
+BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include) {
+    Defs d;
+    suite_ptr s = d.add_suite("suite");                       // suite suite
+    s->add_variable("CORE", "/path/to/core");                 //   edit CORE /path/to/core
+    s->add_variable("ECF_INCLUDE", "%CORE%/%SUITE%/include"); //   edit ECF_INCLUDE %CORE%/%SUITE%/include
+    task_ptr t1 = s->add_task("t1");                          //   task t1
+
+    std::string ecf_file_location;
+    EcfFile ecf(t1.get(), ecf_file_location);
+
+    auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
+}
+
+BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_multiple_ecf_include) {
+    Defs d;
+    suite_ptr s = d.add_suite("suite");                                   // suite suite
+    s->add_variable("CORE", "/path/to/core");                             //   edit CORE /path/to/core
+    s->add_variable("ECF_INCLUDE", "%CORE%/%SUITE%/include:%CORE%/more"); //   edit ECF_INCLUDE %CORE%/%SUITE%...
+    task_ptr t1 = s->add_task("t1");                                      //   task t1
+
+    std::string location;
+    EcfFile ecf(t1.get(), location);
+
+    auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 2);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[1], "/path/to/core/more");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
