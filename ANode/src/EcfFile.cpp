@@ -442,6 +442,48 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,
     }
 }
 
+/**
+ * Retrieve the set of paths defined by ECF_INCLUDE.
+ *
+ * ECF_INCLUDE is either a single path, or a list of paths (separated by ':').
+ * The content of ECF_INCLUDE can reference ecFlow variables, which are replaced in the result.
+ *
+ * @param ecf
+ *   The ECF file to consider (the Node directly related with the file determines which ECF_INCLUDE value is used)
+ *
+ * @return
+ *   An empty set if ECF_INCLUDE is not defined; otherwise, the set of paths defined by ECF_INCLUDE, after resolving
+ *   all ecFlow variables.
+ */
+std::vector<std::string> EcfFile::get_ecf_include_paths(const EcfFile& ecf) {
+    assert(ecf.node_);
+    const Node& node = *ecf.node_;
+
+    std::string ecf_include;
+    node.findParentUserVariableValue(Str::ECF_INCLUDE(), ecf_include);
+
+    std::vector<std::string> paths;
+    if (!ecf_include.empty()) {
+
+        // if ECF_INCLUDE is a set a paths, search in order. i.e., like $PATH
+        if (ecf_include.find(':') != std::string::npos) {
+            Str::split(ecf_include, paths, ":");
+        }
+        else {
+            paths = {ecf_include};
+        }
+
+        // Don't rely on hard coded paths. Added for testing, but could be generally useful
+        // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
+        for (std::string& path : paths) {
+            node.variable_dollar_subsitution(path);
+            node.variableSubsitution(path);
+        }
+    }
+
+    return paths;
+}
+
 bool EcfFile::open_script_file(const std::string& file_or_cmd,
                                EcfFile::Type type,
                                std::vector<std::string>& lines,
@@ -1690,45 +1732,19 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
 
     Node* node = ecfile_->node_;
     if (includedFile[0] == '<') {
-        // %include <filename> can be one of:
-        //    o When ECF_INCLUDE is a single path -> path1/filename
-        //    o When ECF_INCLUDE is a multi  path -> path1:path2:path3  -> ECFLOW-261
-        //                                        -> path1/filename || path2/filename || path3/filename
-        //    o ECF_HOME/filename
-        std::string ecf_include;
-        if (node->findParentUserVariableValue(Str::ECF_INCLUDE(), ecf_include) && !ecf_include.empty()) {
 
-            // if ECF_INCLUDE is a set a paths, search in order. i.e like $PATH
-            if (ecf_include.find(':') != std::string::npos) {
-                std::vector<std::string> include_paths;
-                Str::split(ecf_include, include_paths, ":");
-                for (const auto& include_path : include_paths) {
-                    ecf_include.clear();
-                    ecf_include = include_path;
-                    ecf_include += '/';
-                    ecf_include += the_include_file;
+        auto ecf_include_paths = EcfFile::get_ecf_include_paths(*ecfile_);
+        for (const auto& ecf_include_path : ecf_include_paths) {
+            auto include_path_plus_file = ecf_include_path;
+            include_path_plus_file += '/';
+            include_path_plus_file += the_include_file;
 
-                    // Don't rely on hard coded paths. Added for testing, but could be generally useful
-                    // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
-                    node->variable_dollar_subsitution(ecf_include);
-
-                    if (ecfile_->file_exists(ecf_include))
-                        return ecf_include;
-                }
-            }
-            else {
-                ecf_include += '/';
-                ecf_include += the_include_file;
-                node->variable_dollar_subsitution(ecf_include);
-                if (ecfile_->file_exists(ecf_include))
-                    return ecf_include;
-            }
-
-            // ECF_INCLUDE is specified *BUT* the file does *NOT* exist, Look in ECF_HOME
+            if (ecfile_->file_exists(include_path_plus_file))
+                return include_path_plus_file;
         }
 
         // WE get HERE *if* ECF_INCLUDE not specified, or if specified but file *not found*
-        ecf_include.clear();
+        std::string ecf_include;
         node->findParentVariableValue(Str::ECF_HOME(), ecf_include);
         if (ecf_include.empty()) {
             std::stringstream ss;

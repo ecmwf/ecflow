@@ -1452,7 +1452,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
     return true;
 }
 
-bool Node::variable_dollar_subsitution(std::string& cmd) {
+bool Node::variable_dollar_subsitution(std::string& cmd) const {
     // scan command for environment variables, and substitute
     // edit ECF_INCLUDE $ECF_HOME/include
 
