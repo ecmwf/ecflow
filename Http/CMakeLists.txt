@@ -49,11 +49,11 @@ ecbuild_add_library(
     ${srcs}
   PUBLIC_INCLUDES
     src
-    ../json
-    ../cpp-httplib
   PUBLIC_LIBS
     base
     libclient
+    nlohmann::json
+    httplib::httplib
 )
 target_clangformat(libhttp)
 
