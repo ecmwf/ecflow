@@ -222,10 +222,9 @@ ecbuild_info("")
 
 
 # =========================================================================================
-# cereal is embedded
+# Setup Project-wide dependencies
 # =========================================================================================
-include_directories( ${CMAKE_SOURCE_DIR}/cereal/include )
- 
+include(Dependencies)
 
 message( STATUS "====================================================================================================================" )
 message( STATUS "BOOST" )
