@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE Server
 //============================================================================
 // Name        :
 // Author      : Avi
@@ -20,7 +19,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "CheckPt.hpp"
 #include "Ecf.hpp"
