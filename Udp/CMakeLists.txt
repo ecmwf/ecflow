@@ -38,12 +38,12 @@ ecbuild_add_library(
     ${${LIB_TARGET}_srcs}
   PRIVATE_INCLUDES
     src
-    ../json
   PUBLIC_LIBS
     libclient
-    Threads::Threads
+    nlohmann::json
     Boost::boost
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    Threads::Threads
 )
 target_clangformat(${LIB_TARGET})
 
@@ -128,7 +128,6 @@ ecbuild_add_test(
     ${BOOST_TEST_DYN_LINK}
   INCLUDES
     src
-    ../json
   WORKING_DIRECTORY
     ${CMAKE_CURRENT_BINARY_DIR}/test_sandbox
   ENVIRONMENT

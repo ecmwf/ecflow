@@ -103,6 +103,7 @@ ecbuild_add_library(
     src
     ${CMAKE_BINARY_DIR}/generated
   PUBLIC_LIBS
+    cereal::cereal # this needs to be public as it appears in public header files used downstream
     $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
     Boost::filesystem
     Boost::date_time
