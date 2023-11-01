@@ -1,3 +1,12 @@
+#
+# Copyright 2023- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
 
 # ==============================================================================
 # ECFLOW UDP library
@@ -5,14 +14,14 @@
 set(LIB_TARGET libecflow_udp)
 
 set(${LIB_TARGET}_srcs
-  # HEADERS
+  # Headers
   src/ClientAPI.hpp
   src/RequestHandler.hpp
   src/Trace.hpp
   src/UDPServer.hpp
   src/UDPServerEnvironment.hpp
   src/UDPServerOptions.hpp
-  # SOURCES
+  # Sources
   src/ClientAPI.cpp
   src/RequestHandler.cpp
   src/Trace.cpp
@@ -21,19 +30,20 @@ set(${LIB_TARGET}_srcs
 )
 
 ecbuild_add_library(
-  TARGET ${LIB_TARGET}
+  TARGET
+    ${LIB_TARGET}
   TYPE STATIC
   NOINSTALL
-  SOURCES ${${LIB_TARGET}_srcs}
+  SOURCES
+    ${${LIB_TARGET}_srcs}
   PRIVATE_INCLUDES
     src
-    ../Client/src
     ../json
   PUBLIC_LIBS
     libclient
     pthread
-    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Boost::boost
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
 )
 target_clangformat(${LIB_TARGET})
 
@@ -43,7 +53,7 @@ target_clangformat(${LIB_TARGET})
 set(SERVER_TARGET ecflow_udp)
 
 set(${SERVER_TARGET}_srcs
-  # SOURCES
+  # Sources
   src/UDPServerMain.cpp
 )
 
@@ -52,9 +62,9 @@ ecbuild_add_executable(
   SOURCES ${${SERVER_TARGET}_srcs}
   INCLUDES
     src
-    ../ACore/src   # Needed only to #include "ecflow_version.h"
   LIBS
     ${LIB_TARGET}
+    core # Needed only to #include "ecflow_version.h"
 )
 set_target_properties(${SERVER_TARGET} PROPERTIES
   INSTALL_RPATH ""
