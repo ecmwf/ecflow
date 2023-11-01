@@ -1,86 +1,85 @@
- # =======================================================
- # LIB
- # to list all sources to build use:
- #    cd $WK/Client
- #    find src -name \*.cpp --print
- # =======================================================
- 
- # Excludes src/HttpMain.cpp
-list( APPEND srcs
-   # HEADERS
-   src/ApiV1.hpp
-   src/ApiV1Impl.hpp
-   src/Base64.hpp
-   src/BasicAuth.hpp
-   src/HttpServer.hpp
-   src/HttpServerException.hpp
-   src/JSON.hpp
-   src/Options.hpp
-   src/TokenStorage.hpp
-   src/TypeToJson.hpp
-   # SOURCES
-   src/HttpServer.cpp
-   src/ApiV1.cpp
-   src/ApiV1Impl.cpp
-   src/BasicAuth.cpp
-   src/TypeToJson.cpp
-   src/TokenStorage.cpp
-)
+#
+# Copyright 2023- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
 
 # cpp-httplib requires at least OpenSSL 1.1.1 for https support
 # so if we have OpenSSL enabled and the version is less than this,
 # we should disable SSL capabilities from the HTTP server
 
 if (OPENSSL_FOUND)
-    if (OPENSSL_VERSION VERSION_LESS 1.1.1)
-        ecbuild_warn("HTTP_SERVER requires at least OpenSSL 1.1.1 for https support (have version ${OPENSSL_VERSION}) - disabling https in HTTP server")
-        remove_definitions( -DECF_OPENSSL )
-        set(DISABLED_SSL_IN_HTTP_SERVER 1)
-    endif()
-endif()
+  if (OPENSSL_VERSION VERSION_LESS 1.1.1)
+    ecbuild_warn("HTTP_SERVER requires at least OpenSSL 1.1.1 for https support (have version ${OPENSSL_VERSION}) - disabling https in HTTP server")
+    remove_definitions(-DECF_OPENSSL)
+    set(DISABLED_SSL_IN_HTTP_SERVER 1)
+  endif ()
+endif ()
 
-
-ecbuild_add_library( TARGET libhttp
-                     NOINSTALL
-                     TYPE     STATIC
-                     SOURCES  ${srcs}
-                )
-
-target_link_libraries(libhttp base node nodeattr core pthread)
-target_include_directories(libhttp PUBLIC src
-                                             ../ACore/src
-                                             ../ANattr/src
-                                             ../ANode/src
-                                             ../Base/src
-                                             ../Base/src/cts
-                                             ../Base/src/stc
-                                             ../Client/src
-                                             ../cpp-httplib
-                                             ../json
+set(srcs
+  # Headers
+  src/ApiV1.hpp
+  src/ApiV1Impl.hpp
+  src/Base64.hpp
+  src/BasicAuth.hpp
+  src/HttpServer.hpp
+  src/HttpServerException.hpp
+  src/JSON.hpp
+  src/Options.hpp
+  src/TokenStorage.hpp
+  src/TypeToJson.hpp
+  # Sources
+  src/HttpServer.cpp
+  src/ApiV1.cpp
+  src/ApiV1Impl.cpp
+  src/BasicAuth.cpp
+  src/TypeToJson.cpp
+  src/TokenStorage.cpp
 )
 
+ecbuild_add_library(
+  TARGET libhttp
+  NOINSTALL
+  TYPE STATIC
+  SOURCES
+    ${srcs}
+  PUBLIC_INCLUDES
+    src
+    ../json
+    ../cpp-httplib
+  PUBLIC_LIBS
+    base
+    libclient
+)
 target_clangformat(libhttp)
 
 # ========================================================================
 # EXE ecflow_http, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable( TARGET   ecflow_http
-                        SOURCES
-                          src/HttpMain.cpp
-                        LIBS     libhttp libclient ${OPENSSL_LIBRARIES}
-                        INCLUDES ${Boost_INCLUDE_DIRS} ../cpp-httplib
-                      )
+ecbuild_add_executable(
+  TARGET ecflow_http
+  SOURCES
+    src/HttpMain.cpp
+  LIBS
+    libhttp
+    libclient
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+)
+target_clangformat(ecflow_http)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
 # Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
 # had no effect
 #          
-SET_TARGET_PROPERTIES(ecflow_http PROPERTIES 
-                                    INSTALL_RPATH ""
-                     )
-
-target_clangformat(ecflow_http)
+SET_TARGET_PROPERTIES(ecflow_http
+  PROPERTIES
+  INSTALL_RPATH ""
+)
 
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -98,39 +97,44 @@ target_clangformat(ecflow_http)
 
 if (ENABLE_HTTP AND ENABLE_SERVER)
 
-  list(APPEND test_srcs
-      # HEADERS
+  if (OPENSSL_FOUND AND NOT DISABLED_SSL_IN_HTTP_SERVER)
+
+    set(test_srcs
+      # Headers
       test/Certificate.hpp
       test/InvokeServer.hpp
       test/TokenFile.hpp
-      # SOURCES
+      # Sources
       test/TestApiV1.cpp
-  )
+      test/TestApiV1_main.cpp # test entry point
+    )
 
-  if (OPENSSL_FOUND AND NOT DISABLED_SSL_IN_HTTP_SERVER)
-
-    ecbuild_add_test( TARGET       s_http
-                      SOURCES      ${test_srcs}
-                      LIBS         libhttp libclient libserver ${OPENSSL_LIBRARIES} 
-                                  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
-                                  ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
-                      INCLUDES     src
-                                  ../ANode/test
-                                  ../Base/test
-                                  ../Server/src
-                                  ${Boost_INCLUDE_DIRS}
-                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                      TEST_DEPENDS u_base s_client
-   )
-
-    target_clangformat(s_http CONDITION ENABLE_TESTS)
-  else()
+    ecbuild_add_test(
+      TARGET s_http
+      SOURCES
+        ${test_srcs}
+      INCLUDES
+        ../Base/test
+      LIBS
+        libhttp
+        libclient
+        libserver
+        Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+        $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      TEST_DEPENDS
+        u_base
+        s_client
+    )
+    target_clangformat(s_http
+      CONDITION ENABLE_TESTS
+    )
+  else ()
     message(WARNING "SSL not enabled - will not run HTTP server tests")
-  endif()
+  endif ()
 
-endif()
+endif ()
 
 # ===================================================================
 # install
 # ===================================================================
-install (TARGETS ecflow_http DESTINATION bin)
+install(TARGETS ecflow_http DESTINATION bin)
