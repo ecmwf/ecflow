@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE TestParser
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        : Request
 // Author      : Avi
@@ -19,6 +19,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
