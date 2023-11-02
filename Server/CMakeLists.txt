@@ -61,6 +61,7 @@ ecbuild_add_executable(
   LIBS
     libserver
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    pthread
 )
 target_clangformat(ecflow_server)
 
