@@ -63,11 +63,10 @@ find_package_handle_standard_args(Httplib
 
 set(NAME "httplib")
 
-add_library(${NAME} INTERFACE IMPORTED)
+add_library(${NAME} INTERFACE IMPORTED GLOBAL)
 
 set_target_properties(${NAME}
   PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${HTTPLIB_INCLUDE_DIRS}"
-  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+  INTERFACE_INCLUDE_DIRECTORIES "${HTTPLIB_INCLUDE_DIRS}")
 
 add_library(httplib::httplib ALIAS httplib)

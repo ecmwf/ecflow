@@ -64,11 +64,10 @@ find_package_handle_standard_args(Cereal
 
 set(NAME "cereal")
 
-add_library(${NAME} INTERFACE IMPORTED)
+add_library(${NAME} INTERFACE IMPORTED GLOBAL)
 
 set_target_properties(${NAME}
   PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${CEREAL_INCLUDE_DIRS}"
-  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+  INTERFACE_INCLUDE_DIRECTORIES "${CEREAL_INCLUDE_DIRS}")
 
 add_library(cereal::cereal ALIAS cereal)

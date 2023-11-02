@@ -63,11 +63,10 @@ find_package_handle_standard_args(Json
 
 set(NAME "nlohmann_json")
 
-add_library(${NAME} INTERFACE IMPORTED)
+add_library(${NAME} INTERFACE IMPORTED GLOBAL)
 
 set_target_properties(${NAME}
   PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${JSON_INCLUDE_DIRS}"
-  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+  INTERFACE_INCLUDE_DIRECTORIES "${JSON_INCLUDE_DIRS}")
 
 add_library(nlohmann::json ALIAS nlohmann_json)
