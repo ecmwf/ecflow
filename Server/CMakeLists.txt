@@ -50,6 +50,8 @@ ecbuild_add_library(
 )
 target_clangformat(libserver)
 
+find_package(Threads REQUIRED)
+
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
@@ -61,7 +63,7 @@ ecbuild_add_executable(
   LIBS
     libserver
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    pthread
+    Threads::Threads
 )
 target_clangformat(ecflow_server)
 
@@ -105,6 +107,7 @@ ecbuild_add_test(
     libserver
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    Threads::Threads
   TEST_DEPENDS
     u_base
 )
