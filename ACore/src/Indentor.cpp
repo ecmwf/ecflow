@@ -23,20 +23,12 @@ int Indentor::index_   = 0;
 bool Indentor::indent_ = true;
 
 std::ostream& Indentor::indent(std::ostream& os, int char_spaces) {
-    if (indent_) {
-        int spaces = index_ * char_spaces;
-        for (int i = 0; i != spaces; i++)
-            os << " ";
-    }
+    os << (indent_ ? std::string(index_ * char_spaces, ' ') : "");
     return os;
 }
 
 void Indentor::indent(std::string& os, int char_spaces) {
-    if (indent_) {
-        int spaces = index_ * char_spaces;
-        for (int i = 0; i != spaces; i++)
-            os += " ";
-    }
+    os += (indent_ ? std::string(index_ * char_spaces, ' ') : "");
 }
 
 } // namespace ecf
