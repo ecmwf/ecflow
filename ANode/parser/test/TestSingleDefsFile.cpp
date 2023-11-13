@@ -1,5 +1,3 @@
-#define BOOST_TEST_MODULE TestParser
-
 //============================================================================
 // Name        :
 // Author      : Avi
@@ -23,6 +21,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 

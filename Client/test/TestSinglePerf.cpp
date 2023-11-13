@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE TestSingle
 //============================================================================
 // Name        :
 // Author      : Avi

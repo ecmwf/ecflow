@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE TestMigration
 //============================================================================
 // Name        :
 // Author      : Avi

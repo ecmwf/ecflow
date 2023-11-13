@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE TestSimulator
 //============================================================================
 // Name        :
 // Author      : Avi
@@ -19,7 +18,8 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/test/unit_test.hpp>
+#define BOOST_TEST_MODULE TestSimulator
+#include <boost/test/included/unit_test.hpp>
 
 #include "File.hpp"
 #include "Simulator.hpp"

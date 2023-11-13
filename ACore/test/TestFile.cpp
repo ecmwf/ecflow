@@ -25,6 +25,7 @@
 // #define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
 #ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
     #include <boost/timer/timer.hpp>
+    #include "Str.hpp"
 #endif
 
 #include "File.hpp"
