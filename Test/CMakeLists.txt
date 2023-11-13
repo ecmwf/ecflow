@@ -1,31 +1,43 @@
-# =======================================================
-# to list all sources to build use:
-#    cd $WK/Test
-#    find src -name \*.cpp -print | sort
-# =======================================================
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
- 
-# This library is used for the syste, level testing, hence can include test directories
-ecbuild_add_library( TARGET   libharness
-                     NOINSTALL
-                     TYPE     STATIC
-                     SOURCES  ${srcs}
-                    )
+#
+# Copyright 2023- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
 
-target_link_libraries(libharness libclient base node nodeattr core )
-target_include_directories(libharness PUBLIC src
-                                              ../ACore/src 
-                                              ../ANattr/src
-                                              ../ANode/src
-                                              ../ANode/test
-                                              ../Base/src
-                                              ../Base/src/cts
-                                              ../Base/src/stc
-                                              ../Base/test
-                                              ../Client/src
-                                              ../Client/test 
+file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
+
+set(srcs
+  # Headers
+  src/ServerTestHarness.hpp
+  src/TestFixture.hpp
+  src/ZombieUtil.hpp
+  # Sources
+  src/ServerTestHarness.cpp
+  src/TestFixture.cpp
+  src/ZombieUtill.cpp
 )
 
+ecbuild_add_library(
+  TARGET
+    libharness
+  NOINSTALL
+  TYPE STATIC
+  SOURCES
+    ${srcs}
+  PUBLIC_INCLUDES
+    src
+    ../Base/test
+  PUBLIC_LIBS
+    libclient
+    base
+    node
+    nodeattr
+    core
+)
 target_clangformat(libharness)
 
 # =================================================================
@@ -33,64 +45,72 @@ target_clangformat(libharness)
 
 if (ENABLE_ALL_TESTS)
 
-	list( APPEND test_srcs
-	./TestAbortCmd.cpp
-	./TestAlias.cpp
-	./TestClkSync.cpp
-	./TestComplete.cpp
-	./TestCron.cpp
-    ./TestCtsWaitCmd.cpp
-    ./TestDayDate.cpp
-	./TestEvents.cpp
-	./TestFileCmd.cpp
-    ./TestHandle.cpp
-    ./TestInitAddVariable.cpp
-	./TestKillCmd.cpp
-	./TestLate.cpp
-	./TestLimit.cpp
-    ./TestOrderCmd.cpp
-    ./TestQueueCmd.cpp
-	./TestRepeat.cpp
-	./TestRequeueNode.cpp
-	./TestRunner.cpp
-	./TestServer.cpp
-	./TestSuspend.cpp
-	./TestToday.cpp
-	./TestTrigger.cpp
-	./TestWhyCmd.cpp
-	./Test_Time.cpp
-	)
-	
-	# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
-	# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
-	ecbuild_add_test( TARGET       s_test
-	                  SOURCES      ${test_srcs}
-	                  INCLUDES     ${Boost_INCLUDE_DIRS}
-	                  LIBS         libharness ${OPENSSL_LIBRARIES}
-	                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                     DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-	                  TEST_DEPENDS s_client
-	                )
-	target_clangformat(s_test CONDITION ENABLE_TESTS)
+  set(test_srcs
+    TestAbortCmd.cpp
+    TestAlias.cpp
+    TestClkSync.cpp
+    TestComplete.cpp
+    TestCron.cpp
+    TestCtsWaitCmd.cpp
+    TestDayDate.cpp
+    TestEvents.cpp
+    TestFileCmd.cpp
+    TestHandle.cpp
+    TestInitAddVariable.cpp
+    TestKillCmd.cpp
+    TestLate.cpp
+    TestLimit.cpp
+    TestOrderCmd.cpp
+    TestQueueCmd.cpp
+    TestRepeat.cpp
+    TestRequeueNode.cpp
+    TestRunner.cpp
+    TestServer.cpp
+    TestSuspend.cpp
+    TestToday.cpp
+    TestTrigger.cpp
+    TestWhyCmd.cpp
+    Test_Time.cpp
+  )
+
+  ecbuild_add_test(
+    TARGET
+      s_test
+    SOURCES
+      ${test_srcs}
+    LIBS
+      libharness
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    TEST_DEPENDS
+      s_client
+  )
+  target_clangformat(s_test CONDITION ENABLE_TESTS)
    
-	ecbuild_add_test( TARGET       s_test_zombies
-	                  SOURCES      ./TestZombies.cpp
-	                  INCLUDES     ${Boost_INCLUDE_DIRS}
-	                  LIBS         libharness ${OPENSSL_LIBRARIES}
-	                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                     DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-	                  TEST_DEPENDS s_test
-	                )
-	target_clangformat(s_test_zombies CONDITION ENABLE_TESTS)
-	
-   
-	# This test runs forever, hence not suitable for unit test.                          
-	#ecbuild_add_test( TARGET       singletest
-	#                  SOURCES      ./TestSingle.cpp
-	#                  INCLUDES     ${Boost_INCLUDE_DIRS}
-	#                  LIBS         libharness 
-	#                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-   #                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-	#                  TEST_DEPENDS s_client
-	#               )
+  ecbuild_add_test(
+    TARGET
+      s_test_zombies
+    SOURCES
+      TestZombies.cpp
+    LIBS
+      libharness
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    TEST_DEPENDS
+      s_test
+  )
+  target_clangformat(s_test_zombies CONDITION ENABLE_TESTS)
+
+  # This test runs forever, hence not suitable as unit test.
+  ecbuild_add_test(
+    TARGET
+      s_singletest
+    SOURCES
+      TestSingle.cpp
+    LIBS
+      libharness
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    TEST_DEPENDS
+      s_client
+  )
+  target_clangformat(s_singletest CONDITION ENABLE_TESTS)
+
 endif()

@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE Test
 //============================================================================
 // Name        :
 // Author      : Avi
@@ -13,7 +12,9 @@
 //
 // Description :
 //============================================================================
-#include <boost/test/unit_test.hpp>
+
+#define BOOST_TEST_MODULE Test
+#include <boost/test/included/unit_test.hpp>
 
 #include "TestFixture.hpp"
 

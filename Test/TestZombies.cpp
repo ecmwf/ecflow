@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE TEST_ZOMBIES
 //============================================================================
 // Name        :
 // Author      : Avi
@@ -21,7 +20,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/test/unit_test.hpp>
+#define BOOST_TEST_MODULE TEST_ZOMBIES
+#include <boost/test/included/unit_test.hpp>
 
 #include "AssertTimer.hpp"
 #include "Child.hpp"
