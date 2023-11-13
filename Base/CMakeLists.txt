@@ -174,7 +174,7 @@ ecbuild_add_test(
     ../ANode/test
   LIBS
     base
-    pthread
+    Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   TEST_DEPENDS
     u_aparser
@@ -198,7 +198,7 @@ if (ENABLE_ALL_TESTS)
       ${test_srcs}
     LIBS
       base
-      pthread
+      Threads::Threads
   )
   target_clangformat(perf_job_gen
     CONDITION ENABLE_TESTS

@@ -39,7 +39,7 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     base
-    pthread
+    Threads::Threads
 )
 target_clangformat(libclient)
 

@@ -41,7 +41,7 @@ ecbuild_add_library(
     ../json
   PUBLIC_LIBS
     libclient
-    pthread
+    Threads::Threads
     Boost::boost
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
 )

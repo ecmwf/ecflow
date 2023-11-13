@@ -8,8 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-find_package(Threads REQUIRED)
-
 set(srcs
   # Headers
   src/Analyser.hpp

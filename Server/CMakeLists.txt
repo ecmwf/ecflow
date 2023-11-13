@@ -50,8 +50,6 @@ ecbuild_add_library(
 )
 target_clangformat(libserver)
 
-find_package(Threads REQUIRED)
-
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 

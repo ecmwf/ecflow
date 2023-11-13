@@ -8,8 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-find_package(Threads REQUIRED)
-
 set(viewer_srcs
   # Headers
   AboutDialog.hpp
