@@ -14,6 +14,7 @@
 
 #include "AstCollateVNodesVisitor.hpp"
 #include "ConnectState.hpp"
+#include "Converter.hpp"
 #include "Expression.hpp"
 #include "Limit.hpp"
 #include "ServerDefsAccess.hpp"
@@ -450,7 +451,7 @@ int VNode::tryNo() const {
     if (v.empty())
         return 0;
 
-    return boost::lexical_cast<int>(v);
+    return ecf::convert_to<int>(v);
 }
 
 VNode* VNode::find(const std::vector<std::string>& pathVec) {

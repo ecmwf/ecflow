@@ -12,17 +12,18 @@
 //
 // Description :
 //============================================================================
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "AssertTimer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -56,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_late) {
         suite_ptr suite = theDefs.add_suite("test_late");
         suite->add_variable(
             "SLEEPTIME",
-            boost::lexical_cast<std::string>(TestFixture::job_submission_interval() * 2)); // this will cause the late
+            ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2)); // this will cause the late
 
         task_ptr task = suite->add_task("t1");
         ecf::LateAttr lateAttr;
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_late_hierarchically) {
         suite_ptr suite = theDefs.add_suite("test_late_hierarchically");
         suite->add_variable(
             "SLEEPTIME",
-            boost::lexical_cast<std::string>(TestFixture::job_submission_interval() * 2)); // this will cause the late
+            ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2)); // this will cause the late
         ecf::LateAttr lateAttr;
         lateAttr.addComplete(ecf::TimeSlot(0, 1), true);
         suite->addLate(lateAttr);

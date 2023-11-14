@@ -12,9 +12,10 @@
 //
 // Description
 //============================================================================
-#include <boost/lexical_cast.hpp>
+
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "perf_timer.hpp"
 
 using namespace boost;
@@ -26,7 +27,7 @@ static void func(int const count = 100000) {
     // std::cout << " func : count " << count << "\n";
     for (int i = 0; i < count; i++) {
         std::string s = std::string("fred");
-        s += boost::lexical_cast<std::string>(i);
+        s += ecf::convert_to<std::string>(i);
     }
 }
 

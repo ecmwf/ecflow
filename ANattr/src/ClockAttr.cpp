@@ -15,9 +15,8 @@
 
 #include "ClockAttr.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "DateAttr.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
@@ -84,18 +83,18 @@ void ClockAttr::write(std::string& ss) const {
     }
 
     if (day_ != 0) {
-        ss += boost::lexical_cast<std::string>(day_);
+        ss += ecf::convert_to<std::string>(day_);
         ss += ".";
-        ss += boost::lexical_cast<std::string>(month_);
+        ss += ecf::convert_to<std::string>(month_);
         ss += ".";
-        ss += boost::lexical_cast<std::string>(year_);
+        ss += ecf::convert_to<std::string>(year_);
         ss += " ";
     }
 
     if (gain_ != 0) {
         if (positiveGain_)
             ss += "+";
-        ss += boost::lexical_cast<std::string>(gain_);
+        ss += ecf::convert_to<std::string>(gain_);
     }
 }
 

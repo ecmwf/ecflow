@@ -18,8 +18,8 @@
 #include <iostream>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "File.hpp"
 #include "PasswordEncryption.hpp"
 #include "Str.hpp"
@@ -227,9 +227,9 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
         }
 
         try {
-            auto major = boost::lexical_cast<int>(versionNumberTokens[0]);
-            auto minor = boost::lexical_cast<int>(versionNumberTokens[1]);
-            auto part  = boost::lexical_cast<int>(versionNumberTokens[2]);
+            auto major = ecf::convert_to<int>(versionNumberTokens[0]);
+            auto minor = ecf::convert_to<int>(versionNumberTokens[1]);
+            auto part  = ecf::convert_to<int>(versionNumberTokens[2]);
             if (major < 4) {
                 errorMsg += "Only passwd files with a version >= 4.5.0 is supported\n";
                 return false;
@@ -243,7 +243,7 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
                 return false;
             }
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             errorMsg += "Invalid version number \n";
             return false;
         }
@@ -268,9 +268,9 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
     }
 
     try {
-        boost::lexical_cast<int>(tokens[2]);
+        ecf::convert_to<int>(tokens[2]);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         error_msg += "Port number must be integer's\n";
         return false;
     }

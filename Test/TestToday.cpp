@@ -22,6 +22,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -119,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
         // Initialise clock with todays date and time, then create a today attribute
         // with a time series, so that task runs 3 times
         suite_ptr suite = theDefs.add_suite("test_today_relative_time_series");
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval() - 1));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() - 1));
         ClockAttr clockAttr(Calendar::second_clock_time(), false);
         suite->addClock(clockAttr);
 
@@ -170,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
         suite_ptr suite                       = theDefs.add_suite("test_today_real_time_series");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval() - 1));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() - 1));
         suite->addVerify(VerifyAttr(NState::COMPLETE, 1));
 
         family_ptr fam = suite->add_family("family");

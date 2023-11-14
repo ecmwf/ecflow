@@ -139,13 +139,16 @@ httplib::Response handle_response(const httplib::Result& r,
             throw std::runtime_error("NULL reply from server");
         }
         else if (r->status != expected_code) {
-            throw std::runtime_error("Expected status code: " + std::to_string(expected_code) +
-                                     " got: " + std::to_string(r->status));
+            throw std::runtime_error(
+                "Expected status code: " + ecf::convert_to<std::string>(static_cast<int>(expected_code)) +
+                " got: " + ecf::convert_to<std::string>(r->status));
         }
     }
     else {
         BOOST_REQUIRE_MESSAGE(r, "ERROR: no response");
-        BOOST_REQUIRE_MESSAGE(r->status == expected_code, "ERROR: status code is not " + std::to_string(expected_code));
+        BOOST_REQUIRE_MESSAGE(r->status == expected_code,
+                              "ERROR: status code is not " +
+                                  ecf::convert_to<std::string>(static_cast<int>(expected_code)));
     }
 
     return httplib::Response(*r);
@@ -230,9 +233,9 @@ std::string json_type_to_string(const json& j) {
         case json::value_t::discarded:
             return "discarded";
         case json::value_t::number_integer:
-            return std::to_string(j.get<int>());
+            return ecf::convert_to<std::string>(j.get<int>());
         case json::value_t::number_unsigned:
-            return std::to_string(j.get<unsigned int>());
+            return ecf::convert_to<std::string>(j.get<unsigned int>());
         case json::value_t::number_float:
             return std::to_string(j.get<double>());
         default:

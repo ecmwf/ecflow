@@ -16,6 +16,7 @@
 #include "AutoCancelAttr.hpp"
 
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
 #include "Serialization.hpp"
@@ -46,7 +47,7 @@ std::string AutoCancelAttr::toString() const {
 void AutoCancelAttr::write(std::string& ret) const {
     ret += "autocancel ";
     if (days_) {
-        ret += boost::lexical_cast<std::string>(time_.hour() / 24);
+        ret += ecf::convert_to<std::string>(time_.hour() / 24);
         return;
     }
 

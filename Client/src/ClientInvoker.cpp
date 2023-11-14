@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include "ClientInvoker.hpp"
 
 #include <iostream>
@@ -21,6 +22,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 
 #include "Client.hpp"
+#include "Converter.hpp"
 #ifdef ECF_OPENSSL
     #include "SslClient.hpp"
 #endif
@@ -87,7 +89,7 @@ ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
-    : clientEnv_(false, host, boost::lexical_cast<std::string>(port)),
+    : clientEnv_(false, host, ecf::convert_to<std::string>(port)),
       retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug())
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
@@ -1460,7 +1462,7 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug) {
     client.set_retry_connection_period(1); // avoid long wait
     client.set_connection_attempts(1);     // avoid long wait
     while (true) {
-        free_port = boost::lexical_cast<std::string>(the_port);
+        free_port = ecf::convert_to<std::string>(the_port);
         try {
             if (debug)
                 cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << free_port << "'\n";

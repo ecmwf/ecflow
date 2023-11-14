@@ -18,9 +18,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
 #include "Alias.hpp"
+#include "Converter.hpp"
 #include "DefsDelta.hpp"
 #include "Ecf.hpp"
 #include "Extract.hpp"
@@ -139,7 +138,7 @@ void Task::write_state(std::string& ret, bool& added_comment_char) const {
     if (alias_no_ != 0) {
         add_comment_char(ret, added_comment_char);
         ret += " alias_no:";
-        ret += boost::lexical_cast<std::string>(alias_no_);
+        ret += ecf::convert_to<std::string>(alias_no_);
     }
     Submittable::write_state(ret, added_comment_char);
 }
@@ -228,7 +227,7 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
     }
 
     // create alias
-    std::string alias_name = "alias" + boost::lexical_cast<std::string>(alias_no_);
+    std::string alias_name = "alias" + ecf::convert_to<std::string>(alias_no_);
     alias_ptr alias        = Alias::create(alias_name);
     alias->set_parent(this);
 
@@ -528,7 +527,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
         if (findParentUserVariableValue(Str::ECF_TRIES(), varValue)) {
             // std::cout << "tryNo_ = " << tryNo_ << " ECF_TRIES = " <<  varValue << "\n";
             try {
-                auto ecf_tries = boost::lexical_cast<int>(varValue);
+                auto ecf_tries = ecf::convert_to<int>(varValue);
                 if (try_no() >= ecf_tries) {
 #ifdef DEBUG_DEPENDENCIES
                     LOG(Log::DBG,
@@ -539,7 +538,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
                     return false;
                 }
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 LOG(Log::ERR,
                     "Variable ECF_TRIES must be convertible to an integer. Cannot resubmit job for task:"
                         << absNodePath());

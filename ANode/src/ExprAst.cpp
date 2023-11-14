@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "Cal.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Indentor.hpp"
@@ -1588,7 +1589,7 @@ std::string AstFlag::why_expression(bool html) const {
             ret += "(?)";
         else {
             ret += "(";
-            ret += boost::lexical_cast<std::string>(ref_node->flag().is_set(flag_));
+            ret += ecf::convert_to<std::string>(ref_node->flag().is_set(flag_));
             ret += ")";
         }
     }
@@ -1676,7 +1677,7 @@ std::string AstVariable::why_expression(bool html) const {
         if (!ref_node)
             ret += "(?)";
         ret += "(";
-        ret += boost::lexical_cast<std::string>(theValue);
+        ret += ecf::convert_to<std::string>(theValue);
         ret += ")";
     }
     else {
@@ -1815,7 +1816,7 @@ std::string AstParentVariable::why_expression(bool html) const {
         if (!ref_node)
             ret += "(?)";
         ret += "(";
-        ret += boost::lexical_cast<std::string>(theValue);
+        ret += ecf::convert_to<std::string>(theValue);
         ret += ")";
     }
     else {

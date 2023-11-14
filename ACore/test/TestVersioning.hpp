@@ -7,8 +7,8 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 //
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "SerializationTest.hpp"
 
 /// To simulate changing of data model over time, we will
@@ -92,7 +92,7 @@ private:
             // Change data member type: int(version0)--->string(version1)
             int the_old_hour = 0;
             ar& the_old_hour;
-            hour_ = boost::lexical_cast<std::string>(the_old_hour);
+            hour_ = ecf::convert_to<std::string>(the_old_hour);
         }
         else {
             ar& hour_;

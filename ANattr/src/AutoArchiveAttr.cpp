@@ -16,6 +16,7 @@
 #include "AutoArchiveAttr.hpp"
 
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
 #include "Serialization.hpp"
@@ -46,7 +47,7 @@ std::string AutoArchiveAttr::toString() const {
 void AutoArchiveAttr::write(std::string& ret) const {
     ret += "autoarchive ";
     if (days_) {
-        ret += boost::lexical_cast<std::string>(time_.hour() / 24);
+        ret += ecf::convert_to<std::string>(time_.hour() / 24);
         if (idle_)
             ret += " -i";
         return;

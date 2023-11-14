@@ -12,14 +12,15 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include "Version.hpp"
 
 #include <sstream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/version.hpp>
 #include <cereal/version.hpp>
 
+#include "Converter.hpp"
 #include "ecflow_version.h"
 
 namespace ecf {
@@ -81,20 +82,20 @@ std::string Version::description() {
 
 std::string Version::version() {
     std::string ret = "ecflow_";
-    ret += boost::lexical_cast<std::string>(ECFLOW_RELEASE);
+    ret += ecf::convert_to<std::string>(ECFLOW_RELEASE);
     ret += "_";
-    ret += boost::lexical_cast<std::string>(ECFLOW_MAJOR);
+    ret += ecf::convert_to<std::string>(ECFLOW_MAJOR);
     ret += "_";
-    ret += boost::lexical_cast<std::string>(ECFLOW_MINOR);
+    ret += ecf::convert_to<std::string>(ECFLOW_MINOR);
     return ret;
 }
 
 std::string Version::raw() {
-    std::string ret = boost::lexical_cast<std::string>(ECFLOW_RELEASE);
+    std::string ret = ecf::convert_to<std::string>(ECFLOW_RELEASE);
     ret += ".";
-    ret += boost::lexical_cast<std::string>(ECFLOW_MAJOR);
+    ret += ecf::convert_to<std::string>(ECFLOW_MAJOR);
     ret += ".";
-    ret += boost::lexical_cast<std::string>(ECFLOW_MINOR);
+    ret += ecf::convert_to<std::string>(ECFLOW_MINOR);
     return ret;
 }
 
@@ -111,7 +112,7 @@ std::string Version::compiler() {
 #if defined(_AIX)
     ss << "aix " << __IBMCPP__;
 #elif defined(HPUX)
-    ss << "aCC " << __HP_aCC;        // type aCC +help, this will show compiler manual, search for Predefined Macros
+    ss << "aCC " << __HP_aCC; // type aCC +help, this will show compiler manual, search for Predefined Macros
 #else
     #if defined(__clang__)
     //  To find the list of defines for clang use:

@@ -42,7 +42,7 @@ std::string extract_report_value(const std::string& report, const std::string& l
 
 int extract_number_of_suites(const std::string& report) {
     auto entry = extract_report_value(report, "Number of Suites");
-    return boost::lexical_cast<int>(entry);
+    return ecf::convert_to<int>(entry);
 }
 
 std::string extract_request_per_second(const std::string& report) {

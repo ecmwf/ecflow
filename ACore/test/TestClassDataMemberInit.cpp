@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace boost;
@@ -82,14 +81,6 @@ BOOST_AUTO_TEST_SUITE(CoreTestSuite)
 
 BOOST_AUTO_TEST_CASE(test_class_data_member_init) {
     cout << "ACore:: ...test_class_data_member_init \n";
-
-    //    // MyType needs noexcept on move copy constructor, during vec resize.
-    //	std::vector<MyType> vec;
-    //	for(int i =0; i < 4; i++) {
-    //		//vec.push_back(MyType(boost::lexical_cast<string>(i)));
-    //		vec.emplace_back(boost::lexical_cast<string>(i));
-    //		cout << vec.size() << " " << vec.capacity() << endl;
-    //	}
 
     {
         MyType type("ABC");

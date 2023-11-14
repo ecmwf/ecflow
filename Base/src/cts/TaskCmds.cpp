@@ -12,11 +12,13 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <stdexcept>
 
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Expression.hpp"
 #include "Log.hpp"
@@ -857,7 +859,7 @@ void MeterCmd::print(std::string& os) const {
     os += "meter ";
     os += name_;
     os += " ";
-    os += boost::lexical_cast<std::string>(value_);
+    os += ecf::convert_to<std::string>(value_);
     os += " ";
     os += path_to_node();
 }
@@ -939,9 +941,9 @@ void MeterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     int value = 0;
     try {
         std::string strVal = args[1];
-        value              = boost::lexical_cast<int>(strVal);
+        value              = ecf::convert_to<int>(strVal);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("MeterCmd: Second argument must be a integer, i.e. --meter=name 100\n");
     }
 

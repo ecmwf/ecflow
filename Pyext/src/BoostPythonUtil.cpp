@@ -19,6 +19,7 @@
 
 #include <stdexcept>
 
+#include "Converter.hpp"
 #include "Variable.hpp"
 
 void BoostPythonUtil::list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec) {
@@ -60,7 +61,7 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict,
         }
         else if (boost::python::extract<int>(dict[keys[i]]).check()) {
             int the_int = boost::python::extract<int>(dict[keys[i]]);
-            second      = boost::lexical_cast<std::string>(the_int);
+            second      = ecf::convert_to<std::string>(the_int);
         }
         else
             throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
@@ -83,7 +84,7 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vect
         }
         else if (boost::python::extract<int>(dict[keys[i]]).check()) {
             int the_int = boost::python::extract<int>(dict[keys[i]]);
-            second      = boost::lexical_cast<std::string>(the_int);
+            second      = ecf::convert_to<std::string>(the_int);
         }
         else
             throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");

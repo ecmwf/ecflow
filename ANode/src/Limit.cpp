@@ -17,6 +17,7 @@
 
 #include <stdexcept>
 
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"
@@ -93,7 +94,7 @@ void Limit::print(std::string& os) const {
     if (!PrintStyle::defsStyle()) {
         if (value_ != 0) {
             os += " # ";
-            os += boost::lexical_cast<std::string>(value_);
+            os += ecf::convert_to<std::string>(value_);
             for (const auto& path : paths_) {
                 os += " ";
                 os += path;
@@ -113,7 +114,7 @@ void Limit::write(std::string& ret) const {
     ret += "limit ";
     ret += n_;
     ret += " ";
-    ret += boost::lexical_cast<std::string>(lim_);
+    ret += ecf::convert_to<std::string>(lim_);
 }
 
 void Limit::decrement(int tokens, const std::string& abs_node_path) {

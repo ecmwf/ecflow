@@ -17,6 +17,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "Converter.hpp"
 #include "DashboardDialog.hpp"
 #include "DashboardDock.hpp"
 #include "DashboardTitle.hpp"
@@ -558,7 +559,7 @@ QString Dashboard::uniqueDockId() {
 }
 
 std::string Dashboard::widgetSettingsId(int i) {
-    return "widget_" + boost::lexical_cast<std::string>(i);
+    return "widget_" + ecf::convert_to<std::string>(i);
 }
 
 void Dashboard::notifyServerFilterAdded(ServerItem* /*item*/) {

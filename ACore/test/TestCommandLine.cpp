@@ -15,10 +15,10 @@
 
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "CommandLine.hpp"
+#include "Converter.hpp"
 
 using namespace boost;
 using namespace std;
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_command_line_with_2_args) {
 BOOST_AUTO_TEST_CASE(test_command_line_with_10_args) {
     std::vector<std::string> theArgs(10);
     for (int i = 0; i < 10; i++) {
-        theArgs.push_back("arg"s + lexical_cast<string>(i));
+        theArgs.push_back("arg"s + ecf::convert_to<std::string>(i));
     }
     doCheck(theArgs);
 }

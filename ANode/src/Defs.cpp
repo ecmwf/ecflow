@@ -20,6 +20,7 @@
 
 #include "AbstractObserver.hpp"
 #include "CalendarUpdateParams.hpp"
+#include "Converter.hpp"
 #include "DefsDelta.hpp"
 #include "DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 #include "Ecf.hpp"
@@ -701,11 +702,11 @@ void Defs::write_state(std::string& os) const {
     }
     if (state_change_no_ != 0) {
         os += " state_change:";
-        os += boost::lexical_cast<std::string>(state_change_no_);
+        os += ecf::convert_to<std::string>(state_change_no_);
     }
     if (modify_change_no_ != 0) {
         os += " modify_change:";
-        os += boost::lexical_cast<std::string>(modify_change_no_);
+        os += ecf::convert_to<std::string>(modify_change_no_);
     }
     if (server().get_state() != ServerState::default_state()) {
         os += " server_state:";
@@ -714,7 +715,7 @@ void Defs::write_state(std::string& os) const {
 
     // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
     os += " cal_count:";
-    os += boost::lexical_cast<std::string>(updateCalendarCount_);
+    os += ecf::convert_to<std::string>(updateCalendarCount_);
     os += "\n";
 
     // This read by the DefsParser
@@ -873,9 +874,9 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
                 Str::split(date, vec, ".");
                 if (vec.size() == 3) {
                     try {
-                        int day   = boost::lexical_cast<int>(vec[0]);
-                        int month = boost::lexical_cast<int>(vec[1]);
-                        int year  = boost::lexical_cast<int>(vec[2]);
+                        int day   = ecf::convert_to<int>(vec[0]);
+                        int month = ecf::convert_to<int>(vec[1]);
+                        int year  = ecf::convert_to<int>(vec[2]);
 
                         boost::gregorian::date node_log_date(year, month, day);
                         boost::gregorian::date_duration duration = todays_date_in_utc - node_log_date;
@@ -1652,11 +1653,11 @@ void Defs::order(Node* immediateChild, NOrder::Order ord) {
         case NOrder::ALPHA: {
             std::sort(suiteVec_.begin(), suiteVec_.end(), [](const suite_ptr& a, const suite_ptr& b) {
                 try {
-                    int a_as_int = boost::lexical_cast<int>(a->name());
-                    int b_as_int = boost::lexical_cast<int>(b->name());
+                    int a_as_int = ecf::convert_to<int>(a->name());
+                    int b_as_int = ecf::convert_to<int>(b->name());
                     return a_as_int < b_as_int;
                 }
-                catch (boost::bad_lexical_cast&) {
+                catch (const ecf::bad_conversion&) {
                 }
 
                 return Str::caseInsLess(a->name(), b->name());

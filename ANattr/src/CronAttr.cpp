@@ -12,6 +12,7 @@
 //
 // Description :
 //============================================================================
+
 #include "CronAttr.hpp"
 
 #include <sstream>
@@ -19,11 +20,11 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-#include <boost/lexical_cast.hpp>
 #include <boost/token_functions.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"
@@ -139,7 +140,7 @@ void CronAttr::write(std::string& ret) const {
     if (!weekDays_.empty()) {
         ret += "-w ";
         for (size_t i = 0; i < weekDays_.size(); ++i) {
-            ret += boost::lexical_cast<std::string>(weekDays_[i]);
+            ret += ecf::convert_to<std::string>(weekDays_[i]);
             if (i != weekDays_.size() - 1)
                 ret += ",";
         }
@@ -152,7 +153,7 @@ void CronAttr::write(std::string& ret) const {
         if (weekDays_.empty())
             ret += "-w ";
         for (size_t i = 0; i < last_week_days_of_month_.size(); ++i) {
-            ret += boost::lexical_cast<std::string>(last_week_days_of_month_[i]);
+            ret += ecf::convert_to<std::string>(last_week_days_of_month_[i]);
             ret += 'L';
             if (i != last_week_days_of_month_.size() - 1)
                 ret += ",";
@@ -163,7 +164,7 @@ void CronAttr::write(std::string& ret) const {
     if (!daysOfMonth_.empty()) {
         ret += "-d ";
         for (size_t i = 0; i < daysOfMonth_.size(); ++i) {
-            ret += boost::lexical_cast<std::string>(daysOfMonth_[i]);
+            ret += ecf::convert_to<std::string>(daysOfMonth_[i]);
             if (i != daysOfMonth_.size() - 1)
                 ret += ",";
         }
@@ -180,7 +181,7 @@ void CronAttr::write(std::string& ret) const {
     if (!months_.empty()) {
         ret += "-m ";
         for (size_t i = 0; i < months_.size(); ++i) {
-            ret += boost::lexical_cast<std::string>(months_[i]);
+            ret += ecf::convert_to<std::string>(months_[i]);
             if (i != months_.size() - 1)
                 ret += ",";
         }
@@ -672,10 +673,10 @@ std::vector<int> extract_month(size_t& index, const std::vector<std::string>& li
             continue;
 
         try {
-            auto theInt = boost::lexical_cast<int>(theIntToken);
+            auto theInt = ecf::convert_to<int>(theIntToken);
             theIntVec.push_back(theInt);
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "Invalid cron option: " << option;
             throw std::runtime_error(ss.str());
@@ -714,15 +715,15 @@ void extract_days_of_week(size_t& index,
                     ss << "Invalid cron option: " << option << " " << theIntToken;
                     throw std::runtime_error(ss.str());
                 }
-                auto theInt = boost::lexical_cast<int>(theIntToken[0]);
+                auto theInt = ecf::convert_to<int>(theIntToken[0]);
                 last_week_days_of_month.push_back(theInt);
             }
             else {
-                auto theInt = boost::lexical_cast<int>(theIntToken);
+                auto theInt = ecf::convert_to<int>(theIntToken);
                 days_of_week.push_back(theInt);
             }
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "Invalid cron option: " << option;
             throw std::runtime_error(ss.str());
@@ -758,11 +759,11 @@ void extract_days_of_month(size_t& index,
             if (theIntToken == "L")
                 last_day_of_month = true;
             else {
-                auto theInt = boost::lexical_cast<int>(theIntToken);
+                auto theInt = ecf::convert_to<int>(theIntToken);
                 days_of_month.push_back(theInt);
             }
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "Invalid cron option: " << option;
             throw std::runtime_error(ss.str());

@@ -17,8 +17,7 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
 #include "Str.hpp"
@@ -52,7 +51,7 @@ bool EventParser::doParse(const std::string& line, std::vector<std::string>& lin
         //   event 1 eventName
         //   event 2 eventNamea
         try {
-            number = boost::lexical_cast<int>(lineTokens[1]);
+            number = ecf::convert_to<int>(lineTokens[1]);
             if (lineTokens.size() >= 3 && lineTokens[2][0] != '#') {
                 name = lineTokens[2];
                 // event 1 eventName set
@@ -65,7 +64,7 @@ bool EventParser::doParse(const std::string& line, std::vector<std::string>& lin
                     initial_value = true;
             }
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             name = lineTokens[1];
             if (lineTokens.size() >= 3 && lineTokens[2] == "set")
                 initial_value = true;

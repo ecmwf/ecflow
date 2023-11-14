@@ -34,7 +34,6 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/cast.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/spirit/include/classic_actor.hpp>
 #include <boost/spirit/include/classic_ast.hpp>
@@ -44,6 +43,7 @@
 #include <boost/spirit/include/classic_tree_to_xml.hpp>
 #include <boost/spirit/include/phoenix1_binders.hpp>
 
+#include "Converter.hpp"
 #include "ExprAst.hpp"
 #include "ExprDuplicate.hpp"
 #include "Indentor.hpp"
@@ -778,7 +778,7 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
 
         string thevalue(i->value.begin(), i->value.end());
         boost::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
-        auto theInt = boost::lexical_cast<int>(thevalue);
+        auto theInt = ecf::convert_to<int>(thevalue);
         return new AstInteger(theInt);
     }
     else if (i->value.id() == ExpressionGrammer::node_state_aborted_ID) {
@@ -1155,8 +1155,8 @@ bool SimpleExprParser::doParse() {
         }
         else {
             try {
-                auto left     = boost::lexical_cast<int>(tokens[0]);
-                auto right    = boost::lexical_cast<int>(tokens[1]);
+                auto left     = ecf::convert_to<int>(tokens[0]);
+                auto right    = ecf::convert_to<int>(tokens[1]);
                 ast_          = std::make_unique<AstTop>();
                 Ast* someRoot = new AstEqual();
                 someRoot->addChild(new AstInteger(left));
@@ -1166,7 +1166,7 @@ bool SimpleExprParser::doParse() {
                 //               "'\n";
                 return true;
             }
-            catch (boost::bad_lexical_cast& e) {
+            catch (const ecf::bad_conversion&) {
                 //            cout << "simple INT FAILED expr : " << expr_ << " `" << tokens[0] << "' = '"
                 //                     << tokens[1] << "'\n";
             }

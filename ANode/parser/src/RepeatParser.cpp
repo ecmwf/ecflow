@@ -17,6 +17,7 @@
 
 #include <stdexcept>
 
+#include "Converter.hpp"
 #include "DefsStructureParser.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"
@@ -70,9 +71,9 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
 
             int date = 0;
             try {
-                date = boost::lexical_cast<int>(theEnum);
+                date = ecf::convert_to<int>(theEnum);
             }
-            catch (boost::bad_lexical_cast&) {
+            catch (const ecf::bad_conversion&) {
                 throw std::runtime_error("RepeatParser::doParse: repeat datelist " + name +
                                          ", invalid date : " + theEnum);
             }

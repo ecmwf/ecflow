@@ -18,8 +18,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"
@@ -82,11 +81,11 @@ Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
     if (eventName.find_first_of(Str::NUMERIC()) == 0) {
         try {
-            number_ = boost::lexical_cast<int>(eventName);
+            number_ = ecf::convert_to<int>(eventName);
             n_.clear();
             return;
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             // cast failed, a real string, carry on
         }
     }
@@ -202,7 +201,7 @@ void Event::write(std::string& ret) const {
     if (number_ == std::numeric_limits<int>::max())
         ret += n_;
     else {
-        ret += boost::lexical_cast<std::string>(number_);
+        ret += ecf::convert_to<std::string>(number_);
         ret += " ";
         ret += n_;
     }
@@ -301,7 +300,7 @@ void Meter::print(std::string& os) const {
     if (!PrintStyle::defsStyle()) {
         if (v_ != min_) {
             os += " # ";
-            os += boost::lexical_cast<std::string>(v_);
+            os += ecf::convert_to<std::string>(v_);
         }
     }
     os += "\n";
@@ -317,11 +316,11 @@ void Meter::write(std::string& ret) const {
     ret += "meter ";
     ret += n_;
     ret += " ";
-    ret += boost::lexical_cast<std::string>(min_);
+    ret += ecf::convert_to<std::string>(min_);
     ret += " ";
-    ret += boost::lexical_cast<std::string>(max_);
+    ret += ecf::convert_to<std::string>(max_);
     ret += " ";
-    ret += boost::lexical_cast<std::string>(cc_);
+    ret += ecf::convert_to<std::string>(cc_);
 }
 
 std::string Meter::dump() const {

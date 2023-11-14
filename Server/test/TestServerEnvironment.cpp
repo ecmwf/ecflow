@@ -18,10 +18,10 @@
 #include <stdexcept>
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "CheckPt.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "File.hpp"
 #include "Host.hpp"
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     std::string port = Str::DEFAULT_PORT_NUMBER();
     for (int i = -10; i < 70; ++i) {
         string errorMsg;
-        string argument = "--ecfinterval=" + boost::lexical_cast<std::string>(i);
+        string argument = "--ecfinterval=" + ecf::convert_to<std::string>(i);
 
         int argc        = 2;
         char* argv[]    = {const_cast<char*>("ServerEnvironment"), const_cast<char*>(argument.c_str())};
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             continue;
         }
         if (string("ECF_CHECKINTERVAL") == p.first) {
-            std::string expected = boost::lexical_cast<std::string>(CheckPt::default_interval());
+            std::string expected = ecf::convert_to<std::string>(CheckPt::default_interval());
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_CHECKINTERVAL expected " << CheckPt::default_interval() << " but found "
                                                                   << p.second);

@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h> // for waitpid
 
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "File.hpp"
 #include "JobsParam.hpp"
@@ -1109,7 +1110,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const {
             job_output_size += jobLines_[i].size();
         job_output_size += jobLines_size; // take into account new lines for each line of output
         job_size_ = "job_size:";
-        job_size_ += boost::lexical_cast<std::string>(job_output_size);
+        job_size_ += ecf::convert_to<std::string>(job_output_size);
         return job_size_;
     }
 

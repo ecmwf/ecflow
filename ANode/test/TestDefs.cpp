@@ -10,10 +10,12 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Suite.hpp"
@@ -28,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb) {
 
     // Create a defs file corresponding to:
     // suite suite1
-    //	family family
+    //  family family
     //   	task t1
     //  endfamily
     // endsuite
@@ -47,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb) {
     Defs otherDefs;
     {
         for (int i = 0; i < 14; ++i) {
-            suite_ptr suite1 = otherDefs.add_suite("suite" + boost::lexical_cast<std::string>(i));
+            suite_ptr suite1 = otherDefs.add_suite("suite" + ecf::convert_to<std::string>(i));
             family_ptr fam   = suite1->add_family("family");
             fam->add_task("suite1_task1");
         }

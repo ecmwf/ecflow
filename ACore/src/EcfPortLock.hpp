@@ -23,8 +23,8 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "File.hpp"
 
 namespace ecf {
@@ -32,7 +32,7 @@ namespace ecf {
 class EcfPortLock {
 public:
     static bool is_free(int port, bool debug = false) {
-        std::string the_port = boost::lexical_cast<std::string>(port);
+        std::string the_port = ecf::convert_to<std::string>(port);
         if (boost::filesystem::exists(port_file(the_port))) {
             if (debug)
                 std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";

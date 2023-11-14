@@ -18,6 +18,7 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Expression.hpp"
@@ -247,20 +248,20 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
             ss << "QueryCmd: Cannot find meter " << attribute_ << " on node " << path_to_attribute_;
             throw std::runtime_error(ss.str());
         }
-        return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(meter.value()));
+        return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(meter.value()));
     }
 
     if (query_type_ == "limit") {
         limit_ptr limit = node->find_limit(attribute_);
         if (!limit.get())
             throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
-        return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(limit->value()));
+        return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->value()));
     }
     if (query_type_ == "limit_max") {
         limit_ptr limit = node->find_limit(attribute_);
         if (!limit.get())
             throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
-        return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(limit->theLimit()));
+        return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->theLimit()));
     }
 
     if (query_type_ == "label") {

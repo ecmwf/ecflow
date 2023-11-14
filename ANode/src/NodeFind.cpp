@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Limit.hpp"
 #include "MiscAttrs.hpp"
@@ -318,10 +319,10 @@ const Event& Node::findEventByNameOrNumber(const std::string& theName) const {
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
     if (theName.find_first_of(Str::NUMERIC(), 0) == 0) {
         try {
-            auto eventNumber = boost::lexical_cast<int>(theName);
+            auto eventNumber = ecf::convert_to<int>(theName);
             return findEventByNumber(eventNumber);
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
         }
     }
     return Event::EMPTY();

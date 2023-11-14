@@ -19,9 +19,9 @@
 #include <stdexcept>
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-#include <boost/lexical_cast.hpp>
 
 #include "Cal.hpp"
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
@@ -145,14 +145,14 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
         throw std::runtime_error("Invalid Repeat date: the delta cannot be zero" + ss.str());
     }
 
-    std::string theStart = boost::lexical_cast<std::string>(start);
+    std::string theStart = ecf::convert_to<std::string>(start);
     if (theStart.size() != 8) {
         std::stringstream ss;
         ss << "repeat " << variable << " " << start << " " << end << " " << delta;
         throw std::runtime_error("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format." +
                                  ss.str());
     }
-    std::string theEnd = boost::lexical_cast<std::string>(end);
+    std::string theEnd = ecf::convert_to<std::string>(end);
     if (theEnd.size() != 8) {
         std::stringstream ss;
         ss << "repeat " << variable << " " << start << " " << end << " " << delta;
@@ -256,14 +256,14 @@ void RepeatDate::update_repeat_genvar_value() const {
             int month        = the_date.month();
             int year         = the_date.year();
 
-            yyyy_.set_value(boost::lexical_cast<std::string>(year));
-            mm_.set_value(boost::lexical_cast<std::string>(month));
-            dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
-            dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+            yyyy_.set_value(ecf::convert_to<std::string>(year));
+            mm_.set_value(ecf::convert_to<std::string>(month));
+            dom_.set_value(ecf::convert_to<std::string>(day_of_month));
+            dow_.set_value(ecf::convert_to<std::string>(day_of_week));
 
             long last_value = last_valid_value();
             long julian     = Cal::date_to_julian(last_value);
-            julian_.set_value(boost::lexical_cast<std::string>(julian));
+            julian_.set_value(ecf::convert_to<std::string>(julian));
         }
         catch (std::exception& e) {
             std::stringstream ss;
@@ -327,15 +327,15 @@ void RepeatDate::write(std::string& ret) const {
     ret += "repeat date ";
     ret += name_;
     ret += " ";
-    ret += boost::lexical_cast<std::string>(start_);
+    ret += ecf::convert_to<std::string>(start_);
     ret += " ";
-    ret += boost::lexical_cast<std::string>(end_);
+    ret += ecf::convert_to<std::string>(end_);
     ret += " ";
-    ret += boost::lexical_cast<std::string>(delta_);
+    ret += ecf::convert_to<std::string>(delta_);
 
     if (!PrintStyle::defsStyle() && (value_ != start_)) {
         ret += " # ";
-        ret += boost::lexical_cast<std::string>(value_);
+        ret += ecf::convert_to<std::string>(value_);
     }
 }
 
@@ -365,22 +365,22 @@ bool RepeatDate::operator==(const RepeatDate& rhs) const {
 }
 
 std::string RepeatDate::valueAsString() const {
-    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
+    /// will throw an ecf::bad_conversion if value is not convertible to a string
     try {
-        return boost::lexical_cast<std::string>(last_valid_value());
+        return ecf::convert_to<std::string>(last_valid_value());
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "RepeatDate::valueAsString(): could not convert value " << value_ << " to a string");
     }
     return string();
 }
 
 std::string RepeatDate::value_as_string(int index) const {
-    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
+    /// will throw an ecf::bad_conversion if value is not convertible to a string
     try {
-        return boost::lexical_cast<std::string>(index);
+        return ecf::convert_to<std::string>(index);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
     return string();
 }
@@ -393,9 +393,9 @@ std::string RepeatDate::next_value_as_string() const {
     val = Cal::julian_to_date(julian);
 
     try {
-        return boost::lexical_cast<std::string>(valid_value(val));
+        return ecf::convert_to<std::string>(valid_value(val));
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
     return string();
 }
@@ -408,9 +408,9 @@ std::string RepeatDate::prev_value_as_string() const {
     val = Cal::julian_to_date(julian);
 
     try {
-        return boost::lexical_cast<std::string>(valid_value(val));
+        return ecf::convert_to<std::string>(valid_value(val));
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
     return string();
 }
@@ -431,9 +431,9 @@ void RepeatDate::change(const std::string& newdate) {
 
     long the_new_date = 0;
     try {
-        the_new_date = boost::lexical_cast<long>(newdate);
+        the_new_date = ecf::convert_to<long>(newdate);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         std::stringstream ss;
         ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not convertible to an long";
         throw std::runtime_error(ss.str());
@@ -507,7 +507,7 @@ RepeatDateList::RepeatDateList(const std::string& variable, const std::vector<in
         throw std::runtime_error("RepeatDateList: " + variable + " is empty");
 
     for (int i : list_) {
-        std::string date_i = boost::lexical_cast<std::string>(i);
+        std::string date_i = ecf::convert_to<std::string>(i);
         if (date_i.size() != 8) {
             std::stringstream ss;
             ss << "Invalid Repeat datelist : " << variable << " the date " << i
@@ -588,14 +588,14 @@ void RepeatDateList::update_repeat_genvar_value() const {
             int month        = the_date.month();
             int year         = the_date.year();
 
-            yyyy_.set_value(boost::lexical_cast<std::string>(year));
-            mm_.set_value(boost::lexical_cast<std::string>(month));
-            dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
-            dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+            yyyy_.set_value(ecf::convert_to<std::string>(year));
+            mm_.set_value(ecf::convert_to<std::string>(month));
+            dom_.set_value(ecf::convert_to<std::string>(day_of_month));
+            dow_.set_value(ecf::convert_to<std::string>(day_of_week));
 
             long last_value = last_valid_value();
             long julian     = Cal::date_to_julian(last_value);
-            julian_.set_value(boost::lexical_cast<std::string>(julian));
+            julian_.set_value(ecf::convert_to<std::string>(julian));
         }
         catch (std::exception& e) {
             std::stringstream ss;
@@ -629,12 +629,12 @@ void RepeatDateList::write(std::string& ret) const {
     ret += name_;
     for (int date : list_) {
         ret += " \"";
-        ret += boost::lexical_cast<std::string>(date);
+        ret += ecf::convert_to<std::string>(date);
         ret += "\"";
     }
     if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
         ret += " # ";
-        ret += boost::lexical_cast<std::string>(currentIndex_);
+        ret += ecf::convert_to<std::string>(currentIndex_);
     }
 }
 
@@ -703,19 +703,19 @@ void RepeatDateList::setToLastValue() {
 }
 
 std::string RepeatDateList::valueAsString() const {
-    return boost::lexical_cast<std::string>(last_valid_value());
+    return ecf::convert_to<std::string>(last_valid_value());
 }
 
 std::string RepeatDateList::value_as_string(int index) const {
     if (list_.empty())
         return string("0");
     if (index >= 0 && index < static_cast<int>(list_.size())) {
-        return boost::lexical_cast<std::string>(list_[index]);
+        return ecf::convert_to<std::string>(list_[index]);
     }
     if (index < 0)
-        return boost::lexical_cast<std::string>(list_[0]);
+        return ecf::convert_to<std::string>(list_[0]);
     if (index >= static_cast<int>(list_.size()))
-        return boost::lexical_cast<std::string>(list_[list_.size() - 1]);
+        return ecf::convert_to<std::string>(list_[list_.size() - 1]);
     return std::string();
 }
 
@@ -741,7 +741,7 @@ void RepeatDateList::change(const std::string& newValue) {
     // See if if matches one of the dates
     int new_val = 0;
     try {
-        new_val = boost::lexical_cast<int>(newValue);
+        new_val = ecf::convert_to<int>(newValue);
     }
     catch (...) {
         std::stringstream ss;
@@ -874,9 +874,9 @@ void RepeatInteger::increment() {
 void RepeatInteger::change(const std::string& newValue) {
     long the_new_value = 0;
     try {
-        the_new_value = boost::lexical_cast<long>(newValue);
+        the_new_value = ecf::convert_to<long>(newValue);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         std::stringstream ss;
         ss << "RepeatInteger::change:" << toString() << " The new value(" << newValue
            << ") is not convertible to an long";
@@ -925,17 +925,17 @@ void RepeatInteger::write(std::string& ret) const {
     ret += "repeat integer ";
     ret += name_;
     ret += " ";
-    ret += boost::lexical_cast<std::string>(start_);
+    ret += ecf::convert_to<std::string>(start_);
     ret += " ";
-    ret += boost::lexical_cast<std::string>(end_);
+    ret += ecf::convert_to<std::string>(end_);
     if (delta_ != 1) {
         ret += " ";
-        ret += boost::lexical_cast<std::string>(delta_);
+        ret += ecf::convert_to<std::string>(delta_);
     }
 
     if (!PrintStyle::defsStyle() && (value_ != start_)) {
         ret += " # ";
-        ret += boost::lexical_cast<std::string>(value_);
+        ret += ecf::convert_to<std::string>(value_);
     }
 }
 
@@ -995,22 +995,22 @@ bool RepeatInteger::operator==(const RepeatInteger& rhs) const {
 }
 
 std::string RepeatInteger::valueAsString() const {
-    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
+    /// will throw an ecf::bad_conversion if value is not convertible to a string
     try {
-        return boost::lexical_cast<std::string>(last_valid_value());
+        return ecf::convert_to<std::string>(last_valid_value());
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "");
     }
     return string();
 }
 
 std::string RepeatInteger::value_as_string(int index) const {
-    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
+    /// will throw an ecf::bad_conversion if value is not convertible to a string
     try {
-        return boost::lexical_cast<std::string>(index);
+        return ecf::convert_to<std::string>(index);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
     return string();
 }
@@ -1019,9 +1019,9 @@ std::string RepeatInteger::next_value_as_string() const {
     long val = last_valid_value();
     val += delta_;
     try {
-        return boost::lexical_cast<std::string>(valid_value(val));
+        return ecf::convert_to<std::string>(valid_value(val));
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
     return string();
 }
@@ -1030,9 +1030,9 @@ std::string RepeatInteger::prev_value_as_string() const {
     long val = last_valid_value();
     val -= delta_;
     try {
-        return boost::lexical_cast<std::string>(valid_value(val));
+        return ecf::convert_to<std::string>(valid_value(val));
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
     return string();
 }
@@ -1073,7 +1073,7 @@ void RepeatEnumerated::write(std::string& ret) const {
     }
     if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
         ret += " # ";
-        ret += boost::lexical_cast<std::string>(currentIndex_);
+        ret += ecf::convert_to<std::string>(currentIndex_);
     }
 }
 
@@ -1096,9 +1096,9 @@ void RepeatEnumerated::increment() {
 long RepeatEnumerated::value() const {
     if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theEnums_.size())) {
         try {
-            return boost::lexical_cast<int>(theEnums_[currentIndex_]);
+            return ecf::convert_to<int>(theEnums_[currentIndex_]);
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (const ecf::bad_conversion&) {
             // Ignore and return currentIndex_
         }
     }
@@ -1109,18 +1109,18 @@ long RepeatEnumerated::last_valid_value() const {
     if (!theEnums_.empty()) {
         if (currentIndex_ < 0) {
             try {
-                return boost::lexical_cast<int>(theEnums_[0]);
+                return ecf::convert_to<int>(theEnums_[0]);
             }
-            catch (boost::bad_lexical_cast&) { /* Ignore and return first index */
+            catch (const ecf::bad_conversion&) { /* Ignore and return first index */
             }
             return 0;
         }
         if (currentIndex_ >= static_cast<int>(theEnums_.size())) {
 
             try {
-                return boost::lexical_cast<int>(theEnums_[theEnums_.size() - 1]);
+                return ecf::convert_to<int>(theEnums_[theEnums_.size() - 1]);
             }
-            catch (boost::bad_lexical_cast&) { /* Ignore and return last index */
+            catch (const ecf::bad_conversion&) { /* Ignore and return last index */
             }
             return static_cast<long>(theEnums_.size() - 1);
         }
@@ -1200,11 +1200,11 @@ void RepeatEnumerated::change(const std::string& newValue) {
 
     // If the value is convertible to an integer, treat as an index
     try {
-        auto the_new_value = boost::lexical_cast<long>(newValue);
+        auto the_new_value = ecf::convert_to<long>(newValue);
         changeValue(the_new_value); // can throw if out of range
         return;
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
 
     std::stringstream ss;
@@ -1299,7 +1299,7 @@ void RepeatString::write(std::string& ret) const {
     }
     if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
         ret += " # ";
-        ret += boost::lexical_cast<std::string>(value());
+        ret += ecf::convert_to<std::string>(value());
     }
 }
 
@@ -1388,11 +1388,11 @@ void RepeatString::change(const std::string& newValue) {
 
     // If the value is convertible to an integer, treat as an index
     try {
-        long the_new_value = boost::lexical_cast<int>(newValue);
+        long the_new_value = ecf::convert_to<int>(newValue);
         changeValue(the_new_value);
         return;
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (const ecf::bad_conversion&) {
     }
 
     std::stringstream ss;
@@ -1446,7 +1446,7 @@ bool RepeatDay::compare(RepeatBase* rb) const {
 
 void RepeatDay::write(std::string& ret) const {
     ret += "repeat day ";
-    ret += boost::lexical_cast<std::string>(step_);
+    ret += ecf::convert_to<std::string>(step_);
 }
 
 std::string RepeatDay::dump() const {

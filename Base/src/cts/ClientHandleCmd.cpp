@@ -14,11 +14,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 
@@ -386,7 +385,7 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
             if (!args.empty()) {
                 int suite_names_index = 1;
                 try {
-                    client_handle = boost::lexical_cast<int>(args[0]);
+                    client_handle = ecf::convert_to<int>(args[0]);
                     if (args.size() > 1) {
                         if (args[1] == "true")
                             auto_add_new_suites = true;
@@ -433,7 +432,7 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
                     "To few arguments. First arg should be a integer handle, then a list of suite names. See help");
             int client_handle = 0;
             try {
-                client_handle = boost::lexical_cast<int>(args[0]);
+                client_handle = ecf::convert_to<int>(args[0]);
             }
             catch (std::exception&) {
                 throw std::runtime_error("The first argument must be an integer. See help");
@@ -456,7 +455,7 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
                     "To few arguments. First arg should be a integer handle, then a list of suite names. See help");
             int client_handle = 0;
             try {
-                client_handle = boost::lexical_cast<int>(args[0]);
+                client_handle = ecf::convert_to<int>(args[0]);
             }
             catch (std::exception&) {
                 throw std::runtime_error("ClientHandleCmd::create: The first argument must be an integer. See help");
@@ -479,7 +478,7 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
                                          "be true or false. See help");
             int client_handle = 0;
             try {
-                client_handle = boost::lexical_cast<int>(args[0]);
+                client_handle = ecf::convert_to<int>(args[0]);
             }
             catch (std::exception&) {
                 throw std::runtime_error("ClientHandleCmd::create: The first argument must be an integer. See help");

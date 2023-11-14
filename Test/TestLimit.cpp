@@ -19,9 +19,9 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_limit) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 1));
         int taskSize = 3;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_limit) {
         fam2->addInLimit(InLimit("disk", pathToLimit, 20));
         fam2->addVerify(VerifyAttr(NState::COMPLETE, 1));
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam2->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam2->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
     }

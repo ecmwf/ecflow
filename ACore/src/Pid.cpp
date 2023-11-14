@@ -18,14 +18,14 @@
 #include <stdexcept>
 #include <unistd.h> // for getpid
 
-#include <boost/lexical_cast.hpp>
+#include "Converter.hpp"
 
 std::string Pid::getpid() {
     std::string pid;
     try {
-        pid = boost::lexical_cast<std::string>(::getpid());
+        pid = ecf::convert_to<std::string>(::getpid());
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
         throw std::runtime_error("Pid::getpid(): Could not convert PID to a string\n");
     }
     return pid;

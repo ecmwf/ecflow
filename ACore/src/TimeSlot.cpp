@@ -17,8 +17,7 @@
 
 #include <ostream>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "Serialization.hpp"
 #include "Str.hpp"
 
@@ -72,12 +71,12 @@ void TimeSlot::write(std::string& ret) const {
 
     if (h_ < 10)
         ret += "0";
-    ret += boost::lexical_cast<std::string>(h_);
+    ret += ecf::convert_to<std::string>(h_);
 
     ret += Str::COLON();
     if (m_ < 10)
         ret += "0";
-    ret += boost::lexical_cast<std::string>(m_);
+    ret += ecf::convert_to<std::string>(m_);
 }
 
 boost::posix_time::time_duration TimeSlot::duration() const {

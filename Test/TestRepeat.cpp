@@ -21,9 +21,9 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 4));
         int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 4)); // task should complete 4 times
         }
     }
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 5));
         int taskSize = 2;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 5));
         }
     }
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 2));
         int taskSize = 2;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 2));
         }
     }
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
         int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
 
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
     }

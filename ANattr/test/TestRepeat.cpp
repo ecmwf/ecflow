@@ -17,10 +17,10 @@
 #include <stdexcept>
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "Cal.hpp"
+#include "Converter.hpp"
 #include "RepeatAttr.hpp"
 
 using namespace std;
@@ -716,7 +716,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_change_value) {
         BOOST_CHECK_MESSAGE(rep.valid(), "expected valid at start ");
 
         while (rep.valid()) {
-            rep2.change(boost::lexical_cast<std::string>(rep.value()));
+            rep2.change(ecf::convert_to<std::string>(rep.value()));
             BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),
                                 "expected same value, but found " << rep.value() << "  " << rep2.value());
             rep.increment();
@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_change_value) {
         BOOST_CHECK_MESSAGE(rep.valid(), "expected valid at start ");
 
         while (rep.valid()) {
-            rep2.change(boost::lexical_cast<std::string>(rep.value()));
+            rep2.change(ecf::convert_to<std::string>(rep.value()));
             BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),
                                 "expected same value, but found " << rep.value() << "  " << rep2.value());
             rep.increment();
@@ -791,14 +791,14 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_errors) {
 }
 
 static void check_date(int start, int end, int delta) {
-    boost::gregorian::date bdate(from_undelimited_string(boost::lexical_cast<std::string>(start)));
+    boost::gregorian::date bdate(from_undelimited_string(ecf::convert_to<std::string>(start)));
 
     Repeat rep(RepeatDate("YMD", start, end, delta));
     Repeat rep2(RepeatDate("YMD", start, end, delta));
     while (rep.valid()) {
 
         // xref repeat date with boost date, essentially checking bdate with rep
-        string str_value = boost::lexical_cast<std::string>(rep.value());
+        string str_value = ecf::convert_to<std::string>(rep.value());
         boost::gregorian::date date2(from_undelimited_string(str_value));
         BOOST_CHECK_MESSAGE(bdate == date2, "expected same value, but found " << bdate << "  " << date2);
 
@@ -872,7 +872,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_generated_variables) {
     {
         const Variable& var = rep.find_gen_variable("YMD_JULIAN");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
-        std::string expected = boost::lexical_cast<std::string>(Cal::date_to_julian(20090916));
+        std::string expected = ecf::convert_to<std::string>(Cal::date_to_julian(20090916));
         BOOST_CHECK_MESSAGE(var.theValue() == expected, "expected " << expected << " but found " << var.theValue());
     }
 }
@@ -939,13 +939,13 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_generated_variables2) {
     expected_day_of_week.emplace_back("5");
 
     std::vector<std::string> expected_julian;
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20161231)));
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170101)));
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170102)));
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170103)));
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170104)));
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170105)));
-    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20170106)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20161231)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170101)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170102)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170103)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170104)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170105)));
+    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170106)));
 
     for (int i = 0; i < 7; i++) {
 

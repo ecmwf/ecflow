@@ -22,7 +22,6 @@
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>
-#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "AboutDialog.hpp"
@@ -31,6 +30,7 @@
 #include "ClockWidget.hpp"
 #include "CommandOutputDialog.hpp"
 #include "ConnectState.hpp"
+#include "Converter.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "InfoPanelHandler.hpp"
@@ -666,7 +666,7 @@ void MainWindow::init() {
     std::string winPattern("window_");
     for (int i = 0; i < cnt; i++) {
         if (i != topWinId) {
-            std::string id = winPattern + boost::lexical_cast<std::string>(i);
+            std::string id = winPattern + ecf::convert_to<std::string>(i);
             if (vs.contains(id)) {
                 vs.beginGroup(id);
                 MainWindow::makeWindow(&vs);
@@ -677,7 +677,7 @@ void MainWindow::init() {
 
     // Create the topwindow
     if (topWinId != -1) {
-        std::string id = winPattern + boost::lexical_cast<std::string>(topWinId);
+        std::string id = winPattern + ecf::convert_to<std::string>(topWinId);
         if (vs.contains(id)) {
             vs.beginGroup(id);
             MainWindow::makeWindow(&vs);
@@ -722,7 +722,7 @@ void MainWindow::saveContents(MainWindow* topWin) {
 
     // Save info for all the windows
     for (int i = 0; i < windows_.count(); i++) {
-        std::string id = "window_" + boost::lexical_cast<std::string>(i);
+        std::string id = "window_" + ecf::convert_to<std::string>(i);
         vs.beginGroup(id);
         windows_.at(i)->writeSettings(&vs);
         vs.endGroup();

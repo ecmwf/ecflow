@@ -114,10 +114,13 @@ public:
     static bool valid_name(const std::string& name, std::string& msg);
     static bool valid_name(const std::string& name);
 
-    /// Use this function when you are not sure if string is convertible to an integer.
-    /// This function will check if string has a numeric first & hence faster than
-    /// using boost::lexical_cast< int > alone. Will trap any exception
-    /// will return numeric_limits<int>::max() for invalid conversions
+    /// This function checks if the given string actually has any digits before attempting the conversion;
+    /// this approach is faster than using ecf::convert_to<int> directly (and thus always attempt to
+    /// perform the conversion).
+    /// Use this function when it is not possible to ensure the string is convertible to an integer (e.g. user input).
+    ///
+    /// This function return the given `error_return` (by default, numeric_limits<int>::max()),
+    /// in cases where the conversion is invalid.
     static int to_int(const std::string&, int error_return = std::numeric_limits<int>::max());
 
     /// Truncate the input string at the start/end if exceeds max_lines_ newlines

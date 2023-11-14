@@ -12,13 +12,13 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
+#include <stdexcept>
 
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 
 using namespace ecf;
@@ -125,7 +125,7 @@ void CheckPtCmd::addOption(boost::program_options::options_description& desc) co
 static int parse_check_pt_interval(const std::string& the_arg) {
     int check_pt_interval = 0;
     try {
-        check_pt_interval = boost::lexical_cast<int>(the_arg);
+        check_pt_interval = ecf::convert_to<int>(the_arg);
     }
     catch (...) {
         std::stringstream ss;
@@ -147,7 +147,7 @@ static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) 
 
     int check_pt_alarm_time = 0;
     try {
-        check_pt_alarm_time = boost::lexical_cast<int>(alarm_time);
+        check_pt_alarm_time = ecf::convert_to<int>(alarm_time);
     }
     catch (...) {
         std::stringstream ss;

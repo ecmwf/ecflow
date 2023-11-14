@@ -21,6 +21,7 @@
 
 #include "Cal.hpp"
 #include "Calendar.hpp"
+#include "Converter.hpp"
 #include "Str.hpp"
 #include "TimeSeries.hpp"
 
@@ -537,7 +538,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
         long boost_julian               = cal_date.julian_day();
 
         std::string iso_string          = to_iso_string(cal_date);
-        auto date_as_long               = boost::lexical_cast<long>(iso_string);
+        auto date_as_long               = ecf::convert_to<long>(iso_string);
         long ecmwf_julian               = Cal::date_to_julian(date_as_long);
 
         BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,

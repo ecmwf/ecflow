@@ -17,8 +17,7 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "Indentor.hpp"
 #include "Limit.hpp"
 #include "PrintStyle.hpp"
@@ -120,9 +119,9 @@ void InLimit::print(std::string& os) const {
             Limit* the_limit = limit();
             if (the_limit) {
                 os += " # referenced limit(value) ";
-                os += boost::lexical_cast<std::string>(the_limit->theLimit());
+                os += ecf::convert_to<std::string>(the_limit->theLimit());
                 os += "(";
-                os += boost::lexical_cast<std::string>(the_limit->value());
+                os += ecf::convert_to<std::string>(the_limit->value());
                 os += ")";
             }
         }
@@ -152,7 +151,7 @@ void InLimit::write(std::string& ret) const {
     }
     if (tokens_ != 1) {
         ret += " ";
-        ret += boost::lexical_cast<std::string>(tokens_);
+        ret += ecf::convert_to<std::string>(tokens_);
     }
 }
 

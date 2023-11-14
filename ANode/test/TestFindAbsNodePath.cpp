@@ -10,15 +10,16 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
-// #include "PrintStyle.hpp"
 
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
+
+#include "Converter.hpp"
+#include "Defs.hpp"
+#include "Family.hpp"
+#include "Suite.hpp"
+#include "Task.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -33,16 +34,16 @@ BOOST_AUTO_TEST_CASE(test_find_abs_node_path) {
     Defs theDefs;
     {
         for (int s = 0; s < 3; s++) {
-            suite_ptr suite = theDefs.add_suite("suite" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs.add_suite("suite" + ecf::convert_to<std::string>(s));
             no_of_nodes++;
             for (int f = 0; f < 3; f++) {
-                family_ptr fam = suite->add_family("family" + boost::lexical_cast<std::string>(f));
+                family_ptr fam = suite->add_family("family" + ecf::convert_to<std::string>(f));
                 no_of_nodes++;
                 for (int ff = 0; ff < 3; ff++) {
-                    family_ptr hfam = fam->add_family("family" + boost::lexical_cast<std::string>(ff));
+                    family_ptr hfam = fam->add_family("family" + ecf::convert_to<std::string>(ff));
                     no_of_nodes++;
                     for (int t = 0; t < 3; t++) {
-                        task_ptr task = hfam->add_task("t1" + boost::lexical_cast<std::string>(t));
+                        task_ptr task = hfam->add_task("t1" + ecf::convert_to<std::string>(t));
                         no_of_nodes++;
                         for (int a = 0; a < 3; a++) {
                             task->add_alias_only();

@@ -1,4 +1,3 @@
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -16,9 +15,9 @@
 
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Limit.hpp"
 #include "SerializationTest.hpp"
@@ -50,14 +49,14 @@ BOOST_AUTO_TEST_CASE(test_limit_basics) {
 
     Limit l1("name", 100);
     for (int i = 1; i < 10; i++) {
-        std::string path = boost::lexical_cast<std::string>(i);
+        std::string path = ecf::convert_to<std::string>(i);
         expected_paths.insert(path);
         l1.increment(1, path);
         BOOST_CHECK_MESSAGE(l1.paths() == expected_paths, "Expected paths not the same at " << i);
     }
 
     for (int i = 9; i >= 1; i--) {
-        std::string path = boost::lexical_cast<std::string>(i);
+        std::string path = ecf::convert_to<std::string>(i);
         l1.decrement(1, path);
         auto iter = expected_paths.find(path);
         expected_paths.erase(iter);
@@ -114,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_limit_increment_2) {
     Limit limit("name", 10); // Limit of 10
     for (int i = 0; i < 20; i++) {
         // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
-        std::string path = boost::lexical_cast<std::string>(i);
+        std::string path = ecf::convert_to<std::string>(i);
         limit.increment(1, path);
         BOOST_CHECK_MESSAGE(limit.value() == i + 1,
                             "Expected limit value of " << i + 1 << " but found " << limit.value());

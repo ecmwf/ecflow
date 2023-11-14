@@ -17,11 +17,11 @@
 #include <stdexcept>
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "EcfFile.hpp"
 #include "File.hpp"
@@ -61,12 +61,12 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
     if (!input_max_lines.empty()) {
         try {
             // Note: max_lines_ if type size_t, hence we cast to int to check for negative numbers
-            auto the_max_lines = boost::lexical_cast<int>(input_max_lines);
+            auto the_max_lines = ecf::convert_to<int>(input_max_lines);
             if (the_max_lines <= 0)
                 the_max_lines = File::MAX_LINES();
             max_lines_ = the_max_lines;
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (const ecf::bad_conversion&) {
             std::stringstream ss;
             ss << "CFileCmd::CFileCmd: The third argument(" << input_max_lines
                << ") must be convertible to an integer\n";
@@ -130,12 +130,11 @@ bool CFileCmd::equals(ClientToServerCmd* rhs) const {
 }
 
 void CFileCmd::print(std::string& os) const {
-    user_cmd(
-        os,
-        CtsApi::to_string(CtsApi::file(pathToNode_, toString(file_), boost::lexical_cast<std::string>(max_lines_))));
+    user_cmd(os,
+             CtsApi::to_string(CtsApi::file(pathToNode_, toString(file_), ecf::convert_to<std::string>(max_lines_))));
 }
 void CFileCmd::print_only(std::string& os) const {
-    os += CtsApi::to_string(CtsApi::file(pathToNode_, toString(file_), boost::lexical_cast<std::string>(max_lines_)));
+    os += CtsApi::to_string(CtsApi::file(pathToNode_, toString(file_), ecf::convert_to<std::string>(max_lines_)));
 }
 
 STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {

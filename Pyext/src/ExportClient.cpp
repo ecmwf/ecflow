@@ -12,6 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
 #include <algorithm> // for std::transform
 
 #include <boost/algorithm/string.hpp>
@@ -21,6 +22,7 @@
 #include "BoostPythonUtil.hpp"
 #include "ClientDoc.hpp"
 #include "ClientInvoker.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "NState.hpp"
@@ -38,7 +40,7 @@ namespace bp = boost::python;
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
 void set_host_port(ClientInvoker* self, const std::string& host, int port) {
-    self->set_host_port(host, boost::lexical_cast<std::string>(port));
+    self->set_host_port(host, ecf::convert_to<std::string>(port));
 }
 
 std::string version(ClientInvoker* self) {
@@ -375,7 +377,7 @@ void alter_sort(ClientInvoker* self,
 }
 
 void set_child_pid(ClientInvoker* self, int pid) {
-    self->set_child_pid(boost::lexical_cast<std::string>(pid));
+    self->set_child_pid(ecf::convert_to<std::string>(pid));
 }
 
 void set_child_init_add_vars(ClientInvoker* self, const bp::dict& dict) {

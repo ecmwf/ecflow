@@ -17,8 +17,7 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
+#include "Converter.hpp"
 #include "Ecf.hpp"
 #include "Extract.hpp"
 #include "Indentor.hpp"
@@ -62,7 +61,7 @@ void QueueAttr::print(std::string& os) const {
     write(os);
     if (!PrintStyle::defsStyle()) {
         os += " # ";
-        os += boost::lexical_cast<std::string>(currentIndex_);
+        os += ecf::convert_to<std::string>(currentIndex_);
         for (auto i : state_vec_) {
             os += " ";
             os += NState::toString(i);
@@ -93,9 +92,9 @@ std::string QueueAttr::value() const {
 int QueueAttr::index_or_value() const {
     if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theQueue_.size())) {
         try {
-            return boost::lexical_cast<int>(theQueue_[currentIndex_]);
+            return ecf::convert_to<int>(theQueue_[currentIndex_]);
         }
-        catch (boost::bad_lexical_cast&) {
+        catch (ecf::bad_conversion&) {
             // Ignore and return currentIndex_
         }
     }
@@ -165,7 +164,7 @@ std::string QueueAttr::no_of_aborted() const {
             count++;
     }
     if (count != 0)
-        return boost::lexical_cast<std::string>(count);
+        return ecf::convert_to<std::string>(count);
     return std::string();
 }
 

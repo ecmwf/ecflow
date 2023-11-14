@@ -14,11 +14,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
+#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Extract.hpp"
@@ -66,7 +65,7 @@ std::string ForceCmd::print_short() const {
 
     if (paths_.size() > 1) {
         os += " : truncated : ";
-        os += boost::lexical_cast<std::string>(paths_.size() - 1);
+        os += ecf::convert_to<std::string>(paths_.size() - 1);
         os += " paths *not* shown";
     }
     return os;

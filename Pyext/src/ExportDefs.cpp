@@ -13,12 +13,14 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // file deepcode ignore CppConstantBinaryExpression: <comment the reason here>
+
 #include <stdexcept>
 
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 
 #include "BoostPythonUtil.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DefsDoc.hpp"
 #include "Edit.hpp"
@@ -143,7 +145,7 @@ defs_ptr add_variable(defs_ptr self, const std::string& name, const std::string&
     return self;
 }
 defs_ptr add_variable_int(defs_ptr self, const std::string& name, int value) {
-    self->set_server().add_or_update_user_variables(name, boost::lexical_cast<std::string>(value));
+    self->set_server().add_or_update_user_variables(name, ecf::convert_to<std::string>(value));
     return self;
 }
 defs_ptr add_variable_var(defs_ptr self, const Variable& var) {

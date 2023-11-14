@@ -13,6 +13,7 @@
 
 #include "ClientInvoker.hpp"
 #include "CommandLine.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
@@ -235,7 +236,7 @@ void ServerComThread::run() {
                     if (maxLineNum_ < 0)
                         ci_->file(nodePath_, params_["clientPar"]);
                     else
-                        ci_->file(nodePath_, params_["clientPar"], boost::lexical_cast<std::string>(maxLineNum_));
+                        ci_->file(nodePath_, params_["clientPar"], ecf::convert_to<std::string>(maxLineNum_));
 
                     break;
                 }

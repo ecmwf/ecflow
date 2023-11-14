@@ -17,6 +17,7 @@
 #include <boost/program_options.hpp>
 
 #include "ApiV1.hpp"
+#include "Converter.hpp"
 #include "JSON.hpp"
 #include "Options.hpp"
 
@@ -96,7 +97,7 @@ void HttpServer::parse_args(int argc, char** argv) {
         opts.no_ssl = true;
 
     setenv("ECF_HOST", opts.ecflow_host.c_str(), 1);
-    setenv("ECF_PORT", std::to_string(opts.ecflow_port).c_str(), 1);
+    setenv("ECF_PORT", ecf::convert_to<std::string>(opts.ecflow_port).c_str(), 1);
     // Unset these, otherwise ClientInvoker will automatically
     // try to use them
     unsetenv("ECF_PASSWD");
@@ -197,7 +198,7 @@ void start_server(httplib::Server& http_server) {
     try {
         bool ret = http_server.listen("0.0.0.0", opts.port);
         if (ret == false) {
-            throw std::runtime_error("Failed to bind to port " + std::to_string(opts.port));
+            throw std::runtime_error("Failed to bind to port " + ecf::convert_to<std::string>(opts.port));
         }
     }
     catch (const std::exception& e) {

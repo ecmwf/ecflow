@@ -13,18 +13,19 @@
 // Description : This is used to INVOKE a SINGLE test.
 //               Making it easier for Easier for debugging and development
 //============================================================================
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #define BOOST_TEST_MODULE TEST_ZOMBIES
 #include <boost/test/included/unit_test.hpp>
 
 #include "AssertTimer.hpp"
 #include "Child.hpp"
+#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DurationTimer.hpp"
 #include "Family.hpp"
@@ -470,7 +471,7 @@ static void populate_defs(Defs& theDefs, const std::string& suite_name) {
     suite->addVariable(Variable("SLEEPTIME", "5")); // sleep for longer than normal to allow for creation of zombies
     family_ptr family = suite->add_family("f");
     for (int i = 0; i < NUM_OF_TASKS; i++) {
-        family->add_task("t" + boost::lexical_cast<std::string>(i));
+        family->add_task("t" + ecf::convert_to<std::string>(i));
     }
     suite->add_variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_");
 }

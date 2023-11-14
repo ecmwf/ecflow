@@ -19,8 +19,8 @@
 #include <stdexcept>
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 
+#include "Converter.hpp"
 #include "DefsDelta.hpp"
 #include "Ecf.hpp"
 #include "EcfFile.hpp"
@@ -209,7 +209,7 @@ void Submittable::write_state(std::string& ret, bool& added_comment_char) const 
     if (tryNo_ != 0) {
         add_comment_char(ret, added_comment_char);
         ret += " try:";
-        ret += boost::lexical_cast<std::string>(tryNo_);
+        ret += ecf::convert_to<std::string>(tryNo_);
     }
     Node::write_state(ret, added_comment_char);
 }
@@ -305,9 +305,9 @@ bool Submittable::operator==(const Submittable& rhs) const {
 
 string Submittable::tryNo() const {
     try {
-        return boost::lexical_cast<string>(tryNo_);
+        return ecf::convert_to<std::string>(tryNo_);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
     }
 
     LOG_ASSERT(false, "Submittable::tryNo() corrupt?");
