@@ -24,6 +24,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/asio.hpp>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
+
 class ServerEnvironment;
 class BaseServer;
 
@@ -61,6 +65,43 @@ public:
     /// CheckPt::ALWAYS  - will save immediately, may cause performance issues with large Node trees
     void saveIfAllowed();
 
+    /**
+     * Stores a set of data in the current file location, ensuring a backup file retains the previous version.
+     *
+     * @tparam STORE the type of the function that stores the data
+     * @param current the file path to the current data, which will become the backup
+     * @param backup the file path to the previous backup, to be discarded
+     * @param store the function that actually performs the storage
+     */
+    template <typename STORE>
+    static void storeWithBackup(const fs::path& current, const fs::path& backup, STORE store) {
+        // 1. Save the Definitions to a temporary CheckPoint file
+        //
+        // In case an issue occurs while saving the CheckPoint file (e.g. thrown
+        // exception, or server crash), the procedure is always interrupted without
+        // changes to the current+old CheckPoint files in order to facilitate recovery.
+        //
+        fs::path temporary = fs::unique_path(current.string() + "%%%%-%%%%-%%%%-%%%%");
+        store(temporary.string());
+
+        // 2. Backup the current CheckPoint files
+        //
+        // Important: The current checkpoint is only backed up if it exists
+        // and has size greater than zero bytes. This approach avoid backing up
+        // empty files, resulting from a full file system, and overriding relevant
+        // old content that might be otherwise available.
+        //
+        // The backup effectively replaces the old with the current CheckPoint file.
+        //
+        if (fs::exists(current) && fs::file_size(current) > 0) {
+            fs::remove(backup);
+            fs::rename(current, backup);
+        }
+
+        // 3. Promote the temporary to current CheckPoint file
+        fs::rename(temporary, current);
+    }
+
 private:
     /// save the node tree in the server to a checkPt file.
     /// this is controlled by the configuration. If the configuration does not
@@ -84,4 +125,5 @@ private:
     mutable unsigned int state_change_no_;  // detect state change in defs
     mutable unsigned int modify_change_no_; // detect state change in defs
 };
+
 #endif

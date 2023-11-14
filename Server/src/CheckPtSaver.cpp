@@ -99,28 +99,20 @@ void CheckPtSaver::terminate() {
 }
 
 bool CheckPtSaver::explicitSave(bool from_server) const {
-    bool ret = true;
-
     try {
 #ifdef DEBUG_CHECKPT
         std::cout << "      CheckPtSaver::explicitSave() Saving checkpt file " << serverEnv_->checkPtFilename() << "\n";
 #endif
-        // Time how long we take to checkpt, Help to recognise *SLOW* disk, which can *AFFECT* server performance
-        DurationTimer durationTimer;
+        // In order to detect *SLOW* operations (i.e. disk related), which *AFFECT* server performance,
+        // the following timer measures how long we take to store the CheckPoint file.
+        // After the Definitions are stored, if a configured warning threshold is passed a warning is issues.
+        DurationTimer timer;
 
-        // Backup checkpoint file if it exists & is non zero
-        // Avoid an empty file as a backup file, could results from a full file system
-        // i.e move ecf_checkpt_file --> ecf_backup_checkpt_file
         fs::path checkPtFile(serverEnv_->checkPtFilename());
-        if (fs::exists(checkPtFile) && fs::file_size(checkPtFile) != 0) {
-
-            fs::path oldCheckPtFile(serverEnv_->oldCheckPtFilename());
-            fs::remove(oldCheckPtFile);
-            fs::rename(checkPtFile, oldCheckPtFile);
-        }
-
-        // write to ecf_checkpt_file, if file system is full this could result in an empty file. ?
-        server_->defs_->save_as_checkpt(serverEnv_->checkPtFilename());
+        fs::path oldCheckPtFile(serverEnv_->oldCheckPtFilename());
+        CheckPtSaver::storeWithBackup(checkPtFile, oldCheckPtFile, [&](const fs::path& file_path) {
+            server_->defs_->save_as_checkpt(file_path.string());
+        });
 
         state_change_no_  = Ecf::state_change_no();  // For periodic update only save checkPt if it has changed
         modify_change_no_ = Ecf::modify_change_no(); // For periodic update only save checkPt if it has changed
@@ -131,16 +123,16 @@ bool CheckPtSaver::explicitSave(bool from_server) const {
             std::string msg = Str::SVR_CMD();
             msg += CtsApi::checkPtDefsArg();
             std::stringstream ss;
-            ss << msg << " in " << durationTimer.duration() << " seconds";
+            ss << msg << " in " << timer.duration() << " seconds";
             log(Log::MSG, ss.str());
         }
 
         /// If Save take longer than checkpt_save_time_alarm, then set a flag on server
         /// So that user can be aware of it.
-        if (static_cast<size_t>(durationTimer.duration()) > server_->serverEnv_.checkpt_save_time_alarm()) {
+        if (static_cast<size_t>(timer.duration()) > server_->serverEnv_.checkpt_save_time_alarm()) {
             server_->defs_->flag().set(ecf::Flag::LATE);
             std::stringstream ss;
-            ss << "Check pt save time(" << durationTimer.duration() << ") is greater than alarm time("
+            ss << "Check pt save time(" << timer.duration() << ") is greater than alarm time("
                << server_->serverEnv_.checkpt_save_time_alarm()
                << "). Excessive save times can interfere with scheduling!";
             log(Log::WAR, ss.str());
@@ -150,15 +142,15 @@ bool CheckPtSaver::explicitSave(bool from_server) const {
 #endif
     }
     catch (std::exception& e) {
-        ret             = false;
         std::string msg = "Could not save checkPoint file! ";
         msg += e.what();
         server_->defs_->flag().set(ecf::Flag::CHECKPT_ERROR);
         server_->defs()->set_server().add_or_update_user_variables("ECF_CHECKPT_ERROR", msg);
         LOG(Log::ERR, msg);
+        return false;
     }
 
-    return ret;
+    return true;
 }
 
 void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error) {
