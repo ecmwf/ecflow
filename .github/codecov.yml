@@ -5,6 +5,6 @@
 # Ignored Paths
 # -------------
 ignore:
-  - "cereal"
-  - "cpp-httplib"
-  - "json"
+  - "3rdparty/cereal"
+  - "3rdparty/cpp-httplib"
+  - "3rdparty/json"
