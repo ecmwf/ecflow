@@ -178,7 +178,7 @@ public:
 
     // Instead of immediate node tree traversal at the end of child command
     // we use 'increment_job_generation_count' to defer job generation to server
-    // The server will will check job generation count at poll time.
+    // The server will check job generation count at poll time.
     // This approach radically reduces the number of times we traverse the node tree
     // and hence improves server throughput.
     void increment_job_generation_count() { job_gen_count_++; }

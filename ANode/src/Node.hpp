@@ -187,12 +187,12 @@ public:
               reset_next_time_slot_(reset_next_time_slot),
               reset_relative_duration_(reset_relative_duration),
               log_state_changes_(log_state_changes) {}
-        Requeue_t requeue_t{FULL};
+        const Requeue_t requeue_t{FULL};
         int clear_suspended_in_child_nodes_{0};
-        bool resetRepeats_{true};
-        bool reset_next_time_slot_{true};
-        bool reset_relative_duration_{true};
-        bool log_state_changes_{true};
+        const bool resetRepeats_{true};
+        const bool reset_next_time_slot_{true};
+        const bool reset_relative_duration_{true};
+        const bool log_state_changes_{true};
     };
     virtual void requeue(Requeue_args&);
 
