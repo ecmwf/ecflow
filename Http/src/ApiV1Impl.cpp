@@ -232,15 +232,15 @@ std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request) {
     return ci;
 }
 
-std::unique_ptr<ClientInvoker> get_client(const ecf::ojson& j) {
-    auto ci = std::make_unique<ClientInvoker>();
+std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ecf::ojson& payload) {
+    auto ci = get_client(request);
 
-    ci->set_child_path(j.at("ECF_NAME").get<std::string>());
-    ci->set_child_password(j.at("ECF_PASS").get<std::string>());
-    ci->set_child_pid(json_type_to_string(j.at("ECF_RID")));
-    ci->set_child_try_no(std::stoi(json_type_to_string(j.at("ECF_TRYNO"))));
-    ci->set_child_timeout(j.value("ECF_TIMEOUT", 86400));
-    ci->set_zombie_child_timeout(j.value("ECF_ZOMBIE_TIMEOUT", 43200));
+    ci->set_child_path(payload.at("ECF_NAME").get<std::string>());
+    ci->set_child_password(payload.at("ECF_PASS").get<std::string>());
+    ci->set_child_pid(json_type_to_string(payload.at("ECF_RID")));
+    ci->set_child_try_no(std::stoi(json_type_to_string(payload.at("ECF_TRYNO"))));
+    ci->set_child_timeout(payload.value("ECF_TIMEOUT", 86400));
+    ci->set_zombie_child_timeout(payload.value("ECF_ZOMBIE_TIMEOUT", 43200));
 
     return ci;
 }
@@ -805,7 +805,8 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
                                       "Invalid action for child command: " + name);
         }
 
-        auto client             = get_client(payload);
+        auto client = get_client_for_tasks(request, payload);
+
         const std::string value = payload.at("value");
 
         if (type == "event") {
@@ -1017,7 +1018,7 @@ ecf::ojson update_node_status(const httplib::Request& request) {
                                       "Invalid action for child command: " + name);
         }
 
-        auto client = get_client(payload);
+        auto client = get_client_for_tasks(request, payload);
 
         if (name == "init") {
             client->child_init();
