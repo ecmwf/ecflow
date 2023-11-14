@@ -1,3 +1,13 @@
+#
+# Copyright 2023- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
+
 ### ecflow python bindings
 # NOTES:
 # 1/ Building multiple python3 versions not supported, since find_python(..) caches variables, Hack: clear cached variable.
@@ -51,13 +61,89 @@ include_directories(
   ../CSim/src
 )
 
+
+# ==============================================================================
+# source files (paths relative to dirs python2/python3)
+# ==============================================================================
+set(srcs
+  # Headers
+  ../src/BoostPythonUtil.hpp
+  ../src/ClientDoc.hpp
+  ../src/DefsDoc.hpp
+  ../src/Edit.hpp
+  ../src/GlossaryDoc.hpp
+  ../src/NodeAttrDoc.hpp
+  ../src/NodeUtil.hpp
+  ../src/Trigger.hpp
+  # Sources
+  ../src/BoostPythonUtil.cpp
+  ../src/ClientDoc.cpp
+  ../src/DefsDoc.cpp
+  ../src/EcfExt.cpp
+  ../src/Edit.cpp
+  ../src/ExportClient.cpp
+  ../src/ExportCore.cpp
+  ../src/ExportDefs.cpp
+  ../src/ExportNode.cpp
+  ../src/ExportNodeAttr.cpp
+  ../src/ExportSuiteAndFamily.cpp
+  ../src/ExportTask.cpp
+  ../src/GlossaryDoc.cpp
+  ../src/NodeAttrDoc.cpp
+  ../src/NodeUtil.cpp
+  ../src/Trigger.cpp
+)
+
+# =====================================================================
+# tests
+# =====================================================================
+set(u_tests
+  py_u_test_add
+  py_u_test_collection
+  py_u_test_cron
+  py_u_test_defs_constructor
+  py_u_test_get_attr
+  py_u_test_manual
+  py_u_test_late
+  py_u_test_replace_node
+  py_u_test_tutorial
+  py_u_TestAddDelete
+  py_u_TestAddDeleteFunc
+  py_u_TestAddNodeFunc
+  py_u_TestAutoAddExtern
+  py_u_TestCopy
+  py_u_TestDefs
+  py_u_TestDefsCheck
+  py_u_TestDerivable
+  py_u_TestEcf
+  py_u_TestError
+  py_u_TestFind
+  py_u_TestFlag
+  py_u_TestGetAllTasks
+  py_u_TestJobGeneration
+  py_u_TestParent
+  py_u_TestRemove
+  py_u_TestRepeatArithmetic
+  py_u_TestSimulator
+  py_u_TestTraversal
+  py_u_TestUserManual
+  py_u_TestWith
+  py_u_sort
+)
+
+set(s_tests
+  s_TestClientApi
+  s_TestPythonChildApi
+)
+
+
 message( STATUS "====================================================================================================================" )
 message( STATUS "PYTHON2" )
 message( STATUS "====================================================================================================================" )
 if(${CMAKE_VERSION} VERSION_LESS "3.12.0") 
   # We only support python2 extension for cmake less 3.12.0
   # cmake 3.12.0 or greater allows multiple boost python libs & hence multiple extensions to be built
-  # Using -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 is not suffcient as the wrong(python2) libs are found
+  # Using -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 is not sufficient as the wrong(python2) libs are found
   ecbuild_find_python( VERSION 2.6 REQUIRED )  
   message( STATUS "  PYTHON_FOUND                      : ${PYTHON_FOUND}" )
   message( STATUS "  PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
@@ -119,10 +205,11 @@ else()
           # cmake 3.15
           # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
           # INTERFACE_LIBRARY targets may only have whitelisted properties."
-          find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR} )
+          set(ECFLOW_BOOST_PYTHON_COMPONENT python${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR})
         else()
-          find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python )
+          set(ECFLOW_BOOST_PYTHON_COMPONENT python)
         endif()
+        find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS ${ECFLOW_BOOST_PYTHON_COMPONENT} )
 
         if (Boost_PYTHON_FOUND OR Boost_PYTHON${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR}_FOUND)
           set(ECF_PYTHON_FOUND "ECF_PYTHON_FOUND")
@@ -159,10 +246,11 @@ else()
       # cmake 3.15
       # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
       # INTERFACE_LIBRARY targets may only have whitelisted properties.
-      find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} )
+      set(ECFLOW_BOOST_PYTHON_COMPONENT python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
     else()
-      find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python3 )
+      set(ECFLOW_BOOST_PYTHON_COMPONENT python3)
     endif()
+    find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS ${ECFLOW_BOOST_PYTHON_COMPONENT} )
     
     if (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND)
       if ( Python3_LIBRARIES )
