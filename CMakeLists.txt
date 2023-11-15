@@ -353,7 +353,6 @@ add_subdirectory( ANode )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
-add_subdirectory( Doc )
 
 if (ENABLE_SERVER)
   add_subdirectory( Server )
