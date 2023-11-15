@@ -1,7 +1,7 @@
 .. _brew:
 
-Brew
-////
+Install from Homebrew
+/////////////////////
 
 
 ecFlow's graphical user interface,
@@ -9,8 +9,8 @@ ecFlow's graphical user interface,
 can be installed on macOS platforms from
 `brew <https://formulae.brew.sh/formula/ecflow-ui>`__ via this command::
 
-    brew install ecflow-ui                                             
+    brew install ecflow-ui
 
 It can then be run via the command::
 
-    ecflow_ui                                                          
+    ecflow_ui

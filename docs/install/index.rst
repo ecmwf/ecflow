@@ -4,5 +4,6 @@ Install
 .. toctree::
     :maxdepth: 1
     
-    brew
-    conda-forge
+    install_from_homebrew
+    install_from_conda-forge
+    build_from_source
