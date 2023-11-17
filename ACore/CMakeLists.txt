@@ -8,13 +8,13 @@
 # nor does it submit to any jurisdiction.
 #
 
-configure_file(ecflow_version.h.in ${CMAKE_BINARY_DIR}/generated/ecflow_version.h)
-configure_file(ecflow_source_build_dir.h.in ${CMAKE_BINARY_DIR}/generated/ecflow_source_build_dir.h)
+configure_file(src/ecflow_version.h.in ${CMAKE_BINARY_DIR}/generated/src/ecflow_version.h)
+configure_file(src/ecflow_source_build_dir.h.in ${CMAKE_BINARY_DIR}/generated/src/ecflow_source_build_dir.h)
 
 set(srcs
   # Headers
-  ${CMAKE_BINARY_DIR}/generated/ecflow_version.h
-  ${CMAKE_BINARY_DIR}/generated/ecflow_source_build_dir.h
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow_version.h
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow_source_build_dir.h
   src/AssertTimer.hpp
   src/Cal.hpp
   src/Calendar.hpp
@@ -101,7 +101,7 @@ ecbuild_add_library(
     ${srcs}
   PUBLIC_INCLUDES
     src
-    ${CMAKE_BINARY_DIR}/generated
+    ${CMAKE_BINARY_DIR}/generated/src
   PUBLIC_LIBS
     cereal::cereal # this needs to be public as it appears in public header files used downstream
     $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
@@ -151,6 +151,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     u_acore
+  LABELS
+    unit nightly
   SOURCES
     ${test_srcs}
   LIBS

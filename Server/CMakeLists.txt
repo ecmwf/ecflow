@@ -95,6 +95,8 @@ SET_TARGET_PROPERTIES(ecflow_server
 ecbuild_add_test(
   TARGET
     u_server
+  LABELS
+    unit nightly
   INCLUDES
     src
   SOURCES

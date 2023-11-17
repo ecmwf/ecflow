@@ -59,6 +59,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     c_csim
+  LABELS
+    integration nightly
   SOURCES
     ${test_srcs}
   LIBS
@@ -73,6 +75,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       c_csim_single
+    LABELS
+      integration nightly
     SOURCES
       test/TestSingleSimulator.cpp
       test/TestUtil.cpp

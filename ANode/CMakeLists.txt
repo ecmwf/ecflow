@@ -228,6 +228,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     u_anode
+  LABELS
+    unit nightly
   SOURCES
     ${test_srcs}
   LIBS
@@ -256,6 +258,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     u_aparser
+  LABELS
+    unit nightly
   SOURCES
     ${test_srcs}
   INCLUDES
@@ -279,6 +283,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       u_anode_stest
+    LABELS
+      unit nightly
     SOURCES
       ${test_srcs}
     LIBS
@@ -304,6 +310,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       perf_aparser
+    LABELS
+      performance nightly
     SOURCES
       ${test_srcs}
     LIBS
@@ -329,6 +337,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       perf_aparser_timer
+    LABELS
+      performance nightly
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
     SOURCES
@@ -350,6 +360,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       perf_aparser_only
+    LABELS
+      performance
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
     SOURCES

@@ -110,7 +110,10 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
     )
 
     ecbuild_add_test(
-      TARGET s_http
+      TARGET
+        s_http
+      LABELS
+        integration nightly
       SOURCES
         ${test_srcs}
       INCLUDES

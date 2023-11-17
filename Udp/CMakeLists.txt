@@ -114,8 +114,12 @@ list(APPEND ${TEST_TARGET}_srcs
 )
 
 ecbuild_add_test(
-  TARGET ${TEST_TARGET}
-  SOURCES ${${TEST_TARGET}_srcs}
+  TARGET
+    ${TEST_TARGET}
+  LABELS
+    integration nightly
+  SOURCES
+    ${${TEST_TARGET}_srcs}
   LIBS
     ${LIB_TARGET}
     libclient
