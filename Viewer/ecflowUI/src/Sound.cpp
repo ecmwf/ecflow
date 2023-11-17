@@ -26,7 +26,7 @@
 
 #include <regex>
 
-#include <boost/algorithm/string/replace.hpp>
+#include "Str.hpp"
 
 Sound* Sound::instance_ = nullptr;
 
@@ -79,8 +79,8 @@ void Sound::play(const std::string& fName, int loopCount) {
     if (currentCmd_.empty()) {}
     else {
         std::string cmd = currentCmd_;
-        boost::replace_first(cmd, "%FILE%", fName);
-        boost::replace_first(cmd, "%REPEAT%", ecf::convert_to<std::string>(loopCount - 1));
+        ecf::algorithm::replace_first(cmd, "%FILE%", fName);
+        ecf::algorithm::replace_first(cmd, "%REPEAT%", ecf::convert_to<std::string>(loopCount - 1));
         if (system(cmd.c_str())) {
             UiLog().dbg() << "Sound::play() could not play sound alert. Command: " << cmd;
         }

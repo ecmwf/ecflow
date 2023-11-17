@@ -10,8 +10,6 @@
 
 #include "VNode.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "AstCollateVNodesVisitor.hpp"
 #include "ConnectState.hpp"
 #include "Converter.hpp"
@@ -19,6 +17,7 @@
 #include "Limit.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
+#include "Str.hpp"
 #include "Suite.hpp"
 #include "TriggerCollector.hpp"
 #include "TriggeredScanner.hpp"
@@ -1234,7 +1233,7 @@ VNode* VServer::find(const std::string& fullPath) {
         return this;
 
     std::vector<std::string> pathVec;
-    boost::split(pathVec, fullPath, boost::is_any_of("/"));
+    ecf::algorithm::split(pathVec, fullPath, "/");
 
     if (pathVec.size() > 0 && pathVec.at(0).empty()) {
         pathVec.erase(pathVec.begin());

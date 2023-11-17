@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
     //   Time for boost::split 1000000 times = 1.18149
     //   Time for Str::split_orig 1000000 times = 1.3015
     //   Time for make_split_iterator::split 1000000 times = 4.1821
-    //   Time for boost::string_view 1000000 times =  0.975816
-    //   Time for boost::string_view(2) 1000000 times = 0.780003
+    //   Time for std::string_view 1000000 times =  0.975816
+    //   Time for std::string_view(2) 1000000 times = 0.780003
 
     std::string line = "This is a long string that is going to be used to test the performance of splitting with "
                        "different Implementations the fastest times wins ";
@@ -207,26 +207,26 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
         // BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
     }
 
-    { // boost::string_view
+    { // std::string_view
         boost::timer::cpu_timer timer;
         for (size_t i = 0; i < times; i++) {
             StringSplitter string_splitter(line);
 
             reconstructed.clear();
             while (!string_splitter.finished()) {
-                boost::string_view sv = string_splitter.next();
+                std::string_view sv = string_splitter.next();
                 reconstructed += std::string(sv.begin(), sv.end());
                 reconstructed += " ";
             }
         }
-        cout << " Time for boost::string_view " << times
+        cout << " Time for std::string_view " << times
              << "            times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
         BOOST_CHECK_MESSAGE(line == reconstructed, "\n'" << line << "'\n'" << reconstructed << "'");
     }
 
-    { // boost::string_view
+    { // std::string_view
         boost::timer::cpu_timer timer;
-        std::vector<boost::string_view> result;
+        std::vector<std::string_view> result;
         for (size_t i = 0; i < times; i++) {
 
             result.clear();
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for boost::string_view(2) " << times
+        cout << " Time for std::string_view(2) " << times
              << "         times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
         BOOST_CHECK_MESSAGE(line == reconstructed, "\n'" << line << "'\n'" << reconstructed << "'");
     }
@@ -251,8 +251,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
     //   Time for boost::split 2001774 times = 1.98556
     //   Time for Str::split_orig 2001774 times = 0.947959
     //   Time for boost::make_split_iterator 2001774 times = 3.921
-    //   Time for boost::string_view 2001774 times = 0.765805
-    //   Time for boost::string_view(2) 2001774 times = 0.752472
+    //   Time for std::string_view 2001774 times = 0.765805
+    //   Time for std::string_view(2) 2001774 times = 0.752472
 
     // Now test performance of splitting with a big DEFS file
     char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR");
@@ -385,17 +385,17 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 string reconstructed;
                 while (!string_splitter.finished()) {
-                    boost::string_view sv = string_splitter.next();
+                    std::string_view sv = string_splitter.next();
                     reconstructed += std::string(sv.begin(), sv.end());
                     reconstructed += " ";
                 }
             }
-            cout << " Time for boost::string_view " << file_contents.size()
+            cout << " Time for std::string_view " << file_contents.size()
                  << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
         }
 
         {
-            std::vector<boost::string_view> result1;
+            std::vector<std::string_view> result1;
             boost::timer::cpu_timer timer;
             for (size_t i = 0; i < file_contents.size(); i++) {
 
@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
                 }
                 result1.clear();
             }
-            cout << " Time for boost::string_view(2) " << file_contents.size()
+            cout << " Time std::string_view(2) " << file_contents.size()
                  << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
         }
     }

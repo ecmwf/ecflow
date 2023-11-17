@@ -9,11 +9,10 @@
 
 #include "ExpandState.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "AbstractNodeView.hpp"
 #include "ExpandStateNode.hpp"
 #include "ServerHandler.hpp"
+#include "Str.hpp"
 #include "TreeNodeModel.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
@@ -288,7 +287,7 @@ ExpandStateNode* ExpandState::find(const std::string& fullPath) {
         return root_;
 
     std::vector<std::string> pathVec;
-    boost::split(pathVec, fullPath, boost::is_any_of("/"));
+    ecf::algorithm::split(pathVec, fullPath, "/");
 
     if (pathVec.size() > 0 && pathVec[0].empty()) {
         pathVec.erase(pathVec.begin());

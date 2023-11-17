@@ -15,8 +15,6 @@
 
 #include "NodePath.hpp"
 
-#include <boost/algorithm/string/trim.hpp>
-
 #include "Str.hpp"
 
 using namespace ecf;
@@ -45,8 +43,8 @@ bool NodePath::extractHostPort(const std::string& path, std::string& host, std::
     host = thePath[0].substr(0, colonPos);
     port = thePath[0].substr(colonPos + 1);
 
-    boost::algorithm::trim(host);
-    boost::algorithm::trim(port);
+    ecf::algorithm::trim(host);
+    ecf::algorithm::trim(port);
     if (host.empty())
         return false;
     if (port.empty())

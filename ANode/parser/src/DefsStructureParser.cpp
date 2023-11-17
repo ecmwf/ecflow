@@ -16,8 +16,6 @@
 
 #include <sstream>
 
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/token_functions.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "Defs.hpp"
@@ -270,7 +268,7 @@ bool DefsStructureParser::semiColonInEditVariable() {
         //    edit A fred;        edit B bill         # valid
         //    edit A 'fred;bill'; edit B 'bill;bill'  # Can't cope with this, will be ONE variable !!!!
         for (auto& i : multi_statements_per_line_vec_) {
-            boost::algorithm::trim(i);
+            ecf::algorithm::trim(i);
             if (i.find("edit") != 0) {
                 return true;
             }

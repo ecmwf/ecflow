@@ -17,9 +17,8 @@
     #include <QtCore5Compat/QRegExp>
 #endif
 
-#include <boost/algorithm/string.hpp>
-
 #include "Sound.hpp"
+#include "Str.hpp"
 #include "UserMessage.hpp"
 #include "ViewerUtil.hpp"
 
@@ -331,7 +330,7 @@ VProperty* VProperty::find(const std::string& fullPath) {
         return this;
 
     std::vector<std::string> pathVec;
-    boost::split(pathVec, fullPath, boost::is_any_of("."));
+    ecf::algorithm::split(pathVec, fullPath, ".");
 
     if (pathVec.size() > 0) {
         if (pathVec.at(0) != strName_)

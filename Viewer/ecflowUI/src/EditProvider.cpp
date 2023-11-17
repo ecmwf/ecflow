@@ -9,10 +9,9 @@
 
 #include "EditProvider.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "NodeFwd.hpp"
 #include "ServerHandler.hpp"
+#include "Str.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
@@ -85,8 +84,8 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
             if (pos != std::string::npos && pos + 1 != it.size()) {
                 std::string name = it.substr(0, pos);
                 std::string val  = it.substr(pos + 1);
-                boost::trim(name);
-                boost::trim(val);
+                ecf::algorithm::trim(name);
+                ecf::algorithm::trim(val);
                 vars.push_back(std::make_pair(name, val));
             }
         }

@@ -16,7 +16,6 @@
 #endif
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <boost/algorithm/string.hpp>
 
 #include "MenuHandler.hpp"
 #include "Node.hpp"
@@ -198,8 +197,6 @@ BaseNodeCondition* NodeExpressionParser::parseWholeExpression(const std::string&
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
-
-    // boost::algorithm::to_lower(expr); // convert to lowercase
 
     int index         = 0;
     int length        = expr.length();

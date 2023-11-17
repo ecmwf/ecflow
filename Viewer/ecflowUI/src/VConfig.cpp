@@ -10,14 +10,13 @@
 
 #include "VConfig.hpp"
 
-#include <QDebug>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
+#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
@@ -403,7 +402,7 @@ bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree&
 
         if (vec.size() >= 1) {
             std::vector<std::string> par;
-            boost::split(par, vec[0], boost::is_any_of(":"));
+            ecf::algorithm::split(par, vec[0], ":");
 
             if (par.size() == 2) {
                 // Update
@@ -489,84 +488,3 @@ bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree&
 
     return hasValue;
 }
-/*
-void VConfig::decodeShowMask()
-{
-
-option<int> show::status32_ (globals::instance(), "show_mask32", 0);
-
-option<int> show::status_ (globals::instance(), "show_mask",
-                             (1<<show::unknown)
-                             |(1<<show::suspended)
-                             |(1<<show::complete)
-                             |(1<<show::queued)
-                             |(1<<show::submitted)
-                             |(1<<show::active)
-                             |(1<<show::aborted)
-                             |(1<<show::time_dependant)
-                             |(1<<show::late_nodes)
-                           //			     |(1<<show::migrated_nodes)
-                             |(1<<show::rerun_tasks)
-                             |(1<<show::nodes_with_messages)
-                             |(1<<show::label)
-                             |(1<<show::meter)
-                             |(1<<show::event)
-                             |(1<<show::repeat)
-                             |(1<<show::time)
-                             |(1<<show::date)
-                             |(1<<show::late)
-                             |(1<<show::inlimit)
-                             |(1<<show::limit)
-                             |(1<<show::trigger)
-                             //	& (~(1<<show::variable))
-                             //	& (~(1<<show::genvar))
-                             |(1<<show::time_icon)
-                             |(1<<show::date_icon)
-                             |(1<<show::late_icon)
-                             |(1<<show::waiting_icon)
-                             |(1<<show::rerun_icon)
-                           // |(1<<show::migrated_icon)
-                             |(1<<show::message_icon)
- // & (~(1<<show::defstatus_icon)) & (~(1<<show::zombie_icon))
-                             );
-
-show::show(int f) : flag_(f) {
-  status_ = status_ & (~(1<<show::variable));
-  status_ = status_ & (~(1<<show::genvar));
-}
-
-show::~show() {}
-
-void show::on()
-{
-  if (flag_ > 31) {
-    status32_ = int(status32_) | (1<<(flag_-32));
-  } else {
-    status_   = int(status_  ) | (1<<(flag_));
-  }
-}
-
-void show::off()
-{
-  if (flag_ == show::all) {
-    status_ = 0xFFFF ; status32_ = 0xFFFF;
-    status32_ = (int) (status32_) & (~(1<<(show::none-32)));
-    status32_ = (int) (status32_) & (~(1<<(show::all -32)));
-  } else if (flag_ == show::none) {
-    status_ = 0; status32_ = 0;
-  } else if (flag_ > 31) {
-    status32_ = int(status32_) & (~(1<<(flag_-32)));
-  } else {
-    status_   = int(status_)   & (~(1<<flag_));
-  }
-}
-
-bool show::wanted()
-{
-  if (flag_ > 31) {
-    return (int(status32_) & (1<<(flag_-32))) != 0;
-  } else {
-    return (int(status_  ) & (1<<flag_))    != 0;
-  }
-
-*/

@@ -12,12 +12,12 @@
 
 #include <sstream>
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
+#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
@@ -48,7 +48,7 @@ std::string VSettingsPath::path(const std::string& key) const {
 }
 
 std::string VSettingsPath::join(const std::string& sep) const {
-    return boost::algorithm::join(path_, sep);
+    return ecf::algorithm::join(path_, sep);
 }
 
 //======================================================

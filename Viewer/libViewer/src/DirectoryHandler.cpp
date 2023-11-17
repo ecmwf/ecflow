@@ -13,7 +13,6 @@
 #include <regex>
 
 #include <QFile>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>

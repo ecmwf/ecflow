@@ -12,10 +12,6 @@
 
 #include <fstream>
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "File.hpp"
 #include "FileWatcher.hpp"
 #include "ServerHandler.hpp"

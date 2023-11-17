@@ -13,7 +13,6 @@
 #include <stdexcept>
 
 #include <QDateTime>
-#include <boost/algorithm/string/predicate.hpp>
 
 #include "EcfFile.hpp"
 #include "ServerHandler.hpp"

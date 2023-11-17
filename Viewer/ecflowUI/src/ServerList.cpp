@@ -17,9 +17,6 @@
 #include <stdexcept>
 
 #include <QTimer>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include "Converter.hpp"
 #include "DirectoryHandler.hpp"
@@ -540,7 +537,7 @@ bool ServerList::load() {
         }
 
         std::vector<std::string> sv;
-        boost::split(sv, line, boost::is_any_of(","));
+        ecf::algorithm::split(sv, line, ",");
 
         bool favourite = false;
         if (sv.size() >= 4)

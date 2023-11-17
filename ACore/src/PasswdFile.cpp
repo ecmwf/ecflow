@@ -17,8 +17,6 @@
 
 #include <iostream>
 
-#include <boost/algorithm/string/trim.hpp>
-
 #include "Converter.hpp"
 #include "File.hpp"
 #include "PasswordEncryption.hpp"
@@ -73,7 +71,7 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
             theLine.erase(comment_pos);
         }
 
-        boost::algorithm::trim(theLine); // remove leading and trailing spaces
+        ecf::algorithm::trim(theLine); // remove leading and trailing spaces
         std::vector<std::string> lineTokens;
         Str::split(theLine, lineTokens);
         if (lineTokens.empty())

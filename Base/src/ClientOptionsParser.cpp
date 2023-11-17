@@ -10,7 +10,7 @@
 
 #include "ClientOptionsParser.hpp"
 
-#include <boost/algorithm/string.hpp>
+#include "Str.hpp"
 
 namespace ecf {
 
@@ -36,7 +36,7 @@ ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsP
     //     1) --alter arg1 arg2 arg3 (arg4) path [path [path [...]]]
     //     2) --alter=arg1 arg2 arg3 (arg4) path [path [path [...]]]
 
-    if (boost::algorithm::starts_with(args[0], "--alter")) {
+    if (ecf::algorithm::starts_with(args[0], "--alter")) {
 
         option_t alter{std::string{"alter"}, {}};
 
