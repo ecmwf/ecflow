@@ -1,7 +1,7 @@
 ############################################################################################
 # cmake options:
 #
-#       -DCMAKE_BUILD_TYPE=Debug|RelWithDebInfo|Release|Production
+#       -DCMAKE_BUILD_TYPE=Debug|RelWithDebInfo|Release
 #       -DCMAKE_INSTALL_PREFIX=/path/to/install
 #
 #       -DCMAKE_MODULE_PATH=/path/to/ecbuild/cmake
