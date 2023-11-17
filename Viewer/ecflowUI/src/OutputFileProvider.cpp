@@ -11,11 +11,6 @@
 
 #include <deque>
 
-#include <QDateTime>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "OutputCache.hpp"
 #include "OutputFileClient.hpp"
 #include "ServerHandler.hpp"

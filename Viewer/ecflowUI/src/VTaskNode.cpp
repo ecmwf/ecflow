@@ -10,8 +10,6 @@
 
 #include "VTaskNode.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "ChangeNotify.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"

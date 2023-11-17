@@ -15,7 +15,6 @@
 
 #include <algorithm> // for std::transform
 
-#include <boost/algorithm/string.hpp>
 #include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>
 

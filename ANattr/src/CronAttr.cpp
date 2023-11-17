@@ -18,7 +18,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 #include <boost/token_functions.hpp>
 #include <boost/tokenizer.hpp>
@@ -668,7 +667,7 @@ std::vector<int> extract_month(size_t& index, const std::vector<std::string>& li
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
         string theIntToken = *beg;
-        boost::algorithm::trim(theIntToken);
+        ecf::algorithm::trim(theIntToken);
         if (theIntToken.empty())
             continue;
 
@@ -704,7 +703,7 @@ void extract_days_of_week(size_t& index,
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
         string theIntToken = *beg;
-        boost::algorithm::trim(theIntToken);
+        ecf::algorithm::trim(theIntToken);
         if (theIntToken.empty())
             continue;
 
@@ -751,7 +750,7 @@ void extract_days_of_month(size_t& index,
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
         string theIntToken = *beg;
-        boost::algorithm::trim(theIntToken);
+        ecf::algorithm::trim(theIntToken);
         if (theIntToken.empty())
             continue;
 

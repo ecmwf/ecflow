@@ -25,6 +25,35 @@
 
 namespace ecf {
 
+namespace algorithm {
+
+template <typename Sequence1, typename Sequence2>
+inline static auto join(const Sequence1& strings, const Sequence2& separator) {
+    return ::boost::algorithm::join(strings, separator);
+}
+
+template <typename Sequence, typename SearchSequence, typename ReplaceSequence>
+inline static auto replace_first(Sequence& input, const SearchSequence& search, const ReplaceSequence& replace) {
+    return ::boost::algorithm::replace_first(input, search, replace);
+}
+
+template <typename ResultSequence, typename Sequence1, typename Sequence2>
+inline static ResultSequence& split(ResultSequence& result, const Sequence1& input, const Sequence2& separators) {
+    return ::boost::algorithm::split(result, input, ::boost::is_any_of(separators));
+}
+
+template <typename Sequence1, typename Sequence2>
+inline static bool starts_with(const Sequence1& input, const Sequence2& pattern) {
+    return ::boost::algorithm::starts_with(input, pattern);
+}
+
+template <typename Sequence>
+inline static void trim(Sequence& input) {
+    ::boost::algorithm::trim(input);
+}
+
+} // namespace algorithm
+
 class Str {
 public:
     static int reserve_4() { return 4; }

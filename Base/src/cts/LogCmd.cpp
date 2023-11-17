@@ -15,8 +15,6 @@
 
 #include <stdexcept>
 
-#include <boost/algorithm/string/trim.hpp>
-
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
@@ -28,7 +26,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 LogCmd::LogCmd(LogApi a, int get_last_n_lines) : api_(a), get_last_n_lines_(get_last_n_lines) {
@@ -48,7 +45,7 @@ LogCmd::LogCmd(const std::string& path)
     // ECFLOW-174, Never get the full log, as this can make server consume to much memory
     //             default taken from get_last_n_lines_default
     // ECFLOW-377, should remove leading/trailing spaces from path
-    boost::algorithm::trim(new_path_);
+    ecf::algorithm::trim(new_path_);
 }
 
 void LogCmd::print(std::string& os) const {
@@ -159,7 +156,7 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const {
                 std::string log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
 
                 // ECFLOW-377 should remove leading/trailing spaces from path
-                boost::algorithm::trim(log_file_name);
+                ecf::algorithm::trim(log_file_name);
 
                 Log::instance()->new_path(log_file_name); // will throw for errors
             }

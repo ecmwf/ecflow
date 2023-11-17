@@ -16,7 +16,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QMetaType>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio/ip/host_name.hpp>
 
 #include "ChangeNotify.hpp"

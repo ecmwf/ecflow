@@ -10,12 +10,12 @@
 #include "VDir.hpp"
 
 #include <QtGlobal>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 
 #include "DirectoryHandler.hpp"
+#include "Str.hpp"
 
 VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode) {
 }
@@ -69,7 +69,7 @@ void VDir::reload() {
     boost::filesystem::directory_iterator it(path), eod;
 
     BOOST_FOREACH (boost::filesystem::path const& p, std::make_pair(it, eod)) {
-        if (is_regular_file(p) && boost::algorithm::starts_with(p.filename().string(), pattern_)) {
+        if (is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
             auto* item  = new VDirItem;
 
             item->name_ = p.filename().string();

@@ -11,7 +11,6 @@
 
 #include <cassert>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
 

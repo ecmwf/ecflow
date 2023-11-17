@@ -20,7 +20,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <sys/stat.h>
 #include <sys/wait.h> // for waitpid
@@ -434,8 +433,8 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,
                 continue;
             string name  = script_lines[i].substr(0, equal_pos);
             string value = script_lines[i].substr(equal_pos + 1);
-            boost::algorithm::trim(name);
-            boost::algorithm::trim(value);
+            ecf::algorithm::trim(name);
+            ecf::algorithm::trim(value);
 
             // std::cout << "   extracted as '" << name << "' = '" << value << "'\n";
             used_variables_as_map.insert(std::make_pair(name, value));

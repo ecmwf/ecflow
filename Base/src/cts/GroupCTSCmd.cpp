@@ -17,8 +17,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include <boost/algorithm/string/trim.hpp>
-
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientOptionsParser.hpp"
@@ -60,7 +58,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
     for (auto aCmd : individualCmdVec) {
         // massage the commands so that, we add -- at the start of each command.
         // This is required by the boost program options.
-        boost::algorithm::trim(aCmd);
+        ecf::algorithm::trim(aCmd);
 
         subCmd.clear();
         if (aCmd.find("--") == std::string::npos)
