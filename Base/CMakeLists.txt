@@ -168,6 +168,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     u_base
+  LABELS
+    unit nightly
   SOURCES
     ${test_srcs}
   INCLUDES
@@ -194,6 +196,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       perf_job_gen
+    LABELS
+      performance
     SOURCES
       ${test_srcs}
     LIBS

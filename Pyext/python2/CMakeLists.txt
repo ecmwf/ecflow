@@ -55,6 +55,8 @@ foreach( test ${u_tests} )
   ecbuild_add_test(
     TARGET
       py2_${test}
+    LABELS
+      python nightly
     TYPE PYTHON
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/../test/${test}.py
@@ -72,6 +74,8 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
     ecbuild_add_test(
       TARGET
         py2_${test}
+      LABELS
+        python nightly
       TYPE PYTHON
       ARGS
         ${CMAKE_CURRENT_SOURCE_DIR}/../test/${test}.py

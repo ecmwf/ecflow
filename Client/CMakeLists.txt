@@ -127,6 +127,8 @@ endif()
 ecbuild_add_test(
   TARGET
     s_client
+  LABELS
+    integration nightly
   SOURCES
     ${test_srcs}
   INCLUDES
@@ -151,6 +153,8 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   ecbuild_add_test(
     TARGET
       perf_test_large_defs
+    LABELS
+      performance
     SOURCES
       # Headers
       test/SCPort.hpp
@@ -177,6 +181,8 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   ecbuild_add_test(
     TARGET
       m_test_migration
+    LABELS
+      migration
     SOURCES
       # Headers
       test/SCPort.hpp

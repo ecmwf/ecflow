@@ -84,6 +84,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     u_anattr
+  LABELS
+    unit nightly
   SOURCES
     ${test_srcs}
   LIBS

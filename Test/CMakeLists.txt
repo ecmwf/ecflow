@@ -76,6 +76,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       s_test
+    LABELS
+      integration nightly
     SOURCES
       ${test_srcs}
     LIBS
@@ -89,6 +91,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       s_test_zombies
+    LABELS
+      integration nightly
     SOURCES
       TestZombies.cpp
     LIBS
@@ -103,6 +107,8 @@ if (ENABLE_ALL_TESTS)
   ecbuild_add_test(
     TARGET
       s_singletest
+    LABELS
+      integration nightly
     SOURCES
       TestSingle.cpp
     LIBS

@@ -151,6 +151,8 @@ set(test_srcs
 ecbuild_add_test(
   TARGET
     u_acore
+  LABELS
+    unit nightly
   SOURCES
     ${test_srcs}
   LIBS
