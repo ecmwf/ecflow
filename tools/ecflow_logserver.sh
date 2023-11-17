@@ -100,10 +100,10 @@ prognum=$((base+username))
 #prognum=35502
 
 PROG=$(which $0)
-#PROG_PATH=$(readlink -f $PROG)
-PROG_PATH=$(readlink $PROG)
-#PATH_NAME=$ecflow_DIR/bin
-PATH_NAME=./
+PROG_PATH=$(readlink -f $PROG)
+PATH_NAME=$ecflow_DIR/bin
+#PROG_PATH=$(readlink $PROG)
+#PATH_NAME=./
 
 export LOGPORT=$prognum
 LOGDIR=$(dirname $LOGFILE)
