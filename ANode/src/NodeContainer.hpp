@@ -70,7 +70,7 @@ public:
     void allChildren(std::vector<node_ptr>&) const override;
 
     node_ptr findImmediateChild(const std::string& name, size_t& child_pos) const override;
-    node_ptr find_immediate_child(const boost::string_view&) const override;
+    node_ptr find_immediate_child(const std::string_view&) const override;
     node_ptr find_node_up_the_tree(const std::string& name) const override;
 
     node_ptr find_relative_node(const std::vector<std::string>& pathToNode) override;

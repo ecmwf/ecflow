@@ -30,8 +30,6 @@
 #include <iosfwd>
 #include <limits>
 
-#include <boost/utility/string_view.hpp>
-
 #include "Aspect.hpp"
 #include "Attr.hpp"
 #include "Child.hpp"
@@ -615,7 +613,7 @@ public:
     bool user_variable_exists(const std::string& name) const;
 
     virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr(); }
-    virtual node_ptr find_immediate_child(const boost::string_view&) const { return node_ptr(); }
+    virtual node_ptr find_immediate_child(const std::string_view&) const { return node_ptr(); }
     virtual std::string find_node_path(const std::string& /*type*/, const std::string& /*name*/) const {
         return std::string();
     }

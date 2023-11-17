@@ -29,7 +29,7 @@ static void
 check(const std::string& line, const StringSplitter& string_splitter, const std::vector<std::string>& expected) {
     std::vector<std::string> result;
     while (!string_splitter.finished()) {
-        boost::string_view ref = string_splitter.next();
+        std::string_view ref = string_splitter.next();
         // std::cout << "ref:'" << ref << "'\n";
         result.emplace_back(ref.begin(), ref.end());
     }
@@ -54,9 +54,9 @@ check(const std::string& line, const StringSplitter& string_splitter, const std:
 
 static void check(const std::string& line, const std::vector<std::string>& expected, const char* delims = " \t") {
     std::vector<std::string> result;
-    std::vector<boost::string_view> result2;
+    std::vector<std::string_view> result2;
     StringSplitter::split2(line, result2, delims);
-    std::transform(result2.begin(), result2.end(), std::back_inserter(result), [](const boost::string_view& sv) {
+    std::transform(result2.begin(), result2.end(), std::back_inserter(result), [](const std::string_view& sv) {
         return std::string(sv.begin(), sv.end());
     });
 

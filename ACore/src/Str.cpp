@@ -282,8 +282,8 @@ void Str::split(const std::string& line, std::vector<std::string>& tokens, const
     //   times = 0.686s wall, (0.690s user + 0.000s system = 0.690s) CPU (100.6%) Time for Str::split_using_string_view
     //   1000000  times = 0.482s wall, (0.480s user + 0.000s system = 0.480s) CPU (99.6%) Time for
     //   make_split_iterator::split 1000000    times = 3.611s wall, (3.610s user + 0.000s system = 3.610s) CPU (100.0%)
-    //   Time for boost::string_view 1000000            times = 0.769s wall, (0.770s user + 0.000s system = 0.770s) CPU
-    //   (100.1%) Time for boost::string_view(2) 1000000         times = 0.688s wall, (0.690s user + 0.000s system =
+    //   Time for std::string_view 1000000            times = 0.769s wall, (0.770s user + 0.000s system = 0.770s) CPU
+    //   (100.1%) Time for std::string_view(2) 1000000         times = 0.688s wall, (0.690s user + 0.000s system =
     //   0.690s) CPU (100.3%)
     //  ACore:: ...test_str_split_perf_with_file
     //   This test will split each line in file ${ECF_TEST_DEFS_DIR}vsms2.31415.def
@@ -295,9 +295,9 @@ void Str::split(const std::string& line, std::vector<std::string>& tokens, const
     //   (0.500s user + 0.000s system = 0.500s) CPU (99.7%) Time for Str::split_using_string_view 2001774  times =
     //   0.489s wall, (0.490s user + 0.000s system = 0.490s) CPU (100.3%) Time for Str::split_using_string_view2 2001774
     //   times = 0.639s wall, (0.630s user + 0.000s system = 0.630s) CPU (98.6%) Time for boost::make_split_iterator
-    //   2001774    times = 3.338s wall, (3.340s user + 0.000s system = 3.340s) CPU (100.1%) Time for boost::string_view
+    //   2001774    times = 3.338s wall, (3.340s user + 0.000s system = 3.340s) CPU (100.1%) Time for std::string_view
     //   2001774            times = 0.599s wall, (0.600s user + 0.000s system = 0.600s) CPU (100.1%) Time for
-    //   boost::string_view(2) 2001774         times = 0.696s wall, (0.700s user + 0.000s system = 0.700s) CPU (100.6%)
+    //   std::string_view(2) 2001774         times = 0.696s wall, (0.700s user + 0.000s system = 0.700s) CPU (100.6%)
 }
 
 void Str::split_orig(const std::string& line, std::vector<std::string>& tokens, const std::string& delimiters) {
@@ -331,9 +331,7 @@ void Str::split_orig1(const std::string& line, std::vector<std::string>& tokens,
     }
 }
 
-void Str::split_using_string_view(boost::string_view strv,
-                                  std::vector<std::string>& output,
-                                  boost::string_view delims) {
+void Str::split_using_string_view(std::string_view strv, std::vector<std::string>& output, std::string_view delims) {
     // Uses pointers
     for (auto first = strv.data(), second = strv.data(), last = first + strv.size(); second != last && first != last;
          first = second + 1) {
@@ -344,9 +342,7 @@ void Str::split_using_string_view(boost::string_view strv,
     }
 }
 
-void Str::split_using_string_view2(boost::string_view strv,
-                                   std::vector<std::string>& output,
-                                   boost::string_view delims) {
+void Str::split_using_string_view2(std::string_view strv, std::vector<std::string>& output, std::string_view delims) {
     size_t first     = 0;
 
     size_t strv_size = strv.size();
@@ -354,18 +350,18 @@ void Str::split_using_string_view2(boost::string_view strv,
         const auto second = strv.find_first_of(delims, first);
 
         if (first != second) {
-            boost::string_view ref = strv.substr(first, second - first);
+            std::string_view ref = strv.substr(first, second - first);
             output.emplace_back(ref.begin(), ref.end());
         }
 
-        if (second == boost::string_view::npos)
+        if (second == std::string_view::npos)
             break;
 
         first = second + 1;
     }
 }
 
-bool Str::get_token(boost::string_view str, size_t pos, std::string& token, boost::string_view delims) {
+bool Str::get_token(std::string_view str, size_t pos, std::string& token, std::string_view delims) {
     //   Time for StringSplitter::get_token 250000 times = 1.457s wall, (1.460s user + 0.000s system = 1.460s) CPU
     //   (100.2%) Time for Str::get_token            250000 times = 0.566s wall, (0.560s user + 0.000s system = 0.560s)
     //   CPU (99.0%) Time for Str::get_token2           250000 times = 0.668s wall, (0.670s user + 0.000s system =
@@ -395,7 +391,7 @@ bool Str::get_token(boost::string_view str, size_t pos, std::string& token, boos
     return false;
 }
 
-bool Str::get_token2(boost::string_view strv, size_t pos, std::string& token, boost::string_view delims) {
+bool Str::get_token2(std::string_view strv, size_t pos, std::string& token, std::string_view delims) {
     size_t current_pos = 0;
     size_t first       = 0;
     while (first < strv.size()) {
@@ -403,14 +399,14 @@ bool Str::get_token2(boost::string_view strv, size_t pos, std::string& token, bo
 
         if (first != second) {
             if (current_pos == pos) {
-                boost::string_view ref = strv.substr(first, second - first);
-                token                  = std::string(ref.begin(), ref.end());
+                std::string_view ref = strv.substr(first, second - first);
+                token                = std::string(ref.begin(), ref.end());
                 return true;
             }
             current_pos++;
         }
 
-        if (second == boost::string_view::npos)
+        if (second == std::string_view::npos)
             break;
 
         first = second + 1;
@@ -418,7 +414,7 @@ bool Str::get_token2(boost::string_view strv, size_t pos, std::string& token, bo
     return false;
 }
 
-bool Str::get_token3(boost::string_view str, size_t pos, std::string& token, boost::string_view delims) {
+bool Str::get_token3(std::string_view str, size_t pos, std::string& token, std::string_view delims) {
     size_t current_pos = 0;
     for (auto first = str.data(), second = str.data(), last = first + str.size(); second != last && first != last;
          first = second + 1) {

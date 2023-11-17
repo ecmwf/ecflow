@@ -989,7 +989,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
     bool first = false;
     StringSplitter string_splitter(pathToNode, Str::PATH_SEPERATOR());
     while (!string_splitter.finished()) {
-        boost::string_view path_token = string_splitter.next();
+        std::string_view path_token = string_splitter.next();
         // std::cout << "path_token:'" << path_token << "'  last = " << string_splitter.last() << "\n";
         if (!first) {
             for (const auto& suite : suiteVec_) {

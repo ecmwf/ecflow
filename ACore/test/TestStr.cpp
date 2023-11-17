@@ -153,9 +153,8 @@ check(const std::string& line, const std::vector<std::string>& result, const std
     }
 }
 
-static void check(const std::string& line,
-                  const std::vector<boost::string_view>& result2,
-                  const std::vector<std::string>& expected) {
+static void
+check(const std::string& line, const std::vector<std::string_view>& result2, const std::vector<std::string>& expected) {
     std::vector<std::string> result;
     for (auto ref : result2) {
         result.emplace_back(ref.begin(), ref.end());
@@ -175,7 +174,7 @@ static void check(const std::string& line,
 
 static void check_splitters(const std::string& line, const std::vector<std::string>& expected) {
     std::vector<std::string> result, result1, result2, result3;
-    std::vector<boost::string_view> result4;
+    std::vector<std::string_view> result4;
 
     Str::split_orig(line, result);
     check(line, result, expected);
