@@ -21,12 +21,12 @@
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs
 class JobCreationCtrl : public std::enable_shared_from_this<JobCreationCtrl> {
-private:
-    JobCreationCtrl(const JobCreationCtrl&)                  = delete;
-    const JobCreationCtrl& operator=(const JobCreationCtrl&) = delete;
-
 public:
-    JobCreationCtrl() = default;
+    JobCreationCtrl()                                  = default;
+    JobCreationCtrl(const JobCreationCtrl&)            = delete;
+    ~JobCreationCtrl()                                 = default;
+
+    JobCreationCtrl& operator=(const JobCreationCtrl&) = delete;
 
     void set_node_path(const std::string& absNodePath) { absNodePath_ = absNodePath; }
     const std::string& node_path() const { return absNodePath_; }

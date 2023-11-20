@@ -13,7 +13,6 @@
 
 #include <iostream>
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
@@ -22,8 +21,10 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 
-class InvokeServer : private boost::noncopyable {
+class InvokeServer {
 public:
+    InvokeServer()                    = delete;
+    InvokeServer(const InvokeServer&) = delete;
     explicit InvokeServer(const std::string& msg,
                           const std::string& port                      = ecf::Str::DEFAULT_PORT_NUMBER(),
                           bool disable_job_generation                  = false,
@@ -86,6 +87,8 @@ public:
                   remove_log_file_after_server_exit_);
         }
     }
+
+    InvokeServer& operator=(const InvokeServer&) = delete;
 
     const std::string& port() const { return port_; }
     const std::string& host() const {
@@ -180,7 +183,6 @@ private:
     }
 
 private:
-    InvokeServer(const InvokeServer&) = delete;
     std::string port_;
     std::string host_;
     ecf::Host host_name_;

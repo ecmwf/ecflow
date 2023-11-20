@@ -13,8 +13,6 @@
 
 #include <string>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/node/NodeFwd.hpp"
 
 ///
@@ -22,10 +20,17 @@
 /// \note Placed in this category, since the server does not need to link with it.
 ///
 
-class UrlCmd : private boost::noncopyable {
+class UrlCmd {
 public:
+    UrlCmd()              = delete;
+    UrlCmd(const UrlCmd&) = delete;
+    UrlCmd(UrlCmd&&)      = delete;
+
     /// Will throw std::runtime_error if defs or node path is not correct
     UrlCmd(defs_ptr defs, const std::string& absNodePath);
+
+    UrlCmd& operator=(const UrlCmd&) = delete;
+    UrlCmd& operator=(UrlCmd&&)      = delete;
 
     /// Will throw std::runtime_error if url cannot be formed
     std::string getUrl() const;

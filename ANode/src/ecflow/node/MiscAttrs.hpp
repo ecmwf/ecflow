@@ -11,20 +11,20 @@
 #ifndef ecflow_node_MiscAttrs_HPP
 #define ecflow_node_MiscAttrs_HPP
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Node.hpp"
 
-class MiscAttrs : private boost::noncopyable {
+class MiscAttrs {
 public:
-    explicit MiscAttrs(Node* node) : node_(node) {}
-    MiscAttrs(const MiscAttrs& rhs);
     MiscAttrs() = default;
+    MiscAttrs(const MiscAttrs& rhs);
+    explicit MiscAttrs(Node* node) : node_(node) {}
     ~MiscAttrs();
+
+    MiscAttrs& operator=(const MiscAttrs&) = delete;
 
     // needed by node serialisation
     void set_node(Node* n);

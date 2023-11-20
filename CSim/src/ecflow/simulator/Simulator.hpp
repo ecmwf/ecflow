@@ -15,8 +15,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/core/PrintStyle.hpp"
 
 class QueueAttr;
@@ -32,7 +30,7 @@ namespace ecf {
 //       c/ Tells you about any deadlocks, ie if suite does not complete
 //       d/ Will simulate for both real and hybrid clocks
 //       e/ Simulation will by default run for a year. Should really use start/end clock for accurate simulations
-class Simulator : private boost::noncopyable {
+class Simulator {
 public:
     // For deterministic results simulate using clock(start) and endclock(finish)
     // Otherwise default to run simulation for:
@@ -43,6 +41,8 @@ public:
     //    cron          // 1 year
     //    repeat        // 1 year
     Simulator();
+    Simulator(const Simulator&)            = delete;
+    Simulator& operator=(const Simulator&) = delete;
 
     /// return true if all ok else returns false;
     bool run(Defs&, const std::string& defs_filename, std::string& errorMsg, bool do_checks = true) const;

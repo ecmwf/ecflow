@@ -10,7 +10,6 @@
 
 #include <algorithm> // for std::transform
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>
 
 #include "ecflow/base/WhyCmd.hpp"

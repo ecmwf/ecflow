@@ -11,15 +11,17 @@
 #ifndef ecflow_python_ClientDoc_HPP
 #define ecflow_python_ClientDoc_HPP
 
-#include <boost/core/noncopyable.hpp>
-
 // ===========================================================================
 // IMPORTANT: These appear as python doc strings.
 //            Additionally they are auto documented using sphinx-poco
 //            Hence the doc strings use reStructuredText markup.
 // ===========================================================================
-class ClientDoc : private boost::noncopyable {
+class ClientDoc {
 public:
+    ClientDoc()                            = delete;
+    ClientDoc(const ClientDoc&)            = delete;
+    ClientDoc& operator=(const ClientDoc&) = delete;
+
     static const char* class_client();
     static const char* set_host_port();
     static const char* set_retry_connection_period();
@@ -94,9 +96,6 @@ public:
     static const char* set_child_timeout();
     static const char* set_child_init_add_vars();
     static const char* set_child_complete_del_vars();
-
-private:
-    ClientDoc() = default;
 };
 
 #endif /* ecflow_python_ClientDoc_HPP */

@@ -11,8 +11,6 @@
 #ifndef ecflow_base_cts_EditHistoryMgr_HPP
 #define ecflow_base_cts_EditHistoryMgr_HPP
 
-#include <boost/core/noncopyable.hpp>
-
 class ClientToServerCmd;
 class AbstractServer;
 
@@ -24,10 +22,14 @@ class AbstractServer;
 /// return ClientToServerCmd::isWrite() true.
 ///
 
-class EditHistoryMgr : private boost::noncopyable {
+class EditHistoryMgr {
 public:
+    EditHistoryMgr()                      = delete;
+    EditHistoryMgr(const EditHistoryMgr&) = delete;
     EditHistoryMgr(const ClientToServerCmd*, AbstractServer*);
     ~EditHistoryMgr();
+
+    EditHistoryMgr& operator=(const EditHistoryMgr&) = delete;
 
 private:
     const ClientToServerCmd* cts_cmd_;

@@ -19,14 +19,17 @@
 #include <string>
 #include <vector>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/core/Filesystem.hpp"
 
 namespace ecf {
 
-class File : private boost::noncopyable {
+class File {
 public:
+    File()                       = default;
+    File(const File&)            = delete;
+
+    File& operator=(const File&) = delete;
+
     static size_t MAX_LINES();            //  max number of lines, default to 10000
     static const std::string& JOB_EXTN(); // ".job"
     static const std::string& MAN_EXTN(); // ".man"

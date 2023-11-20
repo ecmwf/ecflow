@@ -11,13 +11,16 @@
 #ifndef ecflow_python_NodeUtil_HPP
 #define ecflow_python_NodeUtil_HPP
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>
 
 #include "ecflow/node/NodeFwd.hpp"
 
-class NodeUtil : private boost::noncopyable {
+class NodeUtil {
 public:
+    NodeUtil()                           = delete;
+    NodeUtil(const NodeUtil&)            = delete;
+    NodeUtil& operator=(const NodeUtil&) = delete;
+
     /// any nodes and attributes to be added
     static boost::python::object do_add(node_ptr self, const boost::python::object& arg);
 

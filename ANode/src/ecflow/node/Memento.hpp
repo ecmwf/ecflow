@@ -37,8 +37,6 @@
 /// Hence, we need to ensure we use the minimum number of serializable types.
 ///
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
@@ -54,9 +52,13 @@
 
 // #define DEBUG_MEMENTO 1
 
-class Memento : private boost::noncopyable {
+class Memento {
 public:
+    Memento()               = default;
+    Memento(const Memento&) = delete;
     virtual ~Memento();
+
+    Memento& operator=(const Memento&) = delete;
 
 private:
     /// Applies the mementos to the client side defs. Can raise std::runtime_error

@@ -11,8 +11,6 @@
 #ifndef ecflow_base_cts_DefsCache_HPP
 #define ecflow_base_cts_DefsCache_HPP
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/node/NodeFwd.hpp"
 
 //================================================================================
@@ -43,8 +41,12 @@
 //      client3:  --------------> get---------------> Server
 //                serialise---------<----return cache
 //================================================================================
-class DefsCache : private boost::noncopyable {
+class DefsCache {
 public:
+    DefsCache()                            = delete;
+    DefsCache(const DefsCache&)            = delete;
+    DefsCache& operator=(const DefsCache&) = delete;
+
     // Server side
     static void update_cache_if_state_changed(Defs* defs);
     static void update_cache(Defs* defs);
@@ -57,8 +59,6 @@ private:
     friend class SSyncCmd;
     friend class DefsCmd;
 
-    DefsCache()  = delete;
-    ~DefsCache() = delete;
     static std::string full_server_defs_as_string_;
     static unsigned int state_change_no_;  // detect state change in defs across clients
     static unsigned int modify_change_no_; // detect state change in defs across clients
