@@ -108,7 +108,8 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_singletest
     LABELS
-      integration nightly
+      integration
+      manual
     SOURCES
       TestSingle.cpp
     LIBS
