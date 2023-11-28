@@ -18,10 +18,8 @@
 #include <string>
 
 #include <boost/chrono.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
@@ -39,6 +37,7 @@
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
+#include "TemporaryFile.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -173,15 +172,11 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
 
     {
         // Test time for persisting to defs file only
-#ifdef DEBUG
-        std::string tmpFilename = "tmp_d.def";
-#else
-        std::string tmpFilename = "tmp.def";
-#endif
+        TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
 
         timer.start();
         PrintStyle style(PrintStyle::DEFS);
-        std::ofstream ofs(tmpFilename.c_str());
+        std::ofstream ofs(temporary.path());
         ofs << defs;
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistOnly,
                             "Performance regression, expected < " << expectedTimeForDefsPersistOnly
@@ -189,8 +184,6 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
                                                                   << timer.format(3, Str::cpu_timer_format()));
         cout << " Persist only, time taken                               = " << timer.format(3, Str::cpu_timer_format())
              << " < limit(" << expectedTimeForDefsPersistOnly << ")" << endl;
-
-        std::remove(tmpFilename.c_str());
     }
 
     {
@@ -331,10 +324,6 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     // Explicitly destroy, To keep valgrind happy
     Log::destroy();
     System::destroy();
-
-    // cout << "Printing Defs \n";
-    // PrintStyle style(PrintStyle::DEFS);
-    //	std::cout << defs;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

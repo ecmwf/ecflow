@@ -36,6 +36,7 @@
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
+#include "TemporaryFile.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -133,14 +134,12 @@ int main(int argc, char* argv[]) {
     }
     {
         // Test time for persisting to defs file only
-        std::string tmpFilename = "tmp.def";
+        TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
 
         timer.start();
-        defs.save_as_checkpt(tmpFilename);
+        defs.save_as_checkpt(temporary.path());
         cout << " Save as DEFS checkpoint, time taken            = " << timer.format(3, Str::cpu_timer_format())
              << endl;
-
-        std::remove(tmpFilename.c_str());
     }
 
     {

@@ -246,8 +246,10 @@ target_clangformat(u_anode
 set(test_srcs
   # Headers
   parser/test/PersistHelper.hpp
+  parser/test/TemporaryFile.hpp
   # Sources
   parser/test/PersistHelper.cpp
+  parser/test/TemporaryFile.cpp
   parser/test/TestAutoAddExterns.cpp
   parser/test/TestDefsStructurePersistAndReload.cpp
   parser/test/TestMementoPersistAndReload.cpp
@@ -304,8 +306,10 @@ if (ENABLE_ALL_TESTS)
   set(test_srcs
     # Headers
     parser/test/PersistHelper.hpp
+    parser/test/TemporaryFile.hpp
     # Sources
     parser/test/PersistHelper.cpp
+    parser/test/TemporaryFile.cpp
     parser/test/TestParserPerformance_main.cpp # test entry point
     parser/test/TestSingleDefsFile.cpp
   )
@@ -331,9 +335,11 @@ if (ENABLE_ALL_TESTS)
   set(test_srcs
     # Headers
     parser/test/PersistHelper.hpp
+    parser/test/TemporaryFile.hpp
     # Sources
     parser/test/ParseTimer.cpp
     parser/test/PersistHelper.cpp
+    parser/test/TemporaryFile.cpp
   )
 
   # The following is not technically a test (as it makes no checks),
