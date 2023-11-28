@@ -77,7 +77,8 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_test
     LABELS
-      integration nightly
+      integration
+      nightly
     SOURCES
       ${test_srcs}
     LIBS
@@ -92,7 +93,8 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_test_zombies
     LABELS
-      integration nightly
+      integration
+      nightly
     SOURCES
       TestZombies.cpp
     LIBS

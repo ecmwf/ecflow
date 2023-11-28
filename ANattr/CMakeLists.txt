@@ -85,7 +85,8 @@ ecbuild_add_test(
   TARGET
     u_anattr
   LABELS
-    unit nightly
+    unit
+    nightly
   SOURCES
     ${test_srcs}
   LIBS

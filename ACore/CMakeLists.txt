@@ -152,7 +152,8 @@ ecbuild_add_test(
   TARGET
     u_acore
   LABELS
-    unit nightly
+    unit
+    nightly
   SOURCES
     ${test_srcs}
   LIBS
