@@ -345,7 +345,7 @@ if (ENABLE_ALL_TESTS)
       performance
       nightly
     ARGS
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
+      ${CMAKE_CURRENT_SOURCE_DIR}/parser/test/data/single_defs/mega.def
     SOURCES
       ${test_srcs}
     LIBS
@@ -367,8 +367,9 @@ if (ENABLE_ALL_TESTS)
       perf_aparser_only
     LABELS
       performance
+      nightly
     ARGS
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
+      ${CMAKE_CURRENT_SOURCE_DIR}/parser/test/data/single_defs/mega.def
     SOURCES
       ${test_srcs}
     LIBS
