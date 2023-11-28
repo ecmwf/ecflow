@@ -22,6 +22,7 @@
 #include "Defs.hpp"
 #include "Ecf.hpp"
 #include "File.hpp"
+#include "TemporaryFile.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -34,19 +35,16 @@ bool PersistHelper::test_persist_and_reload(const Defs& theInMemoryDefs,
     errorMsg_.clear();
     file_size_ = 0;
 
-#ifdef DEBUG
-    std::string tmpFilename = "tmp_d.def";
-#else
-    std::string tmpFilename     = "tmp.def";
-#endif
+    TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
+
     {
         // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-        theInMemoryDefs.save_as_filename(tmpFilename, file_type_on_disk);
+        theInMemoryDefs.save_as_filename(temporary.path(), file_type_on_disk);
     }
 
     // Reload the file we just persisted and compare with in memory defs
     Defs savedDef;
-    return reload_from_defs_file(theInMemoryDefs, savedDef, tmpFilename, do_compare);
+    return reload_from_defs_file(theInMemoryDefs, savedDef, temporary.path(), do_compare);
 }
 
 bool PersistHelper::test_defs_checkpt_and_reload(const Defs& theInMemoryDefs, bool do_compare) {
@@ -54,19 +52,16 @@ bool PersistHelper::test_defs_checkpt_and_reload(const Defs& theInMemoryDefs, bo
     errorMsg_.clear();
     file_size_ = 0;
 
-#ifdef DEBUG
-    std::string tmpFilename = "tmp_d.def";
-#else
-    std::string tmpFilename     = "tmp.def";
-#endif
+    TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
+
     {
         // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-        theInMemoryDefs.save_as_checkpt(tmpFilename);
+        theInMemoryDefs.save_as_checkpt(temporary.path());
     }
 
     // Reload the file we just persisted and compare with in memory defs
     Defs savedDef;
-    bool reload_result = reload_from_defs_file(theInMemoryDefs, savedDef, tmpFilename, do_compare);
+    bool reload_result = reload_from_defs_file(theInMemoryDefs, savedDef, temporary.path(), do_compare);
     if (reload_result)
         return savedDef.checkInvariants(errorMsg_);
     return false;
@@ -97,22 +92,19 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 
     DebugEquality debug_equality; // only as affect in DEBUG build
 
-#ifdef DEBUG
-    std::string tmpFilename = "tmp_d.def";
-#else
-    std::string tmpFilename     = "tmp.def";
-#endif
+    TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
+
     {
         // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-        theInMemoryDefs.save_as_checkpt(tmpFilename); // will save edit history
+        theInMemoryDefs.save_as_checkpt(temporary.path()); // will save edit history
     }
 
     Defs reload_strings_def;
     {
         // Open file, and parse as a string.
         std::string defs_as_string;
-        if (!File::open(tmpFilename, defs_as_string)) {
-            errorMsg_ += "Could not file file: " + tmpFilename;
+        if (!File::open(temporary.path(), defs_as_string)) {
+            errorMsg_ += "Could not file file: " + temporary.path();
             return false;
         }
         std::string error_msg, warning;
@@ -127,7 +119,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 
     // Reload the file we just persisted and compare with in memory defs
     Defs reloaded_defs;
-    if (!reload_from_defs_file(theInMemoryDefs, reloaded_defs, tmpFilename)) {
+    if (!reload_from_defs_file(theInMemoryDefs, reloaded_defs, temporary.path())) {
         return false;
     }
     if (!reloaded_defs.checkInvariants(errorMsg_)) {
@@ -271,22 +263,19 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs,
 }
 
 bool PersistHelper::reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs, Defs& reloaded_defs, bool do_compare) {
-    // make sure edit history is saved
-#ifdef DEBUG
-    std::string tmpCheckPt_file = "tmp.check_debug";
-#else
-    std::string tmpCheckPt_file = "tmp.check";
-#endif
-    theInMemoryDefs.cereal_save_as_checkpt(tmpCheckPt_file);
+    // make sure edit history is stored
+    TemporaryFile temporary("tmp.check_%%%%-%%%%-%%%%-%%%%");
 
-    DebugEquality debug_equality; // only as affect in DEBUG build
+    theInMemoryDefs.cereal_save_as_checkpt(temporary.path());
+
+    DebugEquality debug_equality; // only as effect in DEBUG build
 
     try {
         // Parse the file we just persisted and load the defs file into memory.
-        reloaded_defs.cereal_restore_from_checkpt(tmpCheckPt_file);
+        reloaded_defs.cereal_restore_from_checkpt(temporary.path());
 
         if (do_compare) {
-            // Make sure the checkpoint file file we just parsed match's the one we persisted
+            // Make sure the checkpoint the file we just parsed corresponds to the one we stored
             bool match = reloaded_defs == theInMemoryDefs;
             if (!match) {
                 std::stringstream ss;
@@ -322,8 +311,7 @@ bool PersistHelper::reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs,
         errorMsg_ = "PersistHelper::reload_from_cereal_checkpt_file: " + string(e.what());
     }
 
-    file_size_ = fs::file_size(tmpCheckPt_file);
-    std::remove(tmpCheckPt_file.c_str());
+    file_size_ = temporary.size();
 
     return errorMsg_.empty();
 }
