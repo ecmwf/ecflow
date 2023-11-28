@@ -155,6 +155,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       perf_test_large_defs
     LABELS
       performance
+      manual # requires manual definition of env var ECF_TEST_DEFS_DIR
     SOURCES
       # Headers
       test/SCPort.hpp
@@ -183,6 +184,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       m_test_migration
     LABELS
       migration
+      manual # requires command line argument: m_test_migration <>
     SOURCES
       # Headers
       test/SCPort.hpp

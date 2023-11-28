@@ -355,7 +355,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
 }
 
 BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
-    if (getenv("ECF_SSL")) {
+    if (const char* ecf_ssl = getenv("ECF_SSL"); ecf_ssl) {
         load_threshold_ms       = 8000; // 4500;
         begin_threshold_ms      = 800;  // 400;
         sync_full_threshold_s   = 4.5;  // 2.6;
@@ -367,8 +367,13 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
         client_cmds_threshold_s = 950;  // 8.5;
     }
 
-    char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR");
-    if (ecf_test_defs_dir && fs::exists(ecf_test_defs_dir)) {
+    if (const char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR"); !ecf_test_defs_dir) {
+        std::cout << "Ignoring test! Environment variable ECF_TEST_DEFS_DIR is not defined\n";
+    }
+    else if (!fs::exists(ecf_test_defs_dir)) {
+        std::cout << "Ignoring test! Test definitions directory " << ecf_test_defs_dir << " does not exist\n";
+    }
+    else {
         /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
         InvokeServer invokeServer("Client:: ...test_perf_for_large_defs:", SCPort::next());
         BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -376,10 +381,6 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
 
         ClientInvoker theClient(invokeServer.host(), invokeServer.port());
         time_load_and_downloads(theClient, invokeServer.host(), invokeServer.port(), ecf_test_defs_dir);
-    }
-    else {
-        std::cout << "Ingoring test, since directory defined by environment variable(ECF_TEST_DEFS_DIR) "
-                  << ecf_test_defs_dir << " does not exist";
     }
 }
 

@@ -97,7 +97,13 @@ void do_test_migration(ClientInvoker& theClient,
 }
 
 BOOST_FIXTURE_TEST_CASE(test_migration, ArgsFixture) {
-    if (argc == 2 && fs::exists(argv[1])) {
+    if (argc != 2) {
+        std::cout << "Ignoring test! Since test directory is not provided\n";
+    }
+    else if (!fs::exists(argv[1])) {
+        std::cout << "Ignoring test! Since provided test directory does not exist\n";
+    }
+    else {
         /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
         InvokeServer invokeServer("Client:: ...test_migration:", SCPort::next());
         BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -108,9 +114,6 @@ BOOST_FIXTURE_TEST_CASE(test_migration, ArgsFixture) {
         int error_cnt = 0;
         do_test_migration(theClient, invokeServer.host(), invokeServer.port(), argv[1], error_cnt);
         BOOST_REQUIRE_MESSAGE(error_cnt == 0, "Migration test failed " << error_cnt << " times ");
-    }
-    else {
-        std::cout << "Ignoring test, since directory " << argv[1] << " not found\n";
     }
 }
 
