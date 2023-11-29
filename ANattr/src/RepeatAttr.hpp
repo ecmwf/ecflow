@@ -1,24 +1,24 @@
-#ifndef REPEATATTR_HPP_
-#define REPEATATTR_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #51 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Repeat Attribute. Please note that for repeat string, enumeration
-//               the positional index is used for evaluation.
-//
-// Simulation: Simulation must not affect the real job submission in the server.
-//  o Infinite repeats cause problems with simulation, hence we have
-//    a mechanism to stop this, when reset is called, via server this is disabled
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_attribute_RepeatAttr_HPP
+#define ecflow_attribute_RepeatAttr_HPP
+
+///
+/// \brief Repeat Attribute. Please note that for repeat string, enumeration
+///        the positional index is used for evaluation.
+///
+/// Simulation: Simulation must not affect the real job submission in the server.
+///   o Infinite repeats cause problems with simulation, hence we have
+///     a mechanism to stop this, when reset is called, via server this is disabled
+///
 
 #include <cstdint>
 #include <memory>
@@ -600,4 +600,4 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-#endif
+#endif /* ecflow_attribute_RepeatAttr_HPP */

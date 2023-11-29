@@ -1,45 +1,47 @@
-#ifndef ZOMBIE_HPP_
-#define ZOMBIE_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #15 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Holds the zombie structure
-// WE have 3 structures:
-//      Jobs(path,password,process_id)
-//      Complications ONLY init command provides process_id.
-//      Task(path,password,process_id)
-//      Zombie(path,password,process_id)
-// Issues:
-//   At the extreme we can have *2* Jobs running at one go. Typically user commands
-//   that have a force parameter, will create 'user' zombies.
-//   ** the command can be invoked at any time, i.e we could invoke
-//   ** the user command, whilst the task is in SUBMITTED state
-//   ** This will go through and create user zombie. However at this stage we have *NO* process_id
-//   ** since the job has not started. Zombie(path,password)
-//   When the Task init command is called, we get given a process_id.
-//   ** HOWEVER ** need to determine if this is from the real child cmd or from the zombie
-//   ** We search zombie list, and compare zombies, by path and password
-//   ** if a match is found, we update the zombie id.
-//
-//   IMPORTANT:: Automated test:
-//               If a child command provides just path and password, this is *NOT*
-//               enough information to disambiguate a zombie from a real job.
-//               To work around this the job file has been updated to add ECF_RID=$$
-//
-//   IMPORTANT:: For command line interface we just have the task path.
-//               i,e we don't want to expose password, and user will not easily
-//               know the process or remote id. Hence we will make do with the
-//               task path. We just find the first zombie, and act up on it
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_attribute_Zombie_HPP
+#define ecflow_attribute_Zombie_HPP
+
+///
+/// \brief Holds the zombie structure
+///
+/// WE have 3 structures:
+///      Jobs(path,password,process_id)
+///      Complications ONLY init command provides process_id.
+///      Task(path,password,process_id)
+///      Zombie(path,password,process_id)
+/// Issues:
+///   At the extreme we can have *2* Jobs running at one go. Typically user commands
+///   that have a force parameter, will create 'user' zombies.
+///   ** the command can be invoked at any time, i.e we could invoke
+///   ** the user command, whilst the task is in SUBMITTED state
+///   ** This will go through and create user zombie. However at this stage we have *NO* process_id
+///   ** since the job has not started. Zombie(path,password)
+///   When the Task init command is called, we get given a process_id.
+///   ** HOWEVER ** need to determine if this is from the real child cmd or from the zombie
+///   ** We search zombie list, and compare zombies, by path and password
+///   ** if a match is found, we update the zombie id.
+///
+///   IMPORTANT:: Automated test:
+///               If a child command provides just path and password, this is *NOT*
+///               enough information to disambiguate a zombie from a real job.
+///               To work around this the job file has been updated to add ECF_RID=$$
+///
+///   IMPORTANT:: For command line interface we just have the task path.
+///               i,e we don't want to expose password, and user will not easily
+///               know the process or remote id. Hence we will make do with the
+///               task path. We just find the first zombie, and act up on it
+///
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Child.hpp"
@@ -151,4 +153,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const Zombie&);
-#endif
+
+#endif /* ecflow_attribute_Zombie_HPP */
