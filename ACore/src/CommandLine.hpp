@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef CORE_COMMANDLINE_HPP
-#define CORE_COMMANDLINE_HPP
+#ifndef ecflow_core_CommandLine_HPP
+#define ecflow_core_CommandLine_HPP
 
 #include <ostream>
 #include <string>
@@ -65,9 +65,7 @@ public:
             [](std::vector<std::string>& collection, const std::vector<std::string>& tokens) {
                 std::copy(std::begin(tokens), std::end(tokens), std::back_inserter(collection));
             },
-            [](std::vector<std::string>& collection, const std::string& token) {
-                collection.push_back(token);
-            }};
+            [](std::vector<std::string>& collection, const std::string& token) { collection.push_back(token); }};
 
         std::vector<std::string> ts;
         ((push(ts, tokens)), ...);
@@ -110,4 +108,4 @@ private:
     };
 };
 
-#endif
+#endif /* ecflow_core_CommandLine_HPP */

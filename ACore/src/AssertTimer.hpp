@@ -1,20 +1,20 @@
-#ifndef ASSERTTIMER_HPP_
-#define ASSERTTIMER_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Simple class the assert when time constraint not met
-//============================================================================
+#ifndef ecflow_core_AssertTimer_HPP
+#define ecflow_core_AssertTimer_HPP
+
+///
+/// \brief Simple class that asserts when a time constraint is not met
+///
+
 #include "Calendar.hpp"
 
 namespace ecf {
@@ -43,4 +43,4 @@ private:
 
 } // namespace ecf
 
-#endif /* ASSERTTIMER_HPP_ */
+#endif /* ecflow_core_AssertTimer_HPP */

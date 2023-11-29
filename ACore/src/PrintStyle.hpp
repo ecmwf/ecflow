@@ -1,19 +1,15 @@
-#ifndef PRINTSTYLE_HPP_
-#define PRINTSTYLE_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #12 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_PrintStyle_HPP
+#define ecflow_core_PrintStyle_HPP
 
 #include <string>
 
@@ -24,14 +20,20 @@ public:
     //              as such there is no need extensive checking on recreating defs.
     //              i.e valid name, duplicate nodes, etc
     enum Type_t {
-        NOTHING = 0, // Does nothing
-        DEFS =
-            1, // Output the definition that is fully parse-able                       -> On reload *CHECK* everything
-        STATE =
-            2, // Output definition that includes Node state, and AST, fully parseable -> On reload *CHECK* everything
-        MIGRATE =
-            3,  // Output the definition that is fully parse-able & includes state      -> On reload *CHECK* everything
-        NET = 4 // Output the definition that is fully parse-able & includes state      -> On reload relax checking
+        // Does nothing
+        NOTHING = 0,
+
+        // Output the definition that is fully parse-able                       -> On reload *CHECK* everything
+        DEFS = 1,
+
+        // Output definition that includes Node state, and AST, fully parseable -> On reload *CHECK* everything
+        STATE = 2,
+
+        // Output the definition that is fully parse-able & includes state      -> On reload *CHECK* everything
+        MIGRATE = 3,
+
+        // Output the definition that is fully parse-able & includes state      -> On reload relax checking
+        NET = 4
     };
 
     explicit PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t); }
@@ -58,4 +60,4 @@ private:
     Type_t old_style_;
 };
 
-#endif
+#endif /* ecflow_core_PrintStyle_HPP */

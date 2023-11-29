@@ -1,12 +1,15 @@
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_test_TestVersioning_HPP
+#define ecflow_core_test_TestVersioning_HPP
 
 #include "Converter.hpp"
 #include "SerializationTest.hpp"
@@ -28,7 +31,7 @@ private:
     friend class cereal::access;
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version) {
-        ar& hour_;
+        ar & hour_;
     }
 };
 } // namespace version0
@@ -48,9 +51,9 @@ private:
     void serialize(Archive& ar, std::uint32_t const version) {
         // When *loading* the version pertains to loaded version in the data
         // When *saving* the version always pertains to the latest version
-        ar& hour_;
+        ar & hour_;
         if (version > 0)
-            ar& min_;
+            ar & min_;
     }
 };
 } // namespace version_new_data_member
@@ -68,7 +71,7 @@ private:
     friend class cereal::access;
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version) {
-        ar& hours_;
+        ar & hours_;
     }
 };
 } // namespace version_change_dm_name
@@ -91,13 +94,17 @@ private:
         if (version == 0) {
             // Change data member type: int(version0)--->string(version1)
             int the_old_hour = 0;
-            ar& the_old_hour;
+            ar & the_old_hour;
             hour_ = ecf::convert_to<std::string>(the_old_hour);
         }
         else {
-            ar& hour_;
+            ar & hour_;
         }
     }
 };
+
 } // namespace version_change_dm_type
+
 CEREAL_CLASS_VERSION(version_change_dm_type::X, 1)
+
+#endif /* ecflow_core_test_TestVersioning_HPP */
