@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision$
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <fstream>
 #include <iostream>
@@ -47,8 +42,8 @@ using namespace boost::posix_time;
 BOOST_AUTO_TEST_SUITE(ParserTestSuite)
 
 // This test is used to find a task given a path of the form:
-// 	  suite/family/task
-//    suite/family/family/task
+//     suite/family/task
+//     suite/family/family/task
 void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
     BOOST_CHECK_MESSAGE(f == defs.findAbsNode(f->absNodePath()).get(),
                         "Could not find path " << f->absNodePath() << "\n");

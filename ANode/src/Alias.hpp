@@ -1,19 +1,16 @@
-#ifndef ALIAS_HPP_
-#define ALIAS_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #17 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_Alias_HPP
+#define ecflow_node_Alias_HPP
+
 #include "Submittable.hpp"
 
 class Alias final : public Submittable {
@@ -97,4 +94,4 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Alias&);
 
-#endif
+#endif /* ecflow_node_Alias_HPP */

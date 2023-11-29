@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ExternParser.hpp"
 
@@ -22,7 +17,7 @@
 using namespace std;
 
 bool ExternParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
-    //	cout << "line = " << line << "\n";
+    // cout << "line = " << line << "\n";
     if (lineTokens.size() < 2)
         throw std::runtime_error("ExternParser::doParse Invalid extern " + line);
 
@@ -40,7 +35,7 @@ bool ExternParser::doParse(const std::string& line, std::vector<std::string>& li
     //
     // We will not split it up:
 
-    //	cout << "add extern  = '" << lineTokens[1] << "'\n";
+    // cout << "add extern  = '" << lineTokens[1] << "'\n";
     defsfile()->add_extern(lineTokens[1]);
 
     return true;

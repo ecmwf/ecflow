@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_NODE_PARSER_TEST_TEMPORARYFILE_HPP
-#define ECFLOW_NODE_PARSER_TEST_TEMPORARYFILE_HPP
+#ifndef ecflow_node_parser_test_TemporaryFile_HPP
+#define ecflow_node_parser_test_TemporaryFile_HPP
 
 #include <string>
 
@@ -31,4 +31,4 @@ private:
     fs::path path_;
 };
 
-#endif
+#endif /* ecflow_node_parser_test_TemporaryFile_HPP */

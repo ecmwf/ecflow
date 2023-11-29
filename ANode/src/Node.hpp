@@ -1,32 +1,29 @@
-#ifndef NODE_HPP_
-#define NODE_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #251 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-// Node: The node class does NOT serialise the triggers and complete.
-//       These are created on demand in the server.
-//       However when the client code loads the definition file, the Defs::check
-//       will create AST for trigger and complete expressions.
-//       Because:
-//          1/ the AST are created, so that any parser errors can be _reported_ to the user
-//          2/ References in the AST expressions are resolved, and errors flagged.
-//       This information could have been saved, however was _not_.
-//       Because:
-//          1/ problems on AIX
-//          2/ Cut down on IPC load between client/server
-//
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_Node_HPP
+#define ecflow_node_Node_HPP
+
+///
+/// \note The node class does NOT serialise the triggers and complete.
+/// These are created on demand in the server. However when the client code
+/// loads the definition file, the Defs::check will create AST for trigger and
+/// complete expressions, because:
+///  1/ the AST are created, so that any parser errors can be _reported_ to the user
+///  2/ References in the AST expressions are resolved, and errors flagged.
+///
+/// This information could have been saved, however was _not_, because:
+///  1/ problems on AIX
+///  2/ Cut down on IPC load between client/server
+///
+
 #include <iosfwd>
 #include <limits>
 
@@ -55,6 +52,7 @@ class SimulatorVisitor;
 class DefsAnalyserVisitor;
 class FlatAnalyserVisitor;
 } // namespace ecf
+
 namespace ecf {
 class Calendar;
 class NodeTreeVisitor;
@@ -923,4 +921,4 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-#endif
+#endif /* ecflow_node_Node_HPP */

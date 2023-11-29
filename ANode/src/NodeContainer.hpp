@@ -1,20 +1,19 @@
-#ifndef NODE_CONTAINER_HPP_
-#define NODE_CONTAINER_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-//============================================================================
-// Name        : NodeContainer.hpp
-// Author      : Avi
-// Revision    : $Revision: #88 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : A class that holds families and tasks
-//============================================================================
+#ifndef ecflow_node_NodeContainer_HPP
+#define ecflow_node_NodeContainer_HPP
+
+///
+/// \brief The NodeContainer class holds families and tasks
+///
 
 #include <limits>
 
@@ -173,4 +172,4 @@ protected:
     unsigned int add_remove_state_change_no_{0}; // no need to persist
 };
 
-#endif
+#endif /* ecflow_node_NodeContainer_HPP */

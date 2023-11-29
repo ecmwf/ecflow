@@ -1,27 +1,24 @@
-#ifndef EXPR_DUPLICATE_
-#define EXPR_DUPLICATE_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #11 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// =========================================================================
-// For large designs > 90% of triggers are identical.
-// We take advantage of this by using a map to store a *CLONED* ast
-// This saves a huge amount on re-parsing using spirit classic.
-//
-// This cloned  AST is maintained in a static map, hence we need to
-// manage the lifetime, to avoid valgrind complaining.
-// =========================================================================
+#ifndef ecflow_node_ExprDuplicate_HPP
+#define ecflow_node_ExprDuplicate_HPP
+
+///
+/// \brief For large designs > 90% of triggers are identical.
+/// We take advantage of this by using a map to store a *CLONED* ast
+/// This saves a huge amount on re-parsing using spirit classic.
+///
+/// This cloned  AST is maintained in a static map, hence we need to
+/// manage the lifetime, to avoid valgrind complaining.
+///
 
 #include <memory> // for unique_ptr
 #include <string>
@@ -47,4 +44,4 @@ public:
     static void add(const std::string& expr, AstTop*);
 };
 
-#endif
+#endif /* ecflow_node_ExprDuplicate_HPP */

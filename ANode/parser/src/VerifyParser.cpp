@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #11 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VerifyParser.hpp"
 
@@ -44,8 +39,8 @@ bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& li
 
         std::string state    = stateInt.substr(0, colonPos);
         std::string expected = stateInt.substr(colonPos + 1);
-        //		cout << "state = " << state << "\n";
-        //		cout << "expected = " << expected << "\n";
+        // cout << "state = " << state << "\n";
+        // cout << "expected = " << expected << "\n";
 
         if (!NState::isValid(state)) {
             throw std::runtime_error("VerifyParser::doParse: Invalid state :" + line);
