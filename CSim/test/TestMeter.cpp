@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #4 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
@@ -44,13 +39,13 @@ BOOST_AUTO_TEST_CASE(test_meter) {
     cout << "Simulator:: ...test_meter\n";
 
     // suite suite
-    //  clock real <todays date>
-    //	family family
-    //    	task fc
-    //          meter hour 0 240
+    //   clock real <todays date>
+    //   family family
+    //     task fc
+    //       meter hour 0 240
     //       task half
-    //          trigger fc:hour >= 120
-    //   	endfamily
+    //         trigger fc:hour >= 120
+    //   endfamily
     // endsuite
 
     // Initialise clock with todays date  then create a time attribute + minutes

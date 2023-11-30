@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #6 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
@@ -45,11 +40,11 @@ BOOST_AUTO_TEST_CASE(test_today) {
 
     // suite suite
     //   clock real <fixed date>
-    //	family family
-    //    	task t1
-    //       	today <start>  # +1 minute
-    //       	today <start>  # +2 minute
-    //    endfamily
+    //   family family
+    //     task t1
+    //       today <start>  # +1 minute
+    //       today <start>  # +2 minute
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -87,10 +82,10 @@ BOOST_AUTO_TEST_CASE(test_today_time_series) {
 
     // suite suite
     //   clock real <monday>
-    //	family family
-    //    	task t1
-    //          today 00:30 18:59 04:00  # should run 5 times 00:30 4:30 8:30 12:30 16:30
-    //    endfamily
+    //   family family
+    //     task t1
+    //       today 00:30 18:59 04:00  # should run 5 times 00:30 4:30 8:30 12:30 16:30
+    //   endfamily
     // endsuite
 
     Defs theDefs;
@@ -106,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_series) {
 
         task->addToday(TodayAttr(timeSeries));
         task->addVerify(VerifyAttr(NState::COMPLETE, 5));
-        //  	cout << theDefs << "\n";
+        // cout << theDefs << "\n";
     }
 
     Simulator simulator;
@@ -124,12 +119,12 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
 
     // suite suite
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        date  <today date>
-    //        time  <start>
-    //        today <start>
-    //    endfamily
+    //   family family
+    //     task t1
+    //       date  <today date>
+    //       time  <start>
+    //       today <start>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -152,7 +147,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
         task->addToday(ecf::TodayAttr(TimeSlot(time_plus_hour.time_of_day())));
 
         task->addVerify(VerifyAttr(NState::COMPLETE, 1));
-        //  	cout << theDefs << "\n";
+        // cout << theDefs << "\n";
     }
 
     Simulator simulator;
@@ -160,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_today_time_and_date.def"), errorMsg),
                         errorMsg);
 
-    //   cout << theDefs;
+    // cout << theDefs;
 
     // remove generated log file. Comment out to debug
     std::string logFileName = TestUtil::testDataLocation("test_today_time_and_date.def") + ".log";
