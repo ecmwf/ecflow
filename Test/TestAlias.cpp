@@ -1,23 +1,13 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #6 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-//    This test will TEST:
-//       o Alias creation and running
-//       o Alias ordering
-//       o Alias deletion
-//    Will indirectly test the Alias memento's
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
@@ -33,7 +23,6 @@
 #include "DurationTimer.hpp"
 #include "Family.hpp"
 #include "NOrder.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
 #include "Str.hpp"
 #include "Suite.hpp"
@@ -47,6 +36,14 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 namespace fs = boost::filesystem;
+
+///
+///    This test will TEST:
+///       o Alias creation and running
+///       o Alias ordering
+///       o Alias deletion
+///    Will indirectly test the Alias memento's
+///
 
 BOOST_AUTO_TEST_SUITE(TestSingleSuite)
 

@@ -1,27 +1,27 @@
-#ifndef TESTFIXTURE_HPP_
-#define TESTFIXTURE_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This Fixture facilitates the test of client/server on different platforms
-//
-// In order to carry out the test, we must have a common file system.
-// We will use $SCRATCH as this is accessible by both client and server.
-// This means copying over the test data
-//
-// When TextFixture is GLOBAL, then we can't seem to call any of the
-// BOOST_REQUIRE_MESSAGE() macro in constructor/descructor as this causes a crash
-// i.e order of initialisation issues
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_test_harness_TestFixture_HPP
+#define ecflow_test_harness_TestFixture_HPP
+
+///
+/// \brief This Fixture facilitates the test of client/server on different platforms
+///
+/// In order to carry out the test, we must have a common file system.
+/// We will use $SCRATCH as this is accessible by both client and server.
+/// This means copying over the test data
+///
+/// When TextFixture is GLOBAL, then we can't seem to call any of the
+/// BOOST_REQUIRE_MESSAGE() macro in constructor/descructor as this causes a crash
+/// i.e order of initialisation issues
+///
 
 #include <string>
 
@@ -103,4 +103,4 @@ private:
     PrintStyle print_style_;              // by default show state when writing defs to standard out. RAII
 };
 
-#endif
+#endif /* ecflow_test_harness_TestFixture_HPP */

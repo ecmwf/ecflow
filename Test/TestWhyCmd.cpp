@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #27 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
@@ -297,18 +292,18 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
     // Testing for limits requires that we have least some jobs are submitted.
     // we need to kill these jobs, at the end of test.
 
-    //	suite test_why_limit
-    //    limit disk 50
-    //	   family family
-    //          inlimit /suite1:disk 50
-    //	   		task t0
-    //	   		task t1
-    //	   		task t2
-    //	   		task t3
-    //	   		task t4
-    //	   		task t5
-    //	   endfamily
-    //	endsuite
+    // suite test_why_limit
+    //   limit disk 50
+    //   family family
+    //     inlimit /suite1:disk 50
+    //     task t0
+    //     task t1
+    //     task t2
+    //     task t3
+    //     task t4
+    //     task t5
+    //   endfamily
+    // endsuite
 
     Defs theDefs;
     {

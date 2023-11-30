@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #29 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
@@ -48,19 +43,19 @@ BOOST_AUTO_TEST_CASE(test_triggers_and_meters) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_triggers_and_meters
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //	family family
-    //    	task model
-    //         	meter file 0 100 100
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     task model
+    //       meter file 0 100 100
     //       task t0
-    //           trigger model:file ge 10
+    //         trigger model:file ge 10
     //       task t1
-    //           trigger model:file ge 20
+    //         trigger model:file ge 20
     //       task t2
-    //           trigger model:file ge 30
+    //         trigger model:file ge 30
     //       ....
-    //   	endfamily
+    //   endfamily
     // endsuite
     std::string meterName = "file";
     std::string taskName  = "model";
@@ -98,20 +93,20 @@ BOOST_AUTO_TEST_CASE(test_triggers_with_limits) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_triggers_with_limits
-    //  limit limit 10
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
-    //  family family
-    //       inlimit /test_triggers_and_meters:limit 3
-    //       task model
-    //       task t0
-    //       task t1
-    //       task t2
+    //   limit limit 10
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     inlimit /test_triggers_and_meters:limit 3
+    //     task model
+    //     task t0
+    //     task t1
+    //     task t2
     //   endfamily
     //   family other
-    //       trigger /test_triggers_with_limits:limit >1
-    //       task t1
-    //       task t2
+    //     trigger /test_triggers_with_limits:limit >1
+    //     task t1
+    //     task t2
     //   endfamily
     // endsuite
     Defs theDefs;

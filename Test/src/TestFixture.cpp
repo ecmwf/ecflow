@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #77 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This Fixture facilitates the test of client/server on different platforms
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TestFixture.hpp"
 
@@ -51,16 +46,16 @@ namespace fs = boost::filesystem;
 
 // ************************************************************************************************
 // For test purpose the server can be started:
-// 	1/ By this test fixture
+//  1/ By this test fixture
 //  2/ Externally but on the same machine. by defining env variable: export ECF_HOST=localhost
-// 	   WHY? To test for memory leak. (i.e. with valgrind)
+//     WHY? To test for memory leak. (i.e. with valgrind)
 //  3/ Externally but on a different platform. by defining env variable: export ECF_HOST=itanium
 //     In this case we NEED to copy the test data, so that it is
 //     accessible by the client AND server
 //
 //  When invoking the server Externally _MUST_ use   .
-//			./Server/bin/gcc.<version>/debug/server --ecfinterval=2
-//       	The --ecfinterval=2 is _important_ or test will take a long time
+//     ./Server/bin/gcc.<version>/debug/server --ecfinterval=2
+//        The --ecfinterval=2 is _important_ or test will take a long time
 // ************************************************************************************************
 
 // Uncomment to preserve the files for test
