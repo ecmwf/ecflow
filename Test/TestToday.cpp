@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #35 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
@@ -62,13 +57,13 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_today_single_slot
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        today 11.12
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       today 11.12
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -107,13 +102,13 @@ BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_today_relative_time_series
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //  clock real <todays date>
-    //	family family
-    //    	task t1
-    //        today <start> <finish> <incr>
-    //   	endfamily
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   clock real <todays date>
+    //   family family
+    //     task t1
+    //       today <start> <finish> <incr>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -153,12 +148,12 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_today_real_time_series
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //  clock real <todays date>
-    //	family family
-    //    	task t1
-    //        today 10:01 10:07 00:03
-    //   	endfamily
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   clock real <todays date>
+    //   family family
+    //     task t1
+    //       today 10:01 10:07 00:03
+    //   endfamily
     // endsuite
     Defs theDefs;
     {

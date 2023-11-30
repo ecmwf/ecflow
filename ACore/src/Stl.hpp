@@ -1,24 +1,17 @@
-#ifndef STL_HPP_
-#define STL_HPP_
-//============================================================================
-// Name        : stl
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/*****************************************************************************
- * Standard Library Include Files                                            *
- *****************************************************************************/
-#include <algorithm> //for for_each()
+#ifndef ecflow_core_Stl_HPP
+#define ecflow_core_Stl_HPP
+
+#include <algorithm>
 
 namespace ecf {
 /// Helper struct that will aid the deletion of Pointer from a container
@@ -66,4 +59,4 @@ void AssoDeletePtrs(Container& pContainer) {
 }
 } // namespace ecf
 
-#endif /* STL_HPP_ */
+#endif /* ecflow_core_Stl_HPP */

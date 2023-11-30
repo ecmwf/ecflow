@@ -1,19 +1,19 @@
-#ifndef TIMESERIES_HPP_
-#define TIMESERIES_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #57 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : A single or set of times
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_TimeSeries_HPP
+#define ecflow_core_TimeSeries_HPP
+
+///
+/// \brief Represents a set of time instants (possibly just one)
+///
 
 #include <cstdint>
 #include <vector>
@@ -205,6 +205,7 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const TimeSeries*);
 std::ostream& operator<<(std::ostream& os, const TimeSeries&);
+
 } // namespace ecf
 
-#endif
+#endif /* ecflow_core_TimeSeries_HPP */

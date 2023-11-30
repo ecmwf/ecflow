@@ -1,20 +1,21 @@
-#ifndef CONNECTION_HPP_
-#define CONNECTION_HPP_
-//============================================================================
-// Name        : Connection.cpp
-// Author      : Avi
-// Revision    : $Revision: #26 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Serves as the connection between client server
-//               If you change this file then ssl_connection.hpp may also need changing
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_Connection_HPP
+#define ecflow_base_Connection_HPP
+
+///
+/// \brief Serves as the connection between client server
+///
+/// \note If you change this file then ssl_connection.hpp may also need changing
+///
 
 #if defined(HPUX)
     #include <sys/select.h> // hp-ux uses pselect
@@ -217,4 +218,4 @@ private:
 
 typedef std::shared_ptr<connection> connection_ptr;
 
-#endif /* CONNECTION_HPP_ */
+#endif /* ecflow_base_Connection_HPP */

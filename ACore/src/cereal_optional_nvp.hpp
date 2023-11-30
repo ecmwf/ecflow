@@ -1,41 +1,45 @@
-#ifndef cereal_optional_nvp_h_
-#define cereal_optional_nvp_h_
 /*
-The MIT License (MIT)
-Copyright (c) 2017 Yehonatan Ballas
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-/*
-  Example
-
-struct B
-{
-   int x, y, z;
-
-   template <class Archive>
-   void serialize(Archive & ar)
-   {
-      cereal::make_optional_nvp(ar, "x", x);
-      CEREAL_OPTIONAL_NVP(ar, y);
-      CEREAL_OPTIONAL_NVP(ar, z, [this]() {return z != 1; }); // conditionally save
-   }
-};
+ * The MIT License (MIT)
+ * Copyright (c) 2017 Yehonatan Ballas
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
+
+#ifndef ecflow_core_cereal_optional_nvp_HPP
+#define ecflow_core_cereal_optional_nvp_HPP
+
+///
+/// Example
+///
+/// struct B
+/// {
+/// int x, y, z;
+///
+/// template <class Archive>
+/// void serialize(Archive & ar)
+/// {
+///       cereal::make_optional_nvp(ar, "x", x);
+///       CEREAL_OPTIONAL_NVP(ar, y);
+///       CEREAL_OPTIONAL_NVP(ar, z, [this]() {return z != 1; }); // conditionally save
+/// }
+/// };
+///
 
 #include <cereal/cereal.hpp>
 #include <cereal/details/traits.hpp>
@@ -94,4 +98,4 @@ make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
 #define CEREAL_OPTIONAL_NVP_2(ar, T) ::cereal::make_optional_nvp(ar, #T, T)
 #define CEREAL_OPTIONAL_NVP_3(ar, T, P) ::cereal::make_optional_nvp(ar, #T, T, P)
 
-#endif // cereal_optional_nvp_h
+#endif /* ecflow_core_cereal_optional_nvp_HPP */

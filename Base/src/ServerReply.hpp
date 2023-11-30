@@ -1,20 +1,16 @@
-#ifndef SERVER_REPLY_HPP_
-#define SERVER_REPLY_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #18 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_ServerReply_HPP
+#define ecflow_base_ServerReply_HPP
+
 #include "NodeFwd.hpp"
 #include "Stats.hpp"
 #include "Zombie.hpp"
@@ -155,4 +151,5 @@ private:
     bool invalid_argument_{false};             // clear at the start of invoke
     bool eof_{false};                          // clear at the start of invoke
 };
-#endif
+
+#endif /* ecflow_base_ServerReply_HPP */

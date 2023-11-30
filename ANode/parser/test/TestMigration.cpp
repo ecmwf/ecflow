@@ -1,17 +1,12 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision$
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <string>
@@ -221,121 +216,123 @@ BOOST_AUTO_TEST_CASE(test_state_node_attributes) {
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Queue state: failed: " << helper.errorMsg());
     }
-    {{Defs defs;
-    task_ptr task = defs.add_suite("s1")->add_task("t1");
-    Label label("name", "value");
-    label.set_new_value("new  value");
-    task->addLabel(label);
-    //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "Label state: failed: " << helper.errorMsg());
-}
-{
-    Defs defs;
-    suite_ptr suite = defs.add_suite("s1");
-    Label label("name", "value");
-    label.set_new_value("new  value");
-    suite->addLabel(label);
-    //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "Label state: failed: " << helper.errorMsg());
-}
-{
-    Defs defs;
-    suite_ptr suite = defs.add_suite("s1");
-    Label label("name", "value\nvalue");
-    suite->addLabel(label);
-    //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "Label state: failed: " << helper.errorMsg());
-}
-{
-    Defs defs;
-    suite_ptr suite = defs.add_suite("s1");
-    Label label("name", "value\nvalue");
-    label.set_new_value("value\nwith\nmany\nnewlines");
-    suite->addLabel(label);
-    //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "Label state: failed: " << helper.errorMsg());
-}
-}
-{
-    Defs defs;
-    suite_ptr suite = defs.add_suite("s1");
-    task_ptr t1     = suite->add_task("t1");
-    task_ptr t2     = suite->add_task("t2");
-    task_ptr t3     = suite->add_task("t3");
-    task_ptr t4     = suite->add_task("t4");
-    Limit limit("limit", 10);
-    limit.increment(1, t1->absNodePath());
-    limit.increment(1, t2->absNodePath());
-    limit.increment(1, t3->absNodePath());
-    limit.increment(1, t4->absNodePath());
-    suite->addLimit(limit);
-    //       PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "Limit state: failed: " << helper.errorMsg());
-}
-{
-    Defs defs;
-    suite_ptr suite = defs.add_suite("s1");
-    task_ptr t1     = suite->add_task("t1");
-    InLimit inlimit1("limit", "/s1", 10, true); // limit has state when 'limit this node only' is set
-    inlimit1.set_incremented(true);             // the state
-    InLimit inlimit2("limit2", "/s1", 10);
-    t1->addInLimit(inlimit1);
-    t1->addInLimit(inlimit2);
+    {
+        {
+            Defs defs;
+            task_ptr task = defs.add_suite("s1")->add_task("t1");
+            Label label("name", "value");
+            label.set_new_value("new  value");
+            task->addLabel(label);
+            //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+            BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                                "Label state: failed: " << helper.errorMsg());
+        }
+        {
+            Defs defs;
+            suite_ptr suite = defs.add_suite("s1");
+            Label label("name", "value");
+            label.set_new_value("new  value");
+            suite->addLabel(label);
+            //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+            BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                                "Label state: failed: " << helper.errorMsg());
+        }
+        {
+            Defs defs;
+            suite_ptr suite = defs.add_suite("s1");
+            Label label("name", "value\nvalue");
+            suite->addLabel(label);
+            //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+            BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                                "Label state: failed: " << helper.errorMsg());
+        }
+        {
+            Defs defs;
+            suite_ptr suite = defs.add_suite("s1");
+            Label label("name", "value\nvalue");
+            label.set_new_value("value\nwith\nmany\nnewlines");
+            suite->addLabel(label);
+            //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+            BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                                "Label state: failed: " << helper.errorMsg());
+        }
+    }
+    {
+        Defs defs;
+        suite_ptr suite = defs.add_suite("s1");
+        task_ptr t1     = suite->add_task("t1");
+        task_ptr t2     = suite->add_task("t2");
+        task_ptr t3     = suite->add_task("t3");
+        task_ptr t4     = suite->add_task("t4");
+        Limit limit("limit", 10);
+        limit.increment(1, t1->absNodePath());
+        limit.increment(1, t2->absNodePath());
+        limit.increment(1, t3->absNodePath());
+        limit.increment(1, t4->absNodePath());
+        suite->addLimit(limit);
+        //       PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "Limit state: failed: " << helper.errorMsg());
+    }
+    {
+        Defs defs;
+        suite_ptr suite = defs.add_suite("s1");
+        task_ptr t1     = suite->add_task("t1");
+        InLimit inlimit1("limit", "/s1", 10, true); // limit has state when 'limit this node only' is set
+        inlimit1.set_incremented(true);             // the state
+        InLimit inlimit2("limit2", "/s1", 10);
+        t1->addInLimit(inlimit1);
+        t1->addInLimit(inlimit2);
 
-    //       PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "InLimit state: failed: " << helper.errorMsg());
-}
-{
-    Defs defs;
-    suite_ptr suite = defs.add_suite("s1");
-    task_ptr t1     = suite->add_task("t1");
-    task_ptr t2     = suite->add_task("t2");
-    task_ptr t3     = suite->add_task("t3");
-    task_ptr t4     = suite->add_task("t4");
-    task_ptr t5     = suite->add_task("t5");
-    task_ptr t6     = suite->add_task("t6");
+        //       PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "InLimit state: failed: " << helper.errorMsg());
+    }
+    {
+        Defs defs;
+        suite_ptr suite = defs.add_suite("s1");
+        task_ptr t1     = suite->add_task("t1");
+        task_ptr t2     = suite->add_task("t2");
+        task_ptr t3     = suite->add_task("t3");
+        task_ptr t4     = suite->add_task("t4");
+        task_ptr t5     = suite->add_task("t5");
+        task_ptr t6     = suite->add_task("t6");
 
-    std::vector<std::string> stringList;
-    stringList.reserve(3);
-    stringList.emplace_back("20130101");
-    stringList.emplace_back("20130201");
-    stringList.emplace_back("20130301");
+        std::vector<std::string> stringList;
+        stringList.reserve(3);
+        stringList.emplace_back("20130101");
+        stringList.emplace_back("20130201");
+        stringList.emplace_back("20130301");
 
-    RepeatEnumerated rep("AEnum", stringList);
-    rep.increment();
-    t1->addRepeat(rep);
+        RepeatEnumerated rep("AEnum", stringList);
+        rep.increment();
+        t1->addRepeat(rep);
 
-    RepeatString rep2("AEnum", stringList);
-    rep2.increment();
-    t2->addRepeat(rep2);
+        RepeatString rep2("AEnum", stringList);
+        rep2.increment();
+        t2->addRepeat(rep2);
 
-    RepeatDate rep3("YMD", 20090916, 20090916, 1);
-    rep3.increment();
-    t3->addRepeat(rep3);
+        RepeatDate rep3("YMD", 20090916, 20090916, 1);
+        rep3.increment();
+        t3->addRepeat(rep3);
 
-    RepeatInteger rep4("rep", 0, 100, 1);
-    rep4.increment();
-    t4->addRepeat(rep4);
-    t4->increment_repeat();
+        RepeatInteger rep4("rep", 0, 100, 1);
+        rep4.increment();
+        t4->addRepeat(rep4);
+        t4->increment_repeat();
 
-    RepeatDay rep5(2);
-    rep5.increment();
-    t5->addRepeat(rep5);
+        RepeatDay rep5(2);
+        rep5.increment();
+        t5->addRepeat(rep5);
 
-    RepeatDateList rep6("YMD", {20090916, 20090916});
-    rep6.increment();
-    t6->addRepeat(rep6);
+        RepeatDateList rep6("YMD", {20090916, 20090916});
+        rep6.increment();
+        t6->addRepeat(rep6);
 
-    //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
-    BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
-                        "Repeat state: failed: " << helper.errorMsg());
-}
+        //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "Repeat state: failed: " << helper.errorMsg());
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_state_time_attributes) {

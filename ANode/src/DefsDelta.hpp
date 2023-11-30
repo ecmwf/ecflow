@@ -1,31 +1,31 @@
-#ifndef DEFS_DELTA_HPP_
-#define DEFS_DELTA_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #23 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// class DefsDelta: holds a list of incremental changes made in the server.
-//                  This class is created in the server, and transferred to the client
-//                  The client use it to syncronize with the server, without the need
-//                  for asking for the full defs.
-//
-// When the client request the incremental changes, it also passes its client_state_change_no.
-// The client_state_change number is used in the server side to determine what's changed.
-// These changes are collated with add()  and transferred to the client.
-// The client then calls  incremental_sync() which will apply the changes to the client defs
-// so bringing it in sync with the server defs.
-//
-// Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_DefsDelta_HPP
+#define ecflow_node_DefsDelta_HPP
+
+///
+///
+/// \brief class DefsDelta: holds a list of incremental changes made in the server.
+///                  This class is created in the server, and transferred to the client
+///                  The client use it to syncronize with the server, without the need
+///                  for asking for the full defs.
+///
+/// When the client request the incremental changes, it also passes its client_state_change_no.
+/// The client_state_change number is used in the server side to determine what's changed.
+/// These changes are collated with add()  and transferred to the client.
+/// The client then calls  incremental_sync() which will apply the changes to the client defs
+/// so bringing it in sync with the server defs.
+///
+/// Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
+///
 
 #include <cstdint>
 
@@ -88,4 +88,4 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-#endif
+#endif /* ecflow_node_DefsDelta_HPP */

@@ -1,17 +1,12 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #91 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <stdexcept>
 
@@ -402,7 +397,9 @@ const char* InitCmd::desc() {
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(InitCmd::arg(), po::value<string>(), InitCmd::desc())(
-        "add", po::value<vector<string>>()->multitoken(), "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
+        "add",
+        po::value<vector<string>>()->multitoken(),
+        "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
 }
 
 void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

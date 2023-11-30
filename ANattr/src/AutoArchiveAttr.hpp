@@ -1,19 +1,15 @@
-#ifndef AUTOARCHIVEATTR_HPP_
-#define AUTOARCHIVEATTR_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #9 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_attribute_AutoArchiveAttr_HPP
+#define ecflow_attribute_AutoArchiveAttr_HPP
 
 #include <cstdint>
 
@@ -68,4 +64,5 @@ private:
 };
 
 } // namespace ecf
-#endif
+
+#endif /* ecflow_attribute_AutoArchiveAttr_HPP */

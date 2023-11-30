@@ -1,22 +1,18 @@
-#ifndef FAMILY_HPP_
-#define FAMILY_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-//============================================================================
-// Name        : NodeTree.hpp
-// Author      : Avi
-// Revision    : $Revision: #37 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+#ifndef ecflow_node_Family_HPP
+#define ecflow_node_Family_HPP
 
 #include "NodeContainer.hpp"
+
 class FamGenVariables;
 
 class Family final : public NodeContainer {
@@ -81,7 +77,7 @@ std::ostream& operator<<(std::ostream& os, const Family&);
 
 // We can have several thousands Families. This class helps in avoiding
 // the creation of generated variables until required.
-// This improves client->server down load times by avoiding thousands of string constructions
+// This improves client->server download times by avoiding thousands of string constructions
 class FamGenVariables {
 private:
     FamGenVariables(const FamGenVariables&)                  = delete;
@@ -99,4 +95,5 @@ private:
     mutable Variable genvar_family_;
     mutable Variable genvar_family1_;
 };
-#endif
+
+#endif /* ecflow_node_Family_HPP */

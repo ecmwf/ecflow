@@ -1,26 +1,25 @@
-#ifndef DEFS_HPP_
-#define DEFS_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #165 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// class defs: The root of the node tree. Holds all the suites:
-// Externs are not persisted, why ?:
-//   o Externs are un-resolved references to node paths in trigger expressions and inlimits
-//     These references can be dynamically generated.
-//   o Saves on network bandwidth and checkpoint file size
-//
-// Hence externs are *ONLY* used on the client side.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_Defs_HPP
+#define ecflow_node_Defs_HPP
+
+///
+/// \brief class defs: The root of the node tree. Holds all the suites:
+/// Externs are not persisted, why ?:
+///   o Externs are un-resolved references to node paths in trigger expressions and inlimits
+///     These references can be dynamically generated.
+///   o Saves on network bandwidth and checkpoint file size
+///
+/// Hence externs are *ONLY* used on the client side.
+///
 
 #include <cstdint>
 #include <iosfwd>
@@ -452,4 +451,4 @@ private:
     defs_ptr defs_ptr_;
 };
 
-#endif /* DEFS_HPP_ */
+#endif /* ecflow_node_Defs_HPP */

@@ -1,27 +1,15 @@
-#ifndef CHECKPTSAVER_HPP_
-#define CHECKPTSAVER_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : CheckPtSaver.cpp
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-// This class will save the defs file periodically. The period is obtained from
-// ServerEnvironment. The save of the check point file is controlled by
-// the settings in ServerEnvironment
-//
-// The checkpoint files is the defs file, with state. However its saved in
-// boost serialisation format(i.e can be text,binary,portable binary)
-//
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_server_CheckPtSaver_HPP
+#define ecflow_server_CheckPtSaver_HPP
 
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
@@ -30,6 +18,15 @@ namespace fs = boost::filesystem;
 
 class ServerEnvironment;
 class BaseServer;
+
+///
+/// \brief This class will save the defs file periodically. The period is obtained from
+/// ServerEnvironment. The save of the check point file is controlled by
+/// the settings in ServerEnvironment
+///
+/// The checkpoint files is the defs file, with state. However its saved in
+/// boost serialisation format(i.e can be text,binary,portable binary)
+///
 
 class CheckPtSaver {
     CheckPtSaver(const CheckPtSaver&)                  = delete;
@@ -126,4 +123,4 @@ private:
     mutable unsigned int modify_change_no_; // detect state change in defs
 };
 
-#endif
+#endif /* ecflow_server_CheckPtSaver_HPP */

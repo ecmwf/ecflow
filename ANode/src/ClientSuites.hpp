@@ -1,40 +1,36 @@
-#ifndef CLIENT_SUITES_HPP_
-#define CLIENT_SUITES_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #26 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// The definition file could hold hundreds of suites, however the client
-// may only be interested in a small subset. By allowing the client to register
-// the suites they are interested in, we can reduce the network traffic
-// when they ask for updates.(ie via sync or news)
-// When the Client registers an interest in suites it is returned a handle,
-// this handle must is passed back to the server as a reference, with the sync'ing commands
-//
-// Users are allowed to register interest in suite that have not yet been added
-// This will only work provided we have a definition
-//
-// ***************************************************************************
-// Note: Change of suite order is handled by OrderMemento
-//       and *NOT* by the ClientSuites, however whenever suites are:
-//       registered and added/deleted:
-//       then:
-//           defs_ptr create_defs(Defs* server_defs) const;
-//
-//       Will return the suites in the same order as the defs
-// ****************************************************************************
-//
-// Uses compiler generated copy constructor and destructor
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_ClientSuites_HPP
+#define ecflow_node_ClientSuites_HPP
+
+///
+/// \brief The definition file could hold hundreds of suites, however the client
+/// may only be interested in a small subset. By allowing the client to register
+/// the suites they are interested in, we can reduce the network traffic
+/// when they ask for updates.(ie via sync or news)
+/// When the Client registers an interest in suites it is returned a handle,
+/// this handle must is passed back to the server as a reference, with the sync'ing commands
+///
+/// Users are allowed to register interest in suite that have not yet been added
+/// This will only work provided we have a definition
+///
+///
+/// \note Change of suite order is handled by OrderMemento
+///       and *NOT* by the ClientSuites, however whenever suites are:
+///       registered and added/deleted:
+///       then:
+///           defs_ptr create_defs(Defs* server_defs) const;
+///
+///       Will return the suites in the same order as the defs
+///
 
 #include <limits>
 #include <string>
@@ -150,5 +146,7 @@ private:
     bool auto_add_new_suites_;
     mutable bool handle_changed_{false}; // set when handle created, or when suites added/removed
 };
+
 } // namespace ecf
-#endif
+
+#endif /* ecflow_node_ClientSuites_HPP */

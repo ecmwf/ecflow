@@ -1,17 +1,13 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision$
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
@@ -36,21 +32,21 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     std::string errorMsg, warningMsg;
     BOOST_REQUIRE_MESSAGE(defs.restore(path, errorMsg, warningMsg), errorMsg);
 
-    //  	suite edit
-    //  		edit ECF_INCLUDE /home/ma/map/sms/example/x                  # comment line
-    //  		edit ECF_FILES   /home/ma/map/sms/example/x                  #comment line
-    //  	    edit EXPVER 'f8na'                                          #
-    //  	    edit USER 'ecgems'                                          #comment
-    //  	    edit USER2 "ecgems"                                         # comment
-    //  	    edit INT1 "10"                                             # comment
-    //  	    edit INT2 '11'                                             # comment
-    //  	    edit YMD  '20091012'                                        # comment
-    //  	 	family family
-    //  			edit var  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # comment line
-    //  			edit var2 'smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%'  #comment line
-    //  			task t2
-    //  		endfamily
-    //  	endsuite
+    // suite edit
+    //     edit ECF_INCLUDE /home/ma/map/sms/example/x                  # comment line
+    //     edit ECF_FILES   /home/ma/map/sms/example/x                  #comment line
+    //     edit EXPVER 'f8na'                                          #
+    //     edit USER 'ecgems'                                          #comment
+    //     edit USER2 "ecgems"                                         # comment
+    //     edit INT1 "10"                                             # comment
+    //     edit INT2 '11'                                             # comment
+    //     edit YMD  '20091012'                                        # comment
+    //     family family
+    //         edit var  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # comment line
+    //         edit var2 'smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%'  #comment line
+    //         task t2
+    //     endfamily
+    // endsuite
     suite_ptr editSuite = defs.findSuite("edit");
     BOOST_REQUIRE_MESSAGE(editSuite, "Could not find the edit suite");
 

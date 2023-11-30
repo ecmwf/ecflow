@@ -1,35 +1,38 @@
-#ifndef LOG_HPP_
-#define LOG_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : Log
-// Author      : Avi
-// Revision    : $Revision: #31 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Simple singleton implementation of log
-//
-// Please note how do we guarantee that file is actually written to disk:
-// a/ Each log entry should call std::endl
-// b/ Call flush() on the ofstream
-// c/ The two methods will force ofstream buffer to be written to disk
-//    Well NOT REALLY dues to file caching by the OS.
-// The strongest hint we can give th OS to actually write to the physical medium
-// is to close the file. (This does not guarantee it, but is the closest we can achieve)
-//
-// Why is this an issue ? Testing on cross platform HPUX/linux, requires that
-// testing has access to the ECF log file. Initially the log file held an
-// ofstream of log file as a data member. However this meant that flushing
-// did not guarantee writing ECF log file to disk. Testing requires that we
-// are able to clear and copy the log file for comparison.
-// Hence we use another level of indirection, so that we able to close the
-// log file, and hence can ensure that it gets written to disk
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_Log_HPP
+#define ecflow_core_Log_HPP
+
+///
+/// \brief Simple singleton implementation of log
+///
+/// Please note how do we guarantee that file is actually written to disk:
+///   a/ Each log entry should call std::endl
+///   b/ Call flush() on the ofstream
+///   c/ The two methods will force ofstream buffer to be written to disk
+///
+/// Well NOT REALLY dues to file caching by the OS.
+///
+/// The strongest hint we can give th OS to actually write to the physical medium
+/// is to close the file. (This does not guarantee it, but is the closest we can achieve)
+///
+/// Why is this an issue? Testing on cross platform HPUX/linux, requires that
+/// testing has access to the ECF log file. Initially the log file held an
+/// ofstream of log file as a data member. However this meant that flushing
+/// did not guarantee writing ECF log file to disk. Testing requires that we
+/// are able to clear and copy the log file for comparison.
+/// Hence we use another level of indirection, so that we able to close the
+/// log file, and hence can ensure that it gets written to disk
+///
+
 #include <fstream>
 #include <memory>
 #include <string>
@@ -222,4 +225,4 @@ std::string stringize_f(Functor const& f) {
 
 } // namespace ecf
 
-#endif
+#endif /* ecflow_core_Log_HPP */

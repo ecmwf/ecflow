@@ -1,27 +1,25 @@
-#ifndef NODETREETRAVERSER_HPP_
-#define NODETREETRAVERSER_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : NodeTreeTraverser.cpp
-// Author      : Avi
-// Revision    : $Revision: #26 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// This class will traverse the node tree periodically, It is tied to a server.
-// This implementation uses a strand to ensure sequential processing of the node dependency traversal
-// in the the presence of multiple threads, without the need of explicit locking. i.e mutex's
-//
-// For testing we make the distinction between the poll period, and calendar update interval
-// Some suites require a real time calendar. Hence we must make sure that
-// poll interval is in sync with real time.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#ifndef ecflow_server_NodeTreeTraverser_HPP
+#define ecflow_server_NodeTreeTraverser_HPP
+
+///
+/// \brief This class will traverse the node tree periodically, It is tied to a server.
+/// This implementation uses a strand to ensure sequential processing of the node dependency traversal
+/// in the presence of multiple threads, without the need of explicit locking. i.e mutex's
+///
+/// For testing we make the distinction between the poll period, and calendar update interval
+/// Some suites require a real time calendar. Hence we must make sure that
+/// poll interval is in sync with real time.
+///
 
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -88,4 +86,4 @@ private:
     bool running_;
 };
 
-#endif
+#endif /* ecflow_server_NodeTreeTraverser_HPP */

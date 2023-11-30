@@ -1,19 +1,16 @@
-#ifndef STATS_HPP_
-#define STATS_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #31 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_Stats_HPP
+#define ecflow_base_Stats_HPP
+
 #include <deque>
 #include <string>
 
@@ -134,98 +131,98 @@ private:
     friend class cereal::access;
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version) {
-        ar& status_;
-        ar& locked_by_user_;
-        ar& host_;
-        ar& port_;
-        ar& up_since_;
-        ar& version_;
-        ar& job_sub_interval_;
-        ar& checkpt_interval_;
-        ar& checkpt_save_time_alarm_;
-        ar& checkpt_mode_;
-        ar& no_of_suites_;
-        ar& request_stats_;
-        ar& ECF_HOME_;
-        ar& ECF_CHECK_;
-        ar& ECF_LOG_;
-        ar& ECF_SSL_;
+        ar & status_;
+        ar & locked_by_user_;
+        ar & host_;
+        ar & port_;
+        ar & up_since_;
+        ar & version_;
+        ar & job_sub_interval_;
+        ar & checkpt_interval_;
+        ar & checkpt_save_time_alarm_;
+        ar & checkpt_mode_;
+        ar & no_of_suites_;
+        ar & request_stats_;
+        ar & ECF_HOME_;
+        ar & ECF_CHECK_;
+        ar & ECF_LOG_;
+        ar & ECF_SSL_;
 
-        ar& checkpt_;
+        ar & checkpt_;
 
-        ar& server_version_;
-        ar& restart_server_;
-        ar& shutdown_server_;
-        ar& halt_server_;
-        ar& reload_white_list_file_;
-        ar& reload_passwd_file_;
-        ar& ping_;
-        ar& debug_server_on_;
-        ar& debug_server_off_;
+        ar & server_version_;
+        ar & restart_server_;
+        ar & shutdown_server_;
+        ar & halt_server_;
+        ar & reload_white_list_file_;
+        ar & reload_passwd_file_;
+        ar & ping_;
+        ar & debug_server_on_;
+        ar & debug_server_off_;
 
-        ar& get_defs_;
-        ar& sync_;
-        ar& sync_full_;
-        ar& sync_clock_;
-        ar& news_;
+        ar & get_defs_;
+        ar & sync_;
+        ar & sync_full_;
+        ar & sync_clock_;
+        ar & news_;
 
-        ar& node_job_gen_;
-        ar& node_check_job_gen_only_;
-        ar& node_delete_;
-        ar& node_suspend_;
-        ar& node_resume_;
-        ar& node_kill_;
-        ar& node_status_;
-        ar& node_edit_history_;
-        ar& node_archive_;
-        ar& node_restore_;
+        ar & node_job_gen_;
+        ar & node_check_job_gen_only_;
+        ar & node_delete_;
+        ar & node_suspend_;
+        ar & node_resume_;
+        ar & node_kill_;
+        ar & node_status_;
+        ar & node_edit_history_;
+        ar & node_archive_;
+        ar & node_restore_;
 
-        ar& log_cmd_;
-        ar& log_msg_cmd_;
-        ar& begin_cmd_;
+        ar & log_cmd_;
+        ar & log_msg_cmd_;
+        ar & begin_cmd_;
 
-        ar& task_init_;
-        ar& task_complete_;
-        ar& task_wait_;
-        ar& task_abort_;
-        ar& task_event_;
-        ar& task_meter_;
-        ar& task_label_;
-        ar& task_queue_;
+        ar & task_init_;
+        ar & task_complete_;
+        ar & task_wait_;
+        ar & task_abort_;
+        ar & task_event_;
+        ar & task_meter_;
+        ar & task_label_;
+        ar & task_queue_;
 
-        ar& zombie_fob_;
-        ar& zombie_fail_;
-        ar& zombie_adopt_;
-        ar& zombie_remove_;
-        ar& zombie_get_;
-        ar& zombie_block_;
-        ar& zombie_kill_;
+        ar & zombie_fob_;
+        ar & zombie_fail_;
+        ar & zombie_adopt_;
+        ar & zombie_remove_;
+        ar & zombie_get_;
+        ar & zombie_block_;
+        ar & zombie_kill_;
 
-        ar& requeue_node_;
-        ar& order_node_;
-        ar& run_node_;
-        ar& load_defs_;
-        ar& replace_;
-        ar& force_;
-        ar& free_dep_;
-        ar& suites_;
-        ar& edit_script_;
+        ar & requeue_node_;
+        ar & order_node_;
+        ar & run_node_;
+        ar & load_defs_;
+        ar & replace_;
+        ar & force_;
+        ar & free_dep_;
+        ar & suites_;
+        ar & edit_script_;
 
-        ar& alter_cmd_;
-        ar& ch_cmd_;
-        ar& file_ecf_;
-        ar& file_job_;
-        ar& file_jobout_;
-        ar& file_cmdout_;
-        ar& file_manual_;
+        ar & alter_cmd_;
+        ar & ch_cmd_;
+        ar & file_ecf_;
+        ar & file_job_;
+        ar & file_jobout_;
+        ar & file_cmdout_;
+        ar & file_manual_;
 
-        ar& plug_;
-        ar& move_;
-        ar& group_cmd_;
-        ar& server_load_cmd_;
-        ar& stats_;
-        ar& check_;
-        ar& query_;
+        ar & plug_;
+        ar & move_;
+        ar & group_cmd_;
+        ar & server_load_cmd_;
+        ar & stats_;
+        ar & check_;
+        ar & query_;
     }
 };
 #endif

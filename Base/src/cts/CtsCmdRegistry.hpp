@@ -1,24 +1,15 @@
-#ifndef CTS_CMD_REGISTRY_HPP_
-#define CTS_CMD_REGISTRY_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Registration of all the client to server commands
-//               This allows us to parse the arg associated with
-//               commands in this category. The idea being to keep
-//               new commands functionality in one place.
-//               Any new client to server commands that are created
-//               must be added to this class.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_cts_CtsCmdRegistry_HPP
+#define ecflow_base_cts_CtsCmdRegistry_HPP
 
 #include <vector>
 
@@ -27,6 +18,14 @@
 #include "Cmd.hpp"
 
 class AbstractClientEnv;
+
+///
+/// \brief Registration of all the client to server commands
+///
+/// This allows us to parse the arg associated with commands in this category.
+/// The idea is to keep new commands functionality in one place.
+/// Any new client to server commands that are created must be added to this class.
+///
 
 class CtsCmdRegistry {
 public:
@@ -55,4 +54,4 @@ private:
     void addHelpOption(boost::program_options::options_description& desc) const;
 };
 
-#endif
+#endif /* ecflow_base_cts_CtsCmdRegistry_HPP */

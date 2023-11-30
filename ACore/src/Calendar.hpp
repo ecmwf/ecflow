@@ -1,86 +1,88 @@
-#ifndef CALENDAR_HPP_
-#define CALENDAR_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #48 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : The calendar object is initialised when the suite begins.
-//               The calendar encapsulates date and time. The date is derived from the time.
-//
-// After each update the calendar will store the time_duration between the init() function
-// call and the update() function call.
-// The calendar is to be used for all reference to time and date
-// This will stop different time functionality from getting out of step.
-//
-// Examples of Use of calendar are:
-//    o Generated time variables
-//    o Time dependent attributes: TimeAttr,TodaySeries,CronAttr,DateAttr,DayAttr
-//      ****************************************************************************
-//      ** A time attribute can have a +, which means time relative to suite start
-//      ** This is stored on the TimeSeries, as it isNode/Attribute specific.
-//      ** i.e repeated families will have its own relative start time.
-//      *****************************************************************************
-//
-// DESIGN CONSIDERATIONS:
-//   Real and Hybrid:
-//   Real
-//      calendar is like a normal calendar where time and date are related
-//      and day/date changes at midnight.
-//   Hybrid:
-//      There is currently confusion about how this is supposed to work.
-//      The date is not supposed to change. (According to John date updates at suite restart?)
-//      This has important implications, i.e does the day change ?
-//      If the day does not change, then many of suites will never complete.
-//      	i.e if we use repeat, with a single time series,  "time 10:00"
-//      *** This relies on a day change to reset time attribute at midnight. ****
-//   Conclusion: Will support day change for both REAL and HYBRID (date does not change)
-//
-// Calendar Updates:
-// 	 How and when should we update the calendar?
-//   In both the approaches below we need to make a distinction/separation
-//   between the server poll and calendar update. This is required for testing
-//
-//	o Poll/Job submission interval in server is used to update calendar .
-//     +: No time slots will be missed. even if server is suspended/restarted.
-//        since suspending the server, also suspends the calendar updates
-//     +: Suite relative times will continue to work even after server stopped/started
-//     +: Avoids additional system call.
-//     +: Lead's to more deterministic behaviour
-//     -: If server is suspended and restarted the calendar will NOT be in
-//        phase with system clock. (Its not clear to me why this should be an issue?)
-//     ?: If the server is run for several days is there a possibility for the poll
-//        update to get out of skew with real time. This is only possible if
-//        job dependencies take more the 60 seconds to resolve.
-//      *** THIS FUNCTIONALITY NEEDS TO BE ADVERTISED, SO THAT USERS ARE AWARE OF IT
-//      *** THIS FUNCTIONALITY IS AVAILABLE VIA -s flag on the clock attribute .i.e
-//      *** the -s stand's for stop start clock in line with the server
-// 	        clock real 20.1.2007 +01:00 -s
-// 			clock hybrid -s
-//
-//	o Poll/Job submission interval in server is used Initiate an update of calendar via a system call.
-//     +: calendar is always in phase with system clock.
-//        Many task job dependencies depend on ordering based on real time.
-//     -: Requires additional system call for each poll in the server
-//     -: Time slots can be missed. (i.e if server suspended/restarted).
-//        There is no catch up. (?? See TimeDependencies.ddoc)
-//     -: Relative times will not be adhered too, when server stopped/started.
-//     -: Will require more manual intervention ?
-//
-//  Conclusion:: The clock attribute will be changed to add both capabilities
-//
-//  Resolution: Will support 1 minute resolution:
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_Calendar_HPP
+#define ecflow_core_Calendar_HPP
+
+///
+/// \brief The calendar encapsulates date and time. The date is derived from the time.
+///        The calendar object is initialised when the suite begins.
+///
+/// After each update the calendar will store the time_duration between the init() function
+/// call and the update() function call.
+/// The calendar is to be used for all reference to time and date
+/// This will stop different time functionality from getting out of step.
+///
+/// Examples of Use of calendar are:
+///   o Generated time variables
+///   o Time dependent attributes: TimeAttr,TodaySeries,CronAttr,DateAttr,DayAttr
+///     ****************************************************************************
+///     ** A time attribute can have a +, which means time relative to suite start
+///     ** This is stored on the TimeSeries, as it isNode/Attribute specific.
+///     ** i.e repeated families will have its own relative start time.
+///     *****************************************************************************
+///
+/// DESIGN CONSIDERATIONS:
+///   Real and Hybrid:
+///   Real
+///     calendar is like a normal calendar where time and date are related
+///     and day/date changes at midnight.
+///   Hybrid:
+///     There is currently confusion about how this is supposed to work.
+///     The date is not supposed to change. (According to John date updates at suite restart?)
+///     This has important implications, i.e does the day change ?
+///     If the day does not change, then many of suites will never complete.
+///       i.e if we use repeat, with a single time series,  "time 10:00"
+///     *** This relies on a day change to reset time attribute at midnight. ****
+///  Conclusion: Will support day change for both REAL and HYBRID (date does not change)
+///
+/// Calendar Updates:
+///   How and when should we update the calendar?
+///     In both the approaches below we need to make a distinction/separation
+///     between the server poll and calendar update. This is required for testing
+///
+///   o Poll/Job submission interval in server is used to update calendar .
+///     +: No time slots will be missed. even if server is suspended/restarted.
+///        since suspending the server, also suspends the calendar updates
+///     +: Suite relative times will continue to work even after server stopped/started
+///     +: Avoids additional system call.
+///     +: Lead's to more deterministic behaviour
+///     -: If server is suspended and restarted the calendar will NOT be in
+///        phase with system clock. (Its not clear to me why this should be an issue?)
+///     ?: If the server is run for several days is there a possibility for the poll
+///        update to get out of skew with real time. This is only possible if
+///        job dependencies take more the 60 seconds to resolve.
+///      *** THIS FUNCTIONALITY NEEDS TO BE ADVERTISED, SO THAT USERS ARE AWARE OF IT
+///      *** THIS FUNCTIONALITY IS AVAILABLE VIA -s flag on the clock attribute .i.e
+///      *** the -s stand's for stop start clock in line with the server
+///            clock real 20.1.2007 +01:00 -s
+///            clock hybrid -s
+///
+///   o Poll/Job submission interval in server is used Initiate an update of calendar via a system call.
+///     +: calendar is always in phase with system clock.
+///        Many task job dependencies depend on ordering based on real time.
+///     -: Requires additional system call for each poll in the server
+///     -: Time slots can be missed. (i.e if server suspended/restarted).
+///        There is no catch up. (?? See TimeDependencies.ddoc)
+///     -: Relative times will not be adhered too, when server stopped/started.
+///     -: Will require more manual intervention ?
+///
+///  Conclusion:: The clock attribute will be changed to add both capabilities
+///
+///  Resolution: Will support 1 minute resolution
+///
 
 #include <cstdint>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
+
 namespace cereal {
 class access;
 }
@@ -224,4 +226,4 @@ private:
 };
 } // namespace ecf
 
-#endif
+#endif /* ecflow_core_Calendar_HPP */

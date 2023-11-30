@@ -1,17 +1,15 @@
-#ifndef QUEUE_ATTR_HPP_
-#define QUEUE_ATTR_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #51 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_attribute_QueueAttr_HPP
+#define ecflow_attribute_QueueAttr_HPP
 
 #include <cstdint>
 
@@ -83,4 +81,4 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-#endif
+#endif /* ecflow_attribute_QueueAttr_HPP */

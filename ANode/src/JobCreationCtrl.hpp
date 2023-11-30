@@ -1,19 +1,15 @@
-#ifndef JOBS_GEN_CTRL_HPP_
-#define JOBS_GEN_CTRL_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #4 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_JobCreationCtrl_HPP
+#define ecflow_node_JobCreationCtrl_HPP
 
 #include <string>
 #include <vector>
@@ -63,4 +59,5 @@ private:
     std::vector<weak_submittable_ptr> fail_submittables_;
     JobsParam jobsParam_; // create jobs = false, spawn jobs = false used as a cache
 };
-#endif
+
+#endif /* ecflow_node_JobCreationCtrl_HPP */

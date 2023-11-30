@@ -1,24 +1,23 @@
-#ifndef SSL_CLIENT_HPP_
-#define SSL_CLIENT_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : Client
-// Author      : Avi
-// Revision    : $Revision: #18 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// Client      : Acts as the client part. ( in client/server architecture)
-//               Note: The plug command can move a node to another server
-//               hence the server itself will NEED to ACT as a client.
-//               This is why client lives in Base and not the Client project
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#ifndef ecflow_base_SslClient_HPP
+#define ecflow_base_SslClient_HPP
+
+///
+/// \brief This class acts as the client part. ( in client/server architecture)
+///
+/// \note The plug command can move a node to another server hence the server
+/// itself will NEED to ACT as a client. This is why client lives in Base and
+/// not the Client project
+///
 
 #include "ClientToServerRequest.hpp"
 #include "ServerToClientResponse.hpp"
@@ -77,4 +76,5 @@ private:
     // Default value of 0 means take the timeout from the command
     int timeout_;
 };
-#endif
+
+#endif /* ecflow_base_SslClient_HPP */

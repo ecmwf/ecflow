@@ -1,20 +1,16 @@
-#ifndef SSL_TCP_SERVER_HPP_
-#define SSL_TCP_SERVER_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #62 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : ECFLOW Server. Based on ASIO
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#ifndef ecflow_server_SslTcpServer_HPP
+#define ecflow_server_SslTcpServer_HPP
+
 #include "TcpBaseServer.hpp"
 #include "ssl_connection.hpp"
 class SslServer;
@@ -41,4 +37,4 @@ private:
     void start_accept();
 };
 
-#endif
+#endif /* ecflow_server_SslTcpServer_HPP */

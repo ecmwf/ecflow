@@ -1,27 +1,24 @@
-#ifndef NODESTATE_HPP_
-#define NODESTATE_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #9 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_NodeState_HPP
+#define ecflow_node_NodeState_HPP
 
 #include "NState.hpp"
 
-//
-// Given a set of nodes, return the the most significant state
-// Depend on the Node::computedState, hence include after Node.hpp
-// This will recurse down ****
-//
+///
+/// \brief Given a set of nodes, theComputedNodeState returns the most significant state
+/// Depend on the Node::computedState, hence include after Node.hpp
+/// This will recurse down ****
+///
+
 namespace ecf {
 
 template <class T>
@@ -81,5 +78,7 @@ NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate
         return NState::COMPLETE;
     return NState::UNKNOWN;
 }
+
 } // namespace ecf
-#endif
+
+#endif /* ecflow_node_NodeState_HPP */

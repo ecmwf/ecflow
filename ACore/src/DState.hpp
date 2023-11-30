@@ -1,29 +1,27 @@
-#ifndef DSTATE_HPP_
-#define DSTATE_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #7 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+#ifndef ecflow_core_DState_HPP
+#define ecflow_core_DState_HPP
+
+///
+/// \brief DState stores the state of a node.
+///
+/// The class DState is used to define the enum.
+/// The number of state changes in stored in `state_change_no`.
+///
 
 #include <string>
 
 #include "NState.hpp"
 
-// DState: stores the state of a node.
-// *The class DState just used to define the enum, however we also
-// needed to know when the state changed. Hence the use of state_change_no
-// Uses default copy constructor and destructor, and equality
 class DState {
 public:
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5, SUSPENDED = 6 };

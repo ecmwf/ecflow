@@ -1,20 +1,21 @@
-#ifndef CHILD_HPP_
-#define CHILD_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Specifies the different kinds of child commands
-//               These are specified in the job file, and communicate with the server
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_Child_HPP
+#define ecflow_core_Child_HPP
+
+///
+/// \brief Specifies the different kinds of child commands, as specified in the
+///        job file and communicated to the server.
+///
+
 #include <string>
 #include <vector>
 
@@ -56,4 +57,5 @@ private:
 };
 
 } // namespace ecf
-#endif
+
+#endif /* ecflow_core_Child_HPP */

@@ -1,20 +1,18 @@
-#ifndef TIMEATTR_HPP_
-#define TIMEATTR_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #32 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-/// isFree is called when a node is queued.If it returns true, Task can be submitted
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_attribute_TimeAttr_HPP
+#define ecflow_attribute_TimeAttr_HPP
+
+///
+/// \brief isFree is called when a node is queued. If it returns true, Task can be submitted
 /// checkForReque: is called when a node has completed, and need to determine if it should run again.
 /// These are different/orthogonal concerns.
 /// There is a *separate* issue of whether nodes should be queued when a node is *manually*
@@ -36,7 +34,7 @@
 ///        V                     |                           |
 /// Time   ======================0============0==============0=============
 ///                            10:00        11:00              Midnight
-//
+///
 ///                                                     isFree:hhhhhhhhhhhhhhhhhh
 ///                                                      V
 ///   CheckForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
@@ -47,11 +45,13 @@
 ///
 /// If the job starts at 10:00 but takes more than 1 hour, then it will miss the 11:00 slot
 /// and will have to start at 12:00
-//============================================================================
+///
+
 #include "TimeSeries.hpp"
 
 class DateAttr; // Used in Why
 class DayAttr;  // Used in Why
+
 namespace ecf {
 class Calendar;
 } // namespace ecf
@@ -138,4 +138,5 @@ private:
 };
 
 } // namespace ecf
-#endif
+
+#endif /* ecflow_attribute_TimeAttr_HPP */

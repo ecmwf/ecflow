@@ -1,25 +1,15 @@
-#ifndef BASESERVER_HPP_
-#define BASESERVER_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : Server.cpp
-// Author      : Avi
-// Revision    : $Revision: #62 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : ECFLOW Server. Based on ASIO
-//
-// The port numbers are divided into three ranges:
-//  o the Well Known Ports, (require root permission)  0   -1023
-//  o the Registered Ports,                            1024-49151
-//  o Dynamic and/or Private Ports.                    49151-65535
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#ifndef ecflow_server_BaseServer_HPP
+#define ecflow_server_BaseServer_HPP
 
 #include <boost/asio.hpp>
 
@@ -28,6 +18,15 @@
 #include "NodeTreeTraverser.hpp"
 
 class ServerEnvironment;
+
+///
+/// \brief ecFlow Server, with implementation based on Boost.asio
+///
+/// The port numbers are divided into three ranges:
+///  o the Well Known Ports, (require root permission)  0   -1023
+///  o the Registered Ports,                            1024-49151
+///  o Dynamic and/or Private Ports.                    49151-65535
+///
 
 class BaseServer : public AbstractServer {
 public:
@@ -109,4 +108,4 @@ protected:
     std::string userWhoHasLock_;
 };
 
-#endif
+#endif /* ecflow_server_BaseServer_HPP */

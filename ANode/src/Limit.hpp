@@ -1,28 +1,29 @@
-#ifndef LIMIT_HPP_
-#define LIMIT_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #61 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Limit was placed in the ANode category because inlimit
-//               can reference Limit on *ANOTHER* suite. This presents
-//               A problem with incremental sync, since that requires
-//               access to a parent/suite, to mark the suite as changed.
-//               To get round this issue the Node will set the
-//               parent pointer on the Limit this then makes it easy
-//               for incremental sync, since we directly access the parent suite
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_Limit_HPP
+#define ecflow_node_Limit_HPP
+
+///
+/// \note Limit was placed in the ANode category because inlimit can reference
+/// Limit on *ANOTHER* suite. This presents a problem with incremental sync,
+/// since that requires access to a parent/suite, to mark the suite as changed.
+///
+/// To get round this issue the Node will set the parent pointer on the Limit
+/// this then makes it easy for incremental sync, since we directly access the
+/// parent suite
+///
 
 #include <set>
 #include <string>
+
 namespace cereal {
 class access;
 }
@@ -88,4 +89,4 @@ private:
     void serialize(Archive& ar);
 };
 
-#endif
+#endif /* ecflow_node_Limit_HPP */

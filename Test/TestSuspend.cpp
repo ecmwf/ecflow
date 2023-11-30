@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #24 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
@@ -95,11 +90,11 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
 
     Defs theDefs;
     {
-        // Initialise clock with todays date and time, then create a time attribute
-        // with todays time + minute Avoid adding directly to TimeSlot
-        // i.e if local time is 9:59 and we create a TimeSlot like
-        // 		task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
-        // The the minute will be 62, which is illegal and will not parse
+        // Initialise clock with today's date and time, then create a time attribute
+        // with today's time + minute Avoid adding directly to TimeSlot
+        // i.e. if local time is 9:59, and we create a TimeSlot like
+        //     task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
+        // The minute will be 62, which is illegal and will not parse
         boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
 
         // For each 2 seconds of poll in the server update calendar by 1 minute
@@ -151,8 +146,8 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
     defs_ptr serverDefs     = serverTestHarness.testWaiter(theDefs, timeout, verifyAttrInServer);
     BOOST_REQUIRE_MESSAGE(serverDefs.get(), " Failed to return server after restartServer");
 
-    //	cout << "Printing Defs \n";
-    //	std::cout << *serverDefs.get();
+    // cout << "Printing Defs \n";
+    // std::cout << *serverDefs.get();
 
     cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
 }
@@ -174,11 +169,11 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
     //                     Allows test to run without requiring installation
     Defs theDefs;
     {
-        // Initialise clock with todays date and time, then create a time attribute
-        // with todays time + minute Avoid adding directly to TimeSlot
-        // i.e if local time is 9:59 and we create a TimeSlot like
-        // 		task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
-        // The the minute will be 62, which is illegal and will not parse
+        // Initialise clock with today's date and time, then create a time attribute
+        // with today's time + minute Avoid adding directly to TimeSlot
+        // i.e. if local time is 9:59, and we create a TimeSlot like
+        //     task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
+        // The minute will be 62, which is illegal and will not parse
         boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
 
         suite_ptr suite                       = theDefs.add_suite("test_suspend_node");
@@ -231,8 +226,8 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
     defs_ptr serverDefs     = serverTestHarness.testWaiter(theDefs, timeout, verifyAttrInServer);
     BOOST_REQUIRE_MESSAGE(serverDefs.get(), " Failed to return server after restartServer");
 
-    //	cout << "Printing Defs \n";
-    //	std::cout << *serverDefs.get();
+    // cout << "Printing Defs \n";
+    // std::cout << *serverDefs.get();
 
     cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
 }

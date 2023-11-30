@@ -1,30 +1,30 @@
-#ifndef ABSTRACT_CLIENT_ENV__HPP_
-#define ABSTRACT_CLIENT_ENV__HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This class is used to represent the client environment to the cmds
-//
-// This abstraction ONLY covers aspects that are required, to _CREATE_
-// the client command/request that is to be sent to the server
-// The key theme is that we can define a new client to server command
-// in one place. i.e it allows the functionality, command line arguments,
-// parsing of the arguments, can all be done in the command class itself
-// If the command requires any additional arguments from the client environment
-// they should be added to this class, and the implementation in the derived class
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_AbstractClientEnv_HPP
+#define ecflow_base_AbstractClientEnv_HPP
 
 #include <string>
 #include <vector>
+
+///
+/// \brief This class is used to represent the client environment to the cmds
+///
+/// This abstraction ONLY covers aspects that are required, to _CREATE_
+/// the client command/request that is to be sent to the server
+/// The key theme is that we can define a new client to server command
+/// in one place. i.e it allows the functionality, command line arguments,
+/// parsing of the arguments, can all be done in the command class itself
+/// If the command requires any additional arguments from the client environment
+/// they should be added to this class, and the implementation in the derived class
+///
 
 class AbstractClientEnv {
 protected:
@@ -83,4 +83,5 @@ public:
     virtual void set_test()         = 0;
     virtual bool under_test() const = 0;
 };
-#endif
+
+#endif /* ecflow_base_AbstractClientEnv_HPP */

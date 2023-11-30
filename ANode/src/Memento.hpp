@@ -1,43 +1,41 @@
-#ifndef MEMENTO_HPP_
-#define MEMENTO_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #41 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : class Memento
-//               Class's derived from Memento are stored on DefsDelta.
-//               DefsDelta is transferred from Server to Client during a sync
-//               See SSyncCmd.hpp
-//
-// Are created in the server, but used by the client to sync.
-//
-// Used to capture incremental change of state, to node, and node attributes
-// Serve as a base class of all memento's
-// Later on the client side, the changes can be applied. via incremental_sync()
-// The are several kind of changes that we can capture:
-// 	a/ simple state changes,
-// 	b/ Change in attribute structure
-// 	c/ Deletion of attribute
-// 	d/ Addition of an attribute
-// 	e/ Add/delete of a Family/task
-//    f/ Add/Delete of suite
-//
-// The main emphasis here is to capture a,b,c,d,e. This is easily handled by state_change_no.
-// option f/ is handled via a full update and hence does not use mementos
-//
-// ISSUES: AIX has issues with TOC(table of contents) overflow. This is heavily
-// influenced by the number of global symbols. Unfortunately each boost serializiable
-// type, greatly increases the number of globals.
-// Hence we need to ensure we use the minimum number of serializable types.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_node_Memento_HPP
+#define ecflow_node_Memento_HPP
+
+///
+/// \note Classes derived from Memento are stored on DefsDelta.
+/// DefsDelta is transferred from Server to Client during a sync. See SSyncCmd.hpp
+///
+/// Are created in the server, but used by the client to sync.
+///
+/// Used to capture incremental change of state, to node, and node attributes
+/// Serve as a base class of all memento's
+/// Later on the client side, the changes can be applied. via incremental_sync()
+/// The are several kind of changes that we can capture:
+///   a/ simple state changes,
+///   b/ Change in attribute structure
+///   c/ Deletion of attribute
+///   d/ Addition of an attribute
+///   e/ Add/delete of a Family/task
+///   f/ Add/Delete of suite
+///
+/// The main emphasis here is to capture a,b,c,d,e. This is easily handled by state_change_no.
+/// option f/ is handled via a full update and hence does not use mementos
+///
+/// ISSUES: AIX has issues with TOC(table of contents) overflow. This is heavily
+/// influenced by the number of global symbols. Unfortunately each boost serializable
+/// type, greatly increases the number of globals.
+/// Hence, we need to ensure we use the minimum number of serializable types.
+///
 
 #include <boost/core/noncopyable.hpp>
 
@@ -791,4 +789,4 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-#endif
+#endif /* ecflow_node_Memento_HPP */

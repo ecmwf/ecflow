@@ -1,18 +1,12 @@
-
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #17 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
@@ -51,14 +45,14 @@ BOOST_AUTO_TEST_CASE(test_requeue_node) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_repeat_integer
-    //	repeat integer VAR 0 1 1          # run at 0, 1    2 times
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //	family family
-    //	    repeat integer VAR 0 2 1     # run at 0, 1     2 times
-    //    	task t<n>
-    //       ....
-    //   	endfamily
+    //   repeat integer VAR 0 1 1          # run at 0, 1    2 times
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     repeat integer VAR 0 2 1     # run at 0, 1     2 times
+    //     task t<n>
+    //     ....
+    //   endfamily
     // endsuite
 
     // Each task/job should be run *4* times, according to the repeats Mimics nested loops
@@ -92,10 +86,10 @@ BOOST_AUTO_TEST_CASE(test_requeue_node) {
     defs_ptr serverDefs     = serverTestHarness.testWaiter(theDefs, timeout, verifyAttrInServer);
     BOOST_REQUIRE_MESSAGE(serverDefs.get(), " Failed to return server after re-queue");
 
-    //	cout << "Printing Defs \n";
-    //	std::cout << *serverDefs.get();
+    // cout << "Printing Defs \n";
+    // std::cout << *serverDefs.get();
 
-    // since we requed each task should have completed 8 times
+    // since we requeue, each task should have completed 8 times
     std::vector<Task*> taskVec;
     serverDefs->getAllTasks(taskVec);
     for (Task* t : taskVec) {

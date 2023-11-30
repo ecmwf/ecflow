@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "LogLoadData.hpp"
 
@@ -537,7 +537,7 @@ bool LogLoadData::indexOfTime(qint64 t, size_t& idx, size_t startIdx, qint64 tol
         if (tolerance <= 0)
             tolerance = 10 * 1000; // ms
 
-        for (size_t i = startIdx; ; i--) {
+        for (size_t i = startIdx;; i--) {
             if (time_[i] <= t) {
                 qint64 nextDelta = t - time_[i];
                 qint64 prevDelta = (i < startIdx) ? (time_[i + 1] - t) : (nextDelta + 1);
@@ -930,9 +930,9 @@ void LogLoadData::loadLogFile(const std::string& logFile,
 
     maxReadSize_ = maxReadSize;
 
-    fullRead_   = false;
-    loadStatus_ = LoadNotTried;
-    loadedAt_   = QDateTime::currentDateTime();
+    fullRead_    = false;
+    loadStatus_  = LoadNotTried;
+    loadedAt_    = QDateTime::currentDateTime();
 
     loadLogFileCore(logFile, maxReadSize, suites, false, logConsumer);
 

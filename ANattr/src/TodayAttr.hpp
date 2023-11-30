@@ -1,56 +1,57 @@
-#ifndef TODAYATTR_HPP_
-#define TODAYATTR_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #30 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : The Today attribute is heavily tied to the begin command
-//               Real Clock:
-//               1/ Suite Begin time > Today time
-//                  If the suite 'begin' time is past the time given for today
-//                  the node is free to run.
-//               2/ Suite Begin time < Today Time
-//                  The node will 'hold' until current time > today time
-//               3/ Suite time, has passed midnight(next day)
-//                  then today command will permanently hold the node
-//               4/ Under Real/hybrid clocks today will hold node after
-//                  current is past last today time.
-//
-// take following example when we have a single time slot:
-//  	today 10:00
-//                                                isFree:-----free-----
-//                                                 begin:
-//                                                 V
-// checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-//         isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff  *once* free we stay free (single slot
-//         *only*) begin:
-//          V
-//   Today  ======================0=====================0=================
-//                               10:00              Midnight
-//
-//   Difference between time and today. If begin is started after the time slot
-//   then the node is free to re-run
-//
-// When we have a today time series:
-//  	today 10:00 20:00 01:00
-//
-//  *** If the begin time is past 10:00  in the case above then the
-//  *** node should is free to run once. However for a range its different
-//  *** if suite begin time is past 20:00 then the node is held.
-//.
-//  At 10am the Node is free, when node completes, it is re-queued
-//  At 11am the Node is free, when node completes, it is re-queued
-//  ....
-//  At 20pm the Node is free, when node completes, it is *NOT* re-queued.
-//--------------------------------------------------------------------------------
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_attribute_TodayAttr_HPP
+#define ecflow_attribute_TodayAttr_HPP
+
+///
+/// \brief The Today attribute is heavily tied to the begin command
+///
+/// Real Clock:
+///   1/ Suite Begin time > Today time
+///      If the suite 'begin' time is past the time given for today
+///      the node is free to run.
+///   2/ Suite Begin time < Today Time
+///      The node will 'hold' until current time > today time
+///   3/ Suite time, has passed midnight(next day)
+///      then today command will permanently hold the node
+///   4/ Under Real/hybrid clocks today will hold node after
+///      current is past last today time.
+///
+/// Take the following example when we have a single time slot:
+///     today 10:00
+///                                                isFree:-----free-----
+///                                                 begin:
+///                                                 V
+/// checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///         isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff  *once* free we stay free (single slot
+///         *only*) begin:
+///          V
+///   Today  ======================0=====================0=================
+///                               10:00              Midnight
+///
+///   Difference between time and today. If begin is started after the time slot
+///   then the node is free to re-run
+///
+/// When we have a today time series:
+///     today 10:00 20:00 01:00
+///
+///  *** If the begin time is past 10:00  in the case above then the
+///  *** node should is free to run once. However for a range its different
+///  *** if suite begin time is past 20:00 then the node is held.
+///
+///  At 10am the Node is free, when node completes, it is re-queued
+///  At 11am the Node is free, when node completes, it is re-queued
+///  ....
+///  At 20pm the Node is free, when node completes, it is *NOT* re-queued.
+///
 /// isFree is called when a node is queued. if it returns true, Task can be submitted
 /// checkForReque: is called when a node has completed, and need to determine if it should run again.
 /// These are different/orthogonal concerns.
@@ -80,7 +81,7 @@
 ///
 /// If the job starts at 10:00 but takes more than 1 hour, then it will miss the 11:00 slot
 /// and will have to start at 12:00
-//============================================================================
+///
 
 #include "TimeSeries.hpp"
 
@@ -187,4 +188,5 @@ private:
 };
 
 } // namespace ecf
-#endif
+
+#endif /* ecflow_attribute_TodayAttr_HPP */

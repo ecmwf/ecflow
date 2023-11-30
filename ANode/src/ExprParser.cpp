@@ -1,21 +1,16 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #30 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 // Un-comment these for selective for debugging. At the moment because we have added
 //            ast generation BOOST_SPIRIT_DEBUG is to verbose, making debugging a pain.
-// Tpyically I will comment out ONLY BOOST_SPIRIT_DEBUG and enable all the others
+// Typically, I will comment out ONLY BOOST_SPIRIT_DEBUG and enable all the others
 // #define BOOST_SPIRIT_DEBUG
 // #define BOOST_SPIRIT_DUMP_PARSETREE_AS_XML
 // #define PRINT_TREE

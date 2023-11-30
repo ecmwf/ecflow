@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_CORE_CONVERTER_HPP
-#define ECFLOW_CORE_CONVERTER_HPP
+#ifndef ecflow_core_Converter_HPP
+#define ecflow_core_Converter_HPP
 
 #include <string>
 #include <utility>
@@ -36,14 +36,12 @@ inline static auto try_lexical_convert(From&& v) {
     }
 }
 
-}
+} // namespace details
 
 template <typename From, typename To>
 struct converter_traits
 {
-    inline static auto convert(From&& v) {
-        return details::try_lexical_convert<To>(std::forward<From>(v));
-    }
+    inline static auto convert(From&& v) { return details::try_lexical_convert<To>(std::forward<From>(v)); }
 };
 
 template <>
@@ -59,7 +57,7 @@ struct converter_traits<const char*, std::string>
 };
 
 template <typename From>
-struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is_floating_point_v<From>,std::string>>
+struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is_floating_point_v<From>, std::string>>
 {
     inline static auto convert(From&& v) { return std::to_string(v); }
 };
@@ -72,4 +70,4 @@ inline auto convert_to(From&& v) {
 
 } // namespace ecf
 
-#endif
+#endif /* ecflow_core_Converter_HPP */

@@ -1,21 +1,20 @@
-#ifndef CHECKPT_HPP_
-#define CHECKPT_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #7 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-// This class is used to ONLY serialise the edit history when check pointing
-// Also Provides enums for check pointing
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_core_CheckPt_HPP
+#define ecflow_core_CheckPt_HPP
+
+///
+/// \brief This class serialises the edit history when storing a check point.
+///        Provides also check point status enumerates.
+///
 
 namespace ecf {
 
@@ -40,4 +39,5 @@ private:
 };
 
 } // namespace ecf
-#endif
+
+#endif /* ecflow_core_CheckPt_HPP */
