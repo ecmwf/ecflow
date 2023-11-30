@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_UDP_UDPCLIENT_HPP
-#define ECFLOW_UDP_UDPCLIENT_HPP
+#ifndef ecflow_udp_UDPClient_HPP
+#define ecflow_udp_UDPClient_HPP
 
 #include <string>
 
@@ -92,4 +92,4 @@ using UDPClient = BaseUDPClient;
 
 } // namespace ecf
 
-#endif
+#endif /* ecflow_udp_UDPClient_HPP */

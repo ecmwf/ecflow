@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_UDP_REQUESTHANDLER_HPP
-#define ECFLOW_UDP_REQUESTHANDLER_HPP
+#ifndef ecflow_udp_RequestHandler_HPP
+#define ecflow_udp_RequestHandler_HPP
 
 #include <string>
 
@@ -29,4 +29,4 @@ public:
 
 } // namespace ecf
 
-#endif
+#endif /* ecflow_udp_RequestHandler_HPP */

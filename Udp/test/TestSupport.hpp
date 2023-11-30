@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_UDP_TESTSUPPORT_HPP
-#define ECFLOW_UDP_TESTSUPPORT_HPP
+#ifndef ecflow_udp_test_TestSupport_HPP
+#define ecflow_udp_test_TestSupport_HPP
 
 #include <memory>
 #include <thread>
@@ -285,4 +285,4 @@ private:
 
 } // namespace ecf::test
 
-#endif
+#endif /* ecflow_udp_test_TestSupport_HPP */
