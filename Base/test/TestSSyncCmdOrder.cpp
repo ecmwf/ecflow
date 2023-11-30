@@ -12,7 +12,6 @@
 
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "Ecf.hpp"
 #include "Family.hpp"
 #include "MockServer.hpp"
 #include "SSyncCmd.hpp"
@@ -20,7 +19,8 @@
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
-#include "TestUtil.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/TestUtil.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -13,17 +13,17 @@
 
 #include <boost/program_options.hpp>
 
-#include "CheckPt.hpp"
-#include "Child.hpp"
 #include "Cmd.hpp"
 #include "Flag.hpp"
-#include "NOrder.hpp"
 #include "NodeFwd.hpp"
 #include "PreAllocatedReply.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
 #include "Variable.hpp"
 #include "Zombie.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/NOrder.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;

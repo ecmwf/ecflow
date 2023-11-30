@@ -11,7 +11,7 @@
 #include <iostream>
 
 #include "ClientInvoker.hpp"
-#include "CommandLine.hpp"
+#include "ecflow/core/CommandLine.hpp"
 
 int main(int argc, char* argv[]) {
 

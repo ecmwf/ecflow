@@ -10,7 +10,7 @@
 
 #include "VReply.hpp"
 
-#include "File.hpp"
+#include "ecflow/core/File.hpp"
 
 bool VReply::textFromFile(const std::string& fileName) {
     if (!fileName.empty() && ecf::File::open(fileName, text_)) {

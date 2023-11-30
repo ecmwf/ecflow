@@ -18,12 +18,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientInvoker.hpp"
-#include "EcfPortLock.hpp"
-#include "Host.hpp"
 #include "Server.hpp"
 #include "ServerEnvironment.hpp"
-#include "Str.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Str.hpp"
 
 class InvokeServer {
 public:

@@ -12,8 +12,8 @@
 
 #include "Defs.hpp"
 #include "DefsDelta.hpp"
-#include "Ecf.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 // #define DEBUG_ME 1
 

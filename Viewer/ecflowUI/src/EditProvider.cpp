@@ -12,10 +12,10 @@
 
 #include "NodeFwd.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "ecflow/core/Str.hpp"
 
 // Node
 void EditProvider::visit(VInfoNode* info) {

@@ -15,9 +15,9 @@
 #include <boost/filesystem/operations.hpp>
 
 #include "Defs.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
 #include "TemporaryFile.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

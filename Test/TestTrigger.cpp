@@ -16,16 +16,16 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Converter.hpp"
 #include "Defs.hpp"
-#include "DurationTimer.hpp"
 #include "Family.hpp"
 #include "Limit.hpp"
 #include "ServerTestHarness.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "VerifyAttr.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

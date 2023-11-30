@@ -14,8 +14,8 @@
 
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "PrintStyle.hpp"
 #include "QueueAttr.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace ecf;
 using namespace std;

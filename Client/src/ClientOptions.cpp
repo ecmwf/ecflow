@@ -21,13 +21,13 @@
 
 #include "ClientEnvironment.hpp"
 #include "ClientOptionsParser.hpp"
-#include "CommandLine.hpp"
-#include "Converter.hpp"
 #include "Help.hpp"
-#include "PasswordEncryption.hpp"
-#include "Str.hpp"
 #include "TaskApi.hpp"
-#include "Version.hpp"
+#include "ecflow/core/CommandLine.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace std;
 using namespace ecf;

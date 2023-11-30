@@ -17,7 +17,6 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-#include "Converter.hpp"
 #include "DashboardDialog.hpp"
 #include "DashboardDock.hpp"
 #include "DashboardTitle.hpp"
@@ -34,6 +33,7 @@
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
+#include "ecflow/core/Converter.hpp"
 
 int Dashboard::maxWidgetNum_ = 20;
 

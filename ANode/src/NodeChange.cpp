@@ -10,13 +10,13 @@
 
 #include <stdexcept>
 
-#include "Converter.hpp"
-#include "Ecf.hpp"
 #include "ExprAst.hpp"
 #include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "Node.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

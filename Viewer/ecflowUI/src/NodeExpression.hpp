@@ -10,13 +10,13 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "DState.hpp"
 #include "StringMatchMode.hpp"
 #include "VAttribute.hpp"
 #include "VInfo.hpp"
 #include "VItem.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
+#include "ecflow/core/DState.hpp"
 
 class VItem;
 class VAttributeType;

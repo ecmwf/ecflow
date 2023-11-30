@@ -21,18 +21,18 @@
 #include "Defs.hpp"
 #include "DefsStructureParser.hpp"
 #include "Family.hpp"
-#include "File.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "NodeContainer.hpp"
 #include "PersistHelper.hpp"
-#include "PrintStyle.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
 #include "TemporaryFile.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

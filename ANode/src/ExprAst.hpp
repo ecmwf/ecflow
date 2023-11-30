@@ -16,9 +16,9 @@
 #include <cassert>
 #include <iosfwd>
 
-#include "DState.hpp"
 #include "Flag.hpp"
 #include "NodeFwd.hpp"
+#include "ecflow/core/DState.hpp"
 
 namespace ecf {
 class ExprAstVisitor;

@@ -14,9 +14,9 @@
 #include <boost/program_options.hpp>
 
 #include "ApiV1.hpp"
-#include "Converter.hpp"
 #include "JSON.hpp"
 #include "Options.hpp"
+#include "ecflow/core/Converter.hpp"
 
 Options opts;
 

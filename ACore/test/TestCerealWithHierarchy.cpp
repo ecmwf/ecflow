@@ -11,7 +11,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Serialization.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
 using namespace boost;

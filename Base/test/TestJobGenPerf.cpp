@@ -16,14 +16,14 @@
 #include <boost/filesystem/path.hpp>
 
 #include "Defs.hpp"
-#include "File.hpp"
 #include "JobProfiler.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
 #include "Task.hpp"
 #include "Variable.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

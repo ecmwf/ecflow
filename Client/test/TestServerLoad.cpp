@@ -14,9 +14,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "ecflow/core/File.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

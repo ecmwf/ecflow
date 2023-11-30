@@ -15,20 +15,20 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include "Converter.hpp"
 #include "DefsDelta.hpp"
-#include "Ecf.hpp"
 #include "EcfFile.hpp"
-#include "Extract.hpp"
-#include "File.hpp"
 #include "JobCreationCtrl.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "Memento.hpp"
-#include "Passwd.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
 #include "System.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Passwd.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;

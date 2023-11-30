@@ -17,14 +17,14 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include "Converter.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
-#include "Host.hpp"
-#include "PasswdFile.hpp"
-#include "Str.hpp"
-#include "TimeStamp.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeStamp.hpp"
+#include "ecflow/core/Version.hpp"
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"
 #endif

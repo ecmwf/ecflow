@@ -13,11 +13,11 @@
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "Log.hpp"
-#include "PrintStyle.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "WhyCmd.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace ecf;
 using namespace std;

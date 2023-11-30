@@ -16,12 +16,12 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "EcfFile.hpp"
-#include "File.hpp"
-#include "Str.hpp"
 #include "Submittable.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

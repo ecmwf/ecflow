@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Limit.hpp"
 #include "MiscAttrs.hpp"
 #include "Node.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

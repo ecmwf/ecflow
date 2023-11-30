@@ -13,7 +13,7 @@
 #include <string>
 
 #include "Defs.hpp"
-#include "PrintStyle.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

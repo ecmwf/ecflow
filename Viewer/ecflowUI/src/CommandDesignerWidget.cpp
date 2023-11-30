@@ -13,11 +13,11 @@
 #include <QMessageBox>
 #include <boost/enable_shared_from_this.hpp>
 
-#include "Child.hpp"
 #include "CustomCommandHandler.hpp"
 #include "NodeExpression.hpp"
 #include "NodeQueryResult.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace boost;
 namespace po = boost::program_options;

@@ -13,8 +13,8 @@
 
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
-#include "Serialization.hpp"
 #include "ServerReply.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 //================================================================================
 // Start of Server->client

@@ -36,7 +36,6 @@
 #include "MeterParser.hpp"
 #include "QueueParser.hpp"
 #include "RepeatParser.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TimeParser.hpp"
@@ -45,6 +44,7 @@
 #include "VariableParser.hpp"
 #include "VerifyParser.hpp"
 #include "ZombieAttrParser.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

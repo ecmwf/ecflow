@@ -12,14 +12,14 @@
 
 #include <iostream>
 
-#include "Cal.hpp"
-#include "Converter.hpp"
 #include "Defs.hpp"
 #include "ExprAstVisitor.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
 #include "Node.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

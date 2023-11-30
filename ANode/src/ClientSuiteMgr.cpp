@@ -14,7 +14,7 @@
 #include <sstream>   // for std::stringstream
 #include <stdexcept>
 
-#include "Ecf.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 using namespace ecf;
 using namespace std;

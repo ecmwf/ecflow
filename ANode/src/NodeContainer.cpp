@@ -17,22 +17,22 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DefsDelta.hpp"
-#include "Ecf.hpp"
 #include "Family.hpp"
-#include "File.hpp"
-#include "Host.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "Memento.hpp"
 #include "NodeState.hpp"
 #include "NodeTreeVisitor.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
 #include "SuiteChanged.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 #include "move_peer.hpp"
 
 namespace fs = boost::filesystem;

@@ -15,15 +15,15 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "CheckPt.hpp"
-#include "Converter.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
-#include "Host.hpp"
 #include "JobProfiler.hpp"
-#include "Log.hpp"
 #include "ServerEnvironment.hpp"
-#include "Str.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

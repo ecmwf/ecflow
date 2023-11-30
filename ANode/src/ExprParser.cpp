@@ -35,13 +35,13 @@
 #include <boost/spirit/include/classic_tree_to_xml.hpp>
 #include <boost/spirit/include/phoenix1_binders.hpp>
 
-#include "Converter.hpp"
 #include "ExprAst.hpp"
 #include "ExprDuplicate.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
 #include "NodeAttr.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 // Reference
 // ‘*’   Zero or more

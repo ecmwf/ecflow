@@ -18,11 +18,11 @@
 #endif
 
 #include "Defs.hpp"
-#include "Log.hpp"
 #include "Signal.hpp"
 #include "Submittable.hpp"
 #include "SuiteChanged.hpp"
 #include "System.hpp"
+#include "ecflow/core/Log.hpp"
 
 // #define DEBUG_FORK 1
 // #define DEBUG_CATCH_CHILD 1

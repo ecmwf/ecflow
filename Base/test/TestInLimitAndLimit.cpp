@@ -20,11 +20,11 @@
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "Limit.hpp"
-#include "PrintStyle.hpp" // IWYU pragma: keep
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
 
 using namespace std;
 using namespace ecf;

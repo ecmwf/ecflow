@@ -10,8 +10,8 @@
 
 #include "ssl_connection.hpp"
 
-#include "Ecf.hpp"
-#include "Log.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
 
 ssl_connection::~ssl_connection() {
 #ifdef DEBUG_CONNECTION

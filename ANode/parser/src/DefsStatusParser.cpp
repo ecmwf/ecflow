@@ -13,8 +13,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "DState.hpp"
 #include "Node.hpp"
+#include "ecflow/core/DState.hpp"
 
 using namespace ecf;
 using namespace std;

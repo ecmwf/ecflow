@@ -18,9 +18,9 @@
 #include <unordered_map>
 
 #include "DefsParser.hpp"
-#include "File_r.hpp"
 #include "NodeFwd.hpp"
-#include "PrintStyle.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 class Parser;
 

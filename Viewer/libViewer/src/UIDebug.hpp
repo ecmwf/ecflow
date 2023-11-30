@@ -11,7 +11,7 @@
 #ifndef ecflow_viewer_UIDebug_HPP
 #define ecflow_viewer_UIDebug_HPP
 
-#include "Log.hpp" // from ACore
+#include "ecflow/core/Log.hpp" // from ACore
 
 class UIDebug {
 public:

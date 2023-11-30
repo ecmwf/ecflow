@@ -16,8 +16,8 @@
 #include <nlohmann/json.hpp>
 
 #include "ClientAPI.hpp"
-#include "Converter.hpp"
 #include "Trace.hpp"
+#include "ecflow/core/Converter.hpp"
 
 namespace ecf {
 

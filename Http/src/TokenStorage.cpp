@@ -27,7 +27,7 @@
     #include "HttpServerException.hpp"
     #include "JSON.hpp"
     #include "Options.hpp"
-    #include "Str.hpp"
+    #include "ecflow/core/Str.hpp"
 
 std::shared_mutex m;
 using string                  = std::string;

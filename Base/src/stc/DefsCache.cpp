@@ -11,8 +11,8 @@
 #include "DefsCache.hpp"
 
 #include "Defs.hpp"
-#include "Ecf.hpp"
-#include "Log.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
 
 // =====================================================================================================
 // #define DEBUG_SERVER_SYNC 1

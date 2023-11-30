@@ -14,9 +14,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "TimeSeries.hpp"
 #include "TodayAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;

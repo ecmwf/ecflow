@@ -14,7 +14,7 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "ServerToClientCmd.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -16,15 +16,15 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Child.hpp"
 #include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "File.hpp"
 #include "Flag.hpp"
-#include "NState.hpp"
 #include "Submittable.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/NState.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-#include "Converter.hpp"
+#include "ecflow/core/Converter.hpp"
 
 using namespace ecf;
 using namespace std;

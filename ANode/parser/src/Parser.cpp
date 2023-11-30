@@ -14,11 +14,11 @@
 
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "Stl.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Stl.hpp"
+#include "ecflow/core/Str.hpp"
 
 #ifdef SHOW_PARSER_STATS
-    #include "Indentor.hpp"
+    #include "ecflow/core/Indentor.hpp"
 #endif
 
 using namespace ecf;

@@ -23,16 +23,16 @@
 #include "AutoArchiveAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoRestoreAttr.hpp"
-#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Expression.hpp"
 #include "Family.hpp"
 #include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "MiscAttrs.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
 
 // =======================================================================
 // This struct is used in the node migration tests.

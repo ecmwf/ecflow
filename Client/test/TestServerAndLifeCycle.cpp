@@ -12,12 +12,12 @@
 
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "Submittable.hpp"
 #include "Suite.hpp"
 #include "System.hpp" // kill singleton for valgrind
+#include "ecflow/core/File.hpp"
 
 using namespace std;
 using namespace ecf;

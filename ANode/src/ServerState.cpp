@@ -10,12 +10,12 @@
 
 #include "ServerState.hpp"
 
-#include "Ecf.hpp"
-#include "Host.hpp"
-#include "Log.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace ecf;
 using namespace std;

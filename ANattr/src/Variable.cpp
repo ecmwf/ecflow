@@ -13,9 +13,9 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Indentor.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

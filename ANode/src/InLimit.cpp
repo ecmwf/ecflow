@@ -12,14 +12,14 @@
 
 #include <stdexcept>
 
-#include "Converter.hpp"
-#include "Indentor.hpp"
 #include "Limit.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 #ifdef DEBUG
-    #include "Ecf.hpp"
+    #include "ecflow/core/Ecf.hpp"
 #endif
 
 using namespace std;

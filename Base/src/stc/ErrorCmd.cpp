@@ -13,7 +13,7 @@
 #include <iostream>
 
 #include "ClientToServerCmd.hpp"
-#include "Log.hpp"
+#include "ecflow/core/Log.hpp"
 
 using namespace ecf;
 using namespace std;

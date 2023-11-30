@@ -14,7 +14,7 @@
 
 #include "BaseServer.hpp"
 #include "ServerEnvironment.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Version.hpp"
 
 using boost::asio::ip::tcp;
 

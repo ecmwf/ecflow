@@ -12,10 +12,10 @@
 
 #include <stdexcept>
 
-#include "Extract.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace ecf;
 using namespace std;

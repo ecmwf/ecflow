@@ -14,13 +14,13 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Ecf.hpp"
-#include "File.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

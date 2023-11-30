@@ -13,7 +13,7 @@
 #include <iostream>
 
 #include "ServerEnvironment.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Version.hpp"
 
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"

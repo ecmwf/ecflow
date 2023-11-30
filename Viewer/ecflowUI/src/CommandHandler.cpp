@@ -17,12 +17,12 @@
 #include "ActionHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ShellCommand.hpp"
-#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VAttribute.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
+#include "ecflow/core/Str.hpp"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     #include <QRegExp>

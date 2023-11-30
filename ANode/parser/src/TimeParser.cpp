@@ -14,7 +14,7 @@
 
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace ecf;
 using namespace std;

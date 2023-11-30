@@ -10,7 +10,7 @@
 
 #include "ServerToClientCmd.hpp"
 
-#include "Str.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 

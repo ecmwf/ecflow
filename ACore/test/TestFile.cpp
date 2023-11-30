@@ -16,18 +16,18 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Converter.hpp"
+#include "ecflow/core/Converter.hpp"
 
 // #define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
 #ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
     #include <boost/timer/timer.hpp>
 
-    #include "Str.hpp"
+    #include "ecflow/core/Str.hpp"
 #endif
 
-#include "File.hpp"
-#include "NodePath.hpp"
-#include "User.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/User.hpp"
 
 using namespace boost;
 using namespace std;

@@ -17,8 +17,8 @@
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Log.hpp"
-#include "PrintStyle.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace ecf;
 using namespace std;

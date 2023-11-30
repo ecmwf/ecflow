@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-#include "TimeSlot.hpp"
+#include "ecflow/core/TimeSlot.hpp"
 
 namespace ecf {
 class Calendar;

@@ -15,9 +15,9 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "Child.hpp"
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
+#include "ecflow/core/Child.hpp"
 class AbstractServer;
 
 // class PreAllocatedReply:

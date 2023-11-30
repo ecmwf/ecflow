@@ -14,13 +14,13 @@
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "File.hpp"
-#include "Pid.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "System.hpp"
 #include "TestHelper.hpp"
-// #include "PrintStyle.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
+// #include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

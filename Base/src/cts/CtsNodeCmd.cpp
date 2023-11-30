@@ -18,7 +18,7 @@
 #include "JobCreationCtrl.hpp"
 #include "Jobs.hpp"
 #ifdef DEBUG
-    #include "Ecf.hpp"
+    #include "ecflow/core/Ecf.hpp"
 #endif
 
 using namespace ecf;

@@ -12,7 +12,7 @@
 
 #include <sstream>
 
-#include "Converter.hpp"
+#include "ecflow/core/Converter.hpp"
 
 std::string CtsApi::to_string(const std::vector<std::string>& vec) {
     std::string ret;

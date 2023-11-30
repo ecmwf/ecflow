@@ -83,7 +83,7 @@
 /// and will have to start at 12:00
 ///
 
-#include "TimeSeries.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 class DateAttr; // Used in Why
 class DayAttr;  // Used in Why

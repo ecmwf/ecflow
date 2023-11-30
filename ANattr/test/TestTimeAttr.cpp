@@ -15,9 +15,9 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
 #include "TimeAttr.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;

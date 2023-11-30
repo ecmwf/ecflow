@@ -10,9 +10,9 @@
 
 #include "TypeToJson.hpp"
 
-#include "Child.hpp"
-#include "SState.hpp"
-#include "User.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/SState.hpp"
+#include "ecflow/core/User.hpp"
 
 void to_json(ecf::ojson& j, const Meter& a) {
     j = ecf::ojson({{"name", a.name()}, {"min", a.min()}, {"max", a.max()}, {"value", a.value()}});

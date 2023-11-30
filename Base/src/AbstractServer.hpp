@@ -15,11 +15,11 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "CheckPt.hpp"
-#include "SState.hpp"
 #include "Stats.hpp"
-#include "Str.hpp"
 #include "ZombieCtrl.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/SState.hpp"
+#include "ecflow/core/Str.hpp"
 
 class Defs;
 

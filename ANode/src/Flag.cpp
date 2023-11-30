@@ -12,9 +12,9 @@
 
 #include <stdexcept>
 
-#include "Ecf.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace ecf {
 

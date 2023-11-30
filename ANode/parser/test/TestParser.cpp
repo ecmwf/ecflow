@@ -17,11 +17,11 @@
 
 #include "Defs.hpp"
 #include "DefsStructureParser.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
 #include "Node.hpp"
 #include "PersistHelper.hpp"
-// #include "PrintStyle.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+// #include "ecflow/core/PrintStyle.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

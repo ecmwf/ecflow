@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Converter.hpp"
-#include "perf_timer.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/perf_timer.hpp"
 
 using namespace boost;
 using namespace std;

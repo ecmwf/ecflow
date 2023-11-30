@@ -10,12 +10,12 @@
 
 #include "ClockAttr.hpp"
 
-#include "Calendar.hpp"
-#include "Converter.hpp"
 #include "DateAttr.hpp"
-#include "Ecf.hpp"
-#include "Indentor.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace std;
 using namespace ecf;

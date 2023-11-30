@@ -17,11 +17,11 @@
 
 #include "AbstractServer.hpp"
 #include "Defs.hpp"
-#include "Ecf.hpp" // In server we increment modify and state change numbers,
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
+#include "ecflow/core/Log.hpp"
 
 /// Act as stand in for a server since Request require at least a AbstractServer
 class MockServer : public AbstractServer {

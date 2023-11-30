@@ -27,11 +27,11 @@
 
 #include <boost/asio.hpp>
 
-#include "Serialization.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 // #define DEBUG_CONNECTION 1
 #ifdef DEBUG_CONNECTION
-    #include "Ecf.hpp"
+    #include "ecflow/core/Ecf.hpp"
 #endif
 
 /// The connection class provides serialisation primitives on top of a socket.

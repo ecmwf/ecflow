@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "CalendarUpdateParams.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
 
 using namespace std;
 using namespace ecf;

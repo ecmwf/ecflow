@@ -15,7 +15,7 @@
 #include "Trace.hpp"
 #include "UDPServer.hpp"
 #include "UDPServerOptions.hpp"
-#include "ecflow_version.h"
+#include "ecflow/core/ecflow_version.h"
 
 static std::string ecflow_udp_server_version() {
 #ifdef DEBUG

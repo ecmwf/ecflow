@@ -12,17 +12,17 @@
 
 #include <stdexcept>
 
-#include "Extract.hpp"
 #include "Limit.hpp"
 #include "Memento.hpp"
 #include "Node.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 #ifdef DEBUG
     #include <ostream>
 
-    #include "Ecf.hpp"
+    #include "ecflow/core/Ecf.hpp"
 #endif
 
 using namespace ecf;

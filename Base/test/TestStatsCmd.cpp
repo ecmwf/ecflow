@@ -11,10 +11,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerRequest.hpp"
-#include "Log.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "ServerToClientCmd.hpp"
+#include "ecflow/core/Log.hpp"
 
 ///
 ///   Tests for `Stats` command

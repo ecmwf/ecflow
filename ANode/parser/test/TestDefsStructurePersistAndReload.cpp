@@ -15,7 +15,7 @@
 
 #include "MyDefsFixture.hpp"
 #include "PersistHelper.hpp"
-#include "PrintStyle.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

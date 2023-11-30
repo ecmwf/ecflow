@@ -17,10 +17,10 @@
 #include "ClientOptions.hpp"
 #include "Cmd.hpp"
 #include "CtsApi.hpp"
-#include "NOrder.hpp"
 #include "NodeFwd.hpp"
 #include "ServerReply.hpp"
 #include "TaskApi.hpp"
+#include "ecflow/core/NOrder.hpp"
 
 class CommandLine;
 

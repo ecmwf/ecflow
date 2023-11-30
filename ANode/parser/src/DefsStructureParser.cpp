@@ -15,8 +15,8 @@
 #include <boost/tokenizer.hpp>
 
 #include "Defs.hpp"
-#include "Str.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 // #define DEBUG_PARSER 1
 

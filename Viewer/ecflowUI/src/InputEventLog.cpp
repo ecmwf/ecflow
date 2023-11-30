@@ -24,8 +24,8 @@
 
 #include "DirectoryHandler.hpp"
 #include "LogTruncator.hpp"
-#include "TimeStamp.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/TimeStamp.hpp"
 
 InputEventLog* InputEventLog::instance_ = nullptr;
 static bool firstStart                  = true;

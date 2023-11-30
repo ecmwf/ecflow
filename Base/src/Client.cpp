@@ -17,7 +17,7 @@
 #include "StcCmd.hpp"
 
 #ifdef DEBUG_PERF
-    #include "DebugPerf.hpp"
+    #include "ecflow/core/DebugPerf.hpp"
 #endif
 
 // #define DEBUG_CLIENT 1;

@@ -17,7 +17,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "DurationTimer.hpp"
 #include "Family.hpp"
 #include "Limit.hpp"
 #include "ServerTestHarness.hpp"
@@ -25,6 +24,7 @@
 #include "Task.hpp"
 #include "TestFixture.hpp"
 #include "VerifyAttr.hpp"
+#include "ecflow/core/DurationTimer.hpp"
 
 using namespace std;
 using namespace ecf;

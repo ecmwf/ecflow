@@ -13,7 +13,7 @@
 #include <iostream>
 
 #include "AbstractServer.hpp"
-#include "Converter.hpp"
+#include "ecflow/core/Converter.hpp"
 
 using namespace std;
 using namespace boost;

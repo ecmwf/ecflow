@@ -10,11 +10,11 @@
 
 #include "AutoCancelAttr.hpp"
 
-#include "Calendar.hpp"
-#include "Converter.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 #ifdef DEBUG
     #include <boost/date_time/posix_time/time_formatters.hpp>

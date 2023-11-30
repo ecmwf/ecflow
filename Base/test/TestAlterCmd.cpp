@@ -13,16 +13,16 @@
 
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "Ecf.hpp"
 #include "Family.hpp"
 #include "GenericAttr.hpp"
 #include "LateAttr.hpp"
 #include "Limit.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

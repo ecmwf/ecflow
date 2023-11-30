@@ -16,11 +16,11 @@
 #include "Defs.hpp"
 #include "EcfFile.hpp"
 #include "Family.hpp"
-#include "File.hpp"
-#include "Pid.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

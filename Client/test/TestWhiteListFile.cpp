@@ -17,7 +17,7 @@
 #include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "WhiteListFile.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

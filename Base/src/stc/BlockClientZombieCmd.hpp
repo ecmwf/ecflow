@@ -11,8 +11,8 @@
 #ifndef ecflow_base_stc_BlockClientZombieCmd_HPP
 #define ecflow_base_stc_BlockClientZombieCmd_HPP
 
-#include "Child.hpp"
 #include "ServerToClientCmd.hpp"
+#include "ecflow/core/Child.hpp"
 
 //
 // This command send the zombie type to the client

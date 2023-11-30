@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "Converter.hpp"
+#include "ecflow/core/Converter.hpp"
 
 namespace ecf {
 

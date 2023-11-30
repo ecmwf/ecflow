@@ -12,8 +12,8 @@
 
 #include "Defs.hpp"
 #include "ExprAst.hpp"
-#include "Log.hpp"
 #include "Node.hpp"
+#include "ecflow/core/Log.hpp"
 
 namespace ecf {
 

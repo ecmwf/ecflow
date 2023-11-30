@@ -11,10 +11,10 @@
 #include "VTriggerAttr.hpp"
 
 #include "Expression.hpp"
-#include "Indentor.hpp"
 #include "NodeAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/core/Indentor.hpp"
 
 //================================
 // VTriggerAttrType

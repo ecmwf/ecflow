@@ -20,13 +20,13 @@
 
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "File.hpp"
-#include "Log.hpp"
 #include "Simulator.hpp"
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
-#include "TestUtil.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/TestUtil.hpp"
 
 using namespace std;
 using namespace ecf;

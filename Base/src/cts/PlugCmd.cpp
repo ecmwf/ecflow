@@ -17,9 +17,9 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "NodePath.hpp"
 #include "Suite.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/NodePath.hpp"
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"
     #include "SslClient.hpp"

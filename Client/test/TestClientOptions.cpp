@@ -14,8 +14,8 @@
 #include "ClientInvoker.hpp"
 #include "ClientOptions.hpp"
 #include "ClientToServerCmd.hpp"
-#include "CommandLine.hpp"
-#include "PasswordEncryption.hpp"
+#include "ecflow/core/CommandLine.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
 
 ///
 /// \brief Tests the capabilities of ClientOptions

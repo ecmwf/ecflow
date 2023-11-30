@@ -17,12 +17,12 @@
 
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
-#include "Pid.hpp"
-#include "PrintStyle.hpp"
 #include "SCPort.hpp"
-#include "User.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/User.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

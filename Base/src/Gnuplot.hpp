@@ -16,7 +16,7 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "Host.hpp"
+#include "ecflow/core/Host.hpp"
 
 ///
 /// \brief Encompasses functionality for plotting server load

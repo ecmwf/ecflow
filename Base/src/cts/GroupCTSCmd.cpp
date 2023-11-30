@@ -16,13 +16,13 @@
 #include "AbstractServer.hpp"
 #include "ClientOptionsParser.hpp"
 #include "ClientToServerCmd.hpp"
-#include "CommandLine.hpp"
 #include "CtsApi.hpp"
 #include "CtsCmdRegistry.hpp"
 #include "ErrorCmd.hpp"
 #include "GroupSTCCmd.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
+#include "ecflow/core/CommandLine.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

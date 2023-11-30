@@ -21,13 +21,13 @@
 
 #include "ClientInvoker.hpp"
 #include "Defs.hpp"
-#include "EcfPortLock.hpp"
-#include "File.hpp"
-#include "Host.hpp"
 #include "Node.hpp"
 #include "NodeAttr.hpp"
-#include "Str.hpp"
 #include "UDPClient.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace bp = boost::process;
 

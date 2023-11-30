@@ -12,10 +12,10 @@
 
 #include <iomanip>
 
-#include "Child.hpp"
-#include "Ecf.hpp"
-#include "Str.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 namespace /* __anonymous__ */ {
 

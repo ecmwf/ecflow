@@ -14,8 +14,8 @@
 #include <boost/asio.hpp>
 
 #include "ClientToServerRequest.hpp"
-#include "Log.hpp"
 #include "ServerToClientResponse.hpp"
+#include "ecflow/core/Log.hpp"
 
 class BaseServer;
 class ServerEnvironment;

@@ -17,15 +17,15 @@
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
 #include "Defs.hpp"
-#include "File.hpp"
-#include "Host.hpp"
 #include "InvokeServer.hpp"
 #include "Rtt.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

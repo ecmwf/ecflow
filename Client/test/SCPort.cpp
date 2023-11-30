@@ -14,8 +14,8 @@
 
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
-#include "EcfPortLock.hpp"
-#include "Str.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace ecf {
 

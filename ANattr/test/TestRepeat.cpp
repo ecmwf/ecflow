@@ -13,9 +13,9 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 #include <boost/test/unit_test.hpp>
 
-#include "Cal.hpp"
-#include "Converter.hpp"
 #include "RepeatAttr.hpp"
+#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Converter.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

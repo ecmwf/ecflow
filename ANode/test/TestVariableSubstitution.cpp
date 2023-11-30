@@ -14,12 +14,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "Ecf.hpp"
 #include "Family.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -11,7 +11,7 @@
 #ifndef ecflow_node_NodeState_HPP
 #define ecflow_node_NodeState_HPP
 
-#include "NState.hpp"
+#include "ecflow/core/NState.hpp"
 
 ///
 /// \brief Given a set of nodes, theComputedNodeState returns the most significant state

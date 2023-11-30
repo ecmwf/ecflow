@@ -12,7 +12,6 @@
 
 #include "AutoArchiveAttr.hpp"
 #include "AutoCancelAttr.hpp"
-#include "Calendar.hpp"
 #include "ClockAttr.hpp"
 #include "CronAttr.hpp"
 #include "DateAttr.hpp"
@@ -22,12 +21,13 @@
 #include "NodeAttr.hpp"
 #include "QueueAttr.hpp"
 #include "RepeatAttr.hpp"
-#include "SerializationTest.hpp"
 #include "TimeAttr.hpp"
 #include "TodayAttr.hpp"
 #include "Variable.hpp"
 #include "VerifyAttr.hpp"
 #include "ZombieAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/SerializationTest.hpp"
 
 using namespace std;
 using namespace ecf;

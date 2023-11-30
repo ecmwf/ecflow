@@ -29,22 +29,22 @@
 
 #include "Aspect.hpp"
 #include "Attr.hpp"
-#include "Child.hpp"
 #include "CronAttr.hpp"
-#include "DState.hpp"
 #include "DateAttr.hpp"
 #include "DayAttr.hpp"
 #include "Flag.hpp"
 #include "InLimit.hpp"
 #include "InLimitMgr.hpp"
-#include "NOrder.hpp"
 #include "NodeAttr.hpp"
 #include "NodeFwd.hpp"
-#include "PrintStyle.hpp"
 #include "RepeatAttr.hpp"
 #include "TimeAttr.hpp"
 #include "TodayAttr.hpp"
 #include "Variable.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/DState.hpp"
+#include "ecflow/core/NOrder.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 namespace ecf {
 class Simulator;

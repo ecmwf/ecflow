@@ -16,13 +16,13 @@
 
 #include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
-#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VSettings.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 VConfig* VConfig::instance_ = nullptr;
 

@@ -17,7 +17,7 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "PrintStyle.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 class QueueAttr;
 class Defs;

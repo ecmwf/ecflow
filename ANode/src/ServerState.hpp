@@ -14,8 +14,8 @@
 #include <cstdint>
 
 #include "NodeFwd.hpp"
-#include "SState.hpp"
 #include "Variable.hpp"
+#include "ecflow/core/SState.hpp"
 
 /// This class stores the server state, so that it is accessible by the node tree
 ///

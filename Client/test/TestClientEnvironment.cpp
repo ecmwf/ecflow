@@ -16,8 +16,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientEnvironment.hpp"
-#include "File.hpp"
-#include "Str.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

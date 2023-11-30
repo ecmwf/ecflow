@@ -14,8 +14,8 @@
 #include <deque>
 #include <string>
 
-#include "CheckPt.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 /// This class is used to store all statistical data about all the
 /// commands processed by the server. Uses default copy constructor

@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-#include "NState.hpp"
 #include "VParam.hpp"
+#include "ecflow/core/NState.hpp"
 
 class VNode;
 class ServerHandler;

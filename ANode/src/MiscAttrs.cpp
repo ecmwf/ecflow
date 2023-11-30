@@ -12,10 +12,10 @@
 
 #include <stdexcept>
 
-#include "Ecf.hpp"
 #include "Memento.hpp"
 #include "Node.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 #ifdef DEBUG
     #include <iostream>

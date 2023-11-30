@@ -12,13 +12,13 @@
 
 #include <stdexcept>
 
-#include "Converter.hpp"
-#include "Ecf.hpp"
-#include "Extract.hpp"
-#include "Indentor.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

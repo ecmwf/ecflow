@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-#include "NState.hpp"
+#include "ecflow/core/NState.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 class QueueAttr {

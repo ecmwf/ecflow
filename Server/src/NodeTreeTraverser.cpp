@@ -11,13 +11,13 @@
 #include "NodeTreeTraverser.hpp"
 
 #include "BaseServer.hpp"
-#include "Calendar.hpp"
-#include "CalendarUpdateParams.hpp"
 #include "Defs.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "ServerEnvironment.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Log.hpp"
 
 // #define DEBUG_TRAVERSER 1
 // #define DEBUG_POLL 1

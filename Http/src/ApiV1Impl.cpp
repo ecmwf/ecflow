@@ -17,18 +17,18 @@
 #include <condition_variable>
 
 #include "BasicAuth.hpp"
-#include "Child.hpp"
-#include "Converter.hpp"
 #include "Defs.hpp"
 #include "DefsStructureParser.hpp"
 #include "Family.hpp"
 #include "HttpServerException.hpp"
 #include "Limit.hpp"
 #include "Options.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "TokenStorage.hpp"
 #include "TypeToJson.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
 
 std::shared_ptr<Defs> defs_ = nullptr;
 

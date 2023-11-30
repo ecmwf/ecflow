@@ -18,10 +18,10 @@
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
 #include "EcfFile.hpp"
-#include "File.hpp"
 #include "JobsParam.hpp"
 #include "SuiteChanged.hpp"
 #include "Task.hpp"
+#include "ecflow/core/File.hpp"
 
 using namespace ecf;
 using namespace std;

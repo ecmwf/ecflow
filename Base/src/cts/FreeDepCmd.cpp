@@ -14,9 +14,9 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Log.hpp"
 #include "Node.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Log.hpp"
 
 using namespace ecf;
 using namespace std;

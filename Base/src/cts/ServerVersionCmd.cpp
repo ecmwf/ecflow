@@ -12,7 +12,7 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace ecf;
 using namespace std;

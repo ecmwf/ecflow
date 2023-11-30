@@ -13,12 +13,12 @@
 #include <QApplication>
 
 #include "ClientInvoker.hpp"
-#include "Log.hpp"
 #include "ServerComThread.hpp"
 #include "ServerHandler.hpp"
 #include "UIDebug.hpp"
 #include "UiLogS.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/Log.hpp"
 
 #define _UI_SERVERCOMQUEUE_DEBUG
 

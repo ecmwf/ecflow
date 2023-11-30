@@ -16,10 +16,10 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "DurationTimer.hpp"
-#include "File.hpp"
-#include "Log.hpp"
-#include "Pid.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Pid.hpp"
 
 using namespace ecf;
 using namespace std;

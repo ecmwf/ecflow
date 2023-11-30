@@ -14,8 +14,8 @@
 
 #include <unordered_map>
 
-#include "Ecf.hpp"
 #include "ExprAst.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 using namespace std;
 

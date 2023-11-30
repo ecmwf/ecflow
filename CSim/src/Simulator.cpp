@@ -14,16 +14,16 @@
 #include <boost/filesystem/operations.hpp>
 
 #include "Analyser.hpp"
-#include "CalendarUpdateParams.hpp"
 #include "Defs.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "QueueAttr.hpp"
 #include "SimulatorVisitor.hpp"
-#include "Str.hpp"
 #include "Submittable.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;

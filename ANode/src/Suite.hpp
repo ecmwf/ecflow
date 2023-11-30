@@ -11,9 +11,9 @@
 #ifndef ecflow_node_Suite_HPP
 #define ecflow_node_Suite_HPP
 
-#include "Calendar.hpp"
 #include "ClockAttr.hpp" // IWYU pragma: keep
 #include "NodeContainer.hpp"
+#include "ecflow/core/Calendar.hpp"
 
 class SuiteGenVariables;
 namespace ecf {

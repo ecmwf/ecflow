@@ -14,10 +14,10 @@
 #include "Defs.hpp"
 #include "ExprAst.hpp"
 #include "Family.hpp"
-#include "Indentor.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 

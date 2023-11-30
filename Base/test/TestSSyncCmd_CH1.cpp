@@ -11,8 +11,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "Converter.hpp"
-#include "Ecf.hpp"
 #include "Family.hpp"
 #include "Limit.hpp"
 #include "MockServer.hpp"
@@ -22,6 +20,8 @@
 #include "SuiteChanged.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 using namespace std;
 using namespace ecf;

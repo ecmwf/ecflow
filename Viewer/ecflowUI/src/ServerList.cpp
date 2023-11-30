@@ -19,17 +19,17 @@
 
 #include <QTimer>
 
-#include "Converter.hpp"
 #include "DirectoryHandler.hpp"
 #include "MainWindow.hpp"
 #include "ServerItem.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
 #include "VReply.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
 
 ServerList* ServerList::instance_ = nullptr;
 

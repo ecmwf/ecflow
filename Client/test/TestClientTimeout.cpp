@@ -20,7 +20,7 @@
 // #include "ClientEnvironment.hpp"
 // #include "InvokeServer.hpp"
 // #include "SCPort.hpp"
-// #include "Str.hpp"
+// #include "ecflow/core/Str.hpp"
 //
 // namespace fs = boost::filesystem;
 // using namespace std;

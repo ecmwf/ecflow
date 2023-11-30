@@ -15,9 +15,9 @@
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
 #include "Suite.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Log.hpp"
 
 using namespace ecf;
 using namespace std;

@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
 #include "TestFixture.hpp"
 #include "Zombie.hpp"
 #include "ZombieUtil.hpp"
+#include "ecflow/core/AssertTimer.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -14,9 +14,9 @@
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
-#include "PasswdFile.hpp"
 #include "SCPort.hpp"
-#include "User.hpp"
+#include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/core/User.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

@@ -15,7 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "DurationTimer.hpp"
+#include "ecflow/core/DurationTimer.hpp"
 #include "ServerTestHarness.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"

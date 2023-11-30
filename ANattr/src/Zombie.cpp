@@ -10,9 +10,9 @@
 
 #include "Zombie.hpp"
 
-#include "Calendar.hpp"
-#include "Converter.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
 using namespace std;

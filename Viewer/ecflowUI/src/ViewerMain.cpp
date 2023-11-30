@@ -22,7 +22,6 @@
 #include "CustomCommandHandler.hpp"
 #include "DiagData.hpp"
 #include "DirectoryHandler.hpp"
-#include "File.hpp"
 #include "Highlighter.hpp"
 #include "InfoPanelHandler.hpp"
 #include "InputEventLog.hpp"
@@ -40,7 +39,8 @@
 #include "VIcon.hpp"
 #include "VServerSettings.hpp"
 #include "VSettingsLoader.hpp"
-#include "Version.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Version.hpp"
 
 int main(int argc, char** argv) {
     if (argc == 2) {

@@ -13,9 +13,9 @@
 #include <algorithm>
 
 #include "DirectoryHandler.hpp"
-#include "File.hpp"
 #include "SessionHandler.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/File.hpp"
 
 CustomCommand::CustomCommand(const std::string& name, const std::string& command, bool context)
     : name_(name),

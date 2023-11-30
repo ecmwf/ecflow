@@ -12,10 +12,10 @@
 
 #include <stdexcept>
 
-#include "Converter.hpp"
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

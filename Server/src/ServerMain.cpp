@@ -8,9 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Log.hpp"
 #include "Server.hpp"
 #include "ServerEnvironment.hpp"
+#include "ecflow/core/Log.hpp"
 #ifdef ECF_OPENSSL
     #include "SslServer.hpp"
 #endif

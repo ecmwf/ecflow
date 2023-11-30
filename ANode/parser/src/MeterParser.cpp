@@ -13,8 +13,8 @@
 #include <stdexcept>
 
 #include "DefsStructureParser.hpp"
-#include "Extract.hpp"
 #include "Node.hpp"
+#include "ecflow/core/Extract.hpp"
 
 using namespace ecf;
 using namespace std;

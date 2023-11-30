@@ -13,14 +13,14 @@
 #include <sstream>
 
 #include "Defs.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
 #include "NodeContainer.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 #ifdef DEBUG
-    #include "Ecf.hpp"
+    #include "ecflow/core/Ecf.hpp"
 #endif
 
 using namespace std;

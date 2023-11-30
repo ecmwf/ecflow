@@ -13,9 +13,9 @@
 #include <stdexcept>
 
 #include "DefsStructureParser.hpp"
-#include "Extract.hpp"
 #include "Limit.hpp"
 #include "Node.hpp"
+#include "ecflow/core/Extract.hpp"
 
 using namespace std;
 

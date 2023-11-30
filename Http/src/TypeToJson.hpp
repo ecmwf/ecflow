@@ -31,10 +31,10 @@
 #include "RepeatAttr.hpp"
 #include "Stats.hpp"
 #include "TimeAttr.hpp"
-#include "TimeSlot.hpp"
 #include "TodayAttr.hpp"
 #include "Variable.hpp"
 #include "ZombieAttr.hpp"
+#include "ecflow/core/TimeSlot.hpp"
 
 void to_json(ecf::ojson&, const ::Meter&);
 void to_json(ecf::ojson&, const ::Label&);

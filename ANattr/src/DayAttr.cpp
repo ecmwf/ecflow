@@ -14,13 +14,13 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Calendar.hpp"
-#include "Ecf.hpp"
-#include "Extract.hpp"
-#include "Indentor.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "cereal_boost_time.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/cereal_boost_time.hpp"
 
 using namespace std;
 using namespace ecf;

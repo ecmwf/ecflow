@@ -14,7 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "PasswordEncryption.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
 
 BOOST_AUTO_TEST_SUITE(CoreTestSuite)
 

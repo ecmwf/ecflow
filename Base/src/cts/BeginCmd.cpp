@@ -15,9 +15,9 @@
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Str.hpp"
 #include "Submittable.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

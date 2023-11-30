@@ -13,14 +13,14 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Calendar.hpp"
 #include "DateAttr.hpp" // Used in Why
 #include "DayAttr.hpp"  // Used in Why
-#include "Ecf.hpp"
-#include "Indentor.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 

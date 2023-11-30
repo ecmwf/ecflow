@@ -15,13 +15,13 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "Calendar.hpp"
-#include "Converter.hpp"
-#include "Ecf.hpp"
-#include "Extract.hpp"
-#include "Indentor.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace std;
 using namespace ecf;

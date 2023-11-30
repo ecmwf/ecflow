@@ -15,12 +15,12 @@
 #include "ClientInvoker.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "MockServer.hpp"
 #include "SCPort.hpp"
 #include "Suite.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/File.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -15,8 +15,8 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Str.hpp"
-#include "User.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/User.hpp"
 
 using namespace std;
 using namespace boost;

@@ -32,11 +32,11 @@
 #include "Attr.hpp"
 #include "ClientSuiteMgr.hpp"
 #include "Flag.hpp"
-#include "NOrder.hpp"
-#include "NState.hpp"
 #include "NodeFwd.hpp"
-#include "PrintStyle.hpp"
 #include "ServerState.hpp"
+#include "ecflow/core/NOrder.hpp"
+#include "ecflow/core/NState.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 namespace cereal {
 class access;

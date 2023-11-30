@@ -10,7 +10,7 @@
 
 #include "ClientOptionsParser.hpp"
 
-#include "Str.hpp"
+#include "ecflow/core/Str.hpp"
 
 namespace ecf {
 

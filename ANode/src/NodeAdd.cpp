@@ -13,13 +13,13 @@
 #include "AutoArchiveAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoRestoreAttr.hpp"
-#include "Converter.hpp"
-#include "Ecf.hpp"
 #include "Expression.hpp"
 #include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "MiscAttrs.hpp"
 #include "Node.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 using namespace ecf;
 using namespace std;

@@ -17,9 +17,9 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
-#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/Str.hpp"
 
 // #define _UI_SETTINGS_DEBUG
 

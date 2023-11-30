@@ -12,9 +12,9 @@
     #include <iostream>
 #endif
 
-#include "Ecf.hpp"
 #include "Suite.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 namespace ecf {
 

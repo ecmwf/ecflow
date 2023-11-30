@@ -11,14 +11,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Alias.hpp"
-#include "CalendarUpdateParams.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "TestUtil.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/TestUtil.hpp"
 
 using namespace std;
 using namespace ecf;

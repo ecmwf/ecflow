@@ -10,8 +10,8 @@
 
 #include "Connection.hpp"
 
-#include "Ecf.hpp"
-#include "Log.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
 
 connection::~connection() {
 #ifdef DEBUG_CONNECTION

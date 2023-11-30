@@ -19,13 +19,13 @@
 #include <sys/stat.h>
 #include <sys/wait.h> // for waitpid
 
-#include "Converter.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
 #include "JobsParam.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
 #include "Submittable.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 // #define DEBUG_ECF_ 1
 // #define DEBUG_PRE_PROCESS 1

@@ -17,16 +17,16 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-#include "Calendar.hpp"
-#include "Converter.hpp"
-#include "Ecf.hpp"
 #include "JobProfiler.hpp"
-#include "Log.hpp"
-#include "Pid.hpp"
 #include "ServerOptions.hpp"
-#include "Str.hpp"
 #include "System.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace ecf;
 using namespace std;

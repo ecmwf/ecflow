@@ -13,17 +13,17 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Converter.hpp"
 #include "DefsDelta.hpp"
-#include "Ecf.hpp"
-#include "Indentor.hpp"
 #include "JobsParam.hpp"
 #include "Memento.hpp"
 #include "NodeTreeVisitor.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

@@ -17,9 +17,9 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 
-#include "File.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/File.hpp"
 
 std::string DirectoryHandler::exeDir_;
 std::string DirectoryHandler::shareDir_;

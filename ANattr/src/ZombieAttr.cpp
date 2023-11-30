@@ -15,10 +15,10 @@
 
 #include <boost/tokenizer.hpp>
 
-#include "Converter.hpp"
-#include "Indentor.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace boost;

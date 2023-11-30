@@ -12,8 +12,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Ecf.hpp"
 #include "MyDefsFixture.hpp"
+#include "ecflow/core/Ecf.hpp"
 
 using namespace std;
 using namespace ecf;

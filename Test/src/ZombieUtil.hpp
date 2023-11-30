@@ -11,8 +11,8 @@
 #ifndef ecflow_test_harness_ZombieUtil_HPP
 #define ecflow_test_harness_ZombieUtil_HPP
 
-#include "Child.hpp"
-#include "User.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/User.hpp"
 
 class ClientInvoker;
 

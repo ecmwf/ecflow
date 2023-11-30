@@ -14,11 +14,11 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Cal.hpp"
-#include "Calendar.hpp"
-#include "Converter.hpp"
-#include "Str.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;

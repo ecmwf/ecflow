@@ -16,9 +16,9 @@
 #include "Family.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "PrintStyle.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

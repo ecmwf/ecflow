@@ -15,8 +15,8 @@
 
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "PrintStyle.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
 using namespace boost;

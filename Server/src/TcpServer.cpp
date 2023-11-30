@@ -12,9 +12,9 @@
 
 #include <iostream>
 
-#include "Log.hpp"
 #include "Server.hpp"
 #include "ServerEnvironment.hpp"
+#include "ecflow/core/Log.hpp"
 
 using boost::asio::ip::tcp;
 

@@ -15,8 +15,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "File.hpp"
 #include "UrlCmd.hpp"
+#include "ecflow/core/File.hpp"
 
 using namespace std;
 using namespace ecf;

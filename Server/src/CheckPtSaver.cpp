@@ -16,11 +16,11 @@
 #include "BaseServer.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Ecf.hpp"
-#include "Log.hpp"
 #include "ServerEnvironment.hpp"
-#include "Str.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 // #define DEBUG_CHECKPT 1
 // #define DEBUG_CHECKPT_SAVE_ALLOWED 1

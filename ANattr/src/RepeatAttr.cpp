@@ -15,14 +15,14 @@
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 
-#include "Cal.hpp"
-#include "Converter.hpp"
-#include "Ecf.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

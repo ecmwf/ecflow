@@ -13,19 +13,19 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "ExprAst.hpp"
 #include "Expression.hpp"
-#include "Extract.hpp"
 #include "LateAttr.hpp"
 #include "Limit.hpp"
-#include "Log.hpp"
 #include "MiscAttrs.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

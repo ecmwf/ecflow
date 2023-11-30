@@ -12,14 +12,14 @@
 
 #include <stdexcept>
 
-#include "Calendar.hpp"
-#include "Ecf.hpp"
-#include "Indentor.hpp"
-#include "NState.hpp"
-#include "PrintStyle.hpp"
-#include "Serialization.hpp"
-#include "Str.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/NState.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

@@ -30,12 +30,8 @@
 #include <QVBoxLayout>
 #include <QtGlobal>
 
-#include "File.hpp"
 #include "FileInfoLabel.hpp"
-#include "File_r.hpp"
 #include "LogModel.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "TextFormat.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
@@ -43,6 +39,10 @@
 #include "VFileTransfer.hpp"
 #include "VSettings.hpp"
 #include "ViewerUtil.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 //=======================================================
 //

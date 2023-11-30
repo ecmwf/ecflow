@@ -14,12 +14,12 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Ecf.hpp"
 #include "ExprParser.hpp"
-#include "Indentor.hpp"
-#include "Log.hpp"
 #include "Node.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace std;
 using namespace ecf;

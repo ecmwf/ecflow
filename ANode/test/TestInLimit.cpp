@@ -14,8 +14,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "InLimit.hpp"
-#include "SerializationTest.hpp"
 #include "Task.hpp"
+#include "ecflow/core/SerializationTest.hpp"
 
 using namespace std;
 using namespace ecf;

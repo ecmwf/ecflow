@@ -15,7 +15,7 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "SState.hpp"
+#include "ecflow/core/SState.hpp"
 
 using namespace std;
 

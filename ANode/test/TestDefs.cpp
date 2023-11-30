@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Converter.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/Converter.hpp"
 
 using namespace std;
 using namespace ecf;

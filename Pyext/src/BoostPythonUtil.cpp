@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "Converter.hpp"
 #include "Variable.hpp"
+#include "ecflow/core/Converter.hpp"
 
 void BoostPythonUtil::list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec) {
     int the_list_size = len(list);

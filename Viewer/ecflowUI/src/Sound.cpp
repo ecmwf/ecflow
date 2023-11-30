@@ -13,12 +13,12 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "Converter.hpp"
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "ecflow/core/Converter.hpp"
 
 // #ifdef ECFLOW_QT5
 // #include <QSoundEffect>
@@ -26,7 +26,7 @@
 
 #include <regex>
 
-#include "Str.hpp"
+#include "ecflow/core/Str.hpp"
 
 Sound* Sound::instance_ = nullptr;
 

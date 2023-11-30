@@ -14,9 +14,9 @@
 
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "Log.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Log.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

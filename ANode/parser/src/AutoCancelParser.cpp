@@ -13,9 +13,9 @@
 #include <stdexcept>
 
 #include "AutoCancelAttr.hpp"
-#include "Extract.hpp"
 #include "Node.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace ecf;
 using namespace std;

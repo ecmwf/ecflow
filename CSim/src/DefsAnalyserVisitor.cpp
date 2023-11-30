@@ -14,9 +14,9 @@
 #include "Defs.hpp"
 #include "ExprAst.hpp"
 #include "Family.hpp"
-#include "Indentor.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Indentor.hpp"
 
 using namespace std;
 

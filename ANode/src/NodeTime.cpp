@@ -354,7 +354,7 @@ void Node::markHybridTimeDependentsAsComplete() {
 }
 
 // #define DEBUG_REQUEUE 1
-// #include "Log.hpp"
+// #include "ecflow/core/Log.hpp"
 bool Node::testTimeDependenciesForRequeue() {
     // This function is called as a part of handling state change.
     // We only get here if the Node has *COMPLETED* ( either automatically, or manually i.e force complete)

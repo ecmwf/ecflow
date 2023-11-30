@@ -13,13 +13,13 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Converter.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Extract.hpp"
 #include "Node.hpp"
-#include "Str.hpp"
 #include "SuiteChanged.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

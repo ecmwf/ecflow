@@ -13,10 +13,10 @@
 #include "Defs.hpp"
 #include "ExprAst.hpp"
 #include "Family.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 

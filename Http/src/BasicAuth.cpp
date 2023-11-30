@@ -12,8 +12,8 @@
 
 #include "Base64.hpp"
 #include "HttpServerException.hpp"
-#include "PasswordEncryption.hpp"
-#include "Str.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
+#include "ecflow/core/Str.hpp"
 
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
     const std::string decoded = base64_decode(token);

@@ -13,8 +13,8 @@
 
 #include <cstdint>
 
-#include "Child.hpp"
-#include "User.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/User.hpp"
 
 namespace cereal {
 class access;

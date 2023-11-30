@@ -11,7 +11,7 @@
 #ifndef ecflow_attribute_VerifyAttr_HPP
 #define ecflow_attribute_VerifyAttr_HPP
 
-#include "NState.hpp"
+#include "ecflow/core/NState.hpp"
 
 // Class VerifyAttr:
 // This class is only used for testing/verification purposes. It allows us to

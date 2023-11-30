@@ -14,8 +14,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "DateAttr.hpp"
-#include "PrintStyle.hpp"
-#include "Str.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

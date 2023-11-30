@@ -16,12 +16,12 @@
 #include <QFileInfo>
 #include <QStringList>
 
-#include "File.hpp"
-#include "File_r.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs) : type_(NoType) {
     // Format is as follows:

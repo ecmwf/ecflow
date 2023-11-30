@@ -14,8 +14,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

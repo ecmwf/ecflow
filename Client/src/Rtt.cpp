@@ -16,7 +16,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp> //include all types plus i/o
 
-#include "File.hpp"
+#include "ecflow/core/File.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

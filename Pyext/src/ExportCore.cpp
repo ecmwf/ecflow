@@ -13,16 +13,16 @@
 #include <boost/python/raw_function.hpp>
 
 #include "BoostPythonUtil.hpp"
-#include "CheckPt.hpp"
-#include "DState.hpp"
-#include "Ecf.hpp"
 #include "Edit.hpp"
-#include "File.hpp"
 #include "NodeAttrDoc.hpp"
-#include "PrintStyle.hpp"
-#include "SState.hpp"
-#include "TimeSeries.hpp"
-#include "TimeSlot.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/DState.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/SState.hpp"
+#include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/core/TimeSlot.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template <class K, class T>

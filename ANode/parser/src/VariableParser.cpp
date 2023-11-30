@@ -15,7 +15,7 @@
 #include "Defs.hpp"
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace ecf;
 using namespace std;

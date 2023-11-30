@@ -17,12 +17,12 @@
 #include "AutoArchiveAttr.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "File.hpp"
 #include "Simulator.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

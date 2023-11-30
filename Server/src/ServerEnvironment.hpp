@@ -25,10 +25,10 @@
 
 #include <boost/asio.hpp>
 
-#include "CheckPt.hpp"
-#include "Host.hpp"
-#include "PasswdFile.hpp"
-#include "WhiteListFile.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"

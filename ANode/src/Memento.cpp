@@ -12,9 +12,9 @@
 
 #include <stdexcept>
 
-#include "Serialization.hpp"
-#include "Str.hpp"
-#include "cereal_boost_time.hpp"
+#include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/cereal_boost_time.hpp"
 
 using namespace std;
 using namespace ecf;

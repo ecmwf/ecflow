@@ -15,15 +15,15 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "Ecf.hpp"
 #include "EcfFile.hpp"
 #include "Family.hpp"
-#include "File.hpp"
 #include "JobCreationCtrl.hpp"
 #include "MyDefsFixture.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

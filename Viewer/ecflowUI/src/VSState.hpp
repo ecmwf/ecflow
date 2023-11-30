@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-#include "SState.hpp"
 #include "VParam.hpp"
+#include "ecflow/core/SState.hpp"
 
 class ServerHandler;
 class VProperty;

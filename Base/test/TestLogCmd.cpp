@@ -13,10 +13,10 @@
 
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "File.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace boost;
 namespace fs = boost::filesystem;

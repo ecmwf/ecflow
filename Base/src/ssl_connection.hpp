@@ -22,11 +22,11 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 
-#include "Serialization.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 // #define DEBUG_CONNECTION 1
 #ifdef DEBUG_CONNECTION
-    #include "Ecf.hpp"
+    #include "ecflow/core/Ecf.hpp"
 #endif
 
 ///

@@ -16,10 +16,10 @@
 #include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "PrintStyle.hpp" // IWYU pragma: keep
 #include "ServerToClientCmd.hpp"
 #include "System.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
 
 using namespace std;
 using namespace ecf;

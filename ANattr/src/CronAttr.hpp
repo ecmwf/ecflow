@@ -11,7 +11,7 @@
 #ifndef ecflow_attribute_CronAttr_HPP
 #define ecflow_attribute_CronAttr_HPP
 
-#include "TimeSeries.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 namespace ecf {
 class Calendar;

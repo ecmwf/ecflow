@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 #include "Memento.hpp"
-#include "Serialization.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace std;
 

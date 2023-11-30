@@ -19,11 +19,11 @@
 #include <boost/filesystem/operations.hpp>
 #include <sys/stat.h> // for chmod
 
-#include "File.hpp"
-#include "File_r.hpp"
-#include "Host.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;
