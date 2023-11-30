@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef CLIENT_HELP_HPP
-#define CLIENT_HELP_HPP
+#ifndef ecflow_client_Help_HPP
+#define ecflow_client_Help_HPP
 
 #include <memory>
 
@@ -29,4 +29,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-#endif
+#endif /* ecflow_client_Help_HPP */

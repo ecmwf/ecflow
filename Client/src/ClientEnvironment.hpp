@@ -1,20 +1,15 @@
-#ifndef CLIENT_ENVIRONMENT_HPP_
-#define CLIENT_ENVIRONMENT_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : ClientEnvironment
-// Author      : Avi
-// Revision    : $Revision$
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#ifndef ecflow_client_ClientEnvironment_HPP
+#define ecflow_client_ClientEnvironment_HPP
 
 #include "AbstractClientEnv.hpp"
 #include "Variable.hpp"
@@ -202,4 +197,4 @@ private:
     const std::string& get_password(const char*, const std::string& user) const;
 };
 
-#endif
+#endif /* ecflow_client_ClientEnvironment_HPP */
