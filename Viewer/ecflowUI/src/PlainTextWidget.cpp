@@ -1,20 +1,18 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
-
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "PlainTextWidget.hpp"
+
 #include "ui_PlainTextWidget.h"
 
-
-PlainTextWidget::PlainTextWidget(QWidget* /*parent*/)
-    : ui_(new Ui::PlainTextWidget)
-{
+PlainTextWidget::PlainTextWidget(QWidget* /*parent*/) : ui_(new Ui::PlainTextWidget) {
     ui_->setupUi(this);
 
     ui_->titleLabel->setProperty("fileInfo", "1");
@@ -26,17 +24,13 @@ PlainTextWidget::PlainTextWidget(QWidget* /*parent*/)
     ui_->searchLine->setEditor(ui_->textEdit);
     ui_->searchLine->setVisible(false);
 
-    connect(ui_->searchTb, SIGNAL(clicked()),
-            this, SLOT(slotSearch()));
+    connect(ui_->searchTb, SIGNAL(clicked()), this, SLOT(slotSearch()));
 
-    connect(ui_->gotoLineTb, SIGNAL(clicked()),
-            this, SLOT(slotGotoLine()));
+    connect(ui_->gotoLineTb, SIGNAL(clicked()), this, SLOT(slotGotoLine()));
 
-    connect(ui_->fontSizeUpTb, SIGNAL(clicked()),
-            this, SLOT(slotFontSizeUp()));
+    connect(ui_->fontSizeUpTb, SIGNAL(clicked()), this, SLOT(slotFontSizeUp()));
 
-    connect(ui_->fontSizeDownTb, SIGNAL(clicked()),
-            this, SLOT(slotFontSizeDown()));
+    connect(ui_->fontSizeDownTb, SIGNAL(clicked()), this, SLOT(slotFontSizeDown()));
 }
 
 void PlainTextWidget::setPlainText(QString t) {
