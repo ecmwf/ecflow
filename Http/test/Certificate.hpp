@@ -1,4 +1,19 @@
-// https://gist.github.com/nathan-osman/5041136
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+///
+/// Based on https://gist.github.com/nathan-osman/5041136
+///
+
+#ifndef ecflow_http_test_Certificate_HPP
+#define ecflow_http_test_Certificate_HPP
 
 #include <cstdio>
 #include <iostream>
@@ -169,3 +184,5 @@ inline void Certificate::write_to_disk(EVP_PKEY* pkey, X509* x509) {
         throw std::runtime_error("Unable to write private key to disk");
     }
 }
+
+#endif /* #ifndef ecflow_http_test_Certificate_HPP */

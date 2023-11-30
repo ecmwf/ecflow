@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef JSON_HPP
-#define JSON_HPP
+#ifndef ecflow_http_JSON_HPP
+#define ecflow_http_JSON_HPP
 
 #include "nlohmann/json.hpp"
 
@@ -19,4 +19,4 @@ using ojson = nlohmann::ordered_json;
 
 } // namespace ecf
 
-#endif
+#endif /* ecflow_http_JSON_HPP */

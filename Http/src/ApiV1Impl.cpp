@@ -1,18 +1,12 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : ApiV1Impl
-// Author      : partio
-// Revision    : $Revision$
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ApiV1Impl.hpp"
 
@@ -357,7 +351,7 @@ ecf::ojson get_node_tree(const std::string& path, bool add_id = false) {
 }
 
 ecf::ojson get_suites() {
-    auto suites = get_defs()->suiteVec();
+    auto suites  = get_defs()->suiteVec();
 
     ecf::ojson j = ecf::ojson::array();
     for (const auto& s : suites) {
@@ -374,7 +368,7 @@ ecf::ojson get_server_attributes() {
 
     for (auto v : get_defs()->server().server_variables()) {
         ecf::ojson _j = v;
-        _j["const"]  = true;
+        _j["const"]   = true;
         j["variables"].push_back(_j);
     }
     return j;
@@ -478,10 +472,10 @@ ecf::ojson get_node_output(const httplib::Request& request) {
 }
 
 void add_suite(const httplib::Request& request, httplib::Response& response) {
-    const std::string path  = request.matches[1];
+    const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string defs  = payload.at("definition");
+    const std::string defs   = payload.at("definition");
 
     DefsStructureParser parser(defs);
 
@@ -518,7 +512,7 @@ void add_suite(const httplib::Request& request, httplib::Response& response) {
 
 ecf::ojson update_node_definition(const httplib::Request& request) {
     const std::string path         = request.matches[1];
-    const ecf::ojson payload        = ecf::ojson::parse(request.body);
+    const ecf::ojson payload       = ecf::ojson::parse(request.body);
     const std::string new_defs_str = payload.at("definition");
     const bool force               = payload.value("force", false);
 
@@ -719,13 +713,13 @@ ecf::AutoRestoreAttr create_from_text(const std::string& line) {
 }
 
 ecf::ojson add_node_attribute(const httplib::Request& request) {
-    const std::string path  = request.matches[1];
+    const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string type  = payload.at("type");
-    const std::string value = json_type_to_string(payload.at("value"));
+    const std::string type   = payload.at("type");
+    const std::string value  = json_type_to_string(payload.at("value"));
 
-    auto client             = get_client(request);
+    auto client              = get_client(request);
 
     if (type == "meter") {
         const std::string name = payload.at("name");
@@ -778,10 +772,10 @@ ecf::ojson add_node_attribute(const httplib::Request& request) {
 }
 
 ecf::ojson update_node_attribute(const httplib::Request& request) {
-    const std::string path  = request.matches[1];
+    const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    std::string type        = payload.at("type");
+    std::string type         = payload.at("type");
 
     // Updating node attributes is not a straightforward matter.
     // Firstly, it can be done either as a child command or a user
@@ -805,7 +799,7 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
                                       "Invalid action for child command: " + name);
         }
 
-        auto client = get_client_for_tasks(request, payload);
+        auto client             = get_client_for_tasks(request, payload);
 
         const std::string value = payload.at("value");
 
@@ -910,11 +904,11 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
 }
 
 ecf::ojson delete_node_attribute(const httplib::Request& request) {
-    const std::string path  = request.matches[1];
+    const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string type  = payload.at("type");
-    auto client             = get_client(request);
+    const std::string type   = payload.at("type");
+    auto client              = get_client(request);
 
     if (type == "time" || type == "today" || type == "day" || type == "date" || type == "cron" || type == "late" ||
         type == "complete") {
@@ -937,7 +931,7 @@ ecf::ojson delete_node_attribute(const httplib::Request& request) {
 
 ecf::ojson add_server_attribute(const httplib::Request& request) {
     const ecf::ojson payload = ecf::ojson::parse(request.body);
-    const std::string type  = payload.at("type");
+    const std::string type   = payload.at("type");
 
     if (type != "variable") {
         throw HttpServerException(HttpStatusCode::client_error_bad_request,
@@ -958,9 +952,9 @@ ecf::ojson add_server_attribute(const httplib::Request& request) {
 
 ecf::ojson update_server_attribute(const httplib::Request& request) {
     const ecf::ojson payload = ecf::ojson::parse(request.body);
-    const std::string type  = payload.at("type");
-    const std::string name  = payload.at("name");
-    const std::string value = payload.at("value");
+    const std::string type   = payload.at("type");
+    const std::string name   = payload.at("name");
+    const std::string value  = payload.at("value");
     std::string x;
 
     if (get_defs()->server().find_user_variable(name, x) == false) {
@@ -984,8 +978,8 @@ ecf::ojson delete_server_attribute(const httplib::Request& request) {
 
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string type  = payload.at("type");
-    const std::string name  = payload.at("name");
+    const std::string type   = payload.at("type");
+    const std::string name   = payload.at("name");
     std::string x;
 
     if (get_defs()->server().find_user_variable(name, x) == false) {
@@ -1006,10 +1000,10 @@ ecf::ojson delete_server_attribute(const httplib::Request& request) {
 }
 
 ecf::ojson update_node_status(const httplib::Request& request) {
-    const std::string path  = request.matches[1];
+    const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string name  = payload.at("action");
+    const std::string name   = payload.at("action");
 
     if (payload.contains("ECF_NAME")) {
         // this is a child command call
