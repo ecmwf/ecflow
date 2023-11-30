@@ -1,20 +1,15 @@
-#ifndef SSL_CONNECTION_HPP_
-#define SSL_CONNECTION_HPP_
-//============================================================================
-// Name        : ssl_connection.cpp
-// Author      : Avi
-// Revision    : $Revision: #26 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Serves as the connection between client server
-//               If you change this file then Connection.hpp may also need changing
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_ssl_connection_HPP
+#define ecflow_base_ssl_connection_HPP
 
 #if defined(HPUX)
     #include <sys/select.h> // hp-ux uses pselect
@@ -33,6 +28,12 @@
 #ifdef DEBUG_CONNECTION
     #include "Ecf.hpp"
 #endif
+
+///
+/// \brief Serves as the connection between client server
+///
+/// \note If you change this file then Connection.hpp may also need changing
+///
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
@@ -228,4 +229,4 @@ private:
 
 typedef std::shared_ptr<ssl_connection> ssl_connection_ptr;
 
-#endif /* SSL_CONNECTION_HPP_ */
+#endif /* ecflow_base_ssl_connection_HPP */

@@ -1,23 +1,23 @@
-#ifndef TASK_API_HPP_
-#define TASK_API_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #4 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : Task api. i.e the child commands, typically called from the jobs files
-//               The two variant api must correspond i.e '--get' and 'get'
-//               since this is used by boost program options
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_cts_TaskApi_HPP
+#define ecflow_base_cts_TaskApi_HPP
+
 #include <string>
 #include <vector>
+
+///
+/// \brief Task API, i.e the child commands, typically called from the jobs files
+/// The two variant api must correspond i.e '--get' and 'get' since this is used by boost program options
+///
 
 class TaskApi {
 public:
@@ -47,4 +47,5 @@ public:
     static const char* completeArg();
     static const char* waitArg();
 };
-#endif
+
+#endif /* ecflow_base_cts_TaskApi_HPP */

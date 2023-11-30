@@ -1,39 +1,37 @@
-#ifndef SSYNC_CMD_HPP_
-#define SSYNC_CMD_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #25 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_stc_SSyncCmd_HPP
+#define ecflow_base_stc_SSyncCmd_HPP
 
 #include "DefsCache.hpp"
 #include "DefsDelta.hpp"
 #include "ServerToClientCmd.hpp"
+
 class AbstractServer;
 
-//================================================================================
-// class SSyncCmd: Used to transfer changes made in the server to the client
-//                 The client can then apply the changes to the client side defs.
-//
-// *** This class should be used in conjunction with the news command.
-// *** i.e The news command is used to test for server changes. This command
-// *** will then get those changes and merge them with client side defs, bringing
-// *** client and server defs in sync.
-//
-// The *client_state_change_no* was passed from the client to the server
-// The *client_modify_change_no* was passed from the client to the server
-//
-// This class make use of DefsCache as a performance optimisation.
-//================================================================================
+///
+/// \brief the class SSyncCmd is used to transfer changes made in the server to the client.
+///  The client can then apply the changes to the client side defs.
+///
+/// *** This class should be used in conjunction with the news command.
+/// *** i.e The news command is used to test for server changes. This command
+/// *** will then get those changes and merge them with client side defs, bringing
+/// *** client and server defs in sync.
+///
+/// The *client_state_change_no* was passed from the client to the server
+/// The *client_modify_change_no* was passed from the client to the server
+///
+/// This class make use of DefsCache as a performance optimisation.
+///
+
 class SSyncCmd final : public ServerToClientCmd {
 public:
     // The constructor is *called* in the server.
@@ -99,14 +97,14 @@ private:
                 ar& DefsCache::full_server_defs_as_string_;
             }
             else
-                ar& full_server_defs_as_string_;
+                ar & full_server_defs_as_string_;
         }
         else {
-            ar& full_server_defs_as_string_;
+            ar & full_server_defs_as_string_;
         }
     }
 };
 
 std::ostream& operator<<(std::ostream& os, const SSyncCmd&);
 
-#endif
+#endif /* ecflow_base_stc_SSyncCmd_HPP */

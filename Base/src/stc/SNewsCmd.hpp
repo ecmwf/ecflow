@@ -1,27 +1,27 @@
-#ifndef SNEWS_CMD_HPP_
-#define SNEWS_CMD_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #9 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : class SNewsCmd:  Used to determine any change in the server
-//
-// The *client_state_change_no* was passed from the client to the server
-// The *client_modify_change_no* was passed from the client to the server
-//
-// The code here needs to coordinate with SSyncCmd
-//
-// Paired with CtsCmd(NEWS)
-// Client---CtsCmd(NEWS)---->Server-----(SNewsCmd)--->client:
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_stc_SNewsCmd_HPP
+#define ecflow_base_stc_SNewsCmd_HPP
+
+///
+/// \brief class SNewsCmd is used to determine any change in the server
+///
+/// The *client_state_change_no* was passed from the client to the server
+/// The *client_modify_change_no* was passed from the client to the server
+///
+/// The code here needs to coordinate with SSyncCmd
+///
+/// Paired with CtsCmd(NEWS)
+/// Client---CtsCmd(NEWS)---->Server-----(SNewsCmd)--->client:
+///
 
 #include "ServerToClientCmd.hpp"
 class AbstractServer;
@@ -58,4 +58,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const SNewsCmd&);
-#endif
+
+#endif /* ecflow_base_stc_SNewsCmd_HPP */
