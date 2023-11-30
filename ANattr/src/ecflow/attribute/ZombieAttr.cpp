@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ZombieAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
 
 #include <cassert>
 #include <stdexcept>

@@ -16,7 +16,7 @@
 
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 
 class TaskCmd;
 class AbstractServer;

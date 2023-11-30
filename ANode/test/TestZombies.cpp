@@ -17,7 +17,7 @@
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
-#include "ZombieAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
 
 using namespace std;
 using namespace ecf;

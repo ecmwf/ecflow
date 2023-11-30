@@ -12,7 +12,7 @@
 
 #include <stdexcept>
 
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Converter.hpp"
 
 void BoostPythonUtil::list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec) {

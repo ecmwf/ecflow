@@ -13,8 +13,8 @@
 #include <stdexcept>
 
 #include "DefsStructureParser.hpp"
-#include "LateAttr.hpp"
 #include "Node.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
 
 using namespace ecf;
 using namespace std;

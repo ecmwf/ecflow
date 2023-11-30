@@ -13,11 +13,11 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "GenericAttr.hpp"
 #include "Node.hpp"
-#include "QueueAttr.hpp"
-#include "VerifyAttr.hpp"
-#include "ZombieAttr.hpp"
+#include "ecflow/attribute/GenericAttr.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
 
 class MiscAttrs : private boost::noncopyable {
 public:

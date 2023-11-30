@@ -13,8 +13,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestFixture.hpp"
-#include "Zombie.hpp"
 #include "ZombieUtil.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 
 using namespace std;

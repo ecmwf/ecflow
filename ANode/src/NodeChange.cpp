@@ -11,9 +11,9 @@
 #include <stdexcept>
 
 #include "ExprAst.hpp"
-#include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "Node.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Str.hpp"

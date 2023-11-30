@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 #include "Node.hpp"
-#include "ZombieAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
 
 using namespace ecf;
 using namespace std;

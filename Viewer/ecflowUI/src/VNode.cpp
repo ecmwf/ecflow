@@ -39,7 +39,7 @@
 #include "VTimeAttr.hpp"
 #include "VTriggerAttr.hpp"
 #include "VUserVarAttr.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 

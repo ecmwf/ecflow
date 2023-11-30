@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "CronAttr.hpp"
+#include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"

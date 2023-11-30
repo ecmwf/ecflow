@@ -17,11 +17,11 @@
 
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "QueueAttr.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestFixture.hpp"
 #include "WhyCmd.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"

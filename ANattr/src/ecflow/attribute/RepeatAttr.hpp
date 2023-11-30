@@ -24,7 +24,7 @@
 #include <memory>
 #include <vector>
 
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.

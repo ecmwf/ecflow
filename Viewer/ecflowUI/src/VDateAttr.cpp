@@ -10,10 +10,10 @@
 
 #include "VDateAttr.hpp"
 
-#include "DateAttr.hpp"
-#include "DayAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/attribute/DateAttr.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
 
 //================================
 // VDateAttrType

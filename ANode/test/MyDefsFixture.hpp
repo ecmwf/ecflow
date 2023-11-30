@@ -20,17 +20,17 @@
 #include <algorithm>
 
 #include "Alias.hpp"
-#include "AutoArchiveAttr.hpp"
-#include "AutoCancelAttr.hpp"
 #include "AutoRestoreAttr.hpp"
 #include "Defs.hpp"
 #include "Expression.hpp"
 #include "Family.hpp"
-#include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "MiscAttrs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 

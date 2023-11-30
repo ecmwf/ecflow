@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "AutoArchiveAttr.hpp"
 #include "Node.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 

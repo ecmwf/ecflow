@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"

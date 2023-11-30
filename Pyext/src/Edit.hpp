@@ -15,7 +15,7 @@
 
 #include <boost/python.hpp>
 
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 class Edit {
 public:

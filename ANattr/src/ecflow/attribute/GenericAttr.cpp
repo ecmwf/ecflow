@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "GenericAttr.hpp"
+#include "ecflow/attribute/GenericAttr.hpp"
 
 #include <stdexcept>
 

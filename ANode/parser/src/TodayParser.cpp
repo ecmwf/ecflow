@@ -14,7 +14,7 @@
 
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "TodayAttr.hpp"
+#include "ecflow/attribute/TodayAttr.hpp"
 
 using namespace ecf;
 using namespace std;

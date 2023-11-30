@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 
 #include <sstream>
 

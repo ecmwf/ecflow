@@ -44,7 +44,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "ZombieAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/core/Child.hpp"
 
 /// Use default copy constructor ,assignment operator and destructor

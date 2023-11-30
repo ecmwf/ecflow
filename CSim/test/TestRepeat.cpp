@@ -20,7 +20,7 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 
 using namespace std;

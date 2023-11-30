@@ -24,7 +24,7 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

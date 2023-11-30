@@ -18,11 +18,11 @@
 
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "QueueAttr.hpp"
 #include "ServerTestHarness.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 
 using namespace std;

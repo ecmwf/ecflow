@@ -15,11 +15,11 @@
 
 #include <QStringList>
 
-#include "CronAttr.hpp"
-#include "TimeAttr.hpp"
-#include "TodayAttr.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ecflow/attribute/CronAttr.hpp"
+#include "ecflow/attribute/TimeAttr.hpp"
+#include "ecflow/attribute/TodayAttr.hpp"
 
 class AttributeFilter;
 class VAttributeType;

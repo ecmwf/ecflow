@@ -10,14 +10,14 @@
 
 #include <stdexcept>
 
-#include "AutoArchiveAttr.hpp"
-#include "AutoCancelAttr.hpp"
 #include "AutoRestoreAttr.hpp"
 #include "Expression.hpp"
-#include "LateAttr.hpp"
 #include "Limit.hpp"
 #include "MiscAttrs.hpp"
 #include "Node.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Ecf.hpp"
 
 using namespace ecf;

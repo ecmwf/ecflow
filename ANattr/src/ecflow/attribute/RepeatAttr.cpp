@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "RepeatAttr.hpp"
+#include "ecflow/attribute/RepeatAttr.hpp"
 
 #include <sstream>
 #include <stdexcept>

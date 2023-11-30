@@ -37,7 +37,7 @@
 
 #include "ExprAst.hpp"
 #include "ExprDuplicate.hpp"
-#include "NodeAttr.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"

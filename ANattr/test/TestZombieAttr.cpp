@@ -12,7 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ZombieAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
 
 using namespace std;
 using namespace ecf;

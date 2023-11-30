@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "CronAttr.hpp"
+#include "ecflow/attribute/CronAttr.hpp"
 
 #include <sstream>
 #include <stdexcept>

@@ -15,11 +15,11 @@
 
 #include "Defs.hpp"
 #include "Family.hpp"
-#include "QueueAttr.hpp"
 #include "Suite.hpp"
 #include "System.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -14,8 +14,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include "QueueAttr.hpp"
 #include "Task.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"

@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "DayAttr.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"

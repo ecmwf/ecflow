@@ -14,7 +14,7 @@
 
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Extract.hpp"
 

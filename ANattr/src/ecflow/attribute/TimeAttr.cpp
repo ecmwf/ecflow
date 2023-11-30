@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "TimeAttr.hpp"
+#include "ecflow/attribute/TimeAttr.hpp"
 
 #include <sstream>
 #include <stdexcept>
 
-#include "DateAttr.hpp" // Used in Why
-#include "DayAttr.hpp"  // Used in Why
+#include "ecflow/attribute/DateAttr.hpp" // Used in Why
+#include "ecflow/attribute/DayAttr.hpp"  // Used in Why
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Indentor.hpp"

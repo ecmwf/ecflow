@@ -16,7 +16,7 @@
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 
 class ModelColumn;
 

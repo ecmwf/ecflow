@@ -21,7 +21,7 @@
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"

@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "GenericAttr.hpp"
 #include "Node.hpp"
+#include "ecflow/attribute/GenericAttr.hpp"
 
 using namespace ecf;
 using namespace std;

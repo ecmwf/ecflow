@@ -11,9 +11,9 @@
 #include "VTriggerAttr.hpp"
 
 #include "Expression.hpp"
-#include "NodeAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/core/Indentor.hpp"
 
 //================================

@@ -14,13 +14,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AutoArchiveAttr.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Simulator.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 

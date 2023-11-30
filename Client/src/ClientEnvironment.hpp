@@ -12,7 +12,7 @@
 #define ecflow_client_ClientEnvironment_HPP
 
 #include "AbstractClientEnv.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"
 #endif

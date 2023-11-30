@@ -13,7 +13,7 @@
 
 #include "NodeFwd.hpp"
 #include "Stats.hpp"
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 
 /// This class is used to hold the replies back from the server
 /// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle

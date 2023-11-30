@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "DateAttr.hpp"
+#include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
 

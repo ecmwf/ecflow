@@ -22,7 +22,7 @@
 #include "ServerTestHarness.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

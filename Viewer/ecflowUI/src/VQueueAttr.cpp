@@ -10,10 +10,10 @@
 
 #include "VQueueAttr.hpp"
 
-#include "NodeAttr.hpp"
-#include "QueueAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
 
 //================================
 // VQueueAttrType

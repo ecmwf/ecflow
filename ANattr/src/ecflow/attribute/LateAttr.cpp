@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "LateAttr.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
 
 #include <stdexcept>
 

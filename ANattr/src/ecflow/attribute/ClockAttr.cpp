@@ -8,9 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ClockAttr.hpp"
+#include "ecflow/attribute/ClockAttr.hpp"
 
-#include "DateAttr.hpp"
+#include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"

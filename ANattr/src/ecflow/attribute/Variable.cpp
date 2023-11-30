@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 #include <sstream>
 #include <stdexcept>

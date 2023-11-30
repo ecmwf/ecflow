@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "NodeAttr.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/core/Str.hpp"
 
 using namespace std;

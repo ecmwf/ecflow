@@ -16,9 +16,9 @@
 
 #include <QStringList>
 
-#include "AutoArchiveAttr.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
 
 class AttributeFilter;
 class VAttributeType;

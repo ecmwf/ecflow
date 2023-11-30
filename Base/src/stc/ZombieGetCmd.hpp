@@ -12,7 +12,7 @@
 #define ecflow_base_stc_ZombieGetCmd_HPP
 
 #include "ServerToClientCmd.hpp"
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 class AbstractServer;
 
 //================================================================================

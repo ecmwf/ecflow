@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "AutoCancelAttr.hpp"
 #include "Node.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 

@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "QueueAttr.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
 
 #include <stdexcept>
 

@@ -16,9 +16,9 @@
 
 #include <QStringList>
 
-#include "LateAttr.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
 
 class AttributeFilter;
 class VAttributeType;

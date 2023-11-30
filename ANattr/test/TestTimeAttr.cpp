@@ -15,7 +15,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "TimeAttr.hpp"
+#include "ecflow/attribute/TimeAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 

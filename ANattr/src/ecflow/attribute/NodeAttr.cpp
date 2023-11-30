@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "NodeAttr.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
 
 #include <sstream>
 #include <stdexcept>

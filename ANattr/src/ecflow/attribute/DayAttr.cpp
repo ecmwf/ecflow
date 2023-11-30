@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "DayAttr.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
 
 #include <cassert>
 #include <sstream>

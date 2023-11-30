@@ -14,13 +14,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AutoCancelAttr.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 #include "Simulator.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -22,7 +22,7 @@
 #include "ServerTestHarness.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Str.hpp"

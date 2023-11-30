@@ -20,7 +20,7 @@
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "Task.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"

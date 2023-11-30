@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "DateAttr.hpp"
+#include "ecflow/attribute/DateAttr.hpp"
 
 #include <ostream>
 #include <stdexcept>
