@@ -1,28 +1,24 @@
-#ifndef SERVER_ENVIRONMENT_HPP_
-#define SERVER_ENVIRONMENT_HPP_
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : ServerEnvironment
-// Author      : Avi
-// Revision    : $Revision: #52 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-// The server environment is read from the configuration file. This defines
-// the defaults for the server,and is configurable by the user, at run time
-// Alternatively some variable can be set via environment. See environment.cfg
-//
-// The server must be created before the log file. Since the log is initialised
-// with the log file name from the server environment
-//
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#ifndef ecflow_server_ServerEnvironment_HPP
+#define ecflow_server_ServerEnvironment_HPP
+
+///
+/// \brief The server environment is read from the configuration file. This defines
+/// the defaults for the server,and is configurable by the user, at run time
+/// Alternatively some variable can be set via environment. See environment.cfg
+///
+/// The server must be created before the log file. Since the log is initialised
+/// with the log file name from the server environment
+///
 
 #include <string>
 #include <vector>
@@ -243,4 +239,4 @@ private:
     friend class ServerOptions;
 };
 
-#endif
+#endif /* ecflow_server_ServerEnvironment_HPP */
