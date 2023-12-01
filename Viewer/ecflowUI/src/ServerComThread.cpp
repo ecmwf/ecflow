@@ -12,12 +12,12 @@
 
 #include <algorithm>
 
-#include "ClientInvoker.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Defs.hpp"

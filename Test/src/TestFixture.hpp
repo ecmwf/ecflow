@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include "ClientInvoker.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 
 class Defs;

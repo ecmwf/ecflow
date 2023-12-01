@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "UrlCmd.hpp"
+#include "ecflow/client/UrlCmd.hpp"
 
 #include <stdexcept>
 

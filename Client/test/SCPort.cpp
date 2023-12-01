@@ -12,8 +12,8 @@
 
 #include <iostream>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Str.hpp"
 

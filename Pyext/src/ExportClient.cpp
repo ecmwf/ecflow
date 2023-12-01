@@ -15,9 +15,9 @@
 
 #include "BoostPythonUtil.hpp"
 #include "ClientDoc.hpp"
-#include "ClientInvoker.hpp"
-#include "UrlCmd.hpp"
 #include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/client/UrlCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NState.hpp"

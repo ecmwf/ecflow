@@ -27,8 +27,8 @@
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
 
-#include "ClientInvoker.hpp"
 #include "JSON.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "httplib.h"
 
 void update_defs_loop(int interval);

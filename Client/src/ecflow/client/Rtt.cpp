@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Rtt.hpp"
+#include "ecflow/client/Rtt.hpp"
 
 #include <iostream>
 #include <stdexcept>

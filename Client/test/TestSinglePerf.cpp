@@ -15,12 +15,12 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
-#include "Rtt.hpp"
 #include "SCPort.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"

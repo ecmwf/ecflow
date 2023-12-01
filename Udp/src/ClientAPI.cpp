@@ -10,7 +10,7 @@
 
 #include "ClientAPI.hpp"
 
-#include "ClientInvoker.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 
 namespace ecf {
 

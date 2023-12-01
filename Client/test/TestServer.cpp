@@ -12,10 +12,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"

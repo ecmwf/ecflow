@@ -14,7 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "UrlCmd.hpp"
+#include "ecflow/client/UrlCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 

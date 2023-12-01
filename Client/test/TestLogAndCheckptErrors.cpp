@@ -15,10 +15,10 @@
 #include <boost/test/unit_test.hpp>
 #include <sys/stat.h>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/PrintStyle.hpp"

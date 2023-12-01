@@ -16,13 +16,13 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "BoostPythonUtil.hpp"
-#include "ClientInvoker.hpp"
 #include "DefsDoc.hpp"
 #include "NodeAttrDoc.hpp"
 #include "NodeUtil.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"

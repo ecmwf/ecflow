@@ -13,11 +13,11 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "SCPort.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 

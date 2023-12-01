@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ClientCmdCache.hpp"
+#include "ecflow/client/ClientCmdCache.hpp"
 
 ClientCmdCache::ClientCmdCache() {
 }

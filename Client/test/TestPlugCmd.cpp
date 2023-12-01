@@ -12,11 +12,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "MockServer.hpp"
 #include "SCPort.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"

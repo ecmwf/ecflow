@@ -17,10 +17,10 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
 #include "Server.hpp"
 #include "ServerEnvironment.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"

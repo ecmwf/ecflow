@@ -15,7 +15,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 

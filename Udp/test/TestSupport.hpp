@@ -19,9 +19,9 @@
 #include <boost/process.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
 #include "UDPClient.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"

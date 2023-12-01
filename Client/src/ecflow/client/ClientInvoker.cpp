@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ClientInvoker.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 
 #include <iostream>
 #include <iterator>
@@ -21,8 +21,8 @@
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
 #endif
-#include "ClientEnvironment.hpp"
-#include "Rtt.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"

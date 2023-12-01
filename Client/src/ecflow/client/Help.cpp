@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Help.hpp"
+#include "ecflow/client/Help.hpp"
 
 #include <iomanip>
 

@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#include "ClientInvoker.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/CommandLine.hpp"
 
 int main(int argc, char* argv[]) {

@@ -20,7 +20,6 @@
 #include <boost/asio/ip/host_name.hpp>
 
 #include "ChangeNotify.hpp"
-#include "ClientInvoker.hpp"
 #include "ConnectState.hpp"
 #include "DirectoryHandler.hpp"
 #include "MainWindow.hpp"
@@ -39,6 +38,7 @@
 #include "VNode.hpp"
 #include "VSettings.hpp"
 #include "VTaskObserver.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"

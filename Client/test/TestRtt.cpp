@@ -13,7 +13,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Rtt.hpp"
+#include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/File.hpp"
 
 namespace fs = boost::filesystem;

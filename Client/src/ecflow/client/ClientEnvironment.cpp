@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ClientEnvironment.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
 
 #include <cstdlib> // for getenv()
 #include <iostream>
