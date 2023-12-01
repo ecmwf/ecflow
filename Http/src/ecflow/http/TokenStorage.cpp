@@ -18,12 +18,12 @@
     #include <sstream>
     #include <thread>
 
-    #include <boost/filesystem.hpp>
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
     #include <openssl/sha.h>
     #include <shared_mutex>
 
+    #include "ecflow/core/Filesystem.hpp"
     #include "ecflow/core/Str.hpp"
     #include "ecflow/http/HttpServerException.hpp"
     #include "ecflow/http/JSON.hpp"
@@ -204,18 +204,16 @@ std::vector<Token> ReadTokens(const std::string& filename) {
 }
 
 void TokenStorage::ReadStorage() {
-    namespace fs = boost::filesystem;
-    namespace ch = std::chrono;
-
-    const ch::seconds sleep_time(20);
-    ch::system_clock::time_point last_modified;
+    const std::chrono::seconds sleep_time(20);
+    std::chrono::system_clock::time_point last_modified;
 
     // Scan periodically the api-token file and read the
     // contents automatically if they are updated
 
     while (true) {
         try {
-            auto current_modified = ch::system_clock::from_time_t(fs::last_write_time(fs::path(opts.tokens_file)));
+            auto current_modified =
+                std::chrono::system_clock::from_time_t(fs::last_write_time(fs::path(opts.tokens_file)));
             if (current_modified > last_modified) {
                 auto new_tokens = ReadTokens(opts.tokens_file);
                 {

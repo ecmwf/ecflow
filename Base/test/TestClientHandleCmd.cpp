@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
@@ -18,7 +17,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;

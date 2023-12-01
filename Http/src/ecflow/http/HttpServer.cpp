@@ -10,10 +10,10 @@
 
 #include "ecflow/http/HttpServer.hpp"
 
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/http/ApiV1.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/Options.hpp"
@@ -207,8 +207,6 @@ void start_server(httplib::Server& http_server) {
 void HttpServer::run() {
 #ifdef ECF_OPENSSL
     if (opts.no_ssl == false) {
-        namespace fs = boost::filesystem;
-
         if (fs::exists(opts.cert_directory + "/server.crt") == false ||
             fs::exists(opts.cert_directory + "/server.key") == false) {
             throw std::runtime_error("Directory " + opts.cert_directory +

@@ -12,7 +12,6 @@
 
 #include <cassert>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
@@ -26,6 +25,7 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/Filesystem.hpp"
 
 std::map<VServerSettings::Param, std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param, std::string> VServerSettings::parNames_;
@@ -169,7 +169,7 @@ void VServerSettings::loadSettings() {
     VConfig::instance()->loadSettings(fName, guiProp_, false);
 
     // Some  settings are read through VSettings
-    if (boost::filesystem::exists(fName)) {
+    if (fs::exists(fName)) {
         VSettings vs(fName);
         vs.read(false);
         vs.beginGroup("suite_filter");

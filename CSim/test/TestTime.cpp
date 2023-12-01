@@ -11,11 +11,11 @@
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -26,8 +26,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-
-namespace fs = boost::filesystem;
 
 /// Simulate definition files that are created on then fly. This allows us to create
 /// tests with todays date/time this speeds up the testr, we can also validate

@@ -10,13 +10,11 @@
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/File.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
@@ -43,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     BOOST_CHECK_MESSAGE(diffs.empty(), diffs << "\n" << errorMsg);
 
     if (diffs.empty())
-        boost::filesystem::remove(generated_file);
+        fs::remove(generated_file);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

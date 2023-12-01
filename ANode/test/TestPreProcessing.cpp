@@ -11,8 +11,6 @@
 #include <iostream>
 #include <set>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Ecf.hpp"
@@ -27,7 +25,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 void findVariable(std::string& line, std::set<std::string>& variables) {
     // scan for variables
@@ -71,8 +68,7 @@ void findVariable(std::string& line, std::set<std::string>& variables) {
 }
 
 void autoDiscoverVariables(const std::string& directory, std::set<std::string>& variables) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));
@@ -113,8 +109,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     // SET ECF_HOME
     std::string ecf_home = directory;
 
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path       = fs::absolute(directory);
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));
 

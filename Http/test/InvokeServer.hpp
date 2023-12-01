@@ -14,7 +14,6 @@
 #include <iostream>
 #include <thread>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
@@ -31,15 +30,14 @@ public:
         std::string port(getenv("ECF_PORT"));
         /// Remove check pt and backup check pt file, else server will load it & remove log file
         ecf::Host h;
-        boost::filesystem::remove(h.ecf_checkpt_file(port));
-        boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
-        boost::filesystem::remove(h.ecf_log_file(port));
+        fs::remove(h.ecf_checkpt_file(port));
+        fs::remove(h.ecf_backup_checkpt_file(port));
+        fs::remove(h.ecf_log_file(port));
 
         std::string theServerInvokePath = ecf::File::find_ecf_server_path();
 
         BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(), "The server program could not be found");
-        BOOST_REQUIRE_MESSAGE(boost::filesystem::exists(theServerInvokePath),
-                              "Server exe does not exist at:" << theServerInvokePath);
+        BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath), "Server exe does not exist at:" << theServerInvokePath);
 
         BOOST_TEST_MESSAGE("Using eclow_server from " << theServerInvokePath);
 
@@ -70,15 +68,14 @@ public:
         }
 
         ecf::Host h;
-        boost::filesystem::remove(h.ecf_log_file(port));
-        BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)),
-                            "log file " << h.ecf_log_file(port) << " not deleted\n");
+        fs::remove(h.ecf_log_file(port));
+        BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_log_file(port)), "log file " << h.ecf_log_file(port) << " not deleted\n");
 
-        boost::filesystem::remove(h.ecf_checkpt_file(port));
-        boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
-        BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_checkpt_file(port)),
+        fs::remove(h.ecf_checkpt_file(port));
+        fs::remove(h.ecf_backup_checkpt_file(port));
+        BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_checkpt_file(port)),
                             "file " << h.ecf_checkpt_file(port) << " not deleted\n");
-        BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_backup_checkpt_file(port)),
+        BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_backup_checkpt_file(port)),
                             "file " << h.ecf_backup_checkpt_file(port) << " not deleted\n");
     }
 

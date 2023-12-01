@@ -12,7 +12,6 @@
 
 #include <iostream>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestFixture.hpp"
@@ -31,7 +30,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // #define DEBUG_TEST_WAITER 1
 // #define DEBUG_TEST_WAITER_DEFS 1

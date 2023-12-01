@@ -18,8 +18,12 @@
 //            Additionally they are auto documented using sphinx-poco
 //            Hence the doc strings use reStructuredText markup
 // ===========================================================================
-class NodeAttrDoc : private boost::noncopyable {
+class NodeAttrDoc {
 public:
+    NodeAttrDoc()                              = delete;
+    NodeAttrDoc(const NodeAttrDoc&)            = delete;
+    NodeAttrDoc& operator=(const NodeAttrDoc&) = delete;
+
     static const char* variable_doc();
     static const char* zombie_doc();
     static const char* zombie_type_doc();
@@ -49,9 +53,6 @@ public:
     static const char* repeat_day_doc();
     static const char* cron_doc();
     static const char* clock_doc();
-
-private:
-    NodeAttrDoc() = default;
 };
 
 #endif /* ecflow_python_NodeAttrDoc_HPP */

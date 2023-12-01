@@ -13,11 +13,10 @@
 
 #include <string>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/node/NodeFwd.hpp"
+
 class AbstractServer;
 
 // class PreAllocatedReply:
@@ -25,8 +24,12 @@ class AbstractServer;
 // This will help to reduce memory fragmentation.
 // Since the commands are re-used those commands with state,
 // should be cleared first
-class PreAllocatedReply : private boost::noncopyable {
+class PreAllocatedReply {
 public:
+    PreAllocatedReply()                                    = delete;
+    PreAllocatedReply(const PreAllocatedReply&)            = delete;
+    PreAllocatedReply& operator=(const PreAllocatedReply&) = delete;
+
     static STC_Cmd_ptr ok_cmd();
     static STC_Cmd_ptr block_client_server_halted_cmd();
     static STC_Cmd_ptr block_client_on_home_server_cmd();

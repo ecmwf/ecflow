@@ -19,12 +19,14 @@
 
 #include <string>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/node/NodeFwd.hpp"
 
-class WhyCmd : private boost::noncopyable {
+class WhyCmd {
 public:
+    WhyCmd()              = delete;
+    WhyCmd(const WhyCmd&) = delete;
+    WhyCmd(WhyCmd&&)      = delete;
+
     WhyCmd(defs_ptr defs, const std::string& absNodePath);
 
     /// Why the node is not running

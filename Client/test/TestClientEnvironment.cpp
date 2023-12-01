@@ -12,14 +12,12 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

@@ -12,9 +12,8 @@
 #define ecflow_server_CheckPtSaver_HPP
 
 #include <boost/asio.hpp>
-#include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+#include "ecflow/core/Filesystem.hpp"
 
 class ServerEnvironment;
 class BaseServer;

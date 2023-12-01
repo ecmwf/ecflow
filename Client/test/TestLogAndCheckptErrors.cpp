@@ -10,8 +10,6 @@
 
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 #include <sys/stat.h>
 
@@ -24,7 +22,6 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/User.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
@@ -58,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
     BOOST_CHECK_MESSAGE(chdir(ecf_home.c_str()) == 0,
                         "Can't change directory to " << ecf_home << "  error: " << strerror(errno));
     if (debug_me)
-        cout << "->current path = " << boost::filesystem::current_path() << "\n";
+        cout << "->current path = " << fs::current_path() << "\n";
 
     {
         if (debug_me)
@@ -159,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
     if (debug_me)
         cout << "->remove created directory " << ecf_home << "\n";
     if (debug_me)
-        cout << "->current path = " << boost::filesystem::current_path() << "\n";
+        cout << "->current path = " << fs::current_path() << "\n";
     if (!debug_me) {
         BOOST_CHECK_MESSAGE(File::removeDir(ecf_home),
                             "Failed to remove dir " << ecf_home << "  error: " << strerror(errno));

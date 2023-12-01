@@ -12,7 +12,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Ecf.hpp"
@@ -29,7 +28,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(NodeTestSuite)
 
@@ -145,7 +143,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
                             << job_file_contents << "'");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
@@ -219,7 +217,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
                         "Expected\n'" << expected_job_file_contents << "' but found \n'" << job_file_contents << "'");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
@@ -361,7 +359,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     }
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
@@ -446,7 +444,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
                         "Could not open job file " << job_file_location << " (" << strerror(errno) << ")");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
@@ -528,7 +526,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
                         "Could not open job file " << job_file_location << " (" << strerror(errno) << ")");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
@@ -690,7 +688,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
                             << file_with_used_variables);
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
@@ -765,7 +763,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
                             << file_with_used_variables);
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
@@ -830,7 +828,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     BOOST_REQUIRE_THROW(ecfFile.edit_used_variables(file_with_used_variables), std::runtime_error);
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file) {
@@ -1022,11 +1020,11 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ecfmicro") == string::npos, "%ecfmicro should have been removed:");
 
     /// Remove all the generated files
-    boost::filesystem::remove(man_file_location);
-    boost::filesystem::remove(ecf_file_location);
-    boost::filesystem::remove(usr_file_location);
-    boost::filesystem::remove(job_file_location);
-    boost::filesystem::remove(ecf_home + suite->absNodePath());
+    fs::remove(man_file_location);
+    fs::remove(ecf_file_location);
+    fs::remove(usr_file_location);
+    fs::remove(job_file_location);
+    fs::remove(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
@@ -1117,10 +1115,10 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
                         "%end associated with comment and manual should exist:");
 
     // Remove all the generated files
-    boost::filesystem::remove(ecf_file_location);
-    boost::filesystem::remove(man_file_location);
-    boost::filesystem::remove(job_file_location);
-    boost::filesystem::remove(ecf_home + suite->absNodePath());
+    fs::remove(ecf_file_location);
+    fs::remove(man_file_location);
+    fs::remove(job_file_location);
+    fs::remove(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
@@ -1199,8 +1197,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     BOOST_CHECK_MESSAGE(!job_file_contents.empty(), "Job should not be empty");
 
     // Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
-    boost::filesystem::remove_all(ecf_home + "/a");
+    fs::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + "/a");
 
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
@@ -1344,7 +1342,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
     /// Remove generate file
-    boost::filesystem::remove(job_file_location);
+    fs::remove(job_file_location);
 }
 
 static void basic_test_template(const std::string& test_name,
@@ -1440,7 +1438,7 @@ static void basic_test_template(const std::string& test_name,
     }
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_includeonce) {

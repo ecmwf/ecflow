@@ -10,10 +10,10 @@
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -23,8 +23,6 @@
 
 using namespace std;
 using namespace ecf;
-
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
 
@@ -62,8 +60,8 @@ BOOST_AUTO_TEST_CASE(test_analysys) {
     BOOST_CHECK_MESSAGE(!simulator.run(theDefs, TestUtil::testDataLocation("test_analysys.def"), errorMsg), errorMsg);
 
     //	cout << theDefs << "\n";
-    boost::filesystem::remove("defs.depth");
-    boost::filesystem::remove("defs.flat");
+    fs::remove("defs.depth");
+    fs::remove("defs.flat");
 
     // remove generated log file. Comment out to debug
     std::string logFileName = TestUtil::testDataLocation("test_analysys.def") + ".log";

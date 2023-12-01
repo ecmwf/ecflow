@@ -10,12 +10,10 @@
 
 #include "ecflow/server/CheckPtSaver.hpp"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "ecflow/base/cts/CtsApi.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -29,7 +27,6 @@
     #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #endif
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 
 //-------------------------------------------------------------------------------------

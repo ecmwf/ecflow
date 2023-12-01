@@ -13,15 +13,18 @@
 
 #include <vector>
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp> // IWYU pragma: keep
 
 class Variable;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
-class BoostPythonUtil : private boost::noncopyable {
+class BoostPythonUtil {
 public:
+    BoostPythonUtil()                                  = delete;
+    BoostPythonUtil(const BoostPythonUtil&)            = delete;
+    BoostPythonUtil& operator=(const BoostPythonUtil&) = delete;
+
     /// Convert python list to a vector of integers. raises a type error if integer extraction fails
     static void list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec);
     static void list_to_str_vec(const boost::python::list& list, std::vector<std::string>& int_vec);

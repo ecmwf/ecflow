@@ -10,15 +10,14 @@
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(NodeTestSuite)
 

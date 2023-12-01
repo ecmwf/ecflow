@@ -8,15 +8,14 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_FIXTURE_TEST_SUITE(NodeTestSuite, MyDefsFixture)
 

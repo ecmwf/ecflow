@@ -8,13 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #define BOOST_TEST_MODULE TestSingleSimulator
 #include <boost/test/included/unit_test.hpp>
 
@@ -32,7 +29,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
 
@@ -73,8 +69,8 @@ BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
 //    fs::remove(logFileName);
 //
 //    // cout << theDefs << "\n";
-//    boost::filesystem::remove("defs.depth");
-//    boost::filesystem::remove("defs.flat");
+//    fs::remove("defs.depth");
+//    fs::remove("defs.flat");
 //
 //    /// Destroy singleton's to avoid valgrind from complaining
 //    System::destroy();

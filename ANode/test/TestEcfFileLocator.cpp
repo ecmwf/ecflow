@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/File.hpp"
@@ -24,7 +23,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(NodeTestSuite)
 
@@ -153,9 +151,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
                          EcfFile::PRUNE_ROOT,
                          __LINE__); // ECF_FILES_LOOKUP make *NO* difference for lookup with EcfFile::ECF_SCRIPT
 
-        suite->deleteVariable("ECF_FILES_LOOKUP");    // cleanup
-        suite->deleteVariable("ECF_FILES");           // cleanup
-        boost::filesystem::remove(ecf_file_location); // cleanup
+        suite->deleteVariable("ECF_FILES_LOOKUP"); // cleanup
+        suite->deleteVariable("ECF_FILES");        // cleanup
+        fs::remove(ecf_file_location);             // cleanup
     }
     {
         // cout << "Test ECF_HOME/ECF_LISTS at root location\n";
@@ -173,9 +171,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
         suite->add_variable("ECF_FILES_LOOKUP", "prune_leaf"); // change look up method
         located_ecf_file(task, EcfFile::ECF_FILES, EcfFile::PRUNE_LEAF, __LINE__);
 
-        suite->deleteVariable("ECF_FILES_LOOKUP");    // cleanup
-        suite->deleteVariable("ECF_FILES");           // cleanup
-        boost::filesystem::remove(ecf_file_location); // cleanup
+        suite->deleteVariable("ECF_FILES_LOOKUP"); // cleanup
+        suite->deleteVariable("ECF_FILES");        // cleanup
+        fs::remove(ecf_file_location);             // cleanup
     }
     {
         // cout << "Test ECF_HOME at intermediate location prune_leaf\n";
@@ -195,7 +193,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
             located_ecf_file(task, EcfFile::ECF_HOME, EcfFile::PRUNE_LEAF, __LINE__);
 
             // Remove this file, required for the following test
-            boost::filesystem::remove(ecf_file_location);
+            fs::remove(ecf_file_location);
 
             // Remove ECF_FILES_LOOKUP variable
             suite->deleteVariable("ECF_FILES_LOOKUP");
@@ -203,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
             node = node->parent();
         }
         /// Remove all the generated files
-        boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+        fs::remove_all(ecf_home + suite->absNodePath());
     }
     {
         // cout << "Test ECF_FILES at intermediate location, by prune_leaf\n";
@@ -224,7 +222,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
             located_ecf_file(task, EcfFile::ECF_FILES, EcfFile::PRUNE_LEAF, __LINE__);
 
             // Remove this file, required for the following test
-            boost::filesystem::remove(ecf_file_location);
+            fs::remove(ecf_file_location);
 
             // Remove ECF_FILES_LOOKUP variable
             suite->deleteVariable("ECF_FILES_LOOKUP");
@@ -233,7 +231,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
         }
 
         /// Remove all the generated files
-        boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+        fs::remove_all(ecf_home + suite->absNodePath());
     }
 }
 

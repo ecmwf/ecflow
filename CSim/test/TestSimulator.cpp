@@ -11,8 +11,6 @@
 #include <iostream>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #define BOOST_TEST_MODULE TestSimulator
 #include <boost/test/included/unit_test.hpp>
 
@@ -20,16 +18,13 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-namespace fs = boost::filesystem;
-
 using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
 
 void simulate(const std::string& directory, bool pass) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));

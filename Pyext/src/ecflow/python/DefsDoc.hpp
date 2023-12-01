@@ -18,8 +18,12 @@
 //            Additionally they are auto documented using sphinx-poco
 //            Hence the doc strings use reStructuredText markup.
 // ===========================================================================
-class DefsDoc : private boost::noncopyable {
+class DefsDoc {
 public:
+    DefsDoc()                          = delete;
+    DefsDoc(const DefsDoc&)            = delete;
+    DefsDoc& operator=(const DefsDoc&) = delete;
+
     static const char* add();
     static const char* abs_node_path_doc();
     static const char* part_expression_doc();
@@ -67,9 +71,6 @@ public:
     static const char* check();
     static const char* simulate();
     static const char* get_server_state();
-
-private:
-    DefsDoc() = default;
 };
 
 #endif /* ecflow_python_DefsDoc_HPP */

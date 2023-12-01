@@ -10,8 +10,6 @@
 
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
@@ -27,7 +25,6 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 
 bool EditScriptCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EditScriptCmd*>(rhs);

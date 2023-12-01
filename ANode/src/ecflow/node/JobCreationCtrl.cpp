@@ -14,10 +14,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-
-namespace fs = boost::filesystem;
-
 void JobCreationCtrl::generate_temp_dir() {
     if (!getenv("TMPDIR"))
         throw std::runtime_error(

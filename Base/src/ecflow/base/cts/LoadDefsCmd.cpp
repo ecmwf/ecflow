@@ -10,12 +10,11 @@
 
 #include <stdexcept>
 
-#include <boost/filesystem.hpp>
-
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -55,7 +54,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         load_ok        = defs->restore_from_string(defs_filename, errMsg, warningMsg);
         defs_filename_ = "";
     }
-    else if (boost::filesystem::exists(defs_filename)) {
+    else if (fs::exists(defs_filename)) {
         // defs_filename is actually a file, open the file and read it. This is the method
         // when loading definitions with ecflow_client
 

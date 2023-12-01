@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>

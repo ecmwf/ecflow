@@ -12,14 +12,11 @@
 
 #include <sstream>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "TemporaryFile.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

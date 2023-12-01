@@ -12,8 +12,6 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/DurationTimer.hpp"
@@ -24,7 +22,6 @@
 using namespace ecf;
 using namespace std;
 using namespace boost;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(CoreTestSuite)
 

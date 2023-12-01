@@ -11,16 +11,17 @@
 #ifndef ecflow_base_ClientToServerRequest_HPP
 #define ecflow_base_ClientToServerRequest_HPP
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 
 // Base class for client to server requesting.
 // This class is used in the IPC messaging from  client to server.
-class ClientToServerRequest : private boost::noncopyable {
+class ClientToServerRequest {
 public:
-    ClientToServerRequest()  = default;
-    ~ClientToServerRequest() = default;
+    ClientToServerRequest()                                        = default;
+    ClientToServerRequest(const ClientToServerRequest&)            = delete;
+    ~ClientToServerRequest()                                       = default;
+
+    ClientToServerRequest& operator=(const ClientToServerRequest&) = delete;
 
     void set_cmd(const Cmd_ptr& cmd) {
         cmd_ = cmd;

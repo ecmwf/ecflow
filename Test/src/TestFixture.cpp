@@ -14,15 +14,13 @@
 #include <fstream> // for ofstream
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
@@ -42,7 +40,6 @@ std::string TestFixture::project_test_dir_ = "Test";
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // ************************************************************************************************
 // For test purpose the server can be started:
@@ -88,7 +85,7 @@ void TestFixture::init(const std::string& project_test_dir) {
     }
 
     // client side file for recording all ClientInvoker round trip times
-    boost::filesystem::remove(rtt_filename);
+    fs::remove(rtt_filename);
     Rtt::create(rtt_filename);
 
     // ********************************************************
@@ -120,8 +117,8 @@ void TestFixture::init(const std::string& project_test_dir) {
 
         theSCRATCHArea += "/test_dir";
         test_dir_ = theSCRATCHArea; // test_dir_ needed in destructor
-        if (boost::filesystem::exists(test_dir_)) {
-            boost::filesystem::remove_all(test_dir_);
+        if (fs::exists(test_dir_)) {
+            fs::remove_all(test_dir_);
         }
         theSCRATCHArea += "/ECF_HOME";
         scratchSmsHome_ = theSCRATCHArea;
@@ -174,7 +171,7 @@ void TestFixture::init(const std::string& project_test_dir) {
     }
     else {
         // For local host start by removing log file. Server invocation should create a new log file
-        boost::filesystem::remove(boost::filesystem::path(pathToLogFile()));
+        fs::remove(fs::path(pathToLogFile()));
         host_ = Str::LOCALHOST();
 
         // Create a unique port number, allowing debug and release to run at the same time
@@ -192,8 +189,8 @@ void TestFixture::init(const std::string& project_test_dir) {
 
         // Remove the generated check point files, at start of test, otherwise server will load check point file
         Host h;
-        boost::filesystem::remove(h.ecf_checkpt_file(port_));
-        boost::filesystem::remove(h.ecf_backup_checkpt_file(port_));
+        fs::remove(h.ecf_checkpt_file(port_));
+        fs::remove(h.ecf_backup_checkpt_file(port_));
 
         std::string theServerInvokePath = File::find_ecf_server_path();
         assert(!theServerInvokePath.empty());
@@ -235,13 +232,13 @@ TestFixture::~TestFixture() {
     // destructors should not allow exception propagation
     try {
 #ifndef DEBUG_HOST_SERVER
-        if (!host_.empty() && boost::filesystem::exists(test_dir_)) {
-            boost::filesystem::remove_all(test_dir_);
+        if (!host_.empty() && fs::exists(test_dir_)) {
+            fs::remove_all(test_dir_);
         }
 #endif
 #ifndef DEBUG_LOCAL_SERVER
-        if (boost::filesystem::exists(local_ecf_home())) {
-            boost::filesystem::remove_all(local_ecf_home());
+        if (fs::exists(local_ecf_home())) {
+            fs::remove_all(local_ecf_home());
         }
 #endif
 
@@ -270,9 +267,9 @@ TestFixture::~TestFixture() {
 
         std::cout << "   Remove the generated check point files, at end of test\n";
         Host host;
-        boost::filesystem::remove(host.ecf_log_file(port_));
-        boost::filesystem::remove(host.ecf_checkpt_file(port_));
-        boost::filesystem::remove(host.ecf_backup_checkpt_file(port_));
+        fs::remove(host.ecf_log_file(port_));
+        fs::remove(host.ecf_checkpt_file(port_));
+        fs::remove(host.ecf_backup_checkpt_file(port_));
 
         std::cout << "   remove the lock file\n";
         EcfPortLock::remove(port_);
@@ -283,7 +280,7 @@ TestFixture::~TestFixture() {
         cout << "\nTiming: *NOTE*: The child commands *NOT* recorded. Since its a separate exe(ecflow_client), called "
                 "via .ecf script\n";
         cout << Rtt::analyis(rtt_filename); // report round trip times
-        boost::filesystem::remove(rtt_filename);
+        fs::remove(rtt_filename);
     }
     catch (std::exception& ex) {
         std::cout << "TestFixture::~TestFixture() caught exception " << ex.what() << "\n";

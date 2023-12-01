@@ -11,10 +11,8 @@
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#define BOOST_TEST_MODULE TEST_SINGLE
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#define BOOST_TEST_MODULE TEST_SINGLE
 #include <boost/test/included/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -34,7 +32,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
 BOOST_GLOBAL_FIXTURE(TestFixture);
 
@@ -144,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_stress) {
 //   cout << "Test:: ..." << path << " log file: " << log_file << flush;
 //
 //   // Remove the log file.
-//   boost::filesystem::remove(log_file);
+//   fs::remove(log_file);
 //
 //   // parse in file
 //   Defs theDefs;

@@ -11,8 +11,6 @@
 #include <cstdlib> // getenv
 #include <fstream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
@@ -29,7 +27,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
@@ -69,8 +66,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
                              const std::string& host,
                              const std::string& port,
                              const std::string& directory) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));

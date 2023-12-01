@@ -11,11 +11,10 @@
 #include "VDir.hpp"
 
 #include <QtGlobal>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 
 #include "DirectoryHandler.hpp"
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 
 VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode) {
@@ -46,9 +45,9 @@ void VDir::clear() {
 void VDir::addItem(const std::string& name, unsigned int size, unsigned int mtime) {
     auto* item = new VDirItem;
 
-    boost::filesystem::path p(name);
+    fs::path p(name);
     // std::string dirName=p.parent_path().string();
-    std::string fileName = p.leaf().string();
+    std::string fileName = p.filename().string();
 
     item->name_ = fileName;
     item->size_ = size;
@@ -65,21 +64,21 @@ void VDir::reload() {
 
     where_ = "localhost";
 
-    boost::filesystem::path path(path_);
+    fs::path path(path_);
 
-    boost::filesystem::directory_iterator it(path), eod;
+    fs::directory_iterator it(path), eod;
 
-    BOOST_FOREACH (boost::filesystem::path const& p, std::make_pair(it, eod)) {
+    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
         if (is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
             auto* item = new VDirItem;
 
             item->name_ = p.filename().string();
-            item->size_ = boost::filesystem::file_size(p);
-            item->size_ = boost::filesystem::file_size(p);
+            item->size_ = fs::file_size(p);
+            item->size_ = fs::file_size(p);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-            item->mtime_ = QDateTime::fromSecsSinceEpoch(boost::filesystem::last_write_time(p));
+            item->mtime_ = QDateTime::fromSecsSinceEpoch(fs::last_write_time(p));
 #else
-            item->mtime_ = QDateTime::fromTime_t(boost::filesystem::last_write_time(p));
+            item->mtime_ = QDateTime::fromTime_t(fs::last_write_time(p));
 #endif
             items_.push_back(item);
         }

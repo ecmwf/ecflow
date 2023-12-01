@@ -11,17 +11,18 @@
 #ifndef ecflow_base_ServerToClientResponse_HPP
 #define ecflow_base_ServerToClientResponse_HPP
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 
 // Base class for server to client requesting. This class is used in the IPC messaging between
 // server and client
-class ServerToClientResponse : private boost::noncopyable {
+class ServerToClientResponse {
 public:
-    ServerToClientResponse() = default;
+    ServerToClientResponse()                              = default;
+    ServerToClientResponse(const ServerToClientResponse&) = delete;
     explicit ServerToClientResponse(const STC_Cmd_ptr& cmd) : stc_cmd_(cmd) {}
-    ~ServerToClientResponse() = default;
+    ~ServerToClientResponse()                                        = default;
+
+    ServerToClientResponse& operator=(const ServerToClientResponse&) = delete;
 
     STC_Cmd_ptr get_cmd() const { return stc_cmd_; }
     void set_cmd(const STC_Cmd_ptr& cmd) { stc_cmd_ = cmd; }

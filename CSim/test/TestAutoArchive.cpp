@@ -11,7 +11,6 @@
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
@@ -28,8 +27,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-
-namespace fs = boost::filesystem;
 
 /// Simulate definition files that are created on then fly. This allows us to validate
 /// Defs file, to check for correctness

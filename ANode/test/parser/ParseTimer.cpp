@@ -13,8 +13,6 @@
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/timer/timer.hpp>
 
 #include "PersistHelper.hpp"
@@ -36,7 +34,6 @@
 using namespace std;
 using namespace ecf;
 using namespace boost::timer;
-namespace fs = boost::filesystem;
 
 // This test is used to find a task given a path of the form:
 //      suite/family/task

@@ -15,7 +15,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
 #include <sys/stat.h>
 #include <sys/wait.h> // for waitpid
 
@@ -40,10 +39,10 @@
     #include <iostream>
 #endif
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 using namespace boost;
+
 static const char* T_NOOP        = "nopp";
 static const char* T_COMMENT     = "comment";
 static const char* T_MANUAL      = "manual";
@@ -1114,7 +1113,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const {
     throw std::runtime_error(ss.str());
 }
 
-boost::filesystem::path EcfFile::file_creation_path() const {
+fs::path EcfFile::file_creation_path() const {
     return fs::path(script_or_job_path());
 }
 

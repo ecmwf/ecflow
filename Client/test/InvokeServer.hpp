@@ -13,8 +13,6 @@
 
 #include <iostream>
 
-#include <boost/core/noncopyable.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
@@ -23,8 +21,10 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 
-class InvokeServer : private boost::noncopyable {
+class InvokeServer {
 public:
+    InvokeServer()                    = delete;
+    InvokeServer(const InvokeServer&) = delete;
     explicit InvokeServer(const std::string& msg,
                           const std::string& port                      = ecf::Str::DEFAULT_PORT_NUMBER(),
                           bool disable_job_generation                  = false,
@@ -88,6 +88,8 @@ public:
         }
     }
 
+    InvokeServer& operator=(const InvokeServer&) = delete;
+
     const std::string& port() const { return port_; }
     const std::string& host() const {
         if (host_.empty())
@@ -110,16 +112,16 @@ private:
         /// Remove check pt and backup check pt file, else server will load it & remove log file
         ecf::Host h;
         if (remove_checkpt_file_before_server_start) {
-            boost::filesystem::remove(h.ecf_checkpt_file(port));
-            boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
+            fs::remove(h.ecf_checkpt_file(port));
+            fs::remove(h.ecf_backup_checkpt_file(port));
         }
-        boost::filesystem::remove(h.ecf_log_file(port));
+        fs::remove(h.ecf_log_file(port));
 
         // start the server in the background
         std::string theServerInvokePath = ecf::File::find_ecf_server_path();
         BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(),
                               "InvokeServer::doStart: The server program could not be found");
-        BOOST_REQUIRE_MESSAGE(boost::filesystem::exists(theServerInvokePath),
+        BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath),
                               "InvokeServer::doStart: server exe does not exist at:" << theServerInvokePath);
 
         // Create a port file. To avoid creating multiple servers on the same port number
@@ -165,23 +167,22 @@ private:
         // Remove generated file comment for debug
         ecf::Host h;
         if (remove_log_file_after_server_exit) {
-            boost::filesystem::remove(h.ecf_log_file(port));
-            BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)),
+            fs::remove(h.ecf_log_file(port));
+            BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_log_file(port)),
                                 "log file " << h.ecf_log_file(port) << " not deleted\n");
         }
 
         if (remove_checkpt_file_after_server_exit) {
-            boost::filesystem::remove(h.ecf_checkpt_file(port));
-            boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
-            BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_checkpt_file(port)),
+            fs::remove(h.ecf_checkpt_file(port));
+            fs::remove(h.ecf_backup_checkpt_file(port));
+            BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_checkpt_file(port)),
                                 "file " << h.ecf_checkpt_file(port) << " not deleted\n");
-            BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_backup_checkpt_file(port)),
+            BOOST_CHECK_MESSAGE(!fs::exists(h.ecf_backup_checkpt_file(port)),
                                 "file " << h.ecf_backup_checkpt_file(port) << " not deleted\n");
         }
     }
 
 private:
-    InvokeServer(const InvokeServer&) = delete;
     std::string port_;
     std::string host_;
     ecf::Host host_name_;

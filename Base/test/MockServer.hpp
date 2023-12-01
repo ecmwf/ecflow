@@ -13,8 +13,6 @@
 
 #include <cassert>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
 #include "ecflow/core/Log.hpp"
@@ -149,10 +147,14 @@ private:
 ///   o Ecf::set_server(true): This controls incrementing of state/modify change numbers
 ///                            which should *only* be done on the server side
 ///   o Update Suite state/modify change number
-class MockSuiteChangedServer : private boost::noncopyable {
+class MockSuiteChangedServer {
 public:
+    MockSuiteChangedServer()                              = delete;
+    MockSuiteChangedServer(const MockSuiteChangedServer&) = delete;
     explicit MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true); }
     ~MockSuiteChangedServer() { Ecf::set_server(false); }
+
+    MockSuiteChangedServer& operator=(const MockSuiteChangedServer&) = delete;
 
 private:
     ecf::SuiteChanged suiteChanged_;

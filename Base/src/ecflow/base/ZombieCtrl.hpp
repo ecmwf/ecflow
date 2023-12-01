@@ -11,7 +11,6 @@
 #ifndef ecflow_base_ZombieCtrl_HPP
 #define ecflow_base_ZombieCtrl_HPP
 
-#include <boost/core/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ecflow/attribute/Zombie.hpp"
@@ -26,9 +25,14 @@ class AbstractServer;
 ///
 
 /// All zombies are auto deleted after a period of time. See Zombie::allowed_age()
-class ZombieCtrl : private boost::noncopyable {
+class ZombieCtrl {
 public:
-    ZombieCtrl() = default;
+    ZombieCtrl()                             = default;
+    ZombieCtrl(const ZombieCtrl&)            = delete;
+    ZombieCtrl(ZombieCtrl&&)                 = delete;
+
+    ZombieCtrl& operator=(const ZombieCtrl&) = delete;
+    ZombieCtrl& operator=(ZombieCtrl&&)      = delete;
 
     /// Handle the zombie, and return back to the client
     bool handle_zombie(Submittable*,              // Must be NON NULL
@@ -130,4 +134,5 @@ private:
 private:
     std::vector<Zombie> zombies_;
 };
-#endif
+
+#endif /* ecflow_base_ZombieCtrl_HPP */

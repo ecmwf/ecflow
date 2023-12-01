@@ -10,9 +10,9 @@
 
 #include "TestVersioning.hpp"
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 using namespace std;
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_versioning) {
     }
 
     // remove the generate file
-    boost::filesystem::remove("version0");
+    fs::remove("version0");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

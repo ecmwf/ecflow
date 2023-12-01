@@ -36,8 +36,12 @@ public:
         NET = 4
     };
 
+    PrintStyle()                  = delete;
+    PrintStyle(const PrintStyle&) = delete;
     explicit PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t); }
     ~PrintStyle() { setStyle(old_style_); } // reset to old style on destruction
+
+    PrintStyle& operator=(const PrintStyle&) = delete;
 
     /// We want to control the output, so that we can dump in old style defs format
     /// or choose to dump for debug.
@@ -51,10 +55,6 @@ public:
     // return current style as a string
     static std::string to_string();
     static std::string to_string(PrintStyle::Type_t);
-
-private:
-    PrintStyle(const PrintStyle&)                  = delete;
-    const PrintStyle& operator=(const PrintStyle&) = delete;
 
 private:
     Type_t old_style_;

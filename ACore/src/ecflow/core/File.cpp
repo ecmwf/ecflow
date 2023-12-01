@@ -26,7 +26,6 @@
 
 using namespace std;
 using namespace boost;
-namespace fs = boost::filesystem;
 
 // #define DEBUG_SERVER_PATH 1
 // #define DEBUG_CLIENT_PATH 1
@@ -348,9 +347,9 @@ std::string File::stream_error_condition(const std::ios& stream) {
     return msg;
 }
 
-bool File::find(const boost::filesystem::path& dir_path, // from this directory downwards,
-                const std::string& file_name,            // search for this name,
-                boost::filesystem::path& path_found      // placing path here if found
+bool File::find(const fs::path& dir_path,     // from this directory downwards,
+                const std::string& file_name, // search for this name,
+                fs::path& path_found          // placing path here if found
 ) {
     //	std::cout << "Searching '" << dir_path << "' for  " << file_name  << "\n";
     if (!fs::exists(dir_path))
@@ -373,9 +372,9 @@ bool File::find(const boost::filesystem::path& dir_path, // from this directory 
     return false;
 }
 
-void File::findAll(const boost::filesystem::path& dir_path,          // from this directory downwards
-                   const std::string& file_name,                     // search for this name,
-                   std::vector<boost::filesystem::path>& paths_found // placing path here if found
+void File::findAll(const fs::path& dir_path,          // from this directory downwards
+                   const std::string& file_name,      // search for this name,
+                   std::vector<fs::path>& paths_found // placing path here if found
 ) {
     if (!fs::exists(dir_path))
         return;
@@ -394,9 +393,9 @@ void File::findAll(const boost::filesystem::path& dir_path,          // from thi
     }
 }
 
-void File::find_files_with_extn(const boost::filesystem::path& dir_path,          // In this directory
-                                const std::string& extn,                          // find files matching this extension
-                                std::vector<boost::filesystem::path>& paths_found // placing path here if found
+void File::find_files_with_extn(const fs::path& dir_path,          // In this directory
+                                const std::string& extn,           // find files matching this extension
+                                std::vector<fs::path>& paths_found // placing path here if found
 ) {
     if (!fs::exists(dir_path)) {
         return;
@@ -412,9 +411,9 @@ void File::find_files_with_extn(const boost::filesystem::path& dir_path,        
     }
 }
 
-std::string File::findPath(const boost::filesystem::path& dir_path, // from this directory downwards
-                           const std::string& file_name,            // search for this name,
-                           const std::string& leafDir               // path must contain this string
+std::string File::findPath(const fs::path& dir_path,     // from this directory downwards
+                           const std::string& file_name, // search for this name,
+                           const std::string& leafDir    // path must contain this string
 ) {
     std::vector<fs::path> paths;
     File::findAll(dir_path, file_name, paths);
@@ -430,9 +429,9 @@ std::string File::findPath(const boost::filesystem::path& dir_path, // from this
     return std::string();
 }
 
-std::string File::findPath(const boost::filesystem::path& dir_path, // from this directory downwards
-                           const std::string& file_name,            // search for this name,
-                           const std::vector<std::string>& tokens   // path must contain all these tokens
+std::string File::findPath(const fs::path& dir_path,              // from this directory downwards
+                           const std::string& file_name,          // search for this name,
+                           const std::vector<std::string>& tokens // path must contain all these tokens
 ) {
     std::vector<fs::path> paths;
     File::findAll(dir_path, file_name, paths);
@@ -801,7 +800,7 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
 }
 
 // Remove a directory recursively ****
-bool File::removeDir(const boost::filesystem::path& p) {
+bool File::removeDir(const fs::path& p) {
     try {
         fs::directory_iterator end;
         for (fs::directory_iterator it(p); it != end; ++it) {
@@ -832,9 +831,9 @@ bool File::removeDir(const boost::filesystem::path& p) {
 
 static std::string bjam_workspace_dir() {
     // We need the *SAME* location so that different process find the same file. Get to the workspace directory
-    boost::filesystem::path current_path = boost::filesystem::current_path();
-    std::string stem                     = current_path.stem().string();
-    int count                            = 0;
+    auto current_path = fs::current_path();
+    std::string stem  = current_path.stem().string();
+    int count         = 0;
     while (stem.find("ecflow") == std::string::npos) {
         current_path = current_path.parent_path();
         stem         = current_path.stem().string();

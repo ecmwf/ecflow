@@ -18,12 +18,13 @@
 //            Additionally they are auto documented using sphinx-poco
 //            Hence the doc strings use reStructuredText markup.
 // ===========================================================================
-class GlossaryDoc : private boost::noncopyable {
+class GlossaryDoc {
 public:
-    static const char* list();
+    GlossaryDoc()                              = delete;
+    GlossaryDoc(const GlossaryDoc&)            = delete;
+    GlossaryDoc& operator=(const GlossaryDoc&) = delete;
 
-private:
-    GlossaryDoc() = default;
+    static const char* list();
 };
 
 #endif /* ecflow_python_GlossaryDoc_HPP */

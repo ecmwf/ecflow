@@ -13,8 +13,6 @@
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -29,7 +27,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 

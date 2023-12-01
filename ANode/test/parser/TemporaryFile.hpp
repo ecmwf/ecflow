@@ -13,9 +13,7 @@
 
 #include <string>
 
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
+#include "ecflow/core/Filesystem.hpp"
 
 class TemporaryFile {
 public:

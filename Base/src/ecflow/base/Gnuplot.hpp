@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/core/noncopyable.hpp>
-
 #include "ecflow/core/Host.hpp"
 
 ///
@@ -24,12 +22,16 @@
 
 namespace ecf {
 
-class Gnuplot : private boost::noncopyable {
+class Gnuplot {
 public:
+    Gnuplot()               = delete;
+    Gnuplot(const Gnuplot&) = delete;
     Gnuplot(const std::string& log_file,
             const std::string& host,
             const std::string& port,
             size_t no_of_suites_to_plot = 5);
+
+    Gnuplot& operator=(const Gnuplot&) = delete;
 
     /// parse the log file and show gnuplot of server load
     /// Include the suite most contributing to the load

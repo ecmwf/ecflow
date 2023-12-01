@@ -64,7 +64,7 @@ ecbuild_add_executable(
     src
   LIBS
     ${LIB_TARGET}
-    core # Needed only to #include "ecflow_version.h"
+    core
 )
 set_target_properties(${SERVER_TARGET} PROPERTIES
   INSTALL_RPATH ""
