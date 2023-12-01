@@ -12,11 +12,11 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace boost;
 namespace fs = boost::filesystem;

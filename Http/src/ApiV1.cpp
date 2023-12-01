@@ -17,11 +17,11 @@
 #include <sys/time.h>
 
 #include "ApiV1Impl.hpp"
-#include "Defs.hpp"
 #include "HttpServerException.hpp"
 #include "Options.hpp"
 #include "TypeToJson.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
 
 extern Options opts;
 static std::chrono::system_clock::time_point api_startup;

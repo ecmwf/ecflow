@@ -14,11 +14,11 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "Gnuplot.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
 
 using namespace ecf;
 using namespace std;

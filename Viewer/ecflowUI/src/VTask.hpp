@@ -16,8 +16,8 @@
 #include <string>
 #include <vector>
 
-#include "NodeFwd.hpp"
 #include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 // #include "VReply.hpp"
 class VReply;

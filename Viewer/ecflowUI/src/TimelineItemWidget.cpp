@@ -14,7 +14,6 @@
 
 #include "InfoProvider.hpp"
 #include "MessageLabel.hpp"
-#include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "TimelineData.hpp"
@@ -23,6 +22,7 @@
 #include "VNState.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
+#include "ecflow/node/Node.hpp"
 
 TimelineItemWidget::TimelineItemWidget(QWidget* /*parent*/) : delayedLoad_(false) {
     auto* vb = new QVBoxLayout(this);

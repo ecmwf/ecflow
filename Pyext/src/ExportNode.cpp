@@ -15,21 +15,21 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include "AutoRestoreAttr.hpp"
 #include "BoostPythonUtil.hpp"
 #include "ClientInvoker.hpp"
-#include "Defs.hpp"
 #include "DefsDoc.hpp"
-#include "Expression.hpp"
-#include "Limit.hpp"
-#include "MiscAttrs.hpp"
-#include "Node.hpp"
 #include "NodeAttrDoc.hpp"
-#include "NodeContainer.hpp"
 #include "NodeUtil.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeContainer.hpp"
 
 using namespace ecf;
 using namespace boost::python;

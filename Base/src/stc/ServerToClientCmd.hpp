@@ -12,9 +12,9 @@
 #define ecflow_base_stc_ServerToClientCmd_HPP
 
 #include "Cmd.hpp"
-#include "NodeFwd.hpp"
 #include "ServerReply.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 //================================================================================
 // Start of Server->client

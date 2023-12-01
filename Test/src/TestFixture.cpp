@@ -19,15 +19,15 @@
 
 #include "ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "Rtt.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Task.hpp"
 
 #ifdef DEBUG
 std::string rtt_filename = "rtt.dat";

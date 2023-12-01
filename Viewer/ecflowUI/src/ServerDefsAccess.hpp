@@ -11,7 +11,7 @@
 #ifndef ecflow_viewer_ServerDefsAccess_HPP
 #define ecflow_viewer_ServerDefsAccess_HPP
 
-#include "Defs.hpp"
+#include "ecflow/node/Defs.hpp"
 
 class ServerHandler;
 

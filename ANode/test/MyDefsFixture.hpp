@@ -19,20 +19,20 @@
 
 #include <algorithm>
 
-#include "Alias.hpp"
-#include "AutoRestoreAttr.hpp"
-#include "Defs.hpp"
-#include "Expression.hpp"
-#include "Family.hpp"
-#include "Limit.hpp"
-#include "MiscAttrs.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Alias.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 // =======================================================================
 // This struct is used in the node migration tests.

@@ -10,153 +10,153 @@
 
 set(srcs
   # Headers
-  src/AbstractObserver.hpp
-  src/Alias.hpp
-  src/Aspect.hpp
-  src/Attr.hpp
-  src/AutoRestoreAttr.hpp
-  src/ClientSuiteMgr.hpp
-  src/ClientSuites.hpp
-  src/CmdContext.hpp
-  src/Defs.hpp
-  src/DefsDelta.hpp
-  src/EcfFile.hpp
-  src/ExprAst.hpp
-  src/ExprAstVisitor.hpp
-  src/ExprDuplicate.hpp
-  src/ExprParser.hpp
-  src/Expression.hpp
-  src/Family.hpp
-  src/Flag.hpp
-  src/InLimit.hpp
-  src/InLimitMgr.hpp
-  src/JobCreationCtrl.hpp
-  src/JobProfiler.hpp
-  src/Jobs.hpp
-  src/JobsParam.hpp
-  src/Limit.hpp
-  src/LimitFwd.hpp
-  src/Memento.hpp
-  src/MiscAttrs.hpp
-  src/Node.hpp
-  src/NodeContainer.hpp
-  src/NodeFwd.hpp
-  src/NodeState.hpp
-  src/NodeStats.hpp
-  src/NodeTreeVisitor.hpp
-  src/ResolveExternsVisitor.hpp
-  src/ServerState.hpp
-  src/Signal.hpp
-  src/Submittable.hpp
-  src/Suite.hpp
-  src/SuiteChanged.hpp
-  src/System.hpp
-  src/Task.hpp
-  src/TaskScriptGenerator.hpp
-  src/move_peer.hpp
-  parser/src/AutoArchiveParser.hpp
-  parser/src/AutoCancelParser.hpp
-  parser/src/AutoRestoreParser.hpp
-  parser/src/CalendarParser.hpp
-  parser/src/ClockParser.hpp
-  parser/src/CronParser.hpp
-  parser/src/DateParser.hpp
-  parser/src/DayParser.hpp
-  parser/src/DefsParser.hpp
-  parser/src/DefsStateParser.hpp
-  parser/src/DefsStatusParser.hpp
-  parser/src/DefsStructureParser.hpp
-  parser/src/EventParser.hpp
-  parser/src/ExternParser.hpp
-  parser/src/GenericParser.hpp
-  parser/src/InlimitParser.hpp
-  parser/src/LabelParser.hpp
-  parser/src/LateParser.hpp
-  parser/src/LimitParser.hpp
-  parser/src/MeterParser.hpp
-  parser/src/Parser.hpp
-  parser/src/QueueParser.hpp
-  parser/src/RepeatParser.hpp
-  parser/src/TimeParser.hpp
-  parser/src/TodayParser.hpp
-  parser/src/TriggerParser.hpp
-  parser/src/VariableParser.hpp
-  parser/src/VerifyParser.hpp
-  parser/src/ZombieAttrParser.hpp
+  src/ecflow/node/AbstractObserver.hpp
+  src/ecflow/node/Alias.hpp
+  src/ecflow/node/Aspect.hpp
+  src/ecflow/node/Attr.hpp
+  src/ecflow/node/AutoRestoreAttr.hpp
+  src/ecflow/node/ClientSuiteMgr.hpp
+  src/ecflow/node/ClientSuites.hpp
+  src/ecflow/node/CmdContext.hpp
+  src/ecflow/node/Defs.hpp
+  src/ecflow/node/DefsDelta.hpp
+  src/ecflow/node/EcfFile.hpp
+  src/ecflow/node/ExprAst.hpp
+  src/ecflow/node/ExprAstVisitor.hpp
+  src/ecflow/node/ExprDuplicate.hpp
+  src/ecflow/node/ExprParser.hpp
+  src/ecflow/node/Expression.hpp
+  src/ecflow/node/Family.hpp
+  src/ecflow/node/Flag.hpp
+  src/ecflow/node/InLimit.hpp
+  src/ecflow/node/InLimitMgr.hpp
+  src/ecflow/node/JobCreationCtrl.hpp
+  src/ecflow/node/JobProfiler.hpp
+  src/ecflow/node/Jobs.hpp
+  src/ecflow/node/JobsParam.hpp
+  src/ecflow/node/Limit.hpp
+  src/ecflow/node/LimitFwd.hpp
+  src/ecflow/node/Memento.hpp
+  src/ecflow/node/MiscAttrs.hpp
+  src/ecflow/node/Node.hpp
+  src/ecflow/node/NodeContainer.hpp
+  src/ecflow/node/NodeFwd.hpp
+  src/ecflow/node/NodeState.hpp
+  src/ecflow/node/NodeStats.hpp
+  src/ecflow/node/NodeTreeVisitor.hpp
+  src/ecflow/node/ResolveExternsVisitor.hpp
+  src/ecflow/node/ServerState.hpp
+  src/ecflow/node/Signal.hpp
+  src/ecflow/node/Submittable.hpp
+  src/ecflow/node/Suite.hpp
+  src/ecflow/node/SuiteChanged.hpp
+  src/ecflow/node/System.hpp
+  src/ecflow/node/Task.hpp
+  src/ecflow/node/TaskScriptGenerator.hpp
+  src/ecflow/node/move_peer.hpp
+  src/ecflow/node/parser/AutoArchiveParser.hpp
+  src/ecflow/node/parser/AutoCancelParser.hpp
+  src/ecflow/node/parser/AutoRestoreParser.hpp
+  src/ecflow/node/parser/CalendarParser.hpp
+  src/ecflow/node/parser/ClockParser.hpp
+  src/ecflow/node/parser/CronParser.hpp
+  src/ecflow/node/parser/DateParser.hpp
+  src/ecflow/node/parser/DayParser.hpp
+  src/ecflow/node/parser/DefsParser.hpp
+  src/ecflow/node/parser/DefsStateParser.hpp
+  src/ecflow/node/parser/DefsStatusParser.hpp
+  src/ecflow/node/parser/DefsStructureParser.hpp
+  src/ecflow/node/parser/EventParser.hpp
+  src/ecflow/node/parser/ExternParser.hpp
+  src/ecflow/node/parser/GenericParser.hpp
+  src/ecflow/node/parser/InlimitParser.hpp
+  src/ecflow/node/parser/LabelParser.hpp
+  src/ecflow/node/parser/LateParser.hpp
+  src/ecflow/node/parser/LimitParser.hpp
+  src/ecflow/node/parser/MeterParser.hpp
+  src/ecflow/node/parser/Parser.hpp
+  src/ecflow/node/parser/QueueParser.hpp
+  src/ecflow/node/parser/RepeatParser.hpp
+  src/ecflow/node/parser/TimeParser.hpp
+  src/ecflow/node/parser/TodayParser.hpp
+  src/ecflow/node/parser/TriggerParser.hpp
+  src/ecflow/node/parser/VariableParser.hpp
+  src/ecflow/node/parser/VerifyParser.hpp
+  src/ecflow/node/parser/ZombieAttrParser.hpp
   # Sources
-  src/Alias.cpp
-  src/Attr.cpp
-  src/AutoRestoreAttr.cpp
-  src/ClientSuiteMgr.cpp
-  src/ClientSuites.cpp
-  src/CmdContext.cpp
-  src/Defs.cpp
-  src/DefsDelta.cpp
-  src/EcfFile.cpp
-  src/ExprAst.cpp
-  src/ExprAstVisitor.cpp
-  src/ExprDuplicate.cpp
-  src/ExprParser.cpp
-  src/Expression.cpp
-  src/Family.cpp
-  src/Flag.cpp
-  src/InLimit.cpp
-  src/InLimitMgr.cpp
-  src/JobCreationCtrl.cpp
-  src/JobProfiler.cpp
-  src/Jobs.cpp
-  src/JobsParam.cpp
-  src/Limit.cpp
-  src/Memento.cpp
-  src/MiscAttrs.cpp
-  src/Node.cpp
-  src/NodeAdd.cpp
-  src/NodeChange.cpp
-  src/NodeContainer.cpp
-  src/NodeDelete.cpp
-  src/NodeFind.cpp
-  src/NodeMemento.cpp
-  src/NodeStats.cpp
-  src/NodeTime.cpp
-  src/NodeTreeVisitor.cpp
-  src/ResolveExternsVisitor.cpp
-  src/ServerState.cpp
-  src/Signal.cpp
-  src/Submittable.cpp
-  src/Suite.cpp
-  src/SuiteChanged.cpp
-  src/System.cpp
-  src/Task.cpp
-  src/TaskScriptGenerator.cpp
-  parser/src/AutoArchiveParser.cpp
-  parser/src/AutoCancelParser.cpp
-  parser/src/AutoRestoreParser.cpp
-  parser/src/CalendarParser.cpp
-  parser/src/ClockParser.cpp
-  parser/src/CronParser.cpp
-  parser/src/DateParser.cpp
-  parser/src/DayParser.cpp
-  parser/src/DefsParser.cpp
-  parser/src/DefsStateParser.cpp
-  parser/src/DefsStatusParser.cpp
-  parser/src/DefsStructureParser.cpp
-  parser/src/EventParser.cpp
-  parser/src/ExternParser.cpp
-  parser/src/GenericParser.cpp
-  parser/src/InlimitParser.cpp
-  parser/src/LabelParser.cpp
-  parser/src/LateParser.cpp
-  parser/src/LimitParser.cpp
-  parser/src/MeterParser.cpp
-  parser/src/Parser.cpp
-  parser/src/QueueParser.cpp
-  parser/src/RepeatParser.cpp
-  parser/src/TimeParser.cpp
-  parser/src/TodayParser.cpp
-  parser/src/TriggerParser.cpp
-  parser/src/VariableParser.cpp
-  parser/src/VerifyParser.cpp
-  parser/src/ZombieAttrParser.cpp
+  src/ecflow/node/Alias.cpp
+  src/ecflow/node/Attr.cpp
+  src/ecflow/node/AutoRestoreAttr.cpp
+  src/ecflow/node/ClientSuiteMgr.cpp
+  src/ecflow/node/ClientSuites.cpp
+  src/ecflow/node/CmdContext.cpp
+  src/ecflow/node/Defs.cpp
+  src/ecflow/node/DefsDelta.cpp
+  src/ecflow/node/EcfFile.cpp
+  src/ecflow/node/ExprAst.cpp
+  src/ecflow/node/ExprAstVisitor.cpp
+  src/ecflow/node/ExprDuplicate.cpp
+  src/ecflow/node/ExprParser.cpp
+  src/ecflow/node/Expression.cpp
+  src/ecflow/node/Family.cpp
+  src/ecflow/node/Flag.cpp
+  src/ecflow/node/InLimit.cpp
+  src/ecflow/node/InLimitMgr.cpp
+  src/ecflow/node/JobCreationCtrl.cpp
+  src/ecflow/node/JobProfiler.cpp
+  src/ecflow/node/Jobs.cpp
+  src/ecflow/node/JobsParam.cpp
+  src/ecflow/node/Limit.cpp
+  src/ecflow/node/Memento.cpp
+  src/ecflow/node/MiscAttrs.cpp
+  src/ecflow/node/Node.cpp
+  src/ecflow/node/NodeAdd.cpp
+  src/ecflow/node/NodeChange.cpp
+  src/ecflow/node/NodeContainer.cpp
+  src/ecflow/node/NodeDelete.cpp
+  src/ecflow/node/NodeFind.cpp
+  src/ecflow/node/NodeMemento.cpp
+  src/ecflow/node/NodeStats.cpp
+  src/ecflow/node/NodeTime.cpp
+  src/ecflow/node/NodeTreeVisitor.cpp
+  src/ecflow/node/ResolveExternsVisitor.cpp
+  src/ecflow/node/ServerState.cpp
+  src/ecflow/node/Signal.cpp
+  src/ecflow/node/Submittable.cpp
+  src/ecflow/node/Suite.cpp
+  src/ecflow/node/SuiteChanged.cpp
+  src/ecflow/node/System.cpp
+  src/ecflow/node/Task.cpp
+  src/ecflow/node/TaskScriptGenerator.cpp
+  src/ecflow/node/parser/AutoArchiveParser.cpp
+  src/ecflow/node/parser/AutoCancelParser.cpp
+  src/ecflow/node/parser/AutoRestoreParser.cpp
+  src/ecflow/node/parser/CalendarParser.cpp
+  src/ecflow/node/parser/ClockParser.cpp
+  src/ecflow/node/parser/CronParser.cpp
+  src/ecflow/node/parser/DateParser.cpp
+  src/ecflow/node/parser/DayParser.cpp
+  src/ecflow/node/parser/DefsParser.cpp
+  src/ecflow/node/parser/DefsStateParser.cpp
+  src/ecflow/node/parser/DefsStatusParser.cpp
+  src/ecflow/node/parser/DefsStructureParser.cpp
+  src/ecflow/node/parser/EventParser.cpp
+  src/ecflow/node/parser/ExternParser.cpp
+  src/ecflow/node/parser/GenericParser.cpp
+  src/ecflow/node/parser/InlimitParser.cpp
+  src/ecflow/node/parser/LabelParser.cpp
+  src/ecflow/node/parser/LateParser.cpp
+  src/ecflow/node/parser/LimitParser.cpp
+  src/ecflow/node/parser/MeterParser.cpp
+  src/ecflow/node/parser/Parser.cpp
+  src/ecflow/node/parser/QueueParser.cpp
+  src/ecflow/node/parser/RepeatParser.cpp
+  src/ecflow/node/parser/TimeParser.cpp
+  src/ecflow/node/parser/TodayParser.cpp
+  src/ecflow/node/parser/TriggerParser.cpp
+  src/ecflow/node/parser/VariableParser.cpp
+  src/ecflow/node/parser/VerifyParser.cpp
+  src/ecflow/node/parser/ZombieAttrParser.cpp
 )
 
 ecbuild_add_library(
@@ -168,7 +168,6 @@ ecbuild_add_library(
     ${srcs}
   PUBLIC_INCLUDES
     src
-    parser/src
   PUBLIC_LIBS
     nodeattr
 )
@@ -245,18 +244,18 @@ target_clangformat(u_anode
 
 set(test_srcs
   # Headers
-  parser/test/PersistHelper.hpp
-  parser/test/TemporaryFile.hpp
+  test/parser/PersistHelper.hpp
+  test/parser/TemporaryFile.hpp
   # Sources
-  parser/test/PersistHelper.cpp
-  parser/test/TemporaryFile.cpp
-  parser/test/TestAutoAddExterns.cpp
-  parser/test/TestDefsStructurePersistAndReload.cpp
-  parser/test/TestMementoPersistAndReload.cpp
-  parser/test/TestMigration.cpp
-  parser/test/TestParser.cpp
-  parser/test/TestParser_main.cpp # test entry point
-  parser/test/TestVariableParsing.cpp
+  test/parser/PersistHelper.cpp
+  test/parser/TemporaryFile.cpp
+  test/parser/TestAutoAddExterns.cpp
+  test/parser/TestDefsStructurePersistAndReload.cpp
+  test/parser/TestMementoPersistAndReload.cpp
+  test/parser/TestMigration.cpp
+  test/parser/TestParser.cpp
+  test/parser/TestParser_main.cpp # test entry point
+  test/parser/TestVariableParsing.cpp
 )
 ecbuild_add_test(
   TARGET
@@ -268,6 +267,7 @@ ecbuild_add_test(
     ${test_srcs}
   INCLUDES
     test
+    test/parser
   LIBS
     node
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
@@ -305,13 +305,13 @@ if (ENABLE_ALL_TESTS)
 
   set(test_srcs
     # Headers
-    parser/test/PersistHelper.hpp
-    parser/test/TemporaryFile.hpp
+    test/parser/PersistHelper.hpp
+    test/parser/TemporaryFile.hpp
     # Sources
-    parser/test/PersistHelper.cpp
-    parser/test/TemporaryFile.cpp
-    parser/test/TestParserPerformance_main.cpp # test entry point
-    parser/test/TestSingleDefsFile.cpp
+    test/parser/PersistHelper.cpp
+    test/parser/TemporaryFile.cpp
+    test/parser/TestParserPerformance_main.cpp # test entry point
+    test/parser/TestSingleDefsFile.cpp
   )
 
   ecbuild_add_test(
@@ -334,12 +334,12 @@ if (ENABLE_ALL_TESTS)
 
   set(test_srcs
     # Headers
-    parser/test/PersistHelper.hpp
-    parser/test/TemporaryFile.hpp
+    test/parser/PersistHelper.hpp
+    test/parser/TemporaryFile.hpp
     # Sources
-    parser/test/ParseTimer.cpp
-    parser/test/PersistHelper.cpp
-    parser/test/TemporaryFile.cpp
+    test/parser/ParseTimer.cpp
+    test/parser/PersistHelper.cpp
+    test/parser/TemporaryFile.cpp
   )
 
   # The following is not technically a test (as it makes no checks),
@@ -351,7 +351,7 @@ if (ENABLE_ALL_TESTS)
       performance
       nightly
     ARGS
-      ${CMAKE_CURRENT_SOURCE_DIR}/parser/test/data/single_defs/mega.def
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/data/single_defs/mega.def
     SOURCES
       ${test_srcs}
     LIBS
@@ -366,7 +366,7 @@ if (ENABLE_ALL_TESTS)
   # The following is not technically a test (as it makes no checks),
   # but a tool to parse 'mega.def' file
   set(test_srcs
-    parser/test/ParseOnly.cpp
+    test/parser/ParseOnly.cpp
   )
   ecbuild_add_test(
     TARGET
@@ -375,7 +375,7 @@ if (ENABLE_ALL_TESTS)
       performance
       nightly
     ARGS
-      ${CMAKE_CURRENT_SOURCE_DIR}/parser/test/data/single_defs/mega.def
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/data/single_defs/mega.def
     SOURCES
       ${test_srcs}
     LIBS

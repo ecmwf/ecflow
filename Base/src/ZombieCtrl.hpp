@@ -15,8 +15,8 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Cmd.hpp"
-#include "NodeFwd.hpp"
 #include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 class TaskCmd;
 class AbstractServer;

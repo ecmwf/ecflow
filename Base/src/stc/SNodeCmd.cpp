@@ -14,9 +14,9 @@
 #include <stdexcept>
 
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Suite.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace boost;

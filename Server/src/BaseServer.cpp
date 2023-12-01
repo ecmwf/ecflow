@@ -16,14 +16,14 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "Defs.hpp"
-#include "ExprDuplicate.hpp"
 #include "ServerEnvironment.hpp"
-#include "System.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprDuplicate.hpp"
+#include "ecflow/node/System.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = boost::filesystem;

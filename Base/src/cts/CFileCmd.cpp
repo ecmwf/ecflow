@@ -17,11 +17,11 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "EcfFile.hpp"
-#include "Submittable.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 using namespace ecf;
 using namespace std;

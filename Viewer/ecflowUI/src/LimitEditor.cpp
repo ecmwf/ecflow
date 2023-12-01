@@ -15,7 +15,6 @@
 #include <QSettings>
 #include <QStringListModel>
 
-#include "Aspect.hpp"
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
 #include "MainWindow.hpp"
@@ -25,6 +24,7 @@
 #include "VAttributeType.hpp"
 #include "VLimitAttr.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);

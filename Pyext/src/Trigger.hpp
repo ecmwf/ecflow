@@ -13,7 +13,7 @@
 
 #include <boost/python.hpp>
 
-#include "Expression.hpp"
+#include "ecflow/node/Expression.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Trigger & Complete thin wrapper over Expression, allows us to call:

@@ -14,8 +14,8 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
-#include "Node.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
 
 using namespace ecf;
 using namespace std;

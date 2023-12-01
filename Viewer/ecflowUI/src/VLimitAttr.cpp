@@ -10,10 +10,10 @@
 
 #include "VLimitAttr.hpp"
 
-#include "Limit.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/node/Limit.hpp"
 
 //================================
 // VLimitAttrType

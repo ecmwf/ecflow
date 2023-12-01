@@ -10,9 +10,9 @@
 
 #include "VLimiterAttr.hpp"
 
-#include "InLimit.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/InLimit.hpp"
 
 //================================
 // VLimiterAttrType

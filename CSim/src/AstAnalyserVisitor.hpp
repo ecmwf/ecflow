@@ -13,7 +13,7 @@
 
 #include <set>
 
-#include "ExprAstVisitor.hpp"
+#include "ecflow/node/ExprAstVisitor.hpp"
 
 class Node;
 

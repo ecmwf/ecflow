@@ -13,9 +13,9 @@
 
 #include <QAbstractItemModel>
 
-#include "Aspect.hpp"
 #include "NodeObserver.hpp"
 #include "VInfo.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 class Node;
 

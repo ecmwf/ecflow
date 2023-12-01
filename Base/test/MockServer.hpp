@@ -16,12 +16,12 @@
 #include <boost/core/noncopyable.hpp>
 
 #include "AbstractServer.hpp"
-#include "Defs.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "SuiteChanged.hpp"
 #include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
 
 /// Act as stand in for a server since Request require at least a AbstractServer
 class MockServer : public AbstractServer {

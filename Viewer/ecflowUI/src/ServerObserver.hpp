@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "Aspect.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 class ServerHandler;
 class VServerChange;

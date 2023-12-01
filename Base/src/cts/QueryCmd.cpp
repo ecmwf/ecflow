@@ -15,12 +15,12 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
-#include "Expression.hpp"
-#include "Limit.hpp"
-#include "Node.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Extract.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Node.hpp"
 
 using namespace ecf;
 using namespace std;

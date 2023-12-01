@@ -12,16 +12,8 @@
 
 #include <stdexcept>
 
-#include "Attr.hpp"
-#include "AutoRestoreAttr.hpp"
 #include "BoostPythonUtil.hpp"
-#include "Defs.hpp"
 #include "Edit.hpp"
-#include "Flag.hpp"
-#include "InLimit.hpp"
-#include "Limit.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "Trigger.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -37,6 +29,14 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
+#include "ecflow/node/Attr.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/InLimit.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace boost::python;
 using namespace std;

@@ -14,14 +14,14 @@
 
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
-#include "Alias.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "EcfFile.hpp"
-#include "JobsParam.hpp"
-#include "SuiteChanged.hpp"
-#include "Task.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/node/Alias.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace ecf;
 using namespace std;

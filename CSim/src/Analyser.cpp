@@ -12,9 +12,9 @@
 
 #include <fstream>
 
-#include "Defs.hpp"
 #include "DefsAnalyserVisitor.hpp"
 #include "FlatAnalyserVisitor.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 

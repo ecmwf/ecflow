@@ -17,8 +17,8 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "Simulator.hpp"
-#include "System.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/node/System.hpp"
 
 namespace fs = boost::filesystem;
 

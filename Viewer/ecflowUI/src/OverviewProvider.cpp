@@ -12,13 +12,13 @@
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
 #include "VAttribute.hpp"
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VNode.hpp"
 #include "VSState.hpp"
 #include "VTriggerAttr.hpp"
+#include "ecflow/node/Suite.hpp"
 
 OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::NoTask) {
 }

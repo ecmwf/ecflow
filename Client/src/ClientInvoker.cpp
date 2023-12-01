@@ -22,7 +22,6 @@
     #include "SslClient.hpp"
 #endif
 #include "ClientEnvironment.hpp"
-#include "Defs.hpp"
 #include "Rtt.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -30,6 +29,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeStamp.hpp"
+#include "ecflow/node/Defs.hpp"
 #ifdef DEBUG_PERF
     #include "ecflow/core/DebugPerf.hpp"
 #endif

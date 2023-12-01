@@ -23,8 +23,8 @@
 #include "SSyncCmd.hpp"
 #include "ServerToClientResponse.hpp"
 #include "StcCmd.hpp"
-#include "System.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;

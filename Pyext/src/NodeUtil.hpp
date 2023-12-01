@@ -14,7 +14,7 @@
 #include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>
 
-#include "NodeFwd.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 class NodeUtil : private boost::noncopyable {
 public:

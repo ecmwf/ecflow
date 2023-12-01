@@ -13,15 +13,15 @@
 #include <algorithm>
 
 #include "ClientInvoker.hpp"
-#include "Defs.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
 
 #define _UI_SERVERCOMTHREAD_DEBUG
 

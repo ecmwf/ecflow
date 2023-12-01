@@ -16,9 +16,9 @@
 
 #include <QStringList>
 
-#include "LimitFwd.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ecflow/node/LimitFwd.hpp"
 
 class AttributeFilter;
 class VAttributeType;

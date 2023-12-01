@@ -15,15 +15,15 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
 #include "InvokeServer.hpp"
 #include "MockServer.hpp"
 #include "SCPort.hpp"
 #include "ServerToClientCmd.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

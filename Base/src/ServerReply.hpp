@@ -11,9 +11,9 @@
 #ifndef ecflow_base_ServerReply_HPP
 #define ecflow_base_ServerReply_HPP
 
-#include "NodeFwd.hpp"
 #include "Stats.hpp"
 #include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 /// This class is used to hold the replies back from the server
 /// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle

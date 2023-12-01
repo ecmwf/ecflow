@@ -12,10 +12,10 @@
 
 #include <cassert>
 
-#include "ExprAst.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/ExprAst.hpp"
 
 static std::vector<VAttributeType*> attrTypes;
 

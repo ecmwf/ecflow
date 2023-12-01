@@ -13,13 +13,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Expression.hpp"
-#include "Family.hpp"
 #include "MockServer.hpp"
 #include "ServerToClientCmd.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

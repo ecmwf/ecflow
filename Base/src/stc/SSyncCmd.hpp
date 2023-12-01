@@ -12,8 +12,8 @@
 #define ecflow_base_stc_SSyncCmd_HPP
 
 #include "DefsCache.hpp"
-#include "DefsDelta.hpp"
 #include "ServerToClientCmd.hpp"
+#include "ecflow/node/DefsDelta.hpp"
 
 class AbstractServer;
 

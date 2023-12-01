@@ -12,13 +12,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Submittable.hpp"
-#include "Suite.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace ecf;

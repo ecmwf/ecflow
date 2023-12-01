@@ -10,7 +10,7 @@
 
 #include "AstAnalyserVisitor.hpp"
 
-#include "ExprAst.hpp"
+#include "ecflow/node/ExprAst.hpp"
 
 using namespace std;
 

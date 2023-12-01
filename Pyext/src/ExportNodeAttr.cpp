@@ -15,15 +15,8 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include "Attr.hpp"
-#include "AutoRestoreAttr.hpp"
 #include "BoostPythonUtil.hpp"
 #include "DefsDoc.hpp"
-#include "Expression.hpp"
-#include "Flag.hpp"
-#include "InLimit.hpp"
-#include "JobCreationCtrl.hpp"
-#include "Limit.hpp"
 #include "NodeAttrDoc.hpp"
 #include "Trigger.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
@@ -43,6 +36,13 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
+#include "ecflow/node/Attr.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/InLimit.hpp"
+#include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/Limit.hpp"
 
 using namespace ecf;
 using namespace boost::python;

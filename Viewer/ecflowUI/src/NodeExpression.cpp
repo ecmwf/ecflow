@@ -18,10 +18,8 @@
 #include <QRegularExpressionMatch>
 
 #include "MenuHandler.hpp"
-#include "Node.hpp"
 #include "NodeExpression.hpp"
 #include "ServerHandler.hpp"
-#include "Submittable.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
@@ -30,6 +28,8 @@
 #include "VNodeMover.hpp"
 #include "ViewerUtil.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 // #define _UI_NODEXPRESSIONPARSEER_DEBUG
 

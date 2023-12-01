@@ -13,15 +13,15 @@
 #include "AbstractClientEnv.hpp"
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Expression.hpp"
-#include "Submittable.hpp"
-#include "SuiteChanged.hpp"
 #include "TaskApi.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
 using namespace std;

@@ -22,11 +22,8 @@
 #include "ChangeNotify.hpp"
 #include "ClientInvoker.hpp"
 #include "ConnectState.hpp"
-#include "Defs.hpp"
 #include "DirectoryHandler.hpp"
 #include "MainWindow.hpp"
-#include "Node.hpp"
-#include "NodeFwd.hpp"
 #include "NodeObserver.hpp"
 #include "ServerComObserver.hpp"
 #include "ServerComQueue.hpp"
@@ -44,6 +41,9 @@
 #include "VTaskObserver.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;

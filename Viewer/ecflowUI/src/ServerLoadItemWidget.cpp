@@ -13,7 +13,7 @@
 #include <QVBoxLayout>
 
 #include "InfoProvider.hpp"
-#include "Node.hpp"
+#include "ecflow/node/Node.hpp"
 
 #ifdef ECFLOW_LOGVIEW
     #include "LogLoadWidget.hpp"

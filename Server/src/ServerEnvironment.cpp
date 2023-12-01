@@ -17,9 +17,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-#include "JobProfiler.hpp"
 #include "ServerOptions.hpp"
-#include "System.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -27,6 +25,8 @@
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace ecf;
 using namespace std;

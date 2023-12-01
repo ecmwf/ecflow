@@ -13,9 +13,9 @@
 #include <iostream>
 
 #include "AbstractServer.hpp"
-#include "Defs.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 using namespace ecf;

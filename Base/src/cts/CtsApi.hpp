@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "NodeFwd.hpp"
 #include "ecflow/core/CheckPt.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 // The two variant api must correspond i.e '--get' and 'get' since this is used by boost program options
 // *************************************************************************************

@@ -12,9 +12,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "Suite.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace ecf;

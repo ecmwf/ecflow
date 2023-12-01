@@ -21,7 +21,7 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "NodeFwd.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 class WhyCmd : private boost::noncopyable {
 public:

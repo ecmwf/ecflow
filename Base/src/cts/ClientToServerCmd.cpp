@@ -14,16 +14,16 @@
 #include <stdexcept>
 
 #include "AbstractServer.hpp"
-#include "CmdContext.hpp"
-#include "Defs.hpp"
 #include "EditHistoryMgr.hpp"
-#include "Flag.hpp"
-#include "Node.hpp"
 #include "ServerToClientCmd.hpp"
-#include "SuiteChanged.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/CmdContext.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
 
 using namespace std;
 using namespace boost;

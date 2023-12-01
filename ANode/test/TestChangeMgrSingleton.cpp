@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "AbstractObserver.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
+#include "ecflow/node/AbstractObserver.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace ecf;

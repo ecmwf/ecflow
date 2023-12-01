@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "Node.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Node.hpp"
 
 using namespace boost::python;
 using namespace std;

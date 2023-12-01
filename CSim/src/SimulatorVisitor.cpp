@@ -12,11 +12,11 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

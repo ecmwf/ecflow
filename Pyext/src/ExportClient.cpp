@@ -16,13 +16,13 @@
 #include "BoostPythonUtil.hpp"
 #include "ClientDoc.hpp"
 #include "ClientInvoker.hpp"
-#include "Defs.hpp"
 #include "UrlCmd.hpp"
 #include "WhyCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/node/Defs.hpp"
 #ifdef ECF_OPENSSL
     #include "Openssl.hpp"
 #endif

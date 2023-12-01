@@ -12,8 +12,8 @@
 
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 using namespace boost;

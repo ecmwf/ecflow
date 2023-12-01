@@ -11,7 +11,7 @@
 #include "SStatsCmd.hpp"
 
 #include "AbstractServer.hpp"
-#include "Defs.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 

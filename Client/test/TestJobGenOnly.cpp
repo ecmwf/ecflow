@@ -13,10 +13,10 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
-#include "Defs.hpp"
-#include "JobCreationCtrl.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/JobCreationCtrl.hpp"
 
 using namespace std;
 using namespace ecf;

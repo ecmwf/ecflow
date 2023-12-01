@@ -12,8 +12,8 @@
 
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Suite.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 

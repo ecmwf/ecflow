@@ -14,9 +14,9 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
-#include "JobCreationCtrl.hpp"
-#include "Jobs.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/Jobs.hpp"
 #ifdef DEBUG
     #include "ecflow/core/Ecf.hpp"
 #endif

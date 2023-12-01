@@ -13,8 +13,8 @@
 #include <iostream>
 
 #include "AbstractServer.hpp"
-#include "Defs.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
 using namespace std;

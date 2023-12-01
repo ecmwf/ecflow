@@ -11,13 +11,13 @@
 #include "FlatAnalyserVisitor.hpp"
 
 #include "AstAnalyserVisitor.hpp"
-#include "Defs.hpp"
-#include "ExprAst.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAst.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 

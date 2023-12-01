@@ -15,7 +15,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "NodeTreeVisitor.hpp"
+#include "ecflow/node/NodeTreeVisitor.hpp"
 
 class Defs;
 class Family;

@@ -16,7 +16,6 @@
 #include <QStringListModel>
 #include <QTimer>
 
-#include "Aspect.hpp"
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
 #include "MainWindow.hpp"
@@ -26,6 +25,7 @@
 #include "VAttributeType.hpp"
 #include "VEventAttr.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);

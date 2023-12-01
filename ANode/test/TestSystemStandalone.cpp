@@ -14,8 +14,8 @@
 #include <string>
 #include <unistd.h>
 
-#include "Signal.hpp"
-#include "System.hpp"
+#include "ecflow/node/Signal.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -20,9 +20,7 @@
 #include <sys/types.h>
 
 #include "DirectoryHandler.hpp"
-#include "ExprAst.hpp"
 #include "IconProvider.hpp"
-#include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
@@ -30,6 +28,8 @@
 #include "VNode.hpp"
 #include "VProperty.hpp"
 #include "VSettings.hpp"
+#include "ecflow/node/ExprAst.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 std::map<std::string, VIcon*> VIcon::items_;
 std::vector<VIcon*> VIcon::itemsVec_;

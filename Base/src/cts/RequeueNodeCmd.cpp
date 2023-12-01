@@ -14,10 +14,10 @@
 #include "AbstractServer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "CtsApi.hpp"
-#include "Suite.hpp"
-#include "SuiteChanged.hpp"
-#include "Task.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace ecf;
 using namespace std;

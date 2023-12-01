@@ -14,8 +14,6 @@
 #include <boost/program_options.hpp>
 
 #include "Cmd.hpp"
-#include "Flag.hpp"
-#include "NodeFwd.hpp"
 #include "PreAllocatedReply.hpp"
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/attribute/Zombie.hpp"
@@ -24,6 +22,8 @@
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;

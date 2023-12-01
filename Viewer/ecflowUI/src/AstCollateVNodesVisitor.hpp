@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include "ExprAstVisitor.hpp"
+#include "ecflow/node/ExprAstVisitor.hpp"
 
 class VItem;
 

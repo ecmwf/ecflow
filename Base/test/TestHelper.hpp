@@ -16,8 +16,8 @@
 #include "ClientToServerCmd.hpp"
 #include "ClientToServerRequest.hpp"
 #include "MockServer.hpp"
-#include "Node.hpp"
 #include "ServerToClientCmd.hpp"
+#include "ecflow/node/Node.hpp"
 
 // defines statics utility functions used by more than one test
 class TestHelper {

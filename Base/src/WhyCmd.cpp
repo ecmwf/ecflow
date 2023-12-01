@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "Defs.hpp"
-#include "Node.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
 
 WhyCmd::WhyCmd(defs_ptr defs, const std::string& absNodePath) : defs_(defs) {
     if (!defs_.get()) {

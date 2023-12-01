@@ -14,13 +14,13 @@
 #include <QFile>
 
 #include "InfoProvider.hpp"
-#include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VItemPathParser.hpp"
 #include "VNState.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Node.hpp"
 
 //========================================================
 //

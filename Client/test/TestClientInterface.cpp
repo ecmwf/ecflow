@@ -18,13 +18,13 @@
 
 #include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Flag.hpp"
-#include "Submittable.hpp"
-#include "Suite.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/NState.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/Suite.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

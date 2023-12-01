@@ -15,12 +15,12 @@
 
 #include "BaseServer.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "ServerEnvironment.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
 
 // #define DEBUG_CHECKPT 1
 // #define DEBUG_CHECKPT_SAVE_ALLOWED 1

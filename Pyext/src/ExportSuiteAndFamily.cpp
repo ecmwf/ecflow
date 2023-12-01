@@ -14,12 +14,12 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "BoostPythonUtil.hpp"
-#include "Defs.hpp"
 #include "DefsDoc.hpp"
-#include "Family.hpp"
 #include "NodeUtil.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace ecf;
 using namespace boost::python;

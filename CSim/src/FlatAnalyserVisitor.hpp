@@ -13,7 +13,7 @@
 
 #include <sstream>
 
-#include "NodeTreeVisitor.hpp"
+#include "ecflow/node/NodeTreeVisitor.hpp"
 
 class Node;
 

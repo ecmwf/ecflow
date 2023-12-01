@@ -15,10 +15,10 @@
 
 #include "AbstractNodeModel.hpp"
 #include "ConnectState.hpp"
-#include "Node.hpp"
 #include "VAttributeType.hpp"
 #include "VInfo.hpp"
 #include "Viewer.hpp"
+#include "ecflow/node/Node.hpp"
 
 class AttributeFilter;
 class NodeFilterDef;

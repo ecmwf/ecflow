@@ -17,17 +17,17 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

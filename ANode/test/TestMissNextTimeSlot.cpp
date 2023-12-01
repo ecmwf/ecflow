@@ -10,9 +10,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

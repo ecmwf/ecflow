@@ -13,9 +13,9 @@
 #include <iomanip> // for setw
 
 #include "AbstractServer.hpp"
-#include "ClientSuiteMgr.hpp"
 #include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
+#include "ecflow/node/ClientSuiteMgr.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 

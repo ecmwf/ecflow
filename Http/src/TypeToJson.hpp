@@ -11,13 +11,7 @@
 #ifndef ecflow_http_TypeToJson_HPP
 #define ecflow_http_TypeToJson_HPP
 
-#include "AutoRestoreAttr.hpp"
-#include "Expression.hpp"
-#include "Flag.hpp"
-#include "InLimit.hpp"
 #include "JSON.hpp"
-#include "Limit.hpp"
-#include "LimitFwd.hpp"
 #include "Stats.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -35,6 +29,12 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/core/TimeSlot.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/InLimit.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/LimitFwd.hpp"
 
 void to_json(ecf::ojson&, const ::Meter&);
 void to_json(ecf::ojson&, const ::Label&);

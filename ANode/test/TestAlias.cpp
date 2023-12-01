@@ -14,13 +14,13 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Alias.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Alias.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
