@@ -14,7 +14,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Simulator.hpp"
 #include "TestUtil.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -22,6 +21,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
 using namespace ecf;

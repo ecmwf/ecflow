@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Analyser.hpp"
+#include "ecflow/simulator/Analyser.hpp"
 
 #include <fstream>
 
-#include "DefsAnalyserVisitor.hpp"
-#include "FlatAnalyserVisitor.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/simulator/DefsAnalyserVisitor.hpp"
+#include "ecflow/simulator/FlatAnalyserVisitor.hpp"
 
 using namespace std;
 

@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "SimulatorVisitor.hpp"
+#include "ecflow/simulator/SimulatorVisitor.hpp"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 

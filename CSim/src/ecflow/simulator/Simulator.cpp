@@ -8,13 +8,11 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Simulator.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 #include <boost/filesystem/operations.hpp>
 
-#include "Analyser.hpp"
-#include "SimulatorVisitor.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Log.hpp"
@@ -24,6 +22,8 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/simulator/Analyser.hpp"
+#include "ecflow/simulator/SimulatorVisitor.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;

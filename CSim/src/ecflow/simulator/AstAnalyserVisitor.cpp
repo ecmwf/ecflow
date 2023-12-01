@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "AstAnalyserVisitor.hpp"
+#include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
 #include "ecflow/node/ExprAst.hpp"
 

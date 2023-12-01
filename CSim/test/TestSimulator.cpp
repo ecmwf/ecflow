@@ -16,9 +16,9 @@
 #define BOOST_TEST_MODULE TestSimulator
 #include <boost/test/included/unit_test.hpp>
 
-#include "Simulator.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 namespace fs = boost::filesystem;
 

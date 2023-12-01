@@ -8,15 +8,15 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "DefsAnalyserVisitor.hpp"
+#include "ecflow/simulator/DefsAnalyserVisitor.hpp"
 
-#include "AstAnalyserVisitor.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
 using namespace std;
 

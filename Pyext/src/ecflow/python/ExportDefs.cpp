@@ -13,7 +13,6 @@
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 
-#include "Simulator.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PrintStyle.hpp"
@@ -24,6 +23,7 @@
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/GlossaryDoc.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 using namespace ecf;
 using namespace boost::python;

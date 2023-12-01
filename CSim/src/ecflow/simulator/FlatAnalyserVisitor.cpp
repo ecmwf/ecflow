@@ -8,9 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "FlatAnalyserVisitor.hpp"
+#include "ecflow/simulator/FlatAnalyserVisitor.hpp"
 
-#include "AstAnalyserVisitor.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -18,6 +17,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
 using namespace std;
 

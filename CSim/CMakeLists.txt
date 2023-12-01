@@ -10,19 +10,19 @@
 
 set(srcs
   # Headers
-  src/Analyser.hpp
-  src/AstAnalyserVisitor.hpp
-  src/DefsAnalyserVisitor.hpp
-  src/FlatAnalyserVisitor.hpp
-  src/Simulator.hpp
-  src/SimulatorVisitor.hpp
+  src/ecflow/simulator/Analyser.hpp
+  src/ecflow/simulator/AstAnalyserVisitor.hpp
+  src/ecflow/simulator/DefsAnalyserVisitor.hpp
+  src/ecflow/simulator/FlatAnalyserVisitor.hpp
+  src/ecflow/simulator/Simulator.hpp
+  src/ecflow/simulator/SimulatorVisitor.hpp
   # Sources
-  src/Analyser.cpp
-  src/AstAnalyserVisitor.cpp
-  src/DefsAnalyserVisitor.cpp
-  src/FlatAnalyserVisitor.cpp
-  src/Simulator.cpp
-  src/SimulatorVisitor.cpp
+  src/ecflow/simulator/Analyser.cpp
+  src/ecflow/simulator/AstAnalyserVisitor.cpp
+  src/ecflow/simulator/DefsAnalyserVisitor.cpp
+  src/ecflow/simulator/FlatAnalyserVisitor.cpp
+  src/ecflow/simulator/Simulator.cpp
+  src/ecflow/simulator/SimulatorVisitor.cpp
 )
 ecbuild_add_library(
   TARGET
