@@ -31,7 +31,7 @@
 #include "ecflow/core/WhiteListFile.hpp"
 
 #ifdef ECF_OPENSSL
-    #include "Openssl.hpp"
+    #include "ecflow/base/Openssl.hpp"
 #endif
 
 // Added ServerEvinronmentException so that it can be in the same scope as server

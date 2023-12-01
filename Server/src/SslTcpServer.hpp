@@ -12,7 +12,7 @@
 #define ecflow_server_SslTcpServer_HPP
 
 #include "TcpBaseServer.hpp"
-#include "ssl_connection.hpp"
+#include "ecflow/base/ssl_connection.hpp"
 class SslServer;
 
 class SslTcpServer : public TcpBaseServer {

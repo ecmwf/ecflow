@@ -12,9 +12,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
-#include "ServerToClientCmd.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Family.hpp"

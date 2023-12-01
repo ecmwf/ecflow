@@ -11,10 +11,10 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"

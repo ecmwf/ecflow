@@ -13,8 +13,8 @@
 
 #include <boost/asio.hpp>
 
-#include "ClientToServerRequest.hpp"
-#include "ServerToClientResponse.hpp"
+#include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/core/Log.hpp"
 
 class BaseServer;

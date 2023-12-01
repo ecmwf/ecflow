@@ -16,8 +16,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestFixture.hpp"
-#include "WhyCmd.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"

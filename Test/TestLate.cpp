@@ -16,10 +16,10 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"

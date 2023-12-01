@@ -16,7 +16,7 @@
 #include "ecflow/core/Version.hpp"
 
 #ifdef ECF_OPENSSL
-    #include "Openssl.hpp"
+    #include "ecflow/base/Openssl.hpp"
 #endif
 
 using namespace std;

@@ -17,7 +17,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientInvoker.hpp"
-#include "ClientToServerCmd.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/NState.hpp"

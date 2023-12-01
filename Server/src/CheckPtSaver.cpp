@@ -14,8 +14,8 @@
 #include <boost/filesystem/path.hpp>
 
 #include "BaseServer.hpp"
-#include "CtsApi.hpp"
 #include "ServerEnvironment.hpp"
+#include "ecflow/base/cts/CtsApi.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"

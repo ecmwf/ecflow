@@ -20,9 +20,9 @@
 #include <boost/program_options.hpp>
 
 #include "ClientEnvironment.hpp"
-#include "ClientOptionsParser.hpp"
 #include "Help.hpp"
-#include "TaskApi.hpp"
+#include "ecflow/base/ClientOptionsParser.hpp"
+#include "ecflow/base/cts/TaskApi.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"

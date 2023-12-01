@@ -15,7 +15,7 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "AbstractServer.hpp"
+#include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"

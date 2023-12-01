@@ -15,11 +15,11 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "WhyCmd.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"

@@ -12,7 +12,6 @@
 #define ecflow_http_TypeToJson_HPP
 
 #include "JSON.hpp"
-#include "Stats.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -28,6 +27,7 @@
 #include "ecflow/attribute/TodayAttr.hpp"
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/core/TimeSlot.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
 #include "ecflow/node/Expression.hpp"

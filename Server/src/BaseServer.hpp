@@ -13,9 +13,9 @@
 
 #include <boost/asio.hpp>
 
-#include "AbstractServer.hpp"
 #include "CheckPtSaver.hpp"
 #include "NodeTreeTraverser.hpp"
+#include "ecflow/base/AbstractServer.hpp"
 
 class ServerEnvironment;
 

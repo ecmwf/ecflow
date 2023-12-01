@@ -10,10 +10,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
-#include "SSyncCmd.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/TestUtil.hpp"
 #include "ecflow/node/Defs.hpp"

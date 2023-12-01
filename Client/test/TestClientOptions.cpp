@@ -13,7 +13,7 @@
 #include "ClientEnvironment.hpp"
 #include "ClientInvoker.hpp"
 #include "ClientOptions.hpp"
-#include "ClientToServerCmd.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 

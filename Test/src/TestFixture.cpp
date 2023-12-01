@@ -18,9 +18,9 @@
 #include <boost/filesystem/path.hpp>
 
 #include "ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
-#include "CtsApi.hpp"
 #include "Rtt.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/CtsApi.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"

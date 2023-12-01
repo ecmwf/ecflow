@@ -11,7 +11,7 @@
 #ifndef ecflow_client_ClientOptions_HPP
 #define ecflow_client_ClientOptions_HPP
 
-#include "CtsCmdRegistry.hpp"
+#include "ecflow/base/cts/CtsCmdRegistry.hpp"
 class ClientEnvironment;
 class CommandLine;
 

@@ -17,9 +17,9 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/included/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"

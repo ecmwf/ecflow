@@ -11,19 +11,19 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "BlockClientZombieCmd.hpp"
-#include "DefsCmd.hpp"
-#include "ErrorCmd.hpp"
-#include "GroupSTCCmd.hpp"
 #include "MyDefsFixture.hpp"
-#include "SNewsCmd.hpp"
-#include "SNodeCmd.hpp"
-#include "SServerLoadCmd.hpp"
-#include "SStringCmd.hpp"
-#include "SSyncCmd.hpp"
-#include "ServerToClientResponse.hpp"
-#include "StcCmd.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/ServerToClientResponse.hpp"
+#include "ecflow/base/stc/BlockClientZombieCmd.hpp"
+#include "ecflow/base/stc/DefsCmd.hpp"
+#include "ecflow/base/stc/ErrorCmd.hpp"
+#include "ecflow/base/stc/GroupSTCCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SNodeCmd.hpp"
+#include "ecflow/base/stc/SServerLoadCmd.hpp"
+#include "ecflow/base/stc/SStringCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/node/System.hpp"
 
 using namespace std;

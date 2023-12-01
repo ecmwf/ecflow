@@ -15,10 +15,10 @@
 
 #include "ClientEnvironment.hpp"
 #include "ClientOptions.hpp"
-#include "Cmd.hpp"
-#include "CtsApi.hpp"
-#include "ServerReply.hpp"
-#include "TaskApi.hpp"
+#include "ecflow/base/Cmd.hpp"
+#include "ecflow/base/ServerReply.hpp"
+#include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/base/cts/TaskApi.hpp"
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 

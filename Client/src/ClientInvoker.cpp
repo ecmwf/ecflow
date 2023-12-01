@@ -16,10 +16,10 @@
 
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 
-#include "Client.hpp"
+#include "ecflow/base/Client.hpp"
 #include "ecflow/core/Converter.hpp"
 #ifdef ECF_OPENSSL
-    #include "SslClient.hpp"
+    #include "ecflow/base/SslClient.hpp"
 #endif
 #include "ClientEnvironment.hpp"
 #include "Rtt.hpp"

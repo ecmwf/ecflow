@@ -19,8 +19,8 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "WhyCmd.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/PrintStyle.hpp"

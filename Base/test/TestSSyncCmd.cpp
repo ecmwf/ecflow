@@ -10,12 +10,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "SNewsCmd.hpp"
-#include "SSyncCmd.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/node/Defs.hpp"

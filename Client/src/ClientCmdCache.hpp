@@ -11,7 +11,7 @@
 #ifndef ecflow_client_ClientCmdCache_HPP
 #define ecflow_client_ClientCmdCache_HPP
 
-#include "ClientToServerCmd.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
 
 class ClientCmdCache {
 public:

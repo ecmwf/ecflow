@@ -10,10 +10,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerRequest.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "ServerToClientCmd.hpp"
+#include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Log.hpp"
 
 ///

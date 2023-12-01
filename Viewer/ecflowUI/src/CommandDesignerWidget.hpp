@@ -15,10 +15,10 @@
 
 class CommandLineEdit;
 
-#include "CtsCmdRegistry.hpp"
 #include "CustomCommandHandler.hpp"
 #include "MenuHandler.hpp"
 #include "NodeQueryResultModel.hpp"
+#include "ecflow/base/cts/CtsCmdRegistry.hpp"
 #include "ui_CommandDesignerWidget.h"
 
 class CommandDesignerWidget : public QWidget, private Ui::commandDesignerWidget {
