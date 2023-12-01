@@ -299,11 +299,11 @@ QString OutputModel::formatDate(QDateTime dt) const {
 }
 
 QString OutputModel::formatAgo(QDateTime dt) const {
-    QString str   = tr("Right now");
+    QString str = tr("Right now");
 
     QDateTime now = QDateTime::currentDateTime();
 
-    int delta     = dt.secsTo(now);
+    int delta = dt.secsTo(now);
     if (delta < 0)
         delta = 0;
 
@@ -335,7 +335,7 @@ QString OutputModel::formatAgo(QDateTime dt) const {
 qint64 OutputModel::secsToNow(QDateTime dt) const {
     QDateTime now = QDateTime::currentDateTime();
 
-    qint64 delta  = dt.secsTo(now);
+    qint64 delta = dt.secsTo(now);
     return (delta < 0) ? 0 : delta;
 }
 

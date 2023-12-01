@@ -55,8 +55,8 @@ public:
     VAttribute* attribute() const { return attr_; }
     virtual VItem* item() const = 0;
 
-    virtual std::string name()  = 0;
-    virtual std::string path()  = 0;
+    virtual std::string name() = 0;
+    virtual std::string path() = 0;
     virtual std::string serverAlias() { return ""; }
     virtual std::string relativePath() { return ""; }
     virtual std::string nodePath() = 0;
@@ -164,8 +164,8 @@ typedef std::shared_ptr<VInfoAttribute> VInfoAttribute_ptr;
 
 class VInfoVisitor {
 public:
-    VInfoVisitor()                      = default;
-    virtual ~VInfoVisitor()             = default;
+    VInfoVisitor()          = default;
+    virtual ~VInfoVisitor() = default;
 
     virtual void visit(VInfoServer*)    = 0;
     virtual void visit(VInfoNode*)      = 0;
@@ -174,8 +174,8 @@ public:
 
 class VInfoObserver {
 public:
-    VInfoObserver()                     = default;
-    virtual ~VInfoObserver()            = default;
+    VInfoObserver()          = default;
+    virtual ~VInfoObserver() = default;
 
     virtual void notifyDataLost(VInfo*) = 0;
     virtual void notifyDelete(VInfo*)   = 0;

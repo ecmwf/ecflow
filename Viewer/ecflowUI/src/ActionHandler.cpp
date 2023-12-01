@@ -349,7 +349,7 @@ bool ActionHandler::confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
         ecf::Str::replace_all(question, placeholder, "<b>" + QString::number(taskNum).toStdString() + "</b>");
     }
 
-    QString msg        = QString::fromStdString(question);
+    QString msg = QString::fromStdString(question);
 
     QString warningStr = QString::fromStdString(warning);
     if (!warningStr.isEmpty()) {

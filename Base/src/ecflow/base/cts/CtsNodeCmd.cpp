@@ -371,7 +371,7 @@ void CtsNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
 
     std::string absNodePath = vm[theArg()].as<std::string>();
 
-    cmd                     = std::make_shared<CtsNodeCmd>(api_, absNodePath);
+    cmd = std::make_shared<CtsNodeCmd>(api_, absNodePath);
 }
 
 std::ostream& operator<<(std::ostream& os, const CtsNodeCmd& c) {

@@ -130,7 +130,7 @@ void WhyItemWidget::infoReady(VReply* reply) {
 }
 
 void WhyItemWidget::infoFailed(VReply* reply) {
-    QString s   = "Failed to refresh server before building the Why? output.\
+    QString s = "Failed to refresh server before building the Why? output.\
                      Time-related attributes might show out-of-date values.";
 
     QString err = QString::fromStdString(reply->errorText());

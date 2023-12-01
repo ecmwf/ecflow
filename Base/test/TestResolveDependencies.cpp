@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
         suite_ptr suite = defs.add_suite(suitename);
         family_ptr fam  = suite->add_family(familyname);
 
-        task_ptr task   = fam->add_task("t");
+        task_ptr task = fam->add_task("t");
         task->addMeter(Meter(metername, 0, 240, 120));
 
         task_ptr task_tt = fam->add_task("tt");

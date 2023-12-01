@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
         boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
         boost::posix_time::ptime time1        = theLocalTime + minutes(3);
 
-        suite_ptr suite                       = theDefs.add_suite("test_repeat_clears_user_edit");
+        suite_ptr suite = theDefs.add_suite("test_repeat_clears_user_edit");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
 

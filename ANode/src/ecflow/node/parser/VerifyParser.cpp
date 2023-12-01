@@ -29,11 +29,11 @@ bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& li
         throw std::runtime_error("VerifyParser::doParse: Invalid verify :" + line);
 
     if (!nodeStack().empty()) {
-        Node* node           = nodeStack_top();
+        Node* node = nodeStack_top();
 
         std::string stateInt = lineTokens[1];
 
-        size_t colonPos      = stateInt.find_first_of(':');
+        size_t colonPos = stateInt.find_first_of(':');
         if (colonPos == std::string::npos)
             throw std::runtime_error("Invalid verify :" + line);
 

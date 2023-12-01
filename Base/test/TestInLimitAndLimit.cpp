@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(test_limit_references_after_delete) {
     {
         suite_ptr suite = Suite::create("suite");
 
-        family_ptr fam  = Family::create("f");
+        family_ptr fam = Family::create("f");
         fam->addTask(Task::create("t1"));
         fam->addInLimit(in_limit1);
         suite->addFamily(fam);

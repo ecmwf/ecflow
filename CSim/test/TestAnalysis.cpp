@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_analysys) {
         suite_ptr suite = theDefs.add_suite("test_analysys");
         family_ptr fam  = suite->add_family("family");
 
-        task_ptr task1  = fam->add_task("t1");
+        task_ptr task1 = fam->add_task("t1");
         task1->add_trigger("t2 == complete");
 
         task_ptr task2 = fam->add_task("t2");

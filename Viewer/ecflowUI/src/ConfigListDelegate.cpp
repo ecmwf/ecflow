@@ -68,7 +68,7 @@ void ConfigListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 QSize ConfigListDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QSize size = QStyledItemDelegate::sizeHint(option, index);
 
-    int w      = (maxTextWidth_ > iconSize_) ? maxTextWidth_ : iconSize_;
+    int w = (maxTextWidth_ > iconSize_) ? maxTextWidth_ : iconSize_;
     w += 4;
 
     QFont f;

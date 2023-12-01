@@ -224,8 +224,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode,
 
     VTreeNode* node = tree_->find(vnode);
 
-    bool attrNumCh  = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-    bool nodeNumCh  = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+    bool attrNumCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+    bool nodeNumCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 #ifdef _UI_VMODELDATA_DEBUG
     UiLogS(server_).dbg() << " node=" << vnode->strName();
@@ -1351,7 +1351,7 @@ void VTreeModelData::add(ServerHandler* server) {
 
     VModelServer* d = nullptr;
 
-    d               = new VTreeServer(server, filterDef_, attrFilter_);
+    d = new VTreeServer(server, filterDef_, attrFilter_);
 
     connectToModel(d);
 
@@ -1401,7 +1401,7 @@ void VTableModelData::add(ServerHandler* server) {
 
     VModelServer* d = nullptr;
 
-    d               = new VTableServer(server, filterDef_);
+    d = new VTableServer(server, filterDef_);
 
     connectToModel(d);
 

@@ -59,7 +59,7 @@ Suite& Suite::operator=(const Suite& rhs) {
             clockAttr_ = std::make_shared<ClockAttr>(*rhs.clockAttr_);
         if (rhs.clock_end_attr_.get())
             clock_end_attr_ = std::make_shared<ClockAttr>(*rhs.clock_end_attr_);
-        cal_                = rhs.cal_;
+        cal_ = rhs.cal_;
 
         state_change_no_    = 0;
         modify_change_no_   = Ecf::incr_modify_change_no();
@@ -824,8 +824,8 @@ void SuiteGenVariables::update_generated_variables() const {
     //    assert( t.tm_year + 1900 == cal_.year());
     // #endif
 
-    int hours               = time_of_day.hours();
-    int minutes             = time_of_day.minutes();
+    int hours   = time_of_day.hours();
+    int minutes = time_of_day.minutes();
 
     constexpr int buff_size = 255;
     char buffer[buff_size];

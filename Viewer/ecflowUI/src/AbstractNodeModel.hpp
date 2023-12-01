@@ -76,10 +76,10 @@ public Q_SLOTS:
     void slotFilterDeleteBegin();
     void slotFilterDeleteEnd();
 
-    virtual void slotServerAddBegin(int row)                     = 0;
-    virtual void slotServerAddEnd()                              = 0;
-    virtual void slotServerRemoveBegin(VModelServer*, int)       = 0;
-    virtual void slotServerRemoveEnd(int)                        = 0;
+    virtual void slotServerAddBegin(int row)               = 0;
+    virtual void slotServerAddEnd()                        = 0;
+    virtual void slotServerRemoveBegin(VModelServer*, int) = 0;
+    virtual void slotServerRemoveEnd(int)                  = 0;
 
     virtual void slotDataChanged(VModelServer*)                  = 0;
     virtual void slotBeginServerScan(VModelServer* server, int)  = 0;

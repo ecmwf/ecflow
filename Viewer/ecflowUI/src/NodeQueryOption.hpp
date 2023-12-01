@@ -33,7 +33,7 @@ public:
     QString type() const { return type_; }
     QString name() const { return name_; }
     QString label() const { return label_; }
-    virtual QString valueAsString() const     = 0;
+    virtual QString valueAsString() const = 0;
 
     virtual void swap(const NodeQueryOption*) = 0;
     virtual QString query() const { return QString(); }

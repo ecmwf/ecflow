@@ -578,7 +578,7 @@ std::string ServerTestHarness::testDataLocation(const std::string& defsFile) {
 
     size_t dot_pos = base_name.rfind('.', base_name.length());
     assert(dot_pos != std::string::npos); // missing '.'
-    base_name            = base_name.substr(0, dot_pos);
+    base_name = base_name.substr(0, dot_pos);
 
     std::string testData = TestFixture::smshome() + "/" + base_name;
     return testData;

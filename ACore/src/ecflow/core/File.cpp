@@ -1083,7 +1083,7 @@ std::string File::root_build_dir() {
     std::string stem = current_path.stem().string();
     int count        = 0;
     while (stem.find("ecflow") == std::string::npos) {
-        current_path     = current_path.parent_path();
+        current_path = current_path.parent_path();
 
         the_current_path = current_path.string(); // cos current_path.string() is returned by reference
 

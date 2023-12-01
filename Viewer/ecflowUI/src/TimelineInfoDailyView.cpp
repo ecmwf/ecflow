@@ -285,9 +285,9 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter* painter,
 
     // bool selected=option.state & QStyle::State_Selected;
 
-    int leftEdge       = option.rect.x();
-    int rightEdge      = option.rect.x() + option.rect.width();
-    int extendedRight  = -1;
+    int leftEdge      = option.rect.x();
+    int rightEdge     = option.rect.x() + option.rect.width();
+    int extendedRight = -1;
 
     unsigned int day   = index.data().toUInt();
     unsigned int sDate = day + startTime_.msecsSinceStartOfDay() / 1000;
@@ -458,7 +458,7 @@ int TimelineInfoDailyDelegate::timeToPos(QRect r, unsigned int time) const {
     unsigned int start = startTime_.msecsSinceStartOfDay() / 1000;
     unsigned int end   = endTime_.msecsSinceStartOfDay() / 1000;
 
-    time               = time % 86400;
+    time = time % 86400;
 
     if (time < start)
         return r.x() - 2;

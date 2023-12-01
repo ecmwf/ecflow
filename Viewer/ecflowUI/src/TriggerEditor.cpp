@@ -52,7 +52,7 @@ TriggerEditor::TriggerEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(
 
     QString txt = data[2];
 
-    oriText_    = txt;
+    oriText_ = txt;
     w_->te_->setPlainText(txt);
 
     QString typeInHeader;

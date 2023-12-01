@@ -76,7 +76,7 @@ void LineEdit::adjustSize() {
 }
 
 void LineEdit::resizeEvent(QResizeEvent*) {
-    int frame    = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+    int frame = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 
     QSize tbSize = clearTb_->sizeHint();
     clearTb_->move(rect().right() - frame - tbSize.width(), (rect().bottom() + 1 - tbSize.height()) / 2);

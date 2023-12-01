@@ -381,7 +381,7 @@ std::string RepeatDate::value_as_string(int index) const {
 }
 
 std::string RepeatDate::next_value_as_string() const {
-    long val    = last_valid_value();
+    long val = last_valid_value();
 
     long julian = Cal::date_to_julian(val);
     julian += delta_;
@@ -396,7 +396,7 @@ std::string RepeatDate::next_value_as_string() const {
 }
 
 std::string RepeatDate::prev_value_as_string() const {
-    long val    = last_valid_value();
+    long val = last_valid_value();
 
     long julian = Cal::date_to_julian(val);
     julian -= delta_;

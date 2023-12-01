@@ -258,7 +258,7 @@ bool SuiteFilter::merge(const SuiteFilter* sf) {
 
     std::vector<SuiteFilterItem> oriItems = items_;
 
-    items_                                = sf->items_;
+    items_ = sf->items_;
     for (auto& oriItem : oriItems) {
         for (auto& item : items_) {
             if (item.name_ == oriItem.name_) {

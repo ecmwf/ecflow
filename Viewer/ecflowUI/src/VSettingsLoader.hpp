@@ -19,7 +19,7 @@
 class VSettingsLoader {
 public:
     explicit VSettingsLoader();
-    virtual ~VSettingsLoader()  = default;
+    virtual ~VSettingsLoader() = default;
 
     virtual void loadSettings() = 0;
     static void process();

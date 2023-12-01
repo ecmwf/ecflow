@@ -176,7 +176,7 @@ public:
 class StringMatchBase {
 public:
     StringMatchBase(bool caseSensitive) { caseSensitive_ = caseSensitive; }
-    virtual ~StringMatchBase()                                      = default;
+    virtual ~StringMatchBase() = default;
 
     virtual bool match(std::string searchFor, std::string searchIn) = 0;
 

@@ -36,12 +36,12 @@ BOOST_AUTO_TEST_CASE(test_state_hierarchy) {
     //  endfamily
     // endsuite
     Defs theDefs;
-    suite_ptr s1         = theDefs.add_suite("suite1");
-    family_ptr f1        = s1->add_family("family");
-    task_ptr t1          = f1->add_task("t1");
-    task_ptr t2          = f1->add_task("t2");
-    task_ptr t3          = f1->add_task("t3");
-    task_ptr t4          = f1->add_task("t4");
+    suite_ptr s1  = theDefs.add_suite("suite1");
+    family_ptr f1 = s1->add_family("family");
+    task_ptr t1   = f1->add_task("t1");
+    task_ptr t2   = f1->add_task("t2");
+    task_ptr t3   = f1->add_task("t3");
+    task_ptr t4   = f1->add_task("t4");
 
     NState::State result = s1->computedState(Node::IMMEDIATE_CHILDREN);
     BOOST_REQUIRE_MESSAGE(result == NState::UNKNOWN,

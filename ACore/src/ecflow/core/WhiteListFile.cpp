@@ -22,7 +22,7 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 
-WhiteListFile::WhiteListFile()  = default;
+WhiteListFile::WhiteListFile() = default;
 
 WhiteListFile::~WhiteListFile() = default;
 

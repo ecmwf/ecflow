@@ -135,7 +135,7 @@ void Openssl::init_for_client() {
     if (!init_for_client_ && enabled()) {
         init_for_client_ = true;
 
-        ssl_context_     = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
+        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
         ssl_context_->load_verify_file(crt());
     }
 }

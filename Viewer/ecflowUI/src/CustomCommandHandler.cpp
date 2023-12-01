@@ -121,8 +121,8 @@ int CustomCommandHandler::findIndexFromName(const std::string& name) const {
 
 void CustomCommandHandler::writeSettings() {
     std::vector<VSettings> vsItems;
-    std::string dummyFileName    = "dummy";
-    std::string key              = "commands";
+    std::string dummyFileName = "dummy";
+    std::string key           = "commands";
 
     std::string settingsFilePath = settingsFile();
     VSettings vs(settingsFilePath);

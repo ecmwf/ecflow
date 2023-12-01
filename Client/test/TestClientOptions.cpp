@@ -440,7 +440,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_add) {
 
     for (const auto& paths : paths_set) {
 
-        using Expected                           = AlterCmd::Add_attr_type;
+        using Expected = AlterCmd::Add_attr_type;
 
         std::vector<std::string> variable_values = {"",
                                                     "--dashes at beginning of value",

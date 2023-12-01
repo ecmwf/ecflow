@@ -104,7 +104,7 @@ int SimpleGraphLayoutBuilder::compute_level(SimpleGraphLayoutNode* item) {
 
     item->visited_ = true;
 
-    int lvl        = 0;
+    int lvl = 0;
     for (auto i : item->parents_) {
         auto p = nodes_[i];
         if (p->managed_) {
@@ -265,11 +265,11 @@ void SimpleGraphLayoutBuilder::printState(const std::vector<int>& nodes) {
 }
 
 void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
-    int H_DIST                   = 10;
-    int V_DIST                   = 10;
-    int max_in_a_level           = 0;
-    int max_level                = 0;
-    int levelNum                 = 0;
+    int H_DIST         = 10;
+    int V_DIST         = 10;
+    int max_in_a_level = 0;
+    int max_level      = 0;
+    int levelNum       = 0;
 
     SimpleGraphLayoutNode* focus = nullptr;
 
@@ -340,7 +340,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
             max_level      = item->level_;
         }
 
-        levelNum               = std::max(levelNum, item->level_);
+        levelNum = std::max(levelNum, item->level_);
 
         widths[item->level_]   = std::max(widths[item->level_], item->width_);
         heights[item->level_]  = std::max(heights[item->level_], item->height_);
@@ -446,7 +446,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
                 return nodes_[idx1]->y_ < nodes_[idx2]->y_;
             });
 
-            move_it  = !move_it;
+            move_it = !move_it;
 
             bool chg = true;
             int a    = 10000;

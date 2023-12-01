@@ -40,7 +40,7 @@
 SuiteItemWidget::SuiteItemWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
 
-    infoProvider_   = new SuiteProvider(this);
+    infoProvider_ = new SuiteProvider(this);
 
     model_          = new SuiteModel(this);
     auto* sortModel = new QSortFilterProxyModel(this);

@@ -21,7 +21,7 @@
 class AbstractTextEditSearchInterface {
 public:
     AbstractTextEditSearchInterface();
-    virtual ~AbstractTextEditSearchInterface()               = default;
+    virtual ~AbstractTextEditSearchInterface() = default;
 
     virtual bool findString(QString str,
                             bool highlightAll,

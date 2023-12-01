@@ -416,7 +416,7 @@ void TableNodeView::slotHeaderContextMenu(const QPoint& position) {
     if (varColumn) {
         varName = header_->model()->headerData(section, Qt::Horizontal).toString();
 
-        ac      = new QAction(menu);
+        ac = new QAction(menu);
         ac->setText(tr("Change column \'") + varName + "\'");
         ac->setData("change");
         menu->addAction(ac);
@@ -555,7 +555,7 @@ TableNodeHeader::TableNodeHeader(QWidget* parent) : QHeaderView(Qt::Horizontal, 
 
     connect(this, SIGNAL(sectionResized(int, int, int)), this, SLOT(slotSectionResized(int)));
 
-    int pixId  = IconProvider::add(":viewer/filter_decor.svg", "filter_decor");
+    int pixId = IconProvider::add(":viewer/filter_decor.svg", "filter_decor");
 
     customPix_ = IconProvider::pixmap(pixId, 10);
 

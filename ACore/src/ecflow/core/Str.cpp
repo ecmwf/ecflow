@@ -337,7 +337,7 @@ void Str::split_using_string_view(std::string_view strv, std::vector<std::string
 }
 
 void Str::split_using_string_view2(std::string_view strv, std::vector<std::string>& output, std::string_view delims) {
-    size_t first     = 0;
+    size_t first = 0;
 
     size_t strv_size = strv.size();
     while (first < strv_size) {

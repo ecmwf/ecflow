@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
         boost::posix_time::ptime theLocalTime    = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
         boost::posix_time::ptime time_minus_hour = theLocalTime - hours(1);
 
-        suite_ptr suite                          = theDefs.add_suite("test_today_single_slot");
+        suite_ptr suite = theDefs.add_suite("test_today_single_slot");
         ClockAttr clockAttr(theLocalTime, false, true /*positive gain*/);
         suite->addClock(clockAttr);
 
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
         boost::posix_time::ptime time1        = theLocalTime + minutes(1);
         boost::posix_time::ptime time2        = theLocalTime + minutes(7);
 
-        suite_ptr suite                       = theDefs.add_suite("test_today_real_time_series");
+        suite_ptr suite = theDefs.add_suite("test_today_real_time_series");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
         suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() - 1));

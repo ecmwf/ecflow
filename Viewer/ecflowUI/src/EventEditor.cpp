@@ -224,7 +224,7 @@ void EventEditor::lookup(const QModelIndex& idx) {
 
     std::string nodePath = model_->data(idx, Qt::DisplayRole).toString().toStdString();
 
-    VInfo_ptr ni         = VInfo::createFromPath(info_->server(), nodePath);
+    VInfo_ptr ni = VInfo::createFromPath(info_->server(), nodePath);
     if (ni) {
         MainWindow::lookUpInTree(ni);
     }

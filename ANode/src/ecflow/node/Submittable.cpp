@@ -63,7 +63,7 @@ Submittable& Submittable::operator=(const Submittable& rhs) {
         delete sub_gen_variables_;
         sub_gen_variables_ = nullptr;
 
-        state_change_no_   = Ecf::incr_state_change_no();
+        state_change_no_ = Ecf::incr_state_change_no();
     }
     return *this;
 }

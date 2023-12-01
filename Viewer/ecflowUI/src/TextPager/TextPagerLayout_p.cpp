@@ -92,10 +92,10 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
     }
     QList<QTextLayout::FormatRange> formats = formatMap.values();
 
-    int leftMargin                          = LeftMargin;
-    int rightMargin                         = 0;
-    int topMargin                           = 0;
-    int bottomMargin                        = 0;
+    int leftMargin   = LeftMargin;
+    int rightMargin  = 0;
+    int topMargin    = 0;
+    int bottomMargin = 0;
     Q_FOREACH (SyntaxHighlighter* syntaxHighlighter, syntaxHighlighters) {
         syntaxHighlighter->d->currentBlockPosition = lineStart;
         syntaxHighlighter->d->formatRanges.clear();
@@ -125,7 +125,7 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
     textLayout->beginLayout();
     const int lineWidth = viewportWidth() - (leftMargin + rightMargin);
 
-    int localWidest     = -1;
+    int localWidest = -1;
     Q_FOREVER {
         QTextLine line = textLayout->createLine();
         if (!line.isValid()) {
@@ -237,7 +237,7 @@ void TextPagerLayout::relayoutByGeometry(int height) {
 
     QList<TextPagerSection*> l = relayoutCommon();
 
-    const int max              = viewportPosition + buffer.size() - bufferOffset(); // in document coordinates
+    const int max = viewportPosition + buffer.size() - bufferOffset(); // in document coordinates
     ASSUME(viewportPosition == 0 || bufferReadCharacter(viewportPosition - 1) == '\n');
 
     static const int extraLines = qMax(2, qgetenv("LAZYTEXTEDIT_EXTRA_LINES").toInt());
@@ -276,7 +276,7 @@ void TextPagerLayout::relayoutByPosition(int size) {
 
     QList<TextPagerSection*> l = relayoutCommon();
 
-    const int max              = viewportPosition + qMin(size, buffer.size() - bufferOffset());
+    const int max = viewportPosition + qMin(size, buffer.size() - bufferOffset());
     Q_ASSERT(viewportPosition == 0 || bufferReadCharacter(viewportPosition - 1) == '\n');
     int index = viewportPosition;
     while (index < max) {

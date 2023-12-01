@@ -124,7 +124,7 @@ void print_sparser_node(ecf::ojson& j, const std::vector<node_ptr>& nodes) {
     for (const auto& node : nodes) {
         const std::string type = tolower(node->debugType());
 
-        j[node->name()]        = ecf::ojson::object({});
+        j[node->name()] = ecf::ojson::object({});
         if (type == "family") {
             print_sparser_node(j[node->name()], std::dynamic_pointer_cast<Family>(node)->nodeVec());
         }
@@ -251,12 +251,12 @@ node_ptr get_node(const std::string& path) {
 ecf::ojson get_node_status(const httplib::Request& request) {
     const std::string path = request.matches[1];
 
-    auto client            = get_client(request);
+    auto client = get_client(request);
     client->query("dstate", path, "");
 
     ecf::ojson j;
-    j["status"]   = client->server_reply().get_string();
-    j["path"]     = path;
+    j["status"] = client->server_reply().get_string();
+    j["path"]   = path;
 
     node_ptr node = get_node(path);
 
@@ -335,7 +335,7 @@ ecf::ojson get_node_tree(const std::string& path, bool add_id = false) {
         if (node == nullptr)
             throw HttpServerException(HttpStatusCode::client_error_not_found, "Node " + path + " not found");
 
-        j                      = make_node_json(node);
+        j = make_node_json(node);
 
         const std::string type = tolower(node->debugType());
 
@@ -351,7 +351,7 @@ ecf::ojson get_node_tree(const std::string& path, bool add_id = false) {
 }
 
 ecf::ojson get_suites() {
-    auto suites  = get_defs()->suiteVec();
+    auto suites = get_defs()->suiteVec();
 
     ecf::ojson j = ecf::ojson::array();
     for (const auto& s : suites) {
@@ -377,7 +377,7 @@ ecf::ojson get_server_attributes() {
 ecf::ojson get_node_attributes(const std::string& path) {
     ecf::ojson j;
 
-    node_ptr node    = get_node(path);
+    node_ptr node = get_node(path);
 
     j["meters"]      = node->meters();
     j["limits"]      = node->limits();
@@ -434,7 +434,7 @@ ecf::ojson get_node_attributes(const std::string& path) {
 ecf::ojson get_node_definition(const std::string& path) {
     ecf::ojson j;
 
-    node_ptr node   = get_node(path);
+    node_ptr node = get_node(path);
 
     j["definition"] = node->print();
     j["path"]       = path;
@@ -445,7 +445,7 @@ ecf::ojson get_node_definition(const std::string& path) {
 ecf::ojson get_node_output(const httplib::Request& request) {
     const std::string path = request.matches[1];
 
-    auto client            = get_client(request);
+    auto client = get_client(request);
 
     ecf::ojson j;
 
@@ -475,7 +475,7 @@ void add_suite(const httplib::Request& request, httplib::Response& response) {
     const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string defs   = payload.at("definition");
+    const std::string defs = payload.at("definition");
 
     DefsStructureParser parser(defs);
 
@@ -488,7 +488,7 @@ void add_suite(const httplib::Request& request, httplib::Response& response) {
 
     node_ptr node = parser.the_node_ptr();
 
-    auto defsptr  = Defs::create();
+    auto defsptr = Defs::create();
     errorMsg = "", warningMsg = "";
     defsptr->restore_from_string(defs, errorMsg, warningMsg);
 
@@ -541,7 +541,7 @@ ecf::ojson update_node_definition(const httplib::Request& request) {
 
     node_ptr node = parser.the_node_ptr();
 
-    size_t pos    = 0;
+    size_t pos = 0;
 
     // If a child with the same name exists already, it needs to be removed
     // before adding it with this new definition
@@ -608,8 +608,8 @@ template <typename T>
 void add_attribute_to_path(const T& attr, const httplib::Request& request) {
     const std::string path = request.matches[1];
 
-    auto defs              = std::make_shared<Defs>(*get_defs());
-    auto parent            = defs->findAbsNode(path);
+    auto defs   = std::make_shared<Defs>(*get_defs());
+    auto parent = defs->findAbsNode(path);
 
     if (parent.get() == nullptr) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "Path " + path + " not found");
@@ -623,8 +623,8 @@ void add_attribute_to_path(const T& attr, const httplib::Request& request) {
 void remove_attribute_from_path(const std::string& type, const httplib::Request& request) {
     const std::string path = request.matches[1];
 
-    auto defs              = std::make_shared<Defs>(*get_defs());
-    auto parent            = defs->findAbsNode(path);
+    auto defs   = std::make_shared<Defs>(*get_defs());
+    auto parent = defs->findAbsNode(path);
 
     if (parent.get() == nullptr) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "Path " + path + " not found");
@@ -645,8 +645,8 @@ template <typename T>
 void update_attribute_in_path(const T& attr, const std::string& type, const httplib::Request& request) {
     const std::string path = request.matches[1];
 
-    auto defs              = std::make_shared<Defs>(*get_defs());
-    auto parent            = defs->findAbsNode(path);
+    auto defs   = std::make_shared<Defs>(*get_defs());
+    auto parent = defs->findAbsNode(path);
 
     if (parent.get() == nullptr) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "Path " + path + " not found");
@@ -716,10 +716,10 @@ ecf::ojson add_node_attribute(const httplib::Request& request) {
     const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string type   = payload.at("type");
-    const std::string value  = json_type_to_string(payload.at("value"));
+    const std::string type  = payload.at("type");
+    const std::string value = json_type_to_string(payload.at("value"));
 
-    auto client              = get_client(request);
+    auto client = get_client(request);
 
     if (type == "meter") {
         const std::string name = payload.at("name");
@@ -775,7 +775,7 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
     const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    std::string type         = payload.at("type");
+    std::string type = payload.at("type");
 
     // Updating node attributes is not a straightforward matter.
     // Firstly, it can be done either as a child command or a user
@@ -799,7 +799,7 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
                                       "Invalid action for child command: " + name);
         }
 
-        auto client             = get_client_for_tasks(request, payload);
+        auto client = get_client_for_tasks(request, payload);
 
         const std::string value = payload.at("value");
 
@@ -907,8 +907,8 @@ ecf::ojson delete_node_attribute(const httplib::Request& request) {
     const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string type   = payload.at("type");
-    auto client              = get_client(request);
+    const std::string type = payload.at("type");
+    auto client            = get_client(request);
 
     if (type == "time" || type == "today" || type == "day" || type == "date" || type == "cron" || type == "late" ||
         type == "complete") {
@@ -941,7 +941,7 @@ ecf::ojson add_server_attribute(const httplib::Request& request) {
     const std::string name  = payload.at("name");
     const std::string value = json_type_to_string(payload.at("value"));
 
-    auto client             = get_client(request);
+    auto client = get_client(request);
     client->alter("/", "add", type, name, value);
 
     ecf::ojson j;
@@ -978,8 +978,8 @@ ecf::ojson delete_server_attribute(const httplib::Request& request) {
 
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string type   = payload.at("type");
-    const std::string name   = payload.at("name");
+    const std::string type = payload.at("type");
+    const std::string name = payload.at("name");
     std::string x;
 
     if (get_defs()->server().find_user_variable(name, x) == false) {
@@ -1003,7 +1003,7 @@ ecf::ojson update_node_status(const httplib::Request& request) {
     const std::string path   = request.matches[1];
     const ecf::ojson payload = ecf::ojson::parse(request.body);
 
-    const std::string name   = payload.at("action");
+    const std::string name = payload.at("action");
 
     if (payload.contains("ECF_NAME")) {
         // this is a child command call
@@ -1032,7 +1032,7 @@ ecf::ojson update_node_status(const httplib::Request& request) {
         }
     }
     else {
-        auto client    = get_client(request);
+        auto client = get_client(request);
 
         bool recursive = payload.value("recursive", false);
         bool force     = payload.value("force", false);
@@ -1182,7 +1182,7 @@ void update_defs_loop(int interval) {
                     const double last_request_age = static_cast<double>(get_current_time() - last_request_time.load());
                     const auto drift = std::chrono::seconds(static_cast<int>(floor(last_request_age / 60.)));
 
-                    sleeptime        = min(max_sleeptime, base_sleeptime + drift);
+                    sleeptime = min(max_sleeptime, base_sleeptime + drift);
                     if (opts.verbose && sleeptime != previous_sleeptime) {
                         print_polling_interval_notification(
                             sleeptime.count(), base_sleeptime.count(), drift.count(), max_sleeptime.count());

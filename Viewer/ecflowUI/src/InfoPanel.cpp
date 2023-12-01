@@ -129,7 +129,7 @@ void InfoPanel::populateDialog() {
     bcWidget_->useTransparentBg(false);
     verticalLayout_->insertWidget(0, bcWidget_);
 
-    QMenu* menu      = buildOptionsMenu();
+    QMenu* menu = buildOptionsMenu();
 
     QWidget* cornerW = new QWidget(this);
     auto* hb         = new QHBoxLayout(cornerW);
@@ -238,7 +238,7 @@ bool InfoPanel::reset(VInfo_ptr info) {
 }
 
 bool InfoPanel::reloadCore(VInfo_ptr info) {
-    bool retVal        = false; // no real reset/reload happened!!
+    bool retVal = false; // no real reset/reload happened!!
 
     lastBroadcastInfo_ = info;
 
@@ -286,7 +286,7 @@ void InfoPanel::adjustInfo(VInfo_ptr info) {
     if (info) {
         ServerHandler* server = info->server();
 
-        bool sameServer       = (info_) ? (info_->server() == server) : false;
+        bool sameServer = (info_) ? (info_->server() == server) : false;
 
         // Handle observers
         if (!sameServer) {

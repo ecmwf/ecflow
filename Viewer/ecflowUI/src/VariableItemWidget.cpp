@@ -77,7 +77,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler* data,
 
     data_->addObserver(this);
 
-    genVar_      = data_->data(defineIndex)->isGenVar(name.toStdString());
+    genVar_ = data_->data(defineIndex)->isGenVar(name.toStdString());
 
     QString path = QString::fromStdString(data_->data(0)->fullPath());
     QString h    = EditorInfoLabel::formatKeyLabel("Node to modify: ") + "<b>" +
@@ -89,7 +89,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler* data,
     defineNodeName_ = QString::fromStdString(defineData->name());
     defineNodeType_ = QString::fromStdString(defineData->type());
 
-    genVar_         = defineData->isGenVar(name.toStdString());
+    genVar_ = defineData->isGenVar(name.toStdString());
     h += EditorInfoLabel::formatKeyLabel("Variable type: ");
     h += (genVar_) ? tr("generated variable") : tr("user variable");
 
@@ -231,8 +231,8 @@ void VariablePropDialog::notifyUpdated(VariableModelDataHandler*) {
     QString name  = nameEdit_->text();
     QString value = valueEdit_->toPlainText();
 
-    bool st       = false;
-    QString v     = QString::fromStdString(data_->value(defineNodeName_.toStdString(), name.toStdString(), st));
+    bool st   = false;
+    QString v = QString::fromStdString(data_->value(defineNodeName_.toStdString(), name.toStdString(), st));
     if (!st) {
         messageLabel_->showWarning("Variable <b>" + name + "</b> is not defined any more in " + defineNodeType_ +
                                    " <b>" + defineNodeName_ + "</b>!");
@@ -842,7 +842,7 @@ void VariableItemWidget::editItem(const QModelIndex& index) {
 
     QString name;
     QString value;
-    bool genVar        = false;
+    bool genVar = false;
 
     QModelIndex vIndex = sortModel_->mapToSource(index);
 #ifdef _UI_VARIABLEITEMWIDGET_DEBUG
@@ -915,9 +915,9 @@ void VariableItemWidget::removeItem(const QModelIndex& index) {
 
     QString name;
     QString value;
-    bool genVar             = false;
+    bool genVar = false;
 
-    QModelIndex vIndex      = sortModel_->mapToSource(index);
+    QModelIndex vIndex = sortModel_->mapToSource(index);
 
     VariableModelData* data = model_->indexToData(vIndex);
 

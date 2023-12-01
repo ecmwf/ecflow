@@ -138,7 +138,7 @@ static int parse_check_pt_interval(const std::string& the_arg) {
 }
 
 static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) {
-    std::string alarm_time  = the_arg.substr(colon_pos + 1);
+    std::string alarm_time = the_arg.substr(colon_pos + 1);
 
     int check_pt_alarm_time = 0;
     try {

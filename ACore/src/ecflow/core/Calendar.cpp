@@ -104,11 +104,11 @@ void Calendar::assign(const Calendar& rhs) {
     lastTime_      = rhs.lastTime_;
     increment_     = rhs.increment_;
 
-    day_of_week_   = rhs.day_of_week_;  // Cache
-    day_of_year_   = rhs.day_of_year_;  // Cache
-    day_of_month_  = rhs.day_of_month_; // Cache
-    month_         = rhs.month_;        // Cache
-    year_          = rhs.year_;         // Cache
+    day_of_week_  = rhs.day_of_week_;  // Cache
+    day_of_year_  = rhs.day_of_year_;  // Cache
+    day_of_month_ = rhs.day_of_month_; // Cache
+    month_        = rhs.month_;        // Cache
+    year_         = rhs.year_;         // Cache
 }
 
 void Calendar::init(Clock_t clock) {
@@ -206,7 +206,7 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
 
             time_duration td = suiteTime_.time_of_day();
 
-            suiteTime_       = ptime(initTime_.date(), td);
+            suiteTime_ = ptime(initTime_.date(), td);
 
 #ifdef DEBUG_CALENDAR
             cout << "suiteTime_ = " << to_simple_string(suiteTime_) << "\n";

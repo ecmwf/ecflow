@@ -30,7 +30,7 @@ void ConnectState::init() {
 const std::string& ConnectState::describe() const {
     static std::string empty = "";
 
-    auto it                  = descMap.find(state_);
+    auto it = descMap.find(state_);
     if (it != descMap.end()) {
         return it->second;
     }
@@ -67,7 +67,7 @@ void ConnectState::logDisconnect() {
 }
 
 void ConnectState::errorMessage(const std::string& str) {
-    errMsg_         = str;
+    errMsg_ = str;
 
     std::size_t pos = str.find("Client environment:");
     if (pos != std::string::npos) {

@@ -312,7 +312,7 @@ static void check_expected_no_of_zombies_range(size_t min_expected, size_t max_e
     TestFixture::client().zombieGet();
     std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
 
-    bool in_range               = (zombies.size() >= min_expected && zombies.size() <= max_expected);
+    bool in_range = (zombies.size() >= min_expected && zombies.size() <= max_expected);
     BOOST_CHECK_MESSAGE(in_range,
                         "*error* Expected range(" << min_expected << "-" << max_expected << ") zombies but got "
                                                   << zombies.size());

@@ -32,9 +32,9 @@ ZombieItemWidget::ZombieItemWidget(QWidget* parent) : QWidget(parent) {
 
     infoProvider_ = new ZombieProvider(this);
 
-    model_        = new ZombieModel(this);
+    model_ = new ZombieModel(this);
 
-    sortModel_    = new QSortFilterProxyModel(this);
+    sortModel_ = new QSortFilterProxyModel(this);
     sortModel_->setSourceModel(model_);
     sortModel_->setSortRole(Qt::UserRole);
 
@@ -238,7 +238,7 @@ void ZombieItemWidget::checkActionState() {
     QModelIndex vIndex = zombieView->currentIndex();
     QModelIndex index  = sortModel_->mapToSource(vIndex);
 
-    bool acState       = (index.isValid()) ? true : false;
+    bool acState = (index.isValid()) ? true : false;
 
     actionRescue->setEnabled(acState);
     actionFoboff->setEnabled(acState);

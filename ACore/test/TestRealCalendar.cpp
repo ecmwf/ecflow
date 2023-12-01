@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_relative_complex) {
 
             timeSeries.calendarChanged(calendar);
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_complex) {
             time_now += minutes(1);
             calendar.update(time_now);
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_day_changed_for_hybrid) {
     BOOST_CHECK_MESSAGE(calendar.hybrid(), "calendar type should be real");
 
     // HYBRID calendars allow for day change but not date.
-    std::string expected_date         = to_simple_string(calendar.date());
+    std::string expected_date = to_simple_string(calendar.date());
 
     boost::posix_time::ptime time_now = Calendar::second_clock_time();
 

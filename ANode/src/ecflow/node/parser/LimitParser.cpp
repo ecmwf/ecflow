@@ -30,7 +30,7 @@ bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lin
 
     int limitValue = Extract::theInt(lineTokens[2], "LimitParser::doParse: Invalid limit value: " + line);
 
-    Node* node     = nodeStack_top();
+    Node* node = nodeStack_top();
 
     if (rootParser()->get_file_type() != PrintStyle::DEFS) {
         // state

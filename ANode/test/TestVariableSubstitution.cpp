@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution_double_micro) {
     std::cout << "ANode:: ...test_variable_substitution_double_micro\n";
 
     Defs defs;
-    suite_ptr s          = defs.add_suite("suite");
+    suite_ptr s = defs.add_suite("suite");
 
     std::string cmd      = "%%";
     std::string expected = "%";
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
     std::cout << "ANode:: ...test_server_variable_substitution\n";
 
     Defs defs;
-    suite_ptr s                  = defs.add_suite("suite");
+    suite_ptr s = defs.add_suite("suite");
 
     std::vector<std::string> vec = required_server_variables();
     for (const auto& i : vec) {

@@ -34,8 +34,8 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid, bool pos
     month_                         = theDate.month();
     year_                          = theDate.year();
 
-    tm t                           = to_tm(time);
-    gain_                          = t.tm_hour * 3600 + t.tm_min * 60 + t.tm_sec;
+    tm t  = to_tm(time);
+    gain_ = t.tm_hour * 3600 + t.tm_min * 60 + t.tm_sec;
 }
 
 ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)

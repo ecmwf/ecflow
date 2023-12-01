@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     // SET ECF_HOME
     std::string ecf_home = File::test_data("ANode/test/data/TaskScriptGenerator", "ANode");
 
-    std::string head     = ecf_home + "/head.h";
-    std::string tail     = ecf_home + "/tail.h";
+    std::string head = ecf_home + "/head.h";
+    std::string tail = ecf_home + "/tail.h";
     fs::remove_all(ecf_home);
     BOOST_REQUIRE_MESSAGE(!fs::exists(head), "Remove of head file failed");
     BOOST_REQUIRE_MESSAGE(!fs::exists(tail), "Remove of tail file failed");
@@ -159,8 +159,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
     // SET ECF_HOME
     std::string ecf_home = File::test_data("ANode/test/data/TaskScriptGenerator", "ANode");
 
-    std::string head     = ecf_home + "/head.h";
-    std::string tail     = ecf_home + "/tail.h";
+    std::string head = ecf_home + "/head.h";
+    std::string tail = ecf_home + "/tail.h";
     fs::remove_all(ecf_home);
     BOOST_REQUIRE_MESSAGE(!fs::exists(head), "Remove of head file failed");
     BOOST_REQUIRE_MESSAGE(!fs::exists(tail), "Remove of tail file failed");

@@ -93,7 +93,7 @@ std::string Rtt::analyis(const std::string& filename) {
         string cmd   = line.substr(0, cmd_length);
         max_cmd_size = std::max(max_cmd_size, cmd.size());
 
-        string time  = line.substr(rtt_pos + 4);
+        string time = line.substr(rtt_pos + 4);
         time_duration td(duration_from_string(time));
         //      cout << "  cmd:(" << cmd << ") time(" << to_simple_string(td) << ")\n";
 

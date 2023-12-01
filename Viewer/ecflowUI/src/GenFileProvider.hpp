@@ -48,8 +48,8 @@ public:
     GenFileReceiver(const GenFileReceiver&)            = delete;
     GenFileReceiver& operator=(const GenFileReceiver&) = delete;
 
-    virtual void fileFetchFinished(VReply*)            = 0;
-    virtual void fileFetchFailed(VReply*)              = 0;
+    virtual void fileFetchFinished(VReply*) = 0;
+    virtual void fileFetchFailed(VReply*)   = 0;
 
 protected:
     GenFileProvider* fetchManager_{nullptr};

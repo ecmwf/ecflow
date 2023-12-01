@@ -89,7 +89,7 @@ VNState* VNState::toRealState(const VNode* n) {
 
     node_ptr node = n->node();
 
-    auto it       = stateMap_.find(node->state());
+    auto it = stateMap_.find(node->state());
     if (it != stateMap_.end())
         return it->second;
 
@@ -100,7 +100,7 @@ VNState* VNState::toDefaultState(const VNode* n) {
     if (!n || !n->node())
         return nullptr;
 
-    node_ptr node          = n->node();
+    node_ptr node = n->node();
 
     const char* dStateName = DState::toString(node->defStatus());
     assert(dStateName);

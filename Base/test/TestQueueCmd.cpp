@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_queue_cmd) {
     Defs defs;
     string suite_f_t = "/suite/f/t";
 
-    suite_ptr s      = defs.add_suite("suite");
+    suite_ptr s = defs.add_suite("suite");
     QueueAttr q1("q1", {"s1", "s2", "s3"});
     s->add_queue(q1);
     QueueAttr& q1_ref = s->findQueue("q1");

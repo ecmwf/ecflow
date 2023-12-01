@@ -22,8 +22,8 @@ class VProperty;
 
 class VPropertyObserver {
 public:
-    VPropertyObserver()                   = default;
-    virtual ~VPropertyObserver()          = default;
+    VPropertyObserver()          = default;
+    virtual ~VPropertyObserver() = default;
 
     virtual void notifyChange(VProperty*) = 0;
 };

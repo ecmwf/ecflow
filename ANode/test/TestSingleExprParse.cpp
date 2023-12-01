@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
         string expectedRootType       = p.second.first;
         bool expectedEvaluationResult = p.second.second;
 
-        Ast* top                      = theExprParser.getAst();
+        Ast* top = theExprParser.getAst();
         BOOST_REQUIRE_MESSAGE(top, "No abstract syntax tree");
         BOOST_REQUIRE_MESSAGE(top->left(), "No root created");
         BOOST_REQUIRE_MESSAGE(top->left()->isRoot() || top->left()->is_attribute(),

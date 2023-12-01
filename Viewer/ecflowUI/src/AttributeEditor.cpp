@@ -45,7 +45,7 @@ AttributeEditor::AttributeEditor(VInfo_ptr info, QString type, QWidget* parent)
     Q_ASSERT(attr);
     messageLabel_->hide();
 
-    attrData_  = attr->data();
+    attrData_ = attr->data();
 
     QString wt = "Edit " + type;
     wt += "  -  " + QString::fromStdString(VConfig::instance()->appLongName());

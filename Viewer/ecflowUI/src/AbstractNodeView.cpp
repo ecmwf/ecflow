@@ -156,12 +156,12 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
     QPoint pos                  = event->pos();
     QPersistentModelIndex index = indexAt(pos);
 
-    pressedIndex_               = index;
+    pressedIndex_ = index;
 
     // Get the selection flags
     QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
 
-    noSelectionOnMousePress_                    = (command == QItemSelectionModel::NoUpdate || !index.isValid());
+    noSelectionOnMousePress_ = (command == QItemSelectionModel::NoUpdate || !index.isValid());
 
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::mousePressEvent --> current=" << currentIndex().data().toString()
@@ -388,9 +388,9 @@ void AbstractNodeView::doItemsLayout(bool hasRemovedItems) {
     }
 
     viewItems_.clear(); // prepare for new layout
-    rowCount_          = 0;
-    maxRowWidth_       = 0;
-    pressedRefIndex_   = QPersistentModelIndex(QModelIndex());
+    rowCount_        = 0;
+    maxRowWidth_     = 0;
+    pressedRefIndex_ = QPersistentModelIndex(QModelIndex());
 
     QModelIndex parent = root_;
     if (model_->hasChildren(parent)) {
@@ -488,7 +488,7 @@ void AbstractNodeView::scrollTo(const QModelIndex& index) {
         return;
 
     if (verticalScrollMode_ == ScrollPerItem) {
-        int row    = itemRow(item);
+        int row = itemRow(item);
 
         int top    = verticalScrollBar()->value();
         int bottom = top + verticalScrollBar()->pageStep();

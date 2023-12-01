@@ -560,7 +560,7 @@ void NodePathItem::makeShape(int xp, int yp, int len) {
     vec << QPoint(0, height_);
     vec << QPoint(triLen_, height_ / 2);
 
-    shape_    = QPolygon(vec).translated(xp, yp);
+    shape_ = QPolygon(vec).translated(xp, yp);
 
     textRect_ = QRect(xp + triLen_ + hPadding_, yp, len, height_);
 }
@@ -683,7 +683,7 @@ void NodePathServerItem::makeShape(int xp, int yp, int len) {
     vec << QPoint(len, height_);
     vec << QPoint(0, height_);
 
-    shape_    = QPolygon(vec).translated(xp, yp);
+    shape_ = QPolygon(vec).translated(xp, yp);
 
     textRect_ = QRect(xp + hPadding_, yp, len, height_);
 }
@@ -794,7 +794,7 @@ void NodePathWidget::adjust(VInfo_ptr info, ServerHandler** serverOut, bool& sam
 
     // Check if there is data in info
     if (info) {
-        server     = info->server();
+        server = info->server();
 
         sameServer = (info_) ? (info_->server() == server) : false;
 
@@ -865,7 +865,7 @@ void NodePathWidget::setPath(VInfo_ptr info) {
     ServerHandler* server = nullptr;
     bool sameServer       = false;
 
-    VInfo_ptr info_ori    = info_;
+    VInfo_ptr info_ori = info_;
 
     adjust(info, &server, sameServer);
 
@@ -916,8 +916,8 @@ void NodePathWidget::setPath(VInfo_ptr info) {
         QString name;
         NodePathItem* nodeItem = nullptr;
 
-        VNode* n               = lst.at(i);
-        col                    = n->stateColour();
+        VNode* n = lst.at(i);
+        col      = n->stateColour();
 #ifdef _UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   state=" << n->stateName();
 #endif

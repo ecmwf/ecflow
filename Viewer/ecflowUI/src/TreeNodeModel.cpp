@@ -413,7 +413,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex& child) const {
             Q_ASSERT(root);
             row = root->indexOfChild(parentNode);
             Q_ASSERT(row >= 0);
-            VTreeServer* ts   = root->server();
+            VTreeServer* ts = root->server();
 
             int serverAttrNum = root->attrNum(atts_);
             return createIndex(serverAttrNum + row, 0, ts);
@@ -858,7 +858,7 @@ void TreeNodeModel::selectionChanged(QModelIndexList lst) {
     if (lst.count() > 0) {
         QModelIndex idx = lst.back();
 
-        VInfo_ptr info  = nodeInfo(idx);
+        VInfo_ptr info = nodeInfo(idx);
 
         setForceShow(info);
     }

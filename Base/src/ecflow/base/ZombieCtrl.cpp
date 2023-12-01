@@ -448,7 +448,7 @@ void ZombieCtrl::get(std::vector<Zombie>& ret) {
 
     boost::posix_time::ptime time_now = Calendar::second_clock_time();
 
-    size_t zombieVecSize              = zombies_.size();
+    size_t zombieVecSize = zombies_.size();
     ret.reserve(zombieVecSize);
     for (size_t i = 0; i < zombieVecSize; i++) {
 

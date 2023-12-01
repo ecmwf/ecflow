@@ -75,9 +75,9 @@ TimelineHeader::TimelineHeader(QTreeView* view)
     gr.setColorAt(1, bg1);
     timelineBrush_ = QBrush(gr);
 
-    font_          = QFont();
+    font_ = QFont();
     font_.setPointSize(font_.pointSize() - 2);
-    fm_         = QFontMetrics(font_);
+    fm_ = QFontMetrics(font_);
 
     zoomCursor_ = QCursor(QPixmap(":/viewer/cursor_zoom.svg"));
 }
@@ -479,15 +479,15 @@ void MainTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
     int w = sectionSize(logicalIndex);
 
     // period in secs
-    qint64 startSec  = startDate_.toMSecsSinceEpoch() / 1000;
-    qint64 endSec    = endDate_.toMSecsSinceEpoch() / 1000;
-    qint64 period    = endSec - startSec;
+    qint64 startSec = startDate_.toMSecsSinceEpoch() / 1000;
+    qint64 endSec   = endDate_.toMSecsSinceEpoch() / 1000;
+    qint64 period   = endSec - startSec;
 
     int minorTick    = 1; // in secs (it is a delta)
     int majorTick    = 1; // in secs (it is a delta)
     qint64 firstTick = 1; // in secs since epoch
 
-    int hLineY       = pRect.center().y() - majorTickSize_ / 2 - 1;
+    int hLineY = pRect.center().y() - majorTickSize_ / 2 - 1;
     // int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
     int majorTickTop    = hLineY;
     int majorTickBottom = hLineY + majorTickSize_; // pRect.bottom()-fm_.height()-timeTextGap;
@@ -496,8 +496,8 @@ void MainTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
     int dateTextY       = hLineY - (hLineY - pRect.y() - fm_.height()) / 2 - fm_.height() + 1;
     int timeTextY       = majorTickBottom + (pRect.bottom() - majorTickBottom - fm_.height()) / 2 - 1;
 
-    int timeItemW       = ViewerUtil::textWidth(fm_, "223:442");
-    int dateItemW       = ViewerUtil::textWidth(fm_, "2229 May22");
+    int timeItemW = ViewerUtil::textWidth(fm_, "223:442");
+    int dateItemW = ViewerUtil::textWidth(fm_, "2229 May22");
 
     QList<int> majorTickSec;
 
@@ -833,13 +833,13 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
     int w = sectionSize(logicalIndex);
 
     // period in secs
-    qint64 startSec     = startTime_.msecsSinceStartOfDay() / 1000;
-    qint64 endSec       = endTime_.msecsSinceStartOfDay() / 1000;
-    qint64 period       = endSec - startSec;
+    qint64 startSec = startTime_.msecsSinceStartOfDay() / 1000;
+    qint64 endSec   = endTime_.msecsSinceStartOfDay() / 1000;
+    qint64 period   = endSec - startSec;
 
-    int minorTick       = 1; // in secs (it is a delta)
-    int majorTick       = 1; // in secs (it is a delta)
-    qint64 firstTick    = 1; // in secs since epoch
+    int minorTick    = 1; // in secs (it is a delta)
+    int majorTick    = 1; // in secs (it is a delta)
+    qint64 firstTick = 1; // in secs since epoch
 
     int hLineY          = pRect.center().y() - majorTickSize_ / 2 - 1;
     int majorTickTop    = hLineY;
@@ -848,7 +848,7 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
     int minorTickBottom = majorTickBottom - 3;
     int timeTextY       = majorTickBottom + (pRect.bottom() - majorTickBottom - fm_.height()) / 2 - 1;
 
-    int timeItemW       = ViewerUtil::textWidth(fm_, "223:442");
+    int timeItemW = ViewerUtil::textWidth(fm_, "223:442");
 
     QList<int> majorTickSec;
 

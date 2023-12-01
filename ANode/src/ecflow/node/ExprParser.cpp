@@ -67,25 +67,25 @@ typedef treematch_t::tree_iterator tree_iter_t;
 struct ExpressionGrammer : public grammar<ExpressionGrammer>
 {
     // The parser object is copied a lot, so only use reference/pointer variables as data members
-    ExpressionGrammer()                      = default;
-    ~ExpressionGrammer()                     = default;
+    ExpressionGrammer()  = default;
+    ~ExpressionGrammer() = default;
 
-    static const int integer_ID              = 1;
-    static const int dot_path_ID             = 2;
-    static const int equal_1_ID              = 3;
-    static const int equal_2_ID              = 4;
-    static const int not_equal_1_ID          = 5;
-    static const int not_equal_2_ID          = 6;
-    static const int node_name_ID            = 7;
-    static const int greater_equals_1_ID     = 8;
-    static const int greater_equals_2_ID     = 9;
-    static const int less_equals_1_ID        = 10;
-    static const int less_equals_2_ID        = 11;
-    static const int less_than_1_ID          = 12;
-    static const int less_than_2_ID          = 13;
-    static const int greater_than_1_ID       = 14;
-    static const int greater_than_2_ID       = 15;
-    static const int node_state_unknown_ID   = 16;
+    static const int integer_ID            = 1;
+    static const int dot_path_ID           = 2;
+    static const int equal_1_ID            = 3;
+    static const int equal_2_ID            = 4;
+    static const int not_equal_1_ID        = 5;
+    static const int not_equal_2_ID        = 6;
+    static const int node_name_ID          = 7;
+    static const int greater_equals_1_ID   = 8;
+    static const int greater_equals_2_ID   = 9;
+    static const int less_equals_1_ID      = 10;
+    static const int less_equals_2_ID      = 11;
+    static const int less_than_1_ID        = 12;
+    static const int less_than_2_ID        = 13;
+    static const int greater_than_1_ID     = 14;
+    static const int greater_than_2_ID     = 15;
+    static const int node_state_unknown_ID = 16;
 
     static const int node_state_complete_ID  = 18;
     static const int node_state_queued_ID    = 19;
@@ -93,42 +93,42 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
     static const int node_state_active_ID    = 21;
     static const int node_state_aborted_ID   = 22;
 
-    static const int not1_ID                 = 23;
-    static const int not2_ID                 = 24;
-    static const int not3_ID                 = 25;
-    static const int and_ID                  = 26;
-    static const int or_ID                   = 27;
-    static const int dot_dot_path_ID         = 29;
-    static const int base_trigger_ID         = 31;
-    static const int sub_expression_ID       = 32;
-    static const int node_path_state_ID      = 34;
-    static const int absolute_path_ID        = 35;
-    static const int event_state_ID          = 36;
-    static const int variable_ID             = 37;
-    static const int plus_ID                 = 42;
-    static const int minus_ID                = 43;
-    static const int multiply_ID             = 44;
-    static const int divide_ID               = 45;
-    static const int modulo_ID               = 46;
-    static const int calc_expression_ID      = 47;
-    static const int calc_factor_ID          = 48;
-    static const int calc_term_ID            = 49;
-    static const int calc_grouping_ID        = 50;
-    static const int calc_subexpression_ID   = 51;
-    static const int basic_variable_path_ID  = 52;
-    static const int compare_expression_ID   = 53;
+    static const int not1_ID                = 23;
+    static const int not2_ID                = 24;
+    static const int not3_ID                = 25;
+    static const int and_ID                 = 26;
+    static const int or_ID                  = 27;
+    static const int dot_dot_path_ID        = 29;
+    static const int base_trigger_ID        = 31;
+    static const int sub_expression_ID      = 32;
+    static const int node_path_state_ID     = 34;
+    static const int absolute_path_ID       = 35;
+    static const int event_state_ID         = 36;
+    static const int variable_ID            = 37;
+    static const int plus_ID                = 42;
+    static const int minus_ID               = 43;
+    static const int multiply_ID            = 44;
+    static const int divide_ID              = 45;
+    static const int modulo_ID              = 46;
+    static const int calc_expression_ID     = 47;
+    static const int calc_factor_ID         = 48;
+    static const int calc_term_ID           = 49;
+    static const int calc_grouping_ID       = 50;
+    static const int calc_subexpression_ID  = 51;
+    static const int basic_variable_path_ID = 52;
+    static const int compare_expression_ID  = 53;
 
-    static const int cal_date_to_julian_ID   = 54;
-    static const int cal_julian_to_date_ID   = 55;
-    static const int cal_argument_ID         = 56;
+    static const int cal_date_to_julian_ID = 54;
+    static const int cal_julian_to_date_ID = 55;
+    static const int cal_argument_ID       = 56;
 
-    static const int flag_path_ID            = 57;
-    static const int flag_late_ID            = 58;
-    static const int flag_zombie_ID          = 59;
-    static const int flag_archived_ID        = 60;
-    static const int flag_ID                 = 61;
-    static const int root_path_ID            = 62;
-    static const int parent_variable_ID      = 63;
+    static const int flag_path_ID       = 57;
+    static const int flag_late_ID       = 58;
+    static const int flag_zombie_ID     = 59;
+    static const int flag_archived_ID   = 60;
+    static const int flag_ID            = 61;
+    static const int root_path_ID       = 62;
+    static const int parent_variable_ID = 63;
 
     template <typename ScannerT>
     struct definition
@@ -221,13 +221,13 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
             // Integer is distinct from task/family names that are integers, since nodes with integer
             // names that occur in trigger/complete expression must have path ./0 ./1
-            integer             = leaf_node_d[uint_p];
-            plus                = root_node_d[str_p("+")];
-            minus               = root_node_d[str_p("-")];
-            divide              = root_node_d[str_p("/")];
-            multiply            = root_node_d[str_p("*")];
-            modulo              = root_node_d[str_p("%")];
-            operators           = plus | minus | divide | multiply | modulo;
+            integer   = leaf_node_d[uint_p];
+            plus      = root_node_d[str_p("+")];
+            minus     = root_node_d[str_p("-")];
+            divide    = root_node_d[str_p("/")];
+            multiply  = root_node_d[str_p("*")];
+            modulo    = root_node_d[str_p("%")];
+            operators = plus | minus | divide | multiply | modulo;
 
             equal_1             = root_node_d[str_p("==")];
             equal_2             = root_node_d[str_p("eq")];
@@ -235,28 +235,28 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
             not_equal_2         = root_node_d[str_p("ne")];
             equality_comparible = equal_1 | equal_2 | not_equal_2 | not_equal_1;
 
-            greater_equals_1    = root_node_d[str_p(">=")];
-            greater_equals_2    = root_node_d[str_p("ge")];
-            less_equals_1       = root_node_d[str_p("<=")];
-            less_equals_2       = root_node_d[str_p("le")];
-            less_than_1         = root_node_d[str_p("<")];
-            less_than_2         = root_node_d[str_p("lt")];
-            greater_than_1      = root_node_d[str_p(">")];
-            greater_than_2      = root_node_d[str_p("gt")];
+            greater_equals_1 = root_node_d[str_p(">=")];
+            greater_equals_2 = root_node_d[str_p("ge")];
+            less_equals_1    = root_node_d[str_p("<=")];
+            less_equals_2    = root_node_d[str_p("le")];
+            less_than_1      = root_node_d[str_p("<")];
+            less_than_2      = root_node_d[str_p("lt")];
+            greater_than_1   = root_node_d[str_p(">")];
+            greater_than_2   = root_node_d[str_p("gt")];
             // Prioritise to most common first, to speed up parsing
             less_than_comparable = greater_equals_2 | less_equals_2 | greater_than_2 | less_than_2 | greater_equals_1 |
                                    less_equals_1 | less_than_1 | greater_than_1;
 
-            not1_r               = root_node_d[str_p("not ")];
-            not2_r               = root_node_d[str_p("~")];
-            not3_r               = root_node_d[str_p("!")];
-            not_r                = not1_r | not3_r | not2_r;
+            not1_r = root_node_d[str_p("not ")];
+            not2_r = root_node_d[str_p("~")];
+            not3_r = root_node_d[str_p("!")];
+            not_r  = not1_r | not3_r | not2_r;
 
-            and_r                = root_node_d[str_p("and")] || root_node_d[str_p("&&")] || root_node_d[str_p("AND")];
-            or_r                 = root_node_d[str_p("or")] || root_node_d[str_p("||")] || root_node_d[str_p("OR")];
-            and_or               = and_r | or_r;
+            and_r  = root_node_d[str_p("and")] || root_node_d[str_p("&&")] || root_node_d[str_p("AND")];
+            or_r   = root_node_d[str_p("or")] || root_node_d[str_p("||")] || root_node_d[str_p("OR")];
+            and_or = and_r | or_r;
 
-            event_state          = leaf_node_d[str_p("set")] || leaf_node_d[str_p("clear")];
+            event_state = leaf_node_d[str_p("set")] || leaf_node_d[str_p("clear")];
 
             node_state_unknown   = root_node_d[str_p("unknown")];
             node_state_complete  = root_node_d[str_p("complete")];
@@ -267,18 +267,18 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
             nodestate            = node_state_complete | node_state_aborted | node_state_queued | node_state_active |
                         node_state_submitted | node_state_unknown;
 
-            flag_late           = root_node_d[str_p("late")];
-            flag_zombie         = root_node_d[str_p("zombie")];
-            flag_archived       = root_node_d[str_p("archived")];
-            flag                = flag_late | flag_zombie | flag_archived;
+            flag_late     = root_node_d[str_p("late")];
+            flag_zombie   = root_node_d[str_p("zombie")];
+            flag_archived = root_node_d[str_p("archived")];
+            flag          = flag_late | flag_zombie | flag_archived;
 
             variable            = leaf_node_d[nodename];
             basic_variable_path = nodepath >> discard_node_d[ch_p(':')] >> variable;
             parent_variable =
                 ch_p(':') >> variable; // if we discard_node, then we get just 'variable' and NOT parent_variable
 
-            root_path    = leaf_node_d[(str_p("/"))];
-            flag_path    = (nodepath | root_path) >> discard_node_d[str_p("<flag>")] >> flag;
+            root_path = leaf_node_d[(str_p("/"))];
+            flag_path = (nodepath | root_path) >> discard_node_d[str_p("<flag>")] >> flag;
 
             cal_argument = basic_variable_path | integer;
             cal_date_to_julian =
@@ -290,10 +290,10 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                           discard_node_d[ch_p('(')] >> calc_expression >> discard_node_d[ch_p(')')] | flag_path |
                           parent_variable | root_node_d[operators] >> calc_factor | cal_date_to_julian |
                           cal_julian_to_date;
-            calc_term          = calc_factor >> *(root_node_d[operators] >> calc_factor);
-            calc_expression    = calc_term >> *(root_node_d[operators] >> calc_term);
+            calc_term       = calc_factor >> *(root_node_d[operators] >> calc_factor);
+            calc_expression = calc_term >> *(root_node_d[operators] >> calc_term);
 
-            nodepathstate      = nodepath >> equality_comparible >> nodestate;
+            nodepathstate = nodepath >> equality_comparible >> nodestate;
 
             compare_expression = nodepathstate | basic_variable_path >> equality_comparible >> event_state |
                                  root_node_d[calc_expression >> *((equality_comparible | less_than_comparable) >>
@@ -301,13 +301,13 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
             // We need to take special care so that 'and' has a higher priority than 'or'
             // (( This is done by have a custom rule for the and
-            andExpr            = !not_r >> compare_expression >> *(and_r >> !not_r >> compare_expression);
+            andExpr = !not_r >> compare_expression >> *(and_r >> !not_r >> compare_expression);
 
-            calc_grouping      = !not_r >> discard_node_d[ch_p('(')] >> calc_subexpression >> discard_node_d[ch_p(')')];
+            calc_grouping = !not_r >> discard_node_d[ch_p('(')] >> calc_subexpression >> discard_node_d[ch_p(')')];
 
             calc_subexpression = (andExpr | calc_grouping) >> *((and_r | or_r) >> calc_subexpression);
 
-            expression         = calc_subexpression >> end_p;
+            expression = calc_subexpression >> end_p;
 
             BOOST_SPIRIT_DEBUG_NODE(cal_argument);
             BOOST_SPIRIT_DEBUG_NODE(cal_date_to_julian);
@@ -401,22 +401,22 @@ static void populate_rule_names() {
         rule_names[ExpressionGrammer::dot_dot_path_ID]         = "DOT_DOT_PATH";
         rule_names[ExpressionGrammer::absolute_path_ID]        = "ABSOLUTE_PATH";
 
-        rule_names[ExpressionGrammer::base_trigger_ID]         = "BASE_TRIGGER";
-        rule_names[ExpressionGrammer::sub_expression_ID]       = "SUB_EXPRESSION";
-        rule_names[ExpressionGrammer::node_path_state_ID]      = "NODE_PATH_STATE";
-        rule_names[ExpressionGrammer::flag_path_ID]            = "FLAG_PATH";
+        rule_names[ExpressionGrammer::base_trigger_ID]    = "BASE_TRIGGER";
+        rule_names[ExpressionGrammer::sub_expression_ID]  = "SUB_EXPRESSION";
+        rule_names[ExpressionGrammer::node_path_state_ID] = "NODE_PATH_STATE";
+        rule_names[ExpressionGrammer::flag_path_ID]       = "FLAG_PATH";
 
-        rule_names[ExpressionGrammer::event_state_ID]          = "STRING";
-        rule_names[ExpressionGrammer::variable_ID]             = "VARIABLE";
+        rule_names[ExpressionGrammer::event_state_ID] = "STRING";
+        rule_names[ExpressionGrammer::variable_ID]    = "VARIABLE";
 
-        rule_names[ExpressionGrammer::calc_expression_ID]      = "calc_expression_ID";
-        rule_names[ExpressionGrammer::calc_factor_ID]          = "calc_factor_ID";
-        rule_names[ExpressionGrammer::calc_term_ID]            = "calc_term_ID";
-        rule_names[ExpressionGrammer::calc_grouping_ID]        = "calc_grouping_ID";
-        rule_names[ExpressionGrammer::calc_subexpression_ID]   = "calc_subexpression_ID";
-        rule_names[ExpressionGrammer::basic_variable_path_ID]  = "basic_variable_path_ID";
-        rule_names[ExpressionGrammer::parent_variable_ID]      = "parent_variable_ID";
-        rule_names[ExpressionGrammer::compare_expression_ID]   = "compare_expression_ID";
+        rule_names[ExpressionGrammer::calc_expression_ID]     = "calc_expression_ID";
+        rule_names[ExpressionGrammer::calc_factor_ID]         = "calc_factor_ID";
+        rule_names[ExpressionGrammer::calc_term_ID]           = "calc_term_ID";
+        rule_names[ExpressionGrammer::calc_grouping_ID]       = "calc_grouping_ID";
+        rule_names[ExpressionGrammer::calc_subexpression_ID]  = "calc_subexpression_ID";
+        rule_names[ExpressionGrammer::basic_variable_path_ID] = "basic_variable_path_ID";
+        rule_names[ExpressionGrammer::parent_variable_ID]     = "parent_variable_ID";
+        rule_names[ExpressionGrammer::compare_expression_ID]  = "compare_expression_ID";
     }
 }
 
@@ -864,7 +864,7 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         // cout << "is_root_node(i) && i->children.size() == 2\n";
         AstRoot* someRoot = createRootNode(i, rule_names);
 
-        Ast* left         = doCreateAst(i->children.begin(), rule_names, someRoot);
+        Ast* left = doCreateAst(i->children.begin(), rule_names, someRoot);
         if (left)
             someRoot->addChild(left);
         Ast* right = doCreateAst(i->children.begin() + 1, rule_names, someRoot);
@@ -889,7 +889,7 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         LOG_ASSERT(is_not(i->children.begin()), "");
         AstRoot* notRoot = createRootNode(i->children.begin(), rule_names);
 
-        Ast* notChild    = doCreateAst(i->children.begin() + 1, rule_names, notRoot /*top*/);
+        Ast* notChild = doCreateAst(i->children.begin() + 1, rule_names, notRoot /*top*/);
         if (notChild)
             notRoot->addChild(notChild);
 

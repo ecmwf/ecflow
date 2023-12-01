@@ -700,7 +700,7 @@ QString TextPagerCursor::cursorLine() const {
     int layoutIndex             = -1;
     TextPagerLayout* textLayout = TextLayoutCacheManager::requestLayout(*this, 2); // should I use 1?
 
-    QTextLine line              = textLayout->lineForPosition(position(), nullptr, &layoutIndex);
+    QTextLine line = textLayout->lineForPosition(position(), nullptr, &layoutIndex);
     Q_ASSERT(line.isValid()); // ### could this be legitimate?
     Q_ASSERT(textLayout);
     return textLayout->textLayouts.at(layoutIndex)->text().mid(line.textStart(), line.textLength());

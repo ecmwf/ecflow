@@ -61,7 +61,7 @@ std::unique_ptr<TokenFile> create_token_file() {
     fs::path cwd(fs::current_path());
     string tokens_file = cwd.string() + "/api-tokens.json";
 
-    auto tokenfile     = std::make_unique<TokenFile>(tokens_file);
+    auto tokenfile = std::make_unique<TokenFile>(tokens_file);
     BOOST_TEST_MESSAGE("Token file " << tokens_file);
     return tokenfile;
 }
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
                     HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/test/definition"); });
 
-    auto result  = handle_response(request("get", "/v1/suites"));
+    auto result = handle_response(request("get", "/v1/suites"));
 
     json content = json::parse(result.body);
     bool found   = false;
@@ -368,7 +368,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 
     handle_response(request("put", "/v1/suites/test/status", R"({"action":"begin"})", API_KEY));
 
-    auto response              = json::parse(handle_response(request("get", "/v1/suites/test/definition")).body);
+    auto response = json::parse(handle_response(request("get", "/v1/suites/test/definition")).body);
 
     const std::string& correct = "suite test\n  family a\n    task a\n  endfamily\nendsuite\n";
 

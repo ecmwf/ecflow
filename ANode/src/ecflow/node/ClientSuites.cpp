@@ -184,8 +184,8 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const {
             unsigned int suite_state_change_no  = suite->state_change_no();
             unsigned int suite_modify_change_no = suite->modify_change_no();
 
-            the_max_state_change_no             = std::max(the_max_state_change_no, suite_state_change_no);
-            the_max_modify_change_no            = std::max(the_max_modify_change_no, suite_modify_change_no);
+            the_max_state_change_no  = std::max(the_max_state_change_no, suite_state_change_no);
+            the_max_modify_change_no = std::max(the_max_modify_change_no, suite_modify_change_no);
 
             // To avoid copying the suites, we will just add the suites, to the newly created defs
             // However this presents a problem with the suites defs pointer. To avoid corrupting
@@ -270,7 +270,7 @@ void ClientSuites::update_suite_order() {
     const std::vector<suite_ptr>& server_suite_vec = defs_->suiteVec();
     size_t server_suite_vec_size                   = server_suite_vec.size();
 
-    auto suites_end                                = suites_.end();
+    auto suites_end = suites_.end();
     for (auto i = suites_.begin(); i != suites_end; ++i) {
         for (size_t s = 0; s < server_suite_vec_size; s++) {
             if ((*i).name_ == server_suite_vec[s]->name()) {

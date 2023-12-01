@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_today) {
         boost::posix_time::ptime time_plus_minute = theLocalTime + minutes(1);
         boost::posix_time::ptime time_plus_10_minute = theLocalTime + minutes(10);
 
-        suite_ptr suite                              = theDefs.add_suite("test_today");
+        suite_ptr suite = theDefs.add_suite("test_today");
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);
         suite->addClock(clockAttr);
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
         boost::gregorian::date todaysDate       = theLocalTime.date();
         boost::posix_time::ptime time_plus_hour = theLocalTime + hours(1);
 
-        suite_ptr suite                         = theDefs.add_suite("test_today_time_and_date");
+        suite_ptr suite = theDefs.add_suite("test_today_time_and_date");
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);
         suite->addClock(clockAttr);
 

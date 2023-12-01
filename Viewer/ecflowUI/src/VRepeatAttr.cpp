@@ -247,8 +247,8 @@ int VRepeatDateAttr::endIndex() const {
             long jStart = ecf_repeat_date_to_julian(r.start());
             long jEnd   = ecf_repeat_date_to_julian(r.end());
 
-            int index   = (jEnd - jStart) / r.step();
-            long val    = jStart + index * r.step();
+            int index = (jEnd - jStart) / r.step();
+            long val  = jStart + index * r.step();
             while (val > jEnd && index >= 1) {
                 index--;
                 val = jStart + index * r.step();
@@ -357,8 +357,8 @@ QString VRepeatDateListAttr::allValues() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
 
-        int start       = 0;
-        int end         = endIndex();
+        int start = 0;
+        int end   = endIndex();
 
         if (end <= start) {
             return {};

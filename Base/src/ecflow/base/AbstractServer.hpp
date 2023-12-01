@@ -120,7 +120,7 @@ public:
     ///  	b/ File is empty
     ///  	c/ Errors in parsing file
     /// If errors arise the exist user still stay in affect
-    virtual bool reloadWhiteListFile(std::string& errorMsg)    = 0;
+    virtual bool reloadWhiteListFile(std::string& errorMsg) = 0;
 
     virtual bool reloadPasswdFile(std::string& errorMsg)       = 0;
     virtual bool reloadCustomPasswdFile(std::string& errorMsg) = 0;

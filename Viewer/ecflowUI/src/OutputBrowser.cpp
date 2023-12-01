@@ -239,7 +239,7 @@ void OutputBrowser::loadIt(VFile_ptr file) {
     contentsChangedOnLastLoad_ = true;
     lastLoadedSizeFromDisk_    = 0;
 
-    file_                      = file;
+    file_ = file;
     if (!file_) {
         return;
     }
@@ -281,7 +281,7 @@ void OutputBrowser::reloadIt(VFile_ptr file) {
     contentsFile_              = filterIt();
     bool contentsSame          = contentsFile_.get() == file_.get();
 
-    bool deltaAdded            = false;
+    bool deltaAdded = false;
     if (delta && contentsFile_.get() == file_.get()) {
         deltaAdded = addDeltaContents(delta);
     }

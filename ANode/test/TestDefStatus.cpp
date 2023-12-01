@@ -39,9 +39,9 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     task_ptr t1     = f1->add_task("t1");
     task_ptr t2     = f1->add_task("t2");
 
-    family_ptr f2   = suite->add_family("f2");
-    task_ptr f2_t1  = f2->add_task("t1");
-    task_ptr f2_t2  = f2->add_task("t2");
+    family_ptr f2  = suite->add_family("f2");
+    task_ptr f2_t1 = f2->add_task("t1");
+    task_ptr f2_t2 = f2->add_task("t2");
 
     // Get all nodes and tasks for ease of test
     vector<Node*> nodes;

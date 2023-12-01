@@ -18,7 +18,7 @@
 
 bool UserMessage::echoToCout_ = true; // XXX should be false to start with
 
-UserMessage::UserMessage()    = default;
+UserMessage::UserMessage() = default;
 
 void UserMessage::message(MessageType type, bool popup, const std::string& message) {
     if (echoToCout_) {

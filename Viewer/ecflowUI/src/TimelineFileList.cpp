@@ -78,7 +78,7 @@ void TimelineFileList::add(QString logFileIn) {
 
     // get the last time
     QFileInfo fInfo(logFile);
-    size_t fSize           = fInfo.size();
+    size_t fSize = fInfo.size();
 
     unsigned int startTime = 0;
     unsigned int endTime   = 0;

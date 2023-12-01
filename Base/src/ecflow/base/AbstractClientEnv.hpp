@@ -34,10 +34,10 @@ public:
     AbstractClientEnv(const AbstractClientEnv&)                  = delete;
     const AbstractClientEnv& operator=(const AbstractClientEnv&) = delete;
 
-    virtual ~AbstractClientEnv()                                 = default;
+    virtual ~AbstractClientEnv() = default;
 
-    virtual void set_cli(bool f)                                 = 0;
-    virtual bool get_cli() const                                 = 0;
+    virtual void set_cli(bool f) = 0;
+    virtual bool get_cli() const = 0;
 
     /// For all tasks/child based commands we require taskPath and password and optional Remote ID
     /// When the jobs use a queueing system the remote id (ECF_RID) is used to

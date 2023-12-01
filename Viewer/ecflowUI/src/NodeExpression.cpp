@@ -772,7 +772,7 @@ bool StringMatchCondition::execute(VItem* item) {
     auto* searchForOperand = static_cast<WhatToSearchForOperand*>(operands_[0]);
     auto* searchInOperand  = static_cast<WhatToSearchInOperand*>(operands_[1]);
 
-    std::string searchIn   = searchInOperand->what();
+    std::string searchIn = searchInOperand->what();
 
     if (item->isNode()) {
         auto* n = static_cast<VNode*>(item);

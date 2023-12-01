@@ -65,7 +65,7 @@ NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget* /*parent*/) {
 
     borderPen_ = QPen(QColor(230, 230, 230));
 
-    columns_   = ModelColumn::def("query_columns");
+    columns_ = ModelColumn::def("query_columns");
 
     // Property
     if (propVec.empty()) {
@@ -184,7 +184,7 @@ void NodeQueryViewDelegate::renderNode(QPainter* painter,
     // The text rectangle
     QRect textRect = itemRect;
 
-    int textWidth  = ViewerUtil::textWidth(fm, text);
+    int textWidth = ViewerUtil::textWidth(fm, text);
     textRect.setWidth(textWidth + nodeBox_->leftPadding + nodeBox_->rightPadding);
 
     int currentRight = textRect.x() + textRect.width();

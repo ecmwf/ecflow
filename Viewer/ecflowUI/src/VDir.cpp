@@ -50,8 +50,8 @@ void VDir::addItem(const std::string& name, unsigned int size, unsigned int mtim
     // std::string dirName=p.parent_path().string();
     std::string fileName = p.leaf().string();
 
-    item->name_          = fileName;
-    item->size_          = size;
+    item->name_ = fileName;
+    item->size_ = size;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
     item->mtime_ = QDateTime::fromSecsSinceEpoch(mtime);
 #else
@@ -71,7 +71,7 @@ void VDir::reload() {
 
     BOOST_FOREACH (boost::filesystem::path const& p, std::make_pair(it, eod)) {
         if (is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
-            auto* item  = new VDirItem;
+            auto* item = new VDirItem;
 
             item->name_ = p.filename().string();
             item->size_ = boost::filesystem::file_size(p);
