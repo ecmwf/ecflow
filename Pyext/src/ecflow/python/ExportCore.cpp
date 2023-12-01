@@ -12,9 +12,6 @@
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 
-#include "BoostPythonUtil.hpp"
-#include "Edit.hpp"
-#include "NodeAttrDoc.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/DState.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -23,6 +20,9 @@
 #include "ecflow/core/SState.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/core/TimeSlot.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/Edit.hpp"
+#include "ecflow/python/NodeAttrDoc.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template <class K, class T>

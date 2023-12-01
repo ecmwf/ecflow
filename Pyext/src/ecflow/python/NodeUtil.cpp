@@ -8,13 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "NodeUtil.hpp"
+#include "ecflow/python/NodeUtil.hpp"
 
 #include <stdexcept>
 
-#include "BoostPythonUtil.hpp"
-#include "Edit.hpp"
-#include "Trigger.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -37,6 +34,9 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/Edit.hpp"
+#include "ecflow/python/Trigger.hpp"
 
 using namespace boost::python;
 using namespace std;

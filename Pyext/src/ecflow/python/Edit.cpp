@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Edit.hpp"
+#include "ecflow/python/Edit.hpp"
 
 #include <stdexcept>
 
 #include <boost/python.hpp>
 
-#include "BoostPythonUtil.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
 
 using namespace boost::python;
 using namespace std;

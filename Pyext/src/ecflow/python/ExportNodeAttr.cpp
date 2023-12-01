@@ -15,10 +15,6 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include "BoostPythonUtil.hpp"
-#include "DefsDoc.hpp"
-#include "NodeAttrDoc.hpp"
-#include "Trigger.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -43,6 +39,10 @@
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/DefsDoc.hpp"
+#include "ecflow/python/NodeAttrDoc.hpp"
+#include "ecflow/python/Trigger.hpp"
 
 using namespace ecf;
 using namespace boost::python;

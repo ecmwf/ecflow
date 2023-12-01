@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ClientDoc.hpp"
+#include "ecflow/python/ClientDoc.hpp"
 
 const char* ClientDoc::class_client() {
     return "Class client provides an interface to communicate with the `ecflow_server`_.:\n\n"

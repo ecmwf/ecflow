@@ -13,10 +13,6 @@
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
 
-#include "BoostPythonUtil.hpp"
-#include "DefsDoc.hpp"
-#include "Edit.hpp"
-#include "GlossaryDoc.hpp"
 #include "Simulator.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
@@ -24,6 +20,10 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/DefsDoc.hpp"
+#include "ecflow/python/Edit.hpp"
+#include "ecflow/python/GlossaryDoc.hpp"
 
 using namespace ecf;
 using namespace boost::python;

@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "DefsDoc.hpp"
+#include "ecflow/python/DefsDoc.hpp"
 
 const char* DefsDoc::add() {
     return "add(..) provides a way to append Nodes and attributes\n\n"

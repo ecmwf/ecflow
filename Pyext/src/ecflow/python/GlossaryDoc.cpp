@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "GlossaryDoc.hpp"
+#include "ecflow/python/GlossaryDoc.hpp"
 
 const char* GlossaryDoc::list() {
     return "Create a empty Defs\n\n"

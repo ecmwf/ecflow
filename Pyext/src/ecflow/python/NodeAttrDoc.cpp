@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "NodeAttrDoc.hpp"
+#include "ecflow/python/NodeAttrDoc.hpp"
 
 const char* NodeAttrDoc::variable_doc() {
     return "Defines a `variable`_ on a `node`_ for use in `ecf script`_.\n\n"

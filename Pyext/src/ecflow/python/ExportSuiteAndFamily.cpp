@@ -13,13 +13,13 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include "BoostPythonUtil.hpp"
-#include "DefsDoc.hpp"
-#include "NodeUtil.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/DefsDoc.hpp"
+#include "ecflow/python/NodeUtil.hpp"
 
 using namespace ecf;
 using namespace boost::python;

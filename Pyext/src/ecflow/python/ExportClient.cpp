@@ -13,8 +13,6 @@
 #include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>
 
-#include "BoostPythonUtil.hpp"
-#include "ClientDoc.hpp"
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/UrlCmd.hpp"
@@ -23,6 +21,8 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/ClientDoc.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif

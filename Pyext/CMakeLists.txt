@@ -46,52 +46,36 @@ set(SETUP_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
 set(SETUP_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
 configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT} )
 
-
-# ==============================================================================
-# local includes
-# ==============================================================================
-include_directories(  
-  ../ACore/src
-  ../ANattr/src
-  ../ANode/src
-  ../Base/src
-  ../Base/src/cts
-  ../Base/src/stc
-  ../Client/src
-  ../CSim/src
-)
-
-
 # ==============================================================================
 # source files (paths relative to dirs python2/python3)
 # ==============================================================================
 set(srcs
   # Headers
-  ../src/BoostPythonUtil.hpp
-  ../src/ClientDoc.hpp
-  ../src/DefsDoc.hpp
-  ../src/Edit.hpp
-  ../src/GlossaryDoc.hpp
-  ../src/NodeAttrDoc.hpp
-  ../src/NodeUtil.hpp
-  ../src/Trigger.hpp
+  ../src/ecflow/python/BoostPythonUtil.hpp
+  ../src/ecflow/python/ClientDoc.hpp
+  ../src/ecflow/python/DefsDoc.hpp
+  ../src/ecflow/python/Edit.hpp
+  ../src/ecflow/python/GlossaryDoc.hpp
+  ../src/ecflow/python/NodeAttrDoc.hpp
+  ../src/ecflow/python/NodeUtil.hpp
+  ../src/ecflow/python/Trigger.hpp
   # Sources
-  ../src/BoostPythonUtil.cpp
-  ../src/ClientDoc.cpp
-  ../src/DefsDoc.cpp
-  ../src/EcfExt.cpp
-  ../src/Edit.cpp
-  ../src/ExportClient.cpp
-  ../src/ExportCore.cpp
-  ../src/ExportDefs.cpp
-  ../src/ExportNode.cpp
-  ../src/ExportNodeAttr.cpp
-  ../src/ExportSuiteAndFamily.cpp
-  ../src/ExportTask.cpp
-  ../src/GlossaryDoc.cpp
-  ../src/NodeAttrDoc.cpp
-  ../src/NodeUtil.cpp
-  ../src/Trigger.cpp
+  ../src/ecflow/python/BoostPythonUtil.cpp
+  ../src/ecflow/python/ClientDoc.cpp
+  ../src/ecflow/python/DefsDoc.cpp
+  ../src/ecflow/python/EcfExt.cpp
+  ../src/ecflow/python/Edit.cpp
+  ../src/ecflow/python/ExportClient.cpp
+  ../src/ecflow/python/ExportCore.cpp
+  ../src/ecflow/python/ExportDefs.cpp
+  ../src/ecflow/python/ExportNode.cpp
+  ../src/ecflow/python/ExportNodeAttr.cpp
+  ../src/ecflow/python/ExportSuiteAndFamily.cpp
+  ../src/ecflow/python/ExportTask.cpp
+  ../src/ecflow/python/GlossaryDoc.cpp
+  ../src/ecflow/python/NodeAttrDoc.cpp
+  ../src/ecflow/python/NodeUtil.cpp
+  ../src/ecflow/python/Trigger.cpp
 )
 
 # =====================================================================

@@ -15,6 +15,8 @@ ecbuild_add_library(
   TYPE MODULE
   SOURCES
     ${srcs}
+  PRIVATE_INCLUDES
+    ../src
   PUBLIC_LIBS
     libclient
     libsimu

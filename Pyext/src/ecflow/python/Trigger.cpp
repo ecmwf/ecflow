@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Trigger.hpp"
+#include "ecflow/python/Trigger.hpp"
 
 #include <stdexcept>
 

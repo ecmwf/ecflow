@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "BoostPythonUtil.hpp"
+#include "ecflow/python/BoostPythonUtil.hpp"
 
 #include <stdexcept>
 
