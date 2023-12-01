@@ -128,10 +128,10 @@ public:
     /// Do a backward search of rootPath + nodePath + fileExtn
     /// If task path if of the form /suite/family/family2/task, then we keep
     /// on consuming the first path token this should leave:
-    ///   	<root-path>/suite/family/family2/task.ecf
-    ///   	<root-path>/family/family2/task.ecf
-    ///  	   <root-path>/family2/task.ecf
-    ///   	<root-path>/task.ecf
+    ///     <root-path>/suite/family/family2/task.ecf
+    ///     <root-path>/family/family2/task.ecf
+    ///     <root-path>/family2/task.ecf
+    ///      <root-path>/task.ecf
     /// Returns an empty string if file not found
     static std::string
     backwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn);
@@ -139,10 +139,10 @@ public:
     /// Do a forward search of rootPath + nodePath + fileExtn
     /// If task path if of the form /suite/family/family2/task, then we keep
     /// on consuming the last path token this should leave:
-    ///      <root-path>/suite/family/family2/task.ecf
-    ///      <root-path>/suite/family/task.ecf
-    ///      <root-path>/suite/task.ecf
-    ///      <root-path>/task.ecf
+    ///     <root-path>/suite/family/family2/task.ecf
+    ///     <root-path>/suite/family/task.ecf
+    ///     <root-path>/suite/task.ecf
+    ///     <root-path>/task.ecf
     /// Returns an empty string if file not found
     static std::string
     forwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn);

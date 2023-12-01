@@ -557,17 +557,18 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const {
 std::string ServerTestHarness::testDataDefsLocation(const std::string& defsFile) {
     // DefsFile is of the form base_name.def"
     // We want to place the defs and log file in the same location as its test directory
-    // 		test/data/ECF_HOME/base_name/base_name.def
+    //   test/data/ECF_HOME/base_name/base_name.def
     std::string testData = testDataLocation(defsFile) + "/" + defsFile;
     return testData;
 }
 
 std::string ServerTestHarness::testDataLocation(const std::string& defsFile) {
     // DefsFile is of the form:
-    //                           base_name.def
-    //                           /tmp/path/base_name.def
+    //   base_name.def
+    //   /tmp/path/base_name.def
+    //
     // We want to place the defs and log file in the same location as its test directory
-    // 		test/data/ECF_HOME/base_name
+    //   test/data/ECF_HOME/base_name
     //
     std::string base_name = defsFile;
     size_t slash_pos      = defsFile.rfind('/', defsFile.length());
