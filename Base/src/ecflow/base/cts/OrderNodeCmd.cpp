@@ -48,7 +48,7 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const {
     Defs* defs       = as->defs().get();
     node_ptr theNode = find_node_for_edit(defs, absNodepath_);
 
-    Node* theParent  = theNode->parent();
+    Node* theParent = theNode->parent();
     if (theParent)
         theParent->order(theNode.get(), option_);
     else

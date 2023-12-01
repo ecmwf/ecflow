@@ -1021,6 +1021,11 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
     return test_file;
 }
 
+std::string File::test_data_in_current_dir(const std::string& rel_path) {
+    auto data = fs::current_path() / rel_path;
+    return fs::absolute(data).string();
+}
+
 std::string File::root_source_dir() {
 #ifdef CMAKE
     return CMAKE_ECFLOW_SOURCE_DIR;
@@ -1078,7 +1083,7 @@ std::string File::root_build_dir() {
     std::string stem = current_path.stem().string();
     int count        = 0;
     while (stem.find("ecflow") == std::string::npos) {
-        current_path     = current_path.parent_path();
+        current_path = current_path.parent_path();
 
         the_current_path = current_path.string(); // cos current_path.string() is returned by reference
 

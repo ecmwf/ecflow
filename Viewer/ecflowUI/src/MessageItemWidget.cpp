@@ -32,7 +32,7 @@ MessageItemWidget::MessageItemWidget(QWidget* parent) : QWidget(parent) {
 
     infoProvider_ = new MessageProvider(this);
 
-    model_        = new LogModel(this);
+    model_ = new LogModel(this);
 
     treeView_->setProperty("log", "1");
     treeView_->setModel(model_);

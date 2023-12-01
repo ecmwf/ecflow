@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
         boost::posix_time::ptime time1        = theLocalTime + minutes(1);
         boost::posix_time::ptime time2        = theLocalTime + minutes(5);
 
-        suite_ptr suite                       = theDefs.add_suite("test_cron_time_series");
+        suite_ptr suite = theDefs.add_suite("test_cron_time_series");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
 

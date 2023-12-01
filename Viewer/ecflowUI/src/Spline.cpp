@@ -111,7 +111,7 @@ bool Spline::tdma(const std::vector<double>& a,
                   std::vector<double>& X) {
     const double SMALL = 1.0E-30; // used to stop divide-by-zero
 
-    int n              = d.size();
+    int n = d.size();
     std::vector<double> P(n, 0);
     std::vector<double> Q(n, 0);
     X = P;

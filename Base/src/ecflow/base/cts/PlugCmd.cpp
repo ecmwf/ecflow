@@ -129,7 +129,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         // Remove the host:port from the path
-        destPath                                         = NodePath::removeHostPortFromPath(dest_);
+        destPath = NodePath::removeHostPortFromPath(dest_);
 
         std::pair<std::string, std::string> hostPortPair = as->hostPort();
         if ((hostPortPair.first == host || host == "localhost") && hostPortPair.second == port) {
@@ -289,7 +289,7 @@ void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
     std::string sourceNode = args[0];
     std::string destNode   = args[1];
 
-    cmd                    = std::make_shared<PlugCmd>(sourceNode, destNode);
+    cmd = std::make_shared<PlugCmd>(sourceNode, destNode);
 }
 
 // ===================================================================================

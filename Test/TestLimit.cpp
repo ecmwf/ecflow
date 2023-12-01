@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_limit) {
         std::string suiteName   = "test_limit";
         std::string pathToLimit = "/" + suiteName;
 
-        suite_ptr suite         = theDefs.add_suite(suiteName);
+        suite_ptr suite = theDefs.add_suite(suiteName);
         suite->addLimit(Limit("fast", 1));
         suite->addLimit(Limit("disk", 50));
 

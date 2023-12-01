@@ -67,7 +67,7 @@ QVariant CommandOutputModel::data(const QModelIndex& index, int role) const {
     if (pos < 0 || pos >= CommandOutputHandler::instance()->itemCount())
         return {};
 
-    QString id             = columns_->id(index.column());
+    QString id = columns_->id(index.column());
 
     CommandOutput_ptr item = CommandOutputHandler::instance()->items()[pos];
     if (!item)

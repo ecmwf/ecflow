@@ -157,9 +157,9 @@ BOOST_AUTO_TEST_CASE(test_why_time) {
         boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
         boost::posix_time::ptime time1        = theLocalTime - hours(1);
 
-        suite_ptr suite                       = Suite::create("test_why_time");
-        family_ptr fam                        = Family::create("family");
-        task_ptr task                         = Task::create("t1");
+        suite_ptr suite = Suite::create("test_why_time");
+        family_ptr fam  = Family::create("family");
+        task_ptr task   = Task::create("t1");
 
         ClockAttr clockAttr(theLocalTime);
         suite->addClock(clockAttr);
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_why_today) {
         boost::posix_time::ptime theLocalTime(date(2010, 2, 10), hours(1));
         boost::posix_time::ptime time1 = theLocalTime + hours(1);
 
-        suite_ptr suite                = theDefs.add_suite("test_why_today");
+        suite_ptr suite = theDefs.add_suite("test_why_today");
         ClockAttr clockAttr(theLocalTime);
         suite->addClock(clockAttr);
 
@@ -238,9 +238,9 @@ BOOST_AUTO_TEST_CASE(test_why_cron) {
         boost::posix_time::ptime time2        = theLocalTime - hours(1);
         boost::gregorian::date todaysDate     = theLocalTime.date();
 
-        suite_ptr suite                       = Suite::create("test_why_cron");
-        family_ptr fam                        = Family::create("family");
-        task_ptr task                         = Task::create("t1");
+        suite_ptr suite = Suite::create("test_why_cron");
+        family_ptr fam  = Family::create("family");
+        task_ptr task   = Task::create("t1");
 
         ClockAttr clockAttr(theLocalTime, false /*real*/);
         suite->addClock(clockAttr);

@@ -12,7 +12,7 @@
 
 #include <vector>
 
-using Vec          = std::vector<VSettingsLoader*>;
+using Vec = std::vector<VSettingsLoader*>;
 
 static Vec* makers = nullptr;
 

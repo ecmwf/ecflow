@@ -35,7 +35,7 @@
 //===================================================
 
 MessageLabelLoadWidget::MessageLabelLoadWidget(QWidget* parent) : QWidget(parent) {
-    auto* layout   = new QHBoxLayout(this);
+    auto* layout = new QHBoxLayout(this);
 
     loadTextLabel_ = new QLabel("In progress ...", this);
     loadIconLabel_ = new QLabel(this);
@@ -198,21 +198,21 @@ MessageLabel::MessageLabel(QWidget* parent) : QWidget(parent) {
     setProperty("base", "1");
 
     if (typeData.empty()) {
-        auto bg               = QColor(232, 237, 238);
-        auto border           = QColor(180, 194, 230);
-        typeData[InfoType]    = MessageLabelDefData(":/viewer/info.svg", "Info", bg, border);
+        auto bg            = QColor(232, 237, 238);
+        auto border        = QColor(180, 194, 230);
+        typeData[InfoType] = MessageLabelDefData(":/viewer/info.svg", "Info", bg, border);
 
         bg                    = {234, 215, 150};
         border                = {226, 195, 110};
         typeData[WarningType] = MessageLabelDefData(":/viewer/warning.svg", "Warning", bg, border);
 
-        bg                    = {254, 242, 241};
-        border                = {223, 152, 152};
-        typeData[ErrorType]   = MessageLabelDefData(":/viewer/error.svg", "Error", bg, border);
+        bg                  = {254, 242, 241};
+        border              = {223, 152, 152};
+        typeData[ErrorType] = MessageLabelDefData(":/viewer/error.svg", "Error", bg, border);
 
-        bg                    = {232, 249, 236};
-        border                = {90, 220, 190};
-        typeData[TipType]     = MessageLabelDefData(":/viewer/tip.svg", "Tip", bg, border);
+        bg                = {232, 249, 236};
+        border            = {90, 220, 190};
+        typeData[TipType] = MessageLabelDefData(":/viewer/tip.svg", "Tip", bg, border);
     }
 
     pixLabel_ = new QLabel(this);
@@ -229,7 +229,7 @@ MessageLabel::MessageLabel(QWidget* parent) : QWidget(parent) {
     // progress widget
     progWidget_ = new MessageLabelProgWidget(this);
 
-    layout_     = new QHBoxLayout(this);
+    layout_ = new QHBoxLayout(this);
     layout_->setContentsMargins(2, 2, 2, 2);
 
     auto* pixLayout = new QVBoxLayout();
@@ -323,7 +323,7 @@ void MessageLabel::showMessage(const Type& type, QString msg) {
         message_.clear();
     }
 
-    message_  = msg;
+    message_ = msg;
 
     QString s = message_;
     s.replace("\n", "<br>");

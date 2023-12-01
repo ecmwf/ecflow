@@ -69,7 +69,7 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
     int assignment     = '=';
     dtable[assignment] = 0;
 
-    size_t count       = 0;
+    size_t count = 0;
     for (size_t i = 0; i < len; i++) {
         if (dtable[src[i]] != 0x80)
             count++;

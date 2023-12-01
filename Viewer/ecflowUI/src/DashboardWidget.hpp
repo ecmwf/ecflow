@@ -30,7 +30,7 @@ class DashboardWidget : public QWidget {
 
 public:
     DashboardWidget(const std::string& type, QWidget* parent = nullptr);
-    ~DashboardWidget() override                                  = default;
+    ~DashboardWidget() override = default;
 
     virtual void populateDockTitleBar(DashboardDockTitleWidget*) = 0;
     virtual void populateDialog()                                = 0;

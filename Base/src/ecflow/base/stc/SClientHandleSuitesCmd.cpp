@@ -33,7 +33,7 @@ void SClientHandleSuitesCmd::init(AbstractServer* as) {
     ClientSuiteMgr& client_suite_mgr                   = as->defs()->client_suite_mgr();
     const std::vector<ecf::ClientSuites>& clientSuites = client_suite_mgr.clientSuites();
 
-    size_t client_suites_size                          = clientSuites.size();
+    size_t client_suites_size = clientSuites.size();
     client_handles_.reserve(client_suites_size);
     for (size_t c = 0; c < client_suites_size; c++) {
 

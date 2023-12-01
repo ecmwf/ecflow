@@ -151,8 +151,8 @@ bool LogData::indexOfPeriod(qint64 start, qint64 end, size_t& idxStart, size_t& 
     unsigned int startTime = (start - refTimeInMs_) / 1000;
     unsigned int endTime   = (end - refTimeInMs_) / 1000;
 
-    bool hasStart          = false;
-    qint64 tolerance       = toleranceInMs / 1000;
+    bool hasStart    = false;
+    qint64 tolerance = toleranceInMs / 1000;
 
     if (tolerance == 0) {
         for (size_t i = 0; i < data_.size(); i++) {

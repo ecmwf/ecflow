@@ -449,8 +449,8 @@ BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
 
     {
         Defs defs;
-        suite_ptr suite                             = defs.add_suite("s1");
-        node_ptr t                                  = suite->add_task("t1");
+        suite_ptr suite = defs.add_suite("s1");
+        node_ptr t      = suite->add_task("t1");
 
         std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 

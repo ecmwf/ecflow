@@ -289,14 +289,14 @@ static void test_get_token(const std::string& line, const char* delims = " \t") 
 BOOST_AUTO_TEST_CASE(test_StringSplitter_get_token) {
     cout << "ACore:: ...test_StringSplitter_get_token \n";
 
-    std::vector<std::string> test_data  = {"This is a string",
-                                           "a",
-                                           " a",
-                                           "a ",
-                                           " a ",
-                                           "        a     b     c       d        ",
-                                           " - !   $ % ^  & * ( ) - + ? ",
-                                           "\n"};
+    std::vector<std::string> test_data = {"This is a string",
+                                          "a",
+                                          " a",
+                                          "a ",
+                                          " a ",
+                                          "        a     b     c       d        ",
+                                          " - !   $ % ^  & * ( ) - + ? ",
+                                          "\n"};
 
     std::vector<std::string> test_data1 = {
         "/a",

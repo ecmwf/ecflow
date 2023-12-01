@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
         boost::posix_time::ptime time2        = time1 + minutes(TestFixture::job_submission_interval());
         boost::posix_time::ptime time3        = time2 + minutes(TestFixture::job_submission_interval());
 
-        suite_ptr suite                       = theDefs.add_suite("test_time_multiple_single_slot");
+        suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
         suite->add_variable("SLEEPTIME", "1");
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(test_time_real_series) {
         boost::posix_time::ptime time1        = theLocalTime + minutes(1);
         boost::posix_time::ptime time2        = time1 + minutes(TestFixture::job_submission_interval() * 2);
 
-        suite_ptr suite                       = theDefs.add_suite("test_time_real_series");
+        suite_ptr suite = theDefs.add_suite("test_time_real_series");
         suite->add_variable("SLEEPTIME", "1");
 
         ClockAttr clockAttr(theLocalTime, false);
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
         boost::posix_time::ptime time_start  = boost::posix_time::ptime(date(2010, 6, 21), time_duration(23, 59, 0));
         boost::posix_time::ptime clock_start = time_start - minutes(1);
 
-        suite_ptr suite                      = theDefs.add_suite("test_single_real_time_near_midnight");
+        suite_ptr suite = theDefs.add_suite("test_single_real_time_near_midnight");
         ClockAttr clockAttr(clock_start, false);
         suite->addClock(clockAttr);
         suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2));
@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
         boost::posix_time::ptime first_time  = last_time - minutes(TestFixture::job_submission_interval() * 2);
         boost::posix_time::ptime clock_start = first_time - minutes(1);
 
-        suite_ptr suite                      = theDefs.add_suite("test_time_real_series_near_midnight");
+        suite_ptr suite = theDefs.add_suite("test_time_real_series_near_midnight");
         suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2));
 
         ClockAttr clockAttr(clock_start, false);

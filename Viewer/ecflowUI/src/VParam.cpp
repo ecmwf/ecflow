@@ -30,7 +30,7 @@ VParam::~VParam() {
 }
 
 void VParam::setProperty(VProperty* prop) {
-    prop_  = prop;
+    prop_ = prop;
 
     label_ = prop->param("label");
 

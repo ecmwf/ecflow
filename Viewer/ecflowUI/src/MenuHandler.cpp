@@ -89,7 +89,7 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
             for (ptree::const_iterator itMenus = menusDef.begin(); itMenus != menusDef.end(); ++itMenus) {
                 ptree const& menuDef = itMenus->second;
 
-                std::string cname    = menuDef.get("name", "NoName");
+                std::string cname = menuDef.get("name", "NoName");
                 UiLog().dbg() << "  " << cname;
                 auto* menu = new Menu(cname);
 
@@ -119,7 +119,7 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
             // iterate through all the items
 
             for (ptree::const_iterator itItems = itemsDef.begin(); itItems != itemsDef.end(); ++itItems) {
-                ptree const& ItemDef          = itItems->second;
+                ptree const& ItemDef = itItems->second;
 
                 std::string name              = ItemDef.get("name", "NoName");
                 std::string menuName          = ItemDef.get("menu", "NoMenu");
@@ -253,7 +253,7 @@ void MenuHandler::refreshCustomMenuCommands() {
     CustomCommandHistoryHandler* customRecentCmds = CustomCommandHistoryHandler::instance();
     CustomSavedCommandHandler* customSavedCmds    = CustomSavedCommandHandler::instance();
 
-    Menu* menu                                    = findMenu("User defined");
+    Menu* menu = findMenu("User defined");
     if (menu) {
         menu->clearFixedList();
 
@@ -307,7 +307,7 @@ void MenuHandler::refreshCustomMenuCommands() {
         for (int i = 0; i < numRecentCommands; i++) {
             CustomCommand* cmd = customRecentCmds->commandFromIndex(i);
 
-            auto* item         = new MenuItem(cmd->name());
+            auto* item = new MenuItem(cmd->name());
             item->setCommand(cmd->command());
             item->setEnabledCondition(&trueCond_);
             item->setVisibleCondition(&trueCond_);

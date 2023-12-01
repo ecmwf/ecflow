@@ -752,9 +752,9 @@ bool Node::time_today_cron_is_free() const {
         if (!crons_.empty())
             noOfTimeDependencies++;
 
-        bool oneTodayIsFree      = false;
-        bool oneTimeIsFree       = false;
-        bool oneCronIsFree       = false;
+        bool oneTodayIsFree = false;
+        bool oneTimeIsFree  = false;
+        bool oneCronIsFree  = false;
 
         const Calendar& calendar = suite()->calendar();
         for (const auto& time : times_) {

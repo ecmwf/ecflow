@@ -149,7 +149,7 @@ protected:
 
     QRegion visualRegionForSelection(const QItemSelection& selection) const;
 
-    virtual void updateViewport(const QRect rect)   = 0;
+    virtual void updateViewport(const QRect rect) = 0;
 
     virtual int firstVisibleItem(int& offset) const = 0;
     virtual void updateRowCount()                   = 0;

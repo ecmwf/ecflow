@@ -12,7 +12,7 @@
 
 #include <map>
 
-using Map          = std::multimap<std::string, VConfigLoader*>;
+using Map = std::multimap<std::string, VConfigLoader*>;
 
 static Map* makers = nullptr;
 
@@ -31,7 +31,7 @@ bool VConfigLoader::process(const std::string& name, VProperty* prop) {
     Map::size_type entries = makers->count(name);
     auto it                = makers->find(name);
 
-    bool retVal            = false;
+    bool retVal = false;
     for (Map::size_type cnt = 0; cnt != entries; ++cnt, ++it) {
         (*it).second->load(prop);
         retVal = true;

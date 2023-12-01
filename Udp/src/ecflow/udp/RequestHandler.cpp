@@ -205,7 +205,7 @@ public:
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
-        auto meter_value  = ecf::convert_to<int>(value);
+        auto meter_value = ecf::convert_to<int>(value);
 
         return Command::make_command<CommandUserAlterMeter>(path, name, meter_value);
     }
@@ -265,7 +265,7 @@ public:
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
-        auto meter_value  = ecf::convert_to<int>(value);
+        auto meter_value = ecf::convert_to<int>(value);
 
         TRACE_NFO("CommandChildUpdateLabelBuilder", "update to meter ", path, ":", name, " to value: ", meter_value);
 
@@ -345,7 +345,7 @@ public:
 
             // process "data"
             if (method_type == "put") {
-                auto payload    = request.at("payload");
+                auto payload = request.at("payload");
 
                 Command command = command_factory_.make_command_from(payload);
                 command.execute(client_);

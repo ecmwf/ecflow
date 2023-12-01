@@ -147,7 +147,7 @@ Node& Node::operator=(const Node& rhs) {
         st_        = rhs.st_;
         d_st_      = rhs.d_st_;
 
-        vars_      = rhs.vars_;
+        vars_ = rhs.vars_;
 
         delete_attributes();
 
@@ -180,7 +180,7 @@ Node& Node::operator=(const Node& rhs) {
         repeat_     = rhs.repeat_;
         inLimitMgr_ = rhs.inLimitMgr_;
         inLimitMgr_.set_node(this);
-        flag_                = rhs.flag_;
+        flag_ = rhs.flag_;
 
         state_change_no_     = 0;
         variable_change_no_  = 0;
@@ -2681,7 +2681,7 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
             }
         }
     }
-    auto caseInsen   = [](const auto& a, const auto& b) { return Str::caseInsLess(a.name(), b.name()); };
+    auto caseInsen = [](const auto& a, const auto& b) { return Str::caseInsLess(a.name(), b.name()); };
 
     state_change_no_ = Ecf::incr_state_change_no();
     switch (attr) {

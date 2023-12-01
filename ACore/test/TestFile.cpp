@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
     // This is sanity test for splitFileIntoLines used extensively
     cout << "ACore:: ...test_splitFileIntoLines\n";
 
-    std::string path    = File::test_data("ACore/test/data/test_splitFileIntoLines.txt", "ACore");
+    std::string path = File::test_data("ACore/test/data/test_splitFileIntoLines.txt", "ACore");
 
     std::string theText = "This is a test string";
     {
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
 BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
     cout << "ACore:: ...test_file_tokenizer\n";
 
-    std::string path     = File::test_data("ACore/test/data/test_file_tokenizer.txt", "ACore");
+    std::string path = File::test_data("ACore/test/data/test_file_tokenizer.txt", "ACore");
 
     size_t linesWithText = 100;
     std::string theText  = "This is a test string";
@@ -181,8 +181,8 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
     std::string rootPath = File::test_data("ACore/test/data", "ACore");
     std::string expected = File::test_data("ACore/test/data/", "ACore") + nodePath;
 
-    std::string path     = rootPath;
-    std::string dir      = "dir";
+    std::string path = rootPath;
+    std::string dir  = "dir";
     for (int i = 0; i < 6; i++) {
         path += "/" + dir + ecf::convert_to<std::string>(i);
     }
@@ -253,8 +253,8 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
     std::string rootPath = File::test_data("ACore/test/data", "ACore");
     std::string expected = File::test_data("ACore/test/data", "ACore") + nodePath;
 
-    std::string path     = rootPath;
-    std::string dir      = "dir";
+    std::string path = rootPath;
+    std::string dir  = "dir";
     for (int i = 0; i < 6; i++) {
         if (i == 5)
             path += "/task";
@@ -335,9 +335,9 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
     }
     cout << "\n";
 
-    std::string nodePath   = "dir0/dir1/dir2/dir3/dir4/dir5";
-    std::string rootPath   = File::test_data("ACore/test/data", "ACore");
-    std::string expected   = File::test_data("ACore/test/data/", "ACore") + nodePath;
+    std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
+    std::string rootPath = File::test_data("ACore/test/data", "ACore");
+    std::string expected = File::test_data("ACore/test/data/", "ACore") + nodePath;
 
     std::string dir_remove = rootPath + "/dir0";
     {

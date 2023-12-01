@@ -191,99 +191,99 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap["a eq complete"] = std::make_pair(AstEqual::stype(), false);
     exprMap["a ne complete"] = std::make_pair(AstNotEqual::stype(), true);
 
-    exprMap["0 eq 1"]        = std::make_pair(AstEqual::stype(), false);
-    exprMap["1000 eq 9"]     = std::make_pair(AstEqual::stype(), false);
-    exprMap["10 eq 10"]      = std::make_pair(AstEqual::stype(), true);
-    exprMap["10 ge 4"]       = std::make_pair(AstGreaterEqual::stype(), true);
-    exprMap["10 le 4"]       = std::make_pair(AstLessEqual::stype(), false);
+    exprMap["0 eq 1"]    = std::make_pair(AstEqual::stype(), false);
+    exprMap["1000 eq 9"] = std::make_pair(AstEqual::stype(), false);
+    exprMap["10 eq 10"]  = std::make_pair(AstEqual::stype(), true);
+    exprMap["10 ge 4"]   = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["10 le 4"]   = std::make_pair(AstLessEqual::stype(), false);
 
-    exprMap["0 == 0"]        = std::make_pair(AstEqual::stype(), true);
-    exprMap["0 == 1"]        = std::make_pair(AstEqual::stype(), false);
-    exprMap["0 != 1"]        = std::make_pair(AstNotEqual::stype(), true);
-    exprMap["0 < 1"]         = std::make_pair(AstLessThan::stype(), true);
-    exprMap["10 < 1"]        = std::make_pair(AstLessThan::stype(), false);
-    exprMap["1000 == 9"]     = std::make_pair(AstEqual::stype(), false);
-    exprMap["10 == 10"]      = std::make_pair(AstEqual::stype(), true);
-    exprMap["10 >= 4"]       = std::make_pair(AstGreaterEqual::stype(), true);
-    exprMap["10 <= 4"]       = std::make_pair(AstLessEqual::stype(), false);
-    exprMap["0 > 1"]         = std::make_pair(AstGreaterThan::stype(), false);
-    exprMap["10 > 1"]        = std::make_pair(AstGreaterThan::stype(), true);
+    exprMap["0 == 0"]    = std::make_pair(AstEqual::stype(), true);
+    exprMap["0 == 1"]    = std::make_pair(AstEqual::stype(), false);
+    exprMap["0 != 1"]    = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["0 < 1"]     = std::make_pair(AstLessThan::stype(), true);
+    exprMap["10 < 1"]    = std::make_pair(AstLessThan::stype(), false);
+    exprMap["1000 == 9"] = std::make_pair(AstEqual::stype(), false);
+    exprMap["10 == 10"]  = std::make_pair(AstEqual::stype(), true);
+    exprMap["10 >= 4"]   = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["10 <= 4"]   = std::make_pair(AstLessEqual::stype(), false);
+    exprMap["0 > 1"]     = std::make_pair(AstGreaterThan::stype(), false);
+    exprMap["10 > 1"]    = std::make_pair(AstGreaterThan::stype(), true);
 
     // Integer is distinct from task/family names that are integers, since nodes with integer
     // names that occur in trigger/complete expression must have path ./0 ./1
-    exprMap["./12:eventname"]                                     = std::make_pair(AstEqual::stype(), false);
-    exprMap["./12:eventname == 0"]                                = std::make_pair(AstEqual::stype(), true);
-    exprMap["./12/b:eventname"]                                   = std::make_pair(AstEqual::stype(), false);
-    exprMap["/12/b:eventname"]                                    = std::make_pair(AstEqual::stype(), false);
-    exprMap["../12/b:eventname == set"]                           = std::make_pair(AstEqual::stype(), false);
-    exprMap["../12/b:eventname == clear"]                         = std::make_pair(AstEqual::stype(), true);
-    exprMap["../12/b:eventname != clear"]                         = std::make_pair(AstNotEqual::stype(), false);
-    exprMap["12:eventname == set"]                                = std::make_pair(AstEqual::stype(), false);
-    exprMap["12:eventname != set"]                                = std::make_pair(AstNotEqual::stype(), true);
-    exprMap["12:eventname == clear"]                              = std::make_pair(AstEqual::stype(), true);
-    exprMap["./12:eventname == set"]                              = std::make_pair(AstEqual::stype(), false);
-    exprMap["./12:eventname != set"]                              = std::make_pair(AstNotEqual::stype(), true);
-    exprMap["./12:eventname == clear"]                            = std::make_pair(AstEqual::stype(), true);
+    exprMap["./12:eventname"]             = std::make_pair(AstEqual::stype(), false);
+    exprMap["./12:eventname == 0"]        = std::make_pair(AstEqual::stype(), true);
+    exprMap["./12/b:eventname"]           = std::make_pair(AstEqual::stype(), false);
+    exprMap["/12/b:eventname"]            = std::make_pair(AstEqual::stype(), false);
+    exprMap["../12/b:eventname == set"]   = std::make_pair(AstEqual::stype(), false);
+    exprMap["../12/b:eventname == clear"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["../12/b:eventname != clear"] = std::make_pair(AstNotEqual::stype(), false);
+    exprMap["12:eventname == set"]        = std::make_pair(AstEqual::stype(), false);
+    exprMap["12:eventname != set"]        = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["12:eventname == clear"]      = std::make_pair(AstEqual::stype(), true);
+    exprMap["./12:eventname == set"]      = std::make_pair(AstEqual::stype(), false);
+    exprMap["./12:eventname != set"]      = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["./12:eventname == clear"]    = std::make_pair(AstEqual::stype(), true);
 
-    exprMap["a:eventname"]                                        = std::make_pair(AstEqual::stype(), false);
-    exprMap["a:eventname == 0"]                                   = std::make_pair(AstEqual::stype(), true);
-    exprMap["./a/b:eventname"]                                    = std::make_pair(AstEqual::stype(), false);
-    exprMap["/a/b:eventname"]                                     = std::make_pair(AstEqual::stype(), false);
-    exprMap["../a/b:eventname == set"]                            = std::make_pair(AstEqual::stype(), false);
-    exprMap["../a/b:eventname == clear"]                          = std::make_pair(AstEqual::stype(), true);
-    exprMap["../a/b:eventname != clear"]                          = std::make_pair(AstNotEqual::stype(), false);
-    exprMap["a:eventname == set"]                                 = std::make_pair(AstEqual::stype(), false);
-    exprMap["a:eventname != set"]                                 = std::make_pair(AstNotEqual::stype(), true);
-    exprMap["a:eventname == clear"]                               = std::make_pair(AstEqual::stype(), true);
+    exprMap["a:eventname"]               = std::make_pair(AstEqual::stype(), false);
+    exprMap["a:eventname == 0"]          = std::make_pair(AstEqual::stype(), true);
+    exprMap["./a/b:eventname"]           = std::make_pair(AstEqual::stype(), false);
+    exprMap["/a/b:eventname"]            = std::make_pair(AstEqual::stype(), false);
+    exprMap["../a/b:eventname == set"]   = std::make_pair(AstEqual::stype(), false);
+    exprMap["../a/b:eventname == clear"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["../a/b:eventname != clear"] = std::make_pair(AstNotEqual::stype(), false);
+    exprMap["a:eventname == set"]        = std::make_pair(AstEqual::stype(), false);
+    exprMap["a:eventname != set"]        = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["a:eventname == clear"]      = std::make_pair(AstEqual::stype(), true);
 
-    exprMap["a:metername >= 100"]                                 = std::make_pair(AstGreaterEqual::stype(), false);
-    exprMap["b:metername le 100"]                                 = std::make_pair(AstLessEqual::stype(), true);
-    exprMap["./b:metername <= 100"]                               = std::make_pair(AstLessEqual::stype(), true);
-    exprMap["../a/b:metername ge 100"]                            = std::make_pair(AstGreaterEqual::stype(), false);
-    exprMap["../a/b/c:metername >= 100"]                          = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["a:metername >= 100"]        = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["b:metername le 100"]        = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["./b:metername <= 100"]      = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["../a/b:metername ge 100"]   = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["../a/b/c:metername >= 100"] = std::make_pair(AstGreaterEqual::stype(), false);
 
-    exprMap["!a:a  &&   b:b"]                                     = std::make_pair(AstAnd::stype(), false);
-    exprMap["a:a   && ! b:b"]                                     = std::make_pair(AstAnd::stype(), false);
-    exprMap["! a:a ||   b:b"]                                     = std::make_pair(AstOr::stype(), true);
-    exprMap["a:a   || ! b:b"]                                     = std::make_pair(AstOr::stype(), true);
-    exprMap["! a:a &&   b:b &&   c:c"]                            = std::make_pair(AstAnd::stype(), false);
-    exprMap["! a:a &&   b:b ||   c:c"]                            = std::make_pair(AstOr::stype(), false);
-    exprMap["a:a && !   b:b &&   c:c"]                            = std::make_pair(AstAnd::stype(), false);
-    exprMap["a:a && !   b:b ||   c:c"]                            = std::make_pair(AstOr::stype(), false);
-    exprMap["a:a ||     b:b && ! c:c"]                            = std::make_pair(AstOr::stype(), false);
-    exprMap["a:a ||     b:b || ! c:c"]                            = std::make_pair(AstOr::stype(), true);
+    exprMap["!a:a  &&   b:b"]          = std::make_pair(AstAnd::stype(), false);
+    exprMap["a:a   && ! b:b"]          = std::make_pair(AstAnd::stype(), false);
+    exprMap["! a:a ||   b:b"]          = std::make_pair(AstOr::stype(), true);
+    exprMap["a:a   || ! b:b"]          = std::make_pair(AstOr::stype(), true);
+    exprMap["! a:a &&   b:b &&   c:c"] = std::make_pair(AstAnd::stype(), false);
+    exprMap["! a:a &&   b:b ||   c:c"] = std::make_pair(AstOr::stype(), false);
+    exprMap["a:a && !   b:b &&   c:c"] = std::make_pair(AstAnd::stype(), false);
+    exprMap["a:a && !   b:b ||   c:c"] = std::make_pair(AstOr::stype(), false);
+    exprMap["a:a ||     b:b && ! c:c"] = std::make_pair(AstOr::stype(), false);
+    exprMap["a:a ||     b:b || ! c:c"] = std::make_pair(AstOr::stype(), true);
 
-    exprMap["a:b && b:c && c:d && ../c:b && ./x:y && z:x"]        = std::make_pair(AstAnd::stype(), false);
-    exprMap["! a:b && b:c && c:d && ../c:b && ./x:y && z:x"]      = std::make_pair(AstAnd::stype(), false);
-    exprMap["! a:b || b:c && c:d && ../c:b && ./x:y && z:x"]      = std::make_pair(AstOr::stype(), true);
-    exprMap["a:b || b:c && ! c:d && ../c:b && ./x:y && z:x"]      = std::make_pair(AstOr::stype(), false);
-    exprMap["a:b && b:c && c:d && ../c:b && ./x:y && ! z:x"]      = std::make_pair(AstAnd::stype(), false);
-    exprMap["x:x || a:b && b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstOr::stype(), false);
+    exprMap["a:b && b:c && c:d && ../c:b && ./x:y && z:x"]             = std::make_pair(AstAnd::stype(), false);
+    exprMap["! a:b && b:c && c:d && ../c:b && ./x:y && z:x"]           = std::make_pair(AstAnd::stype(), false);
+    exprMap["! a:b || b:c && c:d && ../c:b && ./x:y && z:x"]           = std::make_pair(AstOr::stype(), true);
+    exprMap["a:b || b:c && ! c:d && ../c:b && ./x:y && z:x"]           = std::make_pair(AstOr::stype(), false);
+    exprMap["a:b && b:c && c:d && ../c:b && ./x:y && ! z:x"]           = std::make_pair(AstAnd::stype(), false);
+    exprMap["x:x || a:b && b:c && c:d && ../c:b && ./x:y && z:x"]      = std::make_pair(AstOr::stype(), false);
     exprMap["x:x == 0 || a:b && b:c && c:d && ../c:b && ./x:y && z:x"] = std::make_pair(AstOr::stype(), true);
     exprMap["! a:a && ! b:b && ! c:c && ! d:d "]                       = std::make_pair(AstAnd::stype(), true);
     exprMap["! a:a || ! b:b || ! c:c || ! d:d "]                       = std::make_pair(AstOr::stype(), true);
 
-    exprMap["./a == unknown"]                                          = std::make_pair(AstEqual::stype(), true);
-    exprMap["./a/b != queued"]                                         = std::make_pair(AstNotEqual::stype(), true);
-    exprMap["../a == complete"]                                        = std::make_pair(AstEqual::stype(), false);
-    exprMap["../a/b == aborted"]                                       = std::make_pair(AstEqual::stype(), false);
-    exprMap["../a/b/c != aborted"]                                     = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["./a == unknown"]      = std::make_pair(AstEqual::stype(), true);
+    exprMap["./a/b != queued"]     = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["../a == complete"]    = std::make_pair(AstEqual::stype(), false);
+    exprMap["../a/b == aborted"]   = std::make_pair(AstEqual::stype(), false);
+    exprMap["../a/b/c != aborted"] = std::make_pair(AstNotEqual::stype(), true);
 
-    exprMap["inigroup:YMD == ! 1"]                                     = std::make_pair(AstEqual::stype(), true);
-    exprMap["1 != ! 1"]                                                = std::make_pair(AstNotEqual::stype(), true);
-    exprMap["b == complete or nodepath:eventname"]                     = std::make_pair(AstOr::stype(), false);
+    exprMap["inigroup:YMD == ! 1"]                 = std::make_pair(AstEqual::stype(), true);
+    exprMap["1 != ! 1"]                            = std::make_pair(AstNotEqual::stype(), true);
+    exprMap["b == complete or nodepath:eventname"] = std::make_pair(AstOr::stype(), false);
 
-    exprMap["a eq unknown and b ne complete"]                          = std::make_pair(AstAnd::stype(), true);
-    exprMap["a eq complete or b eq complete"]                          = std::make_pair(AstOr::stype(), false);
-    exprMap["a eq complete or b eq unknown"]                           = std::make_pair(AstOr::stype(), true);
-    exprMap["a eq complete and b eq complete"]                         = std::make_pair(AstAnd::stype(), false);
-    exprMap["(a eq complete and b == complete)"]                       = std::make_pair(AstAnd::stype(), false);
+    exprMap["a eq unknown and b ne complete"]    = std::make_pair(AstAnd::stype(), true);
+    exprMap["a eq complete or b eq complete"]    = std::make_pair(AstOr::stype(), false);
+    exprMap["a eq complete or b eq unknown"]     = std::make_pair(AstOr::stype(), true);
+    exprMap["a eq complete and b eq complete"]   = std::make_pair(AstAnd::stype(), false);
+    exprMap["(a eq complete and b == complete)"] = std::make_pair(AstAnd::stype(), false);
 
-    exprMap["a == unknown && b != complete"]                           = std::make_pair(AstAnd::stype(), true);
-    exprMap["a == complete || b == complete"]                          = std::make_pair(AstOr::stype(), false);
-    exprMap["a == complete || b == unknown"]                           = std::make_pair(AstOr::stype(), true);
-    exprMap["a eq complete && b eq complete"]                          = std::make_pair(AstAnd::stype(), false);
-    exprMap["(a == complete && b == complete)"]                        = std::make_pair(AstAnd::stype(), false);
+    exprMap["a == unknown && b != complete"]    = std::make_pair(AstAnd::stype(), true);
+    exprMap["a == complete || b == complete"]   = std::make_pair(AstOr::stype(), false);
+    exprMap["a == complete || b == unknown"]    = std::make_pair(AstOr::stype(), true);
+    exprMap["a eq complete && b eq complete"]   = std::make_pair(AstAnd::stype(), false);
+    exprMap["(a == complete && b == complete)"] = std::make_pair(AstAnd::stype(), false);
 
     // This should be interpreted as '(a == complete and b == complete) or c == complete'
     // because 'and' has a higher priority than the 'or'. Hence 'OR' must be at the root.
@@ -317,27 +317,27 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap["not ../../../prod2diss/operation_is_late:yes or a == complete "] = std::make_pair(AstOr::stype(), true);
     exprMap["not ../../../prod2diss/operation_is_late:yes or not a == complete "] =
         std::make_pair(AstOr::stype(), true);
-    exprMap["not ( a == complete )"]                                      = std::make_pair(AstNot::stype(), true);
-    exprMap["not ( a == unknown )"]                                       = std::make_pair(AstNot::stype(), false);
-    exprMap["~ ( a == unknown )"]                                         = std::make_pair(AstNot::stype(), false);
-    exprMap["~ ( a != unknown )"]                                         = std::make_pair(AstNot::stype(), true);
-    exprMap["! ( a == unknown )"]                                         = std::make_pair(AstNot::stype(), false);
-    exprMap["!( a == unknown )"]                                          = std::make_pair(AstNot::stype(), false);
-    exprMap["inigroup:YMD eq ~ 1"]                                        = std::make_pair(AstEqual::stype(), true);
-    exprMap["inigroup:YMD eq ~ 0"]                                        = std::make_pair(AstEqual::stype(), false);
-    exprMap["inigroup:YMD eq ! 0"]                                        = std::make_pair(AstEqual::stype(), false);
-    exprMap["/net/main:YMD le /net/cleanplus1:YMD and 1"]                 = std::make_pair(AstAnd::stype(), true);
+    exprMap["not ( a == complete )"]                      = std::make_pair(AstNot::stype(), true);
+    exprMap["not ( a == unknown )"]                       = std::make_pair(AstNot::stype(), false);
+    exprMap["~ ( a == unknown )"]                         = std::make_pair(AstNot::stype(), false);
+    exprMap["~ ( a != unknown )"]                         = std::make_pair(AstNot::stype(), true);
+    exprMap["! ( a == unknown )"]                         = std::make_pair(AstNot::stype(), false);
+    exprMap["!( a == unknown )"]                          = std::make_pair(AstNot::stype(), false);
+    exprMap["inigroup:YMD eq ~ 1"]                        = std::make_pair(AstEqual::stype(), true);
+    exprMap["inigroup:YMD eq ~ 0"]                        = std::make_pair(AstEqual::stype(), false);
+    exprMap["inigroup:YMD eq ! 0"]                        = std::make_pair(AstEqual::stype(), false);
+    exprMap["/net/main:YMD le /net/cleanplus1:YMD and 1"] = std::make_pair(AstAnd::stype(), true);
 
     exprMap["! ../../../operation_is_late:yes == set"]                    = std::make_pair(AstNot::stype(), true);
     exprMap["2 == (((/seasplots/lag:YMD / 100 ) % 100) % 3)"]             = std::make_pair(AstEqual::stype(), false);
     exprMap["(((/seasplots/lag:YMD / 100 ) % 100) % 3) ==  2"]            = std::make_pair(AstEqual::stype(), false);
     exprMap["! ../../../a:yes == set or ! a == complete or y == aborted"] = std::make_pair(AstOr::stype(), true);
 
-    exprMap["bins/wamabs eq complete and links eq complete"]              = std::make_pair(AstAnd::stype(), false);
-    exprMap["/mc/main:YMD le /mc/main/ref:MC_STOP"]                       = std::make_pair(AstLessEqual::stype(), true);
-    exprMap["/mc//main:YMD le /mc/main//ref:MC_STOP"]                     = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["bins/wamabs eq complete and links eq complete"] = std::make_pair(AstAnd::stype(), false);
+    exprMap["/mc/main:YMD le /mc/main/ref:MC_STOP"]          = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["/mc//main:YMD le /mc/main//ref:MC_STOP"]        = std::make_pair(AstLessEqual::stype(), true);
     exprMap["(  ( /o/main/12/an/slwet eq complete and  ( /o/main/12/an/4dvar/ifstraj:finalwave or /o/main/12/an/4dvar "
-            "eq complete)) or /o/main/12/an eq complete)"]                = std::make_pair(AstOr::stype(), false);
+            "eq complete)) or /o/main/12/an eq complete)"]   = std::make_pair(AstOr::stype(), false);
     exprMap["../../sv/getsvs eq complete and  ( getae:1 or getae eq complete)"] =
         std::make_pair(AstAnd::stype(), false);
     exprMap["(  ( /o/lag:YMD gt /sync/o/o/lag:YMD) or  ( /o/main:YMD gt /sync/o/o/main:YMD) or 1 eq 0) and /sync/o ne "
@@ -365,33 +365,33 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
         std::make_pair(AstAnd::stype(), false);
     exprMap["( stage eq complete or ./stage:YMD gt ./retrieve:YMD) and ( ./retrieve:YMD - ./load:YMD lt 5)"] =
         std::make_pair(AstAnd::stype(), false);
-    exprMap["./a:YMD - ./b:YMD lt 5"]                            = std::make_pair(AstLessThan::stype(), true);
+    exprMap["./a:YMD - ./b:YMD lt 5"] = std::make_pair(AstLessThan::stype(), true);
 
-    exprMap["comp == complete and notready == complete"]         = std::make_pair(AstAnd::stype(), false);
+    exprMap["comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(), false);
 
-    exprMap["/s/f/t<flag>late"]                                  = std::make_pair(AstFlag::stype(), false);
-    exprMap["./s<flag>late"]                                     = std::make_pair(AstFlag::stype(), false);
-    exprMap["../s/f/t<flag>late"]                                = std::make_pair(AstFlag::stype(), false);
-    exprMap["/s/f/t<flag>late == 0"]                             = std::make_pair(AstEqual::stype(), true);
-    exprMap["0 == /s/f/t<flag>late"]                             = std::make_pair(AstEqual::stype(), true);
-    exprMap["/s/f/t<flag>late and /s/f/t<flag>late"]             = std::make_pair(AstAnd::stype(), false);
-    exprMap["! /s/f/t<flag>late and ! /s/f/t<flag>late"]         = std::make_pair(AstAnd::stype(), true);
-    exprMap["! /s/f/t<flag>late"]                                = std::make_pair(AstNot::stype(), true);
-    exprMap["/s/f/t<flag>late + 2 >= 2"]                         = std::make_pair(AstGreaterEqual::stype(), true);
-    exprMap["(/s/f/t<flag>late or 1)"]                           = std::make_pair(AstOr::stype(), true);
-    exprMap["/<flag>late"]                                       = std::make_pair(AstFlag::stype(), false);
+    exprMap["/s/f/t<flag>late"]                          = std::make_pair(AstFlag::stype(), false);
+    exprMap["./s<flag>late"]                             = std::make_pair(AstFlag::stype(), false);
+    exprMap["../s/f/t<flag>late"]                        = std::make_pair(AstFlag::stype(), false);
+    exprMap["/s/f/t<flag>late == 0"]                     = std::make_pair(AstEqual::stype(), true);
+    exprMap["0 == /s/f/t<flag>late"]                     = std::make_pair(AstEqual::stype(), true);
+    exprMap["/s/f/t<flag>late and /s/f/t<flag>late"]     = std::make_pair(AstAnd::stype(), false);
+    exprMap["! /s/f/t<flag>late and ! /s/f/t<flag>late"] = std::make_pair(AstAnd::stype(), true);
+    exprMap["! /s/f/t<flag>late"]                        = std::make_pair(AstNot::stype(), true);
+    exprMap["/s/f/t<flag>late + 2 >= 2"]                 = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["(/s/f/t<flag>late or 1)"]                   = std::make_pair(AstOr::stype(), true);
+    exprMap["/<flag>late"]                               = std::make_pair(AstFlag::stype(), false);
 
-    exprMap["/s/f/t<flag>zombie"]                                = std::make_pair(AstFlag::stype(), false);
-    exprMap["./s<flag>zombie"]                                   = std::make_pair(AstFlag::stype(), false);
-    exprMap["../s/f/t<flag>zombie"]                              = std::make_pair(AstFlag::stype(), false);
-    exprMap["/s/f/t<flag>zombie == 0"]                           = std::make_pair(AstEqual::stype(), true);
-    exprMap["0 == /s/f/t<flag>zombie"]                           = std::make_pair(AstEqual::stype(), true);
-    exprMap["/s/f/t<flag>zombie and /s/f/t<flag>zombie"]         = std::make_pair(AstAnd::stype(), false);
-    exprMap["/s/f/t<flag>zombie or /s/f/t<flag>zombie"]          = std::make_pair(AstOr::stype(), false);
-    exprMap["! /s/f/t<flag>zombie and ! /s/f/t<flag>zombie"]     = std::make_pair(AstAnd::stype(), true);
-    exprMap["! /s/f/t<flag>zombie"]                              = std::make_pair(AstNot::stype(), true);
-    exprMap["/s/f/t<flag>zombie + 2 >= 2"]                       = std::make_pair(AstGreaterEqual::stype(), true);
-    exprMap["(/s/f/t<flag>zombie or 1)"]                         = std::make_pair(AstOr::stype(), true);
+    exprMap["/s/f/t<flag>zombie"]                            = std::make_pair(AstFlag::stype(), false);
+    exprMap["./s<flag>zombie"]                               = std::make_pair(AstFlag::stype(), false);
+    exprMap["../s/f/t<flag>zombie"]                          = std::make_pair(AstFlag::stype(), false);
+    exprMap["/s/f/t<flag>zombie == 0"]                       = std::make_pair(AstEqual::stype(), true);
+    exprMap["0 == /s/f/t<flag>zombie"]                       = std::make_pair(AstEqual::stype(), true);
+    exprMap["/s/f/t<flag>zombie and /s/f/t<flag>zombie"]     = std::make_pair(AstAnd::stype(), false);
+    exprMap["/s/f/t<flag>zombie or /s/f/t<flag>zombie"]      = std::make_pair(AstOr::stype(), false);
+    exprMap["! /s/f/t<flag>zombie and ! /s/f/t<flag>zombie"] = std::make_pair(AstAnd::stype(), true);
+    exprMap["! /s/f/t<flag>zombie"]                          = std::make_pair(AstNot::stype(), true);
+    exprMap["/s/f/t<flag>zombie + 2 >= 2"]                   = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["(/s/f/t<flag>zombie or 1)"]                     = std::make_pair(AstOr::stype(), true);
 
     exprMap["/s/f/t<flag>archived"]                              = std::make_pair(AstFlag::stype(), false);
     exprMap["./s<flag>archived"]                                 = std::make_pair(AstFlag::stype(), false);
@@ -405,16 +405,16 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap["/s/f/t<flag>archived + 2 >= 2"]                     = std::make_pair(AstGreaterEqual::stype(), true);
     exprMap["(/s/f/t<flag>archived or 1)"]                       = std::make_pair(AstOr::stype(), true);
 
-    exprMap[":VAR == 0"]                                         = std::make_pair(AstEqual::stype(), true);
-    exprMap[":VAR == 1"]                                         = std::make_pair(AstEqual::stype(), false);
-    exprMap[":VAR == /mc/main/ref:MC_STOP"]                      = std::make_pair(AstEqual::stype(), true);
-    exprMap[":YMD - :YMD <= 5"]                                  = std::make_pair(AstLessEqual::stype(), true);
-    exprMap[":YMD + :YMD <= 5"]                                  = std::make_pair(AstLessEqual::stype(), true);
-    exprMap[":YMD * :YMD <= 5"]                                  = std::make_pair(AstLessEqual::stype(), true);
-    exprMap[":YMD + 1 == 1"]                                     = std::make_pair(AstEqual::stype(), true);
+    exprMap[":VAR == 0"]                    = std::make_pair(AstEqual::stype(), true);
+    exprMap[":VAR == 1"]                    = std::make_pair(AstEqual::stype(), false);
+    exprMap[":VAR == /mc/main/ref:MC_STOP"] = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YMD - :YMD <= 5"]             = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YMD + :YMD <= 5"]             = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YMD * :YMD <= 5"]             = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YMD + 1 == 1"]                = std::make_pair(AstEqual::stype(), true);
 
-    int parse_failure                                            = 0;
-    int ast_failure                                              = 0;
+    int parse_failure = 0;
+    int ast_failure   = 0;
     // std::pair<string, std::pair<string,bool> > p;
     for (const auto& p : exprMap) {
 
@@ -430,7 +430,7 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
             string expectedRootType       = p.second.first;
             bool expectedEvaluationResult = p.second.second;
 
-            Ast* top                      = theExprParser.getAst();
+            Ast* top = theExprParser.getAst();
             if (!top)
                 ast_failure++;
             BOOST_CHECK_MESSAGE(top, "No abstract syntax tree " + p.first);
@@ -484,8 +484,8 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
     // test 10 digit integer, ie yyyymmddhh
     exprMap["2457620 == cal::date_to_julian( 2016081912 )"] = std::make_pair(AstEqual::stype(), true);
 
-    int parse_failure                                       = 0;
-    int ast_failure                                         = 0;
+    int parse_failure = 0;
+    int ast_failure   = 0;
     for (std::pair<string, std::pair<string, bool>> p : exprMap) {
 
         // cout << "parsing: " << p.first << "\n";
@@ -500,7 +500,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
             string expectedRootType       = p.second.first;
             bool expectedEvaluationResult = p.second.second;
 
-            Ast* top                      = theExprParser.getAst();
+            Ast* top = theExprParser.getAst();
             if (!top)
                 ast_failure++;
             BOOST_CHECK_MESSAGE(top, "No abstract syntax tree " + p.first);
@@ -578,15 +578,15 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
         long julian_day                    = startDate.julian_day();
         std::string str_julian_day         = ecf::convert_to<std::string>(julian_day);
         std::string eight_digit_iso_string = to_iso_string(startDate);
-        string expr                  = str_julian_day + " ==  cal::date_to_julian(" + eight_digit_iso_string + ")";
-        exprMap[expr]                = std::make_pair(AstEqual::stype(), true);
+        string expr   = str_julian_day + " ==  cal::date_to_julian(" + eight_digit_iso_string + ")";
+        exprMap[expr] = std::make_pair(AstEqual::stype(), true);
 
         std::string ten_digit_string = eight_digit_iso_string + "12";
         expr                         = str_julian_day + " ==  cal::date_to_julian(" + ten_digit_string + ")";
         exprMap[expr]                = std::make_pair(AstEqual::stype(), true);
 
-        string expr2                 = to_iso_string(startDate) + " == cal::julian_to_date(" + str_julian_day + ")";
-        exprMap[expr2]               = std::make_pair(AstEqual::stype(), true);
+        string expr2   = to_iso_string(startDate) + " == cal::julian_to_date(" + str_julian_day + ")";
+        exprMap[expr2] = std::make_pair(AstEqual::stype(), true);
         startDate += days(1);
     }
 
@@ -606,7 +606,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
             string expectedRootType       = p.second.first;
             bool expectedEvaluationResult = p.second.second;
 
-            Ast* top                      = theExprParser.getAst();
+            Ast* top = theExprParser.getAst();
             if (!top)
                 ast_failure++;
             BOOST_CHECK_MESSAGE(top, "No abstract syntax tree " + p.first);
@@ -659,7 +659,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
         string expectedRootType       = p.second.first;
         bool expectedEvaluationResult = p.second.second;
 
-        Ast* top                      = theExprParser.getAst();
+        Ast* top = theExprParser.getAst();
         BOOST_REQUIRE_MESSAGE(top, "No abstract syntax tree");
         BOOST_CHECK_MESSAGE(top->left(), "No root created");
         BOOST_CHECK_MESSAGE(top->left()->isRoot(), "First child of top should be a root");

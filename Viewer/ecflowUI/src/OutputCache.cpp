@@ -117,8 +117,8 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info, const std::string& sourcePath,
 OutputCacheItem* OutputCache::attachOne(VInfo_ptr info, const std::string& fileName) {
     OutputCacheItem* attachedItem = nullptr;
     if (info && info->isNode() && info->server()) {
-        QString inPath                               = QString::fromStdString(info->path() + ":");
-        QString inFileName                           = QString::fromStdString(fileName);
+        QString inPath     = QString::fromStdString(info->path() + ":");
+        QString inFileName = QString::fromStdString(fileName);
 
         QMap<QString, OutputCacheItem*>::iterator it = items_.begin();
         while (it != items_.end()) {

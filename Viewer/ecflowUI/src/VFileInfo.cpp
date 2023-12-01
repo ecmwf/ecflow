@@ -62,9 +62,9 @@ QString VFileInfo::formatDate(const std::time_t& t) {
 QString VFileInfo::formatDateAgo(const std::time_t& t) {
     QString str = QObject::tr("Right now");
 
-    time_t now  = time(nullptr);
+    time_t now = time(nullptr);
 
-    int delta   = now - t;
+    int delta = now - t;
     if (delta < 0)
         delta = 0;
 

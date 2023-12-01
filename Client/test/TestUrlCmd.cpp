@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_url_cmd) {
 
     std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
 
-    defs_ptr defs    = Defs::create();
+    defs_ptr defs = Defs::create();
 
     std::string errorMsg, warningMsg;
     bool parse = defs->restore(path, errorMsg, warningMsg);

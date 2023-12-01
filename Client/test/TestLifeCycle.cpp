@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
                                                        1,
                                                        eventname)));
         TestHelper::invokeRequest(&defs, Cmd_ptr(new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
-        node_ptr node         = defs.findAbsNode(suite1_family1_a);
+        node_ptr node = defs.findAbsNode(suite1_family1_a);
 
         const Event& theEvent = node->findEventByNameOrNumber(eventname);
         BOOST_CHECK_MESSAGE(!theEvent.empty(), "Could not find the event myEvent");

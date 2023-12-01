@@ -1397,7 +1397,7 @@ node_ptr Defs::replaceChild(const std::string& path,
     }
 
     // Take a note of begun status, in case the suite is being replaced.
-    bool begin_node             = server_parent->suite()->begun();
+    bool begin_node = server_parent->suite()->begun();
 
     node_ptr client_node_to_add = last_client_child->remove();
     bool addOk                  = server_parent->addChild(client_node_to_add, client_child_pos);
@@ -2113,11 +2113,11 @@ std::string Defs::stats() const {
         alias += task->aliases().size();
 
     NodeStats stats;
-    stats.suites_             = suiteVec_.size();
-    stats.family_             = family_vec.size();
-    stats.task_               = task_vec.size();
-    stats.alias_              = alias;
-    stats.nodes_              = node_vec.size();
+    stats.suites_ = suiteVec_.size();
+    stats.family_ = family_vec.size();
+    stats.task_   = task_vec.size();
+    stats.alias_  = alias;
+    stats.nodes_  = node_vec.size();
 
     stats.edit_history_nodes_ = edit_history_.size();
     for (const auto& i : edit_history_) {

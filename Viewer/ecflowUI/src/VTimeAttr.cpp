@@ -135,7 +135,7 @@ void VTimeAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
         const std::vector<ecf::TodayAttr>& tdV = vnode->node_->todayVec();
         const std::vector<ecf::CronAttr>& cV   = vnode->node_->crons();
 
-        auto n                                 = static_cast<int>(tV.size());
+        auto n = static_cast<int>(tV.size());
         for (int i = 0; i < n; i++) {
             vec.push_back(new VTimeAttr(vnode, tV[i], i));
         }

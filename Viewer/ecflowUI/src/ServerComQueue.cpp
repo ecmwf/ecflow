@@ -141,7 +141,7 @@ bool ServerComQueue::prepareReset() {
 
     taskStarted_ = false;
 
-    state_       = ResetState;
+    state_ = ResetState;
 
     // If the comthread is running we need to wait
     // until it finishes its task.

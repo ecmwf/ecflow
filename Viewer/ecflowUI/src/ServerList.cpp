@@ -455,7 +455,7 @@ std::string ServerList::uniqueName(const std::string& name) {
         c << i;
         std::string currentName = name + "_" + c.str();
 
-        hasIt                   = false;
+        hasIt = false;
         for (auto it = items_.begin(); it != items_.end(); ++it) {
             if ((*it)->name() == currentName) {
                 hasIt = true;

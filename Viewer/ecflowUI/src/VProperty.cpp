@@ -160,7 +160,7 @@ void VProperty::setValue(QVariant val) {
 
     bool changed = (value_ != val);
 
-    value_       = val;
+    value_ = val;
 
     if (changed)
         dispatchChange();
@@ -408,7 +408,7 @@ void VProperty::setUseMaster(bool b) {
 }
 
 VProperty* VProperty::clone(bool addLink, bool setMaster, bool useMaster) {
-    auto* cp          = new VProperty(strName_);
+    auto* cp = new VProperty(strName_);
 
     cp->value_        = value_;
     cp->defaultValue_ = defaultValue_;

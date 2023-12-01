@@ -134,9 +134,9 @@ void Highlighter::toHtml(QString& html) {
     // tmpCursor.setCharFormat(textfmt);
 
     // Apply the additional formats set by the syntax highlighter
-    QTextBlock start         = document()->findBlock(cursor.selectionStart());
-    QTextBlock end           = document()->findBlock(cursor.selectionEnd());
-    end                      = end.next();
+    QTextBlock start = document()->findBlock(cursor.selectionStart());
+    QTextBlock end   = document()->findBlock(cursor.selectionEnd());
+    end              = end.next();
 
     const int selectionStart = cursor.selectionStart();
     const int endOfDocument  = tmpDoc->characterCount() - 1;

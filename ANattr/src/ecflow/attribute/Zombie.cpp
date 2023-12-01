@@ -249,17 +249,17 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
     string host("host");
     string explanation("explanation");
 
-    size_t path_width               = path.size();
-    size_t type_width               = type.size();
-    size_t duration_width           = duration.size();
-    size_t password_width           = password.size();
-    size_t tryno_width              = try_no.size();
-    size_t rid_width                = rid.size();
-    size_t user_action_width        = user_action.size(); // max of FOB,FAIL,ADOPT,BLOCK,REMOVE + (manual- | auto- )
-    size_t child_type_width         = child_type.size();
-    size_t calls_width              = calls.size();
-    size_t host_width               = host.size();
-    size_t explanation_width        = explanation.size();
+    size_t path_width        = path.size();
+    size_t type_width        = type.size();
+    size_t duration_width    = duration.size();
+    size_t password_width    = password.size();
+    size_t tryno_width       = try_no.size();
+    size_t rid_width         = rid.size();
+    size_t user_action_width = user_action.size(); // max of FOB,FAIL,ADOPT,BLOCK,REMOVE + (manual- | auto- )
+    size_t child_type_width  = child_type.size();
+    size_t calls_width       = calls.size();
+    size_t host_width        = host.size();
+    size_t explanation_width = explanation.size();
 
     std::string ecf_pid_expl        = "PID miss-match, password matches. Job scheduled twice. Check submitter";
     std::string ecf_pid_passwd_expl = "Both PID and password miss-match. Re-queue & submit of active job?";
@@ -278,10 +278,10 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
         calls_width             = std::max(calls_width, no_of_calls.size());
         host_width              = std::max(host_width, z.host().size());
 
-        std::string try_no_int  = ecf::convert_to<std::string>(z.try_no());
-        tryno_width             = std::max(tryno_width, try_no_int.size());
-        child_type_width        = std::max(child_type_width, Child::to_string(z.last_child_cmd()).size());
-        user_action_width       = std::max(user_action_width, z.user_action_str().size());
+        std::string try_no_int = ecf::convert_to<std::string>(z.try_no());
+        tryno_width            = std::max(tryno_width, try_no_int.size());
+        child_type_width       = std::max(child_type_width, Child::to_string(z.last_child_cmd()).size());
+        user_action_width      = std::max(user_action_width, z.user_action_str().size());
 
         switch (z.type()) {
             case Child::USER:

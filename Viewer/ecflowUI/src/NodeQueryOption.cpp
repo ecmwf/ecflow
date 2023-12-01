@@ -41,7 +41,7 @@ public:
     explicit NodeQueryOptionFactory(const NodeQueryOptionFactory&)   = delete;
     NodeQueryOptionFactory& operator=(const NodeQueryOptionFactory&) = delete;
 
-    virtual NodeQueryOption* make(VProperty* p)                      = 0;
+    virtual NodeQueryOption* make(VProperty* p) = 0;
     static NodeQueryOption* create(VProperty* p);
 };
 
@@ -480,7 +480,7 @@ void NodeQueryPeriodOption::load(VSettings* vs) {
         QString from = QString::fromStdString(vs->get("from", fromDate_.toString(Qt::ISODate).toStdString()));
         QString to   = QString::fromStdString(vs->get("to", fromDate_.toString(Qt::ISODate).toStdString()));
 
-        fromDate_    = QDateTime::fromString(from, Qt::ISODate);
+        fromDate_ = QDateTime::fromString(from, Qt::ISODate);
         fromDate_.setTimeSpec(Qt::UTC);
         toDate_ = QDateTime::fromString(to, Qt::ISODate);
         toDate_.setTimeSpec(Qt::UTC);

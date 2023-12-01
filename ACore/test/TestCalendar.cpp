@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
             calendar.update(minutes(1));
             timeSeries.calendarChanged(calendar);
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
             // Update calendar every minute, then see we can match time series, *RELATIVE* to suite start
             calendar.update(minutes(1));
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -532,9 +532,9 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
         boost::gregorian::date cal_date = calendar.date();
         long boost_julian               = cal_date.julian_day();
 
-        std::string iso_string          = to_iso_string(cal_date);
-        auto date_as_long               = ecf::convert_to<long>(iso_string);
-        long ecmwf_julian               = Cal::date_to_julian(date_as_long);
+        std::string iso_string = to_iso_string(cal_date);
+        auto date_as_long      = ecf::convert_to<long>(iso_string);
+        long ecmwf_julian      = Cal::date_to_julian(date_as_long);
 
         BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,
                             "boost julian " << boost_julian << " != ecmwf julian " << ecmwf_julian << " for "

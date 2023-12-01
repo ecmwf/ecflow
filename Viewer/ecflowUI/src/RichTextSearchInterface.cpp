@@ -42,8 +42,8 @@ bool RichTextSearchInterface::findString(QString str,
         cursor.movePosition(move);
 
     QList<QTextEdit::ExtraSelection> extraSelections;
-    bool found             = false;
-    bool keepGoing         = true;
+    bool found     = false;
+    bool keepGoing = true;
 
     Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
 

@@ -132,22 +132,22 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
     for (int i = first; i < first + count; i++) {
         QModelIndex currentIndex = model_->index(i - first, 0, parentIndex);
 
-        last                     = i + children;
-        item                     = &viewItems_[last];
-        item->parentItem         = parentId;
-        item->index              = currentIndex;
-        item->hasMoreSiblings    = (i < first + count - 1);
-        item->level              = level;
-        item->expanded           = false;
-        item->total              = 0;
-        item->widestInSiblings   = widest;
+        last                   = i + children;
+        item                   = &viewItems_[last];
+        item->parentItem       = parentId;
+        item->index            = currentIndex;
+        item->hasMoreSiblings  = (i < first + count - 1);
+        item->level            = level;
+        item->expanded         = false;
+        item->total            = 0;
+        item->widestInSiblings = widest;
 
         // We compute the size of the item. For attributes we delay the width computation until we
         // actually paint them and we set their width to 300.
         item->width  = itemWidthVec[i - first];
         item->height = itemHeightVec[i - first];
 
-        int xp       = leftMargin_;
+        int xp = leftMargin_;
         if (parentId >= 0) {
             item->widestInSiblings = widest;
             xp                     = viewItems_[parentId].alignedRight() + itemGap_;
@@ -351,7 +351,7 @@ void CompactView::drawRow(QPainter* painter,
     int rh  = rowHeight(start, 1, iir);
 
     // See if there are no multiline items in this row
-    bool singleRow          = delegate_->isSingleHeight(rh);
+    bool singleRow = delegate_->isSingleHeight(rh);
 
     int firstLevel          = 0;
     const int viewportWidth = viewport()->width();
@@ -794,7 +794,7 @@ void CompactView::updateScrollBars() {
         // doItemsLayout();
     }
 
-    int itemsInViewport  = 0;
+    int itemsInViewport = 0;
 
     const int itemsCount = viewItems_.size();
     if (itemsCount == 0)

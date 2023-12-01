@@ -33,48 +33,48 @@ VProperty* VServerSettings::globalProp_ = nullptr;
 
 VServerSettings::VServerSettings(ServerHandler* server) : server_(server), prop_(nullptr), guiProp_(nullptr) {
     if (parNames_.empty()) {
-        parNames_[AutoUpdate]               = "server.update.autoUpdate";
-        parNames_[UpdateRate]               = "server.update.updateRateInSec";
-        parNames_[AdaptiveUpdate]           = "server.update.adaptiveUpdate";
-        parNames_[AdaptiveUpdateIncrement]  = "server.update.adaptiveUpdateIncrementInSec";
-        parNames_[MaxAdaptiveUpdateRate]    = "server.update.maxAdaptiveUpdateRateInMin";
-        parNames_[AdaptiveUpdateMode]       = "server.update.adaptiveUpdateMode";
+        parNames_[AutoUpdate]              = "server.update.autoUpdate";
+        parNames_[UpdateRate]              = "server.update.updateRateInSec";
+        parNames_[AdaptiveUpdate]          = "server.update.adaptiveUpdate";
+        parNames_[AdaptiveUpdateIncrement] = "server.update.adaptiveUpdateIncrementInSec";
+        parNames_[MaxAdaptiveUpdateRate]   = "server.update.maxAdaptiveUpdateRateInMin";
+        parNames_[AdaptiveUpdateMode]      = "server.update.adaptiveUpdateMode";
 
-        parNames_[MaxOutputFileLines]       = "server.files.maxOutputFileLines";
-        parNames_[ReadFromDisk]             = "server.files.readFilesFromDisk";
-        parNames_[UserLogServerHost]        = "server.files.logServerHost";
-        parNames_[UserLogServerPort]        = "server.files.logServerPort";
+        parNames_[MaxOutputFileLines] = "server.files.maxOutputFileLines";
+        parNames_[ReadFromDisk]       = "server.files.readFilesFromDisk";
+        parNames_[UserLogServerHost]  = "server.files.logServerHost";
+        parNames_[UserLogServerPort]  = "server.files.logServerPort";
 
         parNames_[NodeMenuMode]             = "server.menu.nodeMenuMode";
         parNames_[NodeMenuModeForDefStatus] = "server.menu.defStatusMenuModeControl";
         parNames_[UidForServerLogTransfer]  = "server.files.uidForServerLogTransfer";
         parNames_[MaxSizeForTimelineData]   = "server.files.maxSizeForTimelineData";
 
-        parNames_[NotifyAbortedEnabled]     = "server.notification.aborted.enabled";
-        parNames_[NotifyAbortedPopup]       = "server.notification.aborted.popup";
-        parNames_[NotifyAbortedSound]       = "server.notification.aborted.sound";
+        parNames_[NotifyAbortedEnabled] = "server.notification.aborted.enabled";
+        parNames_[NotifyAbortedPopup]   = "server.notification.aborted.popup";
+        parNames_[NotifyAbortedSound]   = "server.notification.aborted.sound";
 
-        parNames_[NotifyRestartedEnabled]   = "server.notification.restarted.enabled";
-        parNames_[NotifyRestartedPopup]     = "server.notification.restarted.popup";
-        parNames_[NotifyRestartedSound]     = "server.notification.restarted.sound";
+        parNames_[NotifyRestartedEnabled] = "server.notification.restarted.enabled";
+        parNames_[NotifyRestartedPopup]   = "server.notification.restarted.popup";
+        parNames_[NotifyRestartedSound]   = "server.notification.restarted.sound";
 
-        parNames_[NotifyLateEnabled]        = "server.notification.late.enabled";
-        parNames_[NotifyLatePopup]          = "server.notification.late.popup";
-        parNames_[NotifyLateSound]          = "server.notification.late.sound";
+        parNames_[NotifyLateEnabled] = "server.notification.late.enabled";
+        parNames_[NotifyLatePopup]   = "server.notification.late.popup";
+        parNames_[NotifyLateSound]   = "server.notification.late.sound";
 
-        parNames_[NotifyZombieEnabled]      = "server.notification.zombie.enabled";
-        parNames_[NotifyZombiePopup]        = "server.notification.zombie.popup";
-        parNames_[NotifyZombieSound]        = "server.notification.zombie.sound";
+        parNames_[NotifyZombieEnabled] = "server.notification.zombie.enabled";
+        parNames_[NotifyZombiePopup]   = "server.notification.zombie.popup";
+        parNames_[NotifyZombieSound]   = "server.notification.zombie.sound";
 
-        parNames_[NotifyAliasEnabled]       = "server.notification.alias.enabled";
-        parNames_[NotifyAliasPopup]         = "server.notification.alias.popup";
-        parNames_[NotifyAliasSound]         = "server.notification.alias.sound";
+        parNames_[NotifyAliasEnabled] = "server.notification.alias.enabled";
+        parNames_[NotifyAliasPopup]   = "server.notification.alias.popup";
+        parNames_[NotifyAliasSound]   = "server.notification.alias.sound";
 
-        notifyIds_[NotifyAbortedEnabled]    = "aborted";
-        notifyIds_[NotifyRestartedEnabled]  = "restarted";
-        notifyIds_[NotifyLateEnabled]       = "late";
-        notifyIds_[NotifyZombieEnabled]     = "zombie";
-        notifyIds_[NotifyAliasEnabled]      = "alias";
+        notifyIds_[NotifyAbortedEnabled]   = "aborted";
+        notifyIds_[NotifyRestartedEnabled] = "restarted";
+        notifyIds_[NotifyLateEnabled]      = "late";
+        notifyIds_[NotifyZombieEnabled]    = "zombie";
+        notifyIds_[NotifyAliasEnabled]     = "alias";
     }
 
     assert(globalProp_);

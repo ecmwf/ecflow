@@ -37,7 +37,7 @@ bool CronParser::doParse(const std::string& line, std::vector<std::string>& line
 
     bool parse_state = (rootParser()->get_file_type() != PrintStyle::DEFS);
 
-    size_t index     = 1; // to get over the cron
+    size_t index = 1; // to get over the cron
     CronAttr cronAttr;
     CronAttr::parse(cronAttr, lineTokens, index, parse_state);
 

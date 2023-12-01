@@ -362,7 +362,7 @@ void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
 
     std::string pathToNode = args[0];
 
-    std::string file_type  = "script";
+    std::string file_type = "script";
     if (args.size() >= 2) {
         file_type = args[1];
     }

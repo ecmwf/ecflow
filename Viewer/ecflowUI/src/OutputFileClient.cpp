@@ -179,7 +179,7 @@ void OutputFileClient::slotRead() {
         if (total_ / progressChunk_ > lastProgress_) {
             lastProgress_ = total_ / progressChunk_;
 
-            int prog      = 0;
+            int prog = 0;
             if (expected_ > 0) {
                 prog = static_cast<int>(100. * static_cast<float>(total_) / static_cast<float>(expected_));
                 if (prog > 100)

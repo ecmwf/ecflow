@@ -159,7 +159,7 @@ void ChangeNotifyDialogWidget::updateSettings() {
     QColor textCol = notifier_->textColour();
     QColor bgLight = bgCol.lighter(105);
 
-    QString st     = "QLabel { \
+    QString st = "QLabel { \
 					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
                          stop: 0 " +
                  bgLight.name() + ", stop: 1 " + bgCol.name() + "); color: " + textCol.name() +

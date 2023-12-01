@@ -136,8 +136,8 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         textRect.setLeft(option.rect.x() - 17);
         bool locked = index.data(VariableModel::ReadOnlyRole).toBool();
         if (locked) {
-            hasLock  = true;
-            lockPix  = IconProvider::lockPixmap(textRect.height() - 6);
+            hasLock = true;
+            lockPix = IconProvider::lockPixmap(textRect.height() - 6);
 
             lockRect = QRect(textRect.left() - 4 - lockPix.width(),
                              textRect.top() + (textRect.height() - lockPix.height()) / 2,
@@ -152,7 +152,7 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
                 pixId = shadowGenVarPixId_;
             }
             if (pixId >= 0) {
-                hasGen  = true;
+                hasGen = true;
 
                 genPix  = IconProvider::pixmap(pixId, textRect.height() - 4);
                 genRect = QRect(textRect.left(),

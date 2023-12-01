@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_based_requeue_resets_relative_duration) {
     f->addRepeat(RepeatInteger("rep", 1993, 2017));
     f->addTime(TimeAttr("+00:01"));
 
-    task_ptr t1   = f->add_task("uk2fsb");
+    task_ptr t1 = f->add_task("uk2fsb");
 
     auto& theTime = const_cast<TimeSeries&>(f->timeVec().back().time_series());
 

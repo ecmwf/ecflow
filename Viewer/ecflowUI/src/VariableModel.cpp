@@ -573,8 +573,8 @@ bool VariableSortModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourc
 
     QModelIndex idx2 = varModel_->index(sourceRow, 1, sourceParent);
 
-    QString s        = varModel_->data(idx, Qt::DisplayRole).toString();
-    QString s2       = varModel_->data(idx2, Qt::DisplayRole).toString();
+    QString s  = varModel_->data(idx, Qt::DisplayRole).toString();
+    QString s2 = varModel_->data(idx2, Qt::DisplayRole).toString();
 
     if (s.contains(matchText_, Qt::CaseInsensitive) || s2.contains(matchText_, Qt::CaseInsensitive)) {
         return true;

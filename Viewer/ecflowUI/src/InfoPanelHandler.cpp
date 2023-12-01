@@ -62,7 +62,7 @@ void InfoPanelHandler::init(const std::string& configFile) {
             for (ptree::const_iterator itPanel = panelsPt.begin(); itPanel != panelsPt.end(); ++itPanel) {
                 ptree const& panelPt = itPanel->second;
 
-                std::string cname    = panelPt.get("name", "");
+                std::string cname = panelPt.get("name", "");
 
                 UiLog().dbg() << "  " << cname;
 

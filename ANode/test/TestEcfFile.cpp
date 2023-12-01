@@ -900,7 +900,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
         }
         ecf_body += "%VAR3:substitute_var%\n";
     }
-    string tail     = "\n%include <tail.h>\n# ===================================";
+    string tail = "\n%include <tail.h>\n# ===================================";
 
     string ecf_file = header;
     ecf_file += manual_head;

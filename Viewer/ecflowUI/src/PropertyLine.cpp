@@ -413,7 +413,7 @@ ColourPropertyLine::ColourPropertyLine(VProperty* guiProp, bool addLabel, QWidge
     int height = fm.height();
     int width  = ViewerUtil::textWidth(fm, "AAAAAAA");
 
-    cb_        = new QToolButton(parent);
+    cb_ = new QToolButton(parent);
     cb_->setObjectName(prop_->name());
     cb_->setFixedWidth(width);
     cb_->setFixedHeight(height + 2);
@@ -433,7 +433,7 @@ QWidget* ColourPropertyLine::button() {
 }
 
 void ColourPropertyLine::slotReset(QVariant v) {
-    auto c     = v.value<QColor>();
+    auto c = v.value<QColor>();
 
     QString st = styleSheet_;
     st.replace("BG",
@@ -638,7 +638,7 @@ IntPropertyLine::IntPropertyLine(VProperty* guiProp, bool addLabel, QWidget* par
 
     auto* validator = new QIntValidator(le_);
 
-    QString s       = guiProp->param("max");
+    QString s = guiProp->param("max");
     if (!s.isEmpty()) {
         validator->setTop(s.toInt());
     }

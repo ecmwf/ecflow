@@ -1160,7 +1160,7 @@ void VServer::clear() {
     assert(totalNum_ == 0);
 
     // Deallocate the nodes vector
-    nodes_            = std::vector<VNode*>();
+    nodes_ = std::vector<VNode*>();
 
     triggeredScanned_ = false;
 }

@@ -367,7 +367,7 @@ QString VFileTransfer::buildCommand() {
 
     QString proxyJump = buildSocksProxyJump();
 
-    QString command   = scriptName_;
+    QString command = scriptName_;
 
     if (useMetaData_) {
         command += " -m file_md ";
@@ -556,9 +556,9 @@ void VDirTransfer::transferLocalViaSocks(QString sourceFile) {
 QString VDirTransfer::buildCommand() {
     QString proxyJump = buildSocksProxyJump();
 
-    auto targetFile   = QString::fromStdString(fResult_->path());
+    auto targetFile = QString::fromStdString(fResult_->path());
 
-    QString command   = scriptName_ + " -m dir -s \'" + sourceFile_ + "\' -t " + " \'" + targetFile + "\' ";
+    QString command = scriptName_ + " -m dir -s \'" + sourceFile_ + "\' -t " + " \'" + targetFile + "\' ";
 
     if (proxyJump != "__NOJUMP__" && !proxyJump.isEmpty()) {
         command += " -j " + proxyJump;

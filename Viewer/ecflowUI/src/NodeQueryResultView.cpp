@@ -30,7 +30,7 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) : QTreeView(parent) {
 
     actionHandler_ = new ActionHandler(this, this);
 
-    sortModel_     = new QSortFilterProxyModel(this);
+    sortModel_ = new QSortFilterProxyModel(this);
     // sortModel_->setDynamicSortFilter(true);
     setModel(sortModel_);
 

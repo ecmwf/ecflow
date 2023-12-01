@@ -153,11 +153,11 @@ NodeQueryEditor::NodeQueryEditor(QWidget* parent) : QWidget(parent) {
     //-------------------------
 
     // Node type
-    typeEdit_      = new NodeQueryListOptionEdit(query_->option("type"), typeList_, typeResetTb_, this);
-    stateEdit_     = new NodeQueryListOptionEdit(query_->option("state"), stateList_, stateResetTb_, this);
-    flagEdit_      = new NodeQueryListOptionEdit(query_->option("flag"), flagList_, flagResetTb_, this);
+    typeEdit_  = new NodeQueryListOptionEdit(query_->option("type"), typeList_, typeResetTb_, this);
+    stateEdit_ = new NodeQueryListOptionEdit(query_->option("state"), stateList_, stateResetTb_, this);
+    flagEdit_  = new NodeQueryListOptionEdit(query_->option("flag"), flagList_, flagResetTb_, this);
 
-    attrEdit_      = new NodeQueryListOptionEdit(query_->option("attribute"), attrList_, attrResetTb_, this);
+    attrEdit_ = new NodeQueryListOptionEdit(query_->option("attribute"), attrList_, attrResetTb_, this);
 
     int listHeight = (fm.height() + 2) * 6 + 6;
     typeList_->setFixedHeight(listHeight);
@@ -392,7 +392,7 @@ void NodeQueryEditor::slotAttrPanelChanged() {
 void NodeQueryEditor::checkGuiState() {
     serverResetTb_->setEnabled(serverCb_->hasSelection());
 
-    bool oneServer       = (serverCb_->count() == 1 || serverCb_->selection().count() == 1);
+    bool oneServer = (serverCb_->count() == 1 || serverCb_->selection().count() == 1);
 
     bool oriRootLeStatus = rootLe_->isEnabled();
     rootLabel_->setEnabled(oneServer);

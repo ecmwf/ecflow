@@ -42,7 +42,7 @@
 VParamSet::VParamSet() = default;
 
 void VParamSet::init(const std::vector<VParam*>& items) {
-    all_      = items;
+    all_ = items;
 
     int maxId = 0;
     for (std::vector<VParam*>::const_iterator it = all_.begin(); it != all_.end(); ++it) {

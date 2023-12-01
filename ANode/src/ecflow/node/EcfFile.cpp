@@ -942,7 +942,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
     // get the cached ECF_MICRO variable, typically its one char.
     string ecfMicro = ecfMicroCache_;
 
-    char microChar  = ecfMicro[0];
+    char microChar = ecfMicro[0];
 
     // We need a stack to properly implement nopp. This is required since we need to pair
     // the %end, with nopp. i.e need to handle
@@ -1186,7 +1186,7 @@ bool EcfFile::extractManual(const std::vector<std::string>& lines,
     // get the cached ECF_MICRO variable, typically its one char.
     string ecfMicro = ecfMicroCache_;
 
-    bool add        = false;
+    bool add = false;
     for (const auto& line : lines) {
         if (line.find(ecfMicro) == 0) {
             if (line.find(T_MANUAL) == 1) {

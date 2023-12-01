@@ -183,7 +183,7 @@ void CommandDesignerWidget::addClientCommandsToComponentList() {
     // sort the commands into alphabetical order
     std::vector<boost::shared_ptr<po::option_description>> options = clientOptionsDescriptions_->options();
 
-    using opt_desc                                                 = boost::shared_ptr<po::option_description>;
+    using opt_desc = boost::shared_ptr<po::option_description>;
     std::sort(options.begin(), options.end(), [](const opt_desc& a, const opt_desc& b) {
         return a->long_name() < b->long_name();
     });
@@ -445,7 +445,7 @@ void CommandDesignerWidget::on_editCommandButton__clicked() {
     QTableWidgetItem* contextItem = savedCommandsTable_->item(row, 1);
     QTableWidgetItem* commandItem = savedCommandsTable_->item(row, 2);
 
-    inCommandEditMode_            = true;
+    inCommandEditMode_ = true;
 
     // insert the details into the edit boxes
     commandLineEdit_->setText(commandItem->text());

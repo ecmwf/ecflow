@@ -236,7 +236,7 @@ VDir_ptr OutputFileFetchQueueManager::dirToFile(const std::string& fileName) con
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::OutputTask) {
     // outCache will be clean up automatically (QObject)
-    outCache_     = new OutputCache(this);
+    outCache_ = new OutputCache(this);
 
     fetchManager_ = new OutputFileFetchQueueManager(this);
 }

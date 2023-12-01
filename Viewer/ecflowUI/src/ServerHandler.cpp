@@ -81,7 +81,7 @@ ServerHandler::ServerHandler(const std::string& name,
     longName_     = host_ + "@" + port_;
     fullLongName_ = name_ + "[" + longName_ + "]";
 
-    conf_         = new VServerSettings(this);
+    conf_ = new VServerSettings(this);
 
     // Connect up the timer for refreshing the server info. The timer has not
     // started yet.
@@ -578,7 +578,7 @@ NState::State ServerHandler::state(bool& suspended) {
     if (connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
         return NState::UNKNOWN;
 
-    suspended  = false;
+    suspended = false;
 
     defs_ptr d = safelyAccessSimpleDefsMembers();
     if (d && d.get()) {

@@ -16,13 +16,13 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/node/Defs.hpp"
-#include "ecflow/core/DurationTimer.hpp"
-#include "ecflow/node/Family.hpp"
 #include "ServerTestHarness.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
-#include "ecflow/attribute/VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

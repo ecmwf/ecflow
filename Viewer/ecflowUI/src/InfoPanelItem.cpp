@@ -59,7 +59,7 @@ void InfoPanelItem::adjust(VInfo_ptr info) {
     if (info) {
         ServerHandler* server = info->server();
 
-        bool sameServer       = (info_) ? (info_->server() == server) : false;
+        bool sameServer = (info_) ? (info_->server() == server) : false;
 
         // Handle observers
         if (!sameServer) {

@@ -102,7 +102,7 @@ void OutputDirClient::getDir(const std::string& name) {
     boost::filesystem::path fp(name);
     std::string dirName = fp.parent_path().string();
 
-    remoteFile_         = name;
+    remoteFile_ = name;
     dir_.reset();
     dir_ = std::make_shared<VDir>(dirName);
     data_.clear();

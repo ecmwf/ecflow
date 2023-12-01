@@ -43,7 +43,7 @@ ShellCommand::ShellCommand(const std::string& cmdStr, const std::string& cmdDefS
 
     command_ = cmdIn.mid(3);
 
-    proc_    = new QProcess(this);
+    proc_ = new QProcess(this);
 
     // Some commands/script are located in bin, while some other is share/ecflow/etc
 

@@ -214,7 +214,7 @@ void TextPagerEdit::setDocument(TextPagerDocument* doc) {
     d->textLayouts.clear();
     viewport()->setCursor(Qt::IBeamCursor);
     viewport()->setMouseTracking(true);
-    d->sectionCount        = 0;
+    d->sectionCount = 0;
 
     d->textCursor          = TextPagerCursor(doc);
     d->textCursor.textEdit = this;
@@ -361,7 +361,7 @@ void TextPagerEdit::paintEvent(QPaintEvent* e) {
     p.setFont(font());
     QVector<QTextLayout::FormatRange> selections;
     selections.reserve(d->extraSelections.size() + 1);
-    int textLayoutOffset            = d->viewportPosition;
+    int textLayoutOffset = d->viewportPosition;
 
     const QTextLayout* cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : nullptr;
     int extraSelectionIndex         = 0;
@@ -890,7 +890,7 @@ void TextEditPrivate::onDocumentSizeChanged(int /*size*/) {
 }
 
 void TextEditPrivate::adjustVerticalScrollBar() {
-    int s    = findLastPageSize();
+    int s = findLastPageSize();
 
     int size = (document != nullptr) ? (document->documentSize()) : 0;
 
@@ -1222,7 +1222,7 @@ void TextEditPrivate::updateScrollBarPosition() {
     const int req              = requestedScrollBarPosition;
     requestedScrollBarPosition = -1;
 
-    Direction direction        = Forward;
+    Direction direction = Forward;
     if (lastRequestedScrollBarPosition != -1 && lastRequestedScrollBarPosition != req) {
         if (lastRequestedScrollBarPosition > req) {
             direction = Backward;
@@ -1419,7 +1419,7 @@ void TextEditPrivate::relayout() {
 
     int widestOri = widest;
 
-    widest        = -1;
+    widest = -1;
     relayoutByGeometry(s.height());
     if (widest == -1)
         widest = widestOri;
@@ -1716,8 +1716,8 @@ void TextPagerEdit::zoomIn() {
 void TextPagerEdit::zoomOut() {
     int oriSize = font().pointSize();
 
-    QFont f     = font();
-    int fps     = f.pointSize();
+    QFont f = font();
+    int fps = f.pointSize();
     if (fps > 1) {
         f.setPointSize(fps - 1);
         setFont(f);
@@ -1781,7 +1781,7 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent* e) {
     selections.reserve(d->extraSelections.size() + 1);
     int textLayoutOffset = d->viewportPosition;
 
-    QRect numRect        = er;
+    QRect numRect = er;
 
     // Background and border
     painter.fillRect(numRect, lineNumArea_->bgColour());

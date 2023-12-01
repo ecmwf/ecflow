@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
         family_ptr fam = suite->add_family("family");
         int taskSize   = 2; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task                  = fam->add_task("t" + ecf::convert_to<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
 
             boost::posix_time::ptime time1 = theLocalTime + minutes(1 + i);
             task->addTime(ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
         // The minute will be 62, which is illegal and will not parse
         boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
 
-        suite_ptr suite                       = theDefs.add_suite("test_suspend_node");
+        suite_ptr suite = theDefs.add_suite("test_suspend_node");
         ClockAttr clockAttr(theLocalTime);
         suite->addClock(clockAttr);
 

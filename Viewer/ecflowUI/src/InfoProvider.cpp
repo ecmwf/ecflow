@@ -202,11 +202,11 @@ void InfoProvider::taskChanged(VTask_ptr task) {
 }
 
 JobProvider::JobProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::JobTask) {
-    fileVarName_        = "ECF_JOB";
+    fileVarName_ = "ECF_JOB";
 
     fileNotDefinedText_ = "Job is <b>not</b> defined";
 
-    fileMissingText_    = "Job <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
+    fileMissingText_ = "Job <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
 				 for read/write access. Check for file presence and read access below. \
 	             The file may have been deleted or this may be a '<i>dummy</i>' task";
 }

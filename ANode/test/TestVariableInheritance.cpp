@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_variable_inheritance) {
         fam->addVariable(Variable("MIDDLE", "20"));
         t = fam->add_task("t");
         t->addVariable(Variable("LOWER", "abc"));
-        t2              = fam->add_task("t2");
+        t2 = fam->add_task("t2");
 
         family_ptr fam2 = suite->add_family("f2");
         fam2->addVariable(Variable("TOPLEVEL", "40"));

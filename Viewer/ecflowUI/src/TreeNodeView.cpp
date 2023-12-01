@@ -88,7 +88,7 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view, TreeNodeModel* model, NodeFil
     propVec.emplace_back("view.tree.nodeToolTip");
     propVec.emplace_back("view.tree.attributeToolTip");
 
-    prop_           = new PropertyMapper(propVec, this);
+    prop_ = new PropertyMapper(propVec, this);
 
     VProperty* prop = nullptr;
     std::string propName;

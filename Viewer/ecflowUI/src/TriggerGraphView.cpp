@@ -113,7 +113,7 @@ QRectF TriggerGraphNodeItem::boundingRect() const {
 void TriggerGraphNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     // Init style option
     QStyleOptionViewItem opt;
-    opt.rect        = bRect_.toRect();
+    opt.rect = bRect_.toRect();
 
     QModelIndex idx = view_->model()->index(index_, 0);
     view_->delegate()->paint(painter, opt, idx);
@@ -444,7 +444,7 @@ void TriggerGraphEdgeInfoDialog::setInfo(TriggerGraphEdgeItem* e) {
 QString TriggerGraphEdgeInfoDialog::makeHtml(TriggerGraphEdgeItem* e) const {
     QString s = "<table width=\'100%\'>";
 
-    VItem* t  = e->from_->item();
+    VItem* t = e->from_->item();
     makeRow("from", t, s);
 
     t = e->to_->item();

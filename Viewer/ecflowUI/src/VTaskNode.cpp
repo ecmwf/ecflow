@@ -19,9 +19,9 @@ VTaskNode::VTaskNode(VNode* parent, node_ptr node) : VNode(parent, node), prevTr
     unsigned int tn          = tryNo();
     NState::State new_status = node_->state();
 
-    bool aborted             = (new_status == NState::ABORTED);
-    bool zombie              = node_->flag().is_set(ecf::Flag::ZOMBIE);
-    bool late                = node_->flag().is_set(ecf::Flag::LATE);
+    bool aborted = (new_status == NState::ABORTED);
+    bool zombie  = node_->flag().is_set(ecf::Flag::ZOMBIE);
+    bool late    = node_->flag().is_set(ecf::Flag::LATE);
 
     updatePrev(tn, aborted, zombie, late);
 }
@@ -89,10 +89,10 @@ void VTaskNode::check(VServerSettings* conf, const VNodeInternalState& st) {
 void VTaskNode::check(VServerSettings* conf, bool stateChange) {
     NState::State new_status = node_->state();
 
-    bool new_aborted         = (new_status == NState::ABORTED);
-    unsigned int new_tryNo   = tryNo();
-    bool new_zombie          = isZombie();
-    bool new_late            = isLate();
+    bool new_aborted       = (new_status == NState::ABORTED);
+    unsigned int new_tryNo = tryNo();
+    bool new_zombie        = isZombie();
+    bool new_late          = isLate();
 
     // Aborted
     if (stateChange) {

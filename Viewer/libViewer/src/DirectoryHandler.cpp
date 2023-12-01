@@ -32,7 +32,7 @@ std::string DirectoryHandler::uiLogFile_;
 std::string DirectoryHandler::uiEventLogFile_;
 std::string DirectoryHandler::socketDir_;
 
-static bool firstStartUp             = false;
+static bool firstStartUp = false;
 
 DirectoryHandler::DirectoryHandler() = default;
 
@@ -236,7 +236,7 @@ void DirectoryHandler::findDirContents(const std::string& dirPath,
         std::smatch what;
         std::string fileName = p.filename().string();
 
-        bool rightType       = (type == File) ? is_regular_file(p) : is_directory(p); // file or directory?
+        bool rightType = (type == File) ? is_regular_file(p) : is_directory(p); // file or directory?
 
         if (rightType && std::regex_match(fileName, what, expr)) {
             res.push_back(fileName);

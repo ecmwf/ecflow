@@ -179,8 +179,8 @@ void DashboardTitle::updateTitle() {
         const int marginX = 0;
         const int gap     = 1;
 
-        int maxBandH      = 2;
-        int bandH         = (current_) ? maxBandH : 2;
+        int maxBandH = 2;
+        int bandH    = (current_) ? maxBandH : 2;
 
         QFont f;
         QFontMetrics fm(f);
@@ -191,8 +191,8 @@ void DashboardTitle::updateTitle() {
         // Compute the pixmap size
         int h = fm.height() + bandH + 1;
         // int w=fm.width("ABCD...")+(num-1);
-        int w       = maxPixWidth_ - 10;
-        int dw      = w / num;
+        int w  = maxPixWidth_ - 10;
+        int dw = w / num;
 
         int xp      = 0;
         int yp      = 0;
@@ -304,8 +304,8 @@ void DashboardTitle::updateTitle() {
         QFontMetrics fm(f); // Compute the pixmap size
         int h = fm.height() + 2;
         // int w=fm.width("ABCD...")+(num-1);
-        int w    = h * 5 / 4;
-        int dw   = w / num;
+        int w  = h * 5 / 4;
+        int dw = w / num;
 
         descPix_ = QPixmap(w + 1, h + 1);
         descPix_.fill(Qt::transparent);

@@ -199,7 +199,7 @@ void RepeatIntEditor::initSpinner() {
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "repeat");
 
-    auto* rep      = static_cast<VRepeatAttr*>(a);
+    auto* rep = static_cast<VRepeatAttr*>(a);
 
     int startIndex = rep->startIndex();
     int endIndex   = rep->endIndex();

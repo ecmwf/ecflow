@@ -38,7 +38,7 @@ PointerAlignment: Left
 
 # Align things as much as possible.
 AlignOperands: true
-AlignConsecutiveAssignments: AcrossEmptyLines
+AlignConsecutiveAssignments: Consecutive
 AlignEscapedNewlines: Left
 AlignTrailingComments: true
 

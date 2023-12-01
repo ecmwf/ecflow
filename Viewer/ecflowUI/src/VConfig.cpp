@@ -149,7 +149,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
         else if (name == "line" && ptProp.empty()) {
             auto* chProp = new VProperty(name);
             prop->addChild(chProp);
-            auto val       = ptProp.get_value<std::string>();
+            auto val = ptProp.get_value<std::string>();
 
             QString prefix = prop->param("prefix");
             if (!prefix.isEmpty())
@@ -249,8 +249,8 @@ VProperty* VConfig::cloneServerGui(VProperty* linkTarget) {
 
 // Saves the global settings that can be edited through the gui
 void VConfig::saveSettings() {
-    SessionItem* cs    = SessionHandler::instance()->current();
-    std::string fName  = cs->settingsFile();
+    SessionItem* cs   = SessionHandler::instance()->current();
+    std::string fName = cs->settingsFile();
 
     VProperty* guiProp = group("gui");
 
@@ -296,7 +296,7 @@ void VConfig::loadSettings() {
     SessionItem* cs     = SessionHandler::instance()->current();
     std::string parFile = cs->settingsFile();
 
-    VProperty* guiProp  = group("gui");
+    VProperty* guiProp = group("gui");
 
     loadSettings(parFile, guiProp, true);
 }

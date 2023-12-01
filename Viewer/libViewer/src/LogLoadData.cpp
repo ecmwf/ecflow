@@ -793,7 +793,7 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
     if (time_stamp.size() < 2)
         return;
 
-    QString s    = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
+    QString s = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
 
     QDateTime dt = QDateTime::fromString(s, "HH:mm:ss d.M.yyyy");
     dt.setTimeSpec(Qt::UTC);
@@ -930,9 +930,9 @@ void LogLoadData::loadLogFile(const std::string& logFile,
 
     maxReadSize_ = maxReadSize;
 
-    fullRead_    = false;
-    loadStatus_  = LoadNotTried;
-    loadedAt_    = QDateTime::currentDateTime();
+    fullRead_   = false;
+    loadStatus_ = LoadNotTried;
+    loadedAt_   = QDateTime::currentDateTime();
 
     loadLogFileCore(logFile, maxReadSize, suites, false, logConsumer);
 

@@ -55,7 +55,7 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
     VNode* node           = info_->node();
     ServerHandler* server = info_->server();
 
-    bool run              = true;
+    bool run = true;
 
     //---------------------------
     // Extract user variables
@@ -75,7 +75,7 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
     std::string comStart = micro + comStartText;
     std::string comEnd   = micro + comEndText;
 
-    bool inVars          = false;
+    bool inVars = false;
     for (const auto& it : txt) {
         const std::string& line = it;
 

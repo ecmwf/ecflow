@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
         string errorMsg;
         string argument = "--ecfinterval=" + ecf::convert_to<std::string>(i);
 
-        int argc        = 2;
-        char* argv[]    = {const_cast<char*>("ServerEnvironment"), const_cast<char*>(argument.c_str())};
+        int argc     = 2;
+        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>(argument.c_str())};
         ServerEnvironment serverEnv(argc, argv);
         bool valid = serverEnv.valid(errorMsg);
         if (i > 0 && i < 61) {

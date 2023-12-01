@@ -37,7 +37,7 @@ void ExpandState::init(const VNode* vnode) {
     QModelIndex idx = model_->serverToIndex(server);
     bool expanded   = view_->isExpanded(idx);
 
-    root_           = new ExpandStateNode(server->vRoot(), expanded);
+    root_ = new ExpandStateNode(server->vRoot(), expanded);
 
     save(server->vRoot());
 }
@@ -204,7 +204,7 @@ void ExpandState::collectExpanded(ExpandStateNode* expand,
 #endif
     // The contents of expand node and the vnode might differ. We try to
     // adjust the expand node to the vnode with this call.
-    bool adjusted         = expand->adjustContents(node);
+    bool adjusted = expand->adjustContents(node);
 
     std::size_t numExpand = expand->children_.size();
     std::size_t numNode   = node->numOfChildren();

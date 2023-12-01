@@ -32,7 +32,7 @@ struct BaseNodeDelegateBox
 {
     BaseNodeDelegateBox() : sizeHintCache(QSize(10, 10)), selectRm(2) {}
 
-    virtual ~BaseNodeDelegateBox()      = default;
+    virtual ~BaseNodeDelegateBox() = default;
 
     virtual void adjust(const QFont& f) = 0;
     virtual QRect adjustTextRect(const QRect& rIn) const {
@@ -87,8 +87,8 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
         sizeHintCache = QSize(100, fullHeight);
         spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-        auto h        = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
-        iconSize      = h;
+        auto h   = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize = h;
         if (iconSize % 2 == 1)
             iconSize += 1;
 
@@ -117,8 +117,8 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
         sizeHintCache = QSize(100, fullHeight);
         spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-        int h         = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
-        iconSize      = h;
+        int h    = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize = h;
         if (iconSize % 2 == 1)
             iconSize += 1;
 

@@ -25,7 +25,7 @@ class QModelIndex;
 class NodeViewBase {
 public:
     explicit NodeViewBase(NodeFilterDef*);
-    virtual ~NodeViewBase()                       = default;
+    virtual ~NodeViewBase() = default;
 
     virtual void reload()                         = 0;
     virtual void rerender()                       = 0;
@@ -35,8 +35,8 @@ public:
     virtual void selectFirstServer()              = 0;
     virtual void setCurrentSelection(VInfo_ptr n) = 0;
 
-    virtual void readSettings(VSettings* vs)      = 0;
-    virtual void writeSettings(VSettings* vs)     = 0;
+    virtual void readSettings(VSettings* vs)  = 0;
+    virtual void writeSettings(VSettings* vs) = 0;
 
 protected:
     NodeFilterDef* filterDef_;

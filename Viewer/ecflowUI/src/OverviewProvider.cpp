@@ -91,10 +91,10 @@ void OverviewProvider::taskChanged(VTask_ptr task) {
 void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     static const std::string inc = "  ";
 
-    ServerHandler* server        = info->server();
+    ServerHandler* server = info->server();
     if (!server)
         return;
-    VServer* snode    = server->vRoot();
+    VServer* snode = server->vRoot();
 
     ConnectState* cst = server->connectState();
 
@@ -232,7 +232,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
         f << "flags   : " << flags << "\n";
     }
 
-    node_ptr nn                                = node->node();
+    node_ptr nn = node->node();
 
     boost::posix_time::ptime state_change_time = nn->state_change_time();
     if (!state_change_time.is_special()) {
