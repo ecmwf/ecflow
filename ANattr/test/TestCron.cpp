@@ -13,10 +13,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "CronAttr.hpp"
-#include "Str.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/attribute/CronAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;

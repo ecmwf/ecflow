@@ -19,9 +19,9 @@
 
 #include <QThread>
 
-#include "AbstractObserver.hpp"
-#include "Defs.hpp"
 #include "VTask.hpp"
+#include "ecflow/node/AbstractObserver.hpp"
+#include "ecflow/node/Defs.hpp"
 
 class ChangeMgrSingleton;
 class ClientInvoker;

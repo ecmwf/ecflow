@@ -12,13 +12,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Cal.hpp"
-#include "Converter.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

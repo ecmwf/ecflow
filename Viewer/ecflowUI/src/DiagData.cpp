@@ -13,16 +13,16 @@
 #include <QString>
 #include <QStringList>
 
-#include "File.hpp"
-#include "File_r.hpp"
 #include "ModelColumn.hpp"
-#include "NodePath.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 DiagData* DiagData::instance_ = nullptr;
 

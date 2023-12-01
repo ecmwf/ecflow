@@ -10,11 +10,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "ServerToClientCmd.hpp"
-#include "Str.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

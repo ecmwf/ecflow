@@ -10,9 +10,9 @@
 
 #include "VLateAttr.hpp"
 
-#include "NodeAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
 
 //================================
 // VLateAttrType

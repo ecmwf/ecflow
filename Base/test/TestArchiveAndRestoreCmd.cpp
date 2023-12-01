@@ -11,16 +11,16 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "Pid.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
 #include "TestHelper.hpp"
-// #include "PrintStyle.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+// #include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -1,5 +1,5 @@
 #
-# Copyright 2023- ECMWF.
+# Copyright 2009- ECMWF.
 #
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -22,23 +22,23 @@ endif ()
 
 set(srcs
   # Headers
-  src/ApiV1.hpp
-  src/ApiV1Impl.hpp
-  src/Base64.hpp
-  src/BasicAuth.hpp
-  src/HttpServer.hpp
-  src/HttpServerException.hpp
-  src/JSON.hpp
-  src/Options.hpp
-  src/TokenStorage.hpp
-  src/TypeToJson.hpp
+  src/ecflow/http/ApiV1.hpp
+  src/ecflow/http/ApiV1Impl.hpp
+  src/ecflow/http/Base64.hpp
+  src/ecflow/http/BasicAuth.hpp
+  src/ecflow/http/HttpServer.hpp
+  src/ecflow/http/HttpServerException.hpp
+  src/ecflow/http/JSON.hpp
+  src/ecflow/http/Options.hpp
+  src/ecflow/http/TokenStorage.hpp
+  src/ecflow/http/TypeToJson.hpp
   # Sources
-  src/HttpServer.cpp
-  src/ApiV1.cpp
-  src/ApiV1Impl.cpp
-  src/BasicAuth.cpp
-  src/TypeToJson.cpp
-  src/TokenStorage.cpp
+  src/ecflow/http/HttpServer.cpp
+  src/ecflow/http/ApiV1.cpp
+  src/ecflow/http/ApiV1Impl.cpp
+  src/ecflow/http/BasicAuth.cpp
+  src/ecflow/http/TypeToJson.cpp
+  src/ecflow/http/TokenStorage.cpp
 )
 
 ecbuild_add_library(
@@ -63,7 +63,7 @@ target_clangformat(libhttp)
 ecbuild_add_executable(
   TARGET ecflow_http
   SOURCES
-    src/HttpMain.cpp
+    src/ecflow/http/HttpMain.cpp
   LIBS
     libhttp
     libclient

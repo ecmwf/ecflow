@@ -13,9 +13,9 @@
 
 #include <QWidget>
 
-#include "Aspect.hpp"
 #include "TriggerCollector.hpp"
 #include "VInfo.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 class TriggerTableItem;
 class TriggerTableCollector;

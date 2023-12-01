@@ -18,14 +18,14 @@
 #include <QFileInfo>
 #include <QStringList>
 
-#include "File.hpp"
-#include "File_r.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "TimelineData.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNState.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 #ifndef SIZE_MAX
     #ifdef __SIZE_MAX__

@@ -14,8 +14,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Str.hpp"
-#include "StringSplitter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/StringSplitter.hpp"
 
 using namespace std;
 using namespace ecf;

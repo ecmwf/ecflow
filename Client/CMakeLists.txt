@@ -1,5 +1,5 @@
 #
-# Copyright 2023- ECMWF.
+# Copyright 2009- ECMWF.
 #
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -10,22 +10,22 @@
 
 set(srcs
   # Headers
-  src/ClientCmdCache.hpp
-  src/ClientEnvironment.hpp
-  src/ClientInvoker.hpp
-  src/ClientOptions.hpp
-  src/Help.hpp
-  src/Rtt.hpp
-  src/UrlCmd.hpp
+  src/ecflow/client/ClientCmdCache.hpp
+  src/ecflow/client/ClientEnvironment.hpp
+  src/ecflow/client/ClientInvoker.hpp
+  src/ecflow/client/ClientOptions.hpp
+  src/ecflow/client/Help.hpp
+  src/ecflow/client/Rtt.hpp
+  src/ecflow/client/UrlCmd.hpp
   # Sources
-  src/ClientCmdCache.cpp
-  src/Rtt.cpp
-  src/ClientEnvironment.cpp
-  src/ClientInvoker.cpp
-  src/Help.cpp
-  src/Rtt.cpp
-  src/ClientOptions.cpp
-  src/UrlCmd.cpp
+  src/ecflow/client/ClientCmdCache.cpp
+  src/ecflow/client/Rtt.cpp
+  src/ecflow/client/ClientEnvironment.cpp
+  src/ecflow/client/ClientInvoker.cpp
+  src/ecflow/client/Help.cpp
+  src/ecflow/client/Rtt.cpp
+  src/ecflow/client/ClientOptions.cpp
+  src/ecflow/client/UrlCmd.cpp
 )
 
 ecbuild_add_library(
@@ -50,7 +50,7 @@ ecbuild_add_executable(
   TARGET
     ecflow_client
   SOURCES
-    src/ClientMain.cpp
+    src/ecflow/client/ClientMain.cpp
   LIBS
     libclient
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>

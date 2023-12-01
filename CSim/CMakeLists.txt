@@ -1,5 +1,5 @@
 #
-# Copyright 2023- ECMWF.
+# Copyright 2009- ECMWF.
 #
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -10,19 +10,19 @@
 
 set(srcs
   # Headers
-  src/Analyser.hpp
-  src/AstAnalyserVisitor.hpp
-  src/DefsAnalyserVisitor.hpp
-  src/FlatAnalyserVisitor.hpp
-  src/Simulator.hpp
-  src/SimulatorVisitor.hpp
+  src/ecflow/simulator/Analyser.hpp
+  src/ecflow/simulator/AstAnalyserVisitor.hpp
+  src/ecflow/simulator/DefsAnalyserVisitor.hpp
+  src/ecflow/simulator/FlatAnalyserVisitor.hpp
+  src/ecflow/simulator/Simulator.hpp
+  src/ecflow/simulator/SimulatorVisitor.hpp
   # Sources
-  src/Analyser.cpp
-  src/AstAnalyserVisitor.cpp
-  src/DefsAnalyserVisitor.cpp
-  src/FlatAnalyserVisitor.cpp
-  src/Simulator.cpp
-  src/SimulatorVisitor.cpp
+  src/ecflow/simulator/Analyser.cpp
+  src/ecflow/simulator/AstAnalyserVisitor.cpp
+  src/ecflow/simulator/DefsAnalyserVisitor.cpp
+  src/ecflow/simulator/FlatAnalyserVisitor.cpp
+  src/ecflow/simulator/Simulator.cpp
+  src/ecflow/simulator/SimulatorVisitor.cpp
 )
 ecbuild_add_library(
   TARGET

@@ -10,12 +10,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
-#include "ClientOptions.hpp"
-#include "ClientToServerCmd.hpp"
-#include "CommandLine.hpp"
-#include "PasswordEncryption.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/client/ClientOptions.hpp"
+#include "ecflow/core/CommandLine.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
 
 ///
 /// \brief Tests the capabilities of ClientOptions

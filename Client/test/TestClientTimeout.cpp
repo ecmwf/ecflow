@@ -16,11 +16,11 @@
 // #include <boost/filesystem/path.hpp>
 // #include <boost/test/unit_test.hpp>
 //
-// #include "ClientInvoker.hpp"
-// #include "ClientEnvironment.hpp"
+// #include "ecflow/client/ClientInvoker.hpp"
+// #include "ecflow/client/ClientEnvironment.hpp"
 // #include "InvokeServer.hpp"
 // #include "SCPort.hpp"
-// #include "Str.hpp"
+// #include "ecflow/core/Str.hpp"
 //
 // namespace fs = boost::filesystem;
 // using namespace std;

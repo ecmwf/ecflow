@@ -18,9 +18,9 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
 
-#include "ExprAst.hpp"
-#include "ExprDuplicate.hpp"
-#include "ExprParser.hpp"
+#include "ecflow/node/ExprAst.hpp"
+#include "ecflow/node/ExprDuplicate.hpp"
+#include "ecflow/node/ExprParser.hpp"
 using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;

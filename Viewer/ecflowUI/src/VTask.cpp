@@ -13,7 +13,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "VTaskObserver.hpp"
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 
 VTask::VTask(Type t, VTaskObserver* obs)
     : type_(t),

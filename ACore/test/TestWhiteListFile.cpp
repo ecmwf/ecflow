@@ -14,8 +14,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "File.hpp"
-#include "WhiteListFile.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

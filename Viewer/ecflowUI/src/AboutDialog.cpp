@@ -15,8 +15,8 @@
 #include <QTreeWidgetItem>
 
 #include "DirectoryHandler.hpp"
-#include "Version.hpp"
 #include "WidgetNameProvider.hpp"
+#include "ecflow/core/Version.hpp"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     #include <QRegExp>

@@ -18,9 +18,9 @@
 #endif
 
 #include "Sound.hpp"
-#include "Str.hpp"
 #include "UserMessage.hpp"
 #include "ViewerUtil.hpp"
+#include "ecflow/core/Str.hpp"
 
 VProperty::VProperty(const std::string& name)
     : strName_(name),

@@ -10,7 +10,7 @@
 
 #include "TestUtil.hpp"
 
-#include "File.hpp"
+#include "ecflow/core/File.hpp"
 
 using namespace std;
 using namespace ecf;

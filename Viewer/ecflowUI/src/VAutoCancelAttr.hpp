@@ -16,9 +16,9 @@
 
 #include <QStringList>
 
-#include "AutoCancelAttr.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
 
 class AttributeFilter;
 class VAttributeType;

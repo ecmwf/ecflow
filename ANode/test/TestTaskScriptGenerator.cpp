@@ -14,16 +14,16 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "EcfFile.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "JobCreationCtrl.hpp"
 #include "MyDefsFixture.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

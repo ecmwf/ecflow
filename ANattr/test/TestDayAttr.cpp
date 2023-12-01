@@ -13,10 +13,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "DayAttr.hpp"
-#include "PrintStyle.hpp"
-#include "Str.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;

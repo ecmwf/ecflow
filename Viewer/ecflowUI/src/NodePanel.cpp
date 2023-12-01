@@ -13,12 +13,12 @@
 #include <QDebug>
 #include <QResizeEvent>
 
-#include "Converter.hpp"
 #include "Dashboard.hpp"
 #include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
 #include "ServerHandler.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/Converter.hpp"
 
 NodePanel::NodePanel(QWidget* parent)
     : TabWidget(parent)

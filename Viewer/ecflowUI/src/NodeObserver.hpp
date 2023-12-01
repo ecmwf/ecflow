@@ -11,8 +11,8 @@
 #ifndef ecflow_viewer_NodeObserver_HPP
 #define ecflow_viewer_NodeObserver_HPP
 
-#include "Aspect.hpp"
-#include "Node.hpp"
+#include "ecflow/node/Aspect.hpp"
+#include "ecflow/node/Node.hpp"
 
 class VNode;
 class VNodeChange;

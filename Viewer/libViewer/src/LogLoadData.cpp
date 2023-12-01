@@ -17,13 +17,13 @@
 #include <QStringList>
 #include <QtGlobal>
 
-#include "File.hpp"
-#include "File_r.hpp"
 #include "LogConsumer.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 // static int REQCNT=0;
 

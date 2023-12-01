@@ -16,7 +16,7 @@
 #include <boost/foreach.hpp>
 
 #include "DirectoryHandler.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Str.hpp"
 
 VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode) {
 }

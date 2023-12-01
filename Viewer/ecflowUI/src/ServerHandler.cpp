@@ -20,14 +20,9 @@
 #include <boost/asio/ip/host_name.hpp>
 
 #include "ChangeNotify.hpp"
-#include "ClientInvoker.hpp"
 #include "ConnectState.hpp"
-#include "Defs.hpp"
 #include "DirectoryHandler.hpp"
-#include "File.hpp"
 #include "MainWindow.hpp"
-#include "Node.hpp"
-#include "NodeFwd.hpp"
 #include "NodeObserver.hpp"
 #include "ServerComObserver.hpp"
 #include "ServerComQueue.hpp"
@@ -35,7 +30,6 @@
 #include "ServerObserver.hpp"
 #include "SessionHandler.hpp"
 #include "ShellCommand.hpp"
-#include "Str.hpp"
 #include "SuiteFilter.hpp"
 #include "UIDebug.hpp"
 #include "UiLogS.hpp"
@@ -44,6 +38,12 @@
 #include "VNode.hpp"
 #include "VSettings.hpp"
 #include "VTaskObserver.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;

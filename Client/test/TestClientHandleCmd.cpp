@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "System.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;

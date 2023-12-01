@@ -11,8 +11,8 @@
 #ifndef ecflow_viewer_VTaskNode_HPP
 #define ecflow_viewer_VTaskNode_HPP
 
-#include "Node.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Node.hpp"
 
 class ServerHandler;
 class VServer;

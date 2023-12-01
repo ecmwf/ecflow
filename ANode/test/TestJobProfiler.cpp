@@ -13,15 +13,15 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -13,12 +13,12 @@
 #include "AbstractNodeView.hpp"
 #include "ExpandStateNode.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "TreeNodeModel.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
+#include "ecflow/core/Str.hpp"
 
 // #define _UI_EXPANDSTATE_DEBUG
 

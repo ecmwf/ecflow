@@ -32,7 +32,6 @@
 #include "CustomCommandHandler.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
@@ -40,6 +39,7 @@
 #include "VNode.hpp"
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
+#include "ecflow/core/Str.hpp"
 
 int MenuItem::idCnt_ = 0;
 

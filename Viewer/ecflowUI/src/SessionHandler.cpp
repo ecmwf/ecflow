@@ -17,8 +17,8 @@
 
 #include "DirectoryHandler.hpp"
 #include "ServerList.hpp"
-#include "Str.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/Str.hpp"
 
 SessionHandler* SessionHandler::instance_ = nullptr;
 

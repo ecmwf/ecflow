@@ -17,9 +17,9 @@
 #include <QObject>
 #include <QStringList>
 
-#include "Node.hpp"
 #include "VInfo.hpp"
 #include "VParam.hpp"
+#include "ecflow/node/Node.hpp"
 
 class NodeQuery;
 class NodeFilterEngine;

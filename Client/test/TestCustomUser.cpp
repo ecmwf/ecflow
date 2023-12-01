@@ -11,12 +11,12 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
-#include "PasswdFile.hpp"
 #include "SCPort.hpp"
-#include "User.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/core/User.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

@@ -13,8 +13,8 @@
 
 #include <vector>
 
-#include "Node.hpp"
 #include "ServerItem.hpp"
+#include "ecflow/node/Node.hpp"
 
 class VSettings;
 

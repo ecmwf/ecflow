@@ -16,9 +16,9 @@
 
 #include <QStringList>
 
-#include "AutoRestoreAttr.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
 
 class AttributeFilter;
 class VAttributeType;

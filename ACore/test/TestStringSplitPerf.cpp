@@ -22,9 +22,9 @@
 
     #include <boost/timer/timer.hpp>
 
-    #include "File.hpp"
-    #include "Str.hpp"
-    #include "StringSplitter.hpp"
+    #include "ecflow/core/File.hpp"
+    #include "ecflow/core/Str.hpp"
+    #include "ecflow/core/StringSplitter.hpp"
 
 using namespace std;
 using namespace ecf;

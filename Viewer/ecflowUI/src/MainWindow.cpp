@@ -30,7 +30,6 @@
 #include "ClockWidget.hpp"
 #include "CommandOutputDialog.hpp"
 #include "ConnectState.hpp"
-#include "Converter.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "InfoPanelHandler.hpp"
@@ -53,8 +52,9 @@
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VSettings.hpp"
-#include "Version.hpp"
 #include "WidgetNameProvider.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Version.hpp"
 
 bool MainWindow::quitStarted_ = false;
 QList<MainWindow*> MainWindow::windows_;

@@ -10,20 +10,20 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "CalendarUpdateParams.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
-#include "Limit.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "SNewsCmd.hpp"
-#include "SSyncCmd.hpp"
-#include "Suite.hpp"
-#include "SuiteChanged.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

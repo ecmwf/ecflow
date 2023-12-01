@@ -10,9 +10,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "SerializationTest.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/SerializationTest.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;

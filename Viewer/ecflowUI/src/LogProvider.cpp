@@ -12,11 +12,11 @@
 
 #include <fstream>
 
-#include "File.hpp"
 #include "FileWatcher.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "ecflow/core/File.hpp"
 
 LogProvider::LogProvider(InfoPresenter* owner, QObject* parent)
     : QObject(parent),

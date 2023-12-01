@@ -15,17 +15,17 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "EcfFile.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "JobsParam.hpp"
-#include "Pid.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

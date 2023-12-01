@@ -13,9 +13,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "Version.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Version.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 using namespace ecf;

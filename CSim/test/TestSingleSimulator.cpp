@@ -18,15 +18,15 @@
 #define BOOST_TEST_MODULE TestSingleSimulator
 #include <boost/test/included/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "Log.hpp"
-#include "Simulator.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
-#include "TestUtil.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/TestUtil.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -17,9 +17,9 @@
 #include <QColor>
 #include <QStringList>
 
-#include "Aspect.hpp"
-#include "Node.hpp"
 #include "VItem.hpp"
+#include "ecflow/node/Aspect.hpp"
+#include "ecflow/node/Node.hpp"
 
 class AttributeFilter;
 class IconFilter;

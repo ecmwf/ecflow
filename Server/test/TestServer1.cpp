@@ -14,12 +14,12 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "EcfPortLock.hpp"
-#include "Host.hpp"
-#include "Log.hpp"
-#include "Server.hpp"
-#include "ServerEnvironment.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/server/Server.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 using namespace std;
 using namespace ecf;

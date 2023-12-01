@@ -15,11 +15,11 @@
 
 #include <QDateTime>
 
-#include "EcfFile.hpp"
 #include "ServerHandler.hpp"
-#include "Submittable.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
     : owner_(owner),

@@ -13,13 +13,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
-#include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "PrintStyle.hpp" // IWYU pragma: keep
-#include "ServerToClientCmd.hpp"
-#include "System.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;

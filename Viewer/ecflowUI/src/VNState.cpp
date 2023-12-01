@@ -21,11 +21,11 @@
 #include <sys/types.h>
 
 #include "ServerHandler.hpp"
-#include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VNode.hpp"
 #include "VProperty.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 std::map<std::string, VNState*> VNState::items_;
 static std::map<NState::State, VNState*> stateMap_;

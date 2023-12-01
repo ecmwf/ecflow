@@ -14,13 +14,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Converter.hpp"
-#include "Defs.hpp"
-#include "ExprAst.hpp"
-#include "ExprParser.hpp"
-#include "Expression.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAst.hpp"
+#include "ecflow/node/ExprParser.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

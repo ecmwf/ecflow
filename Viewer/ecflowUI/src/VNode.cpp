@@ -12,13 +12,8 @@
 
 #include "AstCollateVNodesVisitor.hpp"
 #include "ConnectState.hpp"
-#include "Converter.hpp"
-#include "Expression.hpp"
-#include "Limit.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
 #include "TriggerCollector.hpp"
 #include "TriggeredScanner.hpp"
 #include "UiLog.hpp"
@@ -41,7 +36,12 @@
 #include "VTimeAttr.hpp"
 #include "VTriggerAttr.hpp"
 #include "VUserVarAttr.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
 
 #define _UI_VNODE_DEBUG
 

@@ -22,10 +22,10 @@
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"
-#include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 std::map<std::string, VSState*> VSState::items_;
 static std::map<SState::State, VSState*> stateMap_;

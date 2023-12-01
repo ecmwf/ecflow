@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "ServerObserver.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 class ServerHandler;
 class VAttribute;

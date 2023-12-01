@@ -15,10 +15,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Certificate.hpp"
-#include "HttpServer.hpp"
-#include "HttpServerException.hpp"
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
+#include "ecflow/http/HttpServer.hpp"
+#include "ecflow/http/HttpServerException.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 

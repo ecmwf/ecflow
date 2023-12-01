@@ -14,9 +14,9 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "File.hpp"
-#include "PasswdFile.hpp"
-#include "PasswordEncryption.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

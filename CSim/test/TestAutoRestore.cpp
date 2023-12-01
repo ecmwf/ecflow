@@ -14,16 +14,16 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AutoArchiveAttr.hpp"
-#include "AutoRestoreAttr.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "Simulator.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestUtil.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
 using namespace ecf;

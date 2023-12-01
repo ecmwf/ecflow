@@ -14,9 +14,9 @@
 #include <QAbstractItemModel>
 #include <QColor>
 
-#include "Aspect.hpp"
 #include "TriggerCollector.hpp"
 #include "VInfo.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 class NodeQueryResult;
 

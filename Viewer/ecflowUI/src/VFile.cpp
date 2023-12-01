@@ -20,9 +20,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "Converter.hpp"
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/Converter.hpp"
 
 #define UI_VFILE_DEBUG_
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2023- ECMWF.
+# Copyright 2009- ECMWF.
 #
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,88 +8,92 @@
 # nor does it submit to any jurisdiction.
 #
 
-configure_file(src/ecflow_version.h.in ${CMAKE_BINARY_DIR}/generated/src/ecflow_version.h)
-configure_file(src/ecflow_source_build_dir.h.in ${CMAKE_BINARY_DIR}/generated/src/ecflow_source_build_dir.h)
+configure_file(
+  src/ecflow/core/ecflow_version.h.in
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_version.h)
+configure_file(
+  src/ecflow/core/ecflow_source_build_dir.h.in
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h)
 
 set(srcs
   # Headers
-  ${CMAKE_BINARY_DIR}/generated/src/ecflow_version.h
-  ${CMAKE_BINARY_DIR}/generated/src/ecflow_source_build_dir.h
-  src/AssertTimer.hpp
-  src/Cal.hpp
-  src/Calendar.hpp
-  src/CalendarUpdateParams.hpp
-  src/CheckPt.hpp
-  src/Child.hpp
-  src/CommandLine.hpp
-  src/DState.hpp
-  src/DebugPerf.hpp
-  src/DurationTimer.hpp
-  src/Ecf.hpp
-  src/EcfPortLock.hpp
-  src/Extract.hpp
-  src/File.hpp
-  src/File_r.hpp
-  src/Host.hpp
-  src/Indentor.hpp
-  src/Log.hpp
-  src/LogVerification.hpp
-  src/NOrder.hpp
-  src/NState.hpp
-  src/NodePath.hpp
-  src/Passwd.hpp
-  src/PasswdFile.hpp
-  src/PasswordEncryption.hpp
-  src/Pid.hpp
-  src/PrintStyle.hpp
-  src/SState.hpp
-  src/Serialization.hpp
-  src/SerializationTest.hpp
-  src/Stl.hpp
-  src/Str.hpp
-  src/StringSplitter.hpp
-  src/TestUtil.hpp
-  src/TimeSeries.hpp
-  src/TimeSlot.hpp
-  src/TimeStamp.hpp
-  src/User.hpp
-  src/Version.hpp
-  src/WhiteListFile.hpp
-  src/cereal_boost_time.hpp
-  src/cereal_optional_nvp.hpp
-  src/perf_timer.hpp
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_version.h
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h
+  src/ecflow/core/AssertTimer.hpp
+  src/ecflow/core/Cal.hpp
+  src/ecflow/core/Calendar.hpp
+  src/ecflow/core/CalendarUpdateParams.hpp
+  src/ecflow/core/CheckPt.hpp
+  src/ecflow/core/Child.hpp
+  src/ecflow/core/CommandLine.hpp
+  src/ecflow/core/DState.hpp
+  src/ecflow/core/DebugPerf.hpp
+  src/ecflow/core/DurationTimer.hpp
+  src/ecflow/core/Ecf.hpp
+  src/ecflow/core/EcfPortLock.hpp
+  src/ecflow/core/Extract.hpp
+  src/ecflow/core/File.hpp
+  src/ecflow/core/File_r.hpp
+  src/ecflow/core/Host.hpp
+  src/ecflow/core/Indentor.hpp
+  src/ecflow/core/Log.hpp
+  src/ecflow/core/LogVerification.hpp
+  src/ecflow/core/NOrder.hpp
+  src/ecflow/core/NState.hpp
+  src/ecflow/core/NodePath.hpp
+  src/ecflow/core/Passwd.hpp
+  src/ecflow/core/PasswdFile.hpp
+  src/ecflow/core/PasswordEncryption.hpp
+  src/ecflow/core/Pid.hpp
+  src/ecflow/core/PrintStyle.hpp
+  src/ecflow/core/SState.hpp
+  src/ecflow/core/Serialization.hpp
+  src/ecflow/core/SerializationTest.hpp
+  src/ecflow/core/Stl.hpp
+  src/ecflow/core/Str.hpp
+  src/ecflow/core/StringSplitter.hpp
+  src/ecflow/core/TestUtil.hpp
+  src/ecflow/core/TimeSeries.hpp
+  src/ecflow/core/TimeSlot.hpp
+  src/ecflow/core/TimeStamp.hpp
+  src/ecflow/core/User.hpp
+  src/ecflow/core/Version.hpp
+  src/ecflow/core/WhiteListFile.hpp
+  src/ecflow/core/cereal_boost_time.hpp
+  src/ecflow/core/cereal_optional_nvp.hpp
+  src/ecflow/core/perf_timer.hpp
   # Sources
-  src/AssertTimer.cpp
-  src/Cal.cpp
-  src/Calendar.cpp
-  src/Child.cpp
-  src/CommandLine.cpp
-  src/DState.cpp
-  src/DurationTimer.cpp
-  src/Ecf.cpp
-  src/Extract.cpp
-  src/File.cpp
-  src/File_r.cpp
-  src/Host.cpp
-  src/Indentor.cpp
-  src/Log.cpp
-  src/LogVerification.cpp
-  src/NOrder.cpp
-  src/NState.cpp
-  src/NodePath.cpp
-  src/Passwd.cpp
-  src/PasswdFile.cpp
-  src/Pid.cpp
-  src/PrintStyle.cpp
-  src/SState.cpp
-  src/Str.cpp
-  src/StringSplitter.cpp
-  src/TimeSeries.cpp
-  src/TimeSlot.cpp
-  src/TimeStamp.cpp
-  src/User.cpp
-  src/Version.cpp
-  src/WhiteListFile.cpp
+  src/ecflow/core/AssertTimer.cpp
+  src/ecflow/core/Cal.cpp
+  src/ecflow/core/Calendar.cpp
+  src/ecflow/core/Child.cpp
+  src/ecflow/core/CommandLine.cpp
+  src/ecflow/core/DState.cpp
+  src/ecflow/core/DurationTimer.cpp
+  src/ecflow/core/Ecf.cpp
+  src/ecflow/core/Extract.cpp
+  src/ecflow/core/File.cpp
+  src/ecflow/core/File_r.cpp
+  src/ecflow/core/Host.cpp
+  src/ecflow/core/Indentor.cpp
+  src/ecflow/core/Log.cpp
+  src/ecflow/core/LogVerification.cpp
+  src/ecflow/core/NOrder.cpp
+  src/ecflow/core/NState.cpp
+  src/ecflow/core/NodePath.cpp
+  src/ecflow/core/Passwd.cpp
+  src/ecflow/core/PasswdFile.cpp
+  src/ecflow/core/Pid.cpp
+  src/ecflow/core/PrintStyle.cpp
+  src/ecflow/core/SState.cpp
+  src/ecflow/core/Str.cpp
+  src/ecflow/core/StringSplitter.cpp
+  src/ecflow/core/TimeSeries.cpp
+  src/ecflow/core/TimeSlot.cpp
+  src/ecflow/core/TimeStamp.cpp
+  src/ecflow/core/User.cpp
+  src/ecflow/core/Version.cpp
+  src/ecflow/core/WhiteListFile.cpp
 )
 
 ecbuild_add_library(

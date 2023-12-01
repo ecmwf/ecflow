@@ -14,9 +14,9 @@
 
 #include <QPushButton>
 
-#include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Node.hpp"
 
 //========================================================
 //

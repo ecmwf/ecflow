@@ -17,11 +17,11 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
-#include "EcfPortLock.hpp"
-#include "Host.hpp"
-#include "Str.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Str.hpp"
 
 class InvokeServer : private boost::noncopyable {
 public:

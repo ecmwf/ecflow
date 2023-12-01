@@ -19,11 +19,11 @@
 
 #include <QMutex>
 
-#include "Defs.hpp"
 #include "VInfo.hpp"
 #include "VReply.hpp"
 #include "VServerSettings.hpp"
 #include "VTask.hpp"
+#include "ecflow/node/Defs.hpp"
 
 class ClientInvoker;
 class ServerReply;

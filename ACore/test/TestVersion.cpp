@@ -13,9 +13,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "File.hpp"
-#include "Str.hpp"
-#include "Version.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace std;
 using namespace ecf;

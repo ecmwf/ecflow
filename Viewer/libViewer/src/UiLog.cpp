@@ -27,7 +27,7 @@
 #if 0
     #include "ServerHandler.hpp"
 #endif
-#include "TimeStamp.hpp"
+#include "ecflow/core/TimeStamp.hpp"
 
 static LogTruncator* truncator = nullptr;
 

@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "CheckPtSaver.hpp"
+#include "ecflow/server/CheckPtSaver.hpp"
 
 // TODO: Move the following trace_*_function to a common test module/library
 static void trace_test() {

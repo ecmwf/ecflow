@@ -15,15 +15,15 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include "Defs.hpp"
-#include "File.hpp"
-#include "JobProfiler.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
-#include "Task.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

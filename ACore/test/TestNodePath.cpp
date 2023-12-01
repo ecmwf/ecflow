@@ -14,7 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "NodePath.hpp"
+#include "ecflow/core/NodePath.hpp"
 
 using namespace std;
 

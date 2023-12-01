@@ -15,19 +15,19 @@
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "Converter.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "QueueAttr.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "WhyCmd.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;

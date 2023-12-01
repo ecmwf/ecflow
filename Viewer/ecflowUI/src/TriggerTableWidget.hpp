@@ -13,8 +13,8 @@
 
 #include <QDialog>
 
-#include "Aspect.hpp"
 #include "VInfo.hpp"
+#include "ecflow/node/Aspect.hpp"
 #include "ui_TriggerTableWidget.h"
 
 class TriggerTableItem;

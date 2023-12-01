@@ -30,7 +30,6 @@
 #include "CustomCommandDialog.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "TextFormat.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
@@ -40,6 +39,7 @@
 #include "VNodeMover.hpp"
 #include "VNodeStateDiag.hpp"
 #include "VReportMaker.hpp"
+#include "ecflow/core/Str.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
 

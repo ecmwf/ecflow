@@ -19,15 +19,15 @@
 #include <boost/process.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
-#include "Defs.hpp"
-#include "EcfPortLock.hpp"
-#include "File.hpp"
-#include "Host.hpp"
-#include "Node.hpp"
-#include "NodeAttr.hpp"
-#include "Str.hpp"
-#include "UDPClient.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/udp/UDPClient.hpp"
 
 namespace bp = boost::process;
 

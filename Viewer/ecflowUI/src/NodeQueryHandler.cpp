@@ -13,8 +13,8 @@
 #include <algorithm>
 
 #include "DirectoryHandler.hpp"
-#include "File.hpp"
 #include "NodeQuery.hpp"
+#include "ecflow/core/File.hpp"
 
 NodeQueryHandler* NodeQueryHandler::instance_ = nullptr;
 

@@ -12,8 +12,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "CommandLine.hpp"
-#include "Converter.hpp"
+#include "ecflow/core/CommandLine.hpp"
+#include "ecflow/core/Converter.hpp"
 
 using namespace boost;
 using namespace std;

@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 using namespace std;
 

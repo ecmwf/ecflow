@@ -16,7 +16,7 @@
 
 #include "VDir.hpp"
 #include "VFile.hpp"
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
 
 class VReply {
 public:

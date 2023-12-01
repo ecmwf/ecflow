@@ -16,9 +16,9 @@
 #include <QSet>
 #include <QWidget>
 
-#include "DState.hpp"
 #include "ServerFilter.hpp"
 #include "ServerList.hpp"
+#include "ecflow/core/DState.hpp"
 
 class QToolButton;
 class VParam;

@@ -18,7 +18,6 @@
 
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
-#include "Node.hpp"
 #include "SessionHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
@@ -26,6 +25,7 @@
 #include "VInfo.hpp"
 #include "VNode.hpp"
 #include "VRepeatAttr.hpp"
+#include "ecflow/node/Node.hpp"
 
 RepeatEditorWidget::RepeatEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
