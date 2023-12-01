@@ -15,7 +15,7 @@
 
 #include <boost/asio.hpp>
 
-#include "RequestHandler.hpp"
+#include "ecflow/udp/RequestHandler.hpp"
 
 namespace ecf {
 

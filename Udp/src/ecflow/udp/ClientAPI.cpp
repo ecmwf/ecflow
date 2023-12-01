@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ClientAPI.hpp"
+#include "ecflow/udp/ClientAPI.hpp"
 
 #include "ecflow/client/ClientInvoker.hpp"
 

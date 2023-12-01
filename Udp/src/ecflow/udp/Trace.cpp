@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Trace.hpp"
+#include "ecflow/udp/Trace.hpp"
 
 #include <iostream>
 

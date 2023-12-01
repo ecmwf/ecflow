@@ -8,9 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "UDPServerOptions.hpp"
+#include "ecflow/udp/UDPServerOptions.hpp"
 
-#include "UDPServerEnvironment.hpp"
+#include "ecflow/udp/UDPServerEnvironment.hpp"
 
 namespace ecf {
 

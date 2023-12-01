@@ -8,16 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "RequestHandler.hpp"
+#include "ecflow/udp/RequestHandler.hpp"
 
 #include <string>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
-#include "ClientAPI.hpp"
-#include "Trace.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/udp/ClientAPI.hpp"
+#include "ecflow/udp/Trace.hpp"
 
 namespace ecf {
 

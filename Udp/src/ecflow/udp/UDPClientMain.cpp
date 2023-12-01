@@ -11,7 +11,7 @@
 #include <iostream>
 #include <utility>
 
-#include "UDPClient.hpp"
+#include "ecflow/udp/UDPClient.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc != 4) {

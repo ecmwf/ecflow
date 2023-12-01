@@ -11,11 +11,11 @@
 #include <iostream>
 #include <string>
 
-#include "RequestHandler.hpp"
-#include "Trace.hpp"
-#include "UDPServer.hpp"
-#include "UDPServerOptions.hpp"
 #include "ecflow/core/ecflow_version.h"
+#include "ecflow/udp/RequestHandler.hpp"
+#include "ecflow/udp/Trace.hpp"
+#include "ecflow/udp/UDPServer.hpp"
+#include "ecflow/udp/UDPServerOptions.hpp"
 
 static std::string ecflow_udp_server_version() {
 #ifdef DEBUG

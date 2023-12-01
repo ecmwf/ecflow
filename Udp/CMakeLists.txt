@@ -15,18 +15,18 @@ set(LIB_TARGET libecflow_udp)
 
 set(${LIB_TARGET}_srcs
   # Headers
-  src/ClientAPI.hpp
-  src/RequestHandler.hpp
-  src/Trace.hpp
-  src/UDPServer.hpp
-  src/UDPServerEnvironment.hpp
-  src/UDPServerOptions.hpp
+  src/ecflow/udp/ClientAPI.hpp
+  src/ecflow/udp/RequestHandler.hpp
+  src/ecflow/udp/Trace.hpp
+  src/ecflow/udp/UDPServer.hpp
+  src/ecflow/udp/UDPServerEnvironment.hpp
+  src/ecflow/udp/UDPServerOptions.hpp
   # Sources
-  src/ClientAPI.cpp
-  src/RequestHandler.cpp
-  src/Trace.cpp
-  src/UDPServerEnvironment.cpp
-  src/UDPServerOptions.cpp
+  src/ecflow/udp/ClientAPI.cpp
+  src/ecflow/udp/RequestHandler.cpp
+  src/ecflow/udp/Trace.cpp
+  src/ecflow/udp/UDPServerEnvironment.cpp
+  src/ecflow/udp/UDPServerOptions.cpp
 )
 
 ecbuild_add_library(
@@ -54,7 +54,7 @@ set(SERVER_TARGET ecflow_udp)
 
 set(${SERVER_TARGET}_srcs
   # Sources
-  src/UDPServerMain.cpp
+  src/ecflow/udp/UDPServerMain.cpp
 )
 
 ecbuild_add_executable(
@@ -79,9 +79,9 @@ set(CLIENT_TARGET ecflow_udp_client)
 
 set(${CLIENT_TARGET}_srcs
   # HEADERS
-  src/UDPClient.hpp
+  src/ecflow/udp/UDPClient.hpp
   # SOURCES
-  src/UDPClientMain.cpp
+  src/ecflow/udp/UDPClientMain.cpp
 )
 
 ecbuild_add_executable(
