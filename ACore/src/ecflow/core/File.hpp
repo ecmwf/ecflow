@@ -158,9 +158,10 @@ public:
 
     // Locate test data
     static std::string test_data(const std::string& rel_path, const std::string& dir);
-
-    // return root source
+    static std::string test_data_in_current_dir(const std::string& rel_path);
+    // return ecFlow project source code folder
     static std::string root_source_dir();
+    // return ecFlow project build folder
     static std::string root_build_dir();
 
     static int max_open_file_allowed();

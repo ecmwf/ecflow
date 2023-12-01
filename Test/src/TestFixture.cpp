@@ -77,13 +77,15 @@ ClientInvoker& TestFixture::client() {
 
 void TestFixture::init(const std::string& project_test_dir) {
     TestFixture::project_test_dir_ = project_test_dir;
+    auto test_dir                  = local_ecf_home();
     std::cout << "TestFixture::TestFixture() project_test_dir      :" << project_test_dir << "\n";
-    std::cout << "TestFixture::TestFixture() local_ecf_home        :" << local_ecf_home() << "\n";
+    std::cout << "TestFixture::TestFixture() local_ecf_home        :" << test_dir << "\n";
     std::cout << "TestFixture::TestFixture() jobSubmissionInterval :" << job_submission_interval() << "\n";
     std::cout << "TestFixture::TestFixture() cwd                   :" << fs::current_path() << "\n";
 
-    if (!fs::exists(local_ecf_home()))
-        fs::create_directory(local_ecf_home());
+    if (!fs::exists(test_dir)) {
+        fs::create_directories(test_dir);
+    }
 
     // client side file for recording all ClientInvoker round trip times
     boost::filesystem::remove(rtt_filename);
@@ -353,51 +355,38 @@ std::string TestFixture::pathToLogFile() {
 }
 
 std::string TestFixture::local_ecf_home() {
-    std::string rel_path = project_test_dir_;
-#ifdef DEBUG
-
-    #if defined(_AIX)
-    rel_path += "/data/ECF_HOME_debug_aix";
-    #elif defined(HPUX)
-    rel_path += "/data/ECF_HOME_debug_hpux";
-    #else
-        #if defined(__clang__)
-    rel_path += "/data/ECF_HOME_debug_clang";
-        #elif defined(__INTEL_COMPILER)
-    rel_path += "/data/ECF_HOME_debug_intel";
-        #elif defined(_CRAYC)
-    rel_path += "/data/ECF_HOME_debug_cray";
-        #else
-    rel_path += "/data/ECF_HOME_debug_gnu";
-        #endif
-    #endif
-
+    std::string compiler = "unknown";
+#if defined(_AIX)
+    compiler = "aix";
+#elif defined(HPUX)
+    compiler = "hpux";
 #else
-
-    #if defined(_AIX)
-    rel_path += "/data/ECF_HOME_release_aix";
-    #elif defined(HPUX)
-    rel_path += "/data/ECF_HOME_release_hpux";
+    #if defined(__clang__)
+    compiler = "clang";
+    #elif defined(__INTEL_COMPILER)
+    compiler = "intel";
+    #elif defined(_CRAYC)
+    compiler = "cray";
     #else
-        #if defined(__clang__)
-    rel_path += "/data/ECF_HOME_release_clang";
-        #elif defined(__INTEL_COMPILER)
-    rel_path += "/data/ECF_HOME_release_intel";
-        #elif defined(_CRAYC)
-    rel_path += "/data/ECF_HOME_release_cray";
-        #else
-    rel_path += "/data/ECF_HOME_release_gnu";
-        #endif
+    compiler = "gnu";
     #endif
-
 #endif
 
-    // Allow post-fix to be added, to allow test to run in parallel
-    char* theEnv = getenv("TEST_ECF_HOME_POSTFIX");
-    if (theEnv)
-        rel_path += std::string(theEnv);
+    std::string build_type = "unknown";
+#ifdef DEBUG
+    build_type = "debug";
+#else
+    build_type = "release";
+#endif
 
-    std::string absolute_path = File::test_data(rel_path, project_test_dir_);
+    std::string rel_path = "data/ECF_HOME_" + build_type + "_" + compiler;
+
+    // Allow post-fix to be added, to allow test to run in parallel
+    if (const char* custom_postfix = getenv("TEST_ECF_HOME_POSTFIX"); custom_postfix) {
+        rel_path += custom_postfix;
+    }
+
+    std::string absolute_path = File::test_data_in_current_dir(rel_path);
     return absolute_path;
 }
 
