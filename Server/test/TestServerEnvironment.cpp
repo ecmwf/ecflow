@@ -15,7 +15,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ServerEnvironment.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -24,6 +23,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 using namespace std;
 using namespace ecf;

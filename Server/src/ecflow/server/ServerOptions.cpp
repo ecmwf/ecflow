@@ -8,12 +8,12 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ServerOptions.hpp"
+#include "ecflow/server/ServerOptions.hpp"
 
 #include <iostream>
 
-#include "ServerEnvironment.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"

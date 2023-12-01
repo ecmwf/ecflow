@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ServerEnvironment.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 #include <cstdlib> // for getenv()
 #include <iostream>
@@ -17,7 +17,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-#include "ServerOptions.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -27,6 +26,7 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/server/ServerOptions.hpp"
 
 using namespace ecf;
 using namespace std;

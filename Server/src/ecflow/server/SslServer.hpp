@@ -11,8 +11,8 @@
 #ifndef ecflow_server_SslServer_HPP
 #define ecflow_server_SslServer_HPP
 
-#include "BaseServer.hpp"
-#include "SslTcpServer.hpp"
+#include "ecflow/server/BaseServer.hpp"
+#include "ecflow/server/SslTcpServer.hpp"
 
 class SslServer : public BaseServer {
 public:

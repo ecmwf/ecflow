@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Server.hpp"
+#include "ecflow/server/Server.hpp"
 
 Server::Server(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
     : BaseServer(io_service, serverEnv),

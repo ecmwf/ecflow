@@ -8,11 +8,11 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "Server.hpp"
-#include "ServerEnvironment.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/server/Server.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 #ifdef ECF_OPENSSL
-    #include "SslServer.hpp"
+    #include "ecflow/server/SslServer.hpp"
 #endif
 
 using namespace ecf;

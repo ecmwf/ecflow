@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "TcpBaseServer.hpp"
+#include "ecflow/server/TcpBaseServer.hpp"
 
 #include <iostream>
 
-#include "BaseServer.hpp"
-#include "ServerEnvironment.hpp"
 #include "ecflow/core/Version.hpp"
+#include "ecflow/server/BaseServer.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 using boost::asio::ip::tcp;
 

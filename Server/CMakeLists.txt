@@ -10,29 +10,29 @@
 
 set(srcs
   # Headers
-  src/BaseServer.hpp
-  src/CheckPtSaver.hpp
-  src/NodeTreeTraverser.hpp
-  src/Server.hpp
-  src/ServerEnvironment.hpp
-  src/ServerOptions.hpp
-  src/SslServer.hpp
-  src/SslTcpServer.hpp
-  src/TcpBaseServer.hpp
-  src/TcpServer.hpp
-  $<$<BOOL:${OPENSSL_FOUND}>:src/SslServer.hpp>
-  $<$<BOOL:${OPENSSL_FOUND}>:src/SslTcpServer.hpp>
+  src/ecflow/server/BaseServer.hpp
+  src/ecflow/server/CheckPtSaver.hpp
+  src/ecflow/server/NodeTreeTraverser.hpp
+  src/ecflow/server/Server.hpp
+  src/ecflow/server/ServerEnvironment.hpp
+  src/ecflow/server/ServerOptions.hpp
+  src/ecflow/server/SslServer.hpp
+  src/ecflow/server/SslTcpServer.hpp
+  src/ecflow/server/TcpBaseServer.hpp
+  src/ecflow/server/TcpServer.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.hpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.hpp>
   # Sources
-  src/BaseServer.cpp
-  src/CheckPtSaver.cpp
-  src/NodeTreeTraverser.cpp
-  src/Server.cpp
-  src/ServerEnvironment.cpp
-  src/ServerOptions.cpp
-  src/TcpBaseServer.cpp
-  src/TcpServer.cpp
-  $<$<BOOL:${OPENSSL_FOUND}>:src/SslServer.cpp>
-  $<$<BOOL:${OPENSSL_FOUND}>:src/SslTcpServer.cpp>
+  src/ecflow/server/BaseServer.cpp
+  src/ecflow/server/CheckPtSaver.cpp
+  src/ecflow/server/NodeTreeTraverser.cpp
+  src/ecflow/server/Server.cpp
+  src/ecflow/server/ServerEnvironment.cpp
+  src/ecflow/server/ServerOptions.cpp
+  src/ecflow/server/TcpBaseServer.cpp
+  src/ecflow/server/TcpServer.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.cpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.cpp>
 )
 
 ecbuild_add_library(
@@ -57,7 +57,7 @@ ecbuild_add_executable(
   TARGET
     ecflow_server
   SOURCES
-    src/ServerMain.cpp
+    src/ecflow/server/ServerMain.cpp
   LIBS
     libserver
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>

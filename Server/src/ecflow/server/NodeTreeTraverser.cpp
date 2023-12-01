@@ -8,16 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "NodeTreeTraverser.hpp"
+#include "ecflow/server/NodeTreeTraverser.hpp"
 
-#include "BaseServer.hpp"
-#include "ServerEnvironment.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/server/BaseServer.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 // #define DEBUG_TRAVERSER 1
 // #define DEBUG_POLL 1

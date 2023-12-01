@@ -17,13 +17,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Server.hpp"
-#include "ServerEnvironment.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/server/Server.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 class InvokeServer {
 public:

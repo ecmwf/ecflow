@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "BaseServer.hpp" // Must come before boost/serialization headers.
+#include "ecflow/server/BaseServer.hpp" // Must come before boost/serialization headers.
 
 #include <iostream>
 #include <stdexcept>
@@ -16,7 +16,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "ServerEnvironment.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
@@ -24,6 +23,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = boost::filesystem;

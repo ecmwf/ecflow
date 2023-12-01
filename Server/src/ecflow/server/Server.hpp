@@ -11,8 +11,8 @@
 #ifndef ecflow_server_Server_HPP
 #define ecflow_server_Server_HPP
 
-#include "BaseServer.hpp"
-#include "TcpServer.hpp"
+#include "ecflow/server/BaseServer.hpp"
+#include "ecflow/server/TcpServer.hpp"
 
 class Server : public BaseServer {
 public:
