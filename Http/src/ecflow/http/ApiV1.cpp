@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ApiV1.hpp"
+#include "ecflow/http/ApiV1.hpp"
 
 #include <atomic>
 #include <mutex>
@@ -16,11 +16,11 @@
 
 #include <sys/time.h>
 
-#include "ApiV1Impl.hpp"
-#include "HttpServerException.hpp"
-#include "Options.hpp"
-#include "TypeToJson.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/http/ApiV1Impl.hpp"
+#include "ecflow/http/HttpServerException.hpp"
+#include "ecflow/http/Options.hpp"
+#include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/node/Defs.hpp"
 
 extern Options opts;

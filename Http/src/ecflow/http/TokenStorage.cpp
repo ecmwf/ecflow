@@ -10,7 +10,7 @@
 
 #ifdef ECF_OPENSSL
 
-    #include "TokenStorage.hpp"
+    #include "ecflow/http/TokenStorage.hpp"
 
     #include <atomic> // shared mutex only with c++14
     #include <fstream>
@@ -24,10 +24,10 @@
     #include <openssl/sha.h>
     #include <shared_mutex>
 
-    #include "HttpServerException.hpp"
-    #include "JSON.hpp"
-    #include "Options.hpp"
     #include "ecflow/core/Str.hpp"
+    #include "ecflow/http/HttpServerException.hpp"
+    #include "ecflow/http/JSON.hpp"
+    #include "ecflow/http/Options.hpp"
 
 std::shared_mutex m;
 using string                  = std::string;

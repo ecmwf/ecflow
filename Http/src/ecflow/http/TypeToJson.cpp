@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "TypeToJson.hpp"
+#include "ecflow/http/TypeToJson.hpp"
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/SState.hpp"

@@ -12,7 +12,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "HttpServer.hpp"
+#include "ecflow/http/HttpServer.hpp"
 
 int main(int argc, char* argv[]) {
     // Sometimes we get SIGPIPE through openssl, when server is trying

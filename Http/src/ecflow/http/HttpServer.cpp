@@ -8,15 +8,15 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "HttpServer.hpp"
+#include "ecflow/http/HttpServer.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include "ApiV1.hpp"
-#include "JSON.hpp"
-#include "Options.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/http/ApiV1.hpp"
+#include "ecflow/http/JSON.hpp"
+#include "ecflow/http/Options.hpp"
 
 Options opts;
 

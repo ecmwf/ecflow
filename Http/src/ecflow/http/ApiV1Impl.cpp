@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ApiV1Impl.hpp"
+#include "ecflow/http/ApiV1Impl.hpp"
 
 #include <mutex>
 #include <string>
@@ -16,14 +16,14 @@
 
 #include <condition_variable>
 
-#include "BasicAuth.hpp"
-#include "HttpServerException.hpp"
-#include "Options.hpp"
-#include "TokenStorage.hpp"
-#include "TypeToJson.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/http/BasicAuth.hpp"
+#include "ecflow/http/HttpServerException.hpp"
+#include "ecflow/http/Options.hpp"
+#include "ecflow/http/TokenStorage.hpp"
+#include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"

@@ -8,12 +8,12 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "BasicAuth.hpp"
+#include "ecflow/http/BasicAuth.hpp"
 
-#include "Base64.hpp"
-#include "HttpServerException.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/http/Base64.hpp"
+#include "ecflow/http/HttpServerException.hpp"
 
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
     const std::string decoded = base64_decode(token);
