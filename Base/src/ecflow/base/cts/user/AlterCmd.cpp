@@ -19,6 +19,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Enumerate.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
@@ -47,327 +48,150 @@ static std::string dump_args(const std::vector<std::string>& options, const std:
     return the_args;
 }
 
+namespace ecf::detail {
+
+template <>
+struct EnumTraits<AlterCmd::Delete_attr_type>
+{
+    using underlying_t = std::underlying_type_t<AlterCmd::Delete_attr_type>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(AlterCmd::DEL_VARIABLE, "variable"),
+        std::make_pair(AlterCmd::DEL_TIME, "time"),
+        std::make_pair(AlterCmd::DEL_TODAY, "today"),
+        std::make_pair(AlterCmd::DEL_DATE, "date"),
+        std::make_pair(AlterCmd::DEL_DAY, "day"),
+        std::make_pair(AlterCmd::DEL_CRON, "cron"),
+        std::make_pair(AlterCmd::DEL_EVENT, "event"),
+        std::make_pair(AlterCmd::DEL_METER, "meter"),
+        std::make_pair(AlterCmd::DEL_LABEL, "label"),
+        std::make_pair(AlterCmd::DEL_TRIGGER, "trigger"),
+        std::make_pair(AlterCmd::DEL_COMPLETE, "complete"),
+        std::make_pair(AlterCmd::DEL_REPEAT, "repeat"),
+        std::make_pair(AlterCmd::DEL_LIMIT, "limit"),
+        std::make_pair(AlterCmd::DEL_LIMIT_PATH, "limit_path"),
+        std::make_pair(AlterCmd::DEL_INLIMIT, "inlimit"),
+        std::make_pair(AlterCmd::DEL_ZOMBIE, "zombie"),
+        std::make_pair(AlterCmd::DEL_LATE, "late"),
+        std::make_pair(AlterCmd::DEL_QUEUE, "queue"),
+        std::make_pair(AlterCmd::DEL_GENERIC, "generic")
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(EnumTraits<AlterCmd::Delete_attr_type>::size == map.back().first);
+};
+
+template <>
+struct EnumTraits<AlterCmd::Add_attr_type>
+{
+    using underlying_t = std::underlying_type_t<AlterCmd::Add_attr_type>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(AlterCmd::ADD_TIME, "time"),
+        std::make_pair(AlterCmd::ADD_TODAY, "today"),
+        std::make_pair(AlterCmd::ADD_DATE, "date"),
+        std::make_pair(AlterCmd::ADD_DAY, "day"),
+        std::make_pair(AlterCmd::ADD_ZOMBIE, "zombie"),
+        std::make_pair(AlterCmd::ADD_VARIABLE, "variable"),
+        std::make_pair(AlterCmd::ADD_LATE, "late"),
+        std::make_pair(AlterCmd::ADD_LIMIT, "limit"),
+        std::make_pair(AlterCmd::ADD_INLIMIT, "inlimit"),
+        std::make_pair(AlterCmd::ADD_LABEL, "label")
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(EnumTraits<AlterCmd::Add_attr_type>::size == map.back().first);
+};
+
+template <>
+struct EnumTraits<AlterCmd::Change_attr_type>
+{
+    using underlying_t = std::underlying_type_t<AlterCmd::Change_attr_type>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(AlterCmd::VARIABLE, "variable"),
+        std::make_pair(AlterCmd::CLOCK_TYPE, "clock_type"),
+        std::make_pair(AlterCmd::CLOCK_DATE, "clock_date"),
+        std::make_pair(AlterCmd::CLOCK_GAIN, "clock_gain"),
+        std::make_pair(AlterCmd::CLOCK_SYNC, "clock_sync"),
+        std::make_pair(AlterCmd::EVENT, "event"),
+        std::make_pair(AlterCmd::METER, "meter"),
+        std::make_pair(AlterCmd::LABEL, "label"),
+        std::make_pair(AlterCmd::TRIGGER, "trigger"),
+        std::make_pair(AlterCmd::COMPLETE, "complete"),
+        std::make_pair(AlterCmd::REPEAT, "repeat"),
+        std::make_pair(AlterCmd::LIMIT_MAX, "limit_max"),
+        std::make_pair(AlterCmd::LIMIT_VAL, "limit_value"),
+        std::make_pair(AlterCmd::DEFSTATUS, "defstatus"),
+        std::make_pair(AlterCmd::LATE, "late"),
+        std::make_pair(AlterCmd::TIME, "time"),
+        std::make_pair(AlterCmd::TODAY, "today")
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(EnumTraits<AlterCmd::Change_attr_type>::size == map.back().first);
+};
+
+} // namespace ecf::detail
+
 static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s) {
-    if (s == "variable")
-        return AlterCmd::DEL_VARIABLE;
-    if (s == "time")
-        return AlterCmd::DEL_TIME;
-    if (s == "today")
-        return AlterCmd::DEL_TODAY;
-    if (s == "date")
-        return AlterCmd::DEL_DATE;
-    if (s == "day")
-        return AlterCmd::DEL_DAY;
-    if (s == "cron")
-        return AlterCmd::DEL_CRON;
-    if (s == "event")
-        return AlterCmd::DEL_EVENT;
-    if (s == "meter")
-        return AlterCmd::DEL_METER;
-    if (s == "label")
-        return AlterCmd::DEL_LABEL;
-    if (s == "trigger")
-        return AlterCmd::DEL_TRIGGER;
-    if (s == "complete")
-        return AlterCmd::DEL_COMPLETE;
-    if (s == "repeat")
-        return AlterCmd::DEL_REPEAT;
-    if (s == "limit")
-        return AlterCmd::DEL_LIMIT;
-    if (s == "limit_path")
-        return AlterCmd::DEL_LIMIT_PATH;
-    if (s == "inlimit")
-        return AlterCmd::DEL_INLIMIT;
-    if (s == "zombie")
-        return AlterCmd::DEL_ZOMBIE;
-    if (s == "late")
-        return AlterCmd::DEL_LATE;
-    if (s == "queue")
-        return AlterCmd::DEL_QUEUE;
-    if (s == "generic")
-        return AlterCmd::DEL_GENERIC;
+    if (auto found = ecf::Enumerate<AlterCmd::Delete_attr_type>::to_enum(s); found) {
+        return found.value();
+    }
     return AlterCmd::DELETE_ATTR_ND;
 }
+
 static std::string to_string(AlterCmd::Delete_attr_type d) {
-    switch (d) {
-        case AlterCmd::DEL_VARIABLE:
-            return "variable";
-            break;
-        case AlterCmd::DEL_TIME:
-            return "time";
-            break;
-        case AlterCmd::DEL_TODAY:
-            return "today";
-            break;
-        case AlterCmd::DEL_DATE:
-            return "date";
-            break;
-        case AlterCmd::DEL_DAY:
-            return "day";
-            break;
-        case AlterCmd::DEL_CRON:
-            return "cron";
-            break;
-        case AlterCmd::DEL_EVENT:
-            return "event";
-            break;
-        case AlterCmd::DEL_METER:
-            return "meter";
-            break;
-        case AlterCmd::DEL_LABEL:
-            return "label";
-            break;
-        case AlterCmd::DEL_TRIGGER:
-            return "trigger";
-            break;
-        case AlterCmd::DEL_COMPLETE:
-            return "complete";
-            break;
-        case AlterCmd::DEL_REPEAT:
-            return "repeat";
-            break;
-        case AlterCmd::DEL_LIMIT:
-            return "limit";
-            break;
-        case AlterCmd::DEL_LIMIT_PATH:
-            return "limit_path";
-            break;
-        case AlterCmd::DEL_INLIMIT:
-            return "inlimit";
-            break;
-        case AlterCmd::DEL_ZOMBIE:
-            return "zombie";
-            break;
-        case AlterCmd::DEL_LATE:
-            return "late";
-            break;
-        case AlterCmd::DEL_QUEUE:
-            return "queue";
-            break;
-        case AlterCmd::DEL_GENERIC:
-            return "generic";
-            break;
-        case AlterCmd::DELETE_ATTR_ND:
-            break;
-        default:
-            break;
+    if (auto found = ecf::Enumerate<AlterCmd::Delete_attr_type>::to_string(d); found) {
+        return std::string{found.value()};
     }
-    return string();
+    return {};
 }
+
 static void validDeleteAttr(std::vector<std::string>& vec) {
-    vec.reserve(19);
-    vec.emplace_back("variable");
-    vec.emplace_back("time");
-    vec.emplace_back("today");
-    vec.emplace_back("date");
-    vec.emplace_back("day");
-    vec.emplace_back("cron");
-    vec.emplace_back("event");
-    vec.emplace_back("meter");
-    vec.emplace_back("label");
-    vec.emplace_back("trigger");
-    vec.emplace_back("complete");
-    vec.emplace_back("repeat");
-    vec.emplace_back("limit");
-    vec.emplace_back("limit_path");
-    vec.emplace_back("inlimit");
-    vec.emplace_back("zombie");
-    vec.emplace_back("late");
-    vec.emplace_back("queue");
-    vec.emplace_back("generic");
+    vec = ecf::Enumerate<AlterCmd::Delete_attr_type>::designations();
 }
 
 static AlterCmd::Add_attr_type addAttrType(const std::string& s) {
-    if (s == "time")
-        return AlterCmd::ADD_TIME;
-    if (s == "today")
-        return AlterCmd::ADD_TODAY;
-    if (s == "date")
-        return AlterCmd::ADD_DATE;
-    if (s == "day")
-        return AlterCmd::ADD_DAY;
-    if (s == "zombie")
-        return AlterCmd::ADD_ZOMBIE;
-    if (s == "variable")
-        return AlterCmd::ADD_VARIABLE;
-    if (s == "late")
-        return AlterCmd::ADD_LATE;
-    if (s == "limit")
-        return AlterCmd::ADD_LIMIT;
-    if (s == "inlimit")
-        return AlterCmd::ADD_INLIMIT;
-    if (s == "label")
-        return AlterCmd::ADD_LABEL;
+    if (auto found = ecf::Enumerate<AlterCmd::Add_attr_type>::to_enum(s); found) {
+        return found.value();
+    }
     return AlterCmd::ADD_ATTR_ND;
 }
+
 static std::string to_string(AlterCmd::Add_attr_type a) {
-    switch (a) {
-        case AlterCmd::ADD_TIME:
-            return "time;";
-            break;
-        case AlterCmd::ADD_TODAY:
-            return "today";
-            break;
-        case AlterCmd::ADD_DATE:
-            return "date";
-            break;
-        case AlterCmd::ADD_DAY:
-            return "day";
-            break;
-        case AlterCmd::ADD_ZOMBIE:
-            return "zombie";
-            break;
-        case AlterCmd::ADD_VARIABLE:
-            return "variable";
-            break;
-        case AlterCmd::ADD_LATE:
-            return "late";
-            break;
-        case AlterCmd::ADD_LIMIT:
-            return "limit";
-            break;
-        case AlterCmd::ADD_INLIMIT:
-            return "inlimit";
-            break;
-        case AlterCmd::ADD_LABEL:
-            return "label";
-            break;
-        case AlterCmd::ADD_ATTR_ND:
-            break;
+    if (auto found = ecf::Enumerate<AlterCmd::Add_attr_type>::to_string(a); found) {
+        return std::string{found.value()};
     }
-    return string();
+    return {};
 }
+
 static void validAddAttr(std::vector<std::string>& vec) {
-    vec.reserve(10);
-    vec.emplace_back("time");
-    vec.emplace_back("today");
-    vec.emplace_back("date");
-    vec.emplace_back("day");
-    vec.emplace_back("zombie");
-    vec.emplace_back("variable");
-    vec.emplace_back("late");
-    vec.emplace_back("limit");
-    vec.emplace_back("inlimit");
-    vec.emplace_back("label");
+    vec = Enumerate<AlterCmd::Add_attr_type>::designations();
 }
 
 static AlterCmd::Change_attr_type changeAttrType(const std::string& s) {
-    if (s == "variable")
-        return AlterCmd::VARIABLE;
-    if (s == "clock_type")
-        return AlterCmd::CLOCK_TYPE;
-    if (s == "clock_date")
-        return AlterCmd::CLOCK_DATE;
-    if (s == "clock_gain")
-        return AlterCmd::CLOCK_GAIN;
-    if (s == "clock_sync")
-        return AlterCmd::CLOCK_SYNC;
-    if (s == "event")
-        return AlterCmd::EVENT;
-    if (s == "meter")
-        return AlterCmd::METER;
-    if (s == "label")
-        return AlterCmd::LABEL;
-    if (s == "trigger")
-        return AlterCmd::TRIGGER;
-    if (s == "complete")
-        return AlterCmd::COMPLETE;
-    if (s == "repeat")
-        return AlterCmd::REPEAT;
-    if (s == "limit_max")
-        return AlterCmd::LIMIT_MAX;
-    if (s == "limit_value")
-        return AlterCmd::LIMIT_VAL;
-    if (s == "defstatus")
-        return AlterCmd::DEFSTATUS;
-    if (s == "late")
-        return AlterCmd::LATE;
-    if (s == "time")
-        return AlterCmd::TIME;
-    if (s == "today")
-        return AlterCmd::TODAY;
+    if (auto found = Enumerate<AlterCmd::Change_attr_type>::to_enum(s); found) {
+        return found.value();
+    }
     return AlterCmd::CHANGE_ATTR_ND;
 }
+
 static std::string to_string(AlterCmd::Change_attr_type c) {
-    switch (c) {
-        case AlterCmd::VARIABLE:
-            return "variable";
-            break;
-        case AlterCmd::CLOCK_TYPE:
-            return "clock_type";
-            break;
-        case AlterCmd::CLOCK_DATE:
-            return "clock_date";
-            break;
-        case AlterCmd::CLOCK_GAIN:
-            return "clock_gain";
-            break;
-        case AlterCmd::CLOCK_SYNC:
-            return "clock_sync";
-            break;
-        case AlterCmd::EVENT:
-            return "event";
-            break;
-        case AlterCmd::METER:
-            return "meter";
-            break;
-        case AlterCmd::LABEL:
-            return "label";
-            break;
-        case AlterCmd::TRIGGER:
-            return "trigger";
-            break;
-        case AlterCmd::COMPLETE:
-            return "complete";
-            break;
-        case AlterCmd::REPEAT:
-            return "repeat";
-            break;
-        case AlterCmd::LIMIT_MAX:
-            return "limit_max";
-            break;
-        case AlterCmd::LIMIT_VAL:
-            return "limit_value";
-            break;
-        case AlterCmd::DEFSTATUS:
-            return "defstatus";
-            break;
-        case AlterCmd::LATE:
-            return "late";
-            break;
-        case AlterCmd::TIME:
-            return "time";
-            break;
-        case AlterCmd::TODAY:
-            return "today";
-            break;
-        case AlterCmd::CHANGE_ATTR_ND:
-            break;
-        default:
-            break;
+    if (auto found = Enumerate<AlterCmd::Change_attr_type>::to_string(c); found) {
+        return std::string{found.value()};
     }
-    return string();
+    return {};
 }
+
 static void validChangeAttr(std::vector<std::string>& vec) {
-    vec.reserve(18);
-    vec.emplace_back("variable");
-    vec.emplace_back("clock_type");
-    vec.emplace_back("clock_gain");
-    vec.emplace_back("clock_date");
-    vec.emplace_back("clock_sync");
-    vec.emplace_back("event");
-    vec.emplace_back("meter");
-    vec.emplace_back("label");
-    vec.emplace_back("trigger");
-    vec.emplace_back("complete");
-    vec.emplace_back("repeat");
-    vec.emplace_back("limit_max");
-    vec.emplace_back("limit_value");
-    vec.emplace_back("defstatus");
-    vec.emplace_back("free_password");
-    vec.emplace_back("late");
-    vec.emplace_back("time");
-    vec.emplace_back("today");
+    vec = ecf::Enumerate<AlterCmd::Change_attr_type>::designations();
 }
 
 //=======================================================================================
