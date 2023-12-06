@@ -11,7 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"

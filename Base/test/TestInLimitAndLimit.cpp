@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"

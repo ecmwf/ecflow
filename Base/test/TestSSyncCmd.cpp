@@ -13,7 +13,7 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/SNewsCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"

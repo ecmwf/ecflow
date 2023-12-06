@@ -12,6 +12,8 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Version.hpp"
 
 using namespace ecf;
@@ -71,3 +73,6 @@ std::ostream& operator<<(std::ostream& os, const ServerVersionCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(ServerVersionCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(ServerVersionCmd)

@@ -12,7 +12,7 @@
 
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Str.hpp"
 

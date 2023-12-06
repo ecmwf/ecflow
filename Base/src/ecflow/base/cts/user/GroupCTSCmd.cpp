@@ -15,11 +15,12 @@
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/ClientOptionsParser.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/GroupSTCCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
@@ -401,3 +402,6 @@ std::ostream& operator<<(std::ostream& os, const GroupCTSCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(GroupCTSCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(GroupCTSCmd)

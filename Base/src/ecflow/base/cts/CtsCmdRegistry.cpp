@@ -13,7 +13,9 @@
 #include <memory>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/task/TaskCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+
 namespace po = boost::program_options;
 
 CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {

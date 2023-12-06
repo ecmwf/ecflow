@@ -12,6 +12,9 @@
 
 #include <iostream>
 
+#include "ecflow/base/cts/task/TaskCmd.hpp" // required to enforce cereal registration
+#include "ecflow/base/cts/user/UserCmd.hpp" // required to enforce cereal registration
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"

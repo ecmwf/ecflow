@@ -12,9 +12,9 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/Stats.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -71,3 +71,6 @@ std::ostream& operator<<(std::ostream& os, const LogMessageCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(LogMessageCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(LogMessageCmd)

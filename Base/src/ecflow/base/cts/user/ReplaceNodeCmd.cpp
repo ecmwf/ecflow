@@ -12,8 +12,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 
@@ -236,3 +236,6 @@ std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(ReplaceNodeCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(ReplaceNodeCmd)

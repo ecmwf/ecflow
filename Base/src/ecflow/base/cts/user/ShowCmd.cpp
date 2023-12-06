@@ -12,7 +12,8 @@
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -107,3 +108,6 @@ std::ostream& operator<<(std::ostream& os, const ShowCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(ShowCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(ShowCmd)

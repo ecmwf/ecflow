@@ -13,8 +13,9 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
@@ -378,3 +379,6 @@ std::ostream& operator<<(std::ostream& os, const CFileCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(CFileCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(CFileCmd)

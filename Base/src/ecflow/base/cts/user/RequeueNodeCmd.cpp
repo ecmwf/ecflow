@@ -14,6 +14,8 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -252,3 +254,6 @@ std::ostream& operator<<(std::ostream& os, const RequeueNodeCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(RequeueNodeCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(RequeueNodeCmd)

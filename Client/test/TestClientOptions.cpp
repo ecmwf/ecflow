@@ -10,7 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/ClientOptions.hpp"

@@ -30,7 +30,9 @@ set(srcs
   src/ecflow/base/cts/CtsCmdRegistry.hpp
   src/ecflow/base/cts/EditHistoryMgr.hpp
   src/ecflow/base/cts/task/TaskApi.hpp
+  src/ecflow/base/cts/task/TaskCmd.hpp
   src/ecflow/base/cts/user/CtsApi.hpp
+  src/ecflow/base/cts/user/UserCmd.hpp
   src/ecflow/base/stc/BlockClientZombieCmd.hpp
   src/ecflow/base/stc/DefsCache.hpp
   src/ecflow/base/stc/DefsCmd.hpp
@@ -68,7 +70,7 @@ set(srcs
   src/ecflow/base/cts/CtsCmdRegistry.cpp
   src/ecflow/base/cts/EditHistoryMgr.cpp
   src/ecflow/base/cts/task/TaskApi.cpp
-  src/ecflow/base/cts/task/TaskCmds.cpp
+  src/ecflow/base/cts/task/TaskCmd.cpp
   src/ecflow/base/cts/user/AlterCmd.cpp
   src/ecflow/base/cts/user/BeginCmd.cpp
   src/ecflow/base/cts/user/CFileCmd.cpp
@@ -86,6 +88,7 @@ set(srcs
   src/ecflow/base/cts/user/LoadDefsCmd.cpp
   src/ecflow/base/cts/user/LogCmd.cpp
   src/ecflow/base/cts/user/LogMessageCmd.cpp
+  src/ecflow/base/cts/user/MoveCmd.cpp
   src/ecflow/base/cts/user/OrderNodeCmd.cpp
   src/ecflow/base/cts/user/PathsCmd.cpp
   src/ecflow/base/cts/user/PlugCmd.cpp

@@ -12,8 +12,9 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Task.hpp"
@@ -218,3 +219,6 @@ std::ostream& operator<<(std::ostream& os, const DeleteCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(DeleteCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(DeleteCmd)

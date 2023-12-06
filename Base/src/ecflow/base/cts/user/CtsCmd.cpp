@@ -13,10 +13,10 @@
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Gnuplot.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
 
@@ -783,3 +783,6 @@ std::ostream& operator<<(std::ostream& os, const CtsCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(CtsCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(CtsCmd)

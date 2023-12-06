@@ -13,6 +13,8 @@
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
+#include "ecflow/base/cts/task/TaskCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/BlockClientZombieCmd.hpp"
 #include "ecflow/base/stc/DefsCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"

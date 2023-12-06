@@ -15,6 +15,7 @@
 
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/EditHistoryMgr.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Host.hpp"
@@ -225,39 +226,3 @@ void ClientToServerCmd::add_delete_edit_history(Defs* defs, const std::string& p
     print(ss, path); // custom print
     defs->add_edit_history(Str::ROOT_PATH(), ss);
 }
-
-CEREAL_REGISTER_TYPE(ServerVersionCmd)
-CEREAL_REGISTER_TYPE(CtsCmd)
-CEREAL_REGISTER_TYPE(CSyncCmd)
-CEREAL_REGISTER_TYPE(ClientHandleCmd)
-CEREAL_REGISTER_TYPE(CtsNodeCmd)
-CEREAL_REGISTER_TYPE(PathsCmd)
-CEREAL_REGISTER_TYPE(DeleteCmd)
-CEREAL_REGISTER_TYPE(CheckPtCmd)
-CEREAL_REGISTER_TYPE(LoadDefsCmd)
-CEREAL_REGISTER_TYPE(LogCmd)
-CEREAL_REGISTER_TYPE(LogMessageCmd)
-CEREAL_REGISTER_TYPE(BeginCmd)
-CEREAL_REGISTER_TYPE(ZombieCmd)
-CEREAL_REGISTER_TYPE(InitCmd)
-CEREAL_REGISTER_TYPE(EventCmd)
-CEREAL_REGISTER_TYPE(MeterCmd)
-CEREAL_REGISTER_TYPE(LabelCmd)
-CEREAL_REGISTER_TYPE(QueueCmd)
-CEREAL_REGISTER_TYPE(AbortCmd)
-CEREAL_REGISTER_TYPE(CtsWaitCmd)
-CEREAL_REGISTER_TYPE(CompleteCmd)
-CEREAL_REGISTER_TYPE(RequeueNodeCmd)
-CEREAL_REGISTER_TYPE(OrderNodeCmd)
-CEREAL_REGISTER_TYPE(RunNodeCmd)
-CEREAL_REGISTER_TYPE(ReplaceNodeCmd)
-CEREAL_REGISTER_TYPE(ForceCmd)
-CEREAL_REGISTER_TYPE(FreeDepCmd)
-CEREAL_REGISTER_TYPE(CFileCmd)
-CEREAL_REGISTER_TYPE(EditScriptCmd)
-CEREAL_REGISTER_TYPE(PlugCmd)
-CEREAL_REGISTER_TYPE(AlterCmd)
-CEREAL_REGISTER_TYPE(MoveCmd)
-CEREAL_REGISTER_TYPE(GroupCTSCmd)
-CEREAL_REGISTER_TYPE(ShowCmd)
-CEREAL_REGISTER_TYPE(QueryCmd)

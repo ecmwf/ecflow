@@ -12,8 +12,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -177,3 +177,6 @@ std::ostream& operator<<(std::ostream& os, const FreeDepCmd& c) {
     os << ret;
     return os;
 }
+
+CEREAL_REGISTER_TYPE(FreeDepCmd)
+CEREAL_REGISTER_DYNAMIC_INIT(FreeDepCmd)
