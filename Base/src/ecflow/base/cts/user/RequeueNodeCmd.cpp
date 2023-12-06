@@ -13,7 +13,7 @@
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
-#include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"

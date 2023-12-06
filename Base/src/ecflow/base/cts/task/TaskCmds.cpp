@@ -14,7 +14,7 @@
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
-#include "ecflow/base/cts/TaskApi.hpp"
+#include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"

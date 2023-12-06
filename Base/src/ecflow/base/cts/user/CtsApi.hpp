@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_cts_CtsApi_HPP
-#define ecflow_base_cts_CtsApi_HPP
+#ifndef ecflow_base_cts_user_CtsApi_HPP
+#define ecflow_base_cts_user_CtsApi_HPP
 
 ///
 /// \brief (C)lient (t)o (s)erver API
@@ -283,4 +283,4 @@ public:
     static const char* queryArg();
 };
 
-#endif /* ecflow_base_cts_CtsApi_HPP */
+#endif /* ecflow_base_cts_user_CtsApi_HPP */

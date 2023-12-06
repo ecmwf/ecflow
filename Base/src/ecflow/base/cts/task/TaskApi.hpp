@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_cts_TaskApi_HPP
-#define ecflow_base_cts_TaskApi_HPP
+#ifndef ecflow_base_cts_task_TaskApi_HPP
+#define ecflow_base_cts_task_TaskApi_HPP
 
 #include <string>
 #include <vector>
@@ -48,4 +48,4 @@ public:
     static const char* waitArg();
 };
 
-#endif /* ecflow_base_cts_TaskApi_HPP */
+#endif /* ecflow_base_cts_task_TaskApi_HPP */

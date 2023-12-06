@@ -14,7 +14,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
-#include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/base/cts/user/CtsApi.hpp"
 
 using namespace ecf;
 using namespace std;

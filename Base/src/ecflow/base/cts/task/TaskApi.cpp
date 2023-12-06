@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/base/cts/TaskApi.hpp"
+#include "ecflow/base/cts/task/TaskApi.hpp"
 
 std::string TaskApi::init(const std::string& process_id) {
     std::string ret = "--init=";

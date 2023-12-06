@@ -27,10 +27,10 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/base/ssl_connection.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/base/SslClient.hpp>
   src/ecflow/base/cts/ClientToServerCmd.hpp
-  src/ecflow/base/cts/CtsApi.hpp
   src/ecflow/base/cts/CtsCmdRegistry.hpp
   src/ecflow/base/cts/EditHistoryMgr.hpp
-  src/ecflow/base/cts/TaskApi.hpp
+  src/ecflow/base/cts/task/TaskApi.hpp
+  src/ecflow/base/cts/user/CtsApi.hpp
   src/ecflow/base/stc/BlockClientZombieCmd.hpp
   src/ecflow/base/stc/DefsCache.hpp
   src/ecflow/base/stc/DefsCmd.hpp
@@ -64,39 +64,39 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/base/Openssl.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/base/ssl_connection.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/base/SslClient.cpp>
-  src/ecflow/base/cts/AlterCmd.cpp
-  src/ecflow/base/cts/BeginCmd.cpp
-  src/ecflow/base/cts/CFileCmd.cpp
-  src/ecflow/base/cts/CSyncCmd.cpp
-  src/ecflow/base/cts/CheckPtCmd.cpp
-  src/ecflow/base/cts/ClientHandleCmd.cpp
   src/ecflow/base/cts/ClientToServerCmd.cpp
-  src/ecflow/base/cts/CtsApi.cpp
-  src/ecflow/base/cts/CtsCmd.cpp
   src/ecflow/base/cts/CtsCmdRegistry.cpp
-  src/ecflow/base/cts/CtsNodeCmd.cpp
-  src/ecflow/base/cts/DeleteCmd.cpp
   src/ecflow/base/cts/EditHistoryMgr.cpp
-  src/ecflow/base/cts/EditScriptCmd.cpp
-  src/ecflow/base/cts/ForceCmd.cpp
-  src/ecflow/base/cts/FreeDepCmd.cpp
-  src/ecflow/base/cts/GroupCTSCmd.cpp
-  src/ecflow/base/cts/LoadDefsCmd.cpp
-  src/ecflow/base/cts/LogCmd.cpp
-  src/ecflow/base/cts/LogMessageCmd.cpp
-  src/ecflow/base/cts/OrderNodeCmd.cpp
-  src/ecflow/base/cts/PathsCmd.cpp
-  src/ecflow/base/cts/PlugCmd.cpp
-  src/ecflow/base/cts/QueryCmd.cpp
-  src/ecflow/base/cts/ReplaceNodeCmd.cpp
-  src/ecflow/base/cts/RequeueNodeCmd.cpp
-  src/ecflow/base/cts/RunNodeCmd.cpp
-  src/ecflow/base/cts/ServerVersionCmd.cpp
-  src/ecflow/base/cts/ShowCmd.cpp
-  src/ecflow/base/cts/TaskApi.cpp
-  src/ecflow/base/cts/TaskCmds.cpp
-  src/ecflow/base/cts/UserCmd.cpp
-  src/ecflow/base/cts/ZombieCmd.cpp
+  src/ecflow/base/cts/task/TaskApi.cpp
+  src/ecflow/base/cts/task/TaskCmds.cpp
+  src/ecflow/base/cts/user/AlterCmd.cpp
+  src/ecflow/base/cts/user/BeginCmd.cpp
+  src/ecflow/base/cts/user/CFileCmd.cpp
+  src/ecflow/base/cts/user/CSyncCmd.cpp
+  src/ecflow/base/cts/user/CheckPtCmd.cpp
+  src/ecflow/base/cts/user/ClientHandleCmd.cpp
+  src/ecflow/base/cts/user/CtsApi.cpp
+  src/ecflow/base/cts/user/CtsCmd.cpp
+  src/ecflow/base/cts/user/CtsNodeCmd.cpp
+  src/ecflow/base/cts/user/DeleteCmd.cpp
+  src/ecflow/base/cts/user/EditScriptCmd.cpp
+  src/ecflow/base/cts/user/ForceCmd.cpp
+  src/ecflow/base/cts/user/FreeDepCmd.cpp
+  src/ecflow/base/cts/user/GroupCTSCmd.cpp
+  src/ecflow/base/cts/user/LoadDefsCmd.cpp
+  src/ecflow/base/cts/user/LogCmd.cpp
+  src/ecflow/base/cts/user/LogMessageCmd.cpp
+  src/ecflow/base/cts/user/OrderNodeCmd.cpp
+  src/ecflow/base/cts/user/PathsCmd.cpp
+  src/ecflow/base/cts/user/PlugCmd.cpp
+  src/ecflow/base/cts/user/QueryCmd.cpp
+  src/ecflow/base/cts/user/ReplaceNodeCmd.cpp
+  src/ecflow/base/cts/user/RequeueNodeCmd.cpp
+  src/ecflow/base/cts/user/RunNodeCmd.cpp
+  src/ecflow/base/cts/user/ServerVersionCmd.cpp
+  src/ecflow/base/cts/user/ShowCmd.cpp
+  src/ecflow/base/cts/user/UserCmd.cpp
+  src/ecflow/base/cts/user/ZombieCmd.cpp
   src/ecflow/base/stc/BlockClientZombieCmd.cpp
   src/ecflow/base/stc/DefsCache.cpp
   src/ecflow/base/stc/DefsCmd.cpp

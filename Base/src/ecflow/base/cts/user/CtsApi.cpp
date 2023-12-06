@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/base/cts/user/CtsApi.hpp"
 
 #include <sstream>
 

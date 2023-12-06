@@ -15,7 +15,7 @@
 #include <iostream>
 
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
