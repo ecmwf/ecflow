@@ -17,7 +17,14 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 
 #include "ecflow/base/Client.hpp"
-#include "ecflow/base/cts/task/TaskCmd.hpp"
+#include "ecflow/base/cts/task/AbortCmd.hpp"
+#include "ecflow/base/cts/task/CompleteCmd.hpp"
+#include "ecflow/base/cts/task/CtsWaitCmd.hpp"
+#include "ecflow/base/cts/task/EventCmd.hpp"
+#include "ecflow/base/cts/task/InitCmd.hpp"
+#include "ecflow/base/cts/task/LabelCmd.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/task/QueueCmd.hpp"
 #include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #ifdef ECF_OPENSSL

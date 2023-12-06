@@ -29,6 +29,14 @@ set(srcs
   src/ecflow/base/cts/ClientToServerCmd.hpp
   src/ecflow/base/cts/CtsCmdRegistry.hpp
   src/ecflow/base/cts/EditHistoryMgr.hpp
+  src/ecflow/base/cts/task/AbortCmd.hpp
+  src/ecflow/base/cts/task/CompleteCmd.hpp
+  src/ecflow/base/cts/task/CtsWaitCmd.hpp
+  src/ecflow/base/cts/task/EventCmd.hpp
+  src/ecflow/base/cts/task/InitCmd.hpp
+  src/ecflow/base/cts/task/LabelCmd.hpp
+  src/ecflow/base/cts/task/MeterCmd.hpp
+  src/ecflow/base/cts/task/QueueCmd.hpp
   src/ecflow/base/cts/task/TaskApi.hpp
   src/ecflow/base/cts/task/TaskCmd.hpp
   src/ecflow/base/cts/user/CtsApi.hpp
@@ -69,6 +77,14 @@ set(srcs
   src/ecflow/base/cts/ClientToServerCmd.cpp
   src/ecflow/base/cts/CtsCmdRegistry.cpp
   src/ecflow/base/cts/EditHistoryMgr.cpp
+  src/ecflow/base/cts/task/AbortCmd.cpp
+  src/ecflow/base/cts/task/CompleteCmd.cpp
+  src/ecflow/base/cts/task/CtsWaitCmd.cpp
+  src/ecflow/base/cts/task/EventCmd.cpp
+  src/ecflow/base/cts/task/InitCmd.cpp
+  src/ecflow/base/cts/task/LabelCmd.cpp
+  src/ecflow/base/cts/task/MeterCmd.cpp
+  src/ecflow/base/cts/task/QueueCmd.cpp
   src/ecflow/base/cts/task/TaskApi.cpp
   src/ecflow/base/cts/task/TaskCmd.cpp
   src/ecflow/base/cts/user/AlterCmd.cpp

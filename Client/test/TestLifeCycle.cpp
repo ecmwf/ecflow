@@ -13,7 +13,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/task/TaskCmd.hpp"
+#include "ecflow/base/cts/task/CompleteCmd.hpp"
+#include "ecflow/base/cts/task/EventCmd.hpp"
+#include "ecflow/base/cts/task/InitCmd.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
 #include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"

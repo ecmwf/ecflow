@@ -13,7 +13,14 @@
 #include <memory>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
-#include "ecflow/base/cts/task/TaskCmd.hpp"
+#include "ecflow/base/cts/task/AbortCmd.hpp"
+#include "ecflow/base/cts/task/CompleteCmd.hpp"
+#include "ecflow/base/cts/task/CtsWaitCmd.hpp"
+#include "ecflow/base/cts/task/EventCmd.hpp"
+#include "ecflow/base/cts/task/InitCmd.hpp"
+#include "ecflow/base/cts/task/LabelCmd.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/task/QueueCmd.hpp"
 #include "ecflow/base/cts/user/UserCmd.hpp"
 
 namespace po = boost::program_options;
