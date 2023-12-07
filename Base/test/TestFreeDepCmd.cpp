@@ -13,7 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MockServer.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/cts/user/FreeDepCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"

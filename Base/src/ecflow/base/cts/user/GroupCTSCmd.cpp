@@ -8,6 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/GroupCTSCmd.hpp"
+
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -17,7 +19,6 @@
 #include "ecflow/base/ClientOptionsParser.hpp"
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/GroupSTCCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"

@@ -8,22 +8,24 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/AlterCmd.hpp"
+
 #include <stdexcept>
 
+#include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
-#include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
-#include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/Node.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 

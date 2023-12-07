@@ -8,13 +8,14 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/QueryCmd.hpp"
+
 #include <iostream>
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Extract.hpp"

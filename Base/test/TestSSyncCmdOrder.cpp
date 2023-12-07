@@ -12,7 +12,8 @@
 
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/TestUtil.hpp"

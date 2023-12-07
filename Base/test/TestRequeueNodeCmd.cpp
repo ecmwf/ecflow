@@ -11,7 +11,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/cts/user/AlterCmd.hpp"
+#include "ecflow/base/cts/user/ForceCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"

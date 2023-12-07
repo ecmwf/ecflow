@@ -8,14 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
-#include "ecflow/core/Str.hpp"
-#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
 

@@ -13,6 +13,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 

@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/RunNodeCmd.hpp"
+
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/JobsParam.hpp"

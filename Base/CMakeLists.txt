@@ -39,8 +39,35 @@ set(srcs
   src/ecflow/base/cts/task/QueueCmd.hpp
   src/ecflow/base/cts/task/TaskApi.hpp
   src/ecflow/base/cts/task/TaskCmd.hpp
+  src/ecflow/base/cts/user/AlterCmd.hpp
+  src/ecflow/base/cts/user/BeginCmd.hpp
+  src/ecflow/base/cts/user/CFileCmd.hpp
+  src/ecflow/base/cts/user/CheckPtCmd.hpp
+  src/ecflow/base/cts/user/ClientHandleCmd.hpp
+  src/ecflow/base/cts/user/CSyncCmd.hpp
   src/ecflow/base/cts/user/CtsApi.hpp
+  src/ecflow/base/cts/user/CtsCmd.hpp
+  src/ecflow/base/cts/user/CtsNodeCmd.hpp
+  src/ecflow/base/cts/user/DeleteCmd.hpp
+  src/ecflow/base/cts/user/EditScriptCmd.hpp
+  src/ecflow/base/cts/user/ForceCmd.hpp
+  src/ecflow/base/cts/user/FreeDepCmd.hpp
+  src/ecflow/base/cts/user/GroupCTSCmd.hpp
+  src/ecflow/base/cts/user/LoadDefsCmd.hpp
+  src/ecflow/base/cts/user/LogCmd.hpp
+  src/ecflow/base/cts/user/LogMessageCmd.hpp
+  src/ecflow/base/cts/user/MoveCmd.hpp
+  src/ecflow/base/cts/user/OrderNodeCmd.hpp
+  src/ecflow/base/cts/user/PathsCmd.hpp
+  src/ecflow/base/cts/user/PlugCmd.hpp
+  src/ecflow/base/cts/user/QueryCmd.hpp
+  src/ecflow/base/cts/user/ReplaceNodeCmd.hpp
+  src/ecflow/base/cts/user/RequeueNodeCmd.hpp
+  src/ecflow/base/cts/user/RunNodeCmd.hpp
+  src/ecflow/base/cts/user/ServerVersionCmd.hpp
+  src/ecflow/base/cts/user/ShowCmd.hpp
   src/ecflow/base/cts/user/UserCmd.hpp
+  src/ecflow/base/cts/user/ZombieCmd.hpp
   src/ecflow/base/stc/BlockClientZombieCmd.hpp
   src/ecflow/base/stc/DefsCache.hpp
   src/ecflow/base/stc/DefsCmd.hpp

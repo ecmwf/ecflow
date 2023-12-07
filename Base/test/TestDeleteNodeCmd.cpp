@@ -12,7 +12,8 @@
 
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Str.hpp"
 

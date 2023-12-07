@@ -8,12 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/FreeDepCmd.hpp"
+
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/SuiteChanged.hpp"

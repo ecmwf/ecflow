@@ -16,7 +16,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"

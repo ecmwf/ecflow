@@ -14,7 +14,8 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"

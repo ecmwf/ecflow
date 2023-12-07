@@ -8,11 +8,12 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/base/cts/user/ShowCmd.hpp"
+
 #include <iostream>
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 using namespace ecf;

@@ -15,8 +15,8 @@
 
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/core/Serialization.hpp"
-#include "ecflow/node/Defs.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;

@@ -18,6 +18,7 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
