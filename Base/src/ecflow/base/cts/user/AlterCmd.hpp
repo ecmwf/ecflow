@@ -36,7 +36,7 @@ public:
         DELETE_ATTR_ND,
         DEL_LATE,
         DEL_QUEUE,
-        DEL_GENERIC
+        DEL_GENERIC,
     };
 
     enum Change_attr_type {
@@ -57,7 +57,7 @@ public:
         CLOCK_SYNC,
         LATE,
         TIME,
-        TODAY
+        TODAY,
     };
 
     enum Add_attr_type {
@@ -71,7 +71,7 @@ public:
         ADD_LATE,
         ADD_LIMIT,
         ADD_INLIMIT,
-        ADD_LABEL
+        ADD_LABEL,
     };
 
     // Python

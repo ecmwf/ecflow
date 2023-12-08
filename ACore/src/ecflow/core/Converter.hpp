@@ -24,7 +24,7 @@ struct bad_conversion : public std::runtime_error
     explicit bad_conversion(const std::string& m) : std::runtime_error(m) {}
 };
 
-namespace details {
+namespace detail {
 
 template <typename To, typename From>
 inline static auto try_lexical_convert(From&& v) {
@@ -36,12 +36,12 @@ inline static auto try_lexical_convert(From&& v) {
     }
 }
 
-} // namespace details
+} // namespace detail
 
 template <typename From, typename To>
 struct converter_traits
 {
-    inline static auto convert(From&& v) { return details::try_lexical_convert<To>(std::forward<From>(v)); }
+    inline static auto convert(From&& v) { return detail::try_lexical_convert<To>(std::forward<From>(v)); }
 };
 
 template <>
@@ -64,7 +64,7 @@ struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is
 
 template <typename To, typename From>
 inline auto convert_to(From&& v) {
-    using namespace ecf::details;
+    using namespace ecf::detail;
     return converter_traits<From, To>::convert(std::forward<From>(v));
 }
 
