@@ -13,6 +13,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/LabelCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"

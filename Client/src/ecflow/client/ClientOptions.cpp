@@ -20,7 +20,7 @@
 #include <boost/program_options.hpp>
 
 #include "ecflow/base/ClientOptionsParser.hpp"
-#include "ecflow/base/cts/TaskApi.hpp"
+#include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/Help.hpp"
 #include "ecflow/core/CommandLine.hpp"

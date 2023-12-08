@@ -10,7 +10,7 @@
 
 #include "ecflow/server/CheckPtSaver.hpp"
 
-#include "ecflow/base/cts/CtsApi.hpp"
+#include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Filesystem.hpp"

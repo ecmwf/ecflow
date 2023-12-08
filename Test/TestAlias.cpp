@@ -17,7 +17,7 @@
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/CFileCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/NOrder.hpp"

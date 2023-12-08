@@ -13,6 +13,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Family.hpp"

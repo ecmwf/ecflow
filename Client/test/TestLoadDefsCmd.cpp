@@ -15,10 +15,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
-#include "MockServer.hpp"
 #include "SCPort.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
-#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"

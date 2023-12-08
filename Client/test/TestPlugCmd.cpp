@@ -13,9 +13,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
-#include "MockServer.hpp"
 #include "SCPort.hpp"
-#include "TestHelper.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"

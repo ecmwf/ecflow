@@ -11,7 +11,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"

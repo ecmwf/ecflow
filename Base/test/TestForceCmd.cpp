@@ -15,7 +15,9 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/ForceCmd.hpp"
+#include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
 #include "ecflow/node/System.hpp"

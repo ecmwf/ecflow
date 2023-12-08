@@ -12,6 +12,42 @@
 
 #include <iostream>
 
+#include "ecflow/base/cts/task/AbortCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/task/CompleteCmd.hpp"      // required to enforce cereal registration
+#include "ecflow/base/cts/task/CtsWaitCmd.hpp"       // required to enforce cereal registration
+#include "ecflow/base/cts/task/EventCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/task/InitCmd.hpp"          // required to enforce cereal registration
+#include "ecflow/base/cts/task/LabelCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/task/MeterCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/task/QueueCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/AlterCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/BeginCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/CFileCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/CSyncCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/CheckPtCmd.hpp"       // required to enforce cereal registration
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"  // required to enforce cereal registration
+#include "ecflow/base/cts/user/CtsCmd.hpp"           // required to enforce cereal registration
+#include "ecflow/base/cts/user/CtsNodeCmd.hpp"       // required to enforce cereal registration
+#include "ecflow/base/cts/user/DeleteCmd.hpp"        // required to enforce cereal registration
+#include "ecflow/base/cts/user/EditScriptCmd.hpp"    // required to enforce cereal registration
+#include "ecflow/base/cts/user/ForceCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/FreeDepCmd.hpp"       // required to enforce cereal registration
+#include "ecflow/base/cts/user/GroupCTSCmd.hpp"      // required to enforce cereal registration
+#include "ecflow/base/cts/user/LoadDefsCmd.hpp"      // required to enforce cereal registration
+#include "ecflow/base/cts/user/LogCmd.hpp"           // required to enforce cereal registration
+#include "ecflow/base/cts/user/LogMessageCmd.hpp"    // required to enforce cereal registration
+#include "ecflow/base/cts/user/MoveCmd.hpp"          // required to enforce cereal registration
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"     // required to enforce cereal registration
+#include "ecflow/base/cts/user/PathsCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/PlugCmd.hpp"          // required to enforce cereal registration
+#include "ecflow/base/cts/user/QueryCmd.hpp"         // required to enforce cereal registration
+#include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"   // required to enforce cereal registration
+#include "ecflow/base/cts/user/RequeueNodeCmd.hpp"   // required to enforce cereal registration
+#include "ecflow/base/cts/user/RunNodeCmd.hpp"       // required to enforce cereal registration
+#include "ecflow/base/cts/user/ServerVersionCmd.hpp" // required to enforce cereal registration
+#include "ecflow/base/cts/user/ShowCmd.hpp"          // required to enforce cereal registration
+#include "ecflow/base/cts/user/ZombieCmd.hpp"        // required to enforce cereal registration
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"

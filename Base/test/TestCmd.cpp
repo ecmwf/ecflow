@@ -14,6 +14,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/AbortCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"

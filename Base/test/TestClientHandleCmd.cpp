@@ -11,7 +11,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Suite.hpp"
 
