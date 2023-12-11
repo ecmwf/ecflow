@@ -22,7 +22,7 @@ namespace ecf {
 // IMPORTANT: std::string_view is a *READ ONLY* REFERENCE to an existing string
 // HENCE:     the reference string *MUST* not change, and its lifetime must EXCEED string_view
 //
-// Will split a string. Will return a empty std::string_view if there a separator at the end.
+// Will split a string. Will return an empty std::string_view if there's a separator at the end.
 // This shows the fastest split for a string. **** Based on boost 1.64 ****
 //    Method:              time
 //    boost::split:        4.06

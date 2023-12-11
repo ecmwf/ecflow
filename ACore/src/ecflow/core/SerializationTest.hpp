@@ -28,7 +28,6 @@ void do_restore(const std::string& fileName, const T& saved) {
         BOOST_CHECK_MESSAGE(false, "Restore failed because: " << e.what());
     }
     BOOST_CHECK_MESSAGE(saved == restored, "save and restored don't match for " << fileName << "\n");
-    //   BOOST_CHECK_MESSAGE(saved == restored," save and restored don't match\n" << saved  << "\n" << restored );
 }
 
 template <typename T>

@@ -218,7 +218,7 @@ private:
 
 private:
     // Note: The *only* reason to serialise the calendar is so that we can support
-    // why() command on the client side. By default calendar is initialised in the *server*
+    // why() command on the client side. By default, calendar is initialised in the *server*
     // at begin time, from the clock attribute
     friend class cereal::access;
     template <class Archive>

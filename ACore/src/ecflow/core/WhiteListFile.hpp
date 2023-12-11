@@ -30,7 +30,7 @@ public:
     ~WhiteListFile();
 
     // If any user in read/write lists, then it has read access.
-    // However when paths are specified teh returns may not me the same. i.e
+    // However, when paths are specified the returns may not be the same. i.e,
     //    verify_read_access("userX") != verify_read_access("userX","/f")
     // This is is because different commands, call different functions:
     // Hence if we have:
@@ -38,7 +38,7 @@ public:
     //  userX  /s1               TRUE                  FALSE                        TRUE
     //  -userX /s2               TRUE                  FALSE                        FALSE
     //
-    // If we also add * in the mix: All users have read/write acess to suite /a, and read access to /b
+    // If we also add * in the mix: All users have read/write access to suite `/a`, and read access to `/b`
     //  *  /a
     //  -* /b
     //  userX  /s1

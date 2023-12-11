@@ -68,11 +68,11 @@ public:
     //  fred  -> fred
     static void removeSingleQuotes(std::string&);
 
-    /// Find 'stringToFind' in 'jobLine' and replace with string 'stringToRplace'
+    /// Find 'stringToFind' in 'jobLine' and replace with string 'stringToReplace'
     /// return true if replace ok else returns false;
-    static bool replace(std::string& subject, const std::string& stringToFind, const std::string& stringToRplace);
-    static bool replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToRplace);
-    static void replaceall(std::string& subject, const std::string& stringToFind, const std::string& stringToRplace);
+    static bool replace(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace);
+    static bool replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace);
+    static void replaceall(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace);
 
     // extract data member value, ie given a string of the form:
     //   str=cmd a b fred:value
@@ -130,10 +130,10 @@ public:
     /// case in sensitive string comparison
     static bool caseInsCompare(const std::string&, const std::string&);
 
-    /// case insenstive less
+    /// case insensitive less
     static bool caseInsLess(const std::string&, const std::string&);
 
-    /// case insenstive Greater
+    /// case insensitive Greater
     static bool caseInsGreater(const std::string&, const std::string&);
 
     /// Used for checking node names
@@ -159,7 +159,7 @@ public:
     /// Only use strcmp if the first characters are the same
     static int local_strcmp(const char* s, const char* t) { return (*s != *t ? *s - *t : strcmp(s, t)); }
 
-    // returns a static string of alpha numerics and underscore
+    // returns a static string of alphanumerics and underscore
     static const std::string& ALPHANUMERIC_UNDERSCORE();
 
     // returns a static string of numerics chars

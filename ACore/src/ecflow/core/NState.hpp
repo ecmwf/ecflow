@@ -20,10 +20,10 @@ class access;
 
 // NState: stores the state of a node.
 // *The class NState just used to define the enum, however we also
-// needed to know when the state changed. Hence the use of state_change_no
+// needed to know when the state changed. Hence, the use of state_change_no
 // Uses default copy constructor and destructor, and equality
 //
-// The default_state() should *NEVER* change as it will affect client/server comms
+// The default_state() should *NEVER* change as it will impact client/server communications
 //
 class NState {
 public:

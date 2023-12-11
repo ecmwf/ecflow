@@ -57,15 +57,16 @@ void StringSplitter::split(const std::string& str,
     }
 }
 
-void StringSplitter::split2(std::string_view str, std::vector<std::string_view>& ret, const char* delims) {
+void StringSplitter::split2(std::string_view str, std::vector<std::string_view>& ret, const char* delimiters) {
     std::string_view::size_type start = 0;
-    auto pos                          = str.find_first_of(delims, start);
+
+    auto pos = str.find_first_of(delimiters, start);
     while (pos != std::string_view::npos) {
         if (pos != start) {
             ret.emplace_back(str.substr(start, pos - start));
         }
         start = pos + 1;
-        pos   = str.find_first_of(delims, start);
+        pos   = str.find_first_of(delimiters, start);
     }
     if (start < str.length())
         ret.emplace_back(str.substr(start, str.length() - start));

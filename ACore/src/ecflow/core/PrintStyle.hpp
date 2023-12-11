@@ -16,9 +16,9 @@
 class PrintStyle {
 public:
     // Use to control the print defs/node output to string or file
-    // Please note: with PrintStyle::NET is used to transfer Defs between client <->server
+    // Please note: with PrintStyle::NET is used to transfer Defs between client <-> server
     //              as such there is no need extensive checking on recreating defs.
-    //              i.e valid name, duplicate nodes, etc
+    //              i.e. valid name, duplicate nodes, etc
     enum Type_t {
         // Does nothing
         NOTHING = 0,

@@ -42,8 +42,6 @@ public:
 
     static void create(const std::string& the_port) {
         std::string the_file = port_file(the_port);
-        //      std::cout << "EcfPortLock::create " << the_file << "
-        //      ---------------------------------------------------\n";
         std::string errorMsg;
         if (!ecf::File::create(the_file, "", errorMsg)) {
             std::stringstream sb;
@@ -54,8 +52,6 @@ public:
 
     static void remove(const std::string& the_port) {
         std::string the_file = port_file(the_port);
-        //      std::cout << "EcfPortLock::remove " << the_file << "
-        //      --------------------------------------------------\n";
         fs::remove(the_file);
     }
 

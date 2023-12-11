@@ -152,7 +152,7 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
     //	tokenizer tokens(file_iter,end_of_stream, sep);
     // std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
 
-    // The current implementation is 2.5 times faster then method 1, and ~4 times faster than method 2
+    // The current implementation is 2.5 times faster than method 1, and ~4 times faster than method 2
     return true;
 }
 
@@ -239,7 +239,7 @@ bool File::open(const std::string& filePath, std::string& contents) {
 }
 
 bool File::create(const std::string& filename, const std::vector<std::string>& lines, std::string& errorMsg) {
-    // For very large file. This is about 1 second quicker. Than using streams
+    // For very large file. This is about 1 second quicker. Then using streams
     // See Test: TestFile.cpp:test_file_create_perf
     FILE* theFile = fopen(filename.c_str(), "w");
     if (theFile == nullptr) {
@@ -504,7 +504,7 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
             // pathToFileOrDir is of form: /tmp/fred/sms.job
             //   we should only create directories for /tmp/fred
             if (thePath.back().find(".") != std::string::npos) {
-                // assume the last token represents a file, hence dont create a directory
+                // assume the last token represents a file, hence don't create a directory
 #ifdef INTEL_DEBUG_ME
                 std::cout << "   last file " << thePath.back() << " has a *dot* ignoring " << std::endl;
 #endif
@@ -650,7 +650,7 @@ std::string File::diff(const std::string& file,
 std::string
 File::backwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn) {
     // Do a backward search of rootPath + nodePath
-    // If task path if of the form /suite/family/family2/task, then we keep
+    // If task path is of the form /suite/family/family2/task, then we keep
     // on consuming the first path token this should leave:
     //   	<root-path>/suite/family/family2/task.ecf
     //   	<root-path>/family/family2/task.ecf

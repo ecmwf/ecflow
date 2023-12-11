@@ -319,7 +319,7 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
 bool PasswdFile::clear(const std::string& pathToFile, std::string& errorMsg) {
     std::vector<std::string> lines;
     if (File::splitFileIntoLines(pathToFile, lines, true /* ignore empty lines */)) {
-        // Just leave the version. i.e the first line.
+        // Just leave the version, i.e. the first line.
         if (lines.size() > 1) {
             lines.erase(lines.begin() + 1, lines.end());
 

@@ -25,9 +25,9 @@ namespace ecf {
 // The version number is extracted externally.
 //   see ACore/doc/extracting_version_number.ddoc
 //
-//   See ACore/src/ecflow_version.h"
-//   This file is generated when cmake is run, i.e
-//   sh -x $WK/cmake.sh debug
+//   See ACore/src/ecflow_version.h
+//   This file is generated when cmake is run, i.e.
+//     `sh -x $WK/cmake.sh debug`
 //
 // When changing the version change remember to:
 //    - re-login into remote system to update ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR
@@ -36,7 +36,7 @@ namespace ecf {
 // To Install a new version on all the different platforms:
 //  . build_scripts/nightly/quick_install_.sh
 // This is because the definition hold's the last version.
-// Hence we must rerun to update the version.
+// Hence, we must rerun to update the version.
 //
 // ************************************************************************************
 // Use  <minor_number>rc<number> for release candidates, Once release we revert back:

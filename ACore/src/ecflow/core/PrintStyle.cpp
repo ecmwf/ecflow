@@ -17,8 +17,6 @@ PrintStyle::Type_t PrintStyle::getStyle() {
 }
 
 void PrintStyle::setStyle(PrintStyle::Type_t f) {
-    // std::cout << "PrintStyle::setStyle() BEFORE " << PrintStyle::to_string(style_) << " AFTER " <<
-    // PrintStyle::to_string(f) << "   *********************\n";
     style_ = f;
 }
 

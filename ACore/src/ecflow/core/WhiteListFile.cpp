@@ -134,13 +134,13 @@ bool WhiteListFile::verify_write_access(const std::string& user, const std::vect
 
 static bool path_access(const std::vector<std::string>& paths, const std::vector<std::string>& allowed_paths) {
     if (allowed_paths.empty())
-        return true; // no paths is specified in PASSWORD file allow access
+        return true; // no paths are specified in PASSWORD file allow access
 
     // Paths specified in PASSWORD file.
     if (paths.empty())
         return false; // INPUT user path empty deny access
 
-    // when we have a set of paths, supplied the the GUI. These can be random path selections
+    // when we have a set of paths, supplied by the GUI. These can be random path selections
     // Hence to allow access *ALL* paths need to pass access
     //
     // need to correctly check for subsets
