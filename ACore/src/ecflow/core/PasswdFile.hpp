@@ -41,10 +41,10 @@ private:
     std::string user_;
     std::string host_;
     std::string port_;
-    std::string passwd_; // always stored as crypted
+    std::string passwd_; // always stored as ciphertext
 };
 
-// This class is used to authenticate, user commands, i.e like ping,alter, etc
+// This class is used to authenticate, user commands, i.e. like ping,alter, etc
 class PasswdFile {
 public:
     PasswdFile();
@@ -59,7 +59,7 @@ public:
     // to be called by the server, to at least one user with given host and port
     bool check_at_least_one_user_with_host_and_port(const std::string& host, const std::string& port);
 
-    // get the password for the given user, host and port. Otherwise return a empty string
+    // get the password for the given user, host and port. Otherwise, return an empty string
     std::string get_passwd(const std::string& user, const std::string& host, const std::string& port);
 
     // authenticate the user, given the password.

@@ -214,10 +214,10 @@ void Str::removeSingleQuotes(std::string& s) {
     }
 }
 
-bool Str::replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace) {
+bool Str::replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToReplace) {
     size_t pos = jobLine.find(stringToFind);
     if (pos != string::npos) {
-        jobLine.replace(pos, stringToFind.length(), stringToRplace);
+        jobLine.replace(pos, stringToFind.length(), stringToReplace);
         return true;
     }
     return false;

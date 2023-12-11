@@ -29,11 +29,6 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
 }
 
 bool Extract::pathAndName(const std::string& token, std::string& path, std::string& name) {
-    // cout << "Extract::pathAndName  token = " << token << "\n";
-    // can have:
-    //            /suite/family:obj      path = /suite/family   name = obj
-    //            /suite/family          path = /suite/family   name =
-    //            obj                    path =                 name = obj
     if (token.empty())
         return false;
 
@@ -51,7 +46,6 @@ bool Extract::pathAndName(const std::string& token, std::string& path, std::stri
         name = token.substr(colonPos + 1);
     }
 
-    //	cout << "Extract::pathAndName token=" << token << " path= '" << path << "' name= '" << name << "'\n";
     return true;
 }
 
@@ -95,22 +89,14 @@ int Extract::ymd(const std::string& ymdToken, std::string& errorMsg) {
     return theInt(ymdToken, errorMsg);
 }
 
-int Extract::optionalInt(const std::vector<std::string>& lineTokens,
+int Extract::optionalInt(const std::vector<std::string>& tokens,
                          int pos,
                          int defaultValue,
                          const std::string& errorMsg) {
-    // token0 token1 token2 token3   size = 4
-    // pos0   pos1   pos2   pos3
-    //
-    // could have line of the form
-    // repeat integer variable 1 2 #a comment
-    // repeat integer variable 3 4 # a comment
-    // hence we must check the first character, and not the complete token
-
     int the_int = defaultValue;
-    if (static_cast<int>(lineTokens.size()) >= pos + 1 && lineTokens[pos][0] != '#') {
+    if (static_cast<int>(tokens.size()) >= pos + 1 && tokens[pos][0] != '#') {
 
-        the_int = theInt(lineTokens[pos], errorMsg);
+        the_int = theInt(tokens[pos], errorMsg);
     }
     return the_int;
 }

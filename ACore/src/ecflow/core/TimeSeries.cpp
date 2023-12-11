@@ -132,8 +132,8 @@ bool TimeSeries::calendarChanged(const ecf::Calendar& c) {
     }
     else if (c.dayChanged()) {
 
-        // Clear expired flag and next slot. Needed since requue will expire flag when past time slot
-        // Hence we need something to reset. Otherwise for next day isFree will always return false;
+        // Clear expired flag and next slot. Needed since requeuing will expire flag when pastime slot
+        // Hence we need something to reset. Otherwise, for next day isFree will always return false;
         isValid_      = true;
         nextTimeSlot_ = start_;
         return true;
@@ -419,7 +419,7 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
                                  const TimeSlot& the_max,
                                  bool cmd_context) const {
     // ************************************************************************
-    // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED. Hence ****asyncronous****
+    // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED. Hence ****asynchronous****
     // RETURNING TRUE FROM HERE WILL FORCE NODE TO QUEUED STATE
     // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED/expired
     // The resolution is in minutes
@@ -465,7 +465,7 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
             //  we use >= specifically for unit test, to pass.
             if (suiteTimeNow >= suiteTimeAtReque_) {
                 // normal flow, i.e same day
-                suiteTimeAtReque_ = TimeSlot(); // make NULL, allow reque to reset.
+                suiteTimeAtReque_ = TimeSlot(); // make NULL, allow requeuing to reset.
             }
             else {
                 // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
