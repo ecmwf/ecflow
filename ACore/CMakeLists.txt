@@ -131,6 +131,7 @@ set(test_srcs
   test/TestClassDataMemberInit.cpp
   test/TestCommandLine.cpp
   test/TestCore_main.cpp # contains main() function for test driver
+  test/TestExtract.cpp
   test/TestFile.cpp
   test/TestGetUserDetails.cpp
   test/TestLog.cpp
