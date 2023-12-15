@@ -13,6 +13,7 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -22,15 +23,14 @@ using namespace ecf;
 using namespace std;
 
 void Node::changeVariable(const std::string& name, const std::string& value) {
-    size_t theSize = vars_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (vars_[i].name() == name) {
-            vars_[i].set_value(value);
-            variable_change_no_ = Ecf::incr_state_change_no();
-            return;
-        }
+    auto found = ecf::algorithm::find_by_name(vars_, name);
+
+    if (found == std::end(vars_)) {
+        throw std::runtime_error("Node::changeVariable: Could not find variable " + name);
     }
-    throw std::runtime_error("Node::changeVariable: Could not find variable " + name);
+
+    found->set_value(value);
+    variable_change_no_ = Ecf::incr_state_change_no();
 }
 
 bool Node::set_event(const std::string& event_name_or_number, bool value) {
@@ -39,10 +39,10 @@ bool Node::set_event(const std::string& event_name_or_number, bool value) {
     }
 
     // find by name first
-    size_t theSize = events_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (events_[i].name() == event_name_or_number) {
-            events_[i].set_value(value);
+    {
+        auto found = ecf::algorithm::find_by_name(events_, event_name_or_number);
+        if (found != std::end(events_)) {
+            found->set_value(value);
             return true;
         }
     }
@@ -50,12 +50,11 @@ bool Node::set_event(const std::string& event_name_or_number, bool value) {
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
     if (event_name_or_number.find_first_of(Str::NUMERIC()) == 0) {
         try {
-            auto eventNumber = ecf::convert_to<int>(event_name_or_number);
-            for (size_t i = 0; i < theSize; i++) {
-                if (events_[i].number() == eventNumber) {
-                    events_[i].set_value(value);
-                    return true;
-                }
+            auto number = ecf::convert_to<int>(event_name_or_number);
+            auto found  = ecf::algorithm::find_by_number(events_, number);
+            if (found != std::end(events_)) {
+                found->set_value(value);
+                return true;
             }
         }
         catch (const ecf::bad_conversion&) {
@@ -70,10 +69,10 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number) {
     }
 
     // find by name first
-    size_t theSize = events_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (events_[i].name() == event_name_or_number) {
-            events_[i].usedInTrigger(true);
+    {
+        auto found = ecf::algorithm::find_by_name(events_, event_name_or_number);
+        if (found != std::end(events_)) {
+            found->usedInTrigger(true);
             return true;
         }
     }
@@ -81,18 +80,17 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number) {
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
     if (event_name_or_number.find_first_of(Str::NUMERIC()) == 0) {
         try {
-            auto eventNumber = ecf::convert_to<int>(event_name_or_number);
-            for (size_t i = 0; i < theSize; i++) {
-                if (events_[i].number() == eventNumber) {
-                    events_[i].usedInTrigger(true);
-                    return true;
-                    ;
-                }
+            auto number = ecf::convert_to<int>(event_name_or_number);
+            auto found  = ecf::algorithm::find_by_number(events_, number);
+            if (found != std::end(events_)) {
+                found->usedInTrigger(true);
+                return true;
             }
         }
         catch (const ecf::bad_conversion&) {
         }
     }
+
     return false;
 }
 void Node::changeEvent(const std::string& event_name_or_number, const std::string& setOrClear) {
@@ -116,25 +114,25 @@ void Node::changeEvent(const std::string& event_name_or_number, bool value) {
     throw std::runtime_error("Node::changeEvent: Could not find event " + event_name_or_number);
 }
 
-bool Node::set_meter(const std::string& meter_name, int value) {
-    size_t the_meter_size = meters_.size();
-    for (size_t i = 0; i < the_meter_size; ++i) {
-        if (meters_[i].name() == meter_name) {
-            meters_[i].set_value(value);
-            return true;
-        }
+bool Node::set_meter(const std::string& name, int value) {
+    auto found = ecf::algorithm::find_by_name(meters_, name);
+
+    if (found == std::end(meters_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(value);
+    return true;
 }
-bool Node::set_meter_used_in_trigger(const std::string& meter_name) {
-    size_t the_meter_size = meters_.size();
-    for (size_t i = 0; i < the_meter_size; ++i) {
-        if (meters_[i].name() == meter_name) {
-            meters_[i].usedInTrigger(true);
-            return true;
-        }
+bool Node::set_meter_used_in_trigger(const std::string& name) {
+    auto found = ecf::algorithm::find_by_name(meters_, name);
+
+    if (found == std::end(meters_)) {
+        return false;
     }
-    return false;
+
+    found->usedInTrigger(true);
+    return true;
 }
 void Node::changeMeter(const std::string& meter_name, const std::string& value) {
     int theValue = 0;
@@ -146,6 +144,7 @@ void Node::changeMeter(const std::string& meter_name, const std::string& value) 
     }
     changeMeter(meter_name, theValue);
 }
+
 void Node::changeMeter(const std::string& meter_name, int value) {
     if (set_meter(meter_name, value))
         return;
@@ -153,14 +152,13 @@ void Node::changeMeter(const std::string& meter_name, int value) {
 }
 
 void Node::changeLabel(const std::string& name, const std::string& value) {
-    size_t theSize = labels_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (labels_[i].name() == name) {
-            labels_[i].set_new_value(value);
-            return;
-        }
+    auto found = ecf::algorithm::find_by_name(labels_, name);
+
+    if (found == std::end(labels_)) {
+        throw std::runtime_error("Node::changeLabel: Could not find label " + name);
     }
-    throw std::runtime_error("Node::changeLabel: Could not find label " + name);
+
+    found->set_new_value(value);
 }
 
 void Node::changeTrigger(const std::string& expression) {
@@ -241,30 +239,28 @@ void Node::change_time(const std::string& old, const std::string& new_time) {
     TimeAttr old_attr(TimeSeries::create(old));      // can throw if parse fails
     TimeAttr new_attr(TimeSeries::create(new_time)); // can throw if parse fails
 
-    size_t theSize = times_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (times_[i].structureEquals(old_attr)) {
-            times_[i]        = new_attr;
-            state_change_no_ = Ecf::incr_state_change_no();
-            return;
-        }
+    // Don't use '==' since that compares additional state like free_
+    auto found = ecf::algorithm::find_by(times_, [&](const auto& item) { return item.structureEquals(old_attr); });
+
+    if (found == std::end(times_)) {
+        throw std::runtime_error("Node::change_time : Cannot find time attribute: ");
     }
-    throw std::runtime_error("Node::change_time : Cannot find time attribute: ");
+
+    *found           = new_attr;
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::change_today(const std::string& old, const std::string& new_time) {
     TodayAttr old_attr(TimeSeries::create(old));      // can throw if parse fails
     TodayAttr new_attr(TimeSeries::create(new_time)); // can throw if parse fails
 
-    size_t theSize = todays_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (todays_[i].structureEquals(old_attr)) {
-            todays_[i]       = new_attr;
-            state_change_no_ = Ecf::incr_state_change_no();
-            return;
-        }
+    // Don't use '==' since that compares additional state like free_
+    auto found = ecf::algorithm::find_by(todays_, [&](const auto& item) { return item.structureEquals(old_attr); });
+
+    if (found == std::end(todays_)) {
+        throw std::runtime_error("Node::change_today : Cannot find time attribute: ");
     }
-    throw std::runtime_error("Node::change_today : Cannot find today attribute: ");
+
+    *found           = new_attr;
+    state_change_no_ = Ecf::incr_state_change_no();
 }
