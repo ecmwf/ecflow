@@ -10,6 +10,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -161,12 +162,8 @@ bool Node::user_variable_exists(const std::string& name) const {
 }
 
 const Variable& Node::findVariable(const std::string& name) const {
-    for (const auto& v : vars_) {
-        if (v.name() == name) {
-            return v;
-        }
-    }
-    return Variable::EMPTY();
+    auto found = ecf::algorithm::find_by_name(vars_, name);
+    return found == std::end(vars_) ? Variable::EMPTY() : *found;
 }
 
 std::string Node::find_parent_variable_sub_value(const std::string& name) const {
@@ -224,13 +221,14 @@ const Variable& Node::find_parent_variable(const std::string& name) const {
 }
 
 bool Node::findVariableValue(const std::string& name, std::string& returnedValue) const {
-    for (const auto& var : vars_) {
-        if (var.name() == name) {
-            returnedValue = var.theValue();
-            return true;
-        }
+    auto found = ecf::algorithm::find_by_name(vars_, name);
+
+    if (found == std::end(vars_)) {
+        return false;
     }
-    return false;
+
+    returnedValue = found->theValue();
+    return true;
 }
 
 bool Node::findGenVariableValue(const std::string& name, std::string& returnedValue) const {
@@ -243,21 +241,13 @@ bool Node::findGenVariableValue(const std::string& name, std::string& returnedVa
 }
 
 bool Node::findLimit(const Limit& theLimit) const {
-    for (const auto& lim : limits_) {
-        if (lim->name() == theLimit.name()) {
-            return true;
-        }
-    }
-    return false;
+    auto found = ecf::algorithm::find_by_name(limits_, theLimit.name());
+    return found != std::end(limits_);
 }
 
 limit_ptr Node::find_limit(const std::string& theName) const {
-    for (const auto& lim : limits_) {
-        if (lim->name() == theName) {
-            return lim;
-        }
-    }
-    return limit_ptr();
+    auto found = ecf::algorithm::find_by_name(limits_, theName);
+    return found == std::end(limits_) ? limit_ptr() : *found;
 }
 
 limit_ptr Node::findLimitUpNodeTree(const std::string& name) const {
@@ -278,31 +268,18 @@ limit_ptr Node::findLimitUpNodeTree(const std::string& name) const {
 }
 
 const Event& Node::findEvent(const Event& theEvent) const {
-    for (const auto& e : events_) {
-        // compare ignores state like value_ and initial_value
-        if (e.compare(theEvent)) {
-            return e;
-        }
-    }
-    return Event::EMPTY();
+    auto found = ecf::algorithm::find_by(events_, [&](const auto& item) { return item.compare(theEvent); });
+    return found == std::end(events_) ? Event::EMPTY() : *found;
 }
 
 const Event& Node::findEventByNumber(int number) const {
-    for (const auto& e : events_) {
-        if (e.number() == number) {
-            return e;
-        }
-    }
-    return Event::EMPTY();
+    auto found = ecf::algorithm::find_by_number(events_, number);
+    return found == std::end(events_) ? Event::EMPTY() : *found;
 }
 
 const Event& Node::findEventByName(const std::string& event_name) const {
-    for (const auto& e : events_) {
-        if (e.name() == event_name) {
-            return e;
-        }
-    }
-    return Event::EMPTY();
+    auto found = ecf::algorithm::find_by_name(events_, event_name);
+    return found == std::end(events_) ? Event::EMPTY() : *found;
 }
 
 const Event& Node::findEventByNameOrNumber(const std::string& theName) const {
@@ -324,39 +301,23 @@ const Event& Node::findEventByNameOrNumber(const std::string& theName) const {
 }
 
 const Meter& Node::findMeter(const std::string& name) const {
-    for (const auto& m : meters_) {
-        if (m.name() == name) {
-            return m;
-        }
-    }
-    return Meter::EMPTY();
+    auto found = ecf::algorithm::find_by_name(meters_, name);
+    return found == std::end(meters_) ? Meter::EMPTY() : *found;
 }
 
 Meter& Node::find_meter(const std::string& name) {
-    for (auto& m : meters_) {
-        if (m.name() == name) {
-            return m;
-        }
-    }
-    return const_cast<Meter&>(Meter::EMPTY());
+    auto found = ecf::algorithm::find_by_name(meters_, name);
+    return found == std::end(meters_) ? const_cast<Meter&>(Meter::EMPTY()) : *found;
 }
 
 bool Node::findLabel(const std::string& name) const {
-    for (const auto& l : labels_) {
-        if (l.name() == name) {
-            return true;
-        }
-    }
-    return false;
+    auto found = ecf::algorithm::find_by_name(labels_, name);
+    return found != std::end(labels_);
 }
 
 const Label& Node::find_label(const std::string& name) const {
-    for (const auto& l : labels_) {
-        if (l.name() == name) {
-            return l;
-        }
-    }
-    return Label::EMPTY();
+    auto found = ecf::algorithm::find_by_name(labels_, name);
+    return found == std::end(labels_) ? Label::EMPTY() : *found;
 }
 
 bool Node::findVerify(const VerifyAttr& v) const {

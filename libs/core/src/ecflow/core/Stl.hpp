@@ -12,6 +12,7 @@
 #define ecflow_core_Stl_HPP
 
 #include <algorithm>
+#include <memory>
 
 namespace ecf {
 /// Helper struct that will aid the deletion of Pointer from a container
@@ -57,6 +58,49 @@ void AssoDeletePtrs(Container& pContainer) {
     std::for_each(pContainer.begin(), pContainer.end(), TAsoDeletor<typename Container::value_type>());
     pContainer.clear();
 }
+
+namespace algorithm {
+
+namespace detail {
+
+template <typename T>
+struct is_shared_pointer : std::false_type
+{
+};
+
+template <typename T>
+struct is_shared_pointer<std::shared_ptr<T>> : std::true_type
+{
+};
+
+} // namespace detail
+
+template <typename T>
+constexpr bool is_shared_pointer_v = detail::is_shared_pointer<T>::value;
+
+template <typename C, typename Predicate>
+inline auto find_by(C& container, Predicate predicate) {
+    return std::find_if(std::begin(container), std::end(container), predicate);
+}
+
+template <typename C>
+inline auto find_by_name(C& container, std::string_view name) {
+    // Important: special handling to seamlessly handle containers of std::shared_ptr.
+    if constexpr (is_shared_pointer_v<typename C::value_type>) {
+        return find_by(container, [&](const auto& item) { return item->name() == name; });
+    }
+    else {
+        return find_by(container, [&](const auto& item) { return item.name() == name; });
+    }
+}
+
+template <typename C, typename I>
+inline auto find_by_number(C& container, I number) {
+    return find_by(container, [&](const auto& item) { return item.number() == number; });
+}
+
+} // namespace algorithm
+
 } // namespace ecf
 
 #endif /* ecflow_core_Stl_HPP */

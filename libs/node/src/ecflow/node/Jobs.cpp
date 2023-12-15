@@ -54,12 +54,11 @@ bool Jobs::generate(JobsParam& jobsParam) const {
 
         if (defs_) {
             if (defs_->server().get_state() == SState::RUNNING) {
-                const std::vector<suite_ptr>& suiteVec = defs_->suiteVec();
-                size_t theSize                         = suiteVec.size();
-                for (size_t i = 0; i < theSize; i++) {
-                    // SuiteChanged moved internal to Suite::resolveDependencies. i.e on fast path
-                    // and when suites not begun we save a constructor/destructor calls
-                    (void)suiteVec[i]->resolveDependencies(jobsParam);
+                const std::vector<suite_ptr>& suites = defs_->suiteVec();
+                for (const suite_ptr& suite: suites) {
+                    // SuiteChanged moved into Suite::resolveDependencies.
+                    // This ensures the fast path and when suite are not begun we save a ctor/dtor call
+                    (void)suite->resolveDependencies(jobsParam);
                 }
             }
         }

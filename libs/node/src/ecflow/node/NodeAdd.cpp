@@ -15,6 +15,7 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -25,18 +26,18 @@ using namespace ecf;
 using namespace std;
 
 bool Node::update_variable(const std::string& name, const std::string& value) {
-    size_t theSize = vars_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (vars_[i].name() == name) {
-            // Variable already exist, *UPDATE* its value
-            vars_[i].set_value(value);
-            if (0 == Ecf::debug_level())
-                std::cerr << "Node::addVariable: Variable of name '" << name << "' already exist for node "
-                          << debugNodePath() << " updating with value '" << value << "'\n";
-            return true;
-        }
+    auto found = ecf::algorithm::find_by_name(vars_, name);
+
+    if (found == std::end(vars_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(value);
+    if (0 == Ecf::debug_level()) {
+        std::cerr << "Node::addVariable: Variable of name '" << name << "' already exist for node " << debugNodePath()
+                  << " updating with value '" << value << "'\n";
+    }
+    return true;
 }
 
 void Node::addVariable(const Variable& v) {
