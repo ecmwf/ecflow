@@ -20,6 +20,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 #include "ecflow/node/AbstractObserver.hpp"
@@ -1045,11 +1046,9 @@ void Node::setStateOnly(NState::State newState,
 
     // Record state changes for verification
     if (misc_attrs_) {
-        size_t theSize = misc_attrs_->verifys_.size();
-        for (size_t i = 0; i < theSize; i++) {
-            if (misc_attrs_->verifys_[i].state() == newState) {
-                // cout << "Verify: calendar " << to_simple_string(calendar.date()) << "\n";
-                misc_attrs_->verifys_[i].incrementActual();
+        for (auto& verify : misc_attrs_->verifys_) {
+            if (verify.state() == newState) {
+                verify.incrementActual();
             }
         }
     }
@@ -1092,22 +1091,27 @@ DState::State Node::dstate() const {
 }
 
 bool Node::set_event(const std::string& event_name_or_number) {
-    for (Event& e : events_) {
-        if (e.name_or_number() == event_name_or_number) {
-            e.set_value(true);
-            return true;
-        }
+    auto found = ecf::algorithm::find_by(
+        events_, [&](const auto& item) { return item.name_or_number() == event_name_or_number; });
+
+    if (found == std::end(events_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(true);
+    return true;
 }
+
 bool Node::clear_event(const std::string& event_name_or_number) {
-    for (Event& e : events_) {
-        if (e.name_or_number() == event_name_or_number) {
-            e.set_value(false);
-            return true;
-        }
+    auto found = ecf::algorithm::find_by(
+        events_, [&](const auto& item) { return item.name_or_number() == event_name_or_number; });
+
+    if (found == std::end(events_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(false);
+    return true;
 }
 
 void Node::setRepeatToLastValue() {
