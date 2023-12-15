@@ -139,7 +139,7 @@ node_ptr Node::create(const std::string& node_string, std::string& error_msg) {
 }
 
 Node& Node::operator=(const Node& rhs) {
-    // Note:: Defs assignment operator use copy/swap, hence this assignemnt note used
+    // Note:: Defs assignment operator use copy/swap, hence this assignment note used
     // parent must set parent_
     if (this != &rhs) {
         n_         = rhs.n_;
@@ -286,7 +286,7 @@ void Node::begin() {
     // DO *NOT* call update_generated_variables(). Called on a type specific bases, for begin
     // Typically we need only call update_generated_variables() for a task, at job creation time.
     // so that ECF_OUT, ECF_TRYNO, ECF_JOBOUT, ECF_PASS(paswd_) can be updated.
-    // However the generated variables are used when within job generation and can be referenced by AST
+    // However, the generated variables are used when within job generation and can be referenced by AST
     // Hence to avoid excessive memory consumption, they are created on demand
 }
 
@@ -437,7 +437,7 @@ void Node::reset() {
 }
 
 void Node::handle_migration(const ecf::Calendar& c) {
-    // called when defs created by reading from a file on disk. i.e checkpoint
+    // called when defs created by reading from a file on disk. i.e. checkpoint
     // handle any migration
     for (auto& day : days_) {
         day.handle_migration(c);
@@ -445,7 +445,7 @@ void Node::handle_migration(const ecf::Calendar& c) {
 }
 
 void Node::requeue_time_attrs() {
-    // Note: we *dont* mark hybrid time dependencies as complete.
+    // Note: we *don't* mark hybrid time dependencies as complete.
     //       i.e. since this is called during alter command, it could be that
     //        the task is in a submitted or active state.
     do_requeue_time_attrs(true /*reset_next_time_slot*/, true /*reset_relative_duration*/, Requeue_args::FULL);
@@ -502,9 +502,9 @@ void Node::check_for_lateness(const ecf::Calendar& c, const ecf::LateAttr* inher
             if (!inherited_late || inherited_late->isNull())
                 checkForLateness(c);
             else {
-                LateAttr overidden_late = *inherited_late;
-                overidden_late.override_with(late_.get());
-                if (overidden_late.check_for_lateness(st_, c)) {
+                LateAttr overridden_late = *inherited_late;
+                overridden_late.override_with(late_.get());
+                if (overridden_late.check_for_lateness(st_, c)) {
                     late_->setLate(true);
                     flag().set(ecf::Flag::LATE);
                 }
@@ -529,8 +529,8 @@ void Node::checkForLateness(const ecf::Calendar& c) {
 
 void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes) {
     // The state duration is ONLY updated *IF* state has changed.
-    // However on re-queue *ALWAYS* reset state time.
-    // Otherwise we can end up, showing time in the future. SEE ECFLOW-1215
+    // However, on re-queue *ALWAYS* reset state time.
+    // Otherwise, we can end up showing time in the future. SEE ECFLOW-1215
     Suite* theSuite = suite();
     if (theSuite) {
         const Calendar& calendar = theSuite->calendar();
@@ -605,7 +605,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
 
                 // Remove effects of RUN and Force complete interactive commands
                 // For automated re-queue *DUE* to Repeats, *CLEAR* any user interaction that would miss the next time
-                // slots. *Down* the hierarchy This handles the case where a user, has manually intervened (i.e via run
+                // slots. *Down* the hierarchy This handles the case where a user, has manually intervened (i.e. via run
                 // or complete) and we had a time attribute That time attribute will have expired, typically we show
                 // next day. In the case where we have a parent repeat we need to clear the flag, otherwise the
                 // task/family with time based attribute would wait for next day.
@@ -621,7 +621,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
         }
 
         /// If user has *INTERACTIVLY* forced changed in state to complete *OR* run the job.
-        /// This would cause Node to miss the next time slot. i.e expire the time slot
+        /// This would cause Node to miss the next time slot. i.e. expire the time slot
         /// In which case testTimeDependenciesForRequeue should return false for a single time/today dependency
         /// and not requeue the node.
         if (has_time_dependencies() && testTimeDependenciesForRequeue()) {
@@ -693,8 +693,8 @@ void Node::set_most_significant_state_up_node_tree() {
 // Returning false, *STOPS* further traversal *DOWN* the node tree
 bool Node::resolveDependencies(JobsParam& jobsParam) {
     // This function is called:
-    //    a/ Periodically by the server, i.e every minute
-    //    b/ Asyncrousnly, after child command, via job submission
+    //    a/ Periodically by the server, i.e. every minute
+    //    b/ Asynchronously, after child command, via job submission
 #ifdef DEBUG_DEPENDENCIES
     LogToCout toCoutAsWell;
     cout << "\n";
@@ -736,7 +736,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
     }
 
     // Complete *MUST* be evaluated before trigger. As it can affect the other
-    // i.e A state change to COMPLETE, in which case no need to submit tasks
+    // i.e. A state change to COMPLETE, in which case no need to submit tasks
     // However if the complete does *not* evaluate it should *NOT* hold the node.
     if (evaluateComplete()) {
         if (completeAst()) {
@@ -760,14 +760,14 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
     if (evaluateTrigger()) {
         // WE only get here **IF** :
         // 1/ There is no trigger
-        // 2/ WE have a trigger and it evaluates to true
+        // 2/ WE have a trigger, and it evaluates to true
 #ifdef DEBUG_DEPENDENCIES
         LOG(Log::DBG, "   Node::resolveDependencies() " << absNodePath() << " FREE of TRIGGER");
 #endif
         return true;
     }
 
-    // We *have* a trigger and it does not evaluate, hold the node
+    // We *have* a trigger, and it does not evaluate, hold the node
 #ifdef DEBUG_DEPENDENCIES
     LOG(Log::DBG, "   Node::resolveDependencies() " << absNodePath() << " HOLDING due to TRIGGER");
 #endif
@@ -807,17 +807,17 @@ void Node::clearComplete() const {
 }
 
 bool Node::evaluateComplete() const {
-    // Complete *MUST* be evaluate before trigger. As it can affect the other
+    // Complete *MUST* be evaluated before trigger. As it can affect the other
     AstTop* theCompeteAst = completeAst();
     if (theCompeteAst) {
-        // *NOTE* if we have a non NULL complete ast, we must have complete expression
-        // The freed state is stored on the expression ( i.e not on the ast)
+        // *NOTE* if we have a non-NULL complete ast, we must have complete expression
+        // The freed state is stored on the expression ( i.e. not on the ast)
         // ISSUE: Complete expression cannot be by-passed in the GUI
         if (c_expr_->isFree() || theCompeteAst->evaluate()) {
 
             // Note: if a task has been set complete, the use may decide to place into queued state( via GUI)
             //       In which case, we *want* this complete expression to be re-evaluated.
-            //       Hence the old code below has been commented out.
+            //       Hence, the old code below has been commented out.
             // >>old: Set the complete as free, until begin()/requeue, // Only update state change no, if state has
             // changed.
             // >>old:if (!c_expr_->isFree()) freeComplete();
@@ -866,8 +866,8 @@ bool Node::evaluateTrigger() const {
     if (theTriggerAst) {
 
         // Note 1: A trigger can be freed by the ForceCmd
-        // Note 2: if we have a non NULL trigger ast, we must have trigger expression
-        // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
+        // Note 2: if we have a non-NULL trigger ast, we must have trigger expression
+        // Note 3: The freed state is stored on the expression ( i.e. *NOT* on the ast (abstract syntax tree) )
         if (t_expr_->isFree() || theTriggerAst->evaluate()) {
 
             // *ALWAYS* evaluate trigger expression unless user has forcibly removed trigger dependencies
@@ -1023,7 +1023,7 @@ void Node::setStateOnly(NState::State newState,
 
     if (do_log_state_changes) {
         // SUP-408 what does submitted mean in log?
-        // We want to mimimize calls to create a new time stamp in the log file.
+        // We want to minimize the calls to create a new time stamp in the log file.
         // A time stamp is automatically created, whenever a *new* client request is received, & then cached
         // However we can get a change in state, during tree traversal, when a node is free of its dependencies
         // If we were to just log the message it would use the last cached time stamp. Giving misleading info:
@@ -1032,7 +1032,7 @@ void Node::setStateOnly(NState::State newState,
             // std::cout << "!!!!! NOT in cmd context updating time stamp before logging\n";
             Log::instance()->cache_time_stamp();
         }
-        ecf::log(Log::LOG, log_state_change); // Note: log type, must be same for debug & release for test, i.e for log
+        ecf::log(Log::LOG, log_state_change); // Note: log type, must be same for debug & release for test, i.e. for log
                                               // file verification
     }
 
@@ -1181,7 +1181,7 @@ search_user_edit_variables(const std::string& name, std::string& value, const Na
 }
 
 // #define DEBUG_S 1
-bool Node::variableSubsitution(std::string& cmd) const {
+bool Node::variableSubstitution(std::string& cmd) const {
     char micro = '%';
     std::string micro_char;
     findParentUserVariableValue(Str::ECF_MICRO(), micro_char);
@@ -1198,16 +1198,16 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
     // edit cmd "/home/ma/map/sms/smsfectch -F %ECF_FILES% -I %ECF_INCLUDE%"
     // We can also have
     //
-    // "%<VAR>:<substitute>% i.e if VAR exist use it, else use substitute
+    // "%<VAR>:<substitute>% i.e. if VAR exist use it, else use substitute
     //
     // ************************************************************************************************************
     // Special case handling for user variables, and generated variables, which take precedence over node variables
     // ************************************************************************************************************
     //
-    // i.e VAR is defined as BILL
+    // i.e. VAR is defined as BILL
     //  %VAR:fred --f%  will either be "BILL" or if VAR is not defined "fred --f"
     //
-    // Infinite recursion. Its possible to end up with infinite recursion:
+    // Infinite recursion. It is possible to end up with infinite recursion:
     //   	edit hello '%hello%'  # string like %hello% will cause infinite recursion
     //   	edit fred '%bill%'
     //	 	edit bill '%fred%'   # should be 10
@@ -1221,8 +1221,8 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
     Alias* is_a_alias          = isAlias();
     while (true) {
         // A while loop here is used to:
-        //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
-        //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
+        //   a/ Allow for multiple substitution on a single line. i.e. `%ECF_FILES% -I %ECF_INCLUDE%`
+        //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
 
         size_t firstPercentPos = cmd.find(micro, pos);
         if (firstPercentPos == string::npos)
@@ -1235,7 +1235,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         pos = 0;
         if (secondPercentPos - firstPercentPos <= 1) {
             // handle %% with no characters in between, skip over
-            // i.e to handle "printf %%02d %HOUR:00%" --> "printf %02d 00"   i.e if HOUR not defined
+            // i.e. to handle "printf %%02d %HOUR:00%" --> "printf %02d 00" i.e. if HOUR not defined
             pos                = secondPercentPos + 1;
             double_micro_found = true;
             continue;
@@ -1250,10 +1250,10 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         // ****************************************************************************************
         // Look for generated variables that should NOT be overridden first:
         //    Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
-        //    However for job file generation we should use use the generated variables first.
+        //    However for job file generation we should use the generated variables first.
         //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
         //    FREE_JOBS_PASSWORD is left for the server to deal with
-        // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-999
+        // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitimately override these. ECFLOW-999
         bool generated_variable = false;
         if (percentVar.find("ECF_") == 0) {
             if (percentVar.find(Str::ECF_HOST()) != std::string::npos)
@@ -1287,8 +1287,8 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             if (firstColon != string::npos) {
 
                 if (is_a_alias && findParentVariableValue(percentVar, varValue)) {
-                    // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in
-                    // the name
+                    // For alias, we could have added variables with %A:0%, %A:1%.
+                    // Aliases allow variables with ':' in the name.
                     cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
                 }
                 else {
@@ -1349,7 +1349,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
     if (double_micro_found) {
         // replace all double micro with a single micro, this must be a single parse
         // date +%%Y%%m%%d" ==> date +%Y%m%d
-        // %%%%             ==> %%            // i.e single parse
+        // %%%%             ==> %%            // i.e. single parse
         std::string doubleEcfMicro;
         doubleEcfMicro += micro;
         doubleEcfMicro += micro;
@@ -1375,8 +1375,8 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
     int count = 0;
     while (true) {
         // A while loop here is used to:
-        //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
-        //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
+        //   a/ Allow for multiple substitution on a single line. i.e. `%ECF_FILES% -I %ECF_INCLUDE%`
+        //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
 
         size_t firstPercentPos = cmd.find(micro);
         if (firstPercentPos == string::npos)
@@ -1409,7 +1409,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
                 // %VAR:fred% --->  name("VAR:fred") value(theFoundVariable.value())
                 used_variables.insert(std::make_pair(percentVar, varValue));
 
-                // replace the "%VAR:fred --f%" with variable value, so that we dont process it again
+                // replace the "%VAR:fred --f%" with variable value, so that we don't process it again
                 cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
             }
             else {
@@ -1448,7 +1448,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
     return true;
 }
 
-bool Node::variable_dollar_subsitution(std::string& cmd) const {
+bool Node::variable_dollar_substitution(std::string& cmd) const {
     // scan command for environment variables, and substitute
     // edit ECF_INCLUDE $ECF_HOME/include
 
@@ -1502,9 +1502,9 @@ std::string Node::triggerExpression() const {
 
 bool Node::check_expressions(Ast* ast, const std::string& expr, bool trigger, std::string& errorMsg) const {
     if (ast) {
-        // The expression have been parsed and we have created the abstract syntax tree
-        // Try to resolve the path/node references in the expressions
-        // Also resolve references to events,meter,repeats variables.
+        // The expression has been parsed, and we have created the abstract syntax tree.
+        // We now try to resolve the path/node references in the expressions.
+        // And, also, resolve references to events, meter, repeats and variables.
         AstResolveVisitor astVisitor(this);
         ast->accept(astVisitor);
         if (!astVisitor.errorMsg().empty()) {
@@ -1557,7 +1557,7 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const {
 
     /// ************************************************************************************
     /// *IMPORTANT side effect: *
-    /// The simulator relies AstResolveVisitor to set usedInTriggger() for events and meters
+    /// The simulator relies AstResolveVisitor to set usedInTrigger() for events and meters
     /// *************************************************************************************
 
     /// Make Sure: To sure capture parser errors:
@@ -1603,8 +1603,7 @@ void Node::add_comment_char(std::string& ret, bool& added_comment_char) const {
 
 void Node::write_state(std::string& ret, bool& added_comment_char) const {
     // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
-    //             multiple statement on a single line i.e.
-    //                 task a; task b;
+    //             multiple statement on a single line i.e. `task a; task b;`
     // If attribute correspond to the defaults don't write then out
     if (state() != NState::UNKNOWN) {
         add_comment_char(ret, added_comment_char);
@@ -1736,7 +1735,7 @@ void Node::print(std::string& os) const {
 
     if (PrintStyle::getStyle() == PrintStyle::STATE) {
         // Distinguish normal variable from generated, by adding a #
-        // This also allows it be read in again and compared in the AParser/tests
+        // This also allows it to be read in again and compared in the AParser/tests
         std::vector<Variable> gvec;
         gen_variables(gvec);
         for (const Variable& v : gvec) {
@@ -1903,7 +1902,7 @@ bool Node::operator==(const Node& rhs) const {
             return false;
         }
     }
-    // We dont compare genvar as this is only used in server environment
+    // We don't compare `genvar` as this is only used in server environment
 
     if (!(inLimitMgr_ == rhs.inLimitMgr_)) {
 #ifdef DEBUG
@@ -2279,7 +2278,7 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
         vec.push_back(ss.str());
 
         // When task is active/submitted no point, going any further.
-        // However for FAMILY/SUITE we still need to proceed
+        // However, for FAMILY/SUITE we still need to proceed
         if (isTask())
             return why_found;
         why_found = true; // return true if why found
@@ -2364,8 +2363,8 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
     AstTop* theTriggerAst = triggerAst();
     if (report_on_trigger_expression && theTriggerAst) {
         // Note 1: A trigger can be freed by the ForceCmd
-        // Note 2: if we have a non NULL trigger ast, we must have trigger expression
-        // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
+        // Note 2: if we have a non-NULL trigger ast, we must have trigger expression
+        // Note 3: The freed state is stored on the expression ( i.e. *NOT* on the ast (abstract syntax tree) )
         if (!t_expr_->isFree()) {
 #ifdef DEBUG_WHY
             std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";

@@ -121,7 +121,7 @@ public:
     ///   - include pre-processing
     ///   - variable substitution
     ///   - remove comment and manual sections
-    ///   - ignore %noop
+    ///   - ignore %nopp
     void pre_process_user_file(std::vector<std::string>& user_edit_file, std::string& pre_processed_file);
 
     /// Searches for the first %comment, then extracts all variables of the form
@@ -151,7 +151,7 @@ private:
                        std::vector<std::string>& theManualLines,
                        std::string& errormsg) const;
 
-    void remove_comment_manual_and_noop_tokens();
+    void remove_comment_manual_and_nopp_tokens();
 
     static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
     static void dump_expanded_script_file(const std::vector<std::string>& lines); // for DEBUG

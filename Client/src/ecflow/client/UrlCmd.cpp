@@ -42,7 +42,7 @@ std::string UrlCmd::getUrl() const {
         throw std::runtime_error(errorMsg);
     }
 
-    if (!node_->variableSubsitution(url)) {
+    if (!node_->variableSubstitution(url)) {
         std::string errorMsg = "UrlCmd:: Variable substitution failed for ";
         errorMsg += url;
         throw std::runtime_error(errorMsg);

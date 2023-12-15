@@ -82,7 +82,7 @@ public:
     virtual node_ptr clone() const = 0;
 
     // Server called functions:
-    /// Required when we have time attributes, when time related attribute are free they stay free, until re-queu
+    //   Required when we have time attributes, when time related attribute are free they stay free, until re-queue
     struct Calendar_args
     {
         Calendar_args() = default;
@@ -193,8 +193,8 @@ public:
     virtual void requeue(Requeue_args&);
 
     // force queued allows a job to re-run preserving job output.
-    // However other nodes may reference this nodes events/meters/late in trigger expression, hence
-    // reset events,meters and late flag ECFLOW-1617
+    // However, other nodes may reference this node's events/meters/late in trigger expression,
+    // and reset events, meters and late flag ECFLOW-1617
     virtual void reset_late_event_meters();
 
     /// Re queue the time based attributes only.
@@ -237,7 +237,7 @@ public:
     /// find all %VAR% and replaces with variable values, returns false on the
     /// first variable that can't be found, cmd will be left half processed.
     /// Will search for ECF_MICRO, if not found assumes % as the micro char
-    bool variableSubsitution(std::string& cmd) const;
+    bool variableSubstitution(std::string& cmd) const;
 
     bool variable_substitution(std::string& cmd, const NameValueMap& user_edit_variables, char micro = '%') const;
 
@@ -247,7 +247,7 @@ public:
     /// Find all environment variables, in the input string and substitute.
     /// with correspondingly named variable value.
     /// i.e search for ${ENV} and replace
-    bool variable_dollar_subsitution(std::string& cmd) const;
+    bool variable_dollar_substitution(std::string& cmd) const;
 
     /// Resolve inlimit references to limits, and check trigger and complete expression
     virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
@@ -281,7 +281,7 @@ public:
     bool operator==(const Node& rhs) const;
     virtual bool checkInvariants(std::string& errorMsg) const;
 
-    /// Implements the visitor pattren
+    /// Implements the visitor pattern
     virtual void accept(ecf::NodeTreeVisitor&)               = 0;
     virtual void acceptVisitTraversor(ecf::NodeTreeVisitor&) = 0; // Visitor does the traversal
 
@@ -607,7 +607,7 @@ public:
     /// Useful when we want to return by reference
     const std::string& find_parent_user_variable_value(const std::string& name) const;
 
-    /// Search up the hierarchy, simply checks for existence independent of variable vlaue
+    /// Search up the hierarchy, simply checks for existence independent of variable value
     bool user_variable_exists(const std::string& name) const;
 
     virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr(); }
@@ -797,10 +797,10 @@ private:
     bool testTimeDependenciesForRequeue();
     bool calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args&);
     bool holding_day_or_date(const ecf::Calendar& c) const;
-    void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion, Requeue_args::Requeue_t);
+    void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duration, Requeue_args::Requeue_t);
     bool has_time_dependencies() const;
 
-private: // alow simulator access
+private: // allow simulator access
     friend class ecf::DefsAnalyserVisitor;
     friend class ecf::FlatAnalyserVisitor;
     friend class ecf::SimulatorVisitor;

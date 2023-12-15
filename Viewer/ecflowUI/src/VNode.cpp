@@ -486,7 +486,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     if (!var.empty()) {
         val = var.theValue();
         if (substitute) {
-            node_->variableSubsitution(val);
+            node_->variableSubstitution(val);
         }
         return val;
     }
@@ -494,7 +494,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     if (!gvar.empty()) {
         val = gvar.theValue();
         if (substitute) {
-            node_->variableSubsitution(val);
+            node_->variableSubstitution(val);
         }
         return val;
     }
@@ -513,7 +513,7 @@ std::string VNode::findInheritedVariable(const std::string& key, bool substitute
     if (node_->findParentVariableValue(key, val)) {
         if (substitute) {
             // this must resolve ECF_MICRO all the time
-            node_->variableSubsitution(val);
+            node_->variableSubstitution(val);
         }
         return val;
     }
@@ -549,7 +549,7 @@ bool VNode::substituteVariableValue(std::string& val) const {
 
     // should set the def mutex because variableSubsitution
     // might need information from the defs
-    return node_->variableSubsitution(val);
+    return node_->variableSubstitution(val);
 }
 
 int VNode::variablesNum() const {
