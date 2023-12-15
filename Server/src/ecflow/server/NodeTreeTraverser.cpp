@@ -141,7 +141,7 @@ void NodeTreeTraverser::terminate() {
 }
 
 void NodeTreeTraverser::do_traverse() {
-    // since we poll every second, if less than next poll(every 60 seconds) continue.
+    // since we poll every second, if less than next poll (every 60 seconds) continue.
     ptime time_now = Calendar::second_clock_time();
     if (time_now < next_poll_time_) {
 
@@ -161,8 +161,8 @@ void NodeTreeTraverser::do_traverse() {
 
     LogFlusher logFlusher;
 
-    // We have SOFT real time, we poll every second, BUT only update the suite calendar at the job submission
-    // interval. However we cannot guarantee to hit exactly at the next poll time
+    // We have SOFT real time, we poll every second, BUT only update the suite calendar at job submission interval.
+    // However, we cannot guarantee to hit exactly at the next poll time
     // *** traverse node tree and increment next_poll_time_ ***
     time_duration duration          = time_now - last_time_;
     int diff_from_last_time         = duration.total_seconds();
@@ -312,25 +312,25 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
     // *****************************************************************************
     // JOB SUBMISSION SEEMS TO WORK BEST IF THE CALENDAR INCREMENT HAPPENS FIRST
     // HOWEVER THIS MEANS WE MAY MISS THE VERY FIRST JOB SUBMISSION. ??
-    // Note: events,meters and task completion kick of another job submission
+    // Note: events, meters and task completion kickoff another job submission
     //       There seems to be greater stability in terms of testing as it allows
     //       process to complete, before the calendar is incremented.
     // *****************************************************************************
 
     // This functions gets called every 60 seconds or so, update calendar && time
-    // dependent variables in case any jobs depend on them. By default the calendar
+    // dependent variables in case any jobs depend on them. By default, the calendar
     // update interval is the same as submitJobsInterval for non-real calendars,
     // however for testing both real/non-real calendars the calendar increment can be
     // changed to speed up calendar. This is done by setting the calendar increment
-    // on the suite(i.e in the defs file)  which will the _override_ this setting.
+    // on the suite (i.e. via the defs file) which will _override_ this setting.
     //
-    // Additionally by passing in the flag running_, it allow suites which want to
+    // Additionally, by passing in the flag running_, it allows suites which want to
     // stop the calendar updates, when the server is stopped to do so.
     // For real time calendars we make one system call here, instead of many times in each suite
     //
-    // In the case where defs/node tree is suspended updateCalendar will continue
-    // to mark those time dep' are free, as free. This information is then used
-    // during the resume
+    // In the case where defs/node tree is suspended, updateCalendar will continue
+    // to mark those time dependencies that are free, as free.
+    // This information is then used during the resume.
 #ifdef DEBUG_TRAVERSER
     ++count_;
 #endif
@@ -343,9 +343,10 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
 void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time,
                                                             bool user_cmd_context) const {
     // **************************************************************************************
-    // This can be called at the end of a user command(force,alter,requeue,etc),
-    // hence start_time may be >= poll_time, Note: for child command we just call
-    // increment_job_generation_count()
+    // This can be called at the end of a user command (force, alter, requeue, etc.).
+    // Hence, start_time may be >= poll_time.
+    //
+    // Note: for child command we just call increment_job_generation_count()
     // **************************************************************************************
 
     if (running_) {
@@ -355,13 +356,6 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
 
         // ** In the *NON* command context, we should always have start_time < next_poll_time_
         if (user_cmd_context && start_time >= next_poll_time_) {
-
-            // cout <<
-            // "*****************************************************************************************************\n";
-            // cout << "user Command context " << cmd_context << " start_time: " << start_time << " >= " << "
-            // next_poll_time_: " << next_poll_time_ << "\n"; cout <<
-            // "*****************************************************************************************************\n";
-
             server_->increment_job_generation_count();
             return;
         }
@@ -369,11 +363,12 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
         server_->reset_job_generation_count();
 
         // Pass submit jobs interval, so that we can check jobs submission occurs within the allocated time.
-        // By default job generation is enabled, however for testing, allow job generation to be disabled.
+        // By default, job generation is enabled.
+        // However, for testing, we allow job generation to be disabled.
         JobsParam jobsParam(serverEnv_.submitJobsInterval(), serverEnv_.jobGeneration());
 
         // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
-        // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+        // Hence, we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
         // Should allow greater child communication.
         // By setting set_next_poll_time, we enable timeout of job generation.
         // ** IMPLIES => next_poll_time_ must be set first, before *THIS* function is called **
@@ -385,15 +380,12 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
             ecf::log(Log::ERR, jobsParam.getErrorMsg());
         }
         if (jobsParam.timed_out_of_job_generation()) {
-
             // Implies we timed out, hence time_out_time >= next_poll_time_
             const ptime& time_out_time = jobsParam.time_out_time();
-            // std::cout << "Job generation *timed* out: start time:" << start_time << "  time_out_time:" <<
-            // time_out_time << "  poll_time:" << next_poll_time_ << "\n";
 
-            // It could be that we started job generation a few seconds before the poll time,
-            // Hence to avoid excessive warnings, Only warn if time_out_time > next_poll_time_ and forgive about 5
-            // seconds
+            // Timeout could occur because job generation started just a few seconds before the poll time.
+            // Excessive warnings are avoided by issuing warnings only if `time_out_time > next_poll_time_`.
+            // Notice: the following implementation considers 5 seconds of leeway.
             if (!time_out_time.is_special() && time_out_time > next_poll_time_) {
                 const int leeway       = 5;
                 time_duration duration = time_out_time - next_poll_time_;

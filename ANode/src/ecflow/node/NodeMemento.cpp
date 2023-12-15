@@ -34,7 +34,7 @@ void Node::clear() {
     // ************************************************************
     // Note: auto cancel, auto restore, auto archive does not have any
     //       changeable state, Hence it is not cleared.
-    //       Hence no need for memento
+    //       Hence, no need for memento
     // ************************************************************
 
     meters_.clear();
@@ -508,11 +508,9 @@ void Node::set_memento(const NodeRepeatMemento* memento, std::vector<ecf::Aspect
 
     if (!repeat_.empty()) {
 
-        // Note: the node is incremented one past, the last value
-        // In Node we increment() then check for validity
-        // hence the_new_value may be outside of the valid range.
-        // This can be seen when do a incremental sync,
-        // *hence* allow memento to copy the value as is.
+        // Note: the node is incremented one past the last value.
+        // In Node, we increment() then check for validity so the_new_value may be outside the valid range.
+        // This may happen when doing an incremental sync, *hence*, allow memento to copy the value as is.
         repeat_.set_value(memento->repeat_.index_or_value());
 
         // Alternative, but expensive since relies on cloning and coping potentially very large vectors
@@ -539,11 +537,9 @@ void Node::set_memento(const NodeRepeatIndexMemento* memento,
 
     if (!repeat_.empty()) {
 
-        // Note: the node is incremented one past, the last value
-        // In Node we increment() then check for validity
-        // hence the_new_value may be outside of the valid range.
-        // This can be seen when do a incremental sync,
-        // *hence* allow memento to copy the value as is.
+        // Note: the node is incremented one past the last value.
+        // In Node we increment() then check for validity so the_new_value may be outside the valid range.
+        // This may happen when doing an incremental sync, *hence*, allow memento to copy the value as is.
         repeat_.set_value(memento->index_or_value_);
     }
 }

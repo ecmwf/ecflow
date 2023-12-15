@@ -131,7 +131,7 @@ void NodeContainer::requeue(Requeue_args& args) {
     restore_on_begin_or_requeue();
     Node::requeue(args);
 
-    // For negative numbers, do nothing, i.e do not clear
+    // For negative numbers, do nothing, i.e. do not clear
     if (args.clear_suspended_in_child_nodes_ >= 0)
         args.clear_suspended_in_child_nodes_++;
 
@@ -200,8 +200,8 @@ void NodeContainer::kill(const std::string& /* zombie_pid, only valid for single
 
 void NodeContainer::status() {
     for (const auto& n : nodes_) {
-        // Avoid exception for top down case, if Task is not active or submitted
-        // Allows status cmd to run over more Tasks, without early exit, when some tasks are not active/sumitted
+        // Avoid exception for top-down case, if Task is not active or submitted
+        // Allows status cmd to run over more Tasks, without early exit, when some tasks are not active/submitted
         if (n->isTask() && (n->state() != NState::ACTIVE && n->state() != NState::SUBMITTED)) {
             continue;
         }
@@ -474,7 +474,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam) {
     // cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
     //  Don't evaluate children unless parent is free. BOMB out early for this case.
     //  Note:: Task::resolveDependencies() will check inLimit up front. *** THIS CHECKS UP THE HIERARCHY ***
-    //  Note:: Node::resolveDependencies() may have forced family node to complete, should have have
+    //  Note:: Node::resolveDependencies() may have forced family node to complete, should have
     //         returned false in this case, to stop any job submission
     if (!Node::resolveDependencies(jobsParam)) {
 
@@ -497,7 +497,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam) {
     }
 
     for (const auto& n : nodes_) {
-        // Note: we don't bomb out early here. Since a later child could be free. i.e f1/ty or t4
+        // Note: we don't bomb out early here. Since a later child could be free e.g. f1/ty or t4
         // child t1 holding
         // child t2 holding
         // child f1 free
@@ -618,7 +618,7 @@ void NodeContainer::handleStateChange() {
     // Increment any repeats & requeue
     requeueOrSetMostSignificantStateUpNodeTree();
 
-    Node::handleStateChange(); // may do a autorestore, if state is COMPLETE
+    Node::handleStateChange(); // may result in an auto-restore, if state is COMPLETE
 }
 
 size_t NodeContainer::child_position(const Node* child) const {
@@ -808,7 +808,7 @@ void NodeContainer::find_closest_matching_node(const std::vector<std::string>& p
 
         closest_matching_node = shared_from_this();
 
-        // Match the Container i.e family or suite
+        // Match the Container i.e. family or suite
         bool lastIndex = (indexIntoPathNode == pathSize - 1);
         if (lastIndex) {
             return;
@@ -829,10 +829,10 @@ void NodeContainer::match_closest_children(const std::vector<std::string>& pathT
 
     bool lastIndex = (indexIntoPathNode == pathSize - 1);
     if (lastIndex) {
-        // even if the name matches, its only valid if the index is the last index
-        // i.e if we have a suite like /a/b/c/d/e
-        //     and a path like         /a/b/c/d/e/f/g
-        // In this we will match with e but it not valid since its not the last index
+        // Even if the name matches, it is only valid if the index is the last index
+        // e.g. given a suite /a/b/c/d/e
+        //      and the path  /a/b/c/d/e/f/g
+        // The path will match with e, but it invalid since it is not the last index
         for (const auto& n : nodes_) {
             if (n->name() == pathToNode[indexIntoPathNode]) {
                 closest_matching_node = n;
@@ -1142,7 +1142,7 @@ std::string NodeContainer::archive_path() const {
     }
 
     std::string the_archive_file_name = absNodePath();
-    Str::replaceall(the_archive_file_name, "/", ":"); // we use ':' since its not allowed in the node names
+    Str::replaceall(the_archive_file_name, "/", ":"); // we use ':' since it is not allowed in the node names
     the_archive_file_name += ".check";
 
     std::string port = Str::DEFAULT_PORT_NUMBER();
@@ -1319,7 +1319,7 @@ void NodeContainer::remove_archived_files() {
     // remove trailing '.check'
     std::string::size_type check_pos = the_archive_path.rfind(".check");
     if (check_pos == std::string::npos) {
-        // somethings gone wrong
+        // something has gone wrong
         return;
     }
     the_archive_path.erase(the_archive_path.begin() + check_pos, the_archive_path.end());
@@ -1331,7 +1331,7 @@ void NodeContainer::remove_archived_files() {
         return;
 
     // if this nodes archive file is a prefix for any archived file, then it is child archived file and needs
-    // to be deleted. i.e if /ecflow is being deleted then:
+    // to be deleted. i.e. if /ecflow is being deleted then:
     // the_archive_path = Avis-MacBook-Pro.local.4040.:ecflow
     // Hence if this matches as a prefix for any archive file, then it needs to be deleted.
     //  Avis-MacBook-Pro.local.4040.:ecflow.check
@@ -1406,7 +1406,7 @@ template <class Archive>
 void NodeContainer::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Node>(this), CEREAL_NVP(nodes_));
 
-    // Setup the parent pointers. Since they are not serialised
+    // Set up the parent pointers. Since they are not serialised
     if (Archive::is_loading::value) {
         for (auto& n : nodes_) {
             n->set_parent(this);

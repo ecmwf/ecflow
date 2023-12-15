@@ -93,7 +93,7 @@ void Submittable::complete() {
     flag().clear(ecf::Flag::ZOMBIE);
 
     /// Should we clear paswd_ & process_id? It can be argued that
-    /// we should keep this. In case it is needed. i.e The job may not really be
+    /// we should keep this. In case it is needed. i.e. The job may not really be
     /// complete. However keeping, this means the memory usage will continue to rise
     /// Dependent on number of tasks. This can affect network bandwidth as well.
     /// Hence to reduce network bandwidth we chose to clear the strings
@@ -172,9 +172,9 @@ bool Submittable::calendarChanged(const ecf::Calendar& c,
 }
 
 void Submittable::write_state(std::string& ret, bool& added_comment_char) const {
-    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
+    // *IMPORTANT* we *CAN'T* use ';' character, since is used in the parser, when we have
     //             multiple statement on a single line i.e.
-    //                 task a; task b;
+    //                 `task a; task b;`
     if (!paswd_.empty() && paswd_ != Submittable::DUMMY_JOBS_PASSWORD()) {
         add_comment_char(ret, added_comment_char);
         ret += " passwd:";
@@ -358,7 +358,7 @@ EcfFile Submittable::locatedEcfFile() const {
         reasonEcfFileNotFound += ") does not exist:\n";
     }
 
-    // Caution: This is not used in operations or research, equally is has not been tested.
+    // Caution: This is not used in operations or research; equally it has not been tested.
     std::string ecf_fetch_cmd;
     findParentVariableValue(Str::ECF_FETCH(), ecf_fetch_cmd);
     if (!ecf_fetch_cmd.empty()) {
@@ -366,7 +366,7 @@ EcfFile Submittable::locatedEcfFile() const {
         std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << ecf_fetch_cmd
                   << "' variable exists\n";
 #endif
-        if (variableSubsitution(ecf_fetch_cmd)) {
+        if (variableSubstitution(ecf_fetch_cmd)) {
             return EcfFile(const_cast<Submittable*>(this), ecf_fetch_cmd, EcfFile::ECF_FETCH_CMD);
         }
         else {
@@ -387,7 +387,7 @@ EcfFile Submittable::locatedEcfFile() const {
         std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT_CMD = '" << ecf_script_cmd
                   << "' variable exists\n";
 #endif
-        if (variableSubsitution(ecf_script_cmd)) {
+        if (variableSubstitution(ecf_script_cmd)) {
             return EcfFile(const_cast<Submittable*>(this), ecf_script_cmd, EcfFile::ECF_SCRIPT_CMD);
         }
         else {
@@ -415,7 +415,7 @@ EcfFile Submittable::locatedEcfFile() const {
                   << ecf_filesDirectory << "' backwards\n";
 #endif
         if (!ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory)) {
-            // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf ||
+            // If File::backwardSearch fails it returns an empty string, i.e. failure to locate script (Task/.ecf ||
             // Alias/.usr) file
             std::string searchResult;
             if (file_search_algo == EcfFile::PRUNE_ROOT)
@@ -435,11 +435,11 @@ EcfFile Submittable::locatedEcfFile() const {
                 return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
         }
         else {
-            // Before failing try again but with variable Subsitution. ECFLOW-788
+            // Before failing try again but with variable Substitution. ECFLOW-788
             std::string original_ecf_filesDirectory = ecf_filesDirectory;
-            variableSubsitution(ecf_filesDirectory);
+            variableSubstitution(ecf_filesDirectory);
             if (!ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory)) {
-                // If search fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr)
+                // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr)
                 // file
                 std::string searchResult;
                 if (file_search_algo == EcfFile::PRUNE_ROOT)
@@ -474,7 +474,7 @@ EcfFile Submittable::locatedEcfFile() const {
               << "' backwards\n";
 #endif
     if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
-        // If search fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
+        // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr) file
         std::string searchResult;
         if (file_search_algo == EcfFile::PRUNE_ROOT)
             searchResult = File::backwardSearch(ecf_home, theAbsNodePath, script_extension());
@@ -518,12 +518,12 @@ void Submittable::set_jobs_password(const std::string& p) {
 
 void Submittable::increment_try_no() {
     // EVERY time we SUBMIT a job we must:
-    // o generate a password, and hence updated generated variable ECF_PASS
-    // o increment the try number
+    // - generate a password, and hence updated generated variable ECF_PASS
+    // - increment the try number
     //   This means we also need to regenerate the variables
     //   since ECF_TRYNO , ECF_JOB, ECF_JOBOUT depend on the try number.
-    //   ALSO ECF_RID is updated with empty string
-    // o Clear the process/remote id. These will be reset by the child commands
+    //   ALSO, ECF_RID is updated with empty string
+    // - Clear the process/remote id. These will be reset by the child commands
     // *** This MUST be done before pre-processing as it uses these variables ***
     tryNo_++;
     rid_.clear();
@@ -589,10 +589,10 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
     try {
         // Locate the ecf files corresponding to the task.
         // Assign lifetime of EcfFile to JobsParam.
-        // Minimise memory allocation/deallocation with Job lines and allow include file caching
+        // Minimise memory allocation/de-allocation with Job lines, and allow _include file_ caching
         jobsParam.set_ecf_file(locatedEcfFile());
 
-        // Pre-process ecf file (i.e expand includes, remove comments,manual) and perform
+        // Pre-process ecf file (i.e. expand includes, remove comments,manual) and perform
         // variable substitution. This will then form the '.job' files.
         // If the job file already exist it is overridden
         // The job file SHOULD be referenced in ECF_JOB_CMD
@@ -640,7 +640,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
 }
 
 bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
-    // No script(i.e .ecf file), hence it is assumed the ECF_JOB_CMD will call:
+    // No script(i.e. .ecf file), hence it is assumed the ECF_JOB_CMD will call:
     //  ECF_PASS=%ECF_PASS%;ECF_PORT=%ECF_PORT%;ECF_HOST=%ECF_HOST%;ECF_NAME=%ECF_NAME%;ECF_TRYNO=%ECF_TRYNO%;
     //  ecflow_client --init %%;
     //     . some user script, or in-line command, should use full path.;
@@ -700,7 +700,7 @@ void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
 
     // Typically a valid try number is >=1.
     // Since check_job_creation is only used for testing/python, we will initialise tryNum to -1
-    // so than when it is incremented it will by a try_no of zero. *zero is an invalid try_no *
+    // so that when it is incremented it will be a try_no of zero. *zero is an invalid try_no *
     tryNo_ = -1;
 
     /// call just before job submission, reset data members, update try_no, and *** generate variable ***
@@ -713,7 +713,7 @@ void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
         std::string tmpLocationForJob = jobCtrl->dir_for_job_creation();
         tmpLocationForJob += absNodePath();
         tmpLocationForJob += File::JOB_EXTN();
-        tmpLocationForJob += "0"; // try number of zero ( i.e an invalid try number)
+        tmpLocationForJob += "0"; // try number of zero ( i.e. an invalid try number)
         set_genvar_ecfjob(tmpLocationForJob);
     }
 
@@ -768,7 +768,7 @@ void Submittable::kill(const std::string& zombie_pid) {
 
         // *** Generated variables are *NOT* persisted.                                     ***
         // *** Hence if we have recovered from a check point file, then they will be empty. ***
-        // *** i.e terminate server with active jobs, restart from saved check_pt file
+        // *** i.e. terminate server with active jobs, restart from saved check_pt file
         // *** and then try to kill the active job, will get an exception( see below) since
         // *** Generated variable ECF_RID will be empty.
         if (!sub_gen_variables_) {
@@ -805,7 +805,7 @@ void Submittable::kill(const std::string& zombie_pid) {
         Str::replace(ecf_kill_cmd, "%ECF_RID%", zombie_pid);
     }
 
-    if (!variableSubsitution(ecf_kill_cmd)) {
+    if (!variableSubstitution(ecf_kill_cmd)) {
         flag().set(ecf::Flag::KILLCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD(" << ecf_kill_cmd << ") on task "
@@ -813,7 +813,7 @@ void Submittable::kill(const std::string& zombie_pid) {
         throw std::runtime_error(ss.str());
     }
 
-    // Please note: this is *non blocking* the output of the command(ECF_KILL_CMD) should be written to %ECF_JOB%.kill
+    // Please note: this is *non-blocking* the output of the command(ECF_KILL_CMD) should be written to %ECF_JOB%.kill
     // The output is accessible via the --file cmd
     // Done as two separate steps as kill command is not blocking on the server
     //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
@@ -843,7 +843,7 @@ void Submittable::status() {
 
     // *** Generated variables are *NOT* persisted.                                     ***
     // *** Hence if we have recovered from a check point file, then they will be empty. ***
-    // *** i.e terminate server with active jobs, restart from saved check_pt file
+    // *** i.e. terminate server with active jobs, restart from saved check_pt file
     // *** and then try to kill/status the active job, will get an exception(see below) since
     // *** Generated variable ECF_RID will be empty.
     if (!sub_gen_variables_) {
@@ -867,7 +867,7 @@ void Submittable::status() {
         throw std::runtime_error(ss.str());
     }
 
-    if (!variableSubsitution(ecf_status_cmd)) {
+    if (!variableSubstitution(ecf_status_cmd)) {
         flag().set(ecf::Flag::STATUSCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD(" << ecf_status_cmd << ") on task "
@@ -875,7 +875,7 @@ void Submittable::status() {
         throw std::runtime_error(ss.str());
     }
 
-    // Please note: this is *non blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
+    // Please note: this is *non-blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
     // SPAWN process, attach signal to monitor process. returns true
     std::string errorMsg;
     if (!System::instance()->spawn(System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), errorMsg)) {
@@ -897,7 +897,7 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
         return false;
     }
 
-    if (!variableSubsitution(ecf_job_cmd)) {
+    if (!variableSubstitution(ecf_job_cmd)) {
         jobsParam.errorMsg() +=
             "Submittable::createChildProcess: Variable substitution failed for ECF_JOB_CMD(" + ecf_job_cmd + ") :";
         return false;
@@ -946,15 +946,15 @@ void Submittable::update_limits() {
         incrementInLimit(limitSet); // will recurse up
     }
     else if (task_state == NState::ACTIVE) {
-        // Only change those LIMITs where in-limit has -s i.e limit submission
+        // Only change those LIMITs where in-limit has -s i.e. limit submission
         decrementInLimitForSubmission(limitSet); // will recurse up
     }
     else {
         // UNKNOWN, QUEUED
         // For all other states, this task should NOT be consuming a limit token.
         // During interactive use a Submittable may get re-queued. In case its consuming
-        // a limit token, we decrement the limit. If the we are NOT consuming
-        // a token, its still *SAFE* to call decrementInLimit
+        // a limit token, we decrement the limit. If we are NOT consuming
+        // a token, it's still *SAFE* to call decrementInLimit
         decrementInLimit(limitSet); // will recurse up
     }
 }
@@ -1010,7 +1010,7 @@ void Submittable::update_static_generated_variables(const std::string& ecf_home,
 }
 
 const Variable& Submittable::findGenVariable(const std::string& name) const {
-    // AST can reference generated variables. Currently integer based values
+    // AST can reference generated variables. Currently, integer based values
     // The task names can be integers, other valid option is try_no
     if (!sub_gen_variables_)
         update_generated_variables();
@@ -1057,7 +1057,7 @@ void Submittable::set_genvar_ecfrid(const std::string& value) {
 
 // Generated Variables ================================================================================================
 // The false below is used as a dummy argument to call the Variable constructor that does not
-// Check the variable names. i.e we know they are valid
+// Check the variable names. i.e. we know they are valid
 SubGenVariables::SubGenVariables(const Submittable* sub)
     : submittable_(sub),
       genvar_ecfjob_(Str::ECF_JOB(), "", false),

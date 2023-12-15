@@ -192,7 +192,7 @@ void Node::addDate(const DateAttr& d) {
     std::cout << "Node::addDate()\n";
 #endif
 
-    // By disallowing what effect would if have on existing suites ?
+    // By disallowing what effect would it have on existing suites ?
     if (isSuite()) {
         throw std::runtime_error("Cannot add time based dependency on a suite"); // Added at 4.0.2
     }
@@ -206,7 +206,7 @@ void Node::addDay(const DayAttr& d) {
     std::cout << "Node::addDay\n";
 #endif
 
-    // By disallowing what effect would if have on existing suites ?
+    // By disallowing what effect would it have on existing suites ?
     if (isSuite()) {
         throw std::runtime_error("Cannot add time based dependency on a suite"); // Added at 4.0.2
     }
@@ -315,7 +315,7 @@ void Node::addInLimit(const InLimit& l, bool check) {
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
-static void throwIfRepeatAllreadyExists(Node* node) {
+static void throwIfRepeatAlreadyExists(Node* node) {
     if (!node->repeat().empty()) {
         std::stringstream ss;
         ss << "Add Repeat failed: Repeat of name '" << node->repeat().name() << "' already exist for node "
@@ -331,13 +331,13 @@ static void throwIfRepeatAllreadyExists(Node* node) {
     }
 }
 void Node::addRepeat(Repeat&& r) {
-    throwIfRepeatAllreadyExists(this);
+    throwIfRepeatAlreadyExists(this);
     repeat_ = std::move(r);
     repeat_.update_repeat_genvar();
     state_change_no_ = Ecf::incr_state_change_no();
 }
 void Node::addRepeat(const Repeat& r) {
-    throwIfRepeatAllreadyExists(this);
+    throwIfRepeatAlreadyExists(this);
     repeat_ = r;
     repeat_.update_repeat_genvar();
     state_change_no_ = Ecf::incr_state_change_no();

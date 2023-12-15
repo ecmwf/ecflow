@@ -14,42 +14,52 @@
 #include "ecflow/node/NodeFwd.hpp"
 
 ///
-/// Job generation involves:
-///  1/ resolving dependencies. This means we look at day,date,time and triggers,
-///     and check to to see if a node is free or still holding.
-///     When a node is free of its dependencies, a job can be created.
-///     Note: for a node that is suspended, job generation is disabled.
-///           In this case the time dependencies are still checked.
-///           and if free are marked as such. later on if the node is resumed
-///           we check dependencies and create the jobs
-///  2/ Creating jobs. Pre processing and variable substitution
-///  3/ Changing state of task to submitted.
-///  4/ Increment the inlimit references, for successful job submission
-///  5/ Error/Complete must decrement limits
-///  6/ Set up signal handlers to monitor child job, so that on failure
-///     Change state to ABORTED and decrement limit references
+/// Job generation implies the following activities:
 ///
-///  Job submission *MUST* be done sequentially,as each job submission could
-///  consume a resource(i.e like a limit), which can affect subsequent jobs.
+/// 1/ Resolve dependencies.
+/// This implies inspecting day, date, time and triggers; and determine if
+/// each node is free or still holding.
+/// For task nodes that are free of its dependencies, a job can be created.
+/// Note: Job generation is not performed for Nodes that are suspended.
+///       In this case, time dependencies are still checked, and marked as
+///       free, accordingly. When the Nodes are later resumed, dependencies
+///       are (re)checked and job scripts are eventually created.
 ///
-/// The process of resolving dependencies and submitting all the tasks, must take
-/// less than 60 seconds. As this is resolution of the clock.
-/// For testing purposes this can be changed and also we do not always want
-/// to create jobs.
+/// 2/ Create jobs scripts.
+/// Perform pre-processing of .ecf files including variable substitution.
 ///
-/// Return true, if job submission ok, else false and error message in JobsParam
+/// 3/ Change state of task to submitted.
 ///
-/// The jobs file are shell scripts, which have IPC(child commands) which talk to
+/// 4/ Increment the inlimit references (for successful job submissions).
+///
+/// 5/ Update limits according to Error/Complete
+///
+/// 6/ Set up signal handlers to monitor child jobs.
+/// This ensures that on failure the Task state is changed to ABORTED and
+/// related limit references are updated accordingly.
+///
+/// Important: Job submissions *MUST* be done sequentially, as each job
+/// submission can potentially consume a resource (e.g. a limit), which can
+/// affect the ability to perform subsequent job submissions.
+///
+/// The process of resolving dependencies (and submitting all the tasks), must
+/// take less than 60 seconds, as this is resolution of the clock.
+/// For testing purposes, this can be changed and we might not always want
+/// to actually create jobs.
+///
+/// @returns true, if job submission succeeds; false, otherwise (with error message in JobsParam)
+///
+/// The job files are shell scripts, which have IPC (child commands) which talk to
 /// to the server. Since the scripts are user created, they can include, errors:
 ///   o multiple call to complete
-///     To guard against this, we should *not* clear reset password in the complete
-///     Otherwise we will registered as a zombie.
-///   o Failure to call complete (maybe due to early exit in the job file)
+///     To guard against this, we should *not* clear/reset password in the complete.
+///     Otherwise, we will registered as a zombie.
+///   o Failure to call complete (maybe due to early exit in the job file).
 ///     There is not much we can do here, the job will stay active.
 ///   o Path do not match, since the node tree, in the server has been deleted
 ///     Typically the job will hold on the child commands.
 ///
-/// Note: in real life test 99% of job generation is done after child command
+/// Note: in real life test 99% of job generation is done after child command.
 ///
 
 class Jobs {

@@ -177,7 +177,7 @@ void Suite::reset() {
 }
 
 void Suite::handle_migration(const ecf::Calendar& c) {
-    // called when defs is read in from a file. i.e checkpoint
+    // called when defs is read in from a file i.e. checkpoint
 
     NodeContainer::handle_migration(c);
 }
@@ -260,7 +260,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam) {
 
         //  ** See: collateChanges  and ECFLOW-1512
         // Updating calendar_change_no_ ensure we sync suite calendar.
-        // additionally this will end up adding an one more memento(SuiteCalendarMemento),
+        // additionally this will end up adding one more memento(SuiteCalendarMemento),
         // and thus affects python changed_node_paths
         calendar_change_no_ = Ecf::state_change_no() + 1;
 
@@ -342,7 +342,7 @@ void Suite::print(std::string& os) const {
 void Suite::write_state(std::string& ret, bool& added_comment_char) const {
     // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
     //             multiple statement on a single line i.e.
-    //                 task a; task b;
+    //                 `task a; task b;`
     if (begun_) {
         add_comment_char(ret, added_comment_char);
         ret += " begun:1";
@@ -394,7 +394,7 @@ void Suite::changeClock(const ClockAttr& c) {
 }
 
 void Suite::add_end_clock(const ClockAttr& c) {
-    // end clock is for for simulator only
+    // end clock is for simulator only
     if (clock_end_attr_.get()) {
         throw std::runtime_error("Add end Clock failed: Suite can only have one end clock " + absNodePath());
     }
@@ -415,9 +415,9 @@ void Suite::add_end_clock(const ClockAttr& c) {
 void Suite::changeClockType(const std::string& clockType) {
     // ISSUES:
     // Whenever the user *alters* the clock attributes, it needs to be followed by a re-queue of the suite, because:
-    //   o/ if we change from real ->hybrid, then we need to set cron, etc time based nodes to complete
+    //   o/ if we change from real ->hybrid, then we need to set cron, etc. time based nodes to complete
     //      Since we could have running tasks, it is up to user to decide when.
-    //   o/ If we change from hybrid ->real, then Node with cron attributes etc, need to be requeued.
+    //   o/ If we change from hybrid ->real, then Node with cron attributes etc., need to be re-queued.
     //   o/ Any relative times are no longer valid
     //   o/ Time attributes will be incorrect, and hence may fail/pass incorrectly during dependency evaluation.
     //   o/ Why command may be wrong
@@ -427,7 +427,7 @@ void Suite::changeClockType(const std::string& clockType) {
     // the best we can do is to :
     //   o/ re-sync suite calendar for clock attribute
     //   o/ re-queue all time based attributes, *avoiding*
-    //      change of state when switching to hybrid clock (i.e due to day,date,cron time attrs)
+    //      change of state when switching to hybrid clock (i.e. due to day,date,cron time attrs)
     // This is handled in handle_clock_attribute_change()
     //
 
@@ -460,10 +460,10 @@ void Suite::changeClockDate(const std::string& theDate) {
         throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate);
 
     // ECFLOW-417
-    // By default the user *IS* expected to requeue afterwards. However in the case where we
+    // By default the user *IS* expected to requeue afterward. However, in the case where we
     // have a hybrid clock *AND* repeat day, the calendar date will be updated after the requeue.
     // This will update calendar by repeat days.
-    // Hence take this into account by decrementing by number of days
+    // Hence, take this into account by decrementing by number of days
     if (clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
         boost::gregorian::date the_date(year, month, dayy);
         the_date -= date_duration(repeat().step());
@@ -533,7 +533,7 @@ void Suite::handle_clock_attribute_change() {
     // re-queue all the time attributes, since clock attribute has changed, avoid changing node state.
     // Note: when switching to hybrid clock the re-queue of time dependencies will
     //       *not* mark hybrid (day,date,cron) as complete
-    //       since these nodes could be in a active/submitted state.
+    //       since these nodes could be in an active/submitted state.
     NodeContainer::requeue_time_attrs();
 
     // make sure we regenerate all suite variables, i.e like ECF_DATE, etc
@@ -596,8 +596,8 @@ void Suite::collateChanges(DefsDelta& changes) const {
     // Optimising updates:
     // Problem:
     //    User has requested 1 second updated in the viewer. We used add SuiteCalendarMemento
-    //    when ever there were changes in the suite. However this causes the suite in the
-    //    viewer to *refresh* to often.
+    //    when ever there were changes in the suite. However, this causes the suite in the
+    //    viewer to *refresh* too often.
     //
     // Soln 1:
     //   Use:
@@ -767,7 +767,7 @@ std::string Suite::find_node_path(const std::string& type, const std::string& no
 // =======================================================================================
 
 // The false below is used as a dummy argument to call the Variable constructor that does not
-// check the variable names. i.e we know they are valid
+// check the variable names. i.e. we know they are valid
 SuiteGenVariables::SuiteGenVariables(const Suite* s)
     : suite_(s),
       genvar_suite_("SUITE", "", false),

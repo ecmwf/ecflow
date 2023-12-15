@@ -21,9 +21,9 @@ using namespace boost::posix_time;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion, Requeue_args::Requeue_t rt) {
+void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duration, Requeue_args::Requeue_t rt) {
     // must be done before the re-queue
-    if (reset_relative_duartion) {
+    if (reset_relative_duration) {
         for (auto& cron : crons_) {
             cron.resetRelativeDuration();
         }
@@ -57,7 +57,7 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
     if (!days_.empty()) {
         // The day attribute, is matched with the corresponding *date* under requeue.
         // HOWEVER, when re-queueing due to a *TIME* dependency we MUST keep the current date on the day attribute
-        // ADDITIONALLY WE use expired_ to remove days which have *EXPIRED*(i.e failed for check for re-queue), thus
+        // ADDITIONALLY WE use expired_ to remove days which have *EXPIRED* (i.e. failed for check for re-queue), thus
         // avoiding is_free() OTHERWISE when we have multiple days, even the days which have expired are considered for
         // running the task.
         switch (rt) {
@@ -149,7 +149,7 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
     else {
 
         // If *BEFORE* midnight we have FREE day/date and submitted or active jobs, don't clear the day/dates
-        // i.e take:
+        // i.e. take:
         //    family f1
         //       day monday
         //       time 23:00
@@ -190,7 +190,7 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
 #endif
             if (free_date || free_day) {
                 // See if we have any complete submitted or active children,
-                // if so DONT clear day/date at midnight. hence day/date will *STAY* *FREE*
+                // if so DON'T clear day/date at midnight. hence day/date will *STAY* *FREE*
                 // Allow following tasks to complete
                 std::vector<node_ptr> all_children;
                 allChildren(all_children);
@@ -274,8 +274,8 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
 }
 
 void Node::markHybridTimeDependentsAsComplete() {
-    // If hybrid clock and then we may have day/date/cron time dependencies
-    // which mean that node will be stuck in the QUEUED state, i.e since the
+    // If hybrid clock, then we may have day/date/cron time dependencies
+    // which mean that node will be stuck in the QUEUED state, i.e. since the
     // date/day does not change with the hybrid clock.
     // hence Mark these Nodes as complete
     const Calendar& calendar = suite()->calendar();
@@ -327,7 +327,7 @@ void Node::markHybridTimeDependentsAsComplete() {
 
             if (oneDateIsFree || oneDayIsFree || oneCronIsFree) {
                 if (noOfTimeDependencies > 1) {
-                    // when we have multiple time dependencies they results *MUST* be anded for the node to be free.
+                    // when we have multiple time dependencies their results *MUST* be added for the node to be free.
                     if (!dates_.empty() && !oneDateIsFree) {
                         setStateOnly(NState::COMPLETE);
                         return;
@@ -357,7 +357,7 @@ void Node::markHybridTimeDependentsAsComplete() {
 // #include "ecflow/core/Log.hpp"
 bool Node::testTimeDependenciesForRequeue() {
     // This function is called as a part of handling state change.
-    // We only get here if the Node has *COMPLETED* ( either automatically, or manually i.e force complete)
+    // We only get here if the Node has *COMPLETED* ( either automatically, or manually i.e. force complete)
     // We are now determining if the node should be re-queued due to time dependency in the *FUTURE*
     const Calendar& calendar = suite()->calendar();
 
@@ -433,10 +433,10 @@ bool Node::testTimeDependenciesForRequeue() {
 
     for (DayAttr& day : days_) {
         if (cmd_context) {
-            // In the command context,i.e. force complete or task runs and completes, then expire the day. *EVEN* if we
-            // the day is in the future: why?: The user has taken control, *TYPICALLY* the day is under a repeat, by
-            // expiring, we allow the repeat to increment
-            //       before *only* if the day matched under the command context, we got this behaviour. i.e with
+            // In the command context,i.e. force complete or task runs and completes, then expire the day.
+            // *EVEN* if the day is in the future: why?: The user has taken control, *TYPICALLY* the day is under
+            // a repeat, by expiring, we allow the repeat to increment
+            //       before *only* if the day matched under the command context, we got this behaviour. i.e. with
             //       check_for_expiration
             day.set_expired();
         }
@@ -472,10 +472,10 @@ void Node::miss_next_time_slot() {
     //    time 12:00
     // Essentially this avoids an automated job run, *IF* the job was run manually for a given time slot.
     // If we call this function before 10:00, we want to miss the next time slot (i.e. 10:00)
-    // and want to *requeue*, for 12:00 time slot. However at re-queue, we need to ensure
+    // and want to *requeue*, for 12:00 time slot. However, at re-queue, we need to ensure
     // we do *not* reset the 10:00 time slot. hence by setting NO_REQUE_IF_SINGLE_TIME_DEP
     // we allow requeue to query this flag, and hence avoid resetting the time based attribute
-    // Note: requeue will *always* clear NO_REQUE_IF_SINGLE_TIME_DEP afterwards.
+    // Note: requeue will *always* clear NO_REQUE_IF_SINGLE_TIME_DEP afterward.
     //
     // In the case above when we reach the last time slot, there is *NO* automatic requeue, and
     // hence, *no* clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
@@ -483,7 +483,7 @@ void Node::miss_next_time_slot() {
     // when all the children are complete. *or* user does a manual re-queue
     //
     // Additionally if the job *aborts*, we clear NO_REQUE_IF_SINGLE_TIME_DEP if it was set.
-    // Otherwise if manually run again, we will miss further time slots.
+    // Otherwise, if manually run again, we will miss further time slots.
     if (has_time_dependencies()) {
 
         /// Handle abort
@@ -721,7 +721,7 @@ bool Node::timeDependenciesFree() const {
     if (oneDateIsFree || oneDayIsFree || oneTodayIsFree || oneTimeIsFree || oneCronIsFree) {
         if (noOfTimeDependencies > 1) {
             // *When* we have multiple time dependencies of *different types* then the results
-            // *MUST* be anded for the node to be free.
+            // *MUST* be added for the node to be free.
             if (!dates_.empty() && !oneDateIsFree)
                 return false;
             if (!days_.empty() && !oneDayIsFree)
@@ -777,7 +777,7 @@ bool Node::time_today_cron_is_free() const {
         if (!todays_.empty()) {
             // : single Today: (single-time)   is free, if calendar time >= today_time
             // : single Today: (range)         is free, if calendar time == (one of the time ranges)
-            // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+            // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | today_time)
             if (todays_.size() == 1) {
                 // Single Today Attribute: could be single slot or range
                 if (todays_[0].isFree(calendar)) {
@@ -802,7 +802,7 @@ bool Node::time_today_cron_is_free() const {
         if (oneTodayIsFree || oneTimeIsFree || oneCronIsFree) {
             if (noOfTimeDependencies > 1) {
                 // *When* we have multiple time dependencies of *different types* then the results
-                // *MUST* be anded for the node to be free.
+                // *MUST* be added for the node to be free.
                 if (!todays_.empty() && !oneTodayIsFree)
                     return false;
                 if (!times_.empty() && !oneTimeIsFree)

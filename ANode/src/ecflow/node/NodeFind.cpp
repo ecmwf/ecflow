@@ -57,7 +57,7 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
     // The defs environment is constructed via:
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
     //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
-    //   o/ These values are updated from the server environment when the BEGIN cmd is called.
+    //   o/ These values are updated from the server environment when the `BEGIN` command is called.
     Defs* the_defs = defs();
     if (the_defs) {
         theValue = the_defs->server().find_variable(name);
@@ -82,7 +82,7 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
     // The defs environment is constructed via:
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
     //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_HOST
-    //   o/ These values are updated from the server environment when the BEGIN cmd is called.
+    //   o/ These values are updated from the server environment when the `BEGIN` command is called.
     Defs* the_defs = defs();
     if (the_defs) {
         theValue = the_defs->server().find_variable(name);
@@ -174,7 +174,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
     const Variable& var = findVariable(name);
     if (!var.empty()) {
         ret = var.theValue();
-        variableSubsitution(ret);
+        variableSubstitution(ret);
         return ret;
     }
 
@@ -183,7 +183,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
         const Variable& pvar = theParent->findVariable(name);
         if (!pvar.empty()) {
             ret = pvar.theValue();
-            variableSubsitution(ret);
+            variableSubstitution(ret);
             return ret;
         }
         theParent = theParent->parent();
@@ -391,12 +391,12 @@ const Repeat& Node::findRepeat(const std::string& name) const {
 }
 
 bool Node::findExprVariable(const std::string& name) {
-    // if event found return true. also mark this event so simulator know its used in a trigger
+    // if event found return true; also, mark this event so simulator know it's used in a trigger
     if (set_event_used_in_trigger(name)) {
         return true;
     }
 
-    // if meter found mark as used in trigger for simulator and return
+    // if meter found mark as used in trigger for simulator, and return
     if (set_meter_used_in_trigger(name)) {
         return true;
     }
@@ -447,7 +447,7 @@ int Node::findExprVariableValue(const std::string& name) const {
         // RepeatEnumerated last_valid_value() returns the current value if cast-able to integer otherwise
         // position/index,
         //                                     (i.e. since enum can be anything)
-        // RepeatString     last_valid_value() returns the current position/index  ( Alternatives ? )
+        // RepeatString     last_valid_value() returns the current position/index  ( Alternatives? )
         // RepeatDay        last_valid_value() returns the current step
         // Note: At Repeat expiration Repeat::value() may be out of range of start-end
         //       But Repeat::last_valid_value() should always be in range, hence at Repeat expiration
@@ -490,7 +490,7 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const {
         // RepeatEnumerated last_valid_value() returns the current value if cast-able as integer otherwise
         // position/index,
         //                                    (i.e. since enum can be anything)
-        // RepeatString     last_valid_value() returns the current position/index  ( Alternatives ? )
+        // RepeatString     last_valid_value() returns the current position/index  ( Alternatives? )
         // RepeatDay        last_valid_value() returns the current step
         // Note: At Repeat expiration Repeat::value() may be out of range of start-end
         //       But Repeat::last_valid_value() should always be in range, hence at Repeat expiration
@@ -532,7 +532,7 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const 
         // RepeatInteger    last_valid_value() returns the value, by the current value of integer
         // RepeatEnumerated last_valid_value() returns the current value if cast-able as integer, else position/index, (
         //                                     i.e. since enum can be anything)
-        // RepeatString     last_valid_value() returns the current position/index  ( Alternatives ? )
+        // RepeatString     last_valid_value() returns the current position/index  ( Alternatives? )
         // RepeatDay        last_valid_value() returns the current step
         // Note: At Repeat expiration Repeat::value() may be out of range of start-end
         //       But Repeat::last_valid_value() should always be in range, hence at Repeat expiration
@@ -705,12 +705,12 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
     Defs* theDefs = defs();
     if (!theDefs) {
-        // In the case where we have a stand alone Node. i.e no parent set. The Defs will be NULL.
+        // In the case where we have a standalone Node i.e. no parent set. The Defs will be NULL.
         // Take the case where we want to dump the state of a single node.
         //    ecflow_client --get_state=/test/f2 --port=4141
         // Here we are printing the state of the Node only, *NO* defs is returned.
-        // The print will cause the AST to be evaluated. The trigger evaluation will required chasing
-        // down reference nodes. Hence we will end up here. Rather than crashing, just return a NULL Pointer.
+        // The print will cause the AST to be evaluated. The trigger evaluation will require chasing
+        // down reference nodes. Hence, we will end up here. Rather than crashing, just return a NULL Pointer.
         return node_ptr();
     }
 
@@ -719,7 +719,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
     ///      b/ Inlimit nodepaths.
     ///  In *both* the case above, the node path may not exist, in the definition. Hence::
     ///  On client side:: references not defined in externs are considered errors
-    ///  On server side:: No extern's are stored, hence for unresolved node paths, we return NULL
+    ///  On server side:: No externs are stored, hence for unresolved node paths, we return NULL
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
     string debug_path = "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
@@ -732,7 +732,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
         debug_path += "(!nodePath.empty() && nodePath[0] == '/') \n";
 #endif
 
-        // Must be a absolute path. i.e /suite/family/path
+        // Must be an absolute path. i.e. /suite/family/path
         node_ptr constNode = theDefs->findAbsNode(nodePath);
         if (constNode.get()) {
             return constNode;
@@ -754,8 +754,8 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             // return NULL *without* setting an error message as node path is defined as an extern
 
             // OK: the node path appears in the extern list. This may be because that suite  has not been loaded.
-            // *** If the suite is loaded, then its an error that we did not
-            // *** locate the node. i.e in the previous call to defs->findAbsNode(nodePath);
+            // *** If the suite is loaded, then it's an error that we did not
+            // *** locate the node. i.e. in the previous call to defs->findAbsNode(nodePath);
             vector<string> theExtractedPath;
             NodePath::split(nodePath, theExtractedPath);
 
@@ -773,7 +773,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
             }
 
-            // Its an extern path that references a suite thats NOT loaded yet
+            // It's an extern path that references a suite that's NOT loaded yet
             return node_ptr();
         }
 
@@ -808,7 +808,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
         return node_ptr();
     }
 
-    //  i.e   " a == complete" =====>        nodePath = a
+    //  i.e.   " a == complete" =====>        nodePath = a
     if (theExtractedPath.size() == 1) {
 #ifdef DEBUG_FIND_REFERENCED_NODE
         debug_path += "( theExtractedPath.size() == 1)\n";
@@ -824,14 +824,13 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
         if (!res.get()) {
-            // lets see if its in an extern Node. extern can have absolute and relative paths
-            // In this case it will be a relative path, hence no point trying to see if suite
-            // is loaded
+            // Let's see if it is in an extern Node. Externs can have absolute and relative paths.
+            // In this case, it will be a relative path, and thus there is no point trying to see if suite is loaded
             if (theDefs->find_extern(nodePath, extern_obj)) {
                 // =================================================================
                 // **Client side* specific: Only client side defs, stores externs
                 // =================================================================
-                // The path exist in the extern and we know its relative
+                // The path exist in the extern, and we know it is relative
                 return node_ptr();
             }
         }
@@ -846,12 +845,12 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
         debug_path +=
             "(theExtractedPath.size() >= 2 && theExtractedPath[0] != \".\") && theExtractedPath[0] != \"..\"\n";
 #endif
-        // First check to see see if its in the externs
+        // First check to see if it is in the externs
         if (theDefs->find_extern(nodePath, extern_obj)) {
             // =================================================================
             // **Client side* specific: Only client side defs, stores externs
             // =================================================================
-            // The path a/b/c exist in the extern and we know its relative
+            // The path a/b/c exist in the extern, and we know its relative
             // Again no point in checking to see if suite is loaded if path is relative
             return node_ptr();
         }
@@ -878,7 +877,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 
     // ********************************************************************
     // Note  ./   sibling go to parent and search down
-    //       ../  search at level of parent, requires we go up to parents parent to search down
+    //       ../  search at the level of the parent, requires we go up to parent and search down
     // **********************************************************************
     // Handle node path of the type "../a/b/c"  "../../a/b/c"
     if (theExtractedPath.size() >= 2 && theExtractedPath[0] == "..") {
@@ -890,7 +889,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
         Node* theParent = parent(); // get past the first parent
         while (static_cast<int>(theExtractedPath.size()) && theParent && theExtractedPath[0] == "..") {
             theExtractedPath.erase(theExtractedPath.begin() + 0);
-            theParent = theParent->parent(); // for each .. go up a parent
+            theParent = theParent->parent(); // for each `..` go up the parent
 #ifdef DEBUG_FIND_REFERENCED_NODE
             debug_path += "..: thepParent = ";
             if (theParent)

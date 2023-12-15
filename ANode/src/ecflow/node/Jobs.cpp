@@ -42,8 +42,8 @@ bool Jobs::generate(JobsParam& jobsParam) const {
 #endif
     {
         // Constructor does nothing, destructor will un-block SIGCHLD
-        // This will allow child process termination to handled by the signal handler in System
-        // The desctructor will then re-block SIGCHLD
+        // This allows the child process termination to be handled by the signal handler in System.
+        // The destructor will then re-block SIGCHLD
         Signal unblock_on_desctruction_then_reblock;
 
         // *******************************************************************
