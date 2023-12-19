@@ -13,9 +13,8 @@
 
 #include <stack>
 #include <string>
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 class DefsStructureParser;
 class Node;

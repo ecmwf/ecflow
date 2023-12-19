@@ -41,9 +41,10 @@
 /// };
 ///
 
+#include <type_traits> // for std::enable_if_t
+
 #include <cereal/cereal.hpp>
 #include <cereal/details/traits.hpp>
-#include <type_traits> // for std::enable_if_t
 
 namespace cereal {
 class JSONInputArchive;

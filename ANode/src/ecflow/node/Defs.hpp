@@ -24,9 +24,8 @@
 #include <cstdint>
 #include <iosfwd>
 #include <set>
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/core/NState.hpp"
