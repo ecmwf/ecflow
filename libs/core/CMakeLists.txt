@@ -64,6 +64,7 @@ set(srcs
   src/ecflow/core/cereal_boost_time.hpp
   src/ecflow/core/cereal_optional_nvp.hpp
   src/ecflow/core/perf_timer.hpp
+  src/ecflow/core/exceptions/Exceptions.hpp
   # Sources
   src/ecflow/core/AssertTimer.cpp
   src/ecflow/core/Cal.cpp

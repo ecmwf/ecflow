@@ -10,9 +10,11 @@
 
 set(srcs
   # Headers
+  src/ecflow/server/AvisoUpdater.hpp
   src/ecflow/server/BaseServer.hpp
   src/ecflow/server/CheckPtSaver.hpp
   src/ecflow/server/NodeTreeTraverser.hpp
+  src/ecflow/server/PeriodicScheduler.hpp
   src/ecflow/server/Server.hpp
   src/ecflow/server/ServerEnvironment.hpp
   src/ecflow/server/ServerOptions.hpp
@@ -23,9 +25,11 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.hpp>
   # Sources
+  src/ecflow/server/AvisoUpdater.cpp
   src/ecflow/server/BaseServer.cpp
   src/ecflow/server/CheckPtSaver.cpp
   src/ecflow/server/NodeTreeTraverser.cpp
+  src/ecflow/server/PeriodicScheduler.cpp
   src/ecflow/server/Server.cpp
   src/ecflow/server/ServerEnvironment.cpp
   src/ecflow/server/ServerOptions.cpp
@@ -47,6 +51,7 @@ ecbuild_add_library(
   PUBLIC_LIBS
     base
     Boost::boost # Boost header-only libraries must be available (namely asio)
+    nlohmann::json
 )
 target_clangformat(libserver)
 
@@ -114,6 +119,29 @@ ecbuild_add_test(
 )
 
 target_clangformat(u_server CONDITION ENABLE_TESTS)
+
+# ================================================================================
+# TEST
+ecbuild_add_test(
+  TARGET
+    s_periodic_scheduler
+  LABELS
+    integration nightly
+  INCLUDES
+    src
+  SOURCES
+    test/TestPeriodicScheduler.cpp
+    test/TestPeriodicScheduler_main.cpp # test entry point
+  LIBS
+    libserver
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    Threads::Threads
+  TEST_DEPENDS
+    u_base
+)
+
+target_clangformat(s_periodic_scheduler CONDITION ENABLE_TESTS)
 
 # ===================================================================
 # install

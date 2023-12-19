@@ -410,6 +410,28 @@ void Node::set_memento(const NodeLabelMemento* memento, std::vector<ecf::Aspect:
     addLabel(memento->label_);
 }
 
+void Node::set_memento(const NodeAvisoMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
+
+#ifdef DEBUG_MEMENTO
+    std::cout << "Node::set_memento(const NodeAvisoMemento* memento) " << debugNodePath() << "\n";
+#endif
+
+    if (aspect_only) {
+        // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+        aspects.push_back(ecf::Aspect::AVISO);
+        return;
+    }
+
+    size_t theSize = avisos_.size();
+    for (size_t i = 0; i < theSize; i++) {
+        if (avisos_[i].name() == memento->aviso_.name()) {
+            avisos_[i] = memento->aviso_;
+            return;
+        }
+    }
+    addAviso(memento->aviso_);
+}
+
 void Node::set_memento(const NodeQueueMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
     if (aspect_only) {
         // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects

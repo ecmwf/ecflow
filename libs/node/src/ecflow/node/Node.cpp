@@ -36,6 +36,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/Format.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
@@ -1777,6 +1778,9 @@ void Node::print(std::string& os) const {
     for (const CronAttr& cron : crons_) {
         cron.print(os);
     }
+    for (const AvisoAttr& a : avisos_) {
+        ecf::format_as_defs(a, os);
+    }
 
     if (auto_cancel_)
         auto_cancel_->print(os);
@@ -2345,6 +2349,13 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
                 why_found = true;
             }
         }
+        for (const auto& aviso : avisos_) {
+            postFix.clear();
+            if (aviso.why(postFix)) {
+                vec.push_back(prefix + postFix);
+                why_found = true;
+            }
+        }
     }
 
     // **************************************************************************************
@@ -2885,6 +2896,7 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); }); // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, avisos_, [this]() { return !avisos_.empty(); }); // conditionally save
 
     CEREAL_OPTIONAL_NVP(ar, times_, [this]() { return !times_.empty(); });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, todays_, [this]() { return !todays_.empty(); }); // conditionally save

@@ -161,6 +161,16 @@ void Node::changeLabel(const std::string& name, const std::string& value) {
     found->set_new_value(value);
 }
 
+void Node::changeAviso(const std::string& name, const std::string& value) {
+    auto found = ecf::algorithm::find_by_name(avisos_, name);
+
+    if (found == std::end(avisos_)) {
+        throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
+    }
+
+    found->set_listener(value);
+}
+
 void Node::changeTrigger(const std::string& expression) {
     (void)parse_and_check_expressions(expression, true /*trigger*/, "Node::changeTrigger:"); // will throw for errors
     deleteTrigger();

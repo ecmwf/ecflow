@@ -58,6 +58,9 @@
         },
         "queue" : {
             "label": "Queues"
+        },
+        "aviso" : {
+          "label" : "Avisos"
         }
 	}
 }

@@ -281,6 +281,29 @@ void Node::deleteLabel(const std::string& name) {
 #endif
 }
 
+void Node::deleteAviso(const std::string& name) {
+    if (name.empty()) {
+        avisos_.clear();
+        state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+        std::cout << "Node::deleteAviso\n";
+#endif
+        return;
+    }
+
+    auto found = ecf::algorithm::find_by_name(avisos_, name);
+
+    if (found == std::end(avisos_)) {
+        throw std::runtime_error("Node::deleteAviso: Cannot find aviso: " + name);
+    }
+
+    avisos_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteAviso\n";
+#endif
+}
+
 void Node::delete_queue(const std::string& name) {
     if (misc_attrs_) {
         misc_attrs_->delete_queue(name);

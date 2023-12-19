@@ -37,6 +37,7 @@ public:
         DEL_LATE,
         DEL_QUEUE,
         DEL_GENERIC,
+        DEL_AVISO,
     };
 
     enum Change_attr_type {
@@ -58,6 +59,7 @@ public:
         LATE,
         TIME,
         TODAY,
+        AVISO,
     };
 
     enum Add_attr_type {
@@ -72,6 +74,7 @@ public:
         ADD_LIMIT,
         ADD_INLIMIT,
         ADD_LABEL,
+        ADD_AVISO,
     };
 
     // Python

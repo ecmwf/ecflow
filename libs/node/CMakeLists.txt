@@ -55,9 +55,11 @@ set(srcs
   src/ecflow/node/Task.hpp
   src/ecflow/node/TaskScriptGenerator.hpp
   src/ecflow/node/move_peer.hpp
+  src/ecflow/node/formatter/Formatter.hpp
   src/ecflow/node/parser/AutoArchiveParser.hpp
   src/ecflow/node/parser/AutoCancelParser.hpp
   src/ecflow/node/parser/AutoRestoreParser.hpp
+  src/ecflow/node/parser/AvisoParser.hpp
   src/ecflow/node/parser/CalendarParser.hpp
   src/ecflow/node/parser/ClockParser.hpp
   src/ecflow/node/parser/CronParser.hpp
@@ -132,6 +134,7 @@ set(srcs
   src/ecflow/node/parser/AutoArchiveParser.cpp
   src/ecflow/node/parser/AutoCancelParser.cpp
   src/ecflow/node/parser/AutoRestoreParser.cpp
+  src/ecflow/node/parser/AvisoParser.cpp
   src/ecflow/node/parser/CalendarParser.cpp
   src/ecflow/node/parser/ClockParser.cpp
   src/ecflow/node/parser/CronParser.cpp

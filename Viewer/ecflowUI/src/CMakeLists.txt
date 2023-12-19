@@ -215,6 +215,7 @@ set(viewer_srcs
   VAutoArchiveAttr.hpp
   VAutoCancelAttr.hpp
   VAutoRestoreAttr.hpp
+  VAvisoAttr.hpp
   VConfig.hpp
   VConfigLoader.hpp
   VDateAttr.hpp
@@ -491,6 +492,7 @@ set(viewer_srcs
   VAutoArchiveAttr.cpp
   VAutoCancelAttr.cpp
   VAutoRestoreAttr.cpp
+  VAvisoAttr.cpp
   VConfig.cpp
   VConfigLoader.cpp
   VDateAttr.cpp

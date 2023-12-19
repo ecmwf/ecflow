@@ -320,6 +320,11 @@ const Label& Node::find_label(const std::string& name) const {
     return found == std::end(labels_) ? Label::EMPTY() : *found;
 }
 
+bool Node::findAviso(const std::string& name) const {
+    auto found = ecf::algorithm::find_by_name(avisos_, name);
+    return found != std::end(avisos_);
+}
+
 bool Node::findVerify(const VerifyAttr& v) const {
     if (misc_attrs_)
         return misc_attrs_->findVerify(v);

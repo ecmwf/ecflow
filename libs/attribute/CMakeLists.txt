@@ -12,6 +12,8 @@ set(srcs
   # Headers
   src/ecflow/attribute/AutoArchiveAttr.hpp
   src/ecflow/attribute/AutoCancelAttr.hpp
+  src/ecflow/attribute/AvisoAttr.hpp
+  src/ecflow/attribute/AvisoService.hpp
   src/ecflow/attribute/ClockAttr.hpp
   src/ecflow/attribute/CronAttr.hpp
   src/ecflow/attribute/DateAttr.hpp
@@ -30,6 +32,8 @@ set(srcs
   # Sources
   src/ecflow/attribute/AutoArchiveAttr.cpp
   src/ecflow/attribute/AutoCancelAttr.cpp
+  src/ecflow/attribute/AvisoAttr.cpp
+  src/ecflow/attribute/AvisoService.cpp
   src/ecflow/attribute/ClockAttr.cpp
   src/ecflow/attribute/CronAttr.cpp
   src/ecflow/attribute/DateAttr.cpp
@@ -59,6 +63,7 @@ ecbuild_add_library(
   PUBLIC_LIBS
     core
     Boost::date_time
+    nlohmann::json
 )
 target_clangformat(attributes)
 
