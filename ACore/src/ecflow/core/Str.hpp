@@ -14,10 +14,10 @@
 #include <cstring>
 #include <limits>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
-#include <string_view>
 
 namespace ecf {
 

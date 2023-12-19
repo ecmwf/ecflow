@@ -22,9 +22,9 @@
 // Note: For testing purposes we do not always want to create jobs
 class JobCreationCtrl : public std::enable_shared_from_this<JobCreationCtrl> {
 public:
-    JobCreationCtrl()                                  = default;
-    JobCreationCtrl(const JobCreationCtrl&)            = delete;
-    ~JobCreationCtrl()                                 = default;
+    JobCreationCtrl()                       = default;
+    JobCreationCtrl(const JobCreationCtrl&) = delete;
+    ~JobCreationCtrl()                      = default;
 
     JobCreationCtrl& operator=(const JobCreationCtrl&) = delete;
 

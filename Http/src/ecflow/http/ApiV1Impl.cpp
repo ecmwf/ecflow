@@ -10,11 +10,10 @@
 
 #include "ecflow/http/ApiV1Impl.hpp"
 
+#include <condition_variable>
 #include <mutex>
 #include <string>
 #include <thread>
-
-#include <condition_variable>
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Converter.hpp"

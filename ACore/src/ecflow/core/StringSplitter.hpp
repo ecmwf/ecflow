@@ -12,9 +12,8 @@
 #define ecflow_core_StringSplitter_HPP
 
 #include <string>
-#include <vector>
-
 #include <string_view>
+#include <vector>
 
 namespace ecf {
 

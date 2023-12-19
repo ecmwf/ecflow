@@ -11,7 +11,6 @@
 #include "ecflow/node/ExprDuplicate.hpp"
 
 #include <iostream>
-
 #include <unordered_map>
 
 #include "ecflow/core/Ecf.hpp"

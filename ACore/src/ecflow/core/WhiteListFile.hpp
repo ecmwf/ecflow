@@ -16,9 +16,8 @@
 ///
 
 #include <string>
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 // ----------------------------------------------------------------
 // The whiteList file, is used to indicate users who are allowed

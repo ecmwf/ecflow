@@ -15,13 +15,13 @@
     #include <atomic> // shared mutex only with c++14
     #include <fstream>
     #include <iomanip>
+    #include <shared_mutex>
     #include <sstream>
     #include <thread>
 
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
     #include <openssl/sha.h>
-    #include <shared_mutex>
 
     #include "ecflow/core/Filesystem.hpp"
     #include "ecflow/core/Str.hpp"

@@ -65,7 +65,7 @@ IncludeBlocks: Regroup
 IncludeCategories:
   # By default, first include the 'main' header file related to source file
   # Then include every 'system' headers (i.e. in <>)
-  - Regex:           '<[^Q][[:alnum:]]+(\.h)?>'
+  - Regex:           '<[^Q][[:alnum:]_]+(\.h)?>'
     Priority:        10
   # Then include '3rd party' headers 
   - Regex:           '<[[:alnum:]/._]+>'

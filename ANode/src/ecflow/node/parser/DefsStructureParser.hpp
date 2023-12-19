@@ -13,9 +13,8 @@
 
 #include <stack>
 #include <string>
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 #include "ecflow/core/File_r.hpp"
 #include "ecflow/core/PrintStyle.hpp"

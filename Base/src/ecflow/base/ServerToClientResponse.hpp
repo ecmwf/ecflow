@@ -20,7 +20,7 @@ public:
     ServerToClientResponse()                              = default;
     ServerToClientResponse(const ServerToClientResponse&) = delete;
     explicit ServerToClientResponse(const STC_Cmd_ptr& cmd) : stc_cmd_(cmd) {}
-    ~ServerToClientResponse()                                        = default;
+    ~ServerToClientResponse() = default;
 
     ServerToClientResponse& operator=(const ServerToClientResponse&) = delete;
 

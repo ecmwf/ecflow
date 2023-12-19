@@ -109,7 +109,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     // SET ECF_HOME
     std::string ecf_home = directory;
 
-    auto full_path       = fs::absolute(directory);
+    auto full_path = fs::absolute(directory);
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));
 
