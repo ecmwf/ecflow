@@ -88,6 +88,7 @@ class VNode : public VItem {
     friend class VLabelAttr;
     friend class VMeterAttr;
     friend class VEventAttr;
+    friend class VAvisoAttr;
     friend class VRepeatAttr;
     friend class VTriggerAttr;
     friend class VLimitAttr;

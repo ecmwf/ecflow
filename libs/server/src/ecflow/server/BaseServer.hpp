@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/server/CheckPtSaver.hpp"
 #include "ecflow/server/NodeTreeTraverser.hpp"
+#include "ecflow/server/AvisoUpdater.hpp"
 
 class ServerEnvironment;
 
@@ -97,6 +98,9 @@ protected:
     defs_ptr defs_; // shared because is deleted in Test, and used in System::instance()
     NodeTreeTraverser traverser_;
     friend class NodeTreeTraverser;
+
+    ecf::CheckAvisoNotifications avisoNotifications_;
+    ecf::AvisoUpdater avisoUpdater_;
 
     CheckPtSaver checkPtSaver_;
     friend class CheckPtSaver;

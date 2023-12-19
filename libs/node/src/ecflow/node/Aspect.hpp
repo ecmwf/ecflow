@@ -53,7 +53,8 @@ public:
         ALIAS_NUMBER,
         QUEUE,
         QUEUE_INDEX,
-        GENERIC
+        GENERIC,
+        AVISO
     };
 
     // Disable default construction

@@ -298,6 +298,17 @@ void Node::addEvent(const Event& e, bool check) {
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void Node::addAviso(const AvisoAttr& a) {
+    if (findAviso(a.name())) {
+        std::stringstream ss;
+        ss << "Add Aviso failed: Duplicate aviso of name '" << a.name() << "' already exist for node "
+           << debugNodePath();
+        throw std::runtime_error(ss.str());
+    }
+    avisos_.push_back(a);
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
 void Node::addLimit(const Limit& l, bool check) {
     if (check && findLimit(l)) {
         std::stringstream ss;

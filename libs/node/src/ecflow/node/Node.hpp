@@ -27,6 +27,7 @@
 #include <iosfwd>
 #include <limits>
 
+#include "ecflow/attribute/AvisoAttr.hpp"
 #include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/attribute/DayAttr.hpp"
@@ -392,6 +393,7 @@ public:
     const std::vector<DateAttr>& dates() const { return dates_; }
     const std::vector<DayAttr>& days() const { return days_; }
     const std::vector<ecf::CronAttr>& crons() const { return crons_; }
+    const std::vector<ecf::AvisoAttr>& avisos() const { return avisos_; }
 
     const std::vector<VerifyAttr>& verifys() const;
     const std::vector<ZombieAttr>& zombies() const;
@@ -456,6 +458,7 @@ public:
     void addDate(const DateAttr&);
     void addDay(const DayAttr&);
     void addCron(const ecf::CronAttr&);
+    void addAviso(const ecf::AvisoAttr&);
 
     void addLimit(const Limit&, bool check = true);       // will throw std::runtime_error if duplicate
     void addInLimit(const InLimit& l, bool check = true); // will throw std::runtime_error if duplicate
@@ -507,6 +510,7 @@ public:
     void deleteEvent(const std::string& name);
     void deleteMeter(const std::string& name);
     void deleteLabel(const std::string& name);
+    void deleteAviso(const std::string& name);
     void delete_queue(const std::string& name);
     void delete_generic(const std::string& name);
     void deleteTrigger();
@@ -529,6 +533,7 @@ public:
     void changeMeter(const std::string& name, const std::string& value);
     void changeMeter(const std::string& name, int value);
     void changeLabel(const std::string& name, const std::string& value);
+    void changeAviso(const std::string& name, const std::string& value);
     void changeTrigger(const std::string& expression);
     void changeComplete(const std::string& expression);
     void changeRepeat(const std::string& value);
@@ -557,6 +562,7 @@ public:
     void set_memento(const NodeEventMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeMeterMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeLabelMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
+    void set_memento(const NodeAvisoMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeQueueMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeGenericMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeQueueIndexMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
@@ -626,6 +632,7 @@ public:
     bool findLimit(const Limit&) const;
     bool findLabel(const std::string& name) const;
     const Label& find_label(const std::string& name) const;
+    bool findAviso(const std::string& name) const;
     const QueueAttr& find_queue(const std::string& name) const;
     QueueAttr& findQueue(const std::string& name);
     const GenericAttr& find_generic(const std::string& name) const;
@@ -880,6 +887,7 @@ private:
     std::vector<Meter> meters_;
     std::vector<Event> events_;
     std::vector<Label> labels_;
+    std::vector<ecf::AvisoAttr> avisos_;
 
     std::vector<ecf::TimeAttr> times_;
     std::vector<ecf::TodayAttr> todays_;

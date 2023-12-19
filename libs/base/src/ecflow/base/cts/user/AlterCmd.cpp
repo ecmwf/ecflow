@@ -75,7 +75,8 @@ struct EnumTraits<AlterCmd::Delete_attr_type>
         std::make_pair(AlterCmd::DEL_ZOMBIE, "zombie"),
         std::make_pair(AlterCmd::DEL_LATE, "late"),
         std::make_pair(AlterCmd::DEL_QUEUE, "queue"),
-        std::make_pair(AlterCmd::DEL_GENERIC, "generic")
+        std::make_pair(AlterCmd::DEL_GENERIC, "generic"),
+        std::make_pair(AlterCmd::DEL_AVISO, "aviso")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -99,7 +100,8 @@ struct EnumTraits<AlterCmd::Add_attr_type>
         std::make_pair(AlterCmd::ADD_LATE, "late"),
         std::make_pair(AlterCmd::ADD_LIMIT, "limit"),
         std::make_pair(AlterCmd::ADD_INLIMIT, "inlimit"),
-        std::make_pair(AlterCmd::ADD_LABEL, "label")
+        std::make_pair(AlterCmd::ADD_LABEL, "label"),
+        std::make_pair(AlterCmd::ADD_AVISO, "aviso")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -130,7 +132,8 @@ struct EnumTraits<AlterCmd::Change_attr_type>
         std::make_pair(AlterCmd::DEFSTATUS, "defstatus"),
         std::make_pair(AlterCmd::LATE, "late"),
         std::make_pair(AlterCmd::TIME, "time"),
-        std::make_pair(AlterCmd::TODAY, "today")
+        std::make_pair(AlterCmd::TODAY, "today"),
+        std::make_pair(AlterCmd::AVISO, "aviso")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -366,6 +369,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::DEL_LABEL:
                     node->deleteLabel(name_);
                     break;
+                case AlterCmd::DEL_AVISO:
+                    node->deleteAviso(name_);
+                    break;
                 case AlterCmd::DEL_TRIGGER:
                     node->deleteTrigger();
                     break;
@@ -432,6 +438,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::LABEL:
                     node->changeLabel(name_, value_);
                     break;
+                case AlterCmd::AVISO:
+                    node->changeAviso(name_, value_);
+                    break;
                 case AlterCmd::TRIGGER:
                     node->changeTrigger(name_);
                     break; // expression must parse
@@ -482,6 +491,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 case AlterCmd::ADD_DAY:
                     node->addDay(DayAttr::create(name_));
+                    break;
+                case AlterCmd::ADD_AVISO:
+                    node->addAviso(AvisoAttr(name_, value_));
                     break;
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
@@ -800,6 +812,20 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             value = options[3];
             break;
         }
+        case AlterCmd::ADD_AVISO: {
+            if (options.size() == 3 && paths.size() > 1) {
+                // label value may be a path, hence it will be in the paths parameter
+                options.push_back(paths[0]);
+                paths.erase(paths.begin());
+            }
+            if (options.size() < 4) {
+                ss << "AlterCmd: add: Expected 'add aviso <name> <handle> <paths>. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
         case AlterCmd::ADD_LIMIT: {
             if (options.size() < 4) {
                 ss << "AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n"
@@ -852,6 +878,11 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         case AlterCmd::ADD_DAY:
             (void)DayAttr::create(name);
             break;
+        case AlterCmd::ADD_AVISO: {
+            // Create an Aviso to check if name is valid
+            AvisoAttr check(name, value);
+            break;
+        }
         case AlterCmd::ADD_ZOMBIE:
             (void)ZombieAttr::create(name);
             break;
@@ -1038,6 +1069,12 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
                 if (emptyCron.structureEquals(parsedCron)) {
                     throw std::runtime_error("Delete cron Attribute failed. Check cron " + name);
                 }
+            }
+            break;
+        }
+        case AlterCmd::DEL_AVISO: {
+            if (!name.empty()) {
+                AvisoAttr check(name, "value"); // will throw if not valid
             }
             break;
         }
@@ -1281,6 +1318,23 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                 }
             }
             name = options[2];
+            break;
+        }
+
+        case AlterCmd::AVISO: {
+            if (options.size() != 4) {
+                ss << "AlterCmd: change aviso expects 4 arguments : change aviso <name> <handle> but found "
+                   << (options.size()) << ".\n";
+                ss << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            if (paths.empty()) {
+                ss << "AlterCmd: change aviso expects at least 1 node path but none was provided.\n";
+                ss << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            name  = options[2];
+            value = options[3];
             break;
         }
 

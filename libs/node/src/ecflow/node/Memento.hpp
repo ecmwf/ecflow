@@ -651,6 +651,24 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+class NodeAvisoMemento : public Memento {
+public:
+    NodeAvisoMemento() = default;
+    explicit NodeAvisoMemento(const ecf::AvisoAttr& a) : aviso_(a) {}
+
+private:
+    void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
+        n->set_memento(this, aspects, f);
+    }
+
+    ecf::AvisoAttr aviso_;
+    friend class Node;
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
+};
+
 class NodeDateMemento : public Memento {
 public:
     explicit NodeDateMemento(const DateAttr& attr) : attr_(attr) {}

@@ -108,6 +108,8 @@ public:
     /// This function is used to choose the fastest implementation
     static void split(const std::string& line, std::vector<std::string>& tokens, const std::string& delimiters = " \t");
 
+    static std::vector<std::string_view> tokenize_quotation(const std::string& s, std::string_view quotes);
+
     static void
     split_orig(const std::string& line, std::vector<std::string>& tokens, const std::string& delimiters = " \t");
 

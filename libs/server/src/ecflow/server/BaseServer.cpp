@@ -36,6 +36,8 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
       signals_(io_service),
       defs_(Defs::create()), // ECFLOW-182
       traverser_(this, io_service, serverEnv),
+      avisoNotifications_(),
+      avisoUpdater_(io_service, std::chrono::seconds(10), avisoNotifications_),
       checkPtSaver_(this, io_service, &serverEnv),
       serverState_(SState::HALTED),
       serverEnv_(serverEnv) {
@@ -113,6 +115,7 @@ void BaseServer::handle_terminate() {
 
     // Cancel async timers for check pointing and traversal
     traverser_.terminate();
+    avisoUpdater_.terminate();
     checkPtSaver_.terminate();
 }
 
@@ -323,6 +326,8 @@ void BaseServer::shutdown() {
     // to check point.
     traverser_.stop();
 
+    avisoUpdater_.stop();
+
     // Continue check pointing since, we allow tasks communication. This can change node
     // tree state. Which we *must* be able to checkpoint.
     // If we go from HALTED --> SHUTDOWN, then check pointing  needs to be enabled
@@ -344,6 +349,8 @@ void BaseServer::halted() {
 
     // Stop server from creating new jobs. i.e Job scheduling.
     traverser_.stop();
+
+    avisoUpdater_.stop();
 
     // *** CRITICAL*** when the server is halted, we ***MUST NOT*** do any further check pointing
     // In a typical operational scenario where we have a home, and backup servers.
@@ -375,6 +382,7 @@ void BaseServer::restart() {
     set_server_state(SState::RUNNING);
 
     traverser_.start();
+    avisoUpdater_.start();
     checkPtSaver_.start();
 }
 
