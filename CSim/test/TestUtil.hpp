@@ -19,9 +19,9 @@
 //
 class TestUtil {
 public:
-    TestUtil()                           = delete;
-    TestUtil(const TestUtil&)            = delete;
-    TestUtil(TestUtil&&)                 = delete;
+    TestUtil()                = delete;
+    TestUtil(const TestUtil&) = delete;
+    TestUtil(TestUtil&&)      = delete;
 
     TestUtil& operator=(const TestUtil&) = delete;
     TestUtil& operator=(TestUtil&&)      = delete;

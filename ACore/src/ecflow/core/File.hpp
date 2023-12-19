@@ -25,8 +25,8 @@ namespace ecf {
 
 class File {
 public:
-    File()                       = default;
-    File(const File&)            = delete;
+    File()            = default;
+    File(const File&) = delete;
 
     File& operator=(const File&) = delete;
 

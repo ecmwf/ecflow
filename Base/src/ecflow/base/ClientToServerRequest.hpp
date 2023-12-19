@@ -17,9 +17,9 @@
 // This class is used in the IPC messaging from  client to server.
 class ClientToServerRequest {
 public:
-    ClientToServerRequest()                                        = default;
-    ClientToServerRequest(const ClientToServerRequest&)            = delete;
-    ~ClientToServerRequest()                                       = default;
+    ClientToServerRequest()                             = default;
+    ClientToServerRequest(const ClientToServerRequest&) = delete;
+    ~ClientToServerRequest()                            = default;
 
     ClientToServerRequest& operator=(const ClientToServerRequest&) = delete;
 

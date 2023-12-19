@@ -27,9 +27,9 @@ class AbstractServer;
 /// All zombies are auto deleted after a period of time. See Zombie::allowed_age()
 class ZombieCtrl {
 public:
-    ZombieCtrl()                             = default;
-    ZombieCtrl(const ZombieCtrl&)            = delete;
-    ZombieCtrl(ZombieCtrl&&)                 = delete;
+    ZombieCtrl()                  = default;
+    ZombieCtrl(const ZombieCtrl&) = delete;
+    ZombieCtrl(ZombieCtrl&&)      = delete;
 
     ZombieCtrl& operator=(const ZombieCtrl&) = delete;
     ZombieCtrl& operator=(ZombieCtrl&&)      = delete;
