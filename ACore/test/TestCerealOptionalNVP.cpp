@@ -13,7 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Filesystem.hpp"
-#include "ecflow/core/SerializationTest.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
 using namespace boost;

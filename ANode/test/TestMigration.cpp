@@ -11,9 +11,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
+#include "TestSerialisation.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/SerializationTest.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"

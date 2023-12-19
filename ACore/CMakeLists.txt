@@ -49,7 +49,6 @@ set(srcs
   src/ecflow/core/PrintStyle.hpp
   src/ecflow/core/SState.hpp
   src/ecflow/core/Serialization.hpp
-  src/ecflow/core/SerializationTest.hpp
   src/ecflow/core/Stl.hpp
   src/ecflow/core/Str.hpp
   src/ecflow/core/StringSplitter.hpp
@@ -119,6 +118,22 @@ ecbuild_add_library(
 )
 target_clangformat(core)
 
+##
+## Notice: test_support is an INTERFACE-only test utility library.
+##
+
+ecbuild_add_library(
+  TARGET
+    test_support
+  NOINSTALL
+  TYPE INTERFACE
+  SOURCES
+    test/TestSerialisation.hpp
+  PUBLIC_INCLUDES
+    test
+)
+target_clangformat(test_support)
+
 set(test_srcs
   # Headers
   test/TestVersioning.hpp
@@ -163,6 +178,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
+    test_support
     core
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 #

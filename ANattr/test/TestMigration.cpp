@@ -11,6 +11,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestSerialisation.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -28,7 +29,6 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/SerializationTest.hpp"
 #include "ecflow/core/TimeSlot.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
