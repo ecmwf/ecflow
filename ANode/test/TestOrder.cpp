@@ -11,7 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/CalendarUpdateParams.hpp"
-#include "ecflow/core/TestUtil.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -73,22 +73,25 @@ BOOST_AUTO_TEST_CASE(test_order) {
     // In init state all suite should be in alpha order
     theDefs.order(theDefs.findAbsNode("/A").get(), NOrder::ALPHA);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == alpha,
-                          "NOrder::ALPHA expected " << toString(alpha) << " but found "
-                                                    << toString(toStrVec(theDefs.suiteVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == alpha,
+                          "NOrder::ALPHA expected "
+                              << ecf::algorithm::join(alpha) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec())));
 
     // sort in reverse order
     theDefs.order(theDefs.findAbsNode("/a").get(), NOrder::ORDER);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == order,
-                          "NOrder::ORDER expected " << toString(order) << " but found "
-                                                    << toString(toStrVec(theDefs.suiteVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == order,
+                          "NOrder::ORDER expected "
+                              << ecf::algorithm::join(order) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec())));
 
     // Change back to alpha, then move suite 'c' to the top
     theDefs.order(theDefs.findAbsNode("/A").get(), NOrder::ALPHA);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == alpha,
-                          "NOrder::ALPHA expected " << toString(alpha) << " but found "
-                                                    << toString(toStrVec(theDefs.suiteVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == alpha,
+                          "NOrder::ALPHA expected "
+                              << ecf::algorithm::join(alpha) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec())));
     test_invariants(theDefs, __LINE__);
 
     std::vector<std::string> expected;
@@ -99,24 +102,28 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("B");
     theDefs.order(theDefs.findAbsNode("/c").get(), NOrder::TOP);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == expected,
-                          "NOrder::TOP expected " << toString(expected) << " but found "
-                                                  << toString(toStrVec(theDefs.suiteVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == expected,
+                          "NOrder::TOP expected "
+                              << ecf::algorithm::join(expected) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec())));
 
     // move suite 'c' back to the bottom
     theDefs.order(theDefs.findAbsNode("/c").get(), NOrder::BOTTOM);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == alpha, "NOrder::BOTTOM order not as expected");
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == alpha,
+                          "NOrder::BOTTOM order not as expected");
 
     // move suite 'a' up one place. Should be no change, since its already at the top
     theDefs.order(theDefs.findAbsNode("/a").get(), NOrder::UP);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == alpha, "NOrder::UP order not as expected");
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == alpha,
+                          "NOrder::UP order not as expected");
 
     // move suite 'c' down one place. Should be no change, since its already at the bottom
     theDefs.order(theDefs.findAbsNode("/c").get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == alpha, "NOrder::DOWN order not as expected");
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == alpha,
+                          "NOrder::DOWN order not as expected");
 
     // Move suite 'a' down by one place
     expected.clear();
@@ -127,7 +134,8 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("c");
     theDefs.order(theDefs.findAbsNode("/a").get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == expected, "NOrder::DOWN order not as expected");
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == expected,
+                          "NOrder::DOWN order not as expected");
 
     // Move suite 'b' up by one place
     expected.clear();
@@ -138,7 +146,8 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("c");
     theDefs.order(theDefs.findAbsNode("/b").get(), NOrder::UP);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs.suiteVec()) == expected, "NOrder::UP order not as expected");
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs.suiteVec()) == expected,
+                          "NOrder::UP order not as expected");
 
     // Test family ordering ==========================================================================
     // In init state all suite should be in alpha order
@@ -147,23 +156,26 @@ BOOST_AUTO_TEST_CASE(test_order) {
 
     theDefs.order(theDefs.findAbsNode("/a/a").get(), NOrder::ALPHA);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == alpha,
-                          "NOrder::ALPHA Init order " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                                      << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == alpha,
+                          "NOrder::ALPHA Init order "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // sort in reverse order
     std::sort(expected.begin(), expected.end(), std::greater<std::string>());
     suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::ORDER);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == order,
-                          "NOrder::ORDER order " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                                 << toString(order));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == order,
+                          "NOrder::ORDER order "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(order));
 
     // Change back to alpha, then move family 'e' to the top
     suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::ALPHA);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == alpha,
-                          "NOrder::ALPHA expected " << toString(alpha) << " but found "
-                                                    << toString(toStrVec(suite->nodeVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == alpha,
+                          "NOrder::ALPHA expected "
+                              << ecf::algorithm::join(alpha) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec())));
     test_invariants(theDefs, __LINE__);
     expected.clear();
     expected.emplace_back("c");
@@ -172,30 +184,34 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("b");
     expected.emplace_back("B");
     suite->order(theDefs.findAbsNode("/a/c").get(), NOrder::TOP);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == expected,
-                          "NOrder::TOP order  " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                                << toString(expected));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == expected,
+                          "NOrder::TOP order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(expected));
 
     //  move family 'c' back to the bottom
     suite->order(theDefs.findAbsNode("/a/c").get(), NOrder::BOTTOM);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == alpha,
-                          "NOrder::BOTTOM order  " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                                   << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == alpha,
+                          "NOrder::BOTTOM order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // move family 'a' up one place. Should be no change, since its already at the top
     suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::UP);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == alpha,
-                          "NOrder::UP order  " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                               << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == alpha,
+                          "NOrder::UP order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // move family 'c' down one place. Should be no change, since its already at the bottom
     suite->order(theDefs.findAbsNode("/a/c").get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == alpha,
-                          "NOrder::DOWN order  " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                                 << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == alpha,
+                          "NOrder::DOWN order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // Move family 'a' down by one place
     expected.clear();
@@ -206,9 +222,10 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("c");
     suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == expected,
-                          "NOrder::DOWN order  " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                                 << toString(expected));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == expected,
+                          "NOrder::DOWN order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(expected));
 
     // Move family 'b' up by one place
     suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::ALPHA); // reset
@@ -220,9 +237,10 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("B");
     expected.emplace_back("c");
     suite->order(theDefs.findAbsNode("/a/b").get(), NOrder::UP);
-    BOOST_REQUIRE_MESSAGE(toStrVec(suite->nodeVec()) == expected,
-                          "NOrder::UP order  " << toString(toStrVec(suite->nodeVec())) << " not as expected "
-                                               << toString(expected));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(suite->nodeVec()) == expected,
+                          "NOrder::UP order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(suite->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(expected));
 
     // Test Task ordering ==========================================================================
     // In init state all tasks should be in alpha order
@@ -231,16 +249,18 @@ BOOST_AUTO_TEST_CASE(test_order) {
 
     family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::ALPHA);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == alpha,
-                          "NOrder::ALPHA Init state " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                                      << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == alpha,
+                          "NOrder::ALPHA Init state "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // sort in reverse order
     family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::ORDER);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == order,
-                          "NOrder::ORDER  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                            << toString(order));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == order,
+                          "NOrder::ORDER  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(order));
 
     // Change back to alpha, then move task 'c' to the top
     family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::ALPHA); // reset
@@ -252,30 +272,34 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("B");
     family->order(theDefs.findAbsNode("/a/a/c").get(), NOrder::TOP);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == expected,
-                          "NOrder::TOP order  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                                << toString(expected));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == expected,
+                          "NOrder::TOP order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(expected));
 
     //  move task 'c' back to the bottom
     family->order(theDefs.findAbsNode("/a/a/c").get(), NOrder::BOTTOM);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == alpha,
-                          "NOrder::BOTTOM order  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                                   << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == alpha,
+                          "NOrder::BOTTOM order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // move task 'a' up one place. Should be no change, since its already at the top
     family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::UP);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == alpha,
-                          "NOrder::UP order  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                               << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == alpha,
+                          "NOrder::UP order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // move task 'e' down one place. Should be no change, since its already at the bottom
     family->order(theDefs.findAbsNode("/a/a/c").get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == alpha,
-                          "NOrder::DOWN order  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                                 << toString(alpha));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == alpha,
+                          "NOrder::DOWN order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(alpha));
 
     // Move task 'a' down by one place
     expected.clear();
@@ -286,9 +310,10 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("c");
     family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == expected,
-                          "NOrder::DOWN order  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                                 << toString(expected));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == expected,
+                          "NOrder::DOWN order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(expected));
 
     // Move task 'b' up by one place
     family->order(theDefs.findAbsNode("/a/a/b").get(), NOrder::DOWN);
@@ -299,9 +324,10 @@ BOOST_AUTO_TEST_CASE(test_order) {
     expected.emplace_back("b");
     expected.emplace_back("c");
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(family->nodeVec()) == expected,
-                          "NOrder::UP order  " << toString(toStrVec(family->nodeVec())) << " not as expected "
-                                               << toString(expected));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(family->nodeVec()) == expected,
+                          "NOrder::UP order  "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(family->nodeVec()))
+                              << " not as expected " << ecf::algorithm::join(expected));
 }
 
 BOOST_AUTO_TEST_CASE(test_alias_order) {
@@ -329,9 +355,10 @@ BOOST_AUTO_TEST_CASE(test_alias_order) {
     expected.emplace_back("alias3");
     task->order(alias0.get(), NOrder::DOWN);
     test_invariants(theDefs, __LINE__);
-    BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                          "NOrder::DOWN expected " << toString(expected) << " but found "
-                                                   << toString(toStrVec(task->aliases())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                          "NOrder::DOWN expected "
+                              << ecf::algorithm::join(expected) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
 
     task->order(alias0.get(), NOrder::ALPHA);
     test_invariants(theDefs, __LINE__);
@@ -340,9 +367,10 @@ BOOST_AUTO_TEST_CASE(test_alias_order) {
     expected.emplace_back("alias1");
     expected.emplace_back("alias2");
     expected.emplace_back("alias3");
-    BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                          "NOrder::ALPHA expectex " << toString(expected) << " but found "
-                                                    << toString(toStrVec(task->aliases())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                          "NOrder::ALPHA expectex "
+                              << ecf::algorithm::join(expected) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
 
     task->order(task->find_alias("alias3").get(), NOrder::UP);
     test_invariants(theDefs, __LINE__);
@@ -351,9 +379,10 @@ BOOST_AUTO_TEST_CASE(test_alias_order) {
     expected.emplace_back("alias1");
     expected.emplace_back("alias3");
     expected.emplace_back("alias2");
-    BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                          "NOrder::UP expected " << toString(expected) << " but found "
-                                                 << toString(toStrVec(task->aliases())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                          "NOrder::UP expected "
+                              << ecf::algorithm::join(expected) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
 
     // sort in reverse order
     std::sort(expected.begin(), expected.end(), std::greater<std::string>());
@@ -364,9 +393,10 @@ BOOST_AUTO_TEST_CASE(test_alias_order) {
     expected.emplace_back("alias2");
     expected.emplace_back("alias1");
     expected.emplace_back("alias0");
-    BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                          "NOrder::ORDER expected " << toString(expected) << " but found "
-                                                    << toString(toStrVec(task->aliases())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                          "NOrder::ORDER expected "
+                              << ecf::algorithm::join(expected) << " but found "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
 }
 
 BOOST_AUTO_TEST_CASE(test_order_by_runtime) {

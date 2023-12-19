@@ -53,7 +53,6 @@ set(srcs
   src/ecflow/core/Stl.hpp
   src/ecflow/core/Str.hpp
   src/ecflow/core/StringSplitter.hpp
-  src/ecflow/core/TestUtil.hpp
   src/ecflow/core/TimeSeries.hpp
   src/ecflow/core/TimeSlot.hpp
   src/ecflow/core/TimeStamp.hpp

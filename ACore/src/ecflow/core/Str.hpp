@@ -23,8 +23,8 @@ namespace ecf {
 
 namespace algorithm {
 
-template <typename Sequence1, typename Sequence2>
-inline static auto join(const Sequence1& strings, const Sequence2& separator) {
+template <typename Sequence1, typename Sequence2 = std::string>
+inline static auto join(const Sequence1& strings, const Sequence2& separator = std::string(", ")) {
     return ::boost::algorithm::join(strings, separator);
 }
 
@@ -46,6 +46,14 @@ inline static bool starts_with(const Sequence1& input, const Sequence2& pattern)
 template <typename Sequence>
 inline static void trim(Sequence& input) {
     ::boost::algorithm::trim(input);
+}
+
+template <typename T>
+static std::vector<std::string> transform_to_name_vector(const std::vector<T>& i) {
+    std::vector<std::string> o;
+    o.reserve(i.size());
+    std::transform(std::begin(i), std::end(i), std::back_inserter(o), [](const auto& v) { return v->name(); });
+    return o;
 }
 
 } // namespace algorithm

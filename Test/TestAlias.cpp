@@ -22,7 +22,6 @@
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/core/TestUtil.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -150,9 +149,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias1");
         expected.push_back("alias0");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::DOWN expected " << toString(expected) << " but found "
-                                                       << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::DOWN expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::UP)) == 0,
@@ -169,9 +169,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias0");
         expected.push_back("alias1");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::UP expected " << toString(expected) << " but found "
-                                                     << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::UP expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::ORDER)) == 0,
@@ -188,9 +189,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias1");
         expected.push_back("alias0");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::ORDER expected " << toString(expected) << " but found "
-                                                        << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::ORDER expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::ALPHA)) == 0,
@@ -207,9 +209,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias0");
         expected.push_back("alias1");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::ALPHA expected " << toString(expected) << " but found "
-                                                        << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::ALPHA expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     // TEST Alias DELETION =============================================================================
