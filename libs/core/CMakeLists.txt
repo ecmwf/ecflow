@@ -40,6 +40,7 @@ set(srcs
   src/ecflow/core/Indentor.hpp
   src/ecflow/core/Log.hpp
   src/ecflow/core/LogVerification.hpp
+  src/ecflow/core/Message.hpp
   src/ecflow/core/NOrder.hpp
   src/ecflow/core/NState.hpp
   src/ecflow/core/NodePath.hpp
@@ -153,6 +154,7 @@ set(test_srcs
   test/TestFile.cpp
   test/TestGetUserDetails.cpp
   test/TestLog.cpp
+  test/TestMessage.cpp
   test/TestMigration.cpp
   test/TestNodePath.cpp
   test/TestPasswdFile.cpp
