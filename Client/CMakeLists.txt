@@ -103,25 +103,25 @@ set(test_srcs
 
 if (ENABLE_SERVER)
   list(APPEND test_srcs
-      # Headers
-      test/SCPort.hpp
-      # Sources
-      test/SCPort.cpp
-      test/TestClientTimeout.cpp
-      test/TestClientHandleCmd.cpp
-      test/TestCheckPtDefsCmd.cpp
-      test/TestCustomUser.cpp
-      test/TestGroupCmd.cpp
-      test/TestLoadDefsCmd.cpp
-      test/TestLogAndCheckptErrors.cpp
-      test/TestPasswdFile.cpp
-      test/TestPlugCmd.cpp
-      test/TestServer.cpp
-      test/TestServerAndLifeCycle.cpp
-      test/TestServerLoad.cpp
-      test/TestSignalSIGTERM.cpp
-      test/TestWhiteListFile.cpp
-      )
+    # Headers
+    test/SCPort.hpp
+    # Sources
+    test/SCPort.cpp
+    test/TestClientTimeout.cpp
+    test/TestClientHandleCmd.cpp
+    test/TestCheckPtDefsCmd.cpp
+    test/TestCustomUser.cpp
+    test/TestGroupCmd.cpp
+    test/TestLoadDefsCmd.cpp
+    test/TestLogAndCheckptErrors.cpp
+    test/TestPasswdFile.cpp
+    test/TestPlugCmd.cpp
+    test/TestServer.cpp
+    test/TestServerAndLifeCycle.cpp
+    test/TestServerLoad.cpp
+    test/TestSignalSIGTERM.cpp
+    test/TestWhiteListFile.cpp
+  )
 endif()
 
 ecbuild_add_test(
@@ -139,6 +139,8 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  DEPENDS
+    ecflow_server # the server is launched to support tests
   TEST_DEPENDS
     u_base
 )
@@ -169,6 +171,8 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       libclient
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
   )
@@ -198,6 +202,8 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       libclient
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
   )

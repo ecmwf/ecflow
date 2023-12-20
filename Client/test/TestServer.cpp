@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_Server)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -599,5 +601,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
          << boost_timer.format(3, Str::cpu_timer_format()) << ") DurationTimer("
          << to_simple_string(duration_timer.elapsed()) << ")" << endl;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

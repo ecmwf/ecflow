@@ -39,7 +39,9 @@ void test_alter(const CommandLine& cl, REQUIRE check) {
     }
 }
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ClientOptions)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
     const char* expected_username = "username";
@@ -721,5 +723,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_delete) {
         }
     } // paths
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

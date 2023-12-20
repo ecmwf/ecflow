@@ -19,11 +19,9 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
-#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -41,7 +39,9 @@ struct ArgsFixture
     char** argv;
 };
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -107,5 +107,7 @@ BOOST_FIXTURE_TEST_CASE(test_migration, ArgsFixture) {
         BOOST_REQUIRE_MESSAGE(error_cnt == 0, "Migration test failed " << error_cnt << " times ");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

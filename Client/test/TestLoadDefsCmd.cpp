@@ -26,7 +26,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_LoadDefsCmd)
 
 //=============================================================================
 // This test the LoadDefsCmd. This command will merge/absorb a defs file
@@ -158,5 +160,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs) {
     /// Destroy singleton's to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

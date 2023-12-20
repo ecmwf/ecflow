@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_JobGenOnly)
 
 //  Tests the Job generation against the OLD sms
 BOOST_AUTO_TEST_CASE(test_jobgenonly) {
@@ -84,5 +86,7 @@ BOOST_AUTO_TEST_CASE(test_jobgenonly) {
         BOOST_REQUIRE_MESSAGE(fs::exists(s), "File " << s << " should have been created");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

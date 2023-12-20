@@ -29,7 +29,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_LifeCycle)
 
 BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
     cout << "Client:: ...test_node_tree_lifecycle" << endl;
@@ -237,5 +239,7 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
         BOOST_CHECK_MESSAGE(defs.checkInvariants(errorMsg), errorMsg);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

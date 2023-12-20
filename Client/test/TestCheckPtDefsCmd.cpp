@@ -23,7 +23,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_CheckPtDefsCmd)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -386,5 +388,7 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
                               "Expected edit history of size 0, but found " << defs.get_edit_history().size());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

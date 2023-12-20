@@ -120,9 +120,9 @@ private:
         // start the server in the background
         std::string theServerInvokePath = ecf::File::find_ecf_server_path();
         BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(),
-                              "InvokeServer::doStart: The server program could not be found");
+                              "InvokeServer::doStart: `ecflow_server` executable must be available");
         BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath),
-                              "InvokeServer::doStart: server exe does not exist at:" << theServerInvokePath);
+                              "InvokeServer::doStart: `ecflow_server` executable available at:" << theServerInvokePath);
 
         // Create a port file. To avoid creating multiple servers on the same port number
         ecf::EcfPortLock::create(port);
