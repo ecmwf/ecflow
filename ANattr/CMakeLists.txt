@@ -90,6 +90,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
+    test_support
     nodeattr
   TEST_DEPENDS
     u_acore

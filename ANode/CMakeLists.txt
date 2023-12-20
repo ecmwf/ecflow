@@ -233,6 +233,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
+    test_support
     node
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS

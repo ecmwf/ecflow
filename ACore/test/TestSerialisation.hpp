@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_core_SerializationTest_HPP
-#define ecflow_core_SerializationTest_HPP
+#ifndef ecflow_core_TestSerialisation_HPP
+#define ecflow_core_TestSerialisation_HPP
 
 #include <boost/test/unit_test.hpp>
 
@@ -17,7 +17,6 @@
 
 namespace ecf {
 
-// The following template  functions are used test/debug only
 template <typename T>
 void do_restore(const std::string& fileName, const T& saved) {
     T restored;
@@ -66,4 +65,4 @@ void doSaveAndRestore(const std::string& fileName) {
 
 } // namespace ecf
 
-#endif /* ecflow_core_SerializationTest_HPP */
+#endif /* ecflow_core_TestSerialisation_HPP */

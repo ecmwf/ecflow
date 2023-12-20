@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestSerialisation.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -27,7 +28,6 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
-#include "ecflow/core/SerializationTest.hpp"
 
 using namespace std;
 using namespace ecf;

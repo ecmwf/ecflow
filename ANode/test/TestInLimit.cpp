@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/SerializationTest.hpp"
+#include "TestSerialisation.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/Task.hpp"
 
