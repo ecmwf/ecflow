@@ -8,5 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE TestSingleExpression
+#define BOOST_TEST_MODULE Test_SingleExprParse
 #include <boost/test/included/unit_test.hpp>

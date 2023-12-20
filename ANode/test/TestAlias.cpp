@@ -23,7 +23,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Alias)
 
 BOOST_AUTO_TEST_CASE(test_alias_create) {
     cout << "ANode:: ...test_alias_create\n";
@@ -143,5 +145,7 @@ BOOST_AUTO_TEST_CASE(test_alias_create) {
     // Cleanup by removing the created directory
     fs::remove_all(ecf_home);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

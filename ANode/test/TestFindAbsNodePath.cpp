@@ -21,7 +21,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_FindAbsNodePath)
 
 BOOST_AUTO_TEST_CASE(test_find_abs_node_path) {
     cout << "ANode:: ...test_find_abs_node_path\n";
@@ -77,5 +79,7 @@ BOOST_AUTO_TEST_CASE(test_find_abs_node_path) {
                                                  << found_node->debugNodePath());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

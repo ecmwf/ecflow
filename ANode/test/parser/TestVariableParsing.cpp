@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_VariableParsing)
 
 BOOST_AUTO_TEST_CASE(test_single_defs) {
 
@@ -67,5 +69,7 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     BOOST_REQUIRE_MESSAGE(!user.empty(), "Could not find variable USER");
     BOOST_REQUIRE_MESSAGE(user.value() == 0, "Expected user to have a value of 0, but found " << user.value());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

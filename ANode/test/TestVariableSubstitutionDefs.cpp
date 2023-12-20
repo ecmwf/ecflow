@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_VariableSubstitutionDefs)
 
 BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
     std::cout << "ANode:: ...test_defs_variable_substitution\n";
@@ -186,5 +188,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution_double_micro) {
     BOOST_CHECK_MESSAGE(defs.variableSubsitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

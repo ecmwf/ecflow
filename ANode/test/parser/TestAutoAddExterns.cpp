@@ -19,7 +19,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_AutoAddExterns)
 
 // Test that automatic add of externs
 BOOST_AUTO_TEST_CASE(test_auto_add_externs) {
@@ -52,5 +54,7 @@ BOOST_AUTO_TEST_CASE(test_auto_add_externs) {
                               << defs.externs().size() << "\n"
                               << defs << "\n");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

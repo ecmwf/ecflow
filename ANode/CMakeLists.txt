@@ -202,7 +202,7 @@ set(test_srcs
   test/TestMigration.cpp
   test/TestMissNextTimeSlot.cpp
   test/TestMovePeer.cpp
-  test/TestNodeBeginReque.cpp
+  test/TestNodeBeginRequeue.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
   test/TestOrder.cpp
@@ -211,6 +211,7 @@ set(test_srcs
   test/TestRepeatWithTimeDependencies.cpp
   test/TestReplace.cpp
   test/TestSetState.cpp
+  test/TestSpecificIssues.cpp
   test/TestSystem.cpp
   test/TestTaskScriptGenerator.cpp
   test/TestTimeDependencies.cpp
@@ -219,9 +220,6 @@ set(test_srcs
   test/TestVariableSubstitution.cpp
   test/TestVariableSubstitutionDefs.cpp
   test/TestZombies.cpp
-  test/Test_ECFLOW-195.cpp
-  test/Test_ECFLOW-247.cpp
-  test/Test_ECFLOW-417.cpp
 )
 
 ecbuild_add_test(

@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_DefsStructurePersisteAndReload)
 
 //=============================================================================
 // This test case will save the defs file in old style format
@@ -83,5 +85,7 @@ BOOST_AUTO_TEST_CASE(test_find_task_using_paths) {
         test_find_task_using_path(s.get(), theDefsFixture.defsfile_);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -36,7 +36,9 @@ using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_SingleDefsFile)
 
 // This test is used to find a task given a path of the form:
 //     suite/family/task
@@ -317,5 +319,7 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     Log::destroy();
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

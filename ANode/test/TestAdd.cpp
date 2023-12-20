@@ -21,7 +21,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Add)
 
 BOOST_AUTO_TEST_CASE(test_add) {
     cout << "ANode:: ...test_add\n";
@@ -111,5 +113,7 @@ BOOST_AUTO_TEST_CASE(test_add_delete_time) {
     t1->deleteToday("");
     BOOST_CHECK_MESSAGE(!t1->hasTimeDependencies(), "Expected no time attributes");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

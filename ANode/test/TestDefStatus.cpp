@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_DefsStatus)
 
 BOOST_AUTO_TEST_CASE(test_defstatus) {
     cout << "ANode:: ...test_defstatus\n";
@@ -170,5 +172,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
                             "Expected suspended but found " << DState::toString(n->dstate()));
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

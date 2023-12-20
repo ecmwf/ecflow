@@ -18,9 +18,11 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
 
-BOOST_AUTO_TEST_CASE(test_node_begin_reque_hybrid) {
+BOOST_AUTO_TEST_SUITE(T_NodeBeginRequeue)
+
+BOOST_AUTO_TEST_CASE(test_node_begin_requeue_hybrid) {
     cout << "ANode:: ...test_node_begin_reque_hybrid\n";
 
     // Create a suite with a *HYBRID* clock, and tasks with day,date and cron time attributes
@@ -72,5 +74,7 @@ BOOST_AUTO_TEST_CASE(test_node_begin_reque_hybrid) {
     BOOST_CHECK_MESSAGE(t2->state() == NState::COMPLETE, "Expected node to be complete");
     BOOST_CHECK_MESSAGE(t3->state() == NState::COMPLETE, "Expected node to be complete");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -57,7 +57,9 @@ private:
     Node* node_;
 };
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_ChangeMgrSingleton)
 
 BOOST_AUTO_TEST_CASE(test_change_mgr_singleton) {
     cout << "ANode:: ...test_change_mgr_singleton\n";
@@ -121,5 +123,7 @@ BOOST_AUTO_TEST_CASE(test_change_mgr_singleton) {
         delete theDefs;
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

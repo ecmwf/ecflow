@@ -18,7 +18,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_MovePeer)
 
 BOOST_AUTO_TEST_CASE(test_move_peer) {
     cout << "ANode:: ...test_move_peer\n";
@@ -96,4 +98,7 @@ BOOST_AUTO_TEST_CASE(test_move_peer) {
 
     BOOST_CHECK_MESSAGE(defs == expectedDefs, "Defs are not the same");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

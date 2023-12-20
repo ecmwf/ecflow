@@ -23,7 +23,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_SetState)
 
 static void set_state(node_ptr n, NState::State set, NState::State expected) {
     n->set_state(set);
@@ -137,5 +139,7 @@ BOOST_AUTO_TEST_CASE(test_set_aborted) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -18,7 +18,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_ExprRepeatDateArithmetic)
 
 BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic) {
     cout << "ANode:: ...test_repeat_data_arithmetic\n";
@@ -212,5 +214,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic_take_from_end_of_month) {
     t2->changeTrigger("t1:YMD - 1 eq 20091231");
     BOOST_CHECK_MESSAGE(t2->triggerAst()->evaluate(), "Expected trigger to use date arithmetic");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

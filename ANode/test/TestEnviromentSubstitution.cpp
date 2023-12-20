@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_EnvironmentSubstitution)
 
 BOOST_AUTO_TEST_CASE(test_environment_substitution) {
     std::cout << "ANode:: ...test_environment_substitution\n";
@@ -89,5 +91,7 @@ BOOST_AUTO_TEST_CASE(test_environment_substitution) {
     BOOST_CHECK_MESSAGE(s->variable_dollar_substitution(cmd), " substitution failed ");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

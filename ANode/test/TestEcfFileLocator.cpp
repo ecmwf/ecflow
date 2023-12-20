@@ -24,7 +24,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_EcfFileLocator)
 
 void located_ecf_file(task_ptr task,
                       EcfFile::Origin expected_origin,
@@ -485,5 +487,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

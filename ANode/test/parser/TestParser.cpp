@@ -27,7 +27,9 @@ std::vector<std::string> defs_with_expected_warnings() {
     return {"limit/limit3.def"};
 }
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_Parser)
 
 void test_defs(const std::string& directory, bool pass) {
     auto full_path = fs::absolute(directory);
@@ -225,5 +227,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_node) {
     // All the defs in this directory are expected to pass
     test_node_defs(path, true);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

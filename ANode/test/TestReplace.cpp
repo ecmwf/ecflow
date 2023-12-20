@@ -63,7 +63,9 @@ private:
     unsigned int modify_change_no_;
 };
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Replace)
 
 BOOST_AUTO_TEST_CASE(test_replace_add_task) {
     cout << "ANode:: ...test_replace_add_task\n";
@@ -1044,5 +1046,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
     Ecf::set_state_change_no(0);
     Ecf::set_modify_change_no(0);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,7 +17,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_MissNextTimeSlot)
 
 BOOST_AUTO_TEST_CASE(test_miss_next_time_slot) {
     cout << "ANode:: ...test_miss_next_time_slot\n";
@@ -113,5 +115,7 @@ BOOST_AUTO_TEST_CASE(test_miss_next_time_slot) {
     BOOST_CHECK_MESSAGE(!ts_12.is_valid(), "Expected time 12 to be expired");
     BOOST_CHECK_MESSAGE(!ts_13.is_valid(), "Expected time 13 to be expired");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

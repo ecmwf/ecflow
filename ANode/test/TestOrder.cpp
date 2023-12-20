@@ -25,7 +25,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Order)
 
 static void test_invariants(Defs& the_defs, int line) {
     std::string errorMsg;
@@ -467,4 +469,7 @@ BOOST_AUTO_TEST_CASE(test_order_by_runtime) {
 
     BOOST_CHECK_MESSAGE(defs == expectedDefs, "Defs are not the same");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

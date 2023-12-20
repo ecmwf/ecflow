@@ -27,7 +27,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_TaskScriptGenerator)
 
 BOOST_AUTO_TEST_CASE(test_reset_after_job_generation_checking) {
     cout << "ANode:: ...test_reset_after_job_generation_checking\n";
@@ -239,5 +241,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
         cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,7 +17,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Flag)
 
 BOOST_AUTO_TEST_CASE(test_node_flags) {
     cout << "ANode:: ...test_node_flags\n";
@@ -75,5 +77,7 @@ BOOST_AUTO_TEST_CASE(test_node_flags_parsing) {
     BOOST_REQUIRE_MESSAGE(flag == flag2,
                           "Flags should be equal.\nflag1:" << flag.to_string() << "\nflag2:" << flag2.to_string());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
