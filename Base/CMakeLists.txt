@@ -191,7 +191,6 @@ set(test_srcs
   test/TestClientHandleCmd.cpp
   test/TestCmd.cpp
   test/TestDeleteNodeCmd.cpp
-  test/TestECFLOW-189.cpp
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
   test/TestInLimitAndLimit.cpp
@@ -203,6 +202,7 @@ set(test_srcs
   test/TestRequest.cpp
   test/TestRequeueNodeCmd.cpp
   test/TestResolveDependencies.cpp
+  test/TestSpecificIssues.cpp
   test/TestSSyncCmd.cpp
   test/TestSSyncCmdOrder.cpp
   test/TestSSyncCmd_CH1.cpp

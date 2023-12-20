@@ -26,7 +26,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ArchiveAndRestoreCmd)
 
 BOOST_AUTO_TEST_CASE(test_add_log4) {
     // create once for all test below, then remove at the end
@@ -349,5 +351,7 @@ BOOST_AUTO_TEST_CASE(test_destroy_log4) {
     fs::remove("test_add_log4.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -26,7 +26,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_FreeDepCmd)
 
 BOOST_AUTO_TEST_CASE(test_free_dep_cmd) {
     cout << "Base:: ...test_free_dep_cmd\n";
@@ -334,5 +336,7 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series_2) {
                             << NState::toString(task->state())
                             << ", free dependency should avoid re-queue for a future single time dependency.");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

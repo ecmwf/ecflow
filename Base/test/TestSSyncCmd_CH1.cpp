@@ -43,7 +43,9 @@ using namespace ecf;
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_SSyncCmd_CH1)
 
 static defs_ptr create_client_defs(defs_ptr defs) {
     for (size_t j = 0; j < 5; j++) {
@@ -706,5 +708,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_full_sync_using_handle) {
     /* client side */ BOOST_CHECK_MESSAGE(!cmd1.do_sync(server_reply),
                                           "Expected no changes to client, we should be in sync");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

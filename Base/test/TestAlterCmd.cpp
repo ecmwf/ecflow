@@ -28,7 +28,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_AlterCmd)
 
 class TestStateChanged {
 public:
@@ -1267,5 +1269,7 @@ BOOST_AUTO_TEST_CASE(test_destroy_log5) {
     fs::remove("test_add_log5.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

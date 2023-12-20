@@ -17,7 +17,9 @@
 using namespace std;
 namespace po = boost::program_options;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ProgramOptions)
 
 BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
     cout << "Base:: ...test_program_options_implicit_value\n";
@@ -143,5 +145,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
     expected.emplace_back("-w");
     BOOST_CHECK_MESSAGE(vm["arg1"].as<vector<string>>() == expected, "multi-token not as expected");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,7 +21,9 @@ using namespace boost;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_LogCmd)
 
 BOOST_AUTO_TEST_CASE(test_log_cmd) {
     cout << "Base:: ...test_log_cmd\n";
@@ -97,5 +99,7 @@ BOOST_AUTO_TEST_CASE(test_log_cmd) {
     fs::remove(old_log_file);          // remove generated log file
     fs::remove(expected_new_log_file); // remove generated log file
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

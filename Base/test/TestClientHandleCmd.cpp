@@ -22,7 +22,9 @@ using namespace ecf;
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
 
 BOOST_AUTO_TEST_CASE(test_add_log3) {
     // create once for all test below, then remove at the end
@@ -361,4 +363,7 @@ BOOST_AUTO_TEST_CASE(test_destroy_log3) {
     fs::remove("test_add_log3.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

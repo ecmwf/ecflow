@@ -52,7 +52,9 @@ std::string extract_request_per_second(const std::string& report) {
 
 } // namespace
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_StatsCmd)
 
 BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_number_of_suites) {
 
@@ -128,5 +130,7 @@ BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_requests_per_second) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
