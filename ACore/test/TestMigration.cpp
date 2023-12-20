@@ -23,7 +23,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 // If you are updating the tests, *MAKE SURE* to check out test/data/migration/* files
 // #define UPDATE_TESTS 1
@@ -63,5 +65,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_cereal) {
     do_restore<NState>(file_name + "nstate" + cereal_version, NState());
 #endif
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

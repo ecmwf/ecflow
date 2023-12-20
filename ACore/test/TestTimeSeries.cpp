@@ -25,7 +25,9 @@ using namespace boost::gregorian;
 
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_TimeSeries)
 
 BOOST_AUTO_TEST_CASE(test_default_boost_time_duration) {
     cout << "ACore:: ...test_default_boost_time_duration\n";
@@ -774,5 +776,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
                                            << "'");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

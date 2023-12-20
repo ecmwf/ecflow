@@ -16,7 +16,9 @@
 
 #include "ecflow/core/PasswordEncryption.hpp"
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_PasswordEncryption)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_encrypt_password) {
     PasswordEncryption::username_t user               = "username";
@@ -28,5 +30,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_encrypt_password) {
 
     BOOST_REQUIRE(encrypted == expected);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

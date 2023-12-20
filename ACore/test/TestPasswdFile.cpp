@@ -21,7 +21,9 @@ using namespace ecf;
 
 // #define DEBUG_ME 1
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_PasswdFile)
 
 void test_passwd_files(const std::string& directory, bool pass) {
     auto full_path = fs::absolute(directory);
@@ -145,5 +147,7 @@ BOOST_AUTO_TEST_CASE(test_passwd) {
 
     BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds(), "expected passwords to match");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

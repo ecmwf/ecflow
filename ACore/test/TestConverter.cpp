@@ -32,9 +32,9 @@ struct ecf::converter_traits<Widget, Gizmo>
     inline static Gizmo convert(const Widget&) { return Gizmo{}; }
 };
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
 
-BOOST_AUTO_TEST_SUITE(Converter)
+BOOST_AUTO_TEST_SUITE(T_Converter)
 
 BOOST_AUTO_TEST_CASE(can_convert_from_numeric_to_string) {
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(0), "0");

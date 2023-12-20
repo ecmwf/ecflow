@@ -31,7 +31,9 @@ using namespace ecf;
 using namespace boost;
 #endif
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_StringSplitPerf)
 
 #ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
 
@@ -473,5 +475,7 @@ BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
 }
 
 #endif
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

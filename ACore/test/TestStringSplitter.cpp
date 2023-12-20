@@ -19,7 +19,9 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_StringSplitter)
 
 static void
 check(const std::string& line, const StringSplitter& string_splitter, const std::vector<std::string>& expected) {
@@ -312,34 +314,6 @@ BOOST_AUTO_TEST_CASE(test_StringSplitter_get_token) {
     }
 }
 
-// BOOST_AUTO_TEST_CASE( test_StringSplitter_iterator )
-//{
-//    cout << "ACore:: ...test_StringSplitter_iterator\n";
-//
-//    std::string input = "This is a example with fred.com";
-//    //iterate tokens
-//    StringSplitter sp(input);
-//    for (auto x : sp)
-//       std::cout << x << "\n";
-
-//   //search for token
-//   StringSplitter sp1(input);
-//   auto x = std::find(sp1.begin(), sp1.end(), "example");
-//
-//   //store tokens
-//   StringSplitter sp2(input);
-//   std::vector<string> tokens;
-//   std::for_each(sp2.begin(), sp2.end(),
-//                 [&tokens](auto x)
-//                 {
-//                    tokens.emplace_back(x.begin(), x.end());
-//                 });
-//
-//   //filter tokens
-//   StringSplitter sp3(input);
-//   std::vector<string_view> tokens;
-//   std::copy_if(sp3.begin(), sp3.end(), std::back_inserter(tokens),
-//                [](auto x) { return x.ends_with(".com"); });
-//}
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

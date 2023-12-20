@@ -22,7 +22,9 @@ using namespace boost::gregorian;
 
 static std::string fileName = "test.txt";
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Serialisation)
 
 BOOST_AUTO_TEST_CASE(test_calendar_serialisation) {
     cout << "ACore:: ...test_calendar_serialisation \n";
@@ -60,5 +62,7 @@ BOOST_AUTO_TEST_CASE(test_TimeSeries_serialisation) {
         doSaveAndRestore(fileName, saved);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

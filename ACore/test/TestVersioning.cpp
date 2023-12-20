@@ -18,7 +18,9 @@
 using namespace std;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Versioning)
 
 // This class will create a Class X. This is serialised.
 // This class is then reloaded, with different kinds of version changes, to base version 0;
@@ -58,5 +60,7 @@ BOOST_AUTO_TEST_CASE(test_versioning) {
     // remove the generate file
     fs::remove("version0");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,7 +21,9 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Version)
 
 BOOST_AUTO_TEST_CASE(test_version) {
     std::string desc = Version::description();
@@ -70,5 +72,7 @@ BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
         "\n  Expected " << cmake_version << " but found " << Version::raw()
                         << ", Please regenerate file $WK/ACore/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

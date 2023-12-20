@@ -51,7 +51,9 @@ std::ostream& operator<<(std::ostream& os, Base const& m) {
 
 // =================================================================================
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_CerealOptionalNVP)
 
 BOOST_AUTO_TEST_CASE(test_cereal_optional) {
     cout << "ACore:: ...test_cereal_optional\n";
@@ -79,5 +81,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_optional) {
         fs::remove(path); // Remove the file. Comment out for debugging
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

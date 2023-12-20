@@ -9,11 +9,14 @@
  */
 
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
+#include <boost/timer/timer.hpp>
 
+#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
 
@@ -21,7 +24,9 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Str)
 
 BOOST_AUTO_TEST_CASE(test_str) {
     cout << "ACore:: ...test_str\n";
@@ -635,233 +640,239 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //// ==============================================================
 //// Timing to find the fastest looping
 //// ==============================================================
-// class Fred {
-// public:
-//    Fred(int i = 0) : i_(i)            { /*std::cout << "Fred constructor\n"*/;}
-//    Fred(const Fred& rhs) : i_(rhs.i_) { /*std::cout << "Fred copy constructor\n";*/ }
-//    Fred& operator=(const Fred& rhs)   { /*std::cout << "assignment operator\n";*/ i_ = rhs.i_; return *this;}
-//    ~Fred()                            { /*std::cout << "Fred destructor\n";*/}
-//
-//	void inc() { i_++;}
-// private:
-//	int i_;
-// };
+class Fred {
+public:
+    Fred(int i = 0) : i_(i) { /*std::cout << "Fred constructor\n"*/
+        ;
+    }
+    Fred(const Fred& rhs) : i_(rhs.i_) { /*std::cout << "Fred copy constructor\n";*/
+    }
+    Fred& operator=(const Fred& rhs) { /*std::cout << "assignment operator\n";*/
+        i_ = rhs.i_;
+        return *this;
+    }
+    ~Fred() { /*std::cout << "Fred destructor\n";*/
+    }
 
-// BOOST_AUTO_TEST_CASE( test_loop )
-//{
-//	size_t vecSize = 200000000;
-//	std::vector<Fred> vec;
-//	vec.reserve(vecSize);
-//	for (size_t i = 0; i < vecSize ; i++) { vec.push_back(Fred(i));}
-//
-//  	boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-//  elapsed//
-//    timer.restart();
-//    for(auto &fred : vec) { fred.inc(); }
-//    cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                " <<
-//    timer.format(3,Str::cpu_timer_format()) << "\n";
-//
-//    timer.restart();
-//    std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );
-//    cout << "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 " <<
-//    timer.format(3,Str::cpu_timer_format()) << "\n";
-//
-//  	timer.restart();
-//	std::vector<Fred>::iterator theEnd = vec.end();
-//  	for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); }
-//  	cout << "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } " <<
-//  timer.format(3,Str::cpu_timer_format()) << "\n";
-//
-//  	timer.restart();
-//  	std::for_each(vec.begin(),vec.end(),std::mem_fun_ref(&Fred::inc) );
-//  	cout << "Time: std::for_each(vec.begin();vec.end(),std::mem_fun_ref(&Fred::inc))                    " <<
-//  timer.format(3,Str::cpu_timer_format()) << "\n";
-//
-//  	timer.restart();
-//  	size_t theSize = vec.size();
-//	for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }
-//  	cout << "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              " <<
-//  timer.format(3,Str::cpu_timer_format()) << "\n";
-// }
+    void inc() { i_++; }
+
+private:
+    int i_;
+};
+
+BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
+    const size_t size = 200000000;
+    std::vector<Fred> vec;
+    vec.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+        vec.push_back(Fred(i));
+    }
+
+    {
+        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        for (auto& fred : vec) {
+            fred.inc();
+        }
+        cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                "
+             << timer.format(3, Str::cpu_timer_format()) << "\n";
+    }
+
+    {
+        boost::timer::cpu_timer timer;
+        std::for_each(vec.begin(), vec.end(), [](Fred& fred) { fred.inc(); });
+        cout << "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
+             << timer.format(3, Str::cpu_timer_format()) << "\n";
+    }
+
+    {
+        boost::timer::cpu_timer timer;
+        std::vector<Fred>::iterator theEnd = vec.end();
+        for (std::vector<Fred>::iterator i = vec.begin(); i < theEnd; i++) {
+            (*i).inc();
+        }
+        cout << "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
+             << timer.format(3, Str::cpu_timer_format()) << "\n";
+    }
+
+    {
+        boost::timer::cpu_timer timer;
+        size_t theSize = vec.size();
+        for (size_t i = 0; i < theSize; i++) {
+            vec[i].inc();
+        }
+        cout << "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
+             << timer.format(3, Str::cpu_timer_format()) << "\n";
+    }
+}
 
 /// ==============================================================
 /// Timing to find the fastest conversion from string to int
 /// ==============================================================
-// static void methodX(  const std::string& str,
-//                       std::vector<std::string>& stringRes,
-//                       std::vector<int>& numberRes)
-//{
-//	// 0.81
-//	// for bad conversion istringstream seems to return 0, hence add guard
-//	if ( str.find_first_of( Str::NUMERIC(), 0 ) == 0 ) {
-//		int number = 0;
-//		std::istringstream ( str ) >> number;
-//		numberRes.push_back( number );
-//  	}
-//	else {
-//		stringRes.push_back( str );
-//	}
-// }
-//
-//
-// static void method1(  const std::string& str,
-//                       std::vector<std::string>& stringRes,
-//                       std::vector<int>& numberRes)
-//{
-//	// 12.2
-//	try {
-//		int number = ecf::convert_to<int>( str );
-//		numberRes.push_back( number );
-//	}
-//	catch (const ecf::bad_conversion&) {
-//		stringRes.push_back( str );
-//	}
-// }
-//
-// static void method2(  const std::string& str,
-//                       std::vector<std::string>& stringRes,
-//                       std::vector<int>& numberRes)
-//{
-//	// 0.6
-//	if ( str.find_first_of( Str::NUMERIC(), 0 ) == 0 ) {
-//		try {
-//			int number = ecf::convert_to<int>( str );
-//			numberRes.push_back( number );
-//		}
-//		catch (const ecf::bad_conversion&) {
-//			stringRes.push_back( str );
-//		}
-//	}
-//	else {
-//		stringRes.push_back( str );
-//	}
-// }
-//
-// static void method3(  const std::string& str,
-//                       std::vector<std::string>& stringRes,
-//                       std::vector<int>& numberRes)
-//{
-//	// 0.14
-//	// atoi return 0 for errors,
-//	int number = atoi(str.c_str()); //does not handle errors
-//	if (number == 0 && str.size() != 1) {
-//		stringRes.push_back( str );
-//	}
-//	else {
-//		numberRes.push_back( number );
-//	}
-// }
-//
-//
-// BOOST_AUTO_TEST_CASE( test_lexical_cast_perf )
-//{
-//	cout << "ACore:: ...test_string_to_int_conversion\n";
-//
-//	size_t the_size  = 1000000;
-//	std::vector<std::string> stringTokens;
-//	std::vector<std::string> numberTokens;
-//  	std::vector<int> expectedNumberRes;
-//	for(size_t i=0; i < the_size; i++) { stringTokens.push_back("astring");}
-//	for(size_t i=0; i < the_size; i++) {
-//		numberTokens.push_back(ecf::convert_to<std::string>(i));
-//		expectedNumberRes.push_back(i);
-//    }
-//
-//	std::vector<std::string> stringRes; stringTokens.reserve(stringTokens.size());
-//	std::vector<int> numberRes; numberRes.reserve(expectedNumberRes.size());
-//
-//	{
-//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-// elapsed 		for(size_t i =0; i < stringTokens.size(); i++) { 			method1(stringTokens[i],
-// stringRes, numberRes );
-//		}
-//		for(size_t i =0; i < numberTokens.size(); i++) {
-//			method1(numberTokens[i], stringRes, numberRes );
-//		}
-//		cout << "Time for method1  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
-//		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes," method 1 wrong");
-//		BOOST_CHECK_MESSAGE(stringTokens == stringRes,"method 1 wrong");
-//		numberRes.clear();
-//		stringRes.clear();
-//	}
-//
-//	{
-//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-// elapsed 		for(size_t i =0; i < stringTokens.size(); i++) { 			methodX(stringTokens[i],
-// stringRes, numberRes );
-//		}
-//		for(size_t i =0; i < numberTokens.size(); i++) {
-//			methodX(numberTokens[i], stringRes, numberRes );
-//		}
-//		cout << "Time for methodX  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
-//		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes," method X wrong");
-//		BOOST_CHECK_MESSAGE(stringTokens == stringRes,"method X wrong");
-//		numberRes.clear();
-//		stringRes.clear();
-//	}
-//
-//	{
-//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-// elapsed 		for(size_t i =0; i < stringTokens.size(); i++) { 			method2(stringTokens[i],
-// stringRes, numberRes );
-//		}
-//		for(size_t i =0; i < numberTokens.size(); i++) {
-//			method2(numberTokens[i], stringRes, numberRes );
-//		}
-//		cout << "Time for method2  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
-//		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,"method 2 wrong");
-//		BOOST_CHECK_MESSAGE(stringTokens == stringRes,"method 2 wrong");
-//		numberRes.clear();
-//		stringRes.clear();
-//	}
-//
-//	{
-//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-// elapsed 		for(size_t i =0; i < stringTokens.size(); i++) { 			method3(stringTokens[i],
-// stringRes, numberRes );
-//		}
-//		for(size_t i =0; i < numberTokens.size(); i++) {
-//			method3(numberTokens[i], stringRes, numberRes );
-//		}
-//		cout << "Time for method3  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
-//		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes," method3 wrong  numberRes.size()=" <<
-// numberRes.size()
-//<< " expected size = " << expectedNumberRes.size()); 		BOOST_CHECK_MESSAGE(stringTokens == stringRes," method3
-// wrong stringRes.size()=" << stringRes.size() << " expected size = " << stringTokens.size()); numberRes.clear();
-//		stringRes.clear();
-//	}
-// }
+static void methodX(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+    // 0.81
+    // for bad conversion istringstream seems to return 0, hence add guard
+    if (str.find_first_of(Str::NUMERIC(), 0) == 0) {
+        int number = 0;
+        std::istringstream(str) >> number;
+        numberRes.push_back(number);
+    }
+    else {
+        stringRes.push_back(str);
+    }
+}
 
-// BOOST_AUTO_TEST_CASE( test_int_to_str_perf )
-//{
-//    cout << "ACore:: ...test_int_to_str_perf\n";
-//
-//    // Lexical_cast is approx twice as fast as using streams
-//    // time for ostream = 0.97
-//    // time for lexical_cast = 0.45
-//
-//    const int the_size = 1000000;
-//    {
-//       boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-//       elapsed for(size_t i =0; i < the_size; i++) {
-//          std::ostringstream st;
-//          st << i;
-//          std::string s = st.str();
-//       }
-//       cout << "Time for int to string using ostringstream  elapsed time = " <<
-//       timer.format(3,Str::cpu_timer_format()) << "\n";
-//    }
-//
-//
-//    {
-//       boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu &
-//       elapsed for(size_t i =0; i < the_size; i++) {
-//          std::string s = ecf::convert_to<std::string>(i);
-//       }
-//       cout << "Time for int to string using ecf::convert_to elapsed time = " <<
-//       timer.format(3,Str::cpu_timer_format()) << "\n";
-//    }
-// }
+static void method1(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+    // 12.2
+    try {
+        int number = ecf::convert_to<int>(str);
+        numberRes.push_back(number);
+    }
+    catch (const ecf::bad_conversion&) {
+        stringRes.push_back(str);
+    }
+}
+
+static void method2(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+    // 0.6
+    if (str.find_first_of(Str::NUMERIC(), 0) == 0) {
+        try {
+            int number = ecf::convert_to<int>(str);
+            numberRes.push_back(number);
+        }
+        catch (const ecf::bad_conversion&) {
+            stringRes.push_back(str);
+        }
+    }
+    else {
+        stringRes.push_back(str);
+    }
+}
+
+static void method3(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+    // 0.14
+    // atoi return 0 for errors,
+    int number = atoi(str.c_str()); // does not handle errors
+    if (number == 0 && str.size() != 1) {
+        stringRes.push_back(str);
+    }
+    else {
+        numberRes.push_back(number);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
+    cout << "ACore:: ...test_string_to_int_conversion\n";
+
+    size_t the_size = 1000000;
+    std::vector<std::string> stringTokens;
+    std::vector<std::string> numberTokens;
+    std::vector<int> expectedNumberRes;
+    for (size_t i = 0; i < the_size; i++) {
+        stringTokens.push_back("astring");
+    }
+    for (size_t i = 0; i < the_size; i++) {
+        numberTokens.push_back(ecf::convert_to<std::string>(i));
+        expectedNumberRes.push_back(i);
+    }
+
+    std::vector<std::string> stringRes;
+    stringTokens.reserve(stringTokens.size());
+    std::vector<int> numberRes;
+    numberRes.reserve(expectedNumberRes.size());
+
+    {
+        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        for (size_t i = 0; i < stringTokens.size(); i++) {
+            method1(stringTokens[i], stringRes, numberRes);
+        }
+        for (size_t i = 0; i < numberTokens.size(); i++) {
+            method1(numberTokens[i], stringRes, numberRes);
+        }
+        cout << "Time for method1  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method 1 wrong");
+        BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 1 wrong");
+        numberRes.clear();
+        stringRes.clear();
+    }
+
+    {
+        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        for (size_t i = 0; i < stringTokens.size(); i++) {
+            methodX(stringTokens[i], stringRes, numberRes);
+        }
+        for (size_t i = 0; i < numberTokens.size(); i++) {
+            methodX(numberTokens[i], stringRes, numberRes);
+        }
+        cout << "Time for methodX  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method X wrong");
+        BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method X wrong");
+        numberRes.clear();
+        stringRes.clear();
+    }
+
+    {
+        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        for (size_t i = 0; i < stringTokens.size(); i++) {
+            method2(stringTokens[i], stringRes, numberRes);
+        }
+        for (size_t i = 0; i < numberTokens.size(); i++) {
+            method2(numberTokens[i], stringRes, numberRes);
+        }
+        cout << "Time for method2  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, "method 2 wrong");
+        BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 2 wrong");
+        numberRes.clear();
+        stringRes.clear();
+    }
+
+    {
+        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        for (size_t i = 0; i < stringTokens.size(); i++) {
+            method3(stringTokens[i], stringRes, numberRes);
+        }
+        for (size_t i = 0; i < numberTokens.size(); i++) {
+            method3(numberTokens[i], stringRes, numberRes);
+        }
+        cout << "Time for method3  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,
+                            " method3 wrong numberRes.size()=" << numberRes.size()
+                                                               << " expected size = " << expectedNumberRes.size());
+        BOOST_CHECK_MESSAGE(stringTokens == stringRes,
+                            " method3 wrong stringRes.size()=" << stringRes.size()
+                                                               << " expected size = " << stringTokens.size());
+        numberRes.clear();
+        stringRes.clear();
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
+    cout << "ACore:: ...test_int_to_str_perf\n";
+
+    // Lexical_cast is approx twice as fast as using streams
+    // time for ostream = 0.97
+    // time for lexical_cast = 0.45
+
+    const int the_size = 1000000;
+    {
+        boost::timer::cpu_timer timer;
+        for (size_t i = 0; i < the_size; i++) {
+            std::ostringstream st;
+            st << i;
+            std::string s = st.str();
+        }
+        cout << "Time for int to string using ostringstream  elapsed time = "
+             << timer.format(3, Str::cpu_timer_format()) << "\n";
+    }
+
+    {
+        boost::timer::cpu_timer timer;
+        for (size_t i = 0; i < the_size; i++) {
+            std::string s = ecf::convert_to<std::string>(i);
+        }
+        cout << "Time for int to string using ecf::convert_to elapsed time = "
+             << timer.format(3, Str::cpu_timer_format()) << "\n";
+    }
+}
 
 BOOST_AUTO_TEST_CASE(test_str_valid_name) {
     cout << "ACore:: ...test_str_valid_name\n";
@@ -920,5 +931,7 @@ BOOST_AUTO_TEST_CASE(test_str_valid_name) {
         BOOST_CHECK_MESSAGE(!Str::valid_name(s), "Expected " << s << " to be in-valid");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

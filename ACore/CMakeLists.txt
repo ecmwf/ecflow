@@ -158,7 +158,6 @@ set(test_srcs
   test/TestSanitizerAS.cpp
   test/TestSanitizerUB.cpp
   test/TestSerialisation.cpp
-  test/TestStackTrace.cpp
   test/TestStr.cpp
   test/TestStringSplitPerf.cpp
   test/TestStringSplitter.cpp
@@ -181,13 +180,7 @@ ecbuild_add_test(
     test_support
     core
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-#
-# Important!
-#
-# Boost::timer, Boost::chrono are required when certain definitions are manually turned on, e.g.
-#  - FILE_PERF_CHECK_IMPLEMENTATIONS, at TestFile.cpp
-#  - STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_, at TestStringSplitPerf.cpp
-#
+    Boost::timer
 )
 target_clangformat(u_acore
   CONDITION ENABLE_TESTS

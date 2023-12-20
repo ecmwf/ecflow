@@ -13,12 +13,15 @@
 #include <string>
 
 #include <boost/test/unit_test.hpp>
+#include <boost/timer/timer.hpp>
 
 #include "ecflow/core/NodePath.hpp"
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_NodePath)
 
 static void checkPath(const std::vector<std::string>& expectedPath, const std::string& path) {
     std::vector<std::string> thePath;
@@ -116,23 +119,26 @@ BOOST_AUTO_TEST_CASE(test_extractHostPort) {
     BOOST_CHECK_MESSAGE(host == "host" && port == "port", "expected 'host:port' found " << host << ":" << port);
 }
 
-// BOOST_AUTO_TEST_CASE( test_NodePath_perf )
-//{
-//	cout << "ACore:: ...test_NodePath_perf \n";
-//
-//	// Timing using:
-//	//    StringSplitter : 6.35
-//	//    Str::split     : 8.64
-//	// See: Str::split -> define USE_STRINGSPLITTER
-//
-//	boost::timer timer;  // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
-//	int n= 10000000 ;
-//	std::vector<std::string> thePath;thePath.reserve(20);
-//	for(int i = 0; i < n; i++) {
-//	   thePath.clear();
-//		NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction",thePath);
-//	}
-//	cout << "Timing for " << n << " NodePath is  " << timer.elapsed() << endl;
-// }
+BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
+    cout << "ACore:: ...test_NodePath_perf \n";
+
+    // Timing using:
+    //    StringSplitter : 6.35
+    //    Str::split     : 8.64
+    // See: Str::split -> define USE_STRINGSPLITTER
+
+    // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+    boost::timer::auto_cpu_timer timer;
+    int n = 10000000;
+    std::vector<std::string> thePath;
+    thePath.reserve(20);
+    for (int i = 0; i < n; i++) {
+        thePath.clear();
+        NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction", thePath);
+    }
+    cout << "Timing for " << n << " NodePath is  " << timer.elapsed().wall << endl;
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

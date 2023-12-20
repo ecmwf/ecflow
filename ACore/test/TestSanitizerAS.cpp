@@ -15,7 +15,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_SanitizerAS)
 
 bool bool_returning_function() {
     return true;
@@ -75,5 +77,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
 #if defined(__GNUC__) and !defined(__clang__)
     #pragma GCC diagnostic pop
 #endif
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
