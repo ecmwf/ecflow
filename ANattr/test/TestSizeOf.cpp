@@ -19,7 +19,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_SizeOf)
 
 BOOST_AUTO_TEST_CASE(test_size_of) {
     cout << "ACore:: ...test_size_of\n";
@@ -40,5 +42,7 @@ BOOST_AUTO_TEST_CASE(test_size_of) {
 
     BOOST_CHECK_MESSAGE(true, "Dummy");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

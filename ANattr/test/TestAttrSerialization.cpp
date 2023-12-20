@@ -37,7 +37,9 @@ using namespace boost::posix_time;
 // Globals used throughout the test
 static std::string fileName = "test.txt";
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_AttrSerialization)
 
 BOOST_AUTO_TEST_CASE(test_AttrDefaultConstructor_serialisation) {
     cout << "ANattr:: ...test_AttrDefaultConstructor_serialisation \n";
@@ -331,5 +333,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_attr_serialisation) {
     doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::KILL, 10));
     doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::ADOPT, 10));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

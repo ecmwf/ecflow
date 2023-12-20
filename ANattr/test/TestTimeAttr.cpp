@@ -24,7 +24,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_TimeAttr)
 
 BOOST_AUTO_TEST_CASE(test_time_string_constrcutor) {
     cout << "ANattr:: ...test_time_string_constrcutor\n";
@@ -442,5 +444,7 @@ BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

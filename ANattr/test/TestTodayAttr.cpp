@@ -23,7 +23,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_TodayAttr)
 
 BOOST_AUTO_TEST_CASE(test_today_string_constrcutor) {
     cout << "ANattr:: ...test_today_string_constrcutor\n";
@@ -236,5 +238,7 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
                             timeSeries3.toString() << " checkForRequeue should fail at " << time);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -23,7 +23,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_DayAttr)
 
 BOOST_AUTO_TEST_CASE(test_day_attr) {
     cout << "ANattr:: ...test_day_attr\n";
@@ -163,5 +165,7 @@ BOOST_AUTO_TEST_CASE(test_day_parsing) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
