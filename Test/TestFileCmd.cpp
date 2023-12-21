@@ -32,7 +32,9 @@ using namespace boost::posix_time;
 /// \note This is used to INVOKE a SINGLE test. Easier for debugging
 ///
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_FileCmd)
 
 BOOST_AUTO_TEST_CASE(test_file_cmd) {
     DurationTimer timer;
@@ -131,5 +133,7 @@ BOOST_AUTO_TEST_CASE(test_file_cmd) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -27,7 +27,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Limit)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -50,26 +52,26 @@ BOOST_AUTO_TEST_CASE(test_limit) {
 
     // # Test the ecf file can be found via ECF_SCRIPT
     // # Note: we have to use relative paths, since these tests are relocatable
-    //  Create the defs file
-    //	suite test_limit
-    //      limit disk 50
-    //      limit fast 1
-    //	   edit ECF_HOME data/ECF_HOME    # added by test harness
-    //	   edit SLEEPTIME 1
-    //	   edit ECF_INCLUDE $ECF_HOME/includes
-    //	   family family
-    //           inlimit /suite1:fast
-    //	   		task t1
-    //	   		task t2
-    //	   		task t3
-    //	   endfamily
-    //	   family family2
-    //           inlimit /suite1:disk 20
-    //	   		task t1
-    //	   		task t2
-    //	   		task t3
-    //	   endfamily
-    //	endsuite
+    // Create the defs file
+    // suite test_limit
+    //   limit disk 50
+    //   limit fast 1
+    //   edit ECF_HOME data/ECF_HOME    # added by test harness
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     inlimit /suite1:fast
+    //     task t1
+    //     task t2
+    //     task t3
+    //   endfamily
+    //   family family2
+    //     inlimit /suite1:disk 20
+    //     task t1
+    //     task t2
+    //     task t3
+    //   endfamily
+    // endsuite
 
     Defs theDefs;
     {
@@ -105,5 +107,7 @@ BOOST_AUTO_TEST_CASE(test_limit) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

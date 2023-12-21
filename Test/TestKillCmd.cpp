@@ -34,7 +34,9 @@ using namespace boost::posix_time;
 /// \note This is used to INVOKE a SINGLE test. Easier for debugging
 ///
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_KillCmd)
 
 // forward declare functions
 static bool kill_cmd(bool kill_task);
@@ -94,9 +96,7 @@ static bool kill_cmd(bool kill_task) {
     // will update the defs with the server environment, and hence overriding
     // any env variable of the same name, set here. Hence just use addVariable as above.
     // *************************************************************************
-    //	cout << theDefs << "\n";
 
-    // cout << "test_kill_cmd Start test\n";
     // The test harness will create corresponding directory structure & default ecf file
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, defs_location, 1 /*timeout*/, false /* don't wait for test to finish */);
@@ -143,5 +143,7 @@ static bool waitForTaskState(NState::State state, int max_time_to_wait) {
     }
     return false;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

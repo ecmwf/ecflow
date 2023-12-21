@@ -31,7 +31,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Time)
 
 BOOST_AUTO_TEST_CASE(test_single_real_time) {
     DurationTimer timer;
@@ -48,13 +50,13 @@ BOOST_AUTO_TEST_CASE(test_single_real_time) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //  family family
+    //   family family
     //     task t1
-    //          time 10:00
-    //     endfamily
+    //       time 10:00
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -106,13 +108,13 @@ BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //  family family
+    //   family family
     //     task t1
-    //          trigger /suite:TIME == 1001
-    //     endfamily
+    //       trigger /suite:TIME == 1001
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -164,14 +166,14 @@ BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_time_multiple_single_slot
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //  family family
+    //   family family
     //     task t1
-    //          time 10:01
-    //          time 10:04
-    //          time 10:07
-    //     endfamily
+    //       time 10:01
+    //       time 10:04
+    //       time 10:07
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -216,13 +218,13 @@ BOOST_AUTO_TEST_CASE(test_time_relative_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_time_relative_time_series
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //  family family
+    //   family family
     //     task t1
-    //        time +<start> <finish> incr
-    //     endfamily
+    //       time +<start> <finish> incr
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -262,13 +264,13 @@ BOOST_AUTO_TEST_CASE(test_time_real_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_time_real_series
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <date>
-    //  family family
+    //   family family
     //     task t1
-    //        time <start> <finish> <incr>
-    //     endfamily
+    //       time <start> <finish> <incr>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -313,13 +315,13 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
-    //  edit SLEEPTIME 4
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 4
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //  family family
+    //   family family
     //     task t1
-    //          time 23:59
-    //     endfamily
+    //       time 23:59
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -376,13 +378,13 @@ BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_time_real_series
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <date>
-    //  family family
+    //   family family
     //     task t1
-    //        time <start> <finish> <incr>
-    //     endfamily
+    //       time <start> <finish> <incr>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -423,4 +425,7 @@ BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

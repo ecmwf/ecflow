@@ -27,7 +27,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Events)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -162,5 +164,7 @@ BOOST_AUTO_TEST_CASE(test_event_and_query) {
     }
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

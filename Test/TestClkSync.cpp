@@ -30,7 +30,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_ClkSync)
 
 BOOST_AUTO_TEST_CASE(test_clk_sync) {
     // This test is used to test sync'ing of the suite calendars
@@ -119,8 +121,6 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
        << " cal_count(" << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
     for (size_t i = 0; i < 3; i++) {
-        // cout << "\n loop:" << i << " sleeping for " << TestFixture::job_submission_interval() << "s\n";
-
         // Occasionally we get a random failure.
         // It is suspected that BETWEEN the two calls below, one off
         //    Suite::updateCalendar() or Suite::resolveDependencies() is called in the server:
@@ -162,5 +162,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

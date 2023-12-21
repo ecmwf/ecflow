@@ -26,13 +26,15 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_AbortCmd)
 
 // Test the abort command. This will test the abort command and the
 // retry behaviour. i.e if a task is aborted, and the variable ECF_TRIES
 // is defined. Then providing its value is less the the task's try number
 // we should do an immediate job submission.
-BOOST_AUTO_TEST_CASE(test_) {
+BOOST_AUTO_TEST_CASE(test_abort_cmd) {
     DurationTimer timer;
     cout << "Test:: ...test_abort_cmd " << flush;
     TestClean clean_at_start_and_end;
@@ -46,12 +48,12 @@ BOOST_AUTO_TEST_CASE(test_) {
     //                     Allows test to run without requiring installation
 
     // # Note: we have to use relative paths, since these tests are relocatable
-    //	suite test_task_abort_cmd
-    //     edit ECF_TRIES '4'
-    //	  family family0
-    //  		task abort
-    //	   endfamily
-    //	endsuite
+    // suite test_task_abort_cmd
+    //   edit ECF_TRIES '4'
+    //   family family0
+    //     task abort
+    //   endfamily
+    // endsuite
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_abort_cmd");
@@ -86,5 +88,7 @@ BOOST_AUTO_TEST_CASE(test_) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

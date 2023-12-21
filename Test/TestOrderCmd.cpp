@@ -36,7 +36,9 @@ using namespace boost::posix_time;
 /// Making it easier for Easier for debugging and development
 ///
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_OrderCmd)
 
 std::vector<std::string> to_string_vec(const std::vector<suite_ptr>& sv) {
     std::vector<std::string> r;
@@ -244,4 +246,7 @@ BOOST_AUTO_TEST_CASE(test_handle_change_order) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

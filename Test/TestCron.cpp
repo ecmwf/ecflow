@@ -30,7 +30,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Cron)
 
 static void wait_for_cron(int max_time_to_wait, const std::string& path) {
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
@@ -79,13 +81,13 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_cron_time_series
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        cron <start> <finish> <incr>
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       cron <start> <finish> <incr>
+    //   endfamily
     // endsuite
     Defs theDefs;
     std::string path;
@@ -136,5 +138,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

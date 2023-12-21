@@ -38,7 +38,9 @@ static int timeout = 30;
 static int timeout = 20;
 #endif
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Suspend)
 
 static void waitForTimeDependenciesToBeFree(int max_time_to_wait) {
     // wait for a period of time, while time dependencies fire.
@@ -231,5 +233,7 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
 
     cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

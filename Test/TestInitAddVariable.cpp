@@ -27,7 +27,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_InitAddVariable)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -45,15 +47,15 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_server_job_submission
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
-    //  edit INIT_ADD_VARIABLES --add "NAME1=1" "NAME2=2"
-    //  edit COMPLETE_DEL_VARIABLES --remove NAME1 NAME2
-    //  family family
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit INIT_ADD_VARIABLES --add "NAME1=1" "NAME2=2"
+    //   edit COMPLETE_DEL_VARIABLES --remove NAME1 NAME2
+    //   family family
     //     task t1     # can't place trigger on t1, otherwise we have dead lock. Variables added at ACTIVE, but trigger
     //     expression resolved at QUEUE time task t2
-    //        trigger t1:NAME1 == 1 and t1:NAME2 == 2
-    //     endfamily
+    //       trigger t1:NAME1 == 1 and t1:NAME2 == 2
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -98,5 +100,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -41,7 +41,9 @@ using namespace boost::posix_time;
 ///    Will indirectly test the Alias memento's
 ///
 
-BOOST_AUTO_TEST_SUITE(TestSingleSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Alias)
 
 void wait_for_alias_to_complete(const std::string& alias_path) {
     AssertTimer assertTimer(10, false); // Bomb out after 10 seconds, fall back if test fail
@@ -235,5 +237,7 @@ BOOST_AUTO_TEST_CASE(test_alias) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

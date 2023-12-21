@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Complete)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -56,18 +58,18 @@ BOOST_AUTO_TEST_CASE(test_complete) {
     //                     Allows test to run without requiring installation
 
     // # Note: we have to use relative paths, since these tests are relocatable
-    //	suite test_complete
-    //	  family family
-    //       repeat integer YMD 0 1
-    //	   	complete ./family/check:nofiles  # repeat family with waiting for children to complete
-    //	   	task check
-    //	   		event 1 nofiles
-    //	    task t1
-    //         trigger check==complete
+    // suite test_complete
+    //   family family
+    //     repeat integer YMD 0 1
+    //     complete ./family/check:nofiles  # repeat family with waiting for children to complete
+    //     task check
+    //       event 1 nofiles
+    //     task t1
+    //       trigger check==complete
     //       task t2
-    //          trigger t2 == complete   #  never runs
-    //	    endfamily
-    //	endsuite
+    //     trigger t2 == complete   #  never runs
+    //   endfamily
+    // endsuite
     std::string eventName = "nofiles";
     Defs theDefs;
     {
@@ -164,5 +166,7 @@ BOOST_AUTO_TEST_CASE(test_complete_with_empty_family) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

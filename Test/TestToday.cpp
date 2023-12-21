@@ -30,7 +30,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Today)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -182,5 +184,7 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
