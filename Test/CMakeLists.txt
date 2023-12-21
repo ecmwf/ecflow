@@ -33,7 +33,7 @@ ecbuild_add_library(
     libclient
     base
     node
-    nodeattr
+    attributes
     core
 )
 target_clangformat(libharness)
@@ -92,7 +92,7 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      s_test_zombies
+      s_zombies
     LABELS
       integration
       nightly
@@ -105,12 +105,12 @@ if (ENABLE_ALL_TESTS)
     TEST_DEPENDS
       s_test
   )
-  target_clangformat(s_test_zombies CONDITION ENABLE_TESTS)
+  target_clangformat(s_zombies CONDITION ENABLE_TESTS)
 
   # This test runs forever, hence not suitable as unit test.
   ecbuild_add_test(
     TARGET
-      s_singletest
+      s_single
     LABELS
       integration
       manual
@@ -123,6 +123,6 @@ if (ENABLE_ALL_TESTS)
     TEST_DEPENDS
       s_client
   )
-  target_clangformat(s_singletest CONDITION ENABLE_TESTS)
+  target_clangformat(s_single CONDITION ENABLE_TESTS)
 
 endif()

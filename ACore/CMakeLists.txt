@@ -170,7 +170,7 @@ set(test_srcs
 
 ecbuild_add_test(
   TARGET
-    u_acore
+    u_core
   LABELS
     unit
     nightly
@@ -182,6 +182,6 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
 )
-target_clangformat(u_acore
+target_clangformat(u_core
   CONDITION ENABLE_TESTS
 )

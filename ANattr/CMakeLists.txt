@@ -49,7 +49,7 @@ set(srcs
 
 ecbuild_add_library(
   TARGET
-    nodeattr
+    attributes
   NOINSTALL
   TYPE STATIC
   SOURCES
@@ -60,7 +60,7 @@ ecbuild_add_library(
     core
     Boost::date_time
 )
-target_clangformat(nodeattr)
+target_clangformat(attributes)
 
 
 set(test_srcs
@@ -83,7 +83,7 @@ set(test_srcs
 
 ecbuild_add_test(
   TARGET
-    u_anattr
+    u_attributes
   LABELS
     unit
     nightly
@@ -91,11 +91,11 @@ ecbuild_add_test(
     ${test_srcs}
   LIBS
     test_support
-    nodeattr
+    attributes
   TEST_DEPENDS
-    u_acore
+    u_core
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
-target_clangformat(u_anattr
+target_clangformat(u_attributes
   CONDITION ENABLE_TESTS
 )

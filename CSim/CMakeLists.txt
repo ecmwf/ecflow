@@ -26,7 +26,7 @@ set(srcs
 )
 ecbuild_add_library(
   TARGET
-    libsimu
+    libsimulator
   NOINSTALL
   TYPE STATIC
   SOURCES
@@ -35,10 +35,10 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     node
-    nodeattr
+    attributes
     core
 )
-target_clangformat(libsimu)
+target_clangformat(libsimulator)
 
 set(test_srcs
   # Headers
@@ -59,24 +59,24 @@ set(test_srcs
 )
 ecbuild_add_test(
   TARGET
-    c_csim
+    s_simulator
   LABELS
     integration nightly
   SOURCES
     ${test_srcs}
   LIBS
-    libsimu
+    libsimulator
     Threads::Threads
   TEST_DEPENDS
     u_base
 )
-target_clangformat(c_csim CONDITION ENABLE_TESTS)
+target_clangformat(s_simulator CONDITION ENABLE_TESTS)
 
 if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      c_csim_single
+      s_simulator_single
     LABELS
       integration nightly
     SOURCES
@@ -84,11 +84,11 @@ if (ENABLE_ALL_TESTS)
       test/TestSingleSimulator_main.cpp # test entry point
       test/TestUtil.cpp
     LIBS
-      libsimu
+      libsimulator
       Threads::Threads
     TEST_DEPENDS
       u_base
   )
-  target_clangformat(c_csim_single CONDITION ENABLE_TESTS)
+  target_clangformat(s_simulator_single CONDITION ENABLE_TESTS)
 
 endif()

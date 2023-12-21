@@ -223,7 +223,7 @@ ecbuild_add_test(
     Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   TEST_DEPENDS
-    u_aparser
+    u_parser
 )
 target_clangformat(u_base
   CONDITION ENABLE_TESTS
@@ -239,7 +239,7 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      perf_job_gen
+      p_job_gen
     LABELS
       performance
     SOURCES
@@ -248,7 +248,7 @@ if (ENABLE_ALL_TESTS)
       base
       Threads::Threads
   )
-  target_clangformat(perf_job_gen
+  target_clangformat(p_job_gen
     CONDITION ENABLE_TESTS
   )
 endif()

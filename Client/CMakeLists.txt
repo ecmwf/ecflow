@@ -154,7 +154,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   #
   ecbuild_add_test(
     TARGET
-      perf_test_large_defs
+      p_large_defs
     LABELS
       performance
       manual # requires manual definition of env var ECF_TEST_DEFS_DIR
@@ -176,7 +176,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
     TEST_DEPENDS
       u_base
   )
-  target_clangformat(perf_test_large_defs
+  target_clangformat(p_large_defs
     CONDITION ENABLE_TESTS
   )
 
@@ -185,7 +185,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   #
   ecbuild_add_test(
     TARGET
-      m_test_migration
+      m_migration
     LABELS
       migration
       manual # requires command line argument: m_test_migration <>
@@ -207,7 +207,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
     TEST_DEPENDS
       u_base
   )
-  target_clangformat(m_test_migration
+  target_clangformat(m_migration
     CONDITION ENABLE_TESTS
   )
 

@@ -169,7 +169,7 @@ ecbuild_add_library(
   PUBLIC_INCLUDES
     src
   PUBLIC_LIBS
-    nodeattr
+    attributes
 )
 target_clangformat(node)
 
@@ -224,7 +224,7 @@ set(test_srcs
 
 ecbuild_add_test(
   TARGET
-    u_anode
+    u_node
   LABELS
     unit
     nightly
@@ -235,9 +235,9 @@ ecbuild_add_test(
     node
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
-    u_anattr
+    u_attributes
 )
-target_clangformat(u_anode
+target_clangformat(u_node
   CONDITION ENABLE_TESTS)
 
 
@@ -258,7 +258,7 @@ set(test_srcs
 )
 ecbuild_add_test(
   TARGET
-    u_aparser
+    u_parser
   LABELS
     unit
     nightly
@@ -271,9 +271,9 @@ ecbuild_add_test(
     node
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
-    u_anode
+    u_node
 )
-target_clangformat(u_aparser
+target_clangformat(u_parser
   CONDITION ENABLE_TESTS
 )
 
@@ -285,7 +285,7 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      u_anode_stest
+      u_node_single
     LABELS
       unit
       nightly
@@ -297,7 +297,7 @@ if (ENABLE_ALL_TESTS)
     TEST_DEPENDS
       u_anattr
   )
-  target_clangformat(u_anode_stest
+  target_clangformat(u_node_single
     CONDITION ENABLE_TESTS
   )
 
@@ -315,7 +315,7 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      perf_aparser
+      p_parser
     LABELS
       performance
       nightly
@@ -326,7 +326,7 @@ if (ENABLE_ALL_TESTS)
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       Boost::timer
   )
-  target_clangformat(perf_aparser
+  target_clangformat(p_parser
     CONDITION ENABLE_TESTS
   )
 
@@ -345,7 +345,7 @@ if (ENABLE_ALL_TESTS)
   # but a tool to measure the time it takes to parse 'mega.def' file
   ecbuild_add_test(
     TARGET
-      perf_aparser_timer
+      p_parser_timer
     LABELS
       performance
       nightly
@@ -358,7 +358,7 @@ if (ENABLE_ALL_TESTS)
       Boost::boost # Boost header-only libraries must be available
       Boost::timer
   )
-  target_clangformat(perf_aparser_timer
+  target_clangformat(p_parser_timer
     CONDITION ENABLE_TESTS
   )
 
@@ -369,7 +369,7 @@ if (ENABLE_ALL_TESTS)
   )
   ecbuild_add_test(
     TARGET
-      perf_aparser_only
+      p_parser_only
     LABELS
       performance
       nightly
@@ -381,7 +381,7 @@ if (ENABLE_ALL_TESTS)
       node
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   )
-  target_clangformat(perf_aparser_only
+  target_clangformat(p_parser_only
     CONDITION ENABLE_TESTS
   )
 
