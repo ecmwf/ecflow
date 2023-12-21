@@ -8,5 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE TestUDP
+#define BOOST_TEST_MODULE Test_UDP
 #include <boost/test/unit_test.hpp>

@@ -109,7 +109,7 @@ list(APPEND ${TEST_TARGET}_srcs
   # HEADERS
   test/TestSupport.hpp
   # SOURCES
-  test/TestMain.cpp
+  test/TestUDP_main.cpp
   test/TestUDPServer.cpp
 )
 
@@ -127,6 +127,7 @@ ecbuild_add_test(
     Boost::unit_test_framework
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS
+    ecflow_server # the server is launched to support tests
     ${SERVER_TARGET}
   DEFINITIONS
     ${BOOST_TEST_DYN_LINK}
