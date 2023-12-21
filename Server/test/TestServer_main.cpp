@@ -8,5 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE TestServer
+#define BOOST_TEST_MODULE Test_Server
 #include <boost/test/included/unit_test.hpp>

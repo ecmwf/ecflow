@@ -27,7 +27,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestServer)
+BOOST_AUTO_TEST_SUITE(U_Server)
+
+BOOST_AUTO_TEST_SUITE(T_ServerEnvironment)
 
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     cout << "Server:: ...test_server_environment_ecfinterval\n";
@@ -359,5 +361,7 @@ BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
     /// Destroy Log singleton to avoid valgrind from complaining
     Log::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

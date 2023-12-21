@@ -19,7 +19,9 @@
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_VariableInheritance)
 
 static void findParentVariableValue(task_ptr t, const std::string& name, const std::string& expected) {
     std::string value;
@@ -72,5 +74,7 @@ BOOST_AUTO_TEST_CASE(test_variable_inheritance) {
     findParentVariableValue(t2, "LOWER", "10");
     findParentVariableValue(z, "LOWER", "10");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

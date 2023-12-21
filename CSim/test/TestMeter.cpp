@@ -67,12 +67,11 @@ BOOST_AUTO_TEST_CASE(test_meter) {
         task_ptr half = fam->add_task("half");
         half->add_trigger("fc:hour >= 120");
         half->addVerify(VerifyAttr(NState::COMPLETE, 1));
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_meter.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_meter.def"), errorMsg), errorMsg);
 
     // The simulator will set all the meter values, so final value must be the max value.
     bool found_task = false;
@@ -91,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_meter) {
     BOOST_REQUIRE_MESSAGE(found_task, "Failed to find task fc ");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_meter.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_meter.def") + ".log";
     fs::remove(logFileName);
 
     /// Destroy System singleton to avoid valgrind from complaining

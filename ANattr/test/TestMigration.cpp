@@ -39,7 +39,9 @@ using namespace boost::gregorian;
 
 // #define UPDATE_TESTS 1
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 // These test are used for future release. They help to ensure that we have
 // backward compatibility.i.e future release can open file, created by an earlier release
@@ -336,5 +338,7 @@ BOOST_AUTO_TEST_CASE(test_day_migration) {
     fs::remove("test_day_migration_free_and_expired");
     fs::remove("test_day_migration_free_expired_date");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

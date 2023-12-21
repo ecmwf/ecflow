@@ -49,7 +49,9 @@ static void get_defs(Defs& defs) {
     BOOST_CHECK(parse);
 }
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_PlugCmd)
 
 BOOST_AUTO_TEST_CASE(test_plug_cmd) {
     cout << "Client:: ...test_plug_cmd" << endl;
@@ -382,5 +384,7 @@ BOOST_AUTO_TEST_CASE(test_server_plug_cmd) {
             ClientEnvironment::hostSpecified(), ClientEnvironment::portSpecified(), Str::LOCALHOST(), port2);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

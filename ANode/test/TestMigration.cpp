@@ -26,7 +26,9 @@ using namespace boost::gregorian;
 
 // #define UPDATE_TESTS 1
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
     cout << "ANode:: ...test_default_constructor_persistence\n";
@@ -79,5 +81,7 @@ BOOST_AUTO_TEST_CASE(test_compare_cereal_and_defs_checkpt_file) {
     fs::remove(file_name + "defs.checkpt");   // Remove the file. Comment out for debugging
     fs::remove(file_name + "cereal.checkpt"); // Remove the file. Comment out for debugging
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

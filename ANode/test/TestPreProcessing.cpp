@@ -102,7 +102,9 @@ void autoDiscoverVariables(const std::string& directory, std::set<std::string>& 
     }
 }
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_PreProcessing)
 
 // *Auto* discover the good/bad sms files
 void test_sms_preprocessing(const std::string& directory, bool pass) {
@@ -205,5 +207,7 @@ BOOST_AUTO_TEST_CASE(test_bad_sms) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

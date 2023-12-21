@@ -19,7 +19,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_PasswdFile)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -179,5 +181,7 @@ BOOST_AUTO_TEST_CASE(test_loading_of_passwd_fail) {
     // Remove the white list file. Comment out for debug
     fs::remove(passwd_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

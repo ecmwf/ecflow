@@ -26,7 +26,9 @@ using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_ExprParser)
 
 BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
     std::cout << "ANode:: ...test_expression_parser_basic\n";
@@ -735,5 +737,7 @@ BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
         BOOST_CHECK_MESSAGE(!theExprParser.doParse(errorMsg), expr << " expected to fail ");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

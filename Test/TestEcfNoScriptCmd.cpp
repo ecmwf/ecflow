@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_EcfNoScriptCmd)
 
 BOOST_AUTO_TEST_CASE(test_ecf_no_script) {
     // This test is used to case where we ONLY want to execute ECF_JOB_CMD WITHOUT processing .ecf script.
@@ -73,5 +75,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_no_script) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

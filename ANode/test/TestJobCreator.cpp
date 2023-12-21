@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_JobCreator)
 
 BOOST_AUTO_TEST_CASE(test_job_creator) {
     cout << "ANode:: ...test_job_creator\n";
@@ -108,5 +110,7 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

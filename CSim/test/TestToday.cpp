@@ -31,7 +31,9 @@ using namespace boost::posix_time;
 /// tests with todays date/time this speeds up the testr, we can also validate
 /// Defs file, to check for correctness
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_Today)
 
 BOOST_AUTO_TEST_CASE(test_today) {
     cout << "Simulator:: ...test_today\n";
@@ -61,17 +63,16 @@ BOOST_AUTO_TEST_CASE(test_today) {
         task->addToday(ecf::TodayAttr(TimeSlot(time_plus_minute.time_of_day())));
         task->addToday(ecf::TodayAttr(TimeSlot(time_plus_10_minute.time_of_day())));
         task->addVerify(VerifyAttr(NState::COMPLETE, 2)); // expect task to complete 2 time
-                                                          //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    bool result = simulator.run(theDefs, TestUtil::testDataLocation("test_today.def"), errorMsg);
+    bool result = simulator.run(theDefs, findTestDataLocation("test_today.def"), errorMsg);
 
     BOOST_CHECK_MESSAGE(result, errorMsg);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_today.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_today.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -99,16 +100,15 @@ BOOST_AUTO_TEST_CASE(test_today_time_series) {
 
         task->addToday(TodayAttr(timeSeries));
         task->addVerify(VerifyAttr(NState::COMPLETE, 5));
-        // cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_today_time_series.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_today_time_series.def"), errorMsg),
                         errorMsg);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_today_time_series.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_today_time_series.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -129,8 +129,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
         // To speed up simulation: start calendar with hour increment AND time attributes with hours only
         //
         // Task will only run if all time dependencies are satisfied
-        boost::posix_time::ptime theLocalTime = ptime(date(2010, 2, 10), hours(15));
-        ;
+        boost::posix_time::ptime theLocalTime   = ptime(date(2010, 2, 10), hours(15));
         boost::gregorian::date todaysDate       = theLocalTime.date();
         boost::posix_time::ptime time_plus_hour = theLocalTime + hours(1);
 
@@ -145,19 +144,18 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
         task->addToday(ecf::TodayAttr(TimeSlot(time_plus_hour.time_of_day())));
 
         task->addVerify(VerifyAttr(NState::COMPLETE, 1));
-        // cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_today_time_and_date.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_today_time_and_date.def"), errorMsg),
                         errorMsg);
 
-    // cout << theDefs;
-
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_today_time_and_date.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_today_time_and_date.def") + ".log";
     fs::remove(logFileName);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

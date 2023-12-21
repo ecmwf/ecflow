@@ -21,7 +21,6 @@
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -30,7 +29,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_SinglePerf)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -374,5 +375,7 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
         time_load_and_downloads(theClient, invokeServer.host(), invokeServer.port(), ecf_test_defs_dir);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

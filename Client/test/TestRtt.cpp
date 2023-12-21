@@ -18,7 +18,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_Rtt)
 
 BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     cout << "Client:: ...test_client_invoker_round_trip_times" << endl;
@@ -43,5 +45,7 @@ BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     if (diffs.empty())
         fs::remove(generated_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_InitAddVariables)
 
 BOOST_AUTO_TEST_CASE(test_init_add_variables) {
     cout << "Client:: ...test_init_add_variables " << endl;
@@ -85,5 +87,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variables) {
         BOOST_CHECK_MESSAGE(v2.empty(), "Expected --complete to delete variable");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

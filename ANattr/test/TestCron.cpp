@@ -23,7 +23,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Cron)
 
 BOOST_AUTO_TEST_CASE(test_cron_parsing) {
     cout << "ANattr:: ...test_cron_parsing\n";
@@ -615,5 +617,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
         // Do not requeue cron 00, and cron 15, so that we can check for free
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

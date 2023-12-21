@@ -20,7 +20,9 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_HistoryParser)
 
 static std::string dump(const std::vector<std::string>& vec) {
     std::stringstream ss;
@@ -104,5 +106,7 @@ BOOST_AUTO_TEST_CASE(test_defs_history_parser) {
                                 << dump(parser.parsed_messages()));
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

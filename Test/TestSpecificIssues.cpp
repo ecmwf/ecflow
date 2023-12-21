@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_SpecificIssues)
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
     // Test ECF_JOB_CMD where task *completes* but the ECF_JOB_CMD still fails. i.e ECFLOW-1589
@@ -84,5 +86,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -19,7 +19,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Label)
 
 BOOST_AUTO_TEST_CASE(test_label_parsing) {
     cout << "ANattr:: ...test_label_parsing\n";
@@ -76,5 +78,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
                             "Expected " << expected.dump() << " but found " << label.dump());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ServerLoad)
 
 BOOST_AUTO_TEST_CASE(test_server_load) {
     // Check if gnuplot is found on the path, on the RPM machines gnuplot not always installed
@@ -130,5 +132,7 @@ BOOST_AUTO_TEST_CASE(test_server_load) {
     fs::remove(gnuplot_script_file);
     fs::remove(gnuplot_png_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

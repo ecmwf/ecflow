@@ -25,7 +25,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_RepeatWithTimeDependencies)
 
 BOOST_AUTO_TEST_CASE(test_repeat_day_time_combination_in_hierarchy) {
     cout << "ANode:: ...test_repeat_day_time_combination_in_hierarchy \n";
@@ -240,5 +242,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_with_impossible_day_combination_in_hierarchy) {
     }
     BOOST_CHECK_MESSAGE(submitted == 0, "Expected 0 submission but found " << submitted);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -73,7 +73,9 @@ private:
     int* my_ptr_{nullptr}; //  show be applied for all constructor types
 };
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_ClassDataMemberInit)
 
 BOOST_AUTO_TEST_CASE(test_class_data_member_init) {
     cout << "ACore:: ...test_class_data_member_init \n";
@@ -105,5 +107,7 @@ BOOST_AUTO_TEST_CASE(test_class_data_member_init) {
         BOOST_CHECK_MESSAGE(tassigned.my_ptr() == nullptr, "Error found");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -29,7 +29,9 @@ using namespace ecf;
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_SSyncCmdOrder)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 typedef boost::function<void(defs_ptr)> defs_change_cmd;
@@ -246,5 +248,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_cmd_test_order) {
     /// Keep valgrind happy
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

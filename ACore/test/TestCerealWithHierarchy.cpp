@@ -112,7 +112,9 @@ CEREAL_REGISTER_TYPE(Derived1)
 
 // =================================================================================
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_CerealWithHierarchy)
 
 BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
     cout << "ACore:: ...test_cereal_save_as_string_and_save_as_filename\n";
@@ -144,5 +146,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
 
     fs::remove("ACore.txt");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -22,7 +22,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_RealCalendar)
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar) {
     cout << "ACore:: ...test_REAL_calendar\n";
@@ -342,5 +344,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_day_changed_for_hybrid) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

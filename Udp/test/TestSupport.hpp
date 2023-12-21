@@ -42,8 +42,8 @@ public:
     BaseMockServer(hostname_t host, port_t port, Args... args) : host_{std::move(host)},
                                                                  port_{port},
                                                                  server_{} {
-        BOOST_REQUIRE_MESSAGE(!host_.empty(), "unable to determine host name");
-        BOOST_REQUIRE_MESSAGE(port_ > 0, "port must be larger than 0");
+        BOOST_REQUIRE_MESSAGE(!host_.empty(), "determiner host name");
+        BOOST_REQUIRE_MESSAGE(port_ > 0, "port is be larger than 0");
 
         server_ = SERVER::launch(host_, port_, std::forward<Args>(args)...);
         std::cout << "   MOCK: " << SERVER::designation << " has been started!" << std::endl;
@@ -76,8 +76,16 @@ public:
 
     void load_definition(const std::string& defs) const {
         ClientInvoker client(ecf::Str::LOCALHOST(), port());
-        auto error = client.loadDefs(defs);
-        BOOST_REQUIRE_MESSAGE(!error, "unable to load definitions");
+        try {
+            BOOST_REQUIRE_MESSAGE(fs::exists(defs), "definitions file exists at: " + defs);
+            auto error = client.loadDefs(defs);
+            BOOST_REQUIRE_MESSAGE(!error, "load definitions, without error ");
+        }
+        catch (std::exception& e) {
+            BOOST_REQUIRE_MESSAGE(
+                false, "load definitions, without throwing exception (but threw: " + std::string(e.what()) + ")");
+        }
+
         std::cout << "   MOCK: reference ecFlow suite has been loaded" << std::endl;
     }
 

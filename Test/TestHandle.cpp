@@ -37,29 +37,9 @@ using namespace boost::posix_time;
 /// Making it easier for Easier for debugging and development
 ///
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
 
-// static void dump_suites_and_handles(ClientInvoker& theClient, const std::string& title)
-//{
-//    std::cout << title;
-//    TestFixture::client().suites();
-//    {
-//       const std::vector<std::string>& suites =  TestFixture::client().server_reply().get_string_vec();
-//       for(const std::string& suite: suites) { std::cout << "\n---> " << suite; }
-//       std::cout << "\n";
-//
-//       const std::vector<std::pair<unsigned int, std::vector<std::string> > >& handles =
-//       TestFixture::client().server_reply().get_client_handle_suites(); std::pair<unsigned int,
-//       std::vector<std::string> > int_str_pair; for(size_t i =0; i < handles.size(); i++) {
-//           std::cout << "handle: " << handles[i].first << " : ";
-//           for(const std::string& suite: handles[i].second) {
-//             std::cout << suite << " ";
-//          }
-//          std::cout << "\n";
-//       }
-//    }
-//    std::cout << "\n";
-// }
+BOOST_AUTO_TEST_SUITE(T_Handle)
 
 BOOST_AUTO_TEST_CASE(test_handle) {
     DurationTimer timer;
@@ -432,5 +412,7 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

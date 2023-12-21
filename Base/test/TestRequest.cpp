@@ -61,7 +61,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_FIXTURE_TEST_SUITE(BaseTestSuite, MyDefsFixture)
+BOOST_FIXTURE_TEST_SUITE(U_Base, MyDefsFixture)
+
+BOOST_AUTO_TEST_SUITE(T_Request)
 
 // Can't delete the fixture defs, hence use a NULL deleter to avoid freeing memory twice.
 // Required since DefsCmd and LoadDefsCmd requires a shared_ptr.
@@ -464,5 +466,7 @@ BOOST_AUTO_TEST_CASE(test_request_authenticate) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

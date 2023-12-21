@@ -33,7 +33,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_SSyncCmd)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 typedef boost::function<void(defs_ptr)> defs_change_cmd;
@@ -476,5 +478,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_cmd) {
     test_sync_scaffold(set_defs_flag, "set_defs_flag");
     test_sync_scaffold(set_defs_state, "set_defs_state");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -18,7 +18,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_CopyConstructor)
 
 BOOST_AUTO_TEST_CASE(test_copy_constructors) {
     cout << "ANode:: ...test_copy_constructors\n";
@@ -50,5 +52,7 @@ BOOST_AUTO_TEST_CASE(test_default_constructors) {
     Family f2("fred");
     BOOST_CHECK_MESSAGE(f2.check_defaults(), "constructor test for defaults failed");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

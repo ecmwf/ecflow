@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
@@ -67,5 +69,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
 
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

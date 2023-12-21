@@ -106,7 +106,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       test/TokenFile.hpp
       # Sources
       test/TestApiV1.cpp
-      test/TestApiV1_main.cpp # test entry point
+      test/TestHttp_main.cpp # test entry point
     )
 
     ecbuild_add_test(
@@ -124,6 +124,9 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         libserver
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      DEPENDS
+        ecflow_server # the server is launched to support tests
+        ecflow_http
       TEST_DEPENDS
         u_base
         s_client

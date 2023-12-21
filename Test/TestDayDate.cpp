@@ -28,7 +28,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_DayDate)
 
 BOOST_AUTO_TEST_CASE(test_day_at_midnight) {
     // See ECFLOW-337 versus ECFLOW-1550
@@ -133,5 +135,7 @@ BOOST_AUTO_TEST_CASE(test_date_at_midnight) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

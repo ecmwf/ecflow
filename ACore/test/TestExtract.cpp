@@ -14,9 +14,9 @@
 
 #include "ecflow/core/Extract.hpp"
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
 
-BOOST_AUTO_TEST_SUITE(TestExtract)
+BOOST_AUTO_TEST_SUITE(T_Extract)
 
 BOOST_AUTO_TEST_CASE(can_extract_path_and_name) {
     using namespace std::string_literals;

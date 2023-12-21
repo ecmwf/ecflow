@@ -67,7 +67,9 @@ void handle_store(const fs::path& temporary) {
     ofs << "2";
 };
 
-BOOST_AUTO_TEST_SUITE(TestServer)
+BOOST_AUTO_TEST_SUITE(U_Server)
+
+BOOST_AUTO_TEST_SUITE(T_CheckPtSaver)
 
 BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case0) {
     trace_test();
@@ -124,5 +126,7 @@ BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case3) {
     BOOST_CHECK_EQUAL(current.load(), "2");
     BOOST_CHECK_EQUAL(backup.load(), "1");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_DeleteNodeCmd)
 
 BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
     cout << "Base:: ...test_delete_node_cmd\n";
@@ -261,4 +263,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_edit_history_ECFLOW_1684) {
                                 << fixtureDef.defsfile_.dump_edit_history());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

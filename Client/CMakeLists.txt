@@ -103,25 +103,25 @@ set(test_srcs
 
 if (ENABLE_SERVER)
   list(APPEND test_srcs
-      # Headers
-      test/SCPort.hpp
-      # Sources
-      test/SCPort.cpp
-      test/TestClientTimeout.cpp
-      test/TestClientHandleCmd.cpp
-      test/TestCheckPtDefsCmd.cpp
-      test/TestCustomUser.cpp
-      test/TestGroupCmd.cpp
-      test/TestLoadDefsCmd.cpp
-      test/TestLogAndCheckptErrors.cpp
-      test/TestPasswdFile.cpp
-      test/TestPlugCmd.cpp
-      test/TestServer.cpp
-      test/TestServerAndLifeCycle.cpp
-      test/TestServerLoad.cpp
-      test/TestSignalSIGTERM.cpp
-      test/TestWhiteListFile.cpp
-      )
+    # Headers
+    test/SCPort.hpp
+    # Sources
+    test/SCPort.cpp
+    test/TestClientTimeout.cpp
+    test/TestClientHandleCmd.cpp
+    test/TestCheckPtDefsCmd.cpp
+    test/TestCustomUser.cpp
+    test/TestGroupCmd.cpp
+    test/TestLoadDefsCmd.cpp
+    test/TestLogAndCheckptErrors.cpp
+    test/TestPasswdFile.cpp
+    test/TestPlugCmd.cpp
+    test/TestServer.cpp
+    test/TestServerAndLifeCycle.cpp
+    test/TestServerLoad.cpp
+    test/TestSignalSIGTERM.cpp
+    test/TestWhiteListFile.cpp
+  )
 endif()
 
 ecbuild_add_test(
@@ -139,6 +139,8 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  DEPENDS
+    ecflow_server # the server is launched to support tests
   TEST_DEPENDS
     u_base
 )
@@ -152,7 +154,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   #
   ecbuild_add_test(
     TARGET
-      perf_test_large_defs
+      p_large_defs
     LABELS
       performance
       manual # requires manual definition of env var ECF_TEST_DEFS_DIR
@@ -169,10 +171,12 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       libclient
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
   )
-  target_clangformat(perf_test_large_defs
+  target_clangformat(p_large_defs
     CONDITION ENABLE_TESTS
   )
 
@@ -181,7 +185,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
   #
   ecbuild_add_test(
     TARGET
-      m_test_migration
+      m_migration
     LABELS
       migration
       manual # requires command line argument: m_test_migration <>
@@ -198,10 +202,12 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       libclient
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
     TEST_DEPENDS
       u_base
   )
-  target_clangformat(m_test_migration
+  target_clangformat(m_migration
     CONDITION ENABLE_TESTS
   )
 

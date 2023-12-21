@@ -16,7 +16,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_PerfTimer)
 
 static void func(int const count = 100000) {
     // std::cout << " func : count " << count << "\n";
@@ -79,5 +81,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_timer) {
     }
     BOOST_CHECK_MESSAGE(true, "dummy to keep unit test happy");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

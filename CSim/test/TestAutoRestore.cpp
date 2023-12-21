@@ -32,7 +32,9 @@ using namespace boost::posix_time;
 /// Simulate definition files that are created on then fly. This allows us to validate
 /// Defs file, to check for correctness
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_AutoRestore)
 
 BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
     cout << "Simulator:: ...test_autorestore_suite\n";
@@ -65,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autorestore_suite.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autorestore_suite.def"), errorMsg),
                         errorMsg);
 
     //   PrintStyle::setStyle(PrintStyle::MIGRATE);
@@ -82,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
     BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s1->absNodePath() << " to be restored");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autorestore_suite.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autorestore_suite.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -142,7 +144,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autorestore_family.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autorestore_family.def"), errorMsg),
                         errorMsg);
     // PrintStyle::setStyle(PrintStyle::MIGRATE);
     // cout << theDefs;
@@ -162,8 +164,10 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
     }
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autorestore_family.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autorestore_family.def") + ".log";
     fs::remove(logFileName);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

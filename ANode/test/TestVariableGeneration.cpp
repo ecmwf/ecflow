@@ -23,7 +23,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_VariableGeneration)
 
 static void findParentVariableValue(task_ptr t, const std::string& name, const std::string& expected) {
     std::string value;
@@ -101,5 +103,7 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
     findParentVariableValue(t, "YMD_JULIAN", ecf::convert_to<std::string>(Cal::date_to_julian(20090101)));
     findParentVariableValue(t, "RepeatInteger", "10");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

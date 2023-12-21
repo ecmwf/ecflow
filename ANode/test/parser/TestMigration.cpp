@@ -43,7 +43,9 @@ using namespace boost::gregorian;
 // Finally compare the two *RELOADED* defs file.
 // ********************************************************************
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 BOOST_AUTO_TEST_CASE(test_state_parser) {
     cout << "AParser:: ...test_state_parser\n";
@@ -611,5 +613,7 @@ BOOST_AUTO_TEST_CASE(test_state_fixture_defs) {
     BOOST_REQUIRE_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(theDefsFixture.defsfile_),
                           "Fixture failed: " << helper.errorMsg());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

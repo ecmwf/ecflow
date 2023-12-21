@@ -24,7 +24,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_VariableSubstitution)
 
 BOOST_AUTO_TEST_CASE(test_variable_substitution) {
     std::cout << "ANode:: ...test_variable_substitution\n";
@@ -486,5 +488,7 @@ BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
     std::string expected = "ECFLOW-999 1> ECFLOW-999 2>&1";
     BOOST_CHECK_MESSAGE(cmd == expected, "variable substitution failed expected " << expected << " but found " << cmd);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

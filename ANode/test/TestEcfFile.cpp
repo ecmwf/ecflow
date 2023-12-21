@@ -29,7 +29,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_EcfFile)
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_with_bad_ECF_MICRO) {
     cout << "ANode:: ...test_ecf_file_with_bad_ECF_MICRO\n";
@@ -1689,5 +1691,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_multiple_ecf_include) {
     BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
     BOOST_REQUIRE_EQUAL(ecf_include_paths[1], "/path/to/core/more");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

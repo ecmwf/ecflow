@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Limit)
 
 BOOST_AUTO_TEST_CASE(test_limit_basics) {
     cout << "ANode:: ...test_limit_basics \n";
@@ -208,5 +210,7 @@ BOOST_AUTO_TEST_CASE(test_Limit_serialisation) {
     Limit saved2("limitName", 100, 10, paths);
     doSaveAndRestore(fileName, saved2);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

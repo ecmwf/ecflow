@@ -24,7 +24,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_MeterCmd)
 
 BOOST_AUTO_TEST_CASE(test_meter_cmd) {
     cout << "Base:: ...test_meter_cmd\n";
@@ -115,5 +117,7 @@ BOOST_AUTO_TEST_CASE(test_meter_cmd) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

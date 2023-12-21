@@ -8,6 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-int main() {
-    return 0;
-}
+#define BOOST_TEST_MODULE Test_Http
+#include <boost/test/included/unit_test.hpp>

@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_NodeState)
 
 BOOST_AUTO_TEST_CASE(test_state_hierarchy) {
     cout << "ANode:: ...test_state_hierarchy\n";
@@ -131,5 +133,7 @@ BOOST_AUTO_TEST_CASE(test_state_hierarchy) {
                               "Expected NState::COMPLETE for family but found " << NState::toString(result));
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

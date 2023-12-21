@@ -37,7 +37,9 @@ using namespace ecf;
 // Finally compare the two *RELOADED* defs file.
 // ********************************************************************
 
-BOOST_AUTO_TEST_SUITE(ParserTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Parser)
+
+BOOST_AUTO_TEST_SUITE(T_MementoPersistAndReload)
 
 BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
     std::vector<ecf::Aspect::Type> aspects;
@@ -464,5 +466,7 @@ BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
                             "NodeZombieMemento failed: " << helper.errorMsg());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

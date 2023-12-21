@@ -18,7 +18,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_CommandLine)
 
 static void doCheck(const std::vector<std::string>& theArgs) {
     CommandLine cl(theArgs);
@@ -120,5 +122,7 @@ BOOST_AUTO_TEST_CASE(test_command_line_is_able_to_handle_single_quotes_in_double
     BOOST_REQUIRE_EQUAL(cl.tokens()[5], "'value'");
     BOOST_REQUIRE_EQUAL(cl.tokens()[6], "/some/path");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

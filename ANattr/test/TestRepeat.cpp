@@ -21,7 +21,9 @@ using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Repeat)
 
 BOOST_AUTO_TEST_CASE(test_repeat_invariants) {
     cout << "ANattr:: ...test_repeat_invariants\n";
@@ -995,5 +997,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_generated_variables2) {
         rep.increment();
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

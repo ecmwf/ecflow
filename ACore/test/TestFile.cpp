@@ -32,7 +32,9 @@ using namespace boost;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_File)
 
 BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
     // This is sanity test for splitFileIntoLines used extensively
@@ -548,5 +550,7 @@ BOOST_AUTO_TEST_CASE(test_get_all_files_by_extension) {
         BOOST_REQUIRE_MESSAGE(vec.size() == 7, "Expected 7 files in directory " << rootPath);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

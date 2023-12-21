@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Defs)
 
 BOOST_AUTO_TEST_CASE(test_defs_absorb) {
     cout << "ANode:: ...test_defs_absorb\n";
@@ -96,5 +98,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_1684) {
     BOOST_CHECK_MESSAGE(defs.get_edit_history().size() == 1,
                         "Expected edit history of size 1 but found " << defs.get_edit_history().size());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

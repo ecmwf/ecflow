@@ -15,13 +15,11 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -33,7 +31,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_WhyCmd)
 
 static unsigned int waitForWhy(const std::string& path, const std::string& why, int max_time_to_wait) {
     unsigned int updateCalendarCount = 0;
@@ -534,5 +534,7 @@ BOOST_AUTO_TEST_CASE(test_why_repeat) {
 
     cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

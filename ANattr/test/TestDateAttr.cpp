@@ -22,7 +22,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_DateAttr)
 
 BOOST_AUTO_TEST_CASE(test_date) {
     cout << "ANattr:: ...test_date\n";
@@ -115,4 +117,7 @@ BOOST_AUTO_TEST_CASE(test_date_errors) {
         BOOST_REQUIRE_THROW(DateAttr("1.13.99999999"), std::runtime_error);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

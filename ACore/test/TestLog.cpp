@@ -23,7 +23,9 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Log)
 
 static std::string getLogPath() {
 
@@ -375,5 +377,7 @@ BOOST_AUTO_TEST_CASE(test_get_log_timing) {
 
     cout << timer.duration() << "s\n" << flush;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

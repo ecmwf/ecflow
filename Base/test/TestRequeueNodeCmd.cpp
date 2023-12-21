@@ -28,7 +28,9 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_RequeueNodeCmd)
 
 BOOST_AUTO_TEST_CASE(test_requeue_with_suspend) {
     cout << "Base:: ...test_requeue_with_suspend\n";
@@ -375,5 +377,7 @@ BOOST_AUTO_TEST_CASE(test_reque_with_repeat_and_defstatus_complete) {
 
     fs::remove(log_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

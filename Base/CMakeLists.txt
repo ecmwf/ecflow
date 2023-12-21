@@ -191,7 +191,6 @@ set(test_srcs
   test/TestClientHandleCmd.cpp
   test/TestCmd.cpp
   test/TestDeleteNodeCmd.cpp
-  test/TestECFLOW-189.cpp
   test/TestForceCmd.cpp
   test/TestFreeDepCmd.cpp
   test/TestInLimitAndLimit.cpp
@@ -203,6 +202,7 @@ set(test_srcs
   test/TestRequest.cpp
   test/TestRequeueNodeCmd.cpp
   test/TestResolveDependencies.cpp
+  test/TestSpecificIssues.cpp
   test/TestSSyncCmd.cpp
   test/TestSSyncCmdOrder.cpp
   test/TestSSyncCmd_CH1.cpp
@@ -223,7 +223,7 @@ ecbuild_add_test(
     Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   TEST_DEPENDS
-    u_aparser
+    u_parser
 )
 target_clangformat(u_base
   CONDITION ENABLE_TESTS
@@ -239,7 +239,7 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      perf_job_gen
+      p_job_gen
     LABELS
       performance
     SOURCES
@@ -248,7 +248,7 @@ if (ENABLE_ALL_TESTS)
       base
       Threads::Threads
   )
-  target_clangformat(perf_job_gen
+  target_clangformat(p_job_gen
     CONDITION ENABLE_TESTS
   )
 endif()

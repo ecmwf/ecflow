@@ -15,7 +15,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_SanitizerUB)
 
 struct Base
 {
@@ -112,5 +114,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_member_access_through_null_pointer) {
         BOOST_CHECK_MESSAGE(x, "stop boost test from complaining");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

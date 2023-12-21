@@ -27,7 +27,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_CtsWaitCmd)
 
 static void create_defs(Defs& theDefs, const std::string& suite_name) {
     // suite test_wait_cmd
@@ -218,5 +220,7 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

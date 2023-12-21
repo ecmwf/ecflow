@@ -17,7 +17,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_ZombieAttr)
 
 BOOST_AUTO_TEST_CASE(test_zombie_attr) {
     cout << "ANattr:: ...test_zombie_attr\n";
@@ -123,5 +125,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_attr_parsing) {
         BOOST_CHECK_MESSAGE(zombie.child_cmds().size() == 1, "Expected one child");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

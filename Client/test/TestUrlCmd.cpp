@@ -21,7 +21,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_UrlCmd)
 
 //=============================================================================
 // This will test the UrlCmd.
@@ -49,5 +51,7 @@ BOOST_AUTO_TEST_CASE(test_url_cmd) {
     std::string actual   = urlCmd.getUrl();
     BOOST_CHECK_MESSAGE(expected == actual, "Expected '" << expected << "' but found " << actual);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

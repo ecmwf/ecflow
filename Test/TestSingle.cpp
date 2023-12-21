@@ -12,8 +12,7 @@
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#define BOOST_TEST_MODULE TEST_SINGLE
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
@@ -22,7 +21,6 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -32,8 +30,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-
-BOOST_GLOBAL_FIXTURE(TestFixture);
 
 ///
 /// \note This is used to INVOKE a SINGLE test.

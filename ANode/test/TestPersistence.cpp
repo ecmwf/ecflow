@@ -17,7 +17,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_FIXTURE_TEST_SUITE(NodeTestSuite, MyDefsFixture)
+BOOST_FIXTURE_TEST_SUITE(U_Node, MyDefsFixture)
+
+BOOST_AUTO_TEST_SUITE(T_Persistence)
 
 // Allow for multiple archives
 static void testPersistence(const Defs& fixtureDefs) {
@@ -76,4 +78,7 @@ BOOST_AUTO_TEST_CASE(test_node_defs_persistence) {
         BOOST_REQUIRE_MESSAGE(*the_copy == *all_node, "Nodes not the same");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

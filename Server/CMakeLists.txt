@@ -103,7 +103,7 @@ ecbuild_add_test(
     test/TestCheckPtSaver.cpp
     test/TestServerEnvironment.cpp
     test/TestServer_main.cpp # test entry point
-    test/TestServer1.cpp
+    test/TestServer.cpp
   LIBS
     libserver
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)

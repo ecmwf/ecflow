@@ -16,12 +16,13 @@
 
 using namespace std;
 using namespace ecf;
+using namespace boost;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-using namespace boost;
+BOOST_AUTO_TEST_SUITE(U_Core)
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(T_TimeSlot)
 
 BOOST_AUTO_TEST_CASE(test_time_slot) {
     cout << "ACore:: ...test_time_slot\n";
@@ -94,5 +95,7 @@ BOOST_AUTO_TEST_CASE(test_time_slot) {
         BOOST_CHECK_MESSAGE(x1 >= y1, ">= operator expected to succced");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

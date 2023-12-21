@@ -30,10 +30,10 @@ ecbuild_add_library(
     ../src
   PUBLIC_LIBS
     libclient
-    libsimu
+    libsimulator
     base
     node
-    nodeattr
+    attributes
     core
     Python3::Python
     Boost::${ECFLOW_BOOST_PYTHON_COMPONENT}

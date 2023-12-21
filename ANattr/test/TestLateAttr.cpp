@@ -24,7 +24,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_LateAttr)
 
 BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
     cout << "ANattr:: ...test_late_attr_submitted\n";
@@ -304,5 +306,7 @@ BOOST_AUTO_TEST_CASE(test_late_parsing_errors) {
     BOOST_CHECK_THROW((void)LateAttr::create("late -c +23:10 -s 10:10 -a"), std::runtime_error);
     BOOST_CHECK_THROW((void)LateAttr::create("late -c +23:10 -s 10:10 -a 11:11 -s"), std::runtime_error);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

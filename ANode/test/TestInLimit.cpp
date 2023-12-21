@@ -20,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_InLimit)
 
 BOOST_AUTO_TEST_CASE(test_inlimit_basics) {
     cout << "ANode:: ...test_inlimit_basics \n";
@@ -117,5 +119,7 @@ BOOST_AUTO_TEST_CASE(test_InLimit_serialisation) {
         std::remove(fileName.c_str());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

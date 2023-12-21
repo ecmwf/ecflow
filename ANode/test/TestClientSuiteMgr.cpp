@@ -21,7 +21,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_ClientSuiteMgr)
 
 BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_user) {
     cout << "ANode:: ...test_client_suite_mgr_remove_user\n";
@@ -131,5 +133,7 @@ BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_handle) {
                         "Expected client suite of size 0 but found " << mgr.clientSuites().size());
     BOOST_CHECK_THROW(mgr.remove_client_suite(handle3), std::runtime_error);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

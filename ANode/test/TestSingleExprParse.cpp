@@ -28,7 +28,9 @@ using namespace boost::posix_time;
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_SingleExprParse)
 
 BOOST_AUTO_TEST_CASE(test_single_expression) {
     std::cout << "ANode:: ...test_single_expression\n";
@@ -118,5 +120,7 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
 //    ExprDuplicate reclaim_cloned_ast_memory;
 //    cout << " read " << i << " expressions\n";
 // }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

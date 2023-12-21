@@ -8,11 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE Test
+#define BOOST_TEST_MODULE Test_SingleSimulator
 #include <boost/test/included/unit_test.hpp>
-
-#include "TestFixture.hpp"
-
-// Global test fixture. Dues to boost deficiency this can't be accessed. hence
-// TestFixture makes use of global data.
-BOOST_GLOBAL_FIXTURE(TestFixture);

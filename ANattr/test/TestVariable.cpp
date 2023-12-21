@@ -17,7 +17,9 @@
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Variable)
 
 BOOST_AUTO_TEST_CASE(test_multi_line_variable_values) {
     cout << "ANattr:: ...test_multi_line_variable_values\n";
@@ -95,5 +97,7 @@ BOOST_AUTO_TEST_CASE(test_variable_value) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

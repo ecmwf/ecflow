@@ -11,8 +11,7 @@
 #include <iostream>
 #include <string>
 
-#define BOOST_TEST_MODULE TestSimulator
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/System.hpp"
@@ -21,7 +20,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_Simulator)
 
 void simulate(const std::string& directory, bool pass) {
     auto full_path = fs::absolute(directory);
@@ -91,5 +92,7 @@ BOOST_AUTO_TEST_CASE(test_simulate_bad_defs) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

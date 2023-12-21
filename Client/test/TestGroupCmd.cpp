@@ -22,7 +22,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_GroupCmd)
 
 BOOST_AUTO_TEST_CASE(test_group_cmd) {
     // The previous test's has created/destroyed a server process
@@ -255,5 +257,7 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
                                                  << theClient.errorMsg());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

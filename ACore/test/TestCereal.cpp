@@ -73,7 +73,9 @@ std::ostream& operator<<(std::ostream& os, MyTop const& m) {
 
 // =================================================================================
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Cereal)
 
 BOOST_AUTO_TEST_CASE(test_cereal_json) {
     cout << "ACore:: ...test_cereal_json \n";
@@ -108,5 +110,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_json2) {
     { ecf::doRestore(path, m1); }
     { ecf::doSaveAndRestore<MyTop>(path); }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

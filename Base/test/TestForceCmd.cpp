@@ -25,7 +25,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ForceCmd)
 
 static defs_ptr create_defs() {
     defs_ptr theDefs = Defs::create();
@@ -1096,4 +1098,7 @@ BOOST_AUTO_TEST_CASE(test_destroy_log2) {
     fs::remove("test_add_log2.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

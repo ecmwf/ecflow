@@ -25,7 +25,9 @@ using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_TimeDependencies)
 
 // See ECFLOW-337
 // See ECFLOW-833. Also See Note: ACore/doc/TimeDependencies.ddoc
@@ -471,5 +473,7 @@ BOOST_AUTO_TEST_CASE(test_impossible_date_combination) {
     }
     BOOST_CHECK_MESSAGE(submitted == 0, "Expected zero submission but found " << submitted);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

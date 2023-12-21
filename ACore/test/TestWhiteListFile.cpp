@@ -20,7 +20,9 @@ using namespace ecf;
 
 // #define DEBUG_ME 1
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_WhiteListFile)
 
 void test_white_list_files(const std::string& directory, bool pass) {
     auto full_path = fs::absolute(directory);
@@ -681,5 +683,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
                           "Expected user to not have read/write if no paths specified\n"
                               << theFile.dump_valid_users());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,7 +21,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_SignalSIGTERM)
 
 static void wait_for_sigterm_in_server(ClientInvoker& theClient) {
     int count = 0;
@@ -105,5 +107,7 @@ BOOST_AUTO_TEST_CASE(test_signal_SIGTERM) {
                           "Expected backup check point file(" << invokeServer.ecf_backup_checkpt_file()
                                                               << "), to have file size > 0");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

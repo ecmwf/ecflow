@@ -8,8 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
-
 set(srcs
   # Headers
   src/ServerTestHarness.hpp
@@ -35,7 +33,7 @@ ecbuild_add_library(
     libclient
     base
     node
-    nodeattr
+    attributes
     core
 )
 target_clangformat(libharness)
@@ -46,6 +44,7 @@ target_clangformat(libharness)
 if (ENABLE_ALL_TESTS)
 
   set(test_srcs
+    Test_main.cpp # test entry point
     TestAbortCmd.cpp
     TestAlias.cpp
     TestClkSync.cpp
@@ -53,6 +52,8 @@ if (ENABLE_ALL_TESTS)
     TestCron.cpp
     TestCtsWaitCmd.cpp
     TestDayDate.cpp
+    TestEcfNoScriptCmd.cpp
+    TestEcfScriptCmd.cpp
     TestEvents.cpp
     TestFileCmd.cpp
     TestHandle.cpp
@@ -64,13 +65,13 @@ if (ENABLE_ALL_TESTS)
     TestQueueCmd.cpp
     TestRepeat.cpp
     TestRequeueNode.cpp
-    TestRunner.cpp
     TestServer.cpp
+    TestSpecificIssues.cpp
     TestSuspend.cpp
+    TestTime.cpp
     TestToday.cpp
     TestTrigger.cpp
     TestWhyCmd.cpp
-    Test_Time.cpp
   )
 
   ecbuild_add_test(
@@ -88,38 +89,40 @@ if (ENABLE_ALL_TESTS)
       s_client
   )
   target_clangformat(s_test CONDITION ENABLE_TESTS)
-   
+
   ecbuild_add_test(
     TARGET
-      s_test_zombies
+      s_zombies
     LABELS
       integration
       nightly
     SOURCES
       TestZombies.cpp
+      TestZombies_main.cpp # test entry point
     LIBS
       libharness
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_test
   )
-  target_clangformat(s_test_zombies CONDITION ENABLE_TESTS)
+  target_clangformat(s_zombies CONDITION ENABLE_TESTS)
 
   # This test runs forever, hence not suitable as unit test.
   ecbuild_add_test(
     TARGET
-      s_singletest
+      s_single
     LABELS
       integration
       manual
     SOURCES
       TestSingle.cpp
+      TestSingle_main.cpp # test entry point
     LIBS
       libharness
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_client
   )
-  target_clangformat(s_singletest CONDITION ENABLE_TESTS)
+  target_clangformat(s_single CONDITION ENABLE_TESTS)
 
 endif()
