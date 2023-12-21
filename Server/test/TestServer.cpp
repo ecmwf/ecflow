@@ -23,7 +23,9 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestServer)
+BOOST_AUTO_TEST_SUITE(U_Server)
+
+BOOST_AUTO_TEST_SUITE(T_Server)
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // make public the function we wish to test:
@@ -202,5 +204,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
     /// Destroy Log singleton to avoid valgrind from complaining
     Log::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
