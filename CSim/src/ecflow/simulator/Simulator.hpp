@@ -23,13 +23,12 @@ class Submittable;
 
 namespace ecf {
 
-/// This class is used to simulate a definition file. This is use full
-/// because:
-//       a/ Save time over involving server and asking client to play definition file
-//       b/ Tells you about any parser errors in the definition file
-//       c/ Tells you about any deadlocks, ie if suite does not complete
-//       d/ Will simulate for both real and hybrid clocks
-//       e/ Simulation will by default run for a year. Should really use start/end clock for accurate simulations
+// This class is used to simulate a definition file. This is usefull because:
+//   a/ Saves time over involving server and asking client to play definition file
+//   b/ Informs about any parser errors in the definition file
+//   c/ Informs about any deadlocks, i.e. if a suite does not complete
+//   d/ Simulates both real and hybrid clocks
+//   e/ Simulation will by default run for a year. Should really use start/end clock for accurate simulations
 class Simulator {
 public:
     // For deterministic results simulate using clock(start) and endclock(finish)

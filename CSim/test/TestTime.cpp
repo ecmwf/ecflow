@@ -31,7 +31,9 @@ using namespace boost::posix_time;
 /// tests with todays date/time this speeds up the testr, we can also validate
 /// Defs file, to check for correctness
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_Time)
 
 BOOST_AUTO_TEST_CASE(test_time) {
     cout << "Simulator:: ...test_time\n";
@@ -39,10 +41,10 @@ BOOST_AUTO_TEST_CASE(test_time) {
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
     //   clock real <todays date>
-    //	family family
-    //    	task t1
+    //   family family
+    //     task t1
     //       time <start>
-    //    endfamily
+    //   endfamily
     // endsuite
 
     // Initialise clock with todays date  then create a time attribute + minutes
@@ -60,18 +62,16 @@ BOOST_AUTO_TEST_CASE(test_time) {
         task_ptr task  = fam->add_task("t");
         task->addTime(ecf::TimeAttr(TimeSlot(time_plus_minute.time_of_day())));
         task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // expect task to complete 1 time
-
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_time.def"), errorMsg),
                         errorMsg << "\n"
                                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_time.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_time.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -80,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_time_series) {
 
     // suite suite
     //   clock real <sunday>
-    //	family family
-    //    	task t1
-    //        time 00:30 23:59 04:00  # should run 6 times 00:30 4:30 8:30 12:30 16:30 20:30
-    //   	endfamily
+    //   family family
+    //     task t1
+    //     time 00:30 23:59 04:00  # should run 6 times 00:30 4:30 8:30 12:30 16:30 20:30
+    //   endfamily
     // endsuite
 
     // Initialise real clock on a Moday, such that task should _only_ run
@@ -101,18 +101,16 @@ BOOST_AUTO_TEST_CASE(test_time_series) {
 
         task->addTime(TimeAttr(timeSeries));
         task->addVerify(VerifyAttr(NState::COMPLETE, 6)); // expect task to complete 6 times
-
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_series.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_time_series.def"), errorMsg),
                         errorMsg << "\n"
                                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_time_series.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_time_series.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -122,11 +120,11 @@ BOOST_AUTO_TEST_CASE(test_time_and_date) {
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        date  <today date>
-    //        time <start>
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       date  <today date>
+    //       time <start>
+    //   endfamily
     // endsuite
 
     Defs theDefs;
@@ -146,18 +144,16 @@ BOOST_AUTO_TEST_CASE(test_time_and_date) {
         task->addDate(DateAttr(todaysDate));
         task->addTime(ecf::TimeAttr(TimeSlot(time_plus_minute.time_of_day())));
         task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // expect task to complete 1 time
-
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_time_and_date.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_time_and_date.def"), errorMsg),
                         errorMsg << "\n"
                                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_time_and_date.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_time_and_date.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -167,11 +163,11 @@ BOOST_AUTO_TEST_CASE(test_time_and_tomorrows_date) {
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
     //   clock real <todays date>
-    //  family family
+    //   family family
     //     task t1
-    //        date  <tomorrows date>
-    //        time <start>
-    //     endfamily
+    //       date  <tomorrows date>
+    //       time <start>
+    //   endfamily
     // endsuite
 
     Defs theDefs;
@@ -192,19 +188,17 @@ BOOST_AUTO_TEST_CASE(test_time_and_tomorrows_date) {
         task->addDate(DateAttr(tomorrows_date));
         task->addTime(ecf::TimeAttr(TimeSlot(time_plus_minute.time_of_day())));
         task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // expect task to complete 1 time
-
-        //    cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_time_and_tomorrows_date.def"), errorMsg),
+        simulator.run(theDefs, findTestDataLocation("test_time_and_tomorrows_date.def"), errorMsg),
         errorMsg << "\n"
                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_time_and_tomorrows_date.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_time_and_tomorrows_date.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -214,13 +208,13 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        date <today date>
-    //        date <tomorrows date>
-    //        time <start>
-    //        time <start>
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       date <today date>
+    //       date <tomorrows date>
+    //       time <start>
+    //       time <start>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -251,12 +245,12 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_dates.def"), errorMsg),
+        simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_dates.def"), errorMsg),
         errorMsg << "\n"
                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_multiple_times_and_dates.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_multiple_times_and_dates.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -266,13 +260,13 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
     //   clock hybrid <todays date>
-    //	family family
-    //    	task t1
-    //        date  <today date>
-    //        date  <tomrrows date>
-    //        time <start>
-    //        time <start>
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       date  <today date>
+    //       date  <tomrrows date>
+    //       time <start>
+    //       time <start>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -300,12 +294,12 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_dates_hybrid.def"), errorMsg),
+        simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_dates_hybrid.def"), errorMsg),
         errorMsg << "\n"
                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_multiple_times_and_dates_hybrid.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_multiple_times_and_dates_hybrid.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -314,14 +308,14 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_days) {
 
     // suite suite
     //   clock real <sunday>
-    //	family family
+    //   family family
     //     rep integer 0 1 1 # repeat twice
-    //    	task t1
-    //        day  monday
-    //        day  tuesday
-    //        time <start>
-    //        time <start>
-    //   	endfamily
+    //     task t1
+    //       day  monday
+    //       day  tuesday
+    //       time <start>
+    //       time <start>
+    //   endfamily
     // endsuite
 
     // Initialise real clock on a sunday, such that task should run on Monday & tuesday twice
@@ -340,19 +334,17 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_days) {
         task->addTime(TimeAttr(TimeSlot(10, 0)));
         task->addTime(TimeAttr(TimeSlot(20, 0)));
         task->addVerify(VerifyAttr(NState::COMPLETE, 4)); // expect task to complete 4 time
-
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_days.def"), errorMsg),
+        simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_days.def"), errorMsg),
         errorMsg << "\n"
                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_multiple_times_and_days.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_multiple_times_and_days.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -361,13 +353,13 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_days_hybrid) {
 
     // suite suite
     //   clock hybrid <monday>
-    //	family family
-    //    	task t1
-    //        day  monday
-    //        day  tuesday
-    //        time <start>
-    //        time <start>
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       day  monday
+    //       day  tuesday
+    //       time <start>
+    //       time <start>
+    //   endfamily
     // endsuite
 
     // Initialise real clock on a Monday, such that task should _only_ run
@@ -387,20 +379,20 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_days_hybrid) {
         task->addTime(TimeAttr(TimeSlot(11, 0)));
         task->addTime(TimeAttr(TimeSlot(20, 0)));
         task->addVerify(VerifyAttr(NState::COMPLETE, 3)); // expect task to complete 3 times
-
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_multiple_times_and_days_hybrid.def"), errorMsg),
+        simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_days_hybrid.def"), errorMsg),
         errorMsg << "\n"
                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_multiple_times_and_days_hybrid.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_multiple_times_and_days_hybrid.def") + ".log";
     fs::remove(logFileName);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

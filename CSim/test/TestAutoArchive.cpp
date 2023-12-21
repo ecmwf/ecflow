@@ -31,7 +31,9 @@ using namespace boost::posix_time;
 /// Simulate definition files that are created on then fly. This allows us to validate
 /// Defs file, to check for correctness
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_AutoArchive)
 
 BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     cout << "Simulator:: ...test_autoarchive_suite\n";
@@ -69,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autoarchive_suite.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_suite.def"), errorMsg),
                         errorMsg);
 
     // make sure autoarchive archives the suite.
@@ -114,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s3->absNodePath() << " to be restored");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autoarchive_suite.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autoarchive_suite.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -170,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_autoarchive_ast_node_reset.def"), errorMsg), errorMsg);
+        simulator.run(theDefs, findTestDataLocation("test_autoarchive_ast_node_reset.def"), errorMsg), errorMsg);
 
     // Auto archive should archive suite s2 and s3, leaving one suite i.e s1
     const std::vector<suite_ptr>& suites = theDefs.suiteVec();
@@ -190,7 +192,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     }
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autocancel_ast_node_reset.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autocancel_ast_node_reset.def") + ".log";
     fs::remove(logFileName);
     fs::remove(suite_s2->archive_path()); // remove generated archive files
     fs::remove(suite_s3->archive_path()); // remove generated archive files
@@ -240,7 +242,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autoarchive_family.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_family.def"), errorMsg),
                         errorMsg);
 
     // make sure all familes has been archived
@@ -262,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
     }
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autoarchive_family_and_task.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autoarchive_family_and_task.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -290,7 +292,7 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_two_autoarchive_in_hierarchy.def"), errorMsg),
+        simulator.run(theDefs, findTestDataLocation("test_two_autoarchive_in_hierarchy.def"), errorMsg),
         errorMsg);
 
     // Check ONLY the suite got archived an not family
@@ -305,8 +307,10 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
     BOOST_CHECK_MESSAGE(!fam, "Expected family to be deleted");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_two_autoarchive_in_hierarchy.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_two_autoarchive_in_hierarchy.def") + ".log";
     fs::remove(logFileName);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

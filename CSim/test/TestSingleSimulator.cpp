@@ -12,12 +12,14 @@
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#define BOOST_TEST_MODULE TestSingleSimulator
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
+#include "TestUtil.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
@@ -26,51 +28,52 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
 
-// BOOST_AUTO_TEST_CASE( test_analysys )
-//{
-//    cout << "Simulator:: ...test_analysys\n";
-//    //suite suite
-//    // family family
-//    //    task t1
-//    //          trigger t2 == complete
-//    //    task t2
-//    //          trigger t1 == complete
-//    //    endfamily
-//    //endsuite
-//
-//    // This simulation is expected to fail, since we have a deadlock/ race condition
-//    // It will prodice a defs.depth and defs.flat files. Make sure to remove them
-//    Defs theDefs;
-//    {
-//       suite_ptr suite = theDefs.add_suite("test_analysys");
-//       family_ptr fam = suite->add_family("family");
-//
-//       task_ptr task1 = fam->add_task("t1");
-//       task1->add_trigger( "t2 == complete" );
-//
-//       task_ptr task2 = fam->add_task("t2");
-//       task2->add_trigger( "t1 == complete" );
-//
-//       //    cout << theDefs << "\n";
-//    }
-//
-//    Simulator simulator;
-//    std::string errorMsg;
-//    BOOST_CHECK_MESSAGE(!simulator.run(theDefs, TestUtil::testDataLocation("test_analysys.def") , errorMsg),errorMsg);
-//
-//    // remove generated log file. Comment out to debug
-//    std::string logFileName = TestUtil::testDataLocation("test_analysys.def") + ".log";
-//    fs::remove(logFileName);
-//
-//    // cout << theDefs << "\n";
-//    fs::remove("defs.depth");
-//    fs::remove("defs.flat");
-//
-//    /// Destroy singleton's to avoid valgrind from complaining
-//    System::destroy();
-// }
+BOOST_AUTO_TEST_SUITE(T_SingleSimulator)
+
+BOOST_AUTO_TEST_CASE(test_analysys, *boost::unit_test::disabled()) {
+    cout << "Simulator:: ...test_analysys\n";
+    // suite suite
+    //   family family
+    //     task t1
+    //       trigger t2 == complete
+    //     task t2
+    //       trigger t1 == complete
+    //   endfamily
+    // endsuite
+
+    // This simulation is expected to fail, since we have a deadlock/ race condition
+    // It will prodice a defs.depth and defs.flat files. Make sure to remove them
+    Defs theDefs;
+    {
+        suite_ptr suite = theDefs.add_suite("test_analysys");
+        family_ptr fam  = suite->add_family("family");
+
+        task_ptr task1 = fam->add_task("t1");
+        task1->add_trigger("t2 == complete");
+
+        task_ptr task2 = fam->add_task("t2");
+        task2->add_trigger("t1 == complete");
+
+        //    cout << theDefs << "\n";
+    }
+
+    Simulator simulator;
+    std::string errorMsg;
+    BOOST_CHECK_MESSAGE(!simulator.run(theDefs, findTestDataLocation("test_analysys.def"), errorMsg), errorMsg);
+
+    // remove generated log file. Comment out to debug
+    std::string logFileName = findTestDataLocation("test_analysys.def") + ".log";
+    fs::remove(logFileName);
+
+    // cout << theDefs << "\n";
+    fs::remove("defs.depth");
+    fs::remove("defs.flat");
+
+    /// Destroy singleton's to avoid valgrind from complaining
+    System::destroy();
+}
 
 BOOST_AUTO_TEST_CASE(test_single_from_file) {
     cout << "Simulator:: ...test_single_from_file\n";
@@ -83,5 +86,7 @@ BOOST_AUTO_TEST_CASE(test_single_from_file) {
 
     BOOST_REQUIRE_MESSAGE(passed, path << " failed simulation \n" << errorMsg);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

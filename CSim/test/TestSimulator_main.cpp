@@ -8,12 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_simulator_test_TestUtil_HPP
-#define ecflow_simulator_test_TestUtil_HPP
-
-#include <string>
-
-/// Returns the location of the defs file, such thats it in the test data area
-std::string findTestDataLocation(const std::string& defsFile);
-
-#endif /* ecflow_simulator_test_TestUtil_HPP */
+#define BOOST_TEST_MODULE Test_Simulator
+#include <boost/test/included/unit_test.hpp>

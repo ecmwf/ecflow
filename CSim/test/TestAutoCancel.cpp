@@ -30,7 +30,9 @@ using namespace boost::posix_time;
 /// Simulate definition files that are created on then fly. This us to validate
 /// Defs file, to check for correctness
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_AutoCancel)
 
 BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
     cout << "Simulator:: ...test_autocancel_ast_node_reset\n";
@@ -55,7 +57,6 @@ BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
         task_ptr task3 = fam->add_task("t3");
         task3->add_trigger("/s3 == complete");
         task3->add_complete("/s2 == complete");
-        //		cout << theDefs << "\n";
     }
     {
         ClockAttr clockAttr(true);
@@ -89,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_autocancel_ast_node_reset.def"), errorMsg), errorMsg);
+        simulator.run(theDefs, findTestDataLocation("test_autocancel_ast_node_reset.def"), errorMsg), errorMsg);
 
     // Auto cancel should delete suite s2 and s3, leaving one suite i.e s1
     BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 1,
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
     }
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autocancel_ast_node_reset.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autocancel_ast_node_reset.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -140,12 +141,11 @@ BOOST_AUTO_TEST_CASE(test_autocancel_suite) {
         suite->addAutoCancel(ecf::AutoCancelAttr(1));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t");
-        //    	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autocancel_suite.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_suite.def"), errorMsg),
                         errorMsg);
 
     // make sure autocancel deletes the suite.
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_suite) {
                         "Expected to have 0 suites but found " << theDefs.suiteVec().size());
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autocancel_suite.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autocancel_suite.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_autocancel_family_and_task.def"), errorMsg), errorMsg);
+        simulator.run(theDefs, findTestDataLocation("test_autocancel_family_and_task.def"), errorMsg), errorMsg);
 
     // make sure autocancel deletes the families.
     std::vector<Family*> famVec;
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
                                                                  << theDefs);
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autocancel_family_and_task.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autocancel_family_and_task.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -256,12 +256,11 @@ BOOST_AUTO_TEST_CASE(test_autocancel_task) {
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t");
         task->addAutoCancel(ecf::AutoCancelAttr(1));
-        //    	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autocancel_task.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_task.def"), errorMsg),
                         errorMsg);
 
     // make sure autocancel deletes the tasks and leaves families intact.
@@ -275,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_task) {
     BOOST_CHECK_MESSAGE(task_vec.size() == 0, "Expected to have 0 tasks but found " << task_vec.size());
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autocancel_task.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autocancel_task.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -300,7 +299,7 @@ BOOST_AUTO_TEST_CASE(test_two_autocancel_in_hierarchy) {
     Simulator simulator;
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_two_autocancel_in_hierarchy.def"), errorMsg), errorMsg);
+        simulator.run(theDefs, findTestDataLocation("test_two_autocancel_in_hierarchy.def"), errorMsg), errorMsg);
 
     std::vector<task_ptr> task_vec;
     theDefs.get_all_tasks(task_vec);
@@ -312,8 +311,10 @@ BOOST_AUTO_TEST_CASE(test_two_autocancel_in_hierarchy) {
     BOOST_CHECK_MESSAGE(task_vec.size() == 0, "Expected to have 0 tasks but found " << task_vec.size());
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_two_autocancel_in_hierarchy.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_two_autocancel_in_hierarchy.def") + ".log";
     fs::remove(logFileName);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

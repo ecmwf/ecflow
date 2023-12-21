@@ -52,6 +52,7 @@ set(test_srcs
   test/TestMeter.cpp
   test/TestRepeat.cpp
   test/TestSimulator.cpp
+  test/TestSimulator_main.cpp # test entry point
   test/TestTime.cpp
   test/TestToday.cpp
   test/TestUtil.cpp
@@ -66,7 +67,8 @@ ecbuild_add_test(
   LIBS
     libsimu
     Threads::Threads
-  TEST_DEPENDS u_base
+  TEST_DEPENDS
+    u_base
 )
 target_clangformat(c_csim CONDITION ENABLE_TESTS)
 
@@ -79,6 +81,7 @@ if (ENABLE_ALL_TESTS)
       integration nightly
     SOURCES
       test/TestSingleSimulator.cpp
+      test/TestSingleSimulator_main.cpp # test entry point
       test/TestUtil.cpp
     LIBS
       libsimu
