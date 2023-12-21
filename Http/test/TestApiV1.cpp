@@ -21,11 +21,12 @@
 #include "ecflow/http/HttpServerException.hpp"
 #include "httplib.h"
 
-BOOST_AUTO_TEST_SUITE(HttpTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Http)
 
-namespace utf = boost::unit_test;
-using json    = nlohmann::json;
-using string  = std::string;
+BOOST_AUTO_TEST_SUITE(T_ApiV1)
+
+using json   = nlohmann::json;
+using string = std::string;
 
 const string API_HOST("localhost");
 const string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
@@ -416,7 +417,7 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
         HttpStatusCode::client_error_unauthorized);
 }
 
-BOOST_AUTO_TEST_CASE(test_family_add, *utf::depends_on("HttpTestSuite/test_suite")) {
+BOOST_AUTO_TEST_CASE(test_family_add, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_suite")) {
     handle_response(
         request("put", "/v1/suites/test/definition", R"({"definition": "family dynamic\nendfamily"})", API_KEY));
     wait_until([] { return check_for_path("/v1/suites/test/dynamic/definition"); });
@@ -424,7 +425,7 @@ BOOST_AUTO_TEST_CASE(test_family_add, *utf::depends_on("HttpTestSuite/test_suite
 
 // STATUS
 
-BOOST_AUTO_TEST_CASE(test_status, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     const std::map<std::string, std::string> statuses{
@@ -452,7 +453,7 @@ BOOST_AUTO_TEST_CASE(test_status, *utf::depends_on("HttpTestSuite/test_family_ad
 
 // VARIABLE
 
-BOOST_AUTO_TEST_CASE(test_variable, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_variable, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -477,7 +478,7 @@ BOOST_AUTO_TEST_CASE(test_variable, *utf::depends_on("HttpTestSuite/test_family_
 
 // METER
 
-BOOST_AUTO_TEST_CASE(test_meter, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_meter, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(request("post",
@@ -503,7 +504,7 @@ BOOST_AUTO_TEST_CASE(test_meter, *utf::depends_on("HttpTestSuite/test_family_add
 
 // LIMIT
 
-BOOST_AUTO_TEST_CASE(test_limit, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_limit, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -527,7 +528,7 @@ BOOST_AUTO_TEST_CASE(test_limit, *utf::depends_on("HttpTestSuite/test_family_add
 
 // EVENT
 
-BOOST_AUTO_TEST_CASE(test_event, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_event, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -552,7 +553,7 @@ BOOST_AUTO_TEST_CASE(test_event, *utf::depends_on("HttpTestSuite/test_family_add
 
 // LABEL
 
-BOOST_AUTO_TEST_CASE(test_label, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_label, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -577,7 +578,7 @@ BOOST_AUTO_TEST_CASE(test_label, *utf::depends_on("HttpTestSuite/test_family_add
 
 // TIME
 
-BOOST_AUTO_TEST_CASE(test_time, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_time, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -603,7 +604,7 @@ BOOST_AUTO_TEST_CASE(test_time, *utf::depends_on("HttpTestSuite/test_family_add"
 
 // DAY
 
-BOOST_AUTO_TEST_CASE(test_day, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_day, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -629,7 +630,7 @@ BOOST_AUTO_TEST_CASE(test_day, *utf::depends_on("HttpTestSuite/test_family_add")
 
 // DATE
 
-BOOST_AUTO_TEST_CASE(test_date, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_date, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -655,7 +656,7 @@ BOOST_AUTO_TEST_CASE(test_date, *utf::depends_on("HttpTestSuite/test_family_add"
 
 // TODAY
 
-BOOST_AUTO_TEST_CASE(test_today, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_today, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -684,7 +685,7 @@ BOOST_AUTO_TEST_CASE(test_today, *utf::depends_on("HttpTestSuite/test_family_add
 
 // CRON
 
-BOOST_AUTO_TEST_CASE(test_cron, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_cron, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -711,7 +712,7 @@ BOOST_AUTO_TEST_CASE(test_cron, *utf::depends_on("HttpTestSuite/test_family_add"
 
 // LATE
 
-BOOST_AUTO_TEST_CASE(test_late, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_late, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(request("post",
@@ -741,7 +742,7 @@ BOOST_AUTO_TEST_CASE(test_late, *utf::depends_on("HttpTestSuite/test_family_add"
 
 // COMPLETE
 
-BOOST_AUTO_TEST_CASE(test_complete, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_complete, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(request("post",
@@ -773,7 +774,7 @@ BOOST_AUTO_TEST_CASE(test_complete, *utf::depends_on("HttpTestSuite/test_family_
 
 // AUTOCANCEL
 
-BOOST_AUTO_TEST_CASE(test_autocancel, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_autocancel, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -797,7 +798,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel, *utf::depends_on("HttpTestSuite/test_famil
 
 // AUTOARCHIVE
 
-BOOST_AUTO_TEST_CASE(test_autoarchive, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_autoarchive, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -821,7 +822,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive, *utf::depends_on("HttpTestSuite/test_fami
 
 // AUTORESTORE
 
-BOOST_AUTO_TEST_CASE(test_autorestore, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_autorestore, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(
@@ -847,21 +848,21 @@ BOOST_AUTO_TEST_CASE(test_autorestore, *utf::depends_on("HttpTestSuite/test_fami
 
 // OUTPUT
 
-BOOST_AUTO_TEST_CASE(test_output, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_output, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
     handle_response(request("get", "/v1/suites/test/a/a/output"), HttpStatusCode::client_error_not_found);
 }
 
 // SCRIPT
 
-BOOST_AUTO_TEST_CASE(test_script, *utf::depends_on("HttpTestSuite/test_family_add")) {
+BOOST_AUTO_TEST_CASE(test_script, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
     handle_response(request("get", "/v1/suites/test/a/a/script"), HttpStatusCode::client_error_not_found);
 }
 
 // DELETE FAMILY
 
-BOOST_AUTO_TEST_CASE(test_suite_family_delete, *utf::depends_on("HttpTestSuite/test_autorestore")) {
+BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_autorestore")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     handle_response(request("delete", "/v1/suites/test/dynamic/definition", "", API_KEY),
@@ -873,7 +874,7 @@ BOOST_AUTO_TEST_CASE(test_suite_family_delete, *utf::depends_on("HttpTestSuite/t
     wait_until([] { return false == check_for_path("/v1/suites/test/definition"); });
 }
 
-BOOST_AUTO_TEST_CASE(test_statistics, *utf::depends_on("HttpTestSuite/test_server")) {
+BOOST_AUTO_TEST_CASE(test_statistics, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_server")) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     auto response = handle_response(request("get", "/v1/statistics"));
@@ -882,5 +883,7 @@ BOOST_AUTO_TEST_CASE(test_statistics, *utf::depends_on("HttpTestSuite/test_serve
     BOOST_REQUIRE(j["num_requests"].get<int>() > 0);
     BOOST_REQUIRE(j["num_errors"].get<int>() > 0);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
