@@ -795,8 +795,7 @@ endif()
 # add all the images as dependencies of the resource file so that it is
 # automatically recompiled when an image changes
 file(GLOB image_files "${CMAKE_CURRENT_SOURCE_DIR}/../images/*.*")
-add_custom_target(Qt_resource_cpp DEPENDS ${VIEWER_RES})
-add_dependencies(Qt_resource_cpp ${image_files})
+add_custom_target(Qt_resource_cpp DEPENDS ${VIEWER_RES} ${image_files})
 
 ecbuild_add_executable(
   TARGET

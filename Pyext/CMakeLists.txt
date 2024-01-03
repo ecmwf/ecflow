@@ -196,6 +196,7 @@ else()
         find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS ${ECFLOW_BOOST_PYTHON_COMPONENT} )
 
         if (Boost_PYTHON_FOUND OR Boost_PYTHON${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR}_FOUND)
+          # Indicate that both Python and Boost.Python have been found
           set(ECF_PYTHON_FOUND "ECF_PYTHON_FOUND")
           add_subdirectory( python2 )
         else()
@@ -226,6 +227,11 @@ else()
     message( STATUS "  Python3_VERSION_MINOR             : ${Python3_VERSION_MINOR}" )
     message( STATUS "  Python3_VERSION_PATCH             : ${Python3_VERSION_PATCH}" )
 
+    # Set (deprecated) FindPython variables
+    # These need to be available, as they are used by `ecbuild_add_test(... TYPE PYTHON ...)`
+    set(PYTHONINTERP_FOUND "${Python3_Interpreter_FOUND}")
+    set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
+
     if ( Boost_MINOR_VERSION GREATER 66 )
       # cmake 3.15
       # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
@@ -235,15 +241,11 @@ else()
       set(ECFLOW_BOOST_PYTHON_COMPONENT python3)
     endif()
     find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS ${ECFLOW_BOOST_PYTHON_COMPONENT} )
-    
+
     if (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND)
-      if ( Python3_LIBRARIES )
-        ecbuild_find_python( VERSION ${Python3_VERSION} REQUIRED )
-        set(ECF_PYTHON_FOUND "ECF_PYTHON_FOUND")
-        add_subdirectory( python3 )
-      else()
-        message( STATUS "  python3 libraries *NOT* found" )
-      endif()
+      # Indicate that both Python and Boost.Python have been found
+      set(ECF_PYTHON_FOUND "ECF_PYTHON_FOUND")
+      add_subdirectory( python3 )
     else()
       message( STATUS "  Boost python3 libraries *NOT* found" )
     endif()
