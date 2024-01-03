@@ -63,6 +63,7 @@ option( ENABLE_HTTP                "Enable HTTP server (experimental)" ON  )
 option( ENABLE_UDP                 "Enable UDP server (experimental)" ON )
 option( ENABLE_DOCS                "Enable Documentation" OFF )
 
+include(Policies NO_POLICY_SCOPE)
 
 # =========================================================================================
 # Dependency: Qt
