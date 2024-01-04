@@ -16,25 +16,25 @@
 #include "ecflow/core/Converter.hpp"
 
 void BoostPythonUtil::list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec) {
-    int the_list_size = len(list);
+    auto the_list_size = len(list);
     int_vec.reserve(the_list_size);
-    for (int i = 0; i < the_list_size; ++i) {
+    for (ssize_t i = 0; i < the_list_size; ++i) {
         int_vec.push_back(boost::python::extract<int>(list[i]));
     }
 }
 
 void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vector<std::string>& vec) {
-    int the_list_size = len(list);
+    auto the_list_size = len(list);
     vec.reserve(the_list_size);
-    for (int i = 0; i < the_list_size; ++i) {
+    for (ssize_t i = 0; i < the_list_size; ++i) {
         vec.push_back(boost::python::extract<std::string>(list[i]));
     }
 }
 
 void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vector<Variable>& vec) {
-    int the_list_size = len(list);
+    auto the_list_size = len(list);
     vec.reserve(the_list_size);
-    for (int i = 0; i < the_list_size; ++i) {
+    for (ssize_t i = 0; i < the_list_size; ++i) {
         vec.push_back(boost::python::extract<Variable>(list[i]));
     }
 }
@@ -42,10 +42,10 @@ void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vect
 void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict,
                                       std::vector<std::pair<std::string, std::string>>& str_pair_vec) {
     boost::python::list keys = dict.keys();
-    const int no_of_keys     = len(keys);
+    const auto no_of_keys    = len(keys);
     str_pair_vec.reserve(no_of_keys);
 
-    for (int i = 0; i < no_of_keys; ++i) {
+    for (ssize_t i = 0; i < no_of_keys; ++i) {
 
         std::string second;
         std::string first = boost::python::extract<std::string>(keys[i]);
@@ -59,16 +59,15 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict,
         else
             throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
         str_pair_vec.emplace_back(first, second);
-        //         std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
     }
 }
 
 void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vector<Variable>& vec) {
     boost::python::list keys = dict.keys();
-    const int no_of_keys     = len(keys);
+    const auto no_of_keys    = len(keys);
     vec.reserve(no_of_keys);
 
-    for (int i = 0; i < no_of_keys; ++i) {
+    for (ssize_t i = 0; i < no_of_keys; ++i) {
 
         std::string second;
         std::string first = boost::python::extract<std::string>(keys[i]);
@@ -83,6 +82,5 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vect
             throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
 
         vec.emplace_back(first, second);
-        // std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
     }
 }
