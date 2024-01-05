@@ -27,12 +27,12 @@ namespace ecf {
 // suites (and hence handle) changed, and hence minimise the need for updates.
 
 class SuiteChanged {
-private:
+public:
+    explicit SuiteChanged(suite_ptr s);
+    // Disable copy (and move) semantics
     SuiteChanged(const SuiteChanged&)                  = delete;
     const SuiteChanged& operator=(const SuiteChanged&) = delete;
 
-public:
-    explicit SuiteChanged(suite_ptr s);
     ~SuiteChanged();
 
 private:
@@ -42,12 +42,12 @@ private:
 };
 
 class SuiteChanged0 {
-private:
+public:
+    explicit SuiteChanged0(node_ptr s);
+    // Disable copy (and move) semantics
     SuiteChanged0(const SuiteChanged0&)                  = delete;
     const SuiteChanged0& operator=(const SuiteChanged0&) = delete;
 
-public:
-    explicit SuiteChanged0(node_ptr s);
     ~SuiteChanged0();
 
 private:
@@ -59,12 +59,12 @@ private:
 
 // Faster than using node_ptr.
 class SuiteChangedPtr {
-private:
+public:
+    explicit SuiteChangedPtr(Node* s);
+    // Disable copy (and move) semantics
     SuiteChangedPtr(const SuiteChangedPtr&)                  = delete;
     const SuiteChangedPtr& operator=(const SuiteChangedPtr&) = delete;
 
-public:
-    explicit SuiteChangedPtr(Node* s);
     ~SuiteChangedPtr();
 
 private:
@@ -74,12 +74,12 @@ private:
 };
 
 class SuiteChanged1 {
-private:
+public:
+    explicit SuiteChanged1(Suite* s);
+    // Disable copy (and move) semantics
     SuiteChanged1(const SuiteChanged1&)                  = delete;
     const SuiteChanged1& operator=(const SuiteChanged1&) = delete;
 
-public:
-    explicit SuiteChanged1(Suite* s);
     ~SuiteChanged1();
 
 private:

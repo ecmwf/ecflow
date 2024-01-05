@@ -47,14 +47,14 @@ public:
           serverRunning_(serverRunning),
           forTest_(forTest) {}
 
+    // Disable copy (and move) semantics
+    CalendarUpdateParams(const CalendarUpdateParams&)                  = delete;
+    const CalendarUpdateParams& operator=(const CalendarUpdateParams&) = delete;
+
     const boost::posix_time::ptime& timeNow() const { return timeNow_; }
     const boost::posix_time::time_duration& serverPollPeriod() const { return serverPollPeriod_; }
     bool serverRunning() const { return serverRunning_; }
     bool forTest() const { return forTest_; }
-
-private:
-    CalendarUpdateParams(const CalendarUpdateParams&)                  = delete;
-    const CalendarUpdateParams& operator=(const CalendarUpdateParams&) = delete;
 
 private:
     boost::posix_time::ptime timeNow_;                  // Current time and date, not used in simulator

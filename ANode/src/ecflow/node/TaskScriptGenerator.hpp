@@ -18,12 +18,12 @@ class Task;
 namespace ecf {
 
 class TaskScriptGenerator {
-private:
-    TaskScriptGenerator(const TaskScriptGenerator&)                  = delete;
-    const TaskScriptGenerator& operator=(const TaskScriptGenerator&) = delete;
-
 public:
     explicit TaskScriptGenerator(const Task*);
+
+    // Disable copy (and move) semantics
+    TaskScriptGenerator(const TaskScriptGenerator&)                  = delete;
+    const TaskScriptGenerator& operator=(const TaskScriptGenerator&) = delete;
 
     void generate(const std::map<std::string, std::string>& override);
 

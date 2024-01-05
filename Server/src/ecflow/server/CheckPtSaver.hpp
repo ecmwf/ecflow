@@ -28,11 +28,12 @@ class BaseServer;
 ///
 
 class CheckPtSaver {
+public:
+    CheckPtSaver(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment*);
+    // Disable copy (and move) semantics
     CheckPtSaver(const CheckPtSaver&)                  = delete;
     const CheckPtSaver& operator=(const CheckPtSaver&) = delete;
 
-public:
-    CheckPtSaver(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment*);
     ~CheckPtSaver();
 
     /// Start periodical save of the checkpoint file

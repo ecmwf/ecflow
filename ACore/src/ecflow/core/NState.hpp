@@ -28,6 +28,7 @@ class access;
 class NState {
 public:
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5 };
+
     explicit NState(State s) : st_(s), state_change_no_(0) {}
     NState() : st_(default_state()) {}
     static NState::State default_state() { return NState::UNKNOWN; }

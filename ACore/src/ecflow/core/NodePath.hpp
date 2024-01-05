@@ -16,6 +16,12 @@
 
 class NodePath {
 public:
+    // Disable default construction
+    NodePath() = delete;
+    // Disable copy (and move) semantics
+    NodePath(const NodePath&)                  = delete;
+    const NodePath& operator=(const NodePath&) = delete;
+
     /// returns the path as a vector of strings, preserving the order
     /// Note: multiple path separator '/' are treated as one separator.
     /// Mimics unix path conventions. hence
@@ -33,11 +39,6 @@ public:
     /// Given a path like:   //localhost:3141/suite/family/task
     /// returns              /suite/family/task
     static std::string removeHostPortFromPath(const std::string& path);
-
-private:
-    NodePath()                                 = delete;
-    NodePath(const NodePath&)                  = delete;
-    const NodePath& operator=(const NodePath&) = delete;
 };
 
 #endif /* ecflow_core_NodePath_HPP */

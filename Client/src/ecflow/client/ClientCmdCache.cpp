@@ -10,11 +10,6 @@
 
 #include "ecflow/client/ClientCmdCache.hpp"
 
-ClientCmdCache::ClientCmdCache() {
-}
-ClientCmdCache::~ClientCmdCache() {
-}
-
 std::shared_ptr<CSyncCmd> ClientCmdCache::csync_cmd(CSyncCmd::Api api,
                                                     unsigned int client_handle,
                                                     unsigned int client_state_change_no,

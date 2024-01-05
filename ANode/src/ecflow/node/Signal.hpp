@@ -21,12 +21,11 @@
 namespace ecf {
 
 class Signal {
-private:
-    Signal(const Signal&)                  = delete;
-    const Signal& operator=(const Signal&) = delete;
-
 public:
     Signal();
+    // Disable copy (and move) semantics
+    Signal(const Signal&)                  = delete;
+    const Signal& operator=(const Signal&) = delete;
 
     /// UNBLOCK SIGCHLD at start of destructor
     /// BLOCK SIGCHLD and the end of the destructor

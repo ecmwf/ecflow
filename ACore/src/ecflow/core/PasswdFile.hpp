@@ -48,6 +48,10 @@ private:
 class PasswdFile {
 public:
     PasswdFile();
+    // Disable copy (and move) semantics
+    PasswdFile(const PasswdFile&)                  = delete;
+    const PasswdFile& operator=(const PasswdFile&) = delete;
+
     ~PasswdFile();
 
     bool empty() const { return vec_.empty(); }
@@ -84,10 +88,6 @@ public:
 private:
     bool add_user(std::vector<std::string>& tokens, std::string& error_msg);
     bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;
-
-private:
-    PasswdFile(const PasswdFile&)                  = delete;
-    const PasswdFile& operator=(const PasswdFile&) = delete;
 
 private:
     std::string passwd_file_;

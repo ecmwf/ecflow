@@ -29,11 +29,12 @@ class ServerEnvironment;
 // #define DEBUG_TRAVERSER 1
 
 class NodeTreeTraverser {
+public:
+    NodeTreeTraverser(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment& serverEnv);
+    // Disable copy (and move) semantics
     NodeTreeTraverser(const NodeTreeTraverser&)                  = delete;
     const NodeTreeTraverser& operator=(const NodeTreeTraverser&) = delete;
 
-public:
-    NodeTreeTraverser(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment& serverEnv);
     ~NodeTreeTraverser();
 
     /// If first time Starts traversing Node tree and resolving dependencies.

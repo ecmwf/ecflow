@@ -19,12 +19,11 @@
 /// This class will parse a expression and create the abstract syntax tree
 /// It will own the AST unless specifically released calling ast();
 class ExprParser {
-private:
-    ExprParser(const ExprParser&)                  = delete;
-    const ExprParser& operator=(const ExprParser&) = delete;
-
 public:
     explicit ExprParser(const std::string& expression);
+    // Disable copy (and move) semantics
+    ExprParser(const ExprParser&)                  = delete;
+    const ExprParser& operator=(const ExprParser&) = delete;
 
     /// Parse the expression, return true if parse OK false otherwise
     /// if false is returned, and error message is returned
@@ -45,12 +44,11 @@ private:
 // we will recognise very simple expression, and bypass spirit. Very limited
 // But the simple expression do form a very large subset
 class SimpleExprParser {
-private:
-    SimpleExprParser(const SimpleExprParser&)                  = delete;
-    const SimpleExprParser& operator=(const SimpleExprParser&) = delete;
-
 public:
     explicit SimpleExprParser(const std::string& expression) : expr_(expression) {}
+    // Disable copy (and move) semantics
+    SimpleExprParser(const SimpleExprParser&)                  = delete;
+    const SimpleExprParser& operator=(const SimpleExprParser&) = delete;
 
     /// Parse the expression, return true if parse OK false otherwise
     bool doParse();

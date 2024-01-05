@@ -134,12 +134,11 @@ std::ostream& operator<<(std::ostream& os, const Suite&);
 // This class helps in avoiding the creation of generated variables until required.
 // This improves client->server down load times by avoiding thousands of string constructions
 class SuiteGenVariables {
-private:
-    SuiteGenVariables(const SuiteGenVariables&)                  = delete;
-    const SuiteGenVariables& operator=(const SuiteGenVariables&) = delete;
-
 public:
     explicit SuiteGenVariables(const Suite*);
+    // Disable copy (and move) semantics
+    SuiteGenVariables(const SuiteGenVariables&)                  = delete;
+    const SuiteGenVariables& operator=(const SuiteGenVariables&) = delete;
 
     void force_update() { force_update_ = true; }
     void update_generated_variables() const;

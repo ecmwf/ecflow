@@ -167,12 +167,11 @@ private:
 // the creation of generated variables until required.
 // This improves client->server down load times by avoiding thousands of string constructions
 class SubGenVariables {
-private:
-    SubGenVariables(const SubGenVariables&)                  = delete;
-    const SubGenVariables& operator=(const SubGenVariables&) = delete;
-
 public:
     explicit SubGenVariables(const Submittable*);
+    // Disable copy (and move) semantics
+    SubGenVariables(const SubGenVariables&)                  = delete;
+    const SubGenVariables& operator=(const SubGenVariables&) = delete;
 
     void update_generated_variables() const;
 

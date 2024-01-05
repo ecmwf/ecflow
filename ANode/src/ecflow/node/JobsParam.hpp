@@ -20,10 +20,6 @@
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs or spawn jobs
 class JobsParam {
-private:
-    JobsParam(const JobsParam&)                  = delete;
-    const JobsParam& operator=(const JobsParam&) = delete;
-
 public:
     // This constructor is used in test
     explicit JobsParam(bool createJobs = false) : createJobs_(createJobs) {}
@@ -35,6 +31,10 @@ public:
         if (!createJobs_)
             spawnJobs_ = false;
     }
+
+    // Disable copy (and move) semantics
+    JobsParam(const JobsParam&)                  = delete;
+    const JobsParam& operator=(const JobsParam&) = delete;
 
     // Allow JobsParam to be re-used. Preserve cache in EcfFile. ECFLOW-1210
     void clear();

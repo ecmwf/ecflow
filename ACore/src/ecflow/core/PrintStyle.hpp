@@ -36,12 +36,15 @@ public:
         NET = 4
     };
 
-    PrintStyle()                  = delete;
-    PrintStyle(const PrintStyle&) = delete;
     explicit PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t); }
-    ~PrintStyle() { setStyle(old_style_); } // reset to old style on destruction
 
+    // Disable default construction
+    PrintStyle() = delete;
+    // Disable copy (and move) semantics
+    PrintStyle(const PrintStyle&)            = delete;
     PrintStyle& operator=(const PrintStyle&) = delete;
+
+    ~PrintStyle() { setStyle(old_style_); } // reset to old style on destruction
 
     /// We want to control the output, so that we can dump in old style defs format
     /// or choose to dump for debug.

@@ -15,17 +15,18 @@
 
 class Pid {
 public:
+    // Disable default construction
+    Pid() = delete;
+    // Disable copy (and move) semantics
+    Pid(const Pid&)                  = delete;
+    const Pid& operator=(const Pid&) = delete;
+
     /// Returns the current Process ID (as a string); otherwise, throws exception(std::runtime_error)
     static std::string getpid();
 
     /// Returns a unique name, based on Process ID, composed of prefix + '_' + getpid();
     /// otherwise, throws exception(std::runtime_error)
     static std::string unique_name(const std::string& prefix);
-
-private:
-    Pid()                            = default;
-    Pid(const Pid&)                  = delete;
-    const Pid& operator=(const Pid&) = delete;
 };
 
 #endif /* ecflow_core_Pid_HPP */

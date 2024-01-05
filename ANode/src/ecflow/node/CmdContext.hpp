@@ -20,13 +20,13 @@ namespace ecf {
 class CmdContext {
 public:
     CmdContext();
+    // Disable copy (and move) semantics
+    CmdContext(const CmdContext&)                  = delete;
+    const CmdContext& operator=(const CmdContext&) = delete;
+
     ~CmdContext();
 
     static bool in_command() { return in_command_; }
-
-private:
-    CmdContext(const CmdContext&)                  = delete;
-    const CmdContext& operator=(const CmdContext&) = delete;
 
 private:
     static bool in_command_;

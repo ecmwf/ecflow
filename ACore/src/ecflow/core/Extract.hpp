@@ -16,6 +16,12 @@
 
 class Extract {
 public:
+    // Disable default construction
+    Extract() = delete;
+    // Disable copy (and move) semantics
+    Extract(const Extract&)                  = delete;
+    const Extract& operator=(const Extract&) = delete;
+
     ///
     /// Extract path and name from given token.
     ///
@@ -72,11 +78,6 @@ public:
     /// @throws std::runtime_error if extractions fails, with the provided error message included in exception message
     ///
     static int optionalInt(const std::vector<std::string>& tokens, int pos, int defValue, const std::string& errorMsg);
-
-private:
-    Extract()                                = delete;
-    Extract(const Extract&)                  = delete;
-    const Extract& operator=(const Extract&) = delete;
 };
 
 #endif /* ecflow_core_Extract_HPP */

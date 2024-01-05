@@ -19,6 +19,10 @@ namespace ecf {
 class File_r {
 public:
     explicit File_r(const std::string& file_name);
+    // Disable copy (and move) semantics
+    File_r(const File_r&)                  = delete;
+    const File_r& operator=(const File_r&) = delete;
+
     ~File_r();
 
     bool ok() const { return (fp_) ? true : false; }
@@ -30,9 +34,6 @@ public:
     const std::string& file_name() const { return file_name_; }
 
 private:
-    File_r(const File_r&)                  = delete;
-    const File_r& operator=(const File_r&) = delete;
-
     std::string file_name_;
     std::ifstream fp_;
 };

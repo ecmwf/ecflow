@@ -64,7 +64,7 @@ void export_Core() {
         .def("__str__", &Edit::to_string)              // __str__
         ;
 
-    class_<File, boost::noncopyable>("File", "Utility class, Used in test only.")
+    class_<File, boost::noncopyable>("File", "Utility class, Used in test only.", no_init)
         .def("find_server", &File::find_ecf_server_path, "Provides pathname to the server")
         .staticmethod("find_server")
         .def("find_client", &File::find_ecf_client_path, "Provides pathname to the client")

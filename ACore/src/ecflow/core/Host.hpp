@@ -21,6 +21,10 @@ public:
     Host();
     explicit Host(const std::string& host);
 
+    // Disable copy (and move) semantics
+    Host(const Host&)                  = delete;
+    const Host& operator=(const Host&) = delete;
+
     /// return the host name
     std::string name() const;
 
@@ -44,10 +48,6 @@ public:
 
     /// Given a port and file name, will return <host>.<port>.file_name
     std::string prefix_host_and_port(const std::string& port, const std::string& file_name) const;
-
-private:
-    Host(const Host&)                  = delete;
-    const Host& operator=(const Host&) = delete;
 
 private:
     std::string host_port_prefix(const std::string& port) const;

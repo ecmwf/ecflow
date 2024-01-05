@@ -27,6 +27,12 @@ namespace ecf {
 
 class Version {
 public:
+    // Disable default construction
+    Version() = delete;
+    // Disable copy (and move) semantics
+    Version(const Version&)                  = delete;
+    const Version& operator=(const Version&) = delete;
+
     /// Outputs a string of the form:
     /// ECF <tag> version release_.major_.minor_
     static std::string description();
@@ -39,13 +45,8 @@ public:
     static std::string raw();
 
 private:
-    Version()                                = delete;
-    Version(const Version&)                  = delete;
-    const Version& operator=(const Version&) = delete;
-
     static const std::string TAG; // alpha, beta, release
 
-private:
     /// return version of the boost library
     static std::string boost();
 

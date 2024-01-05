@@ -18,6 +18,12 @@ namespace ecf {
 
 class LogVerification {
 public:
+    // Disable default construction
+    LogVerification() = delete;
+    // Disable copy (and move) semantics
+    LogVerification(const LogVerification&)                  = delete;
+    const LogVerification& operator=(const LogVerification&) = delete;
+
     /// Given a log file, extract in order. The node_path and the state
     static bool extractNodePathAndState(const std::string& logfile,
                                         std::vector<std::pair<std::string, std::string>>& pathStateVec,
@@ -28,11 +34,6 @@ public:
     /// Compensate for states that are scheduler dependent
     static bool
     compareNodeStates(const std::string& logfile, const std::string& goldenRefLogFile, std::string& errorMsg);
-
-private:
-    LogVerification()                                        = default;
-    LogVerification(const LogVerification&)                  = delete;
-    const LogVerification& operator=(const LogVerification&) = delete;
 };
 
 } // namespace ecf
