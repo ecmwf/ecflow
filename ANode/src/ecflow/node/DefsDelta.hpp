@@ -35,14 +35,13 @@ class access;
 }
 
 class DefsDelta {
-private:
-    DefsDelta(const DefsDelta&)                  = delete;
-    const DefsDelta& operator=(const DefsDelta&) = delete;
-
 public:
     ///=========================================================================
     /// *Server side*
     explicit DefsDelta(unsigned int client_state_change_no) : client_state_change_no_(client_state_change_no) {}
+    // Disable copy (and move) semantics
+    DefsDelta(const DefsDelta&)                  = delete;
+    const DefsDelta& operator=(const DefsDelta&) = delete;
 
     /// This class can be re-used hence init() should reset all data members
     void init(unsigned int client_state_change_no, bool sync_suite_clock);

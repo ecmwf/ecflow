@@ -39,6 +39,9 @@ class Defs;
 class ClientSuiteMgr {
 public:
     explicit ClientSuiteMgr(Defs*);
+    // Disable copy (and move) semantics
+    ClientSuiteMgr(const ClientSuiteMgr&)                  = delete;
+    const ClientSuiteMgr& operator=(const ClientSuiteMgr&) = delete;
 
     /// Create a client suite, and return the handle associated with the created object
     unsigned int
@@ -106,10 +109,6 @@ public:
 
     /// For debug dumps
     std::string dump() const;
-
-private:
-    ClientSuiteMgr(const ClientSuiteMgr&)                  = delete;
-    const ClientSuiteMgr& operator=(const ClientSuiteMgr&) = delete;
 
 private:
     std::vector<ecf::ClientSuites> clientSuites_;

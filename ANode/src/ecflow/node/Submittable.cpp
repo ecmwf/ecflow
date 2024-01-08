@@ -663,12 +663,12 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
 }
 
 class JobCreationTimer {
-private:
+public:
+    explicit JobCreationTimer(Submittable* sub) : enabled_(false), failed_(false), sub_(sub) {}
+    // Disable copy (and move) semantics
     JobCreationTimer(const JobCreationTimer&)                  = delete;
     const JobCreationTimer& operator=(const JobCreationTimer&) = delete;
 
-public:
-    explicit JobCreationTimer(Submittable* sub) : enabled_(false), failed_(false), sub_(sub) {}
     ~JobCreationTimer() {
         if (enabled_) {
             std::cout << " " << sub_->absNodePath();
@@ -680,10 +680,12 @@ public:
             }
         }
     }
+
     void set_enabled() {
         enabled_ = true;
         start_   = Calendar::second_clock_time();
     }
+
     void set_failed() { failed_ = true; }
 
 private:

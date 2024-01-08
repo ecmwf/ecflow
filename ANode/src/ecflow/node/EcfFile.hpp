@@ -21,13 +21,14 @@
 // When job processing the same include file can be opened and closed many time
 // This cache serves to open the include file only once. It halves the job processing time.
 class IncludeFileCache {
-private:
+public:
+    explicit IncludeFileCache(const std::string& path);
+    // Disable copy (and move) semantics
     IncludeFileCache(const IncludeFileCache&)                  = delete;
     const IncludeFileCache& operator=(const IncludeFileCache&) = delete;
 
-public:
-    explicit IncludeFileCache(const std::string& path);
     ~IncludeFileCache();
+
     const std::string& path() const { return path_; }
     bool lines(std::vector<std::string>&);
 
@@ -189,12 +190,12 @@ private:
 // This class is used in expanding(pre-processing) the includes.
 // The pre-processing is done in a depth first fashion (ECFLOW-673)
 class PreProcessor {
-private:
+public:
+    explicit PreProcessor(EcfFile*, const char* error_context);
+    // Disable copy (and move) semantics
     PreProcessor(const PreProcessor&)                  = delete;
     const PreProcessor& operator=(const PreProcessor&) = delete;
 
-public:
-    explicit PreProcessor(EcfFile*, const char* error_context);
     ~PreProcessor();
 
     void preProcess(std::vector<std::string>& script_lines);

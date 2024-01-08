@@ -29,6 +29,12 @@
 //
 class Ecf {
 public:
+    // Disable default construction
+    Ecf() = delete;
+    // Disable copy (and move) semantics
+    Ecf(const Ecf&)                  = delete;
+    const Ecf& operator=(const Ecf&) = delete;
+
     /// Increment and then return state change no
     static unsigned int incr_state_change_no();
     static unsigned int state_change_no() { return state_change_no_; }
@@ -71,10 +77,6 @@ public:
     static const std::string& URL();
 
 private:
-    Ecf()                            = default;
-    Ecf(const Ecf&)                  = delete;
-    const Ecf& operator=(const Ecf&) = delete;
-
     static bool server_;
     static bool debug_equality_;
     static unsigned int debug_level_;
@@ -96,16 +98,19 @@ private:
 class DebugEquality {
 public:
     DebugEquality() { Ecf::set_debug_equality(true); }
+    // Disable copy (and move) semantics
+    DebugEquality(const DebugEquality&)                  = delete;
+    const DebugEquality& operator=(const DebugEquality&) = delete;
+
     ~DebugEquality() {
         Ecf::set_debug_equality(false);
         set_ignore_server_variables(false);
     }
+
     static bool ignore_server_variables() { return ignore_server_variables_; }
     static void set_ignore_server_variables(bool flg) { ignore_server_variables_ = flg; }
 
 private:
-    DebugEquality(const DebugEquality&)                  = delete;
-    const DebugEquality& operator=(const DebugEquality&) = delete;
     static bool ignore_server_variables_;
 };
 

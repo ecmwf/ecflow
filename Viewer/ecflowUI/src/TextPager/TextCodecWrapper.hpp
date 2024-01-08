@@ -17,7 +17,7 @@
 
 class TextCodecWrapper {
 public:
-    TextCodecWrapper(QStringConverter::Encoding e = QStringConverter::System) : value_{e} {}
+    explicit TextCodecWrapper(QStringConverter::Encoding e = QStringConverter::System) : value_{e} {}
     QStringConverter::Encoding value() const { return value_; }
     bool hasValue() const { return true; }
     static auto fromName(const QByteArray& codecName) {

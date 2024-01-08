@@ -44,7 +44,9 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const { client.user_update_meter(path_, name_, std::to_string(value_)); };
+    void actually_execute(const ClientAPI& client) const {
+        client.user_update_meter(path_, name_, std::to_string(value_));
+    };
 
     static constexpr const char* COMMAND_TAG = "alter_meter";
 
@@ -61,7 +63,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{std::move(value)} {};
-    void actually_execute(ClientAPI& client) const { client.user_update_label(path_, name_, value_); };
+    void actually_execute(const ClientAPI& client) const { client.user_update_label(path_, name_, value_); };
 
     static constexpr const char* COMMAND_TAG = "alter_label";
 
@@ -78,7 +80,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const {
+    void actually_execute(const ClientAPI& client) const {
         if (value_) {
             client.user_set_event(path_, name_);
         }
@@ -102,7 +104,9 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const { client.child_update_meter(path_, name_, std::to_string(value_)); };
+    void actually_execute(const ClientAPI& client) const {
+        client.child_update_meter(path_, name_, std::to_string(value_));
+    };
 
     static constexpr const char* COMMAND_TAG = "meter";
 
@@ -119,7 +123,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{std::move(value)} {};
-    void actually_execute(ClientAPI& client) const { client.child_update_label(path_, name_, value_); };
+    void actually_execute(const ClientAPI& client) const { client.child_update_label(path_, name_, value_); };
 
     static constexpr const char* COMMAND_TAG = "label";
 
@@ -136,7 +140,7 @@ public:
         : path_{std::move(path)},
           name_{std::move(name)},
           value_{value} {};
-    void actually_execute(ClientAPI& client) const {
+    void actually_execute(const ClientAPI& client) const {
         if (value_) {
             client.child_set_event(path_, name_);
         }
@@ -156,7 +160,12 @@ private:
 /// The actual (type erased) `command`
 class Command {
 public:
-    Command(Command&& rhs) noexcept : impl_{std::move(rhs.impl_)} {}
+    //
+    // (1) Declaring a user-defined constructor effectively disables a default constructor
+    // (2) Since the std::unique_ptr data member has a deleted copy-constructor,
+    //     the implicitly deplared copy-constructor of Command is also deleted
+    // (3) An implicitly declared move-constructor makes Command a move-only class
+    //
 
     template <typename COMMAND, typename... ARGS>
     static Command make_command(ARGS&&... args) {
@@ -174,7 +183,7 @@ private:
 /// The `command` build interface
 class CommandBuilder {
 public:
-    virtual ~CommandBuilder(){};
+    virtual ~CommandBuilder()                 = default;
     virtual const char* name()                = 0;
     virtual Command build(nlohmann::json obj) = 0;
 };
@@ -248,7 +257,7 @@ public:
         std::string path  = obj.at("path");
         std::string value = obj.at("value");
 
-        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to label ", path, ":", name, " to value: ", value);
+        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to label ", path, ":", name, " to value: ", value)
 
         return Command::make_command<CommandChildUpdateLabel>(path, name, value);
     }
@@ -267,7 +276,7 @@ public:
 
         auto meter_value = ecf::convert_to<int>(value);
 
-        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to meter ", path, ":", name, " to value: ", meter_value);
+        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to meter ", path, ":", name, " to value: ", meter_value)
 
         return Command::make_command<CommandChildUpdateMeter>(path, name, meter_value);
     }
@@ -295,7 +304,7 @@ public:
             throw std::runtime_error("Unexpected Event value");
         }
 
-        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to event ", path, ":", name, " to value: ", event_value);
+        TRACE_NFO("CommandChildUpdateLabelBuilder", "update to event ", path, ":", name, " to value: ", event_value)
 
         return Command::make_command<CommandChildUpdateEvent>(path, name, event_value);
     }
@@ -367,7 +376,7 @@ public:
             return;
         }
 
-        TRACE_NFO("JSONRequestHandler", "request handled successfully");
+        TRACE_NFO("JSONRequestHandler", "request handled successfully")
     }
 
     void configure_authentication(const nlohmann::json& header) {
@@ -403,17 +412,17 @@ private:
 
 void RequestHandler::handle(const RequestHandler::inbound_t& request) const {
     try {
-        TRACE_NFO("RequestHandler", "Processing request: ", request);
+        TRACE_NFO("RequestHandler", "Processing request: ", request)
 
         nlohmann::json inbound = nlohmann::json::parse(request);
         JSONRequestHandler handler;
         handler.handle(inbound);
     }
     catch (nlohmann::json::exception& e) {
-        TRACE_ERR("RequestHandler", "Unable to parse JSON request");
+        TRACE_ERR("RequestHandler", "Unable to parse JSON request")
     }
     catch (...) {
-        TRACE_ERR("RequestHandler", "Unknown error detected");
+        TRACE_ERR("RequestHandler", "Unknown error detected")
     }
 }
 

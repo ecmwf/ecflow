@@ -53,7 +53,7 @@ class TextPagerDocument : public QObject {
     Q_FLAGS(FindMode)
 
 public:
-    TextPagerDocument(QObject* parent = nullptr);
+    explicit TextPagerDocument(QObject* parent = nullptr);
     ~TextPagerDocument() override;
 
     enum DeviceMode { Sparse, LoadAll };
@@ -80,8 +80,8 @@ public:
     inline bool load(const QString& fileName, DeviceMode mode, const QByteArray& codecName) {
         return load(fileName, mode, TextCodecWrapper::fromName(codecName));
     }
-    bool load(QIODevice* device, DeviceMode mode = Sparse, TextCodecWrapper = {});
-    bool load(const QString& fileName, DeviceMode mode = Sparse, TextCodecWrapper = {});
+    bool load(QIODevice* device, DeviceMode mode = Sparse, TextCodecWrapper = TextCodecWrapper{});
+    bool load(const QString& fileName, DeviceMode mode = Sparse, TextCodecWrapper = TextCodecWrapper{});
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     //    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName)

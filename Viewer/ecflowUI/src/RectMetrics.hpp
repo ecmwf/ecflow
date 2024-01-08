@@ -13,7 +13,7 @@
 
 class RectMetrics {
 public:
-    RectMetrics(int penWidth);
+    explicit RectMetrics(int penWidth);
     int topOffset() const { return topOffset_; }
     int bottomOffset() const { return bottomOffset_; }
 

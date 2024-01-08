@@ -25,7 +25,7 @@ class TreeNodeWidget : public NodeWidget, public VPropertyObserver, protected Ui
     Q_OBJECT
 
 public:
-    TreeNodeWidget(ServerFilter*, QWidget* parent = nullptr);
+    explicit TreeNodeWidget(ServerFilter*, QWidget* parent = nullptr);
     ~TreeNodeWidget() override;
 
     void populateDockTitleBar(DashboardDockTitleWidget* tw) override;

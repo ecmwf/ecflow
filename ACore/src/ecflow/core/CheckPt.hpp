@@ -26,16 +26,17 @@ public:
     /// UNDEFINED   - Internal use only
     enum Mode { NEVER, ON_TIME, ALWAYS, UNDEFINED };
 
+    // Disable default construction
+    CheckPt() = delete;
+    // Disable copy (and move) semantics
+    CheckPt(const CheckPt&)                  = delete;
+    const CheckPt& operator=(const CheckPt&) = delete;
+
     /// The interval between automatic saves of check point by server
     static int default_interval() { return 120; }
 
     /// If saving check point takes longer than the alarm time, raise late flag on the server
     static int default_save_time_alarm() { return 20; }
-
-private:
-    CheckPt()                                = delete;
-    CheckPt(const CheckPt&)                  = delete;
-    const CheckPt& operator=(const CheckPt&) = delete;
 };
 
 } // namespace ecf

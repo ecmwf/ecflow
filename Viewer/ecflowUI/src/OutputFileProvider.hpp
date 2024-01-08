@@ -31,7 +31,7 @@ struct OutputCacheItem;
 
 class OutputFileFetchServerTask : public AbstractFetchTask {
 public:
-    OutputFileFetchServerTask(FetchQueueOwner* owner);
+    explicit OutputFileFetchServerTask(FetchQueueOwner* owner);
     void run() override;
     void setFileProvider(OutputFileProvider* p) { fileProvider_ = p; }
 

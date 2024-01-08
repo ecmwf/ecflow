@@ -56,8 +56,9 @@ public:
         GENERIC
     };
 
-private:
-    Aspect()                               = delete;
+    // Disable default construction
+    Aspect() = delete;
+    // Disable copy (and move) semantics
     Aspect(const Aspect&)                  = delete;
     const Aspect& operator=(const Aspect&) = delete;
 };

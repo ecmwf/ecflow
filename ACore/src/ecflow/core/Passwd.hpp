@@ -30,13 +30,14 @@
 
 class Passwd {
 public:
-    /// generate a random password
-    static std::string generate();
-
-private:
-    Passwd()                               = delete;
+    // Disable default construction
+    Passwd() = delete;
+    // Disable copy (and move) semantics
     Passwd(const Passwd&)                  = delete;
     const Passwd& operator=(const Passwd&) = delete;
+
+    /// generate a random password
+    static std::string generate();
 };
 
 #endif /* ecflow_core_Passwd_HPP */

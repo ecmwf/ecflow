@@ -35,6 +35,12 @@ public:
         NOT_SET
     };
 
+    // Disable default construction
+    Child() = delete;
+    // Disable copy (and move) semantics
+    Child(const Child&)                  = delete;
+    const Child& operator=(const Child&) = delete;
+
     static std::string to_string(ZombieType);
     static bool valid_zombie_type(const std::string&);
     static ZombieType zombie_type(const std::string&);
@@ -49,11 +55,6 @@ public:
     /// Expect a , separated string
     static bool valid_child_cmds(const std::string&);
     static bool valid_child_cmd(const std::string&);
-
-private:
-    Child()                              = delete;
-    Child(const Child&)                  = delete;
-    const Child& operator=(const Child&) = delete;
 };
 
 } // namespace ecf

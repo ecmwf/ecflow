@@ -36,7 +36,7 @@ QDebug& operator<<(QDebug& str, const QTextLine& line);
 
 class TextDocumentBuffer {
 public:
-    TextDocumentBuffer(TextPagerDocument* doc) : document(doc), bufferPosition(0) {}
+    explicit TextDocumentBuffer(TextPagerDocument* doc) : document(doc), bufferPosition(0) {}
     virtual ~TextDocumentBuffer() = default;
 
     inline QString bufferRead(int from, int size) const {
@@ -67,7 +67,7 @@ class TextPagerEdit;
 class TextPagerLayout : public TextDocumentBuffer {
 public:
     enum { MinimumBufferSize = 90000, LeftMargin = 3 };
-    TextPagerLayout(TextPagerDocument* doc = nullptr) : TextDocumentBuffer(doc) {}
+    explicit TextPagerLayout(TextPagerDocument* doc = nullptr) : TextDocumentBuffer(doc) {}
 
     ~TextPagerLayout() override {
         qDeleteAll(textLayouts);

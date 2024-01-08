@@ -27,7 +27,7 @@ class NodeQueryComboOption;
 
 class NodeQueryOption {
 public:
-    NodeQueryOption(VProperty*);
+    explicit NodeQueryOption(VProperty*);
     virtual ~NodeQueryOption() = default;
 
     QString type() const { return type_; }
@@ -60,7 +60,7 @@ protected:
 
 class NodeQueryStringOption : public NodeQueryOption {
 public:
-    NodeQueryStringOption(VProperty*);
+    explicit NodeQueryStringOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -92,7 +92,7 @@ protected:
 
 class NodeQueryListOption : public NodeQueryOption {
 public:
-    NodeQueryListOption(VProperty*);
+    explicit NodeQueryListOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -116,7 +116,7 @@ protected:
 
 class NodeQueryComboOption : public NodeQueryOption {
 public:
-    NodeQueryComboOption(VProperty*);
+    explicit NodeQueryComboOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -140,7 +140,7 @@ protected:
 
 class NodeQueryPeriodOption : public NodeQueryOption {
 public:
-    NodeQueryPeriodOption(VProperty*);
+    explicit NodeQueryPeriodOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 

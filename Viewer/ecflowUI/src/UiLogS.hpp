@@ -24,7 +24,7 @@ public:
 
 class UiLogS : public UiLog {
 public:
-    UiLogS(ServerHandler* server);
+    explicit UiLogS(ServerHandler* server);
 };
 
 #endif /* ecflow_viewer_UiLogS_HPP */

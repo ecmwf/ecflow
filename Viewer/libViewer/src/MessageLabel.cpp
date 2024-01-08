@@ -151,7 +151,7 @@ void MessageLabelProgWidget::progress(QString text, int value) {
 }
 
 void MessageLabelProgWidget::startDelayedProgress(QString infoText, int max) {
-    delayedProgressDef_ = {infoText, max};
+    delayedProgressDef_ = DelayedProgressDef{infoText, max};
     delayedProgressTimer_->stop();
     delayedProgressTimer_->start();
 }

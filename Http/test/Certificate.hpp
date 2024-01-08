@@ -26,7 +26,7 @@
 class Certificate {
 public:
     Certificate() = delete;
-    Certificate(const std::string& path);
+    explicit Certificate(const std::string& path);
     ~Certificate();
 
 private:

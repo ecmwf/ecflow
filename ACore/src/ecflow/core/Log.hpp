@@ -47,9 +47,14 @@ class LogImpl;
 class Log {
 public:
     enum LogType { MSG, LOG, ERR, WAR, DBG, OTH };
+
     static void create(const std::string& filename);
     static void destroy();
     static Log* instance() { return instance_; }
+
+    // Disable copy (and move) semantics
+    Log(const Log&)                  = delete;
+    const Log& operator=(const Log&) = delete;
 
     /// If file is closed will open it
     /// Outputs t the file a message of type XXX:[HH:MM:SS D.M.YYYY] message
@@ -110,10 +115,6 @@ private:
     void create_logimpl();
 
 private:
-    Log(const Log&)                  = delete;
-    const Log& operator=(const Log&) = delete;
-
-private:
     explicit Log(const std::string& fileName);
     static Log* instance_;
 
@@ -126,23 +127,25 @@ private:
 class LogFlusher {
 public:
     LogFlusher() = default;
-    ~LogFlusher();
-
-private:
+    // Disable copy (and move) semantics
     LogFlusher(const LogFlusher&)                  = delete;
     const LogFlusher& operator=(const LogFlusher&) = delete;
+
+    ~LogFlusher();
 };
 
 class LogTimer {
 public:
-    LogTimer(const char* msg) : msg_(msg) {}
+    explicit LogTimer(const char* msg) : msg_(msg) {}
+    // Disable copy (and move) semantics
+    LogTimer(const LogTimer&)                  = delete;
+    const LogTimer& operator=(const LogTimer&) = delete;
+
     ~LogTimer();
 
 private:
     const char* msg_;
     DurationTimer timer_;
-    LogTimer(const LogTimer&)                  = delete;
-    const LogTimer& operator=(const LogTimer&) = delete;
 };
 
 /// The LogImpl allows the ofstream object to be closed, and so provide strongest
@@ -152,6 +155,10 @@ private:
 class LogImpl {
 public:
     explicit LogImpl(const std::string& filename);
+    // Disable copy (and move) semantics
+    LogImpl(const LogImpl&)                  = delete;
+    const LogImpl& operator=(const LogImpl&) = delete;
+
     ~LogImpl();
 
     bool log(Log::LogType lt, const std::string& message) { return do_log(lt, message, true); }
@@ -168,11 +175,6 @@ public:
 private:
     bool do_log(Log::LogType, const std::string& message, bool newline);
 
-private:
-    LogImpl(const LogImpl&)                  = delete;
-    const LogImpl& operator=(const LogImpl&) = delete;
-
-private:
     std::string time_stamp_;
     std::string log_type_and_time_stamp_; // re-use memory
     std::string log_open_error_;
@@ -183,7 +185,7 @@ private:
 /// Utility class used for test, since server assumes log is always present
 class TestLog {
 public:
-    TestLog(const std::string& log_path);
+    explicit TestLog(const std::string& log_path);
     ~TestLog();
 
 private:
@@ -194,12 +196,15 @@ private:
 class LogToCout {
 public:
     LogToCout() { flag_ = true; }
+    // Disable copy (and move) semantics
+    LogToCout(const LogToCout&)                  = delete;
+    const LogToCout& operator=(const LogToCout&) = delete;
+
     ~LogToCout() { flag_ = false; }
+
     static bool ok() { return flag_; }
 
 private:
-    LogToCout(const LogToCout&)                  = delete;
-    const LogToCout& operator=(const LogToCout&) = delete;
     static bool flag_;
 };
 

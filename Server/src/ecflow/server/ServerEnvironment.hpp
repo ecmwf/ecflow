@@ -43,12 +43,13 @@ public:
 };
 
 class ServerEnvironment {
-    ServerEnvironment(const ServerEnvironment&)                  = delete;
-    const ServerEnvironment& operator=(const ServerEnvironment&) = delete;
-
 public:
     ServerEnvironment(int argc, char* argv[]);
     ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file); // *only used in test*
+    // Disable copy (and move) semantics
+    ServerEnvironment(const ServerEnvironment&)                  = delete;
+    const ServerEnvironment& operator=(const ServerEnvironment&) = delete;
+
     ~ServerEnvironment();
 
     /// return true if option are valid false and error message otherwise

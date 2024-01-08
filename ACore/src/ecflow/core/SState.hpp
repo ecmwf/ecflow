@@ -23,6 +23,12 @@ public:
     /// HALTED       yes               no               no             no
     enum State { HALTED, SHUTDOWN, RUNNING };
 
+    // Disable default construction
+    SState() = delete;
+    // Disable copy (and move) semantics
+    SState(const SState&)                  = delete;
+    const SState& operator=(const SState&) = delete;
+
     /// Given an integer return the server state as a string.
     /// if int is not  0,1,2 return "UNKNOWN
     static std::string to_string(int status);
@@ -30,11 +36,6 @@ public:
 
     static SState::State toState(const std::string&);
     static bool isValid(const std::string&);
-
-private:
-    SState()                               = delete;
-    SState(const SState&)                  = delete;
-    const SState& operator=(const SState&) = delete;
 };
 
 #endif /* ecflow_core_SState_HPP */

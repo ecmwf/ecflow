@@ -40,7 +40,7 @@ namespace version_new_data_member {
 class X {
 public:
     static std::string type() { return "X"; }
-    X(int h = 0, int m = 0) : hour_(h), min_(m) {}
+    explicit X(int h = 0, int m = 0) : hour_(h), min_(m) {}
     bool operator==(const X& rhs) const { return hour_ == rhs.hour_ && min_ == rhs.min_; }
 
 private:

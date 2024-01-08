@@ -175,7 +175,7 @@ public:
 
 class StringMatchBase {
 public:
-    StringMatchBase(bool caseSensitive) { caseSensitive_ = caseSensitive; }
+    explicit StringMatchBase(bool caseSensitive) { caseSensitive_ = caseSensitive; }
     virtual ~StringMatchBase() = default;
 
     virtual bool match(std::string searchFor, std::string searchIn) = 0;
@@ -186,7 +186,7 @@ protected:
 
 class StringMatchExact : public StringMatchBase {
 public:
-    StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchExact() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -194,7 +194,7 @@ public:
 
 class StringMatchContains : public StringMatchBase {
 public:
-    StringMatchContains(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchContains(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchContains() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -202,7 +202,7 @@ public:
 
 class StringMatchWildcard : public StringMatchBase {
 public:
-    StringMatchWildcard(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchWildcard(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchWildcard() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -210,7 +210,7 @@ public:
 
 class StringMatchRegexp : public StringMatchBase {
 public:
-    StringMatchRegexp(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchRegexp(bool caseSensitive) : StringMatchBase(caseSensitive) {}
     ~StringMatchRegexp() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;

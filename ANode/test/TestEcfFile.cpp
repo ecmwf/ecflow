@@ -1657,7 +1657,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include_with_dollar) {
     EcfFile ecf(t1.get(), ecf_file_location);
 
     auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
-    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1u);
     BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
 }
 
@@ -1672,7 +1672,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include) {
     EcfFile ecf(t1.get(), ecf_file_location);
 
     auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
-    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1u);
     BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
 }
 
@@ -1687,7 +1687,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_multiple_ecf_include) {
     EcfFile ecf(t1.get(), location);
 
     auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
-    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 2);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 2u);
     BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
     BOOST_REQUIRE_EQUAL(ecf_include_paths[1], "/path/to/core/more");
 }

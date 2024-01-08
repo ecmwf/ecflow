@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(T_CustomUser)
 
 class Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env {
 public:
-    Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env(const std::string& passwd_file)
+    explicit Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env(const std::string& passwd_file)
         : ecf_passwd_("ECF_CUSTOM_PASSWD="),
           ecf_user_("ECF_USER=") {
         ecf_passwd_ += passwd_file;

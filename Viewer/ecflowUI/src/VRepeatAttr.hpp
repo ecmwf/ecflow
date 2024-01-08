@@ -46,7 +46,7 @@ private:
 
 class VRepeatAttr : public VAttribute {
 public:
-    VRepeatAttr(VNode* parent);
+    explicit VRepeatAttr(VNode* parent);
 
     int startIndex() const { return 0; }
     virtual int endIndex() const       = 0;
@@ -68,7 +68,7 @@ public:
 
 class VRepeatDateAttr : public VRepeatAttr {
 public:
-    VRepeatDateAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDateAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -83,7 +83,7 @@ protected:
 
 class VRepeatDateListAttr : public VRepeatAttr {
 public:
-    VRepeatDateListAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDateListAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -99,7 +99,7 @@ protected:
 
 class VRepeatDayAttr : public VRepeatAttr {
 public:
-    VRepeatDayAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDayAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override { return 0; }
     int currentIndex() const override { return 0; }
     QString startValue() const override;
@@ -114,7 +114,7 @@ protected:
 
 class VRepeatIntAttr : public VRepeatAttr {
 public:
-    VRepeatIntAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatIntAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -129,7 +129,7 @@ protected:
 
 class VRepeatEnumAttr : public VRepeatAttr {
 public:
-    VRepeatEnumAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatEnumAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -145,7 +145,7 @@ protected:
 
 class VRepeatStringAttr : public VRepeatAttr {
 public:
-    VRepeatStringAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatStringAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;

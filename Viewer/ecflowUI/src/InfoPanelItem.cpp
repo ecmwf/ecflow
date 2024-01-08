@@ -189,7 +189,7 @@ void InfoPanelItem::setFrozen(bool b) {
         return;
 
     // We update the derived class
-    updateState(FrozenChanged);
+    updateState(ChangeFlags(FrozenChanged));
 }
 
 void InfoPanelItem::setDetached(bool b, bool update) {
@@ -200,7 +200,7 @@ void InfoPanelItem::setDetached(bool b, bool update) {
             return;
 
         // We update the derived class
-        updateState(DetachedChanged);
+        updateState(ChangeFlags(DetachedChanged));
     }
 }
 

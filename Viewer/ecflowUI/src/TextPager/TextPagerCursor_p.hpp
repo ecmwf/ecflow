@@ -174,7 +174,7 @@ private Q_SLOTS:
     }
 
 private:
-    TextLayoutCacheManager(QObject* parent) : QObject(parent) {
+    explicit TextLayoutCacheManager(QObject* parent) : QObject(parent) {
         maxLayouts = qMax(1, qgetenv("TEXTCURSOR_MAX_CACHED_TEXTLAYOUTS").toInt());
     }
 

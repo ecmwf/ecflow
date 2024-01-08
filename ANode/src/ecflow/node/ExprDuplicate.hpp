@@ -27,11 +27,12 @@ class AstTop;
 // reclaim memory allocated in map, Avoid valgrind errors
 class ExprDuplicate {
 private:
+public:
+    ExprDuplicate() = default;
+    // Disable copy (and move) semantics
     ExprDuplicate(const ExprDuplicate&)                  = delete;
     const ExprDuplicate& operator=(const ExprDuplicate&) = delete;
 
-public:
-    ExprDuplicate() = default;
     ~ExprDuplicate();
 
     // for debug only

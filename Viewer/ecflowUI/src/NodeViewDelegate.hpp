@@ -132,7 +132,7 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 
 class LabelStyle {
 public:
-    LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
+    explicit LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
     void update();
 
     bool alwaysEnabled_;

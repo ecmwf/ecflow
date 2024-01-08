@@ -50,7 +50,7 @@ struct LastPageCache
 class TextEditPrivate : public QObject, public TextPagerLayout {
     Q_OBJECT
 public:
-    TextEditPrivate(TextPagerEdit* qptr)
+    explicit TextEditPrivate(TextPagerEdit* qptr)
         : requestedScrollBarPosition(-1),
           lastRequestedScrollBarPosition(-1),
           cursorWidth(2),

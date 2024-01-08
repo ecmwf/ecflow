@@ -34,7 +34,7 @@ public:
     /// An SSL server with the SSLv23 method can understand any of the SSLv2, SSLv3, and TLSv1 hello messages.
     /// However, the SSL client using the SSLv23 method cannot establish connection with the SSL server
     ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
-    Openssl() {}
+    Openssl() = default;
 
     const std::string& ssl() const { return ssl_; }
     bool enabled() const { return !ssl_.empty(); }

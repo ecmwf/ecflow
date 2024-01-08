@@ -20,12 +20,11 @@
 class ServerEnvironment;
 
 class ServerOptions {
-private:
-    ServerOptions(const ServerOptions&)                  = delete;
-    const ServerOptions& operator=(const ServerOptions&) = delete;
-
 public:
     ServerOptions(int argc, char* argv[], ServerEnvironment*);
+    // Disable copy (and move) semantics
+    ServerOptions(const ServerOptions&)                  = delete;
+    const ServerOptions& operator=(const ServerOptions&) = delete;
 
     /// return true if help selected, else false
     bool help_option() const;

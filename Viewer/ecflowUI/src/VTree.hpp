@@ -83,7 +83,7 @@ class VTree : public VTreeNode {
     friend class VTreeServer;
 
 public:
-    VTree(VTreeServer*);
+    explicit VTree(VTreeServer*);
     ~VTree() override;
 
     VTreeNode* find(const VNode*) const;

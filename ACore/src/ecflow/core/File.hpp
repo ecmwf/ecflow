@@ -25,9 +25,10 @@ namespace ecf {
 
 class File {
 public:
-    File()            = default;
-    File(const File&) = delete;
-
+    // Disable default construction
+    File() = delete;
+    // Disable copy (and move) semantics
+    File(const File&)            = delete;
     File& operator=(const File&) = delete;
 
     static size_t MAX_LINES();            //  max number of lines, default to 10000

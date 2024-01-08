@@ -60,6 +60,12 @@ static std::vector<std::string> transform_to_name_vector(const std::vector<T>& i
 
 class Str {
 public:
+    // Disable default construction
+    Str() = delete;
+    // Disable copy (and move) semantics
+    Str(const Str&)                  = delete;
+    const Str& operator=(const Str&) = delete;
+
     static int reserve_4() { return 4; }
     static int reserve_8() { return 8; }
     static int reserve_16() { return 17; }
@@ -223,11 +229,6 @@ public:
     static const std::string& ECF_CUSTOM_PASSWD();
 
     static const char* cpu_timer_format() { return "%ws wall, (%us user + %ss system = %ts) CPU (%p%)"; }
-
-private:
-    Str()                            = default;
-    Str(const Str&)                  = delete;
-    const Str& operator=(const Str&) = delete;
 };
 
 } // namespace ecf

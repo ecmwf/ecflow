@@ -23,7 +23,7 @@ class Base {
 public:
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5, SUSPENDED = 6 };
     Base() = default;
-    Base(bool test) : test_(test) {}
+    explicit Base(bool test) : test_(test) {}
     bool operator==(const Base& rhs) const {
         return x == rhs.x && y == rhs.y && state_ == rhs.state_ && test_ == rhs.test_;
     }

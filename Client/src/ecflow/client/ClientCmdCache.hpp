@@ -15,11 +15,12 @@
 
 class ClientCmdCache {
 public:
+    ClientCmdCache() = default;
+    // Disable copy (and move) semantics
     ClientCmdCache(const ClientCmdCache&)                  = delete;
     const ClientCmdCache& operator=(const ClientCmdCache&) = delete;
 
-    ClientCmdCache();
-    ~ClientCmdCache();
+    ~ClientCmdCache() = default;
 
     std::shared_ptr<CSyncCmd> csync_cmd(CSyncCmd::Api,
                                         unsigned int client_handle,

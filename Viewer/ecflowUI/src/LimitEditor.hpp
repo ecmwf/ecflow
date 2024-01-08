@@ -24,13 +24,13 @@ class LimitEditorWidget : public QWidget, protected Ui::LimitEditorWidget {
     friend class LimitEditor;
 
 public:
-    LimitEditorWidget(QWidget* parent = nullptr);
+    explicit LimitEditorWidget(QWidget* parent = nullptr);
 };
 
 class LimitEditor : public AttributeEditor {
     Q_OBJECT
 public:
-    LimitEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit LimitEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~LimitEditor() override;
 
 protected Q_SLOTS:

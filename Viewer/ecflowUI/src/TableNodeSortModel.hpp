@@ -22,7 +22,7 @@ class ModelColumn;
 class TableNodeSortModel : public QSortFilterProxyModel {
     Q_OBJECT
 public:
-    TableNodeSortModel(TableNodeModel*, QObject* parent = nullptr);
+    explicit TableNodeSortModel(TableNodeModel*, QObject* parent = nullptr);
     ~TableNodeSortModel() override;
 
     // From QSortFilterProxyModel:

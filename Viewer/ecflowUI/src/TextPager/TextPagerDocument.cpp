@@ -372,7 +372,7 @@ QTextCodec* TextPagerDocument::textCodec() const {
 
 class FindScope {
 public:
-    FindScope(TextDocumentPrivate::FindState* s) : state(s) {
+    explicit FindScope(TextDocumentPrivate::FindState* s) : state(s) {
         if (state)
             *state = TextDocumentPrivate::Finding;
     }

@@ -79,12 +79,11 @@ std::ostream& operator<<(std::ostream& os, const Family&);
 // the creation of generated variables until required.
 // This improves client->server download times by avoiding thousands of string constructions
 class FamGenVariables {
-private:
-    FamGenVariables(const FamGenVariables&)                  = delete;
-    const FamGenVariables& operator=(const FamGenVariables&) = delete;
-
 public:
     explicit FamGenVariables(const Family*);
+    // Disable copy (and move) semantics
+    FamGenVariables(const FamGenVariables&)                  = delete;
+    const FamGenVariables& operator=(const FamGenVariables&) = delete;
 
     void update_generated_variables() const;
     const Variable& findGenVariable(const std::string& name) const;

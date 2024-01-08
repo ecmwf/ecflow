@@ -32,8 +32,8 @@ class NodeQueryResultItem {
 
 public:
     NodeQueryResultItem() = default;
-    NodeQueryResultItem(VNode* node);
-    NodeQueryResultItem(NodeQueryResultTmp_ptr);
+    explicit NodeQueryResultItem(VNode* node);
+    explicit NodeQueryResultItem(NodeQueryResultTmp_ptr);
 
     void invalidateNode();
     bool updateNode();

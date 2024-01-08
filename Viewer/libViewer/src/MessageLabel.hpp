@@ -22,7 +22,7 @@ class QTimer;
 class DelayedProgressDef {
 public:
     DelayedProgressDef() = default;
-    DelayedProgressDef(QString text, int max = 0) : infoText_(text), max_(max) {}
+    explicit DelayedProgressDef(QString text, int max = 0) : infoText_(text), max_(max) {}
     void clear() {
         infoText_.clear();
         progText_.clear();
@@ -39,7 +39,7 @@ class MessageLabelProgWidget : public QWidget {
     Q_OBJECT
 
 public:
-    MessageLabelProgWidget(QWidget* parent);
+    explicit MessageLabelProgWidget(QWidget* parent);
 
     void startProgress(int max);
     void showProgressCancelButton(bool);

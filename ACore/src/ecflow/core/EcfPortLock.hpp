@@ -28,6 +28,12 @@ namespace ecf {
 
 class EcfPortLock {
 public:
+    // Disable default construction
+    EcfPortLock() = delete;
+    // Disable copy (and move) semantics
+    EcfPortLock(const EcfPortLock&)                  = delete;
+    const EcfPortLock& operator=(const EcfPortLock&) = delete;
+
     static bool is_free(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
         if (fs::exists(port_file(the_port))) {
@@ -56,10 +62,6 @@ public:
     }
 
 private:
-    EcfPortLock()                                    = delete;
-    EcfPortLock(const EcfPortLock&)                  = delete;
-    const EcfPortLock& operator=(const EcfPortLock&) = delete;
-
     static std::string port_file(const std::string& the_port) {
         // We need the *SAME* location so that different process find the same file.
         // When going across compiler the root_build_dir is not sufficient

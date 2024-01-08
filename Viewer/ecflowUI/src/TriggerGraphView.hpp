@@ -120,7 +120,7 @@ protected:
 class TriggerGraphEdgeInfoDialog : public QDialog {
     Q_OBJECT
 public:
-    TriggerGraphEdgeInfoDialog(QWidget* parent = nullptr);
+    explicit TriggerGraphEdgeInfoDialog(QWidget* parent = nullptr);
     void setInfo(TriggerGraphEdgeItem*);
     void readSettings(VComboSettings* vs);
     void writeSettings(VComboSettings* vs);
@@ -171,7 +171,7 @@ class TriggerGraphView : public QGraphicsView, public VPropertyObserver {
     friend class TriggeredRelationCollector;
 
 public:
-    TriggerGraphView(QWidget* parent = nullptr);
+    explicit TriggerGraphView(QWidget* parent = nullptr);
     ~TriggerGraphView() override;
 
     void clear(bool keepConfig = false);

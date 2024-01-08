@@ -27,13 +27,13 @@ class Parser;
 class DefsString {
 public:
     explicit DefsString(const std::string& defs_as_string);
+    // Disable copy (and move) semantics
+    DefsString(const DefsString&)                  = delete;
+    const DefsString& operator=(const DefsString&) = delete;
+
     bool good() const;
     void getline(std::string& line);
     bool empty() const { return empty_; }
-
-private:
-    DefsString(const DefsString&)                  = delete;
-    const DefsString& operator=(const DefsString&) = delete;
 
 private:
     std::vector<std::string> lines_;
@@ -47,14 +47,13 @@ private:
 //    STATE: structure + state
 //    MIGRATE: structure + state (No checking, and no externs and fault tolerant)
 class DefsStructureParser {
-private:
-    DefsStructureParser(const DefsStructureParser&)                  = delete;
-    const DefsStructureParser& operator=(const DefsStructureParser&) = delete;
-
 public:
     DefsStructureParser(Defs* defsfile, const std::string& file_name);
     DefsStructureParser(Defs* defsfile, const std::string& def_str, bool);
     explicit DefsStructureParser(const std::string& defs_node_string);
+    // Disable copy (and move) semantics
+    DefsStructureParser(const DefsStructureParser&)                  = delete;
+    const DefsStructureParser& operator=(const DefsStructureParser&) = delete;
     ~DefsStructureParser();
 
     /// Parse the definition file, *AND* check expressions and limits

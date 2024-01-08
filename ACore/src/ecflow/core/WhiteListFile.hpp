@@ -26,6 +26,10 @@
 class WhiteListFile {
 public:
     WhiteListFile();
+    // Disable copy (and move) semantics
+    WhiteListFile(const WhiteListFile&)                  = delete;
+    const WhiteListFile& operator=(const WhiteListFile&) = delete;
+
     ~WhiteListFile();
 
     // If any user in read/write lists, then it has read access.
@@ -73,10 +77,6 @@ public:
 
     // return true if current user has write access
     void allow_write_access_for_server_user();
-
-private:
-    WhiteListFile(const WhiteListFile&)                  = delete;
-    const WhiteListFile& operator=(const WhiteListFile&) = delete;
 
 private:
     bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;

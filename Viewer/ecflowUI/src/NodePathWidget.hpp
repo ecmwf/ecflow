@@ -168,7 +168,7 @@ class NodePathEllipsisItem : public NodePathItem {
     friend class BcWidget;
 
 public:
-    NodePathEllipsisItem(BcWidget* owner);
+    explicit NodePathEllipsisItem(BcWidget* owner);
 };
 
 class NodePathWidget : public QWidget, public NodeObserver, public ServerObserver, public VInfoObserver {

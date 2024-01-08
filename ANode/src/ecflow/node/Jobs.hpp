@@ -63,14 +63,13 @@
 ///
 
 class Jobs {
-private:
-    Jobs(const Jobs&)                  = delete;
-    const Jobs& operator=(const Jobs&) = delete;
-
 public:
     explicit Jobs(const defs_ptr& d) : defs_(d.get()) {}
     explicit Jobs(Defs* d) : defs_(d) {}
     explicit Jobs(Node* d) : node_(d) {}
+    // Disable copy (and move) semantics
+    Jobs(const Jobs&)                  = delete;
+    const Jobs& operator=(const Jobs&) = delete;
 
     bool generate(JobsParam&) const;
     bool generate() const;

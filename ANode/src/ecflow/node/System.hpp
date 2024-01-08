@@ -49,11 +49,11 @@ namespace ecf {
 /// created by ecf_submit.
 
 class System {
-private:
+public:
+    // Disable copy (and move) semantics
     System(const System&)                  = delete;
     const System& operator=(const System&) = delete;
 
-public:
     static System* instance();
 
     /// Destroy the singleton. used in test only, to avoid valgrind issues

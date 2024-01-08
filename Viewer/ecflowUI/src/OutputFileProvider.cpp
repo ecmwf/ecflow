@@ -52,7 +52,7 @@ void OutputFileFetchServerTask::run() {
 
 class OutputFileFetchQueueManager : public FetchQueueOwner {
 public:
-    OutputFileFetchQueueManager(OutputFileProvider*);
+    explicit OutputFileFetchQueueManager(OutputFileProvider*);
     void runFull(ServerHandler* server,
                  VNode* node,
                  const std::string& fileName,

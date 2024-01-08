@@ -39,7 +39,7 @@ protected Q_SLOTS:
     void slotVersionError(QString);
 
 private:
-    OutputFileClient(const OutputClient&);
+    explicit OutputFileClient(const OutputClient&);
     OutputFileClient& operator=(const OutputClient&);
     void estimateExpectedSize();
     bool parseResultHeader(char* buf, quint64& len);

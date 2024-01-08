@@ -424,9 +424,10 @@ std::ostream& operator<<(std::ostream& os, const Defs&);
 // This class is used to read the History
 class DefsHistoryParser {
 public:
+    DefsHistoryParser();
+    // Disable copy (and move) semantics
     DefsHistoryParser(const DefsHistoryParser&)                  = delete;
     const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
-    DefsHistoryParser();
 
     void parse(const std::string& line);
     const std::vector<std::string>& parsed_messages() const { return parsed_messages_; }
@@ -440,11 +441,11 @@ private:
 class ChangeStartNotification {
 public:
     explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start(); }
-    ~ChangeStartNotification() { defs_ptr_->notify_end(); }
-
-private:
+    // Disable copy (and move) semantics
     ChangeStartNotification(const ChangeStartNotification&)                  = delete;
     const ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
+
+    ~ChangeStartNotification() { defs_ptr_->notify_end(); }
 
 private:
     defs_ptr defs_ptr_;

@@ -100,7 +100,7 @@ private:
 
 class TableNodeHeaderButton {
 public:
-    TableNodeHeaderButton(QString id) : id_(id) {}
+    explicit TableNodeHeaderButton(QString id) : id_(id) {}
 
     QString id() const { return id_; }
     void setRect(QRect r) { rect_ = r; }

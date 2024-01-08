@@ -50,7 +50,7 @@ int OutputBrowser::minConfirmSearchSize_ = 20 * 1024 * 1024;
 
 class OutputBrowserState : public QObject {
 public:
-    OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
+    explicit OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
     ~OutputBrowserState() override = default;
 
     virtual void handleClear();
@@ -63,7 +63,7 @@ protected:
 
 class OutputBrowserEmptyState : public OutputBrowserState {
 public:
-    OutputBrowserEmptyState(OutputBrowser* browser);
+    explicit OutputBrowserEmptyState(OutputBrowser* browser);
     void handleClear() override;
 };
 

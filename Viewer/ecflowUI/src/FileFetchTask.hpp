@@ -26,14 +26,14 @@ class VReply;
 
 class FileFetchLocalTask : public AbstractFetchTask {
 public:
-    FileFetchLocalTask(FetchQueueOwner* owner);
+    explicit FileFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
 class FileFetchTransferTask : public QObject, public AbstractFetchTask {
     Q_OBJECT
 public:
-    FileFetchTransferTask(FetchQueueOwner* owner);
+    explicit FileFetchTransferTask(FetchQueueOwner* owner);
     void run() override;
     void stop() override;
     void clear() override;
@@ -51,14 +51,14 @@ protected:
 
 class FileFetchCacheTask : public AbstractFetchTask {
 public:
-    FileFetchCacheTask(FetchQueueOwner* owner);
+    explicit FileFetchCacheTask(FetchQueueOwner* owner);
     void run() override;
 };
 
 class FileFetchLogServerTask : public QObject, public AbstractFetchTask {
     Q_OBJECT
 public:
-    FileFetchLogServerTask(FetchQueueOwner* owner);
+    explicit FileFetchLogServerTask(FetchQueueOwner* owner);
     ~FileFetchLogServerTask();
     void run() override;
     void stop() override;

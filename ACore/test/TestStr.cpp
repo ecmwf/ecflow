@@ -642,16 +642,18 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //// ==============================================================
 class Fred {
 public:
-    Fred(int i = 0) : i_(i) { /*std::cout << "Fred constructor\n"*/
-        ;
+    explicit Fred(int i = 0) : i_(i) { /*std::cout << "Fred constructor\n"*/
+        // Do nothing...
     }
     Fred(const Fred& rhs) : i_(rhs.i_) { /*std::cout << "Fred copy constructor\n";*/
+        // Do nothing...
     }
     Fred& operator=(const Fred& rhs) { /*std::cout << "assignment operator\n";*/
         i_ = rhs.i_;
         return *this;
     }
     ~Fred() { /*std::cout << "Fred destructor\n";*/
+        // Do nothing...
     }
 
     void inc() { i_++; }

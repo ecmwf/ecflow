@@ -35,7 +35,7 @@ protected Q_SLOTS:
     void truncateLogEnd();
 
 protected:
-    InputEventLog(QObject* parent = nullptr);
+    explicit InputEventLog(QObject* parent = nullptr);
 
     bool eventFilter(QObject* obj, QEvent* event) override;
     void logMousePress(QObject* obj, QMouseEvent* e);

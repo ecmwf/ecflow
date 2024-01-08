@@ -24,7 +24,7 @@
 
 class TextPagerSearchHighlighter : public SyntaxHighlighter {
 public:
-    TextPagerSearchHighlighter(QObject* parent = nullptr);
+    explicit TextPagerSearchHighlighter(QObject* parent = nullptr);
     void highlightBlock(const QString& string) override;
     void reset(QString txt, TextPagerDocument::FindMode mode, bool apply);
     void reset(QRegExp rx, TextPagerDocument::FindMode mode, bool apply);

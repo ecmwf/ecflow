@@ -362,7 +362,7 @@ void OutputDirFetchTransferTask::parseLine(QString line) {
 
 class OutputDirFetchQueueManager : public FetchQueueOwner {
 public:
-    OutputDirFetchQueueManager(OutputDirProvider*);
+    explicit OutputDirFetchQueueManager(OutputDirProvider*);
     void run(ServerHandler* server, VNode* node, const std::string& joboutFile);
 
     VReply* theReply() const override;

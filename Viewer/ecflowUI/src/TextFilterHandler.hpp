@@ -19,7 +19,7 @@ class VSettings;
 
 class TextFilterItem {
 public:
-    TextFilterItem(const std::string& filter, bool matched = true, bool caseSensitive = false, bool contextMenu = true)
+    explicit TextFilterItem(const std::string& filter, bool matched = true, bool caseSensitive = false, bool contextMenu = true)
         : filter_(filter),
           matched_(matched),
           caseSensitive_(caseSensitive),
