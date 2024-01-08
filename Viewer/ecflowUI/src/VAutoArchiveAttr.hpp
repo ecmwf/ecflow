@@ -38,7 +38,7 @@ private:
 class VAutoArchiveAttr : public VAttribute {
 
 public:
-    VAutoArchiveAttr(VNode* parent);
+    explicit VAutoArchiveAttr(VNode* parent);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;

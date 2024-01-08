@@ -20,7 +20,7 @@ class TriggeredScanner : public QObject {
     Q_OBJECT
 
 public:
-    TriggeredScanner(QObject* parent) : QObject(parent), total_(0), current_(0), batchSize_(100) {}
+    explicit TriggeredScanner(QObject* parent) : QObject(parent), total_(0), current_(0), batchSize_(100) {}
 
     void clear();
     void start(VServer*);

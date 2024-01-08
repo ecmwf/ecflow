@@ -18,7 +18,7 @@ class LogModel;
 class LogView : public QTreeView {
     Q_OBJECT
 public:
-    LogView(QWidget* parent = nullptr);
+    explicit LogView(QWidget* parent = nullptr);
     void setLogModel(LogModel*);
     void setModel(QAbstractItemModel*) override;
 

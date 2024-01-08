@@ -15,7 +15,7 @@
 
 class FontMetrics : public QFontMetrics {
 public:
-    FontMetrics(const QFont& font);
+    explicit FontMetrics(const QFont& font);
     int realHeight() const { return realHeight_; }
     int topPaddingForCentre() const { return topPadding_; }
     int bottomPaddingForCentre() const { return bottomPadding_; }

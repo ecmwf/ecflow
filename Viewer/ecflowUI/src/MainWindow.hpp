@@ -38,7 +38,7 @@ class MainWindowTitleHandler {
     friend class MainWindow;
 
 public:
-    MainWindowTitleHandler(MainWindow*);
+    explicit MainWindowTitleHandler(MainWindow*);
     ~MainWindowTitleHandler();
 
     void update();
@@ -53,7 +53,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QStringList, QWidget* parent = nullptr);
+    explicit MainWindow(QStringList, QWidget* parent = nullptr);
     ~MainWindow() override;
 
     ServerHandler* selectedServer() const;

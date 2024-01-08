@@ -37,7 +37,7 @@ private:
 class Derived1 : public BaseCmd {
 public:
     Derived1() = default;
-    Derived1(int x) : BaseCmd(), x_(x) {}
+    explicit Derived1(int x) : BaseCmd(), x_(x) {}
     ~Derived1() override = default;
 
     int get_x() const { return x_; }
@@ -75,7 +75,7 @@ std::ostream& operator<<(std::ostream& os, Derived1 const& m) {
 class CmdContainer {
 public:
     CmdContainer() = default;
-    CmdContainer(std::shared_ptr<BaseCmd> cmd) : cmd_(cmd) {}
+    explicit CmdContainer(std::shared_ptr<BaseCmd> cmd) : cmd_(cmd) {}
 
     bool operator==(const CmdContainer& rhs) const {
         if (!cmd_.get() && !rhs.cmd_.get())

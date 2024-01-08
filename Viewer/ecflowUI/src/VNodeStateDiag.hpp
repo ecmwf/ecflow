@@ -15,7 +15,7 @@
 
 class VNodeStateDiag {
 public:
-    VNodeStateDiag(VInfo_ptr);
+    explicit VNodeStateDiag(VInfo_ptr);
 };
 
 #endif /* ecflow_viewer_VNodeStateDiag_HPP */

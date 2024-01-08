@@ -23,7 +23,7 @@ class VFileTransferCore : public QObject {
     Q_OBJECT
 
 public:
-    VFileTransferCore(QObject* parent = nullptr);
+    explicit VFileTransferCore(QObject* parent = nullptr);
     virtual ~VFileTransferCore();
 
     virtual void clear();

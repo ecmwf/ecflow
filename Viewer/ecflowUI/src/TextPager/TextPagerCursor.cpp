@@ -23,7 +23,7 @@
 
 class SelectionChangedEmitter {
 public:
-    SelectionChangedEmitter(TextPagerEdit* t) : selectionStart(-1), selectionEnd(-1), textEdit(t) {
+    explicit SelectionChangedEmitter(TextPagerEdit* t) : selectionStart(-1), selectionEnd(-1), textEdit(t) {
         if (textEdit) {
             selectionStart = textEdit->textCursor().selectionStart();
             selectionEnd   = textEdit->textCursor().selectionEnd();

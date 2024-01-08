@@ -21,7 +21,7 @@ class VReply;
 
 class GenFileProvider : public FetchQueueOwner {
 public:
-    GenFileProvider(GenFileReceiver*);
+    explicit GenFileProvider(GenFileReceiver*);
     ~GenFileProvider();
     GenFileProvider(const GenFileProvider&)            = delete;
     GenFileProvider& operator=(const GenFileProvider&) = delete;

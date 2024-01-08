@@ -85,7 +85,7 @@ struct LogLoadSuiteModelDataItem
 
 class LogLoadRequestSortModel : public QSortFilterProxyModel {
 public:
-    LogLoadRequestSortModel(QObject* parent = 0);
+    explicit LogLoadRequestSortModel(QObject* parent = 0);
 
 protected:
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
@@ -139,7 +139,7 @@ protected:
 
 class ChartCallout : public QGraphicsItem {
 public:
-    ChartCallout(QChart* parent);
+    explicit ChartCallout(QChart* parent);
 
     void setText(const QString& text);
     void setAnchor(QPointF point);
@@ -204,7 +204,7 @@ class LogRequestViewHandler : public QObject {
     friend class LogStatUidCmdView;
 
 public:
-    LogRequestViewHandler(QWidget* parent);
+    explicit LogRequestViewHandler(QWidget* parent);
     ~LogRequestViewHandler();
 
     QList<LogRequestView*> views() const { return views_; }

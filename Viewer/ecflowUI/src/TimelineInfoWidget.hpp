@@ -100,7 +100,7 @@ private:
 
 class TimelineInfoDialog : public QDialog {
 public:
-    TimelineInfoDialog(QWidget* parent = nullptr);
+    explicit TimelineInfoDialog(QWidget* parent = nullptr);
     ~TimelineInfoDialog() override;
 
     TimelineInfoWidget* infoW_;

@@ -136,7 +136,7 @@ public:
 
 class LogTimer {
 public:
-    LogTimer(const char* msg) : msg_(msg) {}
+    explicit LogTimer(const char* msg) : msg_(msg) {}
     // Disable copy (and move) semantics
     LogTimer(const LogTimer&)                  = delete;
     const LogTimer& operator=(const LogTimer&) = delete;
@@ -185,7 +185,7 @@ private:
 /// Utility class used for test, since server assumes log is always present
 class TestLog {
 public:
-    TestLog(const std::string& log_path);
+    explicit TestLog(const std::string& log_path);
     ~TestLog();
 
 private:

@@ -80,7 +80,7 @@ class TimelineSortModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    TimelineSortModel(TimelineModel*, QObject* parent = nullptr);
+    explicit TimelineSortModel(TimelineModel*, QObject* parent = nullptr);
     ~TimelineSortModel() override;
 
     enum SortMode { PathSortMode, TimeSortMode, TreeSortMode, QtSortMode };

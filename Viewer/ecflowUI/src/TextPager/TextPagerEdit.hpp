@@ -41,7 +41,7 @@ class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver {
     Q_PROPERTY(bool lineBreaking READ lineBreaking WRITE setLineBreaking)
 
 public:
-    TextPagerEdit(QWidget* parent = nullptr);
+    explicit TextPagerEdit(QWidget* parent = nullptr);
     ~TextPagerEdit() override;
 
     TextPagerDocument* document() const;
@@ -70,7 +70,7 @@ public:
 
     bool load(const QString& fileName,
               TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse,
-              TextCodecWrapper                   = {});
+              TextCodecWrapper                   = TextCodecWrapper{});
 
     void paintEvent(QPaintEvent* e) override;
     void scrollContentsBy(int dx, int dy) override;

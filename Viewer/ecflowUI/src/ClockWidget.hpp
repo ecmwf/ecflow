@@ -21,7 +21,7 @@ class PropertyMapper;
 class ClockWidget : public QLabel, public VPropertyObserver {
     Q_OBJECT
 public:
-    ClockWidget(QWidget* parent = nullptr);
+    explicit ClockWidget(QWidget* parent = nullptr);
     ~ClockWidget() override;
 
     void notifyChange(VProperty*) override;

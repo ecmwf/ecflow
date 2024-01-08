@@ -27,7 +27,7 @@ class VItemVisitor;
 
 class VItem {
 public:
-    VItem(VNode* parent) : parent_(parent) {}
+    explicit VItem(VNode* parent) : parent_(parent) {}
     virtual ~VItem() = default;
 
     VNode* parent() const { return parent_; }

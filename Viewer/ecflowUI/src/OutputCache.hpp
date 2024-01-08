@@ -48,7 +48,7 @@ class OutputCache : public QObject {
     Q_OBJECT
 
 public:
-    OutputCache(QObject* parent = nullptr);
+    explicit OutputCache(QObject* parent = nullptr);
     ~OutputCache() override;
 
     OutputCacheItem* add(VInfo_ptr info, const std::string& sourcePath, VFile_ptr file);
@@ -61,7 +61,7 @@ protected Q_SLOTS:
     void slotTimeOut();
 
 private:
-    OutputCache(const OutputClient&);
+    explicit OutputCache(const OutputClient&);
     OutputCache& operator=(const OutputCache&);
     void adjustTimer();
     void startTimer();

@@ -45,7 +45,7 @@ private:
 
 class TriggerListCollector : public TriggerCollector {
 public:
-    TriggerListCollector(bool extended) : extended_(extended) {}
+    explicit TriggerListCollector(bool extended) : extended_(extended) {}
 
     ~TriggerListCollector() override;
     bool add(VItem*, VItem*, Mode) override;
@@ -90,7 +90,7 @@ private:
 
 class TriggeredCollector : public TriggerListCollector {
 public:
-    TriggeredCollector(VNode* n) : TriggerListCollector(false), node_(n) {}
+    explicit TriggeredCollector(VNode* n) : TriggerListCollector(false), node_(n) {}
     bool add(VItem*, VItem*, Mode) override;
 
 private:
@@ -125,7 +125,7 @@ protected:
 
 class TriggerTableItem {
 public:
-    TriggerTableItem(VItem* t) : t_(t) {}
+    explicit TriggerTableItem(VItem* t) : t_(t) {}
 
     void addDependency(VItem* dep, TriggerCollector::Mode mode) { deps_.emplace_back(dep, mode); }
 
@@ -141,7 +141,7 @@ protected:
 
 class TriggerTableCollector : public TriggerCollector {
 public:
-    TriggerTableCollector(bool extended) : extended_(extended) {}
+    explicit TriggerTableCollector(bool extended) : extended_(extended) {}
 
     ~TriggerTableCollector() override;
     bool add(VItem*, VItem*, Mode) override;

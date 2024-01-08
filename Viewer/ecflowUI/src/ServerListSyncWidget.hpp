@@ -24,7 +24,7 @@ class ServerListSyncWidget : public QWidget, protected Ui::ServerListSyncWidget 
     Q_OBJECT
 
 public:
-    ServerListSyncWidget(QWidget* parent = nullptr);
+    explicit ServerListSyncWidget(QWidget* parent = nullptr);
     ~ServerListSyncWidget() override;
     void reload();
 

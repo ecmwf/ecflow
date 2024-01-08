@@ -17,7 +17,7 @@ class OneLineTextEdit : public QTextEdit {
     Q_OBJECT
 
 public:
-    OneLineTextEdit(QWidget* parent = nullptr);
+    explicit OneLineTextEdit(QWidget* parent = nullptr);
     QSize sizeHint() const override;
 
 Q_SIGNALS:

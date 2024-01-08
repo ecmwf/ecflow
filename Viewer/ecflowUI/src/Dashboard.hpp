@@ -28,7 +28,7 @@ class Dashboard : public QMainWindow, public ServerFilterObserver {
     Q_OBJECT
 
 public:
-    Dashboard(QString, QWidget* parent = nullptr);
+    explicit Dashboard(QString, QWidget* parent = nullptr);
     ~Dashboard() override;
 
     void reload();

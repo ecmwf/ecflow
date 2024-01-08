@@ -75,7 +75,7 @@ class VariableAddDialog : public QDialog, public VariableModelDataObserver, priv
     Q_OBJECT
 
 public:
-    VariableAddDialog(VariableModelDataHandler* data, QWidget* parent = nullptr);
+    explicit VariableAddDialog(VariableModelDataHandler* data, QWidget* parent = nullptr);
     VariableAddDialog(VariableModelDataHandler* data, QString name, QString value, QWidget* parent = nullptr);
     ~VariableAddDialog() override;
 

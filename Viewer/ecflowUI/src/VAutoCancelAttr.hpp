@@ -38,7 +38,7 @@ private:
 class VAutoCancelAttr : public VAttribute {
 
 public:
-    VAutoCancelAttr(VNode* parent);
+    explicit VAutoCancelAttr(VNode* parent);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;

@@ -444,8 +444,10 @@ private:
 /// Note: this applies to the clone as well
 class RepeatDay final : public RepeatBase {
 public:
-    RepeatDay(int step) : RepeatBase("day"), step_(step) {}
     RepeatDay() : RepeatBase("day") {}
+
+    // Enable implicit conversion from integer
+    RepeatDay(int step) : RepeatBase("day"), step_(step) {}
 
     bool operator==(const RepeatDay& rhs) const;
     bool operator<(const RepeatDay& rhs) const { return step_ < rhs.step(); }
@@ -500,17 +502,25 @@ private:
 class Repeat {
 public:
     Repeat(); // for serialisation
+
+    // Enable implicit conversion to Repeat
     Repeat(const RepeatDate&);
     Repeat(const RepeatDateList&);
     Repeat(const RepeatInteger&);
     Repeat(const RepeatEnumerated&);
     Repeat(const RepeatString&);
     Repeat(const RepeatDay&);
+
+    // Enable copy semantics
     Repeat(const Repeat&);
-    Repeat(Repeat&& rhs) : type_(std::move(rhs.type_)) {}
-    ~Repeat();
     Repeat& operator=(const Repeat& rhs);
+
+    // Enable move semantics
+    Repeat(Repeat&& rhs) : type_(std::move(rhs.type_)) {}
     Repeat& operator=(Repeat&& rhs);
+
+    ~Repeat();
+
     bool operator==(const Repeat& rhs) const;
     bool operator<(const Repeat& rhs) const { return name() < rhs.name(); }
 

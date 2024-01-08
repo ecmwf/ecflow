@@ -79,7 +79,7 @@ public:
 // Helper structure for data collection
 struct LogReqCounter
 {
-    LogReqCounter(const std::string& name);
+    explicit LogReqCounter(const std::string& name);
 
     void clear();
     void add(bool childCmd, const std::string& line);
@@ -94,7 +94,7 @@ struct LogReqCounter
 // an individual suite or for all the suites
 class LogLoadDataItem {
 public:
-    LogLoadDataItem(const std::string& name);
+    explicit LogLoadDataItem(const std::string& name);
     LogLoadDataItem();
 
     void clear();

@@ -141,7 +141,7 @@ struct DocumentCommand
 {
     enum Type { None, Inserted, Removed };
 
-    DocumentCommand(Type t, int pos = -1, const QString& string = QString())
+    explicit DocumentCommand(Type t, int pos = -1, const QString& string = QString())
         : type(t),
           position(pos),
           text(string),
@@ -160,7 +160,7 @@ struct TextDocumentPrivate : public QObject
 {
     Q_OBJECT
 public:
-    TextDocumentPrivate(TextPagerDocument* doc)
+    explicit TextDocumentPrivate(TextPagerDocument* doc)
         : q(doc),
           first(nullptr),
           last(nullptr),

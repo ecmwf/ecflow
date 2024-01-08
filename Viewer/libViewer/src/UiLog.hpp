@@ -28,7 +28,7 @@ class QDateTime;
 class UiFunctionLog {
 public:
     UiFunctionLog(const std::string& server, const std::string& funcName);
-    UiFunctionLog(const std::string& funcName);
+    explicit UiFunctionLog(const std::string& funcName);
     ~UiFunctionLog();
 
     std::string logEnter() const;

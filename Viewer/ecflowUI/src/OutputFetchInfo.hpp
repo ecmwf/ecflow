@@ -29,7 +29,7 @@ class OutputFetchInfo;
 class OutputFetchInfo : public QWidget {
     Q_OBJECT
 public:
-    OutputFetchInfo(QWidget* parent);
+    explicit OutputFetchInfo(QWidget* parent);
     void clearInfo();
     void setInfo(VReply*, VInfo_ptr info = nullptr);
     void setError(QString);

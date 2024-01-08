@@ -21,14 +21,14 @@ class MeterEditorWidget : public QWidget, protected Ui::MeterEditorWidget {
     friend class MeterEditor;
 
 public:
-    MeterEditorWidget(QWidget* parent = nullptr);
+    explicit MeterEditorWidget(QWidget* parent = nullptr);
 };
 
 class MeterEditor : public AttributeEditor {
     Q_OBJECT
 
 public:
-    MeterEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit MeterEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~MeterEditor() override;
 
 protected Q_SLOTS:

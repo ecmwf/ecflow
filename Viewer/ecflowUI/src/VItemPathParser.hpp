@@ -20,7 +20,7 @@ public:
         DiagFormat     // host@port:/nodepath
     };
 
-    VItemPathParser(const std::string& path, PathFormat format = DefaultFormat);
+    explicit VItemPathParser(const std::string& path, PathFormat format = DefaultFormat);
 
     enum ItemType { ServerType, NodeType, AttributeType, NoType };
 

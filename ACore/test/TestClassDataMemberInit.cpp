@@ -21,7 +21,7 @@ using namespace std;
 
 class MyType {
 public:
-    MyType(std::string str) : mName(std::move(str)) {
+    explicit MyType(std::string str) : mName(std::move(str)) {
 #ifdef DEBUG_ME
         std::cout << "MyType::MyType " << mName << " my_int:" << my_int_ << '\n';
 #endif

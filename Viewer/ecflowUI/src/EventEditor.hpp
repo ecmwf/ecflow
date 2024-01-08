@@ -24,13 +24,13 @@ class EventEditorWidget : public QWidget, protected Ui::EventEditorWidget {
     friend class EventEditor;
 
 public:
-    EventEditorWidget(QWidget* parent = nullptr);
+    explicit EventEditorWidget(QWidget* parent = nullptr);
 };
 
 class EventEditor : public AttributeEditor {
     Q_OBJECT
 public:
-    EventEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit EventEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~EventEditor() override;
 
 protected Q_SLOTS:

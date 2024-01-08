@@ -28,7 +28,7 @@ public:
     void infoFailed(VReply*) override;
 
 protected:
-    VReportMaker(QObject* parent = nullptr);
+    explicit VReportMaker(QObject* parent = nullptr);
     void run(VInfo_ptr);
     void sendJiraReport(VFile_ptr file);
 };

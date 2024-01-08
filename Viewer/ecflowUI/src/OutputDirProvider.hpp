@@ -37,7 +37,7 @@ protected:
 class OutputDirFetchLogServerTask : public QObject, public OutputDirFetchTask {
     Q_OBJECT
 public:
-    OutputDirFetchLogServerTask(FetchQueueOwner* owner);
+    explicit OutputDirFetchLogServerTask(FetchQueueOwner* owner);
     ~OutputDirFetchLogServerTask();
     void run() override;
     void stop() override;
@@ -56,7 +56,7 @@ protected:
 
 class OutputDirFetchLocalTask : public OutputDirFetchTask {
 public:
-    OutputDirFetchLocalTask(FetchQueueOwner* owner);
+    explicit OutputDirFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 

@@ -38,7 +38,7 @@ private:
 class VAutoRestoreAttr : public VAttribute {
 
 public:
-    VAutoRestoreAttr(VNode* parent);
+    explicit VAutoRestoreAttr(VNode* parent);
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;

@@ -19,7 +19,7 @@
 class TokenFile {
 public:
     TokenFile() = delete;
-    TokenFile(const std::string& tokenfile);
+    explicit TokenFile(const std::string& tokenfile);
     ~TokenFile();
 
 private:

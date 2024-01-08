@@ -30,7 +30,7 @@ class VariableModel : public QAbstractItemModel {
     friend class VariableSortModel;
 
 public:
-    VariableModel(VariableModelDataHandler* data, QObject* parent = nullptr);
+    explicit VariableModel(VariableModelDataHandler* data, QObject* parent = nullptr);
 
     enum CustomItemRole {
         ReadOnlyRole = Qt::UserRole + 1,
@@ -92,7 +92,7 @@ class VariableSortModel : public QSortFilterProxyModel {
 public:
     enum MatchMode { FilterMode, SearchMode };
 
-    VariableSortModel(VariableModel*, QObject* parent = nullptr);
+    explicit VariableSortModel(VariableModel*, QObject* parent = nullptr);
     ~VariableSortModel() override = default;
 
     MatchMode matchMode() const { return matchMode_; }

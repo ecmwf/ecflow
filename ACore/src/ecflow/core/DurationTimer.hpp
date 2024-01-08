@@ -41,7 +41,7 @@ private:
 
 class ScopedDurationTimer {
 public:
-    ScopedDurationTimer(const char* msg)
+    explicit ScopedDurationTimer(const char* msg)
         : start_time_(boost::posix_time::microsec_clock::universal_time()),
           msg_(msg) {}
     ~ScopedDurationTimer();

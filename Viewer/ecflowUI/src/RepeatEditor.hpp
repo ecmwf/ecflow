@@ -29,7 +29,7 @@ class RepeatEditorWidget : public QWidget, protected Ui::RepeatEditorWidget {
     friend class RepeatDateEditor;
 
 public:
-    RepeatEditorWidget(QWidget* parent = nullptr);
+    explicit RepeatEditorWidget(QWidget* parent = nullptr);
 
 protected:
     void hideRow(QWidget* w);
@@ -39,7 +39,7 @@ class RepeatEditor : public AttributeEditor {
     Q_OBJECT
 
 public:
-    RepeatEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit RepeatEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~RepeatEditor() override;
 
 protected Q_SLOTS:
