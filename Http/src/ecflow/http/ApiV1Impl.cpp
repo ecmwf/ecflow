@@ -12,6 +12,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <thread>
 
@@ -789,6 +790,14 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
     // to allow user to modify all ecFlow attributes, whether the Client code
     // supports it or not.
 
+    struct Ancillary
+    {
+        std::string type;
+        std::string action;
+        std::string value;
+    };
+    std::optional<Ancillary> ancillary;
+
     if (payload.contains("ECF_NAME")) {
         const std::string name = payload.at("name");
 
@@ -820,7 +829,11 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
             auto queue_action = payload.at("queue_action").get<std::string>();
             auto queue_step   = payload.contains("queue_step") ? payload.at("queue_step").get<std::string>() : "";
             auto queue_path   = payload.contains("queue_path") ? payload.at("queue_path").get<std::string>() : "";
-            reply             = client->child_queue(name, queue_action, queue_step, queue_path);
+            std::string reply = client->child_queue(name, queue_action, queue_step, queue_path);
+
+            if (queue_action == "active" || queue_action == "no_of_aborted") {
+                ancillary = std::make_optional(Ancillary{type, queue_action, reply});
+            }
         }
         else {
             throw HttpServerException(HttpStatusCode::server_error_not_implemented,
@@ -899,9 +912,19 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
             client->alter(path, "change", type, name, value);
         }
     }
+
+    // Package the response body
     ecf::ojson j;
     j["path"]    = path;
     j["message"] = "Attribute changed successfully";
+    if (ancillary) {
+        if (ancillary->action == "active") {
+            j["step"] = ancillary->value;
+        }
+        else if (ancillary->action == "no_of_aborted") {
+            j["no_of_aborted"] = ancillary->value;
+        }
+    }
     return j;
 }
 
