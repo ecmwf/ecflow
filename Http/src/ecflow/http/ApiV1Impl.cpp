@@ -800,9 +800,8 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
 
         auto client = get_client_for_tasks(request, payload);
 
-        const std::string value = payload.at("value");
-
         if (type == "event") {
+            const std::string value = payload.at("value");
             if (value != "set" && value != "true" && value != "clear" && value != "false") {
                 throw HttpServerException(HttpStatusCode::client_error_bad_request,
                                           "'value' for event must be one of: set/true, clear/false");
@@ -810,18 +809,22 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
             client->child_event(name, (value == "true" || value == "set"));
         }
         else if (type == "meter") {
+            const std::string value = payload.at("value");
             client->child_meter(name, std::stoi(value));
         }
         else if (type == "label") {
+            const std::string value = payload.at("value");
             client->child_label(name, value);
         }
         else if (type == "queue") {
-            client->child_queue(
-                name, payload.at("queue_action").get<std::string>(), payload.at("queue_step").get<std::string>(), path);
+            auto queue_action = payload.at("queue_action").get<std::string>();
+            auto queue_step   = payload.contains("queue_step") ? payload.at("queue_step").get<std::string>() : "";
+            auto queue_path   = payload.contains("queue_path") ? payload.at("queue_path").get<std::string>() : "";
+            reply             = client->child_queue(name, queue_action, queue_step, queue_path);
         }
         else {
             throw HttpServerException(HttpStatusCode::server_error_not_implemented,
-                                      "Child action " + name + " not supported");
+                                      "Child action " + type + ", on attribute " + name + ", is not supported");
         }
     }
     else {
