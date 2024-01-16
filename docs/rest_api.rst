@@ -510,7 +510,7 @@ Payload Format for Creating a New Suite or Updating Node Definition
 
   {
     "definition": "...",
-    "auto_add_extern": true|false
+    "auto_add_extern": "true|false"
   }
 
 where
@@ -655,7 +655,7 @@ For attributes that are not named, such as repeat or late
 Payload Format for Updating Node Attributes From a Child Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Updating node attributes with a child command (ie. from a script with
+Updating node attributes with a child command (i.e. from a script with
 child command authentication).
 
 .. code-block:: json
@@ -669,25 +669,63 @@ child command authentication).
     "type": "event|label|limit|meter|queue",
     "value": "...",
     "queue_action": "...",
-    "queue_step"
+    "queue_step": "...",
+    "queue_path": "..."
   }
 
 where
 
--  name: name of the attribute that is changed
+-  name, is the name of the attribute that is changed
 
--  ECF_NAME, ECF_PASS, ECF_RID, ECF_TRYNO: ecFlow generated parameters
+-  ECF_NAME, ECF_PASS, ECF_RID, ECF_TRYNO, are ecFlow generated parameters
 
-Some actions have additional parameters:
-
-queue:
+Updating :code:`queue` attributes requires a set of additional parameters, as follows:
 
 .. code-block:: json
 
   {
-    "name": "queue",
+    "name": "...",
     "queue_action": "...",
-    "queue_step": "..."
+    "queue_step": "...",
+    "queue_path": "..."
+  }
+
+Notice that the parameter :code:`value` is **not** used when updating an attribude of type :code:`queue`.
+
+The :code:`queue_step` and :code:`queue_path` parameters are optional.  The parameter :code:`queue_step` should only be
+provided when the :code:`queue_action` is either :code:`complete` or :code:`aborted`.  If the field :code:`queue_path`
+is provided the server will search for the queue only on the named node, otherwise, the absense of the
+:code:`queue_path` parameter triggers the upward search of the queue starting from the target node (i.e. the node named
+by ECF_NAME) through the node tree.
+
+Response of Updating Node Attributes From a Child Command
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The typical response when updating a node attribute has the following format
+
+.. code-block:: json
+
+  {
+    "message": "..."
+  }
+
+However, when updating an attribude of type :code:`queue` the response body has additional information.
+When the requesting :code:`queue_action` is :code:`active`, the response will contain
+
+.. code-block:: json
+
+  {
+    "message": "...",
+    "step": "<selected-step>"
+  }
+
+and when the requesting :code:`queue_action` is :code:`no_of_aborted`, the response will contain
+
+.. code-block:: json
+
+  {
+    "message": "...",
+    "no_of_aborted": "<current-number-of-queued-or-aborted-steps>"
   }
 
 
@@ -704,8 +742,9 @@ Payload Format for Updating Server Status
 Payload Format for Updating Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Note! SCript can only be updated through the REST API if it already
-exists in the server.
+.. warning::
+
+   A script can only be updated through the REST API if it already exists in the server.
 
 .. code-block:: json
     
@@ -964,7 +1003,7 @@ Create a new family
 
 .. code-block:: bash
 
-  curl -X PUT https://localhost:8080/v1/suites/test -H 'content-type: application/json' -H authorization: Bearer <MYTOKEN>' -d '{"definition": "family b\nendfamily\n"}'
+  curl -X PUT https://localhost:8080/v1/suites/test -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"definition": "family b\nendfamily\n"}'
 
 Create a new attribute
 ~~~~~~~~~~~~~~~~~~~~~~

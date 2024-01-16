@@ -110,24 +110,35 @@ void apply_listeners(httplib::Server& http_server) {
     const auto format = [&dump_headers](const httplib::Request& req, const httplib::Response& res) {
         std::stringstream ss;
 
+        ss << '\n';
+
+        ss << "*** REQUEST ***\n";
         ss << req.method << " " << req.version << " " << req.path;
-
         char sep = '?';
-
         for (const auto& p : req.params) {
             ss << sep << p.first << "=" << p.second;
             sep = '&';
         }
+        ss << '\n';
 
-        ss << "\n";
+        ss << "-=- header(s):\n";
         dump_headers(req.headers, ss);
 
-        ss << "\nresponse: ";
+        if (!req.body.empty()) {
+            ss << "-=- body:\n";
+            ss << req.body << "\n";
+        }
+
+        ss << '\n';
+        ss << "*** RESPONSE ***\n";
         ss << res.status << " " << res.version << "\n";
+
+        ss << "-=- header(s):\n";
         dump_headers(res.headers, ss);
 
         if (!res.body.empty()) {
-            ss << "\n" << res.body;
+            ss << "-=- body:\n";
+            ss << res.body << "\n";
         }
 
         return ss.str();
