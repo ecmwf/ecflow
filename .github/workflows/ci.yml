@@ -55,7 +55,6 @@ jobs:
     uses: ecmwf-actions/downstream-ci/.github/workflows/downstream-ci-hpc.yml@main
     with:
       ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
-      skip_matrix_jobs: intel-2021.4.0
     secrets: inherit
 
   # Run CI of private downstream packages on HPC
