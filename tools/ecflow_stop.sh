@@ -21,6 +21,11 @@
 
 #set -eux
 
+if [[ $(hostname) = a[a-d]?-*.bullx ]]; then
+    echo "To use an ecFlow server on the Atos HPC at ECMWF, please read instructions: https://confluence.ecmwf.int/display/UDOC/HPC2020%3A+Using+ecFlow"
+    exit 0
+fi
+
 #===============================================================================
 # Get the absolute path THIS script. use it to locate ecflow_client and ecflow_server
 # This avoids mixing 4/5 version of ecflow.
