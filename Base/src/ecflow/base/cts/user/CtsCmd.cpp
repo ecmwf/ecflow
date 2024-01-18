@@ -165,69 +165,53 @@ void CtsCmd::print_only(std::string& os) const {
 
 bool CtsCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CtsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
 bool CtsCmd::isWrite() const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RESTART_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::SHUTDOWN_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::HALT_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::TERMINATE_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RELOAD_WHITE_LIST_FILE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RELOAD_PASSWD_FILE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::FORCE_DEP_EVAL:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::PING:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::STATS:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::STATS_SERVER:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::STATS_RESET:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::SUITES:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::DEBUG_SERVER_ON:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::DEBUG_SERVER_OFF:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::SERVER_LOAD:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::NO_CMD:
             assert(false);
             break;
@@ -243,72 +227,53 @@ bool CtsCmd::cmd_updates_defs() const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES:
             return false;
-            break;
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:
             return true;
-            break;
         case CtsCmd::RESTART_SERVER:
             return true;
-            break;
         case CtsCmd::SHUTDOWN_SERVER:
             return true;
-            break;
         case CtsCmd::HALT_SERVER:
             return true;
-            break;
         case CtsCmd::TERMINATE_SERVER:
             return true;
-            break;
         case CtsCmd::RELOAD_WHITE_LIST_FILE:
             return false;
-            break;
         case CtsCmd::RELOAD_PASSWD_FILE:
             return false;
-            break;
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:
             return false;
-            break;
         case CtsCmd::FORCE_DEP_EVAL:
             return true;
-            break;
         case CtsCmd::PING:
             return false;
-            break;
         case CtsCmd::STATS:
             return false;
-            break;
         case CtsCmd::STATS_SERVER:
             return false;
-            break;
         case CtsCmd::STATS_RESET:
             return false;
-            break;
         case CtsCmd::SUITES:
             return false;
-            break;
         case CtsCmd::DEBUG_SERVER_ON:
             return false;
-            break;
         case CtsCmd::DEBUG_SERVER_OFF:
             return false;
-            break;
         case CtsCmd::SERVER_LOAD:
             return false;
-            break;
         case CtsCmd::NO_CMD:
-            assert(false);
-            break;
+            [[fallthrough]];
         default:
             assert(false);
-            break;
     }
     assert(false);
     return false;
 }
 
 int CtsCmd::timeout() const {
-    if (api_ == CtsCmd::PING)
+    if (api_ == CtsCmd::PING) {
         return 10;
+    }
     return ClientToServerCmd::timeout();
 }
 
@@ -316,64 +281,44 @@ const char* CtsCmd::theArg() const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES:
             return CtsApi::zombieGetArg();
-            break;
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:
             return CtsApi::restoreDefsFromCheckPtArg();
-            break;
         case CtsCmd::RESTART_SERVER:
             return CtsApi::restartServerArg();
-            break;
         case CtsCmd::SHUTDOWN_SERVER:
             return CtsApi::shutdownServerArg();
-            break;
         case CtsCmd::HALT_SERVER:
             return CtsApi::haltServerArg();
-            break;
         case CtsCmd::TERMINATE_SERVER:
             return CtsApi::terminateServerArg();
-            break;
         case CtsCmd::RELOAD_WHITE_LIST_FILE:
             return CtsApi::reloadwsfileArg();
-            break;
         case CtsCmd::RELOAD_PASSWD_FILE:
             return CtsApi::reloadpasswdfile_arg();
-            break;
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:
             return CtsApi::reloadcustompasswdfile_arg();
-            break;
         case CtsCmd::FORCE_DEP_EVAL:
             return CtsApi::forceDependencyEvalArg();
-            break;
         case CtsCmd::PING:
             return CtsApi::pingServerArg();
-            break;
         case CtsCmd::STATS:
             return CtsApi::statsArg();
-            break;
         case CtsCmd::STATS_SERVER:
             return CtsApi::stats_server_arg();
-            break;
         case CtsCmd::STATS_RESET:
             return CtsApi::stats_reset_arg();
-            break;
         case CtsCmd::SUITES:
             return CtsApi::suitesArg();
-            break;
         case CtsCmd::DEBUG_SERVER_ON:
             return CtsApi::debug_server_on_arg();
-            break;
         case CtsCmd::DEBUG_SERVER_OFF:
             return CtsApi::debug_server_off_arg();
-            break;
         case CtsCmd::SERVER_LOAD:
             return CtsApi::server_load_arg();
-            break;
         case CtsCmd::NO_CMD:
-            assert(false);
-            break;
+            [[fallthrough]];
         default:
             assert(false);
-            break;
     }
     assert(false);
     return nullptr;
@@ -385,29 +330,30 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             as->update_stats().zombie_get_++;
             return PreAllocatedReply::zombie_get_cmd(as);
         }
-
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT: {
             as->update_stats().restore_defs_from_checkpt_++;
             as->restore_defs_from_checkpt(); // this can throw, i.e. if server not halted, or defs has suites, etc
             break;
         }
-
         case CtsCmd::RESTART_SERVER: {
             as->update_stats().restart_server_++;
             as->restart();
             return doJobSubmission(as);
         }
-        case CtsCmd::SHUTDOWN_SERVER:
+        case CtsCmd::SHUTDOWN_SERVER: {
             as->update_stats().shutdown_server_++;
             as->shutdown();
             break;
-        case CtsCmd::HALT_SERVER:
+        }
+        case CtsCmd::HALT_SERVER: {
             as->update_stats().halt_server_++;
             as->halted();
             break;
-        case CtsCmd::TERMINATE_SERVER:
+        }
+        case CtsCmd::TERMINATE_SERVER: {
             as->checkPtDefs();
             break;
+        }
         case CtsCmd::RELOAD_WHITE_LIST_FILE: {
             as->update_stats().reload_white_list_file_++;
             std::string errorMsg;
@@ -437,13 +383,15 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             // The default does *not* allow job spawning
             Jobs jobs(as->defs());
             JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
-            if (!jobs.generate(jobsParam))
+            if (!jobs.generate(jobsParam)) {
                 throw std::runtime_error(jobsParam.getErrorMsg());
+            }
             break;
         }
-        case CtsCmd::PING:
+        case CtsCmd::PING: {
             as->update_stats().ping_++;
             break;
+        }
         case CtsCmd::STATS: {
             as->update_stats().stats_++;
             std::stringstream ss;
@@ -458,28 +406,31 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             return PreAllocatedReply::stats_cmd(as);
             break; // Only to be used in test, as subject to change, returns Stats struct
         }
-        case CtsCmd::STATS_RESET:
+        case CtsCmd::STATS_RESET: {
             as->update_stats().reset();
             break; // we could have done as->update_stats().stats_++, to honor reset, we dont
-        case CtsCmd::SUITES:
+        }
+        case CtsCmd::SUITES: {
             as->update_stats().suites_++;
             return PreAllocatedReply::suites_cmd(as);
             break;
-        case CtsCmd::DEBUG_SERVER_ON:
+        }
+        case CtsCmd::DEBUG_SERVER_ON: {
             as->update_stats().debug_server_on_++;
             as->debug_server_on();
             break;
-        case CtsCmd::DEBUG_SERVER_OFF:
+        }
+        case CtsCmd::DEBUG_SERVER_OFF: {
             as->update_stats().debug_server_off_++;
             as->debug_server_off();
             break;
+        }
         case CtsCmd::SERVER_LOAD: {
             as->update_stats().server_load_cmd_++;
             return PreAllocatedReply::server_load_cmd(Log::instance()->path());
         }
         case CtsCmd::NO_CMD:
-            assert(false);
-            break;
+            [[fallthrough]];
         default:
             assert(false);
             break;
@@ -729,16 +680,14 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
 }
 
 bool CtsCmd::handleRequestIsTestable() const {
-    if (api_ == CtsCmd::TERMINATE_SERVER)
-        return false;
-    if (api_ == CtsCmd::RESTORE_DEFS_FROM_CHECKPT)
-        return false;
-    return true;
+    bool is_testable = api_ != CtsCmd::TERMINATE_SERVER & api_ != CtsCmd::RESTORE_DEFS_FROM_CHECKPT;
+    return !is_testable;
 }
 
 void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    if (ac->debug())
+    if (ac->debug()) {
         cout << "  CtsCmd::create api = '" << api_ << "'.\n";
+    }
 
     assert(api_ != CtsCmd::NO_CMD);
 
@@ -746,28 +695,34 @@ void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
 
         std::string do_prompt = vm[theArg()].as<std::string>();
         if (do_prompt.empty()) {
-            if (api_ == CtsCmd::HALT_SERVER)
+            if (api_ == CtsCmd::HALT_SERVER) {
                 prompt_for_confirmation("Are you sure you want to halt the server ? ");
-            else if (api_ == CtsCmd::SHUTDOWN_SERVER)
+            }
+            else if (api_ == CtsCmd::SHUTDOWN_SERVER) {
                 prompt_for_confirmation("Are you sure you want to shut down the server ? ");
-            else
+            }
+            else {
                 prompt_for_confirmation("Are you sure you want to terminate the server ? ");
+            }
         }
-        else if (do_prompt != "yes")
+        else if (do_prompt != "yes") {
             throw std::runtime_error(
                 "Halt, shutdown and terminate expected 'yes' as the only argument to bypass the confirmation prompt");
+        }
     }
     else if (api_ == CtsCmd::SERVER_LOAD) {
 
         std::string log_file = vm[theArg()].as<std::string>();
-        if (ac->debug())
+        if (ac->debug()) {
             std::cout << "  CtsCmd::create CtsCmd::SERVER_LOAD " << log_file << "\n";
+        }
 
         if (!log_file.empty()) {
 
             // testing client interface
-            if (ac->under_test())
+            if (ac->under_test()) {
                 return;
+            }
 
             // No need to call server. Parse the log file to create gnu_plot file.
             Gnuplot gnuplot(log_file, ac->host(), ac->port());

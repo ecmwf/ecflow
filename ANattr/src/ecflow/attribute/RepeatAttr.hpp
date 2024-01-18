@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.
@@ -609,5 +610,11 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
+
+CEREAL_FORCE_DYNAMIC_INIT(RepeatDateList)
+CEREAL_FORCE_DYNAMIC_INIT(RepeatInteger)
+CEREAL_FORCE_DYNAMIC_INIT(RepeatEnumerated)
+CEREAL_FORCE_DYNAMIC_INIT(RepeatString)
+CEREAL_FORCE_DYNAMIC_INIT(RepeatDay)
 
 #endif /* ecflow_attribute_RepeatAttr_HPP */
