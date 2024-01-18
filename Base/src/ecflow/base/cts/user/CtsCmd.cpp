@@ -356,24 +356,21 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         }
         case CtsCmd::RELOAD_WHITE_LIST_FILE: {
             as->update_stats().reload_white_list_file_++;
-            std::string errorMsg;
-            if (!as->reloadWhiteListFile(errorMsg)) {
+            if (std::string errorMsg; !as->reloadWhiteListFile(errorMsg)) {
                 throw std::runtime_error(errorMsg);
             }
             break;
         }
         case CtsCmd::RELOAD_PASSWD_FILE: {
             as->update_stats().reload_passwd_file_++;
-            std::string errorMsg;
-            if (!as->reloadPasswdFile(errorMsg)) {
+            if (std::string errorMsg; !as->reloadPasswdFile(errorMsg)) {
                 throw std::runtime_error(errorMsg);
             }
             break;
         }
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE: {
             as->update_stats().reload_passwd_file_++;
-            std::string errorMsg;
-            if (!as->reloadCustomPasswdFile(errorMsg)) {
+            if (std::string errorMsg; !as->reloadCustomPasswdFile(errorMsg)) {
                 throw std::runtime_error(errorMsg);
             }
             break;
@@ -382,8 +379,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             // The Default JobsParam does *not* allow Job creation, & hence => does not submit jobs
             // The default does *not* allow job spawning
             Jobs jobs(as->defs());
-            JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
-            if (!jobs.generate(jobsParam)) {
+            if (JobsParam jobsParam; !jobs.generate(jobsParam)) { // create jobs = false, spawn_jobs = false
                 throw std::runtime_error(jobsParam.getErrorMsg());
             }
             break;

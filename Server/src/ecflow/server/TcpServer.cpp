@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/server/Server.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
