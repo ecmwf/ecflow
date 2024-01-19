@@ -23,7 +23,16 @@ namespace ecf {
 
 class Child {
 public:
-    enum CmdType { INIT, EVENT, METER, LABEL, WAIT, QUEUE, ABORT, COMPLETE };
+    enum CmdType {
+        INIT,    // Notify Task start
+        EVENT,   // Notify Task event update
+        METER,   // Notify Task meter update
+        LABEL,   // Notify Task label update
+        WAIT,    // Request to wait until given expression evaluates to true
+        QUEUE,   // Request to interact with Queue (active|complete|abort|...)
+        ABORT,   // Notify Task abortion
+        COMPLETE // Notify Task completion
+    };
 
     enum ZombieType {
         USER,           // zombie created by user action

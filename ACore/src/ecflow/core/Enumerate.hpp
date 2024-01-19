@@ -11,9 +11,9 @@
 #ifndef ecflow_core_Enumerate_HPP
 #define ecflow_core_Enumerate_HPP
 
+#include <algorithm>
 #include <optional>
 #include <string>
-
 #include <string_view>
 
 namespace ecf {
