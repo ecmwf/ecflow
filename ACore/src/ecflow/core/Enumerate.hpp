@@ -12,6 +12,7 @@
 #define ecflow_core_Enumerate_HPP
 
 #include <algorithm>
+#include <array>
 #include <optional>
 #include <string>
 #include <string_view>
