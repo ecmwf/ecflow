@@ -18,54 +18,45 @@
 #include <stdexcept>
 #include <unistd.h> // ofr getuid()
 
+#include "ecflow/core/Enumerate.hpp"
+
 namespace ecf {
 
+namespace detail {
+
+template <>
+struct EnumTraits<User::Action>
+{
+    using underlying_t = std::underlying_type_t<User::Action>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(User::Action::FOB, "fob"),
+        std::make_pair(User::Action::FAIL, "fail"),
+        std::make_pair(User::Action::ADOPT, "adopt"),
+        std::make_pair(User::Action::REMOVE, "remove"),
+        std::make_pair(User::Action::BLOCK, "block"),
+        std::make_pair(User::Action::KILL, "kill"),
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(EnumTraits<User::Action>::size == map.back().first + 1);
+};
+
+} // namespace detail
+
 bool User::valid_user_action(const std::string& s) {
-    if (s == "fob")
-        return true;
-    if (s == "fail")
-        return true;
-    if (s == "adopt")
-        return true;
-    if (s == "remove")
-        return true;
-    if (s == "block")
-        return true;
-    if (s == "kill")
-        return true;
-    return false;
+    return Enumerate<User::Action>::is_valid(s);
 }
 
 User::Action User::user_action(const std::string& s) {
-    if (s == "fob")
-        return User::FOB;
-    if (s == "fail")
-        return User::FAIL;
-    if (s == "adopt")
-        return User::ADOPT;
-    if (s == "remove")
-        return User::REMOVE;
-    if (s == "block")
-        return User::BLOCK;
-    if (s == "kill")
-        return User::KILL;
-    return User::BLOCK;
+    return Enumerate<User::Action>::to_enum(s).value_or(User::BLOCK);
 }
 
 std::string User::to_string(User::Action uc) {
-    switch (uc) {
-        case User::FOB:
-            return "fob";
-        case User::FAIL:
-            return "fail";
-        case User::ADOPT:
-            return "adopt";
-        case User::REMOVE:
-            return "remove";
-        case User::BLOCK:
-            return "block";
-        case User::KILL:
-            return "kill";
+    if (auto found = Enumerate<User::Action>::to_string(uc); found) {
+        return std::string{found.value()};
     }
     assert(false);
     return std::string();
