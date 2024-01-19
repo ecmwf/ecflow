@@ -25,6 +25,7 @@
 class DState {
 public:
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5, SUSPENDED = 6 };
+
     explicit DState(State s) : st_(s), state_change_no_(0) {}
     DState() : st_(default_state()) {}
     static DState::State default_state() { return DState::QUEUED; } // NEVER change, or will break client/server
@@ -41,9 +42,9 @@ public:
     bool operator!=(State s) const { return s != st_; }
 
     static NState::State convert(DState::State);
-    static const char* toString(DState::State);
-    static const char* to_html(DState::State);
-    static const char* toString(const DState& ns) { return toString(ns.state()); }
+    static std::string toString(DState::State);
+    static std::string to_html(DState::State);
+    static std::string toString(const DState& ns) { return toString(ns.state()); }
     static std::string to_string(DState::State s) { return std::string(toString(s)); }
     static DState::State toState(const std::string&);
     static bool isValid(const std::string&);

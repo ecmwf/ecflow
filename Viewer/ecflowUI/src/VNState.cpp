@@ -102,9 +102,7 @@ VNState* VNState::toDefaultState(const VNode* n) {
 
     node_ptr node = n->node();
 
-    const char* dStateName = DState::toString(node->defStatus());
-    assert(dStateName);
-    std::string dsn(dStateName);
+    std::string dsn = DState::toString(node->defStatus());
     return find(dsn);
 }
 
