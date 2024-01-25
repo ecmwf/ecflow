@@ -42,9 +42,9 @@ public:
     bool operator!=(State s) const { return s != st_; }
 
     static NState::State convert(DState::State);
-    static std::string toString(DState::State);
+    static const char* toString(DState::State);
     static std::string to_html(DState::State);
-    static std::string toString(const DState& ns) { return toString(ns.state()); }
+    static const char* toString(const DState& ns) { return toString(ns.state()); }
     static std::string to_string(DState::State s) { return std::string(toString(s)); }
     static DState::State toState(const std::string&);
     static bool isValid(const std::string&);

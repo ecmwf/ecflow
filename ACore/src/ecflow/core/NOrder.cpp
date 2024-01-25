@@ -34,6 +34,9 @@ struct EnumTraits<NOrder::Order>
     };
     static constexpr size_t size = map.size();
 
+    static_assert(std::is_same_v<NOrder::Order, decltype(map)::value_type::first_type>);
+    static_assert(std::is_same_v<const char*, decltype(map)::value_type::second_type>);
+
     static_assert(EnumTraits<NOrder::Order>::size == map.back().first + 1);
 };
 

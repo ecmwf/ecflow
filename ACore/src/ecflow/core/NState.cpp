@@ -49,12 +49,12 @@ void NState::setState(State s) {
 #endif
 }
 
-std::string NState::toString(NState::State s) {
+const char* NState::toString(NState::State s) {
     if (auto found = ecf::Enumerate<NState::State>::to_string(s); found) {
-        return std::string{found.value()};
+        return found.value().data();
     }
     assert(false);
-    return std::string{};
+    return nullptr;
 }
 
 std::string NState::to_html(NState::State s) {

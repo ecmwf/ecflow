@@ -71,9 +71,9 @@ NState::State DState::convert(DState::State display_state) {
     return NState::UNKNOWN;
 }
 
-std::string DState::toString(DState::State s) {
+const char* DState::toString(DState::State s) {
     if (auto found = ecf::Enumerate<DState::State>::to_string(s); found) {
-        return std::string{found.value()};
+        return found.value().data();
     }
     assert(false);
     return {};
