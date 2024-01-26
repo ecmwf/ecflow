@@ -71,8 +71,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_suite.def"), errorMsg),
-                        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_suite.def"), errorMsg), errorMsg);
 
     // make sure autoarchive archives the suite.
     BOOST_CHECK_MESSAGE(s1->get_flag().is_set(ecf::Flag::ARCHIVED),
@@ -171,8 +170,8 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     // Run the simulator
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_autoarchive_ast_node_reset.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_ast_node_reset.def"), errorMsg),
+                        errorMsg);
 
     // Auto archive should archive suite s2 and s3, leaving one suite i.e s1
     const std::vector<suite_ptr>& suites = theDefs.suiteVec();
@@ -291,9 +290,8 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_two_autoarchive_in_hierarchy.def"), errorMsg),
-        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_two_autoarchive_in_hierarchy.def"), errorMsg),
+                        errorMsg);
 
     // Check ONLY the suite got archived an not family
     BOOST_CHECK_MESSAGE(suite->get_flag().is_set(ecf::Flag::ARCHIVED),

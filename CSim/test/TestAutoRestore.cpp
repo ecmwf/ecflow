@@ -67,8 +67,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autorestore_suite.def"), errorMsg),
-                        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autorestore_suite.def"), errorMsg), errorMsg);
 
     //   PrintStyle::setStyle(PrintStyle::MIGRATE);
     //   cout << theDefs;

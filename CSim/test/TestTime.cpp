@@ -192,10 +192,9 @@ BOOST_AUTO_TEST_CASE(test_time_and_tomorrows_date) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_time_and_tomorrows_date.def"), errorMsg),
-        errorMsg << "\n"
-                 << theDefs);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_time_and_tomorrows_date.def"), errorMsg),
+                        errorMsg << "\n"
+                                 << theDefs);
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_time_and_tomorrows_date.def") + ".log";
@@ -244,10 +243,9 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_dates.def"), errorMsg),
-        errorMsg << "\n"
-                 << theDefs);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_dates.def"), errorMsg),
+                        errorMsg << "\n"
+                                 << theDefs);
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_multiple_times_and_dates.def") + ".log";
@@ -338,10 +336,9 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_days) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_days.def"), errorMsg),
-        errorMsg << "\n"
-                 << theDefs);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_multiple_times_and_days.def"), errorMsg),
+                        errorMsg << "\n"
+                                 << theDefs);
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_multiple_times_and_days.def") + ".log";

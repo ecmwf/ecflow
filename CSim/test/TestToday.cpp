@@ -104,8 +104,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_series) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_today_time_series.def"), errorMsg),
-                        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_today_time_series.def"), errorMsg), errorMsg);
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_today_time_series.def") + ".log";

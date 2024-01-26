@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
     // Run the simulator
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_autocancel_ast_node_reset.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_ast_node_reset.def"), errorMsg),
+                        errorMsg);
 
     // Auto cancel should delete suite s2 and s3, leaving one suite i.e s1
     BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 1,
@@ -145,8 +145,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_suite) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_suite.def"), errorMsg),
-                        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_suite.def"), errorMsg), errorMsg);
 
     // make sure autocancel deletes the suite.
     BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 0,
@@ -207,8 +206,8 @@ BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_autocancel_family_and_task.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_family_and_task.def"), errorMsg),
+                        errorMsg);
 
     // make sure autocancel deletes the families.
     std::vector<Family*> famVec;
@@ -260,8 +259,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_task) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_task.def"), errorMsg),
-                        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_task.def"), errorMsg), errorMsg);
 
     // make sure autocancel deletes the tasks and leaves families intact.
     std::vector<task_ptr> task_vec;
@@ -298,8 +296,8 @@ BOOST_AUTO_TEST_CASE(test_two_autocancel_in_hierarchy) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_two_autocancel_in_hierarchy.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_two_autocancel_in_hierarchy.def"), errorMsg),
+                        errorMsg);
 
     std::vector<task_ptr> task_vec;
     theDefs.get_all_tasks(task_vec);

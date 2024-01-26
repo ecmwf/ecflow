@@ -113,10 +113,9 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer_relative) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, findTestDataLocation("test_repeat_integer_relative.def"), errorMsg),
-        errorMsg << "\n"
-                 << theDefs);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_integer_relative.def"), errorMsg),
+                        errorMsg << "\n"
+                                 << theDefs);
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_integer_relative.def") + ".log";
