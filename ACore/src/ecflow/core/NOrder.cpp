@@ -12,63 +12,52 @@
 
 #include <cassert>
 
+#include "ecflow/core/Enumerate.hpp"
+
+namespace ecf::detail {
+
+template <>
+struct EnumTraits<NOrder::Order>
+{
+    using underlying_t = std::underlying_type_t<NOrder::Order>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(NOrder::Order::TOP, "top"),
+        std::make_pair(NOrder::Order::BOTTOM, "bottom"),
+        std::make_pair(NOrder::Order::ALPHA, "alpha"),
+        std::make_pair(NOrder::Order::ORDER, "order"),
+        std::make_pair(NOrder::Order::UP, "up"),
+        std::make_pair(NOrder::Order::DOWN, "down"),
+        std::make_pair(NOrder::Order::RUNTIME, "runtime")
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(std::is_same_v<NOrder::Order, decltype(map)::value_type::first_type>);
+    static_assert(std::is_same_v<const char*, decltype(map)::value_type::second_type>);
+
+    static_assert(EnumTraits<NOrder::Order>::size == map.back().first + 1);
+};
+
+} // namespace ecf::detail
+
 std::string NOrder::toString(NOrder::Order s) {
-    switch (s) {
-        case NOrder::TOP:
-            return "top";
-        case NOrder::BOTTOM:
-            return "bottom";
-        case NOrder::ALPHA:
-            return "alpha";
-        case NOrder::ORDER:
-            return "order";
-        case NOrder::UP:
-            return "up";
-        case NOrder::DOWN:
-            return "down";
-        case NOrder::RUNTIME:
-            return "runtime";
-        default:
-            assert(false);
-            break;
+    if (auto found = ecf::Enumerate<NOrder::Order>::to_string(s); found) {
+        return std::string{found.value()};
     }
     assert(false);
-    return std::string();
+    return std::string{};
 }
 
 NOrder::Order NOrder::toOrder(const std::string& str) {
-    if (str == "top")
-        return NOrder::TOP;
-    if (str == "bottom")
-        return NOrder::BOTTOM;
-    if (str == "alpha")
-        return NOrder::ALPHA;
-    if (str == "order")
-        return NOrder::ORDER;
-    if (str == "up")
-        return NOrder::UP;
-    if (str == "down")
-        return NOrder::DOWN;
-    if (str == "runtime")
-        return NOrder::RUNTIME;
+    if (auto found = ecf::Enumerate<NOrder::Order>::to_enum(str); found) {
+        return found.value();
+    }
     assert(false);
     return NOrder::TOP;
 }
 
 bool NOrder::isValid(const std::string& order) {
-    if (order == "top")
-        return true;
-    if (order == "bottom")
-        return true;
-    if (order == "alpha")
-        return true;
-    if (order == "order")
-        return true;
-    if (order == "up")
-        return true;
-    if (order == "down")
-        return true;
-    if (order == "runtime")
-        return true;
-    return false;
+    return ecf::Enumerate<NOrder::Order>::is_valid(order);
 }

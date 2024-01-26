@@ -45,7 +45,7 @@ public:
     bool operator!=(State s) const { return s != st_; }
 
     static const char* toString(NState::State s);
-    static const char* to_html(NState::State s);
+    static std::string to_html(NState::State s);
     static const char* toString(const NState& ns) { return toString(ns.state()); }
     static NState::State toState(const std::string&);
     static bool isValid(const std::string& state);

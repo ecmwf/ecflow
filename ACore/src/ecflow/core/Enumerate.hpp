@@ -11,10 +11,12 @@
 #ifndef ecflow_core_Enumerate_HPP
 #define ecflow_core_Enumerate_HPP
 
+#include <algorithm>
+#include <array>
 #include <optional>
 #include <string>
-
 #include <string_view>
+#include <vector>
 
 namespace ecf {
 
@@ -50,13 +52,14 @@ public:
      * @param e the enum value
      * @return the designation, in case it exists; an empty optional, otherwise
      */
-    static constexpr inline std::optional<string_t> to_string(enum_t e) noexcept {
-        auto found = std::find_if(
-            std::begin(TRAITS::map), std::end(TRAITS::map), [&](const auto& item) { return item.first == e; });
-        if (found == std::end(TRAITS::map)) {
-            return std::nullopt;
+    static constexpr std::optional<string_t> to_string(enum_t e) noexcept {
+        if (auto found = std::find_if(
+                std::begin(TRAITS::map), std::end(TRAITS::map), [&](const auto& item) { return item.first == e; });
+            found != std::end(TRAITS::map)) {
+
+            return std::make_optional(found->second);
         }
-        return std::make_optional(found->second);
+        return std::nullopt;
     }
 
     /**
@@ -65,13 +68,14 @@ public:
      * @param s the designation
      * @return the enum value, in case it exists; an empty optional, otherwise
      */
-    static constexpr inline std::optional<E> to_enum(string_t s) noexcept {
-        auto found = std::find_if(
-            std::begin(TRAITS::map), std::end(TRAITS::map), [&](const auto& item) { return item.second == s; });
-        if (found == std::end(TRAITS::map)) {
-            return std::nullopt;
+    static constexpr std::optional<E> to_enum(string_t s) noexcept {
+        if (auto found = std::find_if(
+                std::begin(TRAITS::map), std::end(TRAITS::map), [&](const auto& item) { return item.second == s; });
+            found != std::end(TRAITS::map)) {
+
+            return std::make_optional(found->first);
         }
-        return std::make_optional(found->first);
+        return std::nullopt;
     }
 
     /**
@@ -80,7 +84,7 @@ public:
      * @param s the designation
      * @return true, if valid; false, otherwise
      */
-    static bool inline is_valid(string_t s) {
+    static constexpr bool is_valid(string_t s) {
         auto found = std::find_if(
             std::begin(TRAITS::map), std::end(TRAITS::map), [&](const auto& item) { return item.second == s; });
         return found != std::end(TRAITS::map);
@@ -113,7 +117,7 @@ public:
         std::transform(std::begin(TRAITS::map),
                        std::end(TRAITS::map),
                        std::back_inserter(result),
-                       [](const auto& item) { return item.second; });
+                       [](const auto& item) { return std::string{item.second}; });
 
         return result;
     }

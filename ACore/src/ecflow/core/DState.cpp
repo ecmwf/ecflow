@@ -14,7 +14,33 @@
 #include <stdexcept>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Enumerate.hpp"
 #include "ecflow/core/Serialization.hpp"
+
+namespace ecf::detail {
+
+template <>
+struct EnumTraits<DState::State>
+{
+    using underlying_t = std::underlying_type_t<DState::State>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(DState::State::UNKNOWN, "unknown"),
+        std::make_pair(DState::State::COMPLETE, "complete"),
+        std::make_pair(DState::State::QUEUED, "queued"),
+        std::make_pair(DState::State::ABORTED, "aborted"),
+        std::make_pair(DState::State::SUBMITTED, "submitted"),
+        std::make_pair(DState::State::ACTIVE, "active"),
+        std::make_pair(DState::State::SUSPENDED, "suspended"),
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(EnumTraits<DState::State>::size == map.back().first + 1);
+};
+
+} // namespace ecf::detail
 
 void DState::setState(State s) {
     st_              = s;
@@ -29,152 +55,59 @@ NState::State DState::convert(DState::State display_state) {
     switch (display_state) {
         case DState::UNKNOWN:
             return NState::UNKNOWN;
-            break;
         case DState::COMPLETE:
             return NState::COMPLETE;
-            break;
         case DState::SUSPENDED:
             return NState::UNKNOWN;
-            break;
         case DState::QUEUED:
             return NState::QUEUED;
-            break;
         case DState::ABORTED:
             return NState::ABORTED;
-            break;
         case DState::SUBMITTED:
             return NState::SUBMITTED;
-            break;
         case DState::ACTIVE:
             return NState::ACTIVE;
-            break;
     }
     return NState::UNKNOWN;
 }
 
 const char* DState::toString(DState::State s) {
-    switch (s) {
-        case DState::UNKNOWN:
-            return "unknown";
-            break;
-        case DState::COMPLETE:
-            return "complete";
-            break;
-        case DState::QUEUED:
-            return "queued";
-            break;
-        case DState::ABORTED:
-            return "aborted";
-            break;
-        case DState::SUBMITTED:
-            return "submitted";
-            break;
-        case DState::SUSPENDED:
-            return "suspended";
-            break;
-        case DState::ACTIVE:
-            return "active";
-            break;
-        default:
-            assert(false);
-            break;
+    if (auto found = ecf::Enumerate<DState::State>::to_string(s); found) {
+        return found.value().data();
     }
     assert(false);
-    return nullptr;
+    return {};
 }
 
-const char* DState::to_html(DState::State s) {
-    switch (s) {
-        case DState::UNKNOWN:
-            return "<state>unknown</state>";
-            break;
-        case DState::COMPLETE:
-            return "<state>complete</state>";
-            break;
-        case DState::QUEUED:
-            return "<state>queued</state>";
-            break;
-        case DState::ABORTED:
-            return "<state>aborted</state>";
-            break;
-        case DState::SUBMITTED:
-            return "<state>submitted</state>";
-            break;
-        case DState::SUSPENDED:
-            return "<state>suspended</state>";
-            break;
-        case DState::ACTIVE:
-            return "<state>active</state>";
-            break;
-        default:
-            assert(false);
-            break;
+std::string DState::to_html(DState::State s) {
+    std::string res;
+    if (auto found = ecf::Enumerate<DState::State>::to_string(s); found) {
+        res += "<state>";
+        res += found.value();
+        res += "</state>";
+        return res;
     }
     assert(false);
-    return nullptr;
+    return res;
 }
 
 DState::State DState::toState(const std::string& str) {
-    if (str == "complete")
-        return DState::COMPLETE;
-    if (str == "unknown")
-        return DState::UNKNOWN;
-    if (str == "queued")
-        return DState::QUEUED;
-    if (str == "aborted")
-        return DState::ABORTED;
-    if (str == "submitted")
-        return DState::SUBMITTED;
-    if (str == "suspended")
-        return DState::SUSPENDED;
-    if (str == "active")
-        return DState::ACTIVE;
+    if (auto found = ecf::Enumerate<DState::State>::to_enum(str); found) {
+        return found.value();
+    }
     throw std::runtime_error("DState::toState: Can change string to a DState :" + str);
-    return DState::UNKNOWN;
 }
 
 bool DState::isValid(const std::string& state) {
-    if (state == "complete")
-        return true;
-    if (state == "aborted")
-        return true;
-    if (state == "queued")
-        return true;
-    if (state == "active")
-        return true;
-    if (state == "suspended")
-        return true;
-    if (state == "unknown")
-        return true;
-    if (state == "submitted")
-        return true;
-    return false;
+    return ecf::Enumerate<DState::State>::is_valid(state);
 }
 
 std::vector<std::string> DState::allStates() {
-    std::vector<std::string> vec;
-    vec.reserve(7);
-    vec.emplace_back("complete");
-    vec.emplace_back("unknown");
-    vec.emplace_back("queued");
-    vec.emplace_back("aborted");
-    vec.emplace_back("submitted");
-    vec.emplace_back("suspended");
-    vec.emplace_back("active");
-    return vec;
+    return ecf::Enumerate<DState::State>::designations();
 }
 
 std::vector<DState::State> DState::states() {
-    std::vector<DState::State> vec;
-    vec.reserve(7);
-    vec.push_back(DState::UNKNOWN);
-    vec.push_back(DState::COMPLETE);
-    vec.push_back(DState::QUEUED);
-    vec.push_back(DState::ABORTED);
-    vec.push_back(DState::SUBMITTED);
-    vec.push_back(DState::ACTIVE);
-    vec.push_back(DState::SUSPENDED);
-    return vec;
+    return ecf::Enumerate<DState::State>::enums();
 }
 
 // ==========================================================================

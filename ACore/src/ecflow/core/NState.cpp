@@ -13,7 +13,32 @@
 #include <cassert>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Enumerate.hpp"
 #include "ecflow/core/Serialization.hpp"
+
+namespace ecf::detail {
+
+template <>
+struct EnumTraits<NState::State>
+{
+    using underlying_t = std::underlying_type_t<NState::State>;
+
+    static constexpr std::array map = std::array{
+        // clang-format off
+        std::make_pair(NState::State::UNKNOWN, "unknown"),
+        std::make_pair(NState::State::COMPLETE, "complete"),
+        std::make_pair(NState::State::QUEUED, "queued"),
+        std::make_pair(NState::State::ABORTED, "aborted"),
+        std::make_pair(NState::State::SUBMITTED, "submitted"),
+        std::make_pair(NState::State::ACTIVE, "active")
+        // clang-format on
+    };
+    static constexpr size_t size = map.size();
+
+    static_assert(EnumTraits<NState::State>::size == map.back().first + 1);
+};
+
+} // namespace ecf::detail
 
 void NState::setState(State s) {
     st_              = s;
@@ -25,133 +50,50 @@ void NState::setState(State s) {
 }
 
 const char* NState::toString(NState::State s) {
-    switch (s) {
-        case NState::UNKNOWN:
-            return "unknown";
-            break;
-        case NState::COMPLETE:
-            return "complete";
-            break;
-        case NState::QUEUED:
-            return "queued";
-            break;
-        case NState::ABORTED:
-            return "aborted";
-            break;
-        case NState::SUBMITTED:
-            return "submitted";
-            break;
-        case NState::ACTIVE:
-            return "active";
-            break;
-        default:
-            assert(false);
-            break;
+    if (auto found = ecf::Enumerate<NState::State>::to_string(s); found) {
+        return found.value().data();
     }
     assert(false);
     return nullptr;
 }
 
-const char* NState::to_html(NState::State s) {
-    switch (s) {
-        case NState::UNKNOWN:
-            return "<state>unknown</state>";
-            break;
-        case NState::COMPLETE:
-            return "<state>complete</state>";
-            break;
-        case NState::QUEUED:
-            return "<state>queued</state>";
-            break;
-        case NState::ABORTED:
-            return "<state>aborted</state>";
-            break;
-        case NState::SUBMITTED:
-            return "<state>submitted</state>";
-            break;
-        case NState::ACTIVE:
-            return "<state>active</state>";
-            break;
-        default:
-            assert(false);
-            break;
+std::string NState::to_html(NState::State s) {
+    std::string res;
+    if (auto found = ecf::Enumerate<NState::State>::to_string(s); found) {
+        res += "<state>";
+        res += found.value();
+        res += "</state>";
+        return res;
     }
     assert(false);
-    return nullptr;
+    return res;
 }
 
 NState::State NState::toState(const std::string& str) {
-    if (str == "complete")
-        return NState::COMPLETE;
-    if (str == "queued")
-        return NState::QUEUED;
-    if (str == "aborted")
-        return NState::ABORTED;
-    if (str == "active")
-        return NState::ACTIVE;
-    if (str == "submitted")
-        return NState::SUBMITTED;
-    if (str == "unknown")
-        return NState::UNKNOWN;
+    if (auto found = ecf::Enumerate<NState::State>::to_enum(str); found) {
+        return found.value();
+    }
     assert(false);
     return NState::UNKNOWN;
 }
 
 std::pair<NState::State, bool> NState::to_state(const std::string& str) {
-    if (str == "complete")
-        return std::make_pair(NState::COMPLETE, true);
-    if (str == "queued")
-        return std::make_pair(NState::QUEUED, true);
-    if (str == "aborted")
-        return std::make_pair(NState::ABORTED, true);
-    if (str == "active")
-        return std::make_pair(NState::ACTIVE, true);
-    if (str == "submitted")
-        return std::make_pair(NState::SUBMITTED, true);
-    if (str == "unknown")
-        return std::make_pair(NState::UNKNOWN, true);
-
+    if (auto found = ecf::Enumerate<NState::State>::to_enum(str); found) {
+        return std::make_pair(found.value(), true);
+    }
     return std::make_pair(NState::UNKNOWN, false);
 }
 
 bool NState::isValid(const std::string& state) {
-    if (state == "complete")
-        return true;
-    if (state == "queued")
-        return true;
-    if (state == "aborted")
-        return true;
-    if (state == "active")
-        return true;
-    if (state == "submitted")
-        return true;
-    if (state == "unknown")
-        return true;
-    return false;
+    return ecf::Enumerate<NState::State>::is_valid(state);
 }
 
 std::vector<std::string> NState::allStates() {
-    std::vector<std::string> vec;
-    vec.reserve(6);
-    vec.emplace_back("complete");
-    vec.emplace_back("unknown");
-    vec.emplace_back("queued");
-    vec.emplace_back("aborted");
-    vec.emplace_back("submitted");
-    vec.emplace_back("active");
-    return vec;
+    return ecf::Enumerate<NState::State>::designations();
 }
 
 std::vector<NState::State> NState::states() {
-    std::vector<NState::State> vec;
-    vec.reserve(6);
-    vec.push_back(NState::UNKNOWN);
-    vec.push_back(NState::COMPLETE);
-    vec.push_back(NState::QUEUED);
-    vec.push_back(NState::ABORTED);
-    vec.push_back(NState::SUBMITTED);
-    vec.push_back(NState::ACTIVE);
-    return vec;
+    return ecf::Enumerate<NState::State>::enums();
 }
 
 template <class Archive>
