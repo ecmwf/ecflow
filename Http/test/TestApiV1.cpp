@@ -12,6 +12,8 @@
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
 
+#include <httplib.h>
+
 #include <boost/test/unit_test.hpp>
 
 #include "Certificate.hpp"
@@ -19,17 +21,18 @@
 #include "TokenFile.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
-#include "httplib.h"
+#include "ecflow/http/JSON.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
 
 BOOST_AUTO_TEST_SUITE(T_ApiV1)
 
-using json   = nlohmann::json;
-using string = std::string;
+using ecf::http::HttpServer;
+using ecf::http::HttpStatusCode;
+using ecf::http::ojson;
 
-const string API_HOST("localhost");
-const string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
+const std::string API_HOST("localhost");
+const std::string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
 
 std::unique_ptr<Certificate> create_certificate() {
     const char* cert_dir = getenv("ECF_API_CERT_DIRECTORY");
@@ -55,7 +58,7 @@ std::unique_ptr<Certificate> create_certificate() {
 
 std::unique_ptr<TokenFile> create_token_file() {
     fs::path cwd(fs::current_path());
-    string tokens_file = cwd.string() + "/api-tokens.json";
+    std::string tokens_file = cwd.string() + "/api-tokens.json";
 
     auto tokenfile = std::make_unique<TokenFile>(tokens_file);
     BOOST_TEST_MESSAGE("Token file " << tokens_file);
@@ -150,10 +153,10 @@ httplib::Response handle_response(const httplib::Result& r,
     return httplib::Response(*r);
 }
 
-httplib::Result request(const string& method,
-                        const string& resource,
-                        const string& payload                  = "",
-                        const string& token                    = "",
+httplib::Result request(const std::string& method,
+                        const std::string& resource,
+                        const std::string& payload             = "",
+                        const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
     httplib::SSLClient c(API_HOST, 8080);
 
@@ -203,7 +206,7 @@ bool wait_until(T&& func, int wait_time = 1, int wait_count = 10) {
     return true;
 }
 
-bool check_for_path(const string& path) {
+bool check_for_path(const std::string& path) {
     try {
         handle_response(request("head", path), HttpStatusCode::success_ok, true);
         return true;
@@ -213,43 +216,46 @@ bool check_for_path(const string& path) {
     }
 }
 
-std::string json_type_to_string(const json& j) {
+std::string json_type_to_string(const ojson& j) {
     switch (j.type()) {
-        case json::value_t::null:
+        case ojson::value_t::null:
             return "null";
-        case json::value_t::boolean:
+        case ojson::value_t::boolean:
             return (j.get<bool>()) ? "true" : "false";
-        case json::value_t::string:
+        case ojson::value_t::string:
             return j.get<std::string>();
-        case json::value_t::binary:
+        case ojson::value_t::binary:
             return j.dump();
-        case json::value_t::array:
-        case json::value_t::object:
+        case ojson::value_t::array:
+        case ojson::value_t::object:
             return j.dump();
-        case json::value_t::discarded:
+        case ojson::value_t::discarded:
             return "discarded";
-        case json::value_t::number_integer:
+        case ojson::value_t::number_integer:
             return ecf::convert_to<std::string>(j.get<int>());
-        case json::value_t::number_unsigned:
+        case ojson::value_t::number_unsigned:
             return ecf::convert_to<std::string>(j.get<unsigned int>());
-        case json::value_t::number_float:
+        case ojson::value_t::number_float:
             return std::to_string(j.get<double>());
         default:
             return std::string();
     }
 }
 
-bool check_for_element(const string& path, const string& key_name, const string& attr_name, const string& value) {
+bool check_for_element(const std::string& path,
+                       const std::string& key_name,
+                       const std::string& attr_name,
+                       const std::string& value) {
 
     try {
         auto r = handle_response(request("get", path), HttpStatusCode::success_ok, true);
-        auto j = json::parse(r.body);
+        auto j = ojson::parse(r.body);
 
         if (j.is_null()) {
             return false;
         }
         else if (j.is_array() == false) {
-            j = json::array({j});
+            j = ojson::array({j});
             std::cout << "json is " << j << std::endl;
         }
 
@@ -325,11 +331,11 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 
     auto result = handle_response(request("get", "/v1/suites"));
 
-    json content = json::parse(result.body);
+    auto content = ojson::parse(result.body);
     bool found   = false;
 
     for (const auto& suite : content) {
-        if (suite.get<string>() == "test") {
+        if (suite.get<std::string>() == "test") {
             found = true;
             break;
         }
@@ -337,7 +343,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
     BOOST_REQUIRE(found);
 
     result  = handle_response(request("get", "/v1/suites/tree"));
-    content = json::parse(result.body);
+    content = ojson::parse(result.body);
     found   = false;
 
     for (const auto& suite : content.items()) {
@@ -350,7 +356,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
     BOOST_REQUIRE(found);
 
     result  = handle_response(request("get", "/v1/suites/test/a/tree"));
-    content = json::parse(result.body);
+    content = ojson::parse(result.body);
     found   = false;
 
     for (const auto& node : content.items()) {
@@ -364,14 +370,14 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 
     handle_response(request("put", "/v1/suites/test/status", R"({"action":"begin"})", API_KEY));
 
-    auto response = json::parse(handle_response(request("get", "/v1/suites/test/definition")).body);
+    auto response = ojson::parse(handle_response(request("get", "/v1/suites/test/definition")).body);
 
     const std::string& correct = "suite test\n  family a\n    task a\n  endfamily\nendsuite\n";
 
     // std::cout << "correct: " << correct << std::endl
     //           << "response:" << response.at("definition").get<string>() << std::endl;
 
-    BOOST_REQUIRE(response.at("definition").get<string>() == correct);
+    BOOST_REQUIRE(response.at("definition").get<std::string>() == correct);
 
     handle_response(request("put", "/v1/suites/test/status", R"({"action":"suspend"})", API_KEY));
     wait_until([] { return check_for_element("/v1/suites/test/status?filter=status", "", "", "suspended"); });
@@ -398,19 +404,19 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
     wait_until(
         [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
 
-    const string pbkdf2_API_KEY("351db772d94310a6d57aa7144448f4c108e7ee2e2a00a74edbdf8edb11bee71b");
+    const std::string pbkdf2_API_KEY("351db772d94310a6d57aa7144448f4c108e7ee2e2a00a74edbdf8edb11bee71b");
     handle_response(
         request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", pbkdf2_API_KEY),
         HttpStatusCode::success_created);
     wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
 
-    const string expired_API_KEY("764073a74875ada28859454e58881229a5149ae400589fc617234d8d96c6d91a");
+    const std::string expired_API_KEY("764073a74875ada28859454e58881229a5149ae400589fc617234d8d96c6d91a");
     handle_response(
         request(
             "post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", expired_API_KEY),
         HttpStatusCode::client_error_unauthorized);
 
-    const string revoked_API_KEY("5c6f6a003f3292c4d7671c9ad8ca10fb76e2273e584992f0d1f8fdf4abcdc81e");
+    const std::string revoked_API_KEY("5c6f6a003f3292c4d7671c9ad8ca10fb76e2273e584992f0d1f8fdf4abcdc81e");
     handle_response(
         request(
             "post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", revoked_API_KEY),
@@ -432,7 +438,7 @@ BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/
         {"abort", "aborted"}, {"complete", "complete"}, {"requeue", "queued"}, {"suspend", "suspended"}};
 
     for (const auto& status : statuses) {
-        json j = {{"action", status.first}};
+        ojson j = {{"action", status.first}};
         handle_response(request("put", "/v1/suites/test/dynamic/status", j.dump(), API_KEY));
 
         wait_until(
@@ -878,7 +884,7 @@ BOOST_AUTO_TEST_CASE(test_statistics, *boost::unit_test::depends_on("S_Http/T_Ap
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     auto response = handle_response(request("get", "/v1/statistics"));
-    auto j        = json::parse(response.body);
+    auto j        = ojson::parse(response.body);
 
     BOOST_REQUIRE(j["num_requests"].get<int>() > 0);
     BOOST_REQUIRE(j["num_errors"].get<int>() > 0);

@@ -18,7 +18,7 @@
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/Options.hpp"
 
-Options opts;
+namespace ecf::http {
 
 HttpServer::HttpServer(int argc, char** argv) {
     parse_args(argc, argv);
@@ -151,7 +151,7 @@ void apply_listeners(httplib::Server& http_server) {
         catch (const std::exception& e) {
             if (opts.verbose)
                 printf("Exception: Error 500: %s\n", e.what());
-            ecf::ojson j;
+            ojson j;
             j["status"]  = res.status;
             j["message"] = e.what();
             j["path"]    = req.path;
@@ -177,7 +177,7 @@ void apply_listeners(httplib::Server& http_server) {
         // registered endpoints
 
         if (res.body.empty()) {
-            ecf::ojson j;
+            ojson j;
             j["path"]   = req.path;
             j["status"] = res.status;
             res.set_content(j.dump(), "application/json");
@@ -240,3 +240,5 @@ void HttpServer::run() {
         start_server(http_server);
     }
 }
+
+} // namespace ecf::http

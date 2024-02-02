@@ -14,6 +14,8 @@
 
 #include "ecflow/http/HttpServer.hpp"
 
+using ecf::http::HttpServer;
+
 int main(int argc, char* argv[]) {
     // Sometimes we get SIGPIPE through openssl, when server is trying
     // to write to a socket which client has already closed.

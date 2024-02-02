@@ -23,7 +23,8 @@
 #include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/node/Defs.hpp"
 
-extern Options opts;
+namespace ecf::http {
+
 static std::chrono::system_clock::time_point api_startup;
 std::atomic<unsigned int> num_requests(0);
 std::atomic<unsigned int> num_errors(0);
@@ -90,7 +91,7 @@ void handle_exception(const std::exception& e, const httplib::Request& request, 
         status_code = HttpStatusCode::server_error_bad_gateway;
     }
 
-    ecf::ojson j;
+    ojson j;
     j["code"]    = status_code;
     j["message"] = err;
     j["path"]    = request.path;
@@ -104,7 +105,7 @@ void handle_exception(const std::exception& e, const httplib::Request& request, 
 }
 
 void handle_exception(const HttpServerException& e, const httplib::Request& request, httplib::Response& response) {
-    ecf::ojson j;
+    ojson j;
     j["code"]    = e.code();
     j["message"] = e.what();
     j["path"]    = request.path;
@@ -141,7 +142,7 @@ void trycatch(const httplib::Request& request, httplib::Response& response, T&& 
     }
 }
 
-ecf::ojson filter_json(const ecf::ojson& j, const httplib::Request& r) {
+ojson filter_json(const ojson& j, const httplib::Request& r) {
 
     const std::string path = r.get_param_value("filter");
     if (path.empty())
@@ -173,8 +174,8 @@ ecf::ojson filter_json(const ecf::ojson& j, const httplib::Request& r) {
     }
 
     // recursively find the correct element inside json document
-    std::function<ecf::ojson(const ecf::ojson&, std::vector<std::string>&)> dive =
-        [&](const ecf::ojson& js, std::vector<std::string>& path_elems) -> ecf::ojson {
+    std::function<ojson(const ojson&, std::vector<std::string>&)> dive =
+        [&](const ojson& js, std::vector<std::string>& path_elems) -> ojson {
         if (path_elems.empty())
             return js;
 
@@ -189,9 +190,9 @@ ecf::ojson filter_json(const ecf::ojson& j, const httplib::Request& r) {
 
             return dive(js.at(elem), path_elems);
         }
-        catch (const ecf::ojson::exception& e) {
+        catch (const ojson::exception& e) {
             // filter path is not found or some other problem with user given path
-            return ecf::ojson();
+            return ojson();
         }
     };
 
@@ -205,7 +206,7 @@ void create(httplib::Server& http_server) {
     http_server.Get("/v1/suites", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
             num_cached_requests++;
-            ecf::ojson j = filter_json(get_suites(), request);
+            ojson j = filter_json(get_suites(), request);
 
             response.status = HttpStatusCode::success_ok;
             response.set_content(j.dump(), "application/json");
@@ -233,7 +234,7 @@ void create(httplib::Server& http_server) {
     http_server.Get("/v1/suites/tree", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
             num_cached_requests++;
-            ecf::ojson j    = filter_json(get_sparser_node_tree("/"), request);
+            ojson j         = filter_json(get_sparser_node_tree("/"), request);
             response.status = HttpStatusCode::success_ok;
             response.set_content(j.dump(), "application/json");
             set_cors(response);
@@ -254,7 +255,7 @@ void create(httplib::Server& http_server) {
                         trycatch(request, response, [&]() {
                             num_cached_requests++;
                             const std::string path = request.matches[1];
-                            ecf::ojson j           = filter_json(get_sparser_node_tree(path), request);
+                            ojson j                = filter_json(get_sparser_node_tree(path), request);
                             response.status        = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
                             set_cors(response);
@@ -279,7 +280,7 @@ void create(httplib::Server& http_server) {
                                auto client            = get_client(request);
                                client->delete_node(path);
 
-                               ecf::ojson j;
+                               ojson j;
                                j["message"]    = "Node deleted successfully";
                                response.status = HttpStatusCode::success_no_content;
                                response.set_content(j.dump(), "application/json");
@@ -290,10 +291,10 @@ void create(httplib::Server& http_server) {
     http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/definition$)",
                     [](const httplib::Request& request, httplib::Response& response) {
                         trycatch(request, response, [&]() {
-                            ecf::ojson j = update_node_definition(request);
+                            ojson j = update_node_definition(request);
 
                             response.status = HttpStatusCode::success_ok;
-                            response.set_content(j.dump(), "application/ecf::ojson");
+                            response.set_content(j.dump(), "application/ojson");
                             set_cors(response);
                         });
                     });
@@ -303,7 +304,7 @@ void create(httplib::Server& http_server) {
                         trycatch(request, response, [&]() {
                             num_cached_requests++;
                             const std::string path = request.matches[1];
-                            ecf::ojson j           = filter_json(get_node_definition(path), request);
+                            ojson j                = filter_json(get_node_definition(path), request);
 
                             response.status = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
@@ -326,7 +327,7 @@ void create(httplib::Server& http_server) {
                     [](const httplib::Request& request, httplib::Response& response) {
                         trycatch(request, response, [&]() {
                             num_cached_requests++;
-                            ecf::ojson j = filter_json(get_node_status(request), request);
+                            ojson j = filter_json(get_node_status(request), request);
 
                             response.status = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
@@ -337,7 +338,7 @@ void create(httplib::Server& http_server) {
     http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/status$)",
                     [](const httplib::Request& request, httplib::Response& response) {
                         trycatch(request, response, [&]() {
-                            ecf::ojson j    = update_node_status(request);
+                            ojson j         = update_node_status(request);
                             response.status = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
                             set_cors(response);
@@ -360,7 +361,7 @@ void create(httplib::Server& http_server) {
                         trycatch(request, response, [&]() {
                             num_cached_requests++;
                             const std::string path = request.matches[1];
-                            ecf::ojson j           = filter_json(get_node_attributes(path), request);
+                            ojson j                = filter_json(get_node_attributes(path), request);
 
                             response.status = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
@@ -371,9 +372,9 @@ void create(httplib::Server& http_server) {
     http_server.Post(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
                      [](const httplib::Request& request, httplib::Response& response) {
                          trycatch(request, response, [&]() {
-                             ecf::ojson j    = add_node_attribute(request);
+                             ojson j         = add_node_attribute(request);
                              response.status = HttpStatusCode::success_created;
-                             response.set_content(j.dump(), "application/ecf::ojson");
+                             response.set_content(j.dump(), "application/ojson");
                              response.set_header("Location",
                                                  "/v1/suites" + static_cast<std::string>(request.matches[1]) +
                                                      "/attributes");
@@ -384,7 +385,7 @@ void create(httplib::Server& http_server) {
     http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
                     [](const httplib::Request& request, httplib::Response& response) {
                         trycatch(request, response, [&]() {
-                            ecf::ojson j    = update_node_attribute(request);
+                            ojson j         = update_node_attribute(request);
                             response.status = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
                             set_cors(response);
@@ -394,7 +395,7 @@ void create(httplib::Server& http_server) {
     http_server.Delete(R"(/v1/suites([A-Za-z0-9_\/\.]+)/attributes$)",
                        [](const httplib::Request& request, httplib::Response& response) {
                            trycatch(request, response, [&]() {
-                               ecf::ojson j    = delete_node_attribute(request);
+                               ojson j         = delete_node_attribute(request);
                                response.status = HttpStatusCode::success_no_content;
                                response.set_content(j.dump(), "application/json");
                                set_cors(response);
@@ -418,7 +419,7 @@ void create(httplib::Server& http_server) {
                             const std::string path = request.matches[1];
                             auto client            = get_client(request);
 
-                            ecf::ojson j;
+                            ojson j;
 
                             client->file(path, "script");
                             j["script"] = client->server_reply().get_string();
@@ -441,7 +442,7 @@ void create(httplib::Server& http_server) {
    http_server.Put(R"(/v1/suites([A-Za-z0-9_\/\.]+)/script$)",
                    [](const httplib::Request& request, httplib::Response& response) {
                       trycatch(request, response, [&]() {
-                         ecf::ojson j = update_script_content(request);
+                         ojson j = update_script_content(request);
                          response.status = HttpStatusCode::success_ok;
                          response.set_content(j.dump(), "application/json");
                          set_cors(response);
@@ -463,7 +464,7 @@ void create(httplib::Server& http_server) {
     http_server.Get(R"(/v1/suites([A-Za-z0-9_\/\.]+)/output$)",
                     [](const httplib::Request& request, httplib::Response& response) {
                         trycatch(request, response, [&]() {
-                            ecf::ojson j    = filter_json(get_node_output(request), request);
+                            ojson j         = filter_json(get_node_output(request), request);
                             response.status = HttpStatusCode::success_ok;
                             response.set_content(j.dump(), "application/json");
                             set_cors(response);
@@ -477,7 +478,7 @@ void create(httplib::Server& http_server) {
             auto client = get_client(request);
             client->pingServer();
 
-            ecf::ojson j;
+            ojson j;
             j["host"]            = client->host() + ":" + client->port();
             j["round_trip_time"] = to_simple_string(client->round_trip_time());
             j                    = filter_json(j, request);
@@ -501,8 +502,8 @@ void create(httplib::Server& http_server) {
             auto client = get_client(request);
 
             client->stats_server();
-            ecf::ojson j = client->server_reply().stats();
-            j            = filter_json(j, request);
+            ojson j = client->server_reply().stats();
+            j       = filter_json(j, request);
 
             response.status = HttpStatusCode::success_ok;
             response.set_content(j.dump(), "application/json");
@@ -512,8 +513,8 @@ void create(httplib::Server& http_server) {
 
     http_server.Put("/v1/server/status", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
-            const ecf::ojson payload = ecf::ojson::parse(request.body);
-            const std::string name   = payload.at("action");
+            const ojson payload    = ojson::parse(request.body);
+            const std::string name = payload.at("action");
 
             auto client = get_client(request);
 
@@ -530,7 +531,7 @@ void create(httplib::Server& http_server) {
                 throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid action: " + name);
             }
 
-            ecf::ojson j;
+            ojson j;
             j["message"] = "Server updated successfully";
 
             response.status = HttpStatusCode::success_ok;
@@ -550,7 +551,7 @@ void create(httplib::Server& http_server) {
     http_server.Get("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
             num_cached_requests++;
-            ecf::ojson j = filter_json(get_server_attributes(), request);
+            ojson j = filter_json(get_server_attributes(), request);
 
             response.status = HttpStatusCode::success_ok;
             response.set_content(j.dump(), "application/json");
@@ -560,7 +561,7 @@ void create(httplib::Server& http_server) {
 
     http_server.Post("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
-            ecf::ojson j = add_server_attribute(request);
+            ojson j = add_server_attribute(request);
 
             response.status = HttpStatusCode::success_created;
             response.set_content(j.dump(), "application/json");
@@ -571,7 +572,7 @@ void create(httplib::Server& http_server) {
 
     http_server.Put("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
-            ecf::ojson j = update_server_attribute(request);
+            ojson j = update_server_attribute(request);
 
             response.status = HttpStatusCode::success_ok;
             response.set_content(j.dump(), "application/json");
@@ -581,7 +582,7 @@ void create(httplib::Server& http_server) {
 
     http_server.Delete("/v1/server/attributes", [](const httplib::Request& request, httplib::Response& response) {
         trycatch(request, response, [&]() {
-            ecf::ojson j = delete_server_attribute(request);
+            ojson j = delete_server_attribute(request);
 
             response.status = HttpStatusCode::success_no_content;
             response.set_content(j.dump(), "application/json");
@@ -605,10 +606,10 @@ void create(httplib::Server& http_server) {
             const std::tm tm = *gmtime(&t);
             strftime(date, 80, "%Y-%m-%dT%H:%M:%SZ", &tm);
 
-            ecf::ojson j = {{"num_requests", num_requests.load()},
-                            {"num_errors", num_errors.load()},
-                            {"num_cached_requests", num_cached_requests.load()},
-                            {"since", std::string(date)}};
+            ojson j = {{"num_requests", num_requests.load()},
+                       {"num_errors", num_errors.load()},
+                       {"num_cached_requests", num_cached_requests.load()},
+                       {"since", std::string(date)}};
 
             j = filter_json(j, request);
             response.set_content(j.dump(), "application/json");
@@ -631,9 +632,12 @@ void create(httplib::Server& http_server) {
 } // namespace
 
 void ApiV1::create(httplib::Server& http_server) {
-    ::create(http_server);
+    ecf::http::create(http_server);
     update_defs_loop(opts.polling_interval);
 
-    if (opts.verbose)
+    if (opts.verbose) {
         printf("API v1 ready\n");
+    }
 }
+
+} // namespace ecf::http

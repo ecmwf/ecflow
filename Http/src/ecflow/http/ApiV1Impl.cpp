@@ -22,7 +22,9 @@
 #include "ecflow/http/BasicAuth.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/Options.hpp"
-#include "ecflow/http/TokenStorage.hpp"
+#if defined(ECF_OPENSSL)
+    #include "ecflow/http/TokenStorage.hpp"
+#endif
 #include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -30,20 +32,22 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
+// For token based authentication, this user account
+// needs to have full access to server as it's acting
+// in lieu of the actual user
+
+namespace ecf::http {
+
+const char* ECF_USER = getenv("ECF_USER");
+const char* ECF_PASS = getenv("ECF_PASS");
+
+extern std::atomic<unsigned int> last_request_time;
+
 std::shared_ptr<Defs> defs_ = nullptr;
 
 static std::mutex def_mutex, cv_mutex;
 static std::condition_variable defs_cv;
 std::atomic<bool> update_defs(true);
-extern Options opts;
-extern std::atomic<unsigned int> last_request_time;
-
-// For token based authentication, this user account
-// needs to have full access to server as it's acting
-// in lieu of the actual user
-
-const char* ECF_USER = getenv("ECF_USER");
-const char* ECF_PASS = getenv("ECF_PASS");
 
 namespace {
 
@@ -82,26 +86,26 @@ std::string tolower(const std::string& str) {
     return ret;
 }
 
-std::string json_type_to_string(const ecf::ojson& j) {
+std::string json_type_to_string(const ojson& j) {
     switch (j.type()) {
-        case ecf::ojson::value_t::null:
+        case ojson::value_t::null:
             return "null";
-        case ecf::ojson::value_t::boolean:
+        case ojson::value_t::boolean:
             return (j.get<bool>()) ? "true" : "false";
-        case ecf::ojson::value_t::string:
+        case ojson::value_t::string:
             return j.get<std::string>();
-        case ecf::ojson::value_t::binary:
+        case ojson::value_t::binary:
             return j.dump();
-        case ecf::ojson::value_t::array:
-        case ecf::ojson::value_t::object:
+        case ojson::value_t::array:
+        case ojson::value_t::object:
             return j.dump();
-        case ecf::ojson::value_t::discarded:
+        case ojson::value_t::discarded:
             return "discarded";
-        case ecf::ojson::value_t::number_integer:
+        case ojson::value_t::number_integer:
             return ecf::convert_to<std::string>(j.get<int>());
-        case ecf::ojson::value_t::number_unsigned:
+        case ojson::value_t::number_unsigned:
             return ecf::convert_to<std::string>(j.get<unsigned int>());
-        case ecf::ojson::value_t::number_float:
+        case ojson::value_t::number_float:
             return ecf::convert_to<std::string>(j.get<double>());
         default:
             return std::string();
@@ -115,24 +119,23 @@ std::shared_ptr<Defs> get_defs() {
     return defs_;
 }
 
-ecf::ojson make_node_json(node_ptr node) {
-    return ecf::ojson::object(
-        {{"type", tolower(node->debugType())}, {"name", node->name()}, {"children", ecf::ojson::array()}});
+ojson make_node_json(node_ptr node) {
+    return ojson::object({{"type", tolower(node->debugType())}, {"name", node->name()}, {"children", ojson::array()}});
 }
 
-void print_sparser_node(ecf::ojson& j, const std::vector<node_ptr>& nodes) {
+void print_sparser_node(ojson& j, const std::vector<node_ptr>& nodes) {
     for (const auto& node : nodes) {
         const std::string type = tolower(node->debugType());
 
-        j[node->name()] = ecf::ojson::object({});
+        j[node->name()] = ojson::object({});
         if (type == "family") {
             print_sparser_node(j[node->name()], std::dynamic_pointer_cast<Family>(node)->nodeVec());
         }
     }
 }
 
-void print_node(ecf::ojson& j, const std::vector<node_ptr>& nodes, bool add_id = false) {
-    j["children"].get_ptr<ecf::ojson::array_t*>()->reserve(nodes.size());
+void print_node(ojson& j, const std::vector<node_ptr>& nodes, bool add_id = false) {
+    j["children"].get_ptr<ojson::array_t*>()->reserve(nodes.size());
     for (const auto& node : nodes) {
         const std::string type = tolower(node->debugType());
         auto jnode             = make_node_json(node);
@@ -226,7 +229,7 @@ std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request) {
     return ci;
 }
 
-std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ecf::ojson& payload) {
+std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ojson& payload) {
     auto ci = get_client(request);
 
     ci->set_child_path(payload.at("ECF_NAME").get<std::string>());
@@ -248,13 +251,13 @@ node_ptr get_node(const std::string& path) {
     return node;
 }
 
-ecf::ojson get_node_status(const httplib::Request& request) {
+ojson get_node_status(const httplib::Request& request) {
     const std::string path = request.matches[1];
 
     auto client = get_client(request);
     client->query("dstate", path, "");
 
-    ecf::ojson j;
+    ojson j;
     j["status"] = client->server_reply().get_string();
     j["path"]   = path;
 
@@ -265,7 +268,7 @@ ecf::ojson get_node_status(const httplib::Request& request) {
 
         std::vector<std::string> why;
         node->bottom_up_why(why);
-        j["why"]                  = ecf::ojson::object({});
+        j["why"]                  = ojson::object({});
         j["why"]["bottom_up_why"] = why;
         why.clear();
         node->top_down_why(why);
@@ -282,13 +285,13 @@ void apply_to_parents(const Node* node, T&& func) {
     }
 }
 
-ecf::ojson get_sparser_node_tree(const std::string& path) {
-    ecf::ojson j;
+ojson get_sparser_node_tree(const std::string& path) {
+    ojson j;
 
     if (path == "/") {
         const std::vector<suite_ptr> suites = get_defs()->suiteVec();
         for (const auto& suite : suites) {
-            j[suite->name()] = ecf::ojson::object({});
+            j[suite->name()] = ojson::object({});
 
             print_sparser_node(j[suite->name()], suite->nodeVec());
         }
@@ -313,16 +316,16 @@ ecf::ojson get_sparser_node_tree(const std::string& path) {
     return j;
 }
 
-ecf::ojson get_node_tree(const std::string& path, bool add_id = false) {
-    ecf::ojson j;
+ojson get_node_tree(const std::string& path, bool add_id = false) {
+    ojson j;
 
     if (path == "/") {
         const std::vector<suite_ptr> suites = get_defs()->suiteVec();
-        j["suites"]                         = ecf::ojson::array();
-        j["suites"].get_ptr<ecf::ojson::array_t*>()->reserve(suites.size());
+        j["suites"]                         = ojson::array();
+        j["suites"].get_ptr<ojson::array_t*>()->reserve(suites.size());
 
         for (const auto& suite : suites) {
-            ecf::ojson js = make_node_json(suite);
+            ojson js = make_node_json(suite);
 
             print_node(js, suite->nodeVec(), add_id);
 
@@ -350,32 +353,32 @@ ecf::ojson get_node_tree(const std::string& path, bool add_id = false) {
     return j;
 }
 
-ecf::ojson get_suites() {
+ojson get_suites() {
     auto suites = get_defs()->suiteVec();
 
-    ecf::ojson j = ecf::ojson::array();
+    ojson j = ojson::array();
     for (const auto& s : suites) {
         j.push_back(s->name());
     }
     return j;
 }
 
-ecf::ojson get_server_attributes() {
+ojson get_server_attributes() {
 
-    ecf::ojson j;
+    ojson j;
 
     j["variables"] = get_defs()->server().user_variables();
 
     for (auto v : get_defs()->server().server_variables()) {
-        ecf::ojson _j = v;
-        _j["const"]   = true;
+        ojson _j    = v;
+        _j["const"] = true;
         j["variables"].push_back(_j);
     }
     return j;
 }
 
-ecf::ojson get_node_attributes(const std::string& path) {
-    ecf::ojson j;
+ojson get_node_attributes(const std::string& path) {
+    ojson j;
 
     node_ptr node = get_node(path);
 
@@ -431,8 +434,8 @@ ecf::ojson get_node_attributes(const std::string& path) {
     return j;
 }
 
-ecf::ojson get_node_definition(const std::string& path) {
-    ecf::ojson j;
+ojson get_node_definition(const std::string& path) {
+    ojson j;
 
     node_ptr node = get_node(path);
 
@@ -442,12 +445,12 @@ ecf::ojson get_node_definition(const std::string& path) {
     return j;
 }
 
-ecf::ojson get_node_output(const httplib::Request& request) {
+ojson get_node_output(const httplib::Request& request) {
     const std::string path = request.matches[1];
 
     auto client = get_client(request);
 
-    ecf::ojson j;
+    ojson j;
 
     client->file(path, "jobout");
     j["job_output"] = client->server_reply().get_string();
@@ -472,8 +475,8 @@ ecf::ojson get_node_output(const httplib::Request& request) {
 }
 
 void add_suite(const httplib::Request& request, httplib::Response& response) {
-    const std::string path   = request.matches[1];
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
 
     const std::string defs = payload.at("definition");
 
@@ -497,22 +500,22 @@ void add_suite(const httplib::Request& request, httplib::Response& response) {
             defsptr->auto_add_externs(true);
         }
     }
-    catch (const ecf::ojson::exception& e) {
+    catch (const ojson::exception& e) {
     }
 
     auto client = get_client(request);
     client->load(defsptr);
 
-    ecf::ojson j;
+    ojson j;
     j["message"] = "Suite(s) created successfully";
     response.set_content(j.dump(), "application/json");
     response.status = HttpStatusCode::success_created;
     response.set_header("Location", request.path + "/" + node->name() + "/definition");
 }
 
-ecf::ojson update_node_definition(const httplib::Request& request) {
+ojson update_node_definition(const httplib::Request& request) {
     const std::string path         = request.matches[1];
-    const ecf::ojson payload       = ecf::ojson::parse(request.body);
+    const ojson payload            = ojson::parse(request.body);
     const std::string new_defs_str = payload.at("definition");
     const bool force               = payload.value("force", false);
 
@@ -560,7 +563,7 @@ ecf::ojson update_node_definition(const httplib::Request& request) {
     auto client = get_client(request);
     client->replace(path, defs->print(), true, force);
 
-    ecf::ojson j;
+    ojson j;
     j["path"]    = path;
     j["message"] = "Definition updated successfully";
     return j;
@@ -712,9 +715,9 @@ ecf::AutoRestoreAttr create_from_text(const std::string& line) {
     return ecf::AutoRestoreAttr(tasks);
 }
 
-ecf::ojson add_node_attribute(const httplib::Request& request) {
-    const std::string path   = request.matches[1];
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
+ojson add_node_attribute(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
 
     const std::string type  = payload.at("type");
     const std::string value = json_type_to_string(payload.at("value"));
@@ -765,15 +768,15 @@ ecf::ojson add_node_attribute(const httplib::Request& request) {
         client->alter(path, "add", type, name, value);
     }
 
-    ecf::ojson j;
+    ojson j;
     j["path"]    = path;
     j["message"] = "Attribute added successfully";
     return j;
 }
 
-ecf::ojson update_node_attribute(const httplib::Request& request) {
-    const std::string path   = request.matches[1];
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
+ojson update_node_attribute(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
 
     std::string type = payload.at("type");
 
@@ -887,12 +890,12 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
                 value = json_type_to_string(payload.at("value"));
                 type  = type + "_value";
             }
-            catch (const ecf::ojson::out_of_range& e) {
+            catch (const ojson::out_of_range& e) {
                 try {
                     value = json_type_to_string(payload.at("max"));
                     type  = type + "_max";
                 }
-                catch (const ecf::ojson::out_of_range& e) {
+                catch (const ojson::out_of_range& e) {
                     throw HttpServerException(HttpStatusCode::client_error_bad_request,
                                               "For limit either 'max' or 'value' must be defined");
                 }
@@ -914,7 +917,7 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
     }
 
     // Package the response body
-    ecf::ojson j;
+    ojson j;
     j["path"]    = path;
     j["message"] = "Attribute changed successfully";
     if (ancillary) {
@@ -928,9 +931,9 @@ ecf::ojson update_node_attribute(const httplib::Request& request) {
     return j;
 }
 
-ecf::ojson delete_node_attribute(const httplib::Request& request) {
-    const std::string path   = request.matches[1];
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
+ojson delete_node_attribute(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
 
     const std::string type = payload.at("type");
     auto client            = get_client(request);
@@ -948,15 +951,15 @@ ecf::ojson delete_node_attribute(const httplib::Request& request) {
         client->alter(path, "delete", type, name);
     }
 
-    ecf::ojson j;
+    ojson j;
     j["path"]    = path;
     j["message"] = "Attribute deleted successfully";
     return j;
 }
 
-ecf::ojson add_server_attribute(const httplib::Request& request) {
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
-    const std::string type   = payload.at("type");
+ojson add_server_attribute(const httplib::Request& request) {
+    const ojson payload    = ojson::parse(request.body);
+    const std::string type = payload.at("type");
 
     if (type != "variable") {
         throw HttpServerException(HttpStatusCode::client_error_bad_request,
@@ -969,17 +972,17 @@ ecf::ojson add_server_attribute(const httplib::Request& request) {
     auto client = get_client(request);
     client->alter("/", "add", type, name, value);
 
-    ecf::ojson j;
+    ojson j;
     j["path"]    = "/";
     j["message"] = "Attribute added successfully";
     return j;
 }
 
-ecf::ojson update_server_attribute(const httplib::Request& request) {
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
-    const std::string type   = payload.at("type");
-    const std::string name   = payload.at("name");
-    const std::string value  = payload.at("value");
+ojson update_server_attribute(const httplib::Request& request) {
+    const ojson payload     = ojson::parse(request.body);
+    const std::string type  = payload.at("type");
+    const std::string name  = payload.at("name");
+    const std::string value = payload.at("value");
     std::string x;
 
     if (get_defs()->server().find_user_variable(name, x) == false) {
@@ -993,15 +996,15 @@ ecf::ojson update_server_attribute(const httplib::Request& request) {
     auto client = get_client(request);
     client->alter("/", "change", type, name, value);
 
-    ecf::ojson j;
+    ojson j;
     j["path"]    = "/";
     j["message"] = "Attribute changed successfully";
     return j;
 }
 
-ecf::ojson delete_server_attribute(const httplib::Request& request) {
+ojson delete_server_attribute(const httplib::Request& request) {
 
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
+    const ojson payload = ojson::parse(request.body);
 
     const std::string type = payload.at("type");
     const std::string name = payload.at("name");
@@ -1018,15 +1021,15 @@ ecf::ojson delete_server_attribute(const httplib::Request& request) {
     auto client = get_client(request);
     client->alter("/", "delete", type, name);
 
-    ecf::ojson j;
+    ojson j;
     j["path"]    = "/";
     j["message"] = "Attribute deleted successfully";
     return j;
 }
 
-ecf::ojson update_node_status(const httplib::Request& request) {
-    const std::string path   = request.matches[1];
-    const ecf::ojson payload = ecf::ojson::parse(request.body);
+ojson update_node_status(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
 
     const std::string name = payload.at("action");
 
@@ -1104,7 +1107,7 @@ ecf::ojson update_node_status(const httplib::Request& request) {
             client->force(path, name_, recursive);
         }
     }
-    ecf::ojson j;
+    ojson j;
     j["path"]    = path;
     j["message"] = "Status changed successfully";
     return j;
@@ -1229,3 +1232,5 @@ void update_defs_loop(int interval) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
+
+} // namespace ecf::http

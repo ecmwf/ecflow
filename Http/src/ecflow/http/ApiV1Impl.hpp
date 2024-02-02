@@ -27,39 +27,44 @@
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
 
+#include <httplib.h>
+
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/http/JSON.hpp"
-#include "httplib.h"
+
+namespace ecf::http {
 
 void update_defs_loop(int interval);
 
 std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
-std::unique_ptr<ClientInvoker> get_client(const ecf::ojson& j);
+std::unique_ptr<ClientInvoker> get_client(const ojson& j);
 
-ecf::ojson get_sparser_node_tree(const std::string& path);
+ojson get_sparser_node_tree(const std::string& path);
 
 void add_suite(const httplib::Request& request, httplib::Response& response);
 
-ecf::ojson get_suites();
+ojson get_suites();
 
-ecf::ojson get_server_attributes();
-ecf::ojson add_server_attribute(const httplib::Request& request);
-ecf::ojson update_server_attribute(const httplib::Request& request);
-ecf::ojson delete_server_attribute(const httplib::Request& request);
+ojson get_server_attributes();
+ojson add_server_attribute(const httplib::Request& request);
+ojson update_server_attribute(const httplib::Request& request);
+ojson delete_server_attribute(const httplib::Request& request);
 
-ecf::ojson get_node_definition(const std::string& path);
-ecf::ojson update_node_definition(const httplib::Request& request);
+ojson get_node_definition(const std::string& path);
+ojson update_node_definition(const httplib::Request& request);
 
-ecf::ojson get_node_attributes(const std::string& path);
-ecf::ojson add_node_attribute(const httplib::Request& request);
-ecf::ojson update_node_attribute(const httplib::Request& request);
-ecf::ojson delete_node_attribute(const httplib::Request& request);
+ojson get_node_attributes(const std::string& path);
+ojson add_node_attribute(const httplib::Request& request);
+ojson update_node_attribute(const httplib::Request& request);
+ojson delete_node_attribute(const httplib::Request& request);
 
-ecf::ojson get_node_status(const httplib::Request& request);
-ecf::ojson update_node_status(const httplib::Request& request);
+ojson get_node_status(const httplib::Request& request);
+ojson update_node_status(const httplib::Request& request);
 
-ecf::ojson get_node_output(const httplib::Request& request);
+ojson get_node_output(const httplib::Request& request);
 
-ecf::ojson update_script_content(const httplib::Request& request);
+ojson update_script_content(const httplib::Request& request);
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_ApiV1Impl_HPP */

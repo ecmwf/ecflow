@@ -36,42 +36,51 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/LimitFwd.hpp"
 
-void to_json(ecf::ojson&, const ::Meter&);
-void to_json(ecf::ojson&, const ::Label&);
-void to_json(ecf::ojson&, const ::Variable&);
-void to_json(ecf::ojson&, const ::Event&);
-void to_json(ecf::ojson&, const ::limit_ptr&);
-void to_json(ecf::ojson&, const ::InLimit&);
-void to_json(ecf::ojson&, const ::DateAttr&);
-void to_json(ecf::ojson&, const ::DayAttr&);
-void to_json(ecf::ojson&, const ::RepeatDate&);
-void to_json(ecf::ojson&, const ::RepeatDateTime&);
-void to_json(ecf::ojson&, const ::RepeatDay&);
-void to_json(ecf::ojson&, const ::RepeatDateList&);
-void to_json(ecf::ojson&, const ::RepeatInteger&);
-void to_json(ecf::ojson&, const ::RepeatEnumerated&);
-void to_json(ecf::ojson&, const ::RepeatString&);
-void to_json(ecf::ojson&, const ::Repeat&);
-void to_json(ecf::ojson&, const ::Stats&);
-void to_json(ecf::ojson&, const ::Expression*);
-void to_json(ecf::ojson&, const ::Expression&);
-void to_json(ecf::ojson&, const ::QueueAttr&);
-void to_json(ecf::ojson&, const ::ZombieAttr&);
-void to_json(ecf::ojson&, const ::GenericAttr&);
+/**
+ * IMPORTANT
+ *
+ * The following `to_json` functions are used by nlohmann::json library to convert the given object to a JSON object.
+ *
+ * These functions are effectively customization points, found using ADL (Argument-Dependent Lookup), and so need to be
+ * declared in the same namespace as the object.
+ */
+
+void to_json(ecf::http::ojson&, const ::Meter&);
+void to_json(ecf::http::ojson&, const ::Label&);
+void to_json(ecf::http::ojson&, const ::Variable&);
+void to_json(ecf::http::ojson&, const ::Event&);
+void to_json(ecf::http::ojson&, const ::limit_ptr&);
+void to_json(ecf::http::ojson&, const ::InLimit&);
+void to_json(ecf::http::ojson&, const ::DateAttr&);
+void to_json(ecf::http::ojson&, const ::DayAttr&);
+void to_json(ecf::http::ojson&, const ::RepeatDate&);
+void to_json(ecf::http::ojson&, const ::RepeatDateTime&);
+void to_json(ecf::http::ojson&, const ::RepeatDay&);
+void to_json(ecf::http::ojson&, const ::RepeatDateList&);
+void to_json(ecf::http::ojson&, const ::RepeatInteger&);
+void to_json(ecf::http::ojson&, const ::RepeatEnumerated&);
+void to_json(ecf::http::ojson&, const ::RepeatString&);
+void to_json(ecf::http::ojson&, const ::Repeat&);
+void to_json(ecf::http::ojson&, const ::Stats&);
+void to_json(ecf::http::ojson&, const ::Expression*);
+void to_json(ecf::http::ojson&, const ::Expression&);
+void to_json(ecf::http::ojson&, const ::QueueAttr&);
+void to_json(ecf::http::ojson&, const ::ZombieAttr&);
+void to_json(ecf::http::ojson&, const ::GenericAttr&);
 namespace ecf {
-void to_json(ecf::ojson&, const ecf::TimeAttr&);
-void to_json(ecf::ojson&, const ecf::TodayAttr&);
-void to_json(ecf::ojson&, const ecf::CronAttr&);
-void to_json(ecf::ojson&, const ecf::Flag&);
-void to_json(ecf::ojson&, const ecf::LateAttr*);
-void to_json(ecf::ojson&, const ecf::LateAttr&);
-void to_json(ecf::ojson&, const ecf::TimeSlot&);
-void to_json(ecf::ojson&, const ecf::AutoCancelAttr*);
-void to_json(ecf::ojson&, const ecf::AutoCancelAttr&);
-void to_json(ecf::ojson&, const ecf::AutoArchiveAttr*);
-void to_json(ecf::ojson&, const ecf::AutoArchiveAttr&);
-void to_json(ecf::ojson&, const ecf::AutoRestoreAttr*);
-void to_json(ecf::ojson&, const ecf::AutoRestoreAttr&);
+void to_json(ecf::http::ojson&, const ecf::TimeAttr&);
+void to_json(ecf::http::ojson&, const ecf::TodayAttr&);
+void to_json(ecf::http::ojson&, const ecf::CronAttr&);
+void to_json(ecf::http::ojson&, const ecf::Flag&);
+void to_json(ecf::http::ojson&, const ecf::LateAttr*);
+void to_json(ecf::http::ojson&, const ecf::LateAttr&);
+void to_json(ecf::http::ojson&, const ecf::TimeSlot&);
+void to_json(ecf::http::ojson&, const ecf::AutoCancelAttr*);
+void to_json(ecf::http::ojson&, const ecf::AutoCancelAttr&);
+void to_json(ecf::http::ojson&, const ecf::AutoArchiveAttr*);
+void to_json(ecf::http::ojson&, const ecf::AutoArchiveAttr&);
+void to_json(ecf::http::ojson&, const ecf::AutoRestoreAttr*);
+void to_json(ecf::http::ojson&, const ecf::AutoRestoreAttr&);
 } // namespace ecf
 
 #endif /* ecflow_http_TypeToJson_HPP */

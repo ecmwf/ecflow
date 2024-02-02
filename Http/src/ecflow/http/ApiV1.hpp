@@ -27,11 +27,15 @@
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
 
-#include "httplib.h"
+#include <httplib.h>
+
+namespace ecf::http {
 
 class ApiV1 {
 public:
     static void create(httplib::Server& server);
 };
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_ApiV1_HPP */

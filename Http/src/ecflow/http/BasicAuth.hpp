@@ -13,9 +13,13 @@
 
 #include <string>
 
+namespace ecf::http {
+
 class BasicAuth {
 public:
     static std::pair<std::string, std::string> get_credentials(const std::string& token);
 };
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_BasicAuth_HPP */

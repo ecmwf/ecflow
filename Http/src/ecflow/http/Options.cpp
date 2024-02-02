@@ -8,15 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_JSON_HPP
-#define ecflow_http_JSON_HPP
-
-#include "nlohmann/json.hpp"
+#include "ecflow/http/Options.hpp"
 
 namespace ecf::http {
 
-using ojson = nlohmann::ordered_json;
+Options opts = {};
 
 } // namespace ecf::http
-
-#endif /* ecflow_http_JSON_HPP */

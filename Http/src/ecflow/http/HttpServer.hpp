@@ -11,6 +11,8 @@
 #ifndef ecflow_http_HttpServer_HPP
 #define ecflow_http_HttpServer_HPP
 
+namespace ecf::http {
+
 class HttpServer {
 public:
     HttpServer(int argc, char** argv);
@@ -20,5 +22,7 @@ public:
 private:
     void parse_args(int argc, char** argv);
 };
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_HttpServer_HPP */

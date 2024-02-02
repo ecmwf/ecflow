@@ -30,15 +30,16 @@ set(srcs
   src/ecflow/http/HttpServerException.hpp
   src/ecflow/http/JSON.hpp
   src/ecflow/http/Options.hpp
-  src/ecflow/http/TokenStorage.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.hpp>
   src/ecflow/http/TypeToJson.hpp
   # Sources
   src/ecflow/http/HttpServer.cpp
   src/ecflow/http/ApiV1.cpp
   src/ecflow/http/ApiV1Impl.cpp
   src/ecflow/http/BasicAuth.cpp
+  src/ecflow/http/Options.cpp
   src/ecflow/http/TypeToJson.cpp
-  src/ecflow/http/TokenStorage.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.cpp>
 )
 
 ecbuild_add_library(
