@@ -10,21 +10,21 @@
 
 #include "ecflow/http/ApiV1Impl.hpp"
 
-#include <condition_variable>
-#include <mutex>
 #include <optional>
 #include <string>
-#include <thread>
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/http/BasicAuth.hpp"
+#include "ecflow/http/Client.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/Options.hpp"
 #if defined(ECF_OPENSSL)
     #include "ecflow/http/TokenStorage.hpp"
 #endif
+#include "ecflow/http/DefsStorage.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
 #include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -38,45 +38,7 @@
 
 namespace ecf::http {
 
-const char* ECF_USER = getenv("ECF_USER");
-const char* ECF_PASS = getenv("ECF_PASS");
-
-extern std::atomic<unsigned int> last_request_time;
-
-std::shared_ptr<Defs> defs_ = nullptr;
-
-static std::mutex def_mutex, cv_mutex;
-static std::condition_variable defs_cv;
-std::atomic<bool> update_defs(true);
-
 namespace {
-
-static void print_polling_interval_notification(long long sleeptime,
-                                                long long base_sleeptime,
-                                                long long drift,
-                                                long long max_sleeptime) {
-    const char* fmt = "Polling interval is now %lld (base: %lld drift: %lld max: %lld)\n";
-    printf(fmt, sleeptime, base_sleeptime, drift, max_sleeptime);
-}
-
-template <typename T>
-void trigger_defs_update(T&& func) {
-    {
-        std::lock_guard<std::mutex> lock(cv_mutex);
-        update_defs = true;
-        defs_cv.notify_one();
-    }
-
-    while (update_defs.load() == true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    }
-
-    func();
-}
-
-void trigger_defs_update() {
-    trigger_defs_update([] {});
-}
 
 std::string tolower(const std::string& str) {
     std::string ret = str;
@@ -86,38 +48,8 @@ std::string tolower(const std::string& str) {
     return ret;
 }
 
-std::string json_type_to_string(const ojson& j) {
-    switch (j.type()) {
-        case ojson::value_t::null:
-            return "null";
-        case ojson::value_t::boolean:
-            return (j.get<bool>()) ? "true" : "false";
-        case ojson::value_t::string:
-            return j.get<std::string>();
-        case ojson::value_t::binary:
-            return j.dump();
-        case ojson::value_t::array:
-        case ojson::value_t::object:
-            return j.dump();
-        case ojson::value_t::discarded:
-            return "discarded";
-        case ojson::value_t::number_integer:
-            return ecf::convert_to<std::string>(j.get<int>());
-        case ojson::value_t::number_unsigned:
-            return ecf::convert_to<std::string>(j.get<unsigned int>());
-        case ojson::value_t::number_float:
-            return ecf::convert_to<std::string>(j.get<double>());
-        default:
-            return std::string();
-    }
-}
 
 } // namespace
-
-std::shared_ptr<Defs> get_defs() {
-    std::lock_guard<std::mutex> lock(def_mutex);
-    return defs_;
-}
 
 ojson make_node_json(node_ptr node) {
     return ojson::object({{"type", tolower(node->debugType())}, {"name", node->name()}, {"children", ojson::array()}});
@@ -145,101 +77,6 @@ void print_node(ojson& j, const std::vector<node_ptr>& nodes, bool add_id = fals
             print_node(j["children"].back(), std::dynamic_pointer_cast<Family>(node)->nodeVec(), add_id);
         }
     }
-}
-
-bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
-
-    auto auth_with_token = [&](const std::string& token) -> bool {
-#ifdef ECF_OPENSSL
-        if (TokenStorage::instance().verify(token)) {
-            if (ECF_USER != nullptr && ECF_PASS != nullptr) {
-                ci->set_user_name(std::string(ECF_USER));
-                ci->set_password(std::string(ECF_PASS));
-            }
-            return true;
-        }
-#endif
-        return false;
-    };
-
-    const auto& header = request.headers;
-
-    // Authorization: Basic ..........
-    // Authorization: Bearer ..........
-
-    auto auth = header.find("Authorization");
-
-    if (auth != header.end()) {
-        std::vector<std::string> elems;
-        ecf::Str::split(auth->second, elems, " ");
-
-        if (elems[0] == "Basic") {
-            auto creds = BasicAuth::get_credentials(elems[1]);
-            ci->set_user_name(creds.first);
-            ci->set_password(creds.second);
-            return true;
-        }
-        else if (elems[0] == "Bearer") {
-#ifndef ECF_OPENSSL
-            throw HttpServerException(HttpStatusCode::server_error_internal_server_error,
-                                      "Server compiled without SSL support");
-#else
-            return auth_with_token(elems[1]);
-#endif
-        }
-        return false;
-    }
-
-    // No standard authentication header set,
-    // try X-API-Key and/or queryparam
-
-    auth = header.find("X-API-Key");
-
-    if (auth != header.end()) {
-#ifndef ECF_OPENSSL
-        throw HttpServerException(HttpStatusCode::server_error_internal_server_error,
-                                  "Server compiled without SSL support");
-#else
-        return auth_with_token(auth->second);
-#endif
-    }
-
-    // allow token to be passed as a query parameter
-    const std::string token = request.get_param_value("key");
-
-    if (token.empty() == false) {
-#ifndef ECF_OPENSSL
-        throw HttpServerException(HttpStatusCode::server_error_internal_server_error,
-                                  "Server compiled without SSL support");
-#else
-        return auth_with_token(token);
-#endif
-    }
-
-    return false;
-}
-
-std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request) {
-    auto ci = std::make_unique<ClientInvoker>();
-
-    if (request.method != "GET" && request.method != "OPTIONS" && request.method != "HEAD" &&
-        authenticate(request, ci.get()) == false) {
-        throw HttpServerException(HttpStatusCode::client_error_unauthorized, "Unauthorized");
-    }
-    return ci;
-}
-
-std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ojson& payload) {
-    auto ci = get_client(request);
-
-    ci->set_child_path(payload.at("ECF_NAME").get<std::string>());
-    ci->set_child_password(payload.at("ECF_PASS").get<std::string>());
-    ci->set_child_pid(json_type_to_string(payload.at("ECF_RID")));
-    ci->set_child_try_no(std::stoi(json_type_to_string(payload.at("ECF_TRYNO"))));
-    ci->set_child_timeout(payload.value("ECF_TIMEOUT", 86400));
-    ci->set_zombie_child_timeout(payload.value("ECF_ZOMBIE_TIMEOUT", 43200));
-
-    return ci;
 }
 
 node_ptr get_node(const std::string& path) {
@@ -1113,124 +950,27 @@ ojson update_node_status(const httplib::Request& request) {
     return j;
 }
 
-#if 0
-json update_script_content(const httplib::Request& request) {
-   const std::string path = request.matches[1];
-   const json payload = json::parse(request.body);
+ojson update_script_content(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
 
-   const std::string script = payload.at("script");
+    const std::string script = payload.at("script");
 
-   std::vector<std::string> lines;
-   lines.reserve(20);
-   std::stringstream ss(script);
+    std::vector<std::string> lines;
+    lines.reserve(20);
+    std::stringstream ss(script);
 
-   for (std::string line; std::getline(ss, line, '\n');) {
-      lines.push_back(line);
-   }
-
-   auto client = get_client(request);
-   client->edit_script_submit(path, {}, lines, false, false);
-
-   json j;
-
-   j["message"] = "Script submitted successfully";
-   return j;
-}
-#endif
-
-void update_defs_loop(int interval) {
-    std::thread t([&]() {
-        ClientInvoker client;
-        //      client.set_auto_sync(true);
-
-        auto get_current_time = [] {
-            struct timeval curtime;
-            gettimeofday(&curtime, nullptr);
-            return static_cast<unsigned int>(curtime.tv_sec);
-        };
-
-        auto update = [&] {
-            {
-                std::lock_guard<std::mutex> lock(def_mutex);
-                if (defs_ != nullptr)
-                    client.sync(defs_);
-                defs_ = client.defs();
-            }
-            if (opts.verbose) {
-                printf("Defs modify_change_no: %d state_change_no: %d\n",
-                       defs_->modify_change_no(),
-                       defs_->state_change_no());
-            }
-        };
-
-        // These will throw is ecflow server is not present; we will not
-        // try to reconnect if there wasn't a connection to begin with
-        client.news_local();
-        client.sync_local();
-
-        // Implement a drift to update cycle. The basic idea is that if we
-        // don't get requests to the interface, we slowly start to increase
-        // the interval which we use to poll ecFlow server. This is done to
-        // reduce ecFlow server load when there is no activity on the REST
-        // API.
-        // For every minute that goes by without any activity on the REST API,
-        // we increase the drift by one second. The maximum drift value is
-        // 10 * polling interval, but minimum 30 seconds. Activity on the API
-        // will reset drift to zero.
-
-        const std::chrono::seconds base_sleeptime(interval);
-        std::chrono::seconds sleeptime(interval);
-        const std::chrono::seconds max_sleeptime(std::max(30, opts.max_polling_interval));
-        std::chrono::seconds previous_sleeptime(interval);
-
-        for (;;) {
-            try {
-                while (true) {
-                    std::unique_lock<std::mutex> lock(cv_mutex);
-                    if (defs_cv.wait_for(lock, sleeptime, [] { return update_defs.load(); })) {
-                        // update requested by some other thread
-                        if (opts.verbose)
-                            printf("defs update requested\n");
-                        update();
-                        update_defs = false;
-                    }
-                    else {
-                        // update triggered by timeout
-                        client.news(defs_);
-                        if (client.get_news()) {
-                            update();
-                            update_defs = false;
-                        }
-                    }
-
-                    if (opts.max_polling_interval <= opts.polling_interval) {
-                        // drift disabled
-                        continue;
-                    }
-                    const double last_request_age = static_cast<double>(get_current_time() - last_request_time.load());
-                    const auto drift = std::chrono::seconds(static_cast<int>(floor(last_request_age / 60.)));
-
-                    sleeptime = min(max_sleeptime, base_sleeptime + drift);
-                    if (opts.verbose && sleeptime != previous_sleeptime) {
-                        print_polling_interval_notification(
-                            sleeptime.count(), base_sleeptime.count(), drift.count(), max_sleeptime.count());
-                    }
-
-                    previous_sleeptime = sleeptime;
-                }
-            }
-            catch (const std::exception& e) {
-                printf("ERROR: Communication problem with ecflow server? Retrying in 5s\n");
-                std::this_thread::sleep_for(std::chrono::seconds(5));
-            }
-        }
-    });
-
-    t.detach();
-
-    while (update_defs.load() == true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    for (std::string line; std::getline(ss, line, '\n');) {
+        lines.push_back(line);
     }
+
+    auto client = get_client(request);
+    client->edit_script_submit(path, {}, lines, false, false);
+
+    ojson j;
+
+    j["message"] = "Script submitted successfully";
+    return j;
 }
 
 } // namespace ecf::http

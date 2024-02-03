@@ -8,17 +8,15 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_JSON_HPP
-#define ecflow_http_JSON_HPP
+#ifndef ecflow_http_Api_HPP
+#define ecflow_http_Api_HPP
 
-#include "nlohmann/json.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
 
 namespace ecf::http {
 
-using ojson = nlohmann::ordered_json;
-
-std::string json_type_to_string(const ojson& j);
+void setup(httplib::Server& server);
 
 } // namespace ecf::http
 
-#endif /* ecflow_http_JSON_HPP */
+#endif /* ecflow_http_Api_HPP */

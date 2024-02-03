@@ -8,17 +8,21 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_JSON_HPP
-#define ecflow_http_JSON_HPP
+#ifndef ecflow_http_Client_HPP
+#define ecflow_http_Client_HPP
 
-#include "nlohmann/json.hpp"
+#include <memory>
+
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
+#include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {
 
-using ojson = nlohmann::ordered_json;
+std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
 
-std::string json_type_to_string(const ojson& j);
+std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ojson& payload);
 
 } // namespace ecf::http
 
-#endif /* ecflow_http_JSON_HPP */
+#endif /* ecflow_http_Client_HPP */

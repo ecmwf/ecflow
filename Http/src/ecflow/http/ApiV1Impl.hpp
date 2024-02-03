@@ -11,33 +11,11 @@
 #ifndef ecflow_http_ApiV1Impl_HPP
 #define ecflow_http_ApiV1Impl_HPP
 
-#include <sys/socket.h>
-#if defined(MSG_NOSIGNAL)
-    // The MSG_NOSIGNAL flag should be defined by <sys/socket.h>
-    // (as per POSIX: https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/send.html),
-    // but that is not always the case for OSX.
-    //
-    // If MSG_NOSIGNAL is not defined, we leave it up to httplib to use default flags.
-    //
-    #define CPPHTTPLIB_SEND_FLAGS MSG_NOSIGNAL
-    #define CPPHTTPLIB_RECV_FLAGS MSG_NOSIGNAL
-#endif
-
-#ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
-#endif
-
-#include <httplib.h>
-
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
 #include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {
-
-void update_defs_loop(int interval);
-
-std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
-std::unique_ptr<ClientInvoker> get_client(const ojson& j);
 
 ojson get_sparser_node_tree(const std::string& path);
 

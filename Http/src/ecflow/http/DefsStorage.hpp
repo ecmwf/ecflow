@@ -8,17 +8,23 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_JSON_HPP
-#define ecflow_http_JSON_HPP
+#ifndef ecflow_http_DefsStorage_HPP
+#define ecflow_http_DefsStorage_HPP
 
-#include "nlohmann/json.hpp"
+#include <functional>
+
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {
 
-using ojson = nlohmann::ordered_json;
+std::shared_ptr<Defs> get_defs();
 
-std::string json_type_to_string(const ojson& j);
+void update_defs_loop(int interval);
+
+void trigger_defs_update();
+void trigger_defs_update(std::function<void()> function);
 
 } // namespace ecf::http
 
-#endif /* ecflow_http_JSON_HPP */
+#endif /* DefsStorage */

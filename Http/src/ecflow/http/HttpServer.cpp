@@ -14,7 +14,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Filesystem.hpp"
-#include "ecflow/http/ApiV1.hpp"
+#include "ecflow/http/Api.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/Options.hpp"
 
@@ -196,7 +196,7 @@ void start_server(httplib::Server& http_server) {
     if (opts.verbose)
         printf("ecFlow server location is %s:%d\n", opts.ecflow_host.c_str(), opts.ecflow_port);
 
-    ApiV1::create(http_server);
+    setup(http_server);
 
     const std::string proto = (opts.no_ssl ? "http" : "https");
 
