@@ -210,8 +210,9 @@ void to_json(ojson& j, const ::Stats& s) {
 }
 
 void to_json(ojson& j, const ::Expression* a) {
-    if (a == nullptr)
+    if (!a) {
         return;
+    }
 
     to_json(j, *a);
 }
@@ -222,10 +223,12 @@ void to_json(ojson& j, const ::Expression& a) {
 
     for (const auto& expr : exprs) {
         std::string typestr("FIRST");
-        if (expr.andExpr())
+        if (expr.andExpr()) {
             typestr = "AND";
-        else if (expr.orExpr())
+        }
+        else if (expr.orExpr()) {
             typestr = "OR";
+        }
 
         ojson jj = ojson::object({{"expression", expr.expression()}, {"type", typestr}});
 
@@ -254,7 +257,7 @@ void to_json(ojson& j, const ::ZombieAttr& a) {
 
 void to_json(ojson& j, const ::GenericAttr& a) {
     j["name"]   = a.name();
-    j["values"] = const_cast<GenericAttr&>(a).values();
+    j["values"] = a.values();
 }
 
 namespace ecf {
@@ -281,8 +284,9 @@ void to_json(ojson& j, const ecf::Flag& a) {
 }
 
 void to_json(ojson& j, const ecf::LateAttr* a) {
-    if (a == nullptr)
+    if (!a) {
         return;
+    }
 
     to_json(j, *a);
 }
@@ -302,8 +306,9 @@ void to_json(ojson& j, const ecf::TimeSlot& a) {
 }
 
 void to_json(ojson& j, const ecf::AutoCancelAttr* a) {
-    if (a == nullptr)
+    if (!a) {
         return;
+    }
 
     to_json(j, *a);
 }
@@ -317,8 +322,9 @@ void to_json(ojson& j, const ecf::AutoCancelAttr& a) {
 }
 
 void to_json(ojson& j, const ecf::AutoRestoreAttr* a) {
-    if (a == nullptr)
+    if (!a) {
         return;
+    }
 
     to_json(j, *a);
 }
@@ -328,8 +334,9 @@ void to_json(ojson& j, const ecf::AutoRestoreAttr& a) {
 }
 
 void to_json(ojson& j, const ecf::AutoArchiveAttr* a) {
-    if (a == nullptr)
+    if (!a) {
         return;
+    }
 
     to_json(j, *a);
 }

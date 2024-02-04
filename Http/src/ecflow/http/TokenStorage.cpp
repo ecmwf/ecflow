@@ -31,7 +31,7 @@ namespace ecf::http {
 
 std::shared_mutex m;
 
-std::atomic<bool> initialized = false;
+std::atomic initialized = false;
 
 namespace {
 
@@ -41,7 +41,7 @@ std::string hmac_sha256(const std::string& salt, const std::string& token) {
 
     HMAC(EVP_sha256(),
          salt.c_str(),
-         salt.size(),
+         static_cast<int>(salt.size()),
          reinterpret_cast<const unsigned char*>(token.c_str()),
          token.size(),
          hash,
@@ -57,9 +57,9 @@ std::string hmac_pbkdf2_sha256(const std::string& salt, const std::string& token
     unsigned char hash[SHA256_DIGEST_LENGTH];
 
     PKCS5_PBKDF2_HMAC(token.c_str(),
-                      token.size(),
+                      static_cast<int>(token.size()),
                       reinterpret_cast<const unsigned char*>(salt.c_str()),
-                      salt.size(),
+                      static_cast<int>(salt.size()),
                       num_iterations,
                       EVP_sha256(),
                       SHA256_DIGEST_LENGTH,
@@ -71,7 +71,7 @@ std::string hmac_pbkdf2_sha256(const std::string& salt, const std::string& token
     return ss.str();
 }
 
-std::string hash(const std::string& method, const std::string& salt, const std::string token) {
+std::string hash(const std::string& method, const std::string& salt, const std::string& token) {
     /*
      * Hash a token with correct HMAC.
      * Current options are:
@@ -97,9 +97,10 @@ std::string hash(const std::string& method, const std::string& salt, const std::
     throw HttpServerException(HttpStatusCode::server_error_internal_server_error, "Unsupported HMAC: " + method);
 }
 
-bool is_supported_hmac(const std::string& method) {
-    if (method == "sha256" || method.find("pbkdf2:sha256") != std::string::npos)
+bool is_supported_hmac(std::string_view method) {
+    if (method == "sha256" || method.find("pbkdf2:sha256") != std::string::npos) {
         return true;
+    }
     return false;
 }
 
@@ -130,17 +131,16 @@ bool TokenStorage::verify(const std::string& token) const {
     // Take a (weak) reader lock; the background thread updating
     // tokens from file can block us but other readers cannot
 
-    std::shared_lock<std::shared_mutex> lock(m);
+    std::shared_lock lock(m);
     for (const auto& t : tokens_) {
         const std::string hashed = hash(t.method, t.salt, token);
         if (hashed == t.hash && (t.expires.time_since_epoch().count() == 0 || t.expires > now) &&
             (t.revoked.time_since_epoch().count() == 0 || t.revoked > now)) {
-            if (opts.verbose)
+            if (opts.verbose) {
                 printf("Token for '%s' authenticated successfully\n", t.description.c_str());
+            }
             return true;
         }
-        // printf("%s %s %s to %s should be %s\n", t.method.c_str(), t.salt.c_str(), token.c_str(), hashed.c_str(),
-        // t.hash.c_str());
     }
     return false;
 }
@@ -154,13 +154,13 @@ std::vector<Token> ReadTokens(const std::string& filename) {
      * Format is:
      * [
      * {
-     *    "hash" : "...",        // hashed and salted token, format is identical to python
-                                 // library 'werkzeug': METHOD$SALT$HASH
-          "description" : "...", // free-form description of token (application)
-          "expires_at" : NUM,    // unix epoch time when this token will expire
-                                 // OPTIONAL: if missing or zero, no expiration time is set
-          "revoked_at" : NUM     // unix epoch time when this token was revoked
-                                 // OPTIONAL: if missing or zero, no revoke time is set
+     *    "hash" : "...",        # hashed and salted token, format is identical to python
+                                 # library 'werkzeug': METHOD$SALT$HASH
+          "description" : "...", # free-form description of token (application)
+          "expires_at" : NUM,    # unix epoch time when this token will expire
+                                 # OPTIONAL: if missing or zero, no expiration time is set
+          "revoked_at" : NUM     # unix epoch time when this token was revoked
+                                 # OPTIONAL: if missing or zero, no revoke time is set
      * }
      * ]
      */
@@ -197,8 +197,9 @@ std::vector<Token> ReadTokens(const std::string& filename) {
             printf("Invalid token: %s: %s\n", o.dump().c_str(), e.what());
         }
     }
-    if (opts.verbose)
+    if (opts.verbose) {
         printf("Read %ld tokens\n", new_tokens.size());
+    }
 
     return new_tokens;
 }
@@ -217,7 +218,7 @@ void TokenStorage::ReadStorage() {
             if (current_modified > last_modified) {
                 auto new_tokens = ReadTokens(opts.tokens_file);
                 {
-                    std::lock_guard<std::shared_mutex> lock(m);
+                    std::lock_guard lock(m);
                     tokens_ = new_tokens;
                 }
                 last_modified = current_modified;

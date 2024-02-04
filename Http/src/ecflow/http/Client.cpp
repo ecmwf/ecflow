@@ -26,12 +26,12 @@
 
 namespace ecf::http {
 
-const char* ECF_USER = getenv("ECF_USER");
-const char* ECF_PASS = getenv("ECF_PASS");
+const char* const ECF_USER = getenv("ECF_USER");
+const char* const ECF_PASS = getenv("ECF_PASS");
 
 bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
 
-    auto auth_with_token = [&](const std::string& token) -> bool {
+    auto auth_with_token = [&](const std::string& token) {
 #ifdef ECF_OPENSSL
         if (TokenStorage::instance().verify(token)) {
             if (ECF_USER != nullptr && ECF_PASS != nullptr) {
@@ -87,9 +87,7 @@ bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
     }
 
     // allow token to be passed as a query parameter
-    const std::string token = request.get_param_value("key");
-
-    if (token.empty() == false) {
+    if (const std::string token = request.get_param_value("key"); token.empty() == false) {
 #ifndef ECF_OPENSSL
         throw HttpServerException(HttpStatusCode::server_error_internal_server_error,
                                   "Server compiled without SSL support");

@@ -16,11 +16,11 @@ namespace ecf::http {
 class HttpServer {
 public:
     HttpServer(int argc, char** argv);
-    void run();
+    void run() const;
     ~HttpServer() = default;
 
 private:
-    void parse_args(int argc, char** argv);
+    void parse_args(int argc, char** argv) const;
 };
 
 } // namespace ecf::http

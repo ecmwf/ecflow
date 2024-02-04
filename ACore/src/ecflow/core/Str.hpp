@@ -56,6 +56,11 @@ static std::vector<std::string> transform_to_name_vector(const std::vector<T>& i
     return o;
 }
 
+inline std::string tolower(std::string s) {
+    std::transform(std::begin(s), std::end(s), std::begin(s), [](unsigned char c) { return std::tolower(c); });
+    return s;
+}
+
 } // namespace algorithm
 
 class Str {

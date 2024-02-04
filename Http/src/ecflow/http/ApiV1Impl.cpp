@@ -40,24 +40,20 @@ namespace ecf::http {
 
 namespace {
 
-std::string tolower(const std::string& str) {
-    std::string ret = str;
-    for (auto& c : ret) {
-        c = std::tolower(c);
-    }
-    return ret;
+ojson make_json_response(std::string_view path, std::string_view message) {
+    return ojson::object({{"path", path}, {"message", message}});
 }
-
 
 } // namespace
 
 ojson make_node_json(node_ptr node) {
-    return ojson::object({{"type", tolower(node->debugType())}, {"name", node->name()}, {"children", ojson::array()}});
+    return ojson::object(
+        {{"type", ecf::algorithm::tolower(node->debugType())}, {"name", node->name()}, {"children", ojson::array()}});
 }
 
 void print_sparser_node(ojson& j, const std::vector<node_ptr>& nodes) {
     for (const auto& node : nodes) {
-        const std::string type = tolower(node->debugType());
+        const std::string type = ecf::algorithm::tolower(node->debugType());
 
         j[node->name()] = ojson::object({});
         if (type == "family") {
@@ -69,7 +65,7 @@ void print_sparser_node(ojson& j, const std::vector<node_ptr>& nodes) {
 void print_node(ojson& j, const std::vector<node_ptr>& nodes, bool add_id = false) {
     j["children"].get_ptr<ojson::array_t*>()->reserve(nodes.size());
     for (const auto& node : nodes) {
-        const std::string type = tolower(node->debugType());
+        const std::string type = ecf::algorithm::tolower(node->debugType());
         auto jnode             = make_node_json(node);
 
         j["children"].push_back(jnode);
@@ -98,9 +94,7 @@ ojson get_node_status(const httplib::Request& request) {
     j["status"] = client->server_reply().get_string();
     j["path"]   = path;
 
-    node_ptr node = get_node(path);
-
-    if (node) {
+    if (node_ptr node = get_node(path); node) {
         j["default_status"] = DState::to_string(node->defStatus());
 
         std::vector<std::string> why;
@@ -140,7 +134,7 @@ ojson get_sparser_node_tree(const std::string& path) {
             throw HttpServerException(HttpStatusCode::client_error_not_found, "Node " + path + " not found");
         }
 
-        const std::string type = tolower(node->debugType());
+        const std::string type = ecf::algorithm::tolower(node->debugType());
 
         if (type == "family") {
             print_sparser_node(j, std::dynamic_pointer_cast<Family>(node)->nodeVec());
@@ -172,12 +166,13 @@ ojson get_node_tree(const std::string& path, bool add_id = false) {
     else {
         node_ptr node = get_node(path);
 
-        if (node == nullptr)
+        if (node == nullptr) {
             throw HttpServerException(HttpStatusCode::client_error_not_found, "Node " + path + " not found");
+        }
 
         j = make_node_json(node);
 
-        const std::string type = tolower(node->debugType());
+        const std::string type = ecf::algorithm::tolower(node->debugType());
 
         if (type == "family") {
             print_node(j, std::dynamic_pointer_cast<Family>(node)->nodeVec(), add_id);
@@ -296,7 +291,7 @@ ojson get_node_output(const httplib::Request& request) {
         client->file(path, "kill");
         j["kill_output"] = client->server_reply().get_string();
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e [[maybe_unused]]) {
         j["kill_output"] = "";
     }
 
@@ -304,7 +299,7 @@ ojson get_node_output(const httplib::Request& request) {
         client->file(path, "stat");
         j["status_output"] = client->server_reply().get_string();
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e [[maybe_unused]]) {
         j["status_output"] = "";
     }
 
@@ -319,25 +314,32 @@ void add_suite(const httplib::Request& request, httplib::Response& response) {
 
     DefsStructureParser parser(defs);
 
-    std::string errorMsg, warningMsg;
+    {
+        std::string errorMsg;
+        std::string warningMsg;
 
-    if (parser.doParse(errorMsg, warningMsg) == false) {
-        throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                  "Invalid definition: " + errorMsg + "/" + warningMsg);
+        if (parser.doParse(errorMsg, warningMsg) == false) {
+            throw HttpServerException(HttpStatusCode::client_error_bad_request,
+                                      "Invalid definition: " + errorMsg + "/" + warningMsg);
+        }
     }
 
     node_ptr node = parser.the_node_ptr();
 
     auto defsptr = Defs::create();
-    errorMsg = "", warningMsg = "";
-    defsptr->restore_from_string(defs, errorMsg, warningMsg);
+    {
+        std::string errorMsg;
+        std::string warningMsg;
+        defsptr->restore_from_string(defs, errorMsg, warningMsg);
+    }
 
     try {
         if (json_type_to_string(payload.at("auto_add_externs")) == "true") {
             defsptr->auto_add_externs(true);
         }
     }
-    catch (const ojson::exception& e) {
+    catch (const ojson::exception& e [[maybe_unused]]) {
+        // Nothing to do...
     }
 
     auto client = get_client(request);
@@ -372,27 +374,29 @@ ojson update_node_definition(const httplib::Request& request) {
 
     DefsStructureParser parser(new_defs_str);
 
-    std::string errorMsg, warningMsg;
+    {
+        std::string errorMsg;
+        std::string warningMsg;
 
-    if (parser.doParse(errorMsg, warningMsg) == false) {
-        throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                  "Invalid definition: " + errorMsg + "/" + warningMsg);
+        if (parser.doParse(errorMsg, warningMsg) == false) {
+            throw HttpServerException(HttpStatusCode::client_error_bad_request,
+                                      "Invalid definition: " + errorMsg + "/" + warningMsg);
+        }
     }
-
-    node_ptr node = parser.the_node_ptr();
-
-    size_t pos = 0;
 
     // If a child with the same name exists already, it needs to be removed
     // before adding it with this new definition
-    auto existing_node = parent->findImmediateChild(node->name(), pos);
-
-    if (existing_node.get() != nullptr) {
-        parent->removeChild(existing_node.get());
+    node_ptr node = parser.the_node_ptr();
+    size_t pos    = 0;
+    if (auto child = parent->findImmediateChild(node->name(), pos); child) {
+        parent->removeChild(child.get());
     }
 
-    if (parent->isAddChildOk(node.get(), errorMsg) == false) {
-        throw HttpServerException(HttpStatusCode::client_error_bad_request, errorMsg);
+    {
+        std::string errorMsg;
+        if (parent->isAddChildOk(node.get(), errorMsg) == false) {
+            throw HttpServerException(HttpStatusCode::client_error_bad_request, errorMsg);
+        }
     }
 
     parent->addChild(node);
@@ -400,11 +404,10 @@ ojson update_node_definition(const httplib::Request& request) {
     auto client = get_client(request);
     client->replace(path, defs->print(), true, force);
 
-    ojson j;
-    j["path"]    = path;
-    j["message"] = "Definition updated successfully";
-    return j;
+    return make_json_response(path, "Definition updated successfully");
 }
+
+namespace /* __anonymous__ */ {
 
 template <typename T>
 void add_attribute_to_node(node_ptr node, const T& attr);
@@ -444,6 +447,8 @@ void add_attribute_to_node(node_ptr node, const ecf::AutoArchiveAttr& attr) {
     node->add_autoarchive(attr);
 }
 
+} // namespace
+
 template <typename T>
 void add_attribute_to_path(const T& attr, const httplib::Request& request) {
     const std::string path = request.matches[1];
@@ -460,7 +465,7 @@ void add_attribute_to_path(const T& attr, const httplib::Request& request) {
     client->replace(path, defs->print(), false, false);
 }
 
-void remove_attribute_from_path(const std::string& type, const httplib::Request& request) {
+void remove_attribute_from_path(std::string_view type, const httplib::Request& request) {
     const std::string path = request.matches[1];
 
     auto defs   = std::make_shared<Defs>(*get_defs());
@@ -470,19 +475,22 @@ void remove_attribute_from_path(const std::string& type, const httplib::Request&
         throw HttpServerException(HttpStatusCode::client_error_not_found, "Path " + path + " not found");
     }
 
-    if (type == "autocancel")
+    if (type == "autocancel") {
         parent->deleteAutoCancel();
-    else if (type == "autorestore")
+    }
+    else if (type == "autorestore") {
         parent->deleteAutoRestore();
-    else if (type == "autoarchive")
+    }
+    else if (type == "autoarchive") {
         parent->deleteAutoArchive();
+    }
 
     auto client = get_client(request);
     client->replace(path, defs->print(), false, false);
 }
 
 template <typename T>
-void update_attribute_in_path(const T& attr, const std::string& type, const httplib::Request& request) {
+void update_attribute_in_path(const T& attr, std::string_view type, const httplib::Request& request) {
     const std::string path = request.matches[1];
 
     auto defs   = std::make_shared<Defs>(*get_defs());
@@ -492,12 +500,15 @@ void update_attribute_in_path(const T& attr, const std::string& type, const http
         throw HttpServerException(HttpStatusCode::client_error_not_found, "Path " + path + " not found");
     }
 
-    if (type == "autocancel")
+    if (type == "autocancel") {
         parent->deleteAutoCancel();
-    else if (type == "autorestore")
+    }
+    else if (type == "autorestore") {
         parent->deleteAutoRestore();
-    else if (type == "autoarchive")
+    }
+    else if (type == "autoarchive") {
         parent->deleteAutoArchive();
+    }
 
     add_attribute_to_node(parent, attr);
 
@@ -605,30 +616,25 @@ ojson add_node_attribute(const httplib::Request& request) {
         client->alter(path, "add", type, name, value);
     }
 
-    ojson j;
-    j["path"]    = path;
-    j["message"] = "Attribute added successfully";
-    return j;
+    return make_json_response(path, "Attribute added successfully");
 }
 
-ojson update_node_attribute(const httplib::Request& request) {
+namespace /* __anonymous__ */ {
+
+ojson update_node_attribute_by_task(const httplib::Request& request) {
     const std::string path = request.matches[1];
+
     const ojson payload    = ojson::parse(request.body);
+    const std::string type = payload.at("type");
+    const std::string name = payload.at("name");
 
-    std::string type = payload.at("type");
+    // this is a child command call
+    if (ecf::Child::valid_child_cmd(type) == false) {
+        throw HttpServerException(HttpStatusCode::client_error_bad_request,
+                                  "Invalid action for child command: " + name);
+    }
 
-    // Updating node attributes is not a straightforward matter.
-    // Firstly, it can be done either as a child command or a user
-    // command. We deal with both.
-    // Secondly, when it comes to user commands, the current client
-    // framework is not nearly covering all cases (attributes):
-    // * Some attributes can be added,changed and delete with ClientInvoker
-    // * Some attributes can be either added, changed or deleted with ClientInvoker
-    // * Some attributes cannot be modified in any way with ClientInvoker
-    //
-    // Because I want the API to be consistent, it will bend over backwards
-    // to allow user to modify all ecFlow attributes, whether the Client code
-    // supports it or not.
+    auto client = get_client_for_tasks(request, payload);
 
     struct Ancillary
     {
@@ -638,125 +644,38 @@ ojson update_node_attribute(const httplib::Request& request) {
     };
     std::optional<Ancillary> ancillary;
 
-    if (payload.contains("ECF_NAME")) {
-        const std::string name = payload.at("name");
-
-        // this is a child command call
-        if (ecf::Child::valid_child_cmd(type) == false) {
+    if (type == "event") {
+        const std::string value = payload.at("value");
+        if (value != "set" && value != "true" && value != "clear" && value != "false") {
             throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                      "Invalid action for child command: " + name);
+                                      "'value' for event must be one of: set/true, clear/false");
         }
+        client->child_event(name, (value == "true" || value == "set"));
+    }
+    else if (type == "meter") {
+        const std::string value = payload.at("value");
+        client->child_meter(name, std::stoi(value));
+    }
+    else if (type == "label") {
+        const std::string value = payload.at("value");
+        client->child_label(name, value);
+    }
+    else if (type == "queue") {
+        auto queue_action = payload.at("queue_action").get<std::string>();
+        auto queue_step   = payload.contains("queue_step") ? payload.at("queue_step").get<std::string>() : "";
+        auto queue_path   = payload.contains("queue_path") ? payload.at("queue_path").get<std::string>() : "";
+        std::string reply = client->child_queue(name, queue_action, queue_step, queue_path);
 
-        auto client = get_client_for_tasks(request, payload);
-
-        if (type == "event") {
-            const std::string value = payload.at("value");
-            if (value != "set" && value != "true" && value != "clear" && value != "false") {
-                throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                          "'value' for event must be one of: set/true, clear/false");
-            }
-            client->child_event(name, (value == "true" || value == "set"));
-        }
-        else if (type == "meter") {
-            const std::string value = payload.at("value");
-            client->child_meter(name, std::stoi(value));
-        }
-        else if (type == "label") {
-            const std::string value = payload.at("value");
-            client->child_label(name, value);
-        }
-        else if (type == "queue") {
-            auto queue_action = payload.at("queue_action").get<std::string>();
-            auto queue_step   = payload.contains("queue_step") ? payload.at("queue_step").get<std::string>() : "";
-            auto queue_path   = payload.contains("queue_path") ? payload.at("queue_path").get<std::string>() : "";
-            std::string reply = client->child_queue(name, queue_action, queue_step, queue_path);
-
-            if (queue_action == "active" || queue_action == "no_of_aborted") {
-                ancillary = std::make_optional(Ancillary{type, queue_action, reply});
-            }
-        }
-        else {
-            throw HttpServerException(HttpStatusCode::server_error_not_implemented,
-                                      "Child action " + type + ", on attribute " + name + ", is not supported");
+        if (queue_action == "active" || queue_action == "no_of_aborted") {
+            ancillary = std::make_optional(Ancillary{type, queue_action, reply});
         }
     }
     else {
-        auto client = get_client(request);
-
-        if (type == "repeat" || type == "late" || type == "complete") {
-            const std::string value = json_type_to_string(payload.at("value"));
-            client->alter(path, "change", type, value);
-        }
-        else if (type == "today" || type == "time" || type == "late") {
-            const std::string value     = json_type_to_string(payload.at("value"));
-            const std::string old_value = json_type_to_string(payload.at("old_value"));
-            client->alter(path, "change", type, old_value, value);
-        }
-        else if (type == "day" || type == "date") {
-            const std::string value     = json_type_to_string(payload.at("value"));
-            const std::string old_value = json_type_to_string(payload.at("old_value"));
-            client->alter(path, "delete", type, old_value);
-            client->alter(path, "add", type, value);
-        }
-        else if (type == "autocancel") {
-            const std::string value = json_type_to_string(payload.at("value"));
-            update_attribute_in_path(create_from_text<ecf::AutoCancelAttr>(value), type, request);
-            trigger_defs_update();
-        }
-        else if (type == "autorestore") {
-            const std::string value = json_type_to_string(payload.at("value"));
-            update_attribute_in_path(create_from_text<ecf::AutoRestoreAttr>(value), type, request);
-            trigger_defs_update();
-        }
-        else if (type == "autoarchive") {
-            const std::string value = json_type_to_string(payload.at("value"));
-            update_attribute_in_path(create_from_text<ecf::AutoArchiveAttr>(value), type, request);
-            trigger_defs_update();
-        }
-        else if (type == "cron") {
-            const std::string value     = json_type_to_string(payload.at("value"));
-            const std::string old_value = json_type_to_string(payload.at("old_value"));
-            client->alter(path, "delete", type, old_value);
-            trigger_defs_update([&] { add_attribute_to_path(ecf::CronAttr::create(value), request); });
-        }
-        else if (type == "limit") {
-            const std::string name = payload.at("name");
-            const static std::vector<std::string> keys{"max", "value"};
-            std::string value;
-            try {
-                value = json_type_to_string(payload.at("value"));
-                type  = type + "_value";
-            }
-            catch (const ojson::out_of_range& e) {
-                try {
-                    value = json_type_to_string(payload.at("max"));
-                    type  = type + "_max";
-                }
-                catch (const ojson::out_of_range& e) {
-                    throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                              "For limit either 'max' or 'value' must be defined");
-                }
-            }
-            client->alter(path, "change", type, name, value);
-        }
-        else {
-            const std::string name = payload.at("name");
-            std::string value      = json_type_to_string(payload.at("value"));
-            if (type == "event") {
-                if (value != "set" && value != "true" && value != "clear" && value != "false") {
-                    throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                              "'value' for event must be one of: set/true, clear/false");
-                }
-                value = (value == "true" || value == "set") ? "set" : "clear";
-            }
-            client->alter(path, "change", type, name, value);
-        }
+        throw HttpServerException(HttpStatusCode::server_error_not_implemented,
+                                  "Child action " + type + ", on attribute " + name + ", is not supported");
     }
 
-    // Package the response body
-    ojson j;
-    j["path"]    = path;
-    j["message"] = "Attribute changed successfully";
+    ojson j = make_json_response(path, "Attribute changed successfully");
     if (ancillary) {
         if (ancillary->action == "active") {
             j["step"] = ancillary->value;
@@ -766,6 +685,116 @@ ojson update_node_attribute(const httplib::Request& request) {
         }
     }
     return j;
+}
+
+ojson update_node_attribute_by_user(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
+
+    std::string type = payload.at("type");
+
+    auto client = get_client(request);
+
+    if (type == "repeat" || type == "late" || type == "complete") {
+        const std::string value = json_type_to_string(payload.at("value"));
+        client->alter(path, "change", type, value);
+    }
+    else if (type == "today" || type == "time" || type == "late") {
+        const std::string value     = json_type_to_string(payload.at("value"));
+        const std::string old_value = json_type_to_string(payload.at("old_value"));
+        client->alter(path, "change", type, old_value, value);
+    }
+    else if (type == "day" || type == "date") {
+        const std::string value     = json_type_to_string(payload.at("value"));
+        const std::string old_value = json_type_to_string(payload.at("old_value"));
+        client->alter(path, "delete", type, old_value);
+        client->alter(path, "add", type, value);
+    }
+    else if (type == "autocancel") {
+        const std::string value = json_type_to_string(payload.at("value"));
+        update_attribute_in_path(create_from_text<ecf::AutoCancelAttr>(value), type, request);
+        trigger_defs_update();
+    }
+    else if (type == "autorestore") {
+        const std::string value = json_type_to_string(payload.at("value"));
+        update_attribute_in_path(create_from_text<ecf::AutoRestoreAttr>(value), type, request);
+        trigger_defs_update();
+    }
+    else if (type == "autoarchive") {
+        const std::string value = json_type_to_string(payload.at("value"));
+        update_attribute_in_path(create_from_text<ecf::AutoArchiveAttr>(value), type, request);
+        trigger_defs_update();
+    }
+    else if (type == "cron") {
+        const std::string value     = json_type_to_string(payload.at("value"));
+        const std::string old_value = json_type_to_string(payload.at("old_value"));
+        client->alter(path, "delete", type, old_value);
+        trigger_defs_update([&] { add_attribute_to_path(ecf::CronAttr::create(value), request); });
+    }
+    else if (type == "limit") {
+        const std::string name = payload.at("name");
+        const static std::vector<std::string> keys{"max", "value"};
+        std::string value;
+        try {
+            value = json_type_to_string(payload.at("value"));
+            type  = type + "_value";
+        }
+        catch (const ojson::out_of_range& e [[maybe_unused]]) {
+            try {
+                value = json_type_to_string(payload.at("max"));
+                type  = type + "_max";
+            }
+            catch (const ojson::out_of_range& e [[maybe_unused]]) {
+                throw HttpServerException(HttpStatusCode::client_error_bad_request,
+                                          "For limit either 'max' or 'value' must be defined");
+            }
+        }
+        client->alter(path, "change", type, name, value);
+    }
+    else {
+        const std::string name = payload.at("name");
+        std::string value      = json_type_to_string(payload.at("value"));
+        if (type == "event") {
+            if (value != "set" && value != "true" && value != "clear" && value != "false") {
+                throw HttpServerException(HttpStatusCode::client_error_bad_request,
+                                          "'value' for event must be one of: set/true, clear/false");
+            }
+            value = (value == "true" || value == "set") ? "set" : "clear";
+        }
+        client->alter(path, "change", type, name, value);
+    }
+
+    return make_json_response(path, "Attribute changed successfully");
+}
+
+} // namespace
+
+ojson update_node_attribute(const httplib::Request& request) {
+
+    const ojson payload = ojson::parse(request.body);
+
+    std::string type = payload.at("type");
+
+    //
+    // Important: updating node attributes is not a straightforward matter!
+    //
+    // Firstly, it can be done either as a child command or a user command.
+    //
+    // Secondly, for user commands, the current client framework does not cover all attribute operations:
+    //  * Some attributes can be added, changed and delete with ClientInvoker
+    //  * Some attributes can be either added, changed or deleted with ClientInvoker
+    //  * Some attributes cannot be modified in any way with ClientInvoker
+    //
+    // As we want the API to be consistent, we allow to modify all ecFlow attributes,
+    // whether the Client code supports it or not.
+    //
+
+    if (payload.contains("ECF_NAME")) {
+        return update_node_attribute_by_task(request);
+    }
+    else {
+        return update_node_attribute_by_user(request);
+    }
 }
 
 ojson delete_node_attribute(const httplib::Request& request) {
@@ -788,10 +817,7 @@ ojson delete_node_attribute(const httplib::Request& request) {
         client->alter(path, "delete", type, name);
     }
 
-    ojson j;
-    j["path"]    = path;
-    j["message"] = "Attribute deleted successfully";
-    return j;
+    return make_json_response(path, "Attribute deleted successfully");
 }
 
 ojson add_server_attribute(const httplib::Request& request) {
@@ -809,10 +835,7 @@ ojson add_server_attribute(const httplib::Request& request) {
     auto client = get_client(request);
     client->alter("/", "add", type, name, value);
 
-    ojson j;
-    j["path"]    = "/";
-    j["message"] = "Attribute added successfully";
-    return j;
+    return make_json_response("/", "Attribute added successfully");
 }
 
 ojson update_server_attribute(const httplib::Request& request) {
@@ -820,9 +843,8 @@ ojson update_server_attribute(const httplib::Request& request) {
     const std::string type  = payload.at("type");
     const std::string name  = payload.at("name");
     const std::string value = payload.at("value");
-    std::string x;
 
-    if (get_defs()->server().find_user_variable(name, x) == false) {
+    if (std::string x; !get_defs()->server().find_user_variable(name, x)) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "User variable not found");
     }
     else if (type != "variable") {
@@ -833,10 +855,7 @@ ojson update_server_attribute(const httplib::Request& request) {
     auto client = get_client(request);
     client->alter("/", "change", type, name, value);
 
-    ojson j;
-    j["path"]    = "/";
-    j["message"] = "Attribute changed successfully";
-    return j;
+    return make_json_response("/", "Attribute changed successfully");
 }
 
 ojson delete_server_attribute(const httplib::Request& request) {
@@ -845,9 +864,8 @@ ojson delete_server_attribute(const httplib::Request& request) {
 
     const std::string type = payload.at("type");
     const std::string name = payload.at("name");
-    std::string x;
 
-    if (get_defs()->server().find_user_variable(name, x) == false) {
+    if (std::string x; !get_defs()->server().find_user_variable(name, x)) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "User variable not found");
     }
     else if (type != "variable") {
@@ -858,96 +876,108 @@ ojson delete_server_attribute(const httplib::Request& request) {
     auto client = get_client(request);
     client->alter("/", "delete", type, name);
 
-    ojson j;
-    j["path"]    = "/";
-    j["message"] = "Attribute deleted successfully";
-    return j;
+    return make_json_response("/", "Attribute deleted successfully");
 }
 
-ojson update_node_status(const httplib::Request& request) {
+namespace /* __anonymous__ */ {
+
+ojson update_node_status_by_task(const httplib::Request& request) {
     const std::string path = request.matches[1];
     const ojson payload    = ojson::parse(request.body);
-
     const std::string name = payload.at("action");
 
-    if (payload.contains("ECF_NAME")) {
-        // this is a child command call
-        if (ecf::Child::valid_child_cmd(name) == false) {
-            throw HttpServerException(HttpStatusCode::client_error_bad_request,
-                                      "Invalid action for child command: " + name);
-        }
+    // this is a child command call
+    if (ecf::Child::valid_child_cmd(name) == false) {
+        throw HttpServerException(HttpStatusCode::client_error_bad_request,
+                                  "Invalid action for child command: " + name);
+    }
 
-        auto client = get_client_for_tasks(request, payload);
+    auto client = get_client_for_tasks(request, payload);
 
-        if (name == "init") {
-            client->child_init();
-        }
-        else if (name == "abort") {
-            client->child_abort(payload.value("abort_why", ""));
-        }
-        else if (name == "complete") {
-            client->child_complete();
-        }
-        else if (name == "wait") {
-            client->child_wait(payload.at("wait_expression"));
-        }
-        else {
-            throw HttpServerException(HttpStatusCode::server_error_not_implemented,
-                                      "Child action " + name + " not supported");
-        }
+    if (name == "init") {
+        client->child_init();
+    }
+    else if (name == "abort") {
+        client->child_abort(payload.value("abort_why", ""));
+    }
+    else if (name == "complete") {
+        client->child_complete();
+    }
+    else if (name == "wait") {
+        client->child_wait(payload.at("wait_expression"));
     }
     else {
-        auto client = get_client(request);
-
-        bool recursive = payload.value("recursive", false);
-        bool force     = payload.value("force", false);
-
-        if (name == "begin") {
-            client->begin(path);
-        }
-        else if (name == "resume") {
-            client->resume(path);
-        }
-        else if (name == "requeue") {
-            client->requeue(path);
-        }
-        else if (name == "suspend") {
-            client->suspend(path);
-        }
-        else if (name == "defstatus") {
-            client->alter(path, "change", name, payload.at("defstatus_value").get<std::string>());
-        }
-        else if (name == "execute") {
-            client->run(path, true);
-        }
-        else if (name == "archive") {
-            client->archive(path, force);
-        }
-        else if (name == "restore") {
-            client->restore(path);
-        }
-        else {
-            std::string name_ = name;
-            if (name_ == "abort") {
-                name_ = "aborted";
-            }
-            else if (name_ == "rerun") {
-                name_ = "queued";
-            }
-            else if (name_ == "execute") {
-                name_ = "run";
-            }
-            else if (name_ == "submit") {
-                name_ = "submitted";
-            }
-
-            client->force(path, name_, recursive);
-        }
+        throw HttpServerException(HttpStatusCode::server_error_not_implemented,
+                                  "Child action " + name + " not supported");
     }
-    ojson j;
-    j["path"]    = path;
-    j["message"] = "Status changed successfully";
-    return j;
+
+    return make_json_response(path, "Status changed successfully");
+}
+
+ojson update_node_status_by_user(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+    const ojson payload    = ojson::parse(request.body);
+    const std::string name = payload.at("action");
+
+    auto client = get_client(request);
+
+    bool recursive = payload.value("recursive", false);
+    bool force     = payload.value("force", false);
+
+    if (name == "begin") {
+        client->begin(path);
+    }
+    else if (name == "resume") {
+        client->resume(path);
+    }
+    else if (name == "requeue") {
+        client->requeue(path);
+    }
+    else if (name == "suspend") {
+        client->suspend(path);
+    }
+    else if (name == "defstatus") {
+        client->alter(path, "change", name, payload.at("defstatus_value").get<std::string>());
+    }
+    else if (name == "execute") {
+        client->run(path, true);
+    }
+    else if (name == "archive") {
+        client->archive(path, force);
+    }
+    else if (name == "restore") {
+        client->restore(path);
+    }
+    else {
+        std::string name_ = name;
+        if (name_ == "abort") {
+            name_ = "aborted";
+        }
+        else if (name_ == "rerun") {
+            name_ = "queued";
+        }
+        else if (name_ == "execute") {
+            name_ = "run";
+        }
+        else if (name_ == "submit") {
+            name_ = "submitted";
+        }
+
+        client->force(path, name_, recursive);
+    }
+
+    return make_json_response(path, "Status changed successfully");
+}
+
+} // namespace
+
+ojson update_node_status(const httplib::Request& request) {
+    if (const ojson payload = ojson::parse(request.body); payload.contains("ECF_NAME")) {
+        return update_node_status_by_task(request);
+    }
+    else {
+        return update_node_status_by_user(request);
+    }
 }
 
 ojson update_script_content(const httplib::Request& request) {
@@ -967,10 +997,7 @@ ojson update_script_content(const httplib::Request& request) {
     auto client = get_client(request);
     client->edit_script_submit(path, {}, lines, false, false);
 
-    ojson j;
-
-    j["message"] = "Script submitted successfully";
-    return j;
+    return make_json_response(path, "Script submitted successfully");
 }
 
 } // namespace ecf::http

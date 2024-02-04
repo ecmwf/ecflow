@@ -54,7 +54,7 @@ void handle_exception(const std::exception& e, const httplib::Request& request, 
     // if user requests an ecflow script and the script does not exists, should
     // 404 be returned (even if the rest api path was correct)?
 
-    auto trimr = [](const std::string& str) -> std::string {
+    auto trimr = [](const std::string& str) {
         std::string copy = str;
         copy.erase(copy.find_last_not_of(" \n\r") + 1, std::string::npos);
         return copy;
@@ -122,9 +122,11 @@ void handle_exception(const HttpServerException& e, const httplib::Request& requ
 }
 
 void set_last_request_time() {
-    struct timeval curtime;
+    struct timeval curtime
+    {
+    };
     gettimeofday(&curtime, nullptr);
-    last_request_time = curtime.tv_sec;
+    last_request_time = static_cast<unsigned int>(curtime.tv_sec);
 }
 
 template <typename T>
@@ -147,8 +149,9 @@ void trycatch(const httplib::Request& request, httplib::Response& response, T&& 
 ojson filter_json(const ojson& j, const httplib::Request& r) {
 
     const std::string path = r.get_param_value("filter");
-    if (path.empty())
+    if (path.empty()) {
         return j;
+    }
 
     // split filter path on dot, and reverse the elements
     // the elements are consumed by the dive() function
@@ -157,42 +160,45 @@ ojson filter_json(const ojson& j, const httplib::Request& r) {
     ecf::Str::split(path, path_elems, ".");
     std::reverse(path_elems.begin(), path_elems.end());
 
-    if (path_elems.empty())
+    if (path_elems.empty()) {
         return j;
+    }
 
     // separate array name and index from a string
-    auto get_array_info = [](const std::string& str) {
-        auto start = str.find("["), stop = str.find("]");
-        const std::string key = str.substr(0, start);
-        const int index       = std::stoi(str.substr(start + 1, stop - start));
+    auto get_array_info = [](std::string_view str) {
+        const auto start = str.find("[");
+        const auto stop  = str.find("]");
+        const auto key   = str.substr(0, start);
+        const int index  = std::stoi(std::string{str.substr(start + 1, stop - start)});
         return std::make_pair(key, index);
     };
 
     // special case: filter is .[INDEX], means that we return the
     // correct array element from root json element assuming it's an array
     if (path_elems.size() == 1 && path_elems[0][0] == '[' && path_elems[0][path_elems[0].size() - 1] == ']') {
-        const auto arr = get_array_info(path_elems[0]);
-        return j[arr.second];
+        const auto [key, index] = get_array_info(path_elems[0]);
+        return j[index];
     }
 
     // recursively find the correct element inside json document
-    std::function<ojson(const ojson&, std::vector<std::string>&)> dive =
-        [&](const ojson& js, std::vector<std::string>& path_elems) -> ojson {
-        if (path_elems.empty())
+    std::function<ojson(const ojson&, std::vector<std::string>&)> dive = [&](const ojson& js,
+                                                                             const std::vector<std::string>& elems) {
+        if (elems.empty()) {
             return js;
+        }
 
         const auto elem = path_elems.back();
         path_elems.pop_back();
 
         try {
             if (elem.find("[") != std::string::npos && elem.find("]") != std::string::npos) {
-                const auto arr = get_array_info(elem);
-                return dive(js.at(arr.first)[arr.second], path_elems);
+                const auto [key, index] = get_array_info(elem);
+                return dive(js.at(std::string{key})[index], path_elems);
             }
 
             return dive(js.at(elem), path_elems);
         }
-        catch (const ojson::exception& e) {
+        catch (const ojson::exception& e [[maybe_unused]]) {
             // filter path is not found or some other problem with user given path
             return ojson();
         }
@@ -399,7 +405,7 @@ void node_script_read(const httplib::Request& request, httplib::Response& respon
             client->file(path, "job");
             j["job"] = client->server_reply().get_string();
         }
-        catch (const std::exception& e) {
+        catch (const std::exception& e [[maybe_unused]]) {
             j["job"] = "";
         }
 
@@ -484,27 +490,22 @@ void server_status_read(const httplib::Request& request, httplib::Response& resp
 
 void server_status_update(const httplib::Request& request, httplib::Response& response) {
     trycatch(request, response, [&]() {
-        const ojson payload    = ojson::parse(request.body);
-        const std::string name = payload.at("action");
-
-        auto client = get_client(request);
-
-        if (name == "reload_whitelist_file") {
-            client->reloadwsfile();
+        auto payload = ojson::parse(request.body);
+        if (const std::string name = payload.at("action"); name == "reload_whitelist_file") {
+            get_client(request)->reloadwsfile();
         }
         else if (name == "reload_passwd_file") {
-            client->reloadpasswdfile();
+            get_client(request)->reloadpasswdfile();
         }
         else if (name == "reload_custom_passwd_file") {
-            client->reloadcustompasswdfile();
+            get_client(request)->reloadcustompasswdfile();
         }
         else {
             throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid action: " + name);
         }
 
         ojson j;
-        j["message"] = "Server updated successfully";
-
+        j["message"]    = "Server updated successfully";
         response.status = HttpStatusCode::success_ok;
         response.set_content(j.dump(), "application/json");
         set_cors(response);
@@ -573,14 +574,15 @@ void server_statistics_read(const httplib::Request& request, httplib::Response& 
     trycatch(request, response, [&]() {
         response.status     = HttpStatusCode::success_ok;
         const std::time_t t = std::chrono::system_clock::to_time_t(api_startup);
-        char date[80];
-        const std::tm tm = *gmtime(&t);
-        strftime(date, 80, "%Y-%m-%dT%H:%M:%SZ", &tm);
+        std::array<char, 80> date{};
+        std::tm tm{};
+        gmtime_r(&t, &tm);
+        strftime(date.data(), 80, "%Y-%m-%dT%H:%M:%SZ", &tm);
 
         ojson j = {{"num_requests", num_requests.load()},
                    {"num_errors", num_errors.load()},
                    {"num_cached_requests", num_cached_requests.load()},
-                   {"since", std::string(date)}};
+                   {"since", std::string{date.data()}}};
 
         j = filter_json(j, request);
         response.set_content(j.dump(), "application/json");

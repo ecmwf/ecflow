@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     sigemptyset(&set);
     sigaddset(&set, SIGPIPE);
 
-    if (pthread_sigmask(SIG_BLOCK, &set, NULL) != 0) {
+    if (pthread_sigmask(SIG_BLOCK, &set, nullptr) != 0) {
         throw std::runtime_error("Failed to set signal mask");
     }
 
