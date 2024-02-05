@@ -15,6 +15,9 @@
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DState.hpp"
+#include "ecflow/core/NState.hpp"
+#include "ecflow/core/Overload.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/http/BasicAuth.hpp"
 #include "ecflow/http/Client.hpp"
@@ -25,11 +28,15 @@
 #endif
 #include "ecflow/http/DefsStorage.hpp"
 #include "ecflow/http/HttpLibrary.hpp"
+#include "ecflow/http/TreeGeneration.hpp"
 #include "ecflow/http/TypeToJson.hpp"
+#include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/DefsTreeVisitor.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 // For token based authentication, this user account
@@ -114,6 +121,18 @@ void apply_to_parents(const Node* node, T&& func) {
     for (const Node* up = node; up != nullptr; up = up->parent()) {
         func(up);
     }
+}
+
+ojson get_basic_node_tree(const std::string& path) {
+    BasicTree tree;
+    DefsTreeVisitor(get_defs(), tree).visit_at(path);
+    return tree.content();
+}
+
+ojson get_full_node_tree(const std::string& path) {
+    FullTree tree;
+    DefsTreeVisitor(get_defs(), tree).visit_at(path);
+    return tree.content();
 }
 
 ojson get_sparser_node_tree(const std::string& path) {

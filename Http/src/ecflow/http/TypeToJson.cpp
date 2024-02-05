@@ -33,7 +33,11 @@ void to_json(ojson& j, const ::Event& a) {
 }
 
 void to_json(ojson& j, const limit_ptr& a) {
-    j = ojson({{"name", a->name()}, {"value", a->value()}, {"limit", a->theLimit()}});
+    to_json(j, *a);
+}
+
+void to_json(ojson& j, const Limit& a) {
+    j = ojson({{"name", a.name()}, {"value", a.value()}, {"limit", a.theLimit()}});
 }
 
 void to_json(ojson& j, const ::InLimit& a) {

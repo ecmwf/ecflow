@@ -50,6 +50,7 @@ void to_json(ecf::http::ojson&, const ::Label&);
 void to_json(ecf::http::ojson&, const ::Variable&);
 void to_json(ecf::http::ojson&, const ::Event&);
 void to_json(ecf::http::ojson&, const ::limit_ptr&);
+void to_json(ecf::http::ojson&, const ::Limit&);
 void to_json(ecf::http::ojson&, const ::InLimit&);
 void to_json(ecf::http::ojson&, const ::DateAttr&);
 void to_json(ecf::http::ojson&, const ::DayAttr&);

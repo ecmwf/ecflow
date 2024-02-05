@@ -216,32 +216,6 @@ bool check_for_path(const std::string& path) {
     }
 }
 
-std::string json_type_to_string(const ojson& j) {
-    switch (j.type()) {
-        case ojson::value_t::null:
-            return "null";
-        case ojson::value_t::boolean:
-            return (j.get<bool>()) ? "true" : "false";
-        case ojson::value_t::string:
-            return j.get<std::string>();
-        case ojson::value_t::binary:
-            return j.dump();
-        case ojson::value_t::array:
-        case ojson::value_t::object:
-            return j.dump();
-        case ojson::value_t::discarded:
-            return "discarded";
-        case ojson::value_t::number_integer:
-            return ecf::convert_to<std::string>(j.get<int>());
-        case ojson::value_t::number_unsigned:
-            return ecf::convert_to<std::string>(j.get<unsigned int>());
-        case ojson::value_t::number_float:
-            return std::to_string(j.get<double>());
-        default:
-            return std::string();
-    }
-}
-
 bool check_for_element(const std::string& path,
                        const std::string& key_name,
                        const std::string& attr_name,
@@ -265,7 +239,7 @@ bool check_for_element(const std::string& path,
                 // { "name": "foo", "value": "bar"}
                 // std::cout << "expecting: " << attr_name << "=" << value << " got: " << x["name"].get<std::string>()
                 // << "=" << json_type_to_string(x[key_name]) << std::endl;
-                if (attr_name == x["name"] && value == json_type_to_string(x[key_name]))
+                if (attr_name == x["name"] && value == ecf::http::json_type_to_string(x[key_name]))
                     return true;
             }
             else if (key_name.empty() == false) {
@@ -273,14 +247,14 @@ bool check_for_element(const std::string& path,
                 // std::cout << "expecting: " << key_name << "='" << value << " got: " << key_name << "='" <<
                 // json_type_to_string(x[key_name]) << "'" << std::endl;
 
-                if (json_type_to_string(x[key_name]) == value)
+                if (ecf::http::json_type_to_string(x[key_name]) == value)
                     return true;
             }
             else {
                 // "bar"
                 // std::cout << "expecting: '" << value << "' got: '" << json_type_to_string(x) << "'" << std::endl;
 
-                if (value == json_type_to_string(x))
+                if (value == ecf::http::json_type_to_string(x))
                     return true;
             }
         }
@@ -374,13 +348,131 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 
     const std::string& correct = "suite test\n  family a\n    task a\n  endfamily\nendsuite\n";
 
-    // std::cout << "correct: " << correct << std::endl
-    //           << "response:" << response.at("definition").get<string>() << std::endl;
-
     BOOST_REQUIRE(response.at("definition").get<std::string>() == correct);
 
     handle_response(request("put", "/v1/suites/test/status", R"({"action":"suspend"})", API_KEY));
     wait_until([] { return check_for_element("/v1/suites/test/status?filter=status", "", "", "suspended"); });
+}
+
+BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
+    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+
+    // (0) Clean up -- in case there is any left-over from passed/failed tests
+    request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/basic_suite/definition"); });
+
+    // (1) Publish 'basic_suite' suite
+
+    std::string suite_definition =
+        R"({"definition" : "suite basic_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
+    handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
+    wait_until([] { return check_for_path("/v1/suites/basic_suite/definition"); });
+
+    // (2) Retrieve 'basic_suite' suite tree
+    {
+        auto result  = handle_response(request("get", "/v1/suites/tree"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.contains("basic_suite"));
+        BOOST_REQUIRE(content["basic_suite"].contains("f"));
+        BOOST_REQUIRE(content["basic_suite"]["f"].contains("t"));
+    }
+
+    // (3) Retrieve 'basic_suite' suite tree, explicitly specifying basic content
+    {
+        auto result  = handle_response(request("get", "/v1/suites/tree?content=basic"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.contains("basic_suite"));
+        BOOST_REQUIRE(content["basic_suite"].contains("f"));
+        BOOST_REQUIRE(content["basic_suite"]["f"].contains("t"));
+    }
+
+    // (4) Retrieve specific node tree
+    {
+        auto result  = handle_response(request("get", "/v1/suites/basic_suite/f/tree?content=basic"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.contains("f"));
+        BOOST_REQUIRE(content["f"].contains("t"));
+    }
+
+    // (5) Clean up
+    request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/basic_suite/definition"); });
+}
+
+BOOST_AUTO_TEST_CASE(test_node_full_tree) {
+    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+
+    // (0) Clean up -- in case there is any left-over from passed/failed tests
+    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
+
+    // (1) Publish 'full_tree' suite
+
+    std::string suite_definition =
+        R"({"definition" : "suite full_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
+    handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
+    wait_until([] { return check_for_path("/v1/suites/full_suite/definition"); });
+
+    // (2) Retrieve 'full_suite' suite tree, explicitly specifying full content
+    {
+        auto result  = handle_response(request("get", "/v1/suites/tree?content=full"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.contains("full_suite"));
+        BOOST_REQUIRE(content["full_suite"].contains("type"));
+        BOOST_REQUIRE(content["full_suite"]["type"] == "suite");
+        BOOST_REQUIRE(content["full_suite"].contains("state"));
+        BOOST_REQUIRE(content["full_suite"]["state"].contains("node"));
+        BOOST_REQUIRE(content["full_suite"]["state"].contains("default"));
+        BOOST_REQUIRE(content["full_suite"].contains("children"));
+
+        BOOST_REQUIRE(content["full_suite"]["children"].contains("f"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"].contains("type"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["type"] == "family");
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"].contains("state"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["state"].contains("node"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["state"].contains("default"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"].contains("children"));
+
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"].contains("t"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"].contains("type"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"]["type"] == "task");
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"].contains("state"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"]["state"].contains("node"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"]["state"].contains("default"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"].contains("attributes"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"]["attributes"].size() == 3);
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"].contains("aliases"));
+        BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"]["aliases"].size() == 0);
+    }
+
+    // (2) Retrieve 'full_suite' suite tree, explicitly specifying full content
+    {
+        auto result  = handle_response(request("get", "/v1/suites/full_suite/f/tree?content=full"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.contains("f"));
+        BOOST_REQUIRE(content["f"].contains("state"));
+        BOOST_REQUIRE(content["f"]["state"].contains("node"));
+        BOOST_REQUIRE(content["f"]["state"].contains("default"));
+        BOOST_REQUIRE(content["f"].contains("children"));
+
+        BOOST_REQUIRE(content["f"]["children"].contains("t"));
+        BOOST_REQUIRE(content["f"]["children"]["t"].contains("state"));
+        BOOST_REQUIRE(content["f"]["children"]["t"]["state"].contains("node"));
+        BOOST_REQUIRE(content["f"]["children"]["t"]["state"].contains("default"));
+        BOOST_REQUIRE(content["f"]["children"]["t"].contains("attributes"));
+        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 3);
+        BOOST_REQUIRE(content["f"]["children"]["t"].contains("aliases"));
+        BOOST_REQUIRE(content["f"]["children"]["t"]["aliases"].size() == 0);
+    }
+
+    // (4) Clean up
+    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 }
 
 BOOST_AUTO_TEST_CASE(test_token_authentication) {

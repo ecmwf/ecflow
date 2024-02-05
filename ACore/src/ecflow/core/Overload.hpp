@@ -8,21 +8,20 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/http/Api.hpp"
+#ifndef ecflow_core_Overload_HPP
+#define ecflow_core_Overload_HPP
 
-#include "ecflow/http/ApiV1.hpp"
-#include "ecflow/http/DefsStorage.hpp"
-#include "ecflow/http/Options.hpp"
+namespace ecf {
 
-namespace ecf::http {
+template <class... Ts>
+struct overload : Ts...
+{
+    using Ts::operator()...;
+};
 
-void setup(httplib::Server& http_server) {
-    routing(http_server);
-    update_defs_loop(opts.polling_interval);
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>; // Deduction guideline not needed from C++20
 
-    if (opts.verbose) {
-        printf("API v1 ready\n");
-    }
-}
+} // namespace ecf
 
-} // namespace ecf::http
+#endif /* ecflow_core_Overload_HPP */

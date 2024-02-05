@@ -34,6 +34,7 @@ set(srcs
   src/ecflow/http/JSON.hpp
   src/ecflow/http/Options.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.hpp>
+  src/ecflow/http/TreeGeneration.hpp
   src/ecflow/http/TypeToJson.hpp
   # Sources
   src/ecflow/http/Api.cpp

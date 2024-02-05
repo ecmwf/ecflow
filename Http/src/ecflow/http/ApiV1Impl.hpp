@@ -17,6 +17,8 @@
 
 namespace ecf::http {
 
+ojson get_basic_node_tree(const std::string& path);
+ojson get_full_node_tree(const std::string& path);
 ojson get_sparser_node_tree(const std::string& path);
 
 void add_suite(const httplib::Request& request, httplib::Response& response);
