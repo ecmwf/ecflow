@@ -26,6 +26,9 @@
 #ifdef ECF_OPENSSL
     #define CPPHTTPLIB_OPENSSL_SUPPORT
 #endif
+#ifdef ECF_HTTP_COMPRESSION
+    #define CPPHTTPLIB_ZLIB_SUPPORT
+#endif
 
 #include <httplib.h>
 
