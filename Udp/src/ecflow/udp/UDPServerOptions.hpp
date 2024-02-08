@@ -48,7 +48,7 @@ public:
         if (variables.count(option) > 0) {
             return variables[option].template as<U>();
         }
-        return {};
+        return std::nullopt;
     }
 
     bool has_help() const { return get_option(OPTION_HELP); }
