@@ -40,6 +40,7 @@ public:
     void visitLessThan(AstLessThan*) override {}
     void visitLeaf(AstLeaf*) override {}
     void visitInteger(AstInteger*) override {}
+    void visitInstant(AstInstant*) override {}
     void visitFunction(AstFunction*) override {}
     void visitNodeState(AstNodeState*) override {}
     void visitEventState(AstEventState*) override;

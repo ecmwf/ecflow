@@ -824,6 +824,23 @@ void export_NodeAttr() {
              &RepeatDate::step,
              "Return the step increment. This is used to update the repeat, until end date is reached");
 
+    class_<RepeatDateTime>("RepeatDateTime",
+                           NodeAttrDoc::repeat_datetime_doc(),
+                           init<std::string, std::string, std::string, bp::optional<std::string>>()) // name, start, end , delta
+        .def(self == self)                                                             // __eq__
+        .def("__str__", &RepeatDateTime::toString)                                     // __str__
+        .def("__copy__", copyObject<RepeatDateTime>)                                   // __copy__ uses copy constructor
+        .def("name",
+             &RepeatDateTime::name,
+             return_value_policy<copy_const_reference>(),
+             "Return the name of the repeat.")
+        .def(
+            "start", &RepeatDateTime::start, "Return the start date as an integer (i.e. seconds since 19700101T000000)")
+        .def("end", &RepeatDateTime::end, "Return the end date as an integer (i.e. seconds since 19700101T000000)")
+        .def("step",
+             &RepeatDateTime::step,
+             "Return the step increment (in seconds). This is used to update the repeat, until end instant is reached");
+
     class_<RepeatDateList>("RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
         .def("__init__", make_constructor(&create_RepeatDateList))
         .def(self == self)                           // __eq__

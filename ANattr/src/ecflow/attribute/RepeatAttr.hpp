@@ -21,10 +21,14 @@
 ///
 
 #include <cstdint>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Chrono.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.
@@ -52,6 +56,7 @@ public:
     // value to be beyond the last valid value
     // Depending on the kind of repeat the returned can be value or the current index
     // RepeatDate       -> value
+    // RepeatDateTime   -> value
     // RepeatDateList   -> value
     // RepeatString     -> index into array of strings
     // RepeatInteger    -> value
@@ -61,6 +66,7 @@ public:
 
     // Depending on the kind of repeat the returned can be value or *current* index
     // RepeatDate       -> value
+    // RepeatDateTime   -> value
     // RepeatDateList   -> value
     // RepeatString     -> index  ( will always return a index)
     // RepeatInteger    -> value
@@ -99,6 +105,7 @@ public:
     virtual bool is_repeat_day() const { return false; }
 
     virtual bool isDate() const { return false; }
+    virtual bool isDateTime() const { return false; }
     virtual bool isDateList() const { return false; }
     virtual bool isInteger() const { return false; }
     virtual bool isEnumerated() const { return false; }
@@ -188,6 +195,108 @@ private:
     mutable Variable dom_;    // *not* persisted
     mutable Variable dow_;    // *not* persisted
     mutable Variable julian_; // *not* persisted
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
+};
+
+class RepeatDateTime final : public RepeatBase {
+public:
+    RepeatDateTime(const std::string& variable,
+                   const std::string& start,
+                   const std::string& end,
+                   const std::string& delta = "24:00:00");
+    RepeatDateTime(const std::string& variable, ecf::Instant start, ecf::Instant end, ecf::Duration delta);
+    RepeatDateTime() = default;
+
+    void gen_variables(std::vector<Variable>& vec) const override;
+    const Variable& find_gen_variable(const std::string& name) const override;
+    void update_repeat_genvar() const override;
+
+    const ecf::Instant& start_instant() const { return start_; }
+    const ecf::Instant& end_instant() const { return end_; }
+    const ecf::Duration& step_duration() const { return delta_; }
+    const ecf::Instant& value_instant() const { return value_; }
+
+    int start() const override { return coerce_from_instant(start_); }
+    int end() const override { return coerce_from_instant(end_); }
+    int step() const override { return delta_.as_seconds().count(); }
+    long value() const override { return coerce_from_instant(value_); }
+    long index_or_value() const override { return coerce_from_instant(value_); }
+    long last_valid_value() const override;
+    long last_valid_value_minus(int value) const override;
+    long last_valid_value_plus(int value) const override;
+
+    void delta(const ecf::Duration& d) { delta_ = d; }
+    bool operator==(const RepeatDateTime& rhs) const;
+    bool operator<(const RepeatDateTime& rhs) const { return name() < rhs.name(); }
+
+    RepeatDateTime* clone() const override { return new RepeatDateTime(name_, start_, end_, delta_, value_); }
+    bool compare(RepeatBase*) const override;
+    bool valid() const override {
+        return (delta_ > ecf::Duration{std::chrono::seconds{0}}) ? (value_ <= end_) : (value_ >= end_);
+    }
+    std::string valueAsString() const override;
+    std::string value_as_string(int index) const override;
+    std::string next_value_as_string() const override;
+    std::string prev_value_as_string() const override;
+
+    void setToLastValue() override;
+    void reset() override;
+    void increment() override;
+    void change(const std::string& newValue) override; // can throw std::runtime_error
+    void changeValue(long newValue) override;          // can throw std::runtime_error
+    void set_value(long newValue) override;            // will NOT throw, allows any value
+
+    void write(std::string&) const override;
+
+    std::string dump() const override;
+    bool isDateTime() const override { return true; }
+
+    /// Simulator functions:
+    bool isInfinite() const override { return false; }
+
+private:
+    ecf::Instant valid_value(const ecf::Instant& value) const;
+
+    RepeatDateTime(const std::string& name,
+                   ecf::Instant start,
+                   ecf::Instant end,
+                   ecf::Duration delta,
+                   ecf::Instant value)
+        : RepeatBase(name),
+          start_(start),
+          end_(end),
+          delta_(delta),
+          value_(value) {}
+
+    void update_repeat_genvar_value() const;
+
+private:
+    ecf::Instant start_;
+    ecf::Instant end_;
+    ecf::Duration delta_;
+    ecf::Instant value_;
+
+    // *not* persisted
+    mutable VariableMap generated_{
+        // clang-format off
+        // Date
+        Variable(name_ + "_DATE", "<invalid>"),
+        // Date Components
+        Variable(name_ + "_YYYY", "<invalid>"),
+        Variable(name_ + "_MM", "<invalid>"),
+        Variable(name_ + "_DD", "<invalid>"),
+        Variable(name_ + "_JULIAN", "<invalid>"),
+        // Time
+        Variable(name_ + "_TIME", "<invalid>"),
+        // Time Components4
+        Variable(name_ + "_HOURS", "<invalid>"),
+        Variable(name_ + "_MINUTES", "<invalid>"),
+        Variable(name_ + "_SECONDS", "<invalid>")
+        // clang-format on
+    };
 
     friend class cereal::access;
     template <class Archive>
@@ -505,6 +614,7 @@ public:
 
     // Enable implicit conversion to Repeat
     Repeat(const RepeatDate&);
+    Repeat(const RepeatDateTime&);
     Repeat(const RepeatDateList&);
     Repeat(const RepeatInteger&);
     Repeat(const RepeatEnumerated&);

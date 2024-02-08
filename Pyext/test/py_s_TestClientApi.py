@@ -19,8 +19,8 @@ import shutil   # used to remove directory tree
 
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
-from ecflow import Defs,Suite,Family,Task,Edit,Meter, Clock, DState,  Style, State, RepeatDate, PrintStyle, \
-                   File, Client, SState, CheckPt, Cron, Late, debug_build, Flag, FlagType
+from ecflow import Defs, Suite, Family, Task, Edit, Meter, Clock, DState,  Style, State, RepeatDate, RepeatDateTime, \
+                   PrintStyle, File, Client, SState, CheckPt, Cron, Late, debug_build, Flag, FlagType
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
@@ -1225,13 +1225,15 @@ def test_client_alter_delete(ci):
     task_t2 = ci.get_defs().find_abs_node(t2)
     repeat = task_t2.get_repeat()
     assert repeat.empty(), "Expected repeat to be deleted:\n" + str(ci.get_defs())
- 
+
+
 def test_client_alter_change(ci):
     print_test(ci,"test_client_alter_change")
     ci.delete_all() 
     defs =create_defs("test_client_alter_change")   
     t1 = "/test_client_alter_change/f1/t1"
     repeat_date_path = "/test_client_alter_change/f1/repeat_date"
+    repeat_datetime_path = "/test_client_alter_change/f1/repeat_datetime"
     
     task_t1 = defs.find_abs_node(t1)
     task_t1.add_variable("var","value")
@@ -1259,8 +1261,12 @@ def test_client_alter_change(ci):
 
             
     f1 = defs.find_abs_node("/test_client_alter_change/f1")
+    # Add a new Repeat (based on date)
     repeat_date = f1.add_task("repeat_date")
     repeat_date.add_repeat( RepeatDate("date",20100111,20100115,2) )  # can't add cron and repeat at the same level
+    # Add a new Repeat (based on date+time)
+    repeat_datetime = f1.add_task("repeat_datetime")
+    repeat_datetime.add_repeat(RepeatDateTime("datetime", "20100111T000000", "20100115T000000", "48:00:00"))
            
     ci.load(defs)   
 
@@ -1374,14 +1380,22 @@ def test_client_alter_change(ci):
     task_t1 = ci.get_defs().find_abs_node(t1)
     label = task_t1.find_label("label")
     assert label.new_value() == "new-value", "Expected alter of label to be 'new-value' but found " + label.new_value()
-    
-    ci.alter(repeat_date_path,"change","repeat","20100113")   
+
+    ci.alter(repeat_date_path,"change","repeat","20100113")
     sync_local(ci)
     task = ci.get_defs().find_abs_node(repeat_date_path)
     repeat = task.get_repeat()
     assert repeat.value() == 20100113, "Expected alter of repeat to be 20100113 but found " + str(repeat.value())
     res = ci.query('variable',task.get_abs_node_path(),repeat.name())
     assert res == "20100113", "Expected alter of repeat to be 20100113 but found " + res
+
+    ci.alter(repeat_datetime_path, "change", "repeat", "20100113T000000")
+    sync_local(ci)
+    task = ci.get_defs().find_abs_node(repeat_datetime_path)
+    repeat = task.get_repeat()
+    assert repeat.value() == 1263340800, "Expected alter of repeat to be 1263340800 (i.e. seconds between 19700101T000000 and 20100113T000000) but found " + str(repeat.value())
+    res = ci.query('variable', task.get_abs_node_path(), repeat.name())
+    assert res == "20100113T000000", "Expected alter of repeat to be 20100113T000000 but found " + res
 
 def test_client_alter_flag(ci):
     print_test(ci,"test_client_alter_flag")

@@ -1420,30 +1420,45 @@
          repeat string VARIABLE str1 [str2 ...]        
          repeat file VARIABLE filename       
          repeat date VARIABLE yyyymmdd yyyymmdd [delta]
+         repeat datetime VARIABLE yyyymmddTHHMMSS yyyymmddTHHMMSS [delta]
          repeat datelist VARIABLE yyyymmdd(1) yyyymmdd(2) ...
 
       
       The repeat variable name is available as a generated variable.
 
-      The **repeat date** defines additional generated variables (from ecFlow 4.7.0), which are scoped with prefix of the variable name i.e.:
+      The **repeat date** and **repeat datetime** define several generated variables, prefixed by variable name:
             
       .. code-block:: shell
 
+         # Provided for `repeat date` and `repeat datetime`
          <variable>           # the default, the value is the current date
-         <variable>_YYYY      # The year
+         <variable>_YYYY      # the year
          <variable>_MM        # the month
-         <variable>_DD        # The day of the month
+         <variable>_DD        # the day of the month
          <variable>_DOW       # day of the week  
-         <variable>_JULIAN    # the julian value for the date 
+         <variable>_JULIAN    # the julian value for the date
+         # Provided for `repeat datetime`
+         <variable>_DATE      # the date formatted as yyyymmdd
+         <variable>_TIME      # the time formatted as HHMMSS
+         <variable>_HOURS     # the hours
+         <variable>_MINUTES   # the minutes
+         <variable>_SECONDS   # the seconds
 
       For example:
 
       .. code-block:: shell
-         :caption: Repeat date generated variables, accessible for trigger expressions
+         :caption: Repeat generated variables, accessible for trigger expressions
 
          repeat date YMD 20090101 20220101
          # The following generated variables, are accessible for trigger expressions
-         # YMD, YMD_YYYY, YMD_MM, YMD_DD, YMD_DOW,YMD_JULIAN 
+         # YMD
+         # YMD_YYYY, YMD_MM, YMD_DD, YMD_DOW, YMD_JULIAN
+
+         repeat datetime DT 20090101T000000 20090102T000000 06:00:00
+         # The following generated variables, are accessible for trigger expressions
+         # DT
+         # DT_DATE, DT_YYYY, DT_MM, DT_DD, DT_DOW, DT_JULIAN
+         # DT_TIME, DT_HOURS, DT_MINUTES, DT_SECONDS
 
       The repeat VARIABLE can be used in :term:`trigger` and :term:`complete expression` expressions.
       
@@ -1757,6 +1772,7 @@
       - :term:`repeat` *enumerated*: use the index values as integers. See example below
       - :term:`repeat` *integer*: use the implicit integer values
       - :term:`repeat` *date*: use the date values as integers. Use of plus/minus on repeat date variable uses date arithmetic
+      - :term:`repeat` *datetime*: use the date+time instant values as integers. Use of plus/minus on repeat datetime variable uses second arithmetic
       - :term:`limit`: the limit value is used as an integer. This allows a degree of prioritisation amongst tasks under a limit
       - :term:`late`: the value is stored in a flag, and is a simple boolean. Used to signify when a task is late.
        

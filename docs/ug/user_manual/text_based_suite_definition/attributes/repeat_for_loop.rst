@@ -13,8 +13,16 @@ Any node can be **repeated** in a number of different ways. Only suites can be r
   repeat enumerated date VARIABLE first [second [third ...]]
   repeat string VARIABLE str1 [str2 ...]
   repeat file VARIABLE filename
-  repeat date VARIABLE yyyymmdd yyyymmdd [delta]                     # when used in trigger expression, we use date arithmetic
-  repeat datelist YMD 20130101 20130102 20130103 20200101 20190101   # arbitrary list of dates, also uses date arithmetic in trigger expression
+  repeat date VARIABLE yyyymmdd yyyymmdd [step]
+        # when used in trigger expression, we use date arithmetic
+  repeat datetime VARIABLE yyyymmddTHHMMSS yyyymmddTHHMMSS [step]
+        # loop over time instants separated by a delta duration (given as HH:MM:00)
+  repeat datelist VARIABLE 20130101 20130102 20130103 20200101 20190101
+        # arbitrary list of dates, also uses date arithmetic in trigger expression
+
+The default value for the step depends on the type of the repeat entity.
+When a step is not provided, the default step for both repeat integer and
+repeat day is 1, while for repeat datetime the default value is 24:00:00.
 
 The idea is that the variable given is advanced when the node
 completes and the node is re-queued (except, of course, when the

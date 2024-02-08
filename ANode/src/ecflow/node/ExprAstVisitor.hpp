@@ -33,6 +33,7 @@ class AstLessThan;
 class AstGreaterThan;
 class AstLeaf;
 class AstInteger;
+class AstInstant;
 class AstFunction;
 class AstNodeState;
 class AstEventState;
@@ -65,6 +66,7 @@ public:
     virtual void visitLessThan(AstLessThan*)             = 0;
     virtual void visitLeaf(AstLeaf*)                     = 0;
     virtual void visitInteger(AstInteger*)               = 0;
+    virtual void visitInstant(AstInstant*)               = 0;
     virtual void visitFunction(AstFunction*)             = 0;
     virtual void visitNodeState(AstNodeState*)           = 0;
     virtual void visitEventState(AstEventState*)         = 0;
@@ -99,6 +101,7 @@ public:
     void visitLessThan(AstLessThan*) override {}
     void visitLeaf(AstLeaf*) override {}
     void visitInteger(AstInteger*) override {}
+    void visitInstant(AstInstant*) override {}
     void visitFunction(AstFunction*) override {}
     void visitNodeState(AstNodeState*) override {}
     void visitEventState(AstEventState*) override {}
@@ -135,6 +138,7 @@ public:
     void visitLessThan(AstLessThan*) override {}
     void visitLeaf(AstLeaf*) override {}
     void visitInteger(AstInteger*) override {}
+    void visitInstant(AstInstant*) override {}
     void visitFunction(AstFunction*) override {}
     void visitNodeState(AstNodeState*) override {}
     void visitEventState(AstEventState*) override {}

@@ -11,6 +11,7 @@
 #ifndef ecflow_node_parser_RepeatParser_HPP
 #define ecflow_node_parser_RepeatParser_HPP
 
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/node/parser/Parser.hpp"
 
 class RepeatParser : public Parser {
@@ -23,6 +24,7 @@ public:
 private:
     // void extractDayMonthYear(const std::vector<std::string>& lineTokens,int& x, int& endDate);
     bool get_value(const std::vector<std::string>& lineTokens, int& value) const;
+    bool get_value(const std::vector<std::string>& lineTokens, ecf::Instant& value) const;
 };
 
-#endif /* ecflow_node_parser_RepeatParser_HPP */
+#endif

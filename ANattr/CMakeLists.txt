@@ -78,6 +78,7 @@ set(test_srcs
   test/TestTimeAttr.cpp
   test/TestTodayAttr.cpp
   test/TestVariable.cpp
+  test/TestVariableMap.cpp
   test/TestZombieAttr.cpp
 )
 

@@ -13,7 +13,7 @@
 from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
                   Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
                   JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-                  Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
+                  Repeat, RepeatDate, RepeatDateTime, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
                   Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import os 
@@ -124,26 +124,26 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
           [ Suite("s{0}".format(i)).add( 
               [ Family("f{0}".format(i)).add( 
                   [ Task("t{0}".format(i)) for i in range(1,6)] ) 
-                for i in range(1,6)]  ) 
+                for i in range(1,7)]  )
             for i in range(1,6) ] )
-        assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
+        assert len(defs)==5, " expected 6 suites but found " + str(len(defs))
         for suites in defs:
-            assert len(suites)==5, " expected 5 familes but found " + str(len(suites))
+            assert len(suites)==6, " expected 6 families but found " + str(len(suites))
             for fam in suites:
-                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam)) 
+                assert len(fam)==5, " expected 6 tasks but found " + str(len(fam))
                 
     def test_me6(self):
         defs = Defs(
                 [ Suite("s{0}".format(i),
                     [ Family("f{0}".format(i),
                         [ Task("t{0}".format(i)) for i in range(1,6)] )
-                    for i in range(1,6)]  ) 
+                    for i in range(1,7)]  )
                 for i in range(1,6) ] )
         assert len(defs)==5, " expected 5 suites but found " + str(len(defs))
         for suites in defs:
-            assert len(suites)==5, " expected 5 familes but found " + str(len(suites))
+            assert len(suites)==6, " expected 6 families but found " + str(len(suites))
             for fam in suites:
-                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam))     
+                assert len(fam)==5, " expected 5 tasks but found " + str(len(fam))
              
     def tearDown(self):
         unittest.TestCase.tearDown(self)
@@ -787,6 +787,10 @@ class TestAddRepeat(unittest.TestCase):
         f5 = s1.add_family("f5")
         f5.add_repeat( RepeatDay(1)  )
         add_tasks(f5)
+
+        f6 = s1.add_family("f6")
+        f6.add_repeat(RepeatDateTime("DT", "20100111T000000", "20100115T000000", "48:00:00"))
+        add_tasks(f6)
           
         self.defs = defs
      
@@ -808,6 +812,9 @@ class TestAddRepeat(unittest.TestCase):
                         [ Task("t{0}".format(i)) for i in range(1,3) ] ),
                     Family("f5",
                         RepeatDay(1),
+                        [ Task("t{0}".format(i)) for i in range(1,3) ] ),
+                    Family("f6",
+                        RepeatDateTime("DT", "20100111T000000", "20100115T000000", "48:00:00"),
                         [ Task("t{0}".format(i)) for i in range(1,3) ] )))
 
         Ecf.set_debug_equality(True)
@@ -832,6 +839,9 @@ class TestAddRepeat(unittest.TestCase):
                         [ Task("t{0}".format(i)) for i in range(1,3) ] ),
                     Family("f5").add(
                         RepeatDay(1),
+                        [ Task("t{0}".format(i)) for i in range(1,3) ] ),
+                    Family("f6").add(
+                        RepeatDateTime("DT", "20100111T000000", "20100115T000000", "48:00:00"),
                         [ Task("t{0}".format(i)) for i in range(1,3) ] )))
 
         Ecf.set_debug_equality(True)
@@ -843,12 +853,13 @@ class TestAddRepeat(unittest.TestCase):
         defs = Defs() + Suite("s1") 
         defs.s1 += [ Family("f{0}".format(i)).add(
                       [ Task("t{0}".format(i)) for i in range(1,3) ]) 
-                    for i in range(1,6) ]   
-        defs.s1.f1 += RepeatDate("YMD",20100111,20100115,2) 
+                    for i in range(1,7) ]
+        defs.s1.f1 += RepeatDate("YMD",20100111,20100115,2)
         defs.s1.f2 += RepeatInteger("count",0,100,2) 
         defs.s1.f3 += RepeatEnumerated("enum",["red", "green", "blue" ] ) 
         defs.s1.f4 += RepeatString("enum",["a", "b", "c" ] ) 
-        defs.s1.f5 += RepeatDay(1) 
+        defs.s1.f5 += RepeatDay(1)
+        defs.s1.f6 += RepeatDateTime("DT", "20100111T000000", "20100115T000000", "48:00:00")
   
         Ecf.set_debug_equality(True)
         equals = (self.defs == defs)

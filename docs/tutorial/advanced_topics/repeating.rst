@@ -11,8 +11,10 @@ It is sometimes useful to repeat the same :term:`task` or :term:`family` several
 * strings
 * integers
 * dates
+* time instants
 
-A sequence of integers or dates is created by specifying the first and last element, with an optional increment (the default is one). 
+A sequence of integers, dates or time instants is created by specifying the first and last element, with an optional
+increment (the default is 1 for integers, 1 day for dates, and 24:00:00 for time instants).
 
 We can also loop over an arbitrary list of dates:
 
@@ -108,4 +110,3 @@ Python
 #. How many times will **/test/f4/f5/t1** run?
 #. In :term:`ecflow_ui`, try to modify the values of a :term:`repeat`
 #. Since we are using a 2-second delay, remember to use f5(refresh) to see the intermediate values. The default is to refresh every 60 seconds.
-

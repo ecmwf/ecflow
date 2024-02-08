@@ -16,6 +16,7 @@
 #include <cassert>
 #include <iosfwd>
 
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/DState.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/NodeFwd.hpp"
@@ -436,6 +437,28 @@ private:
     int value_;
 };
 
+class AstInstant : public AstLeaf {
+public:
+    explicit AstInstant(int value) : value_(ecf::coerce_to_instant(value)) {}
+    explicit AstInstant(ecf::Instant value) : value_(std::move(value)) {}
+
+    bool is_evaluateable() const override { return true; }
+    bool evaluate() const override { return value(); } // -1 -2 1 2 3 evaluates to true, 0 returns false
+
+    void accept(ecf::ExprAstVisitor&) override;
+    AstInstant* clone() const override;
+    int value() const override { return ecf::coerce_from_instant(value_); }
+    std::ostream& print(std::ostream& os) const override;
+    void print_flat(std::ostream&, bool add_brackets = false) const override;
+    std::string type() const override { return stype(); }
+    std::string expression() const override;
+    std::string why_expression(bool html = false) const override;
+    static std::string stype() { return "integer"; }
+
+private:
+    ecf::Instant value_;
+};
+
 class AstNodeState : public AstLeaf {
 public:
     explicit AstNodeState(DState::State s) : state_(s) {}
@@ -693,6 +716,7 @@ std::ostream& operator<<(std::ostream& os, const AstGreaterThan&);
 std::ostream& operator<<(std::ostream& os, const AstLessThan&);
 std::ostream& operator<<(std::ostream& os, const AstLeaf&);
 std::ostream& operator<<(std::ostream& os, const AstInteger&);
+std::ostream& operator<<(std::ostream& os, const AstInstant&);
 std::ostream& operator<<(std::ostream& os, const AstNodeState&);
 std::ostream& operator<<(std::ostream& os, const AstEventState&);
 std::ostream& operator<<(std::ostream& os, const AstNode&);

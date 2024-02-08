@@ -15,7 +15,7 @@
 
 import os
 from ecflow import Day, Date, Meter, Event, Queue, Clock, Variable, Label, Limit, InLimit, \
-                   RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
+                   RepeatDate, RepeatDateTime, RepeatEnumerated, RepeatInteger, RepeatString, \
                    Task, Family, Suite, Defs, Client, debug_build, Trigger
 import ecflow_test_util as Test
 
@@ -119,7 +119,14 @@ def check_repeat_date(name, start, end, step):
         return True
     except RuntimeError: 
         return False
-    
+
+def check_repeat_datetime(name, start, end, step):
+    try:
+        RepeatDateTime(name,start,end,step)
+        return True
+    except RuntimeError:
+        return False
+
 def check_repeat_integer(name, start, end, step):
     try:    
         RepeatInteger(name,start,end,step)
@@ -243,6 +250,13 @@ if __name__ == "__main__":
     assert check_repeat_date("m",00000000,00000000,200)== False,  "Expected Exception since start/end are not valid dates is invalid."
     assert check_repeat_date("",20000101,20001201,200)==False,    "Expected Exception since no name specified"
     assert check_repeat_date(" ",20000101,20001201,200)==False,   "Expected Exception cannot have spaces for a name"
+    assert check_repeat_datetime("m", "20000101T000000", "20001201T000000", "4800:00:00"), "Expected valid repeat"
+    assert check_repeat_datetime("m", "20001201T000000", "20000101T000000", "4800:00:00") == False, "Expected exception since end YMD > start YMD"
+    assert check_repeat_datetime("m", "200001011T000000", "20001201T000000", "4800:00:00") == False, "Expected Exception since start is invalid."
+    assert check_repeat_datetime("m", "20000101T000000", "200012013T000000", "4800:00:00") == False, "Expected Exception since send is invalid."
+    assert check_repeat_datetime("m", "00000000T000000", "00000000T000000", "4800:00:00") == False, "Expected Exception since start/end are not valid dates is invalid."
+    assert check_repeat_datetime("", "20000101T000000", "20001201T000000", "4800:00:00") == False, "Expected Exception since no name specified"
+    assert check_repeat_datetime(" ", "20000101T000000", "20001201T000000", "4800:00:00") == False, "Expected Exception cannot have spaces for a name"
     assert check_repeat_integer("name",0, 10, 2 ),                "Expected valid repeat"
     assert check_repeat_integer("",0, 10, 2 )==False,             "Expected Exception since no name specified"
     assert check_repeat_integer(" ",0, 10, 2 )==False,            "Expected Exception cannot have spaces for a name"

@@ -81,6 +81,21 @@ protected:
     static std::string subType_;
 };
 
+class VRepeatDateTimeAttr : public VRepeatAttr {
+public:
+    VRepeatDateTimeAttr(VNode* n) : VRepeatAttr(n) {}
+    int endIndex() const override;
+    int currentIndex() const override;
+    QString startValue() const override;
+    QString endValue() const override;
+    std::string value(int index) const override;
+    int currentPosition() const override;
+    const std::string& subType() const override { return subType_; }
+
+protected:
+    static std::string subType_;
+};
+
 class VRepeatDateListAttr : public VRepeatAttr {
 public:
     explicit VRepeatDateListAttr(VNode* n) : VRepeatAttr(n) {}

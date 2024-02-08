@@ -45,6 +45,7 @@ void to_json(ecf::ojson&, const ::InLimit&);
 void to_json(ecf::ojson&, const ::DateAttr&);
 void to_json(ecf::ojson&, const ::DayAttr&);
 void to_json(ecf::ojson&, const ::RepeatDate&);
+void to_json(ecf::ojson&, const ::RepeatDateTime&);
 void to_json(ecf::ojson&, const ::RepeatDay&);
 void to_json(ecf::ojson&, const ::RepeatDateList&);
 void to_json(ecf::ojson&, const ::RepeatInteger&);

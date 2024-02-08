@@ -12,6 +12,9 @@
 #define ecflow_attribute_Variable_HPP
 
 #include <string>
+#include <vector>
+
+#include <unordered_map>
 
 namespace cereal {
 class access;
@@ -61,6 +64,36 @@ private:
     friend class cereal::access;
     template <class Archive>
     void serialize(Archive& ar);
+};
+
+class VariableMap {
+public:
+    using storage_t = std::vector<Variable>;
+    using index_t   = std::unordered_map<std::string, size_t>;
+
+    template <typename... VARIABLES>
+    explicit VariableMap(const VARIABLES... variables) : variables_{variables...} {
+        // Fill index
+        for (size_t i = 0; i < variables_.size(); ++i) {
+            index_.insert(std::make_pair(variables_[i].name(), i));
+        }
+    }
+
+    [[nodiscard]] storage_t::iterator begin() { return variables_.begin(); }
+    [[nodiscard]] storage_t::const_iterator begin() const { return variables_.begin(); }
+    [[nodiscard]] storage_t::iterator end() { return variables_.end(); }
+    [[nodiscard]] storage_t::const_iterator end() const { return variables_.end(); }
+
+    [[nodiscard]] bool empty() const { return variables_.empty(); }
+    [[nodiscard]] size_t size() const { return variables_.size(); }
+
+    void set_value(const std::string& value);
+
+    [[nodiscard]] Variable& operator[](const std::string& name);
+
+private:
+    storage_t variables_;
+    index_t index_;
 };
 
 #endif /* ecflow_attribute_Variable_HPP */
