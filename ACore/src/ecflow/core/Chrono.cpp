@@ -151,12 +151,11 @@ std::string format_duration(DurationIn d) {
     oss << std::setw(2) << std::setfill('0') << value.count(); // Ensure left 0-padded value with 2 digits
     std::string out = oss.str();
 
-    // Important!
-    // The whole duration has the same sign as the first component
-    // e.g. -23:59:59, is interpreted as (-23 hours) + (-59 minutes) + (-59 seconds) = -86399 seconds
-    int sign = value >= FirstDuration{0} ? 1 : -1;
-
     if constexpr (sizeof...(RestDurations) > 0) {
+        // Important!
+        // The whole duration has the same sign as the first component
+        // e.g. -23:59:59, is interpreted as (-23 hours) + (-59 minutes) + (-59 seconds) = -86399 seconds
+        int sign = value >= FirstDuration{0} ? 1 : -1;
         out += ":" + format_duration<DurationIn, RestDurations...>(sign * (d - value));
     }
 

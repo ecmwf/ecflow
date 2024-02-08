@@ -65,7 +65,7 @@ private:
 void handle_store(const fs::path& temporary) {
     std::ofstream ofs(temporary.string());
     ofs << "2";
-};
+}
 
 BOOST_AUTO_TEST_SUITE(U_Server)
 
