@@ -10,6 +10,7 @@
 
 #include "ecflow/base/cts/user/CtsApi.hpp"
 
+#include <cassert>
 #include <sstream>
 
 #include "ecflow/core/Converter.hpp"
