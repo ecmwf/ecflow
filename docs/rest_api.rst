@@ -21,11 +21,23 @@ Compilation
 ===========
 
 ecFlow REST API is implemented using an HTTP server. The HTTP server
-compilation is enabled by default, and can be enabled (ON) or disabled (OFF) using cmake option :: 
+compilation is enabled by default, and can be enabled (ON) or disabled (OFF) using CMake option:
+
+.. code:: text
 
   -DENABLE_HTTP=ON
 
 The compilation result is an executable called **ecflow_http**.
+
+By default, the ecFlow HTTP server is built with support for compression (i.e. allows :code:`Accept-Encoding: gzip`
+as header in the request), based on the following CMake option:
+
+.. code:: text
+
+  -DENABLE_HTTP_COMPRESSION=ON
+
+To disable compression set the :code:`ENABLE_HTTP_COMPRESSION` to :code:`OFF`. Notice that compression support
+requires the presence of *zlib* -- if this dependency is not available the CMake project configuration step will fail.
 
 When launched, the server will by default listen to port 8080. This can
 be changed with command line option ``-p``, ``--port``. Using option ``-v``,

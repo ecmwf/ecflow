@@ -60,6 +60,7 @@ option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 option( ENABLE_PYTHON_UNDEF_LOOKUP "Some boost/python versions are too closely linked" OFF  )
 option( ENABLE_HTTP                "Enable HTTP server (experimental)" ON  )
+option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server" ON )
 option( ENABLE_UDP                 "Enable UDP server (experimental)" ON )
 option( ENABLE_DOCS                "Enable Documentation" OFF )
 
@@ -198,6 +199,7 @@ ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries available" )
 ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
+ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
 
 

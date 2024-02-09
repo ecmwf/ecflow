@@ -32,3 +32,13 @@ find_package(Json REQUIRED)
 # =========================================================================================
 set(HTTPLIB_DIR "${DEPENDENCIES_DIR}/cpp-httplib")
 find_package(Httplib REQUIRED)
+
+# =========================================================================================
+# zlib
+# =========================================================================================
+if (ENABLE_HTTP_COMPRESSION)
+  find_package(ZLIB)
+  if (NOT ZLIB_FOUND)
+    message(FATAL_ERROR "HTTP compression support requested, but zlib was not found")
+  endif ()
+endif ()

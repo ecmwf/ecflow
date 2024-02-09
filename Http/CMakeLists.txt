@@ -63,6 +63,9 @@ ecbuild_add_library(
     libclient
     nlohmann::json
     httplib::httplib
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  PUBLIC_DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(libhttp)
 
