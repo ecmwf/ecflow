@@ -277,25 +277,6 @@ Run the script for application "my app" using token
     }
   ]
 
-Container Images
-================
-
-For development and experimentation purposes a container image exists
-at:
-
-https://hub.docker.com/repository/docker/partio/ecflow-http
-
-The image can be used for quick prototyping. It expects that ecFlow
-server is found from localhost:3141, change address with ECF_HOST and
-ECF_PORT if needed. Server does not have a SSL certificates defined, so it can only be used to query ecFlow server (not alter states etc).
-
-Usage example:
-
-.. code-block:: bash
-
-  podman run --rm -p 8080:8080 -it docker.io/partio/ecflow-http
-  curl -kv https://localhost:8080/v1/server/ping
-
 API v1 Documentation
 ====================
 
