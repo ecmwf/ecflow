@@ -56,7 +56,7 @@
 
 inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t* out_len) {
 
-    static const unsigned char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static const std::string base64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     unsigned char dtable[256], *out, *pos, block[4], tmp;
     size_t olen;
@@ -71,26 +71,31 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
 
     size_t count = 0;
     for (size_t i = 0; i < len; i++) {
-        if (dtable[src[i]] != 0x80)
+        if (dtable[src[i]] != 0x80) {
             count++;
+        }
     }
 
-    if (count == 0 || count % 4)
-        return NULL;
+    if (count == 0 || count % 4) {
+        return nullptr;
+    }
 
     olen = count / 4 * 3;
     pos = out = (unsigned char*)malloc(olen);
-    if (out == NULL)
-        return NULL;
+    if (out == nullptr) {
+        return nullptr;
+    }
 
     count = 0;
     for (size_t i = 0; i < len; i++) {
         tmp = dtable[src[i]];
-        if (tmp == 0x80)
+        if (tmp == 0x80) {
             continue;
+        }
 
-        if (src[i] == '=')
+        if (src[i] == '=') {
             pad++;
+        }
         block[count] = tmp;
         count++;
         if (count == 4) {
@@ -99,14 +104,16 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
             *pos++ = (block[2] << 6) | block[3];
             count  = 0;
             if (pad) {
-                if (pad == 1)
+                if (pad == 1) {
                     pos--;
-                else if (pad == 2)
+                }
+                else if (pad == 2) {
                     pos -= 2;
+                }
                 else {
                     /* Invalid padding */
                     free(out);
-                    return NULL;
+                    return nullptr;
                 }
                 break;
             }
@@ -140,8 +147,9 @@ inline std::string base64_decode(const std::string& encoded) {
  */
 
 inline bool base64_validate(const std::string& encoded) {
-    if (encoded.size() % 4 != 0)
+    if (encoded.size() % 4 != 0) {
         return false;
+    }
     static const std::regex pattern("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$");
 
     return std::regex_match(encoded, pattern);

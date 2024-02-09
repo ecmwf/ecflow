@@ -8,18 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_BasicAuth_HPP
-#define ecflow_http_BasicAuth_HPP
-
-#include <string>
+#include "ecflow/http/Options.hpp"
 
 namespace ecf::http {
 
-class BasicAuth {
-public:
-    static std::pair<std::string, std::string> get_credentials(const std::string& token);
-};
+Options opts = {};
 
 } // namespace ecf::http
-
-#endif /* ecflow_http_BasicAuth_HPP */

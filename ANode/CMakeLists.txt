@@ -20,6 +20,7 @@ set(srcs
   src/ecflow/node/CmdContext.hpp
   src/ecflow/node/Defs.hpp
   src/ecflow/node/DefsDelta.hpp
+  src/ecflow/node/DefsTreeVisitor.hpp
   src/ecflow/node/EcfFile.hpp
   src/ecflow/node/ExprAst.hpp
   src/ecflow/node/ExprAstVisitor.hpp

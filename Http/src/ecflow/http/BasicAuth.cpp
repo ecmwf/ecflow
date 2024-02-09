@@ -15,6 +15,8 @@
 #include "ecflow/http/Base64.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 
+namespace ecf::http {
+
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
     const std::string decoded = base64_decode(token);
     std::vector<std::string> elems;
@@ -22,3 +24,5 @@ std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string
 
     return std::make_pair(elems[0], PasswordEncryption::encrypt(elems[1], elems[0]));
 }
+
+} // namespace ecf::http

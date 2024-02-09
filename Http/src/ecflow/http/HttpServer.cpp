@@ -14,11 +14,11 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Filesystem.hpp"
-#include "ecflow/http/ApiV1.hpp"
+#include "ecflow/http/Api.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/http/Options.hpp"
 
-Options opts;
+namespace ecf::http {
 
 HttpServer::HttpServer(int argc, char** argv) {
     parse_args(argc, argv);
@@ -54,7 +54,10 @@ void read_environment() {
     }
 }
 
-void HttpServer::parse_args(int argc, char** argv) {
+void HttpServer::parse_args(int argc, char** argv) const {
+
+    // TODO[MB]: This essentially creates an Options object, thus makes more sense that move ability to Options.hpp
+
     namespace po = boost::program_options;
 
     po::options_description desc("Allowed options", 100);
@@ -88,10 +91,12 @@ void HttpServer::parse_args(int argc, char** argv) {
         std::cout << desc << std::endl;
         exit(1);
     }
-    if (verbose)
+    if (verbose) {
         opts.verbose = true;
-    if (no_ssl)
+    }
+    if (no_ssl) {
         opts.no_ssl = true;
+    }
 
     setenv("ECF_HOST", opts.ecflow_host.c_str(), 1);
     setenv("ECF_PORT", ecf::convert_to<std::string>(opts.ecflow_port).c_str(), 1);
@@ -102,11 +107,15 @@ void HttpServer::parse_args(int argc, char** argv) {
 }
 
 void apply_listeners(httplib::Server& http_server) {
+
+    // TODO[MB]: Needs to be further refactored
+
     const auto dump_headers = [](const httplib::Headers& headers, std::stringstream& ss) {
-        for (const auto& m : headers) {
-            ss << m.first << ": " << m.second << "\n";
+        for (const auto& [key, value] : headers) {
+            ss << key << ": " << value << "\n";
         }
     };
+
     const auto format = [&dump_headers](const httplib::Request& req, const httplib::Response& res) {
         std::stringstream ss;
 
@@ -115,8 +124,8 @@ void apply_listeners(httplib::Server& http_server) {
         ss << "*** REQUEST ***\n";
         ss << req.method << " " << req.version << " " << req.path;
         char sep = '?';
-        for (const auto& p : req.params) {
-            ss << sep << p.first << "=" << p.second;
+        for (const auto& [parameter, value] : req.params) {
+            ss << sep << parameter << "=" << value;
             sep = '&';
         }
         ss << '\n';
@@ -149,26 +158,30 @@ void apply_listeners(httplib::Server& http_server) {
             std::rethrow_exception(ep);
         }
         catch (const std::exception& e) {
-            if (opts.verbose)
+            if (opts.verbose) {
                 printf("Exception: Error 500: %s\n", e.what());
-            ecf::ojson j;
+            }
+            ojson j;
             j["status"]  = res.status;
             j["message"] = e.what();
             j["path"]    = req.path;
             j["method"]  = req.method;
-            if (req.body.empty() == false)
+            if (req.body.empty() == false) {
                 j["body"] = req.body;
+            }
             res.set_content(j.dump(), "application/json");
         }
         catch (...) {
-            if (opts.verbose)
+            if (opts.verbose) {
                 printf("Unknown exception occurred\n");
+            }
         }
     });
 
     http_server.set_error_handler([](const httplib::Request& req, httplib::Response& res) {
-        if (opts.verbose)
+        if (opts.verbose) {
             printf("error_handler called: Error: %d\n", res.status);
+        }
 
         // Usually no need to modify response fields -- they should be configured now, as
         // error handler is called *after* httplib finds out that status is >= 400
@@ -177,7 +190,7 @@ void apply_listeners(httplib::Server& http_server) {
         // registered endpoints
 
         if (res.body.empty()) {
-            ecf::ojson j;
+            ojson j;
             j["path"]   = req.path;
             j["status"] = res.status;
             res.set_content(j.dump(), "application/json");
@@ -187,21 +200,24 @@ void apply_listeners(httplib::Server& http_server) {
     http_server.set_logger([&format](const httplib::Request& req, const httplib::Response& res) {
         const std::string str = format(req, res);
         // using std::cout crashes with many threads calling
-        if (opts.verbose)
+        if (opts.verbose) {
             printf("%s\n", str.c_str());
+        }
     });
 }
 
 void start_server(httplib::Server& http_server) {
-    if (opts.verbose)
+    if (opts.verbose) {
         printf("ecFlow server location is %s:%d\n", opts.ecflow_host.c_str(), opts.ecflow_port);
+    }
 
-    ApiV1::create(http_server);
+    setup(http_server);
 
     const std::string proto = (opts.no_ssl ? "http" : "https");
 
-    if (opts.verbose)
+    if (opts.verbose) {
         printf("%s server listening on port %d\n", proto.c_str(), opts.port);
+    }
 
     try {
         bool ret = http_server.listen("0.0.0.0", opts.port);
@@ -210,12 +226,13 @@ void start_server(httplib::Server& http_server) {
         }
     }
     catch (const std::exception& e) {
-        if (opts.verbose)
+        if (opts.verbose) {
             printf("Server execution stopped: %s\n", e.what());
+        }
     }
 }
 
-void HttpServer::run() {
+void HttpServer::run() const {
 #ifdef ECF_OPENSSL
     if (opts.no_ssl == false) {
         if (fs::exists(opts.cert_directory + "/server.crt") == false ||
@@ -240,3 +257,5 @@ void HttpServer::run() {
         start_server(http_server);
     }
 }
+
+} // namespace ecf::http

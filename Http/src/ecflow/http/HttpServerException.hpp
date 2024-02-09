@@ -14,6 +14,8 @@
 #include <exception>
 #include <string>
 
+namespace ecf::http {
+
 enum HttpStatusCode {
     unknown              = 0,
     information_continue = 100,
@@ -91,5 +93,7 @@ private:
     HttpStatusCode code_;
     std::string msg_;
 };
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_HttpServerException_HPP */

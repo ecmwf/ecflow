@@ -13,6 +13,8 @@
 
 #include <string>
 
+namespace ecf::http {
+
 struct Options
 {
     bool verbose{false};                                                        // ECF_RESTAPI_VERBOSE
@@ -25,5 +27,9 @@ struct Options
     std::string cert_directory{std::string(getenv("HOME")) + "/.ecflowrc/ssl"}; // ECF_RESTAPI_CERT_DIRECTORY
     int max_polling_interval{300};                                              // ECF_RESTAPI_MAX_POLLING_INTERVAL
 };
+
+extern Options opts;
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_Options_HPP */

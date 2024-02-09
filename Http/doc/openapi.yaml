@@ -86,6 +86,12 @@ paths:
           description: Filter results
           schema:
             type: string
+        - name: content
+          in: query
+          required: false
+          description: Specify tree content
+          schema:
+            type: string
       responses:
         '200':
           description: Full node tree
@@ -122,6 +128,12 @@ paths:
           in: query
           required: false
           description: Filter results
+          schema:
+            type: string
+        - name: content
+          in: query
+          required: false
+          description: Specify tree content
           schema:
             type: string
       responses:

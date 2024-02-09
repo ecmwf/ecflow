@@ -43,6 +43,7 @@ set(srcs
   src/ecflow/core/NOrder.hpp
   src/ecflow/core/NState.hpp
   src/ecflow/core/NodePath.hpp
+  src/ecflow/core/Overload.hpp
   src/ecflow/core/Passwd.hpp
   src/ecflow/core/PasswdFile.hpp
   src/ecflow/core/PasswordEncryption.hpp

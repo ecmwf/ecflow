@@ -8,18 +8,23 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_BasicAuth_HPP
-#define ecflow_http_BasicAuth_HPP
+#ifndef ecflow_http_DefsStorage_HPP
+#define ecflow_http_DefsStorage_HPP
 
-#include <string>
+#include <functional>
+
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {
 
-class BasicAuth {
-public:
-    static std::pair<std::string, std::string> get_credentials(const std::string& token);
-};
+std::shared_ptr<Defs> get_defs();
+
+void update_defs_loop(int interval);
+
+void trigger_defs_update();
+void trigger_defs_update(std::function<void()> function);
 
 } // namespace ecf::http
 
-#endif /* ecflow_http_BasicAuth_HPP */
+#endif /* DefsStorage */

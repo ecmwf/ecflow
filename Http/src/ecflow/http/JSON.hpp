@@ -13,10 +13,12 @@
 
 #include "nlohmann/json.hpp"
 
-namespace ecf {
+namespace ecf::http {
 
 using ojson = nlohmann::ordered_json;
 
-} // namespace ecf
+std::string json_type_to_string(const ojson& j);
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_JSON_HPP */

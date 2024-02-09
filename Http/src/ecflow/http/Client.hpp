@@ -8,18 +8,21 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_BasicAuth_HPP
-#define ecflow_http_BasicAuth_HPP
+#ifndef ecflow_http_Client_HPP
+#define ecflow_http_Client_HPP
 
-#include <string>
+#include <memory>
+
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
+#include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {
 
-class BasicAuth {
-public:
-    static std::pair<std::string, std::string> get_credentials(const std::string& token);
-};
+std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
+
+std::unique_ptr<ClientInvoker> get_client_for_tasks(const httplib::Request& request, const ojson& payload);
 
 } // namespace ecf::http
 
-#endif /* ecflow_http_BasicAuth_HPP */
+#endif /* ecflow_http_Client_HPP */

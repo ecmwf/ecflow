@@ -11,10 +11,11 @@
 #ifndef ecflow_http_TokenStorage_HPP
 #define ecflow_http_TokenStorage_HPP
 
-#ifdef ECF_OPENSSL
-    #include <chrono>
-    #include <string>
-    #include <vector>
+#include <chrono>
+#include <string>
+#include <vector>
+
+namespace ecf::http {
 
 struct Token
 {
@@ -60,6 +61,6 @@ private:
     std::vector<Token> tokens_;
 };
 
-#endif
+} // namespace ecf::http
 
 #endif /* ecflow_http_TokenStorage_HPP */

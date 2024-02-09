@@ -8,18 +8,21 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_BasicAuth_HPP
-#define ecflow_http_BasicAuth_HPP
+#include "ecflow/http/Api.hpp"
 
-#include <string>
+#include "ecflow/http/ApiV1.hpp"
+#include "ecflow/http/DefsStorage.hpp"
+#include "ecflow/http/Options.hpp"
 
 namespace ecf::http {
 
-class BasicAuth {
-public:
-    static std::pair<std::string, std::string> get_credentials(const std::string& token);
-};
+void setup(httplib::Server& http_server) {
+    routing(http_server);
+    update_defs_loop(opts.polling_interval);
+
+    if (opts.verbose) {
+        printf("API v1 ready\n");
+    }
+}
 
 } // namespace ecf::http
-
-#endif /* ecflow_http_BasicAuth_HPP */

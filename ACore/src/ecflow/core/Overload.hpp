@@ -8,18 +8,20 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_BasicAuth_HPP
-#define ecflow_http_BasicAuth_HPP
+#ifndef ecflow_core_Overload_HPP
+#define ecflow_core_Overload_HPP
 
-#include <string>
+namespace ecf {
 
-namespace ecf::http {
-
-class BasicAuth {
-public:
-    static std::pair<std::string, std::string> get_credentials(const std::string& token);
+template <class... Ts>
+struct overload : Ts...
+{
+    using Ts::operator()...;
 };
 
-} // namespace ecf::http
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>; // Deduction guideline not needed from C++20
 
-#endif /* ecflow_http_BasicAuth_HPP */
+} // namespace ecf
+
+#endif /* ecflow_core_Overload_HPP */

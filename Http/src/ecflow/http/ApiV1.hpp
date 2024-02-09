@@ -11,27 +11,64 @@
 #ifndef ecflow_http_ApiV1_HPP
 #define ecflow_http_ApiV1_HPP
 
-#include <sys/socket.h>
-#if defined(MSG_NOSIGNAL)
-    // The MSG_NOSIGNAL flag should be defined by <sys/socket.h>
-    // (as per POSIX: https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/send.html),
-    // but that is not always the case for OSX.
-    //
-    // If MSG_NOSIGNAL is not defined, we leave it up to httplib to use default flags.
-    //
-    #define CPPHTTPLIB_SEND_FLAGS MSG_NOSIGNAL
-    #define CPPHTTPLIB_RECV_FLAGS MSG_NOSIGNAL
-#endif
+#include "ecflow/http/DefsStorage.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
 
-#ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
-#endif
+namespace ecf::http {
 
-#include "httplib.h"
+void routing(httplib::Server& http_server);
 
-class ApiV1 {
-public:
-    static void create(httplib::Server& server);
-};
+namespace v1 {
+
+void not_implemented(const httplib::Request& request, httplib::Response& response);
+
+void suites_options(const httplib::Request& request, httplib::Response& response);
+void suites_create(const httplib::Request& request, httplib::Response& response);
+void suites_read(const httplib::Request& request, httplib::Response& response);
+
+void node_tree_options(const httplib::Request& request, httplib::Response& response);
+void node_tree_read(const httplib::Request& request, httplib::Response& response);
+
+void node_definition_options(const httplib::Request& request, httplib::Response& response);
+void node_definition_read(const httplib::Request& request, httplib::Response& response);
+void node_definition_update(const httplib::Request& request, httplib::Response& response);
+void node_definition_delete(const httplib::Request& request, httplib::Response& response);
+
+void node_status_options(const httplib::Request& request, httplib::Response& response);
+void node_status_read(const httplib::Request& request, httplib::Response& response);
+void node_status_update(const httplib::Request& request, httplib::Response& response);
+
+void node_attributes_options(const httplib::Request& request, httplib::Response& response);
+void node_attributes_create(const httplib::Request& request, httplib::Response& response);
+void node_attributes_read(const httplib::Request& request, httplib::Response& response);
+void node_attributes_update(const httplib::Request& request, httplib::Response& response);
+void node_attributes_delete(const httplib::Request& request, httplib::Response& response);
+
+void node_script_options(const httplib::Request& request, httplib::Response& response);
+void node_script_read(const httplib::Request& request, httplib::Response& response);
+void node_script_update(const httplib::Request& request, httplib::Response& response);
+
+void node_output_options(const httplib::Request& request, httplib::Response& response);
+void node_output_read(const httplib::Request& request, httplib::Response& response);
+
+void server_ping_options(const httplib::Request& request, httplib::Response& response);
+void server_ping_read(const httplib::Request& request, httplib::Response& response);
+
+void server_status_options(const httplib::Request& request, httplib::Response& response);
+void server_status_read(const httplib::Request& request, httplib::Response& response);
+void server_status_update(const httplib::Request& request, httplib::Response& response);
+
+void server_attributes_options(const httplib::Request& request, httplib::Response& response);
+void server_attributes_create(const httplib::Request& request, httplib::Response& response);
+void server_attributes_read(const httplib::Request& request, httplib::Response& response);
+void server_attributes_update(const httplib::Request& request, httplib::Response& response);
+void server_attributes_delete(const httplib::Request& request, httplib::Response& response);
+
+void server_statistics_options(const httplib::Request& request, httplib::Response& response);
+void server_statistics_read(const httplib::Request& request, httplib::Response& response);
+
+} // namespace v1
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_ApiV1_HPP */

@@ -22,23 +22,32 @@ endif ()
 
 set(srcs
   # Headers
+  src/ecflow/http/Api.hpp
   src/ecflow/http/ApiV1.hpp
   src/ecflow/http/ApiV1Impl.hpp
   src/ecflow/http/Base64.hpp
   src/ecflow/http/BasicAuth.hpp
+  src/ecflow/http/Client.hpp
+  src/ecflow/http/DefsStorage.hpp
   src/ecflow/http/HttpServer.hpp
   src/ecflow/http/HttpServerException.hpp
   src/ecflow/http/JSON.hpp
   src/ecflow/http/Options.hpp
-  src/ecflow/http/TokenStorage.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.hpp>
+  src/ecflow/http/TreeGeneration.hpp
   src/ecflow/http/TypeToJson.hpp
   # Sources
-  src/ecflow/http/HttpServer.cpp
+  src/ecflow/http/Api.cpp
   src/ecflow/http/ApiV1.cpp
   src/ecflow/http/ApiV1Impl.cpp
   src/ecflow/http/BasicAuth.cpp
+  src/ecflow/http/Client.cpp
+  src/ecflow/http/DefsStorage.cpp
+  src/ecflow/http/HttpServer.cpp
+  src/ecflow/http/JSON.cpp
+  src/ecflow/http/Options.cpp
   src/ecflow/http/TypeToJson.cpp
-  src/ecflow/http/TokenStorage.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/http/TokenStorage.cpp>
 )
 
 ecbuild_add_library(

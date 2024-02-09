@@ -11,55 +11,40 @@
 #ifndef ecflow_http_ApiV1Impl_HPP
 #define ecflow_http_ApiV1Impl_HPP
 
-#include <sys/socket.h>
-#if defined(MSG_NOSIGNAL)
-    // The MSG_NOSIGNAL flag should be defined by <sys/socket.h>
-    // (as per POSIX: https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/send.html),
-    // but that is not always the case for OSX.
-    //
-    // If MSG_NOSIGNAL is not defined, we leave it up to httplib to use default flags.
-    //
-    #define CPPHTTPLIB_SEND_FLAGS MSG_NOSIGNAL
-    #define CPPHTTPLIB_RECV_FLAGS MSG_NOSIGNAL
-#endif
-
-#ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
-#endif
-
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/http/HttpLibrary.hpp"
 #include "ecflow/http/JSON.hpp"
-#include "httplib.h"
 
-void update_defs_loop(int interval);
+namespace ecf::http {
 
-std::unique_ptr<ClientInvoker> get_client(const httplib::Request& request);
-std::unique_ptr<ClientInvoker> get_client(const ecf::ojson& j);
-
-ecf::ojson get_sparser_node_tree(const std::string& path);
+ojson get_basic_node_tree(const std::string& path);
+ojson get_full_node_tree(const std::string& path);
+ojson get_sparser_node_tree(const std::string& path);
 
 void add_suite(const httplib::Request& request, httplib::Response& response);
 
-ecf::ojson get_suites();
+ojson get_suites();
 
-ecf::ojson get_server_attributes();
-ecf::ojson add_server_attribute(const httplib::Request& request);
-ecf::ojson update_server_attribute(const httplib::Request& request);
-ecf::ojson delete_server_attribute(const httplib::Request& request);
+ojson get_server_attributes();
+ojson add_server_attribute(const httplib::Request& request);
+ojson update_server_attribute(const httplib::Request& request);
+ojson delete_server_attribute(const httplib::Request& request);
 
-ecf::ojson get_node_definition(const std::string& path);
-ecf::ojson update_node_definition(const httplib::Request& request);
+ojson get_node_definition(const std::string& path);
+ojson update_node_definition(const httplib::Request& request);
 
-ecf::ojson get_node_attributes(const std::string& path);
-ecf::ojson add_node_attribute(const httplib::Request& request);
-ecf::ojson update_node_attribute(const httplib::Request& request);
-ecf::ojson delete_node_attribute(const httplib::Request& request);
+ojson get_node_attributes(const std::string& path);
+ojson add_node_attribute(const httplib::Request& request);
+ojson update_node_attribute(const httplib::Request& request);
+ojson delete_node_attribute(const httplib::Request& request);
 
-ecf::ojson get_node_status(const httplib::Request& request);
-ecf::ojson update_node_status(const httplib::Request& request);
+ojson get_node_status(const httplib::Request& request);
+ojson update_node_status(const httplib::Request& request);
 
-ecf::ojson get_node_output(const httplib::Request& request);
+ojson get_node_output(const httplib::Request& request);
 
-ecf::ojson update_script_content(const httplib::Request& request);
+ojson update_script_content(const httplib::Request& request);
+
+} // namespace ecf::http
 
 #endif /* ecflow_http_ApiV1Impl_HPP */

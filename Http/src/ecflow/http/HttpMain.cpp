@@ -14,6 +14,8 @@
 
 #include "ecflow/http/HttpServer.hpp"
 
+using ecf::http::HttpServer;
+
 int main(int argc, char* argv[]) {
     // Sometimes we get SIGPIPE through openssl, when server is trying
     // to write to a socket which client has already closed.
@@ -22,7 +24,7 @@ int main(int argc, char* argv[]) {
     sigemptyset(&set);
     sigaddset(&set, SIGPIPE);
 
-    if (pthread_sigmask(SIG_BLOCK, &set, NULL) != 0) {
+    if (pthread_sigmask(SIG_BLOCK, &set, nullptr) != 0) {
         throw std::runtime_error("Failed to set signal mask");
     }
 

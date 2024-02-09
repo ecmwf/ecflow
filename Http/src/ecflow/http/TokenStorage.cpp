@@ -8,41 +8,40 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifdef ECF_OPENSSL
+#include "ecflow/http/TokenStorage.hpp"
 
-    #include "ecflow/http/TokenStorage.hpp"
+#include <atomic> // shared mutex only with c++14
+#include <fstream>
+#include <iomanip>
+#include <shared_mutex>
+#include <sstream>
+#include <thread>
 
-    #include <atomic> // shared mutex only with c++14
-    #include <fstream>
-    #include <iomanip>
-    #include <shared_mutex>
-    #include <sstream>
-    #include <thread>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/sha.h>
 
-    #include <openssl/evp.h>
-    #include <openssl/hmac.h>
-    #include <openssl/sha.h>
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/http/HttpServerException.hpp"
+#include "ecflow/http/JSON.hpp"
+#include "ecflow/http/Options.hpp"
 
-    #include "ecflow/core/Filesystem.hpp"
-    #include "ecflow/core/Str.hpp"
-    #include "ecflow/http/HttpServerException.hpp"
-    #include "ecflow/http/JSON.hpp"
-    #include "ecflow/http/Options.hpp"
+namespace ecf::http {
 
 std::shared_mutex m;
-using string                  = std::string;
-std::atomic<bool> initialized = false;
-extern Options opts;
+
+std::atomic initialized = false;
 
 namespace {
 
-string hmac_sha256(const string& salt, const std::string& token) {
+std::string hmac_sha256(const std::string& salt, const std::string& token) {
     unsigned char hash[EVP_MAX_MD_SIZE];
     unsigned int hash_len;
 
     HMAC(EVP_sha256(),
          salt.c_str(),
-         salt.size(),
+         static_cast<int>(salt.size()),
          reinterpret_cast<const unsigned char*>(token.c_str()),
          token.size(),
          hash,
@@ -54,13 +53,13 @@ string hmac_sha256(const string& salt, const std::string& token) {
     return ss.str();
 }
 
-string hmac_pbkdf2_sha256(const string& salt, const std::string& token, int num_iterations) {
+std::string hmac_pbkdf2_sha256(const std::string& salt, const std::string& token, int num_iterations) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
 
     PKCS5_PBKDF2_HMAC(token.c_str(),
-                      token.size(),
+                      static_cast<int>(token.size()),
                       reinterpret_cast<const unsigned char*>(salt.c_str()),
-                      salt.size(),
+                      static_cast<int>(salt.size()),
                       num_iterations,
                       EVP_sha256(),
                       SHA256_DIGEST_LENGTH,
@@ -72,7 +71,7 @@ string hmac_pbkdf2_sha256(const string& salt, const std::string& token, int num_
     return ss.str();
 }
 
-std::string hash(const std::string& method, const std::string& salt, const std::string token) {
+std::string hash(const std::string& method, const std::string& salt, const std::string& token) {
     /*
      * Hash a token with correct HMAC.
      * Current options are:
@@ -83,11 +82,11 @@ std::string hash(const std::string& method, const std::string& salt, const std::
     if (method == "sha256") {
         return hmac_sha256(salt, token);
     }
-    else if (method.find("pbkdf2:sha256") != string::npos) {
+    else if (method.find("pbkdf2:sha256") != std::string::npos) {
         int num_iterations = 260000;
 
         try {
-            num_iterations = std::stoi(method.substr(method.find(":", 8) + 1, string::npos));
+            num_iterations = std::stoi(method.substr(method.find(":", 8) + 1, std::string::npos));
         }
         catch (const std::exception& e) {
             printf("ERROR: method %s has invalid number of iterations: %s\n", method.c_str(), e.what());
@@ -98,9 +97,10 @@ std::string hash(const std::string& method, const std::string& salt, const std::
     throw HttpServerException(HttpStatusCode::server_error_internal_server_error, "Unsupported HMAC: " + method);
 }
 
-bool is_supported_hmac(const std::string& method) {
-    if (method == "sha256" || method.find("pbkdf2:sha256") != string::npos)
+bool is_supported_hmac(std::string_view method) {
+    if (method == "sha256" || method.find("pbkdf2:sha256") != std::string::npos) {
         return true;
+    }
     return false;
 }
 
@@ -113,6 +113,7 @@ std::chrono::system_clock::time_point time_point_from_isostring(const std::strin
     strptime(str.c_str(), "%Y-%m-%dT%H:%M:%SZ", &tm);
     return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
+
 } // namespace
 
 TokenStorage::TokenStorage() {
@@ -130,37 +131,36 @@ bool TokenStorage::verify(const std::string& token) const {
     // Take a (weak) reader lock; the background thread updating
     // tokens from file can block us but other readers cannot
 
-    std::shared_lock<std::shared_mutex> lock(m);
+    std::shared_lock lock(m);
     for (const auto& t : tokens_) {
-        const string hashed = ::hash(t.method, t.salt, token);
+        const std::string hashed = hash(t.method, t.salt, token);
         if (hashed == t.hash && (t.expires.time_since_epoch().count() == 0 || t.expires > now) &&
             (t.revoked.time_since_epoch().count() == 0 || t.revoked > now)) {
-            if (opts.verbose)
+            if (opts.verbose) {
                 printf("Token for '%s' authenticated successfully\n", t.description.c_str());
+            }
             return true;
         }
-        // printf("%s %s %s to %s should be %s\n", t.method.c_str(), t.salt.c_str(), token.c_str(), hashed.c_str(),
-        // t.hash.c_str());
     }
     return false;
 }
 
 std::vector<Token> ReadTokens(const std::string& filename) {
     std::ifstream ifs(filename);
-    ecf::ojson j = ecf::ojson::parse(ifs);
+    auto j = ojson::parse(ifs);
     std::vector<Token> new_tokens;
 
     /* Read a token from json file.
      * Format is:
      * [
      * {
-     *    "hash" : "...",        // hashed and salted token, format is identical to python
-                                 // library 'werkzeug': METHOD$SALT$HASH
-          "description" : "...", // free-form description of token (application)
-          "expires_at" : NUM,    // unix epoch time when this token will expire
-                                 // OPTIONAL: if missing or zero, no expiration time is set
-          "revoked_at" : NUM     // unix epoch time when this token was revoked
-                                 // OPTIONAL: if missing or zero, no revoke time is set
+     *    "hash" : "...",        # hashed and salted token, format is identical to python
+                                 # library 'werkzeug': METHOD$SALT$HASH
+          "description" : "...", # free-form description of token (application)
+          "expires_at" : NUM,    # unix epoch time when this token will expire
+                                 # OPTIONAL: if missing or zero, no expiration time is set
+          "revoked_at" : NUM     # unix epoch time when this token was revoked
+                                 # OPTIONAL: if missing or zero, no revoke time is set
      * }
      * ]
      */
@@ -171,16 +171,16 @@ std::vector<Token> ReadTokens(const std::string& filename) {
             std::chrono::system_clock::time_point revoked_at; // optional
 
             if (o.contains("expires_at")) {
-                expires_at = time_point_from_isostring(o.at("expires_at").get<string>());
+                expires_at = time_point_from_isostring(o.at("expires_at").get<std::string>());
             }
 
             if (o.contains("revoked_at")) {
-                revoked_at = time_point_from_isostring(o.at("revoked_at").get<string>());
+                revoked_at = time_point_from_isostring(o.at("revoked_at").get<std::string>());
             }
 
-            const std::string& hash = o.at("hash").get<string>();
+            const std::string& hash = o.at("hash").get<std::string>();
 
-            std::vector<string> elems;
+            std::vector<std::string> elems;
             ecf::Str::split(hash, elems, "$");
 
             if (elems.size() != 3) {
@@ -191,14 +191,15 @@ std::vector<Token> ReadTokens(const std::string& filename) {
             }
 
             new_tokens.emplace_back(
-                elems[2], elems[1], elems[0], o.at("description").get<string>(), expires_at, revoked_at);
+                elems[2], elems[1], elems[0], o.at("description").get<std::string>(), expires_at, revoked_at);
         }
         catch (const std::exception& e) {
             printf("Invalid token: %s: %s\n", o.dump().c_str(), e.what());
         }
     }
-    if (opts.verbose)
+    if (opts.verbose) {
         printf("Read %ld tokens\n", new_tokens.size());
+    }
 
     return new_tokens;
 }
@@ -217,7 +218,7 @@ void TokenStorage::ReadStorage() {
             if (current_modified > last_modified) {
                 auto new_tokens = ReadTokens(opts.tokens_file);
                 {
-                    std::lock_guard<std::shared_mutex> lock(m);
+                    std::lock_guard lock(m);
                     tokens_ = new_tokens;
                 }
                 last_modified = current_modified;
@@ -226,7 +227,7 @@ void TokenStorage::ReadStorage() {
         catch (const fs::filesystem_error& e) {
             printf("ERROR: API token file (%s) read failed: %s\n", opts.tokens_file.c_str(), e.what());
         }
-        catch (const ecf::ojson::exception& e) {
+        catch (const ojson::exception& e) {
             printf("ERROR: API token file (%s) parse failed: %s\n", opts.tokens_file.c_str(), e.what());
         }
         initialized = true;
@@ -234,4 +235,4 @@ void TokenStorage::ReadStorage() {
     }
 }
 
-#endif
+} // namespace ecf::http

@@ -8,18 +8,15 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_BasicAuth_HPP
-#define ecflow_http_BasicAuth_HPP
+#ifndef ecflow_http_Api_HPP
+#define ecflow_http_Api_HPP
 
-#include <string>
+#include "ecflow/http/HttpLibrary.hpp"
 
 namespace ecf::http {
 
-class BasicAuth {
-public:
-    static std::pair<std::string, std::string> get_credentials(const std::string& token);
-};
+void setup(httplib::Server& server);
 
 } // namespace ecf::http
 
-#endif /* ecflow_http_BasicAuth_HPP */
+#endif /* ecflow_http_Api_HPP */

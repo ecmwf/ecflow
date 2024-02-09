@@ -32,7 +32,7 @@ public:
     bool empty() const { return name_.empty(); }
 
     const std::string& name() const { return name_; }
-    const std::vector<std::string>& values() { return values_; }
+    const std::vector<std::string>& values() const { return values_; }
 
     std::vector<std::string>::const_iterator values_begin() const { return values_.begin(); } // for python
     std::vector<std::string>::const_iterator values_end() const { return values_.end(); }     // for python
