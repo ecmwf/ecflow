@@ -1,30 +1,26 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #34 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
-#include "MockServer.hpp"
 #include "SCPort.hpp"
-#include "Suite.hpp"
-#include "TestHelper.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/PlugCmd.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -53,7 +49,9 @@ static void get_defs(Defs& defs) {
     BOOST_CHECK(parse);
 }
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_PlugCmd)
 
 BOOST_AUTO_TEST_CASE(test_plug_cmd) {
     cout << "Client:: ...test_plug_cmd" << endl;
@@ -386,5 +384,7 @@ BOOST_AUTO_TEST_CASE(test_server_plug_cmd) {
             ClientEnvironment::hostSpecified(), ClientEnvironment::portSpecified(), Str::LOCALHOST(), port2);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

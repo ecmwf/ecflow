@@ -1,68 +1,45 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #22 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This is used to INVOKE a SINGLE test.
-//               Making it easier for Easier for debugging and development
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+///
+/// \note This is used to INVOKE a SINGLE test.
+/// Making it easier for Easier for debugging and development
+///
 
-// static void dump_suites_and_handles(ClientInvoker& theClient, const std::string& title)
-//{
-//    std::cout << title;
-//    TestFixture::client().suites();
-//    {
-//       const std::vector<std::string>& suites =  TestFixture::client().server_reply().get_string_vec();
-//       for(const std::string& suite: suites) { std::cout << "\n---> " << suite; }
-//       std::cout << "\n";
-//
-//       const std::vector<std::pair<unsigned int, std::vector<std::string> > >& handles =
-//       TestFixture::client().server_reply().get_client_handle_suites(); std::pair<unsigned int,
-//       std::vector<std::string> > int_str_pair; for(size_t i =0; i < handles.size(); i++) {
-//           std::cout << "handle: " << handles[i].first << " : ";
-//           for(const std::string& suite: handles[i].second) {
-//             std::cout << suite << " ";
-//          }
-//          std::cout << "\n";
-//       }
-//    }
-//    std::cout << "\n";
-// }
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Handle)
 
 BOOST_AUTO_TEST_CASE(test_handle) {
     DurationTimer timer;
@@ -72,10 +49,10 @@ BOOST_AUTO_TEST_CASE(test_handle) {
     Defs theDefs;
     {
         for (int s = 0; s < 7; s++) {
-            suite_ptr suite = theDefs.add_suite("s" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs.add_suite("s" + ecf::convert_to<std::string>(s));
             suite->addDefStatus(DState::SUSPENDED); // NO NEED to run jobs for this test:
             for (int t = 0; t < 2; t++) {
-                suite->add_task("t" + boost::lexical_cast<std::string>(t));
+                suite->add_task("t" + ecf::convert_to<std::string>(t));
             }
         }
     }
@@ -225,10 +202,10 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
     Defs theDefs;
     {
         for (int s = 0; s < 7; s++) {
-            suite_ptr suite = theDefs.add_suite("s" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs.add_suite("s" + ecf::convert_to<std::string>(s));
             suite->addDefStatus(DState::SUSPENDED);
             for (int t = 0; t < 2; t++) {
-                suite->add_task("t" + boost::lexical_cast<std::string>(t));
+                suite->add_task("t" + ecf::convert_to<std::string>(t));
             }
         }
     }
@@ -363,10 +340,10 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
     defs_ptr theDefs = Defs::create();
     {
         for (int s = 0; s < 3; s++) {
-            suite_ptr suite = theDefs->add_suite("s" + boost::lexical_cast<std::string>(s));
+            suite_ptr suite = theDefs->add_suite("s" + ecf::convert_to<std::string>(s));
             suite->addDefStatus(DState::SUSPENDED); // NO NEED to run jobs for this test:
             for (int t = 0; t < 2; t++) {
-                suite->add_task("t" + boost::lexical_cast<std::string>(t));
+                suite->add_task("t" + ecf::convert_to<std::string>(t));
             }
         }
     }
@@ -435,5 +412,7 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

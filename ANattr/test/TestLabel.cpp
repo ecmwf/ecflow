@@ -1,30 +1,27 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
-#include "NodeAttr.hpp"
-#include "Str.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Label)
 
 BOOST_AUTO_TEST_CASE(test_label_parsing) {
     cout << "ANattr:: ...test_label_parsing\n";
@@ -81,5 +78,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
                             "Expected " << expected.dump() << " but found " << label.dump());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

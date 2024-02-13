@@ -1,46 +1,48 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #23 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/AbortCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_Cmd)
 
 BOOST_AUTO_TEST_CASE(test_simple_cmd) {
     cout << "Base:: ...test_simple_cmd\n";
     TestLog test_log("test_simple_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     // Create the defs file. Note that the default ECF_TRIES = 3
-    //	suite suite
-    //	   family f
-    //	   		task t1
-    //	   		task t2
-    //	   endfamily
-    //	endsuite
+    //   suite suite
+    //     family f
+    //       task t1
+    //       task t2
+    //     endfamily
+    //   endsuite
     Defs defs;
     string suite_f_t1     = "suite/f/t1";
     std::string suitename = "suite";
@@ -79,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_simple_cmd) {
     {
         std::string varValue;
         if (t1->findParentUserVariableValue(Str::ECF_TRIES(), varValue)) {
-            auto ecf_tries = boost::lexical_cast<int>(varValue);
+            auto ecf_tries = ecf::convert_to<int>(varValue);
             while (true) {
                 TestHelper::invokeRequest(
                     &defs,
@@ -120,5 +122,7 @@ BOOST_AUTO_TEST_CASE(test_simple_cmd) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

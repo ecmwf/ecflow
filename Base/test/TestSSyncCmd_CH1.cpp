@@ -1,30 +1,28 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #18 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
-#include "Limit.hpp"
 #include "MockServer.hpp"
-#include "SNewsCmd.hpp"
-#include "SSyncCmd.hpp"
-#include "Suite.hpp"
-#include "SuiteChanged.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/user/AlterCmd.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -45,11 +43,13 @@ using namespace ecf;
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_SSyncCmd_CH1)
 
 static defs_ptr create_client_defs(defs_ptr defs) {
     for (size_t j = 0; j < 5; j++) {
-        suite_ptr suite = defs->add_suite("s" + boost::lexical_cast<std::string>(j));
+        suite_ptr suite = defs->add_suite("s" + ecf::convert_to<std::string>(j));
         family_ptr f    = suite->add_family("f");
         f->add_task("t");
         if (j == 0) {
@@ -708,5 +708,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_full_sync_using_handle) {
     /* client side */ BOOST_CHECK_MESSAGE(!cmd1.do_sync(server_reply),
                                           "Expected no changes to client, we should be in sync");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

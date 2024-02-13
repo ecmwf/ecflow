@@ -1,36 +1,36 @@
-#define BOOST_TEST_MODULE TestBase
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #37 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "ExprAst.hpp"
-#include "Family.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAst.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ResolveDependencies)
 
 BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
     cout << "Base:: ...test_resolve_dependencies\n";
@@ -39,15 +39,15 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // Create the defs file
-    //	suite suite
-    //	   family f
-    //	   		task t
-    //	   			meter step 0 240 120
-    //	   		task tt
-    //	   			complete t:step ge 120
-    //	   			trigger t == complete
-    //	   endfamily
-    //	endsuite
+    //   suite suite
+    //     family f
+    //       task t
+    //         meter step 0 240 120
+    //         task tt
+    //           complete t:step ge 120
+    //           trigger t == complete
+    //     endfamily
+    //   endsuite
     Defs defs;
     std::string metername  = "step";
     std::string suitename  = "suite";
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
         suite_ptr suite = defs.add_suite(suitename);
         family_ptr fam  = suite->add_family(familyname);
 
-        task_ptr task   = fam->add_task("t");
+        task_ptr task = fam->add_task("t");
         task->addMeter(Meter(metername, 0, 240, 120));
 
         task_ptr task_tt = fam->add_task("tt");
@@ -103,12 +103,12 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
 
     //*******************************************************************************
     // Resolve dependencies.
-    //	   		task t
-    //	   			meter step 0 240 120       EXPECTED to be sumbitted
+    //   task t
+    //     meter step 0 240 120       EXPECTED to be sumbitted
     //
-    //	   		task tt
-    //	   			complete t:step ge 120     Expected to HOLD, since we ain't done nothing yet
-    //	   			trigger t == complete
+    //   task tt
+    //     complete t:step ge 120     Expected to HOLD, since we ain't done nothing yet
+    //     trigger t == complete
     {
         JobsParam jobsParam; // create jobs = false, spawn jobs = false
         Jobs jobs(&defs);
@@ -156,37 +156,37 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
 BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
     cout << "Base:: ...test_trigger_after_delete\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //  Create the defs file
-    //	suite suite1    # the limit we want delete
+    // Create the defs file
+    //   suite suite1    # the limit we want delete
     //     family f
-    //     		task t0
-    //          	defstatus complete
-    //     		task t1
-    //             event event
-    //          task t2
-    //             meter meter 0 100 100
-    //          task t3
-    //             edit user_var 1
-    //          task t4
-    //             repeat integer repeat_var 0 10 2
+    //       task t0
+    //         defstatus complete
+    //       task t1
+    //         event event
+    //       task t2
+    //         meter meter 0 100 100
+    //       task t3
+    //         edit user_var 1
+    //       task t4
+    //         repeat integer repeat_var 0 10 2
     //     endfamily
-    //	endsuite
-    //	suite suite2
-    //	   family f
-    //	   		task t0
-    //				trigger /suite1/f/t0 == complete
-    //	   		task t1
-    //				trigger /suite1/f/t1:event == set
-    //	   		task t2
-    //				trigger /suite1/f/t2:meter == 10
-    //	   		task t3
-    //				trigger /suite1/f/t2:user_var == 1
-    //	   		task t4
-    //				trigger /suite1/f/t2:repeat_var == 2
-    //	   endfamily
-    //	endsuite
+    //   endsuite
+    //   suite suite2
+    //     family f
+    //       task t0
+    //         trigger /suite1/f/t0 == complete
+    //       task t1
+    //         trigger /suite1/f/t1:event == set
+    //       task t2
+    //         trigger /suite1/f/t2:meter == 10
+    //       task t3
+    //         trigger /suite1/f/t2:user_var == 1
+    //       task t4
+    //         trigger /suite1/f/t2:repeat_var == 2
+    //     endfamily
+    //   endsuite
     //
-    // In this test case all triggers in suite2 will evalate true, we then delete suite1 and
+    // In this test case all triggers in suite2 will evaluate true, we then delete suite1 and
     // all the triggers should evaluate false; This is used to test the shared ptr in
     // the expression, which hold the reference nodes. When the reference nodes are deleted
     // then the expression should not evaluate
@@ -290,5 +290,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

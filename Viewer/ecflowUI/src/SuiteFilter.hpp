@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef SUITEFILTER_HPP_
-#define SUITEFILTER_HPP_
+#ifndef ecflow_viewer_SuiteFilter_HPP
+#define ecflow_viewer_SuiteFilter_HPP
 
 #include <string>
 #include <vector>
@@ -49,7 +50,8 @@ public:
           loaded_(loaded),
           filtered_(filtered) {}
 
-    SuiteFilterItem(const SuiteFilterItem& other);
+    SuiteFilterItem(const SuiteFilterItem& other)            = default;
+    SuiteFilterItem& operator=(const SuiteFilterItem& other) = default;
 
     bool operator!=(const SuiteFilterItem& rhs) const {
         return name_ != rhs.name_ || loaded_ != rhs.loaded_ || filtered_ != rhs.filtered_;
@@ -129,4 +131,4 @@ private:
     static std::string dummySuite_;
 };
 
-#endif
+#endif /* ecflow_viewer_SuiteFilter_HPP */

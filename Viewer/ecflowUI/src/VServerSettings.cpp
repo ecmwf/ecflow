@@ -1,18 +1,17 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VServerSettings.hpp"
 
 #include <cassert>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
@@ -26,6 +25,7 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/Filesystem.hpp"
 
 std::map<VServerSettings::Param, std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param, std::string> VServerSettings::parNames_;
@@ -33,48 +33,48 @@ VProperty* VServerSettings::globalProp_ = nullptr;
 
 VServerSettings::VServerSettings(ServerHandler* server) : server_(server), prop_(nullptr), guiProp_(nullptr) {
     if (parNames_.empty()) {
-        parNames_[AutoUpdate]               = "server.update.autoUpdate";
-        parNames_[UpdateRate]               = "server.update.updateRateInSec";
-        parNames_[AdaptiveUpdate]           = "server.update.adaptiveUpdate";
-        parNames_[AdaptiveUpdateIncrement]  = "server.update.adaptiveUpdateIncrementInSec";
-        parNames_[MaxAdaptiveUpdateRate]    = "server.update.maxAdaptiveUpdateRateInMin";
-        parNames_[AdaptiveUpdateMode]       = "server.update.adaptiveUpdateMode";
+        parNames_[AutoUpdate]              = "server.update.autoUpdate";
+        parNames_[UpdateRate]              = "server.update.updateRateInSec";
+        parNames_[AdaptiveUpdate]          = "server.update.adaptiveUpdate";
+        parNames_[AdaptiveUpdateIncrement] = "server.update.adaptiveUpdateIncrementInSec";
+        parNames_[MaxAdaptiveUpdateRate]   = "server.update.maxAdaptiveUpdateRateInMin";
+        parNames_[AdaptiveUpdateMode]      = "server.update.adaptiveUpdateMode";
 
-        parNames_[MaxOutputFileLines]       = "server.files.maxOutputFileLines";
-        parNames_[ReadFromDisk]             = "server.files.readFilesFromDisk";
-        parNames_[UserLogServerHost]        = "server.files.logServerHost";
-        parNames_[UserLogServerPort]        = "server.files.logServerPort";
+        parNames_[MaxOutputFileLines] = "server.files.maxOutputFileLines";
+        parNames_[ReadFromDisk]       = "server.files.readFilesFromDisk";
+        parNames_[UserLogServerHost]  = "server.files.logServerHost";
+        parNames_[UserLogServerPort]  = "server.files.logServerPort";
 
         parNames_[NodeMenuMode]             = "server.menu.nodeMenuMode";
         parNames_[NodeMenuModeForDefStatus] = "server.menu.defStatusMenuModeControl";
         parNames_[UidForServerLogTransfer]  = "server.files.uidForServerLogTransfer";
         parNames_[MaxSizeForTimelineData]   = "server.files.maxSizeForTimelineData";
 
-        parNames_[NotifyAbortedEnabled]     = "server.notification.aborted.enabled";
-        parNames_[NotifyAbortedPopup]       = "server.notification.aborted.popup";
-        parNames_[NotifyAbortedSound]       = "server.notification.aborted.sound";
+        parNames_[NotifyAbortedEnabled] = "server.notification.aborted.enabled";
+        parNames_[NotifyAbortedPopup]   = "server.notification.aborted.popup";
+        parNames_[NotifyAbortedSound]   = "server.notification.aborted.sound";
 
-        parNames_[NotifyRestartedEnabled]   = "server.notification.restarted.enabled";
-        parNames_[NotifyRestartedPopup]     = "server.notification.restarted.popup";
-        parNames_[NotifyRestartedSound]     = "server.notification.restarted.sound";
+        parNames_[NotifyRestartedEnabled] = "server.notification.restarted.enabled";
+        parNames_[NotifyRestartedPopup]   = "server.notification.restarted.popup";
+        parNames_[NotifyRestartedSound]   = "server.notification.restarted.sound";
 
-        parNames_[NotifyLateEnabled]        = "server.notification.late.enabled";
-        parNames_[NotifyLatePopup]          = "server.notification.late.popup";
-        parNames_[NotifyLateSound]          = "server.notification.late.sound";
+        parNames_[NotifyLateEnabled] = "server.notification.late.enabled";
+        parNames_[NotifyLatePopup]   = "server.notification.late.popup";
+        parNames_[NotifyLateSound]   = "server.notification.late.sound";
 
-        parNames_[NotifyZombieEnabled]      = "server.notification.zombie.enabled";
-        parNames_[NotifyZombiePopup]        = "server.notification.zombie.popup";
-        parNames_[NotifyZombieSound]        = "server.notification.zombie.sound";
+        parNames_[NotifyZombieEnabled] = "server.notification.zombie.enabled";
+        parNames_[NotifyZombiePopup]   = "server.notification.zombie.popup";
+        parNames_[NotifyZombieSound]   = "server.notification.zombie.sound";
 
-        parNames_[NotifyAliasEnabled]       = "server.notification.alias.enabled";
-        parNames_[NotifyAliasPopup]         = "server.notification.alias.popup";
-        parNames_[NotifyAliasSound]         = "server.notification.alias.sound";
+        parNames_[NotifyAliasEnabled] = "server.notification.alias.enabled";
+        parNames_[NotifyAliasPopup]   = "server.notification.alias.popup";
+        parNames_[NotifyAliasSound]   = "server.notification.alias.sound";
 
-        notifyIds_[NotifyAbortedEnabled]    = "aborted";
-        notifyIds_[NotifyRestartedEnabled]  = "restarted";
-        notifyIds_[NotifyLateEnabled]       = "late";
-        notifyIds_[NotifyZombieEnabled]     = "zombie";
-        notifyIds_[NotifyAliasEnabled]      = "alias";
+        notifyIds_[NotifyAbortedEnabled]   = "aborted";
+        notifyIds_[NotifyRestartedEnabled] = "restarted";
+        notifyIds_[NotifyLateEnabled]      = "late";
+        notifyIds_[NotifyZombieEnabled]    = "zombie";
+        notifyIds_[NotifyAliasEnabled]     = "alias";
     }
 
     assert(globalProp_);
@@ -169,7 +169,7 @@ void VServerSettings::loadSettings() {
     VConfig::instance()->loadSettings(fName, guiProp_, false);
 
     // Some  settings are read through VSettings
-    if (boost::filesystem::exists(fName)) {
+    if (fs::exists(fName)) {
         VSettings vs(fName);
         vs.read(false);
         vs.beginGroup("suite_filter");

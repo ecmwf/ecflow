@@ -7,11 +7,8 @@ ecflow.Cron
 
    Bases: :py:class:`~Boost.Python.instance`
 
-:term:`cron` defines a repeating time dependency for a node.
+A :term:`cron` defines a repeating time dependency for a node.
 
-Crons are repeated indefinitely.
-
-Avoid having a cron and :term:`repeat` at the same level,as both provide looping functionality
 
 Constructor::
 
@@ -29,39 +26,49 @@ Exceptions:
 
 - raises IndexError || RuntimeError when an invalid cron is specified
 
-Usage:
+Usage (see the :ref:`cron definition<text_based_def_cron>` for more examples):
 
 .. code-block:: python
 
-    cron = Cron('+00:00 23:00 00:30', days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])
+    # Run every day at 2pm
+    cron = Cron('14:00')
 
-    # Here '+' means relative to begin or re-queue time
+    # Run every 30 minutes between 0:00 and 20:00, the first 6 days of the month from January until July
+    cron = Cron('+00:00 20:00 00:30', days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])
+
+    # Run relative to suite start time or task requeue time
     cron = Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])
 
-    cron = Cron('+00:00 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])
+    # Run relative to suite start time or task requeue time
+    cron = Cron('+00:15 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])
 
+    # Define Cron based on start/end/increment
     start = TimeSlot(0 , 0)
     finish = TimeSlot(23, 0)
     incr = TimeSlot(0, 30)
     ts = TimeSeries(start, finish, incr, True)  # True means relative to suite start
     cron = Cron(ts, days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2])
 
+    # Use Cron methods to set weekdays, days of month and month parameters
     cron = Cron()
     cron.set_week_days([0, 1, 2, 3, 4, 5, 6])
     cron.set_days_of_month([1, 2, 3, 4, 5, 6 ])
     cron.set_months([1, 2, 3, 4, 5, 6])
     cron.set_time_series(ts)
 
-    cron1 = Cron()
-    cron1.set_time_series(1, 30, True)  # same as cron +01:30
+    # Use Cron methods to set time series
+    cron = Cron()
+    cron.set_time_series(1, 30, True)  # same as cron +01:30
 
-    cron2 = Cron()
-    cron2.set_week_days([0, 1, 2, 3, 4, 5, 6])
-    cron2.set_time_series('00:30 01:30 00:01')
+    # Use Cron methods to set time series over all days of the week
+    cron = Cron()
+    cron.set_week_days([0, 1, 2, 3, 4, 5, 6])
+    cron.set_time_series('00:30 01:30 00:01')
 
-    cron3 = Cron()
-    cron3.set_week_days([0, 1, 2, 3, 4, 5, 6])
-    cron3.set_time_series('+00:30')
+    # Use Cron methods to set relative time series over all days of the week
+    cron = Cron()
+    cron.set_week_days([0, 1, 2, 3, 4, 5, 6])
+    cron.set_time_series('+00:30')
 
 
 .. py:property:: Cron.days_of_month

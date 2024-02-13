@@ -1,34 +1,29 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #4 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "WhiteListFile.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_WhiteListFile)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -179,5 +174,7 @@ BOOST_AUTO_TEST_CASE(test_server_has_write_access_in_non_empty_whitelist) {
         fs::remove(the_host.ecf_lists_file(port));
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,37 +1,34 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
-#include "File.hpp"
 #include "MyDefsFixture.hpp"
-#include "SerializationTest.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "TestSerialisation.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-namespace fs = boost::filesystem;
 
 // #define UPDATE_TESTS 1
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
     cout << "ANode:: ...test_default_constructor_persistence\n";
@@ -84,5 +81,7 @@ BOOST_AUTO_TEST_CASE(test_compare_cereal_and_defs_checkpt_file) {
     fs::remove(file_name + "defs.checkpt");   // Remove the file. Comment out for debugging
     fs::remove(file_name + "cereal.checkpt"); // Remove the file. Comment out for debugging
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

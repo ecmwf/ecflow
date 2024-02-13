@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <QDateTime>
 #include <QtGlobal>
@@ -16,14 +16,10 @@
 #endif
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <boost/algorithm/string.hpp>
 
 #include "MenuHandler.hpp"
-#include "Node.hpp"
 #include "NodeExpression.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
-#include "Submittable.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
@@ -31,6 +27,9 @@
 #include "VNode.hpp"
 #include "VNodeMover.hpp"
 #include "ViewerUtil.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 // #define _UI_NODEXPRESSIONPARSEER_DEBUG
 
@@ -198,8 +197,6 @@ BaseNodeCondition* NodeExpressionParser::parseWholeExpression(const std::string&
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
-
-    // boost::algorithm::to_lower(expr); // convert to lowercase
 
     int index         = 0;
     int length        = expr.length();
@@ -775,7 +772,7 @@ bool StringMatchCondition::execute(VItem* item) {
     auto* searchForOperand = static_cast<WhatToSearchForOperand*>(operands_[0]);
     auto* searchInOperand  = static_cast<WhatToSearchInOperand*>(operands_[1]);
 
-    std::string searchIn   = searchInOperand->what();
+    std::string searchIn = searchInOperand->what();
 
     if (item->isNode()) {
         auto* n = static_cast<VNode*>(item);

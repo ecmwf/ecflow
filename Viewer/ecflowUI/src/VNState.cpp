@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VNState.hpp"
 
@@ -21,11 +21,11 @@
 #include <sys/types.h>
 
 #include "ServerHandler.hpp"
-#include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VNode.hpp"
 #include "VProperty.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 std::map<std::string, VNState*> VNState::items_;
 static std::map<NState::State, VNState*> stateMap_;
@@ -89,7 +89,7 @@ VNState* VNState::toRealState(const VNode* n) {
 
     node_ptr node = n->node();
 
-    auto it       = stateMap_.find(node->state());
+    auto it = stateMap_.find(node->state());
     if (it != stateMap_.end())
         return it->second;
 
@@ -100,7 +100,7 @@ VNState* VNState::toDefaultState(const VNode* n) {
     if (!n || !n->node())
         return nullptr;
 
-    node_ptr node          = n->node();
+    node_ptr node = n->node();
 
     const char* dStateName = DState::toString(node->defStatus());
     assert(dStateName);

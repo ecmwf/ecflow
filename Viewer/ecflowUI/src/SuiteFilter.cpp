@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "SuiteFilter.hpp"
 
@@ -21,14 +22,6 @@
 #define SUITEFILTER_UI_DEBUG_
 
 std::string SuiteFilter::dummySuite_ = "__DUMMY_FOR_UI__";
-
-//=================================================================
-//
-// SuiteFilterItem
-//
-//=================================================================
-
-SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) = default;
 
 //=================================================================
 //
@@ -265,7 +258,7 @@ bool SuiteFilter::merge(const SuiteFilter* sf) {
 
     std::vector<SuiteFilterItem> oriItems = items_;
 
-    items_                                = sf->items_;
+    items_ = sf->items_;
     for (auto& oriItem : oriItems) {
         for (auto& item : items_) {
             if (item.name_ == oriItem.name_) {

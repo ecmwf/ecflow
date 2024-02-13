@@ -1,33 +1,30 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #54 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "Submittable.hpp"
-#include "Suite.hpp"
-#include "System.hpp" // kill singleton for valgrind
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp" // kill singleton for valgrind
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ServerAndLifeCycle)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -293,5 +290,7 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     /// Destroy singleton's to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

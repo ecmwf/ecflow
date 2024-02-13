@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "InfoPanelItem.hpp"
 
@@ -58,7 +59,7 @@ void InfoPanelItem::adjust(VInfo_ptr info) {
     if (info) {
         ServerHandler* server = info->server();
 
-        bool sameServer       = (info_) ? (info_->server() == server) : false;
+        bool sameServer = (info_) ? (info_->server() == server) : false;
 
         // Handle observers
         if (!sameServer) {
@@ -188,7 +189,7 @@ void InfoPanelItem::setFrozen(bool b) {
         return;
 
     // We update the derived class
-    updateState(FrozenChanged);
+    updateState(ChangeFlags(FrozenChanged));
 }
 
 void InfoPanelItem::setDetached(bool b, bool update) {
@@ -199,7 +200,7 @@ void InfoPanelItem::setDetached(bool b, bool update) {
             return;
 
         // We update the derived class
-        updateState(DetachedChanged);
+        updateState(ChangeFlags(DetachedChanged));
     }
 }
 

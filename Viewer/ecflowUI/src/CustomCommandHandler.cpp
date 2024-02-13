@@ -1,21 +1,21 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "CustomCommandHandler.hpp"
 
 #include <algorithm>
 
 #include "DirectoryHandler.hpp"
-#include "File.hpp"
 #include "SessionHandler.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/File.hpp"
 
 CustomCommand::CustomCommand(const std::string& name, const std::string& command, bool context)
     : name_(name),
@@ -121,8 +121,8 @@ int CustomCommandHandler::findIndexFromName(const std::string& name) const {
 
 void CustomCommandHandler::writeSettings() {
     std::vector<VSettings> vsItems;
-    std::string dummyFileName    = "dummy";
-    std::string key              = "commands";
+    std::string dummyFileName = "dummy";
+    std::string key           = "commands";
 
     std::string settingsFilePath = settingsFile();
     VSettings vs(settingsFilePath);

@@ -1,48 +1,41 @@
-
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #6 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
-#include "WhyCmd.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Repeat)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -66,14 +59,14 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_repeat_integer
-    //	repeat integer VAR 0 1 1          # run at 0, 1    2 times
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //	family family
-    //	    repeat integer VAR 0 2 1     # run at 0, 1     2 times
-    //    	task t<n>
-    //       ....
-    //   	endfamily
+    //   repeat integer VAR 0 1 1          # run at 0, 1    2 times
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     repeat integer VAR 0 2 1     # run at 0, 1     2 times
+    //     task t<n>
+    //     ....
+    //   endfamily
     // endsuite
 
     // Each task/job should be run *4* times, according to the repeats
@@ -88,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 4));
         int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 4)); // task should complete 4 times
         }
     }
@@ -111,10 +104,10 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
     // *********************************************************************************
     // suite test_repeat_date
     // family family
-    //    repeat date DATE 20110630 20110632
-    //    task t<n>
+    //   repeat date DATE 20110630 20110632
+    //   task t<n>
     //      ....
-    //    endfamily
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -125,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 5));
         int taskSize = 2;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 5));
         }
     }
@@ -148,10 +141,10 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
     // *********************************************************************************
     // suite test_repeat_date
     // family family
-    //    repeat datelist DATE 20110630 20110632
-    //    task t<n>
-    //      ....
-    //    endfamily
+    //   repeat datelist DATE 20110630 20110632
+    //   task t<n>
+    //   ....
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -162,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 2));
         int taskSize = 2;
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 2));
         }
     }
@@ -183,16 +176,16 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerator) {
     // ********************************************************************************
     // IMPORTANT: A family will only complete when it has reached the end of the repeats
     // *********************************************************************************
-    //   suite test_repeat_enumerator
-    //     family top
-    //       family plot
-    //         family iasi_plots
-    //           repeat enumerated month "200801" "200802"
-    //           task t1
-    //         endfamily
+    // suite test_repeat_enumerator
+    //   family top
+    //     family plot
+    //       family iasi_plots
+    //         repeat enumerated month "200801" "200802"
+    //         task t1
     //       endfamily
     //     endfamily
-    //   endsuite
+    //   endfamily
+    // endsuite
 
     Defs theDefs;
     {
@@ -228,15 +221,15 @@ BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
     // Create the defs file corresponding to the text below
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_repeat_defstatus
-    // defstatus complete
-    //	repeat integer VAR 0 1 1          # run at 0, 1    2 times
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //	family family
-    //	    repeat integer VAR 0 2 1     # run at 0, 1     2 times
-    //   	task t<n>
-    //      ....
-    //  	endfamily
+    //   defstatus complete
+    //   repeat integer VAR 0 1 1          # run at 0, 1    2 times
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     repeat integer VAR 0 2 1     # run at 0, 1     2 times
+    //     task t<n>
+    //     ....
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -251,7 +244,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
         int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
 
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
     }
@@ -273,13 +266,13 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_repeat_clears_user_edit
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
-    //  family family
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
     //     repeat integer VAR 0 3     # run at 0,1,2    i.e 3 times
     //     task t<n>
-    //        time <current time>
-    //     endfamily
+    //       time <current time>
+    //   endfamily
     // endsuite
 
     Defs theDefs;
@@ -288,7 +281,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
         boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
         boost::posix_time::ptime time1        = theLocalTime + minutes(3);
 
-        suite_ptr suite                       = theDefs.add_suite("test_repeat_clears_user_edit");
+        suite_ptr suite = theDefs.add_suite("test_repeat_clears_user_edit");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
 
@@ -298,8 +291,6 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
         task = fam->add_task("t1");
         task->addTime(ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
         task->addVerify(VerifyAttr(NState::COMPLETE, 3));
-
-        // cout << theDefs << "\n";
     }
 
     // The test harness will create corresponding directory structure
@@ -362,5 +353,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,33 +1,28 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #40 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
-#include "Defs.hpp"
-#include "File.hpp"
-#include "JobCreationCtrl.hpp"
-#include "Str.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/JobCreationCtrl.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_JobGenOnly)
 
 //  Tests the Job generation against the OLD sms
 BOOST_AUTO_TEST_CASE(test_jobgenonly) {
@@ -91,5 +86,7 @@ BOOST_AUTO_TEST_CASE(test_jobgenonly) {
         BOOST_REQUIRE_MESSAGE(fs::exists(s), "File " << s << " should have been created");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

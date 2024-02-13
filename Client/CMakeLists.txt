@@ -1,64 +1,73 @@
- # =======================================================
- # LIB
- # to list all sources to build use:
- #    cd $WK/Client
- #    find src -name \*.cpp --print
- # =======================================================
- 
-# Excludes src/ClientMain.cpp
-list( APPEND srcs
-   # HEADERS
-   src/ClientCmdCache.hpp
-   src/ClientEnvironment.hpp
-   src/ClientInvoker.hpp
-   src/ClientOptions.hpp
-   src/Rtt.hpp
-   src/UrlCmd.hpp
-   # SOURCES
-   src/ClientCmdCache.cpp
-   src/Rtt.cpp
-   src/ClientEnvironment.cpp
-   src/ClientInvoker.cpp
-   src/Rtt.cpp
-   src/ClientOptions.cpp
-   src/UrlCmd.cpp
-)
-ecbuild_add_library( TARGET libclient
-                     NOINSTALL
-                     TYPE     STATIC
-                     SOURCES  ${srcs}
-                )
-                
-target_link_libraries(libclient base node nodeattr core  pthread)
-target_include_directories(libclient PUBLIC src
-                                             ../ACore/src 
-                                             ../ANattr/src
-                                             ../ANode/src
-                                             ../Base/src
-                                             ../Base/src/cts
-                                             ../Base/src/stc  )
+#
+# Copyright 2009- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
 
+set(srcs
+  # Headers
+  src/ecflow/client/ClientCmdCache.hpp
+  src/ecflow/client/ClientEnvironment.hpp
+  src/ecflow/client/ClientInvoker.hpp
+  src/ecflow/client/ClientOptions.hpp
+  src/ecflow/client/Help.hpp
+  src/ecflow/client/Rtt.hpp
+  src/ecflow/client/UrlCmd.hpp
+  # Sources
+  src/ecflow/client/ClientCmdCache.cpp
+  src/ecflow/client/Rtt.cpp
+  src/ecflow/client/ClientEnvironment.cpp
+  src/ecflow/client/ClientInvoker.cpp
+  src/ecflow/client/Help.cpp
+  src/ecflow/client/Rtt.cpp
+  src/ecflow/client/ClientOptions.cpp
+  src/ecflow/client/UrlCmd.cpp
+)
+
+ecbuild_add_library(
+  TARGET
+    libclient
+  NOINSTALL
+  TYPE STATIC
+  SOURCES
+    ${srcs}
+  PUBLIC_INCLUDES
+    src
+  PUBLIC_LIBS
+    base
+    Threads::Threads
+)
 target_clangformat(libclient)
 
 # ========================================================================
 # EXE ecflow_client, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable( TARGET   ecflow_client
-                        SOURCES  src/ClientMain.cpp
-                        LIBS     libclient ${OPENSSL_LIBRARIES}
-                        INCLUDES ${Boost_INCLUDE_DIRS} 
-                      )
+ecbuild_add_executable(
+  TARGET
+    ecflow_client
+  SOURCES
+    src/ecflow/client/ClientMain.cpp
+  LIBS
+    libclient
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+)
+target_clangformat(ecflow_client)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
 # Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
 # had no effect
 #          
-SET_TARGET_PROPERTIES(ecflow_client PROPERTIES 
-                                    INSTALL_RPATH ""
-                     )
+SET_TARGET_PROPERTIES(ecflow_client
+  PROPERTIES
+    INSTALL_RPATH ""
+)
 
-target_clangformat(ecflow_client)
+
 
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -77,96 +86,130 @@ target_clangformat(ecflow_client)
 
 # ================================================================================                         
 # TEST
-# Use following to populate list: 
-#  cd $WK/Client                            
-#  find test -name \*.cpp | sort     
-
-list( APPEND test_srcs
-    # HEADERS
-    test/InvokeServer.hpp
-    # SOURCES
-    test/TestClientEnvironment.cpp
-    test/TestClientOptions.cpp
-    test/TestClientInterface.cpp
-    test/TestJobGenOnly.cpp
-    test/TestLifeCycle.cpp
-    test/TestInitAddVariables.cpp
-    test/TestRtt.cpp
-    test/TestUrlCmd.cpp
-    )
+set(test_srcs
+  # Headers
+  test/InvokeServer.hpp
+  # Sources
+  test/TestClient_main.cpp # test entry point
+  test/TestClientEnvironment.cpp
+  test/TestClientOptions.cpp
+  test/TestClientInterface.cpp
+  test/TestJobGenOnly.cpp
+  test/TestLifeCycle.cpp
+  test/TestInitAddVariables.cpp
+  test/TestRtt.cpp
+  test/TestUrlCmd.cpp
+)
 
 if (ENABLE_SERVER)
-    list(APPEND test_srcs
-        # HEADERS
-        test/SCPort.hpp
-        # SOURCES
-        test/SCPort.cpp
-        test/TestClientTimeout.cpp
-        test/TestClientHandleCmd.cpp
-        test/TestCheckPtDefsCmd.cpp
-        test/TestCustomUser.cpp
-        test/TestGroupCmd.cpp
-        test/TestLoadDefsCmd.cpp
-        test/TestLogAndCheckptErrors.cpp
-        test/TestPasswdFile.cpp
-        test/TestPlugCmd.cpp
-        test/TestServer.cpp
-        test/TestServerAndLifeCycle.cpp
-        test/TestServerLoad.cpp
-        test/TestSignalSIGTERM.cpp
-        test/TestWhiteListFile.cpp
-        )
+  list(APPEND test_srcs
+    # Headers
+    test/SCPort.hpp
+    # Sources
+    test/SCPort.cpp
+    test/TestClientTimeout.cpp
+    test/TestClientHandleCmd.cpp
+    test/TestCheckPtDefsCmd.cpp
+    test/TestCustomUser.cpp
+    test/TestGroupCmd.cpp
+    test/TestLoadDefsCmd.cpp
+    test/TestLogAndCheckptErrors.cpp
+    test/TestPasswdFile.cpp
+    test/TestPlugCmd.cpp
+    test/TestServer.cpp
+    test/TestServerAndLifeCycle.cpp
+    test/TestServerLoad.cpp
+    test/TestSignalSIGTERM.cpp
+    test/TestWhiteListFile.cpp
+  )
 endif()
-              
-# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
-# boost_timer -> boost_chrono -> librt
-ecbuild_add_test( TARGET       s_client
-                  SOURCES      ${test_srcs}
-                  LIBS         libclient ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
-                               ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
-                  INCLUDES     ../ANode/test
-                               ../Base/test 
-                               ${Boost_INCLUDE_DIRS}
-                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                  TEST_DEPENDS u_base
-                 )
 
-target_clangformat(s_client CONDITION ENABLE_TESTS)
+ecbuild_add_test(
+  TARGET
+    s_client
+  LABELS
+    integration nightly
+  SOURCES
+    ${test_srcs}
+  INCLUDES
+    ../Base/test
+    ../ANode/test
+  LIBS
+    libclient
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    Boost::timer
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  DEPENDS
+    ecflow_server # the server is launched to support tests
+  TEST_DEPENDS
+    u_base
+)
+target_clangformat(s_client
+  CONDITION ENABLE_TESTS
+)
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
-	# 
-	# Simple stand alone test
-	#
-	# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
-	ecbuild_add_test( TARGET        perf_test_large_defs 
-                      SOURCES      test/TestSinglePerf.cpp test/SCPort.cpp
-                      LIBS         libclient ${OPENSSL_LIBRARIES}
-                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                      INCLUDES     ../ANode/test
-                                   ../Base/test 
-                                   ${Boost_INCLUDE_DIRS}
-                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                      TEST_DEPENDS u_base
-                )
+  #
+  # Simple stand alone test
+  #
+  ecbuild_add_test(
+    TARGET
+      p_large_defs
+    LABELS
+      performance
+      manual # requires manual definition of env var ECF_TEST_DEFS_DIR
+    SOURCES
+      # Headers
+      test/SCPort.hpp
+      # Sources
+      test/SCPort.cpp
+      test/TestSinglePerf.cpp
+      test/TestSinglePerf_main.cpp # test entry point
+    INCLUDES
+      ../Base/test
+    LIBS
+      libclient
+      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
+    TEST_DEPENDS
+      u_base
+  )
+  target_clangformat(p_large_defs
+    CONDITION ENABLE_TESTS
+  )
 
-  target_clangformat(perf_test_large_defs CONDITION ENABLE_TESTS)
-
-	# 
-	# test migration
-	#
-	ecbuild_add_test( TARGET m_test_migration
-                      SOURCES      test/TestMigration.cpp test/SCPort.cpp
-                      LIBS         libclient ${OPENSSL_LIBRARIES}
-                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                      INCLUDES     ../ANode/test
-                                   ../Base/test 
-                                   ${Boost_INCLUDE_DIRS}
-                      DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                      TEST_DEPENDS u_base
-                    )
-
-  target_clangformat(m_test_migration CONDITION ENABLE_TESTS)
+  #
+  # test migration
+  #
+  ecbuild_add_test(
+    TARGET
+      m_migration
+    LABELS
+      migration
+      manual # requires command line argument: m_test_migration <>
+    SOURCES
+      # Headers
+      test/SCPort.hpp
+      # Sources
+      test/SCPort.cpp
+      test/TestMigration.cpp
+      test/TestMigration_main.cpp # test entry point
+    INCLUDES
+      ../Base/test
+    LIBS
+      libclient
+      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server # the server is launched to support tests
+    TEST_DEPENDS
+      u_base
+  )
+  target_clangformat(m_migration
+    CONDITION ENABLE_TESTS
+  )
 
 endif()
 

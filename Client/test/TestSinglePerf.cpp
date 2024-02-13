@@ -1,45 +1,37 @@
-#define BOOST_TEST_MODULE TestSingle
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #11 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib> // getenv
 #include <fstream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "File.hpp"
-#include "Host.hpp"
 #include "InvokeServer.hpp"
-#include "Rtt.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/client/Rtt.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_SinglePerf)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -75,8 +67,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
                              const std::string& host,
                              const std::string& port,
                              const std::string& directory) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));
@@ -356,7 +347,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
 }
 
 BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
-    if (getenv("ECF_SSL")) {
+    if (const char* ecf_ssl = getenv("ECF_SSL"); ecf_ssl) {
         load_threshold_ms       = 8000; // 4500;
         begin_threshold_ms      = 800;  // 400;
         sync_full_threshold_s   = 4.5;  // 2.6;
@@ -368,8 +359,13 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
         client_cmds_threshold_s = 950;  // 8.5;
     }
 
-    char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR");
-    if (ecf_test_defs_dir && fs::exists(ecf_test_defs_dir)) {
+    if (const char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR"); !ecf_test_defs_dir) {
+        std::cout << "Ignoring test! Environment variable ECF_TEST_DEFS_DIR is not defined\n";
+    }
+    else if (!fs::exists(ecf_test_defs_dir)) {
+        std::cout << "Ignoring test! Test definitions directory " << ecf_test_defs_dir << " does not exist\n";
+    }
+    else {
         /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
         InvokeServer invokeServer("Client:: ...test_perf_for_large_defs:", SCPort::next());
         BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -378,10 +374,8 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
         ClientInvoker theClient(invokeServer.host(), invokeServer.port());
         time_load_and_downloads(theClient, invokeServer.host(), invokeServer.port(), ecf_test_defs_dir);
     }
-    else {
-        std::cout << "Ingoring test, since directory defined by environment variable(ECF_TEST_DEFS_DIR) "
-                  << ecf_test_defs_dir << " does not exist";
-    }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

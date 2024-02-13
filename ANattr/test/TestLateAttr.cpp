@@ -1,17 +1,12 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <stdexcept>
@@ -20,16 +15,18 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "LateAttr.hpp"
-#include "NState.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/NState.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_LateAttr)
 
 BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
     cout << "ANattr:: ...test_late_attr_submitted\n";
@@ -309,5 +306,7 @@ BOOST_AUTO_TEST_CASE(test_late_parsing_errors) {
     BOOST_CHECK_THROW((void)LateAttr::create("late -c +23:10 -s 10:10 -a"), std::runtime_error);
     BOOST_CHECK_THROW((void)LateAttr::create("late -c +23:10 -s 10:10 -a 11:11 -s"), std::runtime_error);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

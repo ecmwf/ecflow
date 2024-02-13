@@ -1,43 +1,37 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #39 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "Host.hpp"
 #include "ServerTestHarness.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Server)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -49,12 +43,12 @@ BOOST_AUTO_TEST_CASE(test_server_job_submission) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_server_job_submission
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //	family family
-    //    	task t<n>
-    //       ....
-    //   	endfamily
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   family family
+    //     task t<n>
+    //     ....
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -63,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_server_job_submission) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 1));
         int taskSize = 3; // on linux 1024 tasks take ~4 seconds for job submission
         for (int i = 0; i < taskSize; i++) {
-            task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
+            task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
         }
     }
@@ -155,5 +149,7 @@ BOOST_AUTO_TEST_CASE(test_restore_defs_from_check_pt) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

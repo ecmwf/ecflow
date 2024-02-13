@@ -1,40 +1,41 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #40 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "CalendarUpdateParams.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
-#include "Limit.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "SNewsCmd.hpp"
-#include "SSyncCmd.hpp"
-#include "Suite.hpp"
-#include "SuiteChanged.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/user/AlterCmd.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/PlugCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_SSyncCmd)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 typedef boost::function<void(defs_ptr)> defs_change_cmd;
@@ -477,5 +478,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_cmd) {
     test_sync_scaffold(set_defs_flag, "set_defs_flag");
     test_sync_scaffold(set_defs_state, "set_defs_state");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

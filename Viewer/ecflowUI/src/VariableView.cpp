@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VariableView.hpp"
 
@@ -135,8 +136,8 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         textRect.setLeft(option.rect.x() - 17);
         bool locked = index.data(VariableModel::ReadOnlyRole).toBool();
         if (locked) {
-            hasLock  = true;
-            lockPix  = IconProvider::lockPixmap(textRect.height() - 6);
+            hasLock = true;
+            lockPix = IconProvider::lockPixmap(textRect.height() - 6);
 
             lockRect = QRect(textRect.left() - 4 - lockPix.width(),
                              textRect.top() + (textRect.height() - lockPix.height()) / 2,
@@ -151,7 +152,7 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
                 pixId = shadowGenVarPixId_;
             }
             if (pixId >= 0) {
-                hasGen  = true;
+                hasGen = true;
 
                 genPix  = IconProvider::pixmap(pixId, textRect.height() - 4);
                 genRect = QRect(textRect.left(),

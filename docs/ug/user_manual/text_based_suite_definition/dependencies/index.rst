@@ -16,7 +16,7 @@ nodes, preferably all in the same suite. A node that is dependent
 cannot be started as long as some dependency is **holding** it. For   
 triggers, the phrase **trigger is set** means a trigger has           
 **expired** , and **trigger is not set** means it is still            
-**holding** . By default, a node depends on its parent. So, for       
+**holding**. By default, a node depends on its parent. So, for
 example, a task cannot start if the family to which it belongs is     
 still waiting on a dependency.                                        
                                                                      
@@ -44,9 +44,6 @@ The node can be dependent because:
 
 The following sections discuss the different dependency types, and give
 examples of how to use them together.
-
-Table of contents
-=================
 
 .. toctree::
    :maxdepth: 1

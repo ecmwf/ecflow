@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #39 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
@@ -19,19 +14,22 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_InitAddVariable)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -49,15 +47,15 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_server_job_submission
-    //  edit SLEEPTIME 1
-    //  edit ECF_INCLUDE $ECF_HOME/includes
-    //  edit INIT_ADD_VARIABLES --add "NAME1=1" "NAME2=2"
-    //  edit COMPLETE_DEL_VARIABLES --remove NAME1 NAME2
-    //  family family
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit INIT_ADD_VARIABLES --add "NAME1=1" "NAME2=2"
+    //   edit COMPLETE_DEL_VARIABLES --remove NAME1 NAME2
+    //   family family
     //     task t1     # can't place trigger on t1, otherwise we have dead lock. Variables added at ACTIVE, but trigger
     //     expression resolved at QUEUE time task t2
-    //        trigger t1:NAME1 == 1 and t1:NAME2 == 2
-    //     endfamily
+    //       trigger t1:NAME1 == 1 and t1:NAME2 == 2
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -68,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
         fam->addVerify(VerifyAttr(NState::COMPLETE, 1));
         task_ptr t1 = fam->add_task("t1");
         t1->addVerify(VerifyAttr(NState::COMPLETE, 1));
-        t1->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval()));
+        t1->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval()));
 
         task_ptr t2 = fam->add_task("t2");
         t2->add_trigger("t1 == active and ./t1:NAME1 == 1 and ./t1:NAME2 == 2");
@@ -102,5 +100,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

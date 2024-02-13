@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "LogData.hpp"
 
@@ -15,12 +16,12 @@
 #include <QFileInfo>
 #include <QStringList>
 
-#include "File.hpp"
-#include "File_r.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs) : type_(NoType) {
     // Format is as follows:
@@ -150,8 +151,8 @@ bool LogData::indexOfPeriod(qint64 start, qint64 end, size_t& idxStart, size_t& 
     unsigned int startTime = (start - refTimeInMs_) / 1000;
     unsigned int endTime   = (end - refTimeInMs_) / 1000;
 
-    bool hasStart          = false;
-    qint64 tolerance       = toleranceInMs / 1000;
+    bool hasStart    = false;
+    qint64 tolerance = toleranceInMs / 1000;
 
     if (tolerance == 0) {
         for (size_t i = 0; i < data_.size(); i++) {

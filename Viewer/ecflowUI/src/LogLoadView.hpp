@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef LOGLOADVIEW_HPP
-#define LOGLOADVIEW_HPP
+#ifndef ecflow_viewer_LogLoadView_HPP
+#define ecflow_viewer_LogLoadView_HPP
 
 #include <map>
 #include <string>
@@ -85,7 +85,7 @@ struct LogLoadSuiteModelDataItem
 
 class LogLoadRequestSortModel : public QSortFilterProxyModel {
 public:
-    LogLoadRequestSortModel(QObject* parent = 0);
+    explicit LogLoadRequestSortModel(QObject* parent = 0);
 
 protected:
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
@@ -139,7 +139,7 @@ protected:
 
 class ChartCallout : public QGraphicsItem {
 public:
-    ChartCallout(QChart* parent);
+    explicit ChartCallout(QChart* parent);
 
     void setText(const QString& text);
     void setAnchor(QPointF point);
@@ -204,7 +204,7 @@ class LogRequestViewHandler : public QObject {
     friend class LogStatUidCmdView;
 
 public:
-    LogRequestViewHandler(QWidget* parent);
+    explicit LogRequestViewHandler(QWidget* parent);
     ~LogRequestViewHandler();
 
     QList<LogRequestView*> views() const { return views_; }
@@ -633,4 +633,4 @@ protected:
     ColumnOrder columnOrder_;
 };
 
-#endif // LOGLOADVIEW_HPP
+#endif /* ecflow_viewer_LogLoadView_HPP */

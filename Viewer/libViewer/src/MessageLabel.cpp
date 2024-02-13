@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "MessageLabel.hpp"
 
@@ -35,7 +35,7 @@
 //===================================================
 
 MessageLabelLoadWidget::MessageLabelLoadWidget(QWidget* parent) : QWidget(parent) {
-    auto* layout   = new QHBoxLayout(this);
+    auto* layout = new QHBoxLayout(this);
 
     loadTextLabel_ = new QLabel("In progress ...", this);
     loadIconLabel_ = new QLabel(this);
@@ -151,7 +151,7 @@ void MessageLabelProgWidget::progress(QString text, int value) {
 }
 
 void MessageLabelProgWidget::startDelayedProgress(QString infoText, int max) {
-    delayedProgressDef_ = {infoText, max};
+    delayedProgressDef_ = DelayedProgressDef{infoText, max};
     delayedProgressTimer_->stop();
     delayedProgressTimer_->start();
 }
@@ -198,21 +198,21 @@ MessageLabel::MessageLabel(QWidget* parent) : QWidget(parent) {
     setProperty("base", "1");
 
     if (typeData.empty()) {
-        auto bg               = QColor(232, 237, 238);
-        auto border           = QColor(180, 194, 230);
-        typeData[InfoType]    = MessageLabelDefData(":/viewer/info.svg", "Info", bg, border);
+        auto bg            = QColor(232, 237, 238);
+        auto border        = QColor(180, 194, 230);
+        typeData[InfoType] = MessageLabelDefData(":/viewer/info.svg", "Info", bg, border);
 
         bg                    = {234, 215, 150};
         border                = {226, 195, 110};
         typeData[WarningType] = MessageLabelDefData(":/viewer/warning.svg", "Warning", bg, border);
 
-        bg                    = {254, 242, 241};
-        border                = {223, 152, 152};
-        typeData[ErrorType]   = MessageLabelDefData(":/viewer/error.svg", "Error", bg, border);
+        bg                  = {254, 242, 241};
+        border              = {223, 152, 152};
+        typeData[ErrorType] = MessageLabelDefData(":/viewer/error.svg", "Error", bg, border);
 
-        bg                    = {232, 249, 236};
-        border                = {90, 220, 190};
-        typeData[TipType]     = MessageLabelDefData(":/viewer/tip.svg", "Tip", bg, border);
+        bg                = {232, 249, 236};
+        border            = {90, 220, 190};
+        typeData[TipType] = MessageLabelDefData(":/viewer/tip.svg", "Tip", bg, border);
     }
 
     pixLabel_ = new QLabel(this);
@@ -229,7 +229,7 @@ MessageLabel::MessageLabel(QWidget* parent) : QWidget(parent) {
     // progress widget
     progWidget_ = new MessageLabelProgWidget(this);
 
-    layout_     = new QHBoxLayout(this);
+    layout_ = new QHBoxLayout(this);
     layout_->setContentsMargins(2, 2, 2, 2);
 
     auto* pixLayout = new QVBoxLayout();
@@ -323,7 +323,7 @@ void MessageLabel::showMessage(const Type& type, QString msg) {
         message_.clear();
     }
 
-    message_  = msg;
+    message_ = msg;
 
     QString s = message_;
     s.replace("\n", "<br>");

@@ -1,21 +1,18 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "OutputDirProvider.hpp"
 
 #include <memory>
 
 #include <QFile>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include "OutputDirClient.hpp"
 #include "ServerHandler.hpp"
@@ -24,6 +21,7 @@
 #include "VFileTransfer.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "ecflow/core/Filesystem.hpp"
 
 // #define UI_OUTPUTDIRPROVIDER_DEBUG__
 // #define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
@@ -193,18 +191,18 @@ void OutputDirFetchLocalTask::run() {
 #endif
     VDir_ptr res;
 
-    boost::filesystem::path p(filePath_);
+    fs::path p(filePath_);
 
     // Is it a directory?
     boost::system::error_code errorCode;
-    if (boost::filesystem::is_directory(p, errorCode)) {
+    if (fs::is_directory(p, errorCode)) {
         fail();
         return;
     }
 
     auto reply = owner_->theReply();
     try {
-        if (boost::filesystem::exists(p.parent_path())) {
+        if (fs::exists(p.parent_path())) {
             std::string dirName = p.parent_path().string();
             // if(info_ && info_->isNode() && info_->node())
             if (node_) {
@@ -223,7 +221,7 @@ void OutputDirFetchLocalTask::run() {
         addTryLog(reply, "read from disk: NO ACCESS");
         reply->appendErrorText("No access to path on disk!");
     }
-    catch (const boost::filesystem::filesystem_error& e) {
+    catch (const fs::filesystem_error& e) {
         addTryLog(reply, "read from disk: NO ACCESS");
         reply->appendErrorText("No access to path on disk! error: " + std::string(e.what()));
         // UiLog().warn() << "fetchLocalDir failed:" << std::string(e.what());
@@ -315,7 +313,7 @@ void OutputDirFetchTransferTask::transferFinished() {
             return;
         }
 
-        boost::filesystem::path fp(filePath_);
+        fs::path fp(filePath_);
         std::string dirName = fp.parent_path().string();
         dir_                = std::make_shared<VDir>(dirName);
         dir_->setFetchMode(VDir::TransferFetchMode);
@@ -364,7 +362,7 @@ void OutputDirFetchTransferTask::parseLine(QString line) {
 
 class OutputDirFetchQueueManager : public FetchQueueOwner {
 public:
-    OutputDirFetchQueueManager(OutputDirProvider*);
+    explicit OutputDirFetchQueueManager(OutputDirProvider*);
     void run(ServerHandler* server, VNode* node, const std::string& joboutFile);
 
     VReply* theReply() const override;

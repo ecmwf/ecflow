@@ -1,33 +1,28 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #29 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ServerLoad)
 
 BOOST_AUTO_TEST_CASE(test_server_load) {
     // Check if gnuplot is found on the path, on the RPM machines gnuplot not always installed
@@ -137,5 +132,7 @@ BOOST_AUTO_TEST_CASE(test_server_load) {
     fs::remove(gnuplot_script_file);
     fs::remove(gnuplot_png_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

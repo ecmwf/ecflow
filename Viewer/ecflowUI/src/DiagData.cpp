@@ -1,27 +1,28 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "DiagData.hpp"
 
 #include <QString>
 #include <QStringList>
 
-#include "File.hpp"
-#include "File_r.hpp"
 #include "ModelColumn.hpp"
-#include "NodePath.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 DiagData* DiagData::instance_ = nullptr;
 

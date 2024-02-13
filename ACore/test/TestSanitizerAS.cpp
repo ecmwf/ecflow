@@ -1,26 +1,23 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_SanitizerAS)
 
 bool bool_returning_function() {
     return true;
@@ -28,6 +25,11 @@ bool bool_returning_function() {
 int integer_returning_function() {
     return 3;
 }
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 // *** This test does not seem work with address sanitiser ****
 BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
@@ -47,6 +49,15 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
     }
 }
 
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
     char* test_me = getenv("ECF_TEST_SANITIZER_AS");
     if (test_me) {
@@ -62,5 +73,11 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
         BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
     }
 }
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

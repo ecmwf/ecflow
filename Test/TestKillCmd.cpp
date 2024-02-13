@@ -1,45 +1,42 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #25 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This is used to INVOKE a SINGLE test. Easier for debugging
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+///
+/// \note This is used to INVOKE a SINGLE test. Easier for debugging
+///
+
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_KillCmd)
 
 // forward declare functions
 static bool kill_cmd(bool kill_task);
@@ -99,9 +96,7 @@ static bool kill_cmd(bool kill_task) {
     // will update the defs with the server environment, and hence overriding
     // any env variable of the same name, set here. Hence just use addVariable as above.
     // *************************************************************************
-    //	cout << theDefs << "\n";
 
-    // cout << "test_kill_cmd Start test\n";
     // The test harness will create corresponding directory structure & default ecf file
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, defs_location, 1 /*timeout*/, false /* don't wait for test to finish */);
@@ -148,5 +143,7 @@ static bool waitForTaskState(NState::State state, int max_time_to_wait) {
     }
     return false;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

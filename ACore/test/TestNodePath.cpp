@@ -1,30 +1,27 @@
-#define BOOST_TEST_MODULE TestCore
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #7 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <iterator> // std::ostream_iterator
 #include <string>
 
 #include <boost/test/unit_test.hpp>
+#include <boost/timer/timer.hpp>
 
-#include "NodePath.hpp"
+#include "ecflow/core/NodePath.hpp"
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_NodePath)
 
 static void checkPath(const std::vector<std::string>& expectedPath, const std::string& path) {
     std::vector<std::string> thePath;
@@ -122,23 +119,26 @@ BOOST_AUTO_TEST_CASE(test_extractHostPort) {
     BOOST_CHECK_MESSAGE(host == "host" && port == "port", "expected 'host:port' found " << host << ":" << port);
 }
 
-// BOOST_AUTO_TEST_CASE( test_NodePath_perf )
-//{
-//	cout << "ACore:: ...test_NodePath_perf \n";
-//
-//	// Timing using:
-//	//    StringSplitter : 6.35
-//	//    Str::split     : 8.64
-//	// See: Str::split -> define USE_STRINGSPLITTER
-//
-//	boost::timer timer;  // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
-//	int n= 10000000 ;
-//	std::vector<std::string> thePath;thePath.reserve(20);
-//	for(int i = 0; i < n; i++) {
-//	   thePath.clear();
-//		NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction",thePath);
-//	}
-//	cout << "Timing for " << n << " NodePath is  " << timer.elapsed() << endl;
-// }
+BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
+    cout << "ACore:: ...test_NodePath_perf \n";
+
+    // Timing using:
+    //    StringSplitter : 6.35
+    //    Str::split     : 8.64
+    // See: Str::split -> define USE_STRINGSPLITTER
+
+    // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+    boost::timer::auto_cpu_timer timer;
+    int n = 10000000;
+    std::vector<std::string> thePath;
+    thePath.reserve(20);
+    for (int i = 0; i < n; i++) {
+        thePath.clear();
+        NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction", thePath);
+    }
+    cout << "Timing for " << n << " NodePath is  " << timer.elapsed().wall << endl;
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

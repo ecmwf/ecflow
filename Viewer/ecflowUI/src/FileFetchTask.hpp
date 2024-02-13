@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef FILEFETCHTASK_HPP
-#define FILEFETCHTASK_HPP
+#ifndef ecflow_viewer_FileFetchTask_HPP
+#define ecflow_viewer_FileFetchTask_HPP
 
 #include <deque>
 #include <map>
@@ -25,14 +26,14 @@ class VReply;
 
 class FileFetchLocalTask : public AbstractFetchTask {
 public:
-    FileFetchLocalTask(FetchQueueOwner* owner);
+    explicit FileFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
 class FileFetchTransferTask : public QObject, public AbstractFetchTask {
     Q_OBJECT
 public:
-    FileFetchTransferTask(FetchQueueOwner* owner);
+    explicit FileFetchTransferTask(FetchQueueOwner* owner);
     void run() override;
     void stop() override;
     void clear() override;
@@ -50,14 +51,14 @@ protected:
 
 class FileFetchCacheTask : public AbstractFetchTask {
 public:
-    FileFetchCacheTask(FetchQueueOwner* owner);
+    explicit FileFetchCacheTask(FetchQueueOwner* owner);
     void run() override;
 };
 
 class FileFetchLogServerTask : public QObject, public AbstractFetchTask {
     Q_OBJECT
 public:
-    FileFetchLogServerTask(FetchQueueOwner* owner);
+    explicit FileFetchLogServerTask(FetchQueueOwner* owner);
     ~FileFetchLogServerTask();
     void run() override;
     void stop() override;
@@ -74,4 +75,4 @@ protected:
     OutputFileClient* client_{nullptr};
 };
 
-#endif // FILEFETCHTASK_HPP
+#endif /* ecflow_viewer_FileFetchTask_HPP */

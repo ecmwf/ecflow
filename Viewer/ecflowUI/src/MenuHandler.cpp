@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cassert>
 #include <iostream>
@@ -32,7 +32,6 @@
 #include "CustomCommandHandler.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
@@ -40,6 +39,7 @@
 #include "VNode.hpp"
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
+#include "ecflow/core/Str.hpp"
 
 int MenuItem::idCnt_ = 0;
 
@@ -89,7 +89,7 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
             for (ptree::const_iterator itMenus = menusDef.begin(); itMenus != menusDef.end(); ++itMenus) {
                 ptree const& menuDef = itMenus->second;
 
-                std::string cname    = menuDef.get("name", "NoName");
+                std::string cname = menuDef.get("name", "NoName");
                 UiLog().dbg() << "  " << cname;
                 auto* menu = new Menu(cname);
 
@@ -119,7 +119,7 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
             // iterate through all the items
 
             for (ptree::const_iterator itItems = itemsDef.begin(); itItems != itemsDef.end(); ++itItems) {
-                ptree const& ItemDef          = itItems->second;
+                ptree const& ItemDef = itItems->second;
 
                 std::string name              = ItemDef.get("name", "NoName");
                 std::string menuName          = ItemDef.get("menu", "NoMenu");
@@ -253,7 +253,7 @@ void MenuHandler::refreshCustomMenuCommands() {
     CustomCommandHistoryHandler* customRecentCmds = CustomCommandHistoryHandler::instance();
     CustomSavedCommandHandler* customSavedCmds    = CustomSavedCommandHandler::instance();
 
-    Menu* menu                                    = findMenu("User defined");
+    Menu* menu = findMenu("User defined");
     if (menu) {
         menu->clearFixedList();
 
@@ -307,7 +307,7 @@ void MenuHandler::refreshCustomMenuCommands() {
         for (int i = 0; i < numRecentCommands; i++) {
             CustomCommand* cmd = customRecentCmds->commandFromIndex(i);
 
-            auto* item         = new MenuItem(cmd->name());
+            auto* item = new MenuItem(cmd->name());
             item->setCommand(cmd->command());
             item->setEnabledCondition(&trueCond_);
             item->setVisibleCondition(&trueCond_);

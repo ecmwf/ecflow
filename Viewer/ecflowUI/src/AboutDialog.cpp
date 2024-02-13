@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "AboutDialog.hpp"
 
@@ -15,8 +15,8 @@
 #include <QTreeWidgetItem>
 
 #include "DirectoryHandler.hpp"
-#include "Version.hpp"
 #include "WidgetNameProvider.hpp"
+#include "ecflow/core/Version.hpp"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     #include <QRegExp>

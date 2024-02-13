@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TableNodeView.hpp"
 
@@ -415,7 +416,7 @@ void TableNodeView::slotHeaderContextMenu(const QPoint& position) {
     if (varColumn) {
         varName = header_->model()->headerData(section, Qt::Horizontal).toString();
 
-        ac      = new QAction(menu);
+        ac = new QAction(menu);
         ac->setText(tr("Change column \'") + varName + "\'");
         ac->setData("change");
         menu->addAction(ac);
@@ -554,7 +555,7 @@ TableNodeHeader::TableNodeHeader(QWidget* parent) : QHeaderView(Qt::Horizontal, 
 
     connect(this, SIGNAL(sectionResized(int, int, int)), this, SLOT(slotSectionResized(int)));
 
-    int pixId  = IconProvider::add(":viewer/filter_decor.svg", "filter_decor");
+    int pixId = IconProvider::add(":viewer/filter_decor.svg", "filter_decor");
 
     customPix_ = IconProvider::pixmap(pixId, 10);
 

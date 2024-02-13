@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "Palette.hpp"
 
@@ -72,8 +72,8 @@ void Palette::load(const std::string& parFile) {
     QPalette palette = qApp->palette();
 
     for (ptree::const_iterator it = pt.begin(); it != pt.end(); ++it) {
-        std::string name           = it->first;
-        ptree ptItem               = it->second;
+        std::string name = it->first;
+        ptree ptItem     = it->second;
 
         QPalette::ColorGroup group = QPalette::Active;
         if (name == "active")
@@ -89,8 +89,8 @@ void Palette::load(const std::string& parFile) {
         }
 
         for (ptree::const_iterator itItem = ptItem.begin(); itItem != ptItem.end(); ++itItem) {
-            std::string role                                           = itItem->first;
-            auto val                                                   = itItem->second.get_value<std::string>();
+            std::string role = itItem->first;
+            auto val         = itItem->second.get_value<std::string>();
 
             QMap<std::string, QPalette::ColorRole>::const_iterator itP = paletteId.find(role);
             if (itP != paletteId.end()) {

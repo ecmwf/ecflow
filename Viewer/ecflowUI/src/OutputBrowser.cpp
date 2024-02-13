@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "OutputBrowser.hpp"
 
@@ -50,7 +50,7 @@ int OutputBrowser::minConfirmSearchSize_ = 20 * 1024 * 1024;
 
 class OutputBrowserState : public QObject {
 public:
-    OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
+    explicit OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
     ~OutputBrowserState() override = default;
 
     virtual void handleClear();
@@ -63,7 +63,7 @@ protected:
 
 class OutputBrowserEmptyState : public OutputBrowserState {
 public:
-    OutputBrowserEmptyState(OutputBrowser* browser);
+    explicit OutputBrowserEmptyState(OutputBrowser* browser);
     void handleClear() override;
 };
 
@@ -239,7 +239,7 @@ void OutputBrowser::loadIt(VFile_ptr file) {
     contentsChangedOnLastLoad_ = true;
     lastLoadedSizeFromDisk_    = 0;
 
-    file_                      = file;
+    file_ = file;
     if (!file_) {
         return;
     }
@@ -281,7 +281,7 @@ void OutputBrowser::reloadIt(VFile_ptr file) {
     contentsFile_              = filterIt();
     bool contentsSame          = contentsFile_.get() == file_.get();
 
-    bool deltaAdded            = false;
+    bool deltaAdded = false;
     if (delta && contentsFile_.get() == file_.get()) {
         deltaAdded = addDeltaContents(delta);
     }
@@ -782,7 +782,7 @@ VFile_ptr OutputBrowser::filterIt() {
         msg = "Failed to filter output file using command:<br> \'" + proc.program() + " " + proc.arguments().join(" ") +
               "\'";
 #else
-        msg    = "Failed to run grep command!";
+        msg = "Failed to run grep command!";
 #endif
         if (!errStr.isEmpty())
             msg += "<br>Error message: " + errStr;

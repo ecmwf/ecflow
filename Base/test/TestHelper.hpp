@@ -1,27 +1,23 @@
-#ifndef TESTHELPER_HPP_
-#define TESTHELPER_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #33 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_test_TestHelper_HPP
+#define ecflow_base_test_TestHelper_HPP
 
 #include <boost/test/test_tools.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "ClientToServerRequest.hpp"
 #include "MockServer.hpp"
-#include "Node.hpp"
-#include "ServerToClientCmd.hpp"
+#include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/node/Node.hpp"
 
 // defines statics utility functions used by more than one test
 class TestHelper {
@@ -125,4 +121,5 @@ public:
 private:
     TestHelper() = default;
 };
-#endif /* TESTHELPER_HPP_ */
+
+#endif /* ecflow_base_test_TestHelper_HPP */

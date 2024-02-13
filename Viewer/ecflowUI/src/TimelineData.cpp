@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//=============================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TimelineData.hpp"
 
@@ -18,14 +18,14 @@
 #include <QFileInfo>
 #include <QStringList>
 
-#include "File.hpp"
-#include "File_r.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "TimelineData.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "VNState.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 #ifndef SIZE_MAX
     #ifdef __SIZE_MAX__
@@ -213,12 +213,9 @@ void TimelineData::loadLogFile(const std::string& logFile, size_t maxReadSize, c
     clear();
 
     maxReadSize_ = maxReadSize;
-    if (maxReadSize_ < 0)
-        maxReadSize_ = 0;
-
-    fullRead_   = false;
-    loadStatus_ = LoadNotTried;
-    loadedAt_   = QDateTime::currentDateTime();
+    fullRead_    = false;
+    loadStatus_  = LoadNotTried;
+    loadedAt_    = QDateTime::currentDateTime();
 
     loadLogFileCore(logFile, maxReadSize, suites, false);
 }

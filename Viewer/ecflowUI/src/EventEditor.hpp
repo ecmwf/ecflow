@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef EventEditor_HPP
-#define EventEditor_HPP
+#ifndef ecflow_viewer_EventEditor_HPP
+#define ecflow_viewer_EventEditor_HPP
 
 #include <QStringList>
 
@@ -24,13 +24,13 @@ class EventEditorWidget : public QWidget, protected Ui::EventEditorWidget {
     friend class EventEditor;
 
 public:
-    EventEditorWidget(QWidget* parent = nullptr);
+    explicit EventEditorWidget(QWidget* parent = nullptr);
 };
 
 class EventEditor : public AttributeEditor {
     Q_OBJECT
 public:
-    EventEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit EventEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~EventEditor() override;
 
 protected Q_SLOTS:
@@ -60,4 +60,4 @@ protected:
     bool scanned_;
 };
 
-#endif // EventEditor_HPP
+#endif /* ecflow_viewer_EventEditor_HPP */

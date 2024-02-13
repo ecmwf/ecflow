@@ -1,41 +1,35 @@
-#define BOOST_TEST_MODULE Server
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "CheckPt.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
-#include "Host.hpp"
-#include "JobProfiler.hpp"
-#include "Log.hpp"
-#include "ServerEnvironment.hpp"
-#include "Str.hpp"
+#include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestServer)
+BOOST_AUTO_TEST_SUITE(U_Server)
+
+BOOST_AUTO_TEST_SUITE(T_ServerEnvironment)
 
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     cout << "Server:: ...test_server_environment_ecfinterval\n";
@@ -44,10 +38,10 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     std::string port = Str::DEFAULT_PORT_NUMBER();
     for (int i = -10; i < 70; ++i) {
         string errorMsg;
-        string argument = "--ecfinterval=" + boost::lexical_cast<std::string>(i);
+        string argument = "--ecfinterval=" + ecf::convert_to<std::string>(i);
 
-        int argc        = 2;
-        char* argv[]    = {const_cast<char*>("ServerEnvironment"), const_cast<char*>(argument.c_str())};
+        int argc     = 2;
+        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>(argument.c_str())};
         ServerEnvironment serverEnv(argc, argv);
         bool valid = serverEnv.valid(errorMsg);
         if (i > 0 && i < 61) {
@@ -206,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             continue;
         }
         if (string("ECF_CHECKINTERVAL") == p.first) {
-            std::string expected = boost::lexical_cast<std::string>(CheckPt::default_interval());
+            std::string expected = ecf::convert_to<std::string>(CheckPt::default_interval());
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_CHECKINTERVAL expected " << CheckPt::default_interval() << " but found "
                                                                   << p.second);
@@ -367,5 +361,7 @@ BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
     /// Destroy Log singleton to avoid valgrind from complaining
     Log::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

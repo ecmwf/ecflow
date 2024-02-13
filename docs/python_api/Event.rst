@@ -40,8 +40,8 @@ Usage:
 
    event = Event(2,'event_name')
    task.add_event(event)
-   task1.add_event('2')          # create a event '1' and add to the task
-   task2.add_event('name')       # create a event 'name' and add to task
+   task1.add_event('2')          # create an event '2' and add to the task
+   task2.add_event('name')       # create an event 'name' and add to task
 
    # Events can be created in the Task constructor, like any other attribute
    t = Task('t3',

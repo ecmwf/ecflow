@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef INFOPANELITEM_HPP_
-#define INFOPANELITEM_HPP_
+#ifndef ecflow_viewer_InfoPanelItem_HPP
+#define ecflow_viewer_InfoPanelItem_HPP
 
 #include <string>
 
@@ -117,7 +118,7 @@ public:
     explicit InfoPanelItemFactory(const std::string&);
     virtual ~InfoPanelItemFactory() = default;
 
-    virtual InfoPanelItem* make()   = 0;
+    virtual InfoPanelItem* make() = 0;
     static InfoPanelItem* create(const std::string& name);
 
 private:
@@ -133,4 +134,4 @@ public:
     explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
 };
 
-#endif
+#endif /* ecflow_viewer_InfoPanelItem_HPP */

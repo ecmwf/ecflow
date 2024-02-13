@@ -1,33 +1,30 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #12 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "Suite.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
 
 BOOST_AUTO_TEST_CASE(test_add_log3) {
     // create once for all test below, then remove at the end
@@ -41,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_empty_server) {
     std::vector<std::string> suite_names;
     suite_names.reserve(5);
     for (int i = 0; i < 5; i++)
-        suite_names.push_back("s" + boost::lexical_cast<std::string>(i));
+        suite_names.push_back("s" + ecf::convert_to<std::string>(i));
 
     defs_ptr new_defs = Defs::create();
 
@@ -95,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register_and_drop) {
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
     for (int i = 0; i < 5; i++)
-        suite_names.push_back("s" + boost::lexical_cast<std::string>(i));
+        suite_names.push_back("s" + ecf::convert_to<std::string>(i));
 
     Defs defs;
     for (const auto& suite_name : suite_names)
@@ -128,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register__with_drop) {
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
     for (int i = 0; i < 5; i++)
-        suite_names.push_back("s" + boost::lexical_cast<std::string>(i));
+        suite_names.push_back("s" + ecf::convert_to<std::string>(i));
 
     Defs defs;
     for (const auto& suite_name : suite_names)
@@ -172,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
     for (int i = 0; i < 5; i++)
-        suite_names.push_back("s" + boost::lexical_cast<std::string>(i));
+        suite_names.push_back("s" + std::to_string(i));
 
     Defs defs;
     for (const auto& suite_name : suite_names)
@@ -198,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
     // now add new suite, they should get added to the new client handles
     names.clear();
     for (int i = 5; i < 10; i++)
-        names.push_back("s" + boost::lexical_cast<std::string>(i));
+        names.push_back("s" + std::to_string(i));
     for (const auto& name : names)
         defs.addSuite(Suite::create(name));
 
@@ -209,7 +206,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
 
     // Delete the suite s5,s6,s7,s8,s9
     for (int i = 5; i < 10; i++) {
-        suite_ptr suite = defs.findSuite("s" + boost::lexical_cast<std::string>(i));
+        suite_ptr suite = defs.findSuite("s" + std::to_string(i));
         BOOST_CHECK_MESSAGE(suite.get(), "Failed to find suite s" << i);
         suite->remove();
     }
@@ -230,7 +227,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_add_remove) {
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
     for (int i = 0; i < 5; i++)
-        suite_names.push_back("s" + boost::lexical_cast<std::string>(i));
+        suite_names.push_back("s" + std::to_string(i));
 
     defs_ptr defs = Defs::create();
     for (const auto& suite_name : suite_names)
@@ -321,7 +318,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_suite_ordering) {
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
     for (int i = 0; i < 5; i++)
-        suite_names.push_back("s" + boost::lexical_cast<std::string>(i));
+        suite_names.push_back("s" + ecf::convert_to<std::string>(i));
 
     Defs defs;
     for (const auto& suite_name : suite_names)
@@ -366,4 +363,7 @@ BOOST_AUTO_TEST_CASE(test_destroy_log3) {
     fs::remove("test_add_log3.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

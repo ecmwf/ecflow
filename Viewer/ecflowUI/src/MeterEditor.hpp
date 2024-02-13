@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef METEREDITOR_HPP
-#define METEREDITOR_HPP
+#ifndef ecflow_viewer_MeterEditor_HPP
+#define ecflow_viewer_MeterEditor_HPP
 
 #include "AttributeEditor.hpp"
 #include "VInfo.hpp"
@@ -21,14 +21,14 @@ class MeterEditorWidget : public QWidget, protected Ui::MeterEditorWidget {
     friend class MeterEditor;
 
 public:
-    MeterEditorWidget(QWidget* parent = nullptr);
+    explicit MeterEditorWidget(QWidget* parent = nullptr);
 };
 
 class MeterEditor : public AttributeEditor {
     Q_OBJECT
 
 public:
-    MeterEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit MeterEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~MeterEditor() override;
 
 protected Q_SLOTS:
@@ -45,4 +45,4 @@ protected:
     int oriVal_;
 };
 
-#endif // METEREDITOR_HPP
+#endif /* ecflow_viewer_MeterEditor_HPP */

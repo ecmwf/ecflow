@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TriggerGraphView.hpp"
 
@@ -112,7 +113,7 @@ QRectF TriggerGraphNodeItem::boundingRect() const {
 void TriggerGraphNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     // Init style option
     QStyleOptionViewItem opt;
-    opt.rect        = bRect_.toRect();
+    opt.rect = bRect_.toRect();
 
     QModelIndex idx = view_->model()->index(index_, 0);
     view_->delegate()->paint(painter, opt, idx);
@@ -443,7 +444,7 @@ void TriggerGraphEdgeInfoDialog::setInfo(TriggerGraphEdgeItem* e) {
 QString TriggerGraphEdgeInfoDialog::makeHtml(TriggerGraphEdgeItem* e) const {
     QString s = "<table width=\'100%\'>";
 
-    VItem* t  = e->from_->item();
+    VItem* t = e->from_->item();
     makeRow("from", t, s);
 
     t = e->to_->item();

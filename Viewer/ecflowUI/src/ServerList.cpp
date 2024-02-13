@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ServerList.hpp"
 
@@ -17,21 +18,18 @@
 #include <stdexcept>
 
 #include <QTimer>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "MainWindow.hpp"
 #include "ServerItem.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
 #include "VReply.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
 
 ServerList* ServerList::instance_ = nullptr;
 
@@ -457,7 +455,7 @@ std::string ServerList::uniqueName(const std::string& name) {
         c << i;
         std::string currentName = name + "_" + c.str();
 
-        hasIt                   = false;
+        hasIt = false;
         for (auto it = items_.begin(); it != items_.end(); ++it) {
             if ((*it)->name() == currentName) {
                 hasIt = true;
@@ -494,9 +492,9 @@ bool ServerList::checkItemToAdd(const std::string& name,
     }
 
     try {
-        boost::lexical_cast<int>(port);
+        ecf::convert_to<int>(port);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (const ecf::bad_conversion&) {
         errStr = "Invalid port number: " + port;
         return false;
     }
@@ -540,7 +538,7 @@ bool ServerList::load() {
         }
 
         std::vector<std::string> sv;
-        boost::split(sv, line, boost::is_any_of(","));
+        ecf::algorithm::split(sv, line, ",");
 
         bool favourite = false;
         if (sv.size() >= 4)

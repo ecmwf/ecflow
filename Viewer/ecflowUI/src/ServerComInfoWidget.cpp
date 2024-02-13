@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ServerComInfoWidget.hpp"
 
@@ -121,13 +121,13 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction, QWidget
     fmServer_     = QFontMetrics(fontServer_);
     fmServerReal_ = FontMetrics(fontServer_);
 
-    fontPeriod_   = QFont();
+    fontPeriod_ = QFont();
     fontPeriod_.setPointSize(fontPeriod_.pointSize() - 2);
     fmPeriod_ = QFontMetrics(fontPeriod_);
 
     fontLast_ = QFont();
     fontLast_.setPointSize(fontLast_.pointSize() - 2);
-    fmLast_           = QFontMetrics(fontLast_);
+    fmLast_ = QFontMetrics(fontLast_);
 
     int w             = 200;
     serverRectHeight_ = fmServerReal_.realHeight() + 2 * serverYPadding_;
@@ -457,8 +457,8 @@ void ServerRefreshInfoWidget::fetchInfo() {
         QDateTime currentTime = QDateTime::currentDateTime();
         bool v                = server_->updateInfo(period_, total_, drift_, toNext_);
 
-        bool geoUpdateNeeded  = (v != hasInfo_);
-        hasInfo_              = v;
+        bool geoUpdateNeeded = (v != hasInfo_);
+        hasInfo_             = v;
 
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
         UiLog().dbg() << " period=" << period_ << " total=" << total_ << " toNext=" << toNext_;
@@ -470,7 +470,7 @@ void ServerRefreshInfoWidget::fetchInfo() {
                 server_->lastRefresh().time().toString(); // currentTime.addSecs(-total_+toNext_).time().toString();
             nextRefresh_ = currentTime.addSecs(toNext_).time().toString();
 
-            mode_        = NormalMode;
+            mode_ = NormalMode;
             if (!inRefresh_)
                 refreshAction_->setEnabled(true);
         }
@@ -696,7 +696,7 @@ bool ServerRefreshInfoWidget::periodTextWidthAboutToChange() const {
     UI_FUNCTION_LOG
 #endif
 
-    int mval   = determinePeriodTextWidthMin();
+    int mval = determinePeriodTextWidthMin();
 
     QString pt = fullPeriodText();
 #ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
@@ -734,11 +734,11 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo) {
         int h            = serverRectHeight_; // fmServer_.height()+progRectHeight_; //;2*yPadding;
         int currentRight = 0;
 
-        serverRect_      = QRect(buttonRect_.center().x() + 4,
+        serverRect_  = QRect(buttonRect_.center().x() + 4,
                             (height() - h) / 2,
                             buttonRect_.width() / 2 - 4 + 4 + ViewerUtil::textWidth(fmServer_, serverText_),
                             h);
-        currentRight     = serverRect_.x() + serverRect_.width();
+        currentRight = serverRect_.x() + serverRect_.width();
 
         if (doFetchInfo)
             fetchInfo();
@@ -784,7 +784,7 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo) {
             // Compute physical width of the last refresh text
             lastTextWidth_ = ViewerUtil::textWidth(fmLast_, " last: 22:22:22 ");
 
-            lastRect_      = QRect(currentRight, serverRect_.y(), lastTextWidth_, h);
+            lastRect_ = QRect(currentRight, serverRect_.y(), lastTextWidth_, h);
             currentRight += lastRect_.width() + 6;
         }
         else
@@ -1066,12 +1066,12 @@ void ServerRefreshInfoWidget::printStatus() const {
 
 ServerComActivityLine::ServerComActivityLine(QWidget* parent) : QWidget(parent), font_(QFont()), fm_(font_) {
     font_.setPointSize(font_.pointSize() - 1);
-    fm_         = QFontMetrics(font_);
+    fm_ = QFontMetrics(font_);
 
     int width_  = 200;
     int height_ = fm_.height() + 4 + 6;
 
-    timer_      = new QTimer(this);
+    timer_ = new QTimer(this);
 
     connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
 

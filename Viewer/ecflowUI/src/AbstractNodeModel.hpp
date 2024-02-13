@@ -1,20 +1,21 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef ABSTRACTNODEMODEL_H
-#define ABSTRACTNODEMODEL_H
+#ifndef ecflow_viewer_AbstractNodeModel_HPP
+#define ecflow_viewer_AbstractNodeModel_HPP
 
 #include <QAbstractItemModel>
 
-#include "Aspect.hpp"
 #include "NodeObserver.hpp"
 #include "VInfo.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 class Node;
 
@@ -75,10 +76,10 @@ public Q_SLOTS:
     void slotFilterDeleteBegin();
     void slotFilterDeleteEnd();
 
-    virtual void slotServerAddBegin(int row)                     = 0;
-    virtual void slotServerAddEnd()                              = 0;
-    virtual void slotServerRemoveBegin(VModelServer*, int)       = 0;
-    virtual void slotServerRemoveEnd(int)                        = 0;
+    virtual void slotServerAddBegin(int row)               = 0;
+    virtual void slotServerAddEnd()                        = 0;
+    virtual void slotServerRemoveBegin(VModelServer*, int) = 0;
+    virtual void slotServerRemoveEnd(int)                  = 0;
 
     virtual void slotDataChanged(VModelServer*)                  = 0;
     virtual void slotBeginServerScan(VModelServer* server, int)  = 0;
@@ -97,4 +98,4 @@ protected:
     bool active_{false};
 };
 
-#endif
+#endif /* ecflow_viewer_AbstractNodeModel_HPP */

@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2017 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "AbstractNodeView.hpp"
 
@@ -156,12 +156,12 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
     QPoint pos                  = event->pos();
     QPersistentModelIndex index = indexAt(pos);
 
-    pressedIndex_               = index;
+    pressedIndex_ = index;
 
     // Get the selection flags
     QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
 
-    noSelectionOnMousePress_                    = (command == QItemSelectionModel::NoUpdate || !index.isValid());
+    noSelectionOnMousePress_ = (command == QItemSelectionModel::NoUpdate || !index.isValid());
 
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::mousePressEvent --> current=" << currentIndex().data().toString()
@@ -388,9 +388,9 @@ void AbstractNodeView::doItemsLayout(bool hasRemovedItems) {
     }
 
     viewItems_.clear(); // prepare for new layout
-    rowCount_          = 0;
-    maxRowWidth_       = 0;
-    pressedRefIndex_   = QPersistentModelIndex(QModelIndex());
+    rowCount_        = 0;
+    maxRowWidth_     = 0;
+    pressedRefIndex_ = QPersistentModelIndex(QModelIndex());
 
     QModelIndex parent = root_;
     if (model_->hasChildren(parent)) {
@@ -488,7 +488,7 @@ void AbstractNodeView::scrollTo(const QModelIndex& index) {
         return;
 
     if (verticalScrollMode_ == ScrollPerItem) {
-        int row    = itemRow(item);
+        int row = itemRow(item);
 
         int top    = verticalScrollBar()->value();
         int bottom = top + verticalScrollBar()->pageStep();
@@ -1163,6 +1163,7 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
                 switch (static_cast<const QKeyEvent*>(event)->key()) {
                     case Qt::Key_Backtab:
                         modifiers = modifiers & ~Qt::ShiftModifier; // special case for backtab
+                        [[fallthrough]];
                     case Qt::Key_Down:
                     case Qt::Key_Up:
                     case Qt::Key_Left:

@@ -1,26 +1,26 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "ExprAst.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAst.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_ExprRepeatDateArithmetic)
 
 BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic) {
     cout << "ANode:: ...test_repeat_data_arithmetic\n";
@@ -214,5 +214,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic_take_from_end_of_month) {
     t2->changeTrigger("t1:YMD - 1 eq 20091231");
     BOOST_CHECK_MESSAGE(t2->triggerAst()->evaluate(), "Expected trigger to use date arithmetic");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

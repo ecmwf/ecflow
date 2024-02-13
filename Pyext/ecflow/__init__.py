@@ -15,6 +15,6 @@ from .ecflow import *
 The ecFlow python module
 """
 
-__version__ = '5.11.4'
+__version__ = '5.12.0'
 
 # http://stackoverflow.com/questions/13040646/how-do-i-create-documentation-with-pydoc

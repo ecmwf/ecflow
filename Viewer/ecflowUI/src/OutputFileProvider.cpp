@@ -1,20 +1,16 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "OutputFileProvider.hpp"
 
 #include <deque>
-
-#include <QDateTime>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include "OutputCache.hpp"
 #include "OutputFileClient.hpp"
@@ -56,7 +52,7 @@ void OutputFileFetchServerTask::run() {
 
 class OutputFileFetchQueueManager : public FetchQueueOwner {
 public:
-    OutputFileFetchQueueManager(OutputFileProvider*);
+    explicit OutputFileFetchQueueManager(OutputFileProvider*);
     void runFull(ServerHandler* server,
                  VNode* node,
                  const std::string& fileName,
@@ -240,7 +236,7 @@ VDir_ptr OutputFileFetchQueueManager::dirToFile(const std::string& fileName) con
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::OutputTask) {
     // outCache will be clean up automatically (QObject)
-    outCache_     = new OutputCache(this);
+    outCache_ = new OutputCache(this);
 
     fetchManager_ = new OutputFileFetchQueueManager(this);
 }

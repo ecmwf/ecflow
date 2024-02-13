@@ -1,38 +1,34 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #42 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
 #include "InvokeServer.hpp"
-#include "MockServer.hpp"
 #include "SCPort.hpp"
-#include "ServerToClientCmd.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
+#include "ecflow/base/cts/user/LoadDefsCmd.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_LoadDefsCmd)
 
 //=============================================================================
 // This test the LoadDefsCmd. This command will merge/absorb a defs file
@@ -164,5 +160,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs) {
     /// Destroy singleton's to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

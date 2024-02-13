@@ -1,29 +1,27 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <fstream>
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "DayAttr.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_SizeOf)
 
 BOOST_AUTO_TEST_CASE(test_size_of) {
     cout << "ACore:: ...test_size_of\n";
@@ -44,5 +42,7 @@ BOOST_AUTO_TEST_CASE(test_size_of) {
 
     BOOST_CHECK_MESSAGE(true, "Dummy");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

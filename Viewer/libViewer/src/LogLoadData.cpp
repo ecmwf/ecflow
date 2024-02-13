@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "LogLoadData.hpp"
 
@@ -17,13 +17,13 @@
 #include <QStringList>
 #include <QtGlobal>
 
-#include "File.hpp"
-#include "File_r.hpp"
 #include "LogConsumer.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 // static int REQCNT=0;
 
@@ -122,10 +122,6 @@ bool sortVecFunction(const std::pair<size_t, size_t>& a, const std::pair<size_t,
 }
 
 LogLoadDataItem::LogLoadDataItem(const std::string& name) : name_(name) {
-    if (name == "") {
-        int i = 5;
-        i++;
-    }
     buildSubReq(subReq_);
 }
 
@@ -333,7 +329,7 @@ void LogLoadDataItem::init(size_t num) {
 }
 
 void LogLoadDataItem::valuesAt(size_t idx, size_t& total, size_t& child, size_t& user) const {
-    if (idx >= 0 && idx < size()) {
+    if (idx < size()) {
         child = childReq_[idx];
         user  = userReq_[idx];
         total = child + user;
@@ -541,7 +537,7 @@ bool LogLoadData::indexOfTime(qint64 t, size_t& idx, size_t startIdx, qint64 tol
         if (tolerance <= 0)
             tolerance = 10 * 1000; // ms
 
-        for (size_t i = startIdx; i >= 0; i--) {
+        for (size_t i = startIdx;; i--) {
             if (time_[i] <= t) {
                 qint64 nextDelta = t - time_[i];
                 qint64 prevDelta = (i < startIdx) ? (time_[i + 1] - t) : (nextDelta + 1);
@@ -744,28 +740,28 @@ void LogLoadData::getTotalReq(QLineSeries& series, int& maxVal) {
 }
 
 void LogLoadData::getSuiteChildReq(size_t idx, QLineSeries& series) {
-    if (idx >= 0 && idx < suites().size()) {
+    if (idx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[idx].childReq(), maxVal);
     }
 }
 
 void LogLoadData::getSuiteUserReq(size_t idx, QLineSeries& series) {
-    if (idx >= 0 && idx < suites().size()) {
+    if (idx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[idx].userReq(), maxVal);
     }
 }
 
 void LogLoadData::getSuiteTotalReq(size_t idx, QLineSeries& series) {
-    if (idx >= 0 && idx < suites().size()) {
+    if (idx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[idx].childReq(), suiteData_[idx].userReq(), maxVal);
     }
 }
 
 void LogLoadData::getSuiteSubReq(size_t suiteIdx, size_t subIdx, QLineSeries& series) {
-    if (suiteIdx >= 0 && suiteIdx < suites().size()) {
+    if (suiteIdx < suites().size()) {
         int maxVal = 0;
         getSeries(series, suiteData_[suiteIdx].subReq()[subIdx], maxVal);
     }
@@ -776,7 +772,7 @@ void LogLoadData::getSubReq(size_t subIdx, QLineSeries& series, int& maxVal) {
 }
 
 void LogLoadData::getUidTotalReq(size_t uidIdx, QLineSeries& series, int& maxVal) {
-    if (uidIdx >= 0 && uidIdx < uidData().size()) {
+    if (uidIdx < uidData().size()) {
         // the childreq  = 0 for the uidData!
         maxVal = 0;
         getSeries(series, uidData_[uidIdx].userReq(), maxVal);
@@ -784,7 +780,7 @@ void LogLoadData::getUidTotalReq(size_t uidIdx, QLineSeries& series, int& maxVal
 }
 
 void LogLoadData::getUidSubReq(size_t uidIdx, size_t subIdx, QLineSeries& series) {
-    if (uidIdx >= 0 && uidIdx < uidData().size()) {
+    if (uidIdx < uidData().size()) {
         int maxVal = 0;
         getSeries(series, uidData_[uidIdx].subReq()[subIdx], maxVal);
     }
@@ -797,7 +793,7 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
     if (time_stamp.size() < 2)
         return;
 
-    QString s    = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
+    QString s = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
 
     QDateTime dt = QDateTime::fromString(s, "HH:mm:ss d.M.yyyy");
     dt.setTimeSpec(Qt::UTC);
@@ -813,10 +809,6 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
     // uid specific data
     //---------------------------
     for (size_t i = uidData_.size(); i < uid_vec.size(); i++) {
-        if (uid_vec[i].name_.empty()) {
-            int gg = 22;
-            gg++;
-        }
         uidData_.emplace_back(uid_vec[i].name_);
         uidData_.back().init(time_.size() - 1);
     }
@@ -937,8 +929,6 @@ void LogLoadData::loadLogFile(const std::string& logFile,
     parseHelper_ = LogDataParseHelper();
 
     maxReadSize_ = maxReadSize;
-    if (maxReadSize_ < 0)
-        maxReadSize_ = 0;
 
     fullRead_   = false;
     loadStatus_ = LoadNotTried;

@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TimelineWidget.hpp"
 
@@ -21,6 +22,7 @@
 #include "FileInfoLabel.hpp"
 #include "IconProvider.hpp"
 #include "MainWindow.hpp"
+#include "PlainTextWidget.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "TextFormat.hpp"
@@ -80,9 +82,13 @@ TimelineWidget::TimelineWidget(QWidget* /*parent*/)
 
     model_->resetData(data_);
 
-    view_ = new TimelineView(sortModel_, this);
+    view_       = new TimelineView(sortModel_, this);
+    errorLogTe_ = new PlainTextWidget(this);
+    errorLogTe_->setShowTitleLabel(false);
 
+    ui_->viewHolderLayout->addWidget(errorLogTe_);
     ui_->viewHolderLayout->addWidget(view_);
+    errorLogTe_->hide();
 
     // ui_->view->setModel(model_);
 
@@ -426,6 +432,7 @@ void TimelineWidget::updateFilterTriggerMode() {
 void TimelineWidget::setAllVisible(bool b) {
     ui_->viewControl->setVisible(b);
     view_->setVisible(b);
+    errorLogTe_->hide();
 }
 
 void TimelineWidget::slotPeriodSelectedInView(QDateTime start, QDateTime end) {
@@ -917,10 +924,11 @@ void TimelineWidget::slotFileTransferFailed(QString err) {
         logTransferred_ = false;
         ui_->messageLabel->stopLoadLabel();
         logLoaded_ = false;
-        ui_->messageLabel->showError("Could not fetch log file from remote host! <br>" + err);
+        ui_->messageLabel->showError("Could not fetch log file from remote host! <br>");
         data_->clear();
         setAllVisible(false);
         updateInfoLabel();
+        showErrorLog(err);
     }
 }
 
@@ -1130,6 +1138,11 @@ void TimelineWidget::slotExpandFileInfo(bool st) {
     Q_ASSERT(expandFileInfoProp_);
     expandFileInfoProp_->setValue(st);
     ui_->logInfoLabel->setCompact(!st);
+}
+
+void TimelineWidget::showErrorLog(QString err) {
+    errorLogTe_->setVisible(true);
+    errorLogTe_->setPlainText(err);
 }
 
 void TimelineWidget::writeSettings(VComboSettings* vs) {

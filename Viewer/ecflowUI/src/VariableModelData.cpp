@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VariableModelData.hpp"
 
@@ -480,7 +481,7 @@ void VariableModelDataHandler::reload(VInfo_ptr info) {
     clear(false);
 
     if (info && info->node()) {
-        server_                   = info->server();
+        server_ = info->server();
 
         std::vector<VNode*> nodes = info->node()->ancestors(VNode::ChildToParentSort);
 
@@ -667,7 +668,7 @@ bool VariableModelDataHandler::updateVariables(int dataIndex) {
     // Get the current set of variables and check if the total number of variables
     // has changed. At this point v and vg do not contain any duplicates (within the
     // same block the user variables take precedence over the generated variables)
-    int cntDiff      = data_[dataIndex]->checkUpdateDiff(v, vg);
+    int cntDiff = data_[dataIndex]->checkUpdateDiff(v, vg);
 
     const int numOld = data_[dataIndex]->varNum(); // the current num in the model
     const int numNew = v.size() + vg.size();       // the new num

@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2017 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef ABSTRACTNODEVIEW_HPP
-#define ABSTRACTNODEVIEW_HPP
+#ifndef ecflow_viewer_AbstractNodeView_HPP
+#define ecflow_viewer_AbstractNodeView_HPP
 
 #include <QAbstractScrollArea>
 #include <QBasicTimer>
@@ -149,7 +149,7 @@ protected:
 
     QRegion visualRegionForSelection(const QItemSelection& selection) const;
 
-    virtual void updateViewport(const QRect rect)   = 0;
+    virtual void updateViewport(const QRect rect) = 0;
 
     virtual int firstVisibleItem(int& offset) const = 0;
     virtual void updateRowCount()                   = 0;
@@ -214,4 +214,4 @@ private:
     inline QItemSelectionModel::SelectionFlags selectionBehaviorFlags() const { return QItemSelectionModel::NoUpdate; }
 };
 
-#endif // ABSTRACTNODEVIEW_HPP
+#endif /* ecflow_viewer_AbstractNodeView_HPP */

@@ -1,5 +1,16 @@
 .. _rest_api:
 
+
+..
+   This reStructured Text file uses the following convention:
+     # with overline, for parts
+     * with overline, for chapters
+     = for sections
+     - for subsections
+     ^ for subsubsections
+     " for paragraphs
+
+
 REST API
 //////////////////////
 
@@ -7,14 +18,26 @@ REST API
   ecFlow's REST API is experimental, and its details are subject to change. The documentation reflects its current operation.
 
 Compilation
------------
+===========
 
 ecFlow REST API is implemented using an HTTP server. The HTTP server
-compilation is enabled by default, and can be enabled (ON) or disabled (OFF) using cmake option :: 
+compilation is enabled by default, and can be enabled (ON) or disabled (OFF) using CMake option:
+
+.. code:: text
 
   -DENABLE_HTTP=ON
 
 The compilation result is an executable called **ecflow_http**.
+
+By default, the ecFlow HTTP server is built with support for compression (i.e. allows :code:`Accept-Encoding: gzip`
+as header in the request), based on the following CMake option:
+
+.. code:: text
+
+  -DENABLE_HTTP_COMPRESSION=ON
+
+To disable compression set the :code:`ENABLE_HTTP_COMPRESSION` to :code:`OFF`. Notice that compression support
+requires the presence of *zlib* -- if this dependency is not available the CMake project configuration step will fail.
 
 When launched, the server will by default listen to port 8080. This can
 be changed with command line option ``-p``, ``--port``. Using option ``-v``,
@@ -41,7 +64,7 @@ Default interval to check any changes from ecFlow server is 10 seconds.
 This can be changed with option ``--polling_interval``.
 
 Starting the REST API
----------------------
+=====================
 
 The HTTP server is started as so:
 
@@ -54,7 +77,7 @@ location localhost:3141. This can be changed by setting environment
 variables ``ECF_HOST`` and ``ECF_PORT`` before starting the HTTP server.
 
 Command Line Options and Environment Variables
-----------------------------------------------
+==============================================
 
 REST API options can be controlled either with command line options or
 with environment variables. All environment variables with "RESTAPI" are
@@ -121,7 +144,7 @@ Two new environment variables are introduced:
    files are located. If not specified, **$HOME/.ecflowrc/ssl** is used.
 
 Authentication
---------------
+==============
 
 For HTTP methods POST, PUT and DELETE, authentication is always required
 for user commands. Authentication requires that REST API is being run
@@ -144,7 +167,7 @@ they are not authentication (in the traditional sense).
 +-----------------+------------------+---------------------------------+
 
 Basic Authentication
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 Basic authentication is done with username and password. ecFlow server
 acts as the authenticator, REST API is only passing the credentials
@@ -157,7 +180,7 @@ The username and password are passed to REST API using standard HTTP
 basic authentication mechanism. For example, with curl option ``--user``.
 
 Token Based Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 REST api supports simple token-basic authentication. In this setting the
 api will verify a token's validity and grant access to ecFlow server if
@@ -165,11 +188,15 @@ token is valid. ecFlow server itself does not know about the token. REST
 api acts as a proxy for the user.
 
 The token should be passed to the api with http header in a standard
-fashion::
+fashion:
+
+.. code-block:: text
 
   Authorization: Bearer <TOKEN>
 
-Or with a custom header::
+Or with a custom header:
+
+.. code-block:: text
 
   X-API-Key: <TOKEN>
 
@@ -180,7 +207,7 @@ To authenticate the token, the API needs to have a local database of
 valid tokens. Currently the only supported database backend is file in
 json format. The API will search the token from current working directory
 with name "api-tokens.json". Location can be changed with environment
-variable ``ECF_API_TOKEN_FILE``. The API will automatically check the file
+variable :code:`ECF_API_TOKEN_FILE`. The API will automatically check the file
 for changes every 20 seconds.
 
 The contents of the json file are:
@@ -250,27 +277,8 @@ Run the script for application "my app" using token
     }
   ]
 
-Container Images
-----------------
-
-For development and experimentation purposes a container image exists
-at:
-
-https://hub.docker.com/repository/docker/partio/ecflow-http
-
-The image can be used for quick prototyping. It expects that ecFlow
-server is found from localhost:3141, change address with ECF_HOST and
-ECF_PORT if needed. Server does not have a SSL certificates defined, so it can only be used to query ecFlow server (not alter states etc).
-
-Usage example:
-
-.. code-block:: bash
-
-  podman run --rm -p 8080:8080 -it docker.io/partio/ecflow-http
-  curl -kv https://localhost:8080/v1/server/ping
-
 API v1 Documentation
---------------------
+====================
 
 The API supports operations using GET, POST, PUT and DELETE methods.
 Generally the last word of the URL defines the target of the query. For
@@ -289,7 +297,7 @@ supported targets:
 A short description of the targets.
 
 API Targets
-~~~~~~~~~~~
+-----------
 
 attributes
 ^^^^^^^^^^
@@ -339,191 +347,477 @@ tree
 This is a special target that shows a tree-view of the ecflow node
 structure. Supported REST methods are: GET.
 
-Endpoints
-~~~~~~~~~
+API v1 supports the following endpoints -- specification for each endpoing can be found in the related subsections.
 
-Listing
-^^^^^^^
-
-The API has following endpoints.
-
-
-.. list-table::
+.. list-table:: List of Endpoints
    :header-rows: 1
 
-   * - #
-     - Endpoint
-     - Method
-     - Comment
-     - Payload
-     - Example Result
-   * - 1
-     - /v1/suites
+   * - Endpoint
+     - Method(s)
+     - Description
+   * - /v1/suites
+     - POST, GET
+     - Operations related to Suites
+   * - /v1/suites/tree
      - GET
-     - Get a list of all suites
-     -
-     - ["a"]
-   * - 2
-     - /v1/suites/tree
-     - GET
-     - Get a tree view of all suites
-     -
-     - {"a":{"b":{"c":""}}}
-   * - 3
-     - /v1/suites
-     - POST
-     - Create a new suite
-     - {"definition": "..."}
-     - {"ok"}
-   * - 4
-     - /v1/suites/{node_path}
+     - Operations related to Suite trees
+   * - /v1/suites/{path}
      - DELETE
-     - Delete a node
-     -
-     - {"ok"}
-   * - 5
-     - /v1/suites/{node_path}/tree
+     - Operations related to Nodes
+   * - /v1/suites/{path}/tree
      - GET
-     - Get node tree
-     -
-     - {"b":{"c":""}}
-   * - 6
-     - /v1/suites/{node_path}/definition
+     - Operations related to Node trees
+   * - /v1/suites/{path}/definition
+     - GET, PUT, DELETE
+     - Operations related to Node definitions
+   * - /v1/suites/{path}/status
+     - GET, PUT
+     - Operations related to Node status
+   * - /v1/suites/{path}/attributes
+     - POST, GET, PUT, DELETE
+     - Operations related to Node attributes
+   * - /v1/suites/{path}/script
      - GET
-     - Get node definition
-     -
-     - {"definition": "..."}
-   * - 7
-     - /v1/suites/{node_path}/definition
-     - PUT
-     - Update node definition
-     - {"definition":"family foo\n endfamily"}}
-     - {"message": "Node updated successfully"}
-   * - 8
-     - /v1/suites/{node_path}/definition
-     - DELETE
-     - Delete node
-     - {"message": "Node delete successfully"}
-     -
-   * - 9
-     - /v1/suites/{node_path}/status
+     - Obtain Node script
+   * - /v1/suites/{path}/output
      - GET
-     - Get node status
-     -
-     - {"status":"aborted"}
-   * - 10
-     - /v1/suites/{node_path}/status
-     - PUT
-     - Update node status
-     - {"action":"complete"}
-     - {"message":"Status changed successfully"}
-   * - 11
-     - /v1/suites/{node_path}/attributes
-     - POST
-     - Create a new node attribute
-     - {"type":"...","name":"...","value":"..."}
-     - {"message": "Attribute added successfully"}
-   * - 12
-     - /v1/suites/{node_path}/attributes
+     - Obtain Node job output
+   * - /v1/server/status
+     - GET, PUT
+     - Operations related to server status
+   * - /v1/server/attributes
+     - POST, GET, PUT, DELETE
+     - Operations related to server attributes
+   * - /v1/server/ping
      - GET
-     - Get node attributes
-     -
-     - {"meters":[],"variables":[]}
-   * - 13
-     - /v1/suites/{node_path}/attributes
-     - PUT
-     - Update node attributes
-     - {"type":"...","name":"...","value":"..."}
-     - {"message":"Attribute changed successfully"}
-   * - 14
-     - /v1/suites/{node_path}/attributes
-     - DELETE
-     - Delete node attribute
-     - {"type":"..","name":"..."}
-     - {"message":""Attribute deleted successfully"}
-   * - 15
-     - /v1/suites/{node_path}/script
+     - Ping server
+   * - /v1/statistics
      - GET
-     - Get task script and job file
-     -
-     - {"script": "..."}
-   * - 16
-     - /v1/suites/{node_path}/output
-     - GET
-     - Get task output
-     -
-     - {"job_output": "..."}
-   * - 17
-     - /v1/server/status
-     - GET
-     - Get ecflow server information
-     -
-     - {"statistics":{...}}
-   * - 18
-     - /v1/server/status
-     - PUT
-     - Update ecflow server status (reload configuration)
-     - {"action":"..."}
-     - {"message":"Server updated successfully"}
-   * - 19
-     - /v1/server/attributes
-     - GET
-     - Get ecflow server attributes
-     -
-     - {"variables": [ ... ]]}
-   * - 20
-     - /v1/server/attributes
-     - POST
-     - Add ecflow server attribute
-     - {"type" : "variable", "name" : "...", "value" : ".."}
-     - {"message":"Attribute added successfully"
-   * - 21
-     - /v1/server/attributes
-     - PUT
-     - Update ecflow server attribute
-     - {"type" : "variable", "name" : "...", "value" : ".."}
-     - {"message":"Attribute changed successfully"
-   * - 22
-     - /v1/server/attributes
-     - DELETE
-     - Delete server attribute
-     - {"type" : "variable", "name" : "..."}
-     - {"message": "Attribute deleted successfully"}
-   * - 23
-     - /v1/server/ping
-     - GET
-     - Ping ecflow server
-     -
-     - {"host":"...","round-trip-time":"..."}
-   * - 24
-     - /v1/statistics
-     - GET
-     - GET API statistics
-     -
-     - {"num_requests":"...","num_errors":"..."}
+     - Obtain REST API statistics
 
+.. note::
 
-Payload Format for Creating a New Suite or Updating Node Definition
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  All API v1 endpoints allow the Query Parameters.
+
+  .. list-table::
+     :header-rows: 1
+
+     * - Name
+       - Value
+       - Comment
+     * - filter
+       - a.b.c[0]
+       - filter returned json
+     * - key
+       - abcdf
+       - API key (token), if client is unable to pass the key with HTTP headers
+
+Endpoint :code:`/v1/suites`
+---------------------------
+
+**Create** a new Suite
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites`
+   * - Method
+     - :code:`POST`
+   * - Description
+     - **Create** a new suite
+   * - Parameters
+     - *none*
+   * - Payload
+     - See below for details of the payload used to create a new suite.
+   * - Response
+     - :code:`{"ok"}`
+   * - Example
+     - :code:`curl -X POST https://localhost:8080/v1/suites -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"definition": "suite test2\n family a\n task a\n endfamily\nendsuite"}'`
+
+Payload to create a new Suite
+"""""""""""""""""""""""""""""
 
 .. code-block:: json
 
   {
     "definition": "...",
-    "auto_add_extern": true|false
+    "auto_add_extern": "true|false"
   }
 
 where
 
--  definition: ecFlow suite definition
+- :code:`definition` is the ecFlow node definition
+- :code:`auto_add_extern` indicates whether to automatically add external triggers
 
--  auto_add_extern: whether to automatically add external triggers
+List all Suites
+^^^^^^^^^^^^^^^
 
-Payload Format for Updating Node Status
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
 
-Updating node status with a user command with user authentication.
+   * - Endpoint
+     - :code:`/v1/suites`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the list with all suites
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`["a", "b", "c"]`
 
+Endpoint :code:`/v1/suites/tree`
+--------------------------------
+
+Obtain the tree of all Suites
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/tree`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** a tree with all suites
+   * - Parameters
+     - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`
+   * - Payload
+     - *empty*
+   * - Response
+     - See below for details.
+
+Response with Suite tree
+""""""""""""""""""""""""
+
+When query parameter :code:`content` is not provided, or query parameter is :code:`content=basic`, the basic Suite tree is provided:
+
+.. code:: json
+
+    {
+      "suite": {
+        "family": {
+          "task": ""
+          }
+      }
+    }
+
+When query parameter :code:`content=full`, the full Suite tree is provided:
+
+.. code:: json
+
+  {
+    "some_suite": {
+      "type": "suite",
+      "state": {
+        "node": "active",
+        "default": "complete"
+      },
+      "attributes": [
+        {
+          "name": "YMD",
+          "value": "20100114",
+          "const": false,
+          "type": "variable"
+        }
+      ],
+      "children": {
+        "some_family": {
+          "type": "family",
+          "state": {
+            "node": "active",
+            "default": "unknown"
+          },
+          "attributes": [],
+          "children": {
+            "some_task": {
+              "type": "task",
+              "state": {
+                "node": "active",
+                "default": "unknown"
+              },
+              "attributes": [
+                {
+                  "name": "some_label",
+                  "value": "value",
+                  "type": "label"
+                },
+                {
+                  "name": "some_meter",
+                  "min": 0,
+                  "max": 30,
+                  "value": 0,
+                  "type": "meter"
+                },
+                {
+                  "name": "some_event",
+                  "value": false,
+                  "initial_value": false,
+                  "type": "event"
+                }
+              ],
+              "aliases": {}
+            }
+          }
+        }
+      }
+    }
+  }
+
+Endpoint :code:`/v1/suites/{path}`
+----------------------------------
+
+Delete a Node
+^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}`
+   * - Method
+     - :code:`DELETE`
+   * - Description
+     - **Delete** the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"ok"}`
+
+Endpoint :code:`/v1/suites/{path}/tree`
+---------------------------------------
+
+Obtain the tree of a Node
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/tree`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** a tree view of the node at :code:`/{path}`
+   * - Parameters
+     - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"b":{"c":""}}`, when parameter :code:`content` is not provided, or parameter :code:`content=basic`
+
+       :code:`{"b":{"state":{"node":"...","default":"..."},"children":{...},"attributes":[...]}`
+       when parameter :code:`content=full`
+
+Response with Node tree
+"""""""""""""""""""""""
+
+When query parameter :code:`content` is not provided, or query parameter is :code:`content=basic`, the basic Node tree is provided:
+
+.. code:: json
+
+    {
+      "family": {
+        "task": ""
+      }
+    }
+
+When query parameter :code:`content=full`, the full Node tree is provided:
+
+.. code:: json
+
+  {
+    "some_family": {
+      "type": "family",
+      "state": {
+        "node": "active",
+        "default": "unknown"
+      },
+      "attributes": [],
+      "children": {
+        "some_task": {
+          "type": "task",
+          "state": {
+            "node": "active",
+            "default": "unknown"
+          },
+          "attributes": [
+            {
+              "name": "some_label",
+              "value": "value",
+              "type": "label"
+            },
+            {
+              "name": "some_meter",
+              "min": 0,
+              "max": 30,
+              "value": 0,
+              "type": "meter"
+            },
+            {
+              "name": "some_event",
+              "value": false,
+              "initial_value": false,
+              "type": "event"
+            }
+          ],
+          "aliases": {}
+        }
+      }
+    }
+  }
+
+Endpoint :code:`/v1/suites/{path}/definition`
+---------------------------------------------
+
+Obtain the definition of a Node
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/definition`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the definition of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"definition": "<defs>"}`, where :code:`<defs>` is the content of associated .def file
+
+Update the definition of a Node
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/definition`
+   * - Method
+     - :code:`PUT`
+   * - Description
+     - **Update** the definition of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - See below for details of the payload used to update the definition of an existing node.
+   * - Response
+     - :code:`{"message": "Node updated successfully"}`
+
+Payload to update the definition of a Node
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: json
+
+  {
+    "definition": "...",
+    "auto_add_extern": "true|false"
+  }
+
+where
+
+- :code:`definition` is the ecFlow node definition
+- :code:`auto_add_extern` indicates whether to automatically add external triggers
+
+Delete a Node
+^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/definition`
+   * - Method
+     - :code:`DELETE`
+   * - Description
+     - **Delete** the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"message": "Node deleted successfully"}`
+
+Endpoint :code:`/v1/suites/{path}/status`
+-----------------------------------------
+
+Obtain a Node status
+^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/status`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the status of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"status":"aborted"}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/suites/path/to/node/status`
+
+       :code:`curl https://.../v1/suites/path/to/node/status?filter=default_status`
+
+Update a Node status
+^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/status`
+   * - Method
+     - :code:`PUT`
+   * - Description
+     - **Update** the status of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"status":"..."}`
+
+Payload to update Node status (by User)
+"""""""""""""""""""""""""""""""""""""""
+
+When updating node status with a user command, with user authentication, the request payload is as follows:
 
 .. code-block:: json
 
@@ -534,29 +828,28 @@ Updating node status with a user command with user authentication.
 
 where
 
--  name: Name of the action that is taken against the given path
-
--  recursive: Specify if same action is run recursive through the
+-  :code:`name`: Name of the action that is taken against the given path
+-  :code:`recursive`: Specify if same action is run recursive through the
    children of the node. Note: not all actions support recursive
    operation. Default: false
 
-For action=defstatus there is additional option:
+When :code:`action=defstatus`, the following additional options are necessary:
 
-.. code-block:: json
-    
+.. code-block:: text
+
   {
+    ...
     "name": "defstatus",
     "defstatus_value": "aborted|complete|queued|suspended|unknown"
   }
 
-Payload Format for Updating Node Status From a Child Command
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Payload to update Node status (by Task)
+"""""""""""""""""""""""""""""""""""""""
 
-Updating node status with a child command (ie. from a script with child
-command authentication).
+When updating the node status from a task (i.e. from a script with child command authentication), the request payload is as follows:
 
 .. code-block:: json
-    
+
   {
     "ECF_NAME": "...",
     "ECF_PASS": "...",
@@ -567,37 +860,104 @@ command authentication).
 
 where
 
--  name: Name of the action that is taken against the given path
+-  :code:`action` is the name of the action to be taken taken
+-  :code:`ECF_NAME`, :code:`ECF_PASS`, :code:`ECF_RID`, and :code:`ECF_TRYNO` are ecFlow generated parameters
 
--  ECF_NAME, ECF_PASS, ECF_RID, ECF_TRYNO: ecFlow generated parameters
+When :code:`action=abort`, the followign additional parameters are necessary:
 
-Some actions have additional parameters:
+.. code-block:: text
 
-abort:
-
-.. code-block:: json
-    
   {
+    ...
     "name": "abort",
     "abort_why": "..."
   }
 
-wait:
+When :code:`action=wait`, the followign additional parameters are necessary:
 
-.. code-block:: json
-    
+.. code-block:: text
+
   {
+    ...
     "name": "wait",
     "wait_expression": "..."
   }
 
-Payload Format for Updating Node Attributes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Endpoint :code:`/v1/suites/{path}/attributes`
+---------------------------------------------
 
-Updating node attributes with a user command with user authentication.
+Create a new Node attribute
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/attributes`
+   * - Method
+     - :code:`POST`
+   * - Description
+     - **Create** new attribute for the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"type":"...","name":"...","value":"..."}`
+   * - Response
+     - :code:`{"message": "Attribute added successfully"}`
+
+Obtain all Node attributes
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/attributes`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the attributes of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"meters":[...],"variables":[...]}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/suites/path/to/node/attributes`
+
+Update a Node attribute
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/attributes`
+   * - Method
+     - :code:`PUT`
+   * - Description
+     - **Update** the attribute of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"type":"...","name":"...","value":"..."}`
+   * - Response
+     - :code:`{"message":"Attribute changed successfully"}`
+
+Payload to update Node Attribute (by User)
+""""""""""""""""""""""""""""""""""""""""""
+
+When updating a node attribute using a user command, with user authentication, the request payload is as follows:
 
 .. code-block:: json
-    
+
   {
     "name": "...",
     "type": "event|generic|inlimit|label|late|limit|meter|queue|time|today|trigger|variable",
@@ -607,59 +967,46 @@ Updating node attributes with a user command with user authentication.
     "max": "..."
   }
 
+where
 
--  name: name of the attribute that is changed
+- :code:`name` is the name of the attribute
+- :code:`type` is the type of the attribute
+- :code:`value` is the value of the attribute, after the operation is complete. This is not necessary when :code:`type` is :code:`delete`.
+- :code:`old_value` is used when updating attributes that do not have a name. In this case, :code:`old_value` specifies which attribute(s) are changed.
 
--  type: type of the attribute
+When :code:`type` is :code:`event`, the :code:`value` must be:
 
--  value: value of the added or changed attribute. For delete the key is
-   ignored.
+- :code:`true` or :code:`set`, if the event is to be set
+- :code:`false` or :code:`clear`, if the event is to be cleared
 
--  old_value: for some attributes that don't have a name, old_value is
-   needed to specify which one of the possible multiple attributes are
-   changed.
+When :code:`type` is :code:`limit`, the following keys must be
 
-For event, the value must be
+- :code:`value`, if the value of the limit is to be updated
+- :code:`max`, if the upper limit of the limit is to be updated
 
--  true or "set", if the event is to be set
+When :code:`type` is :code:`meter`, the following keys are necessary:
 
--  false or "clear", if the event is to be cleared
+- :code:`value`
+- :code:`min`
+- :code:`max`
 
-For limit, the name of the "value" key must be
+When :code:`type` is :code:`today` or :code:`time`, the following keys are necessary:
 
--  "value", if the value of the limit is changed
+- :code:`value` when setting the new value
+- :code:`old_value` to specify the (possible multiple) attributes to be updated
+- :code:`name` is not required
 
--  "max", if the upper limit of the limit is changed
+For unnamed attributes, such as :code:`repeat` or :code:`late`, consider that
 
-For meter the following keys need to be defined:
+- :code:`name` is not required
 
--  "value"
+Payload to update Node attribute (by Task)
+""""""""""""""""""""""""""""""""""""""""""
 
--  "min"
-
--  "max"
-
-For today and time, the keys for setting values are:
-
--  "value" to set the new value
-
--  "old_value", to specify which one of the (possible multiple) todays
-   are to be updated
-
--  "name" is not needed
-
-For attributes that are not named, such as repeat or late
-
--  "name" is not needed
-
-Payload Format for Updating Node Attributes From a Child Command
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Updating node attributes with a child command (ie. from a script with
-child command authentication).
+When updating a node attribute from a task (i.e. from a script with child command authentication), the request payload is as follows:
 
 .. code-block:: json
-    
+
   {
     "ECF_NAME": "...",
     "ECF_PASS": "...",
@@ -669,101 +1016,502 @@ child command authentication).
     "type": "event|label|limit|meter|queue",
     "value": "...",
     "queue_action": "...",
-    "queue_step"
+    "queue_step": "...",
+    "queue_path": "..."
   }
 
 where
 
--  name: name of the attribute that is changed
+- :code:`name` is the name of the attribute
+- :code:`ECF_NAME`, :code:`ECF_PASS`, :code:`ECF_RID`, and :code:`ECF_TRYNO` are ecFlow generated parameters
 
--  ECF_NAME, ECF_PASS, ECF_RID, ECF_TRYNO: ecFlow generated parameters
+When updating :code:`queue` attributes, the parameter :code:`value` is **not** used, and the following additional parameters are required:
 
-Some actions have additional parameters:
-
-queue:
-
-.. code-block:: json
+.. code-block:: text
 
   {
-    "name": "queue",
+    ...
     "queue_action": "...",
-    "queue_step": "..."
+    "queue_step": "...",
+    "queue_path": "..."
   }
 
+The :code:`queue_step` and :code:`queue_path` parameters are optional.  The parameter :code:`queue_step` should only be
+provided when the :code:`queue_action` is either :code:`complete` or :code:`aborted`.  If the field :code:`queue_path`
+is provided the server will search for the queue only on the named node, otherwise, the absense of the
+:code:`queue_path` parameter triggers the upward search of the queue starting from the target node (i.e. the node named
+by ECF_NAME) through the node tree.
 
-Payload Format for Updating Server Status
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Response to update Node attribute (by Task)
+"""""""""""""""""""""""""""""""""""""""""""
+
+The typical response to updating a node attribute has the following format
 
 .. code-block:: json
-    
+
   {
-    "action" : "reload_whitelist_file|reload_passwd_file|reload_custom_passwd_file"
+    "message": "..."
   }
 
-
-Payload Format for Updating Script
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Note! SCript can only be updated through the REST API if it already
-exists in the server.
+However, when updating an attribude of type :code:`queue` the response body has additional information.
+When the requesting :code:`queue_action` is :code:`active`, the response will contain
 
 .. code-block:: json
-    
+
+  {
+    "message": "...",
+    "step": "<selected-step>"
+  }
+
+and when the requesting :code:`queue_action` is :code:`no_of_aborted`, the response will contain
+
+.. code-block:: json
+
+  {
+    "message": "...",
+    "no_of_aborted": "<current-number-of-queued-or-aborted-steps>"
+  }
+
+Delete a Node attribute
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/attributes`
+   * - Method
+     - :code:`DELETE`
+   * - Description
+     - **Delete** the attribute of the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"type":"...","name":"..."}`
+   * - Response
+     - :code:`{"message":""Attribute deleted successfully"}`
+
+Endpoint :code:`/v1/suites/{path}/script`
+-----------------------------------------
+
+Obtain the Node script
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/script`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the script associated to the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"script": "..."}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/suites/path/to/node/script`
+
+Update the Node script
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/script`
+   * - Method
+     - :code:`PUT`
+   * - Description
+     - **Update** the script associated to the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"script": "..."}`
+   * - Response
+     - :code:`{"message": "Script updated successfully"}`
+
+Payload to update Node script
+"""""""""""""""""""""""""""""
+
+.. warning::
+
+   A script can only be updated through the REST API if it already exists in the server.
+
+.. code-block:: json
+
   {
     "script" : "..."
   }
 
-Queryparameters
-~~~~~~~~~~~~~~~
+Endpoint :code:`/v1/suites/{path}/output`
+-----------------------------------------
 
-Supported queryparameters:
+Obtain the Node job output
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table::
-   :header-rows: 1
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
 
-   * - Name
-     - Value
-     - Comment
-   * - filter
-     - a.b.c[0]
-     - filter returned json
-   * - key
-     - abcdf
-     - API key (token), if client is unable to pass the key with HTTP headers
-  
+   * - Endpoint
+     - :code:`/v1/suites/{path}/output`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the job output associated to the node at :code:`/{path}`
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"job_output": "..."}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/suites/path/to/node/output`
 
-Swagger UI / OpenAPI
-~~~~~~~~~~~~~~~~~~~~
+Endpoint :code:`/v1/server/status`
+----------------------------------
 
-For a more graphical documentation of the API, see the accompanied
-openapi specification file (openapi.yaml).
+Obtain the Server status
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-To run swagger ui in a container, use the following Containerfile:
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
 
-.. code-block::
+   * - Endpoint
+     - :code:`/v1/server/status`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the server status information
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"statistics":{...}}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/server/status`
+
+Update the Server status
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/server/status`
+   * - Method
+     - :code:`PUT`
+   * - Description
+     - **Update** the server status (i.e. reload configuration)
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"action":"..."}`
+   * - Response
+     - :code:`{"message":"Server updated successfully"}`
+
+Payload to update the Server Status
+"""""""""""""""""""""""""""""""""""
+
+.. code-block:: json
+
+  {
+    "action" : "reload_whitelist_file|reload_passwd_file|reload_custom_passwd_file"
+  }
+
+Endpoint :code:`/v1/server/attributes`
+--------------------------------------
+
+Create a new Server attribute
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/server/attributes`
+   * - Method
+     - :code:`POST`
+   * - Description
+     - **Create** a new server attribute
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"type":"variable","name":"...","value":".."}`
+   * - Response
+     - :code:`{"message":"Attribute added successfully"}`
+
+Obtain a Server attribute
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/server/attributes`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the server attributes
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"variables":[...]}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/server/attributes`
+
+Update a Server attribute
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/server/attributes`
+   * - Method
+     - :code:`PUT`
+   * - Description
+     - **Update** a server attribute
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"type":"variable","name":"...","value":"..."}`
+   * - Response
+     - :code:`{"message":"Attribute changed successfully"}`
+
+Delete a Server attribute
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/server/attributes`
+   * - Method
+     - :code:`DELETE`
+   * - Description
+     - **Delete** a server attribute
+   * - Parameters
+     - *none*
+   * - Payload
+     - :code:`{"type":"variable","name":"..."}`
+   * - Response
+     - :code:`{"message":"Attribute deleted successfully"}`
+
+Endpoint :code:`/v1/server/ping`
+--------------------------------
+
+Ping Server
+^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/server/ping`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the rount-trip-time between ecflow_http and ecflow_server
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"host":"...","round-trip-time":"..."}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/server/ping`
+
+Endpoint :code:`/v1/statistics`
+-------------------------------
+
+Obtain Server statistics
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/statistics`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** the ecflow_http statistics
+   * - Parameters
+     - *none*
+   * - Payload
+     - *empty*
+   * - Response
+     - :code:`{"num_requests":"...","num_errors":"..."}`
+   * - Example
+     - :code:`curl https://localhost:8080/v1/statistics`
+
+OpenAPI Specification
+---------------------
+
+The OpenAPI specification file is available at `openapi.yaml <https://github.com/ecmwf/ecflow/blob/develop/Http/doc/openapi.yaml>`_.
+
+.. note::
+
+  The OpenAPI specification allows the graphical visualisation of the supported endpoints, using Swagger UI.
+
+  To run Swagger UI in a container, use the following Docker file:
+
+  .. code-block::
+
+    FROM swaggerapi/swagger-ui
+    ADD openapi.yaml /tmp
+    ENV SWAGGER_JSON=/tmp/openapi.yaml
+
+More Examples
+-------------
+
+Authentication options
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+  curl [...] https://localhost:8080/v1/suites -H 'authorization: Bearer <MYTOKEN>'
+  curl [...] https://localhost:8080/v1/suites -H 'x-api-key: <MYTOKEN>'
+  curl [...] https://localhost:8080/v1/suites?key=<MYTOKEN>
+
+Create a new family
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+  curl -X PUT https://localhost:8080/v1/suites/test -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"definition": "family b\nendfamily\n"}'
+
+Create a new attribute
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
     
-  FROM swaggerapi/swagger-ui
-  ADD openapi.yaml /tmp
-  ENV SWAGGER_JSON=/tmp/openapi.yaml
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive","value":"+01:00"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel","value":"+01:00"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore","value":"/test/a"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"complete","value":"/test/a eq complete"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"cron","value":"-w 0,1 10:00"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"date","value":"1.*.*"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"day","value":"monday"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"event","name":"foo","value":"set"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"label","name":"foo","value":"bar"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"late","value":"-s +00:01 -a 14:30 -c +00:01"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"limit","name":"foo","value":"0"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"meter","name":"foo","value":"10","min":"0","max":"20"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"time","value":"+00:20"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"today","value":"03:00"}'
+  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo","value":"bar"}'
+
+
+Update an attribute value
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive","value":"0"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel","value":"0"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore","value":"/test"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"complete","value":"/test/a eq active"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"cron","old_value":"-w 0,1 10:00","value":"23:00"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"date","old_value":"1.*.*","value":"2.*.*"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"day","old_value":"monday","value":"tuesday"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"event","name":"foo","value":false}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"label","name":"foo","value":"baz"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"late","old_value":"-s +00:01 -a 14:30 -c +00:01","value":"-c +00:01"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"limit","name":"foo","value":"6"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"meter","name":"foo","value":"15"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"time","old_value":"+00:20","value":"+00:25"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"today","old_value":"03:00","value":"03:00 05:00 01:00"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo","value":"baz"}'
+
+
+Update status
+^^^^^^^^^^^^^
+
+.. code-block:: bash
+    
+  curl -X PUT https://localhost:8080/v1/suites/test/status -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"action":"complete"}'
+  curl -X PUT https://localhost:8080/v1/suites/test/status -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"action":"requeue"}'
+
+
+Delete an attribute
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"complete","value":"/test/a eq active"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"cron","value":"23:00"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"date","value":"2.*.*"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"day","value":"tuesday"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"event","name":"foo"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"label","name":"foo"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"late","value":"-c +00:01"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"limit","name":"foo"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"meter","name":"foo"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"time","value":"+00:25"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"today","value":"03:00 05:00 01:00"}'
+  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo"}'
+
+Delete a suite
+^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+  curl -X DELETE https://localhost:8080/v1/suites/test/definition -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>'
+
 
 Implementation Details
-----------------------
+======================
 
-Basically the API is a wrapper that transforms requests in web-syntax to
-ecflow syntax, and similarly transforming the results from plain-text to
+:code:`ecflow_http` is basically a wrapper that transforms requests in web-syntax to
+ecflow syntax, and similarly transforms the results from plain-text to
 valid json.
 
-The API is internally using the normal ClientInvoker method to
+:code:`ecflow_http` is internally using the normal ClientInvoker method to
 communicate with the server. From the ecFlow servers' point of view the
 API is just another client.
 
-The API can done some things that the command line tool ecflow_client
+:code:`ecflow_http` can done some things that the command line tool ecflow_client
 cannot, mostly to enable adding attributes to existing suites.
 ecflow_client can do to this to some attributes, but the API has a
 broader support. The API also caches the server state and updates it
 only in certain configurable intervals.
 
-The API will keep a cached copy of definitions in its memory. The copy
+:code:`ecflow_http` will keep a cached copy of definitions in its memory. The copy
 is updated by default every 10 seconds (adjustable with a command line
 option). This means that when issuing a GET query to API, it will touch
 the cached copy of definitions and no connection to ecFlow server is
@@ -771,7 +1519,6 @@ made. There are some exceptions to this: when querying output, script,
 server ping, server status a connections to ecFlow server is opened.
 Also all altering commands PUT, POST and DELETE result in a connection
 to ecFlow server.
-
 
 .. list-table::
    :header-rows: 1
@@ -804,7 +1551,7 @@ to ecFlow server.
      - Anything else
      - NO
 
-The API includes two external libraries, both libraries are header only
+:code:`ecflow_http` uses two external libraries, both libraries are header only
 and licensed with MIT license:
 
 -  `cpp-httplib <https://github.com/yhirose/cpp-httplib>`__: provides
@@ -813,8 +1560,8 @@ and licensed with MIT license:
 -  `nlohmann/json <https://github.com/nlohmann/json>`__: provides json
    encoding/decoding functions
 
-The API supports the usual REST API versioning, meaning that the current
-version is "v1" and that version number is a part of the URL. The API
+:code:`ecflow_http` supports the usual REST API versioning, meaning that the current
+version is "v1" and that version number is a part of the URL. :code:`ecflow_http`
 can support multiple different version side-by-side. The v1 code is
 basically split into two files: **ApiV1.hpp/cpp**, and
 **ApiV1Impl.hpp/cpp**. The first one registers the endpoints used to the
@@ -827,222 +1574,30 @@ Compiled successfully with following compilers (CMAKE_BUILD_TYPE=Debug):
 -  gnu
 
    -  8.5
-
    -  9.2
-
    -  10.3
-
    -  11.2
-
    -  12.0
 
 -  clang
 
    -  11.1
-
    -  13.0
-
    -  14.0
-
    -  15.0
 
 Update Interval Drift
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
-By default the REST API will increase the update interval length for
-ecFlow server if the API server is inactive. This is called drift.
+By default :code:`ecflow_http` will increase the update interval length for
+ecFlow server if the :code:`ecflow_http` server is inactive. This is called drift.
 
 For every one minutes that goes by without requests from users, the
-update interval (given with ``--polling_interval``, default value 10
+update interval (given with :code:`--polling_interval`, default value 10
 seconds) is increased linearly by one second. The default maximum value
-is 300 seconds. Whenever the API receives a request from user, the
+is 300 seconds. Whenever :code:`ecflow_http` receives a request from user, the
 update interval value is reset to normal value.
 
 The maximum polling interval can changed with command line option
-``--max_polling_interval``. If drift is enabled, the minimum value is hard
+:code:`--max_polling_interval`. If drift is enabled, the minimum value is hard
 coded to 30 seconds.
-
-Examples
---------
-
-All examples assume that:
-
--  api server is located at https://localhost:8080
-
--  a valid token is supplied
-
--  a suite named "test" exists
-
-Ping ecflow server
-~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl https://localhost:8080/v1/server/ping
-
-Get ecflow server status
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl https://localhost:8080/v1/server/status
-
-Get ecflow server attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl https://localhost:8080/v1/server/attributes
-
-Get API server statistics
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl https://localhost:8080/v1/statistics
-
-Get suite status
-~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl https://localhost:8080/v1/suites/test/status
-
-Get suite status with filtering just for defstatus
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-  
-  curl https://localhost:8080/v1/suites/test/status?filter=default_status
-
-Get all suite attributes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-  
-  curl https://localhost:8080/v1/suites/test/attributes
-
-Get all suite variables
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-  
-  curl https://localhost:8080/v1/suites/test/attributes?filter=variables
-
-Get task output
-~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-  
-  curl https://localhost:8080/v1/suites/test/path/to/task/output
-
-Get task script
-~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-  
-  curl https://localhost:8080/v1/suites/test/path/to/task/script
-
-Authentication options
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl [...] https://localhost:8080/v1/suites -H 'authorization: Bearer <MYTOKEN>'
-  curl [...] https://localhost:8080/v1/suites -H 'x-api-key: <MYTOKEN>'
-  curl [...] https://localhost:8080/v1/suites?key=<MYTOKEN>
-
-Create a new suite
-~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl -X POST https://localhost:8080/v1/suites -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"definition": "suite test2\n family a\n task a\n endfamily\nendsuite"}'
-
-Create a new family
-~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl -X PUT https://localhost:8080/v1/suites/test -H 'content-type: application/json' -H authorization: Bearer <MYTOKEN>' -d '{"definition": "family b\nendfamily\n"}'
-
-Create a new attribute
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-    
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive","value":"+01:00"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel","value":"+01:00"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore","value":"/test/a"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"complete","value":"/test/a eq complete"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"cron","value":"-w 0,1 10:00"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"date","value":"1.*.*"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"day","value":"monday"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"event","name":"foo","value":"set"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"label","name":"foo","value":"bar"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"late","value":"-s +00:01 -a 14:30 -c +00:01"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"limit","name":"foo","value":"0"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"meter","name":"foo","value":"10","min":"0","max":"20"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"time","value":"+00:20"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"today","value":"03:00"}'
-  curl -X POST https://localhost:8080/v1/suites/test/dynamic/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo","value":"bar"}'
-
-
-Update an attribute value
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive","value":"0"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel","value":"0"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore","value":"/test"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"complete","value":"/test/a eq active"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"cron","old_value":"-w 0,1 10:00","value":"23:00"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"date","old_value":"1.*.*","value":"2.*.*"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"day","old_value":"monday","value":"tuesday"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"event","name":"foo","value":false}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"label","name":"foo","value":"baz"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"late","old_value":"-s +00:01 -a 14:30 -c +00:01","value":"-c +00:01"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"limit","name":"foo","value":"6"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"meter","name":"foo","value":"15"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"time","old_value":"+00:20","value":"+00:25"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"today","old_value":"03:00","value":"03:00 05:00 01:00"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo","value":"baz"}'
-
-
-Update status
-~~~~~~~~~~~~~
-
-.. code-block:: bash
-    
-  curl -X PUT https://localhost:8080/v1/suites/test/status -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"action":"complete"}'
-  curl -X PUT https://localhost:8080/v1/suites/test/status -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"action":"requeue"}'
-
-
-Delete an attribute
-~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autoarchive"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autocancel"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"autorestore"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"complete","value":"/test/a eq active"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"cron","value":"23:00"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"date","value":"2.*.*"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"day","value":"tuesday"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"event","name":"foo"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"label","name":"foo"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"late","value":"-c +00:01"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"limit","name":"foo"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"meter","name":"foo"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"time","value":"+00:25"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"today","value":"03:00 05:00 01:00"}'
-  curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo"}'
-
-Delete a suite
-~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-  curl -X DELETE https://localhost:8080/v1/suites/test/definition -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>'

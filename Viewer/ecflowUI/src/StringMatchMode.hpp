@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef VIEWER_SRC_STRINGMATCHMODE_HPP_
-#define VIEWER_SRC_STRINGMATCHMODE_HPP_
+#ifndef ecflow_viewer_StringMatchMode_HPP
+#define ecflow_viewer_StringMatchMode_HPP
 
 #include <map>
 #include <string>
@@ -22,7 +22,8 @@ public:
 
     explicit StringMatchMode(Mode m);
     explicit StringMatchMode(int);
-    StringMatchMode(const StringMatchMode& r) { mode_ = r.mode_; }
+    StringMatchMode(const StringMatchMode& r)            = default;
+    StringMatchMode& operator=(const StringMatchMode& r) = default;
 
     Mode mode() const { return mode_; }
     void setMode(Mode m) { mode_ = m; }
@@ -38,4 +39,4 @@ private:
     static std::map<Mode, std::string> matchOper_;
 };
 
-#endif /* VIEWER_SRC_STRINGMATCHMODE_HPP_ */
+#endif /* ecflow_viewer_StringMatchMode_HPP */

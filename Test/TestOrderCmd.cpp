@@ -1,46 +1,44 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #4 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This is used to INVOKE a SINGLE test.
-//               Making it easier for Easier for debugging and development
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+///
+/// \note This is used to INVOKE a SINGLE test.
+/// Making it easier for Easier for debugging and development
+///
+
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_OrderCmd)
 
 std::vector<std::string> to_string_vec(const std::vector<suite_ptr>& sv) {
     std::vector<std::string> r;
@@ -248,4 +246,7 @@ BOOST_AUTO_TEST_CASE(test_handle_change_order) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

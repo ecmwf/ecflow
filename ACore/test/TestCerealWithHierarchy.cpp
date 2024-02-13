@@ -1,27 +1,21 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Serialization.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
 using namespace boost;
 using namespace std;
-namespace fs = boost::filesystem;
 
 // ======================================================================================
 
@@ -43,7 +37,7 @@ private:
 class Derived1 : public BaseCmd {
 public:
     Derived1() = default;
-    Derived1(int x) : BaseCmd(), x_(x) {}
+    explicit Derived1(int x) : BaseCmd(), x_(x) {}
     ~Derived1() override = default;
 
     int get_x() const { return x_; }
@@ -81,7 +75,7 @@ std::ostream& operator<<(std::ostream& os, Derived1 const& m) {
 class CmdContainer {
 public:
     CmdContainer() = default;
-    CmdContainer(std::shared_ptr<BaseCmd> cmd) : cmd_(cmd) {}
+    explicit CmdContainer(std::shared_ptr<BaseCmd> cmd) : cmd_(cmd) {}
 
     bool operator==(const CmdContainer& rhs) const {
         if (!cmd_.get() && !rhs.cmd_.get())
@@ -114,11 +108,13 @@ std::ostream& operator<<(std::ostream& os, CmdContainer const& m) {
     return os;
 }
 
-CEREAL_REGISTER_TYPE(Derived1);
+CEREAL_REGISTER_TYPE(Derived1)
 
 // =================================================================================
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_CerealWithHierarchy)
 
 BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
     cout << "ACore:: ...test_cereal_save_as_string_and_save_as_filename\n";
@@ -150,5 +146,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
 
     fs::remove("ACore.txt");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

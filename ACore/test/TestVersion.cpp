@@ -1,31 +1,29 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #23 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
-#include "File.hpp"
-#include "Str.hpp"
-#include "Version.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Version)
 
 BOOST_AUTO_TEST_CASE(test_version) {
     std::string desc = Version::description();
@@ -74,5 +72,7 @@ BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
         "\n  Expected " << cmake_version << " but found " << Version::raw()
                         << ", Please regenerate file $WK/ACore/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

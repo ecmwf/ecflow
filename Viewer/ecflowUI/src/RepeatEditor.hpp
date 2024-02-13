@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef REPEATEDITOR_HPP
-#define REPEATEDITOR_HPP
+#ifndef ecflow_viewer_RepeatEditor_HPP
+#define ecflow_viewer_RepeatEditor_HPP
 
 #include <QStringList>
 
@@ -29,7 +29,7 @@ class RepeatEditorWidget : public QWidget, protected Ui::RepeatEditorWidget {
     friend class RepeatDateEditor;
 
 public:
-    RepeatEditorWidget(QWidget* parent = nullptr);
+    explicit RepeatEditorWidget(QWidget* parent = nullptr);
 
 protected:
     void hideRow(QWidget* w);
@@ -39,7 +39,7 @@ class RepeatEditor : public AttributeEditor {
     Q_OBJECT
 
 public:
-    RepeatEditor(VInfo_ptr, QWidget* parent = nullptr);
+    explicit RepeatEditor(VInfo_ptr, QWidget* parent = nullptr);
     ~RepeatEditor() override;
 
 protected Q_SLOTS:
@@ -105,4 +105,4 @@ protected:
     bool isValueChanged() override;
 };
 
-#endif // REPEATEDITOR_HPP
+#endif /* ecflow_viewer_RepeatEditor_HPP */

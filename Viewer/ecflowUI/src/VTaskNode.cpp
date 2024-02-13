@@ -1,16 +1,14 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VTaskNode.hpp"
-
-#include <boost/algorithm/string.hpp>
 
 #include "ChangeNotify.hpp"
 #include "ServerDefsAccess.hpp"
@@ -21,9 +19,9 @@ VTaskNode::VTaskNode(VNode* parent, node_ptr node) : VNode(parent, node), prevTr
     unsigned int tn          = tryNo();
     NState::State new_status = node_->state();
 
-    bool aborted             = (new_status == NState::ABORTED);
-    bool zombie              = node_->flag().is_set(ecf::Flag::ZOMBIE);
-    bool late                = node_->flag().is_set(ecf::Flag::LATE);
+    bool aborted = (new_status == NState::ABORTED);
+    bool zombie  = node_->flag().is_set(ecf::Flag::ZOMBIE);
+    bool late    = node_->flag().is_set(ecf::Flag::LATE);
 
     updatePrev(tn, aborted, zombie, late);
 }
@@ -91,10 +89,10 @@ void VTaskNode::check(VServerSettings* conf, const VNodeInternalState& st) {
 void VTaskNode::check(VServerSettings* conf, bool stateChange) {
     NState::State new_status = node_->state();
 
-    bool new_aborted         = (new_status == NState::ABORTED);
-    unsigned int new_tryNo   = tryNo();
-    bool new_zombie          = isZombie();
-    bool new_late            = isLate();
+    bool new_aborted       = (new_status == NState::ABORTED);
+    unsigned int new_tryNo = tryNo();
+    bool new_zombie        = isZombie();
+    bool new_late          = isLate();
 
     // Aborted
     if (stateChange) {

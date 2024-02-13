@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef MESSAGELABEL_HPP_
-#define MESSAGELABEL_HPP_
+#ifndef ecflow_viewer_MessageLabel_HPP
+#define ecflow_viewer_MessageLabel_HPP
 
 #include <QWidget>
 
@@ -22,7 +22,7 @@ class QTimer;
 class DelayedProgressDef {
 public:
     DelayedProgressDef() = default;
-    DelayedProgressDef(QString text, int max = 0) : infoText_(text), max_(max) {}
+    explicit DelayedProgressDef(QString text, int max = 0) : infoText_(text), max_(max) {}
     void clear() {
         infoText_.clear();
         progText_.clear();
@@ -39,7 +39,7 @@ class MessageLabelProgWidget : public QWidget {
     Q_OBJECT
 
 public:
-    MessageLabelProgWidget(QWidget* parent);
+    explicit MessageLabelProgWidget(QWidget* parent);
 
     void startProgress(int max);
     void showProgressCancelButton(bool);
@@ -135,4 +135,4 @@ private:
     QString message_;
 };
 
-#endif
+#endif /* ecflow_viewer_MessageLabel_HPP */

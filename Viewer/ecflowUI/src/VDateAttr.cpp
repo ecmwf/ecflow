@@ -1,19 +1,19 @@
-//============================================================================
-// Copyright 2017 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VDateAttr.hpp"
 
-#include "DateAttr.hpp"
-#include "DayAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/attribute/DateAttr.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
 
 //================================
 // VDateAttrType
@@ -111,7 +111,7 @@ void VDateAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
         const std::vector<DateAttr>& dateV = vnode->node_->dates();
         const std::vector<DayAttr>& dayV   = vnode->node_->days();
 
-        auto n                             = static_cast<int>(dateV.size());
+        auto n = static_cast<int>(dateV.size());
         for (int i = 0; i < n; i++) {
             vec.push_back(new VDateAttr(vnode, dateV[i], i));
         }

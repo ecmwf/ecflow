@@ -1,23 +1,24 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "OverviewProvider.hpp"
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
 #include "VAttribute.hpp"
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VNode.hpp"
 #include "VSState.hpp"
 #include "VTriggerAttr.hpp"
+#include "ecflow/node/Suite.hpp"
 
 OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::NoTask) {
 }
@@ -90,10 +91,10 @@ void OverviewProvider::taskChanged(VTask_ptr task) {
 void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     static const std::string inc = "  ";
 
-    ServerHandler* server        = info->server();
+    ServerHandler* server = info->server();
     if (!server)
         return;
-    VServer* snode    = server->vRoot();
+    VServer* snode = server->vRoot();
 
     ConnectState* cst = server->connectState();
 
@@ -231,7 +232,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
         f << "flags   : " << flags << "\n";
     }
 
-    node_ptr nn                                = node->node();
+    node_ptr nn = node->node();
 
     boost::posix_time::ptime state_change_time = nn->state_change_time();
     if (!state_change_time.is_special()) {

@@ -1,26 +1,22 @@
-#ifndef SERVERTESTHARNESS_HPP_
-#define SERVERTESTHARNESS_HPP_
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #46 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_test_harness_ServerTestHarness_HPP
+#define ecflow_test_harness_ServerTestHarness_HPP
 
 #include <map>
 #include <string>
 
-#include "NodeFwd.hpp"
-#include "PrintStyle.hpp"
 #include "ZombieUtil.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 // This class provides a test harness for running defs file in a client server environment
 // To avoid Address in use errors, we can have client/server use a different port number
@@ -119,4 +115,5 @@ private:
     std::string defs_filename_;
     PrintStyle print_style_; // by default show state when writing defs to standard out. RAII
 };
-#endif
+
+#endif /* ecflow_test_harness_ServerTestHarness_HPP */

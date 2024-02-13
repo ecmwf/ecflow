@@ -1,29 +1,23 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "SerializationTest.hpp"
+#include "TestSerialisation.hpp"
+#include "ecflow/core/Filesystem.hpp"
 
 using namespace ecf;
 using namespace boost;
 using namespace std;
-namespace fs = boost::filesystem;
 
 class MyClass {
 public:
@@ -42,7 +36,7 @@ private:
     int x{2}, y{2};
     State state_{State::SUSPENDED};
 };
-CEREAL_CLASS_VERSION(MyClass, 1);
+CEREAL_CLASS_VERSION(MyClass, 1)
 
 class MyTop : public MyClass {
 public:
@@ -70,7 +64,7 @@ private:
     }
     int x_{1}, y_{1}, z_{1};
 };
-CEREAL_CLASS_VERSION(MyTop, 1);
+CEREAL_CLASS_VERSION(MyTop, 1)
 
 std::ostream& operator<<(std::ostream& os, MyTop const& m) {
     m.print(os);
@@ -79,7 +73,9 @@ std::ostream& operator<<(std::ostream& os, MyTop const& m) {
 
 // =================================================================================
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Cereal)
 
 BOOST_AUTO_TEST_CASE(test_cereal_json) {
     cout << "ACore:: ...test_cereal_json \n";
@@ -114,5 +110,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_json2) {
     { ecf::doRestore(path, m1); }
     { ecf::doSaveAndRestore<MyTop>(path); }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

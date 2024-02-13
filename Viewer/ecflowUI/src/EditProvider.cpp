@@ -1,21 +1,21 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "EditProvider.hpp"
 
-#include <boost/algorithm/string.hpp>
-
-#include "NodeFwd.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 // Node
 void EditProvider::visit(VInfoNode* info) {
@@ -55,7 +55,7 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
     VNode* node           = info_->node();
     ServerHandler* server = info_->server();
 
-    bool run              = true;
+    bool run = true;
 
     //---------------------------
     // Extract user variables
@@ -75,7 +75,7 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
     std::string comStart = micro + comStartText;
     std::string comEnd   = micro + comEndText;
 
-    bool inVars          = false;
+    bool inVars = false;
     for (const auto& it : txt) {
         const std::string& line = it;
 
@@ -85,8 +85,8 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
             if (pos != std::string::npos && pos + 1 != it.size()) {
                 std::string name = it.substr(0, pos);
                 std::string val  = it.substr(pos + 1);
-                boost::trim(name);
-                boost::trim(val);
+                ecf::algorithm::trim(name);
+                ecf::algorithm::trim(val);
                 vars.push_back(std::make_pair(name, val));
             }
         }

@@ -1,26 +1,22 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #32 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "Str.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -29,7 +25,9 @@ using namespace boost::gregorian;
 
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_TimeSeries)
 
 BOOST_AUTO_TEST_CASE(test_default_boost_time_duration) {
     cout << "ACore:: ...test_default_boost_time_duration\n";
@@ -778,5 +776,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
                                            << "'");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

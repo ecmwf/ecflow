@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -14,7 +14,9 @@
 
 namespace ut = boost::unit_test;
 
-BOOST_FIXTURE_TEST_SUITE(UDPServer, ecf::test::EnableServersFixture)
+BOOST_FIXTURE_TEST_SUITE(S_UDP, ecf::test::EnableServersFixture)
+
+BOOST_AUTO_TEST_SUITE(T_UDPServer)
 
 BOOST_AUTO_TEST_CASE(can_update_events) {
     // Family f2
@@ -162,5 +164,7 @@ BOOST_AUTO_TEST_CASE(can_authenticate_requests) {
 
     ecflow_udp.send(R"()");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,0 +1,10 @@
+
+# To validate this file:
+# curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
+
+# Ignored Paths
+# -------------
+ignore:
+  - "3rdparty/cereal"
+  - "3rdparty/cpp-httplib"
+  - "3rdparty/json"

@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2017 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "StandardView.hpp"
 
@@ -121,14 +121,14 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
     for (int i = first; i < first + count; i++) {
         QModelIndex currentIndex = model_->index(i - first, 0, parentIndex);
 
-        last                     = i + children;
-        item                     = &viewItems_[last];
-        item->parentItem         = parentId;
-        item->index              = currentIndex;
-        item->hasMoreSiblings    = (i < first + count - 1);
-        item->level              = level;
-        item->expanded           = false;
-        item->total              = 0;
+        last                  = i + children;
+        item                  = &viewItems_[last];
+        item->parentItem      = parentId;
+        item->index           = currentIndex;
+        item->hasMoreSiblings = (i < first + count - 1);
+        item->level           = level;
+        item->expanded        = false;
+        item->total           = 0;
 
         // We compute the size of the item. For attributes we delay the width computation until we
         // actually paint them and we set their width to 300.
@@ -137,7 +137,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
         item->width  = w;
         item->height = h;
 
-        int xp       = leftMargin_ + expandIndicatorBoxWidth_; // no indentation for the root
+        int xp = leftMargin_ + expandIndicatorBoxWidth_; // no indentation for the root
 
         if (parentId >= 0) {
             // item->widestInSiblings=widest;
@@ -582,7 +582,7 @@ void StandardView::updateScrollBars() {
         // doItemsLayout();
     }
 
-    int itemsInViewport  = 0;
+    int itemsInViewport = 0;
 
     const int itemsCount = viewItems_.size();
     if (itemsCount == 0)

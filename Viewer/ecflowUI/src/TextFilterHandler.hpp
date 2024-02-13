@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef TEXTFILTERHANDLER_HPP
-#define TEXTFILTERHANDLER_HPP
+#ifndef ecflow_viewer_TextFilterHandler_HPP
+#define ecflow_viewer_TextFilterHandler_HPP
 
 #include <set>
 #include <string>
@@ -19,7 +19,10 @@ class VSettings;
 
 class TextFilterItem {
 public:
-    TextFilterItem(const std::string& filter, bool matched = true, bool caseSensitive = false, bool contextMenu = true)
+    explicit TextFilterItem(const std::string& filter,
+                            bool matched       = true,
+                            bool caseSensitive = false,
+                            bool contextMenu   = true)
         : filter_(filter),
           matched_(matched),
           caseSensitive_(caseSensitive),
@@ -72,4 +75,4 @@ protected:
     std::vector<TextFilterItem> latest_;
 };
 
-#endif // TEXTFILTERHANDLER_HPP
+#endif /* ecflow_viewer_TextFilterHandler_HPP */

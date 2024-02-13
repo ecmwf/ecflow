@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef VINFO_HPP_
-#define VINFO_HPP_
+#ifndef ecflow_viewer_VInfo_HPP
+#define ecflow_viewer_VInfo_HPP
 
 #include <cstddef>
 #include <memory>
@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "ServerObserver.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 class ServerHandler;
 class VAttribute;
@@ -55,8 +55,8 @@ public:
     VAttribute* attribute() const { return attr_; }
     virtual VItem* item() const = 0;
 
-    virtual std::string name()  = 0;
-    virtual std::string path()  = 0;
+    virtual std::string name() = 0;
+    virtual std::string path() = 0;
     virtual std::string serverAlias() { return ""; }
     virtual std::string relativePath() { return ""; }
     virtual std::string nodePath() = 0;
@@ -164,8 +164,8 @@ typedef std::shared_ptr<VInfoAttribute> VInfoAttribute_ptr;
 
 class VInfoVisitor {
 public:
-    VInfoVisitor()                      = default;
-    virtual ~VInfoVisitor()             = default;
+    VInfoVisitor()          = default;
+    virtual ~VInfoVisitor() = default;
 
     virtual void visit(VInfoServer*)    = 0;
     virtual void visit(VInfoNode*)      = 0;
@@ -174,11 +174,11 @@ public:
 
 class VInfoObserver {
 public:
-    VInfoObserver()                     = default;
-    virtual ~VInfoObserver()            = default;
+    VInfoObserver()          = default;
+    virtual ~VInfoObserver() = default;
 
     virtual void notifyDataLost(VInfo*) = 0;
     virtual void notifyDelete(VInfo*)   = 0;
 };
 
-#endif
+#endif /* ecflow_viewer_VInfo_HPP */

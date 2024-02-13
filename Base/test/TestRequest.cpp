@@ -1,41 +1,69 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #128 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "BlockClientZombieCmd.hpp"
-#include "DefsCmd.hpp"
-#include "ErrorCmd.hpp"
-#include "GroupSTCCmd.hpp"
 #include "MyDefsFixture.hpp"
-#include "SNewsCmd.hpp"
-#include "SNodeCmd.hpp"
-#include "SServerLoadCmd.hpp"
-#include "SStringCmd.hpp"
-#include "SSyncCmd.hpp"
-#include "ServerToClientResponse.hpp"
-#include "StcCmd.hpp"
-#include "System.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/ServerToClientResponse.hpp"
+#include "ecflow/base/cts/task/AbortCmd.hpp"
+#include "ecflow/base/cts/task/CompleteCmd.hpp"
+#include "ecflow/base/cts/task/CtsWaitCmd.hpp"
+#include "ecflow/base/cts/task/EventCmd.hpp"
+#include "ecflow/base/cts/task/InitCmd.hpp"
+#include "ecflow/base/cts/task/LabelCmd.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/task/QueueCmd.hpp"
+#include "ecflow/base/cts/user/AlterCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CFileCmd.hpp"
+#include "ecflow/base/cts/user/CSyncCmd.hpp"
+#include "ecflow/base/cts/user/CheckPtCmd.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
+#include "ecflow/base/cts/user/CtsNodeCmd.hpp"
+#include "ecflow/base/cts/user/EditScriptCmd.hpp"
+#include "ecflow/base/cts/user/ForceCmd.hpp"
+#include "ecflow/base/cts/user/FreeDepCmd.hpp"
+#include "ecflow/base/cts/user/GroupCTSCmd.hpp"
+#include "ecflow/base/cts/user/LoadDefsCmd.hpp"
+#include "ecflow/base/cts/user/LogCmd.hpp"
+#include "ecflow/base/cts/user/LogMessageCmd.hpp"
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/PlugCmd.hpp"
+#include "ecflow/base/cts/user/QueryCmd.hpp"
+#include "ecflow/base/cts/user/ReplaceNodeCmd.hpp"
+#include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
+#include "ecflow/base/cts/user/RunNodeCmd.hpp"
+#include "ecflow/base/cts/user/ServerVersionCmd.hpp"
+#include "ecflow/base/cts/user/ShowCmd.hpp"
+#include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/base/stc/BlockClientZombieCmd.hpp"
+#include "ecflow/base/stc/DefsCmd.hpp"
+#include "ecflow/base/stc/ErrorCmd.hpp"
+#include "ecflow/base/stc/GroupSTCCmd.hpp"
+#include "ecflow/base/stc/SNewsCmd.hpp"
+#include "ecflow/base/stc/SNodeCmd.hpp"
+#include "ecflow/base/stc/SServerLoadCmd.hpp"
+#include "ecflow/base/stc/SStringCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/base/stc/StcCmd.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_FIXTURE_TEST_SUITE(BaseTestSuite, MyDefsFixture)
+BOOST_FIXTURE_TEST_SUITE(U_Base, MyDefsFixture)
+
+BOOST_AUTO_TEST_SUITE(T_Request)
 
 // Can't delete the fixture defs, hence use a NULL deleter to avoid freeing memory twice.
 // Required since DefsCmd and LoadDefsCmd requires a shared_ptr.
@@ -438,5 +466,7 @@ BOOST_AUTO_TEST_CASE(test_request_authenticate) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

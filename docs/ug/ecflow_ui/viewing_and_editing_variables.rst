@@ -108,6 +108,16 @@ dialogue allows for the modification of the variable's value:
 .. image:: /_static/ecflow_ui/viewing_and_editing_variables/image6.png
    :width: 4.11875in
    :height: 2.16851in
+|
+.. note::
+    ecFlow allows the definition of variable values with multi-line content.
+
+    However, both ecFlowUI and ecFlow CLI client display the content of
+    multi-line values replacing new line characters with :code:`\\n` (n.b. when
+    using Japanese locale, :code:`\\n` might be displayed as :code:`¥n`).
+
+    When performing the job script generation, ecFlow uses the actual value
+    of the variable including actual new line characters.
 
 If the name of the variable is changed, a new variable will be created
 and the old one will remain.
@@ -135,5 +145,3 @@ inherited from one of its parents, "**0**".
 
    .. image:: /_static/ecflow_ui/viewing_and_editing_variables/image9.png
       :width: 300px
-
-

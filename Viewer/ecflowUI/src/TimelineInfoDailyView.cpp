@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TimelineInfoDailyView.hpp"
 
@@ -284,9 +285,9 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter* painter,
 
     // bool selected=option.state & QStyle::State_Selected;
 
-    int leftEdge       = option.rect.x();
-    int rightEdge      = option.rect.x() + option.rect.width();
-    int extendedRight  = -1;
+    int leftEdge      = option.rect.x();
+    int rightEdge     = option.rect.x() + option.rect.width();
+    int extendedRight = -1;
 
     unsigned int day   = index.data().toUInt();
     unsigned int sDate = day + startTime_.msecsSinceStartOfDay() / 1000;
@@ -457,7 +458,7 @@ int TimelineInfoDailyDelegate::timeToPos(QRect r, unsigned int time) const {
     unsigned int start = startTime_.msecsSinceStartOfDay() / 1000;
     unsigned int end   = endTime_.msecsSinceStartOfDay() / 1000;
 
-    time               = time % 86400;
+    time = time % 86400;
 
     if (time < start)
         return r.x() - 2;

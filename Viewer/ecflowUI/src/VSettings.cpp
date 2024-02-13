@@ -1,25 +1,24 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VSettings.hpp"
 
 #include <sstream>
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Str.hpp"
 
 // #define _UI_SETTINGS_DEBUG
 
@@ -48,7 +47,7 @@ std::string VSettingsPath::path(const std::string& key) const {
 }
 
 std::string VSettingsPath::join(const std::string& sep) const {
-    return boost::algorithm::join(path_, sep);
+    return ecf::algorithm::join(path_, sep);
 }
 
 //======================================================
@@ -69,9 +68,8 @@ void VSettings::clear() {
 
 bool VSettings::fileExists() const {
     if (!file_.empty()) {
-        namespace fs = boost::filesystem;
-        fs::path boostpath(file_);
-        return fs::exists(boostpath);
+        fs::path path(file_);
+        return fs::exists(path);
     }
     return false;
 }

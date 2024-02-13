@@ -1,42 +1,38 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #35 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Today)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -61,13 +57,13 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_today_single_slot
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        today 11.12
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       today 11.12
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -76,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
         boost::posix_time::ptime theLocalTime    = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
         boost::posix_time::ptime time_minus_hour = theLocalTime - hours(1);
 
-        suite_ptr suite                          = theDefs.add_suite("test_today_single_slot");
+        suite_ptr suite = theDefs.add_suite("test_today_single_slot");
         ClockAttr clockAttr(theLocalTime, false, true /*positive gain*/);
         suite->addClock(clockAttr);
 
@@ -106,20 +102,20 @@ BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_today_relative_time_series
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //  clock real <todays date>
-    //	family family
-    //    	task t1
-    //        today <start> <finish> <incr>
-    //   	endfamily
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   clock real <todays date>
+    //   family family
+    //     task t1
+    //       today <start> <finish> <incr>
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
         // Initialise clock with todays date and time, then create a today attribute
         // with a time series, so that task runs 3 times
         suite_ptr suite = theDefs.add_suite("test_today_relative_time_series");
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval() - 1));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() - 1));
         ClockAttr clockAttr(Calendar::second_clock_time(), false);
         suite->addClock(clockAttr);
 
@@ -152,12 +148,12 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_today_real_time_series
-    //	edit ECF_INCLUDE $ECF_HOME/includes
-    //  clock real <todays date>
-    //	family family
-    //    	task t1
-    //        today 10:01 10:07 00:03
-    //   	endfamily
+    //   edit ECF_INCLUDE $ECF_HOME/includes
+    //   clock real <todays date>
+    //   family family
+    //     task t1
+    //       today 10:01 10:07 00:03
+    //   endfamily
     // endsuite
     Defs theDefs;
     {
@@ -167,10 +163,10 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
         boost::posix_time::ptime time1        = theLocalTime + minutes(1);
         boost::posix_time::ptime time2        = theLocalTime + minutes(7);
 
-        suite_ptr suite                       = theDefs.add_suite("test_today_real_time_series");
+        suite_ptr suite = theDefs.add_suite("test_today_real_time_series");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
-        suite->add_variable("SLEEPTIME", boost::lexical_cast<std::string>(TestFixture::job_submission_interval() - 1));
+        suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() - 1));
         suite->addVerify(VerifyAttr(NState::COMPLETE, 1));
 
         family_ptr fam = suite->add_family("family");
@@ -188,5 +184,7 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

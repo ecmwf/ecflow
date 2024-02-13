@@ -1,22 +1,23 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "CommandDesignerWidget.hpp"
 
 #include <QMessageBox>
 #include <boost/enable_shared_from_this.hpp>
 
-#include "Child.hpp"
 #include "CustomCommandHandler.hpp"
 #include "NodeExpression.hpp"
 #include "NodeQueryResult.hpp"
-#include "Str.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace boost;
 namespace po = boost::program_options;
@@ -182,7 +183,7 @@ void CommandDesignerWidget::addClientCommandsToComponentList() {
     // sort the commands into alphabetical order
     std::vector<boost::shared_ptr<po::option_description>> options = clientOptionsDescriptions_->options();
 
-    using opt_desc                                                 = boost::shared_ptr<po::option_description>;
+    using opt_desc = boost::shared_ptr<po::option_description>;
     std::sort(options.begin(), options.end(), [](const opt_desc& a, const opt_desc& b) {
         return a->long_name() < b->long_name();
     });
@@ -444,7 +445,7 @@ void CommandDesignerWidget::on_editCommandButton__clicked() {
     QTableWidgetItem* contextItem = savedCommandsTable_->item(row, 1);
     QTableWidgetItem* commandItem = savedCommandsTable_->item(row, 2);
 
-    inCommandEditMode_            = true;
+    inCommandEditMode_ = true;
 
     // insert the details into the edit boxes
     commandLineEdit_->setText(commandItem->text());

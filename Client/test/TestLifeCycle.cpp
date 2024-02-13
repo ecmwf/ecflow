@@ -1,33 +1,37 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #50 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "File.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Submittable.hpp"
-#include "Suite.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/CompleteCmd.hpp"
+#include "ecflow/base/cts/task/EventCmd.hpp"
+#include "ecflow/base/cts/task/InitCmd.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/Suite.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_LifeCycle)
 
 BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
     cout << "Client:: ...test_node_tree_lifecycle" << endl;
@@ -104,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
                                                        1,
                                                        eventname)));
         TestHelper::invokeRequest(&defs, Cmd_ptr(new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
-        node_ptr node         = defs.findAbsNode(suite1_family1_a);
+        node_ptr node = defs.findAbsNode(suite1_family1_a);
 
         const Event& theEvent = node->findEventByNameOrNumber(eventname);
         BOOST_CHECK_MESSAGE(!theEvent.empty(), "Could not find the event myEvent");
@@ -235,5 +239,7 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
         BOOST_CHECK_MESSAGE(defs.checkInvariants(errorMsg), errorMsg);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

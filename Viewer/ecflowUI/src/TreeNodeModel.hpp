@@ -1,23 +1,24 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef TREENODEMODEL_H
-#define TREENODEMODEL_H
+#ifndef ecflow_viewer_TreeNodeModel_HPP
+#define ecflow_viewer_TreeNodeModel_HPP
 
 #include <QAbstractItemModel>
 
 #include "AbstractNodeModel.hpp"
 #include "ConnectState.hpp"
-#include "Node.hpp"
 #include "VAttributeType.hpp"
 #include "VInfo.hpp"
 #include "Viewer.hpp"
+#include "ecflow/node/Node.hpp"
 
 class AttributeFilter;
 class NodeFilterDef;
@@ -141,4 +142,4 @@ private:
     bool attributeToolTip_;
 };
 
-#endif
+#endif /* ecflow_viewer_TreeNodeModel_HPP */

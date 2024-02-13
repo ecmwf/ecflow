@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "NodeQueryOptionEdit.hpp"
 
@@ -185,8 +185,8 @@ NodeQueryComboOptionEdit::NodeQueryComboOptionEdit(NodeQueryOption* option, QGri
     option_ = static_cast<NodeQueryComboOption*>(option);
     Q_ASSERT(option_);
 
-    label_  = new QLabel(option->label() + ":", parent_);
-    cb_     = new QComboBox(parent_);
+    label_ = new QLabel(option->label() + ":", parent_);
+    cb_    = new QComboBox(parent_);
 
     int row = grid_->rowCount();
     grid_->addWidget(label_, row, 0);
@@ -243,7 +243,7 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option, QG
     : NodeQueryOptionEdit(option->name(), grid, parent) {
     int row = grid_->rowCount();
 
-    label_  = new QLabel(option->label() + ": ", parent_);
+    label_ = new QLabel(option->label() + ": ", parent_);
 
     modeCb_ = new QComboBox(parent);
     modeCb_->addItem("any time", "any");
@@ -314,7 +314,7 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option, QG
 void NodeQueryPeriodOptionEdit::initInternal(NodeQueryOption* option) {
     initIsOn_ = true;
 
-    option_   = static_cast<NodeQueryPeriodOption*>(option);
+    option_ = static_cast<NodeQueryPeriodOption*>(option);
     Q_ASSERT(option_);
     Q_ASSERT(optionId_ == option_->name());
     if (option_->mode() == NodeQueryPeriodOption::LastPeriodMode) {

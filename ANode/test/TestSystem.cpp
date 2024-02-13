@@ -1,29 +1,27 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Signal.hpp"
-#include "System.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/node/Signal.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_System)
 
 BOOST_AUTO_TEST_CASE(test_system) {
     cout << "ANode:: ...test_system \n";
@@ -45,5 +43,7 @@ BOOST_AUTO_TEST_CASE(test_system) {
 
     fs::remove(file); // Remove the file. Comment out for debugging
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

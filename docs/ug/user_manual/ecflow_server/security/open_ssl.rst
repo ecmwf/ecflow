@@ -1,6 +1,6 @@
 .. _open_ssl:
 
-Open ssl
+Open SSL
 ////////
 
 OpenSSL enables encrypted communication between the client and the
@@ -23,7 +23,7 @@ Certificates
 In order to use OpenSSL, we need to set up some certificates. (These
 will be self-signed certificates, rather than a certificate authority).
 
-The ecFlow client and server will look for the certificates in 
+The ecFlow client and server will look for the certificates in
 **$HOME/.ecflowrc/ssl** directory.
 
 ecFlow server expects the following files in : **$HOME/.ecflowrc/ssl**
@@ -50,17 +50,24 @@ The following steps, show you how to create these files:
 -  Generate a password-protected private key. This will request a
    passphrase.
 
-   This key is a 1024 bit RSA key which is encrypted using Triple-DES
-   and stored in a PEM format so that it is readable as ASCII text
+   Consider using a 2048 bit RSA key, encrypted using Triple-DES
+   and stored in a PEM format so that it is readable as ASCII text.
 
    .. code-block:: shell
       :caption: Password protected private key
 
-      openssl genrsa -des3 -out server.key 1024                             
+      openssl genrsa -des3 -out server.key 2048
 
+   .. warning::
+
+      Although it was previously suggested to use 1024 bit RSA keys,
+      when using OpenSSL with TLS Security Level set to 2 (typical of recent OSes)
+      these keys are regarded as unsecure and therefore are automatically rejected.
+
+      The use of 2048 bit RSA keys is *strongly* recommended.
 
 -  If you want additional security. Create a file called
-   **'server.passwd'** and add the passphrase to the file.  Then set the
+   **'server.passwd'** and add the passphrase to the file. Then set the
    file permission so that the file is only readable by the server
    process.
 
@@ -73,8 +80,8 @@ The following steps, show you how to create these files:
       cp server.key server.key.secure
       openssl rsa -in server.key.secure -out server.key                     
 
--  Sign a certificate with a private key (self-signed certificate). 
-   Generate Certificate Signing Request(CSR). 
+-  Sign a certificate with a private key (self-signed certificate).
+   Generate Certificate Signing Request(CSR).
 
    .. warning::
 
@@ -94,8 +101,7 @@ The following steps, show you how to create these files:
    .. code-block:: shell
       :caption: Sign the certificate server.crt must be accessible by client and server
    
-      openssl x509 -req -days 3650 -in server.csr -signkey server.key -out  
-      server.crt                                                            
+      openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 
 -  Generate dhparam file. ecFlow expects 2048 key.
 

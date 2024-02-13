@@ -1,18 +1,18 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VConfigLoader.hpp"
 
 #include <map>
 
-using Map          = std::multimap<std::string, VConfigLoader*>;
+using Map = std::multimap<std::string, VConfigLoader*>;
 
 static Map* makers = nullptr;
 
@@ -31,7 +31,7 @@ bool VConfigLoader::process(const std::string& name, VProperty* prop) {
     Map::size_type entries = makers->count(name);
     auto it                = makers->find(name);
 
-    bool retVal            = false;
+    bool retVal = false;
     for (Map::size_type cnt = 0; cnt != entries; ++cnt, ++it) {
         (*it).second->load(prop);
         retVal = true;

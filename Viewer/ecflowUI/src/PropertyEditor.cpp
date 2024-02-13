@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "PropertyEditor.hpp"
 
@@ -42,7 +42,7 @@ PropertyEditor::~PropertyEditor() = default;
 void PropertyEditor::edit(VProperty* vGroup, QPixmap pix) {
     clear();
 
-    group_      = vGroup;
+    group_ = vGroup;
 
     QString txt = group_->param("desc");
     headerWidget_->show();
@@ -170,7 +170,7 @@ PropertyLine* PropertyEditor::addLine(VProperty* vProp, QGridLayout* gridLayout,
         item->init();
         // item->reset(vProp->link()->value());
 
-        int row     = gridLayout->rowCount();
+        int row = gridLayout->rowCount();
 
         QLabel* lw  = item->label();
         QLabel* slw = item->suffixLabel();
@@ -348,7 +348,7 @@ void PropertyEditor::addNotification(VProperty* vProp, QVBoxLayout* layout, QWid
 
     // ChangeNotifyEditor* ne=new ChangeNotifyEditor(parent);
 
-    auto* tab     = new QTabWidget(parent);
+    auto* tab = new QTabWidget(parent);
 
     bool useGroup = (vProp->param("group") == "true");
 

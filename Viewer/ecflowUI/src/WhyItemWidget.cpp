@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "WhyItemWidget.hpp"
 
@@ -13,13 +14,13 @@
 #include <QFile>
 
 #include "InfoProvider.hpp"
-#include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VConfig.hpp"
 #include "VItemPathParser.hpp"
 #include "VNState.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Node.hpp"
 
 //========================================================
 //
@@ -129,7 +130,7 @@ void WhyItemWidget::infoReady(VReply* reply) {
 }
 
 void WhyItemWidget::infoFailed(VReply* reply) {
-    QString s   = "Failed to refresh server before building the Why? output.\
+    QString s = "Failed to refresh server before building the Why? output.\
                      Time-related attributes might show out-of-date values.";
 
     QString err = QString::fromStdString(reply->errorText());

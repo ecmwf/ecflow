@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ServerHandler.hpp"
 
@@ -16,19 +17,12 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QMetaType>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/asio/ip/host_name.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "ChangeNotify.hpp"
-#include "ClientInvoker.hpp"
 #include "ConnectState.hpp"
-#include "Defs.hpp"
 #include "DirectoryHandler.hpp"
-#include "File.hpp"
 #include "MainWindow.hpp"
-#include "Node.hpp"
-#include "NodeFwd.hpp"
 #include "NodeObserver.hpp"
 #include "ServerComObserver.hpp"
 #include "ServerComQueue.hpp"
@@ -36,7 +30,6 @@
 #include "ServerObserver.hpp"
 #include "SessionHandler.hpp"
 #include "ShellCommand.hpp"
-#include "Str.hpp"
 #include "SuiteFilter.hpp"
 #include "UIDebug.hpp"
 #include "UiLogS.hpp"
@@ -45,6 +38,12 @@
 #include "VNode.hpp"
 #include "VSettings.hpp"
 #include "VTaskObserver.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
@@ -82,7 +81,7 @@ ServerHandler::ServerHandler(const std::string& name,
     longName_     = host_ + "@" + port_;
     fullLongName_ = name_ + "[" + longName_ + "]";
 
-    conf_         = new VServerSettings(this);
+    conf_ = new VServerSettings(this);
 
     // Connect up the timer for refreshing the server info. The timer has not
     // started yet.
@@ -579,7 +578,7 @@ NState::State ServerHandler::state(bool& suspended) {
     if (connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
         return NState::UNKNOWN;
 
-    suspended  = false;
+    suspended = false;
 
     defs_ptr d = safelyAccessSimpleDefsMembers();
     if (d && d.get()) {
@@ -817,7 +816,7 @@ void ServerHandler::slotNodeChanged(const Node* nc, std::vector<ecf::Aspect::Typ
     UiLogS(this).dbg() << "ServerHandler::slotNodeChanged - node: " + nc->name();
 
     // for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-    // UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+    //     UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ecf::convert_to<std::string>(*it));
 
     // This can happen if we initiated a reset while we sync in the thread
     if (vRoot_->isEmpty()) {
@@ -900,7 +899,7 @@ void ServerHandler::broadcast(NoMethodV1 proc,
 void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect) {
     UiLog().dbg() << "ServerHandler::slotDefsChanged -->";
     // for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
-    //	UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+    //     UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ecf::convert_to<std::string>(*it));
 
     // Begin update for the VNode
     // VNodeChange change;

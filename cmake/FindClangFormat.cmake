@@ -1,5 +1,6 @@
 #
-# Copyright 2023- ECMWF.
+# Copyright 2009- ECMWF.
+#
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -45,12 +46,19 @@ function(target_clangformat TARGET)
     return()
   endif ()
 
-  # Collect list of target sources sources
+  # Collect list of target sources
   get_target_property(target_sources ${TARGET} SOURCES)
-  foreach (clangformat_source ${target_sources})
-    get_filename_component(clangformat_source ${clangformat_source} ABSOLUTE)
-    list(APPEND clangformat_sources ${clangformat_source})
-  endforeach ()
+  if (NOT target_sources MATCHES "-NOTFOUND")
+    foreach (clangformat_source ${target_sources})
+      get_filename_component(clangformat_source ${clangformat_source} ABSOLUTE)
+      list(APPEND clangformat_sources ${clangformat_source})
+    endforeach ()
+  endif ()
+
+  # Remove auto-generated sources (e.g. Qt files)
+  list(FILTER clangformat_sources EXCLUDE REGEX ".*/moc_.*")
+  list(FILTER clangformat_sources EXCLUDE REGEX ".*/ui_.*")
+  list(FILTER clangformat_sources EXCLUDE REGEX ".*/qrc_.*")
 
   # Define name of specific format target
   get_target_property(target_name ${TARGET} NAME)

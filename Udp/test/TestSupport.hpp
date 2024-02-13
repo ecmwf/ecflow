@@ -1,5 +1,5 @@
 /*
- * Copyright 2023- ECMWF.
+ * Copyright 2009- ECMWF.
  *
  * This software is licensed under the terms of the Apache Licence version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,24 +8,25 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_UDP_TESTSUPPORT_HPP
-#define ECFLOW_UDP_TESTSUPPORT_HPP
+#ifndef ecflow_udp_test_TestSupport_HPP
+#define ecflow_udp_test_TestSupport_HPP
 
 #include <memory>
 #include <thread>
 
 #include <boost/asio.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/process.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientInvoker.hpp"
-#include "Defs.hpp"
-#include "File.hpp"
-#include "Host.hpp"
-#include "Node.hpp"
-#include "NodeAttr.hpp"
-#include "UDPClient.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Host.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Node.hpp"
+#include "ecflow/udp/UDPClient.hpp"
 
 namespace bp = boost::process;
 
@@ -41,8 +42,8 @@ public:
     BaseMockServer(hostname_t host, port_t port, Args... args) : host_{std::move(host)},
                                                                  port_{port},
                                                                  server_{} {
-        BOOST_REQUIRE_MESSAGE(!host_.empty(), "unable to determine host name");
-        BOOST_REQUIRE_MESSAGE(port_ > 0, "port must be larger than 0");
+        BOOST_REQUIRE_MESSAGE(!host_.empty(), "determiner host name");
+        BOOST_REQUIRE_MESSAGE(port_ > 0, "port is be larger than 0");
 
         server_ = SERVER::launch(host_, port_, std::forward<Args>(args)...);
         std::cout << "   MOCK: " << SERVER::designation << " has been started!" << std::endl;
@@ -74,9 +75,17 @@ public:
     explicit MockServer(port_t port) : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
 
     void load_definition(const std::string& defs) const {
-        ClientInvoker client(host(), port());
-        auto error = client.loadDefs(defs);
-        BOOST_REQUIRE_MESSAGE(!error, "unable to load definitions");
+        ClientInvoker client(ecf::Str::LOCALHOST(), port());
+        try {
+            BOOST_REQUIRE_MESSAGE(fs::exists(defs), "definitions file exists at: " + defs);
+            auto error = client.loadDefs(defs);
+            BOOST_REQUIRE_MESSAGE(!error, "load definitions, without error ");
+        }
+        catch (std::exception& e) {
+            BOOST_REQUIRE_MESSAGE(
+                false, "load definitions, without throwing exception (but threw: " + std::string(e.what()) + ")");
+        }
+
         std::cout << "   MOCK: reference ecFlow suite has been loaded" << std::endl;
     }
 
@@ -97,7 +106,8 @@ public:
 
 private:
     node_ptr get_node_at(const std::string& path) const {
-        ClientInvoker client(host(), port());
+        std::cout << "   Creating ecflow_client connected to " << host() << ":" << port() << std::endl;
+        ClientInvoker client(ecf::Str::LOCALHOST(), port());
 
         // load all definitions
         std::shared_ptr<Defs> defs = nullptr;
@@ -125,15 +135,21 @@ public:
         // Just for precaution, in case a previous run didn't clean up...
         cleanup(host, port);
 
-        std::string invoke_command = ecf::File::root_build_dir() + "/bin/ecflow_server";
+        std::string invoke_command = ecf::File::find_ecf_server_path();
+
+        BOOST_REQUIRE_MESSAGE(!invoke_command.empty(), "The server program could not be found");
+        BOOST_REQUIRE_MESSAGE(fs::exists(invoke_command), "Server exe does not exist at:" << invoke_command);
+
         invoke_command += " --port ";
         invoke_command += std::to_string(port);
         invoke_command += " -d &";
 
+        std::cout << "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command << std::endl;
+
         bp::child child(invoke_command);
 
-        ClientInvoker client(host, port);
-        if (!client.wait_for_server_reply(1)) {
+        ClientInvoker client(ecf::Str::LOCALHOST(), port);
+        if (!client.wait_for_server_reply(5)) {
             BOOST_REQUIRE_MESSAGE(false, "could not launch ecflow server");
         }
 
@@ -146,7 +162,7 @@ public:
                                   host + '.' + std::to_string(port) + ".ecf.check.b",
                                   host + '.' + std::to_string(port) + ".ecf.log"};
         for (const auto& t : temporaries) {
-            boost::filesystem::remove(t);
+            fs::remove(t);
         }
     }
 };
@@ -204,7 +220,9 @@ private:
     }
 
     static void sendRequest(uint16_t port, const std::string& request) {
-        ecf::UDPClient client("localhost", std::to_string(port));
+        const std::string host = "localhost";
+        std::cout << "   Creating ecflow_udp client connected to " << host << ":" << port << std::endl;
+        ecf::UDPClient client(host, std::to_string(port));
         client.send(request);
 
         // Wait for request to flow...
@@ -223,10 +241,12 @@ public:
         invoke_command += std::to_string(ecflow_port);
         invoke_command += " --verbose";
 
+        std::cout << "   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command << std::endl;
+
         bp::child server(invoke_command);
 
         // Wait for server to start...
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
         return server;
     }
@@ -241,16 +261,34 @@ public:
  */
 struct EnableServersFixture
 {
-    EnableServersFixture() : ecflow_server(42424), ecflow_udp(42425, 42424) {
-        // Load 'reference' suite for tests...
-        ecflow_server.load_definition("data/reference.def");
-    }
+    EnableServersFixture() : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
     ~EnableServersFixture() = default;
 
     ecf::test::MockServer ecflow_server;
     ecf::test::MockUDPServer ecflow_udp;
+
+private:
+    static MockServer::port_t get_ecflow_server_port() {
+        MockServer::port_t selected_port = 3199;
+        std::cout << "   Attempting to use port: " << selected_port << std::endl;
+        while (!EcfPortLock::is_free(selected_port)) {
+            std::cout << "   Selected port: " << selected_port << " is not available." << std::endl;
+            ++selected_port;
+            std::cout << "   Attempting to use port: " << selected_port << std::endl;
+        }
+        std::cout << "   Found free port: " << selected_port << "\n";
+        return selected_port;
+    }
+    static MockServer::port_t get_ecflow_udp_port() { return 3198; }
+
+    EnableServersFixture(MockServer::port_t ecflow_server_port, MockServer::port_t ecflow_udp_port)
+        : ecflow_server(ecflow_server_port),
+          ecflow_udp(ecflow_udp_port, ecflow_server_port) {
+        // Load 'reference' suite for tests...
+        ecflow_server.load_definition("data/reference.def");
+    }
 };
 
 } // namespace ecf::test
 
-#endif
+#endif /* ecflow_udp_test_TestSupport_HPP */

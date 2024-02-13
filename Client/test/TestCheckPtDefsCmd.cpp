@@ -1,36 +1,31 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #29 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_CheckPtDefsCmd)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -226,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt) {
                               "Expected " << expected_no_of_suites << " suites, after restoreDefsFromCheckPt but found "
                                           << theClient.defs()->suiteVec().size() << "\n");
 
-        std::string suite = "/s" + boost::lexical_cast<std::string>(i);
+        std::string suite = "/s" + ecf::convert_to<std::string>(i);
         BOOST_REQUIRE_MESSAGE(theClient.delete_node(suite) == 0,
                               "Expected delete single suite to succeed\n"
                                   << theClient.errorMsg());
@@ -393,5 +388,7 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
                               "Expected edit history of size 0, but found " << defs.get_edit_history().size());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

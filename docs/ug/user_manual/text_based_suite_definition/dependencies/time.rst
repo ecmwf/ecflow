@@ -8,6 +8,15 @@ format **[h]h:mm** . Only numeric values are allowed. There can be
 multiple time dependencies for a node, but overlapping times may cause
 unexpected results.
 
+.. note::
+
+  Long running Tasks might overrun the next execution slot, and when this happens the execution automatically skips
+  to the following slot.
+
+  To avoid overruning execution slots, instead of a :code:`time` dependency consider specifyting a time-based trigger.
+  See :ref:`tutorial-time-triggers` for details.
+
+
 To define a series of times, specify the start time, end time and a time
 increment.
 
@@ -34,11 +43,11 @@ times you can use two separate time commands.
         time 15:00 # run at 15:00
         time 19:00 # also run at 19:00
     
-.. note::
+.. warning::
     
-    You should take care with tasks using the time command to
-    cause the suite to cycle on fast systems. If the task takes less than a
-    minute to run then there is a possibility that the trigger will still be
-    valid once the suite has cycled. This can be avoided by making sure that
-    such tasks take longer than one minute to run, for example, by adding a
-    sleep command.
+    Beware that tasks using a :code:`time` dependency may cause the Suite to cycle on fast systems.
+
+    If a task takes less than a minute to run then there is a possibility that the trigger will still be
+    valid once the suite has cycled.
+
+    Avoid this by ensuring that such tasks take longer than one minute to run (e.g. using the :code:`sleep` command).

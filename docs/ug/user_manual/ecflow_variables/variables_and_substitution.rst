@@ -6,10 +6,9 @@ Variables and substitution
 This section describes how to use suite definition **variables** in
 ecFlow script files.
 
-Suite definition variables are defined by the `edit <https://confluence.ecmwf.int/display/ECFLOW/Definition+file+Grammar>`__
-keyword. The section on `ecFlow
-pre-processor <https://confluence.ecmwf.int/display/ECFLOW/The+ecFlow+Pre-processor>`__
-gives more information on how variables are used.
+Suite definition variables are defined by the :ref:`edit<grammar>` keyword.
+The section on the :ref:`ecFlow Pre-processor<the_ecflow_pre-processor>` provides
+more information on how variables are used.
 
 In an ecFlow script, variables are written as text enclosed by a pair
 of '%' characters (the **micro-character**). As in C-format strings,

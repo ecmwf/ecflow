@@ -1,40 +1,33 @@
-#define BOOST_TEST_MODULE TestANattr
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #24 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <boost/test/unit_test.hpp>
 
-#include "AutoArchiveAttr.hpp"
-#include "AutoCancelAttr.hpp"
-#include "Calendar.hpp"
-#include "ClockAttr.hpp"
-#include "CronAttr.hpp"
-#include "DateAttr.hpp"
-#include "DayAttr.hpp"
-#include "GenericAttr.hpp"
-#include "LateAttr.hpp"
-#include "NodeAttr.hpp"
-#include "QueueAttr.hpp"
-#include "RepeatAttr.hpp"
-#include "SerializationTest.hpp"
-#include "TimeAttr.hpp"
-#include "TodayAttr.hpp"
-#include "Variable.hpp"
-#include "VerifyAttr.hpp"
-#include "ZombieAttr.hpp"
+#include "TestSerialisation.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
+#include "ecflow/attribute/ClockAttr.hpp"
+#include "ecflow/attribute/CronAttr.hpp"
+#include "ecflow/attribute/DateAttr.hpp"
+#include "ecflow/attribute/DayAttr.hpp"
+#include "ecflow/attribute/GenericAttr.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/attribute/NodeAttr.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/attribute/RepeatAttr.hpp"
+#include "ecflow/attribute/TimeAttr.hpp"
+#include "ecflow/attribute/TodayAttr.hpp"
+#include "ecflow/attribute/Variable.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/attribute/ZombieAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -44,7 +37,9 @@ using namespace boost::posix_time;
 // Globals used throughout the test
 static std::string fileName = "test.txt";
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_AttrSerialization)
 
 BOOST_AUTO_TEST_CASE(test_AttrDefaultConstructor_serialisation) {
     cout << "ANattr:: ...test_AttrDefaultConstructor_serialisation \n";
@@ -338,5 +333,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_attr_serialisation) {
     doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::KILL, 10));
     doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::ADOPT, 10));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

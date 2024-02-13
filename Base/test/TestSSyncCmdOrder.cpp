@@ -1,30 +1,27 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
 #include "MockServer.hpp"
-#include "SSyncCmd.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
-#include "TestUtil.hpp"
+#include "ecflow/base/cts/user/ClientHandleCmd.hpp"
+#include "ecflow/base/cts/user/OrderNodeCmd.hpp"
+#include "ecflow/base/stc/SSyncCmd.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -32,7 +29,9 @@ using namespace ecf;
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
 static bool bypass_state_modify_change_check = false;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_SSyncCmdOrder)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 typedef boost::function<void(defs_ptr)> defs_change_cmd;
@@ -134,9 +133,10 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
 static void reorder_suites(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/a", NOrder::ALPHA)));
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs->suiteVec()) == vector_abcd(),
-                          "NOrder::ALPHA expected " << toString(vector_abcd())
-                                                    << " but found: " << toString(toStrVec(theDefs->suiteVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec()) == vector_abcd(),
+                          "NOrder::ALPHA expected "
+                              << ecf::algorithm::join(vector_abcd()) << " but found: "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
 }
 
 static void reorder_family(defs_ptr theDefs) {
@@ -146,9 +146,10 @@ static void reorder_family(defs_ptr theDefs) {
 
     std::vector<Family*> families;
     theDefs->findSuite("d")->getAllFamilies(families);
-    BOOST_REQUIRE_MESSAGE(toStrVec(families) == vector_abcd(),
-                          "NOrder::ALPHA  expected " << toString(vector_abcd())
-                                                     << " but found: " << toString(toStrVec(families)));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
+                          "NOrder::ALPHA  expected "
+                              << ecf::algorithm::join(vector_abcd()) << " but found: "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(families)));
 }
 
 static void reorder_task(defs_ptr theDefs) {
@@ -158,9 +159,10 @@ static void reorder_task(defs_ptr theDefs) {
 
     std::vector<Task*> tasks;
     theDefs->findAbsNode("/d/d")->getAllTasks(tasks);
-    BOOST_REQUIRE_MESSAGE(toStrVec(tasks) == vector_abcd(),
-                          "NOrder::ALPHA  expected " << toString(vector_abcd())
-                                                     << " but found: " << toString(toStrVec(tasks)));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(tasks) == vector_abcd(),
+                          "NOrder::ALPHA  expected "
+                              << ecf::algorithm::join(vector_abcd()) << " but found: "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(tasks)));
 }
 
 // static void reorder_alias(defs_ptr theDefs) {
@@ -170,8 +172,9 @@ static void reorder_task(defs_ptr theDefs) {
 //
 //    std::vector<alias_ptr> aliases;
 //    theDefs->findAbsNode("/d/d/d")->get_all_aliases(aliases);
-//    BOOST_REQUIRE_MESSAGE( toStrVec(aliases) == vector_abcd(),"NOrder::ALPHA  expected " << toString(vector_abcd())<<
-//    " but found: " << toString(toStrVec(tasks)));
+//    BOOST_REQUIRE_MESSAGE( ecf::algorithm::transform_to_name_vector(aliases) == vector_abcd(),"NOrder::ALPHA  expected
+//    " << ecf::algorithm::join(vector_abcd())<< " but found: " <<
+//    ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(tasks)));
 // }
 
 static void reorder_suites_using_handles(defs_ptr theDefs) {
@@ -189,9 +192,10 @@ static void reorder_suites_using_handles(defs_ptr theDefs) {
                         "Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/a", NOrder::ALPHA)));
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs->suiteVec()) == vector_abcd(),
-                          "NOrder::ALPHA  expected " << toString(vector_abcd())
-                                                     << " but found: " << toString(toStrVec(theDefs->suiteVec())));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec()) == vector_abcd(),
+                          "NOrder::ALPHA  expected "
+                              << ecf::algorithm::join(vector_abcd()) << " but found: "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
 }
 
 static void reorder_family_using_handles(defs_ptr theDefs) {
@@ -212,16 +216,18 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
     /// Don't call, data model function directly, since Ecf::server_ is false. *here*
     /// The suite should stay the same, only suite d's family should change
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
-    BOOST_REQUIRE_MESSAGE(toStrVec(theDefs->suiteVec()) == vector_dcba(),
-                          "expected " << toString(vector_dcba())
-                                      << " but found: " << toString(toStrVec(theDefs->suiteVec())));
+    BOOST_REQUIRE_MESSAGE(
+        ecf::algorithm::transform_to_name_vector(theDefs->suiteVec()) == vector_dcba(),
+        "expected " << ecf::algorithm::join(vector_dcba()) << " but found: "
+                    << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
 
     suite_ptr suite_a = theDefs->findSuite("d");
     std::vector<Family*> families;
     suite_a->getAllFamilies(families);
-    BOOST_REQUIRE_MESSAGE(toStrVec(families) == vector_abcd(),
-                          "NOrder::ALPHA  expected " << toString(vector_abcd())
-                                                     << " but found: " << toString(toStrVec(families)));
+    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
+                          "NOrder::ALPHA  expected "
+                              << ecf::algorithm::join(vector_abcd()) << " but found: "
+                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(families)));
 }
 
 BOOST_AUTO_TEST_CASE(test_ssync_cmd_test_order) {
@@ -242,5 +248,7 @@ BOOST_AUTO_TEST_CASE(test_ssync_cmd_test_order) {
     /// Keep valgrind happy
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

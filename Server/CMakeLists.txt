@@ -1,80 +1,79 @@
- # =======================================================
- # LIB
- # to list all sources to build use:
- #    cd $WK/Server
- #    find src -name \*.cpp  -print | sort
- # =======================================================
-list( APPEND srcs
-   # HEADERS
-   src/BaseServer.hpp
-   src/CheckPtSaver.hpp
-   src/NodeTreeTraverser.hpp
-   src/Server.hpp
-   src/ServerEnvironment.hpp
-   src/ServerOptions.hpp
-   src/SslServer.hpp
-   src/SslTcpServer.hpp
-   src/TcpBaseServer.hpp
-   src/TcpServer.hpp
-   # SOURCES
-   src/BaseServer.cpp
-   src/CheckPtSaver.cpp
-   src/NodeTreeTraverser.cpp
-   src/Server.cpp
-   src/ServerEnvironment.cpp
-   src/ServerOptions.cpp
-   src/TcpBaseServer.cpp
-   src/TcpServer.cpp
+#
+# Copyright 2009- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
+
+set(srcs
+  # Headers
+  src/ecflow/server/BaseServer.hpp
+  src/ecflow/server/CheckPtSaver.hpp
+  src/ecflow/server/NodeTreeTraverser.hpp
+  src/ecflow/server/Server.hpp
+  src/ecflow/server/ServerEnvironment.hpp
+  src/ecflow/server/ServerOptions.hpp
+  src/ecflow/server/SslServer.hpp
+  src/ecflow/server/SslTcpServer.hpp
+  src/ecflow/server/TcpBaseServer.hpp
+  src/ecflow/server/TcpServer.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.hpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.hpp>
+  # Sources
+  src/ecflow/server/BaseServer.cpp
+  src/ecflow/server/CheckPtSaver.cpp
+  src/ecflow/server/NodeTreeTraverser.cpp
+  src/ecflow/server/Server.cpp
+  src/ecflow/server/ServerEnvironment.cpp
+  src/ecflow/server/ServerOptions.cpp
+  src/ecflow/server/TcpBaseServer.cpp
+  src/ecflow/server/TcpServer.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.cpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.cpp>
 )
 
-if (OPENSSL_FOUND)
-	list( APPEND srcs
-          # HEADERS
-          src/SslServer.hpp
-          src/SslTcpServer.hpp
-          # SOURCES
-          src/SslServer.cpp
-          src/SslTcpServer.cpp
-        )
-endif()
-
-
-ecbuild_add_library( TARGET libserver
-                     NOINSTALL
-                     TYPE     STATIC
-                     SOURCES  ${srcs}
-                     )
-target_link_libraries(libserver base node nodeattr core pthread )
-target_include_directories(libserver PRIVATE src
-                                             ../ACore/src 
-                                             ../ANattr/src
-                                             ../ANode/src
-                                             ../Base/src
-                                             ../Base/src/cts
-                                             ../Base/src/stc 
+ecbuild_add_library(
+  TARGET
+    libserver
+  NOINSTALL
+  TYPE STATIC
+  SOURCES
+    ${srcs}
+  PUBLIC_INCLUDES
+    src
+  PUBLIC_LIBS
+    base
+    Boost::boost # Boost header-only libraries must be available (namely asio)
 )
-
 target_clangformat(libserver)
 
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
-ecbuild_add_executable( TARGET   ecflow_server
-                        SOURCES  src/ServerMain.cpp
-                        LIBS     libserver ${OPENSSL_LIBRARIES}
-                        INCLUDES ${Boost_INCLUDE_DIRS} 
-                       )
+ecbuild_add_executable(
+  TARGET
+    ecflow_server
+  SOURCES
+    src/ecflow/server/ServerMain.cpp
+  LIBS
+    libserver
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    Threads::Threads
+)
+target_clangformat(ecflow_server)
 
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
 # Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
 # had no effect
 #          
-SET_TARGET_PROPERTIES(ecflow_server PROPERTIES 
-                                    INSTALL_RPATH ""
-                     )
-
-target_clangformat(ecflow_server)
+SET_TARGET_PROPERTIES(ecflow_server
+  PROPERTIES
+    INSTALL_RPATH ""
+)
 
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -93,16 +92,26 @@ target_clangformat(ecflow_server)
                           
 # ================================================================================                         
 # TEST
-# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
-ecbuild_add_test( TARGET       u_server
-                  SOURCES      test/TestServerEnvironment.cpp 
-                               test/TestServer1.cpp
-                  INCLUDES     src ${Boost_INCLUDE_DIRS}
-                  LIBS         libserver ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
-                  DEFINITIONS  ${BOOST_TEST_DYN_LINK}
-                  TEST_DEPENDS u_base
-              )
+ecbuild_add_test(
+  TARGET
+    u_server
+  LABELS
+    unit nightly
+  INCLUDES
+    src
+  SOURCES
+    test/TestCheckPtSaver.cpp
+    test/TestServerEnvironment.cpp
+    test/TestServer_main.cpp # test entry point
+    test/TestServer.cpp
+  LIBS
+    libserver
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    Threads::Threads
+  TEST_DEPENDS
+    u_base
+)
 
 target_clangformat(u_server CONDITION ENABLE_TESTS)
 

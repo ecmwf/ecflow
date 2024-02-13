@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef UILOG_HPP
-#define UILOG_HPP
+#ifndef ecflow_viewer_UiLog_HPP
+#define ecflow_viewer_UiLog_HPP
 
 #include <sstream>
 #include <string>
@@ -27,7 +28,7 @@ class QDateTime;
 class UiFunctionLog {
 public:
     UiFunctionLog(const std::string& server, const std::string& funcName);
-    UiFunctionLog(const std::string& funcName);
+    explicit UiFunctionLog(const std::string& funcName);
     ~UiFunctionLog();
 
     std::string logEnter() const;
@@ -93,4 +94,4 @@ std::ostream& operator<<(std::ostream&, const QRect&);
 std::ostream& operator<<(std::ostream&, const QPoint&);
 std::ostream& operator<<(std::ostream&, const QDateTime&);
 
-#endif // UILOG_HPP
+#endif /* ecflow_viewer_UiLog_HPP */

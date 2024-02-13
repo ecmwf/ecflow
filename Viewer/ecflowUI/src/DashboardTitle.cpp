@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "DashboardTitle.hpp"
 
@@ -178,8 +179,8 @@ void DashboardTitle::updateTitle() {
         const int marginX = 0;
         const int gap     = 1;
 
-        int maxBandH      = 2;
-        int bandH         = (current_) ? maxBandH : 2;
+        int maxBandH = 2;
+        int bandH    = (current_) ? maxBandH : 2;
 
         QFont f;
         QFontMetrics fm(f);
@@ -190,8 +191,8 @@ void DashboardTitle::updateTitle() {
         // Compute the pixmap size
         int h = fm.height() + bandH + 1;
         // int w=fm.width("ABCD...")+(num-1);
-        int w       = maxPixWidth_ - 10;
-        int dw      = w / num;
+        int w  = maxPixWidth_ - 10;
+        int dw = w / num;
 
         int xp      = 0;
         int yp      = 0;
@@ -303,8 +304,8 @@ void DashboardTitle::updateTitle() {
         QFontMetrics fm(f); // Compute the pixmap size
         int h = fm.height() + 2;
         // int w=fm.width("ABCD...")+(num-1);
-        int w    = h * 5 / 4;
-        int dw   = w / num;
+        int w  = h * 5 / 4;
+        int dw = w / num;
 
         descPix_ = QPixmap(w + 1, h + 1);
         descPix_.fill(Qt::transparent);

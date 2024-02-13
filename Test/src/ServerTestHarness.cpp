@@ -1,41 +1,35 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #127 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ServerTestHarness.hpp"
 
 #include <iostream>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Ecf.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "QueueAttr.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "WhyCmd.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // #define DEBUG_TEST_WAITER 1
 // #define DEBUG_TEST_WAITER_DEFS 1
@@ -326,7 +320,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
 #ifdef DEBUG_DIFF
             {
                 counter++;
-                std::string filename = dump_defs_filename + boost::lexical_cast<std::string>(counter);
+                std::string filename = dump_defs_filename + ecf::convert_to<std::string>(counter);
                 std::ofstream theFile(filename.c_str());
 
                 std::vector<Task*> tasks;
@@ -524,7 +518,7 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const {
         int delta = abs(max - min) / 10;
         for (int i = min + delta; i <= max; i = i + delta) {
             templateEcfFile += " ";
-            templateEcfFile += boost::lexical_cast<std::string>(i);
+            templateEcfFile += ecf::convert_to<std::string>(i);
         }
         templateEcfFile += "\n";
         templateEcfFile += "do\n";
@@ -561,17 +555,18 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const {
 std::string ServerTestHarness::testDataDefsLocation(const std::string& defsFile) {
     // DefsFile is of the form base_name.def"
     // We want to place the defs and log file in the same location as its test directory
-    // 		test/data/ECF_HOME/base_name/base_name.def
+    //   test/data/ECF_HOME/base_name/base_name.def
     std::string testData = testDataLocation(defsFile) + "/" + defsFile;
     return testData;
 }
 
 std::string ServerTestHarness::testDataLocation(const std::string& defsFile) {
     // DefsFile is of the form:
-    //                           base_name.def
-    //                           /tmp/path/base_name.def
+    //   base_name.def
+    //   /tmp/path/base_name.def
+    //
     // We want to place the defs and log file in the same location as its test directory
-    // 		test/data/ECF_HOME/base_name
+    //   test/data/ECF_HOME/base_name
     //
     std::string base_name = defsFile;
     size_t slash_pos      = defsFile.rfind('/', defsFile.length());
@@ -581,7 +576,7 @@ std::string ServerTestHarness::testDataLocation(const std::string& defsFile) {
 
     size_t dot_pos = base_name.rfind('.', base_name.length());
     assert(dot_pos != std::string::npos); // missing '.'
-    base_name            = base_name.substr(0, dot_pos);
+    base_name = base_name.substr(0, dot_pos);
 
     std::string testData = TestFixture::smshome() + "/" + base_name;
     return testData;

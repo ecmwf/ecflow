@@ -1,14 +1,15 @@
-/***************************** LICENSE START ***********************************
+/*
+ * Copyright 2009- ECMWF and INPE.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
- Copyright 2009- ECMWF and INPE. This software is distributed under the terms
- of the Apache License version 2.0. In applying this license, ECMWF does not
- waive the privileges and immunities granted to it by virtue of its status as
- an Intergovernmental Organization or submit itself to any jurisdiction.
-
- ***************************** LICENSE END *************************************/
-
-#ifndef TREENODEWIDGET_HPP_
-#define TREENODEWIDGET_HPP_
+#ifndef ecflow_viewer_TreeNodeWidget_HPP
+#define ecflow_viewer_TreeNodeWidget_HPP
 
 #include "NodeWidget.hpp"
 #include "VProperty.hpp"
@@ -24,7 +25,7 @@ class TreeNodeWidget : public NodeWidget, public VPropertyObserver, protected Ui
     Q_OBJECT
 
 public:
-    TreeNodeWidget(ServerFilter*, QWidget* parent = nullptr);
+    explicit TreeNodeWidget(ServerFilter*, QWidget* parent = nullptr);
     ~TreeNodeWidget() override;
 
     void populateDockTitleBar(DashboardDockTitleWidget* tw) override;
@@ -61,4 +62,4 @@ protected:
     std::string firstSelectionPath_;
 };
 
-#endif
+#endif /* ecflow_viewer_TreeNodeWidget_HPP */

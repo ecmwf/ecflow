@@ -26,7 +26,7 @@ struct TextPagerSection
 {
 public:
     enum TextSectionOption { IncludePartial = 0x01 };
-    Q_DECLARE_FLAGS(TextSectionOptions, TextSectionOption);
+    Q_DECLARE_FLAGS(TextSectionOptions, TextSectionOption)
 
     ~TextPagerSection();
     QString text() const;
@@ -74,6 +74,6 @@ private:
     friend class TextPagerEdit;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerSection::TextSectionOptions);
+Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerSection::TextSectionOptions)
 
 #endif

@@ -1,46 +1,39 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AutoArchiveAttr.hpp"
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "Simulator.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestUtil.hpp"
-// #include "PrintStyle.hpp"
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-namespace fs = boost::filesystem;
-
 /// Simulate definition files that are created on then fly. This allows us to validate
 /// Defs file, to check for correctness
 
-BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Simulator)
+
+BOOST_AUTO_TEST_SUITE(T_AutoArchive)
 
 BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     cout << "Simulator:: ...test_autoarchive_suite\n";
@@ -78,8 +71,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autoarchive_suite.def"), errorMsg),
-                        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_suite.def"), errorMsg), errorMsg);
 
     // make sure autoarchive archives the suite.
     BOOST_CHECK_MESSAGE(s1->get_flag().is_set(ecf::Flag::ARCHIVED),
@@ -123,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s3->absNodePath() << " to be restored");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autoarchive_suite.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autoarchive_suite.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -178,8 +170,8 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     // Run the simulator
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_autoarchive_ast_node_reset.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_ast_node_reset.def"), errorMsg),
+                        errorMsg);
 
     // Auto archive should archive suite s2 and s3, leaving one suite i.e s1
     const std::vector<suite_ptr>& suites = theDefs.suiteVec();
@@ -199,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     }
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autocancel_ast_node_reset.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autocancel_ast_node_reset.def") + ".log";
     fs::remove(logFileName);
     fs::remove(suite_s2->archive_path()); // remove generated archive files
     fs::remove(suite_s3->archive_path()); // remove generated archive files
@@ -249,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_autoarchive_family.def"), errorMsg),
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autoarchive_family.def"), errorMsg),
                         errorMsg);
 
     // make sure all familes has been archived
@@ -271,7 +263,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
     }
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_autoarchive_family_and_task.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_autoarchive_family_and_task.def") + ".log";
     fs::remove(logFileName);
 }
 
@@ -298,9 +290,8 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(
-        simulator.run(theDefs, TestUtil::testDataLocation("test_two_autoarchive_in_hierarchy.def"), errorMsg),
-        errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_two_autoarchive_in_hierarchy.def"), errorMsg),
+                        errorMsg);
 
     // Check ONLY the suite got archived an not family
     BOOST_CHECK_MESSAGE(suite->get_flag().is_set(ecf::Flag::ARCHIVED),
@@ -314,8 +305,10 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
     BOOST_CHECK_MESSAGE(!fam, "Expected family to be deleted");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_two_autoarchive_in_hierarchy.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_two_autoarchive_in_hierarchy.def") + ".log";
     fs::remove(logFileName);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

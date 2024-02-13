@@ -1,36 +1,31 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #21 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "DurationTimer.hpp"
-#include "File.hpp"
-#include "Log.hpp"
-#include "Pid.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Pid.hpp"
 
 using namespace ecf;
 using namespace std;
 using namespace boost;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Log)
 
 static std::string getLogPath() {
 
@@ -382,5 +377,7 @@ BOOST_AUTO_TEST_CASE(test_get_log_timing) {
 
     cout << timer.duration() << "s\n" << flush;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

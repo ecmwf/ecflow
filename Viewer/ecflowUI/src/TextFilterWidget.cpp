@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TextFilterWidget.hpp"
 
@@ -50,7 +51,7 @@ TextFilterWidget::TextFilterWidget(QWidget* parent) : QWidget(parent) {
     redBrush_   = ViewerUtil::lineEditRedBg();
     greenBrush_ = ViewerUtil::lineEditGreenBg();
 
-    completer_  = new QCompleter(this);
+    completer_ = new QCompleter(this);
     le_->setCompleter(completer_);
 
     QIcon icon;
@@ -131,7 +132,7 @@ void TextFilterWidget::slotFilterEditor() {
 }
 
 void TextFilterWidget::buildMenu(QToolButton* tb) {
-    auto* menu     = new QMenu(tb);
+    auto* menu = new QMenu(tb);
 
     auto* manageAc = new QAction(menu);
     manageAc->setText(tr("Manage filters ..."));
@@ -188,7 +189,7 @@ void TextFilterWidget::buildMenu(QToolButton* tb) {
             bool matchMode     = isMatched();
             bool caseSensitive = isCaseSensitive();
 
-            int pos            = TextFilterHandler::Instance()->indexOf(filter, matchMode, caseSensitive);
+            int pos = TextFilterHandler::Instance()->indexOf(filter, matchMode, caseSensitive);
             if (pos != -1) {
                 TextFilterItem it = TextFilterHandler::Instance()->items()[pos];
 
@@ -216,13 +217,13 @@ void TextFilterWidget::buildMenu(QToolButton* tb) {
                 std::size_t pos = id[1].toInt();
                 TextFilterItem item("", "");
                 if (id[0] == "s") {
-                    if (pos >= 0 && TextFilterHandler::Instance()->items().size()) {
+                    if (TextFilterHandler::Instance()->items().size()) {
                         item = TextFilterHandler::Instance()->items()[pos];
                     }
                 }
 
                 else if (id[0] == "r") {
-                    if (pos >= 0 && TextFilterHandler::Instance()->latestItems().size()) {
+                    if (TextFilterHandler::Instance()->latestItems().size()) {
                         item = TextFilterHandler::Instance()->latestItems()[pos];
                     }
                 }
@@ -261,7 +262,7 @@ void TextFilterWidget::addMenuSection(QMenu* menu,
 
     for (std::size_t i = 0; i < items.size(); i++) {
         if (data != "s" || items[i].contextMenu()) {
-            auto* ac    = new QAction(this);
+            auto* ac = new QAction(this);
 
             QString txt = QString::fromStdString(items[i].filter());
             // Replace whitespace with Open Box U+2423 just for better interpretation

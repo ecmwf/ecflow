@@ -1,46 +1,39 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #27 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "Limit.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
-#include "WhyCmd.hpp"
+#include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/base/cts/ClientToServerCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_WhyCmd)
 
 static unsigned int waitForWhy(const std::string& path, const std::string& why, int max_time_to_wait) {
     unsigned int updateCalendarCount = 0;
@@ -161,9 +154,9 @@ BOOST_AUTO_TEST_CASE(test_why_time) {
         boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
         boost::posix_time::ptime time1        = theLocalTime - hours(1);
 
-        suite_ptr suite                       = Suite::create("test_why_time");
-        family_ptr fam                        = Family::create("family");
-        task_ptr task                         = Task::create("t1");
+        suite_ptr suite = Suite::create("test_why_time");
+        family_ptr fam  = Family::create("family");
+        task_ptr task   = Task::create("t1");
 
         ClockAttr clockAttr(theLocalTime);
         suite->addClock(clockAttr);
@@ -209,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_why_today) {
         boost::posix_time::ptime theLocalTime(date(2010, 2, 10), hours(1));
         boost::posix_time::ptime time1 = theLocalTime + hours(1);
 
-        suite_ptr suite                = theDefs.add_suite("test_why_today");
+        suite_ptr suite = theDefs.add_suite("test_why_today");
         ClockAttr clockAttr(theLocalTime);
         suite->addClock(clockAttr);
 
@@ -242,9 +235,9 @@ BOOST_AUTO_TEST_CASE(test_why_cron) {
         boost::posix_time::ptime time2        = theLocalTime - hours(1);
         boost::gregorian::date todaysDate     = theLocalTime.date();
 
-        suite_ptr suite                       = Suite::create("test_why_cron");
-        family_ptr fam                        = Family::create("family");
-        task_ptr task                         = Task::create("t1");
+        suite_ptr suite = Suite::create("test_why_cron");
+        family_ptr fam  = Family::create("family");
+        task_ptr task   = Task::create("t1");
 
         ClockAttr clockAttr(theLocalTime, false /*real*/);
         suite->addClock(clockAttr);
@@ -296,18 +289,18 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
     // Testing for limits requires that we have least some jobs are submitted.
     // we need to kill these jobs, at the end of test.
 
-    //	suite test_why_limit
-    //    limit disk 50
-    //	   family family
-    //          inlimit /suite1:disk 50
-    //	   		task t0
-    //	   		task t1
-    //	   		task t2
-    //	   		task t3
-    //	   		task t4
-    //	   		task t5
-    //	   endfamily
-    //	endsuite
+    // suite test_why_limit
+    //   limit disk 50
+    //   family family
+    //     inlimit /suite1:disk 50
+    //     task t0
+    //     task t1
+    //     task t2
+    //     task t3
+    //     task t4
+    //     task t5
+    //   endfamily
+    // endsuite
 
     Defs theDefs;
     {
@@ -321,7 +314,7 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
         fam->addInLimit(InLimit("disk", pathToLimit, 50));
         int taskSize = 6;
         for (int i = 0; i < taskSize; i++) {
-            fam->addTask(Task::create("t" + boost::lexical_cast<std::string>(i)));
+            fam->addTask(Task::create("t" + ecf::convert_to<std::string>(i)));
         }
     }
 
@@ -541,5 +534,7 @@ BOOST_AUTO_TEST_CASE(test_why_repeat) {
 
     cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

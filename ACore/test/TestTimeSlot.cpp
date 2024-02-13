@@ -1,31 +1,28 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #29 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "TimeSlot.hpp"
+#include "ecflow/core/TimeSlot.hpp"
 
 using namespace std;
 using namespace ecf;
+using namespace boost;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-using namespace boost;
+BOOST_AUTO_TEST_SUITE(U_Core)
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(T_TimeSlot)
 
 BOOST_AUTO_TEST_CASE(test_time_slot) {
     cout << "ACore:: ...test_time_slot\n";
@@ -98,5 +95,7 @@ BOOST_AUTO_TEST_CASE(test_time_slot) {
         BOOST_CHECK_MESSAGE(x1 >= y1, ">= operator expected to succced");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

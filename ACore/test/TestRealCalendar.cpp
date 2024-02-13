@@ -1,32 +1,30 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #6 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_RealCalendar)
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar) {
     cout << "ACore:: ...test_REAL_calendar\n";
@@ -96,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_relative_complex) {
 
             timeSeries.calendarChanged(calendar);
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -198,7 +196,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_complex) {
             time_now += minutes(1);
             calendar.update(time_now);
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -322,7 +320,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_day_changed_for_hybrid) {
     BOOST_CHECK_MESSAGE(calendar.hybrid(), "calendar type should be real");
 
     // HYBRID calendars allow for day change but not date.
-    std::string expected_date         = to_simple_string(calendar.date());
+    std::string expected_date = to_simple_string(calendar.date());
 
     boost::posix_time::ptime time_now = Calendar::second_clock_time();
 
@@ -346,5 +344,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_day_changed_for_hybrid) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

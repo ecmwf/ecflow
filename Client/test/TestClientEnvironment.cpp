@@ -1,35 +1,29 @@
-#define BOOST_TEST_MODULE TestClient
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #9 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "File.hpp"
-#include "Str.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ClientEnvironment)
 
 // **************************************************************************************
 // test the client environment:
@@ -153,5 +147,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_empty_host_file) {
 
     fs::remove(empty_host_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

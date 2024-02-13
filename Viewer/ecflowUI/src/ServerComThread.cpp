@@ -1,25 +1,27 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ServerComThread.hpp"
 
 #include <algorithm>
 
-#include "ClientInvoker.hpp"
-#include "CommandLine.hpp"
-#include "Defs.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
 #include "SuiteFilter.hpp"
 #include "UiLog.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/CommandLine.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Suite.hpp"
 
 #define _UI_SERVERCOMTHREAD_DEBUG
 
@@ -124,38 +126,15 @@ void ServerComThread::run() {
 
                     UiLog(serverName_).dbg() << " COMMAND";
 
-                    // the commmand is a string. We leave the command parsing to the client.
-                    // This is the safest solution.
-                    if (!commandAsStr_.empty()) {
-                        CommandLine cl(commandAsStr_);
-                        ci_->invoke(cl);
-                    // the command is already tokenised. We only call it when the command
-                    // arguments are correctly identified (e.g. when come from a dialog)
-                    // with exception of --alter (see below).
-                    }
-                    else {
-                        // special treatment for variable add/change to allow values with "--"  characters.
-                        // See issue ECFLOW-1414. The command_ string is supposed to contain these values:
-                        // ecflow_client --alter change variable NAME VALUE PATH
-                        // TODO: remove this code when the cli allows having values starting with "--"
-                        if (command_.size() >= 7 && command_[1] == "--alter" && command_[3] == "variable" &&
-                            (command_[2] == "change" || command_[2] == "add")) {
-                            std::vector<std::string> cmdPaths;
-                            for (size_t i = 6; i < command_.size(); i++) {
-                                cmdPaths.emplace_back(command_[i]);
-                            }
-                            ci_->alter(cmdPaths, command_[2], command_[3], command_[4], command_[5]);
-                        }
-
-                        // call the client invoker with the saved command
-                        else {
-                            CommandLine cl(command_);
+                    // Depending on the source of the action, the command might be:
+                    //  - the 'literal' command string, or
+                    //  - the 'tokenised' command
+                    // Once the CommandLine is created, the handling is the same.
+                    CommandLine cl = commandAsStr_.empty() ? CommandLine(command_) : CommandLine(commandAsStr_);
 #ifdef _UI_SERVERCOMTHREAD_DEBUG
-                            UiLog(serverName_).dbg() << " args=" << cl;
+                    UiLog(serverName_).dbg() << " args=" << cl;
 #endif
-                            ci_->invoke(cl);
-                        }
-                    }
+                    ci_->invoke(cl);
                     break;
                 }
 
@@ -258,7 +237,7 @@ void ServerComThread::run() {
                     if (maxLineNum_ < 0)
                         ci_->file(nodePath_, params_["clientPar"]);
                     else
-                        ci_->file(nodePath_, params_["clientPar"], boost::lexical_cast<std::string>(maxLineNum_));
+                        ci_->file(nodePath_, params_["clientPar"], ecf::convert_to<std::string>(maxLineNum_));
 
                     break;
                 }

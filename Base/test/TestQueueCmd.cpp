@@ -1,34 +1,33 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #9 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "QueueAttr.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/attribute/QueueAttr.hpp"
+#include "ecflow/base/cts/task/QueueCmd.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_QueueCmd)
 
 BOOST_AUTO_TEST_CASE(test_queue_cmd) {
     cout << "Base:: ...test_queue_cmd\n";
@@ -46,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_queue_cmd) {
     Defs defs;
     string suite_f_t = "/suite/f/t";
 
-    suite_ptr s      = defs.add_suite("suite");
+    suite_ptr s = defs.add_suite("suite");
     QueueAttr q1("q1", {"s1", "s2", "s3"});
     s->add_queue(q1);
     QueueAttr& q1_ref = s->findQueue("q1");
@@ -246,5 +245,7 @@ BOOST_AUTO_TEST_CASE(test_queue_cmd) {
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

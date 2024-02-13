@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TimelineView.hpp"
 
@@ -173,10 +174,10 @@ void TimelineDelegate::renderTimeline(QPainter* painter, const QStyleOptionViewI
     if (!data)
         return;
 
-    int leftEdge             = option.rect.x();
-    int rightEdge            = option.rect.x() + option.rect.width();
-    int xpPrev               = leftEdge - 2;
-    int xpNext               = rightEdge + 2;
+    int leftEdge  = option.rect.x();
+    int rightEdge = option.rect.x() + option.rect.width();
+    int xpPrev    = leftEdge - 2;
+    int xpNext    = rightEdge + 2;
 
     const TimelineItem& item = data->items()[row];
     int extendedRight        = -1;
@@ -549,8 +550,8 @@ void TimelineDelegate::setPeriod(QDateTime t1, QDateTime t2) {
 }
 
 void TimelineDelegate::setMaxDurations(int submittedDuration, int activeDuration) {
-    submittedMaxDuration_  = submittedDuration;
-    activeMaxDuration_     = activeDuration;
+    submittedMaxDuration_ = submittedDuration;
+    activeMaxDuration_    = activeDuration;
 
     submittedMaxTextWidth_ = getDurationMaxTextWidth(submittedMaxDuration_);
     activeMaxTextWidth_    = getDurationMaxTextWidth(activeMaxDuration_);
@@ -774,7 +775,7 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,
 
     auto* menu = new QMenu(this);
 
-    auto* ac   = new QAction(this);
+    auto* ac = new QAction(this);
     ac->setText(tr("Show details"));
     QFont fBold;
     fBold.setBold(true);

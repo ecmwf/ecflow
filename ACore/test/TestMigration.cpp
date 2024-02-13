@@ -1,34 +1,31 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <boost/test/unit_test.hpp>
 
-#include "Calendar.hpp"
-#include "DState.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
-#include "NState.hpp"
-#include "SerializationTest.hpp"
-#include "TimeSeries.hpp"
+#include "TestSerialisation.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/DState.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/NState.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Migration)
 
 // If you are updating the tests, *MAKE SURE* to check out test/data/migration/* files
 // #define UPDATE_TESTS 1
@@ -68,5 +65,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_cereal) {
     do_restore<NState>(file_name + "nstate" + cereal_version, NState());
 #endif
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

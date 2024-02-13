@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "NodeQueryEditor.hpp"
 
@@ -153,11 +153,11 @@ NodeQueryEditor::NodeQueryEditor(QWidget* parent) : QWidget(parent) {
     //-------------------------
 
     // Node type
-    typeEdit_      = new NodeQueryListOptionEdit(query_->option("type"), typeList_, typeResetTb_, this);
-    stateEdit_     = new NodeQueryListOptionEdit(query_->option("state"), stateList_, stateResetTb_, this);
-    flagEdit_      = new NodeQueryListOptionEdit(query_->option("flag"), flagList_, flagResetTb_, this);
+    typeEdit_  = new NodeQueryListOptionEdit(query_->option("type"), typeList_, typeResetTb_, this);
+    stateEdit_ = new NodeQueryListOptionEdit(query_->option("state"), stateList_, stateResetTb_, this);
+    flagEdit_  = new NodeQueryListOptionEdit(query_->option("flag"), flagList_, flagResetTb_, this);
 
-    attrEdit_      = new NodeQueryListOptionEdit(query_->option("attribute"), attrList_, attrResetTb_, this);
+    attrEdit_ = new NodeQueryListOptionEdit(query_->option("attribute"), attrList_, attrResetTb_, this);
 
     int listHeight = (fm.height() + 2) * 6 + 6;
     typeList_->setFixedHeight(listHeight);
@@ -392,7 +392,7 @@ void NodeQueryEditor::slotAttrPanelChanged() {
 void NodeQueryEditor::checkGuiState() {
     serverResetTb_->setEnabled(serverCb_->hasSelection());
 
-    bool oneServer       = (serverCb_->count() == 1 || serverCb_->selection().count() == 1);
+    bool oneServer = (serverCb_->count() == 1 || serverCb_->selection().count() == 1);
 
     bool oriRootLeStatus = rootLe_->isEnabled();
     rootLabel_->setEnabled(oneServer);

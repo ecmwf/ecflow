@@ -1,55 +1,49 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #6 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//
-//    This test will TEST:
-//       o Alias creation and running
-//       o Alias ordering
-//       o Alias deletion
-//    Will indirectly test the Alias memento's
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Alias.hpp"
-#include "AssertTimer.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "NOrder.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "TestUtil.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/base/cts/user/CFileCmd.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/NOrder.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Alias.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSingleSuite)
+///
+///    This test will TEST:
+///       o Alias creation and running
+///       o Alias ordering
+///       o Alias deletion
+///    Will indirectly test the Alias memento's
+///
+
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Alias)
 
 void wait_for_alias_to_complete(const std::string& alias_path) {
     AssertTimer assertTimer(10, false); // Bomb out after 10 seconds, fall back if test fail
@@ -157,9 +151,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias1");
         expected.push_back("alias0");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::DOWN expected " << toString(expected) << " but found "
-                                                       << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::DOWN expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::UP)) == 0,
@@ -176,9 +171,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias0");
         expected.push_back("alias1");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::UP expected " << toString(expected) << " but found "
-                                                     << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::UP expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::ORDER)) == 0,
@@ -195,9 +191,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias1");
         expected.push_back("alias0");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::ORDER expected " << toString(expected) << " but found "
-                                                        << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::ORDER expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::ALPHA)) == 0,
@@ -214,9 +211,10 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         std::vector<std::string> expected;
         expected.push_back("alias0");
         expected.push_back("alias1");
-        BOOST_REQUIRE_MESSAGE(toStrVec(task->aliases()) == expected,
-                              "NOrder::ALPHA expected " << toString(expected) << " but found "
-                                                        << toString(toStrVec(task->aliases())));
+        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
+                              "NOrder::ALPHA expected "
+                                  << ecf::algorithm::join(expected) << " but found "
+                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
     }
 
     // TEST Alias DELETION =============================================================================
@@ -239,5 +237,7 @@ BOOST_AUTO_TEST_CASE(test_alias) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

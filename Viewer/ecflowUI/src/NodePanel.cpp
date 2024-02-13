@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "NodePanel.hpp"
 
@@ -17,6 +18,7 @@
 #include "InfoPanel.hpp"
 #include "ServerHandler.hpp"
 #include "VSettings.hpp"
+#include "ecflow/core/Converter.hpp"
 
 NodePanel::NodePanel(QWidget* parent)
     : TabWidget(parent)
@@ -317,7 +319,7 @@ void NodePanel::writeSettings(VComboSettings* vs) {
             vs->beginGroup(id);
             nw->writeSettings(vs);
             vs->endGroup();
-            // pt.add_child("tab_"+ boost::lexical_cast<std::string>(i),ptTab);
+            // pt.add_child("tab_"+   ecf::convert_to<std::string>(i),ptTab);
         }
     }
 }
@@ -362,5 +364,5 @@ void NodePanel::readSettings(VComboSettings* vs) {
 }
 
 std::string NodePanel::tabSettingsId(int i) {
-    return "tab_" + boost::lexical_cast<std::string>(i);
+    return "tab_" + ecf::convert_to<std::string>(i);
 }

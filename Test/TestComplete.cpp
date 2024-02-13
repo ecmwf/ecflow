@@ -1,40 +1,33 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #25 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Complete)
 
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
@@ -65,18 +58,18 @@ BOOST_AUTO_TEST_CASE(test_complete) {
     //                     Allows test to run without requiring installation
 
     // # Note: we have to use relative paths, since these tests are relocatable
-    //	suite test_complete
-    //	  family family
-    //       repeat integer YMD 0 1
-    //	   	complete ./family/check:nofiles  # repeat family with waiting for children to complete
-    //	   	task check
-    //	   		event 1 nofiles
-    //	    task t1
-    //         trigger check==complete
+    // suite test_complete
+    //   family family
+    //     repeat integer YMD 0 1
+    //     complete ./family/check:nofiles  # repeat family with waiting for children to complete
+    //     task check
+    //       event 1 nofiles
+    //     task t1
+    //       trigger check==complete
     //       task t2
-    //          trigger t2 == complete   #  never runs
-    //	    endfamily
-    //	endsuite
+    //     trigger t2 == complete   #  never runs
+    //   endfamily
+    // endsuite
     std::string eventName = "nofiles";
     Defs theDefs;
     {
@@ -173,5 +166,7 @@ BOOST_AUTO_TEST_CASE(test_complete_with_empty_family) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

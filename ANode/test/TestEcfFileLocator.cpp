@@ -1,35 +1,32 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "EcfFile.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "Pid.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_EcfFileLocator)
 
 void located_ecf_file(task_ptr task,
                       EcfFile::Origin expected_origin,
@@ -156,9 +153,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
                          EcfFile::PRUNE_ROOT,
                          __LINE__); // ECF_FILES_LOOKUP make *NO* difference for lookup with EcfFile::ECF_SCRIPT
 
-        suite->deleteVariable("ECF_FILES_LOOKUP");    // cleanup
-        suite->deleteVariable("ECF_FILES");           // cleanup
-        boost::filesystem::remove(ecf_file_location); // cleanup
+        suite->deleteVariable("ECF_FILES_LOOKUP"); // cleanup
+        suite->deleteVariable("ECF_FILES");        // cleanup
+        fs::remove(ecf_file_location);             // cleanup
     }
     {
         // cout << "Test ECF_HOME/ECF_LISTS at root location\n";
@@ -176,9 +173,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
         suite->add_variable("ECF_FILES_LOOKUP", "prune_leaf"); // change look up method
         located_ecf_file(task, EcfFile::ECF_FILES, EcfFile::PRUNE_LEAF, __LINE__);
 
-        suite->deleteVariable("ECF_FILES_LOOKUP");    // cleanup
-        suite->deleteVariable("ECF_FILES");           // cleanup
-        boost::filesystem::remove(ecf_file_location); // cleanup
+        suite->deleteVariable("ECF_FILES_LOOKUP"); // cleanup
+        suite->deleteVariable("ECF_FILES");        // cleanup
+        fs::remove(ecf_file_location);             // cleanup
     }
     {
         // cout << "Test ECF_HOME at intermediate location prune_leaf\n";
@@ -198,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
             located_ecf_file(task, EcfFile::ECF_HOME, EcfFile::PRUNE_LEAF, __LINE__);
 
             // Remove this file, required for the following test
-            boost::filesystem::remove(ecf_file_location);
+            fs::remove(ecf_file_location);
 
             // Remove ECF_FILES_LOOKUP variable
             suite->deleteVariable("ECF_FILES_LOOKUP");
@@ -206,7 +203,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
             node = node->parent();
         }
         /// Remove all the generated files
-        boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+        fs::remove_all(ecf_home + suite->absNodePath());
     }
     {
         // cout << "Test ECF_FILES at intermediate location, by prune_leaf\n";
@@ -227,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
             located_ecf_file(task, EcfFile::ECF_FILES, EcfFile::PRUNE_LEAF, __LINE__);
 
             // Remove this file, required for the following test
-            boost::filesystem::remove(ecf_file_location);
+            fs::remove(ecf_file_location);
 
             // Remove ECF_FILES_LOOKUP variable
             suite->deleteVariable("ECF_FILES_LOOKUP");
@@ -236,7 +233,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
         }
 
         /// Remove all the generated files
-        boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+        fs::remove_all(ecf_home + suite->absNodePath());
     }
 }
 
@@ -490,5 +487,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

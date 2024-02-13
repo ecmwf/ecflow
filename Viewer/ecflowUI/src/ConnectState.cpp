@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ConnectState.hpp"
 
@@ -29,7 +30,7 @@ void ConnectState::init() {
 const std::string& ConnectState::describe() const {
     static std::string empty = "";
 
-    auto it                  = descMap.find(state_);
+    auto it = descMap.find(state_);
     if (it != descMap.end()) {
         return it->second;
     }
@@ -66,7 +67,7 @@ void ConnectState::logDisconnect() {
 }
 
 void ConnectState::errorMessage(const std::string& str) {
-    errMsg_         = str;
+    errMsg_ = str;
 
     std::size_t pos = str.find("Client environment:");
     if (pos != std::string::npos) {

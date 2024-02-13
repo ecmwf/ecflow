@@ -1,32 +1,30 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
-#include <boost/lexical_cast.hpp>
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "perf_timer.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/perf_timer.hpp"
 
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_PerfTimer)
 
 static void func(int const count = 100000) {
     // std::cout << " func : count " << count << "\n";
     for (int i = 0; i < count; i++) {
         std::string s = std::string("fred");
-        s += boost::lexical_cast<std::string>(i);
+        s += ecf::convert_to<std::string>(i);
     }
 }
 
@@ -83,5 +81,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_timer) {
     }
     BOOST_CHECK_MESSAGE(true, "dummy to keep unit test happy");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

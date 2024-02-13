@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TreeNodeViewDelegate.hpp"
 
@@ -92,8 +93,8 @@ public:
         sizeHintCache = QSize(100, fullHeight);
         spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-        auto h        = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
-        iconSize      = h;
+        auto h   = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize = h;
         if (iconSize % 2 == 1)
             iconSize += 1;
 
@@ -142,13 +143,13 @@ public:
         textBottomCorrection = fm.bottomPaddingForCentre();
         fontHeight           = fm.height();
 
-        height               = realFontHeight + topPadding + bottomPadding;
-        fullHeight           = height + topMargin + bottomMargin;
-        sizeHintCache        = QSize(100, fullHeight);
-        spacing              = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
+        height        = realFontHeight + topPadding + bottomPadding;
+        fullHeight    = height + topMargin + bottomMargin;
+        sizeHintCache = QSize(100, fullHeight);
+        spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-        int h                = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
-        iconSize             = h;
+        int h    = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize = h;
         if (iconSize % 2 == 1)
             iconSize += 1;
 
@@ -180,12 +181,12 @@ public:
 };
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent) : model_(model) {
-    nodeBox_               = new TreeNodeDelegateBox;
-    attrBox_               = new TreeAttrDelegateBox;
+    nodeBox_ = new TreeNodeDelegateBox;
+    attrBox_ = new TreeAttrDelegateBox;
 
     drawAttrSelectionRect_ = true;
 
-    attrFont_              = font_;
+    attrFont_ = font_;
     attrFont_.setPointSize(8);
     serverInfoFont_    = font_;
     suiteNumFont_      = font_;
@@ -307,7 +308,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIn
 void TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index, int& w, int& h, bool compAttrWidth) const {
     QVariant tVar = index.data(Qt::DisplayRole);
 
-    h             = nodeBox_->fullHeight;
+    h = nodeBox_->fullHeight;
 
     // For nodes we compute the exact size of visual rect
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -539,7 +540,7 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
 
     if (hasInfo) {
         // infoFont.setBold(true);
-        fm            = QFontMetrics(serverInfoFont_);
+        fm = QFontMetrics(serverInfoFont_);
 
         int infoWidth = ViewerUtil::textWidth(fm, infoTxt);
         infoRect      = nodeText.br_;
@@ -555,9 +556,9 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
 
     // Update load animation
     if (hasLoad) {
-        an           = animation_->find(Animation::ServerLoadType, true);
+        an = animation_->find(Animation::ServerLoadType, true);
 
-        loadRect     = QRect(currentRight + ViewerUtil::textWidth(fm, 'A'),
+        loadRect = QRect(currentRight + ViewerUtil::textWidth(fm, 'A'),
                          itemRect.top() + (itemRect.height() - an->scaledSize().height()) / 2,
                          an->scaledSize().width(),
                          an->scaledSize().height());
@@ -803,8 +804,8 @@ int TreeNodeViewDelegate::renderNode(QPainter* painter,
         stateShape.shape_ = QPolygon(r1);
         currentRight      = r1.x() + r1.width();
 
-        nodeText.br_      = QRect(r1.left() + nodeBox_->leftPadding, r1.top(), textWidth, r1.height());
-        nodeText.fgCol_   = index.data(Qt::ForegroundRole).value<QColor>();
+        nodeText.br_    = QRect(r1.left() + nodeBox_->leftPadding, r1.top(), textWidth, r1.height());
+        nodeText.fgCol_ = index.data(Qt::ForegroundRole).value<QColor>();
 
         if (hasRealBg) {
             int realW = 6;
@@ -1133,7 +1134,7 @@ void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter, const ServerUpd
     QColor minCol = QColor(198, 215, 253);
     QColor maxCol = QColor(43, 97, 158);
 
-    QRect r1      = data.br_;
+    QRect r1 = data.br_;
     r1.setWidth(ViewerUtil::textWidth(fm, data.prevText_));
     painter->setPen(minCol);
     // painter->setPen(Qt::red);
@@ -1146,8 +1147,8 @@ void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter, const ServerUpd
         painter->setPen(maxCol);
         painter->drawText(r2, Qt::AlignRight | Qt::AlignVCenter, data.nextText_);
 
-        int dh      = (data.br_.height() - fm.height() + 1) / 2;
-        QRect r     = data.br_.adjusted(r1.width() + 4, 2 * dh, -r2.width() - 4, -2 * dh);
+        int dh  = (data.br_.height() - fm.height() + 1) / 2;
+        QRect r = data.br_.adjusted(r1.width() + 4, 2 * dh, -r2.width() - 4, -2 * dh);
 
         auto pos    = static_cast<int>(data.prog_ * r.width());
         QRect rPrev = r.adjusted(0, 0, -(r.width() - pos), 0);
@@ -1254,7 +1255,7 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index, int height, QStrin
     QRect itemRect(offset, 0, 10, height - (nodeBox_->topMargin + nodeBox_->bottomMargin));
     int currentRight = itemRect.left();
 
-    bool hasRealBg   = node->isSuspended();
+    bool hasRealBg = node->isSuspended();
 
     // Node type
     QFontMetrics fmType(typeFont_);

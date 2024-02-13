@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VModelData.hpp"
 
@@ -223,8 +224,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode,
 
     VTreeNode* node = tree_->find(vnode);
 
-    bool attrNumCh  = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-    bool nodeNumCh  = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+    bool attrNumCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+    bool nodeNumCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 #ifdef _UI_VMODELDATA_DEBUG
     UiLogS(server_).dbg() << " node=" << vnode->strName();
@@ -392,8 +393,6 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged) {
     // if there was a state change during the sync
     if (suitesChanged.size() > 0 && !filter_->isNull() && !filter_->isComplete()) {
 #ifdef _UI_VMODELDATA_DEBUG
-        if (suitesChanged.size() < 0)
-            UiLogS(server_).dbg() << " suites changed:";
         for (auto i : suitesChanged)
             UiLogS(server_).dbg() << "  " << i->strName();
 #endif
@@ -1159,7 +1158,6 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item) {
     UiLog().dbg() << " server=" << item->longName();
 #endif
 
-    int i = 0;
     for (auto it = servers_.begin(); it != servers_.end(); ++it) {
         if ((*it)->server_ == item->serverHandler()) {
             int nodeNum = (*it)->nodeNum();
@@ -1185,7 +1183,6 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item) {
             }
             return;
         }
-        i++;
     }
 }
 
@@ -1354,7 +1351,7 @@ void VTreeModelData::add(ServerHandler* server) {
 
     VModelServer* d = nullptr;
 
-    d               = new VTreeServer(server, filterDef_, attrFilter_);
+    d = new VTreeServer(server, filterDef_, attrFilter_);
 
     connectToModel(d);
 
@@ -1404,7 +1401,7 @@ void VTableModelData::add(ServerHandler* server) {
 
     VModelServer* d = nullptr;
 
-    d               = new VTableServer(server, filterDef_);
+    d = new VTableServer(server, filterDef_);
 
     connectToModel(d);
 

@@ -1,31 +1,33 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #50 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/task/CompleteCmd.hpp"
+#include "ecflow/base/cts/task/InitCmd.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_InitAddVariables)
 
 BOOST_AUTO_TEST_CASE(test_init_add_variables) {
     cout << "Client:: ...test_init_add_variables " << endl;
@@ -85,5 +87,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variables) {
         BOOST_CHECK_MESSAGE(v2.empty(), "Expected --complete to delete variable");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

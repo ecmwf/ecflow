@@ -13,9 +13,10 @@
 from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
                   Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
                   JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-                  Repeat, RepeatDate,RepeatDateList, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
-                  Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
-                  VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
+                  Repeat, RepeatDate, RepeatDateTime, RepeatDateList, RepeatDay, RepeatEnumerated, RepeatInteger, \
+                  RepeatString, SState, State, Style, Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, \
+                  TimeSlot, Today, UrlCmd, Variable, VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, \
+                  ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest 
 import sys
 
@@ -570,6 +571,7 @@ class TestComparison(unittest.TestCase):
         self.defs1.add_suite("RepeatInteger").add_repeat(RepeatInteger("integer", 0, 100, 2)) 
         self.defs1.add_suite("RepeatEnumerated").add_repeat(RepeatEnumerated("enum", ["red", "green", "blue" ])) 
         self.defs1.add_suite("RepeatDate").add_repeat(RepeatDate("ymd", 20100111, 20100115, 2))
+        self.defs1.add_suite("RepeatDateTime").add_repeat(RepeatDateTime("ymd", "20100111T000000", "20100115T000000", "48:00:00"))
         self.defs1.add_suite("RepeatDateList").add_repeat(RepeatDateList("ymd",[20100111, 20100115]))
         self.defs1.add_suite("RepeatString").add_repeat(RepeatString("string", ["a", "b", "c" ]))
         self.defs1.add_suite("RepeatDay").add_repeat(RepeatDay(1))
@@ -626,6 +628,7 @@ class TestComparison(unittest.TestCase):
             Suite("RepeatInteger").add( RepeatInteger("integer", 0, 100, 2)),
             Suite("RepeatEnumerated").add( RepeatEnumerated("enum", ["red", "green", "blue" ])),
             Suite("RepeatDate").add( RepeatDate("ymd", 20100111, 20100115, 2)),
+            Suite("RepeatDateTime").add( RepeatDateTime("ymd", "20100111T000000", "20100115T000000", "48:00:00")),
             Suite("RepeatDateList").add( RepeatDateList("ymd", [20100111, 20100115])),
             Suite("RepeatString").add( RepeatString("string", ["a", "b", "c" ])),
             Suite("RepeatDay").add( RepeatDay(1)),
@@ -685,6 +688,7 @@ class TestComparison(unittest.TestCase):
         defs += Suite('RepeatInteger',RepeatInteger("integer", 0, 100, 2) )
         defs += Suite('RepeatEnumerated', RepeatEnumerated("enum", ["red", "green", "blue" ]))
         defs += Suite('RepeatDate', RepeatDate("ymd", 20100111, 20100115, 2))
+        defs += Suite('RepeatDateTime', RepeatDateTime("ymd", "20100111T000000", "20100115T000000", "48:00:00"))
         defs += Suite('RepeatDateList', RepeatDateList("ymd", [20100111, 20100115]))
         defs += Suite('RepeatString',RepeatString("string", ["a", "b", "c" ]))
         defs += Suite('RepeatDay', RepeatDay(1))

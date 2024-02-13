@@ -1,17 +1,13 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #9 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 
@@ -21,7 +17,9 @@
 using namespace std;
 namespace po = boost::program_options;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_ProgramOptions)
 
 BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
     cout << "Base:: ...test_program_options_implicit_value\n";
@@ -147,5 +145,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
     expected.emplace_back("-w");
     BOOST_CHECK_MESSAGE(vm["arg1"].as<vector<string>>() == expected, "multi-token not as expected");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

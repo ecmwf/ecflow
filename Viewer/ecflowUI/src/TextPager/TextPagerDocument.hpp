@@ -53,7 +53,7 @@ class TextPagerDocument : public QObject {
     Q_FLAGS(FindMode)
 
 public:
-    TextPagerDocument(QObject* parent = nullptr);
+    explicit TextPagerDocument(QObject* parent = nullptr);
     ~TextPagerDocument() override;
 
     enum DeviceMode { Sparse, LoadAll };
@@ -68,7 +68,7 @@ public:
         Locking                   = 0x0040,
         DefaultOptions            = AutoDetectCarriageReturns
     };
-    Q_DECLARE_FLAGS(Options, Option);
+    Q_DECLARE_FLAGS(Options, Option)
 
     Options options() const;
     void setOptions(Options opt);
@@ -80,8 +80,8 @@ public:
     inline bool load(const QString& fileName, DeviceMode mode, const QByteArray& codecName) {
         return load(fileName, mode, TextCodecWrapper::fromName(codecName));
     }
-    bool load(QIODevice* device, DeviceMode mode = Sparse, TextCodecWrapper = {});
-    bool load(const QString& fileName, DeviceMode mode = Sparse, TextCodecWrapper = {});
+    bool load(QIODevice* device, DeviceMode mode = Sparse, TextCodecWrapper = TextCodecWrapper{});
+    bool load(const QString& fileName, DeviceMode mode = Sparse, TextCodecWrapper = TextCodecWrapper{});
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     //    inline bool load(QIODevice *device, DeviceMode mode, const QByteArray &codecName)
@@ -120,7 +120,7 @@ public:
         FindWrap            = 0x00010,
         FindAll             = 0x00020
     };
-    Q_DECLARE_FLAGS(FindMode, FindModeFlag);
+    Q_DECLARE_FLAGS(FindMode, FindModeFlag)
 
     int chunkSize() const;
     void setChunkSize(int pos);
@@ -190,7 +190,7 @@ private:
     friend struct TextPagerSection;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::FindMode);
-Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::Options);
+Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::FindMode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(TextPagerDocument::Options)
 
 #endif

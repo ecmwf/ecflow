@@ -1,39 +1,33 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #29 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 #include <sys/stat.h>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
-#include "Pid.hpp"
-#include "PrintStyle.hpp"
 #include "SCPort.hpp"
-#include "User.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/User.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_LogAndCheckptErrors)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -63,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
     BOOST_CHECK_MESSAGE(chdir(ecf_home.c_str()) == 0,
                         "Can't change directory to " << ecf_home << "  error: " << strerror(errno));
     if (debug_me)
-        cout << "->current path = " << boost::filesystem::current_path() << "\n";
+        cout << "->current path = " << fs::current_path() << "\n";
 
     {
         if (debug_me)
@@ -164,10 +158,13 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
     if (debug_me)
         cout << "->remove created directory " << ecf_home << "\n";
     if (debug_me)
-        cout << "->current path = " << boost::filesystem::current_path() << "\n";
+        cout << "->current path = " << fs::current_path() << "\n";
     if (!debug_me) {
         BOOST_CHECK_MESSAGE(File::removeDir(ecf_home),
                             "Failed to remove dir " << ecf_home << "  error: " << strerror(errno));
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

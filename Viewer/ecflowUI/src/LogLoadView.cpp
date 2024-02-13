@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "LogLoadView.hpp"
 
@@ -30,12 +30,8 @@
 #include <QVBoxLayout>
 #include <QtGlobal>
 
-#include "File.hpp"
 #include "FileInfoLabel.hpp"
-#include "File_r.hpp"
 #include "LogModel.hpp"
-#include "NodePath.hpp"
-#include "Str.hpp"
 #include "TextFormat.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
@@ -43,6 +39,10 @@
 #include "VFileTransfer.hpp"
 #include "VSettings.hpp"
 #include "ViewerUtil.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/File_r.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Str.hpp"
 
 //=======================================================
 //
@@ -68,8 +68,8 @@ bool LogLoadRequestSortModel::lessThan(const QModelIndex& left, const QModelInde
             QModelIndex leftIdx  = sourceModel()->index(left.row(), 0);
             QModelIndex rightIdx = sourceModel()->index(right.row(), 0);
 
-            QString leftString   = sourceModel()->data(leftIdx).toString();
-            QString rightString  = sourceModel()->data(rightIdx).toString();
+            QString leftString  = sourceModel()->data(leftIdx).toString();
+            QString rightString = sourceModel()->data(rightIdx).toString();
 
             return QString::localeAwareCompare(leftString, rightString) < 0;
         }
@@ -405,10 +405,10 @@ void ChartCallout::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     if (!rect_.contains(anchor)) {
         QPointF point1, point2;
 
-        bool above         = anchor.y() <= rect_.top();
-        bool aboveCenter   = anchor.y() > rect_.top() && anchor.y() <= rect_.center().y();
-        bool belowCenter   = anchor.y() > rect_.center().y() && anchor.y() <= rect_.bottom();
-        bool below         = anchor.y() > rect_.bottom();
+        bool above       = anchor.y() <= rect_.top();
+        bool aboveCenter = anchor.y() > rect_.top() && anchor.y() <= rect_.center().y();
+        bool belowCenter = anchor.y() > rect_.center().y() && anchor.y() <= rect_.bottom();
+        bool below       = anchor.y() > rect_.bottom();
 
         bool onLeft        = anchor.x() <= rect_.left();
         bool leftOfCenter  = anchor.x() > rect_.left() && anchor.x() <= rect_.center().x();
@@ -675,7 +675,7 @@ void ChartView::removeCallout() {
 
 LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) : data_(nullptr), lastScanIndex_(0) {
     // The data object - to read and store processed log data
-    data_                = new LogLoadData();
+    data_ = new LogLoadData();
 
     LogRequestView* view = nullptr;
 
@@ -726,7 +726,7 @@ void LogRequestViewHandler::buildOtherTab(QWidget* parent) {
     vb->setContentsMargins(0, 3, 0, 0);
     vb->setSpacing(1);
 
-    auto* hb    = new QHBoxLayout();
+    auto* hb = new QHBoxLayout();
 
     auto* label = new QLabel("Mode: ", w);
     hb->addWidget(label);
@@ -774,7 +774,7 @@ void LogRequestViewHandler::buildTableTab(QWidget* parent) {
     vb->setContentsMargins(0, 3, 0, 0);
     vb->setSpacing(1);
 
-    auto* hb    = new QHBoxLayout();
+    auto* hb = new QHBoxLayout();
 
     auto* label = new QLabel("Mode: ", w);
     hb->addWidget(label);
@@ -934,7 +934,7 @@ LogRequestView::LogRequestView(LogRequestViewHandler* handler, QWidget* parent)
 
     auto* holder = new QWidget(this);
 
-    mainLayout_  = new QHBoxLayout(holder);
+    mainLayout_ = new QHBoxLayout(holder);
     mainLayout_->setContentsMargins(0, 0, 0, 0);
     mainLayout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
@@ -1376,7 +1376,7 @@ void LogRequestView::scanPositionClicked(qreal pos) {
         // Try to find the nearest data point around the click position
         int idx = 0;
         if (seriesIndex(t1, 0, tw, idx)) {
-            QChart* chart               = views_[0]->chart();
+            QChart* chart = views_[0]->chart();
 
             QList<QAbstractSeries*> lst = chart->series();
             if (!lst.empty()) {
@@ -1412,7 +1412,7 @@ bool LogRequestView::seriesPeriodIndex(qint64 startTime, qint64 endTime, size_t&
 }
 
 bool LogRequestView::seriesIndex(qint64 t, int startIdx, qint64 tolerance, int& idx) {
-    QChart* chart               = views_[0]->chart();
+    QChart* chart = views_[0]->chart();
 
     QList<QAbstractSeries*> lst = chart->series();
     if (lst.empty())
@@ -1480,7 +1480,7 @@ bool LogRequestView::seriesIndex(qint64 t, int startIdx, qint64 tolerance, int& 
 }
 
 qint64 LogRequestView::seriesTime(int idx) {
-    QChart* chart               = views_[0]->chart();
+    QChart* chart = views_[0]->chart();
 
     QList<QAbstractSeries*> lst = chart->series();
     if (lst.empty())
@@ -1520,8 +1520,8 @@ void LogRequestView::scanPositionChanged(qreal pos) {
         return;
     }
 
-    qint64 tw      = views_[0]->widthToTimeRange(50.);
-    bool hasData   = seriesIndex(t, lastScanIndex_, tw, idx);
+    qint64 tw    = views_[0]->widthToTimeRange(50.);
+    bool hasData = seriesIndex(t, lastScanIndex_, tw, idx);
 
     lastScanIndex_ = idx;
     // UiLog().dbg() << "idx=" << idx;
@@ -1668,7 +1668,7 @@ void LogTotalRequestView::addRemoveSuite(int suiteIdx, bool st) {
 void LogTotalRequestView::addSuite(int idx) {
     QChart* chart = nullptr;
 
-    auto* series  = new QLineSeries();
+    auto* series = new QLineSeries();
     series->setName(suiteSeriesId(idx));
     data_->getSuiteTotalReq(idx, *series);
     chart = getChart(TotalChartType);
@@ -1760,9 +1760,9 @@ void LogTotalRequestView::buildScanTable(QString& txt, int idx) {
         QColor col   = seriesColour(tChart, "all");
         QString name = "all";
 
-        tot          = seriesValue(tChart, "all", idx);
-        ch           = seriesValue(cChart, "all", idx);
-        us           = seriesValue(uChart, "all", idx);
+        tot = seriesValue(tChart, "all", idx);
+        ch  = seriesValue(cChart, "all", idx);
+        us  = seriesValue(uChart, "all", idx);
         buildScanRow(txt, name, tot, ch, us, col);
 
         for (int i = 0; i < suiteCtl_.plotState_.size(); i++) {
@@ -1859,7 +1859,7 @@ void LogCmdSuiteRequestView::addSuite(int suiteIdx) {
 void LogCmdSuiteRequestView::addTotal() {
     int prevMaxVal = maxVal_;
 
-    QString id     = "total";
+    QString id = "total";
     addChartById(id);
     ChartView* view = viewIds_.value(id, NULL);
     Q_ASSERT(view);
@@ -1916,7 +1916,7 @@ void LogCmdSuiteRequestView::addCmd(int reqIdx) {
         if (chartId(views_[i]) == "total") {
             QString title = "All suites";
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
             series->setName(cmdSeriesId(reqIdx));
 
             int maxVal = 0;
@@ -1932,7 +1932,7 @@ void LogCmdSuiteRequestView::addCmd(int reqIdx) {
 
             QString title = "suite: " + QString::fromStdString(data_->suites()[suiteIdx].name());
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
             series->setName(cmdSeriesId(reqIdx));
             data_->getSuiteSubReq(suiteIdx, reqIdx, *series);
 
@@ -2084,7 +2084,7 @@ void LogSuiteCmdRequestView::addCmd(int reqIdx) {
 void LogSuiteCmdRequestView::addTotal() {
     int prevMaxVal = maxVal_;
 
-    QString id     = "total";
+    QString id = "total";
     addChartById(id);
     ChartView* view = viewIds_.value(id, NULL);
     Q_ASSERT(view);
@@ -2138,7 +2138,7 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx) {
         if (chartId(views_[i]) == "total") {
             QString title = "All commands";
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
             series->setName(suiteSeriesId(suiteIdx));
 
             int maxVal = 0;
@@ -2154,7 +2154,7 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx) {
 
             QString title = "cmd: " + data_->subReqName(cmdIdx);
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
             series->setName(suiteSeriesId(suiteIdx));
             data_->getSuiteSubReq(suiteIdx, cmdIdx, *series);
             build(views_[i], series, title, maxVal_);
@@ -2293,7 +2293,7 @@ void LogUidCmdRequestView::addUid(int uidIdx) {
         if (chartId(views_[i]) == "total") {
             QString title = "All commands";
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
             series->setName(uidSeriesId(uidIdx));
 
             int maxVal = 0;
@@ -2307,9 +2307,9 @@ void LogUidCmdRequestView::addUid(int uidIdx) {
             QString id = chartId(views_[i]);
             int idx    = id.toInt();
             Q_ASSERT(idx >= 0);
-            QString title  = "command: " + data_->subReqName(idx);
+            QString title = "command: " + data_->subReqName(idx);
 
-            auto* series   = new QLineSeries();
+            auto* series = new QLineSeries();
 
             int userReqIdx = idx;
             series->setName(uidSeriesId(uidIdx));
@@ -2369,7 +2369,7 @@ void LogUidCmdRequestView::addCmd(int reqIdx) {
 void LogUidCmdRequestView::addTotal() {
     int prevMaxVal = maxVal_;
 
-    QString id     = "total";
+    QString id = "total";
     addChartById(id);
     ChartView* view = viewIds_.value(id, NULL);
     Q_ASSERT(view);
@@ -2515,7 +2515,7 @@ void LogCmdUidRequestView::addCmd(int reqIdx) {
         if (chartId(views_[i]) == "total") {
             QString title = "All uids";
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
             series->setName(cmdSeriesId(reqIdx));
 
             int maxVal = 0;
@@ -2531,9 +2531,9 @@ void LogCmdUidRequestView::addCmd(int reqIdx) {
             Q_ASSERT(idx >= 0);
             QString title = "uid: " + data_->uidName(idx);
 
-            auto* series  = new QLineSeries();
+            auto* series = new QLineSeries();
 
-            int uidIdx    = idx;
+            int uidIdx = idx;
             series->setName(cmdSeriesId(reqIdx));
             data_->getUidSubReq(uidIdx, reqIdx, *series);
             build(views_[i], series, title, data_->subReqMax());
@@ -2590,7 +2590,7 @@ void LogCmdUidRequestView::addUid(int uidIdx) {
 void LogCmdUidRequestView::addTotal() {
     int prevMaxVal = maxVal_;
 
-    QString id     = "total";
+    QString id = "total";
     addChartById(id);
     ChartView* view = viewIds_.value(id, NULL);
     Q_ASSERT(view);

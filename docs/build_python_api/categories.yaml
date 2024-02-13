@@ -33,6 +33,7 @@
     - Repeat
     - RepeatDate
     - RepeatDateList
+    - RepeatDateTime
     - RepeatDay
     - RepeatEnumerated
     - RepeatInteger
@@ -89,4 +90,3 @@
     - Style
     - ZombieType
     - ZombieUserActionType
-

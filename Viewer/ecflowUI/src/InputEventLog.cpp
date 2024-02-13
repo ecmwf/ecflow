@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "InputEventLog.hpp"
 
@@ -23,8 +24,8 @@
 
 #include "DirectoryHandler.hpp"
 #include "LogTruncator.hpp"
-#include "TimeStamp.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/TimeStamp.hpp"
 
 InputEventLog* InputEventLog::instance_ = nullptr;
 static bool firstStart                  = true;
@@ -48,7 +49,7 @@ InputEventLog::InputEventLog(QObject* parent) : QObject(parent) {
     QString path = QString::fromStdString(DirectoryHandler::uiEventLogFileName());
     outFile_     = new QFile(path);
 
-    truncator_   = new LogTruncator(path, 86400 * 1000, 5 * 1024 * 1024, 2000, this);
+    truncator_ = new LogTruncator(path, 86400 * 1000, 5 * 1024 * 1024, 2000, this);
     connect(truncator_, SIGNAL(truncateBegin()), this, SLOT(truncateLogBegin()));
     connect(truncator_, SIGNAL(truncateEnd()), this, SLOT(truncateLogEnd()));
 }

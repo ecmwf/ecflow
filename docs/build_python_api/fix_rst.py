@@ -19,6 +19,8 @@ def fix_glossary():
                 if t:
                     for item in glossary_items:
                         t = re.sub(rf"`{item}`_", rf":term:`{item}`", t)
+                    for item in ['cron definition<text_based_def_cron>']:
+                        t = re.sub(rf"`{item}`_", rf":ref:`{item}`", t)
 
             if t:
                 with open(fname, "w") as f:

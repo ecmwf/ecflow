@@ -1,41 +1,37 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib> // for getenv
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "EcfFile.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "JobsParam.hpp"
-#include "Pid.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
-// #include "PrintStyle.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_EcfFile)
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_with_bad_ECF_MICRO) {
     cout << "ANode:: ...test_ecf_file_with_bad_ECF_MICRO\n";
@@ -149,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
                             << job_file_contents << "'");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
@@ -223,7 +219,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
                         "Expected\n'" << expected_job_file_contents << "' but found \n'" << job_file_contents << "'");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
@@ -365,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     }
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
@@ -450,7 +446,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
                         "Could not open job file " << job_file_location << " (" << strerror(errno) << ")");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
@@ -532,7 +528,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
                         "Could not open job file " << job_file_location << " (" << strerror(errno) << ")");
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
@@ -694,7 +690,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
                             << file_with_used_variables);
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
@@ -769,7 +765,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
                             << file_with_used_variables);
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
@@ -834,7 +830,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     BOOST_REQUIRE_THROW(ecfFile.edit_used_variables(file_with_used_variables), std::runtime_error);
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file) {
@@ -873,7 +869,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
         suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
-        for (const std::pair<std::string, std::string>& p : expected_used_variables) {
+        for (const NameValueMap::value_type& p : expected_used_variables) {
             task_t1->addVariable(Variable(p.first, p.second));
         }
         suite->addTask(task_t1);
@@ -904,7 +900,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
         }
         ecf_body += "%VAR3:substitute_var%\n";
     }
-    string tail     = "\n%include <tail.h>\n# ===================================";
+    string tail = "\n%include <tail.h>\n# ===================================";
 
     string ecf_file = header;
     ecf_file += manual_head;
@@ -1026,11 +1022,11 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     BOOST_CHECK_MESSAGE(job_file_contents.find("%ecfmicro") == string::npos, "%ecfmicro should have been removed:");
 
     /// Remove all the generated files
-    boost::filesystem::remove(man_file_location);
-    boost::filesystem::remove(ecf_file_location);
-    boost::filesystem::remove(usr_file_location);
-    boost::filesystem::remove(job_file_location);
-    boost::filesystem::remove(ecf_home + suite->absNodePath());
+    fs::remove(man_file_location);
+    fs::remove(ecf_file_location);
+    fs::remove(usr_file_location);
+    fs::remove(job_file_location);
+    fs::remove(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
@@ -1121,10 +1117,10 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
                         "%end associated with comment and manual should exist:");
 
     // Remove all the generated files
-    boost::filesystem::remove(ecf_file_location);
-    boost::filesystem::remove(man_file_location);
-    boost::filesystem::remove(job_file_location);
-    boost::filesystem::remove(ecf_home + suite->absNodePath());
+    fs::remove(ecf_file_location);
+    fs::remove(man_file_location);
+    fs::remove(job_file_location);
+    fs::remove(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
@@ -1203,8 +1199,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     BOOST_CHECK_MESSAGE(!job_file_contents.empty(), "Job should not be empty");
 
     // Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
-    boost::filesystem::remove_all(ecf_home + "/a");
+    fs::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + "/a");
 
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
@@ -1348,7 +1344,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
     /// Remove generate file
-    boost::filesystem::remove(job_file_location);
+    fs::remove(job_file_location);
 }
 
 static void basic_test_template(const std::string& test_name,
@@ -1444,7 +1440,7 @@ static void basic_test_template(const std::string& test_name,
     }
 
     /// Remove all the generated files
-    boost::filesystem::remove_all(ecf_home + suite->absNodePath());
+    fs::remove_all(ecf_home + suite->absNodePath());
 }
 
 BOOST_AUTO_TEST_CASE(test_includeonce) {
@@ -1649,5 +1645,53 @@ BOOST_AUTO_TEST_CASE(test_ecf_micro_with_comments_ECFLOW_1686) {
 
     basic_test_template("test_ecf_micro_with_comments_ECFLOW_1686", ecf_file, expected_job_file_contents);
 }
+
+BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include_with_dollar) {
+    Defs d;
+    suite_ptr s = d.add_suite("suite");                      // suite suite
+    s->add_variable("CORE", "/path/to/core");                //   edit CORE /path/to/core
+    s->add_variable("ECF_INCLUDE", "$CORE/%SUITE%/include"); //   edit ECF_INCLUDE $CORE/include
+    task_ptr t1 = s->add_task("t1");                         //   task t1
+
+    std::string ecf_file_location;
+    EcfFile ecf(t1.get(), ecf_file_location);
+
+    auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1u);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
+}
+
+BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include) {
+    Defs d;
+    suite_ptr s = d.add_suite("suite");                       // suite suite
+    s->add_variable("CORE", "/path/to/core");                 //   edit CORE /path/to/core
+    s->add_variable("ECF_INCLUDE", "%CORE%/%SUITE%/include"); //   edit ECF_INCLUDE %CORE%/%SUITE%/include
+    task_ptr t1 = s->add_task("t1");                          //   task t1
+
+    std::string ecf_file_location;
+    EcfFile ecf(t1.get(), ecf_file_location);
+
+    auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 1u);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
+}
+
+BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_multiple_ecf_include) {
+    Defs d;
+    suite_ptr s = d.add_suite("suite");                                   // suite suite
+    s->add_variable("CORE", "/path/to/core");                             //   edit CORE /path/to/core
+    s->add_variable("ECF_INCLUDE", "%CORE%/%SUITE%/include:%CORE%/more"); //   edit ECF_INCLUDE %CORE%/%SUITE%...
+    task_ptr t1 = s->add_task("t1");                                      //   task t1
+
+    std::string location;
+    EcfFile ecf(t1.get(), location);
+
+    auto ecf_include_paths = EcfFile::get_ecf_include_paths(ecf);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths.size(), 2u);
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[0], "/path/to/core/suite/include");
+    BOOST_REQUIRE_EQUAL(ecf_include_paths[1], "/path/to/core/more");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

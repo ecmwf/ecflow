@@ -1,41 +1,39 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #32 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Limit.hpp"
-#include "PrintStyle.hpp" // IWYU pragma: keep
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
+#include "ecflow/base/cts/user/BeginCmd.hpp"
+#include "ecflow/base/cts/user/ForceCmd.hpp"
+#include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
+#include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_InLimitAndLimit)
 
 BOOST_AUTO_TEST_CASE(test_add_log) {
     // create once for all test below, then remove at the end
@@ -363,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_limit_references_after_delete) {
     {
         suite_ptr suite = Suite::create("suite");
 
-        family_ptr fam  = Family::create("f");
+        family_ptr fam = Family::create("f");
         fam->addTask(Task::create("t1"));
         fam->addInLimit(in_limit1);
         suite->addFamily(fam);
@@ -1292,5 +1290,7 @@ BOOST_AUTO_TEST_CASE(test_destroy_log) {
     fs::remove("test_add_log.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

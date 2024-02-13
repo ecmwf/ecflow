@@ -1,17 +1,12 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #20 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <string>
@@ -19,51 +14,20 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Cal.hpp"
-#include "Calendar.hpp"
-#include "Str.hpp"
-#include "TimeSeries.hpp"
+#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
 
-// static boost::posix_time::time_duration diff_d(boost::posix_time::time_duration t1, boost::posix_time::time_duration
-// t2)
-//{
-//    // t2 > t1 otherwise assume we have gone over midnight
-//    if (t2 > t1) return t2 - t1;
-//
-//    boost::posix_time::time_duration midnight(24,0,0);
-//    boost::posix_time::time_duration diff_from_midnight = midnight - t1;
-//    std::cout << to_simple_string(diff_from_midnight) << "\n";
-//
-//    return diff_from_midnight + t2;
-// }
-//
-// BOOST_AUTO_TEST_CASE( test_calendar_3 )
-//{
-//    cout << "ACore:: ...test_calendar_3\n";
-//
-//    Calendar calendar;
-//    BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
-//
-//    // init the calendar to 2009, Feb, 10th,  15 minutes past midnight
-//
-//    boost::posix_time::time_duration t1(23,0,0);
-//    boost::posix_time::time_duration t2(1,0,0);
-//    boost::posix_time::time_duration expected(2,0,0);
-////    std::cout << to_simple_string(t1) << "\n";
-////    std::cout << to_simple_string(t2) << "\n";
-////    std::cout << to_simple_string(t1 - t2) << "\n";
-////    std::cout << to_simple_string(t2 - t1) << "\n";
-//
-//   BOOST_CHECK_MESSAGE(diff_d(t1,t2) == expected," Expected " << to_simple_string(expected) << " but found " <<
-//   to_simple_string(diff_d(t1,t2)));
-//}
+BOOST_AUTO_TEST_SUITE(T_Calendar)
 
 BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
     cout << "ACore:: ...test_calendar_default_ptime \n";
@@ -214,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
             calendar.update(minutes(1));
             timeSeries.calendarChanged(calendar);
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -312,7 +276,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
             // Update calendar every minute, then see we can match time series, *RELATIVE* to suite start
             calendar.update(minutes(1));
 
-            tm suiteTm   = to_tm(calendar.suiteTime());
+            tm suiteTm = to_tm(calendar.suiteTime());
 
             bool matches = timeSeries.isFree(calendar);
 
@@ -536,9 +500,9 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
         boost::gregorian::date cal_date = calendar.date();
         long boost_julian               = cal_date.julian_day();
 
-        std::string iso_string          = to_iso_string(cal_date);
-        auto date_as_long               = boost::lexical_cast<long>(iso_string);
-        long ecmwf_julian               = Cal::date_to_julian(date_as_long);
+        std::string iso_string = to_iso_string(cal_date);
+        auto date_as_long      = ecf::convert_to<long>(iso_string);
+        long ecmwf_julian      = Cal::date_to_julian(date_as_long);
 
         BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,
                             "boost julian " << boost_julian << " != ecmwf julian " << ecmwf_julian << " for "
@@ -550,5 +514,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
     }
     BOOST_CHECK_MESSAGE(days == 365, "expected 365 days but found " << days);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

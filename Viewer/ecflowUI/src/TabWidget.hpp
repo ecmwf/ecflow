@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef TABWIDGET_HPP_
-#define TABWIDGET_HPP_
+#ifndef ecflow_viewer_TabWidget_HPP
+#define ecflow_viewer_TabWidget_HPP
 
 #include <QTabBar>
 #include <QWidget>
@@ -21,7 +22,7 @@ class QVBoxLayout;
 
 class IconTabBar : public QTabBar {
 public:
-    IconTabBar(QWidget* parent = nullptr) : QTabBar(parent) {}
+    explicit IconTabBar(QWidget* parent = nullptr) : QTabBar(parent) {}
 
 protected:
     void paintEvent(QPaintEvent* e) override;
@@ -79,4 +80,4 @@ private:
     bool beingCleared_{false};
 };
 
-#endif
+#endif /* ecflow_viewer_TabWidget_HPP */

@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VFile.hpp"
 
@@ -16,12 +17,12 @@
 #include <iostream>
 #include <unistd.h>
 
-#include <boost/lexical_cast.hpp>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
+#include "ecflow/core/Converter.hpp"
 
 #define UI_VFILE_DEBUG_
 
@@ -329,7 +330,7 @@ int VFile::numberOfLines() const {
 void VFile::print() {
     std::string str = " VFile storage=" + std::to_string(storageMode_) + " ";
     if (storageMode_ == MemoryStorage) {
-        str += "memory size:" + boost::lexical_cast<std::string>(dataSize_);
+        str += "memory size:" + ecf::convert_to<std::string>(dataSize_);
     }
     else {
         str += "disk path: " + path_;

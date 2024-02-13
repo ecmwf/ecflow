@@ -1,48 +1,46 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #24 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib> // for getenv()
 #include <fstream> // for std::ofstream
 #include <iostream>
 #include <string>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include "ecflow/core/Converter.hpp"
 
 // #define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
 #ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
     #include <boost/timer/timer.hpp>
+
+    #include "ecflow/core/Str.hpp"
 #endif
 
-#include "File.hpp"
-#include "NodePath.hpp"
-#include "User.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/User.hpp"
 
 using namespace boost;
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_File)
 
 BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
     // This is sanity test for splitFileIntoLines used extensively
     cout << "ACore:: ...test_splitFileIntoLines\n";
 
-    std::string path    = File::test_data("ACore/test/data/test_splitFileIntoLines.txt", "ACore");
+    std::string path = File::test_data("ACore/test/data/test_splitFileIntoLines.txt", "ACore");
 
     std::string theText = "This is a test string";
     {
@@ -124,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
 BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
     cout << "ACore:: ...test_file_tokenizer\n";
 
-    std::string path     = File::test_data("ACore/test/data/test_file_tokenizer.txt", "ACore");
+    std::string path = File::test_data("ACore/test/data/test_file_tokenizer.txt", "ACore");
 
     size_t linesWithText = 100;
     std::string theText  = "This is a test string";
@@ -183,10 +181,10 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
     std::string rootPath = File::test_data("ACore/test/data", "ACore");
     std::string expected = File::test_data("ACore/test/data/", "ACore") + nodePath;
 
-    std::string path     = rootPath;
-    std::string dir      = "dir";
+    std::string path = rootPath;
+    std::string dir  = "dir";
     for (int i = 0; i < 6; i++) {
-        path += "/" + dir + boost::lexical_cast<std::string>(i);
+        path += "/" + dir + ecf::convert_to<std::string>(i);
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/dir5
     //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/dir5
@@ -242,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
 
     // Remove the test dir. Comment out for debugging
     for (int i = 0; i < 6; i++) {
-        path = rootPath + "/" + dir + boost::lexical_cast<std::string>(i);
+        path = rootPath + "/" + dir + ecf::convert_to<std::string>(i);
         BOOST_CHECK_MESSAGE(File::removeDir(path), "Failed to remove dir " << path);
     }
 }
@@ -255,13 +253,13 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
     std::string rootPath = File::test_data("ACore/test/data", "ACore");
     std::string expected = File::test_data("ACore/test/data", "ACore") + nodePath;
 
-    std::string path     = rootPath;
-    std::string dir      = "dir";
+    std::string path = rootPath;
+    std::string dir  = "dir";
     for (int i = 0; i < 6; i++) {
         if (i == 5)
             path += "/task";
         else
-            path += "/" + dir + boost::lexical_cast<std::string>(i);
+            path += "/" + dir + ecf::convert_to<std::string>(i);
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/task
     //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/task
@@ -337,9 +335,9 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
     }
     cout << "\n";
 
-    std::string nodePath   = "dir0/dir1/dir2/dir3/dir4/dir5";
-    std::string rootPath   = File::test_data("ACore/test/data", "ACore");
-    std::string expected   = File::test_data("ACore/test/data/", "ACore") + nodePath;
+    std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
+    std::string rootPath = File::test_data("ACore/test/data", "ACore");
+    std::string expected = File::test_data("ACore/test/data/", "ACore") + nodePath;
 
     std::string dir_remove = rootPath + "/dir0";
     {
@@ -501,19 +499,19 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
     cout << "ACore:: ...test_directory_traversal\n";
 
     int regular_file = 0;
-    int directory    = 0;
-    int symlink      = 0;
-    int other        = 0;
+    //    int directory    = 0;
+    //    int symlink      = 0;
+    //    int other        = 0;
 
     for (auto& entry : fs::directory_iterator(fs::current_path())) {
         if (is_regular_file(entry))
             regular_file++;
-        if (is_directory(entry))
-            directory++;
-        if (is_symlink(entry))
-            symlink++;
-        if (is_other(entry))
-            other++;
+        //        if (is_directory(entry))
+        //            directory++;
+        //        if (is_symlink(entry))
+        //            symlink++;
+        //        if (is_other(entry))
+        //            other++;
         //      cout << "name.path()            " << entry.path() << "\n";
         //      cout << "name.path().string()   " << entry.path().string() << "\n";
         //      cout << "name.path().filename() " << entry.path().filename() << "\n";
@@ -539,18 +537,20 @@ BOOST_AUTO_TEST_CASE(test_get_all_files_by_extension) {
     cout << "ACore:: ...test_get_all_files_by_extension\n";
     {
         std::string rootPath = File::test_data("ACore/test/data/badPasswdFiles", "ACore");
-        std::vector<boost::filesystem::path> vec;
+        std::vector<fs::path> vec;
         File::find_files_with_extn(rootPath, ".passwd", vec);
         // for(auto& file: vec)  std::cout << file << "\n";
         BOOST_REQUIRE_MESSAGE(vec.size() == 6, "Expected 6 files in directory " << rootPath);
     }
     {
         std::string rootPath = File::test_data("ACore/test/data/badWhiteListFiles", "ACore");
-        std::vector<boost::filesystem::path> vec;
+        std::vector<fs::path> vec;
         File::find_files_with_extn(rootPath, ".lists", vec);
         // for(auto& file: vec)  std::cout << file << "\n";
         BOOST_REQUIRE_MESSAGE(vec.size() == 7, "Expected 7 files in directory " << rootPath);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

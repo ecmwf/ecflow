@@ -1,35 +1,33 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #24 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Str.hpp"
-#include "StringSplitter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/StringSplitter.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_StringSplitter)
 
 static void
 check(const std::string& line, const StringSplitter& string_splitter, const std::vector<std::string>& expected) {
     std::vector<std::string> result;
     while (!string_splitter.finished()) {
-        boost::string_view ref = string_splitter.next();
+        std::string_view ref = string_splitter.next();
         // std::cout << "ref:'" << ref << "'\n";
         result.emplace_back(ref.begin(), ref.end());
     }
@@ -54,9 +52,9 @@ check(const std::string& line, const StringSplitter& string_splitter, const std:
 
 static void check(const std::string& line, const std::vector<std::string>& expected, const char* delims = " \t") {
     std::vector<std::string> result;
-    std::vector<boost::string_view> result2;
+    std::vector<std::string_view> result2;
     StringSplitter::split2(line, result2, delims);
-    std::transform(result2.begin(), result2.end(), std::back_inserter(result), [](const boost::string_view& sv) {
+    std::transform(result2.begin(), result2.end(), std::back_inserter(result), [](const std::string_view& sv) {
         return std::string(sv.begin(), sv.end());
     });
 
@@ -293,14 +291,14 @@ static void test_get_token(const std::string& line, const char* delims = " \t") 
 BOOST_AUTO_TEST_CASE(test_StringSplitter_get_token) {
     cout << "ACore:: ...test_StringSplitter_get_token \n";
 
-    std::vector<std::string> test_data  = {"This is a string",
-                                           "a",
-                                           " a",
-                                           "a ",
-                                           " a ",
-                                           "        a     b     c       d        ",
-                                           " - !   $ % ^  & * ( ) - + ? ",
-                                           "\n"};
+    std::vector<std::string> test_data = {"This is a string",
+                                          "a",
+                                          " a",
+                                          "a ",
+                                          " a ",
+                                          "        a     b     c       d        ",
+                                          " - !   $ % ^  & * ( ) - + ? ",
+                                          "\n"};
 
     std::vector<std::string> test_data1 = {
         "/a",
@@ -316,34 +314,6 @@ BOOST_AUTO_TEST_CASE(test_StringSplitter_get_token) {
     }
 }
 
-// BOOST_AUTO_TEST_CASE( test_StringSplitter_iterator )
-//{
-//    cout << "ACore:: ...test_StringSplitter_iterator\n";
-//
-//    std::string input = "This is a example with fred.com";
-//    //iterate tokens
-//    StringSplitter sp(input);
-//    for (auto x : sp)
-//       std::cout << x << "\n";
-
-//   //search for token
-//   StringSplitter sp1(input);
-//   auto x = std::find(sp1.begin(), sp1.end(), "example");
-//
-//   //store tokens
-//   StringSplitter sp2(input);
-//   std::vector<string> tokens;
-//   std::for_each(sp2.begin(), sp2.end(),
-//                 [&tokens](auto x)
-//                 {
-//                    tokens.emplace_back(x.begin(), x.end());
-//                 });
-//
-//   //filter tokens
-//   StringSplitter sp3(input);
-//   std::vector<string_view> tokens;
-//   std::copy_if(sp3.begin(), sp3.end(), std::back_inserter(tokens),
-//                [](auto x) { return x.ends_with(".com"); });
-//}
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

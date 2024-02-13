@@ -1,29 +1,28 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #16 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "ServerToClientCmd.hpp"
-#include "Str.hpp"
+#include "ecflow/base/cts/user/DeleteCmd.hpp"
+#include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/core/Str.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_DeleteNodeCmd)
 
 BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
     cout << "Base:: ...test_delete_node_cmd\n";
@@ -264,4 +263,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_edit_history_ECFLOW_1684) {
                                 << fixtureDef.defsfile_.dump_edit_history());
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

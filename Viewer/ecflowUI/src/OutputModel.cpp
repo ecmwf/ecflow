@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "OutputModel.hpp"
 
@@ -298,11 +299,11 @@ QString OutputModel::formatDate(QDateTime dt) const {
 }
 
 QString OutputModel::formatAgo(QDateTime dt) const {
-    QString str   = tr("Right now");
+    QString str = tr("Right now");
 
     QDateTime now = QDateTime::currentDateTime();
 
-    int delta     = dt.secsTo(now);
+    int delta = dt.secsTo(now);
     if (delta < 0)
         delta = 0;
 
@@ -334,7 +335,7 @@ QString OutputModel::formatAgo(QDateTime dt) const {
 qint64 OutputModel::secsToNow(QDateTime dt) const {
     QDateTime now = QDateTime::currentDateTime();
 
-    qint64 delta  = dt.secsTo(now);
+    qint64 delta = dt.secsTo(now);
     return (delta < 0) ? 0 : delta;
 }
 

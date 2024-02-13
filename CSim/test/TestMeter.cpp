@@ -1,39 +1,32 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #4 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Simulator.hpp"
-#include "Suite.hpp"
-#include "System.hpp"
-#include "Task.hpp"
 #include "TestUtil.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/System.hpp"
+#include "ecflow/node/Task.hpp"
+#include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-
-namespace fs = boost::filesystem;
 
 /// Simulate definition files that are created on then fly. This us to validate
 /// Defs file, to check for correctness
@@ -44,13 +37,13 @@ BOOST_AUTO_TEST_CASE(test_meter) {
     cout << "Simulator:: ...test_meter\n";
 
     // suite suite
-    //  clock real <todays date>
-    //	family family
-    //    	task fc
-    //          meter hour 0 240
+    //   clock real <todays date>
+    //   family family
+    //     task fc
+    //       meter hour 0 240
     //       task half
-    //          trigger fc:hour >= 120
-    //   	endfamily
+    //         trigger fc:hour >= 120
+    //   endfamily
     // endsuite
 
     // Initialise clock with todays date  then create a time attribute + minutes
@@ -74,12 +67,11 @@ BOOST_AUTO_TEST_CASE(test_meter) {
         task_ptr half = fam->add_task("half");
         half->add_trigger("fc:hour >= 120");
         half->addVerify(VerifyAttr(NState::COMPLETE, 1));
-        //  	cout << theDefs << "\n";
     }
 
     Simulator simulator;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_meter.def"), errorMsg), errorMsg);
+    BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_meter.def"), errorMsg), errorMsg);
 
     // The simulator will set all the meter values, so final value must be the max value.
     bool found_task = false;
@@ -98,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_meter) {
     BOOST_REQUIRE_MESSAGE(found_task, "Failed to find task fc ");
 
     // remove generated log file. Comment out to debug
-    std::string logFileName = TestUtil::testDataLocation("test_meter.def") + ".log";
+    std::string logFileName = findTestDataLocation("test_meter.def") + ".log";
     fs::remove(logFileName);
 
     /// Destroy System singleton to avoid valgrind from complaining

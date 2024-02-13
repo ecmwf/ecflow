@@ -47,12 +47,45 @@ def test_repeat_arithmetic(repeat_to_add,repeat_to_add2):
     t2.change_trigger("t1:YMD + 1 eq 20090201");   
     assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090131 + 1  == 20090201"
 
+
+def test_repeat_datetime_arithmetic(repeat_to_add,repeat_to_add2):
+
+    defs = ecflow.Defs()
+    s1 = defs.add_suite("s1")
+    t1 = s1.add_task("t1").add_repeat( repeat_to_add )
+    t2 = s1.add_task("t2").add_trigger("t1:DT ge 20100601T000000")
+
+    # Check trigger expressions
+    print(f"## defs: {defs}")
+    assert len(defs.check()) == 0,  "Expected no errors in parsing expressions."
+
+    # Initial value of repeat is 20090101 hence trigger should fail to evaluate
+    assert t2.evaluate_trigger() == False, "Expected trigger to evaluate. 20090101T000000 >= 20100601T000000"
+
+    # Check end of month - 1 day
+    t2.change_trigger("t1:DT - 86400 eq 20081231T000000")
+    assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090101T000000 - 86400  == 20081231T000000"
+
+    # check addition
+    t2.change_trigger("t1:DT + 86400 eq 20090102T000000");
+    assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090101T000000 + 86400  == 20090102T000000"
+
+    # Check the end of each month + 1 day
+    t1.delete_repeat();
+    t1.add_repeat( repeat_to_add2 )
+    t2.change_trigger("t1:DT + 86400 eq 20090201T000000");
+    assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090131 + 86400  == 20090201T000000"
+
+
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
-    
-    
-    test_repeat_arithmetic(ecflow.RepeatDate("YMD",20090101,20091231,1),    ecflow.RepeatDate("YMD",20090131,20101231,1))
-    test_repeat_arithmetic(ecflow.RepeatDateList("YMD",[20090101,20091231]),ecflow.RepeatDateList("YMD",[20090131,20101231]) )
+
+    test_repeat_arithmetic(ecflow.RepeatDate("YMD", 20090101, 20091231, 1),
+                           ecflow.RepeatDate("YMD", 20090131, 20101231, 1))
+    test_repeat_arithmetic(ecflow.RepeatDateList("YMD", [20090101, 20091231]),
+                           ecflow.RepeatDateList("YMD", [20090131, 20101231]))
+
+    test_repeat_datetime_arithmetic(ecflow.RepeatDateTime("DT", "20090101T000000", "20091231T000000", "24:00:00"),
+                                    ecflow.RepeatDateTime("DT", "20090131T000000", "20101231T000000", "24:00:00"))
 
     print("All Tests pass")
-    

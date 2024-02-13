@@ -1,29 +1,28 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Family.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_DefsStatus)
 
 BOOST_AUTO_TEST_CASE(test_defstatus) {
     cout << "ANode:: ...test_defstatus\n";
@@ -42,9 +41,9 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     task_ptr t1     = f1->add_task("t1");
     task_ptr t2     = f1->add_task("t2");
 
-    family_ptr f2   = suite->add_family("f2");
-    task_ptr f2_t1  = f2->add_task("t1");
-    task_ptr f2_t2  = f2->add_task("t2");
+    family_ptr f2  = suite->add_family("f2");
+    task_ptr f2_t1 = f2->add_task("t1");
+    task_ptr f2_t2 = f2->add_task("t2");
 
     // Get all nodes and tasks for ease of test
     vector<Node*> nodes;
@@ -173,5 +172,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
                             "Expected suspended but found " << DState::toString(n->dstate()));
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

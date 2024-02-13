@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "OutputFileClient.hpp"
 
@@ -179,7 +179,7 @@ void OutputFileClient::slotRead() {
         if (total_ / progressChunk_ > lastProgress_) {
             lastProgress_ = total_ / progressChunk_;
 
-            int prog      = 0;
+            int prog = 0;
             if (expected_ > 0) {
                 prog = static_cast<int>(100. * static_cast<float>(total_) / static_cast<float>(expected_));
                 if (prog > 100)

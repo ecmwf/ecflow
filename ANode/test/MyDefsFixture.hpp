@@ -1,38 +1,38 @@
-#ifndef MYDEFSFIXTURE_HPP_
-#define MYDEFSFIXTURE_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Description : The structure ONLY used to test the persistence/migration
-//               as each new object is created we add it here, to test
-//               Serialisation read/write and migration of previous fixtures
-//============================================================================
-#include <algorithm> //for for_each()
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#include <boost/lexical_cast.hpp>
+#ifndef ecflow_node_test_MyDefsFixture_HPP
+#define ecflow_node_test_MyDefsFixture_HPP
 
-#include "Alias.hpp"
-#include "AutoArchiveAttr.hpp"
-#include "AutoCancelAttr.hpp"
-#include "AutoRestoreAttr.hpp"
-#include "Defs.hpp"
-#include "Expression.hpp"
-#include "Family.hpp"
-#include "LateAttr.hpp"
-#include "Limit.hpp"
-#include "MiscAttrs.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+///
+/// \brief The structure ONLY used to test the persistence/migration
+/// as each new object is created we add it here, to test Serialisation
+/// read/write and migration of previous fixtures.
+///
+
+#include <algorithm>
+
+#include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/attribute/AutoCancelAttr.hpp"
+#include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Alias.hpp"
+#include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 // =======================================================================
 // This struct is used in the node migration tests.
@@ -208,9 +208,9 @@ private:
             std::string labelName = "labelName";
             std::string limitName = "limitName";
             if (i != 0) {
-                fname += boost::lexical_cast<std::string>(i);
-                tname += boost::lexical_cast<std::string>(i);
-                labelName += boost::lexical_cast<std::string>(i);
+                fname += ecf::convert_to<std::string>(i);
+                tname += ecf::convert_to<std::string>(i);
+                labelName += ecf::convert_to<std::string>(i);
             }
 
             family_ptr fam = suite->add_family(fname);
@@ -251,13 +251,13 @@ private:
             nodes_to_restore.emplace_back("/EmptySuite");
             task->add_autorestore(ecf::AutoRestoreAttr(nodes_to_restore));
             if (i == 2) {
-                std::string compExpr = "../familyName" + boost::lexical_cast<std::string>(i - 1);
-                compExpr += "/taskName" + boost::lexical_cast<std::string>(i - 1);
+                std::string compExpr = "../familyName" + ecf::convert_to<std::string>(i - 1);
+                compExpr += "/taskName" + ecf::convert_to<std::string>(i - 1);
                 compExpr += ":myMeter ge 10";
                 task->add_complete(compExpr);
 
-                std::string expression = "../familyName" + boost::lexical_cast<std::string>(i - 1);
-                expression += "/taskName" + boost::lexical_cast<std::string>(i - 1);
+                std::string expression = "../familyName" + ecf::convert_to<std::string>(i - 1);
+                expression += "/taskName" + ecf::convert_to<std::string>(i - 1);
                 expression += " == complete";
                 task->add_trigger(expression);
             }
@@ -284,4 +284,5 @@ private:
         return suite;
     }
 };
-#endif
+
+#endif /* ecflow_node_test_MyDefsFixture_HPP */

@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef LOGLOADDATA_HPP
-#define LOGLOADDATA_HPP
+#ifndef ecflow_viewer_LogLoadData_HPP
+#define ecflow_viewer_LogLoadData_HPP
 
 #include <map>
 #include <string>
@@ -79,7 +79,7 @@ public:
 // Helper structure for data collection
 struct LogReqCounter
 {
-    LogReqCounter(const std::string& name);
+    explicit LogReqCounter(const std::string& name);
 
     void clear();
     void add(bool childCmd, const std::string& line);
@@ -94,7 +94,7 @@ struct LogReqCounter
 // an individual suite or for all the suites
 class LogLoadDataItem {
 public:
-    LogLoadDataItem(const std::string& name);
+    explicit LogLoadDataItem(const std::string& name);
     LogLoadDataItem();
 
     void clear();
@@ -267,4 +267,4 @@ private:
     LogDataParseHelper parseHelper_;
 };
 
-#endif // LOGLOADDATA_HPP
+#endif /* ecflow_viewer_LogLoadData_HPP */

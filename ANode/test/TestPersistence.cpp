@@ -1,27 +1,25 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
 #include "MyDefsFixture.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_FIXTURE_TEST_SUITE(NodeTestSuite, MyDefsFixture)
+BOOST_FIXTURE_TEST_SUITE(U_Node, MyDefsFixture)
+
+BOOST_AUTO_TEST_SUITE(T_Persistence)
 
 // Allow for multiple archives
 static void testPersistence(const Defs& fixtureDefs) {
@@ -80,4 +78,7 @@ BOOST_AUTO_TEST_CASE(test_node_defs_persistence) {
         BOOST_REQUIRE_MESSAGE(*the_copy == *all_node, "Nodes not the same");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

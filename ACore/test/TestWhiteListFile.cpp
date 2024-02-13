@@ -1,38 +1,31 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #11 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "File.hpp"
-#include "WhiteListFile.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
 // #define DEBUG_ME 1
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_WhiteListFile)
 
 void test_white_list_files(const std::string& directory, bool pass) {
-    fs::path full_path(fs::initial_path<fs::path>());
-    full_path = fs::system_complete(fs::path(directory));
+    auto full_path = fs::absolute(directory);
 
     BOOST_CHECK(fs::exists(full_path));
     BOOST_CHECK(fs::is_directory(full_path));
@@ -690,5 +683,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
                           "Expected user to not have read/write if no paths specified\n"
                               << theFile.dump_valid_users());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

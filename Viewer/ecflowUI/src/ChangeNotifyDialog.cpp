@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ChangeNotifyDialog.hpp"
 
@@ -159,7 +159,7 @@ void ChangeNotifyDialogWidget::updateSettings() {
     QColor textCol = notifier_->textColour();
     QColor bgLight = bgCol.lighter(105);
 
-    QString st     = "QLabel { \
+    QString st = "QLabel { \
 					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
                          stop: 0 " +
                  bgLight.name() + ", stop: 1 " + bgCol.name() + "); color: " + textCol.name() +

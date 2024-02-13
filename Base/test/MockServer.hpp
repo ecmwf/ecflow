@@ -1,31 +1,25 @@
-#ifndef MOCK_SERVER_HPP_
-#define MOCK_SERVER_HPP_
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #26 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
+#ifndef ecflow_base_test_MockServer_HPP
+#define ecflow_base_test_MockServer_HPP
 
 #include <cassert>
 
-#include <boost/core/noncopyable.hpp>
-
-#include "AbstractServer.hpp"
-#include "Defs.hpp"
-#include "Ecf.hpp" // In server we increment modify and state change numbers,
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Log.hpp"
-#include "SuiteChanged.hpp"
+#include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/core/Ecf.hpp" // In server we increment modify and state change numbers,
+#include "ecflow/core/Log.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/SuiteChanged.hpp"
 
 /// Act as stand in for a server since Request require at least a AbstractServer
 class MockServer : public AbstractServer {
@@ -153,12 +147,17 @@ private:
 ///   o Ecf::set_server(true): This controls incrementing of state/modify change numbers
 ///                            which should *only* be done on the server side
 ///   o Update Suite state/modify change number
-class MockSuiteChangedServer : private boost::noncopyable {
+class MockSuiteChangedServer {
 public:
+    MockSuiteChangedServer()                              = delete;
+    MockSuiteChangedServer(const MockSuiteChangedServer&) = delete;
     explicit MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true); }
     ~MockSuiteChangedServer() { Ecf::set_server(false); }
+
+    MockSuiteChangedServer& operator=(const MockSuiteChangedServer&) = delete;
 
 private:
     ecf::SuiteChanged suiteChanged_;
 };
-#endif
+
+#endif /* ecflow_base_test_MockServer_HPP */

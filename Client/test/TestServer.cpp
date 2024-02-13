@@ -1,35 +1,33 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #45 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include "ClientEnvironment.hpp"
-#include "ClientInvoker.hpp"
-#include "DurationTimer.hpp"
-#include "File.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
-#include "Version.hpp"
-#include "perf_timer.hpp"
+#include "ecflow/client/ClientEnvironment.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/core/Version.hpp"
+#include "ecflow/core/perf_timer.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_Server)
 
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
@@ -603,5 +601,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
          << boost_timer.format(3, Str::cpu_timer_format()) << ") DurationTimer("
          << to_simple_string(duration_timer.elapsed()) << ")" << endl;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

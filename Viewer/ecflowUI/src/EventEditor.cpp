@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "EventEditor.hpp"
 
@@ -16,7 +16,6 @@
 #include <QStringListModel>
 #include <QTimer>
 
-#include "Aspect.hpp"
 #include "AttributeEditorFactory.hpp"
 #include "CommandHandler.hpp"
 #include "MainWindow.hpp"
@@ -26,6 +25,7 @@
 #include "VAttributeType.hpp"
 #include "VEventAttr.hpp"
 #include "VNode.hpp"
+#include "ecflow/node/Aspect.hpp"
 
 EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent) {
     setupUi(this);
@@ -224,7 +224,7 @@ void EventEditor::lookup(const QModelIndex& idx) {
 
     std::string nodePath = model_->data(idx, Qt::DisplayRole).toString().toStdString();
 
-    VInfo_ptr ni         = VInfo::createFromPath(info_->server(), nodePath);
+    VInfo_ptr ni = VInfo::createFromPath(info_->server(), nodePath);
     if (ni) {
         MainWindow::lookUpInTree(ni);
     }

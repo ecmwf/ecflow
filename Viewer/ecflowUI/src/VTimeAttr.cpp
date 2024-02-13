@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2017 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VTimeAttr.hpp"
 
@@ -135,7 +135,7 @@ void VTimeAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
         const std::vector<ecf::TodayAttr>& tdV = vnode->node_->todayVec();
         const std::vector<ecf::CronAttr>& cV   = vnode->node_->crons();
 
-        auto n                                 = static_cast<int>(tV.size());
+        auto n = static_cast<int>(tV.size());
         for (int i = 0; i < n; i++) {
             vec.push_back(new VTimeAttr(vnode, tV[i], i));
         }

@@ -1,31 +1,29 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #7 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "File.hpp"
-#include "UrlCmd.hpp"
+#include "ecflow/client/UrlCmd.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/node/Defs.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_UrlCmd)
 
 //=============================================================================
 // This will test the UrlCmd.
@@ -34,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_url_cmd) {
 
     std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
 
-    defs_ptr defs    = Defs::create();
+    defs_ptr defs = Defs::create();
 
     std::string errorMsg, warningMsg;
     bool parse = defs->restore(path, errorMsg, warningMsg);
@@ -53,5 +51,7 @@ BOOST_AUTO_TEST_CASE(test_url_cmd) {
     std::string actual   = urlCmd.getUrl();
     BOOST_CHECK_MESSAGE(expected == actual, "Expected '" << expected << "' but found " << actual);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

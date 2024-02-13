@@ -1,43 +1,38 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #30 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
-#include "VerifyAttr.hpp"
+#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(S_Test)
+
+BOOST_AUTO_TEST_SUITE(T_Cron)
 
 static void wait_for_cron(int max_time_to_wait, const std::string& path) {
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
@@ -86,13 +81,13 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite test_cron_time_series
-    //	edit SLEEPTIME 1
-    //	edit ECF_INCLUDE $ECF_HOME/includes
+    //   edit SLEEPTIME 1
+    //   edit ECF_INCLUDE $ECF_HOME/includes
     //   clock real <todays date>
-    //	family family
-    //    	task t1
-    //        cron <start> <finish> <incr>
-    //   	endfamily
+    //   family family
+    //     task t1
+    //       cron <start> <finish> <incr>
+    //   endfamily
     // endsuite
     Defs theDefs;
     std::string path;
@@ -112,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
         boost::posix_time::ptime time1        = theLocalTime + minutes(1);
         boost::posix_time::ptime time2        = theLocalTime + minutes(5);
 
-        suite_ptr suite                       = theDefs.add_suite("test_cron_time_series");
+        suite_ptr suite = theDefs.add_suite("test_cron_time_series");
         ClockAttr clockAttr(theLocalTime, false);
         suite->addClock(clockAttr);
 
@@ -143,5 +138,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

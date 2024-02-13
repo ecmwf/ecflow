@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//=============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef TIMELINEDATA_HPP
-#define TIMELINEDATA_HPP
+#ifndef ecflow_viewer_TimelineData_HPP
+#define ecflow_viewer_TimelineData_HPP
 
 #include <string>
 #include <vector>
@@ -81,7 +82,7 @@ class TimelineData : public QObject {
 public:
     enum LoadStatus { LoadNotTried, LoadFailed, LoadDone };
 
-    TimelineData(QObject* parent = nullptr) : QObject(parent) {}
+    explicit TimelineData(QObject* parent = nullptr) : QObject(parent) {}
 
     void loadLogFile(const std::string& logFile, size_t maxReadSize, const std::vector<std::string>& suites);
     void
@@ -129,4 +130,4 @@ protected:
     std::vector<size_t> sortIndex_;
 };
 
-#endif // TIMELINEDATA_HPP
+#endif /* ecflow_viewer_TimelineData_HPP */

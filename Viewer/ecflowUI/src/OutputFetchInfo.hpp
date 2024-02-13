@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef OUTPUTFETCHINFO_HPP
-#define OUTPUTFETCHINFO_HPP
+#ifndef ecflow_viewer_OutputFetchInfo_HPP
+#define ecflow_viewer_OutputFetchInfo_HPP
 
 #include <string>
 #include <vector>
@@ -28,7 +29,7 @@ class OutputFetchInfo;
 class OutputFetchInfo : public QWidget {
     Q_OBJECT
 public:
-    OutputFetchInfo(QWidget* parent);
+    explicit OutputFetchInfo(QWidget* parent);
     void clearInfo();
     void setInfo(VReply*, VInfo_ptr info = nullptr);
     void setError(QString);
@@ -64,4 +65,4 @@ protected:
     QString makeSearchPath(QString path) const;
 };
 
-#endif // OUTPUTFETCHINFO_HPP
+#endif /* ecflow_viewer_OutputFetchInfo_HPP */

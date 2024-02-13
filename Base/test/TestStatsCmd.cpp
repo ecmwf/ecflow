@@ -1,27 +1,27 @@
-//============================================================================
-// Name        :
-// Author      : Marcos
-// Revision    :
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//   Tests for `Stats` command
-//    - check that the 'number of suits' is correctly reported
-//    - check that the 'requests per second' is correctly reported
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerRequest.hpp"
-#include "Log.hpp"
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
-#include "ServerToClientCmd.hpp"
+#include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/cts/user/CtsCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/core/Log.hpp"
+
+///
+///   Tests for `Stats` command
+///    - check that the 'number of suits' is correctly reported
+///    - check that the 'requests per second' is correctly reported
+///
 
 namespace {
 
@@ -42,7 +42,7 @@ std::string extract_report_value(const std::string& report, const std::string& l
 
 int extract_number_of_suites(const std::string& report) {
     auto entry = extract_report_value(report, "Number of Suites");
-    return boost::lexical_cast<int>(entry);
+    return ecf::convert_to<int>(entry);
 }
 
 std::string extract_request_per_second(const std::string& report) {
@@ -52,7 +52,9 @@ std::string extract_request_per_second(const std::string& report) {
 
 } // namespace
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_StatsCmd)
 
 BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_number_of_suites) {
 
@@ -128,5 +130,7 @@ BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_requests_per_second) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

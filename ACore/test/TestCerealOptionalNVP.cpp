@@ -1,35 +1,29 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "SerializationTest.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
 using namespace boost;
 using namespace std;
-namespace fs = boost::filesystem;
 
 class Base {
 public:
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5, SUSPENDED = 6 };
     Base() = default;
-    Base(bool test) : test_(test) {}
+    explicit Base(bool test) : test_(test) {}
     bool operator==(const Base& rhs) const {
         return x == rhs.x && y == rhs.y && state_ == rhs.state_ && test_ == rhs.test_;
     }
@@ -57,7 +51,9 @@ std::ostream& operator<<(std::ostream& os, Base const& m) {
 
 // =================================================================================
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_CerealOptionalNVP)
 
 BOOST_AUTO_TEST_CASE(test_cereal_optional) {
     cout << "ACore:: ...test_cereal_optional\n";
@@ -85,5 +81,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_optional) {
         fs::remove(path); // Remove the file. Comment out for debugging
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

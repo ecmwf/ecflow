@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef NODEVIEWDELEGATE_HPP_
-#define NODEVIEWDELEGATE_HPP_
+#ifndef ecflow_viewer_NodeViewDelegate_HPP
+#define ecflow_viewer_NodeViewDelegate_HPP
 
 #include <string>
 
@@ -32,7 +32,7 @@ struct BaseNodeDelegateBox
 {
     BaseNodeDelegateBox() : sizeHintCache(QSize(10, 10)), selectRm(2) {}
 
-    virtual ~BaseNodeDelegateBox()      = default;
+    virtual ~BaseNodeDelegateBox() = default;
 
     virtual void adjust(const QFont& f) = 0;
     virtual QRect adjustTextRect(const QRect& rIn) const {
@@ -87,8 +87,8 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
         sizeHintCache = QSize(100, fullHeight);
         spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-        auto h        = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
-        iconSize      = h;
+        auto h   = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize = h;
         if (iconSize % 2 == 1)
             iconSize += 1;
 
@@ -117,8 +117,8 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
         sizeHintCache = QSize(100, fullHeight);
         spacing       = ViewerUtil::textWidth(fm, 'A') * 3 / 4;
 
-        int h         = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
-        iconSize      = h;
+        int h    = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
+        iconSize = h;
         if (iconSize % 2 == 1)
             iconSize += 1;
 
@@ -132,7 +132,7 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 
 class LabelStyle {
 public:
-    LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
+    explicit LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
     void update();
 
     bool alwaysEnabled_;
@@ -252,4 +252,4 @@ protected:
     QMap<LabelType, LabelStyle*> labelStyle_;
 };
 
-#endif
+#endif /* ecflow_viewer_NodeViewDelegate_HPP */

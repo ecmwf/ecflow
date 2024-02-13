@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "Sound.hpp"
 
@@ -18,6 +18,7 @@
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "ecflow/core/Converter.hpp"
 
 // #ifdef ECFLOW_QT5
 // #include <QSoundEffect>
@@ -25,8 +26,7 @@
 
 #include <regex>
 
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/lexical_cast.hpp>
+#include "ecflow/core/Str.hpp"
 
 Sound* Sound::instance_ = nullptr;
 
@@ -79,8 +79,8 @@ void Sound::play(const std::string& fName, int loopCount) {
     if (currentCmd_.empty()) {}
     else {
         std::string cmd = currentCmd_;
-        boost::replace_first(cmd, "%FILE%", fName);
-        boost::replace_first(cmd, "%REPEAT%", boost::lexical_cast<std::string>(loopCount - 1));
+        ecf::algorithm::replace_first(cmd, "%FILE%", fName);
+        ecf::algorithm::replace_first(cmd, "%REPEAT%", ecf::convert_to<std::string>(loopCount - 1));
         if (system(cmd.c_str())) {
             UiLog().dbg() << "Sound::play() could not play sound alert. Command: " << cmd;
         }

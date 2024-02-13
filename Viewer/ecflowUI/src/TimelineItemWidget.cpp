@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TimelineItemWidget.hpp"
 
@@ -13,7 +14,6 @@
 
 #include "InfoProvider.hpp"
 #include "MessageLabel.hpp"
-#include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "TimelineData.hpp"
@@ -22,6 +22,7 @@
 #include "VNState.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
+#include "ecflow/node/Node.hpp"
 
 TimelineItemWidget::TimelineItemWidget(QWidget* /*parent*/) : delayedLoad_(false) {
     auto* vb = new QVBoxLayout(this);

@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef NODEQUERYOPTION_HPP
-#define NODEQUERYOPTION_HPP
+#ifndef ecflow_viewer_NodeQueryOption_HPP
+#define ecflow_viewer_NodeQueryOption_HPP
 
 #include <QDateTime>
 #include <QStringList>
@@ -27,13 +27,13 @@ class NodeQueryComboOption;
 
 class NodeQueryOption {
 public:
-    NodeQueryOption(VProperty*);
+    explicit NodeQueryOption(VProperty*);
     virtual ~NodeQueryOption() = default;
 
     QString type() const { return type_; }
     QString name() const { return name_; }
     QString label() const { return label_; }
-    virtual QString valueAsString() const     = 0;
+    virtual QString valueAsString() const = 0;
 
     virtual void swap(const NodeQueryOption*) = 0;
     virtual QString query() const { return QString(); }
@@ -60,7 +60,7 @@ protected:
 
 class NodeQueryStringOption : public NodeQueryOption {
 public:
-    NodeQueryStringOption(VProperty*);
+    explicit NodeQueryStringOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -92,7 +92,7 @@ protected:
 
 class NodeQueryListOption : public NodeQueryOption {
 public:
-    NodeQueryListOption(VProperty*);
+    explicit NodeQueryListOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -116,7 +116,7 @@ protected:
 
 class NodeQueryComboOption : public NodeQueryOption {
 public:
-    NodeQueryComboOption(VProperty*);
+    explicit NodeQueryComboOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -140,7 +140,7 @@ protected:
 
 class NodeQueryPeriodOption : public NodeQueryOption {
 public:
-    NodeQueryPeriodOption(VProperty*);
+    explicit NodeQueryPeriodOption(VProperty*);
 
     void swap(const NodeQueryOption*) override;
 
@@ -171,4 +171,4 @@ protected:
     QString periodUnits_;
 };
 
-#endif // NODEQUERYOPTION_HPP
+#endif /* ecflow_viewer_NodeQueryOption_HPP */

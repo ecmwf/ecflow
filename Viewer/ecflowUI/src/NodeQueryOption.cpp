@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "NodeQueryOption.hpp"
 
@@ -41,7 +41,7 @@ public:
     explicit NodeQueryOptionFactory(const NodeQueryOptionFactory&)   = delete;
     NodeQueryOptionFactory& operator=(const NodeQueryOptionFactory&) = delete;
 
-    virtual NodeQueryOption* make(VProperty* p)                      = 0;
+    virtual NodeQueryOption* make(VProperty* p) = 0;
     static NodeQueryOption* create(VProperty* p);
 };
 
@@ -480,7 +480,7 @@ void NodeQueryPeriodOption::load(VSettings* vs) {
         QString from = QString::fromStdString(vs->get("from", fromDate_.toString(Qt::ISODate).toStdString()));
         QString to   = QString::fromStdString(vs->get("to", fromDate_.toString(Qt::ISODate).toStdString()));
 
-        fromDate_    = QDateTime::fromString(from, Qt::ISODate);
+        fromDate_ = QDateTime::fromString(from, Qt::ISODate);
         fromDate_.setTimeSpec(Qt::UTC);
         toDate_ = QDateTime::fromString(to, Qt::ISODate);
         toDate_.setTimeSpec(Qt::UTC);

@@ -1,32 +1,28 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "CommandHandler.hpp"
 
-#include <boost/program_options/parsers.hpp>
-
-// #include "File.hpp"
-// #include "NodeFwd.hpp"
-// #include "ArgvCreator.hpp"
 #include <QMessageBox>
 #include <QString>
+#include <boost/program_options/parsers.hpp>
 
 #include "ActionHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ShellCommand.hpp"
-#include "Str.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VAttribute.hpp"
 #include "VConfig.hpp"
 #include "VNode.hpp"
+#include "ecflow/core/Str.hpp"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     #include <QRegExp>
@@ -46,48 +42,51 @@ std::string CommandHandler::killCmd_    = "ecflow_client --kill <full_name>";
 void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
     UI_FUNCTION_LOG
 
-    std::string realCommand(cmd);
-    std::vector<ServerHandler*> targetServers;
-
-    if (realCommand.empty()) {
+    if (cmd.empty()) {
         // UiLog().err() << " command is not recognised. Check the menu definition.";
-        UserMessage::message(
-            UserMessage::ERROR, true, "command " + cmd + " is not recognised. Check the menu definition.");
+        UserMessage::message(UserMessage::ERROR, true, "Empty command is not recognised. Check the menu definition.");
         return;
     }
 
-    UiLog().dbg() << "command=" << cmd;
+    UiLog().dbg() << "command='" << cmd << "'";
 
     std::map<ServerHandler*, std::string> targetNodeNames;
     std::map<ServerHandler*, std::string> targetNodeFullNames;
     std::map<ServerHandler*, std::string> targetParentFullNames;
 
+    std::vector<ServerHandler*> targetServers;
+
     // Figure out what objects (node/server) the command should be applied to
-    for (auto& i : info) {
+    for (const auto& i : info) {
         std::string nodeFullName;
         std::string nodeName;
         std::string parentFullName;
 
-        if (realCommand.find("<node_name>") != std::string::npos) {
+        if (cmd.find("<node_name>") != std::string::npos) {
             nodeName = i->name();
         }
 
-        if (realCommand.find("<full_name>") != std::string::npos) {
-            if (i->isNode())
+        if (cmd.find("<full_name>") != std::string::npos) {
+            if (i->isNode()) {
                 nodeFullName = i->node()->absNodePath();
-            else if (i->isServer())
+            }
+            else if (i->isServer()) {
                 i->server()->longName();
-            else if (i->isAttribute())
+            }
+            else if (i->isAttribute()) {
                 parentFullName = i->node()->absNodePath();
+            }
         }
 
-        if (realCommand.find("<parent_name>") != std::string::npos) {
+        if (cmd.find("<parent_name>") != std::string::npos) {
             if (i->isNode()) {
-                if (VNode* p = i->node()->parent())
+                if (VNode* p = i->node()->parent()) {
                     parentFullName = p->absNodePath();
+                }
             }
-            else if (i->isAttribute())
+            else if (i->isAttribute()) {
                 parentFullName = i->node()->absNodePath();
+            }
         }
 
         // Store the names per target servers
@@ -102,7 +101,9 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
     }
 
     // for each target server, construct and send its command
-    for (auto serverHandler : targetServers) {
+    for (const auto& serverHandler : targetServers) {
+        std::string realCommand = cmd;
+
         // replace placeholders with real node names
         std::string placeholder("<full_name>");
         ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
@@ -123,28 +124,8 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
 
         UiLog().dbg() << " final command: " << realCommand;
 
-        // Ideally we should pass the cmd string staight to the client. However, as a
-        // temporary solution to both:
-        // - fix ECFLOW-1879
-        // - allow values stating with -- (douboe dash) for --alter (see ECFLOW-1414)
-        // we add a tokenisation here for alter.
-        // TODO: remove this code when the cli allows having values starting with --
-        if (realCommand.find("ecflow_client --alter") == 0) {
-            // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
-            std::string alterToReplace("ecflow_client --alter=");
-            std::string alterToReplaceBy("ecflow_client --alter ");
-            ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
-
-            // tokinise --alter
-            auto cmdVec = boost::program_options::split_unix(realCommand, " \t", "'\"", "\\");
-            UiLog().dbg() << " tokenized command: " << cmdVec;
-
-            // set up and run the thread for server communication
-            serverHandler->runCommand(cmdVec);
-        } else {
-            // set up and run the thread for server communication
-            serverHandler->runCommand(realCommand);
-        }
+        // set up and run the thread for server communication
+        serverHandler->runCommand(realCommand);
     }
 }
 

@@ -1,26 +1,23 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_SanitizerUB)
 
 struct Base
 {
@@ -34,6 +31,11 @@ Derived* getDerived() {
     return static_cast<Derived*>(new Base); // Error: invalid downcast
 }
 
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 BOOST_AUTO_TEST_CASE(test_sanitizer_invalid_object_size) {
     char* test_me = getenv("ECF_TEST_SANITIZER_UB");
     if (test_me) {
@@ -45,6 +47,10 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_invalid_object_size) {
         BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
     }
 }
+
+#if defined(__GNUC__) and !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
 
 BOOST_AUTO_TEST_CASE(test_sanitizer_misaligned_structure_pointer_assignment) {
     char* test_me = getenv("ECF_TEST_SANITIZER_UB");
@@ -108,5 +114,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_member_access_through_null_pointer) {
         BOOST_CHECK_MESSAGE(x, "stop boost test from complaining");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

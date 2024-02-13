@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "Dashboard.hpp"
 
@@ -33,6 +33,7 @@
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
+#include "ecflow/core/Converter.hpp"
 
 int Dashboard::maxWidgetNum_ = 20;
 
@@ -558,7 +559,7 @@ QString Dashboard::uniqueDockId() {
 }
 
 std::string Dashboard::widgetSettingsId(int i) {
-    return "widget_" + boost::lexical_cast<std::string>(i);
+    return "widget_" + ecf::convert_to<std::string>(i);
 }
 
 void Dashboard::notifyServerFilterAdded(ServerItem* /*item*/) {

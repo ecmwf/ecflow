@@ -1,36 +1,29 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
-#include "Defs.hpp"
-#include "File.hpp"
-#include "JobProfiler.hpp"
-#include "Jobs.hpp"
-#include "JobsParam.hpp"
-#include "Log.hpp"
-#include "Str.hpp"
-#include "Task.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/JobProfiler.hpp"
+#include "ecflow/node/Jobs.hpp"
+#include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 // #define DEBUG 1
 

@@ -1,38 +1,35 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #10 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
-#include "Ecf.hpp"
-#include "EcfFile.hpp"
-#include "Family.hpp"
-#include "File.hpp"
-#include "JobCreationCtrl.hpp"
 #include "MyDefsFixture.hpp"
-#include "Str.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
-BOOST_AUTO_TEST_SUITE(NodeTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Node)
+
+BOOST_AUTO_TEST_SUITE(T_TaskScriptGenerator)
 
 BOOST_AUTO_TEST_CASE(test_reset_after_job_generation_checking) {
     cout << "ANode:: ...test_reset_after_job_generation_checking\n";
@@ -76,8 +73,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     // SET ECF_HOME
     std::string ecf_home = File::test_data("ANode/test/data/TaskScriptGenerator", "ANode");
 
-    std::string head     = ecf_home + "/head.h";
-    std::string tail     = ecf_home + "/tail.h";
+    std::string head = ecf_home + "/head.h";
+    std::string tail = ecf_home + "/tail.h";
     fs::remove_all(ecf_home);
     BOOST_REQUIRE_MESSAGE(!fs::exists(head), "Remove of head file failed");
     BOOST_REQUIRE_MESSAGE(!fs::exists(tail), "Remove of tail file failed");
@@ -162,8 +159,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
     // SET ECF_HOME
     std::string ecf_home = File::test_data("ANode/test/data/TaskScriptGenerator", "ANode");
 
-    std::string head     = ecf_home + "/head.h";
-    std::string tail     = ecf_home + "/tail.h";
+    std::string head = ecf_home + "/head.h";
+    std::string tail = ecf_home + "/tail.h";
     fs::remove_all(ecf_home);
     BOOST_REQUIRE_MESSAGE(!fs::exists(head), "Remove of head file failed");
     BOOST_REQUIRE_MESSAGE(!fs::exists(tail), "Remove of tail file failed");
@@ -244,5 +241,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
         cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

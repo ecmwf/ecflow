@@ -1,30 +1,28 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #42 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Defs.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "System.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/System.hpp"
 
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
@@ -71,5 +69,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
 
     System::destroy();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

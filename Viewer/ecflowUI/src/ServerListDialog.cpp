@@ -1,12 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ServerListDialog.hpp"
 
@@ -749,14 +749,14 @@ void ServerListDialog::readSettings() {
 //======================================
 
 ServerListModel::ServerListModel(ServerFilter* filter, QObject* parent) : QAbstractItemModel(parent), filter_(filter) {
-    int id       = IconProvider::add(":/viewer/favourite.svg", "favourite");
-    favPix_      = IconProvider::pixmap(id, 12);
+    int id  = IconProvider::add(":/viewer/favourite.svg", "favourite");
+    favPix_ = IconProvider::pixmap(id, 12);
 
     id           = IconProvider::add(":/viewer/favourite_empty.svg", "favourite_empty");
     favEmptyPix_ = IconProvider::pixmap(id, 12);
 
-    id           = IconProvider::add(":/viewer/system.svg", "system");
-    sysPix_      = IconProvider::pixmap(id, 12);
+    id      = IconProvider::add(":/viewer/system.svg", "system");
+    sysPix_ = IconProvider::pixmap(id, 12);
 
     loadFont_.setBold(true);
 }

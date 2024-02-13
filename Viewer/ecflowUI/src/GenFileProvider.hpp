@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef GENFILEPROVIDER_HPP
-#define GENFILEPROVIDER_HPP
+#ifndef ecflow_viewer_GenFileProvider_HPP
+#define ecflow_viewer_GenFileProvider_HPP
 
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@ class VReply;
 
 class GenFileProvider : public FetchQueueOwner {
 public:
-    GenFileProvider(GenFileReceiver*);
+    explicit GenFileProvider(GenFileReceiver*);
     ~GenFileProvider();
     GenFileProvider(const GenFileProvider&)            = delete;
     GenFileProvider& operator=(const GenFileProvider&) = delete;
@@ -47,11 +48,11 @@ public:
     GenFileReceiver(const GenFileReceiver&)            = delete;
     GenFileReceiver& operator=(const GenFileReceiver&) = delete;
 
-    virtual void fileFetchFinished(VReply*)            = 0;
-    virtual void fileFetchFailed(VReply*)              = 0;
+    virtual void fileFetchFinished(VReply*) = 0;
+    virtual void fileFetchFailed(VReply*)   = 0;
 
 protected:
     GenFileProvider* fetchManager_{nullptr};
 };
 
-#endif // GENFILEPROVIDER_HPP
+#endif /* ecflow_viewer_GenFileProvider_HPP */

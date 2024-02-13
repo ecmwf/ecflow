@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VariableModel.hpp"
 
@@ -572,8 +573,8 @@ bool VariableSortModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourc
 
     QModelIndex idx2 = varModel_->index(sourceRow, 1, sourceParent);
 
-    QString s        = varModel_->data(idx, Qt::DisplayRole).toString();
-    QString s2       = varModel_->data(idx2, Qt::DisplayRole).toString();
+    QString s  = varModel_->data(idx, Qt::DisplayRole).toString();
+    QString s2 = varModel_->data(idx2, Qt::DisplayRole).toString();
 
     if (s.contains(matchText_, Qt::CaseInsensitive) || s2.contains(matchText_, Qt::CaseInsensitive)) {
         return true;

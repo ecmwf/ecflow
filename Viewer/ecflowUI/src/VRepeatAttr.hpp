@@ -1,15 +1,15 @@
-//============================================================================
-// Copyright 2017 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef VREPEATATTR_HPP
-#define VREPEATATTR_HPP
+#ifndef ecflow_viewer_VRepeatAttr_HPP
+#define ecflow_viewer_VRepeatAttr_HPP
 
 #include <string>
 
@@ -46,7 +46,7 @@ private:
 
 class VRepeatAttr : public VAttribute {
 public:
-    VRepeatAttr(VNode* parent);
+    explicit VRepeatAttr(VNode* parent);
 
     int startIndex() const { return 0; }
     virtual int endIndex() const       = 0;
@@ -68,7 +68,22 @@ public:
 
 class VRepeatDateAttr : public VRepeatAttr {
 public:
-    VRepeatDateAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDateAttr(VNode* n) : VRepeatAttr(n) {}
+    int endIndex() const override;
+    int currentIndex() const override;
+    QString startValue() const override;
+    QString endValue() const override;
+    std::string value(int index) const override;
+    int currentPosition() const override;
+    const std::string& subType() const override { return subType_; }
+
+protected:
+    static std::string subType_;
+};
+
+class VRepeatDateTimeAttr : public VRepeatAttr {
+public:
+    VRepeatDateTimeAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -83,7 +98,7 @@ protected:
 
 class VRepeatDateListAttr : public VRepeatAttr {
 public:
-    VRepeatDateListAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDateListAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -99,7 +114,7 @@ protected:
 
 class VRepeatDayAttr : public VRepeatAttr {
 public:
-    VRepeatDayAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDayAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override { return 0; }
     int currentIndex() const override { return 0; }
     QString startValue() const override;
@@ -114,7 +129,7 @@ protected:
 
 class VRepeatIntAttr : public VRepeatAttr {
 public:
-    VRepeatIntAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatIntAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -129,7 +144,7 @@ protected:
 
 class VRepeatEnumAttr : public VRepeatAttr {
 public:
-    VRepeatEnumAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatEnumAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -145,7 +160,7 @@ protected:
 
 class VRepeatStringAttr : public VRepeatAttr {
 public:
-    VRepeatStringAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatStringAttr(VNode* n) : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -159,4 +174,4 @@ protected:
     static std::string subType_;
 };
 
-#endif // VREPEATATTR_HPP
+#endif /* ecflow_viewer_VRepeatAttr_HPP */

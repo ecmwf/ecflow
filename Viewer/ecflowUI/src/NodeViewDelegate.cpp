@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "NodeViewDelegate.hpp"
 
@@ -60,18 +61,18 @@ void LabelStyle::update() {
 }
 
 NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent) {
-    hoverPen_             = QPen(QColor(201, 201, 201));
-    hoverBrush_           = QBrush(QColor(250, 250, 250, 210));
-    selectPen_            = QPen(QColor(125, 162, 206));
-    selectBrush_          = QBrush(QColor(193, 220, 252, 110));
-    nodePen_              = QPen(QColor(180, 180, 180));
-    nodeSelectPen_        = QPen(QColor(0, 0, 0), 2);
+    hoverPen_      = QPen(QColor(201, 201, 201));
+    hoverBrush_    = QBrush(QColor(250, 250, 250, 210));
+    selectPen_     = QPen(QColor(125, 162, 206));
+    selectBrush_   = QBrush(QColor(193, 220, 252, 110));
+    nodePen_       = QPen(QColor(180, 180, 180));
+    nodeSelectPen_ = QPen(QColor(0, 0, 0), 2);
 
     lostConnectBgBrush_   = QBrush(QColor(150, 150, 150, 150), Qt::Dense7Pattern);
     lostConnectBandBrush_ = QBrush(QColor(255, 166, 0, 150));
 
-    noConnectBgBrush_     = QBrush(QColor(186, 16, 16, 150), Qt::Dense7Pattern);
-    noConnectBandBrush_   = QBrush(QColor(186, 16, 16, 240));
+    noConnectBgBrush_   = QBrush(QColor(186, 16, 16, 150), Qt::Dense7Pattern);
+    noConnectBandBrush_ = QBrush(QColor(186, 16, 16, 240));
 
     QImageReader imgR(":/viewer/warning.svg");
     if (imgR.canRead()) {
@@ -87,35 +88,35 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent
     grad_.setStart(0, 0);
     grad_.setFinalStop(0, 1);
 
-    eventFillBrush_               = QBrush(QColor(0, 0, 255));
-    eventFillBrush_               = QBrush(QColor(240, 240, 240));
-    meterFillBrush_               = QBrush(QColor(0, 0, 255));
-    meterThresholdBrush_          = QBrush(QColor(0, 0, 255));
-    limitFillBrush_               = QBrush(QColor(0, 255, 0));
-    limitExtraFillBrush_          = QBrush(QColor(0, 0, 255));
-    repeatDayPen_                 = QPen(QColor(0, 0, 0));
-    repeatDatePen_                = QPen(QColor(0, 0, 0));
-    repeatEnumPen_                = QPen(QColor(37, 118, 38));
-    repeatIntPen_                 = QPen(QColor(0, 0, 240));
-    repeatStringPen_              = QPen(QColor(0, 0, 0));
+    eventFillBrush_      = QBrush(QColor(0, 0, 255));
+    eventFillBrush_      = QBrush(QColor(240, 240, 240));
+    meterFillBrush_      = QBrush(QColor(0, 0, 255));
+    meterThresholdBrush_ = QBrush(QColor(0, 0, 255));
+    limitFillBrush_      = QBrush(QColor(0, 255, 0));
+    limitExtraFillBrush_ = QBrush(QColor(0, 0, 255));
+    repeatDayPen_        = QPen(QColor(0, 0, 0));
+    repeatDatePen_       = QPen(QColor(0, 0, 0));
+    repeatEnumPen_       = QPen(QColor(37, 118, 38));
+    repeatIntPen_        = QPen(QColor(0, 0, 240));
+    repeatStringPen_     = QPen(QColor(0, 0, 0));
 
-    triggerBgBrush_               = QBrush(QColor(230, 230, 230));
-    triggerBorderPen_             = QPen(QColor(150, 150, 150));
-    triggerFontPen_               = QPen(QColor(0, 0, 0));
-    completeBgBrush_              = QBrush(QColor(230, 230, 230));
-    completeBorderPen_            = QPen(QColor(150, 150, 150));
-    completeFontPen_              = QPen(QColor(0, 0, 255));
+    triggerBgBrush_    = QBrush(QColor(230, 230, 230));
+    triggerBorderPen_  = QPen(QColor(150, 150, 150));
+    triggerFontPen_    = QPen(QColor(0, 0, 0));
+    completeBgBrush_   = QBrush(QColor(230, 230, 230));
+    completeBorderPen_ = QPen(QColor(150, 150, 150));
+    completeFontPen_   = QPen(QColor(0, 0, 255));
 
-    labelStyle_[DefaultLabel]     = new LabelStyle("view.label.default", true);
-    labelStyle_[ErrorLabel]       = new LabelStyle("view.label.error");
-    labelStyle_[WarningLabel]     = new LabelStyle("view.label.warning");
-    labelStyle_[InfoLabel]        = new LabelStyle("view.label.info");
+    labelStyle_[DefaultLabel] = new LabelStyle("view.label.default", true);
+    labelStyle_[ErrorLabel]   = new LabelStyle("view.label.error");
+    labelStyle_[WarningLabel] = new LabelStyle("view.label.warning");
+    labelStyle_[InfoLabel]    = new LabelStyle("view.label.info");
 
-    holdingTimeFontPen_           = QPen(QColor(255, 0, 0));
-    holdingDateFontPen_           = QPen(QColor(255, 0, 0));
+    holdingTimeFontPen_ = QPen(QColor(255, 0, 0));
+    holdingDateFontPen_ = QPen(QColor(255, 0, 0));
 
-    holdingTimePixId_             = IconProvider::add(":/viewer/icon_clock.svg", "icon_clock");
-    holdingDatePixId_             = IconProvider::add(":/viewer/icon_calendar.svg", "icon_calendar");
+    holdingTimePixId_ = IconProvider::add(":/viewer/icon_clock.svg", "icon_clock");
+    holdingDatePixId_ = IconProvider::add(":/viewer/icon_calendar.svg", "icon_calendar");
 
     attrRenderers_["meter"]       = &NodeViewDelegate::renderMeter;
     attrRenderers_["label"]       = &NodeViewDelegate::renderLabel;
@@ -384,7 +385,7 @@ void NodeViewDelegate::renderMeter(QPainter* painter,
                                    QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 6) {
         return;
@@ -398,7 +399,7 @@ void NodeViewDelegate::renderMeter(QPainter* painter,
 
     bool selected = option.state & QStyle::State_Selected;
 
-    QString name  = data.at(1) + ":";
+    QString name = data.at(1) + ":";
 
     if (data.count() == 7)
         name.prepend(data[6] + ":");
@@ -416,7 +417,7 @@ void NodeViewDelegate::renderMeter(QPainter* painter,
     auto stHeight    = static_cast<int>(static_cast<float>(fm.ascent()) * 0.8);
     int stHeightDiff = (contRect.height() - stHeight) / 2;
 
-    QRect stRect     = contRect.adjusted(attrBox_->leftPadding, stHeightDiff, 0, -stHeightDiff);
+    QRect stRect = contRect.adjusted(attrBox_->leftPadding, stHeightDiff, 0, -stHeightDiff);
     stRect.setWidth(50);
 
     // The text rectangle
@@ -450,7 +451,7 @@ void NodeViewDelegate::renderMeter(QPainter* painter,
 
     // Draw progress
     if (max > min) {
-        QRect progRect   = stRect;
+        QRect progRect = stRect;
 
         float valPercent = static_cast<float>(val - min) / static_cast<float>(max - min);
         if (threshold > min && threshold < max && val > threshold) {
@@ -530,7 +531,7 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
     bool selected = option.state & QStyle::State_Selected;
 
     // The border rect (we will adjust its  width)
-    QRect contRect   = option.rect.adjusted(attrBox_->leftMargin,
+    QRect contRect = option.rect.adjusted(attrBox_->leftMargin,
                                           attrBox_->topMargin + attrBox_->topPadding,
                                           0,
                                           -attrBox_->bottomMargin - attrBox_->bottomPadding);
@@ -580,7 +581,7 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
         Q_ASSERT(valLst.count() > 0);
         valFirst = valLst[0];
 
-        valRect  = nameRect;
+        valRect = nameRect;
         valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
         valRect.setWidth(ViewerUtil::textWidth(fm, valFirst));
 
@@ -589,11 +590,11 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
         valRest       = valLst.join("\n");
         QSize valSize = fm.size(0, valRest);
 
-        valRestRect   = QRect(nameRect.x(), nameRect.y() + nameRect.height() + 2, valSize.width(), valSize.height());
+        valRestRect = QRect(nameRect.x(), nameRect.y() + nameRect.height() + 2, valSize.width(), valSize.height());
 
-        currentRight  = qMax(valRect.x() + valRect.width(), valRestRect.x() + valRestRect.width());
+        currentRight = qMax(valRect.x() + valRect.width(), valRestRect.x() + valRestRect.width());
 
-        val           = valFirst + " " + valRest;
+        val = valFirst + " " + valRest;
     }
 
     // Define clipping
@@ -672,8 +673,8 @@ void NodeViewDelegate::labelSize(QStringList data, int& totalWidth, int& totalHe
     int currentRight  = attrBox_->leftMargin;
     int currentBottom = attrBox_->topMargin + attrBox_->topPadding;
 
-    int multiCnt      = val.count('\n');
-    QFont nameFont    = attrFont_;
+    int multiCnt   = val.count('\n');
+    QFont nameFont = attrFont_;
     nameFont.setBold(true);
     QFont valFont = attrFont_;
 
@@ -712,7 +713,7 @@ void NodeViewDelegate::labelSize(QStringList data, int& totalWidth, int& totalHe
         QString valRest = valLst.join("\n");
         QSize valSize   = fm.size(0, valRest);
 
-        currentRight    = qMax(currentRight, startX + valSize.width());
+        currentRight = qMax(currentRight, startX + valSize.width());
         currentBottom += 2 + valSize.height();
     }
 
@@ -752,7 +753,7 @@ void NodeViewDelegate::renderEvent(QPainter* painter,
                                    QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 2)
         return;
@@ -778,7 +779,7 @@ void NodeViewDelegate::renderEvent(QPainter* painter,
     auto ctHeight    = static_cast<int>(static_cast<float>(fm.ascent()) * 0.8);
     int ctHeightDiff = qMax((contRect.height() - ctHeight) / 2, 2);
 
-    QRect ctRect     = contRect.adjusted(attrBox_->leftPadding, ctHeightDiff, 0, -ctHeightDiff);
+    QRect ctRect = contRect.adjusted(attrBox_->leftPadding, ctHeightDiff, 0, -ctHeightDiff);
     ctRect.setWidth(ctRect.height());
 
     // The text rectangle
@@ -894,7 +895,7 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
                                    QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 4) {
         return;
@@ -947,14 +948,14 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
     valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
     valRect.setWidth(valWidth);
 
-    int xItem   = valRect.x() + valRect.width() + attrBox_->spacing;
+    int xItem = valRect.x() + valRect.width() + attrBox_->spacing;
 
     int itemNum = totalVal;
     if (maxLimitItems_ > 0) {
         itemNum = std::min(itemNum, maxLimitItems_);
     }
 
-    int rightPos    = xItem + itemNum * (itemWidth + itemOffset) + itemOffset;
+    int rightPos = xItem + itemNum * (itemWidth + itemOffset) + itemOffset;
 
     QRect trailRect = valRect;
     QString trailTxt("...");
@@ -1065,7 +1066,7 @@ void NodeViewDelegate::renderLimiter(QPainter* painter,
                                      QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 4)
         return;
@@ -1123,7 +1124,7 @@ void NodeViewDelegate::renderTrigger(QPainter* painter,
                                      QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() != 3)
         return;
@@ -1195,7 +1196,7 @@ void NodeViewDelegate::renderTime(QPainter* painter,
                                   QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 3)
         return;
@@ -1275,7 +1276,7 @@ void NodeViewDelegate::renderDate(QPainter* painter,
                                   QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 3)
         return;
@@ -1360,7 +1361,7 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
                                     QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 9)
         return;
@@ -1382,7 +1383,7 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
     QRect contRect = option.rect.adjusted(attrBox_->leftMargin, attrBox_->topMargin, 0, -attrBox_->bottomMargin);
 
     if (type == "day") {
-        rPen           = repeatDayPen_;
+        rPen = repeatDayPen_;
 
         QFont nameFont = attrFont_;
         QFontMetrics fm(nameFont);
@@ -1526,7 +1527,7 @@ void NodeViewDelegate::renderLate(QPainter* painter,
                                   QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 2)
         return;
@@ -1581,7 +1582,7 @@ void NodeViewDelegate::renderAutoArchive(QPainter* painter,
                                          QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 2)
         return;
@@ -1636,7 +1637,7 @@ void NodeViewDelegate::renderAutoCancel(QPainter* painter,
                                         QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 2)
         return;
@@ -1691,7 +1692,7 @@ void NodeViewDelegate::renderAutoRestore(QPainter* painter,
                                          QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 2)
         return;
@@ -1746,7 +1747,7 @@ void NodeViewDelegate::renderQueue(QPainter* painter,
                                    QSize& size) const {
     int totalWidth = 0;
 
-    size           = QSize(totalWidth, attrBox_->fullHeight);
+    size = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 5)
         return;

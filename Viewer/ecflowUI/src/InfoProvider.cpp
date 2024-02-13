@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "InfoProvider.hpp"
 
@@ -13,13 +14,12 @@
 #include <stdexcept>
 
 #include <QDateTime>
-#include <boost/algorithm/string/predicate.hpp>
 
-#include "EcfFile.hpp"
 #include "ServerHandler.hpp"
-#include "Submittable.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "ecflow/node/EcfFile.hpp"
+#include "ecflow/node/Submittable.hpp"
 
 InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
     : owner_(owner),
@@ -202,11 +202,11 @@ void InfoProvider::taskChanged(VTask_ptr task) {
 }
 
 JobProvider::JobProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::JobTask) {
-    fileVarName_        = "ECF_JOB";
+    fileVarName_ = "ECF_JOB";
 
     fileNotDefinedText_ = "Job is <b>not</b> defined";
 
-    fileMissingText_    = "Job <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
+    fileMissingText_ = "Job <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
 				 for read/write access. Check for file presence and read access below. \
 	             The file may have been deleted or this may be a '<i>dummy</i>' task";
 }

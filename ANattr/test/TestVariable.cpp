@@ -1,28 +1,25 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #14 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <cstdio>
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(ANattrTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Attributes)
+
+BOOST_AUTO_TEST_SUITE(T_Variable)
 
 BOOST_AUTO_TEST_CASE(test_multi_line_variable_values) {
     cout << "ANattr:: ...test_multi_line_variable_values\n";
@@ -100,5 +97,7 @@ BOOST_AUTO_TEST_CASE(test_variable_value) {
         }
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

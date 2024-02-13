@@ -1,14 +1,15 @@
-/***************************** LICENSE START ***********************************
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
- Copyright 2018 ECMWF and INPE. This software is distributed under the terms
- of the Apache License version 2.0. In applying this license, ECMWF does not
- waive the privileges and immunities granted to it by virtue of its status as
- an Intergovernmental Organization or submit itself to any jurisdiction.
-
- ***************************** LICENSE END *************************************/
-
-#ifndef LOCALSOCKETSERVER_HPP
-#define LOCALSOCKETSERVER_HPP
+#ifndef ecflow_viewer_LocalSocketServer_HPP
+#define ecflow_viewer_LocalSocketServer_HPP
 
 #include <QObject>
 
@@ -37,4 +38,4 @@ protected:
     QString serverId_;
 };
 
-#endif // LOCALSOCKETSERVER_HPP
+#endif /* ecflow_viewer_LocalSocketServer_HPP */

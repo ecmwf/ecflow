@@ -1,45 +1,40 @@
-#define BOOST_TEST_MODULE TEST_ZOMBIES
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #58 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description : This is used to INVOKE a SINGLE test.
-//               Making it easier for Easier for debugging and development
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "AssertTimer.hpp"
-#include "Child.hpp"
-#include "Defs.hpp"
-#include "DurationTimer.hpp"
-#include "Family.hpp"
-#include "PrintStyle.hpp"
 #include "ServerTestHarness.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "TestFixture.hpp"
 #include "ZombieUtil.hpp"
+#include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
-namespace fs = boost::filesystem;
+
+///
+/// \note This is used to INVOKE a SINGLE test.
+/// Making it easier for Easier for debugging and development
+///
 
 // ****************************************************************
 // In the test below we create two sets of process. One of these
@@ -69,9 +64,9 @@ namespace fs = boost::filesystem;
 
 static bool ecf_debug_enabled = false; // allow environment(ECF_DEBUG_ZOMBIES) to enable debug
 
-BOOST_GLOBAL_FIXTURE(TestFixture);
+BOOST_AUTO_TEST_SUITE(S_Test)
 
-BOOST_AUTO_TEST_SUITE(TestSuite)
+BOOST_AUTO_TEST_SUITE(T_Zombies)
 
 enum WaitType { SINGLE, ALL };
 static int timeout      = 32;
@@ -312,7 +307,7 @@ static void check_expected_no_of_zombies_range(size_t min_expected, size_t max_e
     TestFixture::client().zombieGet();
     std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
 
-    bool in_range               = (zombies.size() >= min_expected && zombies.size() <= max_expected);
+    bool in_range = (zombies.size() >= min_expected && zombies.size() <= max_expected);
     BOOST_CHECK_MESSAGE(in_range,
                         "*error* Expected range(" << min_expected << "-" << max_expected << ") zombies but got "
                                                   << zombies.size());
@@ -470,7 +465,7 @@ static void populate_defs(Defs& theDefs, const std::string& suite_name) {
     suite->addVariable(Variable("SLEEPTIME", "5")); // sleep for longer than normal to allow for creation of zombies
     family_ptr family = suite->add_family("f");
     for (int i = 0; i < NUM_OF_TASKS; i++) {
-        family->add_task("t" + boost::lexical_cast<std::string>(i));
+        family->add_task("t" + ecf::convert_to<std::string>(i));
     }
     suite->add_variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_");
 }
@@ -1227,5 +1222,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_zombie_type_creation) {
     cout << timer.duration() << "s\n";
 }
 #endif
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

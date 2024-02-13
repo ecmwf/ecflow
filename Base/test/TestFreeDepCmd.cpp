@@ -1,36 +1,34 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #22 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "Expression.hpp"
-#include "Family.hpp"
 #include "MockServer.hpp"
-#include "ServerToClientCmd.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "ecflow/base/cts/user/FreeDepCmd.hpp"
+#include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-BOOST_AUTO_TEST_SUITE(BaseTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Base)
+
+BOOST_AUTO_TEST_SUITE(T_FreeDepCmd)
 
 BOOST_AUTO_TEST_CASE(test_free_dep_cmd) {
     cout << "Base:: ...test_free_dep_cmd\n";
@@ -338,5 +336,7 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series_2) {
                             << NState::toString(task->state())
                             << ", free dependency should avoid re-queue for a future single time dependency.");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

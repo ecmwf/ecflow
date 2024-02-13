@@ -1,29 +1,26 @@
-//============================================================================
-// Name        : Request
-// Author      : Avi
-// Revision    : $Revision: #7 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "TestVersioning.hpp"
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Serialization.hpp"
+#include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Serialization.hpp"
 
 using namespace std;
 using namespace boost;
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_Versioning)
 
 // This class will create a Class X. This is serialised.
 // This class is then reloaded, with different kinds of version changes, to base version 0;
@@ -61,7 +58,9 @@ BOOST_AUTO_TEST_CASE(test_versioning) {
     }
 
     // remove the generate file
-    boost::filesystem::remove("version0");
+    fs::remove("version0");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

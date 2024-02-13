@@ -1,17 +1,56 @@
 #!/usr/bin/env python3
 
-import os
 import re
 import pathlib
+import subprocess
 
-RST_DIR = pathlib.Path(__file__).resolve().parent.joinpath("api")
+cmd_type_terms = {"child": "child command", "user": "user command", "option": ""}
 
 
-def build_rst(name):
-    os.system(f"ecflow_client --help={name} > help_cmd.txt")
-    with open("help_cmd.txt", "r") as f:
-        title = f"{name}"
-        txt = f"""
+def run_command(cmd):
+    print(f"*** Executing: {cmd}")
+    p = subprocess.run(cmd, capture_output=True, text=True)
+    return p.stdout, p.stderr
+
+
+class Entry:
+    def __init__(self, name, type, desc):
+        self.name = name
+        self.type = type
+        self.desc = desc
+
+    def __repr__(self):
+        return f"Entry('{self.name}', '{self.type}', '{self.desc}')"
+
+
+def load_help_table(command):
+    entries = []
+    o, _ = run_command(command)
+    o = o.split("\n")
+    for line in o:
+        m = re.search(r"""(\S+)\s+(child|user|option)\s+(.*)""", line)
+        if m and m.groups and len(m.groups()) == 3:
+            entry = Entry(m.group(1), m.group(2), m.group(3))
+            entries.append(entry)
+    return entries
+
+
+def load_commands():
+    return load_help_table(["ecflow_client", "--help=summary"])
+
+
+def load_options():
+    return load_help_table(["ecflow_client", "--help=option"])
+
+
+def render_single_page_rst(name):
+    o, _ = run_command(["ecflow_client", f"--help={name}"])
+
+    # prefix each line of the output with the necessary indentation
+    o = '\n'.join(['   ' + line for line in o.split('\n')]) + '\n'
+
+    title = f"{name}"
+    txt = f"""
 .. _{name}_cli:
 
 {title}
@@ -21,14 +60,33 @@ def build_rst(name):
 
 """
 
-        for line in f.read().split("\n"):
-            txt += f"   {line}\n"
-
-    with open(f"{RST_DIR}/{name}.rst", "w") as f:
-        f.write(txt)
+    txt += o
+    return txt
 
 
-def build():
+def render_user_option_rst():
+
+    title = f"user"
+    txt = f"""
+.. _user_cli:
+
+{title}
+{"/" * len(title)}
+
+::
+
+   
+   user
+   ----
+   
+   Specifies the user name used to contact the server. Must be used in combination with option --password.
+   
+   
+"""
+    return txt
+
+
+def render_index_rst():
     title = "Command line interface (CLI)"
     txt = f"""
 .. _ecflow_cli:
@@ -46,68 +104,103 @@ The very first argument to :term:`ecflow_client` specifies the command and must 
 
     ecflow_client --load=host1.3141.check
 
+The comprehensive :ref:`list of ecflow_client commands <ecflow_client_commands>` is presented below.
+These commands can be combined with :ref:`ecflow_client common options <ecflow_client_options>` to further customise the
+:term:`ecflow_client` behaviour.
 
-:numref:`Table %s <cli_command_table>` below shows the full list of the available commands. You can also get it via the ``--help`` switch:
+The list of commands, amongst other details, can be displayed by using the option ``--help``.
 
 .. code-block:: shell
 
     ecflow_client --help
 
 
-Some pages about some specific details about the CLI can be find here:
+Some pages about CLI specific details can be found here:
 
 .. toctree::
     :maxdepth: 1
     
     desc/index.rst
+"""
 
+    txt += """
 
-.. list-table:: The list of available CLI commands
+.. list-table:: List of :term:`ecflow_client` commands
     :header-rows: 1
-    :widths: 10 10 80
-    :name: cli_command_table
+    :width: 100%
+    :widths: 20 20 60
+    :name: ecflow_client_commands
 
     * - Command
       - Type
       - Description
     """
 
-    cmd_type_terms = {"child": "child command", "user": "user command"}
+    command_entries = load_commands()
+    for entry in command_entries:
+        txt += f"""
+    * - :ref:`{entry.name}_cli` 
+      - :term:`{cmd_type_terms[entry.type]}`
+      - {entry.desc}
+"""
 
-    names = []
-    os.system("ecflow_client --help=summary > help.txt")
-    with open("help.txt", "r") as f:
-        t = f.read()
-        _, _, t = t.rpartition("Ecflow client commands:")
-        for line in t.split("\n"):
-            line = line.strip()
-            if line != "":
-                m = re.match(r"""(\S+)\s+(\S+)\s+([\S,\s]+)""", line)
-                if m and m.groups and len(m.groups()) == 3:
-                    name = m.group(1).strip()
-                    cmd_type = m.group(2).strip()
-                    desc = m.group(3).strip()
-                    names.append(name)
-                    build_rst(name)
-                    txt += f"""
-    * - :ref:`{name}_cli` 
-      - :term:`{cmd_type_terms[cmd_type]}`
-      - {desc}                
-        """
+    txt += f"""
+
+.. list-table:: List of common options for `ecflow_client` commands
+    :header-rows: 1
+    :width: 100%
+    :widths: 20 80
+    :name: ecflow_client_options
+
+    * - Option
+      - Description
+"""
+
+    option_entries = load_options()
+    for entry in option_entries:
+        txt += f"""
+    * - :ref:`{entry.name}_cli`
+      - {entry.desc}
+"""
 
     txt += f"""
 
 .. toctree::
     :maxdepth: 1
     :hidden:
-
+    
 """
 
-    for name in names:
-        txt += f"""    {RST_DIR}/{name}.rst\n"""
+    for entry in command_entries:
+        txt += f"""    {entry.name} <api/{entry.name}.rst>\n"""
+    for entry in option_entries:
+        txt += f"""    {entry.name} (option) <api/{entry.name}.rst>\n"""
 
+    return txt
+
+
+if __name__ == "__main__":
+
+    # Render and store index.rst
+    content = render_index_rst()
     with open("index.rst", "w") as f:
-        f.write(txt)
+        f.write(content)
 
+    # Ensure api sub-folders is present
+    pathlib.Path("api").mkdir(parents=True, exist_ok=True)
 
-build()
+    # Render and store each of the command/option.rst
+    entries = load_commands()
+    for entry in entries:
+        content = render_single_page_rst(entry.name)
+        with open(f"api/{entry.name}.rst", "w") as f:
+            f.write(content)
+
+    entries = load_options()
+    for entry in entries:
+        if entry.name == "user":
+            content = render_user_option_rst()
+        else:
+            content = render_single_page_rst(entry.name)
+        with open(f"api/{entry.name}.rst", "w") as f:
+            f.write(content)

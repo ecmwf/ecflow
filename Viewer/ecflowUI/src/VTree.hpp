@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef VTREENODE_HPP
-#define VTREENODE_HPP
+#ifndef ecflow_viewer_VTree_HPP
+#define ecflow_viewer_VTree_HPP
 
 #include <vector>
 
@@ -82,7 +83,7 @@ class VTree : public VTreeNode {
     friend class VTreeServer;
 
 public:
-    VTree(VTreeServer*);
+    explicit VTree(VTreeServer*);
     ~VTree() override;
 
     VTreeNode* find(const VNode*) const;
@@ -120,4 +121,4 @@ private:
     int totalNum_;
 };
 
-#endif // VTREENODE_HPP
+#endif /* ecflow_viewer_VTree_HPP */

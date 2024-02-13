@@ -1,41 +1,36 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #75 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "Child.hpp"
-#include "ClientInvoker.hpp"
-#include "ClientToServerCmd.hpp"
-#include "Defs.hpp"
-#include "File.hpp"
-#include "Flag.hpp"
-#include "NState.hpp"
-#include "Submittable.hpp"
-#include "Suite.hpp"
+#include "ecflow/base/cts/user/CFileCmd.hpp"
+#include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/Child.hpp"
+#include "ecflow/core/File.hpp"
+#include "ecflow/core/NState.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/Flag.hpp"
+#include "ecflow/node/Submittable.hpp"
+#include "ecflow/node/Suite.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_ClientInterface)
 
 // **************************************************************************************
 // test the interface, this will create the cmd without actually submitting to the server
@@ -1576,5 +1571,7 @@ BOOST_AUTO_TEST_CASE(test_client_task_interface_for_fail) {
                             std::runtime_error); //  bad path no '/'
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

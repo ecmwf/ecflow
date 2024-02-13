@@ -1,24 +1,19 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VNode.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "AstCollateVNodesVisitor.hpp"
 #include "ConnectState.hpp"
-#include "Expression.hpp"
-#include "Limit.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
 #include "TriggerCollector.hpp"
 #include "TriggeredScanner.hpp"
 #include "UiLog.hpp"
@@ -41,7 +36,12 @@
 #include "VTimeAttr.hpp"
 #include "VTriggerAttr.hpp"
 #include "VUserVarAttr.hpp"
-#include "Variable.hpp"
+#include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/node/Expression.hpp"
+#include "ecflow/node/Limit.hpp"
+#include "ecflow/node/Suite.hpp"
 
 #define _UI_VNODE_DEBUG
 
@@ -450,7 +450,7 @@ int VNode::tryNo() const {
     if (v.empty())
         return 0;
 
-    return boost::lexical_cast<int>(v);
+    return ecf::convert_to<int>(v);
 }
 
 VNode* VNode::find(const std::vector<std::string>& pathVec) {
@@ -486,7 +486,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     if (!var.empty()) {
         val = var.theValue();
         if (substitute) {
-            node_->variableSubsitution(val);
+            node_->variableSubstitution(val);
         }
         return val;
     }
@@ -494,7 +494,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     if (!gvar.empty()) {
         val = gvar.theValue();
         if (substitute) {
-            node_->variableSubsitution(val);
+            node_->variableSubstitution(val);
         }
         return val;
     }
@@ -513,7 +513,7 @@ std::string VNode::findInheritedVariable(const std::string& key, bool substitute
     if (node_->findParentVariableValue(key, val)) {
         if (substitute) {
             // this must resolve ECF_MICRO all the time
-            node_->variableSubsitution(val);
+            node_->variableSubstitution(val);
         }
         return val;
     }
@@ -549,7 +549,7 @@ bool VNode::substituteVariableValue(std::string& val) const {
 
     // should set the def mutex because variableSubsitution
     // might need information from the defs
-    return node_->variableSubsitution(val);
+    return node_->variableSubstitution(val);
 }
 
 int VNode::variablesNum() const {
@@ -1160,7 +1160,7 @@ void VServer::clear() {
     assert(totalNum_ == 0);
 
     // Deallocate the nodes vector
-    nodes_            = std::vector<VNode*>();
+    nodes_ = std::vector<VNode*>();
 
     triggeredScanned_ = false;
 }
@@ -1233,7 +1233,7 @@ VNode* VServer::find(const std::string& fullPath) {
         return this;
 
     std::vector<std::string> pathVec;
-    boost::split(pathVec, fullPath, boost::is_any_of("/"));
+    ecf::algorithm::split(pathVec, fullPath, "/");
 
     if (pathVec.size() > 0 && pathVec.at(0).empty()) {
         pathVec.erase(pathVec.begin());

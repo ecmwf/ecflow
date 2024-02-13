@@ -1,22 +1,23 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef VTASK_HPP_
-#define VTASK_HPP_
+#ifndef ecflow_viewer_VTask_HPP
+#define ecflow_viewer_VTask_HPP
 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "NodeFwd.hpp"
-#include "Zombie.hpp"
+#include "ecflow/attribute/Zombie.hpp"
+#include "ecflow/node/NodeFwd.hpp"
 
 // #include "VReply.hpp"
 class VReply;
@@ -116,4 +117,4 @@ protected:
     Zombie zombie_;
 };
 
-#endif
+#endif /* ecflow_viewer_VTask_HPP */

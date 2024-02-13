@@ -1,15 +1,14 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "ExpandState.hpp"
-
-#include <boost/algorithm/string.hpp>
 
 #include "AbstractNodeView.hpp"
 #include "ExpandStateNode.hpp"
@@ -19,6 +18,7 @@
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
+#include "ecflow/core/Str.hpp"
 
 // #define _UI_EXPANDSTATE_DEBUG
 
@@ -37,7 +37,7 @@ void ExpandState::init(const VNode* vnode) {
     QModelIndex idx = model_->serverToIndex(server);
     bool expanded   = view_->isExpanded(idx);
 
-    root_           = new ExpandStateNode(server->vRoot(), expanded);
+    root_ = new ExpandStateNode(server->vRoot(), expanded);
 
     save(server->vRoot());
 }
@@ -204,7 +204,7 @@ void ExpandState::collectExpanded(ExpandStateNode* expand,
 #endif
     // The contents of expand node and the vnode might differ. We try to
     // adjust the expand node to the vnode with this call.
-    bool adjusted         = expand->adjustContents(node);
+    bool adjusted = expand->adjustContents(node);
 
     std::size_t numExpand = expand->children_.size();
     std::size_t numNode   = node->numOfChildren();
@@ -288,7 +288,7 @@ ExpandStateNode* ExpandState::find(const std::string& fullPath) {
         return root_;
 
     std::vector<std::string> pathVec;
-    boost::split(pathVec, fullPath, boost::is_any_of("/"));
+    ecf::algorithm::split(pathVec, fullPath, "/");
 
     if (pathVec.size() > 0 && pathVec[0].empty()) {
         pathVec.erase(pathVec.begin());

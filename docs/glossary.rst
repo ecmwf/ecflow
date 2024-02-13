@@ -164,9 +164,9 @@
 
   
    complete expression
-      Force a node to be complete **if** the expression evaluates, without running any of the nodes. 
-      
-      This allows you to have tasks in the suite which a run only if others fail. 
+      Force a node to be complete **if** the expression evaluates, without running any of the nodes.
+
+      This allows the user to have tasks in the suite which run only in case others fail.
       In practice the node would need to have a :term:`trigger` also. 
       
       .. list-table::
@@ -180,63 +180,16 @@
            - :token:`complete`
       
    cron
-      Like :term:`time`, cron defines time dependency for a :term:`node`, but it will be repeated indefinitely:
+      A :term:`cron` defines a time dependency for a :term:`node`, similar to :term:`time`,
+      but one that will be repeated indefinitely.
 
-      .. code-block:: shell
-
-         cron -w <weekdays> -d <days> -m <months> <start_time> <end_time> <increment>
-         # weekdays:   range [0...6], Sunday=0, Monday=1, etc    e.g. -w, 0,3,6
-         # days:       range [1..31]                             e.g. -d 1,2,20,30    if the month does not have a day, i.e. February 21st it is ignored
-         # months:     range [1..12]                             e.g. -m 5,6,7,8
-         # start_time: The starting time. format hh:mm           e.g. 15:21
-         # end_time:   The end time, if multiple times used
-         # increment:  The increment in time if multiple times are given
-         
-         -w day of the week   valid values are , 0 → 6 where 0 is Sunday , 1 is Monday etc AND
-                              0L→6L, where 0L means last Sunday of the month, and 1L means the last Monday of the month, etc
-                              It is an error to overlay, i.e. cron -w 0,1,2,1L,2L,3L   23:00  will throw an exception
-         -d day of the month   valid values are in range 0-31,L   Extended so that we now use 'L' to mean the last day of the month
-         -m month              valid values are in range 0-12
-         
-         cron 11:00                           # single time
-         cron 10:00 22:00 00:30               # <start> <finish> <increment>
-         cron +00:20 23:59 00:30              # relative to suite start time, or when re-queued  as part of a repeat loop. Note: maximum relative time is 24 hours
-         cron -w 0,1 10:00 11:00 01:00        # run every Sunday & Monday at 10 and 11 am
-         cron -d 15,16 -m 1 10:00 11:00 01:00 # run 15,16 January at 10 and 11 am
-         cron -w 5L 23:00                     # run on *last* Friday(5L) of each month at 23pm,
-                                             # Python: cron = Cron("23:00",last_week_days_of_the_month=[5])
-         cron -w 0,1L 23:00                   # run every Sunday(0) and *last* Monday(1L) of the month at 23pm
-                                             # Python: cron = Cron("23:00",days_of_week=[0],last_week_days_of_the_month=[1])
-         cron -w 0L,1L,2L,3L,4L,5L,6L 10:00   # run on the last Monday,Tuesday..Saturday,Sunday of the month at 10 am
-                                             # Python: cron = Cron("10:00",last_week_days_of_the_month=[0,1,2,3,4,5,6])
-         cron -d 1,L  23:00                   # Run on the first and last of the month at 23pm
-                                             # Python: cron = Cron("23:00",days_of_week=[1],last_day_of_the_month=True)
-
-   
-      When the node becomes complete it will be :term:`queued` immediately. This means that the suite will never complete, and the output is not directly accessible through :term:`ecflow_ui`
-      
-      If tasks abort, the :term:`ecflow_server` will not schedule it again.
-      
-      If the time the job takes to complete is longer than the interval a “slot” is missed, 
-      e.g.:
-
-      .. code-block:: shell
-      
-         cron 10:00 20:00 01:00 
-         
-      if the 10:00 run takes more than an hour, the 11:00 run will never occur.
-      
-      If the cron defines months, days of the month, or week days or a single time slot
-      the it relies on a day change, hence if a :term:`hybrid clock` is defined, 
-      then it will be set to :term:`complete` at  the beginning of the :term:`suite`, 
-      without running  the corresponding job. 
-      Otherwise under a hybrid clock the :term:`suite` would never :term:`complete`.
-      
       See also:
 
       .. list-table::
          :widths: 40 60
 
+         * - Text Definition
+           - :ref:`cron<text_based_def_cron>`
          * - :ref:`python_api`
            - :py:class:`ecflow.Cron`, :py:class:`ecflow.Node.add_cron` 
          * - :ref:`grammar`
@@ -461,7 +414,7 @@
 
    ECF_FETCH
       *Experimental*
-      This is used to specify a command, whose output can be used as a job script. The ecFlow server will run the command with popen. Hence create care needs to be taken not to doom the server, with command that can hang. As this could severely affect servers ability to schedule jobs.
+      This is used to specify a command, whose output can be used as a job script. The ecFlow server will run the command with popen. Hence great care needs to be taken not to doom the server, with command that can hang. As this could severely affect servers ability to schedule jobs.
 
       .. code-block:: shell
 
@@ -1039,7 +992,19 @@
       For python see :py:class:`ecflow.Family`. For BNF see :token:`family`
       
       It serves as an intermediate :term:`node` in a :term:`suite definition`.
-      
+
+   generic
+      A generic attribute associates a name to a set of generic string values, and is used to gracefully indicate
+      the presence of unknown attributes in the suite definition.
+
+      This kind of attribute is used to allow the introduction of future attributes without requiring an API change.
+      When an older version of ecflow encounters a new/unknown attribute, the attribute is automatically converted
+      into a generic attribute.
+
+      .. warning::
+
+         The user is strongly advised not to include generic attributes in suite definitions.
+
    halted
       Is a :term:`ecflow_server` state. See :term:`server states`.
       
@@ -1455,30 +1420,45 @@
          repeat string VARIABLE str1 [str2 ...]        
          repeat file VARIABLE filename       
          repeat date VARIABLE yyyymmdd yyyymmdd [delta]
+         repeat datetime VARIABLE yyyymmddTHHMMSS yyyymmddTHHMMSS [delta]
          repeat datelist VARIABLE yyyymmdd(1) yyyymmdd(2) ...
 
       
       The repeat variable name is available as a generated variable.
 
-      The **repeat date** defines additional generated variables (from ecFlow 4.7.0), which are scoped with prefix of the variable name i.e.:
+      The **repeat date** and **repeat datetime** define several generated variables, prefixed by variable name:
             
       .. code-block:: shell
 
+         # Provided for `repeat date` and `repeat datetime`
          <variable>           # the default, the value is the current date
-         <variable>_YYYY      # The year
+         <variable>_YYYY      # the year
          <variable>_MM        # the month
-         <variable>_DD        # The day of the month
+         <variable>_DD        # the day of the month
          <variable>_DOW       # day of the week  
-         <variable>_JULIAN    # the julian value for the date 
+         <variable>_JULIAN    # the julian value for the date
+         # Provided for `repeat datetime`
+         <variable>_DATE      # the date formatted as yyyymmdd
+         <variable>_TIME      # the time formatted as HHMMSS
+         <variable>_HOURS     # the hours
+         <variable>_MINUTES   # the minutes
+         <variable>_SECONDS   # the seconds
 
       For example:
 
       .. code-block:: shell
-         :caption: Repeat date generated variables, accessible for trigger expressions
+         :caption: Repeat generated variables, accessible for trigger expressions
 
          repeat date YMD 20090101 20220101
          # The following generated variables, are accessible for trigger expressions
-         # YMD, YMD_YYYY, YMD_MM, YMD_DD, YMD_DOW,YMD_JULIAN 
+         # YMD
+         # YMD_YYYY, YMD_MM, YMD_DD, YMD_DOW, YMD_JULIAN
+
+         repeat datetime DT 20090101T000000 20090102T000000 06:00:00
+         # The following generated variables, are accessible for trigger expressions
+         # DT
+         # DT_DATE, DT_YYYY, DT_MM, DT_DD, DT_DOW, DT_JULIAN
+         # DT_TIME, DT_HOURS, DT_MINUTES, DT_SECONDS
 
       The repeat VARIABLE can be used in :term:`trigger` and :term:`complete expression` expressions.
       
@@ -1792,6 +1772,7 @@
       - :term:`repeat` *enumerated*: use the index values as integers. See example below
       - :term:`repeat` *integer*: use the implicit integer values
       - :term:`repeat` *date*: use the date values as integers. Use of plus/minus on repeat date variable uses date arithmetic
+      - :term:`repeat` *datetime*: use the date+time instant values as integers. Use of plus/minus on repeat datetime variable uses second arithmetic
       - :term:`limit`: the limit value is used as an integer. This allows a degree of prioritisation amongst tasks under a limit
       - :term:`late`: the value is stored in a flag, and is a simple boolean. Used to signify when a task is late.
        
@@ -2019,4 +2000,3 @@
       * **ecf_pid_passwd**: Both PID and password mismatch. Re-queue & submit of active job?
 
       The type of the zombie is not fixed and may change.
-     

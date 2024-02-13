@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VFileInfo.hpp"
 
@@ -61,9 +62,9 @@ QString VFileInfo::formatDate(const std::time_t& t) {
 QString VFileInfo::formatDateAgo(const std::time_t& t) {
     QString str = QObject::tr("Right now");
 
-    time_t now  = time(nullptr);
+    time_t now = time(nullptr);
 
-    int delta   = now - t;
+    int delta = now - t;
     if (delta < 0)
         delta = 0;
 

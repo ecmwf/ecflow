@@ -1,22 +1,17 @@
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
+
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace boost;
@@ -26,7 +21,7 @@ using namespace std;
 
 class MyType {
 public:
-    MyType(std::string str) : mName(std::move(str)) {
+    explicit MyType(std::string str) : mName(std::move(str)) {
 #ifdef DEBUG_ME
         std::cout << "MyType::MyType " << mName << " my_int:" << my_int_ << '\n';
 #endif
@@ -78,18 +73,12 @@ private:
     int* my_ptr_{nullptr}; //  show be applied for all constructor types
 };
 
-BOOST_AUTO_TEST_SUITE(CoreTestSuite)
+BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_ClassDataMemberInit)
 
 BOOST_AUTO_TEST_CASE(test_class_data_member_init) {
     cout << "ACore:: ...test_class_data_member_init \n";
-
-    //    // MyType needs noexcept on move copy constructor, during vec resize.
-    //	std::vector<MyType> vec;
-    //	for(int i =0; i < 4; i++) {
-    //		//vec.push_back(MyType(boost::lexical_cast<string>(i)));
-    //		vec.emplace_back(boost::lexical_cast<string>(i));
-    //		cout << vec.size() << " " << vec.capacity() << endl;
-    //	}
 
     {
         MyType type("ABC");
@@ -118,5 +107,7 @@ BOOST_AUTO_TEST_CASE(test_class_data_member_init) {
         BOOST_CHECK_MESSAGE(tassigned.my_ptr() == nullptr, "Error found");
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

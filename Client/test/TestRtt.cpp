@@ -1,31 +1,26 @@
-//============================================================================
-// Name        :
-// Author      : Avi
-// Revision    : $Revision: #5 $
-//
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//
-// Description :
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "File.hpp"
-#include "Rtt.hpp"
+#include "ecflow/client/Rtt.hpp"
+#include "ecflow/core/File.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE(ClientTestSuite)
+BOOST_AUTO_TEST_SUITE(S_Client)
+
+BOOST_AUTO_TEST_SUITE(T_Rtt)
 
 BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     cout << "Client:: ...test_client_invoker_round_trip_times" << endl;
@@ -48,7 +43,9 @@ BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     BOOST_CHECK_MESSAGE(diffs.empty(), diffs << "\n" << errorMsg);
 
     if (diffs.empty())
-        boost::filesystem::remove(generated_file);
+        fs::remove(generated_file);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

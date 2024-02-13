@@ -1,11 +1,12 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
 #include "VFilter.hpp"
 
@@ -41,7 +42,7 @@
 VParamSet::VParamSet() = default;
 
 void VParamSet::init(const std::vector<VParam*>& items) {
-    all_      = items;
+    all_ = items;
 
     int maxId = 0;
     for (std::vector<VParam*>::const_iterator it = all_.begin(); it != all_.end(); ++it) {
@@ -101,7 +102,7 @@ void VParamSet::clearCurrent() {
 void VParamSet::addToCurrent(VParam* p) {
     current_.push_back(p);
     uint id = p->id();
-    UI_ASSERT(id >= 0 && id < currentCache_.size(), "id=" << id << " currentCache_.size()=" << currentCache_.size());
+    UI_ASSERT(id < currentCache_.size(), "id=" << id << " currentCache_.size()=" << currentCache_.size());
     currentCache_[id] = 1;
     empty_            = false;
     complete_         = (current_.size() == all_.size());

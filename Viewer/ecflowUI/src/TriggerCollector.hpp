@@ -1,14 +1,15 @@
-//============================================================================
-// Copyright 2009- ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-// In applying this licence, ECMWF does not waive the privileges and immunities
-// granted to it by virtue of its status as an intergovernmental organisation
-// nor does it submit to any jurisdiction.
-//============================================================================
+/*
+ * Copyright 2009- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#ifndef TRIGGERCOLLECTOR_HPP
-#define TRIGGERCOLLECTOR_HPP
+#ifndef ecflow_viewer_TriggerCollector_HPP
+#define ecflow_viewer_TriggerCollector_HPP
 
 #include <cstdio>
 #include <set>
@@ -44,7 +45,7 @@ private:
 
 class TriggerListCollector : public TriggerCollector {
 public:
-    TriggerListCollector(bool extended) : extended_(extended) {}
+    explicit TriggerListCollector(bool extended) : extended_(extended) {}
 
     ~TriggerListCollector() override;
     bool add(VItem*, VItem*, Mode) override;
@@ -89,7 +90,7 @@ private:
 
 class TriggeredCollector : public TriggerListCollector {
 public:
-    TriggeredCollector(VNode* n) : TriggerListCollector(false), node_(n) {}
+    explicit TriggeredCollector(VNode* n) : TriggerListCollector(false), node_(n) {}
     bool add(VItem*, VItem*, Mode) override;
 
 private:
@@ -124,7 +125,7 @@ protected:
 
 class TriggerTableItem {
 public:
-    TriggerTableItem(VItem* t) : t_(t) {}
+    explicit TriggerTableItem(VItem* t) : t_(t) {}
 
     void addDependency(VItem* dep, TriggerCollector::Mode mode) { deps_.emplace_back(dep, mode); }
 
@@ -140,7 +141,7 @@ protected:
 
 class TriggerTableCollector : public TriggerCollector {
 public:
-    TriggerTableCollector(bool extended) : extended_(extended) {}
+    explicit TriggerTableCollector(bool extended) : extended_(extended) {}
 
     ~TriggerTableCollector() override;
     bool add(VItem*, VItem*, Mode) override;
@@ -205,4 +206,4 @@ public:
 };
 #endif
 
-#endif // TRIGGERCOLLECTOR_HPP
+#endif /* ecflow_viewer_TriggerCollector_HPP */
