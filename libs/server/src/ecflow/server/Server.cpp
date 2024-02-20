@@ -9,8 +9,3 @@
  */
 
 #include "ecflow/server/Server.hpp"
-
-Server::Server(boost::asio::io_context& io, ServerEnvironment& serverEnv)
-    : BaseServer(io, serverEnv),
-      tcp_server_(this, io, serverEnv) {
-}

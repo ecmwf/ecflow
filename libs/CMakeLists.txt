@@ -482,11 +482,9 @@ set(srcs
   server/src/ecflow/server/Server.hpp
   server/src/ecflow/server/ServerEnvironment.hpp
   server/src/ecflow/server/ServerOptions.hpp
-  server/src/ecflow/server/SslServer.hpp
   server/src/ecflow/server/SslTcpServer.hpp
   server/src/ecflow/server/TcpBaseServer.hpp
   server/src/ecflow/server/TcpServer.hpp
-  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslServer.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
   server/src/ecflow/server/BaseServer.cpp
@@ -498,7 +496,6 @@ set(srcs
   server/src/ecflow/server/ServerOptions.cpp
   server/src/ecflow/server/TcpBaseServer.cpp
   server/src/ecflow/server/TcpServer.cpp
-  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslServer.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.cpp>
 
   # Service -- Headers

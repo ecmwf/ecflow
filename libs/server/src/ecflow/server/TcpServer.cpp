@@ -21,7 +21,7 @@ using boost::asio::ip::tcp;
 using namespace std;
 using namespace ecf;
 
-TcpServer::TcpServer(Server* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
+TcpServer::TcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
     : TcpBaseServer(server, io, serverEnv) {
     // timer_.stop(); // for timing of commands.
 
