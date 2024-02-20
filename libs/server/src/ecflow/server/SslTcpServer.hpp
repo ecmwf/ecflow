@@ -13,12 +13,11 @@
 
 #include "ecflow/base/ssl_connection.hpp"
 #include "ecflow/server/TcpBaseServer.hpp"
-class SslServer;
 
 class SslTcpServer : public TcpBaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit SslTcpServer(SslServer*, boost::asio::io_context& io, ServerEnvironment&);
+    explicit SslTcpServer(BaseServer*, boost::asio::io_context& io, ServerEnvironment&);
     ~SslTcpServer() = default;
 
 private:

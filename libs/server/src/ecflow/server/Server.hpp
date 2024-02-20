@@ -12,16 +12,33 @@
 #define ecflow_server_Server_HPP
 
 #include "ecflow/server/BaseServer.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/server/SslTcpServer.hpp"
 #include "ecflow/server/TcpServer.hpp"
 
-class Server : public BaseServer {
+template <typename U>
+class DefaultServer : public BaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit Server(boost::asio::io_context& io, ServerEnvironment&);
-    ~Server() override = default;
+    explicit DefaultServer(boost::asio::io_context& io, ServerEnvironment& env)
+        : BaseServer(io, env),
+          server_(this, io, env) {}
+    ~DefaultServer() override = default;
+
+    std::string ssl() const override {
+        if constexpr (ECF_OPENSSL == 1) {
+            return serverEnv_.openssl().ssl();
+        }
+        else {
+            return "";
+        }
+    }
 
 private:
-    TcpServer tcp_server_;
+    U server_;
 };
+
+using Server    = DefaultServer<TcpServer>;
+using SslServer = DefaultServer<SslTcpServer>;
 
 #endif /* ecflow_server_Server_HPP */

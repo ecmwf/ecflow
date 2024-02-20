@@ -30,6 +30,8 @@ public:
         void operator()(void const*) const {}
     };
 
+    std::string ssl() const override { return ""; }
+
     // Only in server side do we increment state/modify numbers, controlled by: Ecf::set_server(true)
     explicit MockServer(Defs* defs) : defs_(defs_ptr(defs, MockServer::null_deleter())) { Ecf::set_server(true); }
     explicit MockServer(defs_ptr defs) : defs_(defs) { Ecf::set_server(true); }
