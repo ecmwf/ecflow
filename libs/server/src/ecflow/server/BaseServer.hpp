@@ -87,6 +87,8 @@ public:
     // used in signal, for emergency check point during system session
     void sigterm_signal_handler();
 
+    friend int run(BaseServer& server);
+
 protected:
     /// The io_context used to perform asynchronous operations.
     boost::asio::io_context& io_;
