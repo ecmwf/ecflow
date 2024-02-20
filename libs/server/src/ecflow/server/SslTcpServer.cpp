@@ -13,14 +13,14 @@
 #include <iostream>
 
 #include "ecflow/core/Log.hpp"
+#include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
-#include "ecflow/server/SslServer.hpp"
 
 using boost::asio::ip::tcp;
 using namespace std;
 using namespace ecf;
 
-SslTcpServer::SslTcpServer(SslServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
+SslTcpServer::SslTcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
     : TcpBaseServer(server, io, serverEnv) {
     server_->stats().ECF_SSL_ = serverEnv.openssl().info();
 
