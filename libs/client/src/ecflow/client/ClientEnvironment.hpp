@@ -90,6 +90,9 @@ public:
     // Used by python to enable debug of client api
     void set_debug(bool flag);
 
+    bool http() const { return http_; }
+    void enable_http() { http_ = true; }
+
 #ifdef ECF_OPENSSL
     /// return true if this is a ssl enabled server
     ecf::Openssl& openssl() { return ssl_; }
@@ -166,7 +169,8 @@ private:
     bool denied_{false}; // ECF_DENIED.If the server denies the communication, then the child command can be set to fail
                          // immediately
     bool no_ecf_{false}; // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
-    bool debug_{false};  // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
+    bool http_{false};
+    bool debug_{false};          // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
     bool under_test_{false};     // Used in testing client interface
     bool host_file_read_{false}; // to ensure we read host file only once
     bool gui_{false};
