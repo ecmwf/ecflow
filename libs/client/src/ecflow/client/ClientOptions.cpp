@@ -78,6 +78,9 @@ ClientOptions::ClientOptions() {
         "Enables the use of SSL when contacting the server.\n"
         "When specified overrides the environment variable ECF_SSL.");
 #endif
+    desc_->add_options()(
+        "http",
+        "Enables communication over HTTP between client/server.\n");
     // clang-format on
 }
 
@@ -184,6 +187,12 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         env->enable_ssl();
     }
 #endif
+
+    if (vm.count("http")) {
+        if (env->debug())
+            std::cout << "  http set via command line\n";
+        env->enable_http();
+    }
 
     // Defer the parsing of the command , to the command. This allows
     // all cmd functionality to be centralised with the command
