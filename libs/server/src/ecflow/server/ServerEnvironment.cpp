@@ -67,6 +67,7 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
       submitJobsInterval_(defaultSubmitJobsInterval),
       ecf_prune_node_log_(0),
       jobGeneration_(true),
+      http_(false),
       debug_(false),
       help_option_(false),
       version_option_(false),

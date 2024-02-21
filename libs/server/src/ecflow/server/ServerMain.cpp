@@ -81,6 +81,12 @@ int run(BaseServer& server) {
     return run_boost_services(server.io_, server.serverEnv_);
 }
 
+int run(HttpServer& server) {
+    server.run();
+    return 0;
+}
+
+
 int main(int argc, char* argv[]) {
 
     try {
@@ -103,15 +109,21 @@ int main(int argc, char* argv[]) {
 
         boost::asio::io_context io;
 
-        // Launching SSL server
+        // Launching Http server
+        if (server_environment.http()) {
+            HttpServer theServer(io, server_environment);
+            return run(theServer);
+        }
+
+        // Launching custom TCP/IP (SSL) server
         if constexpr (ECF_OPENSSL == 1) {
             if (server_environment.ssl()) {
                 SslServer theServer(io, server_environment); // This throws exception, if bind address in use
                 return run(theServer);
             }
         }
-
-        // Launching non-SSL server
+        
+        // Launching custom TCP/IP (non-SSL) server
         Server theServer(io, server_environment); // This throws exception, if bind address in use
         return run(theServer);
     }

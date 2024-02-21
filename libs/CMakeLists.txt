@@ -63,6 +63,7 @@ set(srcs
   base/src/ecflow/base/Cmd.hpp
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
+  base/src/ecflow/base/HttpClient.hpp
   base/src/ecflow/base/ServerReply.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
   base/src/ecflow/base/Stats.hpp
@@ -138,6 +139,7 @@ set(srcs
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
+  base/src/ecflow/base/HttpClient.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp

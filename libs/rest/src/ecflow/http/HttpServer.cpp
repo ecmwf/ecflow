@@ -235,7 +235,7 @@ void HttpServer::run() const {
         const std::string key  = opts.cert_directory + "/server.key";
 
         httplib::SSLServer http_server(cert.c_str(), key.c_str());
-        apply_listeners(dynamic_cast<httplib::Server&>(http_server));
+        apply_listeners(http_server);
         start_server(http_server);
     }
     else
