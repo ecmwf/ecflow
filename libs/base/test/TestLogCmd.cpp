@@ -59,12 +59,12 @@ BOOST_AUTO_TEST_CASE(test_log_cmd) {
 
     // Create a new log file, equivalent --log=new .../Base/test/new_logfile.txt
     // LogCmd::doHandleRequest needs log file to have been created first
-    std::string old_log_file = File::test_data("Base/test/old_logfile.txt", "Base");
+    std::string old_log_file = File::test_data("libs/base/test/old_logfile.txt", "libs/base");
     Log::instance()->create(old_log_file);
 
     std::string new_log_file =
-        File::test_data("Base/test/new_logfile.txt ", "Base"); // ECFLOW-377 note extra space at the end
-    std::string expected_new_log_file = File::test_data("Base/test/new_logfile.txt", "Base"); // space removed
+        File::test_data("libs/base/test/new_logfile.txt ", "libs/base"); // ECFLOW-377 note extra space at the end
+    std::string expected_new_log_file = File::test_data("libs/base/test/new_logfile.txt", "libs/base"); // space removed
 
     // ECFLOW-376 --log=new <path> should be treated same as changing ECF_LOG from the gui. i.e added as a user
     // variable. hence visible in GUI

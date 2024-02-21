@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
                           CtsApi::to_string(CtsApi::run(paths, true)) << " should return 0\n"
                                                                       << theClient.errorMsg());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path, true /*force*/) == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path, true /*force*/, true /*check_only*/) == 0,
@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
                               CtsApi::get_log_path() << " should return 0\n"
                                                      << theClient.errorMsg());
 
-        std::string new_log_path = File::test_data("Client/test/data/new_log.log", "Client");
+        std::string new_log_path = File::test_data("libs/client/test/data/new_log.log", "libs/client");
         BOOST_REQUIRE_MESSAGE(theClient.new_log(new_log_path) == 0, " should return 0\n" << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.new_log("") == 0, " should return 0\n" << theClient.errorMsg());
     }

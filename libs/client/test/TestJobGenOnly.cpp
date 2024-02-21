@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(test_jobgenonly) {
 
     // Define paths to ECF_HOME and location of the defs file
 
-    std::string defsFile = File::test_data("Client/test/data/jobgenonly.def", "Client");
-    std::string ecf_home = File::test_data("Client/test/data/ECF_HOME", "Client");
+    std::string defsFile = File::test_data("libs/client/test/data/jobgenonly.def", "libs/client");
+    std::string ecf_home = File::test_data("libs/client/test/data/ECF_HOME", "libs/client");
 
     /// Remove existing job file if any.
     /// 	Job file location may NOT be same as ecf file.

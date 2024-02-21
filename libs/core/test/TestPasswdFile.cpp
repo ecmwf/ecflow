@@ -78,7 +78,7 @@ void test_passwd_files(const std::string& directory, bool pass) {
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_passwd_files) {
     cout << "ACore:: ...test_parsing_for_good_passwd_files\n";
 
-    std::string path = File::test_data("ACore/test/data/goodPasswdFiles", "ACore");
+    std::string path = File::test_data("libs/core/test/data/goodPasswdFiles", "libs/core");
 
     // All the files in this directory are expected to pass
     test_passwd_files(path, true);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_passwd_files) {
 BOOST_AUTO_TEST_CASE(test_parsing_for_bad_passwd_files) {
     cout << "ACore:: ...test_parsing_for_bad_passwd_files\n";
 
-    std::string path = File::test_data("ACore/test/data/badPasswdFiles", "ACore");
+    std::string path = File::test_data("libs/core/test/data/badPasswdFiles", "libs/core");
 
     // All the files in this directory are expected to fail
     test_passwd_files(path, false);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_bad_passwd_files) {
 BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
     cout << "ACore:: ...test_passwd_empty_file\n";
 
-    std::string path = File::test_data("ACore/test/data/goodPasswdFiles/empty.passwd", "ACore");
+    std::string path = File::test_data("libs/core/test/data/goodPasswdFiles/empty.passwd", "libs/core");
 
     PasswdFile theFile;
     std::string errorMsg;
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
 BOOST_AUTO_TEST_CASE(test_passwd) {
     cout << "ACore:: ...test_passwd\n";
 
-    std::string path = File::test_data("ACore/test/data/goodPasswdFiles/ecf.passwd", "ACore");
+    std::string path = File::test_data("libs/core/test/data/goodPasswdFiles/ecf.passwd", "libs/core");
 
     PasswdFile theFile;
     std::string errorMsg;

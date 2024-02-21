@@ -73,7 +73,7 @@ double get_seconds(const boost::timer::nanosecond_type& elapsed) {
 BOOST_AUTO_TEST_CASE(test_single_defs) {
     boost::timer::auto_cpu_timer auto_cpu_timer;
 
-    std::string path      = File::test_data("ANode/test/parser/data/single_defs/mega.def", "parser");
+    std::string path      = File::test_data("libs/node/test/parser/data/single_defs/mega.def", "parser");
     size_t mega_file_size = fs::file_size(path);
     cout << "AParser:: ...test_single_defs " << path << " file_size(" << mega_file_size << ")\n";
 

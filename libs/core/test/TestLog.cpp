@@ -30,10 +30,10 @@ BOOST_AUTO_TEST_SUITE(T_Log)
 static std::string getLogPath() {
 
     // ECFLOW-712, generate unique name for log file, To allow parallel test
-    std::string log_file = "ACore/test/logfile";
+    std::string log_file = "libs/core/test/logfile";
     log_file += Pid::getpid(); // can throw
     log_file += ".txt";
-    return File::test_data(log_file, "ACore");
+    return File::test_data(log_file, "libs/core");
 }
 
 BOOST_AUTO_TEST_CASE(test_log) {
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_log_new_path) {
     fs::remove(Log::instance()->path());
 
     // Specify a new log path. Path could be a relative path like "test/logfile.log"
-    std::string relative_path = File::test_data("ACore/test/logfile.log", "ACore");
+    std::string relative_path = File::test_data("libs/core/test/logfile.log", "libs/core");
 
     BOOST_REQUIRE_NO_THROW(Log::instance()->new_path(relative_path));
     BOOST_CHECK_MESSAGE(!fs::exists(Log::instance()->path()),

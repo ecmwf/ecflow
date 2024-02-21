@@ -190,7 +190,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
 BOOST_AUTO_TEST_CASE(test_good_sms) {
     cout << "ANode:: ...test_good_ecf\n";
 
-    std::string path = File::test_data("ANode/test/data/SMSHOME2/good", "ANode");
+    std::string path = File::test_data("libs/node/test/data/SMSHOME2/good", "libs/node");
 
     // All the sms in this directory are expected to pass
     test_sms_preprocessing(path, true);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_good_sms) {
 BOOST_AUTO_TEST_CASE(test_bad_sms) {
     cout << "ANode:: ...test_bad_ecf\n";
 
-    std::string path = File::test_data("ANode/test/data/SMSHOME2/bad", "ANode");
+    std::string path = File::test_data("libs/node/test/data/SMSHOME2/bad", "libs/node");
 
     // All the sms in this directory are expected to fail
     test_sms_preprocessing(path, false);

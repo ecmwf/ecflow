@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     theClient.set_auto_sync(true);
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     int load = 125;
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     boost::timer::cpu_timer
         boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     Zombie z(Child::USER,
              ecf::Child::INIT,

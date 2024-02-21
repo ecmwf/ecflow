@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home  = File::test_data("ANode/test/data", "ANode");
-    std::string ecf_lists = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home  = File::test_data("libs/node/test/data", "libs/node");
+    std::string ecf_lists = File::test_data("libs/node/test/data", "libs/node");
     suite->add_variable(Str::ECF_HOME(), ecf_home);
     // cerr << theDefs << "\n";
 
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     cout << "ANode:: ...test_ecf_file_locator\n";
 
     // SET ECF_HOME
-    std::string smshome = File::test_data("ANode/test/data/SMSHOME", "ANode");
+    std::string smshome = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
 
     // Create a defs file corresponding to:
     // # Test the sms file can be found via ECF_SCRIPT
@@ -361,10 +361,10 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
     // This test will check we can locate the ecf files in ECF_FILES directory
 
     // SET ECF_HOME. *** TO A DIRECTORY WHERE THERE ARE NO .ECF FILES **
-    std::string smshome = File::test_data("ANode/test/data", "ANode");
+    std::string smshome = File::test_data("libs/node/test/data", "libs/node");
 
     // set ECF_FILES where we do have some .ecf files
-    std::string ecf_files = File::test_data("ANode/test/data/SMSHOME/suite/family", "ANode");
+    std::string ecf_files = File::test_data("libs/node/test/data/SMSHOME/suite/family", "libs/node");
 
     // Create a defs file corresponding to:
     // # Test the sms file can be found via ECF_SCRIPT
@@ -428,10 +428,10 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
     // Will attempt variable substitution, on ECF_FILES is directory does not exist
 
     // SET ECF_HOME. ***TO A DIRECTORY WHERE THERE ARE NO .ECF FILE **
-    std::string smshome = File::test_data("ANode/test/data", "ANode");
+    std::string smshome = File::test_data("libs/node/test/data", "libs/node");
 
     // set ECF_FILES where we do have some .ecf files
-    std::string ecf_files = File::test_data("ANode/test/data/SMSHOME/suite/%FAMILY%", "ANode");
+    std::string ecf_files = File::test_data("libs/node/test/data/SMSHOME/suite/%FAMILY%", "libs/node");
 
     // Create a defs file corresponding to:
     // # Test the sms file can be found via ECF_SCRIPT

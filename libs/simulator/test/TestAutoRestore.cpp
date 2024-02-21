@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),
-                                                      File::test_data("CSim/test", "CSim")); // required for archive
+                                                      File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
     string s1_path;
     {
         ClockAttr clockAttr(true);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
     // ***               autorestore
     Defs theDefs;
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),
-                                                      File::test_data("CSim/test", "CSim")); // required for archive
+                                                      File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
 
     std::vector<std::string> vec;
     {

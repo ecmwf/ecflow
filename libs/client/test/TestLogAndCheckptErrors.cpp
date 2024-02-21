@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
 
         if (debug_me)
             cout << "->load a defs file to the server\n";
-        std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+        std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
         BOOST_CHECK_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
         if (debug_me) {
             BOOST_CHECK_MESSAGE(theClient.sync_local() == 0, "sync_local failed \n" << theClient.errorMsg());

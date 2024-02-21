@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
 
     // load the defs into the server
     {
-        std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+        std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
         BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0,
                               CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n"
                                                                        << theClient.errorMsg());

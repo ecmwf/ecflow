@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
 
     cout << "AParser:: ...test_variable  \n";
 
-    std::string path = File::test_data("ANode/test/parser/data/good_defs/edit/edit.def", "parser");
+    std::string path = File::test_data("libs/node/test/parser/data/good_defs/edit/edit.def", "parser");
 
     Defs defs;
     std::string errorMsg, warningMsg;

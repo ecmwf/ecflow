@@ -41,7 +41,7 @@ static void get_defs(Defs& defs) {
     //             trigger ../family1/a:myMeter >= 50 || ../family1/a:myEvent
     //     endfamily
     // endsuite
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
     std::string errorMsg, warningMsg;
     bool parse = defs.restore(path, errorMsg, warningMsg);
     if (!parse)
@@ -234,7 +234,7 @@ static void test_plug_on_multiple_server(const std::string& host1,
 
     // std::cout << " LOAD the defs into FIRST server(" << host1 << ":" << port1 << ") There is NO DEFS in the second
     // server." << endl;
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
     BOOST_REQUIRE_MESSAGE(server1Client.loadDefs(path) == 0, "load defs failed \n" << server1Client.errorMsg());
 
     // cout << " Test the ERROR conditions in MoveCmd" << endl;

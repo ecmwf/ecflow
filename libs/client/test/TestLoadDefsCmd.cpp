@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
     TestLog test_log("test_load_defs_cmd_handleRequest.log"); // will create log file, and destroy log and remove file
                                                               // at end of scope
 
-    std::string firstDef = File::test_data("Client/test/data/first.def", "Client");
+    std::string firstDef = File::test_data("libs/client/test/data/first.def", "libs/client");
 
     // Load the FIRST file with a set of unresolved extrens
     defs_ptr firstDefs = Defs::create();
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
     size_t noOfSuites = firstDefs->suiteVec().size();
 
     // load the SECOND file, which should resolve the externs
-    std::string secondDef = File::test_data("Client/test/data/second.def", "Client");
+    std::string secondDef = File::test_data("libs/client/test/data/second.def", "libs/client");
     Defs secondDefs;
     {
         std::string errorMsg, warningMsg;
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_check_only) {
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     // Do not load the defs do a check only
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_check_only) {
                                   << theClient.errorMsg());
     }
     // provide path to definition that should fail to parse
-    std::string path_bad_def = File::test_data("Client/test/data/bad.def", "Client");
+    std::string path_bad_def = File::test_data("libs/client/test/data/bad.def", "libs/client");
     BOOST_REQUIRE_THROW(theClient.loadDefs(path_bad_def, false, true /* check only*/), std::runtime_error);
 }
 

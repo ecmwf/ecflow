@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_SUITE(T_Migration)
 BOOST_AUTO_TEST_CASE(test_migration_restore_def_con) {
     cout << "ANattr:: ...test_migration_restore_def_con\n";
 
-    std::string file_name = File::test_data("ANattr/test/data/migration/default_constructor_1_2_2/", "ANattr");
+    std::string file_name =
+        File::test_data("libs/attribute/test/data/migration/default_constructor_1_2_2/", "libs/attribute");
     // BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
 
     // Create migration data
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_def_con) {
 BOOST_AUTO_TEST_CASE(test_migration_restore) {
     cout << "ANattr:: ...test_migration_restore\n";
 
-    std::string file_name = File::test_data("ANattr/test/data/migration/1_2_2/", "ANattr");
+    std::string file_name = File::test_data("libs/attribute/test/data/migration/1_2_2/", "libs/attribute");
     // BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
 
     std::vector<std::string> theVec;

@@ -36,7 +36,7 @@ std::string TestFixture::scratchSmsHome_ = "";
 std::string TestFixture::host_;
 std::string TestFixture::port_;
 std::string TestFixture::test_dir_;
-std::string TestFixture::project_test_dir_ = "Test";
+std::string TestFixture::project_test_dir_ = "libs/test";
 
 using namespace std;
 using namespace ecf;
@@ -64,7 +64,7 @@ TestFixture::TestFixture(const std::string& project_test_dir) : print_style_(Pri
 }
 
 TestFixture::TestFixture() : print_style_(PrintStyle::STATE) {
-    init("Test");
+    init("libs/test");
 }
 
 ClientInvoker& TestFixture::client() {

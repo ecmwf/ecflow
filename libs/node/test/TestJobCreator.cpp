@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     cout << "ANode:: ...test_job_creator\n";
 
     // SET SMSHOME
-    std::string ecf_home = File::test_data("ANode/test/data/SMSHOME", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
 
     // Create the defs file corresponding to the text below
     // # Test the sms file can be found via ECF_SCRIPT

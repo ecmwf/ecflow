@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_job_profiler) {
     cout << "ANode:: ...test_job_profiler\n";
 
     // delete the log file if it exists.
-    std::string log_path = File::test_data("ANode/test/logfile.txt", "ANode");
+    std::string log_path = File::test_data("libs/node/test/logfile.txt", "libs/node");
     fs::remove(log_path);
     BOOST_CHECK_MESSAGE(!fs::exists(log_path), "log file " << log_path << " not deleted ");
 
@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(test_job_profiler) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), File::test_data("ANode/test/data/includes", "ANode")));
-        suite->addVariable(Variable("ECF_HOME", File::test_data("ANode/test/data/SMSHOME", "ANode")));
+        suite->addVariable(Variable(Str::ECF_INCLUDE(), File::test_data("libs/node/test/data/includes", "libs/node")));
+        suite->addVariable(Variable("ECF_HOME", File::test_data("libs/node/test/data/SMSHOME", "libs/node")));
         suite->addVariable(Variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");

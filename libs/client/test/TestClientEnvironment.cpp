@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(T_ClientEnvironment)
 BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
     std::cout << "Client:: ...test_client_environment_host_file_parsing" << endl;
 
-    std::string good_host_file = File::test_data("Client/test/data/good_hostfile", "Client");
+    std::string good_host_file = File::test_data("libs/client/test/data/good_hostfile", "libs/client");
 
     // local host should be implicitly added to internal host list
     std::string the_host = ClientEnvironment::hostSpecified();
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
     // config or environment. To test this correctly we need to specify a port
     // other than the default
 
-    std::string good_host_file = File::test_data("Client/test/data/good_hostfile", "Client");
+    std::string good_host_file = File::test_data("libs/client/test/data/good_hostfile", "libs/client");
 
     // local host should be implicitly added to internal host list
     std::vector<std::pair<std::string, std::string>> expectedHost;
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
 BOOST_AUTO_TEST_CASE(test_client_environment_empty_host_file) {
     std::cout << "Client:: ...test_client_environment_empty_host_file" << endl;
 
-    std::string empty_host_file = File::test_data("Client/test/data/empty_hostfile", "Client");
+    std::string empty_host_file = File::test_data("libs/client/test/data/empty_hostfile", "libs/client");
 
     std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(empty_host_file, "", errormsg), "Failed to create empty host file " << errormsg);

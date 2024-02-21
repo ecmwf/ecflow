@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
     {
         // restart server, load lifecycle, and get the defs tree from the server
         std::string groupRequest = "--restart; load=";
-        groupRequest += File::test_data("Client/test/data/lifecycle.txt", "Client");
+        groupRequest += File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
         groupRequest += "; get";
 
         BOOST_REQUIRE_MESSAGE(theClient.group(groupRequest) == 0,

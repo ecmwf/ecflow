@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_signal_SIGTERM) {
                           CtsApi::restartServer() << " should return 0 server not started, or connection refused\n"
                                                   << theClient.errorMsg());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
 
     // Get the definition

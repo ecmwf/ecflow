@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
     // This is sanity test for splitFileIntoLines used extensively
     cout << "ACore:: ...test_splitFileIntoLines\n";
 
-    std::string path = File::test_data("ACore/test/data/test_splitFileIntoLines.txt", "ACore");
+    std::string path = File::test_data("libs/core/test/data/test_splitFileIntoLines.txt", "libs/core");
 
     std::string theText = "This is a test string";
     {
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
 BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
     cout << "ACore:: ...test_file_tokenizer\n";
 
-    std::string path = File::test_data("ACore/test/data/test_file_tokenizer.txt", "ACore");
+    std::string path = File::test_data("libs/core/test/data/test_file_tokenizer.txt", "libs/core");
 
     size_t linesWithText = 100;
     std::string theText  = "This is a test string";
@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
     cout << "ACore:: ...test_file_backwardSearch\n";
 
     std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
-    std::string rootPath = File::test_data("ACore/test/data", "ACore");
-    std::string expected = File::test_data("ACore/test/data/", "ACore") + nodePath;
+    std::string rootPath = File::test_data("libs/core/test/data", "libs/core");
+    std::string expected = File::test_data("libs/core/test/data/", "libs/core") + nodePath;
 
     std::string path = rootPath;
     std::string dir  = "dir";
@@ -250,8 +250,8 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
 
     std::string dir_path = "/dir0/dir1/dir2/dir3/dir4";
     std::string nodePath = dir_path + "/task";
-    std::string rootPath = File::test_data("ACore/test/data", "ACore");
-    std::string expected = File::test_data("ACore/test/data", "ACore") + nodePath;
+    std::string rootPath = File::test_data("libs/core/test/data", "libs/core");
+    std::string expected = File::test_data("libs/core/test/data", "libs/core") + nodePath;
 
     std::string path = rootPath;
     std::string dir  = "dir";
@@ -336,8 +336,8 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
     cout << "\n";
 
     std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
-    std::string rootPath = File::test_data("ACore/test/data", "ACore");
-    std::string expected = File::test_data("ACore/test/data/", "ACore") + nodePath;
+    std::string rootPath = File::test_data("libs/core/test/data", "libs/core");
+    std::string expected = File::test_data("libs/core/test/data/", "libs/core") + nodePath;
 
     std::string dir_remove = rootPath + "/dir0";
     {
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 BOOST_AUTO_TEST_CASE(test_get_last_lines_of_a_file) {
     cout << "ACore:: ...test_get_last_lines_of_a_file\n";
 
-    std::string path = File::test_data("ACore/test/data/test_get_last_lines_of_a_file.txt", "ACore");
+    std::string path = File::test_data("libs/core/test/data/test_get_last_lines_of_a_file.txt", "libs/core");
     std::string last_100_lines;
     size_t no_of_lines = 100;
     { // create file with 100 lines 0-99
@@ -536,14 +536,14 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
 BOOST_AUTO_TEST_CASE(test_get_all_files_by_extension) {
     cout << "ACore:: ...test_get_all_files_by_extension\n";
     {
-        std::string rootPath = File::test_data("ACore/test/data/badPasswdFiles", "ACore");
+        std::string rootPath = File::test_data("libs/core/test/data/badPasswdFiles", "libs/core");
         std::vector<fs::path> vec;
         File::find_files_with_extn(rootPath, ".passwd", vec);
         // for(auto& file: vec)  std::cout << file << "\n";
         BOOST_REQUIRE_MESSAGE(vec.size() == 6, "Expected 6 files in directory " << rootPath);
     }
     {
-        std::string rootPath = File::test_data("ACore/test/data/badWhiteListFiles", "ACore");
+        std::string rootPath = File::test_data("libs/core/test/data/badWhiteListFiles", "libs/core");
         std::vector<fs::path> vec;
         File::find_files_with_extn(rootPath, ".lists", vec);
         // for(auto& file: vec)  std::cout << file << "\n";

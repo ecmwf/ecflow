@@ -346,10 +346,10 @@ BOOST_AUTO_TEST_CASE(test_reque_with_repeat_and_defstatus_complete) {
 
     // Create a log file with a unique name, to avoid problems when running in paralle
     // This test relies on log file contents to be flushed.
-    std::string log_file = "Base/test/test_reque_with_repeat_and_defstatus_complete_";
+    std::string log_file = "libs/base/test/test_reque_with_repeat_and_defstatus_complete_";
     log_file += Pid::getpid(); // can throw
     log_file += ".log";
-    log_file = File::test_data(log_file, "Base");
+    log_file = File::test_data(log_file, "libs/base");
 
     Log::create(log_file);
 

@@ -19,7 +19,7 @@ import shutil   # used to remove directory tree
 import ecflow_test_util as Test
 from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client, debug_build
 
-def ecf_includes() : return File.source_dir() + "/Pyext/test/data/includes"
+def ecf_includes() : return File.source_dir() + "/libs/pyext/test/data/includes"
 
 def suite_name(): return "suite_job_gen_" + str(os.getpid())  # allow python2 and python3 to run in parallel
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     workspace = File.source_dir();
     print(workspace)
 
-    ecf_home = workspace + "/Pyext/test/data/ECF_HOME"
+    ecf_home = workspace + "/libs/pyext/test/data/ECF_HOME"
     task_vec = TaskVec()
     defs = create_defs(ecf_home,task_vec)
     print(str(defs))
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     print("\nGenerate jobs for all tasks, to the specified directory")
     # Directory will automatically created under the provided directory
     job_ctrl = JobCreationCtrl()
-    job_ctrl.set_dir_for_job_creation(workspace + "/Pyext/test/data")  # generate jobs file under this directory
+    job_ctrl.set_dir_for_job_creation(workspace + "/libs/pyext/test/data")  # generate jobs file under this directory
     defs.check_job_creation(job_ctrl)
     print(job_ctrl.get_error_msg())
     

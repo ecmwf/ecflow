@@ -976,7 +976,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
     }
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
-    std::string ecf_home = File::test_data("ANode/test/data/SMSHOME", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
     serverDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables

@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(T_UrlCmd)
 BOOST_AUTO_TEST_CASE(test_url_cmd) {
     cout << "Client:: ...test_url_cmd" << endl;
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     defs_ptr defs = Defs::create();
 

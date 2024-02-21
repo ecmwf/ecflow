@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(T_Migration)
 BOOST_AUTO_TEST_CASE(test_migration_restore_cereal) {
     cout << "ACore:: ...test_migration_restore_cereal\n";
 
-    std::string file_name = File::test_data("ACore/test/data/migration/", "ACore");
+    std::string file_name = File::test_data("libs/core/test/data/migration/", "libs/core");
 
     // Note: default calendar constructor will init with current time: Hence set for comparison
     Calendar calendar;

@@ -978,8 +978,8 @@ class TestRepeat(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)      
         
-        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course_py" + str(sys.version_info[0]) + "_" + str(os.getpid()) # allow paralled runs
-        self.ecf_includes = File.source_dir() + "/Pyext/test/data/includes"
+        self.ecf_home     = File.build_dir() + "/libs/pyext/test/data/course_py" + str(sys.version_info[0]) + "_" + str(os.getpid()) # allow paralled runs
+        self.ecf_includes = File.source_dir() + "/libs/pyext/test/data/includes"
         #print("self.ecf_home ",self.ecf_home )
  
         try:    os.makedirs( self.ecf_home + "/test/f4/f5")

@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(T_Migration)
 BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
     cout << "ANode:: ...test_default_constructor_persistence\n";
 
-    std::string file_name = File::test_data("ANode/test/data/migration/", "ANode");
+    std::string file_name = File::test_data("libs/node/test/data/migration/", "libs/node");
 
     Defs defs;
     Suite suite;
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
 BOOST_AUTO_TEST_CASE(test_compare_cereal_and_defs_checkpt_file) {
     cout << "ANode:: ...test_compare_cereal_and_defs_checkpt_file\n";
 
-    std::string file_name = File::test_data("ANode/test/data/migration/", "ANode");
+    std::string file_name = File::test_data("libs/node/test/data/migration/", "libs/node");
 
     // Cannot save these tests since server variable use HOST which is different for each platform
     MyDefsFixture fixture;

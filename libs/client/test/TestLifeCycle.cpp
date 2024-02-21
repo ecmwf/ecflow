@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
     TestLog test_log(
         "test_node_tree_lifecycle.log"); // will create log file, and destroy log and remove file at end of scope
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     Defs defs;
     std::string errorMsg, warningMsg;

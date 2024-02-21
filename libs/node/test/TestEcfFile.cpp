@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
     cout << "\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
     cout << "\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
     cout << "\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -657,7 +657,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
@@ -711,7 +711,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
     cout << "\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -782,7 +782,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     cout << "\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -844,7 +844,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     cout << "\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create the defs file corresponding to the text below
     // # Test the sms file can be found via ECF_SCRIPT
@@ -1043,7 +1043,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     // There should be NO variable substitution, or removal of comments/manual
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
 
     // Create a defs file, where the task name mirrors the ecf files in the given directory
     task_ptr task_t1 = Task::create("t1");
@@ -1139,7 +1139,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     // Note: The directories to the job file should be created by EcfFile
 
     // SET ECF_HOME
-    std::string ecf_home          = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home          = File::test_data("libs/node/test/data", "libs/node");
     std::string job_file_location = ecf_home + "/a/made/up/path/t1.job";
 
     // Create a defs file, where the task name mirrors the ecf files in the given directory
@@ -1211,7 +1211,7 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
     cout << "ANode:: ...test_manual_files\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data/SMSHOME", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -1316,7 +1316,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
@@ -1382,7 +1382,7 @@ static void basic_test_template(const std::string& test_name,
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    std::string ecf_home = File::test_data("ANode/test/data", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
     theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables

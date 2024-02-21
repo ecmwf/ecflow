@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_check_pt_defs_cmd) {
                           CtsApi::restartServer() << " should return 0 server not started, or connection refused\n"
                                                   << theClient.errorMsg());
 
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
 
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,
                           CtsApi::restartServer() << " should return 0 server not started, or connection refused\n"
                                                   << theClient.errorMsg());
-    std::string path = File::test_data("Client/test/data/lifecycle.txt", "Client");
+    std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,
                           CtsApi::shutdownServer() << " should return 0\n"
