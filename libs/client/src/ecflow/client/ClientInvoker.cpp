@@ -82,6 +82,8 @@
     #define NEXT_HOST_POLL_PERIOD 30
 #endif
 
+#include "ecflow/base/HttpClient.hpp"
+
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
@@ -432,6 +434,26 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             /// will return false if further action required
                             if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
                                 // The normal response.  RoundTripRecorder will record in rtt_
+                                return 0; // the normal exit path
+                            }
+                        }
+                        catch (std::exception& e) {
+                            server_reply_.set_error_msg(e.what());
+                            return 1;
+                        }
+                    }
+                    else if (clientEnv_.http()) {
+                        HttpClient theClient(cts_cmd, clientEnv_.host(), clientEnv_.port());
+                        theClient.run();
+
+                        if (clientEnv_.debug())
+                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+
+                        /// Let see how the server responded if at all.
+                        try {
+                            /// will return false if further action required
+                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                // The normal response.  RoundTriprecorder will record in rtt_
                                 return 0; // the normal exit path
                             }
                         }
