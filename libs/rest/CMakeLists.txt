@@ -129,7 +129,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       SOURCES
         ${test_srcs}
       INCLUDES
-        ../Base/test
+        ../base/test
       LIBS
         libhttp
         libclient

@@ -350,37 +350,15 @@ find_package(ClangFormat)
 # =========================================================================================
 # build source code
 # =========================================================================================
-add_subdirectory( ACore )
-add_subdirectory( ANattr )
-add_subdirectory( ANode )
-add_subdirectory( Base )
-add_subdirectory( CSim )
-add_subdirectory( Client )
+add_subdirectory( libs )
 
 if (ENABLE_SERVER)
-  add_subdirectory( Server )
   add_subdirectory( tools )
-  add_subdirectory( Test )
-endif()
-
-if (ENABLE_PYTHON)
-  if ( ENABLE_PYTHON_PTR_REGISTER )
-    add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
-  endif()
-  add_subdirectory( Pyext )
 endif()
 
 if (ENABLE_UI)
   add_subdirectory( Viewer )
   add_subdirectory( share )
-endif()
-
-if (ENABLE_HTTP)
-  add_subdirectory( Http )
-endif()
-
-if (ENABLE_UDP)
-  add_subdirectory( Udp )
 endif()
 
 # =========================================================================================
@@ -419,15 +397,17 @@ endif()
 # =========================================================================================
 ecbuild_dont_pack(
   DIRS
+    .scratch
+    .git
     .settings
     bamboo
-    ACore/doc
-    ANattr/doc
-    ANode/doc
-    Client/doc
-    CSim/doc
-    Pyext/doc
-    Server/doc
+    libs/core/doc
+    libs/attributes/doc
+    libs/node/doc
+    libs/client/doc
+    libs/simulator/doc
+    libs/pyext/doc
+    libs/server/doc
     ecbuild
     SCRATCH
     CUSTOMER

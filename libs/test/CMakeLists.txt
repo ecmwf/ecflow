@@ -28,7 +28,7 @@ ecbuild_add_library(
     ${srcs}
   PUBLIC_INCLUDES
     src
-    ../Base/test
+    ../base/test
   PUBLIC_LIBS
     libclient
     base

@@ -217,7 +217,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   INCLUDES
-    ../ANode/test
+    ../node/test
   LIBS
     base
     Threads::Threads

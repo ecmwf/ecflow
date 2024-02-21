@@ -132,8 +132,8 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   INCLUDES
-    ../Base/test
-    ../ANode/test
+    ../base/test
+    ../node/test
   LIBS
     libclient
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
@@ -166,7 +166,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       test/TestSinglePerf.cpp
       test/TestSinglePerf_main.cpp # test entry point
     INCLUDES
-      ../Base/test
+      ../base/test
     LIBS
       libclient
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
@@ -197,7 +197,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       test/TestMigration.cpp
       test/TestMigration_main.cpp # test entry point
     INCLUDES
-      ../Base/test
+      ../base/test
     LIBS
       libclient
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
