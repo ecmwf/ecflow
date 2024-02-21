@@ -77,6 +77,8 @@ public:
     void enable_ssl() { ssl_.enable(serverHost_, the_port()); } // search server.crt first, then <host>.<port>.crt
 #endif
 
+    bool http() const { return http_; }
+
     /// returns the server port. This has a default value defined in server_environment.cfg
     /// but can be overridden by the environment variable ECF_PORT
     int port() const { return serverPort_; }
@@ -216,6 +218,7 @@ private:
     int submitJobsInterval_;
     int ecf_prune_node_log_;
     bool jobGeneration_; // used in debug/test mode only
+    bool http_;
     bool debug_;
     bool help_option_;
     bool version_option_;
