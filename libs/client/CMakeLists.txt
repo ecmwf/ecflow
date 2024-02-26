@@ -143,9 +143,11 @@ ecbuild_add_test(
     ecflow_server # the server is launched to support tests
   TEST_DEPENDS
     u_base
+  CONDITION
+    ENABLE_SERVER # AND ENABLE_TESTS
 )
 target_clangformat(s_client
-  CONDITION ENABLE_TESTS
+  CONDITION ENABLE_SERVER AND ENABLE_TESTS
 )
 
 if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
