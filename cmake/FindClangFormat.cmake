@@ -32,13 +32,17 @@
 function(target_clangformat TARGET)
 
   set(options "")
-  set(single_value_args CONDITION)
-  set(multi_value_args "")
+  set(single_value_args "")
+  set(multi_value_args CONDITION)
   cmake_parse_arguments( ARGS "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN} )
 
   # Skip setup if condition supplied and FALSE
-  if (NOT ${ARGS_CONDITION})
-    return()
+  if (DEFINED ARGS_CONDITION)
+    if (${${ARGS_CONDITION}})
+      # Do nothing, just continue
+    else()
+      return()
+    endif()
   endif()
 
   # Skip setup if clang-format is not available...
