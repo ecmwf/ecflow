@@ -967,7 +967,7 @@ ecflow_client --host localhost --port 5001 --replace /mc mc.dump # we take it as
  export  SUITE=mc ECF_HOST=localhost ECF_PORT=5001
  ./mirror.py -p /mirror/mc -r # load mirror on source server # might be destination or another server yet
 # ImportError: No module named ecf # ecf shall be in the path, at least it can found in ecflow distrib as 
-# ecflow/Pyext/samples/api/ecf.py
+# ecflow/libs/pyext/samples/api/ecf.py
 # ('#MSG: replacing /mirror/test in ', 'localhost', '5001', #5.7.0 # loading OK
 # begin mirror - 
 # Script OK? mirror.py undef ECF_FILES directory?
@@ -1030,5 +1030,5 @@ module load python3 && module load ecflow/5.7.0 && cd /home/ma/map && python3 $E
 
   ECF_HOST=localhost ECF_PORT=31415 ./mirror.py -m localhost:31415 -p /mc
 
-/tmp/map/work/git/ecflow/Pyext/samples/mirror.py
+/tmp/map/work/git/ecflow/libs/pyext/samples/mirror.py
 """

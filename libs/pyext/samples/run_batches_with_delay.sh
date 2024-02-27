@@ -14,7 +14,7 @@
 
 # Example of running a shell command from the GUI.
 # Use the following in ecflowUI:
-# sh $WK/Pyext/samples/run_batches_with_delay.sh -h %ECF_HOST% -p %ECF_PORT% -b 10 -s 2 -n '<full_name>'
+# sh $WK/libs/pyext/samples/run_batches_with_delay.sh -h %ECF_HOST% -p %ECF_PORT% -b 10 -s 2 -n '<full_name>'
 #    - sh at the front is required
 #    - the tick quotes on <full_name> are required
 #
@@ -57,4 +57,4 @@ for path in $node_paths; do
    echo $path
 done   
 
-python3 /var/tmp/ma0/workspace/ecflow/Pyext/samples/run_batches_with_delay.py --host $host --port $port --batch_size $batch_size --sleep_between_batch $sleep_between_batch --paths "$node_paths"
+python3 /var/tmp/ma0/workspace/ecflow/libs/pyext/samples/run_batches_with_delay.py --host $host --port $port --batch_size $batch_size --sleep_between_batch $sleep_between_batch --paths "$node_paths"

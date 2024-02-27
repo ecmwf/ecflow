@@ -59,9 +59,9 @@ if __name__ == "__main__":
     
     DESC = """ 
             example:
-                python3 Pyext/samples/run_batches_with_delay.py -h polonius -p 4141 -b 4 -s 4 -n "/ecflow/cron /limit_basic"
+                python3 libs/pyext/samples/run_batches_with_delay.py -h polonius -p 4141 -b 4 -s 4 -n "/ecflow/cron /limit_basic"
                 The list of paths can be obtained from the GUI, using:
-                sh $WK/Pyext/samples/run_batches_with_delay.sh -h %ECF_HOST% -p %ECF_PORT% -b 10 -s 2 -n '<full_name>'
+                sh $WK/libs/pyext/samples/run_batches_with_delay.sh -h %ECF_HOST% -p %ECF_PORT% -b 10 -s 2 -n '<full_name>'
             """    
             
     print("####################################################################")

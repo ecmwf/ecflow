@@ -88,7 +88,7 @@ if __name__ == "__main__":
     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
     print(ARGS)    
     
-    # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
+    # If running on local work space, use /libs/pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
     if not ARGS.ecf_home:
         if os.getenv("WK") is None:
             print("No ecf_home specified. Please specify a writable directory")
@@ -153,4 +153,3 @@ if __name__ == "__main__":
     newDefs = ARGS.ecf_home + "/../" + os.path.basename(ARGS.defs_file)
     print("Saving modified defs as " + newDefs) 
     DEFS.save_as_defs(newDefs)
-
