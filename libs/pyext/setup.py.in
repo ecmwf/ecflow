@@ -15,7 +15,7 @@ import glob
 # To test install manually, we can:
 #   python3 setup.py --help-commands # help
 #
-#   cd $WK/Pyext
+#   cd $WK/libs/pyext
 #   rm -rf build/                     # for a clean build
 #   python setup.py build_ext         # build C/C++ extensions (compile/link to build directory)
 #   python setup.py install --home=~
@@ -40,16 +40,16 @@ import glob
 # to get this to work, you will need to include the path
 # to your boost installation and  ecflow includes
 boost_root=os.getenv("BOOST_ROOT") 
-include_dirs = [ "@CMAKE_CURRENT_SOURCE_DIR@/../cereal/include",
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../ACore/src", 
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../ANattr/src", 
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../ANode/parser/src",
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../ANode/src",
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../Base/src",
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../Base/src/cts",
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../Base/src/stc",
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../CSim/src", 
-                 "@CMAKE_CURRENT_SOURCE_DIR@/../Client/src",
+include_dirs = [ "@CMAKE_CURRENT_SOURCE_DIR@/../3rdparty/cereal/include",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/core/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/attribute/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/node/parser/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/node/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/base/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/base/src/cts",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/base/src/stc",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/simulator/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/client/src",
                  "@CMAKE_CURRENT_SOURCE_DIR@/src",
                  boost_root,
                ]
@@ -57,13 +57,13 @@ include_dirs = [ "@CMAKE_CURRENT_SOURCE_DIR@/../cereal/include",
 # define the library directories to include any extra libraries that may be needed.
 # Give preference to release libs   
 boost_lib_dir = boost_root + "/stage/lib/"
-library_dirs = ['@CMAKE_BINARY_DIR@/ACore',
-                '@CMAKE_BINARY_DIR@/ANattr/',
-                '@CMAKE_BINARY_DIR@/ANode/',
-                '@CMAKE_BINARY_DIR@/Base/', 
-                '@CMAKE_BINARY_DIR@/CSim/', 
-                '@CMAKE_BINARY_DIR@/Client/', 
-                boost_lib_dir  
+library_dirs = ['@CMAKE_BINARY_DIR@/libs/core',
+                '@CMAKE_BINARY_DIR@/libs/attribute/',
+                '@CMAKE_BINARY_DIR@/libs/node/',
+                '@CMAKE_BINARY_DIR@/libs/base/',
+                '@CMAKE_BINARY_DIR@/libs/simulator/',
+                '@CMAKE_BINARY_DIR@/libs/client/',
+                boost_lib_dir,
                ]
 
 # define the libraries to link with this includes the boost lib
