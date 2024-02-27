@@ -22,7 +22,7 @@ from ecflow import Defs, Clock, DState, Event, Style, State, PrintStyle, File, C
 import ecflow_test_util as Test
 
 
-def ecf_includes() : return File.source_dir() + "/Pyext" + "/test/data/python_includes"
+def ecf_includes(): return File.source_dir() + "/libs/pyext/test/data/python_includes"
 
 def create_defs(name,the_port):
     defs = Defs()
