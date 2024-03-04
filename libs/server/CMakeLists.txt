@@ -10,7 +10,6 @@
 
 set(srcs
   # Headers
-  src/ecflow/server/AvisoUpdater.hpp
   src/ecflow/server/BaseServer.hpp
   src/ecflow/server/CheckPtSaver.hpp
   src/ecflow/server/NodeTreeTraverser.hpp
@@ -25,7 +24,6 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.hpp>
   # Sources
-  src/ecflow/server/AvisoUpdater.cpp
   src/ecflow/server/BaseServer.cpp
   src/ecflow/server/CheckPtSaver.cpp
   src/ecflow/server/NodeTreeTraverser.cpp
@@ -50,6 +48,7 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     base
+    ecflow_service
     Boost::boost # Boost header-only libraries must be available (namely asio)
     nlohmann::json
 )

@@ -8,10 +8,18 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_Aviso_HPP
-#define aviso_Aviso_HPP
+#include <boost/test/unit_test.hpp>
 
-#include "aviso/ListenService.hpp"
-#include "aviso/etcd/Client.hpp"
+#include "aviso/Aviso.hpp"
 
-#endif /* aviso_Aviso_HPP */
+BOOST_AUTO_TEST_SUITE(U_Aviso)
+
+BOOST_AUTO_TEST_SUITE(T_AvisoListener)
+
+BOOST_AUTO_TEST_CASE(test_listen) {
+    BOOST_REQUIRE(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE_END()

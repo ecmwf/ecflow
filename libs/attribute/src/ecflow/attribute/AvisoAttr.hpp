@@ -57,6 +57,8 @@ public:
 
     bool why(std::string& theReasonWhy) const;
 
+    void reset();
+
     [[nodiscard]] bool isFree() const;
 
     void requeue();
