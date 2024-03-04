@@ -8,30 +8,18 @@
 # nor does it submit to any jurisdiction.
 #
 
-# libaviso
+# ecflow_services
 # --------------------------------------------------
 
 set(srcs
   # Headers
-  src/aviso/Aviso.hpp
-  src/aviso/ConfiguredListener.hpp
-  src/aviso/Listener.hpp
-  src/aviso/ListenerSchema.hpp
-  src/aviso/ListenService.hpp
-  src/aviso/etcd/Address.hpp
-  src/aviso/etcd/Client.hpp
-  src/aviso/etcd/Range.hpp
+  src/ecflow/service/Registry.hpp
   # Sources
-  src/aviso/Aviso.cpp
-  src/aviso/ConfiguredListener.cpp
-  src/aviso/ListenerSchema.cpp
-  src/aviso/ListenService.cpp
-  src/aviso/etcd/Range.cpp
-  src/aviso/etcd/Client.cpp
+  src/ecflow/service/Registry.cpp
 )
 
 ecbuild_add_library(
-  TARGET libaviso
+  TARGET ecflow_service
   NOINSTALL
   TYPE STATIC
   SOURCES
@@ -39,44 +27,30 @@ ecbuild_add_library(
   PUBLIC_INCLUDES
     src
   PUBLIC_LIBS
-    Boost::boost
-    nlohmann::json
-    httplib::httplib
-)
-target_clangformat(libaviso)
-
-# ecflow_aviso
-# --------------------------------------------------
-
-ecbuild_add_executable(
-  TARGET ecflow_aviso
-  SOURCES
-    src/aviso/AvisoMain.cpp
-  LIBS
     libaviso
 )
-target_clangformat(ecflow_aviso)
+target_clangformat(ecflow_service)
 
-# u_aviso
+# u_services
 # --------------------------------------------------
 
 set(test_srcs
   # Sources
-  test/TestAviso.cpp
-  test/TestAviso_main.cpp # test entry point
+  test/TestRegistry.cpp
+  test/TestServices_main.cpp # test entry point
 )
 
 ecbuild_add_test(
   TARGET
-    u_aviso
+    u_service
   LABELS
-    integration
+    unit
   SOURCES
     ${test_srcs}
   LIBS
-    libaviso
+    ecflow_service
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
-target_clangformat(u_aviso
+target_clangformat(u_service
   CONDITION ENABLE_TESTS
 )

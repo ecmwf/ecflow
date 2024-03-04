@@ -8,13 +8,16 @@
 # nor does it submit to any jurisdiction.
 #
 
+
+add_subdirectory( aviso )
+
 add_subdirectory( core )
+add_subdirectory( service )
 add_subdirectory( attribute )
 add_subdirectory( node )
 add_subdirectory( base )
 add_subdirectory( simulator )
 add_subdirectory( client )
-add_subdirectory( aviso )
 
 if (ENABLE_SERVER)
   add_subdirectory( server )

@@ -8,10 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_Aviso_HPP
-#define aviso_Aviso_HPP
-
-#include "aviso/ListenService.hpp"
-#include "aviso/etcd/Client.hpp"
-
-#endif /* aviso_Aviso_HPP */
+#define BOOST_TEST_MODULE Test_Aviso
+#include <boost/test/included/unit_test.hpp>

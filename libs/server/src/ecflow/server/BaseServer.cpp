@@ -24,6 +24,7 @@
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/service/Registry.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -36,8 +37,6 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
       signals_(io_service),
       defs_(Defs::create()), // ECFLOW-182
       traverser_(this, io_service, serverEnv),
-      avisoNotifications_(),
-      avisoUpdater_(io_service, std::chrono::seconds(10), avisoNotifications_),
       checkPtSaver_(this, io_service, &serverEnv),
       serverState_(SState::HALTED),
       serverEnv_(serverEnv) {
@@ -53,6 +52,9 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
     // Support for emergency check pointing during system session.
     signals_.add(SIGTERM);
     signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler(); });
+
+    ecf::service::GlobalRegistry::instance().register_service<ecf::service::AvisoController>("aviso.controller");
+    ecf::service::GlobalRegistry::instance().register_service<ecf::service::AvisoRunner>("aviso.runner");
 
     // Update stats, this is returned via --stats command option
     stats().host_                    = serverEnv.hostPort().first;
@@ -115,7 +117,7 @@ void BaseServer::handle_terminate() {
 
     // Cancel async timers for check pointing and traversal
     traverser_.terminate();
-    avisoUpdater_.terminate();
+    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso-runner").terminate();
     checkPtSaver_.terminate();
 }
 
@@ -326,7 +328,7 @@ void BaseServer::shutdown() {
     // to check point.
     traverser_.stop();
 
-    avisoUpdater_.stop();
+    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso.runner").stop();
 
     // Continue check pointing since, we allow tasks communication. This can change node
     // tree state. Which we *must* be able to checkpoint.
@@ -350,7 +352,7 @@ void BaseServer::halted() {
     // Stop server from creating new jobs. i.e Job scheduling.
     traverser_.stop();
 
-    avisoUpdater_.stop();
+    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso.runner").stop();
 
     // *** CRITICAL*** when the server is halted, we ***MUST NOT*** do any further check pointing
     // In a typical operational scenario where we have a home, and backup servers.
@@ -382,7 +384,7 @@ void BaseServer::restart() {
     set_server_state(SState::RUNNING);
 
     traverser_.start();
-    avisoUpdater_.start();
+    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso.runner").start();
     checkPtSaver_.start();
 }
 

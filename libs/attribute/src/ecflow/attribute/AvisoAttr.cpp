@@ -12,9 +12,9 @@
 
 #include <sstream>
 
-#include "ecflow/attribute/AvisoService.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
+#include "ecflow/service/Registry.hpp"
 
 namespace ecf {
 
@@ -33,14 +33,32 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
     return true;
 };
 
+void AvisoAttr::reset() {
+    // TODO: Implement...
+}
+
 bool AvisoAttr::isFree() const {
     using namespace ecf;
-    auto& registry = AvisoService::service();
-    LOG(Log::DBG, Message("******************** Check Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
-    return registry.check_notification(name_);
+    auto& controller =
+        ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoController>("controller");
+
+    LOG(Log::DBG, Message("**** Check Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+
+    // Task associated with Attribute is free when any notification is found
+    auto notifications = controller.poll_notifications(name_);
+    return !notifications.empty();
 }
 
 void AvisoAttr::requeue() {
+    using namespace ecf;
+    auto& controller =
+        ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoController>("controller");
+
+    LOG(Log::DBG, Message("**** Register Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+
+    auto cfg = listener_;
+    cfg = cfg.substr(1, cfg.size() - 2);
+    return controller.subscribe(aviso::ListenRequest{name_, "http://localhost:2379", cfg});
 }
 
 } // namespace ecf
