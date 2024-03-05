@@ -99,6 +99,10 @@ void Submittable::complete() {
     /// Hence to reduce network bandwidth we chose to clear the strings
     clear(); // jobs password, process_id, aborted_reason
 
+    for (auto&& aviso : avisos()) {
+        aviso.finish();
+    }
+
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Submittable::complete()\n";
 #endif
@@ -108,6 +112,10 @@ void Submittable::aborted(const std::string& reason) {
     // Called during *abnormal* child termination
     // This will bubble the state, and decrement any limits
     set_aborted_only(reason);
+
+    for (auto&& aviso : avisos()) {
+        aviso.finish();
+    }
 }
 
 void Submittable::set_process_or_remote_id(const std::string& id) {

@@ -59,7 +59,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     aviso::ListenService service{listener_schema, notify, subscribe};
     for (auto&& [path, address, listener_cfg] : aviso_attribute_cfgs) {
-        aviso::ListenRequest request{path, address, listener_cfg};
+        auto request = aviso::ListenRequest::make_listen_start(path, address, listener_cfg);
         service.register_listener(request);
     }
 

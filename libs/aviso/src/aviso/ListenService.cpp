@@ -10,6 +10,8 @@
 
 #include "aviso/ListenService.hpp"
 
+#include <iostream>
+
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
 #include "aviso/PeriodicExecutor.hpp"
@@ -23,7 +25,12 @@ void ListenService::operator()() {
 
     auto new_subscriptions = subscribe_();
     for (auto&& subscription : new_subscriptions) {
-        register_listener(subscription);
+        if (subscription.is_start()) {
+            register_listener(subscription);
+        }
+        else {
+            unregister_listener(subscription.path());
+        }
     }
 
     // Check notification for each listener
@@ -58,8 +65,8 @@ void ListenService::operator()() {
     }
 }
 
-void ListenService::register_listener(const ListenRequest& request) {
-    auto listener = create_configured_listener(request, schema_);
+void ListenService::register_listener(const ListenRequest& listen) {
+    auto listener = create_configured_listener(listen, schema_);
     register_listener(listener);
 }
 
@@ -67,7 +74,28 @@ void ListenService::register_listener(const listener_t& listener) {
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
 
+    std::cout << "Register listener path " << listener.path() << " for " << address.address() << " and " << key_prefix
+              << std::endl;
     listeners_[address][key_prefix].push_back(listener);
+}
+
+void ListenService::unregister_listener(const std::string& unlisten_path) {
+
+    std::cout << "Unregister listener path " << unlisten_path << std::endl;
+
+    // TODO[MB]: The key_prefix and address maps should be clears when they contain no more listeners
+    //    By not clearing empty map, we keep creating etcd clients, which are will consume/drop notifications sent in
+    //    the meanwhile. This needs to be fixed!!!
+
+    for (auto&& [address, prefix_listerners] : listeners_) {
+        for (auto&& [key_prefix, registered_listeners] : prefix_listerners) {
+            registered_listeners.erase(
+                std::remove_if(std::begin(registered_listeners),
+                               std::end(registered_listeners),
+                               [&unlisten_path](auto&& listener) { return listener.path() == unlisten_path; }),
+                std::end(registered_listeners));
+        }
+    }
 }
 
 } // namespace aviso

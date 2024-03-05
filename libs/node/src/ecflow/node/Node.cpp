@@ -25,6 +25,7 @@
 #include "ecflow/core/cereal_boost_time.hpp"
 #include "ecflow/node/AbstractObserver.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"

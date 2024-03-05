@@ -23,11 +23,43 @@
 
 namespace aviso {
 
-struct ListenRequest
+class ListenRequest {
+public:
+    static ListenRequest
+    make_listen_start(std::string_view path, std::string_view address, std::string_view listener_cfg) {
+        return ListenRequest{true, path, address, listener_cfg};
+    }
+
+    static ListenRequest make_listen_finish(std::string_view path) { return ListenRequest{false, path}; }
+
+    bool is_start() const { return start_; }
+
+    const std::string& path() const { return path_; }
+    const std::string& address() const { return address_; }
+    const std::string& listener_cfg() const { return listener_cfg_; }
+
+private:
+    explicit ListenRequest(bool start, std::string_view path)
+        : start_{start},
+          path_{path},
+          address_{},
+          listener_cfg_{} {}
+    explicit ListenRequest(bool start, std::string_view path, std::string_view address, std::string_view listener_cfg)
+        : start_{start},
+          path_{path},
+          address_{address},
+          listener_cfg_{listener_cfg} {}
+
+    bool start_;
+    std::string path_;
+    std::string address_;
+    std::string listener_cfg_;
+};
+
+struct UnlistenRequest
 {
     std::string path;
     std::string address;
-    std::string listener_cfg;
 };
 
 class Notification {

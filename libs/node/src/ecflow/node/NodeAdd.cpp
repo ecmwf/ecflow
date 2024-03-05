@@ -8,6 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/node/Node.hpp"
+
 #include <stdexcept>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
@@ -17,10 +19,10 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
-#include "ecflow/node/Node.hpp"
 
 using namespace ecf;
 using namespace std;

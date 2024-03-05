@@ -15,6 +15,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Node.hpp"

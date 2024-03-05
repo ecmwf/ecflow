@@ -16,6 +16,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MiscAttrs.hpp"

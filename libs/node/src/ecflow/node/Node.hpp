@@ -27,7 +27,6 @@
 #include <iosfwd>
 #include <limits>
 
-#include "ecflow/attribute/AvisoAttr.hpp"
 #include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/attribute/DayAttr.hpp"
@@ -58,6 +57,7 @@ namespace ecf {
 class Calendar;
 class NodeTreeVisitor;
 class LateAttr;
+class AvisoAttr;
 } // namespace ecf
 
 class Node : public std::enable_shared_from_this<Node> {
