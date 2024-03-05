@@ -23,6 +23,7 @@
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -493,7 +494,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     node->addDay(DayAttr::create(name_));
                     break;
                 case AlterCmd::ADD_AVISO:
-                    node->addAviso(AvisoAttr(name_, value_));
+                    node->addAviso(AvisoAttr(node.get(), name_, value_));
                     break;
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
@@ -880,7 +881,7 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             break;
         case AlterCmd::ADD_AVISO: {
             // Create an Aviso to check if name is valid
-            AvisoAttr check(name, value);
+            AvisoAttr check(nullptr, name, value);
             break;
         }
         case AlterCmd::ADD_ZOMBIE:
@@ -1074,7 +1075,7 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
         }
         case AlterCmd::DEL_AVISO: {
             if (!name.empty()) {
-                AvisoAttr check(name, "value"); // will throw if not valid
+                AvisoAttr check(nullptr, name, "value"); // will throw if not valid
             }
             break;
         }

@@ -12,6 +12,7 @@
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MiscAttrs.hpp"

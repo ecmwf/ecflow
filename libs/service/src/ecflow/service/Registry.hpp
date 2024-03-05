@@ -20,7 +20,7 @@
 
 namespace ecf::service {
 
-struct NotificationRequest
+struct NotificationPackage
 {
     std::string path;
     aviso::ConfiguredListener listener;
@@ -31,12 +31,17 @@ class AvisoController {
 public:
     using subscription_t  = aviso::ListenRequest;
     using subscriptions_t = std::vector<subscription_t>;
-    using notification_t  = NotificationRequest;
+    using notification_t  = NotificationPackage;
     using notifications_t = std::vector<notification_t>;
 
     // Attribute-facing API
 
     void subscribe(const subscription_t& subscription) {
+        std::scoped_lock lock(subscribe_);
+        subscriptions_.push_back(subscription);
+    }
+
+    void unsubscribe(const subscription_t& subscription) {
         std::scoped_lock lock(subscribe_);
         subscriptions_.push_back(subscription);
     }
@@ -64,7 +69,7 @@ public:
         return new_subscriptions;
     }
 
-    void notify(NotificationRequest notification) {
+    void notify(const notification_t& notification) {
         std::scoped_lock lock(notify_);
 
         const auto& key = notification.path;
@@ -176,7 +181,7 @@ inline aviso::ListenerSchema AvisoRunner::load_listener_schema_default() {
 inline void AvisoRunner::notify(const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
     GlobalRegistry::instance()
         .get_service<AvisoController>("aviso_controller")
-        .notify(NotificationRequest{listener.path(), listener, notification});
+        .notify(NotificationPackage{listener.path(), listener, notification});
 }
 
 inline std::vector<aviso::ListenRequest> AvisoRunner::subscribe() {

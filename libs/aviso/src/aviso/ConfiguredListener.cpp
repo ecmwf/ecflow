@@ -157,10 +157,10 @@ std::optional<Notification> ConfiguredListener::accepts(const std::string& key, 
 ConfiguredListener create_configured_listener(const ListenRequest& listen_request, const ListenerSchema& schema) {
     using json = nlohmann::ordered_json;
 
-    json data = json::parse(listen_request.listener_cfg);
+    json data = json::parse(listen_request.listener_cfg());
 
-    std::string address = listen_request.address;
-    std::string path    = listen_request.path;
+    std::string address = listen_request.address();
+    std::string path    = listen_request.path();
     std::string event   = data["event"];
 
     const auto& listener = schema.get_listener(event);

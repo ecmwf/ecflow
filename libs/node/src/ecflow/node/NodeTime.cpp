@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -50,7 +51,7 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
         cron.requeue(calendar, reset_next_time_slot);
     }
     for (auto& aviso : avisos_) {
-        aviso.requeue();
+        aviso.start();
     }
 
     for (auto& date : dates_) {

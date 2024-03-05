@@ -12,7 +12,7 @@
 
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
-#include "ecflow/attribute/AvisoAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 
 //================================
 // VAvisoAttrType

@@ -52,6 +52,7 @@ public:
 
     void register_listener(const ListenRequest& request);
     void register_listener(const listener_t& listener);
+    void unregister_listener(const std::string& unlisten_path);
 
 private:
     aviso::ListenerSchema schema_;

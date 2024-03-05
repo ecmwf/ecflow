@@ -43,6 +43,7 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Alias.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Family.hpp"

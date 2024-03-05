@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_attribute_AvisoAttr_HPP
-#define ecflow_attribute_AvisoAttr_HPP
+#ifndef ecflow_node_AvisoAttr_HPP
+#define ecflow_node_AvisoAttr_HPP
 
 #include <cstdint>
 #include <iostream>
@@ -21,6 +21,8 @@
 namespace cereal {
 class access;
 }
+
+class Node;
 
 namespace ecf {
 
@@ -45,13 +47,14 @@ public:
      *       Cereal invokes the default ctor to create the object and only then proceeds to member-wise serialization.
      */
     AvisoAttr() = default;
-    AvisoAttr(std::string name, listener_t handle);
+    AvisoAttr(Node* parent, std::string name, listener_t handle);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
 
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& listener() const { return listener_; }
+    [[nodiscard]] std::string path() const;
 
     void set_listener(std::string_view listener) { listener_ = listener; }
 
@@ -61,12 +64,14 @@ public:
 
     [[nodiscard]] bool isFree() const;
 
-    void requeue();
+    void start() const;
+    void finish() const;
 
     template <class Archive>
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
 
 private:
+    Node* parent_{nullptr};
     name_t name_;
     listener_t listener_;
 };
@@ -79,4 +84,4 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
 
 } // namespace ecf
 
-#endif /* ecflow_attribute_AvisoAttr_HPP */
+#endif /* ecflow_node_AvisoAttr_HPP */

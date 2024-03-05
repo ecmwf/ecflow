@@ -12,14 +12,14 @@
 
 #include <stdexcept>
 
-#include "ecflow/attribute/AvisoAttr.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 namespace {
 
-auto parse_aviso_line(const std::string& line) {
+auto parse_aviso_line(const std::string& line, Node* parent) {
     std::vector<std::string_view> tokens = ecf::Str::tokenize_quotation(line, "'");
 
     if (tokens.size() != 3) {
@@ -31,7 +31,7 @@ auto parse_aviso_line(const std::string& line) {
 
     // TODO[MB]: name & listener validation...
 
-    return ecf::AvisoAttr{name, listener};
+    return ecf::AvisoAttr{parent, name, listener};
 }
 
 } // namespace
@@ -41,8 +41,9 @@ bool AvisoParser::doParse(const std::string& line, std::vector<std::string>& lin
         throw std::runtime_error("AvisoParser::doParse: Could not add aviso as node stack is empty at line: " + line);
     }
 
-    auto parsed = parse_aviso_line(line);
+    Node* parent = nodeStack_top();
 
+    auto parsed  = parse_aviso_line(line, parent);
     nodeStack_top()->addAviso(parsed);
 
     return true;

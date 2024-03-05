@@ -15,6 +15,7 @@ set(srcs
   src/ecflow/node/Aspect.hpp
   src/ecflow/node/Attr.hpp
   src/ecflow/node/AutoRestoreAttr.hpp
+  src/ecflow/node/AvisoAttr.hpp
   src/ecflow/node/ClientSuiteMgr.hpp
   src/ecflow/node/ClientSuites.hpp
   src/ecflow/node/CmdContext.hpp
@@ -92,6 +93,7 @@ set(srcs
   src/ecflow/node/Alias.cpp
   src/ecflow/node/Attr.cpp
   src/ecflow/node/AutoRestoreAttr.cpp
+  src/ecflow/node/AvisoAttr.cpp
   src/ecflow/node/ClientSuiteMgr.cpp
   src/ecflow/node/ClientSuites.cpp
   src/ecflow/node/CmdContext.cpp
