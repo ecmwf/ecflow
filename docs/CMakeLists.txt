@@ -58,7 +58,7 @@ add_custom_command(
   COMMAND
     ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/_build
   COMMAND
-    ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext/python3"
+    ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_BINARY_DIR}/libs/pyext/python3"
         ${SPHINX_EXECUTABLE} -M html
           ${CMAKE_CURRENT_SOURCE_DIR}/build_python_api
           ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/_build
@@ -88,7 +88,7 @@ add_custom_target(ecflow_python_docs DEPENDS generate_ecflow_python_docs)
 add_custom_command(
   OUTPUT generate_ecflow_docs
   COMMAND
-    ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext/python3"
+    ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_BINARY_DIR}/libs/pyext/python3"
       ${SPHINX_EXECUTABLE} -M html
           ${CMAKE_CURRENT_SOURCE_DIR}
           ${CMAKE_CURRENT_BINARY_DIR}/_build
