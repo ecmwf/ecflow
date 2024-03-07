@@ -34,7 +34,9 @@ bool SStringCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_c
     if (debug)
         cout << "  SStringCmd::handle_server_response str.size()= " << str_.size() << "\n";
     if (server_reply.cli())
-        std::cout << str_ << "\n";
+        // The following uses std::endl to ensure the output is flushed.
+        // This is necessary when called from the Python API, otherwise the output cannot be captured systematically.
+        std::cout << str_ << std::endl;
     else
         server_reply.set_string(str_);
     return true;

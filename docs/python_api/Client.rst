@@ -2259,13 +2259,13 @@ Usage:
 sort_attributes( (Client)arg1, (list)paths, (str)attribute_name [, (bool)recursive=True]) -> None
 
 
-.. py:method:: Client.stats( (Client)arg1) -> None :
+.. py:method:: Client.stats( (Client)arg1) -> str :
    :module: ecflow
 
-Prints the :term:`ecflow_server` statistics to standard out
+Returns the :term:`ecflow_server` statistics as a string
 ::
 
-   void stats()
+   string stats()
 
 Usage:
 
@@ -2273,7 +2273,8 @@ Usage:
 
    try:
        ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)
-       ci.stats()
+       stats = ci.stats()
+       print(stats)
    except RuntimeError, e:
        print(str(e))
 

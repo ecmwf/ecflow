@@ -680,13 +680,14 @@ const char* ClientDoc::ping() {
 }
 
 const char* ClientDoc::stats() {
-    return "Prints the `ecflow_server`_ statistics to standard out\n::\n\n"
-           "   void stats()\n"
+    return "Returns the `ecflow_server`_ statistics as a string\n::\n\n"
+           "   string stats()\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
            "       ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)\n"
-           "       ci.stats()\n"
+           "       stats = ci.stats()\n"
+           "       print(stats)\n"
            "   except RuntimeError, e:\n"
            "       print(str(e))\n";
 }
