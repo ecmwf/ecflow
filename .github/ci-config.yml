@@ -1,4 +1,5 @@
 cmake_options: -DBOOST_ROOT=${BOOST_ROOT_DIR} -DBOOST_INCLUDEDIR=${BOOST_INCLUDE_DIR} -DBOOST_LIBRARYDIR=${BOOST_LIB_DIR} -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} -DENABLE_STATIC_BOOST_LIBS=OFF
+ctest_options: -L nightly
 dependencies: |
   ecmwf/ecbuild
 dependency_branch: develop
