@@ -20,10 +20,63 @@ bool is_valid_path(const std::string& path) {
     return !path.empty() && path[0] == '/';
 }
 
-} // namespace
+void parse_option(ClientOptionsParser::option_t& option,
+                  ClientOptionsParser::option_set_t& processed_options,
+                  ClientOptionsParser::arguments_set_t& args) {
+    if (auto found = args[0].find('='); found == std::string::npos) {
+        // In case form 1) is used, we discard the '--<option>'
+        args.erase(args.begin());
+        // store the 'arg1'
+        option.value.push_back(args.front());
+        option.original_tokens.push_back(args.front());
+    }
+    else {
+        // Otherwise, form 2) is used, and the first positional value must be
+        // taken by tokenizing the option '--<option>=<arg1>'
+        std::string arg = args[0].substr(found + 1);
+        option.value.push_back(arg);
+        option.original_tokens.push_back(arg);
+    }
+    // Discard the option at the front
+    args.erase(args.begin());
+}
 
-ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsParser::arguments_set_t& args) {
-    option_set_t processed_options;
+template <typename PREDICATE>
+void parse_positional_arguments(
+    ClientOptionsParser::option_t& option,
+    ClientOptionsParser::option_set_t& processed_options,
+    ClientOptionsParser::arguments_set_t& args,
+    size_t maximum_positional_args,
+    PREDICATE predicate = [](const std::string&) { return true; }) {
+
+    // Collect up to N positional arguments, that satisfy the predicate
+    for (size_t i = 0; i < maximum_positional_args && !args.empty(); ++i) {
+        // Take each of the positional values as an option value
+        std::string& arg = args.front();
+        // Once we find the first argument that doesn't satify the predicate,
+        // we stop collecting arguments
+        if (!predicate(arg)) {
+            break;
+        }
+        option.value.push_back(arg);
+        option.original_tokens.push_back(arg);
+
+        // Remove the argument value
+        args.erase(args.begin());
+    }
+}
+
+void parse_positional_arguments(ClientOptionsParser::option_t& option,
+                                ClientOptionsParser::option_set_t& processed_options,
+                                ClientOptionsParser::arguments_set_t& args,
+                                size_t maximum_positional_args) {
+
+    // Collect up to N positional arguments
+    parse_positional_arguments(
+        option, processed_options, args, maximum_positional_args, [](const std::string&) { return true; });
+}
+
+void parse_alter(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
 
     // *** Important! ***
     // This custom handler is needed to ensure that the "--alter" option
@@ -36,59 +89,56 @@ ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsP
     //     1) --alter arg1 arg2 arg3 (arg4) path [path [path [...]]]
     //     2) --alter=arg1 arg2 arg3 (arg4) path [path [path [...]]]
 
+    ClientOptionsParser::option_t alter{std::string{"alter"}, {}};
+
+    parse_option(alter, processed_options, args);
+
+    // Collect up to 4 positional arguments, that are not paths
+    parse_positional_arguments(
+        alter, processed_options, args, 4, [](const std::string& arg) { return !is_valid_path(arg); });
+
+    // Collect remaining positional arguments, that are paths
+    parse_positional_arguments(
+        alter, processed_options, args, std::numeric_limits<size_t>::max(), [](const std::string& arg) {
+            return is_valid_path(arg);
+        });
+
+    processed_options.push_back(alter);
+}
+
+void parse_label(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
+
+    // *** Important! ***
+    // This custom handler is needed to ensure that the "--alter" option
+    // special value parameters are handled correctly. For example,
+    // values starting with -, such as "-j64".
+    //
+    // The custom handling will consider that 2 positional values (not
+    // to be confused with positional arguments) are provided with the
+    // --label option, as per one of the following forms:
+    //     1) --label arg1 arg2
+    //     2) --label=arg1 arg2
+
+    ClientOptionsParser::option_t label{std::string{"label"}, {}};
+
+    parse_option(label, processed_options, args);
+
+    // Collect 1 positional argument (i.e. the label value)
+    parse_positional_arguments(label, processed_options, args, 1);
+
+    processed_options.push_back(label);
+}
+
+} // namespace
+
+ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsParser::arguments_set_t& args) {
+    option_set_t processed_options;
+
     if (ecf::algorithm::starts_with(args[0], "--alter")) {
-
-        option_t alter{std::string{"alter"}, {}};
-
-        if (auto found = args[0].find('='); found == std::string::npos) {
-            // In case form 1) is used, we discard the '--alter'
-            args.erase(args.begin());
-            // store the 'arg1'
-            alter.value.push_back(args.front());
-            alter.original_tokens.push_back(args.front());
-        }
-        else {
-            // Otherwise, form 2) is used, and the first positional value must be
-            // taken by tokenizing the option '--alter=arg1'
-            std::string arg = args[0].substr(found + 1);
-            alter.value.push_back(arg);
-            alter.original_tokens.push_back(arg);
-        }
-        // Discard the option at the front
-        args.erase(args.begin());
-
-        // Collect (non path) positional arguments
-        const size_t maximum_positional_args = 4;
-        for (size_t i = 0; i < maximum_positional_args && !args.empty(); ++i) {
-            // Take each of the positional values as an option value
-            std::string& arg = args.front();
-            // Once we find the first path argument we stop collecting arguments
-            if (is_valid_path(arg)) {
-                break;
-            }
-            alter.value.push_back(arg);
-            alter.original_tokens.push_back(arg);
-
-            // Remove the argument value
-            args.erase(args.begin());
-        }
-
-        // Collect only paths
-        for (; !args.empty();) {
-            // Take each of the positional values as an option value
-            std::string& arg = args.front();
-            // Once we find a (non path) argument, we stop collections arguments
-            if (!is_valid_path(arg)) {
-                break;
-            }
-            alter.value.push_back(arg);
-            alter.original_tokens.push_back(arg);
-
-            // Remove the argument value
-            args.erase(args.begin());
-        }
-
-        processed_options.push_back(alter);
+        parse_alter(processed_options, args);
+    }
+    else if (ecf::algorithm::starts_with(args[0], "--label")) {
+        parse_label(processed_options, args);
     }
     return processed_options;
 }

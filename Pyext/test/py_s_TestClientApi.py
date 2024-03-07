@@ -534,12 +534,14 @@ def test_client_free_dep(ci):
 
 def test_client_stats(ci):
     print_test(ci,"test_client_stats")
-    ci.stats()  # writes to standard out
+    stats = ci.stats()
+    assert "statistics" in s, "Expected statistics in the response"
     
 def test_client_stats_reset(ci):
     print_test(ci,"test_client_stats_reset")
     ci.stats_reset()   
-    ci.stats()  # should produce no output, where we measure requests
+    statis = ci.stats()
+    assert "statistics" in s, "Expected statistics in the response"
             
 def test_client_debug_server_on_off(ci):
     print_test(ci,"test_client_debug_server_on_off")
