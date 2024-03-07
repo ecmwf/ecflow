@@ -14,6 +14,7 @@
 import time
 import os
 import pwd
+import select
 from datetime import datetime
 import shutil   # used to remove directory tree
 
@@ -529,20 +530,66 @@ def test_client_free_dep(ci):
         time.sleep(3)       
             
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_free_dep"
-    shutil.rmtree(dir_to_remove, ignore_errors=True)   
+    shutil.rmtree(dir_to_remove, ignore_errors=True)
+
+
+class CustomStdOut:
+    def __enter__(self):
+        # create a pipe to store some content temporarily
+        self.read_pipe, self.write_pipe = os.pipe()
+        # save the original ouput fd
+        self.stdout = os.dup(1)
+        # redirect stdout into the write pipe
+        fd = os.dup2(self.write_pipe, 1)
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        # restore the original output fd
+        os.dup2(self.stdout, 1)
+
+    def _more_data(self):
+        # check if there is more data in the read pipe
+        r, _, _ = select.select([self.read_pipe], [], [], 0)
+        return bool(r)
+
+    def value(self):
+        out = ''
+        while self._more_data():
+            out += os.read(self.read_pipe, 1024).decode('utf-8')
+        return out
 
 
 def test_client_stats(ci):
     print_test(ci,"test_client_stats")
-    stats = ci.stats()
-    assert "statistics" in s, "Expected statistics in the response"
-    
+    with CustomStdOut() as out:
+        stats = ci.stats()
+        assert "statistics" in stats, "Expected 'statistics' in the response"
+        assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+
+
+def test_client_stats_with_stdout(ci):
+    print_test(ci,"test_client_stats_with_stdout")
+    with CustomStdOut() as out:
+        stats = ci.stats(True)
+        assert "statistics" in stats, "Expected 'statistics' in the response"
+        assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+
+
+def test_client_stats_without_stdout(ci):
+    print_test(ci,"test_client_stats_without_stdout")
+    with CustomStdOut() as out:
+        stats = ci.stats(False)
+        assert "statistics" in stats, "Expected 'statistics' in the response"
+        assert not out.value() , "No captured output expected"
+
+
 def test_client_stats_reset(ci):
     print_test(ci,"test_client_stats_reset")
     ci.stats_reset()   
-    statis = ci.stats()
-    assert "statistics" in s, "Expected statistics in the response"
-            
+    stats = ci.stats()
+    assert "statistics" in stats, "Expected 'statistics' in the response"
+
+
 def test_client_debug_server_on_off(ci):
     print_test(ci,"test_client_debug_server_on_off")
     ci.debug_server_on()  # writes to standard out
@@ -2058,7 +2105,9 @@ def do_tests(ci,the_port):
     test_client_check(ci)  
     test_client_check_defstatus(ci)  
     
-    test_client_stats(ci)             
+    test_client_stats(ci)
+    test_client_stats_with_stdout(ci)
+    test_client_stats_without_stdout(ci)
     test_client_stats_reset(ci)             
     test_client_debug_server_on_off(ci)    
           

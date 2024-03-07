@@ -680,13 +680,18 @@ const char* ClientDoc::ping() {
 }
 
 const char* ClientDoc::stats() {
-    return "Returns the `ecflow_server`_ statistics as a string\n::\n\n"
-           "   string stats()\n"
+    return "Returns the `ecflow_server`_ statistics as a string\n\n"
+           ".. warning::\n\n"
+           "    When called without arguments, this function will print the statistics to :code:`stdout`,"
+           " before returning the information as a string.\n"
+           "    To avoid printing the output, set the boolean flag :code:`to_stdout` to :code:`False`.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
            "       ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)\n"
-           "       stats = ci.stats()\n"
+           "       stats = ci.stats()      # prints to stdout\n"
+           "       stats = ci.stats(True)  # prints to stdout\n"
+           "       stats = ci.stats(False) # does not print to stdout\n"
            "       print(stats)\n"
            "   except RuntimeError, e:\n"
            "       print(str(e))\n";

@@ -130,13 +130,16 @@ public:
 private:
     ClientInvoker* _self;
 };
-const std::string& stats(ClientInvoker* self) {
+
+const std::string& stats(ClientInvoker* self, bool to_stdout = true) {
     self->stats();
-    // The statistics are printed to stdout for backward compatibility with previous python client versions
-    // TODO: remove printing to stdout in the next release
-    std::cout << self->server_reply().get_string() << std::endl;
+    if (to_stdout) {
+        std::cout << self->server_reply().get_string() << std::endl;
+    }
     return self->server_reply().get_string();
 }
+BOOST_PYTHON_FUNCTION_OVERLOADS(stats_overloads, stats, 1, 2)
+
 void stats_reset(ClientInvoker* self) {
     self->stats_reset();
 }
@@ -577,7 +580,7 @@ void export_Client() {
         .def("free_all_dep", &free_all_dep, ClientDoc::free_all_dep())
         .def("free_all_dep", &free_all_dep1)
         .def("ping", &ClientInvoker::pingServer, ClientDoc::ping())
-        .def("stats", &stats, return_value_policy<copy_const_reference>(), ClientDoc::stats())
+        .def("stats", &stats, stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
         .def("stats_reset", &stats_reset, ClientDoc::stats_reset())
         .def("get_file",
              &get_file,
