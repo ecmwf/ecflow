@@ -9,4 +9,5 @@ build:
   parallel: 64
   cmake_options:
     - -DENABLE_ALL_TESTS=ON
-  ctest_options: -L nightly
+  ctest_options:
+    - -L nightly
