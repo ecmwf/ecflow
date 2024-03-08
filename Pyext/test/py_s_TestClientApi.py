@@ -362,8 +362,10 @@ def test_client_run(ci):
         ci.sync_local() # get the changes, synced with local defs
         suite = ci.get_defs().find_suite("test_client_run")
         assert suite is not None, "Expected to find suite test_client_run:\n" + str(ci.get_defs())
+        print(f"Suite state: {suite.get_state()}, {count}, at {datetime.now()}")
         if suite.get_state() == State.complete:
             break;
+        assert suite.get_state() != State.aborted, "Expected suite to complete, but found it was aborted"
         time.sleep(3)
         if count > 20:
             assert False, "test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
