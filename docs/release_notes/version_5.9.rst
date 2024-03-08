@@ -9,6 +9,7 @@ Version 5.9.2
 
 * `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2022-11-30
 
+
 ecFlowUI
 ----------
 
@@ -21,6 +22,7 @@ Version 5.9.1
 ==============
 
 * `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2022-11-10
+
 
 ecFlowUI
 ----------
@@ -120,4 +122,3 @@ ecFlowUI
 - **Fix**: fixed an issue when setting variable value for multiple nodes was only applied to the first selected node.
      
 - **Fix**: fixed an issue when Info panel tabs were not notified about selection change when they became unselected
-    
