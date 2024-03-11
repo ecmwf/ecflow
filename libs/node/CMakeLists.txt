@@ -55,6 +55,8 @@ set(srcs
   src/ecflow/node/Task.hpp
   src/ecflow/node/TaskScriptGenerator.hpp
   src/ecflow/node/move_peer.hpp
+  src/ecflow/node/formatter/AvisoFormatter.hpp
+  src/ecflow/node/formatter/Format.hpp
   src/ecflow/node/formatter/Formatter.hpp
   src/ecflow/node/parser/AutoArchiveParser.hpp
   src/ecflow/node/parser/AutoCancelParser.hpp
