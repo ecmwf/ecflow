@@ -2259,13 +2259,15 @@ Usage:
 sort_attributes( (Client)arg1, (list)paths, (str)attribute_name [, (bool)recursive=True]) -> None
 
 
-.. py:method:: Client.stats( (Client)arg1) -> str :
+.. py:method:: Client.stats( (Client)arg1 [, (bool)to_stdout]) -> str :
    :module: ecflow
 
 Returns the :term:`ecflow_server` statistics as a string
-::
 
-   string stats()
+.. warning::
+
+    When called without arguments, this function will print the statistics to :code:`stdout`, before returning the information as a string.
+    To avoid printing the output, set the boolean flag :code:`to_stdout` to :code:`False`.
 
 Usage:
 
@@ -2273,7 +2275,9 @@ Usage:
 
    try:
        ci = Client()  # use default host(ECF_HOST) & port(ECF_PORT)
-       stats = ci.stats()
+       stats = ci.stats()      # prints to stdout
+       stats = ci.stats(True)  # prints to stdout
+       stats = ci.stats(False) # does not print to stdout
        print(stats)
    except RuntimeError, e:
        print(str(e))

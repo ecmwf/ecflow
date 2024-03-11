@@ -6,6 +6,35 @@ Version 5.12 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.12.2
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-03-11
+
+ecFlow Python
+-------------
+
+- **Improvement** allow to disable printing output to :code:`stdout` from :code:`ecflow.Client.stats()` :jiraissue:`ECFLOW-1944`
+- **Bug** corrected failing tests related to ecFlow Client Python API :jiraissue:`ECFLOW-1944,ECFLOW-1947`
+
+
+Version 5.12.1
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-03-07
+
+ecFlow Client
+-------------
+
+- **Bug** corrected handling of :code:`--label` when value starts with :code:`-` or :code:`--` :jiraissue:`ECFLOW-1945`
+
+
+ecFlow Python
+-------------
+
+- **Improvement** enabled returning statistics as string when calling :code:`ecflow.Client.stats()` :jiraissue:`ECFLOW-1944`
+
+
 Version 5.12.0
 ==============
 

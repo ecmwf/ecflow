@@ -234,15 +234,17 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const {
 
 void TaskScriptGenerator::generate_head_file() const {
     std::string path = ecf_include_ + "/head.h";
-    if (fs::exists(path))
+    if (fs::exists(path)) {
+        std::cout << "Skipping generation of head file: " << path << " as it already exists\n";
         return;
+    }
 
     std::string client_exe = "%ECF_CLIENT_EXE_PATH:";
     client_exe += Ecf::CLIENT_NAME();
     client_exe += "% ";
 
     std::string contents;
-    contents += "#!/bin/ksh\n";
+    contents += "#!/usr/bin/env bash\n";
     contents += "set -e          # stop the shell on first error X\n";
     contents += "set -u          # fail when using an undefined variable\n";
     contents += "set -o pipefail # fail if last(rightmost) command exits with a non-zero status\n";
@@ -266,7 +268,7 @@ void TaskScriptGenerator::generate_head_file() const {
         "# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address\n";
     contents += "os_name=$(uname -s)\n";
     contents += "if [[ $os_name = Linux ]] ; then\n";
-    contents += "   host %ECF_HOST%\n";
+    contents += "   ping -c 1 %ECF_HOST%\n";
     contents += "fi\n";
     contents += "\n";
     contents += "# Tell ecFlow we have started\n";
@@ -295,12 +297,16 @@ void TaskScriptGenerator::generate_head_file() const {
         ss << "TaskScriptGenerator::generate_tail_file: Could not create head.h " << path << " " << errorMsg;
         throw std::runtime_error(ss.str());
     }
+
+    std::cout << "Generated header file: " << path << "\n";
 }
 
 void TaskScriptGenerator::generate_tail_file() const {
     std::string path = ecf_include_ + "/tail.h";
-    if (fs::exists(path))
+    if (fs::exists(path)) {
+        std::cout << "Skipping generation of tail file: " << path << " as it already exists\n";
         return;
+    }
 
     std::string contents = "%ECF_CLIENT_EXE_PATH:";
     contents += Ecf::CLIENT_NAME();
@@ -315,6 +321,8 @@ void TaskScriptGenerator::generate_tail_file() const {
         ss << "TaskScriptGenerator::generate_tail_file: Could not create tail.h " << path << " " << errorMsg;
         throw std::runtime_error(ss.str());
     }
+
+    std::cout << "Generated tail file: " << path << "\n";
 }
 
 } // namespace ecf
