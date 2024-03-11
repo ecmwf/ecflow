@@ -49,7 +49,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         nodeStack_top()->addRepeat(Repeat(rep));
     }
     else if (lineTokens[1] == "datetime") {
-        // repeat datetime VARIABLE yyyy-mm-ddTMM:HH:SS yyyy-mm-ddTMM:HH:SS [MM:HH[:SS]]
+        // repeat datetime VARIABLE yyyy-mm-ddTMM:HH:SS yyyy-mm-ddTMM:HH:SS [HH[:MM[:SS]]]
         if (line_token_size < 5)
             throw std::runtime_error(errorMsg);
 
