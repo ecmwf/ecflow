@@ -16,6 +16,7 @@
 ///
 
 #include <iosfwd>
+#include <string>
 
 namespace ecf {
 
@@ -24,8 +25,13 @@ public:
     Indentor() { ++index_; }
     ~Indentor() { --index_; }
 
-    static std::ostream& indent(std::ostream& os, int char_spaces = 2);
     static void indent(std::string& os, int char_spaces = 2);
+
+    template <typename Stream>
+    static Stream& indent(Stream& s, int char_spaces = 2) {
+        s << (indent_ ? std::string(index_ * char_spaces, ' ') : std::string(""));
+        return s;
+    }
 
 private:
     static int index_;

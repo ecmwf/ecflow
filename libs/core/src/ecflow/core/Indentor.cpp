@@ -17,11 +17,6 @@ namespace ecf {
 int Indentor::index_   = 0;
 bool Indentor::indent_ = true;
 
-std::ostream& Indentor::indent(std::ostream& os, int char_spaces) {
-    os << (indent_ ? std::string(index_ * char_spaces, ' ') : "");
-    return os;
-}
-
 void Indentor::indent(std::string& os, int char_spaces) {
     os += (indent_ ? std::string(index_ * char_spaces, ' ') : "");
 }
