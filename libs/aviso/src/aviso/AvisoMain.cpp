@@ -9,96 +9,52 @@
  */
 
 #include <cstdlib>
-#include <httplib.h>
 #include <iostream>
 
 #include <nlohmann/json.hpp>
 
 #include "aviso/Aviso.hpp"
 
-void process_result(const aviso::Listener& listener, const httplib::Result& result) {
-    using json = nlohmann::ordered_json;
-
-    std::cout << "Received: " << result.value().status << " --> " << result.value().reason << std::endl << std::endl;
-
-    if (result.value().status != 200) {
-        std::cout << "Something when wrong!" << std::endl;
-        return;
-    }
-
-    // std::cout << "Received: " << result.value().body << std::endl;
-
-    auto response_body = json::parse(std::begin(result.value().body), std::end(result.value().body));
-    // std::cout << "Received: " << response_body.dump(2) << std::endl;
-
-    if (response_body.contains("kvs")) {
-        for (const auto& kv : response_body["kvs"]) {
-            auto k     = kv["key"];
-            auto key   = aviso::make_from<aviso::Base64>(k);
-            auto v     = kv["value"];
-            auto value = aviso::make_from<aviso::Base64>(v);
-
-            if (key.raw() == listener.prefix()) {
-                auto meta_value = value.raw();
-                auto meta       = json::parse(meta_value);
-                std::cout << "<Header>" << std::endl;
-                std::cout << "-> prev_rev = " << meta["prev_rev"] << std::endl << std::endl;
-            }
-            else {
-                // std::cout << "Received key+value: " << key.raw() << "+" << value.raw() << std::endl;
-                listener.listen_to(key.raw());
-            }
-        }
-    }
-    else {
-        std::cout << "No key+value received" << std::endl;
-    }
-}
-
-void process_listener(const aviso::Listener& listener, httplib::Client& client) {
-    using json = nlohmann::ordered_json;
-
-    std::string path = "/v3/kv/range";
-    httplib::Headers headers;
-
-    int min_mod_revision = 12;
-    auto range           = aviso::Range(listener.prefix());
-
-    std::string body =
-        json::object({{"key", range.base64_begin()}, {"range_end", range.base64_end()}, {"min_mod_revision", min_mod_revision}}).dump();
-    std::string content_type = "application/json";
-
-    std::cout << "Sending: " << body << std::endl;
-
-    httplib::Result result = client.Post(path, headers, body, content_type);
-    process_result(listener, result);
+void echo(const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
+    std::cout << "Received:" << std::endl;
+    std::cout << "Listener --> " << listener.path() << std::endl;
+    std::cout << notification << std::endl;
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
-    std::string scheme_host_port = "http://localhost:2379";
-    httplib::Client client(scheme_host_port);
-
-    // Aviso Attribute configuration (provided in .def file)
-    // TODO: load cfg from file
-    std::vector<std::string> aviso_attribute_cfgs = {
-        R"({ "event": "dissemination", "request": { "destination": "COM", "target": "T9", "step": [0, 6, 10, 18] } })"
-        R"({ "event": "mars", "request": { "class": "od" } })"};
 
     // Aviso Schema configuration (provided in .json file, or maybe downloaded from Aviso server?)
-    // TODO: load schema file, and extract relevant cfg
-    std::string aviso_listener_schema_cfg = {};
+    std::string listener_schema_location = "/workspace/aviso/client/service_configuration/event_listener_schema.json";
+    auto listener_schema                 = aviso::load_listener_schema(listener_schema_location);
 
-    auto l1 = aviso::Listener{"/ec/diss/{destination}",
-                              "date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}"}
-                  .with_parameter("destination", "COM")
-                  .with_parameter("target", "T9");
+    // Aviso configuration (provided in .def file)
+    std::vector<std::string> aviso_attribute_cfgs = {
+        R"({ "path": "/path/to/diss/COM/A", "address": "http://localhost:2379", "event": "dissemination", "request": { "destination": "COM", "target": "T9", "stream": "eefh", "step": [0, 6, 12, 18] } })", // --> /ec/diss/COM
+        R"({ "path": "/path/to/diss/COM/B", "address": "http://localhost:2379", "event": "dissemination", "request": { "destination": "COM", "target": "T9", "step": [0, 6, 12, 18], "stream": "eefh" } })", // --> /ec/diss/COM
+        R"({ "path": "/path/to/diss/COM/C", "address": "http://localhost:2379", "event": "dissemination", "request": { "destination": "COM", "step": 0 } })",
+        R"({ "path": "/path/to/diss/COM/D", "address": "http://localhost:2379", "event": "dissemination", "request": { "destination": "COM", "step": 0 } })",
+        R"({ "path": "/path/to/diss/COM/D", "address": "http://localhost:2378", "event": "dissemination", "request": { "destination": "COM", "step": 0 } })",
 
-    auto l2 = aviso::Listener{"/ec/mars", "date={date},class={class},expver={expver},domain={domain},time={time},stream={stream},step={step}"}
-                  .with_parameter("class", "od");
+        R"({ "path": "/path/to/mars/A", "address": "http://localhost:2379", "event": "mars", "request": { "class": "od" } })"};
 
-    for (auto&& listener : {l1, l2}) {
-        process_listener(listener, client);
+    aviso::ListenService service{echo};
+    for (const auto& cfg : aviso_attribute_cfgs) {
+        auto listener = aviso::create_configured_listener(cfg, listener_schema);
+        service.register_listener(listener);
     }
+
+    service.start(std::chrono::seconds{15});
+
+    std::this_thread::sleep_for(std::chrono::seconds(300));
+
+    // service.stop();
+    // --> no need to stop the service, it will be stopped (and the worker thread joined) when exiting
+
+    // TODO: next steps
+    //  - Persist the latest revision every time it is updated, so that it can be used to resume the service
+    //  - Implement a way to resume the service from the latest revision
+    //  - Implement a way to update the service configuration (listeners) without stopping the service
+    //
 
     return EXIT_SUCCESS;
 }
