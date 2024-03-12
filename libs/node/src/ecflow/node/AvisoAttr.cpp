@@ -55,7 +55,7 @@ bool AvisoAttr::isFree() const {
 
     std::string aviso_path = path();
 
-    LOG(Log::DBG, Message("**** Check Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+    LOG(Log::MSG, "**** Check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ")");
 
     // Task associated with Attribute is free when any notification is found
     auto notifications = controller.poll_notifications(aviso_path);
