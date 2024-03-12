@@ -19,23 +19,45 @@ namespace aviso {
 
 class ListenService {
 public:
-    using listener_t           = aviso::ConfiguredListener;
-    using address_t            = aviso::etcd::Address;
-    using key_prefix_t         = std::string;
-    using listener_set_t       = std::vector<listener_t>;
-    using storage_t            = std::unordered_map<address_t, std::unordered_map<key_prefix_t, listener_set_t>>;
+    using address_t    = aviso::etcd::Address;
+    using key_prefix_t = std::string;
+    using listener_t   = aviso::ConfiguredListener;
+    using revision_t   = int64_t;
+
+    struct Entry
+    {
+        explicit Entry(listener_t listener) : listener_{std::move(listener)}, latest_revision_{0} {}
+        explicit Entry(listener_t listener, revision_t revision)
+            : listener_{std::move(listener)},
+              latest_revision_{revision} {}
+
+        const etcd::Address address() const { return listener_.address(); }
+        std::string_view key_prefix() const { return listener_.resolved_base(); }
+        std::string_view path() const { return listener_.path(); }
+        listener_t listener() { return listener_; }
+
+        revision_t get_latest_revision() const { return latest_revision_; }
+        void update_latest_revision(revision_t revision) {
+            latest_revision_ = std::max(static_cast<int64_t>(revision), latest_revision_);
+        }
+
+    private:
+        listener_t listener_;
+        revision_t latest_revision_;
+    };
+
+    using storage_t            = std::vector<Entry>;
     using notify_callback_t    = std::function<void(const aviso::ConfiguredListener&, const aviso::Notification&)>;
     using subscribe_callback_t = std::function<std::vector<ListenRequest>()>;
-    using revision_t           = int64_t;
-    using schema_t             = aviso::ListenerSchema;
+
+    using schema_t = aviso::ListenerSchema;
 
     ListenService(schema_t schema, notify_callback_t notify, subscribe_callback_t subscribe)
         : schema_{schema},
           executor_{},
           listeners_{},
           notify_{notify},
-          subscribe_{subscribe},
-          latest_revision_{0} {};
+          subscribe_{subscribe} {};
     ListenService()                     = delete;
     ListenService(const ListenService&) = delete;
     ~ListenService() { stop(); }
@@ -58,9 +80,9 @@ private:
     aviso::ListenerSchema schema_;
     aviso::PeriodicExecutor executor_;
     storage_t listeners_;
+
     notify_callback_t notify_;
     subscribe_callback_t subscribe_;
-    revision_t latest_revision_;
 };
 
 } // namespace aviso

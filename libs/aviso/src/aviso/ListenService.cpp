@@ -15,6 +15,7 @@
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
 #include "aviso/PeriodicExecutor.hpp"
+#include "aviso/Revisions.hpp"
 #include "aviso/etcd/Client.hpp"
 
 namespace aviso {
@@ -35,34 +36,35 @@ void ListenService::operator()() {
 
     // Check notification for each listener
     {
-        int64_t highest_revision = 0;
-        // For each host(+port)
-        for (auto&& [address, prefix_listerners] : listeners_) {
-            etcd::Client client{address};
-            // For each key prefix
-            for (auto&& [key_prefix, registered_listeners] : prefix_listerners) {
-                // Poll notifications on the key prefix
-                auto updated_keys = client.poll(key_prefix, latest_revision_ + 1);
-                // Pass updated keys to the listeners
-                for (auto&& [key, value] : updated_keys) {
-                    if (key == "latest_revision") {
-                        highest_revision = std::max(static_cast<int64_t>(std::stoll(value)), highest_revision);
-                        continue;
-                    }
-                    // For each listener
-                    for (auto&& listener : registered_listeners) {
-                        // Accept the notification, if the listener is interested in the key/value
-                        if (auto notification = listener.accepts(key, value); notification) {
-                            notify_(listener, *notification);
-                        }
-                    }
+        for (auto& entry : listeners_) {
+            // For the associated host(+port)
+            etcd::Client client{entry.address()};
+
+            std::cout << "Polling " << entry.key_prefix() << " for " << entry.address().address()
+                      << "(revision: " << entry.get_latest_revision() << ")" << std::endl;
+
+            // Poll notifications on the key prefix
+            auto updated_keys = client.poll(entry.key_prefix(), entry.get_latest_revision() + 1);
+
+            // Pass updated keys to the listener
+            for (auto&& [key, value] : updated_keys) {
+                if (key == "latest_revision") {
+                    entry.update_latest_revision(std::stoll(value));
+                    continue;
+                }
+
+                if (auto notification = entry.listener().accepts(key, value); notification) {
+                    notify_(entry.listener(), *notification);
                 }
             }
         }
-
-        // Ensure lastest revisision is up-to-date
-        latest_revision_ = std::max(latest_revision_, highest_revision);
     }
+
+    Revisions revisions;
+    for (auto&& entry : listeners_) {
+        revisions.add(entry.path(), entry.address().address(), entry.get_latest_revision());
+    }
+    revisions.store();
 }
 
 void ListenService::register_listener(const ListenRequest& listen) {
@@ -76,26 +78,21 @@ void ListenService::register_listener(const listener_t& listener) {
 
     std::cout << "Register listener path " << listener.path() << " for " << address.address() << " and " << key_prefix
               << std::endl;
-    listeners_[address][key_prefix].push_back(listener);
+
+    Revisions revisions;
+    auto cached_revision = revisions.get_revision(listener.path(), address.address());
+
+    listeners_.emplace_back(listener, cached_revision);
 }
 
 void ListenService::unregister_listener(const std::string& unlisten_path) {
 
     std::cout << "Unregister listener path " << unlisten_path << std::endl;
 
-    // TODO[MB]: The key_prefix and address maps should be clears when they contain no more listeners
-    //    By not clearing empty map, we keep creating etcd clients, which are will consume/drop notifications sent in
-    //    the meanwhile. This needs to be fixed!!!
-
-    for (auto&& [address, prefix_listerners] : listeners_) {
-        for (auto&& [key_prefix, registered_listeners] : prefix_listerners) {
-            registered_listeners.erase(
-                std::remove_if(std::begin(registered_listeners),
-                               std::end(registered_listeners),
-                               [&unlisten_path](auto&& listener) { return listener.path() == unlisten_path; }),
-                std::end(registered_listeners));
-        }
-    }
+    listeners_.erase(std::remove_if(std::begin(listeners_),
+                                    std::end(listeners_),
+                                    [&unlisten_path](auto&& listener) { return listener.path() == unlisten_path; }),
+                     std::end(listeners_));
 }
 
 } // namespace aviso

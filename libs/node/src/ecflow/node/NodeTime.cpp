@@ -693,13 +693,16 @@ bool Node::timeDependenciesFree() const {
         }
     }
     for (const auto& aviso : avisos_) {
-        std::cout << "NodeTime: checking Aviso" << std::endl;
         if (aviso.isFree()) {
-            std::cout << "NodeTime: checking Aviso ---> Found free aviso, id: " << aviso.name() << std::endl;
-            if (noOfTimeDependencies == 1)
+            LOG(Log::DBG, "NodeTime: checking Aviso isFree: true, for " << aviso.path() << ":" << aviso.name());
+            if (noOfTimeDependencies == 1) {
                 return true;
+            }
             oneAvisoIsFree = true;
             break;
+        }
+        else {
+            LOG(Log::DBG, "NodeTime: checking Aviso isFree: false");
         }
     }
 
