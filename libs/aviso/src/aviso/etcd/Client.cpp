@@ -10,6 +10,10 @@
 
 #include "aviso/etcd/Client.hpp"
 
+#if defined(ECF_OPENSSL)
+    #define CPPHTTPLIB_OPENSSL_SUPPORT
+#endif
+
 #include <cassert>
 #include <fstream>
 #include <httplib.h>
