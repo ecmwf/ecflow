@@ -122,6 +122,10 @@ void MeterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         throw std::runtime_error(ss.str());
     }
 
+    if (args[0].empty()) {
+        throw std::runtime_error("MeterCmd: First argument must be a non-empty string, i.e. --meter=name 100\n");
+    }
+
     int value = 0;
     try {
         std::string strVal = args[1];

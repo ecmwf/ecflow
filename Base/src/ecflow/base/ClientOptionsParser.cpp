@@ -109,7 +109,7 @@ void parse_alter(ClientOptionsParser::option_set_t& processed_options, ClientOpt
 void parse_label(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
 
     // *** Important! ***
-    // This custom handler is needed to ensure that the "--alter" option
+    // This custom handler is needed to ensure that the "--label" option
     // special value parameters are handled correctly. For example,
     // values starting with -, such as "-j64".
     //
@@ -129,6 +129,30 @@ void parse_label(ClientOptionsParser::option_set_t& processed_options, ClientOpt
     processed_options.push_back(label);
 }
 
+void parse_meter(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
+
+    // *** Important! ***
+    // This custom handler is needed to ensure that the "--meter" option
+    // special value parameters are handled correctly. For example,
+    // values starting with -, such as "-1".
+    //
+    // The custom handling will consider that 2 positional values (not
+    // to be confused with positional arguments) are provided with the
+    // --label option, as per one of the following forms:
+    //     1) --label arg1 arg2
+    //     2) --label=arg1 arg2
+
+    ClientOptionsParser::option_t meter{std::string{"meter"}, {}};
+
+    parse_option(meter, processed_options, args);
+
+    // Collect 1 positional argument (i.e. the label value)
+    parse_positional_arguments(meter, processed_options, args, 1);
+
+    processed_options.push_back(meter);
+}
+
+
 } // namespace
 
 ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsParser::arguments_set_t& args) {
@@ -139,6 +163,9 @@ ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsP
     }
     else if (ecf::algorithm::starts_with(args[0], "--label")) {
         parse_label(processed_options, args);
+    }
+    else if (ecf::algorithm::starts_with(args[0], "--meter")) {
+        parse_meter(processed_options, args);
     }
     return processed_options;
 }

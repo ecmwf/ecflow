@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/base/cts/task/LabelCmd.hpp"
+#include "ecflow/base/cts/task/MeterCmd.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
@@ -22,8 +23,8 @@
 /// \brief Tests the capabilities of ClientOptions
 ///
 
-template <typename REQUIRE>
-void test_label(const CommandLine& cl, REQUIRE check) {
+template <typename COMMAND, typename REQUIRE>
+void test_command(const CommandLine& cl, REQUIRE check) {
     std::cout << "Testing command line: " << cl.original() << std::endl;
 
     ClientOptions options;
@@ -33,7 +34,7 @@ void test_label(const CommandLine& cl, REQUIRE check) {
     environment.set_child_password("password");
     try {
         auto base_command    = options.parse(cl, &environment);
-        auto derived_command = dynamic_cast<LabelCmd*>(base_command.get());
+        auto derived_command = dynamic_cast<COMMAND*>(base_command.get());
 
         BOOST_REQUIRE(derived_command);
         check(*derived_command, environment);
@@ -44,21 +45,18 @@ void test_label(const CommandLine& cl, REQUIRE check) {
 }
 
 template <typename REQUIRE>
+void test_label(const CommandLine& cl, REQUIRE check) {
+    test_command<LabelCmd>(cl, check);
+}
+
+template <typename REQUIRE>
+void test_meter(const CommandLine& cl, REQUIRE check) {
+    test_command<MeterCmd>(cl, check);
+}
+
+template <typename REQUIRE>
 void test_alter(const CommandLine& cl, REQUIRE check) {
-    std::cout << "Testing command line: " << cl.original() << std::endl;
-
-    ClientOptions options;
-    ClientEnvironment environment(false);
-    try {
-        auto base_command    = options.parse(cl, &environment);
-        auto derived_command = dynamic_cast<AlterCmd*>(base_command.get());
-
-        BOOST_REQUIRE(derived_command);
-        check(*derived_command, environment);
-    }
-    catch (boost::program_options::unknown_option& e) {
-        BOOST_FAIL(std::string("Unexpected exception caught: ") + e.what());
-    }
+    test_command<AlterCmd>(cl, check);
 }
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -748,48 +746,118 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_delete) {
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_label) {
     {
-        auto cl = CommandLine::make_command_line("ecflow_client",
-                                                 "--label=name",
-                                                 "some value with spaces");
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "some value with spaces");
         test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
             BOOST_REQUIRE_EQUAL(command.name(), "name");
             BOOST_REQUIRE_EQUAL(command.label(), "some value with spaces");
         });
     }
     {
-        auto cl = CommandLine::make_command_line("ecflow_client",
-                                                 "--label=name",
-                                                 R"(some "quoted" value)");
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label", "name", "some value with spaces");
+        test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.label(), "some value with spaces");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", R"(some "quoted" value)");
         test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
             BOOST_REQUIRE_EQUAL(command.name(), "name");
             BOOST_REQUIRE_EQUAL(command.label(), R"(some "quoted" value)");
         });
     }
     {
-        auto cl = CommandLine::make_command_line("ecflow_client",
-                                                 "--label=name",
-                                                 "-j64");
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label", "name", R"(some "quoted" value)");
+        test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.label(), R"(some "quoted" value)");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "-j64");
         test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
             BOOST_REQUIRE_EQUAL(command.name(), "name");
             BOOST_REQUIRE_EQUAL(command.label(), "-j64");
         });
     }
     {
-        auto cl = CommandLine::make_command_line("ecflow_client",
-                                                 "--label=name",
-                                                 "--long-option");
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "--long-option");
         test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
             BOOST_REQUIRE_EQUAL(command.name(), "name");
             BOOST_REQUIRE_EQUAL(command.label(), "--long-option");
         });
     }
     {
-        auto cl = CommandLine::make_command_line("ecflow_client",
-                                                 "--label=name",
-                                                 "--option=value");
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "--option=value");
         test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
             BOOST_REQUIRE_EQUAL(command.name(), "name");
             BOOST_REQUIRE_EQUAL(command.label(), "--option=value");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "--debug", "--debug");
+        test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.label(), "--debug");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "--port", "--debug", "--port", "123");
+        test_label(cl, [&](const LabelCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.label(), "--port");
+        });
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_handle_meter) {
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter=name", "0");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), 0);
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter", "name", "0");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), 0);
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter=name", "-1");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), -1);
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter", "name", "-1");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), -1);
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter=name", "10");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), 10);
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter=name", "20", "--debug");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), 20);
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--meter=name", "-100", "--debug", "--port", "1234");
+        test_meter(cl, [&](const MeterCmd& command, const ClientEnvironment& env) {
+            BOOST_REQUIRE_EQUAL(command.name(), "name");
+            BOOST_REQUIRE_EQUAL(command.value(), -100);
         });
     }
 }
