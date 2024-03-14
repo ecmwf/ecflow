@@ -6,6 +6,18 @@ Version 5.12 updates
 .. role:: jiraissue
    :class: hidden
 
+
+Version 5.12.3
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-03-14
+
+ecFlow Client
+-------------
+
+- **Bug** corrected handling of :code:`--meter` when value starts with :code:`-` (e.g. :code:`-1`) :jiraissue:`ECFLOW-1948`
+
+
 Version 5.12.2
 ==============
 
