@@ -166,7 +166,7 @@ const char* QueueCmd::desc() {
            "definition\n"
            "     no_of_aborted: returns number of aborted steps as a string, i.e 10\n"
            "     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n"
-           "  arg2(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)\n"
+           "  arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)\n"
            "                This is only valid for complete and aborted steps\n"
            "  arg4(string) = path: (optional). The path where the queue is defined.\n"
            "                 By default we search for the queue up the node tree.\n\n"

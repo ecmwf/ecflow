@@ -136,6 +136,7 @@ void BeginCmd::addOption(boost::program_options::options_description& desc) cons
 }
 void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     std::string beginArg = vm[arg()].as<std::string>();
+    Str::removeQuotes(beginArg);
 
     if (ace->debug()) {
         cout << "  BeginCmd::create arg = " << beginArg << "\n";
