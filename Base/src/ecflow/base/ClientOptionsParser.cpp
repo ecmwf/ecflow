@@ -23,9 +23,17 @@ bool is_valid_path(const std::string& path) {
 void parse_option(ClientOptionsParser::option_t& option,
                   ClientOptionsParser::option_set_t& processed_options,
                   ClientOptionsParser::arguments_set_t& args) {
+    // We must consider two forms of options:
+    //     1) --<option> <arg1>
+    //     2) --<option>=<arg1>
+
     if (auto found = args[0].find('='); found == std::string::npos) {
         // In case form 1) is used, we discard the '--<option>'
         args.erase(args.begin());
+        if (args.empty()) {
+            // This means that the option doesn't actually have a value (i.e. acts as a flag) and we simply return
+            return;
+        }
         // store the 'arg1'
         option.value.push_back(args.front());
         option.original_tokens.push_back(args.front());
@@ -91,6 +99,7 @@ void parse_alter(ClientOptionsParser::option_set_t& processed_options, ClientOpt
 
     ClientOptionsParser::option_t alter{std::string{"alter"}, {}};
 
+    // This effectively always collects an argument (i.e. the operation)
     parse_option(alter, processed_options, args);
 
     // Collect up to 4 positional arguments, that are not paths
@@ -109,7 +118,7 @@ void parse_alter(ClientOptionsParser::option_set_t& processed_options, ClientOpt
 void parse_label(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
 
     // *** Important! ***
-    // This custom handler is needed to ensure that the "--alter" option
+    // This custom handler is needed to ensure that the "--label" option
     // special value parameters are handled correctly. For example,
     // values starting with -, such as "-j64".
     //
@@ -121,12 +130,58 @@ void parse_label(ClientOptionsParser::option_set_t& processed_options, ClientOpt
 
     ClientOptionsParser::option_t label{std::string{"label"}, {}};
 
+    // This effectively always collects an argument (i.e. the label name)
     parse_option(label, processed_options, args);
 
     // Collect 1 positional argument (i.e. the label value)
     parse_positional_arguments(label, processed_options, args, 1);
 
     processed_options.push_back(label);
+}
+
+void parse_meter(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
+
+    // *** Important! ***
+    // This custom handler is needed to ensure that the "--meter" option
+    // special value parameters are handled correctly. For example,
+    // values starting with -, such as "-1".
+    //
+    // The custom handling will consider that 2 positional values (not
+    // to be confused with positional arguments) are provided with the
+    // --label option, as per one of the following forms:
+    //     1) --label arg1 arg2
+    //     2) --label=arg1 arg2
+
+    ClientOptionsParser::option_t meter{std::string{"meter"}, {}};
+
+    // This effectively always collects an argument (i.e. the meter name)
+    parse_option(meter, processed_options, args);
+
+    // Collect 1 positional argument (i.e. the meter value)
+    parse_positional_arguments(meter, processed_options, args, 1);
+
+    processed_options.push_back(meter);
+}
+
+void parse_abort(ClientOptionsParser::option_set_t& processed_options, ClientOptionsParser::arguments_set_t& args) {
+
+    // *** Important! ***
+    // This custom handler is needed to ensure that the "--abort" option
+    // special value parameters are handled correctly. For example,
+    // values starting with -, such as "--some reason--".
+    //
+    // The custom handling will consider that 2 positional values (not
+    // to be confused with positional arguments) are provided with the
+    // --label option, as per one of the following forms:
+    //     1) --label arg1 arg2
+    //     2) --label=arg1 arg2
+
+    ClientOptionsParser::option_t abort{std::string{"abort"}, {}};
+
+    // This effectively always collects an argument (i.e. the reason text)
+    parse_option(abort, processed_options, args);
+
+    processed_options.push_back(abort);
 }
 
 } // namespace
@@ -139,6 +194,12 @@ ClientOptionsParser::option_set_t ClientOptionsParser::operator()(ClientOptionsP
     }
     else if (ecf::algorithm::starts_with(args[0], "--label")) {
         parse_label(processed_options, args);
+    }
+    else if (ecf::algorithm::starts_with(args[0], "--meter")) {
+        parse_meter(processed_options, args);
+    }
+    else if (ecf::algorithm::starts_with(args[0], "--abort")) {
+        parse_abort(processed_options, args);
     }
     return processed_options;
 }
