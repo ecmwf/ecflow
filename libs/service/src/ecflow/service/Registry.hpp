@@ -173,7 +173,7 @@ using GlobalRegistry = Global<Registry>;
 
 inline aviso::ListenerSchema AvisoRunner::load_listener_schema_default() {
     std::string listener_schema_location =
-        "/Users/mamb/w/sandbox.aviso/client/service_configuration/event_listener_schema.json";
+        "client/service_configuration/event_listener_schema.json";
     auto listener_schema = aviso::ListenerSchema::load(listener_schema_location);
     return listener_schema;
 }
