@@ -120,35 +120,35 @@ public:
     template <typename Service>
     Service& register_service(std::string_view name);
 
-    template <>
-    AvisoController& register_service<AvisoController>(std::string_view name [[maybe_unused]]) {
-        // Nothing to register, actually...
-        return controller_;
-    }
-
-    template <>
-    AvisoRunner& register_service<AvisoRunner>(std::string_view name [[maybe_unused]]) {
-        // Nothing to register, actually...
-        return runner_;
-    }
-
     template <typename Service>
     Service& get_service(std::string_view name);
-
-    template <>
-    AvisoController& get_service<AvisoController>(std::string_view name [[maybe_unused]]) {
-        return controller_;
-    }
-
-    template <>
-    AvisoRunner& get_service<AvisoRunner>(std::string_view name [[maybe_unused]]) {
-        return runner_;
-    }
 
 private:
     AvisoController controller_;
     AvisoRunner runner_;
 };
+
+template <>
+inline AvisoController& BaseRegistry::register_service<AvisoController>(std::string_view name [[maybe_unused]]) {
+    // Nothing to register, actually...
+    return controller_;
+}
+
+template <>
+inline AvisoRunner& BaseRegistry::register_service<AvisoRunner>(std::string_view name [[maybe_unused]]) {
+    // Nothing to register, actually...
+    return runner_;
+}
+
+template <>
+inline AvisoController& BaseRegistry::get_service<AvisoController>(std::string_view name [[maybe_unused]]) {
+    return controller_;
+}
+
+template <>
+inline AvisoRunner& BaseRegistry::get_service<AvisoRunner>(std::string_view name [[maybe_unused]]) {
+    return runner_;
+}
 
 using Registry = BaseRegistry;
 
