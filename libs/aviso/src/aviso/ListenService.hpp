@@ -34,7 +34,7 @@ public:
               latest_revision_{revision} {}
 
         const etcd::Address address() const { return listener_.address(); }
-        std::string_view key_prefix() const { return listener_.resolved_base(); }
+        std::string prefix() const { return listener_.prefix(); }
         std::string_view path() const { return listener_.path(); }
         listener_t listener() { return listener_; }
 
@@ -66,7 +66,10 @@ public:
 
     ListenService& operator=(const ListenService&) = delete;
 
-    void start() { start(std::chrono::seconds{1}); }
+    void start() {
+        auto expiry = load_default_polling_interval();
+        start(std::chrono::seconds{expiry});
+    }
     void start(std::chrono::seconds expiry) { executor_.start(*this, expiry); }
 
     void stop() { executor_.stop(); }
@@ -77,6 +80,10 @@ public:
     void register_listener(const ListenRequest& request);
     void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
+
+private:
+    static std::string load_cfg_location();
+    static int load_default_polling_interval();
 
 private:
     aviso::ListenerSchema schema_;

@@ -14,48 +14,51 @@
 #include <nlohmann/json.hpp>
 
 #include "aviso/Aviso.hpp"
+#include "aviso/Log.hpp"
 
 static std::vector<aviso::ListenRequest> subscribe() {
     return {};
 }
 
 static void notify(const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
-    std::cout << "Received:" << std::endl;
-    std::cout << "Listener --> " << listener.path() << std::endl;
-    std::cout << notification << std::endl;
+    using namespace aviso;
+    ALOG(I, "Listened --> " << listener.path() << log::endl << notification << log::endl);
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     // Aviso Schema configuration (provided in .json file, or maybe downloaded from Aviso server?)
     std::string listener_schema_location =
-        ".aviso/service_configuration/event_listener_schema.json";
+        //        ".aviso/service_configuration/event_listener_schema.json";
+        "client/service_configuration/event_listener_schema.json";
     auto listener_schema = aviso::ListenerSchema::load(listener_schema_location);
 
     // Aviso configuration (provided in .def file)
     std::vector<std::tuple<std::string, std::string, std::string>> aviso_attribute_cfgs = {
 
-        {R"(/path/to/diss/COM/A)",
-         R"(http://localhost:2379)",
-         R"({ "event": "dissemination", "request": { "destination": "COM", "target": "T9", "stream": "eefh", "step": [0, 6, 12, 18] } })"},
+        {R"(/path/to/diss/ABC/_task_)",
+         R"(https://aviso-test-ecflow.ecmwf.int)",
+         R"({ "event": "dissemination", "request": { "destination": "ABC", "target": "T9", "stream": "eefh", "step": [0, 6, 12, 18] } })"},
 
-        {R"(/path/to/diss/COM/B)",
-         R"(http://localhost:2379)",
-         R"({"event": "dissemination", "request": { "destination": "COM", "target": "T9", "step": [0, 6, 12, 18], "stream": "eefh" } })"},
+        {R"(/path/to/diss/ABC/_task_)",
+         R"(https://aviso-test-ecflow.ecmwf.int)",
+         R"({"event": "dissemination", "request": { "destination": "ABC", "target": "T9", "step": [0, 6, 12, 18], "stream": "oper" } })"},
 
-        {R"(/path/to/diss/COM/C)",
-         R"(http://localhost:2379)",
-         R"({ "event": "dissemination", "request": { "destination": "COM", "step": 0 } })"},
+        {R"(/path/to/diss/ABC/_task_)",
+         R"(https://aviso-test-ecflow.ecmwf.int)",
+         R"({ "event": "dissemination", "request": { "destination": "ABC", "step": 0 } })"},
 
-        {R"(/path/to/diss/COM/D)",
-         R"(http://localhost:2379)",
-         R"({ "event": "dissemination", "request": { "destination": "COM", "step": 0 } })"},
+        {R"(/path/to/diss/XYZ/_task_)",
+         R"(https://aviso-test-ecflow.ecmwf.int)",
+         R"({ "event": "dissemination", "request": { "destination": "XYZ", "step": 0 } })"},
 
-        {R"(/path/to/diss/COM/D)",
-         R"(http://localhost:2378)",
-         R"({ "event": "dissemination", "request": { "destination": "COM", "step": 0 } })"},
+        {R"(/path/to/diss/XYZ/_task)",
+         R"(https://aviso-test-ecflow.ecmwf.int)",
+         R"({ "event": "dissemination", "request": { "destination": "XYZ", "step": 12 } })"},
 
-        {R"(/path/to/mars/A)", R"(http://localhost:2379)", R"({ "event": "mars", "request": { "class": "od" } })"}};
+        {R"(/path/to/mars/_very_long_name_task_)",
+         R"(https://aviso-test-ecflow.ecmwf.int)",
+         R"({ "event": "mars", "request": {"class": "od" } })"}};
 
     aviso::ListenService service{listener_schema, notify, subscribe};
     for (auto&& [path, address, listener_cfg] : aviso_attribute_cfgs) {
@@ -65,7 +68,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     service.start(std::chrono::seconds{15});
 
-    std::this_thread::sleep_for(std::chrono::seconds(300));
+    std::this_thread::sleep_for(std::chrono::seconds(600));
 
     // service.stop();
     // --> no need to stop the service, it will be stopped (and the worker thread joined) when exiting

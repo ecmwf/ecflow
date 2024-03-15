@@ -19,6 +19,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "aviso/Log.hpp"
+
 namespace aviso {
 
 std::ostream& operator<<(std::ostream& os, const Notification& notification) {
@@ -106,7 +108,7 @@ std::optional<Notification> ConfiguredListener::accepts(const std::string& key, 
 
         for (auto i = m_bgn; i != m_end; ++i) {
             std::smatch m = *i;
-            // std::cout << "Listened to:" << m.str() << std::endl;
+            // ALOG(D, "Extracted parameters:" << m.str());
             for (size_t i = 1; i != m.size(); ++i) {
                 actual_parameters.emplace_back(placeholders[i - 1], m[i]);
             }
@@ -117,7 +119,7 @@ std::optional<Notification> ConfiguredListener::accepts(const std::string& key, 
     bool applicable = true;
     {
         for (const auto& [k, v] : actual_parameters) {
-            //            std::cout << "-> " << k << " = " << v << std::endl;
+            // ALOG(D, "-> " << k << " = " << v);
             if (auto found = parameters_.find(k); found != std::end(parameters_)) {
 
                 auto actual = v;
@@ -139,19 +141,19 @@ std::optional<Notification> ConfiguredListener::accepts(const std::string& key, 
         }
     }
 
-    std::cout << "<Notification> " << key << std::endl;
     if (applicable) {
         Notification notification{key, value};
         for (const auto& [k, v] : actual_parameters) {
             notification.add_parameter(k, v);
         }
-        std::cout << "Match: ✓" << std::endl << std::endl;
+        ALOG(D, "Match: ✓ --> <Notification> " << key);
         return notification;
     }
     else {
-        std::cout << "Match: ✗" << std::endl << std::endl;
+        ALOG(D, "Match: ✗ --> <Notification> " << key);
         return std::nullopt;
     }
+    return std::nullopt;
 }
 
 ConfiguredListener create_configured_listener(const ListenRequest& listen_request, const ListenerSchema& schema) {

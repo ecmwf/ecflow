@@ -15,6 +15,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "aviso/Log.hpp"
+
 namespace aviso {
 
 class Revisions {
@@ -45,8 +47,6 @@ public:
 
 private:
     static nlohmann::json load_revisions(const std::string& location) {
-
-        std::cout << "load_revisions: " << location << std::endl;
         std::ifstream in(location);
         if (!in) {
             nlohmann::json json = {};
@@ -56,15 +56,13 @@ private:
             in >> json;
         }
         catch (const nlohmann::json::parse_error& e) {
-            std::cout << "Failed to parse json: " << e.what() << ". Resetting revision cache..." << std::endl;
+            ALOG(D, "Failed to parse latest revisions. Resetting revision cache...");
             nlohmann::json json = {};
         }
         return json;
     }
 
     static void store_revisions(const std::string& location, const nlohmann::json& json) {
-
-        std::cout << "store_revisions: " << location << std::endl;
         std::ofstream out(location);
         if (!out) {
             throw std::runtime_error("Could not open file for writing: " + location);

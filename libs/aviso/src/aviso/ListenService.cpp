@@ -14,6 +14,7 @@
 
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
+#include "aviso/Log.hpp"
 #include "aviso/PeriodicExecutor.hpp"
 #include "aviso/Revisions.hpp"
 #include "aviso/etcd/Client.hpp"
@@ -40,11 +41,12 @@ void ListenService::operator()() {
             // For the associated host(+port)
             etcd::Client client{entry.address()};
 
-            std::cout << "Polling " << entry.key_prefix() << " for " << entry.address().address()
-                      << "(revision: " << entry.get_latest_revision() << ")" << std::endl;
+            ALOG(D,
+                 "Polling: " << entry.address().address() << " for Aviso " << entry.path()
+                             << " (key: " << entry.prefix() << ", rev: " << entry.get_latest_revision() << ")");
 
             // Poll notifications on the key prefix
-            auto updated_keys = client.poll(entry.key_prefix(), entry.get_latest_revision() + 1);
+            auto updated_keys = client.poll(entry.prefix(), entry.get_latest_revision() + 1);
 
             // Pass updated keys to the listener
             for (auto&& [key, value] : updated_keys) {
@@ -76,8 +78,7 @@ void ListenService::register_listener(const listener_t& listener) {
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
 
-    std::cout << "Register listener path " << listener.path() << " for " << address.address() << " and " << key_prefix
-              << std::endl;
+    ALOG(D, "Creating listener: {" << listener.path() << ", " << address.address() << ", " << key_prefix << "}");
 
     Revisions revisions;
     auto cached_revision = revisions.get_revision(listener.path(), address.address());
@@ -87,12 +88,35 @@ void ListenService::register_listener(const listener_t& listener) {
 
 void ListenService::unregister_listener(const std::string& unlisten_path) {
 
-    std::cout << "Unregister listener path " << unlisten_path << std::endl;
+    ALOG(D, "Removing listener: {" << unlisten_path << "}");
 
     listeners_.erase(std::remove_if(std::begin(listeners_),
                                     std::end(listeners_),
                                     [&unlisten_path](auto&& listener) { return listener.path() == unlisten_path; }),
                      std::end(listeners_));
+}
+
+int ListenService::load_default_polling_interval() {
+    nlohmann::json json;
+    std::ifstream file(load_cfg_location());
+    if (file.is_open()) {
+        file >> json;
+        file.close();
+    }
+
+    int polling_interval = 40;
+    if (json.contains("polling_interval")) {
+        polling_interval = json["polling_interval"];
+        ALOG(I, "Aviso polling interval loaded from configuration file: " << polling_interval << "s");
+        return polling_interval;
+    }
+
+    ALOG(W, "Polling interval not found in configuration file. Using default value: " << polling_interval << "s");
+    return polling_interval;
+}
+
+std::string ListenService::load_cfg_location() {
+    return "ecf_aviso.json";
 }
 
 } // namespace aviso

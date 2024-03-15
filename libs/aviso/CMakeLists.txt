@@ -18,6 +18,7 @@ set(srcs
   src/aviso/Listener.hpp
   src/aviso/ListenerSchema.hpp
   src/aviso/ListenService.hpp
+  src/aviso/Log.hpp
   src/aviso/etcd/Address.hpp
   src/aviso/etcd/Client.hpp
   src/aviso/etcd/Range.hpp

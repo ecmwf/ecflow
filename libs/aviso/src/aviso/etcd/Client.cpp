@@ -23,6 +23,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "aviso/Log.hpp"
 #include "aviso/etcd/Range.hpp"
 
 namespace aviso::etcd {
@@ -43,10 +44,6 @@ Client::~Client() = default;
 std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view key_prefix, int64_t revision) {
     using json = nlohmann::ordered_json;
 
-    std::cout << "Polling key prefix: " << key_prefix;
-    std::cout << ", from revision: " << revision;
-    std::cout << " @ address : " << impl_->address_.address() << std::endl;
-
     httplib::Headers headers;
 
     auto range = Range(key_prefix);
@@ -56,23 +53,20 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
             .dump();
     std::string content_type = "application/json";
 
-    // std::cout << "Sending: " << request_body << std::endl;
-
     httplib::Result result = impl_->client_.Post(endpoint_path, headers, request_body, content_type);
     if (!result) {
-        std::cout << "Error: " << result.error() << std::endl << std::endl;
+        ALOG(E, "Error: " << result.error());
         return std::vector<std::pair<std::string, std::string>>{};
     }
-    std::cout << "Received: " << result.value().status << " --> " << result.value().reason << std::endl;
+    // ALOG(D, "Received: " << result.value().status << " --> " << result.value().reason);
 
     if (result.value().status != 200) {
-        // TODO: handle the error (either by throwing an exception or returning an optional)
-        std::cout << "Something when wrong!" << std::endl;
+        // TODO[MB]: handle the error (either by throwing an exception or returning an optional)
+        ALOG(E, "Something when wrong!");
         return std::vector<std::pair<std::string, std::string>>{};
     }
 
     auto response_body = json::parse(std::begin(result.value().body), std::end(result.value().body));
-    // std::cout << "Received: " << response_body.dump(2) << std::endl;
 
     std::vector<std::pair<std::string, std::string>> entries;
 
@@ -89,13 +83,13 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
             auto value = make_content_from<Base64>(v);
 
             if (key.raw() != key_prefix) {
-                // std::cout << "Received key+value: " << key.raw() << "+" << value.raw() << std::endl;
+                ALOG(D, "Received key+value: " << key.raw() << "+" << value.raw());
                 entries.emplace_back(key.raw(), value.raw());
             }
         }
     }
     else {
-        std::cout << "No new key+value" << std::endl << std::endl;
+        ALOG(D, "No new key+value");
     }
 
     return entries;

@@ -91,9 +91,10 @@ private:
 
 class AvisoRunner {
 public:
+    // TODO[MB]: Configuration should be loaded from a file; currently done lazily inside ListenerSchema::start
     AvisoRunner() : running_{load_listener_schema_default(), AvisoRunner::notify, AvisoRunner::subscribe} {};
 
-    void start() { running_.start(std::chrono::seconds{30}); };
+    void start() { running_.start(); };
     void stop() { running_.stop(); };
     void terminate() { running_.terminate(); };
 
