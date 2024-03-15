@@ -11,6 +11,7 @@
 #ifndef aviso_ListenerSchema_HPP
 #define aviso_ListenerSchema_HPP
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 

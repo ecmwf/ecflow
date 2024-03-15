@@ -55,6 +55,7 @@ ecbuild_add_executable(
     src/aviso/AvisoMain.cpp
   LIBS
     libaviso
+    Threads::Threads
 )
 target_clangformat(ecflow_aviso)
 

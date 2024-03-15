@@ -11,6 +11,8 @@
 #ifndef aviso_ListenService_HPP
 #define aviso_ListenService_HPP
 
+#include <functional>
+
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
 #include "aviso/PeriodicExecutor.hpp"

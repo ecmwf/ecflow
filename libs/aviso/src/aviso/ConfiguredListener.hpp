@@ -11,6 +11,7 @@
 #ifndef aviso_ConfiguredListener_HPP
 #define aviso_ConfiguredListener_HPP
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <unordered_map>
