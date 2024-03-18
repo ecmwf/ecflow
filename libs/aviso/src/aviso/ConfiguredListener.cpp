@@ -24,12 +24,7 @@
 namespace aviso {
 
 std::ostream& operator<<(std::ostream& os, const Notification& notification) {
-    os << "<Notification> " << std::endl;
-    os << "        key->> " << notification.key() << std::endl;
-    os << "      value->> " << notification.value() << std::endl;
-    for (const auto& [k, v] : notification.parameters()) {
-        os << " parameters->> " << k << " = " << v << std::endl;
-    }
+    os << notification.key() << " = " << notification.value() << " (revision: " << notification.revision() << ")";
     return os;
 }
 
@@ -61,7 +56,8 @@ void ConfiguredListener::with_parameter(const std::string& parameter, const std:
     parameters_[parameter] = values;
 }
 
-std::optional<Notification> ConfiguredListener::accepts(const std::string& key, const std::string& value) const {
+std::optional<Notification>
+ConfiguredListener::accepts(const std::string& key, const std::string& value, uint64_t revision) const {
 
     // 1. turn `full` key into regex
     auto original_full = full();
@@ -142,15 +138,15 @@ std::optional<Notification> ConfiguredListener::accepts(const std::string& key, 
     }
 
     if (applicable) {
-        Notification notification{key, value};
+        Notification notification{key, value, revision};
         for (const auto& [k, v] : actual_parameters) {
             notification.add_parameter(k, v);
         }
-        ALOG(D, "Match: ✓ --> <Notification> " << key);
+        ALOG(D, "Match: ✓ --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return notification;
     }
     else {
-        ALOG(D, "Match: ✗ --> <Notification> " << key);
+        ALOG(D, "Match: ✗ --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return std::nullopt;
     }
     return std::nullopt;
@@ -159,18 +155,31 @@ std::optional<Notification> ConfiguredListener::accepts(const std::string& key, 
 ConfiguredListener create_configured_listener(const ListenRequest& listen_request, const ListenerSchema& schema) {
     using json = nlohmann::ordered_json;
 
-    json data = json::parse(listen_request.listener_cfg());
+    json data;
+    try {
+        data = json::parse(listen_request.listener_cfg());
+    }
+    catch (const json::parse_error& e) {
+        throw std::runtime_error("Failed to parse listener configuration: " + std::string(e.what()) + " " +
+                                 listen_request.listener_cfg());
+    }
 
     std::string address = listen_request.address();
     std::string path    = listen_request.path();
     std::string event   = data["event"];
+    uint64_t revision   = listen_request.revision();
 
     const auto& listener = schema.get_listener(event);
     if (!listener) {
         throw std::runtime_error("Listener not found");
     }
 
-    ConfiguredListener configured{etcd::Address{address}, path, listener->name(), listener->base(), listener->stem()};
+    ConfiguredListener configured{
+        etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), revision};
+
+    ALOG(I,
+         "Listener configures with: " << path << " for " << event << " at " << address << " with revision "
+                                      << revision);
 
     auto request = data["request"];
     for (json::iterator entry = request.begin(); entry != request.end(); ++entry) {

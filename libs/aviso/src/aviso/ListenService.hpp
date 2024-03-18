@@ -28,24 +28,18 @@ public:
 
     struct Entry
     {
-        explicit Entry(listener_t listener) : listener_{std::move(listener)}, latest_revision_{0} {}
+        explicit Entry(listener_t listener) : listener_{std::move(listener)} {}
         explicit Entry(listener_t listener, revision_t revision)
-            : listener_{std::move(listener)},
-              latest_revision_{revision} {}
+            : listener_{std::move(listener)} {}
 
         const etcd::Address address() const { return listener_.address(); }
         std::string prefix() const { return listener_.prefix(); }
         std::string_view path() const { return listener_.path(); }
-        listener_t listener() { return listener_; }
-
-        revision_t get_latest_revision() const { return latest_revision_; }
-        void update_latest_revision(revision_t revision) {
-            latest_revision_ = std::max(static_cast<int64_t>(revision), latest_revision_);
-        }
+        const listener_t& listener() const { return listener_; }
+        listener_t& listener() { return listener_; }
 
     private:
         listener_t listener_;
-        revision_t latest_revision_;
     };
 
     using storage_t            = std::vector<Entry>;

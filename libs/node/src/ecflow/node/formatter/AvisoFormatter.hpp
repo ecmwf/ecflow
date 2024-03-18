@@ -19,6 +19,8 @@ struct Formatter<AvisoAttr, Stream>
         output << item.name();
         output << " ";
         output << item.listener();
+        output << " ";
+        output << std::to_string(item.revision());
         output << '\n';
     }
 };

@@ -19,18 +19,20 @@
 //================================
 
 VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
-    dataCount_                       = 3;
-    searchKeyToData_["aviso_name"]   = NameIndex;
-    searchKeyToData_["aviso_handle"] = ValueIndex;
-    searchKeyToData_["name"]         = NameIndex;
-    scanProc_                        = VAvisoAttr::scan;
+    dataCount_                         = 4;
+    searchKeyToData_["aviso_name"]     = NameIndex;
+    searchKeyToData_["aviso_handle"]   = ValueIndex;
+    searchKeyToData_["name"]           = NameIndex;
+    searchKeyToData_["aviso_revision"] = RevisionIndex;
+    scanProc_                          = VAvisoAttr::scan;
 }
 
 QString VAvisoAttrType::toolTip(QStringList d) const {
     QString t = "<b>Type:</b> Aviso<br>";
     if (d.count() == dataCount_) {
         t += "<b>Name:</b> " + d[NameIndex] + "<br>";
-        t += "<b>Value:</b> " + d[ValueIndex];
+        t += "<b>Value:</b> " + d[ValueIndex] + "<br>";
+        t += "<b>Revision:</b> " + d[RevisionIndex];
     }
     return t;
 }
@@ -53,7 +55,7 @@ void VAvisoAttrType::encode(const ecf::AvisoAttr& aviso, QStringList& data, bool
         }
     }
 
-    data << qName_ << QString::fromStdString(aviso.name()) << QString::fromStdString(val);
+    data << qName_ << QString::fromStdString(aviso.name()) << QString::fromStdString(val) << QString::number(aviso.revision());
 }
 
 void VAvisoAttrType::encode_empty(QStringList& data) const {

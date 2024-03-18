@@ -11,6 +11,7 @@
 #ifndef aviso_ConfiguredListener_HPP
 #define aviso_ConfiguredListener_HPP
 
+#include <algorithm>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -26,9 +27,11 @@ namespace aviso {
 
 class ListenRequest {
 public:
-    static ListenRequest
-    make_listen_start(std::string_view path, std::string_view address, std::string_view listener_cfg) {
-        return ListenRequest{true, path, address, listener_cfg};
+    static ListenRequest make_listen_start(std::string_view path,
+                                           std::string_view address,
+                                           std::string_view listener_cfg,
+                                           uint64_t revision) {
+        return ListenRequest{true, path, address, listener_cfg, revision};
     }
 
     static ListenRequest make_listen_finish(std::string_view path) { return ListenRequest{false, path}; }
@@ -38,6 +41,7 @@ public:
     const std::string& path() const { return path_; }
     const std::string& address() const { return address_; }
     const std::string& listener_cfg() const { return listener_cfg_; }
+    uint64_t revision() const { return revision_; }
 
 private:
     explicit ListenRequest(bool start, std::string_view path)
@@ -45,16 +49,22 @@ private:
           path_{path},
           address_{},
           listener_cfg_{} {}
-    explicit ListenRequest(bool start, std::string_view path, std::string_view address, std::string_view listener_cfg)
+    explicit ListenRequest(bool start,
+                           std::string_view path,
+                           std::string_view address,
+                           std::string_view listener_cfg,
+                           uint64_t revision)
         : start_{start},
           path_{path},
           address_{address},
-          listener_cfg_{listener_cfg} {}
+          listener_cfg_{listener_cfg},
+          revision_{revision} {}
 
     bool start_;
     std::string path_;
     std::string address_;
     std::string listener_cfg_;
+    uint64_t revision_;
 };
 
 struct UnlistenRequest
@@ -66,10 +76,14 @@ struct UnlistenRequest
 class Notification {
 public:
     Notification() = default;
-    Notification(std::string_view key, std::string_view value) : key_{key}, value_{value} {}
+    Notification(std::string_view key, std::string_view value, uint64_t revision)
+        : key_{key},
+          value_{value},
+          revision_{revision} {}
 
     std::string_view key() const { return key_; }
     std::string_view value() const { return value_; }
+    uint64_t revision() const { return revision_; }
 
     void add_parameter(const std::string& parameter, const std::string& value) {
         parameters_.emplace_back(parameter, value);
@@ -79,6 +93,7 @@ public:
 private:
     std::string key_{};
     std::string value_{};
+    uint64_t revision_{0};
     std::vector<std::pair<std::string, std::string>> parameters_{};
 };
 
@@ -90,11 +105,13 @@ public:
                        std::string_view path,
                        std::string_view name,
                        std::string_view base,
-                       std::string_view stem)
+                       std::string_view stem,
+                       uint64_t revision)
         : Listener(name, base, stem),
           path_{path},
           address_(std::move(address)),
-          resolved_base_(base) {}
+          resolved_base_(base),
+          revision_{revision} {}
 
     void with_parameter(const std::string& parameter, const std::string& value);
     void with_parameter(const std::string& parameter, int64_t value);
@@ -102,6 +119,9 @@ public:
 
     const std::string& path() const { return path_; }
     const etcd::Address& address() const { return address_; }
+
+    uint64_t revision() const { return revision_; }
+    void update_revision(uint64_t revision) { revision_ = std::max(revision, revision_); }
 
     using Listener::base;
     using Listener::name;
@@ -113,12 +133,13 @@ public:
 
     std::string prefix() const { return resolved_base_ + '/'; }
 
-    std::optional<Notification> accepts(const std::string& key, const std::string& value) const;
+    std::optional<Notification> accepts(const std::string& key, const std::string& value, uint64_t revision) const;
 
 private:
     std::string path_;
     etcd::Address address_;
     std::string resolved_base_;
+    uint64_t revision_;
 
     using parameters_t = std::variant<std::string, std::int64_t, std::vector<std::string>>;
     std::unordered_map<std::string, parameters_t> parameters_ = {};

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "aviso/Aviso.hpp"
+#include "aviso/Log.hpp"
 
 namespace ecf::service {
 
@@ -36,17 +37,25 @@ public:
 
     // Attribute-facing API
 
-    void subscribe(const subscription_t& subscription) {
+    void subscribe(const subscription_t& s) {
+        ALOG(D,
+             "AvisoController::subscribe: " << s.path() << " " << s.address() << " " << s.listener_cfg() << " "
+                                            << s.revision());
         std::scoped_lock lock(subscribe_);
-        subscriptions_.push_back(subscription);
+        subscriptions_.push_back(s);
     }
 
-    void unsubscribe(const subscription_t& subscription) {
+    void unsubscribe(const subscription_t& s) {
+        ALOG(D,
+             "AvisoController::unsubscribe: " << s.path() << " " << s.address() << " " << s.listener_cfg() << " "
+                                              << s.revision());
         std::scoped_lock lock(subscribe_);
-        subscriptions_.push_back(subscription);
+        subscriptions_.push_back(s);
     }
 
     notifications_t poll_notifications(const std::string& name) {
+        ALOG(D, "AvisoController::poll_notifications: " << name);
+
         std::scoped_lock lock(notify_);
 
         if (auto found = notifications_.find(name); found != notifications_.end()) {
@@ -62,6 +71,8 @@ public:
     // Aviso-facing API
 
     subscriptions_t get_subscriptions() {
+        ALOG(D, "AvisoController::get_subscriptions");
+
         std::scoped_lock lock(subscribe_);
         auto new_subscriptions = subscriptions_;
         subscriptions_.clear();
@@ -70,6 +81,8 @@ public:
     }
 
     void notify(const notification_t& notification) {
+        ALOG(D, "AvisoController::notify: " << notification.path << " " << notification.notification);
+
         std::scoped_lock lock(notify_);
 
         const auto& key = notification.path;
@@ -173,9 +186,8 @@ private:
 using GlobalRegistry = Global<Registry>;
 
 inline aviso::ListenerSchema AvisoRunner::load_listener_schema_default() {
-    std::string listener_schema_location =
-        "client/service_configuration/event_listener_schema.json";
-    auto listener_schema = aviso::ListenerSchema::load(listener_schema_location);
+    std::string listener_schema_location = "client/service_configuration/event_listener_schema.json";
+    auto listener_schema                 = aviso::ListenerSchema::load(listener_schema_location);
     return listener_schema;
 }
 

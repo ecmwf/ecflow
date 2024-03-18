@@ -22,16 +22,21 @@ namespace {
 auto parse_aviso_line(const std::string& line, Node* parent) {
     std::vector<std::string_view> tokens = ecf::Str::tokenize_quotation(line, "'");
 
-    if (tokens.size() != 3) {
+    if (tokens.size() != 3 && tokens.size() != 4) {
         throw std::runtime_error("parse_line: Incorrect number of tokens found. Expected 3 tokens, at line: " + line);
     }
 
     ecf::AvisoAttr::name_t name         = std::string{tokens[1]};
     ecf::AvisoAttr::listener_t listener = std::string{tokens[2]};
 
+    ecf::AvisoAttr::revision_t revision = 0;
+    if (tokens.size() == 4) {
+        revision = std::atoi(std::string{tokens[3]}.c_str());
+    }
+
     // TODO[MB]: name & listener validation...
 
-    return ecf::AvisoAttr{parent, name, listener};
+    return ecf::AvisoAttr{parent, name, listener, revision};
 }
 
 } // namespace
@@ -43,7 +48,7 @@ bool AvisoParser::doParse(const std::string& line, std::vector<std::string>& lin
 
     Node* parent = nodeStack_top();
 
-    auto parsed  = parse_aviso_line(line, parent);
+    auto parsed = parse_aviso_line(line, parent);
     nodeStack_top()->addAviso(parsed);
 
     return true;

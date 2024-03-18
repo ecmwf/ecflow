@@ -24,7 +24,13 @@ ListenerSchema ListenerSchema::load(const std::string& schema_path) {
 
 ListenerSchema ListenerSchema::load(std::istream& schema_stream) {
     using json = nlohmann::ordered_json;
-    json data  = json::parse(schema_stream);
+
+    json data;
+    try {
+        data = json::parse(schema_stream);
+    } catch (const json::parse_error& e) {
+        throw std::runtime_error("Failed to parse listener schema: " + std::string(e.what()));
+    }
 
     ListenerSchema schema{};
 

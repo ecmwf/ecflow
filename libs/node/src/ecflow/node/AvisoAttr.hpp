@@ -39,6 +39,7 @@ class AvisoAttr {
 public:
     using name_t     = std::string;
     using listener_t = std::string;
+    using revision_t = std::uint64_t;
 
     /**
      * Creates a(n invalid) Aviso
@@ -47,7 +48,7 @@ public:
      *       Cereal invokes the default ctor to create the object and only then proceeds to member-wise serialization.
      */
     AvisoAttr() = default;
-    AvisoAttr(Node* parent, std::string name, listener_t handle);
+    AvisoAttr(Node* parent, std::string name, listener_t handle, revision_t revision);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
@@ -55,6 +56,7 @@ public:
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& listener() const { return listener_; }
     [[nodiscard]] std::string path() const;
+    [[nodiscard]] revision_t revision() const { return revision_; }
 
     void set_listener(std::string_view listener) { listener_ = listener; }
 
@@ -74,12 +76,14 @@ private:
     Node* parent_{nullptr};
     name_t name_;
     listener_t listener_;
+    mutable revision_t revision_; // mutable, as it is modified by the const method isFree()
 };
 
 template <class Archive>
 void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t version) {
     ar & aviso.name_;
     ar & aviso.listener_;
+    ar & aviso.revision_;
 }
 
 } // namespace ecf

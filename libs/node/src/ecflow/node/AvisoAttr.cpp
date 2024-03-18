@@ -19,10 +19,11 @@
 
 namespace ecf {
 
-AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener)
+AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener, revision_t revision)
     : parent_{parent},
       name_{std::move(name)},
-      listener_{std::move(listener)} {
+      listener_{std::move(listener)},
+      revision_{revision} {
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
     }
@@ -59,7 +60,24 @@ bool AvisoAttr::isFree() const {
 
     // Task associated with Attribute is free when any notification is found
     auto notifications = controller.poll_notifications(aviso_path);
-    return !notifications.empty();
+
+    if (notifications.empty()) {
+        // No notifications, nothing to do -- task continues to wait
+        return false;
+    }
+
+    // Notifications found -- task can continue
+
+    // (a) get the latest revision
+    auto max = std::max_element(notifications.begin(), notifications.end(), [](const auto& a, const auto& b) {
+        return a.listener.revision() < b.listener.revision();
+    });
+
+    // (b) update the revision, in the listener configuration
+    this->revision_ = max->listener.revision();
+    ALOG(D, "AvisoAttr::isFree: " << aviso_path << " updated revision to " << this->revision_);
+
+    return true;
 }
 
 void AvisoAttr::start() const {
@@ -79,7 +97,7 @@ void AvisoAttr::start() const {
 
     auto cfg = listener_;
     cfg      = cfg.substr(1, cfg.size() - 2);
-    return controller.subscribe(aviso::ListenRequest::make_listen_start(aviso_path, aviso_url, cfg));
+    return controller.subscribe(aviso::ListenRequest::make_listen_start(aviso_path, aviso_url, cfg, revision_));
 }
 
 void AvisoAttr::finish() const {

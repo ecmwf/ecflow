@@ -10,13 +10,15 @@
 
 #include "aviso/ListenService.hpp"
 
+#include <fstream>
 #include <iostream>
+
+#include <nlohmann/json.hpp>
 
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
 #include "aviso/Log.hpp"
 #include "aviso/PeriodicExecutor.hpp"
-#include "aviso/Revisions.hpp"
 #include "aviso/etcd/Client.hpp"
 
 namespace aviso {
@@ -43,30 +45,27 @@ void ListenService::operator()() {
 
             ALOG(D,
                  "Polling: " << entry.address().address() << " for Aviso " << entry.path()
-                             << " (key: " << entry.prefix() << ", rev: " << entry.get_latest_revision() << ")");
+                             << " (key: " << entry.prefix() << ", rev: " << entry.listener().revision() << ")");
 
             // Poll notifications on the key prefix
-            auto updated_keys = client.poll(entry.prefix(), entry.get_latest_revision() + 1);
+            auto updated_keys = client.poll(entry.prefix(), entry.listener().revision() + 1);
 
             // Pass updated keys to the listener
             for (auto&& [key, value] : updated_keys) {
                 if (key == "latest_revision") {
-                    entry.update_latest_revision(std::stoll(value));
+                    ALOG(D, "Updating revision for " << entry.path() << " to " << value);
+                    entry.listener().update_revision(std::stoll(value));
+                    ALOG(D, "Revision for " << entry.path() << " is now " << entry.listener().revision());
                     continue;
                 }
 
-                if (auto notification = entry.listener().accepts(key, value); notification) {
+                if (auto notification = entry.listener().accepts(key, value, entry.listener().revision());
+                    notification) {
                     notify_(entry.listener(), *notification);
                 }
             }
         }
     }
-
-    Revisions revisions;
-    for (auto&& entry : listeners_) {
-        revisions.add(entry.path(), entry.address().address(), entry.get_latest_revision());
-    }
-    revisions.store();
 }
 
 void ListenService::register_listener(const ListenRequest& listen) {
@@ -80,10 +79,7 @@ void ListenService::register_listener(const listener_t& listener) {
 
     ALOG(D, "Creating listener: {" << listener.path() << ", " << address.address() << ", " << key_prefix << "}");
 
-    Revisions revisions;
-    auto cached_revision = revisions.get_revision(listener.path(), address.address());
-
-    listeners_.emplace_back(listener, cached_revision);
+    listeners_.emplace_back(listener);
 }
 
 void ListenService::unregister_listener(const std::string& unlisten_path) {
@@ -104,7 +100,7 @@ int ListenService::load_default_polling_interval() {
         file.close();
     }
 
-    int polling_interval = 40;
+    int polling_interval = 20;
     if (json.contains("polling_interval")) {
         polling_interval = json["polling_interval"];
         ALOG(I, "Aviso polling interval loaded from configuration file: " << polling_interval << "s");
