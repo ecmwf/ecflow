@@ -55,6 +55,7 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
 
     ecf::service::GlobalRegistry::instance().register_service<ecf::service::AvisoController>("aviso.controller");
     ecf::service::GlobalRegistry::instance().register_service<ecf::service::AvisoRunner>("aviso.runner");
+    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso-runner").set_server(this);
 
     // Update stats, this is returned via --stats command option
     stats().host_                    = serverEnv.hostPort().first;

@@ -11,6 +11,7 @@
 #ifndef ecflow_base_AbstractServer_HPP
 #define ecflow_base_AbstractServer_HPP
 
+#include <atomic>
 #include <memory>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -206,7 +207,7 @@ protected:
 private:
     ZombieCtrl zombie_ctrl_;
     Stats stats_;
-    int job_gen_count_{0};
+    std::atomic<int> job_gen_count_{0};
 };
 
 #endif /* ecflow_base_AbstractServer_HPP */

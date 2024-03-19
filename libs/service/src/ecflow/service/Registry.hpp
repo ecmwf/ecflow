@@ -18,6 +18,7 @@
 
 #include "aviso/Aviso.hpp"
 #include "aviso/Log.hpp"
+#include "ecflow/base/AbstractServer.hpp"
 
 namespace ecf::service {
 
@@ -105,7 +106,16 @@ private:
 class AvisoRunner {
 public:
     // TODO[MB]: Configuration should be loaded from a file; currently done lazily inside ListenerSchema::start
-    AvisoRunner() : running_{load_listener_schema_default(), AvisoRunner::notify, AvisoRunner::subscribe} {};
+    AvisoRunner()
+        : running_{load_listener_schema_default(),
+                   [this](const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
+                       AvisoRunner::notify(listener, notification);
+                       this->server_->increment_job_generation_count();
+                   },
+                   AvisoRunner::subscribe},
+          server_{nullptr} {};
+
+    void set_server(AbstractServer* server) { server_ = server; };
 
     void start() { running_.start(); };
     void stop() { running_.stop(); };
@@ -118,6 +128,7 @@ public:
 
 private:
     aviso::ListenService running_;
+    AbstractServer* server_;
 };
 
 class BaseRegistry {

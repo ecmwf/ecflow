@@ -28,6 +28,7 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     libaviso
+    base
 )
 target_clangformat(ecflow_service)
 
