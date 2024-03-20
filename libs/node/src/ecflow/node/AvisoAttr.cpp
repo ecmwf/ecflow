@@ -12,6 +12,7 @@
 
 #include <sstream>
 
+#include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Node.hpp"
@@ -21,6 +22,7 @@ namespace ecf {
 
 AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener, revision_t revision)
     : parent_{parent},
+      path_{parent->absNodePath()},
       name_{std::move(name)},
       listener_{std::move(listener)},
       revision_{revision} {
@@ -29,8 +31,20 @@ AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener, revision_t 
     }
 };
 
+void AvisoAttr::set_listener(std::string_view listener) {
+    state_change_no_ = Ecf::incr_state_change_no();
+
+    listener_ = listener;
+}
+
+void AvisoAttr::set_revision(revision_t revision) {
+    state_change_no_ = Ecf::incr_state_change_no();
+
+    revision_ = revision;
+}
+
 std::string AvisoAttr::path() const {
-    std::string path = parent_->absNodePath();
+    std::string path = path_;
     path += ':';
     path += name_;
     return path;
@@ -46,7 +60,7 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
 };
 
 void AvisoAttr::reset() {
-    // TODO: Implement...
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 bool AvisoAttr::isFree() const {
@@ -76,6 +90,7 @@ bool AvisoAttr::isFree() const {
     // (b) update the revision, in the listener configuration
     this->revision_ = max->listener.revision();
     ALOG(D, "AvisoAttr::isFree: " << aviso_path << " updated revision to " << this->revision_);
+    state_change_no_ = Ecf::incr_state_change_no();
 
     return true;
 }

@@ -102,6 +102,9 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         for (const Label& l : labels_) {
             comp->add(std::make_shared<NodeLabelMemento>(l));
         }
+        for (const auto& a : avisos_) {
+            comp->add(std::make_shared<NodeAvisoMemento>(a));
+        }
 
         for (const ecf::TodayAttr& attr : todays_) {
             comp->add(std::make_shared<NodeTodayMemento>(attr));
@@ -188,6 +191,13 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
             if (!comp.get())
                 comp = std::make_shared<CompoundMemento>(absNodePath());
             comp->add(std::make_shared<NodeLabelMemento>(l));
+        }
+    }
+    for (const auto& a : avisos_) {
+        if (a.state_change_no() > client_state_change_no) {
+            if (!comp.get())
+                comp = std::make_shared<CompoundMemento>(absNodePath());
+            comp->add(std::make_shared<NodeAvisoMemento>(a));
         }
     }
 

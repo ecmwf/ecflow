@@ -37,6 +37,7 @@ namespace ecf {
 
 class AvisoAttr {
 public:
+    using path_t     = std::string;
     using name_t     = std::string;
     using listener_t = std::string;
     using revision_t = std::uint64_t;
@@ -55,10 +56,13 @@ public:
 
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& listener() const { return listener_; }
-    [[nodiscard]] std::string path() const;
     [[nodiscard]] revision_t revision() const { return revision_; }
+    [[nodiscard]] std::string path() const;
 
-    void set_listener(std::string_view listener) { listener_ = listener; }
+    void set_listener(std::string_view listener);
+    void set_revision(revision_t revision);
+
+    unsigned int state_change_no() const { return state_change_no_; }
 
     bool why(std::string& theReasonWhy) const;
 
@@ -74,13 +78,17 @@ public:
 
 private:
     Node* parent_{nullptr};
+    path_t path_;
     name_t name_;
     listener_t listener_;
-    mutable revision_t revision_; // mutable, as it is modified by the const method isFree()
+    // The following are mutable as they are modified by the const method isFree()
+    mutable revision_t revision_;
+    mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 };
 
 template <class Archive>
 void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t version) {
+    ar & aviso.path_;
     ar & aviso.name_;
     ar & aviso.listener_;
     ar & aviso.revision_;
