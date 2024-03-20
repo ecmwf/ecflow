@@ -22,6 +22,7 @@ set(srcs
   src/aviso/etcd/Address.hpp
   src/aviso/etcd/Client.hpp
   src/aviso/etcd/Range.hpp
+  src/aviso/executor/PeriodicTaskExecutor.hpp
   # Sources
   src/aviso/Aviso.cpp
   src/aviso/ConfiguredListener.cpp
@@ -66,6 +67,7 @@ target_clangformat(ecflow_aviso)
 set(test_srcs
   # Sources
   test/TestAviso.cpp
+  test/TestPeriodic.cpp
   test/TestAviso_main.cpp # test entry point
 )
 
