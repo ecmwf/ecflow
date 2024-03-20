@@ -21,6 +21,7 @@ public:
     virtual ~IconItem() = default;
 
     QPixmap pixmap(int);
+    QPixmap pixmapToHeight(int size);
     int id() const { return id_; }
     QString path() const { return path_; }
 
@@ -29,6 +30,7 @@ protected:
 
     QString path_;
     std::map<int, QPixmap> pixmaps_;
+    std::map<int, QPixmap> pixmapsByHeight_;
     int id_;
 };
 
@@ -49,6 +51,7 @@ public:
     static QString path(int id);
     static QPixmap pixmap(QString name, int size);
     static QPixmap pixmap(int id, int size);
+    static QPixmap pixmapToHeight(int id, int size);
 
     static QPixmap lockPixmap(int);
     static QPixmap warningPixmap(int);

@@ -63,6 +63,32 @@ QPixmap IconItem::pixmap(int size) {
     return {};
 }
 
+
+QPixmap IconItem::pixmapToHeight(int size) {
+    auto it = pixmapsByHeight_.find(size);
+    if (it != pixmapsByHeight_.end())
+        return it->second;
+    else {
+        QPixmap pix;
+        QImageReader imgR(path_);
+        if (imgR.canRead()) {
+            int w = imgR.size().width();
+            int h = imgR.size().height();
+            float r = static_cast<float>(w)/static_cast<float>(h);
+            imgR.setScaledSize(QSize(size*r, size));
+            QImage img = imgR.read();
+            pix        = QPixmap::fromImage(img);
+        }
+        else {
+            pix = unknown(size);
+        }
+
+        pixmapsByHeight_[size] = pix;
+        return pix;
+    }
+    return {};
+}
+
 QPixmap IconItem::unknown(int size) {
     return unknownIcon.pixmap(size);
 }
@@ -124,6 +150,10 @@ QPixmap IconProvider::pixmap(QString name, int size) {
 
 QPixmap IconProvider::pixmap(int id, int size) {
     return icon(id)->pixmap(size);
+}
+
+QPixmap IconProvider::pixmapToHeight(int id, int size) {
+    return icon(id)->pixmapToHeight(size);
 }
 
 QPixmap IconProvider::lockPixmap(int size) {
