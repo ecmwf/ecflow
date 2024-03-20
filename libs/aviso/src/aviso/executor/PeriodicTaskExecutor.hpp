@@ -68,7 +68,7 @@ public:
     }
 
 private:
-    std::chrono::system_clock::duration liveness_ = std::chrono::milliseconds(500);
+    std::chrono::system_clock::duration liveness_ = std::chrono::milliseconds(250);
     // the liveness is the amount of time to wait before checking if the executor should stop
 
     std::chrono::system_clock::time_point start_;

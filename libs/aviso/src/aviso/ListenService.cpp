@@ -18,12 +18,11 @@
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
 #include "aviso/Log.hpp"
-#include "aviso/PeriodicExecutor.hpp"
 #include "aviso/etcd/Client.hpp"
 
 namespace aviso {
 
-void ListenService::operator()() {
+void ListenService::operator()(const std::chrono::system_clock::time_point& now) {
 
     // Update list of listeners
 

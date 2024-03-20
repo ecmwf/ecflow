@@ -15,7 +15,7 @@
 
 #include "aviso/ConfiguredListener.hpp"
 #include "aviso/ListenerSchema.hpp"
-#include "aviso/PeriodicExecutor.hpp"
+#include "aviso/executor/PeriodicTaskExecutor.hpp"
 
 namespace aviso {
 
@@ -29,8 +29,7 @@ public:
     struct Entry
     {
         explicit Entry(listener_t listener) : listener_{std::move(listener)} {}
-        explicit Entry(listener_t listener, revision_t revision)
-            : listener_{std::move(listener)} {}
+        explicit Entry(listener_t listener, revision_t revision) : listener_{std::move(listener)} {}
 
         const etcd::Address address() const { return listener_.address(); }
         std::string prefix() const { return listener_.prefix(); }
@@ -50,7 +49,7 @@ public:
 
     ListenService(schema_t schema, notify_callback_t notify, subscribe_callback_t subscribe)
         : schema_{schema},
-          executor_{},
+          executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
           listeners_{},
           notify_{notify},
           subscribe_{subscribe} {};
@@ -64,12 +63,12 @@ public:
         auto expiry = load_default_polling_interval();
         start(std::chrono::seconds{expiry});
     }
-    void start(std::chrono::seconds expiry) { executor_.start(*this, expiry); }
+    void start(std::chrono::seconds expiry) { executor_.start(expiry); }
 
     void stop() { executor_.stop(); }
     void terminate() { executor_.stop(); }
 
-    void operator()();
+    void operator()(const std::chrono::system_clock::time_point& now);
 
     void register_listener(const ListenRequest& request);
     void register_listener(const listener_t& listener);
@@ -81,7 +80,7 @@ private:
 
 private:
     aviso::ListenerSchema schema_;
-    aviso::PeriodicExecutor executor_;
+    aviso::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;
     storage_t listeners_;
 
     notify_callback_t notify_;

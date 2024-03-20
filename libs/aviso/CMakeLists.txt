@@ -67,7 +67,7 @@ target_clangformat(ecflow_aviso)
 set(test_srcs
   # Sources
   test/TestAviso.cpp
-  test/TestPeriodic.cpp
+  test/TestPeriodicTaskExecutor.cpp
   test/TestAviso_main.cpp # test entry point
 )
 
