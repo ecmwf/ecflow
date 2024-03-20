@@ -246,6 +246,7 @@ protected:
     QPen holdingTimeFontPen_;
     QPen holdingDateFontPen_;
 
+    int avisoPixId_;
     int holdingTimePixId_;
     int holdingDatePixId_;
 

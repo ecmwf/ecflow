@@ -10,6 +10,8 @@
 
 #include "NodeViewDelegate.hpp"
 
+#include <algorithm>
+
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
@@ -83,6 +85,8 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent
         QImage img = imgR.read();
         errPix_    = QPixmap(QPixmap::fromImage(img));
     }
+
+    avisoPixId_ = IconProvider::add(":/viewer/aviso.svg", "aviso");
 
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
     grad_.setStart(0, 0);
@@ -666,13 +670,14 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
                                    QSize& size) const {
+
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
 
     if (data.count() < 2)
         return;
 
-    QString name = data.at(1) + ":";
+    QString name = data.at(1); // + ":";
     QString val;
     if (data.count() > 2)
         val = data.at(2);
@@ -688,6 +693,7 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
     int currentRight = contRect.x();
     int multiCnt     = val.count('\n');
 
+    QRect avisoRect;
     QRect nameRect;
     QRect valRect, valRestRect;
 
@@ -697,11 +703,16 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
     QString valFirst, valRest;
     QString full;
 
+    auto avisoPix = IconProvider::pixmapToHeight(avisoPixId_,  contRect.height());
+    avisoRect  = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
+    avisoRect.setWidth(avisoPix.width());
+
     if (multiCnt == 0) {
         // The text rectangle
         QFontMetrics fm(nameFont);
         int nameWidth = ViewerUtil::textWidth(fm, name);
-        nameRect      = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
+        nameRect      = contRect;
+        nameRect.setX(avisoRect.x() + avisoRect.width() + attrBox_->spacing);
         nameRect.setWidth(nameWidth);
 
         // The value rectangle
@@ -718,7 +729,8 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
         // The text rectangle
         QFontMetrics fm(nameFont);
         int nameWidth = ViewerUtil::textWidth(fm, name);
-        nameRect      = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
+        nameRect      = contRect;
+        nameRect.setX(avisoRect.x() + avisoRect.width() + attrBox_->spacing);
         nameRect.setWidth(nameWidth);
         nameRect.setHeight(attrBox_->height - attrBox_->topPadding - attrBox_->bottomPadding);
 
@@ -780,6 +792,9 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
             }
         }
     }
+
+    // aviso pixmap
+    painter->drawPixmap(avisoRect, avisoPix);
 
     // Draw name
     painter->setPen(fontPen);
