@@ -12,6 +12,8 @@
 
 #include <stdexcept>
 
+#include <boost/program_options.hpp>
+
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Node.hpp"
@@ -19,24 +21,48 @@
 
 namespace {
 
+template <typename T>
+auto get_option_value(const boost::program_options::variables_map& vm,
+                      const std::string& option_name,
+                      const std::string& line) {
+    if (!vm.count(option_name)) {
+        throw std::runtime_error("AvisoParser::doParse: Could not find '" + option_name + "' option in line: " + line);
+    }
+    return vm[option_name].as<T>();
+}
+
 auto parse_aviso_line(const std::string& line, Node* parent) {
-    std::vector<std::string_view> tokens = ecf::Str::tokenize_quotation(line, "'");
-
-    if (tokens.size() != 3 && tokens.size() != 4) {
-        throw std::runtime_error("parse_line: Incorrect number of tokens found. Expected 3 tokens, at line: " + line);
+    std::vector<std::string> tokens;
+    {
+        // Since po::command_line_parser requires a vector of strings, we need convert from string_view to string
+        std::vector<std::string_view> extracted = ecf::Str::tokenize_quotation(line, "'");
+        std::transform(std::begin(extracted),
+                       std::end(extracted),
+                       std::back_inserter(tokens),
+                       [](const std::string_view& sv) { return std::string{sv}; });
     }
 
-    ecf::AvisoAttr::name_t name         = std::string{tokens[1]};
-    ecf::AvisoAttr::listener_t listener = std::string{tokens[2]};
+    namespace po = boost::program_options;
+    po::options_description description("AvisoParser");
+    description.add_options()("name", po::value<std::string>());
+    description.add_options()("listener", po::value<std::string>());
+    description.add_options()("url", po::value<std::string>());
+    description.add_options()("schema", po::value<std::string>());
+    description.add_options()("revision", po::value<uint64_t>()->default_value(0));
 
-    ecf::AvisoAttr::revision_t revision = 0;
-    if (tokens.size() == 4) {
-        revision = std::atoi(std::string{tokens[3]}.c_str());
-    }
+    po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
 
-    // TODO[MB]: name & listener validation...
+    po::variables_map vm;
+    po::store(parsed_options, vm);
+    po::notify(vm);
 
-    return ecf::AvisoAttr{parent, name, listener, revision};
+    auto name        = get_option_value<ecf::AvisoAttr::name_t>(vm, "name", line);
+    auto listener    = get_option_value<ecf::AvisoAttr::listener_t>(vm, "listener", line);
+    auto url         = get_option_value<ecf::AvisoAttr::url_t>(vm, "url", line);
+    auto schema      = get_option_value<ecf::AvisoAttr::schema_t>(vm, "schema", line);
+    auto revision    = get_option_value<ecf::AvisoAttr::revision_t>(vm, "revision", line);
+
+    return ecf::AvisoAttr{parent, name, listener, url, schema, revision};
 }
 
 } // namespace
@@ -50,6 +76,7 @@ bool AvisoParser::doParse(const std::string& line, std::vector<std::string>& lin
 
     auto parsed = parse_aviso_line(line, parent);
     nodeStack_top()->addAviso(parsed);
+    nodeStack_top()->absNodePath();
 
     return true;
 }

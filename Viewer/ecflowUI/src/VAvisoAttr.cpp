@@ -19,10 +19,11 @@
 //================================
 
 VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
-    dataCount_                         = 4;
+    dataCount_                         = 6;
     searchKeyToData_["aviso_name"]     = NameIndex;
-    searchKeyToData_["aviso_handle"]   = ValueIndex;
-    searchKeyToData_["name"]           = NameIndex;
+    searchKeyToData_["aviso_handle"]   = ListenerIndex;
+    searchKeyToData_["aviso_url"]      = UrlIndex;
+    searchKeyToData_["aviso_schema"]   = SchemaIndex;
     searchKeyToData_["aviso_revision"] = RevisionIndex;
     scanProc_                          = VAvisoAttr::scan;
 }
@@ -31,7 +32,9 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
     QString t = "<b>Type:</b> Aviso<br>";
     if (d.count() == dataCount_) {
         t += "<b>Name:</b> " + d[NameIndex] + "<br>";
-        t += "<b>Value:</b> " + d[ValueIndex] + "<br>";
+        t += "<b>Listener:</b> " + d[ListenerIndex] + "<br>";
+        t += "<b>URL:</b> " + d[UrlIndex] + "<br>";
+        t += "<b>Schema:</b> " + d[SchemaIndex] + "<br>";
         t += "<b>Revision:</b> " + d[RevisionIndex];
     }
     return t;
@@ -40,7 +43,7 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
 QString VAvisoAttrType::definition(QStringList d) const {
     QString t = "aviso";
     if (d.count() == dataCount_) {
-        t += " " + d[NameIndex] + " '" + d[ValueIndex] + "'";
+        t += " " + d[NameIndex] + " '" + d[ListenerIndex] + "'";
     }
     return t;
 }
@@ -55,12 +58,16 @@ void VAvisoAttrType::encode(const ecf::AvisoAttr& aviso, QStringList& data, bool
         }
     }
 
-    data << qName_ << QString::fromStdString(aviso.name()) << QString::fromStdString(val) << QString::number(aviso.revision());
+    data << qName_                                 // TypeIndex
+         << QString::fromStdString(aviso.name())   // NameIndex
+         << QString::fromStdString(val)            // ListenerIndex
+         << QString::fromStdString(aviso.url())    // UrlIndex
+         << QString::fromStdString(aviso.schema()) // SchemaIndex
+         << QString::number(aviso.revision());     // Revision Index
 }
 
 void VAvisoAttrType::encode_empty(QStringList& data) const {
-    data << qName_ << ""
-         << "";
+    data << qName_;
 }
 
 //=====================================================

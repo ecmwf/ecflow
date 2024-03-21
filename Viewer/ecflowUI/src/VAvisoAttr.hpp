@@ -36,7 +36,14 @@ public:
     void encode_empty(QStringList& data) const;
 
 private:
-    enum DataIndex { TypeIndex = 0, NameIndex = 1, ValueIndex = 2, RevisionIndex = 3 };
+    enum DataIndex {
+        TypeIndex     = 0,
+        NameIndex     = 1,
+        ListenerIndex = 2,
+        UrlIndex      = 3,
+        SchemaIndex   = 4,
+        RevisionIndex = 5
+    };
 };
 
 class VAvisoAttr : public VAttribute {

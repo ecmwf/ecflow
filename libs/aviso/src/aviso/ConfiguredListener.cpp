@@ -152,7 +152,7 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
     return std::nullopt;
 }
 
-ConfiguredListener create_configured_listener(const ListenRequest& listen_request, const ListenerSchema& schema) {
+ConfiguredListener create_configured_listener(const ListenRequest& listen_request) {
     using json = nlohmann::ordered_json;
 
     json data;
@@ -162,6 +162,14 @@ ConfiguredListener create_configured_listener(const ListenRequest& listen_reques
     catch (const json::parse_error& e) {
         throw std::runtime_error("Failed to parse listener configuration: " + std::string(e.what()) + " " +
                                  listen_request.listener_cfg());
+    }
+
+    ListenerSchema schema;
+    try {
+        schema = ListenerSchema::load(listen_request.schema());
+    }
+    catch (const std::exception& e) {
+        throw std::runtime_error("Failed to load listener schema: " + std::string(e.what()));
     }
 
     std::string address = listen_request.address();

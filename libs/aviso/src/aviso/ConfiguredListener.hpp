@@ -28,10 +28,11 @@ namespace aviso {
 class ListenRequest {
 public:
     static ListenRequest make_listen_start(std::string_view path,
-                                           std::string_view address,
                                            std::string_view listener_cfg,
+                                           std::string_view address,
+                                           std::string_view schema,
                                            uint64_t revision) {
-        return ListenRequest{true, path, address, listener_cfg, revision};
+        return ListenRequest{true, path, listener_cfg, address, schema, revision};
     }
 
     static ListenRequest make_listen_finish(std::string_view path) { return ListenRequest{false, path}; }
@@ -39,31 +40,37 @@ public:
     bool is_start() const { return start_; }
 
     const std::string& path() const { return path_; }
-    const std::string& address() const { return address_; }
     const std::string& listener_cfg() const { return listener_cfg_; }
+    const std::string& address() const { return address_; }
+    const std::string& schema() const { return schema_; }
     uint64_t revision() const { return revision_; }
 
 private:
     explicit ListenRequest(bool start, std::string_view path)
         : start_{start},
           path_{path},
+          listener_cfg_{},
           address_{},
-          listener_cfg_{} {}
+          schema_{},
+          revision_{0} {}
     explicit ListenRequest(bool start,
                            std::string_view path,
-                           std::string_view address,
                            std::string_view listener_cfg,
+                           std::string_view address,
+                           std::string_view schema,
                            uint64_t revision)
         : start_{start},
           path_{path},
-          address_{address},
           listener_cfg_{listener_cfg},
+          address_{address},
+          schema_{schema},
           revision_{revision} {}
 
     bool start_;
     std::string path_;
-    std::string address_;
     std::string listener_cfg_;
+    std::string address_;
+    std::string schema_;
     uint64_t revision_;
 };
 
@@ -145,7 +152,7 @@ private:
     std::unordered_map<std::string, parameters_t> parameters_ = {};
 };
 
-ConfiguredListener create_configured_listener(const ListenRequest& request, const ListenerSchema& schema);
+ConfiguredListener create_configured_listener(const ListenRequest& request);
 
 } // namespace aviso
 

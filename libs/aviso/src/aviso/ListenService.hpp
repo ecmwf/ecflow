@@ -21,10 +21,11 @@ namespace aviso {
 
 class ListenService {
 public:
-    using address_t    = aviso::etcd::Address;
-    using key_prefix_t = std::string;
-    using listener_t   = aviso::ConfiguredListener;
-    using revision_t   = int64_t;
+    using address_t     = aviso::etcd::Address;
+    using schema_path_t = std::string;
+    using key_prefix_t  = std::string;
+    using listener_t    = aviso::ConfiguredListener;
+    using revision_t    = int64_t;
 
     struct Entry
     {
@@ -45,11 +46,8 @@ public:
     using notify_callback_t    = std::function<void(const aviso::ConfiguredListener&, const aviso::Notification&)>;
     using subscribe_callback_t = std::function<std::vector<ListenRequest>()>;
 
-    using schema_t = aviso::ListenerSchema;
-
-    ListenService(schema_t schema, notify_callback_t notify, subscribe_callback_t subscribe)
-        : schema_{schema},
-          executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
+    ListenService(notify_callback_t notify, subscribe_callback_t subscribe)
+        : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
           listeners_{},
           notify_{notify},
           subscribe_{subscribe} {};
@@ -79,7 +77,6 @@ private:
     static int load_default_polling_interval();
 
 private:
-    aviso::ListenerSchema schema_;
     aviso::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;
     storage_t listeners_;
 

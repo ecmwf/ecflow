@@ -60,9 +60,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
          R"(https://aviso-test-ecflow.ecmwf.int)",
          R"({ "event": "mars", "request": {"class": "od" } })"}};
 
-    aviso::ListenService service{listener_schema, notify, subscribe};
+    aviso::ListenService service{notify, subscribe};
     for (auto&& [path, address, listener_cfg] : aviso_attribute_cfgs) {
-        auto request = aviso::ListenRequest::make_listen_start(path, address, listener_cfg, 0);
+        auto request =
+            aviso::ListenRequest::make_listen_start(path, listener_cfg, address, listener_schema_location, 0);
         service.register_listener(request);
     }
 

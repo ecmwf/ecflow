@@ -15,11 +15,16 @@ struct Formatter<AvisoAttr, Stream>
     static void format(const AvisoAttr& item, Stream& output) {
         ecf::Indentor in;
         ecf::Indentor::indent(output);
-        output << "aviso ";
+        output << "aviso";
+        output << " --name ";
         output << item.name();
-        output << " ";
+        output << " --listener ";
         output << item.listener();
-        output << " ";
+        output << " --url ";
+        output << item.url();
+        output << " --schema ";
+        output << item.schema();
+        output << " --revision ";
         output << std::to_string(item.revision());
         output << '\n';
     }

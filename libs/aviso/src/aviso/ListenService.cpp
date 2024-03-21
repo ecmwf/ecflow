@@ -68,7 +68,7 @@ void ListenService::operator()(const std::chrono::system_clock::time_point& now)
 }
 
 void ListenService::register_listener(const ListenRequest& listen) {
-    auto listener = create_configured_listener(listen, schema_);
+    auto listener = create_configured_listener(listen);
     register_listener(listener);
 }
 

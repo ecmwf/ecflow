@@ -105,10 +105,8 @@ private:
 
 class AvisoRunner {
 public:
-    // TODO[MB]: Configuration should be loaded from a file; currently done lazily inside ListenerSchema::start
     AvisoRunner()
-        : running_{load_listener_schema_default(),
-                   [this](const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
+        : running_{[this](const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
                        AvisoRunner::notify(listener, notification);
                        this->server_->increment_job_generation_count();
                    },
@@ -120,8 +118,6 @@ public:
     void start() { running_.start(); };
     void stop() { running_.stop(); };
     void terminate() { running_.terminate(); };
-
-    static aviso::ListenerSchema load_listener_schema_default();
 
     static void notify(const aviso::ConfiguredListener& listener, const aviso::Notification& notification);
     static std::vector<aviso::ListenRequest> subscribe();
@@ -195,12 +191,6 @@ private:
 };
 
 using GlobalRegistry = Global<Registry>;
-
-inline aviso::ListenerSchema AvisoRunner::load_listener_schema_default() {
-    std::string listener_schema_location = "client/service_configuration/event_listener_schema.json";
-    auto listener_schema                 = aviso::ListenerSchema::load(listener_schema_location);
-    return listener_schema;
-}
 
 inline void AvisoRunner::notify(const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
     GlobalRegistry::instance()

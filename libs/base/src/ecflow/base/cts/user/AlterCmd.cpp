@@ -494,7 +494,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     node->addDay(DayAttr::create(name_));
                     break;
                 case AlterCmd::ADD_AVISO:
-                    node->addAviso(AvisoAttr(node.get(), name_, value_, 0));
+                    node->addAviso(AvisoAttr(node.get(), name_, value_, "url", "schema", 0));
                     break;
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
@@ -881,7 +881,7 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             break;
         case AlterCmd::ADD_AVISO: {
             // Create an Aviso to check if name is valid
-            AvisoAttr check(nullptr, name, value, 0);
+            AvisoAttr check(nullptr, name, value, "url", "schema", 0);
             break;
         }
         case AlterCmd::ADD_ZOMBIE:
@@ -1075,7 +1075,7 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
         }
         case AlterCmd::DEL_AVISO: {
             if (!name.empty()) {
-                AvisoAttr check(nullptr, name, "value", 0); // will throw if not valid
+                AvisoAttr check(nullptr, name, "value", "url", "schema", 0); // will throw if not valid
             }
             break;
         }

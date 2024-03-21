@@ -20,11 +20,13 @@
 
 namespace ecf {
 
-AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener, revision_t revision)
+AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener, url_t url, schema_t schema, revision_t revision)
     : parent_{parent},
-      path_{parent->absNodePath()},
+      parent_path_{parent->absNodePath()},
       name_{std::move(name)},
       listener_{std::move(listener)},
+      url_{std::move(url)},
+      schema_{std::move(schema)},
       revision_{revision} {
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
@@ -44,7 +46,7 @@ void AvisoAttr::set_revision(revision_t revision) {
 }
 
 std::string AvisoAttr::path() const {
-    std::string path = path_;
+    std::string path = parent_path_;
     path += ':';
     path += name_;
     return path;
@@ -102,17 +104,26 @@ void AvisoAttr::start() const {
 
     LOG(Log::DBG, Message("**** Subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
+    // Path -- the unique identifier of the Aviso listener
     std::string aviso_path = path();
-    std::string aviso_url;
-    auto found_aviso_url = parent_->findParentVariableValue("ECF_AVISO_URL", aviso_url);
 
-    if (!found_aviso_url) {
-        throw std::runtime_error("AvisoAttr::requeue: Could not find ECF_AVISO_URI for " + aviso_path);
+    // Listener -- the configuration for the Aviso listener
+    auto aviso_listener = listener_;
+    aviso_listener      = aviso_listener.substr(1, aviso_listener.size() - 2);
+
+    // URL -- the URL for the Aviso server
+    std::string aviso_url = url_;
+    parent_->variableSubstitution(aviso_url);
+    if (aviso_url.empty()) {
+        throw std::runtime_error("AvisoAttr::requeue: Invalid Aviso URL detected for " + aviso_path);
     }
 
-    auto cfg = listener_;
-    cfg      = cfg.substr(1, cfg.size() - 2);
-    return controller.subscribe(aviso::ListenRequest::make_listen_start(aviso_path, aviso_url, cfg, revision_));
+    // Schema -- the path to the Schema used to interpret the Aviso notifications
+    std::string aviso_schema = schema_;
+    parent_->variableSubstitution(aviso_schema);
+
+    return controller.subscribe(
+        aviso::ListenRequest::make_listen_start(aviso_path, aviso_listener, aviso_url, aviso_schema, revision_));
 }
 
 void AvisoAttr::finish() const {

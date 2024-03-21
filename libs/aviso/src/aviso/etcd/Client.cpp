@@ -66,7 +66,14 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
         return std::vector<std::pair<std::string, std::string>>{};
     }
 
-    auto response_body = json::parse(std::begin(result.value().body), std::end(result.value().body));
+    json response_body;
+    try {
+        response_body = json::parse(std::begin(result.value().body), std::end(result.value().body));
+    }
+    catch (const json::parse_error& e) {
+        ALOG(E, "Failed to parse response: " << e.what());
+        return std::vector<std::pair<std::string, std::string>>{};
+    }
 
     std::vector<std::pair<std::string, std::string>> entries;
 

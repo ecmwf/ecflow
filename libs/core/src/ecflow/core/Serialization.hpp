@@ -64,6 +64,8 @@ void save_as_string(std::string& outbound_data, const T& t) {
         oarchive(cereal::make_nvp(typeid(t).name(), t)); // Write the data to the archive
     }
     outbound_data = archive_stream.str();
+
+    std::cout << "*** save_as_string: " << outbound_data << "\n";
 }
 
 template <typename T>
