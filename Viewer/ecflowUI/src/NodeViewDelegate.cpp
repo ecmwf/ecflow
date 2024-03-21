@@ -10,8 +10,6 @@
 
 #include "NodeViewDelegate.hpp"
 
-#include <algorithm>
-
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
