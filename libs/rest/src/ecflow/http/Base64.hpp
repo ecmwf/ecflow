@@ -64,10 +64,11 @@ inline unsigned char* base64_decode(const unsigned char* src, size_t len, size_t
 
     memset(dtable, 0x80, 256);
     for (size_t i = 0; i < sizeof(base64_table) - 1; i++) {
-        dtable[base64_table[i]] = (unsigned char)i;
+        auto base64_char    = static_cast<size_t>(base64_table[i]);
+        dtable[base64_char] = (unsigned char)i;
     }
-    int assignment     = '=';
-    dtable[assignment] = 0;
+    size_t assignment_char  = '=';
+    dtable[assignment_char] = 0;
 
     size_t count = 0;
     for (size_t i = 0; i < len; i++) {
