@@ -8,16 +8,16 @@
 # nor does it submit to any jurisdiction.
 #
 
-# ENABLE_PYTHON_UNDEF_LOOKUP
-# on some systems (e.g. conda on macOS) the boost Python libraries seem to be too
-# closely linked with the exact version of the Python development libraries,
-# meaning that we get segfaults when we try to run a Python example. By removing
-# the Python libraries from the link line and adding -undefined dynamic_lookup
-# we can make our ecflow shared library more movable bewteen systems
-
-if (ENABLE_PYTHON_UNDEF_LOOKUP)
-  add_link_options(-undefined dynamic_lookup)
-endif()
+#
+#   Important!
+#
+# Notice that ecflow Python module is linked with `Python3::Module` CMake imported target,
+# to enable a loose linkage with Python development libraries -- this is necessary in some
+# platforms, such as conda-forge+macOS.
+#
+# In practice, this implies that `-undefined` and `-dynamic_lookup` linkage flags are used
+# and the Python development libraries are not linked directly into the ecflow Python module.
+#
 
 ecbuild_add_library(
   TARGET
@@ -35,7 +35,7 @@ ecbuild_add_library(
     node
     attributes
     core
-    Python3::Python
+    Python3::Module
     Boost::${ECFLOW_BOOST_PYTHON_COMPONENT}
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   CXXFLAGS
