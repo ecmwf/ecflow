@@ -181,12 +181,12 @@ DurationOut parse_duration(const std::string& d) {
     // Extract tail
     std::string tail = d.substr(found + 1, std::string::npos);
 
-    // Important!
-    // The whole duration has the same sign as the first component
-    // e.g. -23:59:59, is interpreted as (-23 hours) + (-59 minutes) + (-59 seconds) = -86399 seconds
-    int sign = value >= FirstDuration{0} ? 1 : -1;
-
     if constexpr (sizeof...(RestDurations) > 0) {
+        // Important!
+        // The whole duration has the same sign as the first component
+        // e.g. -23:59:59, is interpreted as (-23 hours) + (-59 minutes) + (-59 seconds) = -86399 seconds
+        int sign = value >= FirstDuration{0} ? 1 : -1;
+
         out = out + (sign)*parse_duration<DurationOut, RestDurations...>(tail);
     }
 

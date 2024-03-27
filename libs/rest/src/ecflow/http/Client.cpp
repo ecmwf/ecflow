@@ -31,8 +31,8 @@ const char* const ECF_PASS = getenv("ECF_PASS");
 
 bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
 
-    auto auth_with_token = [&](const std::string& token) {
 #ifdef ECF_OPENSSL
+    auto auth_with_token = [&](const std::string& token) {
         if (TokenStorage::instance().verify(token)) {
             if (ECF_USER != nullptr && ECF_PASS != nullptr) {
                 ci->set_user_name(std::string(ECF_USER));
@@ -40,9 +40,9 @@ bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
             }
             return true;
         }
-#endif
         return false;
     };
+#endif
 
     const auto& header = request.headers;
 

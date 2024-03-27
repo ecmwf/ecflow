@@ -177,6 +177,7 @@ ojson filter_json(const ojson& j, const httplib::Request& r) {
     // correct array element from root json element assuming it's an array
     if (path_elems.size() == 1 && path_elems[0][0] == '[' && path_elems[0][path_elems[0].size() - 1] == ']') {
         const auto [key, index] = get_array_info(path_elems[0]);
+        (void)key; // Note: suppress unused variable warning
         return j[index];
     }
 
