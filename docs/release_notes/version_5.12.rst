@@ -6,6 +6,16 @@ Version 5.12 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.12.4
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-03-XX
+
+ecFlow Client
+-------------
+
+- **Bug** corrected ecFlow Python3 module linkage (specific for conda-forge) :jiraissue:`ECFLOW-1950`
+
 
 Version 5.12.3
 ==============
