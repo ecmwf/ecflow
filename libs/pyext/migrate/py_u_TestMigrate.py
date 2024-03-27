@@ -22,7 +22,7 @@ def get_root_source_dir():
                 print("   Found Jamroot.jam in " + cwd)
                 return cwd
         
-        if tail != "Pyext" and tail != "migrate":
+        if tail != "pyext" and tail != "migrate":
             # in cmake, we may be in the build directory, hence we need to determine source directory
             file = cwd + "/CTestTestfile.cmake"
             #print("   searching for " + file)
@@ -59,7 +59,7 @@ class TestMigrate318(unittest.TestCase):
         pass
     
     def locate(self,file):
-        return self.workspace_dir + "/Pyext/" + file
+        return self.workspace_dir + "/libs/pyext/" + file
     
     def testMigrateVersionNumber(self):
         list_of_defs_lines =[ "# 3.1.2"]

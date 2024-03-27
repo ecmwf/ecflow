@@ -38,7 +38,7 @@ class TestConfluence(unittest.TestCase):
                 print("space key:",space_key," page id:",page_id)
 
         comment = "production release"
-        file = "/var/tmp/ma0/workspace/ecflow/Pyext/samples/test.tar.gz"
+        file = "/var/tmp/ma0/workspace/ecflow/libs/pyext/samples/test.tar.gz"
         for space_key in space_key_list:
             page_id = self.c.get_page_id(space_key,title) 
             
@@ -52,4 +52,3 @@ class TestConfluence(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
     print("All Tests pass")
-    

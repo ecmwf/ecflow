@@ -105,7 +105,7 @@ if __name__ == "__main__":
     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
     print(ARGS) 
     
-    # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
+    # If running on local work space, use /libs/pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
     if ARGS.verbose:
         print("Using ECF_HOME=" + ARGS.ecf_home)
          

@@ -42,7 +42,7 @@ def get_root_source_dir():
                 print("   Found Jamroot.jam in " + cwd)
                 return cwd
         
-        if tail != "Pyext" and tail != "migrate":
+        if tail != "pyext" and tail != "migrate":
             # in cmake, we may be in the build directory, hence we need to determine source directory
             file = cwd + "/CTestTestfile.cmake"
             #print "   searching for " + file
@@ -121,7 +121,7 @@ if __name__ == "__main__":
             This programs assumes that ecflow module is accessible
 
             example:
-                python Pyext/samples/TestBench.py --port=3141 --verbose=True ANode/parser/test/data/good_defs/trigger/late.def
+                python libs/pyext/samples/TestBench.py --port=3141 --verbose=True ANode/parser/test/data/good_defs/trigger/late.def
             """    
             
     print("####################################################################")
@@ -157,12 +157,12 @@ if __name__ == "__main__":
     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
     print(ARGS  )  
     
-    # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
+    # If running on local work space, use /libs/pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
     using_workspace = False;
     ecflow_source_dir = ""
     try:
         ecflow_source_dir = get_root_source_dir();
-        ARGS.ecf_home = ecflow_source_dir + "/Pyext/test/data/CUSTOMER/ECF_HOME"
+        ARGS.ecf_home = ecflow_source_dir + "/libs/pyext/test/data/CUSTOMER/ECF_HOME"
         using_workspace = True
         if ARGS.verbose:
             print("Workspace is defined ecflow_source_dir: ",ecflow_source_dir)

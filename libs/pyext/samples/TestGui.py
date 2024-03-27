@@ -58,7 +58,7 @@ class Tester(object) :
             return os.getcwd() + "/test_gui/data/ecf_home_debug_" + str(self.port_)
         return os.getcwd() + "/test_gui/data/ecf_home_release_" + str(self.port_)
 
-    def ecf_includes(self) :  return os.getcwd() + "/Pyext/test/data/includes"
+    def ecf_includes(self) :  return os.getcwd() + "/libs/pyext/test/data/includes"
     def log_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.log"
     def checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check"
     def backup_checkpt_file_path(self): return "./" + gethostname() + "." + self.port_ + ".ecf.check.b"
@@ -1449,7 +1449,7 @@ if __name__ == "__main__":
               This should allow GUI (1 second poll), to see the effects of this test.
               To debug this tests, just set sync_sleep = 0, this will also preserve the test data.
                  - Test data is created in directory: test_gui, this will deleted at the end of the test.
-                 - Assumes includes head.h and tail.h are in CWD + /Pyext/test/data/includes
+                 - Assumes includes head.h and tail.h are in CWD + /libs/pyext/test/data/includes
                  - We will look for the ecflow_client in the embedded child commands in the generated scripts, 
                    o first look in the current cmake build tree of the ecflow module(this may no longer exist)
                    o Next will use /usr/local/apps/ecflow/ with same version as this ecflow python api *IF* it exists
