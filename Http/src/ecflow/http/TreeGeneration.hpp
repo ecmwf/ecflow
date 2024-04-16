@@ -70,6 +70,7 @@ struct FullTree
         ojson& current = parent_[suite.name()] = ojson::object({});
 
         current["type"] = "suite";
+        current["path"] = suite.absNodePath();
         publish_state(suite, current);
         publish_attributes(suite, current);
 
@@ -84,6 +85,7 @@ struct FullTree
         ojson& current = parent_[family.name()] = ojson::object({});
 
         current["type"] = "family";
+        current["path"] = family.absNodePath();
         publish_state(family, current);
         publish_attributes(family, current);
 
@@ -98,6 +100,7 @@ struct FullTree
         ojson& current = parent_[task.name()] = ojson::object({});
 
         current["type"] = "task";
+        current["path"] = task.absNodePath();
         publish_state(task, current);
         publish_attributes(task, current);
 
@@ -113,6 +116,7 @@ struct FullTree
         stack_.push_back(&current);
 
         current["type"] = "alias";
+        current["path"] = alias.absNodePath();
         publish_state(alias, current);
         publish_attributes(alias, current);
     }
