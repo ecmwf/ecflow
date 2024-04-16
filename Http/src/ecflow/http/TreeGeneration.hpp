@@ -121,9 +121,7 @@ struct FullTree
         publish_attributes(alias, current);
     }
 
-    void end_visit(const Alias& alias [[maybe_unused]]) {
-        // Nothing to do...
-    }
+    void end_visit(const Alias& alias [[maybe_unused]]) { stack_.pop_back(); }
 
     const ojson& content() const { return root_; }
 
