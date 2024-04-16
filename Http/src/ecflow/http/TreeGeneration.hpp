@@ -227,6 +227,10 @@ private:
         for (const auto& attr : node.generics()) {
             array.emplace_back(publish_atribute(attr, "generic"));
         }
+
+        if (auto flag = node.get_flag(); flag.flag()) {
+            array.emplace_back(publish_atribute(flag, "flag"));
+        }
     }
 
 private:
