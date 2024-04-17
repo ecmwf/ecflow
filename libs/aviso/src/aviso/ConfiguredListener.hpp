@@ -31,8 +31,9 @@ public:
                                            std::string_view listener_cfg,
                                            std::string_view address,
                                            std::string_view schema,
+                                           uint32_t polling,
                                            uint64_t revision) {
-        return ListenRequest{true, path, listener_cfg, address, schema, revision};
+        return ListenRequest{true, path, listener_cfg, address, schema, polling, revision};
     }
 
     static ListenRequest make_listen_finish(std::string_view path) { return ListenRequest{false, path}; }
@@ -43,6 +44,7 @@ public:
     const std::string& listener_cfg() const { return listener_cfg_; }
     const std::string& address() const { return address_; }
     const std::string& schema() const { return schema_; }
+    uint32_t polling() const { return polling_; }
     uint64_t revision() const { return revision_; }
 
 private:
@@ -58,12 +60,14 @@ private:
                            std::string_view listener_cfg,
                            std::string_view address,
                            std::string_view schema,
+                           uint32_t polling,
                            uint64_t revision)
         : start_{start},
           path_{path},
           listener_cfg_{listener_cfg},
           address_{address},
           schema_{schema},
+          polling_{polling},
           revision_{revision} {}
 
     bool start_;
@@ -71,6 +75,7 @@ private:
     std::string listener_cfg_;
     std::string address_;
     std::string schema_;
+    uint32_t polling_;
     uint64_t revision_;
 };
 
@@ -113,11 +118,13 @@ public:
                        std::string_view name,
                        std::string_view base,
                        std::string_view stem,
+                       uint32_t polling,
                        uint64_t revision)
         : Listener(name, base, stem),
           path_{path},
           address_(std::move(address)),
           resolved_base_(base),
+          polling_{polling},
           revision_{revision} {}
 
     void with_parameter(const std::string& parameter, const std::string& value);
@@ -127,6 +134,7 @@ public:
     const std::string& path() const { return path_; }
     const etcd::Address& address() const { return address_; }
 
+    uint32_t polling() const { return polling_; }
     uint64_t revision() const { return revision_; }
     void update_revision(uint64_t revision) { revision_ = std::max(revision, revision_); }
 
@@ -146,6 +154,7 @@ private:
     std::string path_;
     etcd::Address address_;
     std::string resolved_base_;
+    uint32_t polling_;
     uint64_t revision_;
 
     using parameters_t = std::variant<std::string, std::int64_t, std::vector<std::string>>;

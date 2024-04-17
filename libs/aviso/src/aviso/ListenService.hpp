@@ -58,10 +58,15 @@ public:
     ListenService& operator=(const ListenService&) = delete;
 
     void start() {
-        auto expiry = load_default_polling_interval();
-        start(std::chrono::seconds{expiry});
+        std::uint32_t expiry = 40; // TODO: this value should be configured based on existing listeners
+                                   // Currently this is called before listeners are registered!
+        for (const auto& listener : listeners_) {
+            if (listener.listener().polling() > expiry) {
+                expiry = listener.listener().polling();
+            }
+        }
+        executor_.start(std::chrono::seconds{expiry});
     }
-    void start(std::chrono::seconds expiry) { executor_.start(expiry); }
 
     void stop() { executor_.stop(); }
     void terminate() { executor_.stop(); }
@@ -71,10 +76,6 @@ public:
     void register_listener(const ListenRequest& request);
     void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
-
-private:
-    static std::string load_cfg_location();
-    static int load_default_polling_interval();
 
 private:
     aviso::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;

@@ -24,6 +24,8 @@ struct Formatter<AvisoAttr, Stream>
         output << item.url();
         output << " --schema ";
         output << item.schema();
+        output << " --polling ";
+        output << item.polling();
         output << " --revision ";
         output << std::to_string(item.revision());
         output << '\n';

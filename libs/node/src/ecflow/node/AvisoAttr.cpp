@@ -20,13 +20,20 @@
 
 namespace ecf {
 
-AvisoAttr::AvisoAttr(Node* parent, name_t name, listener_t listener, url_t url, schema_t schema, revision_t revision)
+AvisoAttr::AvisoAttr(Node* parent,
+                     name_t name,
+                     listener_t listener,
+                     url_t url,
+                     schema_t schema,
+                     polling_t polling,
+                     revision_t revision)
     : parent_{parent},
       parent_path_{parent->absNodePath()},
       name_{std::move(name)},
       listener_{std::move(listener)},
       url_{std::move(url)},
       schema_{std::move(schema)},
+      polling_{std::move(polling)},
       revision_{revision} {
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
@@ -122,8 +129,15 @@ void AvisoAttr::start() const {
     std::string aviso_schema = schema_;
     parent_->variableSubstitution(aviso_schema);
 
-    return controller.subscribe(
-        aviso::ListenRequest::make_listen_start(aviso_path, aviso_listener, aviso_url, aviso_schema, revision_));
+    std::string aviso_polling = polling_;
+    parent_->variableSubstitution(aviso_polling);
+    if (aviso_polling.empty()) {
+        throw std::runtime_error("AvisoAttr::requeue: Invalid Aviso polling interval detected for " + aviso_path);
+    }
+    auto polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
+
+    return controller.subscribe(aviso::ListenRequest::make_listen_start(
+        aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_));
 }
 
 void AvisoAttr::finish() const {

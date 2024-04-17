@@ -48,6 +48,7 @@ auto parse_aviso_line(const std::string& line, Node* parent) {
     description.add_options()("listener", po::value<std::string>());
     description.add_options()("url", po::value<std::string>());
     description.add_options()("schema", po::value<std::string>());
+    description.add_options()("polling", po::value<std::string>()->default_value("40"));
     description.add_options()("revision", po::value<uint64_t>()->default_value(0));
 
     po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
@@ -56,13 +57,14 @@ auto parse_aviso_line(const std::string& line, Node* parent) {
     po::store(parsed_options, vm);
     po::notify(vm);
 
-    auto name        = get_option_value<ecf::AvisoAttr::name_t>(vm, "name", line);
-    auto listener    = get_option_value<ecf::AvisoAttr::listener_t>(vm, "listener", line);
-    auto url         = get_option_value<ecf::AvisoAttr::url_t>(vm, "url", line);
-    auto schema      = get_option_value<ecf::AvisoAttr::schema_t>(vm, "schema", line);
-    auto revision    = get_option_value<ecf::AvisoAttr::revision_t>(vm, "revision", line);
+    auto name     = get_option_value<ecf::AvisoAttr::name_t>(vm, "name", line);
+    auto listener = get_option_value<ecf::AvisoAttr::listener_t>(vm, "listener", line);
+    auto url      = get_option_value<ecf::AvisoAttr::url_t>(vm, "url", line);
+    auto schema   = get_option_value<ecf::AvisoAttr::schema_t>(vm, "schema", line);
+    auto polling  = get_option_value<ecf::AvisoAttr::polling_t>(vm, "polling", line);
+    auto revision = get_option_value<ecf::AvisoAttr::revision_t>(vm, "revision", line);
 
-    return ecf::AvisoAttr{parent, name, listener, url, schema, revision};
+    return ecf::AvisoAttr{parent, name, listener, url, schema, polling, revision};
 }
 
 } // namespace

@@ -91,27 +91,4 @@ void ListenService::unregister_listener(const std::string& unlisten_path) {
                      std::end(listeners_));
 }
 
-int ListenService::load_default_polling_interval() {
-    nlohmann::json json;
-    std::ifstream file(load_cfg_location());
-    if (file.is_open()) {
-        file >> json;
-        file.close();
-    }
-
-    int polling_interval = 20;
-    if (json.contains("polling_interval")) {
-        polling_interval = json["polling_interval"];
-        ALOG(I, "Aviso polling interval loaded from configuration file: " << polling_interval << "s");
-        return polling_interval;
-    }
-
-    ALOG(W, "Polling interval not found in configuration file. Using default value: " << polling_interval << "s");
-    return polling_interval;
-}
-
-std::string ListenService::load_cfg_location() {
-    return "ecf_aviso.json";
-}
-
 } // namespace aviso

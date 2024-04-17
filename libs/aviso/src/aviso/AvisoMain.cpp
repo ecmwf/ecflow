@@ -31,7 +31,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     std::string listener_schema_location =
         //        ".aviso/service_configuration/event_listener_schema.json";
         "client/service_configuration/event_listener_schema.json";
-    auto listener_schema = aviso::ListenerSchema::load(listener_schema_location);
+//    auto listener_schema = aviso::ListenerSchema::load(listener_schema_location);
 
     // Aviso configuration (provided in .def file)
     std::vector<std::tuple<std::string, std::string, std::string>> aviso_attribute_cfgs = {
@@ -63,11 +63,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     aviso::ListenService service{notify, subscribe};
     for (auto&& [path, address, listener_cfg] : aviso_attribute_cfgs) {
         auto request =
-            aviso::ListenRequest::make_listen_start(path, listener_cfg, address, listener_schema_location, 0);
+            aviso::ListenRequest::make_listen_start(path, listener_cfg, address, listener_schema_location, 15, 0);
         service.register_listener(request);
     }
 
-    service.start(std::chrono::seconds{15});
+    service.start();
 
     std::this_thread::sleep_for(std::chrono::seconds(600));
 

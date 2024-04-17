@@ -42,7 +42,8 @@ private:
         ListenerIndex = 2,
         UrlIndex      = 3,
         SchemaIndex   = 4,
-        RevisionIndex = 5
+        PollingIndex  = 5,
+        RevisionIndex = 6
     };
 };
 

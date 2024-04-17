@@ -19,11 +19,12 @@
 //================================
 
 VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
-    dataCount_                         = 6;
+    dataCount_                         = 7;
     searchKeyToData_["aviso_name"]     = NameIndex;
     searchKeyToData_["aviso_handle"]   = ListenerIndex;
     searchKeyToData_["aviso_url"]      = UrlIndex;
     searchKeyToData_["aviso_schema"]   = SchemaIndex;
+    searchKeyToData_["aviso_polling"]  = PollingIndex;
     searchKeyToData_["aviso_revision"] = RevisionIndex;
     scanProc_                          = VAvisoAttr::scan;
 }
@@ -35,6 +36,7 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
         t += "<b>Listener:</b> " + d[ListenerIndex] + "<br>";
         t += "<b>URL:</b> " + d[UrlIndex] + "<br>";
         t += "<b>Schema:</b> " + d[SchemaIndex] + "<br>";
+        t += "<b>Polling:</b> " + d[PollingIndex] + " s<br>";
         t += "<b>Revision:</b> " + d[RevisionIndex];
     }
     return t;
@@ -58,12 +60,13 @@ void VAvisoAttrType::encode(const ecf::AvisoAttr& aviso, QStringList& data, bool
         }
     }
 
-    data << qName_                                 // TypeIndex
-         << QString::fromStdString(aviso.name())   // NameIndex
-         << QString::fromStdString(val)            // ListenerIndex
-         << QString::fromStdString(aviso.url())    // UrlIndex
-         << QString::fromStdString(aviso.schema()) // SchemaIndex
-         << QString::number(aviso.revision());     // Revision Index
+    data << qName_                                  // TypeIndex
+         << QString::fromStdString(aviso.name())    // NameIndex
+         << QString::fromStdString(val)             // ListenerIndex
+         << QString::fromStdString(aviso.url())     // UrlIndex
+         << QString::fromStdString(aviso.schema())  // SchemaIndex
+         << QString::fromStdString(aviso.polling()) // PollingIndex
+         << QString::number(aviso.revision());      // Revision Index
 }
 
 void VAvisoAttrType::encode_empty(QStringList& data) const {

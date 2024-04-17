@@ -42,6 +42,7 @@ public:
     using listener_t = std::string;
     using url_t      = std::string;
     using schema_t   = std::string;
+    using polling_t  = std::string;
     using revision_t = std::uint64_t;
 
     /**
@@ -51,16 +52,23 @@ public:
      *       Cereal invokes the default ctor to create the object and only then proceeds to member-wise serialization.
      */
     AvisoAttr() = default;
-    AvisoAttr(Node* parent, name_t name, listener_t handle, url_t url, schema_t schema, revision_t revision);
+    AvisoAttr(Node* parent,
+              name_t name,
+              listener_t handle,
+              url_t url,
+              schema_t schema,
+              polling_t polling,
+              revision_t revision);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
 
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& listener() const { return listener_; }
-    [[nodiscard]] revision_t revision() const { return revision_; }
     [[nodiscard]] inline const std::string& url() const { return url_; }
     [[nodiscard]] inline const std::string& schema() const { return schema_; }
+    [[nodiscard]] inline polling_t polling() const { return polling_; }
+    [[nodiscard]] inline revision_t revision() const { return revision_; }
     [[nodiscard]] path_t path() const;
 
     void set_listener(std::string_view listener);
@@ -87,6 +95,7 @@ private:
     listener_t listener_;
     url_t url_;
     schema_t schema_;
+    polling_t polling_;
 
     // The following are mutable as they are modified by the const method isFree()
     mutable revision_t revision_;
@@ -100,6 +109,7 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
     ar & aviso.listener_;
     ar & aviso.url_;
     ar & aviso.schema_;
+    ar & aviso.polling_;
     ar & aviso.revision_;
 }
 

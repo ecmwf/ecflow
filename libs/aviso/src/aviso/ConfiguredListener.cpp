@@ -175,6 +175,7 @@ ConfiguredListener create_configured_listener(const ListenRequest& listen_reques
     std::string address = listen_request.address();
     std::string path    = listen_request.path();
     std::string event   = data["event"];
+    uint32_t polling    = listen_request.polling();
     uint64_t revision   = listen_request.revision();
 
     const auto& listener = schema.get_listener(event);
@@ -183,7 +184,7 @@ ConfiguredListener create_configured_listener(const ListenRequest& listen_reques
     }
 
     ConfiguredListener configured{
-        etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), revision};
+        etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
 
     ALOG(I,
          "Listener configures with: " << path << " for " << event << " at " << address << " with revision "
