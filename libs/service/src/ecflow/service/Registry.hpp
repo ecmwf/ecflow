@@ -22,6 +22,22 @@
 
 namespace ecf::service {
 
+class TheOneServer {
+public:
+    static void set_server(AbstractServer& server) { TheOneServer::instance().server_ = &server; }
+    static AbstractServer& server() { return *TheOneServer::instance().server_; }
+
+private:
+    TheOneServer() = default;
+
+    static TheOneServer& instance() {
+        static TheOneServer the_one_server;
+        return the_one_server;
+    }
+
+    AbstractServer* server_ = nullptr;
+};
+
 struct NotificationPackage
 {
     std::string path;
@@ -105,101 +121,37 @@ private:
 
 class AvisoRunner {
 public:
-    AvisoRunner()
+    AvisoRunner(AvisoController& controller)
         : running_{[this](const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
-                       AvisoRunner::notify(listener, notification);
-                       this->server_->increment_job_generation_count();
+                       AvisoRunner::notify(this->controller_, listener, notification);
+                       // The following is a hack to force the server to increment the job generation count
+                       TheOneServer::server().increment_job_generation_count();
                    },
-                   AvisoRunner::subscribe},
-          server_{nullptr} {};
-
-    void set_server(AbstractServer* server) { server_ = server; };
+                   [this]() { return AvisoRunner::subscribe(this->controller_); }},
+          controller_{controller} {};
 
     void start() { running_.start(); };
     void stop() { running_.stop(); };
     void terminate() { running_.terminate(); };
 
-    static void notify(const aviso::ConfiguredListener& listener, const aviso::Notification& notification);
-    static std::vector<aviso::ListenRequest> subscribe();
+    static void notify(AvisoController& controller,
+                       const aviso::ConfiguredListener& listener,
+                       const aviso::Notification& notification);
+    static std::vector<aviso::ListenRequest> subscribe(AvisoController& controller);
 
 private:
     aviso::ListenService running_;
-    AbstractServer* server_;
+    AvisoController& controller_;
 };
 
-class BaseRegistry {
-public:
-    using name_t = std::string;
-
-    BaseRegistry() : controller_{}, runner_{} {};
-    BaseRegistry(const BaseRegistry&)            = delete;
-    BaseRegistry(BaseRegistry&&)                 = delete;
-    BaseRegistry& operator=(const BaseRegistry&) = delete;
-    BaseRegistry& operator=(BaseRegistry&&)      = delete;
-    ~BaseRegistry()                              = default;
-
-    template <typename Service>
-    Service& register_service(std::string_view name);
-
-    template <typename Service>
-    Service& get_service(std::string_view name);
-
-private:
-    AvisoController controller_;
-    AvisoRunner runner_;
-};
-
-template <>
-inline AvisoController& BaseRegistry::register_service<AvisoController>(std::string_view name [[maybe_unused]]) {
-    // Nothing to register, actually...
-    return controller_;
+inline void AvisoRunner::notify(AvisoController& controller,
+                                const aviso::ConfiguredListener& listener,
+                                const aviso::Notification& notification) {
+    controller.notify(NotificationPackage{listener.path(), listener, notification});
 }
 
-template <>
-inline AvisoRunner& BaseRegistry::register_service<AvisoRunner>(std::string_view name [[maybe_unused]]) {
-    // Nothing to register, actually...
-    return runner_;
-}
-
-template <>
-inline AvisoController& BaseRegistry::get_service<AvisoController>(std::string_view name [[maybe_unused]]) {
-    return controller_;
-}
-
-template <>
-inline AvisoRunner& BaseRegistry::get_service<AvisoRunner>(std::string_view name [[maybe_unused]]) {
-    return runner_;
-}
-
-using Registry = BaseRegistry;
-
-///
-/// \brief Global manages a \a service object
-///
-/// \tparam T the type of the \a service object
-///
-template <typename T>
-struct Global
-{
-    static T& instance() {
-        static T instance;
-        return instance;
-    }
-
-private:
-    Global() = default;
-};
-
-using GlobalRegistry = Global<Registry>;
-
-inline void AvisoRunner::notify(const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
-    GlobalRegistry::instance()
-        .get_service<AvisoController>("aviso_controller")
-        .notify(NotificationPackage{listener.path(), listener, notification});
-}
-
-inline std::vector<aviso::ListenRequest> AvisoRunner::subscribe() {
-    return GlobalRegistry::instance().get_service<AvisoController>("aviso_controller").get_subscriptions();
+inline std::vector<aviso::ListenRequest> AvisoRunner::subscribe(AvisoController& controller) {
+    return controller.get_subscriptions();
 }
 
 } // namespace ecf::service

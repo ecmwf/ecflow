@@ -53,9 +53,7 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
     signals_.add(SIGTERM);
     signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler(); });
 
-    ecf::service::GlobalRegistry::instance().register_service<ecf::service::AvisoController>("aviso.controller");
-    ecf::service::GlobalRegistry::instance().register_service<ecf::service::AvisoRunner>("aviso.runner");
-    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso-runner").set_server(this);
+    ecf::service::TheOneServer::set_server(*this);
 
     // Update stats, this is returned via --stats command option
     stats().host_                    = serverEnv.hostPort().first;
@@ -118,7 +116,6 @@ void BaseServer::handle_terminate() {
 
     // Cancel async timers for check pointing and traversal
     traverser_.terminate();
-    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso-runner").terminate();
     checkPtSaver_.terminate();
 }
 
@@ -329,8 +326,6 @@ void BaseServer::shutdown() {
     // to check point.
     traverser_.stop();
 
-    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso.runner").stop();
-
     // Continue check pointing since, we allow tasks communication. This can change node
     // tree state. Which we *must* be able to checkpoint.
     // If we go from HALTED --> SHUTDOWN, then check pointing  needs to be enabled
@@ -352,8 +347,6 @@ void BaseServer::halted() {
 
     // Stop server from creating new jobs. i.e Job scheduling.
     traverser_.stop();
-
-    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso.runner").stop();
 
     // *** CRITICAL*** when the server is halted, we ***MUST NOT*** do any further check pointing
     // In a typical operational scenario where we have a home, and backup servers.
@@ -385,7 +378,6 @@ void BaseServer::restart() {
     set_server_state(SState::RUNNING);
 
     traverser_.start();
-    ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoRunner>("aviso.runner").start();
     checkPtSaver_.start();
 }
 

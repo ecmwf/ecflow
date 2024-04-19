@@ -187,7 +187,7 @@ ConfiguredListener create_configured_listener(const ListenRequest& listen_reques
         etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
 
     ALOG(I,
-         "Listener configures with: " << path << " for " << event << " at " << address << " with revision "
+         "Listener configured with: " << path << " for " << event << " at " << address << " with revision "
                                       << revision);
 
     auto request = data["request"];

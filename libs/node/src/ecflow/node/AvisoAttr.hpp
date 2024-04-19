@@ -17,6 +17,7 @@
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/service/Registry.hpp"
 
 namespace cereal {
 class access;
@@ -100,6 +101,11 @@ private:
     // The following are mutable as they are modified by the const method isFree()
     mutable revision_t revision_;
     mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+
+    // The controller is only instanciated between start() and finish() calls
+    // This allows the AvisoAttr have a copy-ctor and assignment operator
+    mutable std::shared_ptr<ecf::service::AvisoController> controller_;
+    mutable std::shared_ptr<ecf::service::AvisoRunner> runner_;
 };
 
 template <class Archive>

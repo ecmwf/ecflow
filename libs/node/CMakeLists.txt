@@ -178,6 +178,7 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     attributes
+    ecflow_service
 )
 target_clangformat(node)
 

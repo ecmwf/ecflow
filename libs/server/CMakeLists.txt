@@ -48,9 +48,7 @@ ecbuild_add_library(
     src
   PUBLIC_LIBS
     base
-    ecflow_service
     Boost::boost # Boost header-only libraries must be available (namely asio)
-    nlohmann::json
 )
 target_clangformat(libserver)
 

@@ -57,16 +57,7 @@ public:
 
     ListenService& operator=(const ListenService&) = delete;
 
-    void start() {
-        std::uint32_t expiry = 40; // TODO: this value should be configured based on existing listeners
-                                   // Currently this is called before listeners are registered!
-        for (const auto& listener : listeners_) {
-            if (listener.listener().polling() > expiry) {
-                expiry = listener.listener().polling();
-            }
-        }
-        executor_.start(std::chrono::seconds{expiry});
-    }
+    void start();
 
     void stop() { executor_.stop(); }
     void terminate() { executor_.stop(); }

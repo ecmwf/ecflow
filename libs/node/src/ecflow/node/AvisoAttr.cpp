@@ -34,7 +34,9 @@ AvisoAttr::AvisoAttr(Node* parent,
       url_{std::move(url)},
       schema_{std::move(schema)},
       polling_{std::move(polling)},
-      revision_{revision} {
+      revision_{revision},
+      controller_{nullptr},
+      runner_{nullptr} {
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
     }
@@ -73,16 +75,16 @@ void AvisoAttr::reset() {
 }
 
 bool AvisoAttr::isFree() const {
-    using namespace ecf;
-    auto& controller =
-        ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoController>("controller");
-
     std::string aviso_path = path();
 
     LOG(Log::MSG, "**** Check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ")");
 
+    if (controller_ == nullptr) {
+        return false;
+    }
+
     // Task associated with Attribute is free when any notification is found
-    auto notifications = controller.poll_notifications(aviso_path);
+    auto notifications = controller_->poll_notifications(aviso_path);
 
     if (notifications.empty()) {
         // No notifications, nothing to do -- task continues to wait
@@ -105,10 +107,6 @@ bool AvisoAttr::isFree() const {
 }
 
 void AvisoAttr::start() const {
-    using namespace ecf;
-    auto& controller =
-        ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoController>("controller");
-
     LOG(Log::DBG, Message("**** Subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     // Path -- the unique identifier of the Aviso listener
@@ -136,19 +134,27 @@ void AvisoAttr::start() const {
     }
     auto polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
 
-    return controller.subscribe(aviso::ListenRequest::make_listen_start(
+    // Controller -- start up the Aviso controller
+    controller_ = std::make_shared<ecf::service::AvisoController>();
+    controller_->subscribe(aviso::ListenRequest::make_listen_start(
         aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_));
+    // Runner -- start up the Aviso runner, and thus effectively start the Aviso listener
+    // n.b. this must be done after subscribing in the controller, so that the polling interval is set
+    runner_ = std::make_shared<ecf::service::AvisoRunner>(*controller_);
+    runner_->start();
 }
 
 void AvisoAttr::finish() const {
     using namespace ecf;
-    auto& controller =
-        ecf::service::GlobalRegistry::instance().get_service<ecf::service::AvisoController>("controller");
-
     LOG(Log::DBG, Message("**** Unsubscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     std::string aviso_path = path();
-    return controller.unsubscribe(aviso::ListenRequest::make_listen_finish(aviso_path));
+    controller_->unsubscribe(aviso::ListenRequest::make_listen_finish(aviso_path));
+
+    // Controller -- shutdown up the Aviso controller
+    runner_->stop();
+    runner_     = nullptr;
+    controller_ = nullptr;
 }
 
 } // namespace ecf

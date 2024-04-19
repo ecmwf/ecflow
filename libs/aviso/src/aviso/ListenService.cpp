@@ -22,6 +22,36 @@
 
 namespace aviso {
 
+void ListenService::start() {
+
+    // Update list of listeners
+
+    auto new_subscriptions = subscribe_();
+    for (auto&& subscription : new_subscriptions) {
+        if (subscription.is_start()) {
+            register_listener(subscription);
+        }
+        else {
+            unregister_listener(subscription.path());
+        }
+    }
+
+    // Start polling...
+
+    std::uint32_t expiry = 40;
+
+    if (!listeners_.empty()) {
+        std::vector<std::uint32_t> polling_intervals;
+        auto found = std::max_element(std::begin(listeners_), std::end(listeners_), [](const auto& a, const auto& b) {
+            return a.listener().polling() < b.listener().polling();
+        });
+        expiry     = found->listener().polling();
+    }
+
+    ALOG(D, "Start polling, with polling interval: " << expiry << " s");
+    executor_.start(std::chrono::seconds{expiry});
+}
+
 void ListenService::operator()(const std::chrono::system_clock::time_point& now) {
 
     // Update list of listeners
