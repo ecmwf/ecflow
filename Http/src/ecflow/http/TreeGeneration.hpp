@@ -63,14 +63,16 @@ private:
 
 struct FullTree
 {
-    FullTree() : root_(ojson::object({})), stack_{&root_} {}
+    FullTree(bool with_id) : root_(ojson::object({})), stack_{&root_}, with_id_{with_id} {}
 
     void begin_visit(const Suite& suite) {
         ojson& parent_ = *stack_.back();
         ojson& current = parent_[suite.name()] = ojson::object({});
 
         current["type"] = "suite";
-        current["path"] = suite.absNodePath();
+        if (with_id_) {
+            current["id"] = suite.absNodePath();
+        }
         publish_state(suite, current);
         publish_attributes(suite, current);
 
@@ -85,7 +87,9 @@ struct FullTree
         ojson& current = parent_[family.name()] = ojson::object({});
 
         current["type"] = "family";
-        current["path"] = family.absNodePath();
+        if (with_id_) {
+            current["id"] = family.absNodePath();
+        }
         publish_state(family, current);
         publish_attributes(family, current);
 
@@ -100,7 +104,9 @@ struct FullTree
         ojson& current = parent_[task.name()] = ojson::object({});
 
         current["type"] = "task";
-        current["path"] = task.absNodePath();
+        if (with_id_) {
+            current["id"] = task.absNodePath();
+        }
         publish_state(task, current);
         publish_attributes(task, current);
 
@@ -116,7 +122,9 @@ struct FullTree
         stack_.push_back(&current);
 
         current["type"] = "alias";
-        current["path"] = alias.absNodePath();
+        if (with_id_) {
+            current["id"] = alias.absNodePath();
+        }
         publish_state(alias, current);
         publish_attributes(alias, current);
     }
@@ -236,6 +244,7 @@ private:
 private:
     ojson root_;
     std::vector<ojson*> stack_;
+    bool with_id_;
 };
 
 } // namespace ecf::http
