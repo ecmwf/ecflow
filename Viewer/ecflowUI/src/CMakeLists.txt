@@ -236,6 +236,7 @@ set(viewer_srcs
   VLimitAttr.hpp
   VLimiterAttr.hpp
   VMeterAttr.hpp
+  VMirrorAttr.hpp
   VModelData.hpp
   VNState.hpp
   VNode.hpp
@@ -512,6 +513,7 @@ set(viewer_srcs
   VLimitAttr.cpp
   VLimiterAttr.cpp
   VMeterAttr.cpp
+  VMirrorAttr.cpp
   VModelData.cpp
   VNode.cpp
   VNodeList.cpp

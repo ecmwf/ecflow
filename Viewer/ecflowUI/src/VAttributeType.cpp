@@ -154,15 +154,16 @@ static SimpleLoader<VAttributeType> loader("attribute");
 #include "VAutoArchiveAttr.hpp"
 #include "VAutoCancelAttr.hpp"
 #include "VAutoRestoreAttr.hpp"
+#include "VAvisoAttr.hpp"
 #include "VDateAttr.hpp"
 #include "VEventAttr.hpp"
-#include "VAvisoAttr.hpp"
 #include "VGenVarAttr.hpp"
 #include "VLabelAttr.hpp"
 #include "VLateAttr.hpp"
 #include "VLimitAttr.hpp"
 #include "VLimiterAttr.hpp"
 #include "VMeterAttr.hpp"
+#include "VMirrorAttr.hpp"
 #include "VQueueAttr.hpp"
 #include "VRepeatAttr.hpp"
 #include "VTimeAttr.hpp"
@@ -173,6 +174,7 @@ static VLabelAttrType labelAttrType;
 static VMeterAttrType meterAttType;
 static VEventAttrType eventAttrType;
 static VAvisoAttrType avisoAttrType;
+static VMirrorAttrType mirrorAttrType;
 static VLimitAttrType limitAttrType;
 static VLimiterAttrType limiterAttrType;
 static VRepeatAttrType repeatAttrType;

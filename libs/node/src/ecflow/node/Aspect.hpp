@@ -54,7 +54,8 @@ public:
         QUEUE,
         QUEUE_INDEX,
         GENERIC,
-        AVISO
+        AVISO,
+        MIRROR
     };
 
     // Disable default construction

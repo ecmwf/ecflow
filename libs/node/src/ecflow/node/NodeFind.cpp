@@ -15,6 +15,7 @@
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
 
@@ -324,6 +325,11 @@ const Label& Node::find_label(const std::string& name) const {
 bool Node::findAviso(const std::string& name) const {
     auto found = ecf::algorithm::find_by_name(avisos_, name);
     return found != std::end(avisos_);
+}
+
+bool Node::findMirror(const std::string& name) const {
+    auto found = ecf::algorithm::find_by_name(mirrors_, name);
+    return found != std::end(mirrors_);
 }
 
 bool Node::findVerify(const VerifyAttr& v) const {

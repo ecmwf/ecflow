@@ -38,6 +38,7 @@
 #include "ecflow/node/parser/LateParser.hpp"
 #include "ecflow/node/parser/LimitParser.hpp"
 #include "ecflow/node/parser/MeterParser.hpp"
+#include "ecflow/node/parser/MirrorParser.hpp"
 #include "ecflow/node/parser/QueueParser.hpp"
 #include "ecflow/node/parser/RepeatParser.hpp"
 #include "ecflow/node/parser/TimeParser.hpp"
@@ -85,6 +86,7 @@ public:
         addParser(new QueueParser(p));
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -176,6 +178,7 @@ public:
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -274,6 +277,7 @@ public:
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -392,6 +396,7 @@ public:
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
         addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {

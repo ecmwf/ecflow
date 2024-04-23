@@ -18,6 +18,7 @@
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
@@ -169,6 +170,7 @@ void Node::changeAviso(const std::string& name, const std::string& value) {
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
+    // TODO[MB]: Update the applicable aviso attribute
     found->set_listener(value);
 }
 
@@ -179,8 +181,19 @@ void Node::changeAviso(const std::string& name, const std::string& value, uint64
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
+    // TODO[MB]: Update the applicable aviso attribute
     found->set_listener(value);
     found->set_revision(revision);
+}
+
+void Node::changeMirror(const std::string& name, const std::string& value) {
+    auto found = ecf::algorithm::find_by_name(mirrors_, name);
+
+    if (found == std::end(mirrors_)) {
+        throw std::runtime_error("Node::changeMirror: Could not find mirror " + name);
+    }
+
+    // TODO[MB]: Update the applicable mirror attribute
 }
 
 void Node::changeTrigger(const std::string& expression) {

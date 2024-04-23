@@ -39,6 +39,7 @@ set(srcs
   src/ecflow/node/Limit.hpp
   src/ecflow/node/LimitFwd.hpp
   src/ecflow/node/Memento.hpp
+  src/ecflow/node/MirrorAttr.hpp
   src/ecflow/node/MiscAttrs.hpp
   src/ecflow/node/Node.hpp
   src/ecflow/node/NodeContainer.hpp
@@ -59,6 +60,7 @@ set(srcs
   src/ecflow/node/formatter/AvisoFormatter.hpp
   src/ecflow/node/formatter/Format.hpp
   src/ecflow/node/formatter/Formatter.hpp
+  src/ecflow/node/formatter/MirrorFormatter.hpp
   src/ecflow/node/parser/AutoArchiveParser.hpp
   src/ecflow/node/parser/AutoCancelParser.hpp
   src/ecflow/node/parser/AutoRestoreParser.hpp
@@ -80,6 +82,7 @@ set(srcs
   src/ecflow/node/parser/LateParser.hpp
   src/ecflow/node/parser/LimitParser.hpp
   src/ecflow/node/parser/MeterParser.hpp
+  src/ecflow/node/parser/MirrorParser.cpp
   src/ecflow/node/parser/Parser.hpp
   src/ecflow/node/parser/QueueParser.hpp
   src/ecflow/node/parser/RepeatParser.hpp
@@ -115,6 +118,7 @@ set(srcs
   src/ecflow/node/JobsParam.cpp
   src/ecflow/node/Limit.cpp
   src/ecflow/node/Memento.cpp
+  src/ecflow/node/MirrorAttr.cpp
   src/ecflow/node/MiscAttrs.cpp
   src/ecflow/node/Node.cpp
   src/ecflow/node/NodeAdd.cpp
@@ -156,6 +160,7 @@ set(srcs
   src/ecflow/node/parser/LateParser.cpp
   src/ecflow/node/parser/LimitParser.cpp
   src/ecflow/node/parser/MeterParser.cpp
+  src/ecflow/node/parser/MirrorParser.cpp
   src/ecflow/node/parser/Parser.cpp
   src/ecflow/node/parser/QueueParser.cpp
   src/ecflow/node/parser/RepeatParser.cpp

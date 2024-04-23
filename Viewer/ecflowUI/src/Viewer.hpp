@@ -32,6 +32,7 @@ enum AttributeType {
     MeterAttribute,
     EventAttribute,
     AvisoAttribute,
+    MirrorAttribute,
     RepeatAttribute,
     TimeAttribute,
     DateAttribute,

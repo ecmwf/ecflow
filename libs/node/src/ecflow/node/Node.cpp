@@ -32,6 +32,7 @@
 #include "ecflow/node/ExprAstVisitor.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -286,6 +287,10 @@ void Node::begin() {
         for (auto& aviso : avisos_) {
             aviso.reset();
         }
+    }
+
+    for (auto& mirror : mirrors_) {
+        mirror.reset();
     }
 
     inLimitMgr_.reset(); // new to 5.0.0 clear inlimit.incremented() flag
@@ -1786,6 +1791,9 @@ void Node::print(std::string& os) const {
     for (const AvisoAttr& a : avisos_) {
         ecf::format_as_defs(a, os);
     }
+    for (const MirrorAttr& m : mirrors_) {
+        ecf::format_as_defs(m, os);
+    }
 
     if (auto_cancel_)
         auto_cancel_->print(os);
@@ -2361,6 +2369,13 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
                 why_found = true;
             }
         }
+        for (const auto& mirror : mirrors_) {
+            postFix.clear();
+            if (mirror.why(postFix)) {
+                vec.push_back(prefix + postFix);
+                why_found = true;
+            }
+        }
     }
 
     // **************************************************************************************
@@ -2898,10 +2913,11 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, c_expr_, [this]() { return c_expr_.get(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, t_expr_, [this]() { return t_expr_.get(); }); // conditionally save
 
-    CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); }); // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); }); // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); }); // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, avisos_, [this]() { return !avisos_.empty(); }); // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); });  // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); });  // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); });  // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, avisos_, [this]() { return !avisos_.empty(); });  // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, mirrors_, [this]() { return !mirrors_.empty(); }); // conditionally save
 
     CEREAL_OPTIONAL_NVP(ar, times_, [this]() { return !times_.empty(); });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, todays_, [this]() { return !todays_.empty(); }); // conditionally save

@@ -44,6 +44,7 @@
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Family.hpp"
@@ -663,6 +664,24 @@ private:
     }
 
     ecf::AvisoAttr aviso_;
+    friend class Node;
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
+};
+
+class NodeMirrorMemento : public Memento {
+public:
+    NodeMirrorMemento() = default;
+    explicit NodeMirrorMemento(const ecf::MirrorAttr& a) : mirror_(a) {}
+
+private:
+    void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
+        n->set_memento(this, aspects, f);
+    }
+
+    ecf::MirrorAttr mirror_;
     friend class Node;
 
     friend class cereal::access;

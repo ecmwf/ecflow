@@ -58,6 +58,7 @@ class Calendar;
 class NodeTreeVisitor;
 class LateAttr;
 class AvisoAttr;
+class MirrorAttr;
 } // namespace ecf
 
 class Node : public std::enable_shared_from_this<Node> {
@@ -394,6 +395,7 @@ public:
     const std::vector<DayAttr>& days() const { return days_; }
     const std::vector<ecf::CronAttr>& crons() const { return crons_; }
     const std::vector<ecf::AvisoAttr>& avisos() const { return avisos_; }
+    const std::vector<ecf::MirrorAttr>& mirrors() const { return mirrors_; }
 
     const std::vector<VerifyAttr>& verifys() const;
     const std::vector<ZombieAttr>& zombies() const;
@@ -459,6 +461,7 @@ public:
     void addDay(const DayAttr&);
     void addCron(const ecf::CronAttr&);
     void addAviso(const ecf::AvisoAttr&);
+    void addMirror(const ecf::MirrorAttr&);
 
     void addLimit(const Limit&, bool check = true);       // will throw std::runtime_error if duplicate
     void addInLimit(const InLimit& l, bool check = true); // will throw std::runtime_error if duplicate
@@ -511,6 +514,7 @@ public:
     void deleteMeter(const std::string& name);
     void deleteLabel(const std::string& name);
     void deleteAviso(const std::string& name);
+    void deleteMirror(const std::string& name);
     void delete_queue(const std::string& name);
     void delete_generic(const std::string& name);
     void deleteTrigger();
@@ -535,6 +539,7 @@ public:
     void changeLabel(const std::string& name, const std::string& value);
     void changeAviso(const std::string& name, const std::string& value);
     void changeAviso(const std::string& name, const std::string& value, uint64_t revision);
+    void changeMirror(const std::string& name, const std::string& value);
     void changeTrigger(const std::string& expression);
     void changeComplete(const std::string& expression);
     void changeRepeat(const std::string& value);
@@ -564,6 +569,7 @@ public:
     void set_memento(const NodeMeterMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeLabelMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeAvisoMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
+    void set_memento(const NodeMirrorMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeQueueMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeGenericMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeQueueIndexMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
@@ -634,6 +640,7 @@ public:
     bool findLabel(const std::string& name) const;
     const Label& find_label(const std::string& name) const;
     bool findAviso(const std::string& name) const;
+    bool findMirror(const std::string& name) const;
     const QueueAttr& find_queue(const std::string& name) const;
     QueueAttr& findQueue(const std::string& name);
     const GenericAttr& find_generic(const std::string& name) const;
@@ -889,6 +896,7 @@ private:
     std::vector<Event> events_;
     std::vector<Label> labels_;
     std::vector<ecf::AvisoAttr> avisos_;
+    std::vector<ecf::MirrorAttr> mirrors_;
 
     std::vector<ecf::TimeAttr> times_;
     std::vector<ecf::TodayAttr> todays_;

@@ -442,6 +442,28 @@ void Node::set_memento(const NodeAvisoMemento* memento, std::vector<ecf::Aspect:
     addAviso(memento->aviso_);
 }
 
+void Node::set_memento(const NodeMirrorMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
+
+#ifdef DEBUG_MEMENTO
+    std::cout << "Node::set_memento(const NodeMirrorMemento* memento) " << debugNodePath() << "\n";
+#endif
+
+    if (aspect_only) {
+        // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+        aspects.push_back(ecf::Aspect::MIRROR);
+        return;
+    }
+
+    size_t theSize = mirrors_.size();
+    for (size_t i = 0; i < theSize; i++) {
+        if (mirrors_[i].name() == memento->mirror_.name()) {
+            mirrors_[i] = memento->mirror_;
+            return;
+        }
+    }
+    addMirror(memento->mirror_);
+}
+
 void Node::set_memento(const NodeQueueMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
     if (aspect_only) {
         // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects

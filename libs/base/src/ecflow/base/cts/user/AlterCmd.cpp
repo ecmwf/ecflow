@@ -27,6 +27,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -77,7 +78,8 @@ struct EnumTraits<AlterCmd::Delete_attr_type>
         std::make_pair(AlterCmd::DEL_LATE, "late"),
         std::make_pair(AlterCmd::DEL_QUEUE, "queue"),
         std::make_pair(AlterCmd::DEL_GENERIC, "generic"),
-        std::make_pair(AlterCmd::DEL_AVISO, "aviso")
+        std::make_pair(AlterCmd::DEL_AVISO, "aviso"),
+        std::make_pair(AlterCmd::DEL_MIRROR, "mirror")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -102,7 +104,8 @@ struct EnumTraits<AlterCmd::Add_attr_type>
         std::make_pair(AlterCmd::ADD_LIMIT, "limit"),
         std::make_pair(AlterCmd::ADD_INLIMIT, "inlimit"),
         std::make_pair(AlterCmd::ADD_LABEL, "label"),
-        std::make_pair(AlterCmd::ADD_AVISO, "aviso")
+        std::make_pair(AlterCmd::ADD_AVISO, "aviso"),
+        std::make_pair(AlterCmd::ADD_MIRROR, "mirror")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -134,7 +137,8 @@ struct EnumTraits<AlterCmd::Change_attr_type>
         std::make_pair(AlterCmd::LATE, "late"),
         std::make_pair(AlterCmd::TIME, "time"),
         std::make_pair(AlterCmd::TODAY, "today"),
-        std::make_pair(AlterCmd::AVISO, "aviso")
+        std::make_pair(AlterCmd::AVISO, "aviso"),
+        std::make_pair(AlterCmd::MIRROR, "mirror")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -405,6 +409,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 case AlterCmd::DELETE_ATTR_ND:
                     break;
+                case AlterCmd::DEL_MIRROR:
+                    node->deleteMirror(name_);
+                    break;
                 default:
                     break;
             }
@@ -471,6 +478,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 case AlterCmd::CHANGE_ATTR_ND:
                     break;
+                case AlterCmd::MIRROR:
+                    node->changeMirror(name_, value_);
+                    break;
                 default:
                     break;
             }
@@ -495,6 +505,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 case AlterCmd::ADD_AVISO:
                     node->addAviso(AvisoAttr(node.get(), name_, value_, "url", "schema", "40", 0));
+                    break;
+                case AlterCmd::ADD_MIRROR:
+                    node->addMirror(MirrorAttr(name_, "remote_path", "remote_host", "remote_port", "40"));
                     break;
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
@@ -814,19 +827,36 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             break;
         }
         case AlterCmd::ADD_AVISO: {
+            // TODO[MB]: The following must parse the parameters from 'value' (?)
             if (options.size() == 3 && paths.size() > 1) {
                 // label value may be a path, hence it will be in the paths parameter
                 options.push_back(paths[0]);
                 paths.erase(paths.begin());
             }
             if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add aviso <name> <handle> <paths>. Not enough arguments\n"
+                ss << "AlterCmd: add: Expected 'add aviso <name> <cfg> <paths>. Not enough arguments\n"
                    << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
             value = options[3];
             break;
         }
+        case AlterCmd::ADD_MIRROR: {
+            // TODO[MB]: The following must parse the parameters from 'value' (?)
+            if (options.size() == 3 && paths.size() > 1) {
+                // label value may be a path, hence it will be in the paths parameter
+                options.push_back(paths[0]);
+                paths.erase(paths.begin());
+            }
+            if (options.size() < 4) {
+                ss << "AlterCmd: add: Expected 'add mirror <name> <cfg> <paths>. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+
         case AlterCmd::ADD_LIMIT: {
             if (options.size() < 4) {
                 ss << "AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n"
@@ -881,7 +911,14 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             break;
         case AlterCmd::ADD_AVISO: {
             // Create an Aviso to check if name is valid
+            // TODO[MB]: The following must use parameters from 'value'
             AvisoAttr check(nullptr, name, value, "url", "schema", "40", 0);
+            break;
+        }
+        case AlterCmd::ADD_MIRROR: {
+            // Create an Aviso to check if name is valid
+            // TODO[MB]: The following must use parameters from 'value'
+            MirrorAttr check(name, "/remote/path", "remote_host", "remote_port", "40");
             break;
         }
         case AlterCmd::ADD_ZOMBIE:
@@ -1075,7 +1112,15 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
         }
         case AlterCmd::DEL_AVISO: {
             if (!name.empty()) {
+                // TODO[MB]: The following must use parameters from 'value'
                 AvisoAttr check(nullptr, name, "value", "url", "schema", "40", 0); // will throw if not valid
+            }
+            break;
+        }
+        case AlterCmd::DEL_MIRROR: {
+            if (!name.empty()) {
+                // TODO[MB]: The following must use parameters from 'value'
+                MirrorAttr check(name, "/remote/path", "remote_host", "remote_port", "40"); // will throw if not valid
             }
             break;
         }

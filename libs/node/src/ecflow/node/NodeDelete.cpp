@@ -19,6 +19,7 @@
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
 
@@ -299,6 +300,29 @@ void Node::deleteAviso(const std::string& name) {
     }
 
     avisos_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteAviso\n";
+#endif
+}
+
+void Node::deleteMirror(const std::string& name) {
+    if (name.empty()) {
+        mirrors_.clear();
+        state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+        std::cout << "Node::deleteAviso\n";
+#endif
+        return;
+    }
+
+    auto found = ecf::algorithm::find_by_name(mirrors_, name);
+
+    if (found == std::end(mirrors_)) {
+        throw std::runtime_error("Node::deleteMirror: Cannot find mirror: " + name);
+    }
+
+    mirrors_.erase(found);
     state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Node::deleteAviso\n";

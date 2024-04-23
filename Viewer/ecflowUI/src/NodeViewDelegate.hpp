@@ -173,6 +173,7 @@ protected:
     virtual void renderMeter(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderLabel(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderAviso(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderMirror(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderEvent(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderVar(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderGenvar(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;

@@ -8,8 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/node/Node.hpp"
-
 #include <stdexcept>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
@@ -22,7 +20,9 @@
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/Node.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -308,6 +308,17 @@ void Node::addAviso(const AvisoAttr& a) {
         throw std::runtime_error(ss.str());
     }
     avisos_.push_back(a);
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::addMirror(const MirrorAttr& m) {
+    if (findMirror(m.name())) {
+        std::stringstream ss;
+        ss << "Add Mirror failed: Duplicate mirror of name '" << m.name() << "' already exist for node "
+           << debugNodePath();
+        throw std::runtime_error(ss.str());
+    }
+    mirrors_.push_back(m);
     state_change_no_ = Ecf::incr_state_change_no();
 }
 

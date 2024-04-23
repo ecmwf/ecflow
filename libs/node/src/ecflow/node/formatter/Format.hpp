@@ -12,6 +12,7 @@
 #define ecflow_node_formatter_Format_HPP
 
 #include "ecflow/node/formatter/AvisoFormatter.hpp"
+#include "ecflow/node/formatter/MirrorFormatter.hpp"
 
 namespace ecf {
 
