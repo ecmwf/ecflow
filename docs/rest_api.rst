@@ -492,7 +492,7 @@ Obtain the tree of all Suites
    * - Description
      - **Read** a tree with all suites
    * - Parameters
-     - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`
+     - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`; :code:`with_id`, (optional), possible values: :code:`true`, :code:`false`
    * - Payload
      - *empty*
    * - Response
@@ -513,13 +513,14 @@ When query parameter :code:`content` is not provided, or query parameter is :cod
       }
     }
 
-When query parameter :code:`content=full`, the full Suite tree is provided:
+When query parameters :code:`content=full&with_id=true`, the full Suite tree is provided:
 
 .. code:: json
 
   {
     "some_suite": {
       "type": "suite",
+      "id": "/some_suite",
       "state": {
         "node": "active",
         "default": "complete"
@@ -535,6 +536,7 @@ When query parameter :code:`content=full`, the full Suite tree is provided:
       "children": {
         "some_family": {
           "type": "family",
+          "id": "/some_suite/some_family",
           "state": {
             "node": "active",
             "default": "unknown"
@@ -543,6 +545,7 @@ When query parameter :code:`content=full`, the full Suite tree is provided:
           "children": {
             "some_task": {
               "type": "task",
+              "id": "/some_suite/some_family/some_task",
               "state": {
                 "node": "active",
                 "default": "unknown"
