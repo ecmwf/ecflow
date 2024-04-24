@@ -6,6 +6,22 @@ Version 5.12 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.12.4
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-03-23
+
+ecFlow Client
+-------------
+
+- **Bug** corrected ecFlow Python3 module linkage (specific for conda-forge) :jiraissue:`ECFLOW-1950`
+
+ecFlow HTTP
+-----------
+
+- **Feature** added :code:`id` field to each Node in the :code:`/<path>/tree` endpoint response :jiraissue:`ECFLOW-1952`
+- **Improvement** added *flag* attribute to Nodes in the :code:`/<path>/tree` endpoint response :jiraissue:`ECFLOW-1954`
+- **Bug** corrected Alias node structure in the :code:`/<path>/tree` endpoint response :jiraissue:`ECFLOW-1953`
 
 Version 5.12.3
 ==============

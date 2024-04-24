@@ -63,13 +63,16 @@ private:
 
 struct FullTree
 {
-    FullTree() : root_(ojson::object({})), stack_{&root_} {}
+    FullTree(bool with_id) : root_(ojson::object({})), stack_{&root_}, with_id_{with_id} {}
 
     void begin_visit(const Suite& suite) {
         ojson& parent_ = *stack_.back();
         ojson& current = parent_[suite.name()] = ojson::object({});
 
         current["type"] = "suite";
+        if (with_id_) {
+            current["id"] = suite.absNodePath();
+        }
         publish_state(suite, current);
         publish_attributes(suite, current);
 
@@ -84,6 +87,9 @@ struct FullTree
         ojson& current = parent_[family.name()] = ojson::object({});
 
         current["type"] = "family";
+        if (with_id_) {
+            current["id"] = family.absNodePath();
+        }
         publish_state(family, current);
         publish_attributes(family, current);
 
@@ -98,6 +104,9 @@ struct FullTree
         ojson& current = parent_[task.name()] = ojson::object({});
 
         current["type"] = "task";
+        if (with_id_) {
+            current["id"] = task.absNodePath();
+        }
         publish_state(task, current);
         publish_attributes(task, current);
 
@@ -113,13 +122,14 @@ struct FullTree
         stack_.push_back(&current);
 
         current["type"] = "alias";
+        if (with_id_) {
+            current["id"] = alias.absNodePath();
+        }
         publish_state(alias, current);
         publish_attributes(alias, current);
     }
 
-    void end_visit(const Alias& alias [[maybe_unused]]) {
-        // Nothing to do...
-    }
+    void end_visit(const Alias& alias [[maybe_unused]]) { stack_.pop_back(); }
 
     const ojson& content() const { return root_; }
 
@@ -225,11 +235,16 @@ private:
         for (const auto& attr : node.generics()) {
             array.emplace_back(publish_atribute(attr, "generic"));
         }
+
+        if (auto flag = node.get_flag(); flag.flag()) {
+            array.emplace_back(publish_atribute(flag, "flag"));
+        }
     }
 
 private:
     ojson root_;
     std::vector<ojson*> stack_;
+    bool with_id_;
 };
 
 } // namespace ecf::http

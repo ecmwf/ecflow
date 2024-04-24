@@ -213,6 +213,11 @@ static std::string get_tree_content_kind(const httplib::Request& request) {
     return request.has_param(content) ? request.get_param_value(content) : "basic";
 }
 
+static bool get_tree_content_id_flag(const httplib::Request& request) {
+    constexpr const char* content = "with_id";
+    return request.has_param(content) ? (request.get_param_value(content) == "true" ? true : false) : false;
+}
+
 } // namespace
 
 namespace v1 {
@@ -263,7 +268,8 @@ void node_tree_read(const httplib::Request& request, httplib::Response& response
         num_cached_requests++;
         const std::string path = request.matches[1];
         std::string tree_kind  = get_tree_content_kind(request);
-        ojson tree_content     = (tree_kind == "full") ? get_full_node_tree(path) : get_basic_node_tree(path);
+        bool with_id           = get_tree_content_id_flag(request);
+        ojson tree_content     = (tree_kind == "full") ? get_full_node_tree(path, with_id) : get_basic_node_tree(path);
         ojson j                = filter_json(tree_content, request);
         response.status        = HttpStatusCode::success_ok;
         response.set_content(j.dump(), "application/json");
