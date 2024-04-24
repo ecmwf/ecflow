@@ -44,6 +44,7 @@ ecbuild_add_library(
     Boost::boost
     nlohmann::json
     httplib::httplib
+    Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
 )
 target_clangformat(libaviso)
