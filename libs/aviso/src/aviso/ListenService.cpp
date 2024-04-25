@@ -82,7 +82,8 @@ void ListenService::operator()(const std::chrono::system_clock::time_point& now)
             // Pass updated keys to the listener
             for (auto&& [key, value] : updated_keys) {
                 if (key == "latest_revision") {
-                    ALOG(D, "Updating revision for " << entry.path() << " to " << value);
+                    auto revision = value;
+                    ALOG(D, "Updating revision for " << entry.path() << " to " << revision);
                     entry.listener().update_revision(std::stoll(value));
                     ALOG(D, "Revision for " << entry.path() << " is now " << entry.listener().revision());
                     continue;
