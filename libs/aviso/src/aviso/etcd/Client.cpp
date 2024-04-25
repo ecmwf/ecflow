@@ -10,8 +10,15 @@
 
 #include "aviso/etcd/Client.hpp"
 
+#include <iostream>
+
 #if defined(ECF_OPENSSL)
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
+    #include <openssl/ssl.h>
+    #if OPENSSL_VERSION_NUMBER < 0x1010100fL
+        #warning OpenSSL versions prior to 1.1.1 detected. Aviso ETCD HTTP client will be build without OpenSSL support!
+    #else
+        #define CPPHTTPLIB_OPENSSL_SUPPORT
+    #endif
 #endif
 
 #include <cassert>
@@ -37,6 +44,7 @@ struct Client::Impl
 };
 
 Client::Client(const Address& address) : impl_(std::make_unique<Client::Impl>(address)) {
+    std::cout << OPENSSL_VERSION_NUMBER << std::endl;
 }
 
 Client::~Client() = default;
