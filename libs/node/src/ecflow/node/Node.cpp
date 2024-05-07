@@ -209,6 +209,12 @@ Node& Node::operator=(const Node& rhs) {
 
 Node::~Node() = default;
 
+void Node::poke() {
+    for (auto& mirror : mirrors_) {
+        mirror.poke();
+    }
+}
+
 bool Node::isParentSuspended() const {
     Node* theParent = parent();
     if (theParent) {

@@ -25,6 +25,8 @@ public:
 
     ~Family() override;
 
+    void poke() override;
+
     static family_ptr create(const std::string& name, bool check = true);
     static family_ptr create_me(const std::string& name); // python api, to pick correct init function
 

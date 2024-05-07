@@ -379,6 +379,9 @@ void BaseServer::restart() {
 
     traverser_.start();
     checkPtSaver_.start();
+
+    // Bootstrap defs
+    defs_->poke();
 }
 
 void BaseServer::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,

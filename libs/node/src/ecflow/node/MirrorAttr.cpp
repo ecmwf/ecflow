@@ -38,6 +38,27 @@ MirrorAttr::MirrorAttr(Node* parent,
     }
 };
 
+void MirrorAttr::poke() {
+    ALOG(D, "**** Check Mirror attribute (name: " << name_ << ")");
+
+    start_controller();
+
+    // Task associated with Attribute is free when any notification is found
+    auto notifications = controller_->poll_notifications(remote_path_);
+
+    if (notifications.empty()) {
+        // No notifications, nothing to do...
+        return;
+    }
+
+    // Notifications found -- Node state to be updated
+    ALOG(D, "MirrorAttr::isFree: found notifications for Mirror attribute (name: " << name_ << ")");
+
+    auto latest_state = static_cast<NState::State>(notifications.back().notification.status);
+    parent_->setStateOnly(latest_state, true);
+    parent_->handleStateChange();
+}
+
 bool MirrorAttr::why(std::string& theReasonWhy) const {
     if (isFree()) {
         return false;

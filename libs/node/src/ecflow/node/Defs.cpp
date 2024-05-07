@@ -123,6 +123,12 @@ Defs::~Defs() {
     ExprDuplicate reclaim_cloned_ast_memory;
 }
 
+void Defs::poke() {
+    for (const auto& suite : suiteVec_) {
+        suite->poke();
+    }
+}
+
 void Defs::handle_migration() {
     // Fix up any migration issues. Remove when in Bolgna, and ecflow4 no longer used
     for (const auto& s : suiteVec_) {

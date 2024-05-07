@@ -83,6 +83,12 @@ NodeContainer& NodeContainer::operator=(const NodeContainer& rhs) {
 
 NodeContainer::~NodeContainer() = default;
 
+void NodeContainer::poke() {
+    for (const auto& n : nodes_) {
+        n->poke();
+    }
+}
+
 bool NodeContainer::check_defaults() const {
     if (order_state_change_no_ != 0)
         throw std::runtime_error("NodeContainer::check_defaults(): order_state_change_no_ != 0");

@@ -49,6 +49,10 @@ Family::~Family() {
     delete fam_gen_variables_;
 }
 
+void Family::poke() {
+    NodeContainer::poke();
+}
+
 family_ptr Family::create(const std::string& name, bool check) {
     return std::make_shared<Family>(name, check);
 }

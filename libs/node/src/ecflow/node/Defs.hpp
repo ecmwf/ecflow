@@ -56,6 +56,8 @@ public:
 
     ~Defs();
 
+    void poke();
+
     void copy_defs_state_only(const defs_ptr& defs); // needed when creating defs for client handles
     bool operator==(const Defs& rhs) const;
     void print(std::string&) const;

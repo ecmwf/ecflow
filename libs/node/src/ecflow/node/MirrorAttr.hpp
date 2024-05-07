@@ -58,6 +58,8 @@ public:
 
     MirrorAttr& operator=(const MirrorAttr& rhs) = default;
 
+    void poke();
+
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& remote_path() const { return remote_path_; }
     [[nodiscard]] inline const std::string& remote_host() const { return remote_host_; }

@@ -72,6 +72,9 @@ public:
 
     Node(const Node& rhs);
     virtual ~Node();
+
+    virtual void poke();
+
     virtual bool check_defaults() const;
 
     // parse string and create suite || family || task || alias. Can return a NULL node_ptr() for errors

@@ -29,6 +29,8 @@ public:
     NodeContainer();
     ~NodeContainer() override;
 
+    void poke() override;
+
     bool check_defaults() const override;
 
     void accept(ecf::NodeTreeVisitor&) override;
