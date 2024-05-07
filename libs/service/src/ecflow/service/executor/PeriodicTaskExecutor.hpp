@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_executor_PeriodicTaskExecutor_HPP
-#define aviso_executor_PeriodicTaskExecutor_HPP
+#ifndef ecflow_service_executor_PeriodicTaskExecutor_HPP
+#define ecflow_service_executor_PeriodicTaskExecutor_HPP
 
 #include <atomic>
 #include <chrono>
@@ -17,7 +17,7 @@
 #include <thread>
 #include <vector>
 
-namespace aviso {
+namespace ecf::service::executor {
 
 struct InvalidExecutorArgument : public std::runtime_error
 {
@@ -80,6 +80,6 @@ private:
     TASK task_;
 };
 
-} // namespace aviso
+} // namespace ecf::service::executor
 
-#endif /* aviso_PeriodicExecutor_HPP */
+#endif /* ecflow_service_executor_PeriodicTaskExecutor_HPP */

@@ -13,8 +13,11 @@
 
 set(srcs
   # Headers
+  src/ecflow/service/AvisoService.hpp
   src/ecflow/service/Registry.hpp
+  src/ecflow/service/executor/PeriodicTaskExecutor.hpp
   # Sources
+  src/ecflow/service/AvisoService.cpp
   src/ecflow/service/Registry.cpp
 )
 
@@ -37,6 +40,7 @@ target_clangformat(ecflow_service)
 
 set(test_srcs
   # Sources
+  test/TestPeriodicTaskExecutor.cpp
   test/TestRegistry.cpp
   test/TestServices_main.cpp # test entry point
 )

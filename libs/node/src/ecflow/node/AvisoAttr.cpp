@@ -16,7 +16,6 @@
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Node.hpp"
-#include "ecflow/service/Registry.hpp"
 
 namespace ecf {
 
@@ -95,11 +94,11 @@ bool AvisoAttr::isFree() const {
 
     // (a) get the latest revision
     auto max = std::max_element(notifications.begin(), notifications.end(), [](const auto& a, const auto& b) {
-        return a.listener.revision() < b.listener.revision();
+        return a.configuration.revision() < b.configuration.revision();
     });
 
     // (b) update the revision, in the listener configuration
-    this->revision_ = max->listener.revision();
+    this->revision_ = max->configuration.revision();
     ALOG(D, "AvisoAttr::isFree: " << aviso_path << " updated revision to " << this->revision_);
     state_change_no_ = Ecf::incr_state_change_no();
 

@@ -11,7 +11,7 @@
 #ifndef aviso_Aviso_HPP
 #define aviso_Aviso_HPP
 
-#include "aviso/ListenService.hpp"
+#include "aviso/ConfiguredListener.hpp"
 #include "aviso/etcd/Client.hpp"
 
 #endif /* aviso_Aviso_HPP */

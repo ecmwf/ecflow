@@ -17,7 +17,7 @@
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/service/Registry.hpp"
+#include "ecflow/service/AvisoService.hpp"
 
 namespace cereal {
 class access;
@@ -90,7 +90,7 @@ public:
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
 
 private:
-    Node* parent_{nullptr}; // only ever used on the server side, to access applicate variables
+    Node* parent_{nullptr}; // only ever used on the server side, to access parent Node variables
     path_t parent_path_;
     name_t name_;
     listener_t listener_;

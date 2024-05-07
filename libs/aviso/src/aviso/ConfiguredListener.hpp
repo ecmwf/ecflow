@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -78,6 +79,21 @@ private:
     uint32_t polling_;
     uint64_t revision_;
 };
+
+inline std::ostream& operator <<(std::ostream& os, const ListenRequest& request) {
+    os << "ListenRequest{";
+    os << "start: " << request.is_start();
+    os << ", path: " << request.path();
+    if (request.is_start()) {
+        os << ", listener_cfg: " << request.listener_cfg();
+        os << ", address: " << request.address();
+        os << ", schema: " << request.schema();
+        os << ", polling: " << request.polling();
+        os << ", revision: " << request.revision();
+    }
+    os << "}";
+    return os;
+}
 
 struct UnlistenRequest
 {

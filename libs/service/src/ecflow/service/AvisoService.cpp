@@ -8,21 +8,11 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "aviso/ListenService.hpp"
+#include "ecflow/service/AvisoService.hpp"
 
-#include <fstream>
-#include <iostream>
+namespace ecf::service {
 
-#include <nlohmann/json.hpp>
-
-#include "aviso/ConfiguredListener.hpp"
-#include "aviso/ListenerSchema.hpp"
-#include "aviso/Log.hpp"
-#include "aviso/etcd/Client.hpp"
-
-namespace aviso {
-
-void ListenService::start() {
+void AvisoService::start() {
 
     // Update list of listeners
 
@@ -52,7 +42,7 @@ void ListenService::start() {
     executor_.start(std::chrono::seconds{expiry});
 }
 
-void ListenService::operator()(const std::chrono::system_clock::time_point& now) {
+void AvisoService::operator()(const std::chrono::system_clock::time_point& now) {
 
     // Update list of listeners
 
@@ -70,7 +60,7 @@ void ListenService::operator()(const std::chrono::system_clock::time_point& now)
     {
         for (auto& entry : listeners_) {
             // For the associated host(+port)
-            etcd::Client client{entry.address()};
+            aviso::etcd::Client client{entry.address()};
 
             ALOG(D,
                  "Polling: " << entry.address().address() << " for Aviso " << entry.path()
@@ -98,12 +88,12 @@ void ListenService::operator()(const std::chrono::system_clock::time_point& now)
     }
 }
 
-void ListenService::register_listener(const ListenRequest& listen) {
+void AvisoService::register_listener(const aviso::ListenRequest& listen) {
     auto listener = create_configured_listener(listen);
     register_listener(listener);
 }
 
-void ListenService::register_listener(const listener_t& listener) {
+void AvisoService::register_listener(const listener_t& listener) {
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
 
@@ -112,7 +102,7 @@ void ListenService::register_listener(const listener_t& listener) {
     listeners_.emplace_back(listener);
 }
 
-void ListenService::unregister_listener(const std::string& unlisten_path) {
+void AvisoService::unregister_listener(const std::string& unlisten_path) {
 
     ALOG(D, "Removing listener: {" << unlisten_path << "}");
 
@@ -122,4 +112,4 @@ void ListenService::unregister_listener(const std::string& unlisten_path) {
                      std::end(listeners_));
 }
 
-} // namespace aviso
+} // namespace ecf::service
