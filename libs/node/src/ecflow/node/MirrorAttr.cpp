@@ -16,16 +16,17 @@
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Node.hpp"
-#include "ecflow/service/Registry.hpp"
 
 namespace ecf {
 
-MirrorAttr::MirrorAttr(name_t name,
+MirrorAttr::MirrorAttr(Node* parent,
+                       name_t name,
                        remote_path_t remote_path,
                        remote_host_t remote_host,
                        remote_port_t remote_port,
                        polling_t polling)
-    : name_{std::move(name)},
+    : parent_{parent},
+      name_{std::move(name)},
       remote_path_{std::move(remote_path)},
       remote_host_{std::move(remote_host)},
       remote_port_{std::move(remote_port)},
@@ -53,19 +54,16 @@ void MirrorAttr::reset() {
          "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
                                                                          << ", port: " << remote_port_ << ")");
 
-    //    // Controller -- start up the Mirror controller
-    //    controller_ = std::make_shared<ecf::service::MirrorController>();
-    //    controller_->subscribe();
-    //    // Runner -- start up the Mirror runner, and thus effectively start the Aviso listener
-    //    // n.b. this must be done after subscribing in the controller, so that the polling interval is set
-    //    runner_ = std::make_shared<ecf::service::MirrorRunner>(*controller_);
-    //    runner_->start();
+    start_controller();
 }
 
 bool MirrorAttr::isFree() const {
-    // Note: An Mirror attribute doesn't hold the task from executing
 
-    return true; // Nothing to do...
+    LOG(Log::MSG, "**** Check Mirror attribute (name: " << name_ << ")");
+
+    start_controller();
+
+    return true;
 }
 
 void MirrorAttr::start() const {
@@ -74,6 +72,23 @@ void MirrorAttr::start() const {
 
 void MirrorAttr::finish() const {
     // Nothing do do...
+}
+
+void MirrorAttr::start_controller() const {
+    if (controller_ == nullptr) {
+        ALOG(D,
+             "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
+                                                                             << ", port: " << remote_port_ << ")");
+
+        // Controller -- start up the Mirror controller
+        controller_ = std::make_shared<ecf::service::MirrorController>();
+        controller_->subscribe(ecf::service::MirrorRequest{
+            remote_path_, remote_host_, remote_port_, boost::lexical_cast<std::uint32_t>(polling_)});
+        // Runner -- start up the Mirror runner, and thus effectively start the Aviso listener
+        // n.b. this must be done after subscribing in the controller, so that the polling interval is set
+        runner_ = std::make_shared<ecf::service::MirrorRunner>(*controller_);
+        runner_->start();
+    }
 }
 
 } // namespace ecf

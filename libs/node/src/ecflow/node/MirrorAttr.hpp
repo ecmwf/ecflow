@@ -17,7 +17,7 @@
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/service/Registry.hpp"
+#include "ecflow/service/MirrorService.hpp"
 
 namespace cereal {
 class access;
@@ -48,7 +48,8 @@ public:
      *       Cereal invokes the default ctor to create the object and only then proceeds to member-wise serialization.
      */
     MirrorAttr() = default;
-    MirrorAttr(name_t name,
+    MirrorAttr(Node* parent,
+               name_t name,
                remote_path_t remote_path,
                remote_host_t remote_host,
                remote_port_t remote_port,
@@ -78,19 +79,22 @@ public:
     friend void serialize(Archive& ar, MirrorAttr& aviso, std::uint32_t version);
 
 private:
+    Node* parent_{nullptr}; // only ever used on the server side, to update parent Node state
     name_t name_;
     remote_path_t remote_path_;
     remote_host_t remote_host_;
     remote_port_t remote_port_;
     polling_t polling_;
 
+    void start_controller() const;
+
     // The following are mutable as they are modified by the const method isFree()
     mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
-    //    // The controller is only instanciated when the Mirror is reset()
-    //    // This allows the MirrorAttr have a copy-ctor and assignment operator
-    //    mutable std::shared_ptr<ecf::service::MirrorController> controller_;
-    //    mutable std::shared_ptr<ecf::service::MirrorRunner> runner_;
+    // The controller is only instanciated when the Mirror is reset()
+    // This allows the MirrorAttr have a copy-ctor and assignment operator
+    mutable std::shared_ptr<ecf::service::MirrorController> controller_;
+    mutable std::shared_ptr<ecf::service::MirrorRunner> runner_;
 };
 
 template <class Archive>

@@ -507,7 +507,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     node->addAviso(AvisoAttr(node.get(), name_, value_, "url", "schema", "40", 0));
                     break;
                 case AlterCmd::ADD_MIRROR:
-                    node->addMirror(MirrorAttr(name_, "remote_path", "remote_host", "remote_port", "40"));
+                    node->addMirror(MirrorAttr(nullptr, name_, "remote_path", "remote_host", "remote_port", "40"));
                     break;
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
@@ -918,7 +918,7 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         case AlterCmd::ADD_MIRROR: {
             // Create an Aviso to check if name is valid
             // TODO[MB]: The following must use parameters from 'value'
-            MirrorAttr check(name, "/remote/path", "remote_host", "remote_port", "40");
+            MirrorAttr check(nullptr, name, "/remote/path", "remote_host", "remote_port", "40");
             break;
         }
         case AlterCmd::ADD_ZOMBIE:
@@ -1120,7 +1120,8 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
         case AlterCmd::DEL_MIRROR: {
             if (!name.empty()) {
                 // TODO[MB]: The following must use parameters from 'value'
-                MirrorAttr check(name, "/remote/path", "remote_host", "remote_port", "40"); // will throw if not valid
+                MirrorAttr check(
+                    nullptr, name, "/remote/path", "remote_host", "remote_port", "40"); // will throw if not valid
             }
             break;
         }

@@ -14,10 +14,12 @@
 set(srcs
   # Headers
   src/ecflow/service/AvisoService.hpp
+  src/ecflow/service/MirrorService.hpp
   src/ecflow/service/Registry.hpp
   src/ecflow/service/executor/PeriodicTaskExecutor.hpp
   # Sources
   src/ecflow/service/AvisoService.cpp
+  src/ecflow/service/MirrorService.cpp
   src/ecflow/service/Registry.cpp
 )
 
@@ -32,6 +34,7 @@ ecbuild_add_library(
   PUBLIC_LIBS
     libaviso
     base
+    libclient
 )
 target_clangformat(ecflow_service)
 

@@ -31,7 +31,7 @@ auto get_option_value(const boost::program_options::variables_map& vm,
     return vm[option_name].as<T>();
 }
 
-auto parse_mirror_line(const std::string& line) {
+auto parse_mirror_line(const std::string& line, Node* parent) {
     std::vector<std::string> tokens;
     {
         // Since po::command_line_parser requires a vector of strings, we need convert from string_view to string
@@ -62,7 +62,7 @@ auto parse_mirror_line(const std::string& line) {
     auto ecflow_port = get_option_value<ecf::MirrorAttr::remote_port_t>(vm, "remote_port", line);
     auto polling     = get_option_value<ecf::MirrorAttr::polling_t>(vm, "polling", line);
 
-    return ecf::MirrorAttr{name, ecflow_path, ecflow_host, ecflow_port, polling};
+    return ecf::MirrorAttr{parent, name, ecflow_path, ecflow_host, ecflow_port, polling};
 }
 
 } // namespace
@@ -72,7 +72,9 @@ bool MirrorParser::doParse(const std::string& line, std::vector<std::string>& li
         throw std::runtime_error("AvisoParser::doParse: Could not add aviso as node stack is empty at line: " + line);
     }
 
-    auto parsed = parse_mirror_line(line);
+    Node* parent = nodeStack_top();
+
+    auto parsed = parse_mirror_line(line, parent);
     nodeStack_top()->addMirror(parsed);
 
     return true;

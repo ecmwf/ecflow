@@ -241,6 +241,11 @@ void Node::begin() {
     // Set the state without causing any side effects
     initState(0);
 
+    if (!mirrors_.empty()) {
+        // In case mirror attributes are available, the node state becomes UNKNOWN
+        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+    }
+
     clearTrigger();
     clearComplete();
 
@@ -306,7 +311,12 @@ void Node::requeue(Requeue_args& args) {
 #ifdef DEBUG_REQUEUE
     LOG(Log::DBG, "      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
-    /// Note: we don't reset verify attributes as they record state stat's
+    // Note: we don't reset verify attributes as they record state stat's
+
+    if (!mirrors_.empty()) {
+        // In case mirror attributes are available, the node state becomes UNKNOWN
+        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+    }
 
     // Set the state without causing any side effects
     initState(args.clear_suspended_in_child_nodes_, args.log_state_changes_);
@@ -401,6 +411,11 @@ void Node::reset_late_event_meters() {
 void Node::reset() {
     // Set the state without causing any side effects
     initState(1);
+
+    if (!mirrors_.empty()) {
+        // In case of mirror attributes, the node state becomes UNKNOWN
+        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+    }
 
     clearTrigger();
     clearComplete();
@@ -2913,10 +2928,10 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, c_expr_, [this]() { return c_expr_.get(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, t_expr_, [this]() { return t_expr_.get(); }); // conditionally save
 
-    CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); });  // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); });  // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); });  // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, avisos_, [this]() { return !avisos_.empty(); });  // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, avisos_, [this]() { return !avisos_.empty(); });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, mirrors_, [this]() { return !mirrors_.empty(); }); // conditionally save
 
     CEREAL_OPTIONAL_NVP(ar, times_, [this]() { return !times_.empty(); });   // conditionally save
