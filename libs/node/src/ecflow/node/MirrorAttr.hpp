@@ -41,6 +41,8 @@ public:
     using remote_port_t = std::string;
     using polling_t     = std::string;
 
+    static bool is_valid_name(const std::string& name);
+
     /**
      * Creates a(n invalid) Mirror
      *

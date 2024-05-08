@@ -11,6 +11,7 @@
 #ifndef ecflow_node_parser_AvisoParser_HPP
 #define ecflow_node_parser_AvisoParser_HPP
 
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/parser/Parser.hpp"
 
 /**
@@ -43,6 +44,10 @@ public:
     static constexpr const char* option_url      = "url";
     static constexpr const char* option_schema   = "schema";
     static constexpr const char* option_revision = "revision";
+
+    static ecf::AvisoAttr parse_aviso_line(const std::string& line);
+    static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name);
+    static ecf::AvisoAttr parse_aviso_line(const std::string& line, Node* parent);
 
     explicit AvisoParser(DefsStructureParser* p) : Parser(p) {}
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;

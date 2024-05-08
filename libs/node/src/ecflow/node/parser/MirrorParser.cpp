@@ -31,7 +31,18 @@ auto get_option_value(const boost::program_options::variables_map& vm,
     return vm[option_name].as<T>();
 }
 
-auto parse_mirror_line(const std::string& line, Node* parent) {
+} // namespace
+
+ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line) {
+    return parse_mirror_line(line, nullptr);
+}
+
+ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, const std::string& name) {
+    auto updated_line = line + " --name " + name;
+    return parse_mirror_line(updated_line, nullptr);
+}
+
+ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* parent) {
     std::vector<std::string> tokens;
     {
         // Since po::command_line_parser requires a vector of strings, we need convert from string_view to string
@@ -64,8 +75,6 @@ auto parse_mirror_line(const std::string& line, Node* parent) {
 
     return ecf::MirrorAttr{parent, name, ecflow_path, ecflow_host, ecflow_port, polling};
 }
-
-} // namespace
 
 bool MirrorParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (nodeStack().empty()) {

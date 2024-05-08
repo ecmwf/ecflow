@@ -700,7 +700,7 @@ public:
     virtual void handleStateChange() = 0; // can end up changing state
 
     /// update change numbers to force sync
-    virtual void force_sync(){};
+    virtual void force_sync() {};
 
     /// check trigger expression have nodes and events,meter,repeat that resolve
     bool check_expressions(Ast*, const std::string& expr, bool trigger, std::string& errorMsg) const;

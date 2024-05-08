@@ -20,6 +20,8 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/parser/AvisoParser.hpp"
+#include "ecflow/node/parser/MirrorParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -170,8 +172,9 @@ void Node::changeAviso(const std::string& name, const std::string& value) {
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
-    // TODO[MB]: Update the applicable aviso attribute
-    found->set_listener(value);
+    *found = AvisoParser::parse_aviso_line(value, name);
+
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::changeAviso(const std::string& name, const std::string& value, uint64_t revision) {
@@ -181,9 +184,10 @@ void Node::changeAviso(const std::string& name, const std::string& value, uint64
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
-    // TODO[MB]: Update the applicable aviso attribute
-    found->set_listener(value);
+    *found = AvisoParser::parse_aviso_line(value, name);
     found->set_revision(revision);
+
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::changeMirror(const std::string& name, const std::string& value) {
@@ -193,7 +197,9 @@ void Node::changeMirror(const std::string& name, const std::string& value) {
         throw std::runtime_error("Node::changeMirror: Could not find mirror " + name);
     }
 
-    // TODO[MB]: Update the applicable mirror attribute
+    *found = MirrorParser::parse_mirror_line(value, name);
+
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::changeTrigger(const std::string& expression) {

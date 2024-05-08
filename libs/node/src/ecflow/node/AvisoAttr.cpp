@@ -19,6 +19,10 @@
 
 namespace ecf {
 
+bool AvisoAttr::is_valid_name(const std::string& name) {
+    return ecf::Str::valid_name(name);
+}
+
 AvisoAttr::AvisoAttr(Node* parent,
                      name_t name,
                      listener_t listener,
@@ -27,7 +31,7 @@ AvisoAttr::AvisoAttr(Node* parent,
                      polling_t polling,
                      revision_t revision)
     : parent_{parent},
-      parent_path_{parent->absNodePath()},
+      parent_path_{parent ? parent->absNodePath() : ""},
       name_{std::move(name)},
       listener_{std::move(listener)},
       url_{std::move(url)},

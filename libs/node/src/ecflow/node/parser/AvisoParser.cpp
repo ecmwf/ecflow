@@ -15,7 +15,6 @@
 #include <boost/program_options.hpp>
 
 #include "ecflow/core/Str.hpp"
-#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
@@ -31,7 +30,18 @@ auto get_option_value(const boost::program_options::variables_map& vm,
     return vm[option_name].as<T>();
 }
 
-auto parse_aviso_line(const std::string& line, Node* parent) {
+} // namespace
+
+ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line) {
+    return parse_aviso_line(line, nullptr);
+}
+
+ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, const std::string& name) {
+    auto updated_line = line + " --name " + name;
+    return parse_aviso_line(updated_line, nullptr);
+}
+
+ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* parent) {
     std::vector<std::string> tokens;
     {
         // Since po::command_line_parser requires a vector of strings, we need convert from string_view to string
@@ -66,8 +76,6 @@ auto parse_aviso_line(const std::string& line, Node* parent) {
 
     return ecf::AvisoAttr{parent, name, listener, url, schema, polling, revision};
 }
-
-} // namespace
 
 bool AvisoParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (nodeStack().empty()) {

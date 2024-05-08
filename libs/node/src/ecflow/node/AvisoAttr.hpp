@@ -46,6 +46,8 @@ public:
     using polling_t  = std::string;
     using revision_t = std::uint64_t;
 
+    static bool is_valid_name(const std::string& name);
+
     /**
      * Creates a(n invalid) Aviso
      *

@@ -19,6 +19,10 @@
 
 namespace ecf {
 
+bool MirrorAttr::is_valid_name(const std::string& name) {
+    return ecf::Str::valid_name(name);
+}
+
 MirrorAttr::MirrorAttr(Node* parent,
                        name_t name,
                        remote_path_t remote_path,
@@ -31,9 +35,7 @@ MirrorAttr::MirrorAttr(Node* parent,
       remote_host_{std::move(remote_host)},
       remote_port_{std::move(remote_port)},
       polling_{std::move(polling)} {
-    //      controller_{nullptr},
-    //      runner_{nullptr} {
-    if (!ecf::Str::valid_name(name_)) {
+    if (!is_valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid MirrorAttr name :", name_));
     }
 };
@@ -66,7 +68,7 @@ bool MirrorAttr::why(std::string& theReasonWhy) const {
 
     theReasonWhy += ecf::Message(" is a Mirror of ", remote_path(), " at '", remote_host(), ":", remote_port(), "'");
     return true;
-};
+}
 
 void MirrorAttr::reset() {
     state_change_no_ = Ecf::incr_state_change_no();

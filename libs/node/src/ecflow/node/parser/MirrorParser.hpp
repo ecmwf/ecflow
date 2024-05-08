@@ -11,6 +11,7 @@
 #ifndef ecflow_node_parser_MirrorParser_HPP
 #define ecflow_node_parser_MirrorParser_HPP
 
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/parser/Parser.hpp"
 
 /**
@@ -41,6 +42,10 @@ public:
     static constexpr const char* option_remote_host = "remote_host";
     static constexpr const char* option_remote_port = "remote_port";
     static constexpr const char* option_polling     = "polling";
+
+    static ecf::MirrorAttr parse_mirror_line(const std::string& line);
+    static ecf::MirrorAttr parse_mirror_line(const std::string& line, const std::string& name);
+    static ecf::MirrorAttr parse_mirror_line(const std::string& line, Node* parent);
 
     explicit MirrorParser(DefsStructureParser* p) : Parser(p) {}
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;

@@ -214,6 +214,11 @@ void NodeAvisoMemento::serialize(Archive& ar, std::uint32_t const version) {
 }
 
 template <class Archive>
+void NodeMirrorMemento::serialize(Archive& ar, std::uint32_t const version) {
+    ar(cereal::base_class<Memento>(this), CEREAL_NVP(mirror_));
+}
+
+template <class Archive>
 void NodeQueueMemento::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<Memento>(this), CEREAL_NVP(queue_));
 }
@@ -341,6 +346,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(NodeEventMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeMeterMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeLabelMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeAvisoMemento);
+CEREAL_TEMPLATE_SPECIALIZE_V(NodeMirrorMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeQueueMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeGenericMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeQueueIndexMemento);
@@ -379,6 +385,7 @@ CEREAL_REGISTER_TYPE(NodeEventMemento)
 CEREAL_REGISTER_TYPE(NodeMeterMemento)
 CEREAL_REGISTER_TYPE(NodeLabelMemento)
 CEREAL_REGISTER_TYPE(NodeAvisoMemento)
+CEREAL_REGISTER_TYPE(NodeMirrorMemento)
 CEREAL_REGISTER_TYPE(NodeQueueMemento)
 CEREAL_REGISTER_TYPE(NodeGenericMemento)
 CEREAL_REGISTER_TYPE(NodeQueueIndexMemento)

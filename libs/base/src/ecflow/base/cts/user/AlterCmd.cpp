@@ -22,7 +22,9 @@
 #include "ecflow/core/Enumerate.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
@@ -31,6 +33,8 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/parser/AvisoParser.hpp"
+#include "ecflow/node/parser/MirrorParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -374,9 +378,6 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::DEL_LABEL:
                     node->deleteLabel(name_);
                     break;
-                case AlterCmd::DEL_AVISO:
-                    node->deleteAviso(name_);
-                    break;
                 case AlterCmd::DEL_TRIGGER:
                     node->deleteTrigger();
                     break;
@@ -408,6 +409,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     node->delete_generic(name_);
                     break;
                 case AlterCmd::DELETE_ATTR_ND:
+                    break;
+                case AlterCmd::DEL_AVISO:
+                    node->deleteAviso(name_);
                     break;
                 case AlterCmd::DEL_MIRROR:
                     node->deleteMirror(name_);
@@ -503,12 +507,16 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::ADD_DAY:
                     node->addDay(DayAttr::create(name_));
                     break;
-                case AlterCmd::ADD_AVISO:
-                    node->addAviso(AvisoAttr(node.get(), name_, value_, "url", "schema", "40", 0));
+                case AlterCmd::ADD_AVISO: {
+                    auto aviso = AvisoParser::parse_aviso_line(value_, name_);
+                    node->addAviso(aviso);
                     break;
-                case AlterCmd::ADD_MIRROR:
-                    node->addMirror(MirrorAttr(nullptr, name_, "remote_path", "remote_host", "remote_port", "40"));
+                }
+                case AlterCmd::ADD_MIRROR: {
+                    auto mirror = MirrorParser::parse_mirror_line(value_, name_);
+                    node->addMirror(mirror);
                     break;
+                }
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
                     break;
@@ -827,14 +835,8 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             break;
         }
         case AlterCmd::ADD_AVISO: {
-            // TODO[MB]: The following must parse the parameters from 'value' (?)
-            if (options.size() == 3 && paths.size() > 1) {
-                // label value may be a path, hence it will be in the paths parameter
-                options.push_back(paths[0]);
-                paths.erase(paths.begin());
-            }
-            if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add aviso <name> <cfg> <paths>. Not enough arguments\n"
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: add: Expected 'add aviso <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
                    << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
@@ -842,14 +844,8 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             break;
         }
         case AlterCmd::ADD_MIRROR: {
-            // TODO[MB]: The following must parse the parameters from 'value' (?)
-            if (options.size() == 3 && paths.size() > 1) {
-                // label value may be a path, hence it will be in the paths parameter
-                options.push_back(paths[0]);
-                paths.erase(paths.begin());
-            }
-            if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add mirror <name> <cfg> <paths>. Not enough arguments\n"
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: add: Expected 'add mirror <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
                    << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
@@ -910,15 +906,11 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             (void)DayAttr::create(name);
             break;
         case AlterCmd::ADD_AVISO: {
-            // Create an Aviso to check if name is valid
-            // TODO[MB]: The following must use parameters from 'value'
-            AvisoAttr check(nullptr, name, value, "url", "schema", "40", 0);
+            AvisoParser::parse_aviso_line(value, name);
             break;
         }
         case AlterCmd::ADD_MIRROR: {
-            // Create an Aviso to check if name is valid
-            // TODO[MB]: The following must use parameters from 'value'
-            MirrorAttr check(nullptr, name, "/remote/path", "remote_host", "remote_port", "40");
+            MirrorParser::parse_mirror_line(value, name);
             break;
         }
         case AlterCmd::ADD_ZOMBIE:
@@ -1111,17 +1103,14 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
             break;
         }
         case AlterCmd::DEL_AVISO: {
-            if (!name.empty()) {
-                // TODO[MB]: The following must use parameters from 'value'
-                AvisoAttr check(nullptr, name, "value", "url", "schema", "40", 0); // will throw if not valid
+            if (!AvisoAttr::is_valid_name(name)) {
+                throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
             }
             break;
         }
         case AlterCmd::DEL_MIRROR: {
-            if (!name.empty()) {
-                // TODO[MB]: The following must use parameters from 'value'
-                MirrorAttr check(
-                    nullptr, name, "/remote/path", "remote_host", "remote_port", "40"); // will throw if not valid
+            if (!MirrorAttr::is_valid_name(name)) {
+                throw ecf::InvalidArgument(ecf::Message("Invalid MirrorAttr name :", name_));
             }
             break;
         }
@@ -1369,15 +1358,22 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
         }
 
         case AlterCmd::AVISO: {
-            if (options.size() != 4) {
-                ss << "AlterCmd: change aviso expects 4 arguments : change aviso <name> <handle> but found "
-                   << (options.size()) << ".\n";
-                ss << dump_args(options, paths) << "\n";
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: change: Expected 'change aviso <name> <cfg> <path> [<path>] [...]."
+                   << "Incorrect number of arguments.\n"
+                   << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
-            if (paths.empty()) {
-                ss << "AlterCmd: change aviso expects at least 1 node path but none was provided.\n";
-                ss << dump_args(options, paths) << "\n";
+            name  = options[2];
+            value = options[3];
+            break;
+        }
+
+        case AlterCmd::MIRROR: {
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: change: Expected 'change mirror <name> <cfg> <path> [<path>] [...]."
+                   << "Incorrect number of arguments.\n"
+                   << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
             name  = options[2];
