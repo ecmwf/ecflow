@@ -33,28 +33,44 @@ MirrorClient::~MirrorClient() = default;
 int MirrorClient::get_node_status(const std::string& remote_host,
                                   const std::string& remote_port,
                                   const std::string& node_path) const {
-    ALOG(D, "Mirror::get_node_status: using " << remote_host << ":" << remote_port << ", path=" << node_path);
-    impl_ = std::make_unique<Impl>();
-    impl_->invoker_.set_host_port(remote_host, remote_port);
-    ALOG(D, "Mirror::get_node_status: sync with the latest defs");
-    impl_->invoker_.sync(impl_->defs_);
+    ALOG(D, "Sync'ing: using " << remote_host << ":" << remote_port << ", path=" << node_path);
 
-    if (!impl_->defs_) {
-        return -1;
+    try {
+        impl_ = std::make_unique<Impl>();
+        impl_->invoker_.set_host_port(remote_host, remote_port);
+        ALOG(D, "Sync'ing: retrieving the latest defs");
+        impl_->invoker_.sync(impl_->defs_);
+        ALOG(D, "Sync'ing finished");
+
+        if (!impl_->defs_) {
+            ALOG(E, "Sync'ing: unable to sync with remote defs");
+            return NState::UNKNOWN;
+        }
+
+        auto node = impl_->defs_->findAbsNode(node_path);
+
+        if (!node) {
+            ALOG(E, "Sync'ing: requested node (" << node_path << ") not found in remote defs");
+            return NState::UNKNOWN;
+        }
+
+        auto state = node->state();
+        ALOG(D, "Sync'ing: found node (" << node_path << "), with status " << state);
+        return state;
     }
-
-    auto node = impl_->defs_->findAbsNode(node_path);
-    return node->state();
+    catch (std::exception& e) {
+        ALOG(W, "Sync'ing: failure to sync, due to: " << e.what());
+        return NState::UNKNOWN;
+    }
 }
 
 MirrorRunner::MirrorRunner(MirrorController& controller)
     : base_t{controller,
              [this](const MirrorConfiguration& listener, const MirrorNotification& notification) {
                  typename MirrorController::notification_t n{listener.path, listener, notification};
-                 ALOG(D, "MirrorRunner::notifying --> making call");
                  MirrorRunner::notify(this->controller_, n);
                  // The following is a hack to force the server to increment the job generation count
-                 ALOG(D, "MirrorRunner::notifying --> forcing server to traverse the defs");
+                 ALOG(D, "Sync'ing: forcing server to traverse the defs");
                  TheOneServer::server().increment_job_generation_count();
              },
              [this]() { return MirrorRunner::subscribe(this->controller_); }} {};
@@ -80,7 +96,7 @@ void MirrorService::start() {
         expiry     = found->mirror_request_.polling;
     }
 
-    ALOG(D, "Start polling, with polling interval: " << expiry << " s");
+    ALOG(D, "Sync'ing: start polling, with polling interval: " << expiry << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 
