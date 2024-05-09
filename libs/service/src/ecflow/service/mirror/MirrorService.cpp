@@ -114,7 +114,9 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
             auto latest_status = mirror_.get_node_status(remote_host, remote_port, remote_path);
 
             ALOG(D, "Mirroring: Notifying remote node state: " << latest_status);
-            notify_(MirrorConfiguration{remote_path}, MirrorNotification{remote_path, latest_status});
+
+            MirrorNotification notification{remote_path, latest_status};
+            notify_(notification);
         }
     }
 }
@@ -129,9 +131,8 @@ void MirrorService::unregister_listener(const std::string& unlisten_path) {
 }
 
 MirrorController::MirrorController()
-    : base_t{[this](const MirrorConfiguration& listener, const MirrorNotification& notification) {
-                 typename MirrorController::notification_t n{listener.path, listener, notification};
-                 this->notify(n);
+    : base_t{[this](const MirrorService::notification_t& notification) {
+                 this->notify(notification);
                  // The following is a hack to force the server to increment the job generation count
                  ALOG(D, "Sync'ing: forcing server to traverse the defs");
                  TheOneServer::server().increment_job_generation_count();

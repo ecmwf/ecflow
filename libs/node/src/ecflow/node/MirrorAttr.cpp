@@ -57,7 +57,7 @@ void MirrorAttr::poke() {
     // Notifications found -- Node state to be updated
     ALOG(D, "MirrorAttr::isFree: found notifications for Mirror attribute (name: " << name_ << ")");
 
-    auto latest_state = static_cast<NState::State>(notifications.back().notification.status);
+    auto latest_state = static_cast<NState::State>(notifications.back().status);
     parent_->setStateOnly(latest_state, true);
     parent_->handleStateChange();
 }

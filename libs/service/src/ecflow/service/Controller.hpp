@@ -20,25 +20,12 @@
 
 namespace ecf::service {
 
-template <typename Configuration, typename Notification>
-struct NotificationPackage
-{
-    std::string path;
-    Configuration configuration;
-    Notification notification;
-};
-
-template <typename Configuration, typename Notification>
-inline std::ostream& operator<<(std::ostream& os, const NotificationPackage<Configuration, Notification>& p) {
-    return os << "NotificationPackage{path: " << p.path << ", listener: TODO, notification: TODO}";
-}
-
-template <typename Subscription, typename Notification, typename Service>
+template <typename Service>
 class Controller {
 public:
-    using subscription_t  = Subscription;
+    using subscription_t  = typename Service::subscription_t;
     using subscriptions_t = std::vector<subscription_t>;
-    using notification_t  = Notification;
+    using notification_t  = typename Service::notification_t;
     using notifications_t = std::vector<notification_t>;
     using service_t       = Service;
 

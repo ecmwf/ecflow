@@ -24,6 +24,19 @@
 
 namespace ecf::service::aviso {
 
+template <typename Configuration, typename Notification>
+struct NotificationPackage
+{
+    std::string path;
+    Configuration configuration;
+    Notification notification;
+};
+
+template <typename Configuration, typename Notification>
+inline std::ostream& operator<<(std::ostream& os, const NotificationPackage<Configuration, Notification>& p) {
+    return os << "NotificationPackage{path: " << p.path << ", listener: TODO, notification: TODO}";
+}
+
 class AvisoService {
 public:
     using address_t     = aviso::etcd::Address;
@@ -31,6 +44,10 @@ public:
     using key_prefix_t  = std::string;
     using listener_t    = ConfiguredListener;
     using revision_t    = int64_t;
+
+    using notification_t  = NotificationPackage<ConfiguredListener, AvisoNotification>;
+    using subscription_t  = AvisoRequest;
+    using subscriptions_t = std::vector<subscription_t>;
 
     struct Entry
     {
@@ -48,8 +65,8 @@ public:
     };
 
     using storage_t            = std::vector<Entry>;
-    using notify_callback_t    = std::function<void(const ConfiguredListener&, const AvisoNotification&)>;
-    using subscribe_callback_t = std::function<std::vector<AvisoRequest>()>;
+    using notify_callback_t    = std::function<void(const AvisoService::notification_t&)>;
+    using subscribe_callback_t = std::function<subscriptions_t()>;
 
     AvisoService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
@@ -80,10 +97,9 @@ private:
     subscribe_callback_t subscribe_;
 };
 
-class AvisoController
-    : private Controller<AvisoRequest, NotificationPackage<ConfiguredListener, AvisoNotification>, AvisoService> {
+class AvisoController : private Controller<AvisoService> {
 public:
-    using base_t = Controller<AvisoRequest, NotificationPackage<ConfiguredListener, AvisoNotification>, AvisoService>;
+    using base_t = Controller<AvisoService>;
 
 public:
     AvisoController();

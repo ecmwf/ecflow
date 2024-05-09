@@ -84,7 +84,8 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
 
                 if (auto notification = entry.listener().accepts(key, value, entry.listener().revision());
                     notification) {
-                    notify_(entry.listener(), *notification);
+                    notification_t n{std::string{entry.path()}, entry.listener(), *notification};
+                    notify_(n);
                 }
             }
         }
@@ -116,8 +117,8 @@ void AvisoService::unregister_listener(const std::string& unlisten_path) {
 }
 
 AvisoController::AvisoController()
-    : base_t{[this](const ConfiguredListener& listener, const AvisoNotification& notification) {
-                 this->notify(AvisoController::notification_t{listener.path(), listener, notification});
+    : base_t{[this](const AvisoController::notification_t& notification) {
+                 this->notify(notification);
                  // The following is a hack to force the server to increment the job generation count
                  TheOneServer::server().increment_job_generation_count();
              },

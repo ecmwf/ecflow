@@ -55,19 +55,24 @@ struct MirrorNotification
     int status;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const MirrorNotification& n) {
+    return os << "MirrorNotification{}";
+}
+
 class MirrorService {
 public:
-    using listener_t = MirrorConfiguration;
+    using notification_t  = MirrorNotification;
+    using subscription_t  = MirrorRequest;
+    using subscriptions_t = std::vector<subscription_t>;
 
     struct Entry
     {
         MirrorRequest mirror_request_;
     };
 
-    using storage_t = std::vector<Entry>;
-    using notify_callback_t =
-        std::function<void(const MirrorConfiguration& listener, const MirrorNotification& notification)>;
-    using subscribe_callback_t = std::function<std::vector<MirrorRequest>()>;
+    using storage_t            = std::vector<Entry>;
+    using notify_callback_t    = std::function<void(const notification_t& notification)>;
+    using subscribe_callback_t = std::function<subscriptions_t()>;
 
     MirrorService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
@@ -100,11 +105,9 @@ private:
     MirrorClient mirror_;
 };
 
-class MirrorController
-    : public Controller<MirrorRequest, NotificationPackage<MirrorConfiguration, MirrorNotification>, MirrorService> {
+class MirrorController : public Controller<MirrorService> {
 public:
-    using base_t =
-        Controller<MirrorRequest, NotificationPackage<MirrorConfiguration, MirrorNotification>, MirrorService>;
+    using base_t = Controller<MirrorService>;
 
     MirrorController();
 
