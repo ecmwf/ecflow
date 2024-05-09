@@ -24,7 +24,7 @@
 
 namespace ecf::service::aviso {
 
-using AvisoController = Controller<ListenRequest, NotificationPackage<ConfiguredListener, Notification>>;
+using AvisoController = Controller<AvisoRequest, NotificationPackage<ConfiguredListener, AvisoNotification>>;
 
 class AvisoService {
 public:
@@ -50,8 +50,8 @@ public:
     };
 
     using storage_t            = std::vector<Entry>;
-    using notify_callback_t    = std::function<void(const ConfiguredListener&, const Notification&)>;
-    using subscribe_callback_t = std::function<std::vector<ListenRequest>()>;
+    using notify_callback_t    = std::function<void(const ConfiguredListener&, const AvisoNotification&)>;
+    using subscribe_callback_t = std::function<std::vector<AvisoRequest>()>;
 
     AvisoService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
@@ -71,7 +71,7 @@ public:
 
     void operator()(const std::chrono::system_clock::time_point& now);
 
-    void register_listener(const ListenRequest& request);
+    void register_listener(const AvisoRequest& request);
     void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
 
@@ -90,7 +90,7 @@ public:
 public:
     AvisoRunner(AvisoController& controller)
         : base_t{controller,
-                 [this](const ConfiguredListener& listener, const Notification& notification) {
+                 [this](const ConfiguredListener& listener, const AvisoNotification& notification) {
                      AvisoRunner::notify(this->controller_,
                                          AvisoController::notification_t{listener.path(), listener, notification});
                      // The following is a hack to force the server to increment the job generation count

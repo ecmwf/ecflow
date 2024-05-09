@@ -10,6 +10,8 @@
 
 #include "ecflow/service/aviso/AvisoService.hpp"
 
+#include "ecflow/service/aviso/etcd/Client.hpp"
+
 namespace ecf::service::aviso {
 
 void AvisoService::start() {
@@ -88,8 +90,8 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
     }
 }
 
-void AvisoService::register_listener(const ListenRequest& listen) {
-    auto listener = create_configured_listener(listen);
+void AvisoService::register_listener(const AvisoRequest& listen) {
+    auto listener = ConfiguredListener::make_configured_listener(listen);
     register_listener(listener);
 }
 

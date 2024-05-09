@@ -15,9 +15,6 @@ set(srcs
   # Headers
   src/ecflow/service/aviso/Aviso.hpp
   src/ecflow/service/aviso/AvisoService.hpp
-  src/ecflow/service/aviso/ConfiguredListener.hpp
-  src/ecflow/service/aviso/Listener.hpp
-  src/ecflow/service/aviso/ListenerSchema.hpp
   src/ecflow/service/aviso/etcd/Address.hpp
   src/ecflow/service/aviso/etcd/Client.hpp
   src/ecflow/service/aviso/etcd/Range.hpp
@@ -28,8 +25,6 @@ set(srcs
   # Sources
   src/ecflow/service/aviso/Aviso.cpp
   src/ecflow/service/aviso/AvisoService.cpp
-  src/ecflow/service/aviso/ConfiguredListener.cpp
-  src/ecflow/service/aviso/ListenerSchema.cpp
   src/ecflow/service/aviso/etcd/Range.cpp
   src/ecflow/service/aviso/etcd/Client.cpp
   src/ecflow/service/mirror/MirrorService.cpp

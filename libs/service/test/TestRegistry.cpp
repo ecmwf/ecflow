@@ -10,7 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/service/aviso/Aviso.hpp"
+#include "ecflow/service/aviso/AvisoService.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Aviso)
 

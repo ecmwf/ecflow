@@ -139,7 +139,7 @@ void AvisoAttr::start() const {
 
     // Controller -- start up the Aviso controller
     controller_ = std::make_shared<controller_t>();
-    controller_->subscribe(ecf::service::aviso::ListenRequest::make_listen_start(
+    controller_->subscribe(ecf::service::aviso::AvisoRequest::make_listen_start(
         aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_));
     // Runner -- start up the Aviso runner, and thus effectively start the Aviso listener
     // n.b. this must be done after subscribing in the controller, so that the polling interval is set
@@ -152,7 +152,7 @@ void AvisoAttr::finish() const {
     LOG(Log::DBG, Message("**** Unsubscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     std::string aviso_path = path();
-    controller_->unsubscribe(ecf::service::aviso::ListenRequest::make_listen_finish(aviso_path));
+    controller_->unsubscribe(ecf::service::aviso::AvisoRequest::make_listen_finish(aviso_path));
 
     // Controller -- shutdown up the Aviso controller
     runner_->stop();
