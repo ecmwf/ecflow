@@ -38,8 +38,7 @@ AvisoAttr::AvisoAttr(Node* parent,
       schema_{std::move(schema)},
       polling_{std::move(polling)},
       revision_{revision},
-      controller_{nullptr},
-      runner_{nullptr} {
+      controller_{nullptr} {
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
     }
@@ -137,14 +136,13 @@ void AvisoAttr::start() const {
     }
     auto polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
 
-    // Controller -- start up the Aviso controller
+    // Controller -- start up the Aviso controller, and subscribe the Aviso listener
     controller_ = std::make_shared<controller_t>();
     controller_->subscribe(ecf::service::aviso::AvisoRequest::make_listen_start(
         aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_));
-    // Runner -- start up the Aviso runner, and thus effectively start the Aviso listener
+    // Controller -- effectively start the Aviso listener
     // n.b. this must be done after subscribing in the controller, so that the polling interval is set
-    runner_ = std::make_shared<runner_t>(*controller_);
-    runner_->start();
+    controller_->start();
 }
 
 void AvisoAttr::finish() const {
@@ -155,8 +153,7 @@ void AvisoAttr::finish() const {
     controller_->unsubscribe(ecf::service::aviso::AvisoRequest::make_listen_finish(aviso_path));
 
     // Controller -- shutdown up the Aviso controller
-    runner_->stop();
-    runner_     = nullptr;
+    controller_->stop();
     controller_ = nullptr;
 }
 

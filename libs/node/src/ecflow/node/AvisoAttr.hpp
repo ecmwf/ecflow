@@ -48,8 +48,6 @@ public:
 
     using controller_t     = ecf::service::aviso::AvisoController;
     using controller_ptr_t = std::shared_ptr<controller_t>;
-    using runner_t         = ecf::service::aviso::AvisoRunner;
-    using runner_ptr_t     = std::shared_ptr<runner_t>;
 
     static bool is_valid_name(const std::string& name);
 
@@ -112,7 +110,6 @@ private:
     // The controller is only instanciated between start() and finish() calls
     // This allows the AvisoAttr have a copy-ctor and assignment operator
     mutable controller_ptr_t controller_;
-    mutable runner_ptr_t runner_;
 };
 
 template <class Archive>

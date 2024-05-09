@@ -17,14 +17,12 @@
 #include <vector>
 
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/service/Controller.hpp"
 #include "ecflow/service/Log.hpp"
-#include "ecflow/service/Registry.hpp"
 #include "ecflow/service/aviso/Aviso.hpp"
 #include "ecflow/service/executor/PeriodicTaskExecutor.hpp"
 
 namespace ecf::service::aviso {
-
-using AvisoController = Controller<AvisoRequest, NotificationPackage<ConfiguredListener, AvisoNotification>>;
 
 class AvisoService {
 public:
@@ -65,17 +63,16 @@ public:
     AvisoService& operator=(const AvisoService&) = delete;
 
     void start();
-
     void stop() { executor_.stop(); }
     void terminate() { executor_.stop(); }
 
     void operator()(const std::chrono::system_clock::time_point& now);
 
+private:
     void register_listener(const AvisoRequest& request);
     void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
 
-private:
     executor::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;
     storage_t listeners_;
 
@@ -83,26 +80,21 @@ private:
     subscribe_callback_t subscribe_;
 };
 
-class AvisoRunner : private Runner<AvisoController, AvisoService> {
+class AvisoController
+    : private Controller<AvisoRequest, NotificationPackage<ConfiguredListener, AvisoNotification>, AvisoService> {
 public:
-    using base_t = Runner<AvisoController, AvisoService>;
+    using base_t = Controller<AvisoRequest, NotificationPackage<ConfiguredListener, AvisoNotification>, AvisoService>;
 
 public:
-    AvisoRunner(AvisoController& controller)
-        : base_t{controller,
-                 [this](const ConfiguredListener& listener, const AvisoNotification& notification) {
-                     AvisoRunner::notify(this->controller_,
-                                         AvisoController::notification_t{listener.path(), listener, notification});
-                     // The following is a hack to force the server to increment the job generation count
-                     TheOneServer::server().increment_job_generation_count();
-                 },
-                 [this]() { return AvisoRunner::subscribe(this->controller_); }} {};
+    AvisoController();
 
     using base_t::notify;
+    using base_t::poll_notifications;
     using base_t::start;
     using base_t::stop;
     using base_t::subscribe;
     using base_t::terminate;
+    using base_t::unsubscribe;
 };
 
 } // namespace ecf::service::aviso

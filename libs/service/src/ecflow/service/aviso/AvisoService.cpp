@@ -10,6 +10,7 @@
 
 #include "ecflow/service/aviso/AvisoService.hpp"
 
+#include "ecflow/service/Registry.hpp"
 #include "ecflow/service/aviso/etcd/Client.hpp"
 
 namespace ecf::service::aviso {
@@ -113,5 +114,13 @@ void AvisoService::unregister_listener(const std::string& unlisten_path) {
                                     [&unlisten_path](auto&& listener) { return listener.path() == unlisten_path; }),
                      std::end(listeners_));
 }
+
+AvisoController::AvisoController()
+    : base_t{[this](const ConfiguredListener& listener, const AvisoNotification& notification) {
+                 this->notify(AvisoController::notification_t{listener.path(), listener, notification});
+                 // The following is a hack to force the server to increment the job generation count
+                 TheOneServer::server().increment_job_generation_count();
+             },
+             [this]() { return this->get_subscriptions(); }} {};
 
 } // namespace ecf::service::aviso

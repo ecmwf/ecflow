@@ -43,8 +43,6 @@ public:
 
     using controller_t     = ecf::service::mirror::MirrorController;
     using controller_ptr_t = std::shared_ptr<controller_t>;
-    using runner_t         = ecf::service::mirror::MirrorRunner;
-    using runner_ptr_t     = std::shared_ptr<runner_t>;
 
     static bool is_valid_name(const std::string& name);
 
@@ -88,6 +86,8 @@ public:
     friend void serialize(Archive& ar, MirrorAttr& aviso, std::uint32_t version);
 
 private:
+    void start_controller() const;
+
     Node* parent_{nullptr}; // only ever used on the server side, to update parent Node state
     name_t name_;
     remote_path_t remote_path_;
@@ -95,15 +95,12 @@ private:
     remote_port_t remote_port_;
     polling_t polling_;
 
-    void start_controller() const;
-
     // The following are mutable as they are modified by the const method isFree()
     mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
     // The controller is only instanciated when the Mirror is reset()
     // This allows the MirrorAttr have a copy-ctor and assignment operator
     mutable controller_ptr_t controller_;
-    mutable runner_ptr_t runner_;
 };
 
 template <class Archive>

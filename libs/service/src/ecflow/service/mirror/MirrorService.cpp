@@ -16,6 +16,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/service/Log.hpp"
+#include "ecflow/service/Registry.hpp"
 
 namespace ecf::service::mirror {
 
@@ -63,17 +64,6 @@ int MirrorClient::get_node_status(const std::string& remote_host,
         return NState::UNKNOWN;
     }
 }
-
-MirrorRunner::MirrorRunner(MirrorController& controller)
-    : base_t{controller,
-             [this](const MirrorConfiguration& listener, const MirrorNotification& notification) {
-                 typename MirrorController::notification_t n{listener.path, listener, notification};
-                 MirrorRunner::notify(this->controller_, n);
-                 // The following is a hack to force the server to increment the job generation count
-                 ALOG(D, "Sync'ing: forcing server to traverse the defs");
-                 TheOneServer::server().increment_job_generation_count();
-             },
-             [this]() { return MirrorRunner::subscribe(this->controller_); }} {};
 
 void MirrorService::start() {
 
@@ -137,5 +127,15 @@ void MirrorService::register_listener(const MirrorRequest& request) {
 void MirrorService::unregister_listener(const std::string& unlisten_path) {
     // Nothing to do ...
 }
+
+MirrorController::MirrorController()
+    : base_t{[this](const MirrorConfiguration& listener, const MirrorNotification& notification) {
+                 typename MirrorController::notification_t n{listener.path, listener, notification};
+                 this->notify(n);
+                 // The following is a hack to force the server to increment the job generation count
+                 ALOG(D, "Sync'ing: forcing server to traverse the defs");
+                 TheOneServer::server().increment_job_generation_count();
+             },
+             [this]() { return this->get_subscriptions(); }} {};
 
 } // namespace ecf::service::mirror

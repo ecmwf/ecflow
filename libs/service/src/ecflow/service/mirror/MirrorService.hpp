@@ -14,7 +14,7 @@
 #include <memory>
 #include <string_view>
 
-#include "ecflow/service/Registry.hpp"
+#include "ecflow/service/Controller.hpp"
 #include "ecflow/service/executor/PeriodicTaskExecutor.hpp"
 
 namespace ecf::service::mirror {
@@ -55,8 +55,6 @@ struct MirrorNotification
     int status;
 };
 
-using MirrorController = Controller<MirrorRequest, NotificationPackage<MirrorConfiguration, MirrorNotification>>;
-
 class MirrorService {
 public:
     using listener_t = MirrorConfiguration;
@@ -84,16 +82,15 @@ public:
     MirrorService& operator=(const MirrorService&) = delete;
 
     void start();
-
     void stop() { executor_.stop(); }
     void terminate() { executor_.stop(); }
 
     void operator()(const std::chrono::system_clock::time_point& now);
 
+private:
     void register_listener(const MirrorRequest& request);
     void unregister_listener(const std::string& unlisten_path);
 
-private:
     executor::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;
     storage_t listeners_;
 
@@ -103,17 +100,20 @@ private:
     MirrorClient mirror_;
 };
 
-class MirrorRunner : private Runner<MirrorController, MirrorService> {
+class MirrorController
+    : public Controller<MirrorRequest, NotificationPackage<MirrorConfiguration, MirrorNotification>, MirrorService> {
 public:
-    using base_t = Runner<MirrorController, MirrorService>;
+    using base_t =
+        Controller<MirrorRequest, NotificationPackage<MirrorConfiguration, MirrorNotification>, MirrorService>;
 
-    MirrorRunner(MirrorController& controller);
+    MirrorController();
 
     using base_t::notify;
     using base_t::start;
     using base_t::stop;
     using base_t::subscribe;
     using base_t::terminate;
+    using base_t::unsubscribe;
 };
 
 } // namespace ecf::service::mirror

@@ -20,6 +20,7 @@ set(srcs
   src/ecflow/service/aviso/etcd/Range.hpp
   src/ecflow/service/executor/PeriodicTaskExecutor.hpp
   src/ecflow/service/mirror/MirrorService.hpp
+  src/ecflow/service/Controller.hpp
   src/ecflow/service/Log.hpp
   src/ecflow/service/Registry.hpp
   # Sources
@@ -28,7 +29,7 @@ set(srcs
   src/ecflow/service/aviso/etcd/Range.cpp
   src/ecflow/service/aviso/etcd/Client.cpp
   src/ecflow/service/mirror/MirrorService.cpp
-  src/ecflow/service/Log.hpp
+  src/ecflow/service/Controller.cpp
   src/ecflow/service/Registry.cpp
 )
 
