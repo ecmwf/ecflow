@@ -17,7 +17,7 @@
 
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/service/MirrorService.hpp"
+#include "ecflow/service/mirror/MirrorService.hpp"
 
 namespace cereal {
 class access;
@@ -40,6 +40,11 @@ public:
     using remote_host_t = std::string;
     using remote_port_t = std::string;
     using polling_t     = std::string;
+
+    using controller_t     = ecf::service::mirror::MirrorController;
+    using controller_ptr_t = std::shared_ptr<controller_t>;
+    using runner_t         = ecf::service::mirror::MirrorRunner;
+    using runner_ptr_t     = std::shared_ptr<runner_t>;
 
     static bool is_valid_name(const std::string& name);
 
@@ -97,8 +102,8 @@ private:
 
     // The controller is only instanciated when the Mirror is reset()
     // This allows the MirrorAttr have a copy-ctor and assignment operator
-    mutable std::shared_ptr<ecf::service::MirrorController> controller_;
-    mutable std::shared_ptr<ecf::service::MirrorRunner> runner_;
+    mutable controller_ptr_t controller_;
+    mutable runner_ptr_t runner_;
 };
 
 template <class Archive>

@@ -104,12 +104,12 @@ void MirrorAttr::start_controller() const {
                                                                              << ", port: " << remote_port_ << ")");
 
         // Controller -- start up the Mirror controller
-        controller_ = std::make_shared<ecf::service::MirrorController>();
-        controller_->subscribe(ecf::service::MirrorRequest{
+        controller_ = std::make_shared<controller_t>();
+        controller_->subscribe(ecf::service::mirror::MirrorRequest{
             remote_path_, remote_host_, remote_port_, boost::lexical_cast<std::uint32_t>(polling_)});
         // Runner -- start up the Mirror runner, and thus effectively start the Aviso listener
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
-        runner_ = std::make_shared<ecf::service::MirrorRunner>(*controller_);
+        runner_ = std::make_shared<ecf::service::mirror::MirrorRunner>(*controller_);
         runner_->start();
     }
 }

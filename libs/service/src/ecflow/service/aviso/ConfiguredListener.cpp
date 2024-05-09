@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "aviso/ConfiguredListener.hpp"
+#include "ecflow/service/aviso/ConfiguredListener.hpp"
 
 #include <cassert>
 #include <fstream>
@@ -19,9 +19,9 @@
 
 #include <nlohmann/json.hpp>
 
-#include "aviso/Log.hpp"
+#include "ecflow/service/Log.hpp"
 
-namespace aviso {
+namespace ecf::service::aviso {
 
 std::ostream& operator<<(std::ostream& os, const Notification& notification) {
     os << notification.key() << " = " << notification.value() << " (revision: " << notification.revision() << ")";
@@ -184,7 +184,7 @@ ConfiguredListener create_configured_listener(const ListenRequest& listen_reques
     }
 
     ConfiguredListener configured{
-        etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
+        aviso::etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
 
     ALOG(I,
          "Listener configured with: " << path << " for " << event << " at " << address << " with revision "
@@ -222,4 +222,4 @@ ConfiguredListener create_configured_listener(const ListenRequest& listen_reques
     return configured;
 }
 
-} // namespace aviso
+} // namespace ecf::service::aviso

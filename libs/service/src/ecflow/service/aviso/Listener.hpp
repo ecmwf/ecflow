@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_Listener_HPP
-#define aviso_Listener_HPP
+#ifndef ecflow_service_aviso_Listener_HPP
+#define ecflow_service_aviso_Listener_HPP
 
 #include <string>
 #include <string_view>
 
-namespace aviso {
+namespace ecf::service::aviso {
 
 class Listener {
 public:
@@ -36,6 +36,6 @@ private:
     std::string stem_{};
 };
 
-} // namespace aviso
+} // namespace ecf::service::aviso
 
-#endif /* aviso_Listener_HPP */
+#endif /* ecflow_service_aviso_Listener_HPP */

@@ -8,16 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_ListenerSchema_HPP
-#define aviso_ListenerSchema_HPP
+#ifndef ecflow_service_aviso_ListenerSchema_HPP
+#define ecflow_service_aviso_ListenerSchema_HPP
 
 #include <optional>
 #include <string>
 #include <unordered_map>
 
-#include "aviso/Listener.hpp"
+#include "ecflow/service/aviso/Listener.hpp"
 
-namespace aviso {
+namespace ecf::service::aviso {
 
 class ListenerSchema {
 public:
@@ -39,6 +39,6 @@ private:
     std::unordered_map<std::string, Listener> listeners_{};
 };
 
-} // namespace aviso
+} // namespace ecf::service::aviso
 
-#endif /* aviso_ListenerSchema_HPP */
+#endif /* ecflow_service_aviso_ListenerSchema_HPP */

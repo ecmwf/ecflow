@@ -16,23 +16,22 @@
 #include <variant>
 #include <vector>
 
-#include "aviso/Aviso.hpp"
-#include "aviso/Log.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/service/Log.hpp"
 #include "ecflow/service/Registry.hpp"
+#include "ecflow/service/aviso/Aviso.hpp"
 #include "ecflow/service/executor/PeriodicTaskExecutor.hpp"
 
-namespace ecf::service {
+namespace ecf::service::aviso {
 
-using AvisoController =
-    Controller<aviso::ListenRequest, NotificationPackage<aviso::ConfiguredListener, aviso::Notification>>;
+using AvisoController = Controller<ListenRequest, NotificationPackage<ConfiguredListener, Notification>>;
 
 class AvisoService {
 public:
     using address_t     = aviso::etcd::Address;
     using schema_path_t = std::string;
     using key_prefix_t  = std::string;
-    using listener_t    = aviso::ConfiguredListener;
+    using listener_t    = ConfiguredListener;
     using revision_t    = int64_t;
 
     struct Entry
@@ -51,8 +50,8 @@ public:
     };
 
     using storage_t            = std::vector<Entry>;
-    using notify_callback_t    = std::function<void(const aviso::ConfiguredListener&, const aviso::Notification&)>;
-    using subscribe_callback_t = std::function<std::vector<aviso::ListenRequest>()>;
+    using notify_callback_t    = std::function<void(const ConfiguredListener&, const Notification&)>;
+    using subscribe_callback_t = std::function<std::vector<ListenRequest>()>;
 
     AvisoService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
@@ -72,7 +71,7 @@ public:
 
     void operator()(const std::chrono::system_clock::time_point& now);
 
-    void register_listener(const aviso::ListenRequest& request);
+    void register_listener(const ListenRequest& request);
     void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
 
@@ -91,7 +90,7 @@ public:
 public:
     AvisoRunner(AvisoController& controller)
         : base_t{controller,
-                 [this](const aviso::ConfiguredListener& listener, const aviso::Notification& notification) {
+                 [this](const ConfiguredListener& listener, const Notification& notification) {
                      AvisoRunner::notify(this->controller_,
                                          AvisoController::notification_t{listener.path(), listener, notification});
                      // The following is a hack to force the server to increment the job generation count
@@ -106,6 +105,6 @@ public:
     using base_t::terminate;
 };
 
-} // namespace ecf::service
+} // namespace ecf::service::aviso
 
 #endif /* ecflow_service_Registry_HPP */

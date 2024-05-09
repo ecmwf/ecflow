@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_ectd_Range_HPP
-#define aviso_ectd_Range_HPP
+#ifndef ecflow_service_aviso_ectd_Range_HPP
+#define ecflow_service_aviso_ectd_Range_HPP
 
 #include <string>
 #include <string_view>
 
-namespace aviso::etcd {
+namespace ecf::service::aviso::etcd {
 
 struct Raw;
 struct Base64;
@@ -90,6 +90,6 @@ private:
     Content range_end;
 };
 
-} // namespace aviso::etcd
+} // namespace ecf::service::aviso::etcd
 
-#endif /* aviso_etcd_Range_HPP */
+#endif /* ecflow_service_aviso_etcd_Range_HPP */

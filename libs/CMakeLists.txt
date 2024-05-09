@@ -9,8 +9,6 @@
 #
 
 
-add_subdirectory( aviso )
-
 add_subdirectory( core )
 add_subdirectory( service )
 add_subdirectory( attribute )

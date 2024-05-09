@@ -20,11 +20,11 @@
 #include <variant>
 #include <vector>
 
-#include "aviso/Listener.hpp"
-#include "aviso/ListenerSchema.hpp"
-#include "aviso/etcd/Address.hpp"
+#include "ecflow/service/aviso/Listener.hpp"
+#include "ecflow/service/aviso/ListenerSchema.hpp"
+#include "ecflow/service/aviso/etcd/Address.hpp"
 
-namespace aviso {
+namespace ecf::service::aviso {
 
 class ListenRequest {
 public:
@@ -80,7 +80,7 @@ private:
     uint64_t revision_;
 };
 
-inline std::ostream& operator <<(std::ostream& os, const ListenRequest& request) {
+inline std::ostream& operator<<(std::ostream& os, const ListenRequest& request) {
     os << "ListenRequest{";
     os << "start: " << request.is_start();
     os << ", path: " << request.path();
@@ -129,7 +129,7 @@ std::ostream& operator<<(std::ostream& os, const Notification& notification);
 
 class ConfiguredListener : private Listener {
 public:
-    ConfiguredListener(etcd::Address address,
+    ConfiguredListener(ecf::service::aviso::etcd::Address address,
                        std::string_view path,
                        std::string_view name,
                        std::string_view base,
@@ -148,7 +148,7 @@ public:
     void with_parameter(const std::string& parameter, const std::vector<std::string>& value);
 
     const std::string& path() const { return path_; }
-    const etcd::Address& address() const { return address_; }
+    const ecf::service::aviso::etcd::Address& address() const { return address_; }
 
     uint32_t polling() const { return polling_; }
     uint64_t revision() const { return revision_; }
@@ -168,7 +168,7 @@ public:
 
 private:
     std::string path_;
-    etcd::Address address_;
+    ecf::service::aviso::etcd::Address address_;
     std::string resolved_base_;
     uint32_t polling_;
     uint64_t revision_;
@@ -179,6 +179,6 @@ private:
 
 ConfiguredListener create_configured_listener(const ListenRequest& request);
 
-} // namespace aviso
+} // namespace ecf::service::aviso
 
 #endif /* aviso_ConfiguredListener_HPP */

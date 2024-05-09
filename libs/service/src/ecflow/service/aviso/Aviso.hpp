@@ -8,10 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_Aviso_HPP
-#define aviso_Aviso_HPP
+#ifndef ecflow_service_aviso_Aviso_HPP
+#define ecflow_service_aviso_Aviso_HPP
 
-#include "aviso/ConfiguredListener.hpp"
-#include "aviso/etcd/Client.hpp"
+#include "ecflow/service/aviso/ConfiguredListener.hpp"
+#include "ecflow/service/aviso/etcd/Client.hpp"
 
-#endif /* aviso_Aviso_HPP */
+#endif /* ecflow_service_aviso_Aviso_HPP */

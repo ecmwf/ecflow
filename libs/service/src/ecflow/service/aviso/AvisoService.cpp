@@ -8,9 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/service/AvisoService.hpp"
+#include "ecflow/service/aviso/AvisoService.hpp"
 
-namespace ecf::service {
+namespace ecf::service::aviso {
 
 void AvisoService::start() {
 
@@ -88,7 +88,7 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
     }
 }
 
-void AvisoService::register_listener(const aviso::ListenRequest& listen) {
+void AvisoService::register_listener(const ListenRequest& listen) {
     auto listener = create_configured_listener(listen);
     register_listener(listener);
 }
@@ -112,4 +112,4 @@ void AvisoService::unregister_listener(const std::string& unlisten_path) {
                      std::end(listeners_));
 }
 
-} // namespace ecf::service
+} // namespace ecf::service::aviso

@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "aviso/etcd/Client.hpp"
+#include "ecflow/service/aviso/etcd/Client.hpp"
 
 #include <iostream>
 
@@ -30,10 +30,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "aviso/Log.hpp"
-#include "aviso/etcd/Range.hpp"
+#include "ecflow/service/Log.hpp"
+#include "ecflow/service/aviso/etcd/Range.hpp"
 
-namespace aviso::etcd {
+namespace ecf::service::aviso::etcd {
 
 struct Client::Impl
 {
@@ -110,4 +110,4 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
     return entries;
 }
 
-} // namespace aviso::etcd
+} // namespace ecf::service::aviso::etcd

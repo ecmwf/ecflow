@@ -13,13 +13,27 @@
 
 set(srcs
   # Headers
-  src/ecflow/service/AvisoService.hpp
-  src/ecflow/service/MirrorService.hpp
-  src/ecflow/service/Registry.hpp
+  src/ecflow/service/aviso/Aviso.hpp
+  src/ecflow/service/aviso/AvisoService.hpp
+  src/ecflow/service/aviso/ConfiguredListener.hpp
+  src/ecflow/service/aviso/Listener.hpp
+  src/ecflow/service/aviso/ListenerSchema.hpp
+  src/ecflow/service/aviso/etcd/Address.hpp
+  src/ecflow/service/aviso/etcd/Client.hpp
+  src/ecflow/service/aviso/etcd/Range.hpp
   src/ecflow/service/executor/PeriodicTaskExecutor.hpp
+  src/ecflow/service/mirror/MirrorService.hpp
+  src/ecflow/service/Log.hpp
+  src/ecflow/service/Registry.hpp
   # Sources
-  src/ecflow/service/AvisoService.cpp
-  src/ecflow/service/MirrorService.cpp
+  src/ecflow/service/aviso/Aviso.cpp
+  src/ecflow/service/aviso/AvisoService.cpp
+  src/ecflow/service/aviso/ConfiguredListener.cpp
+  src/ecflow/service/aviso/ListenerSchema.cpp
+  src/ecflow/service/aviso/etcd/Range.cpp
+  src/ecflow/service/aviso/etcd/Client.cpp
+  src/ecflow/service/mirror/MirrorService.cpp
+  src/ecflow/service/Log.hpp
   src/ecflow/service/Registry.cpp
 )
 
@@ -32,9 +46,13 @@ ecbuild_add_library(
   PUBLIC_INCLUDES
     src
   PUBLIC_LIBS
-    libaviso
     base
     libclient
+    Boost::boost
+    nlohmann::json
+    httplib::httplib
+    Threads::Threads
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
 )
 target_clangformat(ecflow_service)
 
@@ -60,5 +78,29 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_service
+  CONDITION ENABLE_TESTS
+)
+
+# u_aviso
+# --------------------------------------------------
+
+set(test_srcs
+  # Sources
+  test/aviso/TestAviso.cpp
+  test/aviso/TestAviso_main.cpp # test entry point
+)
+
+ecbuild_add_test(
+  TARGET
+    u_aviso
+  LABELS
+    integration
+  SOURCES
+    ${test_srcs}
+  LIBS
+    ecflow_service
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+)
+target_clangformat(u_aviso
   CONDITION ENABLE_TESTS
 )

@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_service_MirrorService_HPP
-#define ecflow_service_MirrorService_HPP
+#ifndef ecflow_service_mirror_MirrorService_HPP
+#define ecflow_service_mirror_MirrorService_HPP
 
 #include <memory>
 #include <string_view>
@@ -17,7 +17,7 @@
 #include "ecflow/service/Registry.hpp"
 #include "ecflow/service/executor/PeriodicTaskExecutor.hpp"
 
-namespace ecf::service {
+namespace ecf::service::mirror {
 
 class MirrorClient {
 public:
@@ -116,6 +116,6 @@ public:
     using base_t::terminate;
 };
 
-} // namespace ecf::service
+} // namespace ecf::service::mirror
 
-#endif /* ecflow_service_MirrorService_HPP */
+#endif /* ecflow_service_mirror_MirrorService_HPP */

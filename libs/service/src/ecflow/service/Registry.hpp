@@ -16,8 +16,8 @@
 #include <variant>
 #include <vector>
 
-#include "aviso/Log.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/service/Log.hpp"
 
 namespace ecf::service {
 

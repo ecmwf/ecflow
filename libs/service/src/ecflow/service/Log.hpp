@@ -8,23 +8,19 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_Log_HPP
-#define aviso_Log_HPP
+#ifndef ecflow_service_Log_HPP
+#define ecflow_service_Log_HPP
 
 #include <iostream>
 #include <thread>
 
-#include "aviso/Listener.hpp"
-#include "aviso/ListenerSchema.hpp"
-#include "aviso/etcd/Address.hpp"
-
-#define ALOG(LEVEL, MESSAGE)                                             \
-    [&]() {                                                              \
-        using namespace aviso::log;                                      \
-        select<Level::LEVEL>() << Meta{} << MESSAGE << aviso::log::endl; \
+#define ALOG(LEVEL, MESSAGE)                                                    \
+    [&]() {                                                                     \
+        using namespace ecf::service::log;                                      \
+        select<Level::LEVEL>() << Meta{} << MESSAGE << ecf::service::log::endl; \
     }()
 
-namespace aviso {
+namespace ecf::service {
 
 namespace log {
 
@@ -109,6 +105,6 @@ Channel<L>& select() {
 
 }; // namespace log
 
-} // namespace aviso
+} // namespace ecf::service
 
-#endif /* aviso_Log_HPP */
+#endif /* ecflow_service_Log_HPP */

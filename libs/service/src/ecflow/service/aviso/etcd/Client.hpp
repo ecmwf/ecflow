@@ -8,16 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_etcd_Client_HPP
-#define aviso_etcd_Client_HPP
+#ifndef ecflow_service_aviso_etcd_Client_HPP
+#define ecflow_service_aviso_etcd_Client_HPP
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "aviso/etcd/Address.hpp"
+#include "ecflow/service/aviso/etcd/Address.hpp"
 
-namespace aviso::etcd {
+namespace ecf::service::aviso::etcd {
 
 class Client {
 public:
@@ -40,4 +40,4 @@ private:
 
 } // namespace aviso::etcd
 
-#endif /* aviso_Aviso_HPP */
+#endif /* ecflow_service_aviso_etcd_Client_HPP */

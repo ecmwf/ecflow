@@ -8,16 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/service/MirrorService.hpp"
+#include "ecflow/service/mirror/MirrorService.hpp"
 
 #include <thread>
 
-#include "aviso/Log.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/service/Log.hpp"
 
-namespace ecf::service {
+namespace ecf::service::mirror {
 
 struct MirrorClient::Impl
 {
@@ -138,4 +138,4 @@ void MirrorService::unregister_listener(const std::string& unlisten_path) {
     // Nothing to do ...
 }
 
-} // namespace ecf::service
+} // namespace ecf::service::mirror

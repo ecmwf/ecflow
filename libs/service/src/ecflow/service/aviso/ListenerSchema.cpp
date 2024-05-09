@@ -8,14 +8,14 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "aviso/ListenerSchema.hpp"
+#include "ecflow/service/aviso/ListenerSchema.hpp"
 
 #include <fstream>
 #include <istream>
 
 #include <nlohmann/json.hpp>
 
-namespace aviso {
+namespace ecf::service::aviso {
 
 ListenerSchema ListenerSchema::load(const std::string& schema_path) {
     std::ifstream schema_stream(schema_path);
@@ -28,7 +28,8 @@ ListenerSchema ListenerSchema::load(std::istream& schema_stream) {
     json data;
     try {
         data = json::parse(schema_stream);
-    } catch (const json::parse_error& e) {
+    }
+    catch (const json::parse_error& e) {
         throw std::runtime_error("Failed to parse listener schema: " + std::string(e.what()));
     }
 
@@ -52,4 +53,4 @@ ListenerSchema ListenerSchema::load(std::istream& schema_stream) {
     return schema;
 }
 
-} // namespace aviso
+} // namespace ecf::service::aviso

@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef aviso_etcd_Address_HPP
-#define aviso_etcd_Address_HPP
+#ifndef ecflow_service_aviso_etcd_Address_HPP
+#define ecflow_service_aviso_etcd_Address_HPP
 
 #include <string>
 #include <string_view>
 
-namespace aviso::etcd {
+namespace ecf::service::aviso::etcd {
 
 class Address {
 public:
@@ -31,17 +31,17 @@ private:
     std::string scheme_host_port_;
 };
 
-} // namespace aviso::etcd
+} // namespace ecf::service::aviso::etcd
 
 namespace std {
 template <>
-struct hash<aviso::etcd::Address>
+struct hash<ecf::service::aviso::etcd::Address>
 {
-    size_t operator()(const aviso::etcd::Address& addr) const noexcept {
+    size_t operator()(const ecf::service::aviso::etcd::Address& addr) const noexcept {
         // We just hash the string representation of the address
         return std::hash<std::string>()(addr.scheme_host_port_);
     }
 };
 } // namespace std
 
-#endif /* aviso_etcd_Address_HPP */
+#endif /* ecflow_service_aviso_etcd_Address_HPP */

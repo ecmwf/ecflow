@@ -8,14 +8,14 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "aviso/etcd/Range.hpp"
+#include "ecflow/service/aviso/etcd/Range.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 
-namespace aviso::etcd {
+namespace ecf::service::aviso::etcd {
 
 std::string Content::decode_base64(const std::string& val) {
     using namespace boost::archive::iterators;
@@ -47,4 +47,4 @@ Range::key_t Range::increment_last_byte(key_t val) {
     return val;
 }
 
-} // namespace aviso::etcd
+} // namespace ecf::service::aviso::etcd
