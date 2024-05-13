@@ -248,6 +248,7 @@ protected:
     QPen holdingDateFontPen_;
 
     int avisoPixId_;
+    int mirrorPixId_;
     int holdingTimePixId_;
     int holdingDatePixId_;
 

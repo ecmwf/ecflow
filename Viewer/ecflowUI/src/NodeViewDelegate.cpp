@@ -85,6 +85,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent
     }
 
     avisoPixId_ = IconProvider::add(":/viewer/aviso.svg", "aviso");
+    mirrorPixId_ = IconProvider::add(":/viewer/remote.svg", "mirror");
 
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
     grad_.setStart(0, 0);
@@ -861,7 +862,7 @@ void NodeViewDelegate::renderMirror(QPainter* painter,
     QString valFirst, valRest;
     QString full;
 
-    auto avisoPix = IconProvider::pixmapToHeight(avisoPixId_, contRect.height());
+    auto avisoPix = IconProvider::pixmapToHeight(mirrorPixId_, contRect.height());
     mirrorRect    = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
     mirrorRect.setWidth(avisoPix.width());
 
