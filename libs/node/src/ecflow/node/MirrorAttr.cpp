@@ -39,7 +39,14 @@ MirrorAttr::MirrorAttr(Node* parent,
     if (!is_valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid MirrorAttr name :", name_));
     }
-};
+}
+
+MirrorAttr::~MirrorAttr() {
+    if (controller_ != nullptr) {
+        controller_->stop();
+        controller_.reset();
+    }
+}
 
 void MirrorAttr::poke() {
     ALOG(D, "**** Check Mirror attribute (name: " << name_ << ")");

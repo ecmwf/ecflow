@@ -508,12 +508,12 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     node->addDay(DayAttr::create(name_));
                     break;
                 case AlterCmd::ADD_AVISO: {
-                    auto aviso = AvisoParser::parse_aviso_line(value_, name_);
+                    auto aviso = AvisoParser::parse_aviso_line(value_, name_, node.get());
                     node->addAviso(aviso);
                     break;
                 }
                 case AlterCmd::ADD_MIRROR: {
-                    auto mirror = MirrorParser::parse_mirror_line(value_, name_);
+                    auto mirror = MirrorParser::parse_mirror_line(value_, name_, node.get());
                     node->addMirror(mirror);
                     break;
                 }

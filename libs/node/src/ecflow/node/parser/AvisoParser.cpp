@@ -37,8 +37,12 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line) {
 }
 
 ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, const std::string& name) {
+    return parse_aviso_line(line, name, nullptr);
+}
+
+ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, const std::string& name, Node* parent) {
     auto updated_line = line + " --name " + name;
-    return parse_aviso_line(updated_line, nullptr);
+    return parse_aviso_line(updated_line, parent);
 }
 
 ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* parent) {

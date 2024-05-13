@@ -38,8 +38,12 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line) {
 }
 
 ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, const std::string& name) {
+    return parse_mirror_line(line, name, nullptr);
+}
+
+ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, const std::string& name, Node* parent) {
     auto updated_line = line + " --name " + name;
-    return parse_mirror_line(updated_line, nullptr);
+    return parse_mirror_line(updated_line, parent);
 }
 
 ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* parent) {
@@ -78,7 +82,7 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* p
 
 bool MirrorParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (nodeStack().empty()) {
-        throw std::runtime_error("AvisoParser::doParse: Could not add aviso as node stack is empty at line: " + line);
+        throw std::runtime_error("MirrorParser::doParse: Could not add 'mirror' as node stack is empty at line: " + line);
     }
 
     Node* parent = nodeStack_top();

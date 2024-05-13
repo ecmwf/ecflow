@@ -184,8 +184,12 @@ void Node::changeAviso(const std::string& name, const std::string& value, uint64
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
-    *found = AvisoParser::parse_aviso_line(value, name);
-    found->set_revision(revision);
+    auto attr = AvisoParser::parse_aviso_line(value, name);
+    attr.set_revision(revision);
+
+    // The following delete/add enforces the reconfiguration of the attribute backend thread
+    this->deleteAviso(name); // delete the aviso if it exists (to avoid duplicates
+    this->addAviso(attr);
 
     state_change_no_ = Ecf::incr_state_change_no();
 }
@@ -197,7 +201,11 @@ void Node::changeMirror(const std::string& name, const std::string& value) {
         throw std::runtime_error("Node::changeMirror: Could not find mirror " + name);
     }
 
-    *found = MirrorParser::parse_mirror_line(value, name);
+    auto attr = MirrorParser::parse_mirror_line(value, name, this);
+
+    // The following delete/add enforces the reconfiguration of the attribute backend thread
+    this->deleteMirror(name); // delete the mirror if it exists (to avoid duplicates
+    this->addMirror(attr);
 
     state_change_no_ = Ecf::incr_state_change_no();
 }

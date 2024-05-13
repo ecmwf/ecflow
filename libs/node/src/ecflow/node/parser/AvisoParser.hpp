@@ -47,6 +47,7 @@ public:
 
     static ecf::AvisoAttr parse_aviso_line(const std::string& line);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name);
+    static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name, Node* parent);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, Node* parent);
 
     explicit AvisoParser(DefsStructureParser* p) : Parser(p) {}

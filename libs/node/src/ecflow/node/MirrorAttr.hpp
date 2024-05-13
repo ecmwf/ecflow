@@ -60,6 +60,7 @@ public:
                remote_port_t remote_port,
                polling_t polling);
     MirrorAttr(const MirrorAttr& rhs) = default;
+    ~MirrorAttr();
 
     MirrorAttr& operator=(const MirrorAttr& rhs) = default;
 
@@ -70,6 +71,8 @@ public:
     [[nodiscard]] inline const std::string& remote_host() const { return remote_host_; }
     [[nodiscard]] inline const std::string& remote_port() const { return remote_port_; }
     [[nodiscard]] inline polling_t polling() const { return polling_; }
+
+    void set_parent(Node* parent) { parent_ = parent; }
 
     unsigned int state_change_no() const { return state_change_no_; }
 
