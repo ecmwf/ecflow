@@ -104,10 +104,18 @@ void MirrorAttr::start_controller() const {
              "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
                                                                              << ", port: " << remote_port_ << ")");
 
+        // Substitute variables in Mirror configuration
+        std::string remote_host = remote_host_;
+        parent_->variableSubstitution(remote_host);
+        std::string remote_port = remote_port_;
+        parent_->variableSubstitution(remote_port);
+        std::string polling = polling_;
+        parent_->variableSubstitution(polling);
+
         // Controller -- start up the Mirror controller, and configure the Mirror request
         controller_ = std::make_shared<controller_t>();
         controller_->subscribe(ecf::service::mirror::MirrorRequest{
-            remote_path_, remote_host_, remote_port_, boost::lexical_cast<std::uint32_t>(polling_)});
+            remote_path_, remote_host, remote_port, boost::lexical_cast<std::uint32_t>(polling)});
         // Controller -- effectively start the Mirror process
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
         controller_->start();
