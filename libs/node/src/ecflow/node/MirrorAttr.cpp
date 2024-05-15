@@ -42,38 +42,10 @@ MirrorAttr::MirrorAttr(Node* parent,
 }
 
 MirrorAttr::~MirrorAttr() {
-    if (controller_ != nullptr) {
-        controller_->stop();
-        controller_.reset();
-    }
-}
-
-void MirrorAttr::poke() {
-    ALOG(D, "**** Check Mirror attribute (name: " << name_ << ")");
-
-    start_controller();
-
-    // Task associated with Attribute is free when any notification is found
-    auto notifications = controller_->poll_notifications(remote_path_);
-
-    if (notifications.empty()) {
-        // No notifications, nothing to do...
-        return;
-    }
-
-    // Notifications found -- Node state to be updated
-    ALOG(D, "MirrorAttr::isFree: found notifications for Mirror attribute (name: " << name_ << ")");
-
-    auto latest_state = static_cast<NState::State>(notifications.back().status);
-    parent_->setStateOnly(latest_state, true);
-    parent_->handleStateChange();
+    stop_controller();
 }
 
 bool MirrorAttr::why(std::string& theReasonWhy) const {
-    if (isFree()) {
-        return false;
-    }
-
     theReasonWhy += ecf::Message(" is a Mirror of ", remote_path(), " at '", remote_host(), ":", remote_port(), "'");
     return true;
 }
@@ -88,21 +60,31 @@ void MirrorAttr::reset() {
     start_controller();
 }
 
-bool MirrorAttr::isFree() const {
+void MirrorAttr::finish() {
 
-    LOG(Log::MSG, "**** Check Mirror attribute (name: " << name_ << ")");
+    ALOG(D,
+         "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
+                                                                         << ", port: " << remote_port_ << ")");
+
+    stop_controller();
+}
+
+void MirrorAttr::mirror() {
+    ALOG(D, "**** Check Mirror attribute (name: " << name_ << ")");
 
     start_controller();
 
-    return true;
-}
+    // Task associated with Attribute is free when any notification is found
+    if (auto notifications = controller_->poll_notifications(remote_path_); !notifications.empty()) {
+        // Notifications found -- Node state to be updated
+        ALOG(D, "MirrorAttr::isFree: found notifications for Mirror attribute (name: " << name_ << ")");
 
-void MirrorAttr::start() const {
-    // Nothing do do...
-}
+        auto latest_state = static_cast<NState::State>(notifications.back().status);
+        parent_->setStateOnly(latest_state, true);
+        parent_->handleStateChange();
+    }
 
-void MirrorAttr::finish() const {
-    // Nothing do do...
+    // No notifications, nothing to do...
 }
 
 void MirrorAttr::start_controller() const {
@@ -126,6 +108,17 @@ void MirrorAttr::start_controller() const {
         // Controller -- effectively start the Mirror process
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
         controller_->start();
+    }
+}
+
+void MirrorAttr::stop_controller() const {
+    if (controller_ != nullptr) {
+        ALOG(D,
+             "MirrorAttr::reset: stop polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
+                                                                            << ", port: " << remote_port_ << ")");
+
+        controller_->stop();
+        controller_.reset();
     }
 }
 

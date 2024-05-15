@@ -64,8 +64,6 @@ public:
 
     MirrorAttr& operator=(const MirrorAttr& rhs) = default;
 
-    void poke();
-
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& remote_path() const { return remote_path_; }
     [[nodiscard]] inline const std::string& remote_host() const { return remote_host_; }
@@ -78,18 +76,23 @@ public:
 
     bool why(std::string& theReasonWhy) const;
 
+    /**
+     * Initialises the Mirror procedure, which effectively starts the background polling mechanism.
+     */
     void reset();
+    void finish();
 
-    [[nodiscard]] bool isFree() const;
-
-    void start() const;
-    void finish() const;
+    /**
+     * Check if state changes were detected by the background polling mechanism, and if so, reflect it on the Node.
+     */
+    void mirror();
 
     template <class Archive>
     friend void serialize(Archive& ar, MirrorAttr& aviso, std::uint32_t version);
 
 private:
     void start_controller() const;
+    void stop_controller() const;
 
     Node* parent_{nullptr}; // only ever used on the server side, to update parent Node state
     name_t name_;

@@ -73,8 +73,6 @@ public:
     Node(const Node& rhs);
     virtual ~Node();
 
-    virtual void poke();
-
     virtual bool check_defaults() const;
 
     // parse string and create suite || family || task || alias. Can return a NULL node_ptr() for errors
@@ -397,7 +395,11 @@ public:
     const std::vector<DateAttr>& dates() const { return dates_; }
     const std::vector<DayAttr>& days() const { return days_; }
     const std::vector<ecf::CronAttr>& crons() const { return crons_; }
+
+    std::vector<ecf::AvisoAttr>& avisos() { return avisos_; }
     const std::vector<ecf::AvisoAttr>& avisos() const { return avisos_; }
+
+    std::vector<ecf::MirrorAttr>& mirrors() { return mirrors_; }
     const std::vector<ecf::MirrorAttr>& mirrors() const { return mirrors_; }
 
     const std::vector<VerifyAttr>& verifys() const;

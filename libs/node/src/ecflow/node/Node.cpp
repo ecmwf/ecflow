@@ -209,12 +209,6 @@ Node& Node::operator=(const Node& rhs) {
 
 Node::~Node() = default;
 
-void Node::poke() {
-    for (auto& mirror : mirrors_) {
-        mirror.poke();
-    }
-}
-
 bool Node::isParentSuspended() const {
     Node* theParent = parent();
     if (theParent) {
@@ -755,6 +749,11 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
             "   Node::resolveDependencies() " << absNodePath() << " HOLDING as node state " << NState::toString(state())
                                               << " is not valid for job submission");
 #endif
+        return false;
+    }
+
+    if (!mirrors_.empty()) {
+        // In case mirror attributes are configured, the node is never free (i.e. will not be run)
         return false;
     }
 

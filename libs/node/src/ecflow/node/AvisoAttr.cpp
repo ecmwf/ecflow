@@ -136,6 +136,15 @@ void AvisoAttr::start() const {
     }
     auto polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
 
+    start_controller(aviso_path, aviso_listener, aviso_url, aviso_schema, polling);
+}
+
+void AvisoAttr::start_controller(const std::string& aviso_path,
+                                 const std::string& aviso_listener,
+                                 const std::string& aviso_url,
+                                 const std::string& aviso_schema,
+                                 std::uint32_t polling) const {
+
     // Controller -- start up the Aviso controller, and subscribe the Aviso listener
     controller_ = std::make_shared<controller_t>();
     controller_->subscribe(ecf::service::aviso::AvisoRequest::make_listen_start(
@@ -145,16 +154,22 @@ void AvisoAttr::start() const {
     controller_->start();
 }
 
+void AvisoAttr::stop_controller(const std::string& aviso_path) const {
+    if (controller_ != nullptr) {
+        controller_->unsubscribe(ecf::service::aviso::AvisoRequest::make_listen_finish(aviso_path));
+
+        // Controller -- shutdown up the Aviso controller
+        controller_->stop();
+        controller_ = nullptr;
+    }
+}
+
 void AvisoAttr::finish() const {
     using namespace ecf;
     LOG(Log::DBG, Message("**** Unsubscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     std::string aviso_path = path();
-    controller_->unsubscribe(ecf::service::aviso::AvisoRequest::make_listen_finish(aviso_path));
-
-    // Controller -- shutdown up the Aviso controller
-    controller_->stop();
-    controller_ = nullptr;
+    stop_controller(aviso_path);
 }
 
 } // namespace ecf

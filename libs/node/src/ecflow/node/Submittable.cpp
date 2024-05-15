@@ -68,10 +68,6 @@ Submittable::~Submittable() {
     delete sub_gen_variables_;
 }
 
-void Submittable::poke() {
-    Node::poke();
-}
-
 bool Submittable::check_defaults() const {
     if (tryNo_ != 0)
         throw std::runtime_error("Submittable::check_defaults(): tryNo_ != 0");

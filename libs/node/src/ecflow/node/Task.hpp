@@ -22,8 +22,6 @@ public:
     node_ptr clone() const override;
     ~Task() override;
 
-    void poke() override;
-
     bool check_defaults() const override;
 
     static task_ptr create(const std::string& name, bool check = true);

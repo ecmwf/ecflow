@@ -14,6 +14,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/Operations.hpp"
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -58,7 +59,7 @@ bool Jobs::generate(JobsParam& jobsParam) const {
                 for (const suite_ptr& suite : suites) {
                     // SuiteChanged moved into Suite::resolveDependencies.
                     // This ensures the fast path and when suite are not begun we save a ctor/dtor call
-                    suite->poke();
+                    ecf::visit(*suite, ActivateAll{});
                     (void)suite->resolveDependencies(jobsParam);
                 }
             }

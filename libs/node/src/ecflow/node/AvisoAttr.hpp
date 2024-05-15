@@ -69,6 +69,7 @@ public:
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
 
+    [[nodiscard]] inline Node* parent() const { return parent_; }
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& listener() const { return listener_; }
     [[nodiscard]] inline const std::string& url() const { return url_; }
@@ -95,6 +96,13 @@ public:
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
 
 private:
+    void start_controller(const std::string& aviso_path,
+                          const std::string& aviso_listener,
+                          const std::string& aviso_url,
+                          const std::string& aviso_schema,
+                          std::uint32_t polling) const;
+    void stop_controller(const std::string& aviso_path) const;
+
     Node* parent_{nullptr}; // only ever used on the server side, to access parent Node variables
     path_t parent_path_;
     name_t name_;

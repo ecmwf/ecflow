@@ -80,10 +80,6 @@ Suite::~Suite() {
     delete suite_gen_variables_;
 }
 
-void Suite::poke()  {
-    NodeContainer::poke();
-}
-
 suite_ptr Suite::create(const std::string& name, bool check) {
     return std::make_shared<Suite>(name, check);
 }

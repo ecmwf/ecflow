@@ -29,8 +29,6 @@ public:
     NodeContainer();
     ~NodeContainer() override;
 
-    void poke() override;
-
     bool check_defaults() const override;
 
     void accept(ecf::NodeTreeVisitor&) override;
@@ -67,6 +65,7 @@ public:
     void addFamily(const family_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
     void add_child(const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
 
+    const std::vector<node_ptr>& children() const { return nodes_; }
     void immediateChildren(std::vector<node_ptr>&) const override;
     void allChildren(std::vector<node_ptr>&) const override;
 

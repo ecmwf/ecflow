@@ -36,6 +36,7 @@
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/node/ServerState.hpp"
+#include "ecflow/node/Suite.hpp"
 
 namespace cereal {
 class access;
@@ -55,8 +56,6 @@ public:
     Defs& operator=(const Defs&);
 
     ~Defs();
-
-    void poke();
 
     void copy_defs_state_only(const defs_ptr& defs); // needed when creating defs for client handles
     bool operator==(const Defs& rhs) const;

@@ -85,10 +85,6 @@ Task::~Task() {
     }
 }
 
-void Task::poke() {
-    Submittable::poke();
-}
-
 task_ptr Task::create(const std::string& name, bool check) {
     return std::make_shared<Task>(name, check);
 }

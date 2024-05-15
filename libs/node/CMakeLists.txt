@@ -47,6 +47,7 @@ set(srcs
   src/ecflow/node/NodeState.hpp
   src/ecflow/node/NodeStats.hpp
   src/ecflow/node/NodeTreeVisitor.hpp
+  src/ecflow/node/Operations.hpp
   src/ecflow/node/ResolveExternsVisitor.hpp
   src/ecflow/node/ServerState.hpp
   src/ecflow/node/Signal.hpp

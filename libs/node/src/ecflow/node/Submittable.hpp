@@ -35,8 +35,6 @@ protected:
 public:
     ~Submittable() override;
 
-    void poke() override;
-
     bool check_defaults() const override;
 
     /// Initialise the task. will set the state to NState::ACTIVE
