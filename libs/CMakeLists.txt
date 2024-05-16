@@ -8,31 +8,591 @@
 # nor does it submit to any jurisdiction.
 #
 
+configure_file(
+  core/src/ecflow/core/ecflow_version.h.in
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_version.h)
+configure_file(
+  core/src/ecflow/core/ecflow_source_build_dir.h.in
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h)
 
-add_subdirectory( core )
-add_subdirectory( service )
-add_subdirectory( attribute )
-add_subdirectory( node )
-add_subdirectory( base )
-add_subdirectory( simulator )
-add_subdirectory( client )
+set(srcs
+  # Attribute -- Headers
+  attribute/src/ecflow/attribute/AutoArchiveAttr.hpp
+  attribute/src/ecflow/attribute/AutoCancelAttr.hpp
+  attribute/src/ecflow/attribute/ClockAttr.hpp
+  attribute/src/ecflow/attribute/CronAttr.hpp
+  attribute/src/ecflow/attribute/DateAttr.hpp
+  attribute/src/ecflow/attribute/DayAttr.hpp
+  attribute/src/ecflow/attribute/GenericAttr.hpp
+  attribute/src/ecflow/attribute/LateAttr.hpp
+  attribute/src/ecflow/attribute/NodeAttr.hpp
+  attribute/src/ecflow/attribute/QueueAttr.hpp
+  attribute/src/ecflow/attribute/RepeatAttr.hpp
+  attribute/src/ecflow/attribute/TimeAttr.hpp
+  attribute/src/ecflow/attribute/TodayAttr.hpp
+  attribute/src/ecflow/attribute/Variable.hpp
+  attribute/src/ecflow/attribute/VerifyAttr.hpp
+  attribute/src/ecflow/attribute/Zombie.hpp
+  attribute/src/ecflow/attribute/ZombieAttr.hpp
+  # Attribute -- Sources
+  attribute/src/ecflow/attribute/AutoArchiveAttr.cpp
+  attribute/src/ecflow/attribute/AutoCancelAttr.cpp
+  attribute/src/ecflow/attribute/ClockAttr.cpp
+  attribute/src/ecflow/attribute/CronAttr.cpp
+  attribute/src/ecflow/attribute/DateAttr.cpp
+  attribute/src/ecflow/attribute/DayAttr.cpp
+  attribute/src/ecflow/attribute/GenericAttr.cpp
+  attribute/src/ecflow/attribute/LateAttr.cpp
+  attribute/src/ecflow/attribute/NodeAttr.cpp
+  attribute/src/ecflow/attribute/QueueAttr.cpp
+  attribute/src/ecflow/attribute/RepeatAttr.cpp
+  attribute/src/ecflow/attribute/TimeAttr.cpp
+  attribute/src/ecflow/attribute/TodayAttr.cpp
+  attribute/src/ecflow/attribute/Variable.cpp
+  attribute/src/ecflow/attribute/VerifyAttr.cpp
+  attribute/src/ecflow/attribute/Zombie.cpp
+  attribute/src/ecflow/attribute/ZombieAttr.cpp
+
+  # Base -- Headers
+  base/src/ecflow/base/AbstractClientEnv.hpp
+  base/src/ecflow/base/AbstractServer.hpp
+  base/src/ecflow/base/Client.hpp
+  base/src/ecflow/base/ClientOptionsParser.hpp
+  base/src/ecflow/base/ClientToServerRequest.hpp
+  base/src/ecflow/base/Cmd.hpp
+  base/src/ecflow/base/Connection.hpp
+  base/src/ecflow/base/Gnuplot.hpp
+  base/src/ecflow/base/ServerReply.hpp
+  base/src/ecflow/base/ServerToClientResponse.hpp
+  base/src/ecflow/base/Stats.hpp
+  base/src/ecflow/base/WhyCmd.hpp
+  base/src/ecflow/base/ZombieCtrl.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.hpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.hpp>
+  base/src/ecflow/base/cts/ClientToServerCmd.hpp
+  base/src/ecflow/base/cts/CtsCmdRegistry.hpp
+  base/src/ecflow/base/cts/EditHistoryMgr.hpp
+  base/src/ecflow/base/cts/task/AbortCmd.hpp
+  base/src/ecflow/base/cts/task/CompleteCmd.hpp
+  base/src/ecflow/base/cts/task/CtsWaitCmd.hpp
+  base/src/ecflow/base/cts/task/EventCmd.hpp
+  base/src/ecflow/base/cts/task/InitCmd.hpp
+  base/src/ecflow/base/cts/task/LabelCmd.hpp
+  base/src/ecflow/base/cts/task/MeterCmd.hpp
+  base/src/ecflow/base/cts/task/QueueCmd.hpp
+  base/src/ecflow/base/cts/task/TaskApi.hpp
+  base/src/ecflow/base/cts/task/TaskCmd.hpp
+  base/src/ecflow/base/cts/user/AlterCmd.hpp
+  base/src/ecflow/base/cts/user/BeginCmd.hpp
+  base/src/ecflow/base/cts/user/CFileCmd.hpp
+  base/src/ecflow/base/cts/user/CheckPtCmd.hpp
+  base/src/ecflow/base/cts/user/ClientHandleCmd.hpp
+  base/src/ecflow/base/cts/user/CSyncCmd.hpp
+  base/src/ecflow/base/cts/user/CtsApi.hpp
+  base/src/ecflow/base/cts/user/CtsCmd.hpp
+  base/src/ecflow/base/cts/user/CtsNodeCmd.hpp
+  base/src/ecflow/base/cts/user/DeleteCmd.hpp
+  base/src/ecflow/base/cts/user/EditScriptCmd.hpp
+  base/src/ecflow/base/cts/user/ForceCmd.hpp
+  base/src/ecflow/base/cts/user/FreeDepCmd.hpp
+  base/src/ecflow/base/cts/user/GroupCTSCmd.hpp
+  base/src/ecflow/base/cts/user/LoadDefsCmd.hpp
+  base/src/ecflow/base/cts/user/LogCmd.hpp
+  base/src/ecflow/base/cts/user/LogMessageCmd.hpp
+  base/src/ecflow/base/cts/user/MoveCmd.hpp
+  base/src/ecflow/base/cts/user/OrderNodeCmd.hpp
+  base/src/ecflow/base/cts/user/PathsCmd.hpp
+  base/src/ecflow/base/cts/user/PlugCmd.hpp
+  base/src/ecflow/base/cts/user/QueryCmd.hpp
+  base/src/ecflow/base/cts/user/ReplaceNodeCmd.hpp
+  base/src/ecflow/base/cts/user/RequeueNodeCmd.hpp
+  base/src/ecflow/base/cts/user/RunNodeCmd.hpp
+  base/src/ecflow/base/cts/user/ServerVersionCmd.hpp
+  base/src/ecflow/base/cts/user/ShowCmd.hpp
+  base/src/ecflow/base/cts/user/UserCmd.hpp
+  base/src/ecflow/base/cts/user/ZombieCmd.hpp
+  base/src/ecflow/base/stc/BlockClientZombieCmd.hpp
+  base/src/ecflow/base/stc/DefsCache.hpp
+  base/src/ecflow/base/stc/DefsCmd.hpp
+  base/src/ecflow/base/stc/ErrorCmd.hpp
+  base/src/ecflow/base/stc/GroupSTCCmd.hpp
+  base/src/ecflow/base/stc/PreAllocatedReply.hpp
+  base/src/ecflow/base/stc/SClientHandleCmd.hpp
+  base/src/ecflow/base/stc/SClientHandleSuitesCmd.hpp
+  base/src/ecflow/base/stc/SNewsCmd.hpp
+  base/src/ecflow/base/stc/SNodeCmd.hpp
+  base/src/ecflow/base/stc/SServerLoadCmd.hpp
+  base/src/ecflow/base/stc/SStatsCmd.hpp
+  base/src/ecflow/base/stc/SStringCmd.hpp
+  base/src/ecflow/base/stc/SStringVecCmd.hpp
+  base/src/ecflow/base/stc/SSuitesCmd.hpp
+  base/src/ecflow/base/stc/SSyncCmd.hpp
+  base/src/ecflow/base/stc/ServerToClientCmd.hpp
+  base/src/ecflow/base/stc/StcCmd.hpp
+  base/src/ecflow/base/stc/ZombieGetCmd.hpp
+  # Base -- Sources
+  base/src/ecflow/base/Client.cpp
+  base/src/ecflow/base/ClientOptionsParser.cpp
+  base/src/ecflow/base/ClientToServerRequest.cpp
+  base/src/ecflow/base/Connection.cpp
+  base/src/ecflow/base/Gnuplot.cpp
+  base/src/ecflow/base/ServerReply.cpp
+  base/src/ecflow/base/ServerToClientResponse.cpp
+  base/src/ecflow/base/Stats.cpp
+  base/src/ecflow/base/WhyCmd.cpp
+  base/src/ecflow/base/ZombieCtrl.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.cpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.cpp>
+  base/src/ecflow/base/cts/ClientToServerCmd.cpp
+  base/src/ecflow/base/cts/CtsCmdRegistry.cpp
+  base/src/ecflow/base/cts/EditHistoryMgr.cpp
+  base/src/ecflow/base/cts/task/AbortCmd.cpp
+  base/src/ecflow/base/cts/task/CompleteCmd.cpp
+  base/src/ecflow/base/cts/task/CtsWaitCmd.cpp
+  base/src/ecflow/base/cts/task/EventCmd.cpp
+  base/src/ecflow/base/cts/task/InitCmd.cpp
+  base/src/ecflow/base/cts/task/LabelCmd.cpp
+  base/src/ecflow/base/cts/task/MeterCmd.cpp
+  base/src/ecflow/base/cts/task/QueueCmd.cpp
+  base/src/ecflow/base/cts/task/TaskApi.cpp
+  base/src/ecflow/base/cts/task/TaskCmd.cpp
+  base/src/ecflow/base/cts/user/AlterCmd.cpp
+  base/src/ecflow/base/cts/user/BeginCmd.cpp
+  base/src/ecflow/base/cts/user/CFileCmd.cpp
+  base/src/ecflow/base/cts/user/CSyncCmd.cpp
+  base/src/ecflow/base/cts/user/CheckPtCmd.cpp
+  base/src/ecflow/base/cts/user/ClientHandleCmd.cpp
+  base/src/ecflow/base/cts/user/CtsApi.cpp
+  base/src/ecflow/base/cts/user/CtsCmd.cpp
+  base/src/ecflow/base/cts/user/CtsNodeCmd.cpp
+  base/src/ecflow/base/cts/user/DeleteCmd.cpp
+  base/src/ecflow/base/cts/user/EditScriptCmd.cpp
+  base/src/ecflow/base/cts/user/ForceCmd.cpp
+  base/src/ecflow/base/cts/user/FreeDepCmd.cpp
+  base/src/ecflow/base/cts/user/GroupCTSCmd.cpp
+  base/src/ecflow/base/cts/user/LoadDefsCmd.cpp
+  base/src/ecflow/base/cts/user/LogCmd.cpp
+  base/src/ecflow/base/cts/user/LogMessageCmd.cpp
+  base/src/ecflow/base/cts/user/MoveCmd.cpp
+  base/src/ecflow/base/cts/user/OrderNodeCmd.cpp
+  base/src/ecflow/base/cts/user/PathsCmd.cpp
+  base/src/ecflow/base/cts/user/PlugCmd.cpp
+  base/src/ecflow/base/cts/user/QueryCmd.cpp
+  base/src/ecflow/base/cts/user/ReplaceNodeCmd.cpp
+  base/src/ecflow/base/cts/user/RequeueNodeCmd.cpp
+  base/src/ecflow/base/cts/user/RunNodeCmd.cpp
+  base/src/ecflow/base/cts/user/ServerVersionCmd.cpp
+  base/src/ecflow/base/cts/user/ShowCmd.cpp
+  base/src/ecflow/base/cts/user/UserCmd.cpp
+  base/src/ecflow/base/cts/user/ZombieCmd.cpp
+  base/src/ecflow/base/stc/BlockClientZombieCmd.cpp
+  base/src/ecflow/base/stc/DefsCache.cpp
+  base/src/ecflow/base/stc/DefsCmd.cpp
+  base/src/ecflow/base/stc/ErrorCmd.cpp
+  base/src/ecflow/base/stc/GroupSTCCmd.cpp
+  base/src/ecflow/base/stc/PreAllocatedReply.cpp
+  base/src/ecflow/base/stc/SClientHandleCmd.cpp
+  base/src/ecflow/base/stc/SClientHandleSuitesCmd.cpp
+  base/src/ecflow/base/stc/SNewsCmd.cpp
+  base/src/ecflow/base/stc/SNodeCmd.cpp
+  base/src/ecflow/base/stc/SServerLoadCmd.cpp
+  base/src/ecflow/base/stc/SStatsCmd.cpp
+  base/src/ecflow/base/stc/SStringCmd.cpp
+  base/src/ecflow/base/stc/SStringVecCmd.cpp
+  base/src/ecflow/base/stc/SSuitesCmd.cpp
+  base/src/ecflow/base/stc/SSyncCmd.cpp
+  base/src/ecflow/base/stc/ServerToClientCmd.cpp
+  base/src/ecflow/base/stc/StcCmd.cpp
+  base/src/ecflow/base/stc/ZombieGetCmd.cpp
+
+  # Client -- Headers
+  client/src/ecflow/client/ClientCmdCache.hpp
+  client/src/ecflow/client/ClientEnvironment.hpp
+  client/src/ecflow/client/ClientInvoker.hpp
+  client/src/ecflow/client/ClientOptions.hpp
+  client/src/ecflow/client/Help.hpp
+  client/src/ecflow/client/Rtt.hpp
+  client/src/ecflow/client/UrlCmd.hpp
+  # Client -- Sources
+  client/src/ecflow/client/ClientCmdCache.cpp
+  client/src/ecflow/client/Rtt.cpp
+  client/src/ecflow/client/ClientEnvironment.cpp
+  client/src/ecflow/client/ClientInvoker.cpp
+  client/src/ecflow/client/Help.cpp
+  client/src/ecflow/client/Rtt.cpp
+  client/src/ecflow/client/ClientOptions.cpp
+  client/src/ecflow/client/UrlCmd.cpp
+
+  # Core -- Headers
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_version.h
+  ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h
+  core/src/ecflow/core/AssertTimer.hpp
+  core/src/ecflow/core/Cal.hpp
+  core/src/ecflow/core/Calendar.hpp
+  core/src/ecflow/core/CalendarUpdateParams.hpp
+  core/src/ecflow/core/CheckPt.hpp
+  core/src/ecflow/core/Child.hpp
+  core/src/ecflow/core/Chrono.hpp
+  core/src/ecflow/core/CommandLine.hpp
+  core/src/ecflow/core/DState.hpp
+  core/src/ecflow/core/DebugPerf.hpp
+  core/src/ecflow/core/DurationTimer.hpp
+  core/src/ecflow/core/Ecf.hpp
+  core/src/ecflow/core/EcfPortLock.hpp
+  core/src/ecflow/core/Extract.hpp
+  core/src/ecflow/core/File.hpp
+  core/src/ecflow/core/File_r.hpp
+  core/src/ecflow/core/Filesystem.hpp
+  core/src/ecflow/core/Host.hpp
+  core/src/ecflow/core/Indentor.hpp
+  core/src/ecflow/core/Log.hpp
+  core/src/ecflow/core/LogVerification.hpp
+  core/src/ecflow/core/Message.hpp
+  core/src/ecflow/core/NOrder.hpp
+  core/src/ecflow/core/NState.hpp
+  core/src/ecflow/core/NodePath.hpp
+  core/src/ecflow/core/Overload.hpp
+  core/src/ecflow/core/Passwd.hpp
+  core/src/ecflow/core/PasswdFile.hpp
+  core/src/ecflow/core/PasswordEncryption.hpp
+  core/src/ecflow/core/Pid.hpp
+  core/src/ecflow/core/PrintStyle.hpp
+  core/src/ecflow/core/SState.hpp
+  core/src/ecflow/core/Serialization.hpp
+  core/src/ecflow/core/Stl.hpp
+  core/src/ecflow/core/Str.hpp
+  core/src/ecflow/core/StringSplitter.hpp
+  core/src/ecflow/core/TimeSeries.hpp
+  core/src/ecflow/core/TimeSlot.hpp
+  core/src/ecflow/core/TimeStamp.hpp
+  core/src/ecflow/core/User.hpp
+  core/src/ecflow/core/Version.hpp
+  core/src/ecflow/core/WhiteListFile.hpp
+  core/src/ecflow/core/cereal_boost_time.hpp
+  core/src/ecflow/core/cereal_optional_nvp.hpp
+  core/src/ecflow/core/perf_timer.hpp
+  core/src/ecflow/core/exceptions/Exceptions.hpp
+  # Core -- Sources
+  core/src/ecflow/core/AssertTimer.cpp
+  core/src/ecflow/core/Cal.cpp
+  core/src/ecflow/core/Calendar.cpp
+  core/src/ecflow/core/Child.cpp
+  core/src/ecflow/core/Chrono.cpp
+  core/src/ecflow/core/CommandLine.cpp
+  core/src/ecflow/core/DState.cpp
+  core/src/ecflow/core/DurationTimer.cpp
+  core/src/ecflow/core/Ecf.cpp
+  core/src/ecflow/core/Extract.cpp
+  core/src/ecflow/core/File.cpp
+  core/src/ecflow/core/File_r.cpp
+  core/src/ecflow/core/Filesystem.cpp
+  core/src/ecflow/core/Host.cpp
+  core/src/ecflow/core/Indentor.cpp
+  core/src/ecflow/core/Log.cpp
+  core/src/ecflow/core/LogVerification.cpp
+  core/src/ecflow/core/NOrder.cpp
+  core/src/ecflow/core/NState.cpp
+  core/src/ecflow/core/NodePath.cpp
+  core/src/ecflow/core/Passwd.cpp
+  core/src/ecflow/core/PasswdFile.cpp
+  core/src/ecflow/core/Pid.cpp
+  core/src/ecflow/core/PrintStyle.cpp
+  core/src/ecflow/core/SState.cpp
+  core/src/ecflow/core/Str.cpp
+  core/src/ecflow/core/StringSplitter.cpp
+  core/src/ecflow/core/TimeSeries.cpp
+  core/src/ecflow/core/TimeSlot.cpp
+  core/src/ecflow/core/TimeStamp.cpp
+  core/src/ecflow/core/User.cpp
+  core/src/ecflow/core/Version.cpp
+  core/src/ecflow/core/WhiteListFile.cpp
+
+  # Node -- Headers
+  node/src/ecflow/node/AbstractObserver.hpp
+  node/src/ecflow/node/Alias.hpp
+  node/src/ecflow/node/Aspect.hpp
+  node/src/ecflow/node/Attr.hpp
+  node/src/ecflow/node/AutoRestoreAttr.hpp
+  node/src/ecflow/node/AvisoAttr.hpp
+  node/src/ecflow/node/ClientSuiteMgr.hpp
+  node/src/ecflow/node/ClientSuites.hpp
+  node/src/ecflow/node/CmdContext.hpp
+  node/src/ecflow/node/Defs.hpp
+  node/src/ecflow/node/DefsDelta.hpp
+  node/src/ecflow/node/DefsTreeVisitor.hpp
+  node/src/ecflow/node/EcfFile.hpp
+  node/src/ecflow/node/ExprAst.hpp
+  node/src/ecflow/node/ExprAstVisitor.hpp
+  node/src/ecflow/node/ExprDuplicate.hpp
+  node/src/ecflow/node/ExprParser.hpp
+  node/src/ecflow/node/Expression.hpp
+  node/src/ecflow/node/Family.hpp
+  node/src/ecflow/node/Flag.hpp
+  node/src/ecflow/node/InLimit.hpp
+  node/src/ecflow/node/InLimitMgr.hpp
+  node/src/ecflow/node/JobCreationCtrl.hpp
+  node/src/ecflow/node/JobProfiler.hpp
+  node/src/ecflow/node/Jobs.hpp
+  node/src/ecflow/node/JobsParam.hpp
+  node/src/ecflow/node/Limit.hpp
+  node/src/ecflow/node/LimitFwd.hpp
+  node/src/ecflow/node/Memento.hpp
+  node/src/ecflow/node/MirrorAttr.hpp
+  node/src/ecflow/node/MiscAttrs.hpp
+  node/src/ecflow/node/Node.hpp
+  node/src/ecflow/node/NodeContainer.hpp
+  node/src/ecflow/node/NodeFwd.hpp
+  node/src/ecflow/node/NodeState.hpp
+  node/src/ecflow/node/NodeStats.hpp
+  node/src/ecflow/node/NodeTreeVisitor.hpp
+  node/src/ecflow/node/Operations.hpp
+  node/src/ecflow/node/ResolveExternsVisitor.hpp
+  node/src/ecflow/node/ServerState.hpp
+  node/src/ecflow/node/Signal.hpp
+  node/src/ecflow/node/Submittable.hpp
+  node/src/ecflow/node/Suite.hpp
+  node/src/ecflow/node/SuiteChanged.hpp
+  node/src/ecflow/node/System.hpp
+  node/src/ecflow/node/Task.hpp
+  node/src/ecflow/node/TaskScriptGenerator.hpp
+  node/src/ecflow/node/move_peer.hpp
+  node/src/ecflow/node/formatter/AvisoFormatter.hpp
+  node/src/ecflow/node/formatter/Format.hpp
+  node/src/ecflow/node/formatter/Formatter.hpp
+  node/src/ecflow/node/formatter/MirrorFormatter.hpp
+  node/src/ecflow/node/parser/AutoArchiveParser.hpp
+  node/src/ecflow/node/parser/AutoCancelParser.hpp
+  node/src/ecflow/node/parser/AutoRestoreParser.hpp
+  node/src/ecflow/node/parser/AvisoParser.hpp
+  node/src/ecflow/node/parser/CalendarParser.hpp
+  node/src/ecflow/node/parser/ClockParser.hpp
+  node/src/ecflow/node/parser/CronParser.hpp
+  node/src/ecflow/node/parser/DateParser.hpp
+  node/src/ecflow/node/parser/DayParser.hpp
+  node/src/ecflow/node/parser/DefsParser.hpp
+  node/src/ecflow/node/parser/DefsStateParser.hpp
+  node/src/ecflow/node/parser/DefsStatusParser.hpp
+  node/src/ecflow/node/parser/DefsStructureParser.hpp
+  node/src/ecflow/node/parser/EventParser.hpp
+  node/src/ecflow/node/parser/ExternParser.hpp
+  node/src/ecflow/node/parser/GenericParser.hpp
+  node/src/ecflow/node/parser/InlimitParser.hpp
+  node/src/ecflow/node/parser/LabelParser.hpp
+  node/src/ecflow/node/parser/LateParser.hpp
+  node/src/ecflow/node/parser/LimitParser.hpp
+  node/src/ecflow/node/parser/MeterParser.hpp
+  node/src/ecflow/node/parser/MirrorParser.cpp
+  node/src/ecflow/node/parser/Parser.hpp
+  node/src/ecflow/node/parser/QueueParser.hpp
+  node/src/ecflow/node/parser/RepeatParser.hpp
+  node/src/ecflow/node/parser/TimeParser.hpp
+  node/src/ecflow/node/parser/TodayParser.hpp
+  node/src/ecflow/node/parser/TriggerParser.hpp
+  node/src/ecflow/node/parser/VariableParser.hpp
+  node/src/ecflow/node/parser/VerifyParser.hpp
+  node/src/ecflow/node/parser/ZombieAttrParser.hpp
+  # Node -- Sources
+  node/src/ecflow/node/Alias.cpp
+  node/src/ecflow/node/Attr.cpp
+  node/src/ecflow/node/AutoRestoreAttr.cpp
+  node/src/ecflow/node/AvisoAttr.cpp
+  node/src/ecflow/node/ClientSuiteMgr.cpp
+  node/src/ecflow/node/ClientSuites.cpp
+  node/src/ecflow/node/CmdContext.cpp
+  node/src/ecflow/node/Defs.cpp
+  node/src/ecflow/node/DefsDelta.cpp
+  node/src/ecflow/node/EcfFile.cpp
+  node/src/ecflow/node/ExprAst.cpp
+  node/src/ecflow/node/ExprAstVisitor.cpp
+  node/src/ecflow/node/ExprDuplicate.cpp
+  node/src/ecflow/node/ExprParser.cpp
+  node/src/ecflow/node/Expression.cpp
+  node/src/ecflow/node/Family.cpp
+  node/src/ecflow/node/Flag.cpp
+  node/src/ecflow/node/InLimit.cpp
+  node/src/ecflow/node/InLimitMgr.cpp
+  node/src/ecflow/node/JobCreationCtrl.cpp
+  node/src/ecflow/node/JobProfiler.cpp
+  node/src/ecflow/node/Jobs.cpp
+  node/src/ecflow/node/JobsParam.cpp
+  node/src/ecflow/node/Limit.cpp
+  node/src/ecflow/node/Memento.cpp
+  node/src/ecflow/node/MirrorAttr.cpp
+  node/src/ecflow/node/MiscAttrs.cpp
+  node/src/ecflow/node/Node.cpp
+  node/src/ecflow/node/NodeAdd.cpp
+  node/src/ecflow/node/NodeChange.cpp
+  node/src/ecflow/node/NodeContainer.cpp
+  node/src/ecflow/node/NodeDelete.cpp
+  node/src/ecflow/node/NodeFind.cpp
+  node/src/ecflow/node/NodeMemento.cpp
+  node/src/ecflow/node/NodeStats.cpp
+  node/src/ecflow/node/NodeTime.cpp
+  node/src/ecflow/node/NodeTreeVisitor.cpp
+  node/src/ecflow/node/ResolveExternsVisitor.cpp
+  node/src/ecflow/node/ServerState.cpp
+  node/src/ecflow/node/Signal.cpp
+  node/src/ecflow/node/Submittable.cpp
+  node/src/ecflow/node/Suite.cpp
+  node/src/ecflow/node/SuiteChanged.cpp
+  node/src/ecflow/node/System.cpp
+  node/src/ecflow/node/Task.cpp
+  node/src/ecflow/node/TaskScriptGenerator.cpp
+  node/src/ecflow/node/parser/AutoArchiveParser.cpp
+  node/src/ecflow/node/parser/AutoCancelParser.cpp
+  node/src/ecflow/node/parser/AutoRestoreParser.cpp
+  node/src/ecflow/node/parser/AvisoParser.cpp
+  node/src/ecflow/node/parser/CalendarParser.cpp
+  node/src/ecflow/node/parser/ClockParser.cpp
+  node/src/ecflow/node/parser/CronParser.cpp
+  node/src/ecflow/node/parser/DateParser.cpp
+  node/src/ecflow/node/parser/DayParser.cpp
+  node/src/ecflow/node/parser/DefsParser.cpp
+  node/src/ecflow/node/parser/DefsStateParser.cpp
+  node/src/ecflow/node/parser/DefsStatusParser.cpp
+  node/src/ecflow/node/parser/DefsStructureParser.cpp
+  node/src/ecflow/node/parser/EventParser.cpp
+  node/src/ecflow/node/parser/ExternParser.cpp
+  node/src/ecflow/node/parser/GenericParser.cpp
+  node/src/ecflow/node/parser/InlimitParser.cpp
+  node/src/ecflow/node/parser/LabelParser.cpp
+  node/src/ecflow/node/parser/LateParser.cpp
+  node/src/ecflow/node/parser/LimitParser.cpp
+  node/src/ecflow/node/parser/MeterParser.cpp
+  node/src/ecflow/node/parser/MirrorParser.cpp
+  node/src/ecflow/node/parser/Parser.cpp
+  node/src/ecflow/node/parser/QueueParser.cpp
+  node/src/ecflow/node/parser/RepeatParser.cpp
+  node/src/ecflow/node/parser/TimeParser.cpp
+  node/src/ecflow/node/parser/TodayParser.cpp
+  node/src/ecflow/node/parser/TriggerParser.cpp
+  node/src/ecflow/node/parser/VariableParser.cpp
+  node/src/ecflow/node/parser/VerifyParser.cpp
+  node/src/ecflow/node/parser/ZombieAttrParser.cpp
+
+  # Server -- Headers
+  server/src/ecflow/server/BaseServer.hpp
+  server/src/ecflow/server/CheckPtSaver.hpp
+  server/src/ecflow/server/NodeTreeTraverser.hpp
+  server/src/ecflow/server/PeriodicScheduler.hpp
+  server/src/ecflow/server/Server.hpp
+  server/src/ecflow/server/ServerEnvironment.hpp
+  server/src/ecflow/server/ServerOptions.hpp
+  server/src/ecflow/server/SslServer.hpp
+  server/src/ecflow/server/SslTcpServer.hpp
+  server/src/ecflow/server/TcpBaseServer.hpp
+  server/src/ecflow/server/TcpServer.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslServer.hpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
+  # Server -- Sources
+  server/src/ecflow/server/BaseServer.cpp
+  server/src/ecflow/server/CheckPtSaver.cpp
+  server/src/ecflow/server/NodeTreeTraverser.cpp
+  server/src/ecflow/server/PeriodicScheduler.cpp
+  server/src/ecflow/server/Server.cpp
+  server/src/ecflow/server/ServerEnvironment.cpp
+  server/src/ecflow/server/ServerOptions.cpp
+  server/src/ecflow/server/TcpBaseServer.cpp
+  server/src/ecflow/server/TcpServer.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslServer.cpp>
+  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.cpp>
+
+  # Service -- Headers
+  service/src/ecflow/service/aviso/Aviso.hpp
+  service/src/ecflow/service/aviso/AvisoService.hpp
+  service/src/ecflow/service/aviso/etcd/Address.hpp
+  service/src/ecflow/service/aviso/etcd/Client.hpp
+  service/src/ecflow/service/aviso/etcd/Range.hpp
+  service/src/ecflow/service/executor/PeriodicTaskExecutor.hpp
+  service/src/ecflow/service/mirror/MirrorService.hpp
+  service/src/ecflow/service/Controller.hpp
+  service/src/ecflow/service/Log.hpp
+  service/src/ecflow/service/Registry.hpp
+  # Service -- Sources
+  service/src/ecflow/service/aviso/Aviso.cpp
+  service/src/ecflow/service/aviso/AvisoService.cpp
+  service/src/ecflow/service/aviso/etcd/Range.cpp
+  service/src/ecflow/service/aviso/etcd/Client.cpp
+  service/src/ecflow/service/mirror/MirrorService.cpp
+  service/src/ecflow/service/Controller.cpp
+  service/src/ecflow/service/Registry.cpp
+
+  # UDP -- Headers
+  udp/src/ecflow/udp/ClientAPI.hpp
+  udp/src/ecflow/udp/RequestHandler.hpp
+  udp/src/ecflow/udp/Trace.hpp
+  udp/src/ecflow/udp/UDPServer.hpp
+  udp/src/ecflow/udp/UDPServerEnvironment.hpp
+  udp/src/ecflow/udp/UDPServerOptions.hpp
+  # UDP -- Sources
+  udp/src/ecflow/udp/ClientAPI.cpp
+  udp/src/ecflow/udp/RequestHandler.cpp
+  udp/src/ecflow/udp/Trace.cpp
+  udp/src/ecflow/udp/UDPServerEnvironment.cpp
+  udp/src/ecflow/udp/UDPServerOptions.cpp
+)
+
+
+ecbuild_add_library(
+  TARGET
+    ecflow_all
+  NOINSTALL
+  TYPE STATIC
+  SOURCES
+    ${srcs}
+  PUBLIC_INCLUDES
+    attribute/src
+    base/src
+    client/src
+    core/src
+    node/src
+    service/src
+    server/src
+    udp/src
+    ${CMAKE_BINARY_DIR}/generated/src
+  PUBLIC_LIBS
+    nlohmann::json
+    cereal::cereal # this needs to be public as it appears in public header files used downstream
+    httplib::httplib
+    $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
+    Boost::filesystem
+    Boost::date_time
+    Boost::program_options
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    $<$<NOT:$<BOOL:${APPLE}>>:crypt>
+    Threads::Threads
+  DEFINITIONS
+    CMAKE
+)
+target_clangformat(ecflow_all)
+
+
+add_subdirectory(core)
+add_subdirectory(service)
+add_subdirectory(attribute)
+add_subdirectory(node)
+add_subdirectory(base)
+add_subdirectory(simulator)
+add_subdirectory(client)
 
 if (ENABLE_SERVER)
-  add_subdirectory( server )
-  add_subdirectory( test )
-endif()
+  add_subdirectory(server)
+  add_subdirectory(test)
+endif ()
 
 if (ENABLE_PYTHON)
-  if ( ENABLE_PYTHON_PTR_REGISTER )
-    add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
-  endif()
-  add_subdirectory( pyext )
-endif()
+  if (ENABLE_PYTHON_PTR_REGISTER)
+    add_definitions(-DECF_ENABLE_PYTHON_PTR_REGISTER)
+  endif ()
+  add_subdirectory(pyext)
+endif ()
 
 if (ENABLE_HTTP)
-  add_subdirectory( rest )
-endif()
+  add_subdirectory(rest)
+endif ()
 
 if (ENABLE_UDP)
-  add_subdirectory( udp )
-endif()
+  add_subdirectory(udp)
+endif ()

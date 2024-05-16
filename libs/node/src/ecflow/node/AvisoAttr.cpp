@@ -42,7 +42,7 @@ AvisoAttr::AvisoAttr(Node* parent,
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
     }
-};
+}
 
 void AvisoAttr::set_listener(std::string_view listener) {
     state_change_no_ = Ecf::incr_state_change_no();
@@ -70,7 +70,7 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
 
     theReasonWhy += ecf::Message(" is Aviso dependent (", listener_, "), but no notification received");
     return true;
-};
+}
 
 void AvisoAttr::reset() {
     state_change_no_ = Ecf::incr_state_change_no();

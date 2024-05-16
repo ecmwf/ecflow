@@ -8,187 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  src/ecflow/node/AbstractObserver.hpp
-  src/ecflow/node/Alias.hpp
-  src/ecflow/node/Aspect.hpp
-  src/ecflow/node/Attr.hpp
-  src/ecflow/node/AutoRestoreAttr.hpp
-  src/ecflow/node/AvisoAttr.hpp
-  src/ecflow/node/ClientSuiteMgr.hpp
-  src/ecflow/node/ClientSuites.hpp
-  src/ecflow/node/CmdContext.hpp
-  src/ecflow/node/Defs.hpp
-  src/ecflow/node/DefsDelta.hpp
-  src/ecflow/node/DefsTreeVisitor.hpp
-  src/ecflow/node/EcfFile.hpp
-  src/ecflow/node/ExprAst.hpp
-  src/ecflow/node/ExprAstVisitor.hpp
-  src/ecflow/node/ExprDuplicate.hpp
-  src/ecflow/node/ExprParser.hpp
-  src/ecflow/node/Expression.hpp
-  src/ecflow/node/Family.hpp
-  src/ecflow/node/Flag.hpp
-  src/ecflow/node/InLimit.hpp
-  src/ecflow/node/InLimitMgr.hpp
-  src/ecflow/node/JobCreationCtrl.hpp
-  src/ecflow/node/JobProfiler.hpp
-  src/ecflow/node/Jobs.hpp
-  src/ecflow/node/JobsParam.hpp
-  src/ecflow/node/Limit.hpp
-  src/ecflow/node/LimitFwd.hpp
-  src/ecflow/node/Memento.hpp
-  src/ecflow/node/MirrorAttr.hpp
-  src/ecflow/node/MiscAttrs.hpp
-  src/ecflow/node/Node.hpp
-  src/ecflow/node/NodeContainer.hpp
-  src/ecflow/node/NodeFwd.hpp
-  src/ecflow/node/NodeState.hpp
-  src/ecflow/node/NodeStats.hpp
-  src/ecflow/node/NodeTreeVisitor.hpp
-  src/ecflow/node/Operations.hpp
-  src/ecflow/node/ResolveExternsVisitor.hpp
-  src/ecflow/node/ServerState.hpp
-  src/ecflow/node/Signal.hpp
-  src/ecflow/node/Submittable.hpp
-  src/ecflow/node/Suite.hpp
-  src/ecflow/node/SuiteChanged.hpp
-  src/ecflow/node/System.hpp
-  src/ecflow/node/Task.hpp
-  src/ecflow/node/TaskScriptGenerator.hpp
-  src/ecflow/node/move_peer.hpp
-  src/ecflow/node/formatter/AvisoFormatter.hpp
-  src/ecflow/node/formatter/Format.hpp
-  src/ecflow/node/formatter/Formatter.hpp
-  src/ecflow/node/formatter/MirrorFormatter.hpp
-  src/ecflow/node/parser/AutoArchiveParser.hpp
-  src/ecflow/node/parser/AutoCancelParser.hpp
-  src/ecflow/node/parser/AutoRestoreParser.hpp
-  src/ecflow/node/parser/AvisoParser.hpp
-  src/ecflow/node/parser/CalendarParser.hpp
-  src/ecflow/node/parser/ClockParser.hpp
-  src/ecflow/node/parser/CronParser.hpp
-  src/ecflow/node/parser/DateParser.hpp
-  src/ecflow/node/parser/DayParser.hpp
-  src/ecflow/node/parser/DefsParser.hpp
-  src/ecflow/node/parser/DefsStateParser.hpp
-  src/ecflow/node/parser/DefsStatusParser.hpp
-  src/ecflow/node/parser/DefsStructureParser.hpp
-  src/ecflow/node/parser/EventParser.hpp
-  src/ecflow/node/parser/ExternParser.hpp
-  src/ecflow/node/parser/GenericParser.hpp
-  src/ecflow/node/parser/InlimitParser.hpp
-  src/ecflow/node/parser/LabelParser.hpp
-  src/ecflow/node/parser/LateParser.hpp
-  src/ecflow/node/parser/LimitParser.hpp
-  src/ecflow/node/parser/MeterParser.hpp
-  src/ecflow/node/parser/MirrorParser.cpp
-  src/ecflow/node/parser/Parser.hpp
-  src/ecflow/node/parser/QueueParser.hpp
-  src/ecflow/node/parser/RepeatParser.hpp
-  src/ecflow/node/parser/TimeParser.hpp
-  src/ecflow/node/parser/TodayParser.hpp
-  src/ecflow/node/parser/TriggerParser.hpp
-  src/ecflow/node/parser/VariableParser.hpp
-  src/ecflow/node/parser/VerifyParser.hpp
-  src/ecflow/node/parser/ZombieAttrParser.hpp
-  # Sources
-  src/ecflow/node/Alias.cpp
-  src/ecflow/node/Attr.cpp
-  src/ecflow/node/AutoRestoreAttr.cpp
-  src/ecflow/node/AvisoAttr.cpp
-  src/ecflow/node/ClientSuiteMgr.cpp
-  src/ecflow/node/ClientSuites.cpp
-  src/ecflow/node/CmdContext.cpp
-  src/ecflow/node/Defs.cpp
-  src/ecflow/node/DefsDelta.cpp
-  src/ecflow/node/EcfFile.cpp
-  src/ecflow/node/ExprAst.cpp
-  src/ecflow/node/ExprAstVisitor.cpp
-  src/ecflow/node/ExprDuplicate.cpp
-  src/ecflow/node/ExprParser.cpp
-  src/ecflow/node/Expression.cpp
-  src/ecflow/node/Family.cpp
-  src/ecflow/node/Flag.cpp
-  src/ecflow/node/InLimit.cpp
-  src/ecflow/node/InLimitMgr.cpp
-  src/ecflow/node/JobCreationCtrl.cpp
-  src/ecflow/node/JobProfiler.cpp
-  src/ecflow/node/Jobs.cpp
-  src/ecflow/node/JobsParam.cpp
-  src/ecflow/node/Limit.cpp
-  src/ecflow/node/Memento.cpp
-  src/ecflow/node/MirrorAttr.cpp
-  src/ecflow/node/MiscAttrs.cpp
-  src/ecflow/node/Node.cpp
-  src/ecflow/node/NodeAdd.cpp
-  src/ecflow/node/NodeChange.cpp
-  src/ecflow/node/NodeContainer.cpp
-  src/ecflow/node/NodeDelete.cpp
-  src/ecflow/node/NodeFind.cpp
-  src/ecflow/node/NodeMemento.cpp
-  src/ecflow/node/NodeStats.cpp
-  src/ecflow/node/NodeTime.cpp
-  src/ecflow/node/NodeTreeVisitor.cpp
-  src/ecflow/node/ResolveExternsVisitor.cpp
-  src/ecflow/node/ServerState.cpp
-  src/ecflow/node/Signal.cpp
-  src/ecflow/node/Submittable.cpp
-  src/ecflow/node/Suite.cpp
-  src/ecflow/node/SuiteChanged.cpp
-  src/ecflow/node/System.cpp
-  src/ecflow/node/Task.cpp
-  src/ecflow/node/TaskScriptGenerator.cpp
-  src/ecflow/node/parser/AutoArchiveParser.cpp
-  src/ecflow/node/parser/AutoCancelParser.cpp
-  src/ecflow/node/parser/AutoRestoreParser.cpp
-  src/ecflow/node/parser/AvisoParser.cpp
-  src/ecflow/node/parser/CalendarParser.cpp
-  src/ecflow/node/parser/ClockParser.cpp
-  src/ecflow/node/parser/CronParser.cpp
-  src/ecflow/node/parser/DateParser.cpp
-  src/ecflow/node/parser/DayParser.cpp
-  src/ecflow/node/parser/DefsParser.cpp
-  src/ecflow/node/parser/DefsStateParser.cpp
-  src/ecflow/node/parser/DefsStatusParser.cpp
-  src/ecflow/node/parser/DefsStructureParser.cpp
-  src/ecflow/node/parser/EventParser.cpp
-  src/ecflow/node/parser/ExternParser.cpp
-  src/ecflow/node/parser/GenericParser.cpp
-  src/ecflow/node/parser/InlimitParser.cpp
-  src/ecflow/node/parser/LabelParser.cpp
-  src/ecflow/node/parser/LateParser.cpp
-  src/ecflow/node/parser/LimitParser.cpp
-  src/ecflow/node/parser/MeterParser.cpp
-  src/ecflow/node/parser/MirrorParser.cpp
-  src/ecflow/node/parser/Parser.cpp
-  src/ecflow/node/parser/QueueParser.cpp
-  src/ecflow/node/parser/RepeatParser.cpp
-  src/ecflow/node/parser/TimeParser.cpp
-  src/ecflow/node/parser/TodayParser.cpp
-  src/ecflow/node/parser/TriggerParser.cpp
-  src/ecflow/node/parser/VariableParser.cpp
-  src/ecflow/node/parser/VerifyParser.cpp
-  src/ecflow/node/parser/ZombieAttrParser.cpp
-)
-
-ecbuild_add_library(
-  TARGET
-    node
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-  PUBLIC_LIBS
-    attributes
-    ecflow_service
-)
-target_clangformat(node)
-
-
 set(test_srcs
   # Headers
   test/MyDefsFixture.hpp
@@ -247,7 +66,7 @@ ecbuild_add_test(
     ${test_srcs}
   LIBS
     test_support
-    node
+    ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_attributes
@@ -283,7 +102,7 @@ ecbuild_add_test(
     test
     test/parser
   LIBS
-    node
+    ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_node
@@ -307,7 +126,7 @@ if (ENABLE_ALL_TESTS)
     SOURCES
       ${test_srcs}
     LIBS
-      node
+      ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     TEST_DEPENDS
       u_anattr
@@ -337,7 +156,7 @@ if (ENABLE_ALL_TESTS)
     SOURCES
       ${test_srcs}
     LIBS
-      node
+      ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       Boost::timer
   )
@@ -369,7 +188,7 @@ if (ENABLE_ALL_TESTS)
     SOURCES
       ${test_srcs}
     LIBS
-      node
+      ecflow_all
       Boost::boost # Boost header-only libraries must be available
       Boost::timer
   )
@@ -393,7 +212,7 @@ if (ENABLE_ALL_TESTS)
     SOURCES
       ${test_srcs}
     LIBS
-      node
+      ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   )
   target_clangformat(p_parser_only

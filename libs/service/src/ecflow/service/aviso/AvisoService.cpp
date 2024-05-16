@@ -122,6 +122,6 @@ AvisoController::AvisoController()
                  // The following is a hack to force the server to increment the job generation count
                  TheOneServer::server().increment_job_generation_count();
              },
-             [this]() { return this->get_subscriptions(); }} {};
+             [this]() { return this->get_subscriptions(); }} {}
 
 } // namespace ecf::service::aviso

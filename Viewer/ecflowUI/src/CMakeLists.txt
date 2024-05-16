@@ -815,9 +815,7 @@ ecbuild_add_executable(
     ${CMAKE_CURRENT_BINARY_DIR}
   LIBS
     viewer
-    libclient
-    base
-    node
+    ecflow_all
     Threads::Threads
     m
     dl

@@ -30,7 +30,7 @@ public:
     using service_t       = Service;
 
     template <typename... Args>
-    explicit Controller(Args&&... args) : running_{std::forward<Args>(args)...} {};
+    explicit Controller(Args&&... args) : running_{std::forward<Args>(args)...} {}
 
     // Attribute-facing API
 

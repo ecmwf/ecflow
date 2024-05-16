@@ -80,7 +80,7 @@ ecbuild_add_library(
   PRIVATE_DEFINITIONS
     ECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow"
   PRIVATE_LIBS
-    core
+    ecflow_all
     Boost::boost
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     # Qt5

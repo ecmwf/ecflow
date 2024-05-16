@@ -11,47 +11,6 @@
 # ecflow_services
 # --------------------------------------------------
 
-set(srcs
-  # Headers
-  src/ecflow/service/aviso/Aviso.hpp
-  src/ecflow/service/aviso/AvisoService.hpp
-  src/ecflow/service/aviso/etcd/Address.hpp
-  src/ecflow/service/aviso/etcd/Client.hpp
-  src/ecflow/service/aviso/etcd/Range.hpp
-  src/ecflow/service/executor/PeriodicTaskExecutor.hpp
-  src/ecflow/service/mirror/MirrorService.hpp
-  src/ecflow/service/Controller.hpp
-  src/ecflow/service/Log.hpp
-  src/ecflow/service/Registry.hpp
-  # Sources
-  src/ecflow/service/aviso/Aviso.cpp
-  src/ecflow/service/aviso/AvisoService.cpp
-  src/ecflow/service/aviso/etcd/Range.cpp
-  src/ecflow/service/aviso/etcd/Client.cpp
-  src/ecflow/service/mirror/MirrorService.cpp
-  src/ecflow/service/Controller.cpp
-  src/ecflow/service/Registry.cpp
-)
-
-ecbuild_add_library(
-  TARGET ecflow_service
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-  PUBLIC_LIBS
-    base
-    libclient
-    Boost::boost
-    nlohmann::json
-    httplib::httplib
-    Threads::Threads
-    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-)
-target_clangformat(ecflow_service)
-
 # u_services
 # --------------------------------------------------
 
@@ -70,7 +29,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
-    ecflow_service
+    ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_service
@@ -94,7 +53,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
-    ecflow_service
+    ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_aviso

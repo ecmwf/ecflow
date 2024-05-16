@@ -59,8 +59,7 @@ ecbuild_add_library(
   PUBLIC_INCLUDES
     src
   PUBLIC_LIBS
-    base
-    libclient
+    ecflow_all
     nlohmann::json
     httplib::httplib
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
@@ -78,7 +77,7 @@ ecbuild_add_executable(
     src/ecflow/http/HttpMain.cpp
   LIBS
     libhttp
-    libclient
+    ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
 )
 target_clangformat(ecflow_http)
@@ -132,8 +131,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         ../base/test
       LIBS
         libhttp
-        libclient
-        libserver
+        ecflow_all
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
       DEPENDS

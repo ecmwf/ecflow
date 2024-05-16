@@ -11,6 +11,7 @@
 #ifndef ecflow_service_Log_HPP
 #define ecflow_service_Log_HPP
 
+#include <functional>
 #include <iostream>
 #include <thread>
 
@@ -103,7 +104,7 @@ Channel<L>& select() {
     return channel;
 }
 
-}; // namespace log
+} // namespace log
 
 } // namespace ecf::service
 

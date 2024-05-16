@@ -11,6 +11,7 @@
 #ifndef ecflow_service_aviso_Aviso_HPP
 #define ecflow_service_aviso_Aviso_HPP
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>

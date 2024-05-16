@@ -30,11 +30,7 @@ ecbuild_add_library(
     src
     ../base/test
   PUBLIC_LIBS
-    libclient
-    base
-    node
-    attributes
-    core
+    ecflow_all
 )
 target_clangformat(libharness)
 
