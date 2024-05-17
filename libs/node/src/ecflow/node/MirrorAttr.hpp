@@ -76,6 +76,8 @@ public:
 
     MirrorAttr& operator=(const MirrorAttr& rhs) = default;
 
+    [[nodiscard]] MirrorAttr make_detached() const;
+
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] std::string absolute_name() const;
 

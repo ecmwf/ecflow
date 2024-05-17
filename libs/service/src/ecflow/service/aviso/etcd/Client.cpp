@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+#include "ecflow/core/Message.hpp"
+
 #if defined(ECF_OPENSSL)
     #include <openssl/ssl.h>
     #if OPENSSL_VERSION_NUMBER < 0x1010100fL
@@ -54,7 +56,6 @@ Client::Client(Address address) : impl_(std::make_unique<Client::Impl>(address))
 
 Client::Client(Address address, std::string auth_token)
     : impl_(std::make_unique<Client::Impl>(std::move(address), std::move(auth_token))) {
-    std::cout << OPENSSL_VERSION_NUMBER << std::endl;
 }
 
 Client::~Client() = default;
@@ -65,7 +66,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
     httplib::Headers headers;
 
     if (!impl_->auth_token_.empty()) {
-        ALOG(D, "EtcdClient: using authorization token " << impl_->auth_token_);
+        ALOG(D, "EtcdClient: using authorization token");
         headers.emplace("Authorization", "Bearer " + impl_->auth_token_);
     }
 
@@ -78,13 +79,11 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
 
     httplib::Result result = impl_->client_.Post(endpoint_path, headers, request_body, content_type);
     if (!result) {
-        ALOG(E, "EtcdClient " << result.error());
-        return std::vector<std::pair<std::string, std::string>>{};
+        throw std::runtime_error(Message("EtcdClient: Unable to retrieve result, due to ", result.error()).str());
     }
 
     if (result.value().status != 200) {
-        ALOG(E, "EtcdClient: status code " << result.value().status << " received");
-        return std::vector<std::pair<std::string, std::string>>{};
+        throw std::runtime_error(Message("EtcdClient: Failed to poll, due to ", result.value().reason).str());
     }
 
     json response_body;
@@ -92,8 +91,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
         response_body = json::parse(std::begin(result.value().body), std::end(result.value().body));
     }
     catch (const json::parse_error& e) {
-        ALOG(E, "EtcdClient: Failed to parse response: " << e.what());
-        return std::vector<std::pair<std::string, std::string>>{};
+        throw std::runtime_error(Message("EtcdClient: Unable to parse response, due to ", e.what()).str());
     }
 
     std::vector<std::pair<std::string, std::string>> entries;
@@ -111,13 +109,13 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
             auto value = make_content_from<Base64>(v);
 
             if (key.raw() != key_prefix) {
-                ALOG(D, "Received key+value: " << key.raw() << "+" << value.raw());
+                ALOG(D, "EtcdClient: Received key+value: " << key.raw() << "+" << value.raw());
                 entries.emplace_back(key.raw(), value.raw());
             }
         }
     }
     else {
-        ALOG(D, "EtcdClient: No new key+value");
+        ALOG(D, "EtcdClient: No new key+value found");
     }
 
     return entries;

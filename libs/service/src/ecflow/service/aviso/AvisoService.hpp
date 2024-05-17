@@ -89,7 +89,6 @@ public:
 
 private:
     void register_listener(const AvisoRequest& request);
-//    void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
 
     executor::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;

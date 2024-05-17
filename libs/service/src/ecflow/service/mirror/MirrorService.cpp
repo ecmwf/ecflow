@@ -10,11 +10,11 @@
 
 #include "ecflow/service/mirror/MirrorService.hpp"
 
-#include <filesystem>
 #include <thread>
 #include <utility>
 
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
@@ -25,10 +25,10 @@ namespace ecf::service::mirror {
 
 namespace {
 
-std::pair<std::string, std::string> load_auth_credentials(const std::filesystem::path& auth_file) {
+std::pair<std::string, std::string> load_auth_credentials(const std::string& auth_file) {
     std::ifstream file(auth_file);
     if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + auth_file.string());
+        throw std::runtime_error("Unable to open file: " + auth_file);
     }
 
     std::string username, password;
@@ -80,23 +80,22 @@ int MirrorClient::get_node_status(const std::string& remote_host,
 
         if (!impl_->defs_) {
             ALOG(E, "MirrorClient: unable to sync with remote defs");
-            return NState::UNKNOWN;
+            throw std::runtime_error("MirrorClient: Failed to sync with remote defs");
         }
 
         auto node = impl_->defs_->findAbsNode(node_path);
 
         if (!node) {
-            ALOG(E, "MirrorClient: requested node (" << node_path << ") not found in remote defs");
-            return NState::UNKNOWN;
+            throw std::runtime_error(
+                Message("MirrorClient: Unable to find requested node (", node_path, ") in remote remote defs").str());
         }
 
         auto state = node->state();
-        ALOG(D, "MirrorClient: found node (" << node_path << "), with status " << state);
+        ALOG(D, "MirrorClient: found node (" << node_path << "), with state " << state);
         return state;
     }
     catch (std::exception& e) {
-        ALOG(W, "MirrorClient: failure to sync, due to: " << e.what());
-        return NState::UNKNOWN;
+        throw std::runtime_error(Message("MirrorClient: failure to sync remote defs, due to: ", e.what()));
     }
 }
 
@@ -148,20 +147,26 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
             auto remote_pass = entry.remote_password_;
 
             // Collect the latest remote status
-            auto latest_status =
-                mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
+            try {
+                auto latest_status =
+                    mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
 
-            ALOG(D, "MirrorService: Notifying remote node state: " << latest_status);
-
-            MirrorNotification notification{remote_path, latest_status};
-            notify_(notification);
+                ALOG(D, "MirrorService: Notifying remote node state: " << latest_status);
+                MirrorNotification notification{true, remote_path, "", latest_status};
+                notify_(notification);
+            }
+            catch (std::runtime_error& e) {
+                ALOG(W, "MirrorService: Failed to sync with remote node: " << e.what());
+                MirrorNotification notification{false, remote_path, e.what(), -1};
+                notify_(notification);
+            }
         }
     }
 }
 
 void MirrorService::register_listener(const MirrorRequest& request) {
     ALOG(D, "MirrorService: Registering Mirror: {" << request.path << "}");
-    Entry& inserted = listeners_.emplace_back(Entry{request});
+    Entry& inserted = listeners_.emplace_back(Entry{request, "", ""});
     if (!request.auth.empty()) {
         ALOG(D, "MirrorService: Loading auth {" << request.auth << "}");
         try {
@@ -182,6 +187,7 @@ MirrorController::MirrorController()
                  ALOG(D, "MirrorController: forcing server to traverse the defs");
                  TheOneServer::server().increment_job_generation_count();
              },
-             [this]() { return this->get_subscriptions(); }} {};
+             [this]() { return this->get_subscriptions(); }} {
+}
 
 } // namespace ecf::service::mirror

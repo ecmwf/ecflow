@@ -42,7 +42,7 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
         t += "<b>Revision:</b> " + d[RevisionIndex] + "<br>";
         t += "<b>Auth:</b> " + d[AuthIndex];
         if (auto& reason = d[ReasonIndex]; !reason.isEmpty()) {
-            t += "<br><b>Reason:</b> " + d[ReasonIndex];
+            t += "<br><b>Reason:</b> <span style=\"color:red\">" + d[ReasonIndex] + "</span>";
         }
     }
     return t;

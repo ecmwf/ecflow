@@ -713,6 +713,9 @@ public:
 
     virtual boost::posix_time::time_duration sum_runtime() { return sc_rt_; }
 
+    void set_state_change_no(unsigned int x) { state_change_no_ = x; }
+    unsigned int state_change_no() const { return state_change_no_; }
+
 protected:
     void set_runtime(const boost::posix_time::time_duration& rt) { sc_rt_ = rt; }
 

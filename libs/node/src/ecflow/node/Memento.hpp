@@ -44,11 +44,11 @@
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
-#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 
@@ -656,7 +656,7 @@ private:
 class NodeAvisoMemento : public Memento {
 public:
     NodeAvisoMemento() = default;
-    explicit NodeAvisoMemento(const ecf::AvisoAttr& a) : aviso_(a) {}
+    explicit NodeAvisoMemento(const ecf::AvisoAttr& a) : aviso_(a.make_detached()) {}
 
 private:
     void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
@@ -674,7 +674,7 @@ private:
 class NodeMirrorMemento : public Memento {
 public:
     NodeMirrorMemento() = default;
-    explicit NodeMirrorMemento(const ecf::MirrorAttr& a) : mirror_(a) {}
+    explicit NodeMirrorMemento(const ecf::MirrorAttr& a) : mirror_(a.make_detached()) {}
 
 private:
     void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {

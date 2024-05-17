@@ -16,6 +16,7 @@
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Operations.hpp"
 
 namespace ecf {
 
@@ -46,6 +47,13 @@ AvisoAttr::AvisoAttr(Node* parent,
     if (!ecf::Str::valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
     }
+}
+
+AvisoAttr AvisoAttr::make_detached() const {
+    AvisoAttr detached   = *this;
+    detached.parent_     = nullptr;
+    detached.controller_ = nullptr;
+    return detached;
 }
 
 void AvisoAttr::set_listener(std::string_view listener) {
@@ -108,12 +116,29 @@ bool AvisoAttr::isFree() const {
         return a.configuration.revision() < b.configuration.revision();
     });
 
-    // (b) update the revision, in the listener configuration
-    this->revision_ = max->configuration.revision();
-    ALOG(D, "AvisoAttr: " << aviso_path << " updated revision to " << this->revision_);
     state_change_no_ = Ecf::incr_state_change_no();
 
-    return true;
+    // (b) update the revision, in the listener configuration
+    if (max->notification.success()) {
+        ALOG(D, "AvisoAttr::isFree: " << aviso_path << " updated revision to " << this->revision_);
+        this->revision_ = max->configuration.revision();
+        parent_->flag().clear(Flag::REMOTE_ERROR);
+        parent_->flag().set_state_change_no(state_change_no_);
+        reason_ = "";
+
+        for (auto* parent = parent_; parent; parent = parent->parent()) {
+            parent->set_state_change_no(state_change_no_);
+        }
+        return max->notification.match().has_value();
+    }
+    else {
+        parent_->flag().set(Flag::REMOTE_ERROR);
+        parent_->flag().set_state_change_no(state_change_no_);
+        reason_ = max->notification.reason();
+
+        ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+        return false;
+    }
 }
 
 void AvisoAttr::start() const {
@@ -157,17 +182,21 @@ void AvisoAttr::start_controller(const std::string& aviso_path,
                                  std::uint32_t polling,
                                  const std::string& aviso_auth) const {
 
-    // Controller -- start up the Aviso controller, and subscribe the Aviso listener
-    controller_ = std::make_shared<controller_t>();
-    controller_->subscribe(ecf::service::aviso::AvisoRequest::make_listen_start(
-        aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_, aviso_auth));
-    // Controller -- effectively start the Aviso listener
-    // n.b. this must be done after subscribing in the controller, so that the polling interval is set
-    controller_->start();
+    if (!controller_) {
+        // Controller -- start up the Aviso controller, and subscribe the Aviso listener
+        controller_ = std::make_shared<controller_t>();
+        controller_->subscribe(ecf::service::aviso::AvisoRequest::make_listen_start(
+            aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_, aviso_auth));
+        // Controller -- effectively start the Aviso listener
+        // n.b. this must be done after subscribing in the controller, so that the polling interval is set
+        controller_->start();
+    }
 }
 
 void AvisoAttr::stop_controller(const std::string& aviso_path) const {
     if (controller_ != nullptr) {
+        ALOG(D, "AvisoAttr: finishing polling for Aviso attribute (" << parent_path_ << ":" << name_ << ")");
+
         controller_->unsubscribe(ecf::service::aviso::AvisoRequest::make_listen_finish(aviso_path));
 
         // Controller -- shutdown up the Aviso controller
@@ -178,7 +207,6 @@ void AvisoAttr::stop_controller(const std::string& aviso_path) const {
 
 void AvisoAttr::finish() const {
     using namespace ecf;
-    LOG(Log::DBG, Message("AvisoAttr: unsubscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     std::string aviso_path = path();
     stop_controller(aviso_path);

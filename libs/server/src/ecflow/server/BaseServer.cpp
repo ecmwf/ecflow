@@ -254,7 +254,7 @@ void BaseServer::updateDefs(defs_ptr defs, bool force) {
     LOG_ASSERT(defs_->server().jobSubmissionInterval() != 0, "");
 
     if (serverState_ == SState::RUNNING) {
-        ecf::visit(*defs_, BootstrapDefs{});
+        ecf::visit_all(*defs_, BootstrapDefs{});
     }
 }
 
@@ -360,7 +360,7 @@ void BaseServer::halted() {
     // Added after discussion with Axel.
     checkPtSaver_.stop();
 
-    ecf::visit(*defs_, ShutdownDefs{});
+    ecf::visit_all(*defs_, ShutdownDefs{});
 
     // Stop the task communication with server. Hence nodes can be stuck
     // in submitted/active states. Task based command will continue attempting,
@@ -387,7 +387,7 @@ void BaseServer::restart() {
     traverser_.start();
     checkPtSaver_.start();
 
-    ecf::visit(*defs_, BootstrapDefs{});
+    ecf::visit_all(*defs_, BootstrapDefs{});
 }
 
 void BaseServer::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,

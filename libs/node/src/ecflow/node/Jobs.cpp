@@ -59,7 +59,7 @@ bool Jobs::generate(JobsParam& jobsParam) const {
                 for (const suite_ptr& suite : suites) {
                     // SuiteChanged moved into Suite::resolveDependencies.
                     // This ensures the fast path and when suite are not begun we save a ctor/dtor call
-                    ecf::visit(*suite, ActivateAll{});
+                    ecf::visit_all(*suite, ActivateAll{});
                     (void)suite->resolveDependencies(jobsParam);
                 }
             }

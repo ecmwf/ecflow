@@ -39,7 +39,7 @@ QString VMirrorAttrType::toolTip(QStringList d) const {
         t += "<b>SSL:</b> " + d[SslIndex] + "<br>";
         t += "<b>Auth:</b> " + d[AuthIndex];
         if (const auto& reason = d[ReasonIndex]; !reason.isEmpty()) {
-            t += "<br><b>Reason:</b> " + d[ReasonIndex];
+            t += "<br><b>Reason:</b> <span style=\"color:red\">" + d[ReasonIndex] + "</span>";
         }
     }
     return t;

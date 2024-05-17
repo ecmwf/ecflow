@@ -54,7 +54,11 @@ std::ostream& operator<<(std::ostream& os, const AvisoRequest& request) {
 /* Notification */
 
 std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification) {
-    os << notification.key() << " = " << notification.value() << " (revision: " << notification.revision() << ")";
+    os << "success: " << notification.success();
+    if (const auto& match = notification.match(); match) {
+        auto& m = match.value();
+        os << m.key() << " = " << m.value() << " (revision: " << m.revision() << ")";
+    }
     return os;
 }
 
@@ -84,24 +88,19 @@ ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoReque
         throw std::runtime_error("Failed to load listener schema: " + std::string(e.what()));
     }
 
-    std::string address    = listen_request.address();
-    std::string path       = listen_request.path();
-    std::string event      = data["event"];
-    uint32_t polling       = listen_request.polling();
-    uint64_t revision      = listen_request.revision();
+    std::string address = listen_request.address();
+    std::string path    = listen_request.path();
+    std::string event   = data["event"];
+    uint32_t polling    = listen_request.polling();
+    uint64_t revision   = listen_request.revision();
 
     const auto& listener = schema.get_listener(event);
     if (!listener) {
         throw std::runtime_error("Listener not found");
     }
 
-    ConfiguredListener configured{aviso::etcd::Address{address},
-                                  path,
-                                  listener->name(),
-                                  listener->base(),
-                                  listener->stem(),
-                                  polling,
-                                  revision};
+    ConfiguredListener configured{
+        aviso::etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
 
     ALOG(I,
          "Aviso: configured with: " << path << " for " << event << " at " << address << " with revision " << revision);
@@ -255,7 +254,7 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
     if (applicable) {
         AvisoNotification notification{key, value, revision};
         for (const auto& [k, v] : actual_parameters) {
-            notification.add_parameter(k, v);
+            notification.match()->add_parameter(k, v);
         }
         ALOG(D, "Aviso: Match [✓] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return notification;

@@ -57,8 +57,12 @@ struct MirrorConfiguration
 };
 struct MirrorNotification
 {
+    bool success;
     std::string path;
+    std::string failure_reason;
     int status;
+
+    std::string reason() const { return failure_reason.substr(0, failure_reason.find_first_of("\n")); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MirrorNotification& n) {

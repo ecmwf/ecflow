@@ -68,19 +68,19 @@ namespace detail {
 template <typename V, typename I>
 void visit_all(const std::vector<std::shared_ptr<I>>& all, V&& visitor) {
     for (auto& item : all) {
-        visit(*item, std::forward<V>(visitor));
+        visit_all(*item, std::forward<V>(visitor));
     }
 }
 
 template <typename V, typename I>
 void visit_attrs(std::vector<I>& all, V&& visitor) {
     for (auto& i : all) {
-        visit(i, std::forward<V>(visitor));
+        visit_all(i, std::forward<V>(visitor));
     }
 }
 
 template <typename I>
-struct Visitor
+struct VisitorAll
 {
     template <typename V>
     void operator()(V&& v) {
@@ -91,7 +91,7 @@ struct Visitor
 };
 
 template <>
-struct Visitor<Task>
+struct VisitorAll<Task>
 {
     template <typename V>
     void operator()(V&& v) {
@@ -104,7 +104,7 @@ struct Visitor<Task>
 };
 
 template <>
-struct Visitor<Family>
+struct VisitorAll<Family>
 {
     template <typename V>
     void operator()(V&& v) {
@@ -116,18 +116,18 @@ struct Visitor<Family>
 };
 
 template <>
-struct Visitor<Node>
+struct VisitorAll<Node>
 {
     template <typename V>
     void operator()(V&& v) {
         if (auto* family_ptr = dynamic_cast<Family*>(&node_)) {
-            visit(*family_ptr, std::forward<V>(v));
+            visit_all(*family_ptr, std::forward<V>(v));
         }
         else if (auto* task_ptr = dynamic_cast<Task*>(&node_)) {
-            visit(*task_ptr, std::forward<V>(v));
+            visit_all(*task_ptr, std::forward<V>(v));
         }
         if (auto* alias_ptr = dynamic_cast<Alias*>(&node_)) {
-            visit(*alias_ptr, std::forward<V>(v));
+            visit_all(*alias_ptr, std::forward<V>(v));
         }
     }
 
@@ -135,7 +135,7 @@ struct Visitor<Node>
 };
 
 template <>
-struct Visitor<Suite>
+struct VisitorAll<Suite>
 {
     template <typename V>
     void operator()(V&& v) {
@@ -147,7 +147,7 @@ struct Visitor<Suite>
 };
 
 template <>
-struct Visitor<Defs>
+struct VisitorAll<Defs>
 {
     template <typename V>
     void operator()(V&& v) {
@@ -159,11 +159,46 @@ struct Visitor<Defs>
     Defs& defs_;
 };
 
+template <typename I>
+struct VisitorParent
+{
+    template <typename V>
+    void operator()(V&& v) {
+        v(item_);
+        if (auto* parent = item_.parent(); parent) {
+            visit_parents(*parent, std::forward<V>(v));
+        }
+    }
+
+    I& item_;
+};
+
 } // namespace detail
 
+/**
+ * Traverses all nodes downwards in the tree, including the given item and all its children.
+ *
+ * @tparam V - Visitor type
+ * @tparam I - Item type
+ * @param item - The 'root' item to traverse
+ * @param visitor - The visitor to apply to each item
+ */
 template <typename V, typename I>
-void visit(I& item, V&& visitor) {
-    detail::Visitor<I>{item}(std::forward<V>(visitor));
+void visit_all(I& item, V&& visitor) {
+    detail::VisitorAll<I>{item}(std::forward<V>(visitor));
+}
+
+/**
+ * Traverses nodes upwards in the tree, including the given item and all its parents.
+ *
+ * @tparam V - Visitor type
+ * @tparam I - Item type
+ * @param item - The 'leaf' item to traverse
+ * @param visitor - The visitor to apply to each item
+ */
+template <typename V, typename I>
+void visit_parents(I& item, V&& visitor) {
+    detail::VisitorParent<I>{item}(std::forward<V>(visitor));
 }
 
 } // namespace ecf

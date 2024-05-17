@@ -78,6 +78,8 @@ public:
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
 
+    [[nodiscard]] AvisoAttr make_detached() const;
+
     [[nodiscard]] inline Node* parent() const { return parent_; }
     [[nodiscard]] inline const std::string& name() const { return name_; }
     [[nodiscard]] inline const std::string& listener() const { return listener_; }
@@ -124,7 +126,7 @@ private:
     polling_t polling_;
 
     auth_t auth_;
-    reason_t reason_;
+    mutable reason_t reason_{};
 
     // The following are mutable as they are modified by the const method isFree()
     mutable revision_t revision_;

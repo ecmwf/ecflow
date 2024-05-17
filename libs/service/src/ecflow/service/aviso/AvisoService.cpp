@@ -17,7 +17,7 @@ namespace ecf::service::aviso {
 
 namespace {
 
-std::string get_authentication_credential(const std::string& auth_file) {
+std::string load_authentication_credential(const std::string& auth_file) {
     std::ifstream file(auth_file);
     if (!file.is_open()) {
         throw std::runtime_error("Unable to open file: " + auth_file);
@@ -87,8 +87,18 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
                                           << entry.prefix() << ", rev: " << entry.listener().revision() << ")");
 
             // Poll notifications on the key prefix
-            auto updated_keys = client.poll(entry.prefix(), entry.listener().revision() + 1);
 
+            std::vector<std::pair<std::string, std::string>> updated_keys;
+            try {
+                updated_keys = client.poll(entry.prefix(), entry.listener().revision() + 1);
+            }
+            catch (const std::exception& e) {
+                notification_t n{std::string{entry.path()}, entry.listener(), AvisoNotification{e.what()}};
+                notify_(n); // Notification regarding failure to contact the server
+                return;
+            }
+
+            auto matched = false;
             // Pass updated keys to the listener
             for (auto&& [key, value] : updated_keys) {
                 if (key == "latest_revision") {
@@ -102,8 +112,14 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
                 if (auto notification = entry.listener().accepts(key, value, entry.listener().revision());
                     notification) {
                     notification_t n{std::string{entry.path()}, entry.listener(), *notification};
-                    notify_(n);
+                    notify_(n); // Notification regarding a successful match
+                    matched = true;
                 }
+            }
+
+            if (!matched) {
+                notification_t n{std::string{entry.path()}, entry.listener(), AvisoNotification{}};
+                notify_(n); // Notification regarding no match
             }
         }
     }
@@ -121,7 +137,7 @@ void AvisoService::register_listener(const AvisoRequest& listen) {
     auto& inserted = listeners_.emplace_back(listener);
 
     if (auto auth = listen.auth(); !auth.empty()) {
-        inserted.auth_token = get_authentication_credential(listen.auth());
+        inserted.auth_token = load_authentication_credential(listen.auth());
     }
 }
 

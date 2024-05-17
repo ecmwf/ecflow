@@ -16,6 +16,7 @@
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Operations.hpp"
 
 namespace ecf {
 
@@ -51,6 +52,13 @@ MirrorAttr::~MirrorAttr() {
     stop_controller();
 }
 
+[[nodiscard]] MirrorAttr MirrorAttr::make_detached() const {
+    MirrorAttr clone{*this};
+    clone.parent_     = nullptr;
+    clone.controller_ = nullptr;
+    return clone;
+}
+
 std::string MirrorAttr::absolute_name() const {
     return parent_->absNodePath() + ':' + name_;
 }
@@ -76,12 +84,34 @@ void MirrorAttr::mirror() {
 
     // Task associated with Attribute is free when any notification is found
     if (auto notifications = controller_->poll_notifications(remote_path_); !notifications.empty()) {
-        // Notifications found -- Node state to be updated
-        ALOG(D, "MirrorAttr::isFree: found notifications for Mirror attribute (name: " << name_ << ")");
 
-        auto latest_state = static_cast<NState::State>(notifications.back().status);
-        parent_->setStateOnly(latest_state, true);
-        parent_->handleStateChange();
+        // Update the 'local' state change number
+        state_change_no_ = Ecf::incr_state_change_no();
+
+        // Notifications found -- Node state to be updated or error to be reported
+        if (auto& notification = notifications.back(); notification.success) {
+            ALOG(D, "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state " << notification.status);
+            auto latest_state = static_cast<NState::State>(notification.status);
+            reason_           = "";
+            parent_->flag().clear(Flag::REMOTE_ERROR);
+            parent_->flag().set_state_change_no(state_change_no_);
+            parent_->setStateOnly(latest_state, true);
+        }
+        else {
+            ALOG(D,
+                 "MirrorAttr: Failure detected on Mirror attribute (name: " << name_ << ") due to "
+                                                                            << notification.path);
+            reason_ = notification.reason();
+            parent_->flag().set(Flag::REMOTE_ERROR);
+            parent_->flag().set_state_change_no(state_change_no_);
+            parent_->setStateOnly(NState::UNKNOWN, true);
+        }
+
+        // Propagate the 'local' state change number to all parents
+        ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+    }
+    else {
+        ALOG(D, "MirrorAttr: No notifications found for Mirror attribute (name: " << name_ << ")");
     }
 
     // No notifications, nothing to do...
@@ -115,7 +145,10 @@ void MirrorAttr::start_controller() const {
 
 void MirrorAttr::stop_controller() const {
     if (controller_ != nullptr) {
-        ALOG(D, "MirrorAttr: stop polling Mirror attribute '" << absolute_name() << "'");
+        ALOG(D,
+             "MirrorAttr: finishing polling for Mirror attribute \"" << parent_->absNodePath() << ":" << name_
+                                                                     << "\", from host: " << remote_host_
+                                                                     << ", port: " << remote_port_ << ")");
 
         controller_->stop();
         controller_.reset();

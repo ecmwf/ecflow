@@ -374,7 +374,8 @@ void export_NodeAttr() {
         .value("sigterm", Flag::ECF_SIGTERM)
         .value("not_set", Flag::NOT_SET)
         .value("log_error", Flag::LOG_ERROR)
-        .value("checkpt_error", Flag::CHECKPT_ERROR);
+        .value("checkpt_error", Flag::CHECKPT_ERROR)
+        .value("remote_error", Flag::REMOTE_ERROR);
 
     class_<Flag>("Flag", "Represents additional state associated with a Node.\n\n", init<>())
         .def("__str__", &Flag::to_string) // __str__
@@ -824,12 +825,13 @@ void export_NodeAttr() {
              &RepeatDate::step,
              "Return the step increment. This is used to update the repeat, until end date is reached");
 
-    class_<RepeatDateTime>("RepeatDateTime",
-                           NodeAttrDoc::repeat_datetime_doc(),
-                           init<std::string, std::string, std::string, bp::optional<std::string>>()) // name, start, end , delta
-        .def(self == self)                                                             // __eq__
-        .def("__str__", &RepeatDateTime::toString)                                     // __str__
-        .def("__copy__", copyObject<RepeatDateTime>)                                   // __copy__ uses copy constructor
+    class_<RepeatDateTime>(
+        "RepeatDateTime",
+        NodeAttrDoc::repeat_datetime_doc(),
+        init<std::string, std::string, std::string, bp::optional<std::string>>()) // name, start, end , delta
+        .def(self == self)                                                        // __eq__
+        .def("__str__", &RepeatDateTime::toString)                                // __str__
+        .def("__copy__", copyObject<RepeatDateTime>)                              // __copy__ uses copy constructor
         .def("name",
              &RepeatDateTime::name,
              return_value_policy<copy_const_reference>(),

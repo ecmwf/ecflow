@@ -19,16 +19,14 @@
 namespace ecf {
 
 void Flag::set(Flag::Type flag) {
-    if (!is_set(flag)) {
-        // minimize changes to state_change_no_
+    if (!is_set(flag)) { // minimize changes to state_change_no_
         flag_ |= (1 << flag);
         state_change_no_ = Ecf::incr_state_change_no();
     }
 }
 
 void Flag::clear(Flag::Type flag) {
-    if (is_set(flag)) {
-        // minimize changes to state_change_no_
+    if (is_set(flag)) { // minimize changes to state_change_no_
         flag_ &= ~(1 << flag);
         state_change_no_ = Ecf::incr_state_change_no();
     }
@@ -41,7 +39,7 @@ void Flag::reset() {
 
 std::vector<Flag::Type> Flag::list() {
     std::vector<Flag::Type> ret;
-    ret.reserve(24);
+    ret.reserve(25);
     ret.push_back(Flag::FORCE_ABORT);
     ret.push_back(Flag::USER_EDIT);
     ret.push_back(Flag::TASK_ABORTED);
@@ -66,18 +64,20 @@ std::vector<Flag::Type> Flag::list() {
     ret.push_back(Flag::ECF_SIGTERM);
     ret.push_back(Flag::LOG_ERROR);
     ret.push_back(Flag::CHECKPT_ERROR);
+    ret.push_back(Flag::REMOTE_ERROR);
     return ret;
 }
 
-constexpr std::array<Flag::Type, 24> Flag::array() {
-    return std::array<Flag::Type, 24>{Flag::FORCE_ABORT,      Flag::USER_EDIT,     Flag::TASK_ABORTED,
-                                      Flag::EDIT_FAILED,      Flag::JOBCMD_FAILED, Flag::KILLCMD_FAILED,
-                                      Flag::STATUSCMD_FAILED, Flag::NO_SCRIPT,     Flag::KILLED,
-                                      Flag::STATUS,           Flag::LATE,          Flag::MESSAGE,
-                                      Flag::BYRULE,           Flag::QUEUELIMIT,    Flag::WAIT,
-                                      Flag::LOCKED,           Flag::ZOMBIE,        Flag::NO_REQUE_IF_SINGLE_TIME_DEP,
-                                      Flag::ARCHIVED,         Flag::RESTORED,      Flag::THRESHOLD,
-                                      Flag::ECF_SIGTERM,      Flag::LOG_ERROR,     Flag::CHECKPT_ERROR};
+constexpr std::array<Flag::Type, 25> Flag::array() {
+    return std::array{Flag::FORCE_ABORT,      Flag::USER_EDIT,     Flag::TASK_ABORTED,
+                      Flag::EDIT_FAILED,      Flag::JOBCMD_FAILED, Flag::KILLCMD_FAILED,
+                      Flag::STATUSCMD_FAILED, Flag::NO_SCRIPT,     Flag::KILLED,
+                      Flag::STATUS,           Flag::LATE,          Flag::MESSAGE,
+                      Flag::BYRULE,           Flag::QUEUELIMIT,    Flag::WAIT,
+                      Flag::LOCKED,           Flag::ZOMBIE,        Flag::NO_REQUE_IF_SINGLE_TIME_DEP,
+                      Flag::ARCHIVED,         Flag::RESTORED,      Flag::THRESHOLD,
+                      Flag::ECF_SIGTERM,      Flag::LOG_ERROR,     Flag::CHECKPT_ERROR,
+                      Flag::REMOTE_ERROR};
 }
 
 std::string Flag::enum_to_string(Flag::Type flag) {
@@ -154,6 +154,9 @@ std::string Flag::enum_to_string(Flag::Type flag) {
             break;
         case Flag::STATUS:
             return "status";
+            break;
+        case Flag::REMOTE_ERROR:
+            return "remote_error";
             break;
         case Flag::NOT_SET:
             return "not_set";
@@ -238,6 +241,9 @@ const char* Flag::enum_to_char_star(Flag::Type flag) {
         case Flag::CHECKPT_ERROR:
             return "checkpt_error";
             break;
+        case Flag::REMOTE_ERROR:
+            return "remote_error";
+            break;
         case Flag::NOT_SET:
             return "not_set";
             break;
@@ -297,11 +303,13 @@ Flag::Type Flag::string_to_flag_type(const std::string& s) {
         return Flag::LOG_ERROR;
     if (s == "checkpt_error")
         return Flag::CHECKPT_ERROR;
+    if (s == "remote_error")
+        return Flag::REMOTE_ERROR;
     return Flag::NOT_SET;
 }
 
 void Flag::valid_flag_type(std::vector<std::string>& vec) {
-    vec.reserve(24);
+    vec.reserve(25);
     vec.emplace_back("force_aborted");
     vec.emplace_back("user_edit");
     vec.emplace_back("task_aborted");
@@ -326,6 +334,7 @@ void Flag::valid_flag_type(std::vector<std::string>& vec) {
     vec.emplace_back("sigterm");
     vec.emplace_back("log_error");
     vec.emplace_back("checkpt_error");
+    vec.emplace_back("remote_error");
 }
 
 std::string Flag::to_string() const {
@@ -335,8 +344,8 @@ std::string Flag::to_string() const {
 }
 
 void Flag::write(std::string& ret) const {
-    bool added                           = false;
-    std::array<Flag::Type, 24> flag_list = Flag::array();
+    bool added     = false;
+    auto flag_list = Flag::array();
     for (auto& i : flag_list) {
         if (is_set(i)) {
             if (added)

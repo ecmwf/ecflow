@@ -166,6 +166,8 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         if (late_)
             comp->add(std::make_shared<NodeLateMemento>(*late_));
 
+        comp->add(std::make_shared<FlagMemento>(flag_));
+
         changes.add(comp);
         return;
     }

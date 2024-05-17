@@ -101,32 +101,50 @@ std::ostream& operator<<(std::ostream& os, const AvisoRequest& request);
  * */
 class AvisoNotification {
 public:
+    struct Match
+    {
+        Match(std::string_view key, std::string_view value, uint64_t revision)
+            : key_{key},
+              value_{value},
+              revision_{revision},
+              parameters_{} {}
+
+        std::string_view key() const { return key_; }
+        std::string_view value() const { return value_; }
+        uint64_t revision() const { return revision_; }
+
+        void add_parameter(const std::string& parameter, const std::string& value) {
+            parameters_.emplace_back(parameter, value);
+        }
+
+        std::string key_;
+        std::string value_;
+        uint64_t revision_;
+        std::vector<std::pair<std::string, std::string>> parameters_{};
+    };
+
+public:
     AvisoNotification() = default;
+    AvisoNotification(std::string_view reason) : success_{false}, match_{}, reason_{reason} {}
     AvisoNotification(std::string_view key, std::string_view value, uint64_t revision)
-        : key_{key},
-          value_{value},
-          revision_{revision} {}
+        : success_{true},
+          match_{std::make_optional<Match>(key, value, revision)} {}
 
-    std::string_view key() const { return key_; }
-    std::string_view value() const { return value_; }
-    uint64_t revision() const { return revision_; }
-
-    void add_parameter(const std::string& parameter, const std::string& value) {
-        parameters_.emplace_back(parameter, value);
-    }
-    std::vector<std::pair<std::string, std::string>> parameters() const { return parameters_; }
+    [[nodiscard]] bool success() const { return success_; }
+    [[nodiscard]] std::optional<Match> match() const { return match_; }
+    [[nodiscard]] std::string reason() const { return reason_; }
 
 private:
-    std::string key_{};
-    std::string value_{};
-    uint64_t revision_{0};
-    std::vector<std::pair<std::string, std::string>> parameters_{};
+    bool success_{true};
+    std::optional<Match> match_{};
+    std::string reason_{};
 };
 
 std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification);
 
 /**
- * A Listener represents an Aviso Listener, loaded from the Schema with placeholders as part of the `base` and `stem`.
+ * A Listener represents an Aviso Listener, loaded from the Schema with placeholders as part of the `base` and
+ * `stem`.
  */
 class Listener {
 public:

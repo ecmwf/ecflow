@@ -13,8 +13,8 @@
 bool Ecf::server_                            = false;
 bool Ecf::debug_equality_                    = false;
 unsigned int Ecf::debug_level_               = 0;
-unsigned int Ecf::state_change_no_           = 0;
-unsigned int Ecf::modify_change_no_          = 0;
+thread_local Ecf::atomic_counter_t Ecf::state_change_no_  = 0;
+thread_local Ecf::atomic_counter_t Ecf::modify_change_no_ = 0;
 bool DebugEquality::ignore_server_variables_ = false;
 
 const char* Ecf::SERVER_NAME() {
@@ -59,7 +59,7 @@ const std::string& Ecf::CHECK_CMD() {
     return CHECK_CMD;
 }
 
-// -remote has been removed form firefox, since version 39
+//-remote has been removed from firefox, since version 39
 //-remote openfile(file)                    -> -file <file>
 //-remote openurl(url)                      -> -url <url>
 //-remote openurl(url,new-window)           -> -new-window <url>
@@ -80,15 +80,14 @@ const std::string& Ecf::URL() {
     return URL;
 }
 
-unsigned int Ecf::incr_state_change_no() {
+Ecf::counter_t Ecf::incr_state_change_no() {
     if (server_) {
         return ++state_change_no_;
     }
     return state_change_no_;
 }
 
-unsigned int Ecf::incr_modify_change_no() {
-
+Ecf::counter_t Ecf::incr_modify_change_no() {
     if (server_) {
         return ++modify_change_no_;
     }
