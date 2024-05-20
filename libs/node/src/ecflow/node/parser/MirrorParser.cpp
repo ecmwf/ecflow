@@ -31,6 +31,13 @@ auto get_option_value(const boost::program_options::variables_map& vm,
     return vm[option_name].as<T>();
 }
 
+template <>
+auto get_option_value<bool>(const boost::program_options::variables_map& vm,
+                            const std::string& option_name,
+                            const std::string& line) {
+    return vm.count(option_name) ? true : false;
+}
+
 } // namespace
 
 ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line) {
@@ -59,11 +66,18 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* p
 
     namespace po = boost::program_options;
     po::options_description description("MirrorParser");
-    description.add_options()("name", po::value<std::string>());
-    description.add_options()("remote_path", po::value<std::string>());
-    description.add_options()("remote_host", po::value<std::string>());
-    description.add_options()("remote_port", po::value<std::string>());
-    description.add_options()("polling", po::value<std::string>()->default_value("40"));
+    description.add_options()(option_name, po::value<std::string>());
+    description.add_options()(option_remote_path, po::value<std::string>());
+    description.add_options()(option_remote_host,
+                              po::value<std::string>()->default_value(ecf::MirrorAttr::default_remote_host));
+    description.add_options()(option_remote_port,
+                              po::value<std::string>()->default_value(ecf::MirrorAttr::default_remote_port));
+    description.add_options()(option_polling,
+                              po::value<std::string>()->default_value(ecf::MirrorAttr::default_polling));
+    description.add_options()(option_ssl, "Use SSL");
+    description.add_options()(option_remote_auth,
+                              po::value<std::string>()->default_value(ecf::MirrorAttr::default_remote_auth));
+    description.add_options()(option_reason, po::value<std::string>()->default_value(""));
 
     po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
 
@@ -71,18 +85,22 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* p
     po::store(parsed_options, vm);
     po::notify(vm);
 
-    auto name        = get_option_value<ecf::MirrorAttr::name_t>(vm, "name", line);
-    auto ecflow_path = get_option_value<ecf::MirrorAttr::remote_path_t>(vm, "remote_path", line);
-    auto ecflow_host = get_option_value<ecf::MirrorAttr::remote_host_t>(vm, "remote_host", line);
-    auto ecflow_port = get_option_value<ecf::MirrorAttr::remote_port_t>(vm, "remote_port", line);
-    auto polling     = get_option_value<ecf::MirrorAttr::polling_t>(vm, "polling", line);
+    auto name        = get_option_value<ecf::MirrorAttr::name_t>(vm, option_name, line);
+    auto ecflow_path = get_option_value<ecf::MirrorAttr::remote_path_t>(vm, option_remote_path, line);
+    auto ecflow_host = get_option_value<ecf::MirrorAttr::remote_host_t>(vm, option_remote_host, line);
+    auto ecflow_port = get_option_value<ecf::MirrorAttr::remote_port_t>(vm, option_remote_port, line);
+    auto polling     = get_option_value<ecf::MirrorAttr::polling_t>(vm, option_polling, line);
+    auto ssl         = get_option_value<ecf::MirrorAttr::flag_t>(vm, option_ssl, line);
+    auto auth        = get_option_value<ecf::MirrorAttr::auth_t>(vm, option_remote_auth, line);
+    auto reason      = get_option_value<ecf::MirrorAttr::reason_t>(vm, option_reason, line);
 
-    return ecf::MirrorAttr{parent, name, ecflow_path, ecflow_host, ecflow_port, polling};
+    return ecf::MirrorAttr{parent, name, ecflow_path, ecflow_host, ecflow_port, polling, ssl, auth, reason};
 }
 
 bool MirrorParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (nodeStack().empty()) {
-        throw std::runtime_error("MirrorParser::doParse: Could not add 'mirror' as node stack is empty at line: " + line);
+        throw std::runtime_error("MirrorParser::doParse: Could not add 'mirror' as node stack is empty at line: " +
+                                 line);
     }
 
     Node* parent = nodeStack_top();

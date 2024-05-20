@@ -40,9 +40,17 @@ public:
     using remote_host_t = std::string;
     using remote_port_t = std::string;
     using polling_t     = std::string;
+    using flag_t        = bool;
+    using auth_t        = std::string;
+    using reason_t      = std::string;
 
     using controller_t     = ecf::service::mirror::MirrorController;
     using controller_ptr_t = std::shared_ptr<controller_t>;
+
+    static constexpr const char* default_remote_host = "%ECF_MIRROR_REMOTE_HOST%";
+    static constexpr const char* default_remote_port = "%ECF_MIRROR_REMOTE_PORT%";
+    static constexpr const char* default_polling     = "%ECF_MIRROR_REMOTE_POLLING%";
+    static constexpr const char* default_remote_auth = "%ECF_MIRROR_REMOTE_AUTH%";
 
     static bool is_valid_name(const std::string& name);
 
@@ -58,17 +66,26 @@ public:
                remote_path_t remote_path,
                remote_host_t remote_host,
                remote_port_t remote_port,
-               polling_t polling);
+               polling_t polling,
+               flag_t ssl,
+               auth_t auth,
+               reason_t reason);
+
     MirrorAttr(const MirrorAttr& rhs) = default;
     ~MirrorAttr();
 
     MirrorAttr& operator=(const MirrorAttr& rhs) = default;
 
     [[nodiscard]] inline const std::string& name() const { return name_; }
+    [[nodiscard]] std::string absolute_name() const;
+
     [[nodiscard]] inline const std::string& remote_path() const { return remote_path_; }
     [[nodiscard]] inline const std::string& remote_host() const { return remote_host_; }
     [[nodiscard]] inline const std::string& remote_port() const { return remote_port_; }
     [[nodiscard]] inline polling_t polling() const { return polling_; }
+    [[nodiscard]] inline flag_t ssl() const { return ssl_; }
+    [[nodiscard]] inline const std::string& auth() const { return auth_; }
+    [[nodiscard]] inline const std::string& reason() const { return reason_; }
 
     void set_parent(Node* parent) { parent_ = parent; }
 
@@ -100,6 +117,9 @@ private:
     remote_host_t remote_host_;
     remote_port_t remote_port_;
     polling_t polling_;
+    flag_t ssl_;
+    auth_t auth_;
+    reason_t reason_;
 
     // The following are mutable as they are modified by the const method isFree()
     mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
@@ -116,6 +136,9 @@ void serialize(Archive& ar, MirrorAttr& aviso, [[maybe_unused]] std::uint32_t ve
     ar & aviso.remote_host_;
     ar & aviso.remote_port_;
     ar & aviso.polling_;
+    ar & aviso.ssl_;
+    ar & aviso.auth_;
+    ar & aviso.reason_;
 }
 
 } // namespace ecf

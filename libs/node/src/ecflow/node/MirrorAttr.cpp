@@ -28,13 +28,19 @@ MirrorAttr::MirrorAttr(Node* parent,
                        remote_path_t remote_path,
                        remote_host_t remote_host,
                        remote_port_t remote_port,
-                       polling_t polling)
+                       polling_t polling,
+                       flag_t ssl,
+                       auth_t auth,
+                       reason_t reason)
     : parent_{parent},
       name_{std::move(name)},
       remote_path_{std::move(remote_path)},
       remote_host_{std::move(remote_host)},
       remote_port_{std::move(remote_port)},
       polling_{std::move(polling)},
+      ssl_{ssl},
+      auth_{std::move(auth)},
+      reason_{std::move(reason)},
       controller_{nullptr} {
     if (!is_valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid MirrorAttr name :", name_));
@@ -45,6 +51,10 @@ MirrorAttr::~MirrorAttr() {
     stop_controller();
 }
 
+std::string MirrorAttr::absolute_name() const {
+    return parent_->absNodePath() + ':' + name_;
+}
+
 bool MirrorAttr::why(std::string& theReasonWhy) const {
     theReasonWhy += ecf::Message(" is a Mirror of ", remote_path(), " at '", remote_host(), ":", remote_port(), "'");
     return true;
@@ -52,25 +62,15 @@ bool MirrorAttr::why(std::string& theReasonWhy) const {
 
 void MirrorAttr::reset() {
     state_change_no_ = Ecf::incr_state_change_no();
-
-    ALOG(D,
-         "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
-                                                                         << ", port: " << remote_port_ << ")");
-
     start_controller();
 }
 
 void MirrorAttr::finish() {
-
-    ALOG(D,
-         "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
-                                                                         << ", port: " << remote_port_ << ")");
-
     stop_controller();
 }
 
 void MirrorAttr::mirror() {
-    ALOG(D, "**** Check Mirror attribute (name: " << name_ << ")");
+    ALOG(D, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
 
     start_controller();
 
@@ -89,10 +89,6 @@ void MirrorAttr::mirror() {
 
 void MirrorAttr::start_controller() const {
     if (controller_ == nullptr) {
-        ALOG(D,
-             "MirrorAttr::reset: start polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
-                                                                             << ", port: " << remote_port_ << ")");
-
         // Substitute variables in Mirror configuration
         std::string remote_host = remote_host_;
         parent_->variableSubstitution(remote_host);
@@ -100,11 +96,17 @@ void MirrorAttr::start_controller() const {
         parent_->variableSubstitution(remote_port);
         std::string polling = polling_;
         parent_->variableSubstitution(polling);
+        std::string auth = auth_;
+        parent_->variableSubstitution(auth);
+
+        ALOG(D,
+             "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
+                                                            << remote_host << ':' << remote_port << ")");
 
         // Controller -- start up the Mirror controller, and configure the Mirror request
         controller_ = std::make_shared<controller_t>();
         controller_->subscribe(ecf::service::mirror::MirrorRequest{
-            remote_path_, remote_host, remote_port, boost::lexical_cast<std::uint32_t>(polling)});
+            remote_path_, remote_host, remote_port, boost::lexical_cast<std::uint32_t>(polling), ssl_, auth});
         // Controller -- effectively start the Mirror process
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
         controller_->start();
@@ -113,9 +115,7 @@ void MirrorAttr::start_controller() const {
 
 void MirrorAttr::stop_controller() const {
     if (controller_ != nullptr) {
-        ALOG(D,
-             "MirrorAttr::reset: stop polling for Mirror attribute (name: " << name_ << ", host: " << remote_host_
-                                                                            << ", port: " << remote_port_ << ")");
+        ALOG(D, "MirrorAttr: stop polling Mirror attribute '" << absolute_name() << "'");
 
         controller_->stop();
         controller_.reset();

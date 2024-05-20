@@ -10,15 +10,36 @@
 
 #include "ecflow/service/mirror/MirrorService.hpp"
 
+#include <filesystem>
 #include <thread>
+#include <utility>
 
 #include "ecflow/client/ClientInvoker.hpp"
+#include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/service/Log.hpp"
 #include "ecflow/service/Registry.hpp"
 
 namespace ecf::service::mirror {
+
+namespace {
+
+std::pair<std::string, std::string> load_auth_credentials(const std::filesystem::path& auth_file) {
+    std::ifstream file(auth_file);
+    if (!file.is_open()) {
+        throw std::runtime_error("Unable to open file: " + auth_file.string());
+    }
+
+    std::string username, password;
+    std::getline(file, username);
+    std::getline(file, password);
+    file.close();
+
+    return {username, password};
+}
+
+} // namespace
 
 struct MirrorClient::Impl
 {
@@ -33,34 +54,48 @@ MirrorClient::~MirrorClient() = default;
 
 int MirrorClient::get_node_status(const std::string& remote_host,
                                   const std::string& remote_port,
-                                  const std::string& node_path) const {
-    ALOG(D, "Sync'ing: using " << remote_host << ":" << remote_port << ", path=" << node_path);
+                                  const std::string& node_path,
+                                  bool ssl,
+                                  const std::string& remote_username,
+                                  const std::string& remote_password) const {
+    ALOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
+    ALOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
 
     try {
         impl_ = std::make_unique<Impl>();
         impl_->invoker_.set_host_port(remote_host, remote_port);
-        ALOG(D, "Sync'ing: retrieving the latest defs");
+        if (ssl) {
+            impl_->invoker_.enable_ssl();
+        }
+        if (!remote_username.empty()) {
+            impl_->invoker_.set_user_name(remote_username);
+        }
+        if (!remote_password.empty()) {
+            // Extremely important: the password actually needs to be encrypted before being set in the invoker!
+            impl_->invoker_.set_password(PasswordEncryption::encrypt(remote_password, remote_username));
+        }
+
+        ALOG(D, "MirrorClient: retrieving the latest defs");
         impl_->invoker_.sync(impl_->defs_);
-        ALOG(D, "Sync'ing finished");
 
         if (!impl_->defs_) {
-            ALOG(E, "Sync'ing: unable to sync with remote defs");
+            ALOG(E, "MirrorClient: unable to sync with remote defs");
             return NState::UNKNOWN;
         }
 
         auto node = impl_->defs_->findAbsNode(node_path);
 
         if (!node) {
-            ALOG(E, "Sync'ing: requested node (" << node_path << ") not found in remote defs");
+            ALOG(E, "MirrorClient: requested node (" << node_path << ") not found in remote defs");
             return NState::UNKNOWN;
         }
 
         auto state = node->state();
-        ALOG(D, "Sync'ing: found node (" << node_path << "), with status " << state);
+        ALOG(D, "MirrorClient: found node (" << node_path << "), with status " << state);
         return state;
     }
     catch (std::exception& e) {
-        ALOG(W, "Sync'ing: failure to sync, due to: " << e.what());
+        ALOG(W, "MirrorClient: failure to sync, due to: " << e.what());
         return NState::UNKNOWN;
     }
 }
@@ -71,7 +106,13 @@ void MirrorService::start() {
 
     auto new_subscriptions = subscribe_();
     for (auto&& subscription : new_subscriptions) {
-        register_listener(subscription);
+        try {
+            register_listener(subscription);
+        }
+        catch (std::runtime_error& e) {
+            ALOG(E, "MirrorService: Unable to register listener: " << e.what());
+            // TODO[MB]: Must gracefully handle this error, by notifying the main thread and providing a reason
+        }
     }
 
     // Start polling...
@@ -86,34 +127,31 @@ void MirrorService::start() {
         expiry     = found->mirror_request_.polling;
     }
 
-    ALOG(D, "Sync'ing: start polling, with polling interval: " << expiry << " s");
+    ALOG(D, "MirrorService: start polling, with polling interval: " << expiry << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 
 void MirrorService::operator()(const std::chrono::system_clock::time_point& now) {
 
-    // Update list of listeners
-
-    auto new_subscriptions = subscribe_();
-    for (auto&& subscription : new_subscriptions) {
-        register_listener(subscription);
-    }
-
     // Check notification for each listener
     {
         for (auto& entry : listeners_) {
             ALOG(D,
-                 "Mirroring: " << entry.mirror_request_.path << " node from " << entry.mirror_request_.host << ":"
-                               << entry.mirror_request_.port);
+                 "MirrorService: Mirroring " << entry.mirror_request_.path << " node from "
+                                             << entry.mirror_request_.host << ":" << entry.mirror_request_.port);
 
             auto remote_path = entry.mirror_request_.path;
             auto remote_host = entry.mirror_request_.host;
             auto remote_port = entry.mirror_request_.port;
+            auto ssl         = entry.mirror_request_.ssl;
+            auto remote_user = entry.remote_username_;
+            auto remote_pass = entry.remote_password_;
 
             // Collect the latest remote status
-            auto latest_status = mirror_.get_node_status(remote_host, remote_port, remote_path);
+            auto latest_status =
+                mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
 
-            ALOG(D, "Mirroring: Notifying remote node state: " << latest_status);
+            ALOG(D, "MirrorService: Notifying remote node state: " << latest_status);
 
             MirrorNotification notification{remote_path, latest_status};
             notify_(notification);
@@ -122,19 +160,26 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
 }
 
 void MirrorService::register_listener(const MirrorRequest& request) {
-    ALOG(D, "Registering Mirror listener: {" << request.path << "}");
-    listeners_.emplace_back(Entry{request});
-}
-
-void MirrorService::unregister_listener(const std::string& unlisten_path) {
-    // Nothing to do ...
+    ALOG(D, "MirrorService: Registering Mirror: {" << request.path << "}");
+    Entry& inserted = listeners_.emplace_back(Entry{request});
+    if (!request.auth.empty()) {
+        ALOG(D, "MirrorService: Loading auth {" << request.auth << "}");
+        try {
+            auto [username, password] = load_auth_credentials(request.auth);
+            inserted.remote_username_ = username;
+            inserted.remote_password_ = password;
+        }
+        catch (std::runtime_error& e) {
+            throw std::runtime_error("MirrorService: Unable to load auth credentials");
+        }
+    }
 }
 
 MirrorController::MirrorController()
     : base_t{[this](const MirrorService::notification_t& notification) {
                  this->notify(notification);
                  // The following is a hack to force the server to increment the job generation count
-                 ALOG(D, "Sync'ing: forcing server to traverse the defs");
+                 ALOG(D, "MirrorController: forcing server to traverse the defs");
                  TheOneServer::server().increment_job_generation_count();
              },
              [this]() { return this->get_subscriptions(); }} {};

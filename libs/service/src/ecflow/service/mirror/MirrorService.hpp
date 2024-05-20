@@ -24,8 +24,12 @@ public:
     MirrorClient();
     ~MirrorClient();
 
-    int
-    get_node_status(const std::string& remote_host, const std::string& remote_port, const std::string& node_path) const;
+    int get_node_status(const std::string& remote_host,
+                        const std::string& remote_port,
+                        const std::string& node_path,
+                        bool ssl,
+                        const std::string& remote_username,
+                        const std::string& remote_password) const;
 
 private:
     struct Impl;
@@ -39,6 +43,8 @@ public:
     std::string host;
     std::string port;
     std::uint32_t polling;
+    bool ssl;
+    std::string auth;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MirrorRequest& r) {
@@ -68,6 +74,8 @@ public:
     struct Entry
     {
         MirrorRequest mirror_request_;
+        std::string remote_username_;
+        std::string remote_password_;
     };
 
     using storage_t            = std::vector<Entry>;
@@ -94,7 +102,6 @@ public:
 
 private:
     void register_listener(const MirrorRequest& request);
-    void unregister_listener(const std::string& unlisten_path);
 
     executor::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;
     storage_t listeners_;

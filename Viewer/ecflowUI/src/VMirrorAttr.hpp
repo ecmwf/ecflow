@@ -42,7 +42,10 @@ private:
         RemotePathIndex = 2,
         RemoteHostIndex = 3,
         RemotePortIndex = 4,
-        PollingIndex    = 5
+        PollingIndex    = 5,
+        SslIndex        = 6,
+        AuthIndex       = 7,
+        ReasonIndex     = 8
     };
 };
 
