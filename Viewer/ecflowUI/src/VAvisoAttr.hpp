@@ -43,7 +43,9 @@ private:
         UrlIndex      = 3,
         SchemaIndex   = 4,
         PollingIndex  = 5,
-        RevisionIndex = 6
+        RevisionIndex = 6,
+        AuthIndex     = 7,
+        ReasonIndex   = 8
     };
 };
 

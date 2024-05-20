@@ -19,13 +19,15 @@
 //================================
 
 VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
-    dataCount_                         = 7;
+    dataCount_                         = 9;
     searchKeyToData_["aviso_name"]     = NameIndex;
     searchKeyToData_["aviso_handle"]   = ListenerIndex;
     searchKeyToData_["aviso_url"]      = UrlIndex;
     searchKeyToData_["aviso_schema"]   = SchemaIndex;
     searchKeyToData_["aviso_polling"]  = PollingIndex;
     searchKeyToData_["aviso_revision"] = RevisionIndex;
+    searchKeyToData_["aviso_auth"]     = AuthIndex;
+    searchKeyToData_["aviso_reason"]   = ReasonIndex;
     scanProc_                          = VAvisoAttr::scan;
 }
 
@@ -37,7 +39,11 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
         t += "<b>URL:</b> " + d[UrlIndex] + "<br>";
         t += "<b>Schema:</b> " + d[SchemaIndex] + "<br>";
         t += "<b>Polling:</b> " + d[PollingIndex] + " s<br>";
-        t += "<b>Revision:</b> " + d[RevisionIndex];
+        t += "<b>Revision:</b> " + d[RevisionIndex] + "<br>";
+        t += "<b>Auth:</b> " + d[AuthIndex];
+        if (auto& reason = d[ReasonIndex]; !reason.isEmpty()) {
+            t += "<br><b>Reason:</b> " + d[ReasonIndex];
+        }
     }
     return t;
 }
@@ -66,7 +72,9 @@ void VAvisoAttrType::encode(const ecf::AvisoAttr& aviso, QStringList& data, bool
          << QString::fromStdString(aviso.url())     // UrlIndex
          << QString::fromStdString(aviso.schema())  // SchemaIndex
          << QString::fromStdString(aviso.polling()) // PollingIndex
-         << QString::number(aviso.revision());      // Revision Index
+         << QString::number(aviso.revision())       // Revision Index
+         << QString::fromStdString(aviso.auth())    // AuthIndex
+         << QString::fromStdString(aviso.reason()); // ReasonIndex
 }
 
 void VAvisoAttrType::encode_empty(QStringList& data) const {

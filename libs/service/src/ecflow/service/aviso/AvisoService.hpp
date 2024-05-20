@@ -34,7 +34,7 @@ struct NotificationPackage
 
 template <typename Configuration, typename Notification>
 inline std::ostream& operator<<(std::ostream& os, const NotificationPackage<Configuration, Notification>& p) {
-    return os << "NotificationPackage{path: " << p.path << ", listener: TODO, notification: TODO}";
+    return os << "NotificationPackage{" << p.path << ", " << p.configuration << ", " << p.notification << "}";
 }
 
 class AvisoService {
@@ -59,6 +59,8 @@ public:
         std::string_view path() const { return listener_.path(); }
         const listener_t& listener() const { return listener_; }
         listener_t& listener() { return listener_; }
+
+        std::string auth_token;
 
     private:
         listener_t listener_;
@@ -87,7 +89,7 @@ public:
 
 private:
     void register_listener(const AvisoRequest& request);
-    void register_listener(const listener_t& listener);
+//    void register_listener(const listener_t& listener);
     void unregister_listener(const std::string& unlisten_path);
 
     executor::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;

@@ -43,7 +43,10 @@ public:
     static constexpr const char* option_listener = "listener";
     static constexpr const char* option_url      = "url";
     static constexpr const char* option_schema   = "schema";
+    static constexpr const char* option_polling  = "polling";
     static constexpr const char* option_revision = "revision";
+    static constexpr const char* option_auth     = "auth";
+    static constexpr const char* option_reason   = "reason";
 
     static ecf::AvisoAttr parse_aviso_line(const std::string& line);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name);

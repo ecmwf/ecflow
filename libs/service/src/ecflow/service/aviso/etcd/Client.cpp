@@ -38,12 +38,22 @@ namespace ecf::service::aviso::etcd {
 struct Client::Impl
 {
     explicit Impl(Address address) : address_(std::move(address)), client_(std::string{address_.address()}) {}
+    explicit Impl(Address address, std::string auth_token)
+        : address_(std::move(address)),
+          auth_token_(std::move(auth_token)),
+          client_(std::string{address_.address()}) {}
 
     Address address_;
+    std::string auth_token_;
     httplib::Client client_;
 };
 
-Client::Client(const Address& address) : impl_(std::make_unique<Client::Impl>(address)) {
+Client::Client(Address address) : impl_(std::make_unique<Client::Impl>(address)) {
+    std::cout << OPENSSL_VERSION_NUMBER << std::endl;
+}
+
+Client::Client(Address address, std::string auth_token)
+    : impl_(std::make_unique<Client::Impl>(std::move(address), std::move(auth_token))) {
     std::cout << OPENSSL_VERSION_NUMBER << std::endl;
 }
 
@@ -54,6 +64,11 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
 
     httplib::Headers headers;
 
+    if (!impl_->auth_token_.empty()) {
+        ALOG(D, "EtcdClient: using authorization token " << impl_->auth_token_);
+        headers.emplace("Authorization", "Bearer " + impl_->auth_token_);
+    }
+
     auto range = Range(key_prefix);
 
     std::string request_body =
@@ -63,14 +78,12 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
 
     httplib::Result result = impl_->client_.Post(endpoint_path, headers, request_body, content_type);
     if (!result) {
-        ALOG(E, "Error: " << result.error());
+        ALOG(E, "EtcdClient " << result.error());
         return std::vector<std::pair<std::string, std::string>>{};
     }
-    // ALOG(D, "Received: " << result.value().status << " --> " << result.value().reason);
 
     if (result.value().status != 200) {
-        // TODO[MB]: handle the error (either by throwing an exception or returning an optional)
-        ALOG(E, "Something when wrong!");
+        ALOG(E, "EtcdClient: status code " << result.value().status << " received");
         return std::vector<std::pair<std::string, std::string>>{};
     }
 
@@ -79,7 +92,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
         response_body = json::parse(std::begin(result.value().body), std::end(result.value().body));
     }
     catch (const json::parse_error& e) {
-        ALOG(E, "Failed to parse response: " << e.what());
+        ALOG(E, "EtcdClient: Failed to parse response: " << e.what());
         return std::vector<std::pair<std::string, std::string>>{};
     }
 
@@ -104,7 +117,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
         }
     }
     else {
-        ALOG(D, "No new key+value");
+        ALOG(D, "EtcdClient: No new key+value");
     }
 
     return entries;

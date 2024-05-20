@@ -29,7 +29,9 @@ AvisoAttr::AvisoAttr(Node* parent,
                      url_t url,
                      schema_t schema,
                      polling_t polling,
-                     revision_t revision)
+                     revision_t revision,
+                     auth_t auth,
+                     reason_t reason)
     : parent_{parent},
       parent_path_{parent ? parent->absNodePath() : ""},
       name_{std::move(name)},
@@ -37,6 +39,8 @@ AvisoAttr::AvisoAttr(Node* parent,
       url_{std::move(url)},
       schema_{std::move(schema)},
       polling_{std::move(polling)},
+      auth_{std::move(auth)},
+      reason_{std::move(reason)},
       revision_{revision},
       controller_{nullptr} {
     if (!ecf::Str::valid_name(name_)) {
@@ -74,12 +78,16 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
 
 void AvisoAttr::reset() {
     state_change_no_ = Ecf::incr_state_change_no();
+
+    if (parent_->state() == NState::QUEUED) {
+        start();
+    }
 }
 
 bool AvisoAttr::isFree() const {
     std::string aviso_path = path();
 
-    LOG(Log::MSG, "**** Check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ")");
+    ALOG(D, "AvisoAttr: check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ") is free");
 
     if (controller_ == nullptr) {
         return false;
@@ -102,14 +110,14 @@ bool AvisoAttr::isFree() const {
 
     // (b) update the revision, in the listener configuration
     this->revision_ = max->configuration.revision();
-    ALOG(D, "AvisoAttr::isFree: " << aviso_path << " updated revision to " << this->revision_);
+    ALOG(D, "AvisoAttr: " << aviso_path << " updated revision to " << this->revision_);
     state_change_no_ = Ecf::incr_state_change_no();
 
     return true;
 }
 
 void AvisoAttr::start() const {
-    LOG(Log::DBG, Message("**** Subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+    LOG(Log::DBG, Message("AvisoAttr: subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     // Path -- the unique identifier of the Aviso listener
     std::string aviso_path = path();
@@ -122,7 +130,7 @@ void AvisoAttr::start() const {
     std::string aviso_url = url_;
     parent_->variableSubstitution(aviso_url);
     if (aviso_url.empty()) {
-        throw std::runtime_error("AvisoAttr::requeue: Invalid Aviso URL detected for " + aviso_path);
+        throw std::runtime_error("AvisoAttr: invalid Aviso URL detected for " + aviso_path);
     }
 
     // Schema -- the path to the Schema used to interpret the Aviso notifications
@@ -132,23 +140,27 @@ void AvisoAttr::start() const {
     std::string aviso_polling = polling_;
     parent_->variableSubstitution(aviso_polling);
     if (aviso_polling.empty()) {
-        throw std::runtime_error("AvisoAttr::requeue: Invalid Aviso polling interval detected for " + aviso_path);
+        throw std::runtime_error("AvisoAttr: invalid Aviso polling interval detected for " + aviso_path);
     }
     auto polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
 
-    start_controller(aviso_path, aviso_listener, aviso_url, aviso_schema, polling);
+    std::string aviso_auth = auth_;
+    parent_->variableSubstitution(aviso_auth);
+
+    start_controller(aviso_path, aviso_listener, aviso_url, aviso_schema, polling, aviso_auth);
 }
 
 void AvisoAttr::start_controller(const std::string& aviso_path,
                                  const std::string& aviso_listener,
                                  const std::string& aviso_url,
                                  const std::string& aviso_schema,
-                                 std::uint32_t polling) const {
+                                 std::uint32_t polling,
+                                 const std::string& aviso_auth) const {
 
     // Controller -- start up the Aviso controller, and subscribe the Aviso listener
     controller_ = std::make_shared<controller_t>();
     controller_->subscribe(ecf::service::aviso::AvisoRequest::make_listen_start(
-        aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_));
+        aviso_path, aviso_listener, aviso_url, aviso_schema, polling, revision_, aviso_auth));
     // Controller -- effectively start the Aviso listener
     // n.b. this must be done after subscribing in the controller, so that the polling interval is set
     controller_->start();
@@ -166,7 +178,7 @@ void AvisoAttr::stop_controller(const std::string& aviso_path) const {
 
 void AvisoAttr::finish() const {
     using namespace ecf;
-    LOG(Log::DBG, Message("**** Unsubscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
+    LOG(Log::DBG, Message("AvisoAttr: unsubscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
     std::string aviso_path = path();
     stop_controller(aviso_path);

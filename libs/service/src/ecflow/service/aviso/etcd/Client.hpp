@@ -22,7 +22,8 @@ namespace ecf::service::aviso::etcd {
 class Client {
 public:
     Client() = default;
-    Client(const Address& address);
+    Client(Address address);
+    Client(Address address, std::string auth_token);
 
     Client(const Client&) = delete;
     Client(Client&&)      = delete;
@@ -38,6 +39,6 @@ private:
     inline static const std::string endpoint_path = "/v3/kv/range";
 };
 
-} // namespace aviso::etcd
+} // namespace ecf::service::aviso::etcd
 
 #endif /* ecflow_service_aviso_etcd_Client_HPP */

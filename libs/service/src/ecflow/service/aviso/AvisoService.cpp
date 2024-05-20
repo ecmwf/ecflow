@@ -15,6 +15,23 @@
 
 namespace ecf::service::aviso {
 
+namespace {
+
+std::string get_authentication_credential(const std::string& auth_file) {
+    std::ifstream file(auth_file);
+    if (!file.is_open()) {
+        throw std::runtime_error("Unable to open file: " + auth_file);
+    }
+
+    std::string token;
+    std::getline(file, token);
+    file.close();
+
+    return token;
+}
+
+} // namespace
+
 void AvisoService::start() {
 
     // Update list of listeners
@@ -41,7 +58,7 @@ void AvisoService::start() {
         expiry     = found->listener().polling();
     }
 
-    ALOG(D, "Start polling, with polling interval: " << expiry << " s");
+    ALOG(D, "AvisoService: start polling, with polling interval: " << expiry << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 
@@ -63,11 +80,11 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
     {
         for (auto& entry : listeners_) {
             // For the associated host(+port)
-            aviso::etcd::Client client{entry.address()};
+            aviso::etcd::Client client{entry.address(), entry.auth_token};
 
             ALOG(D,
-                 "Polling: " << entry.address().address() << " for Aviso " << entry.path()
-                             << " (key: " << entry.prefix() << ", rev: " << entry.listener().revision() << ")");
+                 "AvisoService: polling " << entry.address().address() << " for Aviso " << entry.path() << " (key: "
+                                          << entry.prefix() << ", rev: " << entry.listener().revision() << ")");
 
             // Poll notifications on the key prefix
             auto updated_keys = client.poll(entry.prefix(), entry.listener().revision() + 1);
@@ -76,9 +93,9 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
             for (auto&& [key, value] : updated_keys) {
                 if (key == "latest_revision") {
                     auto revision = value;
-                    ALOG(D, "Updating revision for " << entry.path() << " to " << revision);
+                    ALOG(D, "AvisoService: updating revision for " << entry.path() << " to " << revision);
                     entry.listener().update_revision(std::stoll(value));
-                    ALOG(D, "Revision for " << entry.path() << " is now " << entry.listener().revision());
+                    ALOG(D, "AvisoService: revision for " << entry.path() << " is now " << entry.listener().revision());
                     continue;
                 }
 
@@ -93,22 +110,24 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
 }
 
 void AvisoService::register_listener(const AvisoRequest& listen) {
-    auto listener = ConfiguredListener::make_configured_listener(listen);
-    register_listener(listener);
-}
-
-void AvisoService::register_listener(const listener_t& listener) {
+    auto listener   = ConfiguredListener::make_configured_listener(listen);
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
 
-    ALOG(D, "Creating listener: {" << listener.path() << ", " << address.address() << ", " << key_prefix << "}");
+    ALOG(D,
+         "AvisoService: creating listener {" << listener.path() << ", " << address.address() << ", " << key_prefix
+                                             << "}");
 
-    listeners_.emplace_back(listener);
+    auto& inserted = listeners_.emplace_back(listener);
+
+    if (auto auth = listen.auth(); !auth.empty()) {
+        inserted.auth_token = get_authentication_credential(listen.auth());
+    }
 }
 
 void AvisoService::unregister_listener(const std::string& unlisten_path) {
 
-    ALOG(D, "Removing listener: {" << unlisten_path << "}");
+    ALOG(D, "AvisoService: removing listener: {" << unlisten_path << "}");
 
     listeners_.erase(std::remove_if(std::begin(listeners_),
                                     std::end(listeners_),
@@ -122,6 +141,7 @@ AvisoController::AvisoController()
                  // The following is a hack to force the server to increment the job generation count
                  TheOneServer::server().increment_job_generation_count();
              },
-             [this]() { return this->get_subscriptions(); }} {}
+             [this]() { return this->get_subscriptions(); }} {
+}
 
 } // namespace ecf::service::aviso

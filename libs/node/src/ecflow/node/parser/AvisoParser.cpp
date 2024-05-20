@@ -58,12 +58,14 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
 
     namespace po = boost::program_options;
     po::options_description description("AvisoParser");
-    description.add_options()("name", po::value<std::string>());
-    description.add_options()("listener", po::value<std::string>());
-    description.add_options()("url", po::value<std::string>());
-    description.add_options()("schema", po::value<std::string>());
-    description.add_options()("polling", po::value<std::string>()->default_value("40"));
-    description.add_options()("revision", po::value<uint64_t>()->default_value(0));
+    description.add_options()(option_name, po::value<std::string>());
+    description.add_options()(option_listener, po::value<std::string>());
+    description.add_options()(option_url, po::value<std::string>()->default_value(ecf::AvisoAttr::default_url));
+    description.add_options()(option_schema, po::value<std::string>()->default_value(ecf::AvisoAttr::default_schema));
+    description.add_options()(option_polling, po::value<std::string>()->default_value(ecf::AvisoAttr::default_polling));
+    description.add_options()(option_revision, po::value<uint64_t>()->default_value(0));
+    description.add_options()(option_auth, po::value<std::string>()->default_value(ecf::AvisoAttr::default_auth));
+    description.add_options()(option_reason, po::value<std::string>()->default_value(""));
 
     po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
 
@@ -71,14 +73,16 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     po::store(parsed_options, vm);
     po::notify(vm);
 
-    auto name     = get_option_value<ecf::AvisoAttr::name_t>(vm, "name", line);
-    auto listener = get_option_value<ecf::AvisoAttr::listener_t>(vm, "listener", line);
-    auto url      = get_option_value<ecf::AvisoAttr::url_t>(vm, "url", line);
-    auto schema   = get_option_value<ecf::AvisoAttr::schema_t>(vm, "schema", line);
-    auto polling  = get_option_value<ecf::AvisoAttr::polling_t>(vm, "polling", line);
-    auto revision = get_option_value<ecf::AvisoAttr::revision_t>(vm, "revision", line);
+    auto name     = get_option_value<ecf::AvisoAttr::name_t>(vm, option_name, line);
+    auto listener = get_option_value<ecf::AvisoAttr::listener_t>(vm, option_listener, line);
+    auto url      = get_option_value<ecf::AvisoAttr::url_t>(vm, option_url, line);
+    auto schema   = get_option_value<ecf::AvisoAttr::schema_t>(vm, option_schema, line);
+    auto polling  = get_option_value<ecf::AvisoAttr::polling_t>(vm, option_polling, line);
+    auto revision = get_option_value<ecf::AvisoAttr::revision_t>(vm, option_revision, line);
+    auto auth     = get_option_value<ecf::AvisoAttr::auth_t>(vm, option_auth, line);
+    auto reason   = get_option_value<ecf::AvisoAttr::reason_t>(vm, option_reason, line);
 
-    return ecf::AvisoAttr{parent, name, listener, url, schema, polling, revision};
+    return ecf::AvisoAttr{parent, name, listener, url, schema, polling, revision, auth, reason};
 }
 
 bool AvisoParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {

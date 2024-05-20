@@ -45,9 +45,16 @@ public:
     using schema_t   = std::string;
     using polling_t  = std::string;
     using revision_t = std::uint64_t;
+    using auth_t     = std::string;
+    using reason_t   = std::string;
 
     using controller_t     = ecf::service::aviso::AvisoController;
     using controller_ptr_t = std::shared_ptr<controller_t>;
+
+    static constexpr const char* default_url     = "%ECF_AVISO_URL%";
+    static constexpr const char* default_schema  = "%ECF_AVISO_SCHEMA%";
+    static constexpr const char* default_polling = "%ECF_AVISO_POLLING%";
+    static constexpr const char* default_auth    = "%ECF_AVISO_AUTH%";
 
     static bool is_valid_name(const std::string& name);
 
@@ -64,7 +71,9 @@ public:
               url_t url,
               schema_t schema,
               polling_t polling,
-              revision_t revision);
+              revision_t revision,
+              auth_t auth,
+              reason_t reason);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;
@@ -76,6 +85,8 @@ public:
     [[nodiscard]] inline const std::string& schema() const { return schema_; }
     [[nodiscard]] inline polling_t polling() const { return polling_; }
     [[nodiscard]] inline revision_t revision() const { return revision_; }
+    [[nodiscard]] inline const std::string& auth() const { return auth_; }
+    [[nodiscard]] inline const std::string& reason() const { return reason_; }
     [[nodiscard]] path_t path() const;
 
     void set_listener(std::string_view listener);
@@ -100,7 +111,8 @@ private:
                           const std::string& aviso_listener,
                           const std::string& aviso_url,
                           const std::string& aviso_schema,
-                          std::uint32_t polling) const;
+                          std::uint32_t polling,
+                          const std::string& aviso_auth) const;
     void stop_controller(const std::string& aviso_path) const;
 
     Node* parent_{nullptr}; // only ever used on the server side, to access parent Node variables
@@ -110,6 +122,9 @@ private:
     url_t url_;
     schema_t schema_;
     polling_t polling_;
+
+    auth_t auth_;
+    reason_t reason_;
 
     // The following are mutable as they are modified by the const method isFree()
     mutable revision_t revision_;
@@ -128,6 +143,8 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
     ar & aviso.url_;
     ar & aviso.schema_;
     ar & aviso.polling_;
+    ar & aviso.auth_;
+    ar & aviso.reason_;
     ar & aviso.revision_;
 }
 

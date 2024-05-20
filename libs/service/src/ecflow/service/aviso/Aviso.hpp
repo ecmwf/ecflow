@@ -39,8 +39,9 @@ public:
                                           std::string_view address,
                                           std::string_view schema,
                                           uint32_t polling,
-                                          uint64_t revision) {
-        return AvisoRequest{true, path, listener_cfg, address, schema, polling, revision};
+                                          uint64_t revision,
+                                          std::string_view auth) {
+        return AvisoRequest{true, path, listener_cfg, address, schema, polling, revision, auth};
     }
 
     static AvisoRequest make_listen_finish(std::string_view path) { return AvisoRequest{false, path}; }
@@ -53,6 +54,7 @@ public:
     const std::string& schema() const { return schema_; }
     uint32_t polling() const { return polling_; }
     uint64_t revision() const { return revision_; }
+    const std::string& auth() const { return auth_; }
 
 private:
     explicit AvisoRequest(bool start, std::string_view path)
@@ -61,21 +63,24 @@ private:
           listener_cfg_{},
           address_{},
           schema_{},
-          revision_{0} {}
+          revision_{0},
+          auth_{} {}
     explicit AvisoRequest(bool start,
                           std::string_view path,
                           std::string_view listener_cfg,
                           std::string_view address,
                           std::string_view schema,
                           uint32_t polling,
-                          uint64_t revision)
+                          uint64_t revision,
+                          std::string_view auth)
         : start_{start},
           path_{path},
           listener_cfg_{listener_cfg},
           address_{address},
           schema_{schema},
           polling_{polling},
-          revision_{revision} {}
+          revision_{revision},
+          auth_{auth} {}
 
     bool start_;
     std::string path_;
@@ -84,6 +89,7 @@ private:
     std::string schema_;
     uint32_t polling_;
     uint64_t revision_;
+    std::string auth_;
 };
 
 std::ostream& operator<<(std::ostream& os, const AvisoRequest& request);
@@ -201,6 +207,8 @@ private:
     using parameters_t = std::variant<std::string, std::int64_t, std::vector<std::string>>;
     std::unordered_map<std::string, parameters_t> parameters_ = {};
 };
+
+std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener);
 
 /**
  * A ListenerSchema is the specification of available Listeners.

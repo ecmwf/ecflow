@@ -84,23 +84,27 @@ ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoReque
         throw std::runtime_error("Failed to load listener schema: " + std::string(e.what()));
     }
 
-    std::string address = listen_request.address();
-    std::string path    = listen_request.path();
-    std::string event   = data["event"];
-    uint32_t polling    = listen_request.polling();
-    uint64_t revision   = listen_request.revision();
+    std::string address    = listen_request.address();
+    std::string path       = listen_request.path();
+    std::string event      = data["event"];
+    uint32_t polling       = listen_request.polling();
+    uint64_t revision      = listen_request.revision();
 
     const auto& listener = schema.get_listener(event);
     if (!listener) {
         throw std::runtime_error("Listener not found");
     }
 
-    ConfiguredListener configured{
-        aviso::etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
+    ConfiguredListener configured{aviso::etcd::Address{address},
+                                  path,
+                                  listener->name(),
+                                  listener->base(),
+                                  listener->stem(),
+                                  polling,
+                                  revision};
 
     ALOG(I,
-         "Listener configured with: " << path << " for " << event << " at " << address << " with revision "
-                                      << revision);
+         "Aviso: configured with: " << path << " for " << event << " at " << address << " with revision " << revision);
 
     auto request = data["request"];
     for (json::iterator entry = request.begin(); entry != request.end(); ++entry) {
@@ -170,7 +174,6 @@ void ConfiguredListener::with_parameter(const std::string& parameter, const std:
 
 std::optional<AvisoNotification>
 ConfiguredListener::accepts(const std::string& key, const std::string& value, uint64_t revision) const {
-
     // 1. turn `full` key into regex
     auto original_full = full();
 
@@ -254,14 +257,25 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
         for (const auto& [k, v] : actual_parameters) {
             notification.add_parameter(k, v);
         }
-        ALOG(D, "Match: ✓ --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
+        ALOG(D, "Aviso: Match [✓] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return notification;
     }
     else {
-        ALOG(D, "Match: ✗ --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
+        ALOG(D, "Aviso: Match [✗] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return std::nullopt;
     }
     return std::nullopt;
+}
+
+std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener) {
+    os << "ConfiguredListener{";
+    os << "name: " << listener.name();
+    os << ", full: " << listener.full();
+    os << ", path: " << listener.path();
+    os << ", address: " << listener.address().address();
+    os << ", polling: " << listener.polling();
+    os << ", revision: " << listener.revision() << "}";
+    return os;
 }
 
 /* ListenerSchema */

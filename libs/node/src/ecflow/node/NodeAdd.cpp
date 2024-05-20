@@ -15,6 +15,7 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
@@ -301,22 +302,18 @@ void Node::addEvent(const Event& e, bool check) {
 }
 
 void Node::addAviso(const AvisoAttr& a) {
-    if (findAviso(a.name())) {
-        std::stringstream ss;
-        ss << "Add Aviso failed: Duplicate aviso of name '" << a.name() << "' already exist for node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+    if (!avisos_.empty()) {
+        throw std::runtime_error(
+            ecf::Message("Unable to add Aviso '", a.name(), "'. Only 1 Aviso allowed per node.").str());
     }
     avisos_.push_back(a);
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addMirror(const MirrorAttr& m) {
-    if (findMirror(m.name())) {
-        std::stringstream ss;
-        ss << "Add Mirror failed: Duplicate mirror of name '" << m.name() << "' already exist for node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+    if (!mirrors_.empty()) {
+        throw std::runtime_error(
+            ecf::Message("Unable to add Mirror '", m.name(), "'. Only 1 Mirror allowed per node.").str());
     }
     mirrors_.push_back(m);
     state_change_no_ = Ecf::incr_state_change_no();
