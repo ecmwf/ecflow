@@ -21,7 +21,7 @@
 VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
     dataCount_                         = 9;
     searchKeyToData_["aviso_name"]     = NameIndex;
-    searchKeyToData_["aviso_handle"]   = ListenerIndex;
+    searchKeyToData_["aviso_listener"] = ListenerIndex;
     searchKeyToData_["aviso_url"]      = UrlIndex;
     searchKeyToData_["aviso_schema"]   = SchemaIndex;
     searchKeyToData_["aviso_polling"]  = PollingIndex;

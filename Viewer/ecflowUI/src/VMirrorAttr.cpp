@@ -24,7 +24,7 @@ VMirrorAttrType::VMirrorAttrType() : VAttributeType("mirror") {
     searchKeyToData_["mirror_remote_path"] = RemotePathIndex;
     searchKeyToData_["mirror_remote_host"] = RemoteHostIndex;
     searchKeyToData_["mirror_remote_port"] = RemotePortIndex;
-    searchKeyToData_["aviso_polling"]      = PollingIndex;
+    searchKeyToData_["mirror_polling"]     = PollingIndex;
     scanProc_                              = VMirrorAttr::scan;
 }
 
