@@ -34,7 +34,6 @@ struct Formatter<AvisoAttr, Stream>
         }
         output << " --revision ";
         output << std::to_string(item.revision());
-        output << '\n';
         if (const auto& auth = item.auth(); !auth.empty() && auth != AvisoAttr::default_auth) {
             output << " --auth ";
             output << item.auth();
