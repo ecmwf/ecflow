@@ -21,7 +21,7 @@
     [&]() {                                                                      \
         using namespace ecf::service::log;                                       \
         LOG(LevelTraits<Level::LEVEL>::mapping_type,                             \
-            MESSAGE << "[" << LevelTraits<Level::LEVEL>::name << "]" << Meta{}); \
+            MESSAGE << " {" << LevelTraits<Level::LEVEL>::name << "}" << Meta{}); \
     }()
 
 namespace ecf::service {
@@ -74,7 +74,7 @@ struct Meta
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Meta& meta) {
-    os << " [" << meta.id << "]";
+    os << '[' << meta.id << ']';
     return os;
 }
 
