@@ -120,13 +120,13 @@ void MirrorAttr::mirror() {
             while (top->parent() != nullptr) {
                 top = top->parent();
             }
-            if (node->isSuite()) {
-                return static_cast<Suite*>(node);
+            if (top->isSuite()) {
+                return static_cast<Suite*>(top);
             }
             return nullptr;
         };
         if (Suite* suite = find_suite(parent_); suite) {
-            suite->set_state_change_no(state_change_no_);
+            suite->Suite::set_state_change_no(state_change_no_);
         }
     }
     else {

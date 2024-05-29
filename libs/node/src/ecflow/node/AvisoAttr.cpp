@@ -125,8 +125,6 @@ bool AvisoAttr::isFree() const {
                 parent_->flag().clear(Flag::REMOTE_ERROR);
                 parent_->flag().set_state_change_no(state_change_no_);
                 reason_ = "";
-
-                ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
                 return true;
             },
             [this](const ecf::service::aviso::AvisoNoMatch& response) {
@@ -139,11 +137,11 @@ bool AvisoAttr::isFree() const {
                 parent_->flag().set(Flag::REMOTE_ERROR);
                 parent_->flag().set_state_change_no(state_change_no_);
                 reason_ = response.reason();
-
-                ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
                 return false;
             }},
         back);
+
+    ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
 }
 
 void AvisoAttr::start() const {
