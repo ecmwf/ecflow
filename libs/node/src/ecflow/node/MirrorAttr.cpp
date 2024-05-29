@@ -84,7 +84,7 @@ void MirrorAttr::mirror() {
     start_controller();
 
     // Task associated with Attribute is free when any notification is found
-    if (auto notifications = controller_->poll_notifications(remote_path_); !notifications.empty()) {
+    if (auto notifications = controller_->get_notifications(remote_path_); !notifications.empty()) {
 
         // Update the 'local' state change number
         state_change_no_ = Ecf::incr_state_change_no();

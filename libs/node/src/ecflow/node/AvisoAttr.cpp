@@ -101,7 +101,7 @@ bool AvisoAttr::isFree() const {
     }
 
     // Task associated with Attribute is free when any notification is found
-    auto notifications = controller_->poll_notifications(this->path());
+    auto notifications = controller_->get_notifications(this->path());
 
     if (notifications.empty()) {
         // No notifications, nothing to do -- task continues to wait

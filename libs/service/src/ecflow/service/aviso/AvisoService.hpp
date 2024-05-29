@@ -114,7 +114,7 @@ public:
     AvisoController();
 
     using base_t::notify;
-    using base_t::poll_notifications;
+    using base_t::get_notifications;
     using base_t::start;
     using base_t::stop;
     using base_t::subscribe;

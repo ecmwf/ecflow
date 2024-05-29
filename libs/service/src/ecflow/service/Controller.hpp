@@ -36,23 +36,25 @@ public:
 
     void subscribe(const subscription_t& s) {
         SLOG(D, "Controller: subscribe " << s);
-        std::scoped_lock lock(subscribe_);
-        subscriptions_.push_back(s);
+
+        {
+            std::scoped_lock lock(subscribe_);
+            subscriptions_.push_back(s);
+        }
     }
 
-    notifications_t poll_notifications(const std::string& name) {
-        SLOG(D, "Controller: poll_notifications for " << name);
+    notifications_t get_notifications(const std::string& name) {
+        SLOG(D, "Controller::get_notifications for " << name);
 
-        std::scoped_lock lock(notify_);
+        notifications_t found;
 
-        if (auto found = notifications_.find(name); found != notifications_.end()) {
-            notifications_t new_notifications = {found->second};
-            notifications_.erase(found);
-            return new_notifications;
+        {
+            std::scoped_lock lock(notify_);
+            found = notifications_;
+            notifications_.clear();
         }
 
-        // No notifications found
-        return {};
+        return found;
     }
 
     // Background Thread-facing API
@@ -60,25 +62,22 @@ public:
     subscriptions_t get_subscriptions() {
         SLOG(D, "Controller: collect subscriptions");
 
-        std::scoped_lock lock(subscribe_);
-        auto new_subscriptions = subscriptions_;
-        subscriptions_.clear();
+        subscriptions_t found;
+        {
+            std::scoped_lock lock(subscribe_);
+            found = subscriptions_;
+            subscriptions_.clear();
+        }
 
-        return new_subscriptions;
+        return found;
     }
 
     void notify(const notification_t& notification) {
         SLOG(D, "Controller: notify " << notification);
 
-        std::scoped_lock lock(notify_);
-
-        if (const auto& key = service_t::key(notification); key.has_value()) {
-            if (auto found = notifications_.find(key.value()); found != notifications_.end()) {
-                found->second.push_back(notification);
-            }
-            else {
-                notifications_[key.value()] = {notification};
-            }
+        {
+            std::scoped_lock lock(notify_);
+            notifications_.push_back(notification);
         }
     }
 
@@ -91,7 +90,7 @@ private:
     std::mutex notify_;
 
     std::vector<subscription_t> subscriptions_;
-    std::unordered_map<std::string, std::vector<notification_t>> notifications_;
+    std::vector<notification_t> notifications_;
 
     service_t running_;
 };
