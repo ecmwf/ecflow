@@ -15,6 +15,7 @@
 
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Message.hpp"
+#include "ecflow/core/Overload.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
@@ -41,11 +42,21 @@ std::pair<std::string, std::string> load_auth_credentials(const std::string& aut
 
 } // namespace
 
+/* MirrorClient */
+
 struct MirrorClient::Impl
 {
     std::shared_ptr<Defs> defs_;
     ClientInvoker invoker_;
 };
+
+std::optional<std::string> MirrorService::key(const MirrorService::notification_t& notification) {
+    return std::visit(ecf::overload{[](const service::mirror::MirrorNotification& notification) {
+                                        return std::make_optional(notification.path);
+                                    },
+                                    [](const service::mirror::MirrorError&) { return std::optional<std::string>{}; }},
+                      notification);
+}
 
 MirrorClient::MirrorClient() : impl_(std::make_unique<Impl>()) {
 }
@@ -98,6 +109,42 @@ int MirrorClient::get_node_status(const std::string& remote_host,
         throw std::runtime_error(Message("MirrorClient: failure to sync remote defs, due to: ", e.what()));
     }
 }
+
+/* MirrorRequest */
+
+std::ostream& operator<<(std::ostream& os, const MirrorRequest& r) {
+    os << "MirrorRequest{";
+    os << "path=" << r.path << ", ";
+    os << "host=" << r.host << ", ";
+    os << "port=" << r.port << ", ";
+    os << "polling=" << r.polling << ", ";
+    os << "ssl=" << r.ssl << ", ";
+    os << "auth=" << r.auth << "}";
+    return os;
+}
+
+/* MirrorNotification */
+
+std::ostream& operator<<(std::ostream& os, const MirrorNotification& n) {
+    os << "MirrorNotification{" << n.path << ", " << n.status << ", " << n.reason() << "}";
+    return os;
+}
+
+/* MirrorError */
+
+std::ostream& operator<<(std::ostream& os, const MirrorError& n) {
+    os << "MirrorError{reason = " << n.reason() << "}";
+    return os;
+}
+
+/* MirrorResponse */
+
+std::ostream& operator<<(std::ostream& os, const MirrorResponse& r) {
+    std::visit([&os](const auto& v) { os << v; }, r);
+    return os;
+}
+
+/* MirrorService */
 
 void MirrorService::start() {
 

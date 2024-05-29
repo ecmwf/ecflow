@@ -23,11 +23,11 @@ namespace ecf::service {
 template <typename Service>
 class Controller {
 public:
-    using subscription_t  = typename Service::subscription_t;
+    using service_t       = Service;
+    using subscription_t  = typename service_t::subscription_t;
     using subscriptions_t = std::vector<subscription_t>;
     using notification_t  = typename Service::notification_t;
     using notifications_t = std::vector<notification_t>;
-    using service_t       = Service;
 
     template <typename... Args>
     explicit Controller(Args&&... args) : running_{std::forward<Args>(args)...} {}
@@ -36,12 +36,6 @@ public:
 
     void subscribe(const subscription_t& s) {
         ALOG(D, "Controller: subscribe " << s);
-        std::scoped_lock lock(subscribe_);
-        subscriptions_.push_back(s);
-    }
-
-    void unsubscribe(const subscription_t& s) {
-        ALOG(D, "Controller: unsubscribe " << s);
         std::scoped_lock lock(subscribe_);
         subscriptions_.push_back(s);
     }
@@ -78,12 +72,13 @@ public:
 
         std::scoped_lock lock(notify_);
 
-        const auto& key = notification.path;
-        if (auto found = notifications_.find(key); found != notifications_.end()) {
-            found->second.push_back(notification);
-        }
-        else {
-            notifications_[key] = {notification};
+        if (const auto& key = service_t::key(notification); key.has_value()) {
+            if (auto found = notifications_.find(key.value()); found != notifications_.end()) {
+                found->second.push_back(notification);
+            }
+            else {
+                notifications_[key.value()] = {notification};
+            }
         }
     }
 

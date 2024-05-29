@@ -25,28 +25,30 @@ namespace ecf::service::aviso {
 
 /**
  *
- * An AvisoRequest is a request to start or stop listening for notifications based a given configuration.
+ * An AvisoSubscribe is a request to start listening for notifications based a given configuration.
  *
  * This class holds information used to fully configure an Aviso Listener, including:
  *  - the listener configuration,
  *  - the address of the ETCD server,
  *  - the schema used to specify the notifications
- * */
-class AvisoRequest {
+ *
+ */
+class AvisoSubscribe {
 public:
-    static AvisoRequest make_listen_start(std::string_view path,
-                                          std::string_view listener_cfg,
-                                          std::string_view address,
-                                          std::string_view schema,
-                                          uint32_t polling,
-                                          uint64_t revision,
-                                          std::string_view auth) {
-        return AvisoRequest{true, path, listener_cfg, address, schema, polling, revision, auth};
-    }
-
-    static AvisoRequest make_listen_finish(std::string_view path) { return AvisoRequest{false, path}; }
-
-    bool is_start() const { return start_; }
+    explicit AvisoSubscribe(std::string_view path,
+                            std::string_view listener_cfg,
+                            std::string_view address,
+                            std::string_view schema,
+                            uint32_t polling,
+                            uint64_t revision,
+                            std::string_view auth)
+        : path_{path},
+          listener_cfg_{listener_cfg},
+          address_{address},
+          schema_{schema},
+          polling_{polling},
+          revision_{revision},
+          auth_{auth} {}
 
     const std::string& path() const { return path_; }
     const std::string& listener_cfg() const { return listener_cfg_; }
@@ -56,33 +58,9 @@ public:
     uint64_t revision() const { return revision_; }
     const std::string& auth() const { return auth_; }
 
-private:
-    explicit AvisoRequest(bool start, std::string_view path)
-        : start_{start},
-          path_{path},
-          listener_cfg_{},
-          address_{},
-          schema_{},
-          revision_{0},
-          auth_{} {}
-    explicit AvisoRequest(bool start,
-                          std::string_view path,
-                          std::string_view listener_cfg,
-                          std::string_view address,
-                          std::string_view schema,
-                          uint32_t polling,
-                          uint64_t revision,
-                          std::string_view auth)
-        : start_{start},
-          path_{path},
-          listener_cfg_{listener_cfg},
-          address_{address},
-          schema_{schema},
-          polling_{polling},
-          revision_{revision},
-          auth_{auth} {}
+    friend std::ostream& operator<<(std::ostream&, const AvisoSubscribe&);
 
-    bool start_;
+private:
     std::string path_;
     std::string listener_cfg_;
     std::string address_;
@@ -92,55 +70,90 @@ private:
     std::string auth_;
 };
 
+/**
+ *
+ * An AvisoUnsubscribe is a request to stop listening for notifications.
+ *
+ */
+class AvisoUnsubscribe {
+public:
+    explicit AvisoUnsubscribe(std::string_view path) : path_{path} {}
+
+    const std::string& path() const { return path_; }
+
+    friend std::ostream& operator<<(std::ostream& os, const AvisoUnsubscribe& request);
+
+private:
+    std::string path_;
+};
+
+/**
+ *
+ * An AvisoRequest allows to either subscribe or unsubscribe to notifications.
+ *
+ * n.b. This request is sent from the main thread to the worker thread.
+ *
+ */
+using AvisoRequest = std::variant<AvisoSubscribe, AvisoUnsubscribe>;
+
 std::ostream& operator<<(std::ostream& os, const AvisoRequest& request);
 
 /**
  *
- * A AvisoNotification represents a notification of a change in a key-value pair in ETCD.
+ * An AvisoNotification represents a notification of a match found related to a key-value pair in ETCD.
  *
- * */
+ */
 class AvisoNotification {
 public:
-    struct Match
-    {
-        Match(std::string_view key, std::string_view value, uint64_t revision)
-            : key_{key},
-              value_{value},
-              revision_{revision},
-              parameters_{} {}
-
-        std::string_view key() const { return key_; }
-        std::string_view value() const { return value_; }
-        uint64_t revision() const { return revision_; }
-
-        void add_parameter(const std::string& parameter, const std::string& value) {
-            parameters_.emplace_back(parameter, value);
-        }
-
-        std::string key_;
-        std::string value_;
-        uint64_t revision_;
-        std::vector<std::pair<std::string, std::string>> parameters_{};
-    };
-
-public:
     AvisoNotification() = default;
-    AvisoNotification(std::string_view reason) : success_{false}, match_{}, reason_{reason} {}
     AvisoNotification(std::string_view key, std::string_view value, uint64_t revision)
-        : success_{true},
-          match_{std::make_optional<Match>(key, value, revision)} {}
+        : key_{key},
+          value_{value},
+          revision_{revision},
+          parameters_{} {}
 
-    [[nodiscard]] bool success() const { return success_; }
-    [[nodiscard]] std::optional<Match> match() const { return match_; }
-    [[nodiscard]] std::string reason() const { return reason_; }
+    std::string_view key() const { return key_; }
+    std::string_view value() const { return value_; }
+    uint64_t revision() const { return revision_; }
+
+    void add_parameter(const std::string& parameter, const std::string& value) {
+        parameters_.emplace_back(parameter, value);
+    }
+
+    friend std::ostream& operator<<(std::ostream&, const AvisoNotification&);
 
 private:
-    bool success_{true};
-    std::optional<Match> match_{};
-    std::string reason_{};
+    std::string key_;
+    std::string value_;
+    uint64_t revision_;
+    std::vector<std::pair<std::string, std::string>> parameters_{};
 };
 
-std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification);
+/**
+ *
+ * An AvisoNoMatch represents a notification of successfull polling without any match found.
+ *
+ */
+class AvisoNoMatch {
+    friend std::ostream& operator<<(std::ostream&, const AvisoNoMatch&);
+};
+
+/**
+ *
+ * An AvisoError represents a notification of an error found during polling.
+ *
+ */
+class AvisoError {
+public:
+    explicit AvisoError(std::string_view reason) : reason_{reason} {}
+
+    [[nodiscard]] std::string_view reason() const { return reason_; }
+
+    friend std::ostream& operator<<(std::ostream&, const AvisoError&);
+
+private:
+    std::string reason_;
+};
 
 /**
  * A Listener represents an Aviso Listener, loaded from the Schema with placeholders as part of the `base` and
@@ -181,7 +194,7 @@ public:
      * @param request The AvisoRequest to create the ConfiguredListener from.
      * @return The ConfiguredListener.
      */
-    static ConfiguredListener make_configured_listener(const AvisoRequest& request);
+    static ConfiguredListener make_configured_listener(const AvisoSubscribe& request);
 
 public:
     ConfiguredListener(ecf::service::aviso::etcd::Address address,
@@ -215,6 +228,8 @@ public:
 
     std::optional<AvisoNotification> accepts(const std::string& key, const std::string& value, uint64_t revision) const;
 
+    friend std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener);
+
 private:
     std::string path_;
     ecf::service::aviso::etcd::Address address_;
@@ -225,8 +240,6 @@ private:
     using parameters_t = std::variant<std::string, std::int64_t, std::vector<std::string>>;
     std::unordered_map<std::string, parameters_t> parameters_ = {};
 };
-
-std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener);
 
 /**
  * A ListenerSchema is the specification of available Listeners.

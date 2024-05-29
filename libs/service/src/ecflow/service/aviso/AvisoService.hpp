@@ -12,6 +12,7 @@
 #define ecflow_service_AvisoService_HPP
 
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -32,10 +33,15 @@ struct NotificationPackage
     Notification notification;
 };
 
+using AvisoResponse =
+    std::variant<NotificationPackage<ConfiguredListener, AvisoNotification>, AvisoNoMatch, AvisoError>;
+
 template <typename Configuration, typename Notification>
 inline std::ostream& operator<<(std::ostream& os, const NotificationPackage<Configuration, Notification>& p) {
     return os << "NotificationPackage{" << p.path << ", " << p.configuration << ", " << p.notification << "}";
 }
+
+std::ostream& operator<<(std::ostream& os, const AvisoResponse& r);
 
 class AvisoService {
 public:
@@ -45,7 +51,7 @@ public:
     using listener_t    = ConfiguredListener;
     using revision_t    = int64_t;
 
-    using notification_t  = NotificationPackage<ConfiguredListener, AvisoNotification>;
+    using notification_t  = AvisoResponse;
     using subscription_t  = AvisoRequest;
     using subscriptions_t = std::vector<subscription_t>;
 
@@ -70,6 +76,8 @@ public:
     using notify_callback_t    = std::function<void(const AvisoService::notification_t&)>;
     using subscribe_callback_t = std::function<subscriptions_t()>;
 
+    static std::optional<std::string> key(const notification_t& notification);
+
     AvisoService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
           listeners_{},
@@ -88,7 +96,7 @@ public:
     void operator()(const std::chrono::system_clock::time_point& now);
 
 private:
-    void register_listener(const AvisoRequest& request);
+    void register_listener(const AvisoSubscribe& request);
     void unregister_listener(const std::string& unlisten_path);
 
     executor::PeriodicTaskExecutor<std::function<void(const std::chrono::system_clock::time_point& now)>> executor_;
@@ -111,7 +119,6 @@ public:
     using base_t::stop;
     using base_t::subscribe;
     using base_t::terminate;
-    using base_t::unsubscribe;
 };
 
 } // namespace ecf::service::aviso

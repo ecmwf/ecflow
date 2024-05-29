@@ -19,46 +19,67 @@
 
 #include <nlohmann/json.hpp>
 
+#include "ecflow/core/Overload.hpp"
 #include "ecflow/service/Log.hpp"
 
 namespace ecf::service::aviso {
 
-/* std::variant visitor utility */
+/* AvisoSubscribe */
 
-template <typename... Ts>
-struct Overload : Ts...
-{
-    using Ts::operator()...;
-};
-
-template <class... Ts>
-Overload(Ts...) -> Overload<Ts...>; // required in C++17, no longer required in C++20
-
-/* AvisoRequest */
-
-std::ostream& operator<<(std::ostream& os, const AvisoRequest& request) {
-    os << "ListenRequest{";
-    os << "start: " << request.is_start();
-    os << ", path: " << request.path();
-    if (request.is_start()) {
-        os << ", listener_cfg: " << request.listener_cfg();
-        os << ", address: " << request.address();
-        os << ", schema: " << request.schema();
-        os << ", polling: " << request.polling();
-        os << ", revision: " << request.revision();
-    }
+std::ostream& operator<<(std::ostream& os, const AvisoSubscribe& request) {
+    os << "AvisoSubscribe{";
+    os << "path: " << request.path();
+    os << ", listener_cfg: " << request.listener_cfg();
+    os << ", address: " << request.address();
+    os << ", schema: " << request.schema();
+    os << ", polling: " << request.polling();
+    os << ", revision: " << request.revision();
     os << "}";
     return os;
 }
 
-/* Notification */
+/* AvisoUnsubscribe */
+
+std::ostream& operator<<(std::ostream& os, const AvisoUnsubscribe& request) {
+    os << "AvisoUnsubscribe{";
+    os << "path: " << request.path();
+    os << "}";
+    return os;
+}
+
+/* AvisoRequest */
+
+std::ostream& operator<<(std::ostream& os, const AvisoRequest& request) {
+    std::visit(
+        ecf::overload{[&os](const AvisoSubscribe& r) { os << r; }, [&os](const AvisoUnsubscribe& r) { os << r; }},
+        request);
+    return os;
+}
+
+/* AvisoNotification */
 
 std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification) {
-    os << "success: " << notification.success();
-    if (const auto& match = notification.match(); match) {
-        auto& m = match.value();
-        os << m.key() << " = " << m.value() << " (revision: " << m.revision() << ")";
-    }
+    os << "AvisoNotification{";
+    os << "key: " << notification.key();
+    os << ", value: " << notification.value();
+    os << ", revision: " << notification.revision();
+    os << "}";
+    return os;
+}
+
+/* AvisoNoMatch */
+
+std::ostream& operator<<(std::ostream& os, const AvisoNoMatch& no_match) {
+    os << "AvisoNoMatch{}";
+    return os;
+}
+
+/* AvisoError */
+
+std::ostream& operator<<(std::ostream& os, const AvisoError& error) {
+    os << "AvisoError{";
+    os << "reason: " << error.reason();
+    os << "}";
     return os;
 }
 
@@ -68,7 +89,7 @@ std::ostream& operator<<(std::ostream& os, const AvisoNotification& notification
 
 /* ConfiguredListener */
 
-ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoRequest& listen_request) {
+ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoSubscribe& listen_request) {
     using json = nlohmann::ordered_json;
 
     json data;
@@ -235,13 +256,13 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
                 auto actual = v;
 
                 auto validate =
-                    Overload{[&actual](const std::string& expected) { return expected == actual; },
-                             [&actual](std::int64_t expected) { return std::to_string(expected) == actual; },
-                             [&actual](const std::vector<std::string>& valid) {
-                                 return std::any_of(valid.begin(), valid.end(), [&actual](const auto& expected) {
-                                     return expected == actual;
-                                 });
-                             }};
+                    ecf::overload{[&actual](const std::string& expected) { return expected == actual; },
+                                  [&actual](std::int64_t expected) { return std::to_string(expected) == actual; },
+                                  [&actual](const std::vector<std::string>& valid) {
+                                      return std::any_of(valid.begin(), valid.end(), [&actual](const auto& expected) {
+                                          return expected == actual;
+                                      });
+                                  }};
 
                 applicable = std::visit(validate, found->second);
                 if (!applicable) {
@@ -254,7 +275,7 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
     if (applicable) {
         AvisoNotification notification{key, value, revision};
         for (const auto& [k, v] : actual_parameters) {
-            notification.match()->add_parameter(k, v);
+            notification.add_parameter(k, v);
         }
         ALOG(D, "Aviso: Match [✓] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return notification;

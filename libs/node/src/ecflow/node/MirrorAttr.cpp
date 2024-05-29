@@ -14,6 +14,7 @@
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
+#include "ecflow/core/Overload.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Operations.hpp"
@@ -89,23 +90,26 @@ void MirrorAttr::mirror() {
         state_change_no_ = Ecf::incr_state_change_no();
 
         // Notifications found -- Node state to be updated or error to be reported
-        if (auto& notification = notifications.back(); notification.success) {
-            ALOG(D, "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state " << notification.status);
-            auto latest_state = static_cast<NState::State>(notification.status);
-            reason_           = "";
-            parent_->flag().clear(Flag::REMOTE_ERROR);
-            parent_->flag().set_state_change_no(state_change_no_);
-            parent_->setStateOnly(latest_state, true);
-        }
-        else {
-            ALOG(D,
-                 "MirrorAttr: Failure detected on Mirror attribute (name: " << name_ << ") due to "
-                                                                            << notification.path);
-            reason_ = notification.reason();
-            parent_->flag().set(Flag::REMOTE_ERROR);
-            parent_->flag().set_state_change_no(state_change_no_);
-            parent_->setStateOnly(NState::UNKNOWN, true);
-        }
+        std::visit(ecf::overload{[this](const service::mirror::MirrorNotification& notification) {
+                                     ALOG(D,
+                                          "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state "
+                                                                                          << notification.status);
+                                     auto latest_state = static_cast<NState::State>(notification.status);
+                                     reason_           = "";
+                                     parent_->flag().clear(Flag::REMOTE_ERROR);
+                                     parent_->flag().set_state_change_no(state_change_no_);
+                                     parent_->setStateOnly(latest_state, true);
+                                 },
+                                 [this](const service::mirror::MirrorError& error) {
+                                     ALOG(D,
+                                          "MirrorAttr: Failure detected on Mirror attribute (name: "
+                                              << name_ << ") due to " << error.reason());
+                                     reason_ = error.reason();
+                                     parent_->flag().set(Flag::REMOTE_ERROR);
+                                     parent_->flag().set_state_change_no(state_change_no_);
+                                     parent_->setStateOnly(NState::UNKNOWN, true);
+                                 }},
+                   notifications.back());
 
         // Propagate the 'local' state change number to all parents
         ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });

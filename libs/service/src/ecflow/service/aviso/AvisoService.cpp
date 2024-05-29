@@ -10,6 +10,7 @@
 
 #include "ecflow/service/aviso/AvisoService.hpp"
 
+#include "ecflow/core/Overload.hpp"
 #include "ecflow/service/Registry.hpp"
 #include "ecflow/service/aviso/etcd/Client.hpp"
 
@@ -32,18 +33,34 @@ std::string load_authentication_credential(const std::string& auth_file) {
 
 } // namespace
 
+std::ostream& operator<<(std::ostream& os, const AvisoResponse& r) {
+    std::visit(ecf::overload{[&os](const NotificationPackage<ConfiguredListener, AvisoNotification>& p) { os << p; },
+                             [&os](const AvisoNoMatch& a) { os << a; },
+                             [&os](const AvisoError& a) { os << a; }},
+               r);
+    return os;
+}
+
+std::optional<std::string> AvisoService::key(const AvisoResponse& notification) {
+    return std::visit(ecf::overload{[](const NotificationPackage<ConfiguredListener, AvisoNotification>& p) {
+                                        return std::make_optional(p.path);
+                                    },
+                                    [](const AvisoNoMatch&) { return std::optional<std::string>{}; },
+                                    [](const AvisoError&) { return std::optional<std::string>{}; }},
+                      notification);
+}
+
 void AvisoService::start() {
 
     // Update list of listeners
 
     auto new_subscriptions = subscribe_();
     for (auto&& subscription : new_subscriptions) {
-        if (subscription.is_start()) {
-            register_listener(subscription);
-        }
-        else {
-            unregister_listener(subscription.path());
-        }
+        std::visit(ecf::overload{[this](const AvisoSubscribe& subscription) { this->register_listener(subscription); },
+                                 [this](const AvisoUnsubscribe& subscription) {
+                                     this->unregister_listener(subscription.path());
+                                 }},
+                   subscription);
     }
 
     // Start polling...
@@ -68,12 +85,11 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
 
     auto new_subscriptions = subscribe_();
     for (auto&& subscription : new_subscriptions) {
-        if (subscription.is_start()) {
-            register_listener(subscription);
-        }
-        else {
-            unregister_listener(subscription.path());
-        }
+        std::visit(ecf::overload{[this](const AvisoSubscribe& subscription) { this->register_listener(subscription); },
+                                 [this](const AvisoUnsubscribe& subscription) {
+                                     this->unregister_listener(subscription.path());
+                                 }},
+                   subscription);
     }
 
     // Check notification for each listener
@@ -93,8 +109,7 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
                 updated_keys = client.poll(entry.prefix(), entry.listener().revision() + 1);
             }
             catch (const std::exception& e) {
-                notification_t n{std::string{entry.path()}, entry.listener(), AvisoNotification{e.what()}};
-                notify_(n); // Notification regarding failure to contact the server
+                notify_(AvisoError(e.what())); // Notification regarding failure to contact the server
                 return;
             }
 
@@ -111,21 +126,21 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
 
                 if (auto notification = entry.listener().accepts(key, value, entry.listener().revision());
                     notification) {
-                    notification_t n{std::string{entry.path()}, entry.listener(), *notification};
+                    NotificationPackage<ConfiguredListener, AvisoNotification> n{
+                        std::string{entry.path()}, entry.listener(), *notification};
                     notify_(n); // Notification regarding a successful match
                     matched = true;
                 }
             }
 
             if (!matched) {
-                notification_t n{std::string{entry.path()}, entry.listener(), AvisoNotification{}};
-                notify_(n); // Notification regarding no match
+                notify_(AvisoNoMatch{}); // Notification regarding no match
             }
         }
     }
 }
 
-void AvisoService::register_listener(const AvisoRequest& listen) {
+void AvisoService::register_listener(const AvisoSubscribe& listen) {
     auto listener   = ConfiguredListener::make_configured_listener(listen);
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
