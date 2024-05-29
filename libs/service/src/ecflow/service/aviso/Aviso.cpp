@@ -123,7 +123,7 @@ ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoSubsc
     ConfiguredListener configured{
         aviso::etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
 
-    ALOG(I,
+    SLOG(I,
          "Aviso: configured with: " << path << " for " << event << " at " << address << " with revision " << revision);
 
     auto request = data["request"];
@@ -239,7 +239,7 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
 
         for (auto i = m_bgn; i != m_end; ++i) {
             std::smatch m = *i;
-            // ALOG(D, "Extracted parameters:" << m.str());
+            // SLOG(D, "Extracted parameters:" << m.str());
             for (size_t i = 1; i != m.size(); ++i) {
                 actual_parameters.emplace_back(placeholders[i - 1], m[i]);
             }
@@ -250,7 +250,7 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
     bool applicable = true;
     {
         for (const auto& [k, v] : actual_parameters) {
-            // ALOG(D, "-> " << k << " = " << v);
+            // SLOG(D, "-> " << k << " = " << v);
             if (auto found = parameters_.find(k); found != std::end(parameters_)) {
 
                 auto actual = v;
@@ -277,11 +277,11 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
         for (const auto& [k, v] : actual_parameters) {
             notification.add_parameter(k, v);
         }
-        ALOG(D, "Aviso: Match [✓] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
+        SLOG(D, "Aviso: Match [✓] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return notification;
     }
     else {
-        ALOG(D, "Aviso: Match [✗] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
+        SLOG(D, "Aviso: Match [✗] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return std::nullopt;
     }
     return std::nullopt;

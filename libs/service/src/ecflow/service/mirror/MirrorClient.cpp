@@ -37,8 +37,8 @@ int MirrorClient::get_node_status(const std::string& remote_host,
                                   bool ssl,
                                   const std::string& remote_username,
                                   const std::string& remote_password) const {
-    ALOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
-    ALOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
+    SLOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
+    SLOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
 
     try {
         impl_ = std::make_unique<Impl>();
@@ -54,11 +54,11 @@ int MirrorClient::get_node_status(const std::string& remote_host,
             impl_->invoker_.set_password(PasswordEncryption::encrypt(remote_password, remote_username));
         }
 
-        ALOG(D, "MirrorClient: retrieving the latest defs");
+        SLOG(D, "MirrorClient: retrieving the latest defs");
         impl_->invoker_.sync(impl_->defs_);
 
         if (!impl_->defs_) {
-            ALOG(E, "MirrorClient: unable to sync with remote defs");
+            SLOG(E, "MirrorClient: unable to sync with remote defs");
             throw std::runtime_error("MirrorClient: Failed to sync with remote defs");
         }
 
@@ -70,7 +70,7 @@ int MirrorClient::get_node_status(const std::string& remote_host,
         }
 
         auto state = node->state();
-        ALOG(D, "MirrorClient: found node (" << node_path << "), with state " << state);
+        SLOG(D, "MirrorClient: found node (" << node_path << "), with state " << state);
         return state;
     }
     catch (std::exception& e) {

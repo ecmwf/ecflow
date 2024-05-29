@@ -62,7 +62,7 @@ void MirrorService::start() {
             register_listener(subscription);
         }
         catch (std::runtime_error& e) {
-            ALOG(E, "MirrorService: Unable to register listener: " << e.what());
+            SLOG(E, "MirrorService: Unable to register listener: " << e.what());
             // TODO[MB]: Must gracefully handle this error, by notifying the main thread and providing a reason
         }
     }
@@ -79,7 +79,7 @@ void MirrorService::start() {
         expiry     = found->mirror_request_.polling;
     }
 
-    ALOG(D, "MirrorService: start polling, with polling interval: " << expiry << " s");
+    SLOG(D, "MirrorService: start polling, with polling interval: " << expiry << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 
@@ -88,7 +88,7 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
     // Check notification for each listener
     {
         for (auto& entry : listeners_) {
-            ALOG(D,
+            SLOG(D,
                  "MirrorService: Mirroring " << entry.mirror_request_.path << " node from "
                                              << entry.mirror_request_.host << ":" << entry.mirror_request_.port);
 
@@ -104,12 +104,12 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
                 auto latest_status =
                     mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
 
-                ALOG(D, "MirrorService: Notifying remote node state: " << latest_status);
+                SLOG(D, "MirrorService: Notifying remote node state: " << latest_status);
                 MirrorNotification notification{true, remote_path, "", latest_status};
                 notify_(notification);
             }
             catch (std::runtime_error& e) {
-                ALOG(W, "MirrorService: Failed to sync with remote node: " << e.what());
+                SLOG(W, "MirrorService: Failed to sync with remote node: " << e.what());
                 MirrorNotification notification{false, remote_path, e.what(), -1};
                 notify_(notification);
             }
@@ -118,10 +118,10 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
 }
 
 void MirrorService::register_listener(const MirrorRequest& request) {
-    ALOG(D, "MirrorService: Registering Mirror: {" << request.path << "}");
+    SLOG(D, "MirrorService: Registering Mirror: {" << request.path << "}");
     Entry& inserted = listeners_.emplace_back(Entry{request, "", ""});
     if (!request.auth.empty()) {
-        ALOG(D, "MirrorService: Loading auth {" << request.auth << "}");
+        SLOG(D, "MirrorService: Loading auth {" << request.auth << "}");
         try {
             auto [username, password] = load_auth_credentials(request.auth);
             inserted.remote_username_ = username;
@@ -137,7 +137,7 @@ MirrorController::MirrorController()
     : base_t{[this](const MirrorService::notification_t& notification) {
                  this->notify(notification);
                  // The following is a hack to force the server to increment the job generation count
-                 ALOG(D, "MirrorController: forcing server to traverse the defs");
+                 SLOG(D, "MirrorController: forcing server to traverse the defs");
                  TheOneServer::server().increment_job_generation_count();
              },
              [this]() { return this->get_subscriptions(); }} {

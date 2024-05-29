@@ -66,7 +66,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
     httplib::Headers headers;
 
     if (!impl_->auth_token_.empty()) {
-        ALOG(D, "EtcdClient: using authorization token");
+        SLOG(D, "EtcdClient: using authorization token");
         headers.emplace("Authorization", "Bearer " + impl_->auth_token_);
     }
 
@@ -109,13 +109,13 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
             auto value = make_content_from<Base64>(v);
 
             if (key.raw() != key_prefix) {
-                ALOG(D, "EtcdClient: Received key+value: " << key.raw() << "+" << value.raw());
+                SLOG(D, "EtcdClient: Received key+value: " << key.raw() << "+" << value.raw());
                 entries.emplace_back(key.raw(), value.raw());
             }
         }
     }
     else {
-        ALOG(D, "EtcdClient: No new key+value found");
+        SLOG(D, "EtcdClient: No new key+value found");
     }
 
     return entries;

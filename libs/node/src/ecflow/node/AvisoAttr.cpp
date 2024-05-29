@@ -94,7 +94,7 @@ void AvisoAttr::reset() {
 }
 
 bool AvisoAttr::isFree() const {
-    ALOG(D, "AvisoAttr: check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ") is free");
+    SLOG(D, "AvisoAttr: check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ") is free");
 
     if (controller_ == nullptr) {
         return false;
@@ -120,7 +120,7 @@ bool AvisoAttr::isFree() const {
         ecf::overload{
             [this](const ecf::service::aviso::NotificationPackage<service::aviso::ConfiguredListener,
                                                                   service::aviso::AvisoNotification>& response) {
-                ALOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
+                SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
                 this->revision_ = response.configuration.revision();
                 parent_->flag().clear(Flag::REMOTE_ERROR);
                 parent_->flag().set_state_change_no(state_change_no_);
@@ -200,7 +200,7 @@ void AvisoAttr::start_controller(const std::string& aviso_path,
 
 void AvisoAttr::stop_controller(const std::string& aviso_path) const {
     if (controller_ != nullptr) {
-        ALOG(D, "AvisoAttr: finishing polling for Aviso attribute (" << parent_path_ << ":" << name_ << ")");
+        SLOG(D, "AvisoAttr: finishing polling for Aviso attribute (" << parent_path_ << ":" << name_ << ")");
 
         controller_->subscribe(ecf::service::aviso::AvisoUnsubscribe{aviso_path});
 

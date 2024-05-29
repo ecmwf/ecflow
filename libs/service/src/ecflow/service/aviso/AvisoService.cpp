@@ -75,7 +75,7 @@ void AvisoService::start() {
         expiry     = found->listener().polling();
     }
 
-    ALOG(D, "AvisoService: start polling, with polling interval: " << expiry << " s");
+    SLOG(D, "AvisoService: start polling, with polling interval: " << expiry << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 
@@ -98,7 +98,7 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
             // For the associated host(+port)
             aviso::etcd::Client client{entry.address(), entry.auth_token};
 
-            ALOG(D,
+            SLOG(D,
                  "AvisoService: polling " << entry.address().address() << " for Aviso " << entry.path() << " (key: "
                                           << entry.prefix() << ", rev: " << entry.listener().revision() << ")");
 
@@ -118,9 +118,9 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
             for (auto&& [key, value] : updated_keys) {
                 if (key == "latest_revision") {
                     auto revision = value;
-                    ALOG(D, "AvisoService: updating revision for " << entry.path() << " to " << revision);
+                    SLOG(D, "AvisoService: updating revision for " << entry.path() << " to " << revision);
                     entry.listener().update_revision(std::stoll(value));
-                    ALOG(D, "AvisoService: revision for " << entry.path() << " is now " << entry.listener().revision());
+                    SLOG(D, "AvisoService: revision for " << entry.path() << " is now " << entry.listener().revision());
                     continue;
                 }
 
@@ -145,7 +145,7 @@ void AvisoService::register_listener(const AvisoSubscribe& listen) {
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
 
-    ALOG(D,
+    SLOG(D,
          "AvisoService: creating listener {" << listener.path() << ", " << address.address() << ", " << key_prefix
                                              << "}");
 
@@ -158,7 +158,7 @@ void AvisoService::register_listener(const AvisoSubscribe& listen) {
 
 void AvisoService::unregister_listener(const std::string& unlisten_path) {
 
-    ALOG(D, "AvisoService: removing listener: {" << unlisten_path << "}");
+    SLOG(D, "AvisoService: removing listener: {" << unlisten_path << "}");
 
     listeners_.erase(std::remove_if(std::begin(listeners_),
                                     std::end(listeners_),

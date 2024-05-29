@@ -79,7 +79,7 @@ void MirrorAttr::finish() {
 }
 
 void MirrorAttr::mirror() {
-    ALOG(D, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
+    SLOG(D, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
 
     start_controller();
 
@@ -91,7 +91,7 @@ void MirrorAttr::mirror() {
 
         // Notifications found -- Node state to be updated or error to be reported
         std::visit(ecf::overload{[this](const service::mirror::MirrorNotification& notification) {
-                                     ALOG(D,
+                                     SLOG(D,
                                           "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state "
                                                                                           << notification.status);
                                      auto latest_state = static_cast<NState::State>(notification.status);
@@ -101,7 +101,7 @@ void MirrorAttr::mirror() {
                                      parent_->setStateOnly(latest_state, true);
                                  },
                                  [this](const service::mirror::MirrorError& error) {
-                                     ALOG(D,
+                                     SLOG(D,
                                           "MirrorAttr: Failure detected on Mirror attribute (name: "
                                               << name_ << ") due to " << error.reason());
                                      reason_ = error.reason();
@@ -115,7 +115,7 @@ void MirrorAttr::mirror() {
         ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
     }
     else {
-        ALOG(D, "MirrorAttr: No notifications found for Mirror attribute (name: " << name_ << ")");
+        SLOG(D, "MirrorAttr: No notifications found for Mirror attribute (name: " << name_ << ")");
     }
 
     // No notifications, nothing to do...
@@ -133,7 +133,7 @@ void MirrorAttr::start_controller() const {
         std::string auth = auth_;
         parent_->variableSubstitution(auth);
 
-        ALOG(D,
+        SLOG(D,
              "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
                                                             << remote_host << ':' << remote_port << ")");
 
@@ -149,7 +149,7 @@ void MirrorAttr::start_controller() const {
 
 void MirrorAttr::stop_controller() const {
     if (controller_ != nullptr) {
-        ALOG(D,
+        SLOG(D,
              "MirrorAttr: finishing polling for Mirror attribute \"" << parent_->absNodePath() << ":" << name_
                                                                      << "\", from host: " << remote_host_
                                                                      << ", port: " << remote_port_ << ")");

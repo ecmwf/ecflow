@@ -15,10 +15,13 @@
 #include <iostream>
 #include <thread>
 
-#define ALOG(LEVEL, MESSAGE)                                                    \
-    [&]() {                                                                     \
-        using namespace ecf::service::log;                                      \
-        select<Level::LEVEL>() << Meta{} << MESSAGE << ecf::service::log::endl; \
+#include "ecflow/core/Log.hpp"
+
+#define SLOG(LEVEL, MESSAGE)                                                     \
+    [&]() {                                                                      \
+        using namespace ecf::service::log;                                       \
+        LOG(LevelTraits<Level::LEVEL>::mapping_type,                             \
+            MESSAGE << "[" << LevelTraits<Level::LEVEL>::name << "]" << Meta{}); \
     }()
 
 namespace ecf::service {
@@ -33,31 +36,36 @@ struct LevelTraits;
 template <>
 struct LevelTraits<Level::D>
 {
-    static constexpr const char* name = "D";
+    static constexpr const char* name               = "D";
+    static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::DBG;
 };
 
 template <>
 struct LevelTraits<Level::I>
 {
-    static constexpr const char* name = "I";
+    static constexpr const char* name               = "I";
+    static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::LOG;
 };
 
 template <>
 struct LevelTraits<Level::W>
 {
-    static constexpr const char* name = "W";
+    static constexpr const char* name               = "W";
+    static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::WAR;
 };
 
 template <>
 struct LevelTraits<Level::E>
 {
-    static constexpr const char* name = "E";
+    static constexpr const char* name               = "E";
+    static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::ERR;
 };
 
 template <>
 struct LevelTraits<Level::F>
 {
-    static constexpr const char* name = "F";
+    static constexpr const char* name               = "F";
+    static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::ERR;
 };
 
 struct Meta
@@ -65,43 +73,9 @@ struct Meta
     std::thread::id id = std::this_thread::get_id();
 };
 
-struct Manipulator
-{
-    std::function<void(std::ostream&)> manip;
-};
-
-inline Manipulator endl{[](std::ostream& os) { os << std::endl; }};
-
-template <Level L>
-struct Channel
-{
-    void put(char c) { os.put(c); }
-    void flush() { os.flush(); }
-
-    friend Channel<L>& operator<<(Channel<L>& channel, Meta&& meta) {
-        channel.os << meta.id << " [" << LevelTraits<L>::name << "] - ";
-        return channel;
-    }
-
-    friend Channel<L>& operator<<(Channel<L>& channel, Manipulator manipulator) {
-        manipulator.manip(channel.os);
-        return channel;
-    }
-
-    template <typename T>
-    friend Channel<L>& operator<<(Channel<L>& channel, T&& message) {
-        channel.os << std::forward<T>(message);
-        return channel;
-    }
-
-private:
-    std::ostream& os = std::cout;
-};
-
-template <Level L>
-Channel<L>& select() {
-    static Channel<L> channel;
-    return channel;
+inline std::ostream& operator<<(std::ostream& os, const Meta& meta) {
+    os << " [" << meta.id << "]";
+    return os;
 }
 
 } // namespace log
