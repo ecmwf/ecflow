@@ -11,90 +11,15 @@
 #ifndef ecflow_service_mirror_MirrorService_HPP
 #define ecflow_service_mirror_MirrorService_HPP
 
-#include <memory>
-#include <string_view>
+#include <optional>
+#include <string>
 
 #include "ecflow/service/Controller.hpp"
 #include "ecflow/service/executor/PeriodicTaskExecutor.hpp"
+#include "ecflow/service/mirror/Mirror.hpp"
+#include "ecflow/service/mirror/MirrorClient.hpp"
 
 namespace ecf::service::mirror {
-
-class MirrorClient {
-public:
-    MirrorClient();
-    ~MirrorClient();
-
-    int get_node_status(const std::string& remote_host,
-                        const std::string& remote_port,
-                        const std::string& node_path,
-                        bool ssl,
-                        const std::string& remote_username,
-                        const std::string& remote_password) const;
-
-private:
-    struct Impl;
-    mutable std::unique_ptr<Impl> impl_;
-};
-
-/**
- *
- * A Mirror Request is a request to start listening for state notifications from remote ecFlow server.
- *
- */
-class MirrorRequest {
-public:
-    std::string path;
-    std::string host;
-    std::string port;
-    std::uint32_t polling;
-    bool ssl;
-    std::string auth;
-
-    friend std::ostream& operator<<(std::ostream&, const MirrorRequest&);
-};
-
-/**
- *
- * A MirrorNotification is a notification of a state change in a remote ecFlow server.
- *
- */
-struct MirrorNotification
-{
-    bool success;
-    std::string path;
-    std::string failure_reason;
-    int status;
-
-    std::string reason() const { return failure_reason.substr(0, failure_reason.find_first_of("\n")); }
-
-    friend std::ostream& operator<<(std::ostream&, const MirrorNotification&);
-};
-
-/**
- *
- * A MirrorError is a notification that an error occurred when contacting a remote ecFlow server.
- *
- */
-class MirrorError {
-public:
-    explicit MirrorError(std::string_view reason) : reason_{reason.substr(0, reason.find_first_of("\n"))} {}
-
-    const std::string& reason() const { return reason_; }
-
-    friend std::ostream& operator<<(std::ostream&, const MirrorError&);
-
-private:
-    std::string reason_;
-};
-
-/**
- *
- * A MirrorResponse is notification of either state change or an error.
- *
- */
-using MirrorResponse = std::variant<MirrorNotification, MirrorError>;
-
-std::ostream& operator<<(std::ostream&, const MirrorResponse&);
 
 /**
  *

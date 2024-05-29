@@ -506,6 +506,8 @@ set(srcs
   service/src/ecflow/service/aviso/etcd/Client.hpp
   service/src/ecflow/service/aviso/etcd/Range.hpp
   service/src/ecflow/service/executor/PeriodicTaskExecutor.hpp
+  service/src/ecflow/service/mirror/Mirror.hpp
+  service/src/ecflow/service/mirror/MirrorClient.hpp
   service/src/ecflow/service/mirror/MirrorService.hpp
   service/src/ecflow/service/Controller.hpp
   service/src/ecflow/service/Log.hpp
@@ -515,6 +517,8 @@ set(srcs
   service/src/ecflow/service/aviso/AvisoService.cpp
   service/src/ecflow/service/aviso/etcd/Range.cpp
   service/src/ecflow/service/aviso/etcd/Client.cpp
+  service/src/ecflow/service/mirror/Mirror.cpp
+  service/src/ecflow/service/mirror/MirrorClient.cpp
   service/src/ecflow/service/mirror/MirrorService.cpp
   service/src/ecflow/service/Controller.cpp
   service/src/ecflow/service/Registry.cpp

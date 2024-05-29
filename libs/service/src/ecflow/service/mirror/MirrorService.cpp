@@ -42,13 +42,7 @@ std::pair<std::string, std::string> load_auth_credentials(const std::string& aut
 
 } // namespace
 
-/* MirrorClient */
-
-struct MirrorClient::Impl
-{
-    std::shared_ptr<Defs> defs_;
-    ClientInvoker invoker_;
-};
+/* MirrorService */
 
 std::optional<std::string> MirrorService::key(const MirrorService::notification_t& notification) {
     return std::visit(ecf::overload{[](const service::mirror::MirrorNotification& notification) {
@@ -57,94 +51,6 @@ std::optional<std::string> MirrorService::key(const MirrorService::notification_
                                     [](const service::mirror::MirrorError&) { return std::optional<std::string>{}; }},
                       notification);
 }
-
-MirrorClient::MirrorClient() : impl_(std::make_unique<Impl>()) {
-}
-
-MirrorClient::~MirrorClient() = default;
-
-int MirrorClient::get_node_status(const std::string& remote_host,
-                                  const std::string& remote_port,
-                                  const std::string& node_path,
-                                  bool ssl,
-                                  const std::string& remote_username,
-                                  const std::string& remote_password) const {
-    ALOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
-    ALOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
-
-    try {
-        impl_ = std::make_unique<Impl>();
-        impl_->invoker_.set_host_port(remote_host, remote_port);
-        if (ssl) {
-            impl_->invoker_.enable_ssl();
-        }
-        if (!remote_username.empty()) {
-            impl_->invoker_.set_user_name(remote_username);
-        }
-        if (!remote_password.empty()) {
-            // Extremely important: the password actually needs to be encrypted before being set in the invoker!
-            impl_->invoker_.set_password(PasswordEncryption::encrypt(remote_password, remote_username));
-        }
-
-        ALOG(D, "MirrorClient: retrieving the latest defs");
-        impl_->invoker_.sync(impl_->defs_);
-
-        if (!impl_->defs_) {
-            ALOG(E, "MirrorClient: unable to sync with remote defs");
-            throw std::runtime_error("MirrorClient: Failed to sync with remote defs");
-        }
-
-        auto node = impl_->defs_->findAbsNode(node_path);
-
-        if (!node) {
-            throw std::runtime_error(
-                Message("MirrorClient: Unable to find requested node (", node_path, ") in remote remote defs").str());
-        }
-
-        auto state = node->state();
-        ALOG(D, "MirrorClient: found node (" << node_path << "), with state " << state);
-        return state;
-    }
-    catch (std::exception& e) {
-        throw std::runtime_error(Message("MirrorClient: failure to sync remote defs, due to: ", e.what()));
-    }
-}
-
-/* MirrorRequest */
-
-std::ostream& operator<<(std::ostream& os, const MirrorRequest& r) {
-    os << "MirrorRequest{";
-    os << "path=" << r.path << ", ";
-    os << "host=" << r.host << ", ";
-    os << "port=" << r.port << ", ";
-    os << "polling=" << r.polling << ", ";
-    os << "ssl=" << r.ssl << ", ";
-    os << "auth=" << r.auth << "}";
-    return os;
-}
-
-/* MirrorNotification */
-
-std::ostream& operator<<(std::ostream& os, const MirrorNotification& n) {
-    os << "MirrorNotification{" << n.path << ", " << n.status << ", " << n.reason() << "}";
-    return os;
-}
-
-/* MirrorError */
-
-std::ostream& operator<<(std::ostream& os, const MirrorError& n) {
-    os << "MirrorError{reason = " << n.reason() << "}";
-    return os;
-}
-
-/* MirrorResponse */
-
-std::ostream& operator<<(std::ostream& os, const MirrorResponse& r) {
-    std::visit([&os](const auto& v) { os << v; }, r);
-    return os;
-}
-
-/* MirrorService */
 
 void MirrorService::start() {
 
