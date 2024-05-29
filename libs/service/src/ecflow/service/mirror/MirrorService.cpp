@@ -45,11 +45,12 @@ std::pair<std::string, std::string> load_auth_credentials(const std::string& aut
 /* MirrorService */
 
 std::optional<std::string> MirrorService::key(const MirrorService::notification_t& notification) {
-    return std::visit(ecf::overload{[](const service::mirror::MirrorNotification& notification) {
-                                        return std::make_optional(notification.path);
-                                    },
-                                    [](const service::mirror::MirrorError&) { return std::optional<std::string>{}; }},
-                      notification);
+    return std::visit(
+        ecf::overload{[](const service::mirror::MirrorNotification& notification) {
+                          return std::make_optional(notification.path());
+                      },
+                      [](const service::mirror::MirrorError& error) { return std::make_optional(error.path()); }},
+        notification);
 }
 
 void MirrorService::start() {
@@ -105,13 +106,13 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
                     mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
 
                 SLOG(D, "MirrorService: Notifying remote node state: " << latest_status);
-                MirrorNotification notification{true, remote_path, "", latest_status};
+                MirrorNotification notification{remote_path, latest_status};
                 notify_(notification);
             }
             catch (std::runtime_error& e) {
                 SLOG(W, "MirrorService: Failed to sync with remote node: " << e.what());
-                MirrorNotification notification{false, remote_path, e.what(), -1};
-                notify_(notification);
+                MirrorError error{remote_path, e.what()};
+                notify_(error);
             }
         }
     }
@@ -136,7 +137,8 @@ void MirrorService::register_listener(const MirrorRequest& request) {
 MirrorController::MirrorController()
     : base_t{[this](const MirrorService::notification_t& notification) {
                  this->notify(notification);
-                 // The following is a hack to force the server to increment the job generation count
+
+                 // The following forces the server to increment the job generation count and traverse the defs
                  SLOG(D, "MirrorController: forcing server to traverse the defs");
                  TheOneServer::server().increment_job_generation_count();
              },

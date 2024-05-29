@@ -42,16 +42,18 @@ public:
  * A MirrorNotification is a notification of a state change in a remote ecFlow server.
  *
  */
-struct MirrorNotification
-{
-    bool success;
-    std::string path;
-    std::string failure_reason;
-    int status;
+class MirrorNotification {
+public:
+    MirrorNotification(std::string_view path, int status) : path_(path), status_(status) {}
 
-    std::string reason() const { return failure_reason.substr(0, failure_reason.find_first_of("\n")); }
+    const std::string& path() const { return path_; }
+    int status() const { return status_; }
 
     friend std::ostream& operator<<(std::ostream&, const MirrorNotification&);
+
+private:
+    std::string path_;
+    int status_;
 };
 
 /**
@@ -61,13 +63,22 @@ struct MirrorNotification
  */
 class MirrorError {
 public:
-    explicit MirrorError(std::string_view reason) : reason_{reason.substr(0, reason.find_first_of("\n"))} {}
+    explicit MirrorError(std::string_view path, std::string_view reason)
+        : path_(path),
+          reason_{get_reason_line(reason)} {}
 
+    const std::string& path() const { return path_; }
     const std::string& reason() const { return reason_; }
 
     friend std::ostream& operator<<(std::ostream&, const MirrorError&);
 
 private:
+    inline std::string get_reason_line(std::string_view full_reason) {
+        auto selected = full_reason.substr(0, full_reason.find_first_of("\n"));
+        return std::string{"'"} + std::string{selected} + "'";
+    }
+
+    std::string path_;
     std::string reason_;
 };
 

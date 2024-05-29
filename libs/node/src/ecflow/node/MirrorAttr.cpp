@@ -93,8 +93,8 @@ void MirrorAttr::mirror() {
         std::visit(ecf::overload{[this](const service::mirror::MirrorNotification& notification) {
                                      SLOG(D,
                                           "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state "
-                                                                                          << notification.status);
-                                     auto latest_state = static_cast<NState::State>(notification.status);
+                                                                                          << notification.status());
+                                     auto latest_state = static_cast<NState::State>(notification.status());
                                      reason_           = "";
                                      parent_->flag().clear(Flag::REMOTE_ERROR);
                                      parent_->flag().set_state_change_no(state_change_no_);
@@ -113,6 +113,21 @@ void MirrorAttr::mirror() {
 
         // Propagate the 'local' state change number to all parents
         ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+
+        // Propagate the 'local' state change number to the top level suite
+        auto find_suite = [](Node* node) -> Suite* {
+            Node* top = node;
+            while (top->parent() != nullptr) {
+                top = top->parent();
+            }
+            if (node->isSuite()) {
+                return static_cast<Suite*>(node);
+            }
+            return nullptr;
+        };
+        if (Suite* suite = find_suite(parent_); suite) {
+            suite->set_state_change_no(state_change_no_);
+        }
     }
     else {
         SLOG(D, "MirrorAttr: No notifications found for Mirror attribute (name: " << name_ << ")");

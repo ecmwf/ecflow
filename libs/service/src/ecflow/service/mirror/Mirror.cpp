@@ -28,14 +28,14 @@ std::ostream& operator<<(std::ostream& os, const MirrorRequest& r) {
 /* MirrorNotification */
 
 std::ostream& operator<<(std::ostream& os, const MirrorNotification& n) {
-    os << "MirrorNotification{" << n.path << ", " << n.status << ", " << n.reason() << "}";
+    os << "MirrorNotification{" << n.path() << ", " << n.status() << "}";
     return os;
 }
 
 /* MirrorError */
 
 std::ostream& operator<<(std::ostream& os, const MirrorError& n) {
-    os << "MirrorError{reason = " << n.reason() << "}";
+    os << "MirrorError{" << n.path() << n.reason() << "}";
     return os;
 }
 
