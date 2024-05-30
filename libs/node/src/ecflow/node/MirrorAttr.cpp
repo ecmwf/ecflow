@@ -174,4 +174,11 @@ void MirrorAttr::stop_controller() const {
     }
 }
 
+bool operator==(const MirrorAttr& lhs, const MirrorAttr& rhs) {
+    return lhs.name() == rhs.name() && lhs.remote_path() == rhs.remote_path() &&
+           lhs.remote_host() == rhs.remote_host() && lhs.remote_port() == rhs.remote_port() &&
+           lhs.polling() == rhs.polling() && lhs.ssl() == rhs.ssl() && lhs.auth() == rhs.auth() &&
+           lhs.reason() == rhs.reason();
+}
+
 } // namespace ecf

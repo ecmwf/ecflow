@@ -131,6 +131,8 @@ private:
     mutable controller_ptr_t controller_;
 };
 
+bool operator==(const MirrorAttr& lhs, const MirrorAttr& rhs);
+
 template <class Archive>
 void serialize(Archive& ar, MirrorAttr& aviso, [[maybe_unused]] std::uint32_t version) {
     ar & aviso.name_;

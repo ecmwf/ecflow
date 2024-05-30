@@ -33,11 +33,13 @@
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
@@ -279,6 +281,27 @@ static bp::list wrap_set_of_strings(Limit* limit) {
 
 static job_creation_ctrl_ptr makeJobCreationCtrl() {
     return std::make_shared<JobCreationCtrl>();
+}
+
+static std::shared_ptr<AvisoAttr> aviso_init(const std::string& name,
+                                             const std::string& listener,
+                                             const std::string& url,
+                                             const std::string& schema,
+                                             const std::string& polling,
+                                             const std::string& auth) {
+    auto attr = std::make_shared<AvisoAttr>(nullptr, name, listener, url, schema, polling, 0, auth, "");
+    return attr;
+}
+
+static std::shared_ptr<MirrorAttr> mirror_init(const std::string& name,
+                                               const std::string& path,
+                                               const std::string& host,
+                                               const std::string& port,
+                                               const std::string& polling,
+                                               bool ssl,
+                                               const std::string& auth) {
+    auto attr = std::make_shared<MirrorAttr>(nullptr, name, path, host, port, polling, ssl, auth, "");
+    return attr;
 }
 
 void export_NodeAttr() {
@@ -992,4 +1015,59 @@ void export_NodeAttr() {
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     bp::register_ptr_to_python<std::shared_ptr<ClockAttr>>(); // needed for mac and boost 1.6
 #endif
+
+    class_<ecf::AvisoAttr>("AvisoAttr", NodeAttrDoc::aviso_doc())
+        .def("__init__", make_constructor(&aviso_init))
+        .def(self == self)                      // __eq__
+        .def("__str__", &ecf::to_python_string) // __str__
+        .def("__copy__", copyObject<AvisoAttr>) // __copy__ uses copy constructor
+        .def("name",
+             &AvisoAttr::name,
+             return_value_policy<copy_const_reference>(),
+             "Returns the name of the Aviso attribute")
+        .def("listener",
+             &AvisoAttr::listener,
+             return_value_policy<copy_const_reference>(),
+             "Returns the Aviso listener configuration")
+        .def("url",
+             &AvisoAttr::url,
+             return_value_policy<copy_const_reference>(),
+             "Returns the URL used to contact the Aviso server")
+        .def("schema",
+             &AvisoAttr::schema,
+             return_value_policy<copy_const_reference>(),
+             "Returns the path to the schema used to contact the Aviso server")
+        .def("polling", &AvisoAttr::polling, "Returns polling interval used to contact the Aviso server")
+        .def("auth",
+             &AvisoAttr::auth,
+             return_value_policy<copy_const_reference>(),
+             "Returns the path to Authentication credentials used to contact the Aviso server");
+
+    class_<MirrorAttr>("MirrorAttr", NodeAttrDoc::mirror_doc())
+        .def("__init__", make_constructor(&mirror_init))
+        .def(self == self)                       // __eq__
+        .def("__str__", &ecf::to_python_string)  // __str__
+        .def("__copy__", copyObject<MirrorAttr>) // __copy__ uses copy constructor
+        .def("name",
+             &MirrorAttr::name,
+             return_value_policy<copy_const_reference>(),
+             "Returns the name of the Mirror attribute")
+        .def("remote_path",
+             &MirrorAttr::remote_path,
+             return_value_policy<copy_const_reference>(),
+             "Returns the path on the remote ecFlow server")
+        .def("remote_host",
+             &MirrorAttr::remote_host,
+             return_value_policy<copy_const_reference>(),
+             "Returns the host of the remote ecFlow server")
+        .def("remote_port",
+             &MirrorAttr::remote_port,
+             return_value_policy<copy_const_reference>(),
+             "Returns the port of the remote ecFlow server")
+        .def("ssl", &MirrorAttr::ssl, "Returns a boolean, where true means that SSL is enabled")
+        .def("polling", &MirrorAttr::polling, "Returns the polling interval used to contact the remove ecFlow server")
+        .def("auth",
+             &MirrorAttr::auth,
+             return_value_policy<copy_const_reference>(),
+             "Returns the path to Authentication credentials used to contact the remote ecFlow server");
 }

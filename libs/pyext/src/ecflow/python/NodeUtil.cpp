@@ -28,10 +28,12 @@
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/python/BoostPythonUtil.hpp"
@@ -163,8 +165,15 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg) {
             throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
         self->isSuite()->addClock(extract<ClockAttr>(arg));
     }
-    else if (extract<Variable>(arg).check())
+    else if (extract<Variable>(arg).check()) {
         self->addVariable(extract<Variable>(arg));
+    }
+    else if (auto attr = extract<ecf::AvisoAttr>(arg); attr.check()) {
+        self->addAviso(attr);
+    }
+    else if (auto attr = extract<ecf::MirrorAttr>(arg); attr.check()) {
+        self->addMirror(attr);
+    }
     else if (extract<dict>(arg).check()) {
         dict d = extract<dict>(arg);
         add_variable_dict(self, d);

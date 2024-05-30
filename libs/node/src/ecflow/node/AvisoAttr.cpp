@@ -215,4 +215,33 @@ void AvisoAttr::finish() const {
     stop_controller(aviso_path);
 }
 
+bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
+    return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
+           lhs.schema() == rhs.schema() && lhs.polling() == rhs.polling() && lhs.revision() == rhs.revision() &&
+           lhs.auth() == rhs.auth() && lhs.reason() == rhs.reason();
+}
+
+std::string to_python_string(const AvisoAttr& aviso) {
+    std::string s;
+    s += "AvisoAttr(";
+    s += "name=";
+    s += aviso.name();
+    s += ", listener=";
+    s += aviso.listener();
+    s += ", url=";
+    s += aviso.url();
+    s += ", schema=";
+    s += aviso.schema();
+    s += ", polling=";
+    s += aviso.polling();
+    s += ", revision=";
+    s += aviso.revision();
+    s += ", auth=";
+    s += aviso.auth();
+    s += ", reason=";
+    s += aviso.reason();
+    s += ")";
+    return s;
+}
+
 } // namespace ecf

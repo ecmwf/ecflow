@@ -705,3 +705,54 @@ const char* NodeAttrDoc::clock_doc() {
            "   clock.set_gain(1,10,True)\n"
            "   suite.add_clock(clock)\n";
 }
+
+const char* NodeAttrDoc::aviso_doc() {
+    return "An `aviso`_ attribute, assigned to a `node`_, represents an external trigger holding the node queued until"
+           "an Aviso notification matching the attribute configuration is detected.\n"
+           "\n"
+           "Although `aviso`_ attributes can be set at any level (Suite, Family, Task), it only makes sense to assign "
+           "aviso attributes to tasks, and only one aviso attribute per node is allowed.\n"
+           "\n"
+           "\nConstructor::\n\n"
+           "   AvisoAttr(name, listener, ...)\n"
+           "      string name: The Aviso attribute name\n"
+           "      string listener: The Aviso listener configuration (in JSON format)\n"
+           "      string url: The URL used to contact the Aviso server\n"
+           "      string schema: The path to the Aviso schema\n"
+           "      string polling: The polling interval used to contact the Aviso server\n"
+           "      string auth: The path to the Aviso Authentication credentials\n"
+           "\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   t1 = Task('t1',\n"
+           "             AvisoAttr('name', '{...}', 'http://aviso.com', '60', '/path/to/auth'))\n"
+           "\n"
+           "   t2 = Task('t2')\n"
+           "   t2.add_aviso('name', '{...}', 'http://aviso.com', '60', '/path/to/auth')\n";
+}
+
+const char* NodeAttrDoc::mirror_doc() {
+    return "A `mirror`_ attribute, assigned to a `node`_, enables establishing an external link and "
+           "locally replicate the state of a node executing on a remote ecFlow server.\n"
+           "\n"
+           "Although `mirror`_ attributes can be set at any level (Suite, Family, Task), it only makes sense to assign "
+           "mirror attributes to Tasks, and only one mirror attribute per node is allowed.\n"
+           "\n"
+           "\nConstructor::\n\n"
+           "   MirrorAttr(name, remote_path, ...)\n"
+           "      string name: The Mirror attribute name\n"
+           "      string remote_path: The path on the remote ecFlow server to the node being replicated\n"
+           "      string remote_host: The host of the remote ecFlow server\n"
+           "      string remote_port: The port of the remote ecFlow server\n"
+           "      string polling: The polling interval used to contact the remote ecFlow server\n"
+           "      Bool ssl: `true`, when using SSL to contact the remote ecFlow server; `false`, otherwise\n"
+           "      string auth: The path to the Mirror Authentication credentials\n"
+           "\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   t1 = Task('t1',\n"
+           "             MirrorAttr('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth'))\n"
+           "\n"
+           "   t2 = Task('t2')\n"
+           "   t2.add_aviso('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth')\n";
+}

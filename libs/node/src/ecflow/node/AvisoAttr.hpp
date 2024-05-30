@@ -137,6 +137,10 @@ private:
     mutable controller_ptr_t controller_;
 };
 
+bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs);
+
+std::string to_python_string(const AvisoAttr& aviso);
+
 template <class Archive>
 void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t version) {
     ar & aviso.parent_path_;

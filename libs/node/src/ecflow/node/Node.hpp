@@ -860,6 +860,10 @@ private: /// For use by python interface,
     std::vector<Event>::const_iterator event_end() const { return events_.end(); }
     std::vector<Label>::const_iterator label_begin() const { return labels_.begin(); }
     std::vector<Label>::const_iterator label_end() const { return labels_.end(); }
+    std::vector<ecf::AvisoAttr>::const_iterator aviso_begin() const { return avisos_.begin(); }
+    std::vector<ecf::AvisoAttr>::const_iterator aviso_end() const { return avisos_.end(); }
+    std::vector<ecf::MirrorAttr>::const_iterator mirror_begin() const { return mirrors_.begin(); }
+    std::vector<ecf::MirrorAttr>::const_iterator mirror_end() const { return mirrors_.end(); }
     std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return times_.begin(); }
     std::vector<ecf::TimeAttr>::const_iterator time_end() const { return times_.end(); }
     std::vector<ecf::TodayAttr>::const_iterator today_begin() const { return todays_.begin(); }

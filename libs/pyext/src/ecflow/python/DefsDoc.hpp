@@ -32,6 +32,8 @@ public:
     static const char* trigger();
     static const char* add_variable_doc();
     static const char* add_label_doc();
+    static const char* add_aviso_doc();
+    static const char* add_mirror_doc();
     static const char* add_limit_doc();
     static const char* add_inlimit_doc();
     static const char* node_doc();
