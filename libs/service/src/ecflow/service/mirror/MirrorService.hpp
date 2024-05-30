@@ -44,8 +44,6 @@ public:
     using notify_callback_t    = std::function<void(const notification_t& notification)>;
     using subscribe_callback_t = std::function<subscriptions_t()>;
 
-    static std::optional<std::string> key(const notification_t& notification);
-
     MirrorService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},
           listeners_{},

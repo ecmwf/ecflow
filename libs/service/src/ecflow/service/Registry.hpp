@@ -23,8 +23,8 @@ namespace ecf::service {
 
 class TheOneServer {
 public:
-    static void set_server(AbstractServer& server) { TheOneServer::instance().server_ = &server; }
-    static AbstractServer& server() { return *TheOneServer::instance().server_; }
+    static void set_server(AbstractServer* server) { TheOneServer::instance().server_ = server; }
+    static AbstractServer* server() { return TheOneServer::instance().server_; }
 
 private:
     TheOneServer() = default;

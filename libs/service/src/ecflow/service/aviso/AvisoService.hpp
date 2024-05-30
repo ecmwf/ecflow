@@ -58,11 +58,7 @@ public:
     struct Entry
     {
         explicit Entry(listener_t listener) : listener_{std::move(listener)} {}
-        explicit Entry(listener_t listener, revision_t revision) : listener_{std::move(listener)} {}
 
-        const aviso::etcd::Address address() const { return listener_.address(); }
-        std::string prefix() const { return listener_.prefix(); }
-        std::string_view path() const { return listener_.path(); }
         const listener_t& listener() const { return listener_; }
         listener_t& listener() { return listener_; }
 
@@ -75,8 +71,6 @@ public:
     using storage_t            = std::vector<Entry>;
     using notify_callback_t    = std::function<void(const AvisoService::notification_t&)>;
     using subscribe_callback_t = std::function<subscriptions_t()>;
-
-    static std::optional<std::string> key(const notification_t& notification);
 
     AvisoService(notify_callback_t notify, subscribe_callback_t subscribe)
         : executor_{[this](const std::chrono::system_clock::time_point& now) { this->operator()(now); }},

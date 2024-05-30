@@ -8,18 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/test/unit_test.hpp>
-
-#include "ecflow/service/aviso/AvisoService.hpp"
-
-BOOST_AUTO_TEST_SUITE(U_Aviso)
-
-BOOST_AUTO_TEST_SUITE(T_AvisoListener)
-
-BOOST_AUTO_TEST_CASE(test_listen) {
-    BOOST_REQUIRE(true);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE_END()
+#define BOOST_TEST_MODULE Test_Mirror
+#include <boost/test/included/unit_test.hpp>

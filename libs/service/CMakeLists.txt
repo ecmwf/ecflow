@@ -14,48 +14,67 @@
 # u_services
 # --------------------------------------------------
 
-set(test_srcs
-  # Sources
-  test/TestPeriodicTaskExecutor.cpp
-  test/TestRegistry.cpp
-  test/TestServices_main.cpp # test entry point
-)
-
 ecbuild_add_test(
   TARGET
-    u_service
+    u_service_executor
   LABELS
-    unit
+    unit nightly
   SOURCES
-    ${test_srcs}
+    # Sources
+    test/executor/TestExecutor_main.cpp # test entry point
+    test/executor/TestPeriodicTaskExecutor.cpp
   LIBS
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
-target_clangformat(u_service
+target_clangformat(u_service_executor
   CONDITION ENABLE_TESTS
 )
 
-# u_aviso
+# u_service_aviso
 # --------------------------------------------------
-
-set(test_srcs
-  # Sources
-  test/aviso/TestAviso.cpp
-  test/aviso/TestAviso_main.cpp # test entry point
-)
 
 ecbuild_add_test(
   TARGET
-    u_aviso
+    u_service_aviso
   LABELS
-    integration
+    unit nightly
   SOURCES
-    ${test_srcs}
+    # Headers -- utilities
+    test/aviso/TestContentProvider.hpp
+    # Sources -- utilities
+    test/aviso/TestContentProvider.cpp
+    # Sources
+    test/aviso/TestAviso_main.cpp # test entry point
+    test/aviso/TestAviso.cpp
+    test/aviso/TestAvisoService.cpp
+  LIBS
+    ecflow_all
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    Boost::filesystem
+)
+target_clangformat(u_service_aviso
+  CONDITION ENABLE_TESTS
+)
+
+# u_service_mirror
+# --------------------------------------------------
+
+ecbuild_add_test(
+  TARGET
+    u_service_mirror
+  LABELS
+    unit nightly
+  SOURCES
+    # Sources
+    test/mirror/TestMirror_main.cpp # test entry point
+    test/mirror/TestMirror.cpp
+    test/mirror/TestMirrorClient.cpp
+    test/mirror/TestMirrorService.cpp
   LIBS
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
-target_clangformat(u_aviso
+target_clangformat(u_service_mirror
   CONDITION ENABLE_TESTS
 )

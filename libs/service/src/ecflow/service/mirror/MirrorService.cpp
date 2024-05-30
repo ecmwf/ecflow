@@ -44,15 +44,6 @@ std::pair<std::string, std::string> load_auth_credentials(const std::string& aut
 
 /* MirrorService */
 
-std::optional<std::string> MirrorService::key(const MirrorService::notification_t& notification) {
-    return std::visit(
-        ecf::overload{[](const service::mirror::MirrorNotification& notification) {
-                          return std::make_optional(notification.path());
-                      },
-                      [](const service::mirror::MirrorError& error) { return std::make_optional(error.path()); }},
-        notification);
-}
-
 void MirrorService::start() {
 
     // Update list of listeners
@@ -138,9 +129,12 @@ MirrorController::MirrorController()
     : base_t{[this](const MirrorService::notification_t& notification) {
                  this->notify(notification);
 
-                 // The following forces the server to increment the job generation count and traverse the defs
-                 SLOG(D, "MirrorController: forcing server to traverse the defs");
-                 TheOneServer::server().increment_job_generation_count();
+                 if (auto* server = TheOneServer::server(); server) {
+                     // The following forces the server to increment the job generation count and traverse the defs
+                     server->increment_job_generation_count();
+                 } else {
+                     SLOG(E, "MirrorController: no server available, thus unable to increment job generation count");
+                 }
              },
              [this]() { return this->get_subscriptions(); }} {
 }

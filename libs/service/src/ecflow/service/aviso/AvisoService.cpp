@@ -41,15 +41,6 @@ std::ostream& operator<<(std::ostream& os, const AvisoResponse& r) {
     return os;
 }
 
-std::optional<std::string> AvisoService::key(const AvisoResponse& notification) {
-    return std::visit(ecf::overload{[](const NotificationPackage<ConfiguredListener, AvisoNotification>& p) {
-                                        return std::make_optional(p.path);
-                                    },
-                                    [](const AvisoNoMatch&) { return std::optional<std::string>{}; },
-                                    [](const AvisoError&) { return std::optional<std::string>{}; }},
-                      notification);
-}
-
 void AvisoService::start() {
 
     // Update list of listeners
@@ -96,17 +87,18 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
     {
         for (auto& entry : listeners_) {
             // For the associated host(+port)
-            aviso::etcd::Client client{entry.address(), entry.auth_token};
+            aviso::etcd::Client client{entry.listener().address(), entry.auth_token};
 
             SLOG(D,
-                 "AvisoService: polling " << entry.address().address() << " for Aviso " << entry.path() << " (key: "
-                                          << entry.prefix() << ", rev: " << entry.listener().revision() << ")");
+                 "AvisoService: polling " << entry.listener().address().address() << " for Aviso "
+                                          << entry.listener().path() << " (key: " << entry.listener().prefix()
+                                          << ", rev: " << entry.listener().revision() << ")");
 
             // Poll notifications on the key prefix
 
             std::vector<std::pair<std::string, std::string>> updated_keys;
             try {
-                updated_keys = client.poll(entry.prefix(), entry.listener().revision() + 1);
+                updated_keys = client.poll(entry.listener().prefix(), entry.listener().revision() + 1);
             }
             catch (const std::exception& e) {
                 notify_(AvisoError(e.what())); // Notification regarding failure to contact the server
@@ -118,16 +110,18 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
             for (auto&& [key, value] : updated_keys) {
                 if (key == "latest_revision") {
                     auto revision = value;
-                    SLOG(D, "AvisoService: updating revision for " << entry.path() << " to " << revision);
+                    SLOG(D, "AvisoService: updating revision for " << entry.listener().path() << " to " << revision);
                     entry.listener().update_revision(std::stoll(value));
-                    SLOG(D, "AvisoService: revision for " << entry.path() << " is now " << entry.listener().revision());
+                    SLOG(D,
+                         "AvisoService: revision for " << entry.listener().path() << " is now "
+                                                       << entry.listener().revision());
                     continue;
                 }
 
                 if (auto notification = entry.listener().accepts(key, value, entry.listener().revision());
                     notification) {
                     NotificationPackage<ConfiguredListener, AvisoNotification> n{
-                        std::string{entry.path()}, entry.listener(), *notification};
+                        std::string{entry.listener().path()}, entry.listener(), *notification};
                     notify_(n); // Notification regarding a successful match
                     matched = true;
                 }
@@ -160,17 +154,23 @@ void AvisoService::unregister_listener(const std::string& unlisten_path) {
 
     SLOG(D, "AvisoService: removing listener: {" << unlisten_path << "}");
 
-    listeners_.erase(std::remove_if(std::begin(listeners_),
-                                    std::end(listeners_),
-                                    [&unlisten_path](auto&& listener) { return listener.path() == unlisten_path; }),
-                     std::end(listeners_));
+    listeners_.erase(
+        std::remove_if(std::begin(listeners_),
+                       std::end(listeners_),
+                       [&unlisten_path](auto&& entry) { return entry.listener().path() == unlisten_path; }),
+        std::end(listeners_));
 }
 
 AvisoController::AvisoController()
     : base_t{[this](const AvisoController::notification_t& notification) {
                  this->notify(notification);
-                 // The following is a hack to force the server to increment the job generation count
-                 TheOneServer::server().increment_job_generation_count();
+
+                 if (auto* server = TheOneServer::server(); server) {
+                     // The following forces the server to increment the job generation count and traverse the defs
+                     server->increment_job_generation_count();
+                 } else {
+                     SLOG(E, "AvisoController: no server available, thus unable to increment job generation count");
+                 }
              },
              [this]() { return this->get_subscriptions(); }} {
 }

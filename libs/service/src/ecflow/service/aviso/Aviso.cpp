@@ -50,9 +50,11 @@ std::ostream& operator<<(std::ostream& os, const AvisoUnsubscribe& request) {
 /* AvisoRequest */
 
 std::ostream& operator<<(std::ostream& os, const AvisoRequest& request) {
+    os << "AvisoRequest{";
     std::visit(
         ecf::overload{[&os](const AvisoSubscribe& r) { os << r; }, [&os](const AvisoUnsubscribe& r) { os << r; }},
         request);
+    os << "}";
     return os;
 }
 
@@ -90,34 +92,65 @@ std::ostream& operator<<(std::ostream& os, const AvisoError& error) {
 /* ConfiguredListener */
 
 ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoSubscribe& listen_request) {
+
+    std::ifstream schema_stream(listen_request.schema());
+
+    return make_configured_listener(listen_request.path(),
+                                    listen_request.listener_cfg(),
+                                    listen_request.address(),
+                                    schema_stream,
+                                    listen_request.polling(),
+                                    listen_request.revision());
+}
+
+ConfiguredListener ConfiguredListener::make_configured_listener(const std::string& path,
+                                                                const std::string& listener_cfg,
+                                                                const std::string& address,
+                                                                const std::string& schema_content,
+                                                                uint32_t polling,
+                                                                uint64_t revision) {
+
+    std::istringstream schema_stream(schema_content);
+
+    return make_configured_listener(path, listener_cfg, address, schema_stream, polling, revision);
+}
+
+ConfiguredListener ConfiguredListener::make_configured_listener(const std::string& path,
+                                                                const std::string& listener_cfg,
+                                                                const std::string& address,
+                                                                std::istream& schema_stream,
+                                                                uint32_t polling,
+                                                                uint64_t revision) {
     using json = nlohmann::ordered_json;
 
     json data;
     try {
-        data = json::parse(listen_request.listener_cfg());
+        data = json::parse(listener_cfg);
     }
     catch (const json::parse_error& e) {
         throw std::runtime_error("Failed to parse listener configuration: " + std::string(e.what()) + " " +
-                                 listen_request.listener_cfg());
+                                 listener_cfg);
     }
 
     ListenerSchema schema;
     try {
-        schema = ListenerSchema::load(listen_request.schema());
+        schema = ListenerSchema::load(schema_stream);
     }
     catch (const std::exception& e) {
         throw std::runtime_error("Failed to load listener schema: " + std::string(e.what()));
     }
 
-    std::string address = listen_request.address();
-    std::string path    = listen_request.path();
-    std::string event   = data["event"];
-    uint32_t polling    = listen_request.polling();
-    uint64_t revision   = listen_request.revision();
+    if (!data.contains("event")) {
+        throw std::runtime_error("Listener configuration does not specify 'event'");
+    }
+    if (!data.contains("request")) {
+        throw std::runtime_error("Listener configuration does not specify 'request'");
+    }
 
+    std::string event    = data["event"];
     const auto& listener = schema.get_listener(event);
     if (!listener) {
-        throw std::runtime_error("Listener not found");
+        throw std::runtime_error("Listener could not be found in schema");
     }
 
     ConfiguredListener configured{
@@ -146,8 +179,7 @@ ConfiguredListener ConfiguredListener::make_configured_listener(const AvisoSubsc
                     values_as_atrings.push_back(std::to_string(v.template get<int64_t>()));
                 }
                 else {
-                    // Unsupported type!
-                    std::terminate();
+                    std::terminate(); // Unsupported type!
                 }
             }
 
@@ -246,6 +278,11 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
         }
     }
 
+    if (placeholders.size() != actual_parameters.size()) {
+        SLOG(D, "Aviso: Match [✗] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
+        return std::nullopt;
+    }
+
     // D. Check parameters
     bool applicable = true;
     {
@@ -284,7 +321,6 @@ ConfiguredListener::accepts(const std::string& key, const std::string& value, ui
         SLOG(D, "Aviso: Match [✗] --> <Notification> " << key << " = " << value << " (revision: " << revision << ")");
         return std::nullopt;
     }
-    return std::nullopt;
 }
 
 std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener) {
@@ -305,6 +341,11 @@ std::optional<Listener> ListenerSchema::get_listener(const std::string& name) co
         return found->second;
     }
     return std::nullopt;
+}
+
+ListenerSchema ListenerSchema::load_from_string(const std::string& schema_content) {
+    std::istringstream schema_stream(schema_content);
+    return load(schema_stream);
 }
 
 ListenerSchema ListenerSchema::load(const std::string& schema_path) {

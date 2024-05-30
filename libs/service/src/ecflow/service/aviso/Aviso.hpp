@@ -196,6 +196,20 @@ public:
      */
     static ConfiguredListener make_configured_listener(const AvisoSubscribe& request);
 
+    static ConfiguredListener make_configured_listener(const std::string& path,
+                                                       const std::string& listener_cfg,
+                                                       const std::string& address,
+                                                       const std::string& schema_content,
+                                                       uint32_t polling,
+                                                       uint64_t revision);
+
+    static ConfiguredListener make_configured_listener(const std::string& path,
+                                                       const std::string& listener_cfg,
+                                                       const std::string& address,
+                                                       std::istream& schema_stream,
+                                                       uint32_t polling,
+                                                       uint64_t revision);
+
 public:
     ConfiguredListener(ecf::service::aviso::etcd::Address address,
                        std::string_view path,
@@ -250,6 +264,8 @@ private:
 class ListenerSchema {
 public:
     std::optional<Listener> get_listener(const std::string& name) const;
+
+    static ListenerSchema load_from_string(const std::string& schema_content);
 
     static ListenerSchema load(const std::string& schema_path);
     static ListenerSchema load(std::istream& schema_stream);

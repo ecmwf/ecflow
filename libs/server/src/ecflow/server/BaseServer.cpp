@@ -54,7 +54,7 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
     signals_.add(SIGTERM);
     signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler(); });
 
-    ecf::service::TheOneServer::set_server(*this);
+    ecf::service::TheOneServer::set_server(this);
 
     // Update stats, this is returned via --stats command option
     stats().host_                    = serverEnv.hostPort().first;
