@@ -1,0 +1,19 @@
+suite mirror
+  edit ECF_HOME '/Users/mamb/w/sandbox.aviso/.'
+  edit ECF_INCLUDE '/Users/mamb/w/sandbox.aviso/core/included'
+  edit ECF_FILES '/Users/mamb/w/sandbox.aviso/scripts'
+  family f1
+    edit ECF_MIRROR_REMOTE_HOST 'localhost'
+    edit ECF_MIRROR_REMOTE_PORT '1234'
+    edit ECF_MIRROR_REMOTE_POLLING '21'
+    edit ECF_MIRROR_REMOTE_AUTH '/Users/mamb/w/sandbox.aviso/mirror.auth'
+    task t1
+      mirror --name operationsX --remote_path /s1/f1/t1 --ssl
+    task t2
+      mirror --name operationsY --remote_path /s1/f1/t2 --remote_host %ECF_MIRROR_REMOTE_HOST% --polling 20 --remote_port %ECF_MIRROR_REMOTE_PORT% --ssl
+    task t3
+      mirror --name operationsZ --remote_path /s1/f1/t3 --polling 20 --remote_host %ECF_MIRROR_REMOTE_HOST% --remote_port %ECF_MIRROR_REMOTE_PORT% --ssl
+    task t4
+      trigger t1 == complete and t2 == complete and t3 == complete
+  endfamily
+endsuite

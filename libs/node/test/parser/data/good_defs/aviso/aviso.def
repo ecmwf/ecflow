@@ -1,0 +1,24 @@
+suite aviso
+  edit ECF_HOME '/Users/mamb/w/sandbox.aviso/.'
+  edit ECF_INCLUDE '/Users/mamb/w/sandbox.aviso/core/included'
+  edit ECF_FILES '/Users/mamb/w/sandbox.aviso/scripts'
+  edit ECF_AVISO_URL 'http://localhost:2379'
+  edit ECF_AVISO_SCHEMA '/Users/mamb/w/sandbox.aviso/client/service_configuration/event_listener_schema.json'
+  edit ECF_AVISO_POLLING '40'
+  edit ECF_AVISO_AUTH '/Users/mamb/w/sandbox.aviso/aviso.auth'
+  family f1
+    task t1
+      aviso --name A --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --auth %ECF_AVISO_AUTH% --polling %ECF_AVISO_POLLING%
+    task t2
+      aviso --name B --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling %ECF_AVISO_POLLING%
+    task t3
+      aviso --name D --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 12] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling %ECF_AVISO_POLLING%
+    task t4
+      aviso --name E --listener '{ "event": "dissemination", "request": { "destination": "COM" } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling 20
+    task t5
+      aviso --name F --listener '{ "event": "dissemination", "request": { "destination": "ABC" } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling 20
+    task tX
+      edit ECF_AVISO_URL 'http://wrong:2379'
+      aviso --name X --listener '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "enfo", "step": [0, 6, 12, 18] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling %ECF_AVISO_POLLING%
+  endfamily
+endsuite

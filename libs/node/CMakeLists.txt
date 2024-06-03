@@ -83,9 +83,11 @@ set(test_srcs
   test/parser/PersistHelper.cpp
   test/parser/TemporaryFile.cpp
   test/parser/TestAutoAddExterns.cpp
+  test/parser/TestAvisoAttr.cpp
   test/parser/TestDefsStructurePersistAndReload.cpp
   test/parser/TestMementoPersistAndReload.cpp
   test/parser/TestMigration.cpp
+  test/parser/TestMirrorAttr.cpp
   test/parser/TestParser.cpp
   test/parser/TestParser_main.cpp # test entry point
   test/parser/TestVariableParsing.cpp
