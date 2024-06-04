@@ -10,64 +10,40 @@
 
 #include "ecflow/service/aviso/etcd/Client.hpp"
 
-#include <iostream>
-
-#include "ecflow/core/Message.hpp"
-
-#if defined(ECF_OPENSSL)
-    #include <openssl/ssl.h>
-    #if OPENSSL_VERSION_NUMBER < 0x1010100fL
-        #warning OpenSSL versions prior to 1.1.1 detected. Aviso ETCD HTTP client will be build without OpenSSL support!
-    #else
-        #define CPPHTTPLIB_OPENSSL_SUPPORT
-    #endif
-#endif
-
 #include <cassert>
 #include <fstream>
-#include <httplib.h>
 #include <iostream>
 #include <memory>
 #include <regex>
 
 #include <nlohmann/json.hpp>
 
+#include "ecflow/core/Message.hpp"
 #include "ecflow/service/Log.hpp"
 #include "ecflow/service/aviso/etcd/Range.hpp"
 
 namespace ecf::service::aviso::etcd {
 
-struct Client::Impl
-{
-    explicit Impl(Address address) : address_(std::move(address)), client_(std::string{address_.address()}) {}
-    explicit Impl(Address address, std::string auth_token)
-        : address_(std::move(address)),
-          auth_token_(std::move(auth_token)),
-          client_(std::string{address_.address()}) {}
-
-    Address address_;
-    std::string auth_token_;
-    httplib::Client client_;
-};
-
-Client::Client(Address address) : impl_(std::make_unique<Client::Impl>(address)) {
-    std::cout << OPENSSL_VERSION_NUMBER << std::endl;
+Client::Client(const std::string& address) : client_(address), address_(address), auth_token_() {
 }
 
-Client::Client(Address address, std::string auth_token)
-    : impl_(std::make_unique<Client::Impl>(std::move(address), std::move(auth_token))) {
+Client::Client(const std::string& address, const std::string& auth_token)
+    : client_(address),
+      address_(address),
+      auth_token_(auth_token) {
 }
 
 Client::~Client() = default;
 
 std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view key_prefix, int64_t revision) {
+    std::cout << "Client::poll" << key_prefix << ", revision " << revision << std::endl;
     using json = nlohmann::ordered_json;
 
     httplib::Headers headers;
 
-    if (!impl_->auth_token_.empty()) {
+    if (!auth_token_.empty()) {
         SLOG(D, "EtcdClient: using authorization token");
-        headers.emplace("Authorization", "Bearer " + impl_->auth_token_);
+        headers.emplace("Authorization", "Bearer " + auth_token_);
     }
 
     auto range = Range(key_prefix);
@@ -77,7 +53,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
             .dump();
     std::string content_type = "application/json";
 
-    httplib::Result result = impl_->client_.Post(endpoint_path, headers, request_body, content_type);
+    httplib::Result result = client_.Post(endpoint_path, headers, request_body, content_type);
     if (!result) {
         throw std::runtime_error(Message("EtcdClient: Unable to retrieve result, due to ", result.error()).str());
     }

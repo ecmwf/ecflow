@@ -162,9 +162,8 @@ BOOST_AUTO_TEST_CASE(can_create_parameterised_listener) {
 
 BOOST_AUTO_TEST_CASE(can_create_parameterised_configured_listener) {
     using namespace ecf::service::aviso;
-    using namespace ecf::service::aviso::etcd;
-    ConfiguredListener listener(Address("http://unknown:1234"), "path", "name", "/base", "stem", 2, 0);
-    BOOST_CHECK_EQUAL(listener.address().address(), "http://unknown:1234");
+    ConfiguredListener listener("http://unknown:1234", "path", "name", "/base", "stem", 2, 0);
+    BOOST_CHECK_EQUAL(listener.address(), "http://unknown:1234");
     BOOST_CHECK_EQUAL(listener.path(), "path");
     BOOST_CHECK_EQUAL(listener.name(), "name");
     BOOST_CHECK_EQUAL(listener.base(), "/base");
@@ -177,12 +176,11 @@ BOOST_AUTO_TEST_CASE(can_create_parameterised_configured_listener) {
 
 BOOST_AUTO_TEST_CASE(can_create_parameterised_configured_listener_with_placeholders) {
     using namespace ecf::service::aviso;
-    using namespace ecf::service::aviso::etcd;
-    ConfiguredListener listener(Address("http://unknown:1234"), "path", "name", "/{a}", "{b}/{c}", 2, 0);
+    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}", 2, 0);
     listener.with_parameter("a", "aaa");
     listener.with_parameter("b", "bbb");
     listener.with_parameter("c", "ccc");
-    BOOST_CHECK_EQUAL(listener.address().address(), "http://unknown:1234");
+    BOOST_CHECK_EQUAL(listener.address(), "http://unknown:1234");
     BOOST_CHECK_EQUAL(listener.path(), "path");
     BOOST_CHECK_EQUAL(listener.name(), "name");
     BOOST_CHECK_EQUAL(listener.base(), "/{a}");
@@ -196,8 +194,7 @@ BOOST_AUTO_TEST_CASE(can_create_parameterised_configured_listener_with_placehold
 
 BOOST_AUTO_TEST_CASE(can_detect_non_matching_key) {
     using namespace ecf::service::aviso;
-    using namespace ecf::service::aviso::etcd;
-    ConfiguredListener listener(Address("http://unknown:1234"), "path", "name", "/{a}", "{b}/{c}", 2, 0);
+    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}", 2, 0);
     listener.with_parameter("a", "aaa");
     listener.with_parameter("b", "bbb");
     listener.with_parameter("c", 0);
@@ -208,8 +205,7 @@ BOOST_AUTO_TEST_CASE(can_detect_non_matching_key) {
 
 BOOST_AUTO_TEST_CASE(can_detect_matching_key) {
     using namespace ecf::service::aviso;
-    using namespace ecf::service::aviso::etcd;
-    ConfiguredListener listener(Address("http://unknown:1234"), "path", "name", "/{a}", "{b}/{c}/{d}/{e}", 2, 0);
+    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}/{d}/{e}", 2, 0);
     listener.with_parameter("a", "aaa");
     listener.with_parameter("b", "bbb");
     listener.with_parameter("c", 0);
@@ -237,8 +233,7 @@ BOOST_AUTO_TEST_CASE(can_detect_matching_key) {
 
 BOOST_AUTO_TEST_CASE(can_print_configured_listener) {
     using namespace ecf::service::aviso;
-    using namespace ecf::service::aviso::etcd;
-    ConfiguredListener listener(Address("http://unknown:1234"), "path", "name", "/{a}", "{b}/{c}", 2, 0);
+    ConfiguredListener listener("http://unknown:1234", "path", "name", "/{a}", "{b}/{c}", 2, 0);
     listener.with_parameter("a", "aaa");
     listener.with_parameter("b", "bbb");
     listener.with_parameter("c", "ccc");
@@ -289,7 +284,7 @@ BOOST_AUTO_TEST_CASE(can_make_configured_listener) {
 
     BOOST_CHECK_EQUAL(listener.path(), path);
     BOOST_CHECK_EQUAL(listener.name(), "dissemination");
-    BOOST_CHECK_EQUAL(listener.address().address(), address);
+    BOOST_CHECK_EQUAL(listener.address(), address);
     BOOST_CHECK_EQUAL(listener.base(), "/ec/diss/{destination}");
     BOOST_CHECK_EQUAL(listener.stem(),
                       "date={date},target={target},class={class},expver={expver},domain={domain},time={time},stream={"

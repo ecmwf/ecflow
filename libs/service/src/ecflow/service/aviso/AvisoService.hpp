@@ -45,7 +45,6 @@ std::ostream& operator<<(std::ostream& os, const AvisoResponse& r);
 
 class AvisoService {
 public:
-    using address_t     = aviso::etcd::Address;
     using schema_path_t = std::string;
     using key_prefix_t  = std::string;
     using listener_t    = ConfiguredListener;
@@ -57,7 +56,7 @@ public:
 
     struct Entry
     {
-        explicit Entry(listener_t listener) : listener_{std::move(listener)} {}
+        explicit Entry(const listener_t& listener) : auth_token{}, listener_{listener} {}
 
         const listener_t& listener() const { return listener_; }
         listener_t& listener() { return listener_; }
@@ -107,8 +106,8 @@ public:
 public:
     AvisoController();
 
-    using base_t::notify;
     using base_t::get_notifications;
+    using base_t::notify;
     using base_t::start;
     using base_t::stop;
     using base_t::subscribe;

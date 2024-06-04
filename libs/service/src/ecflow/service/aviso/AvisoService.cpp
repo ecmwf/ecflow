@@ -86,18 +86,18 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
     // Check notification for each listener
     {
         for (auto& entry : listeners_) {
-            // For the associated host(+port)
-            aviso::etcd::Client client{entry.listener().address(), entry.auth_token};
-
             SLOG(D,
-                 "AvisoService: polling " << entry.listener().address().address() << " for Aviso "
-                                          << entry.listener().path() << " (key: " << entry.listener().prefix()
+                 "AvisoService: polling " << entry.listener().address() << " for Aviso " << entry.listener().path()
+                                          << " (key: " << entry.listener().prefix()
                                           << ", rev: " << entry.listener().revision() << ")");
 
             // Poll notifications on the key prefix
 
             std::vector<std::pair<std::string, std::string>> updated_keys;
             try {
+                // For the associated host(+port)
+                std::cout << "entry.listener().address(): " << entry.listener().address() << std::endl;
+                aviso::etcd::Client client{entry.listener().address(), entry.auth_token};
                 updated_keys = client.poll(entry.listener().prefix(), entry.listener().revision() + 1);
             }
             catch (const std::exception& e) {
@@ -139,9 +139,7 @@ void AvisoService::register_listener(const AvisoSubscribe& listen) {
     auto address    = listener.address();
     auto key_prefix = listener.prefix();
 
-    SLOG(D,
-         "AvisoService: creating listener {" << listener.path() << ", " << address.address() << ", " << key_prefix
-                                             << "}");
+    SLOG(D, "AvisoService: creating listener {" << listener.path() << ", " << address << ", " << key_prefix << "}");
 
     auto& inserted = listeners_.emplace_back(listener);
 
@@ -168,7 +166,8 @@ AvisoController::AvisoController()
                  if (auto* server = TheOneServer::server(); server) {
                      // The following forces the server to increment the job generation count and traverse the defs
                      server->increment_job_generation_count();
-                 } else {
+                 }
+                 else {
                      SLOG(E, "AvisoController: no server available, thus unable to increment job generation count");
                  }
              },

@@ -502,7 +502,6 @@ set(srcs
   # Service -- Headers
   service/src/ecflow/service/aviso/Aviso.hpp
   service/src/ecflow/service/aviso/AvisoService.hpp
-  service/src/ecflow/service/aviso/etcd/Address.hpp
   service/src/ecflow/service/aviso/etcd/Client.hpp
   service/src/ecflow/service/aviso/etcd/Range.hpp
   service/src/ecflow/service/executor/PeriodicTaskExecutor.hpp

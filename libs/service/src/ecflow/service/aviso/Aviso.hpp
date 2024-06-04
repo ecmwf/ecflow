@@ -19,8 +19,6 @@
 #include <variant>
 #include <vector>
 
-#include "ecflow/service/aviso/etcd/Address.hpp"
-
 namespace ecf::service::aviso {
 
 /**
@@ -211,11 +209,11 @@ public:
                                                        uint64_t revision);
 
 public:
-    ConfiguredListener(ecf::service::aviso::etcd::Address address,
-                       std::string_view path,
-                       std::string_view name,
-                       std::string_view base,
-                       std::string_view stem,
+    ConfiguredListener(const std::string& address,
+                       const std::string& path,
+                       const std::string& name,
+                       const std::string& base,
+                       const std::string& stem,
                        uint32_t polling,
                        uint64_t revision);
 
@@ -224,7 +222,7 @@ public:
     void with_parameter(const std::string& parameter, const std::vector<std::string>& value);
 
     const std::string& path() const { return path_; }
-    const ecf::service::aviso::etcd::Address& address() const { return address_; }
+    const std::string& address() const { return address_; }
 
     uint32_t polling() const { return polling_; }
     uint64_t revision() const { return revision_; }
@@ -236,7 +234,7 @@ public:
 
     using Listener::full;
 
-    std::string_view resolved_base() const { return resolved_base_; }
+    const std::string& resolved_base() const { return resolved_base_; }
 
     std::string prefix() const { return resolved_base_ + '/'; }
 
@@ -246,7 +244,7 @@ public:
 
 private:
     std::string path_;
-    ecf::service::aviso::etcd::Address address_;
+    std::string address_;
     std::string resolved_base_;
     uint32_t polling_;
     uint64_t revision_;

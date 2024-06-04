@@ -153,8 +153,13 @@ ConfiguredListener ConfiguredListener::make_configured_listener(const std::strin
         throw std::runtime_error("Listener could not be found in schema");
     }
 
-    ConfiguredListener configured{
-        aviso::etcd::Address{address}, path, listener->name(), listener->base(), listener->stem(), polling, revision};
+    ConfiguredListener configured{address,
+                                  path,
+                                  std::string{listener->name()},
+                                  std::string{listener->base()},
+                                  std::string{listener->stem()},
+                                  polling,
+                                  revision};
 
     SLOG(I,
          "Aviso: configured with: " << path << " for " << event << " at " << address << " with revision " << revision);
@@ -190,17 +195,17 @@ ConfiguredListener ConfiguredListener::make_configured_listener(const std::strin
     return configured;
 }
 
-ConfiguredListener::ConfiguredListener(ecf::service::aviso::etcd::Address address,
-                                       std::string_view path,
-                                       std::string_view name,
-                                       std::string_view base,
-                                       std::string_view stem,
+ConfiguredListener::ConfiguredListener(const std::string& address,
+                                       const std::string& path,
+                                       const std::string& name,
+                                       const std::string& base,
+                                       const std::string& stem,
                                        uint32_t polling,
                                        uint64_t revision)
     : Listener(name, base, stem),
       path_{path},
-      address_(std::move(address)),
-      resolved_base_(base),
+      address_{address},
+      resolved_base_{base},
       polling_{polling},
       revision_{revision} {
 }
@@ -328,7 +333,7 @@ std::ostream& operator<<(std::ostream& os, const ConfiguredListener& listener) {
     os << "name: " << listener.name();
     os << ", full: " << listener.full();
     os << ", path: " << listener.path();
-    os << ", address: " << listener.address().address();
+    os << ", address: " << listener.address();
     os << ", polling: " << listener.polling();
     os << ", revision: " << listener.revision() << "}";
     return os;

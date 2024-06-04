@@ -116,7 +116,7 @@ bool AvisoAttr::isFree() const {
     state_change_no_ = Ecf::incr_state_change_no();
 
     // (b) update the revision, in the listener configuration
-    return std::visit(
+    auto is_free = std::visit(
         ecf::overload{
             [this](const ecf::service::aviso::NotificationPackage<service::aviso::ConfiguredListener,
                                                                   service::aviso::AvisoNotification>& response) {
@@ -142,6 +142,8 @@ bool AvisoAttr::isFree() const {
         back);
 
     ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+
+    return is_free;
 }
 
 void AvisoAttr::start() const {
