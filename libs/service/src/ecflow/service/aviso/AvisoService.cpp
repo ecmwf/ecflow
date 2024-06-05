@@ -12,26 +12,10 @@
 
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/service/Registry.hpp"
+#include "ecflow/service/auth/Credentials.hpp"
 #include "ecflow/service/aviso/etcd/Client.hpp"
 
 namespace ecf::service::aviso {
-
-namespace {
-
-std::string load_authentication_credential(const std::string& auth_file) {
-    std::ifstream file(auth_file);
-    if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + auth_file);
-    }
-
-    std::string token;
-    std::getline(file, token);
-    file.close();
-
-    return token;
-}
-
-} // namespace
 
 std::ostream& operator<<(std::ostream& os, const AvisoResponse& r) {
     std::visit(ecf::overload{[&os](const NotificationPackage<ConfiguredListener, AvisoNotification>& p) { os << p; },
@@ -144,7 +128,13 @@ void AvisoService::register_listener(const AvisoSubscribe& listen) {
     auto& inserted = listeners_.emplace_back(listener);
 
     if (auto auth = listen.auth(); !auth.empty()) {
-        inserted.auth_token = load_authentication_credential(listen.auth());
+        auto credentials = ecf::service::auth::Credentials::load(auth);
+        if (auto key_credentials = credentials.key(); key_credentials) {
+            inserted.auth_token = key_credentials->key;
+        }
+        else {
+            SLOG(I, "AvisoService: no key found in auth token for listener {" << listener.path() << "}");
+        }
     }
 }
 

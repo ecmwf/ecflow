@@ -11,7 +11,7 @@
 # ecflow_services
 # --------------------------------------------------
 
-# u_services
+# u_service_executor
 # --------------------------------------------------
 
 ecbuild_add_test(
@@ -31,6 +31,33 @@ target_clangformat(u_service_executor
   CONDITION ENABLE_TESTS
 )
 
+# u_service_auth
+# --------------------------------------------------
+
+ecbuild_add_test(
+  TARGET
+    u_service_auth
+  LABELS
+    unit nightly
+  SOURCES
+    # Headers -- utilities
+    test/TestContentProvider.hpp
+    # Sources -- utilities
+    test/TestContentProvider.cpp
+  # Sources
+    test/auth/TestAuth_main.cpp # test entry point
+    test/auth/TestAuth.cpp
+  INCLUDES
+    test
+  LIBS
+    ecflow_all
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    Boost::filesystem
+)
+target_clangformat(u_service_auth
+  CONDITION ENABLE_TESTS
+)
+
 # u_service_aviso
 # --------------------------------------------------
 
@@ -41,13 +68,15 @@ ecbuild_add_test(
     unit nightly
   SOURCES
     # Headers -- utilities
-    test/aviso/TestContentProvider.hpp
+    test/TestContentProvider.hpp
     # Sources -- utilities
-    test/aviso/TestContentProvider.cpp
+    test/TestContentProvider.cpp
     # Sources
     test/aviso/TestAviso_main.cpp # test entry point
     test/aviso/TestAviso.cpp
     test/aviso/TestAvisoService.cpp
+  INCLUDES
+    test
   LIBS
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)

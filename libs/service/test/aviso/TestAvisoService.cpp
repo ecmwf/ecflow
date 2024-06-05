@@ -258,9 +258,16 @@ BOOST_AUTO_TEST_CASE(can_create_start_and_stop_aviso_controller) {
                  }
              }
          )";
+    std::string auth_content   = R"(
+             {
+                 "url": "http://address:1234",
+                 "key": "00000000111111110000000011111111",
+                 "email": "user@host.int"
+             }
+         )";
 
     ecf::test::TestContentProvider schema_content_provider{"aviso_schema_test", schema_content};
-    ecf::test::TestContentProvider auth_content_provider{"aviso_auth_test"};
+    ecf::test::TestContentProvider auth_content_provider{"aviso_auth_test", auth_content};
 
     ecf::service::TheOneServer::set_server(nullptr);
 

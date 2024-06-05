@@ -21,26 +21,9 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/service/Log.hpp"
 #include "ecflow/service/Registry.hpp"
+#include "ecflow/service/auth/Credentials.hpp"
 
 namespace ecf::service::mirror {
-
-namespace {
-
-std::pair<std::string, std::string> load_auth_credentials(const std::string& auth_file) {
-    std::ifstream file(auth_file);
-    if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + auth_file);
-    }
-
-    std::string username, password;
-    std::getline(file, username);
-    std::getline(file, password);
-    file.close();
-
-    return {username, password};
-}
-
-} // namespace
 
 /* MirrorService */
 
@@ -115,9 +98,11 @@ void MirrorService::register_listener(const MirrorRequest& request) {
     if (!request.auth.empty()) {
         SLOG(D, "MirrorService: Loading auth {" << request.auth << "}");
         try {
-            auto [username, password] = load_auth_credentials(request.auth);
-            inserted.remote_username_ = username;
-            inserted.remote_password_ = password;
+            auto credentials = ecf::service::auth::Credentials::load(request.auth);
+            if (auto user = credentials.user(); user) {
+                inserted.remote_username_ = user->username;
+                inserted.remote_password_ = user->password;
+            }
         }
         catch (std::runtime_error& e) {
             throw std::runtime_error("MirrorService: Unable to load auth credentials");
@@ -132,7 +117,8 @@ MirrorController::MirrorController()
                  if (auto* server = TheOneServer::server(); server) {
                      // The following forces the server to increment the job generation count and traverse the defs
                      server->increment_job_generation_count();
-                 } else {
+                 }
+                 else {
                      SLOG(E, "MirrorController: no server available, thus unable to increment job generation count");
                  }
              },

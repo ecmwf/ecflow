@@ -500,6 +500,7 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.cpp>
 
   # Service -- Headers
+  service/src/ecflow/service/auth/Credentials.hpp
   service/src/ecflow/service/aviso/Aviso.hpp
   service/src/ecflow/service/aviso/AvisoService.hpp
   service/src/ecflow/service/aviso/etcd/Client.hpp
@@ -512,6 +513,7 @@ set(srcs
   service/src/ecflow/service/Log.hpp
   service/src/ecflow/service/Registry.hpp
   # Service -- Sources
+  service/src/ecflow/service/auth/Credentials.cpp
   service/src/ecflow/service/aviso/Aviso.cpp
   service/src/ecflow/service/aviso/AvisoService.cpp
   service/src/ecflow/service/aviso/etcd/Range.cpp
@@ -540,11 +542,11 @@ set(srcs
 
 ecbuild_add_library(
   TARGET
-    ecflow_all
+  ecflow_all
   NOINSTALL
   TYPE STATIC
   SOURCES
-    ${srcs}
+  ${srcs}
   PUBLIC_INCLUDES
     attribute/src
     base/src

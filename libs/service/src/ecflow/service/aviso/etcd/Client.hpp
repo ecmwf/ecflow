@@ -29,7 +29,6 @@ namespace ecf::service::aviso::etcd {
 
 class Client {
 public:
-    Client() = default;
     Client(const std::string& address);
     Client(const std::string& address, const std::string& auth_token);
 

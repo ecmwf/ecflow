@@ -25,7 +25,7 @@ std::string make_temp_filename(std::string file_name_prefix) {
     std::array<char, 4096> file_name_template{};
     std::copy(file_name_prefix.begin(), file_name_prefix.end(), file_name_template.data());
     mkstemp(file_name_template.data());
-    return file_name_prefix;
+    return file_name_template.data();
 }
 
 void store_content_to_file(const std::string& file_path, const std::string& content) {
