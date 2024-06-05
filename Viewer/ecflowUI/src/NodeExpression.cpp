@@ -110,10 +110,8 @@ bool NodeExpressionParser::isEnvVar(const std::string& str) const {
 }
 
 bool NodeExpressionParser::isNodeHasAttribute(const std::string& str) const {
-    if (str == "has_triggers" || str == "has_time" || str == "has_date" || str == "locked")
-        return true;
-
-    return false;
+    constexpr std::array searchable = {"has_triggers", "has_time", "has_date", "locked", "has_aviso", "has_mirror"};
+    return std::find(searchable.begin(), searchable.end(), str) != searchable.end();
 }
 
 bool NodeExpressionParser::isNodeFlag(const std::string& str) const {
@@ -818,6 +816,12 @@ bool NodeAttributeCondition::execute(VItem* item) {
         }
         else if (nodeAttrName_ == "has_triggers") {
             return (node->triggerAst() || node->completeAst());
+        }
+        else if (nodeAttrName_ == "has_aviso") {
+            return !node->avisos().empty();
+        }
+        else if (nodeAttrName_ == "has_mirror") {
+            return !node->mirrors().empty();
         }
     }
 
