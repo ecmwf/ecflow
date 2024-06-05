@@ -36,7 +36,6 @@ Client::Client(const std::string& address, const std::string& auth_token)
 Client::~Client() = default;
 
 std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view key_prefix, int64_t revision) {
-    std::cout << "Client::poll" << key_prefix << ", revision " << revision << std::endl;
     using json = nlohmann::ordered_json;
 
     httplib::Headers headers;

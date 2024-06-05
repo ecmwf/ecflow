@@ -80,7 +80,6 @@ void AvisoService::operator()(const std::chrono::system_clock::time_point& now) 
             std::vector<std::pair<std::string, std::string>> updated_keys;
             try {
                 // For the associated host(+port)
-                std::cout << "entry.listener().address(): " << entry.listener().address() << std::endl;
                 aviso::etcd::Client client{entry.listener().address(), entry.auth_token};
                 updated_keys = client.poll(entry.listener().prefix(), entry.listener().revision() + 1);
             }
