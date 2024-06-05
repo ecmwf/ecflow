@@ -1511,7 +1511,7 @@ void Defs::restore_from_string(const std::string& str) {
     std::string errorMsg, warningMsg;
     if (!restore_from_string(str, errorMsg, warningMsg)) {
         std::stringstream e;
-        e << "Defs::defs_restore_from_string: " << errorMsg;
+        e << "Defs::restore_from_string: " << errorMsg;
         throw std::runtime_error(e.str());
     }
 }
