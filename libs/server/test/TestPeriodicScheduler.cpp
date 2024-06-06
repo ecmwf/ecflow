@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_periodic_scheduler_over_one_minute) {
     // Run services
     io_service.run();
 
-    BOOST_CHECK_EQUAL(collector.instants.size(), 62L);
+    BOOST_CHECK_EQUAL(collector.instants.size(), static_cast<size_t>(62));
 }
 
 BOOST_AUTO_TEST_CASE(test_periodic_scheduler_with_long_lasting_activity) {
