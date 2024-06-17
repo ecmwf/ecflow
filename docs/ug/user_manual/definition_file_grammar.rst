@@ -29,10 +29,13 @@ Definition file grammar
     family: "family" >> `familyName` >> !`leaf_ecf` >> *(`task` | `family`) 
           : >> `endfamily`
     task: "task"  >> `taskName`  >> `leaf_ecf`  >> !endtask
-    leaf_ecf: *( `variable` | `trigger` | `time` | `today` | 
-            : `date` | `day` | `defstatus` | `complete` | `inlimit` |
-            : `label` | `event` | `late` | `limit` | `meter` | `repeat` | 
-            : `cron` | `autocancel` | `zombie` )
+    leaf_ecf: *( `variable` | `trigger` | `time` | `today` |
+            :   `date` | `day` | `defstatus` | `complete` | `inlimit` |
+            :   `label` | `event` | `late` | `limit` | `meter` | `repeat` |
+            :   `cron` | `autocancel` | `zombie`
+            : )
+            : | `aviso`
+            : | `mirror`
     clock: "clock" >> ( "real"| "hybrid" ) >> 
          : ( ( `clock_date` >> !(`hh_mm` | int ) ) | (`hh_mm` | int )) 
          : >> +`nextline`
@@ -40,6 +43,23 @@ Definition file grammar
     complete: "complete" >> `expression` >> +`nextline`
     variable: "edit" >> `identifier` >> `varvalue` >> +`nextline`
     label: "label" >> `identifier` >> `quotedstring`  >> +`nextline`
+    aviso: "aviso" >>
+         :   *( "--name" >> `identifier`
+         :     | "--listener" >> "'" >> `jsonstring` >> "'"
+         :     | "--url" >> ( `varvalue` | `string` )
+         :     | "--polling" >> (`varvalue` | +(integer))
+         :     | "--schema" >> ( `varvalue` | `string` )
+         :     | "--auth" >> ( `varvalue` | `string` )
+         :   )
+    mirror: "mirror" >>
+          :   *( "--name" >> `identifier`
+          :     | "--remote_path" >> `string`
+          :     | "--remote_host" >> ( `varvalue` | `string` )
+          :     | "--remote_port" >> ( `varvalue` | `string` )
+          :     | "--polling" >> (`varvalue` | +(integer))
+          :     | "--auth" >> ( `varvalue` | `string` )
+          :     | --ssl
+          :   )
     time: "time" >> !'+ >> (`timeseries` | `two_int_p` >> 
         : “:” `two_int_p`) >> +`nextline`
     today: "today" >> !'+ >> (`timeseries` | `two_int_p` >> 
@@ -119,7 +139,7 @@ Definition file grammar
     dotpath: ‘.’  >> +( ‘/’  >> `identifier` )
     identifier: (alpha_numeric | ‘_’)  >> *(alpha_numeric | ‘_’)
     nodePath: `absolutepath` | `dotdotpath` | `dotpath`
-    expression: printable chars >> !’\’ >> `nextline`
+    expression: `printable_chars` >> !’\’ >> `nextline`
     int_p: integer
     two_int_p: 2 digit integer
     theYear: 4 digit integer
@@ -128,3 +148,6 @@ Definition file grammar
            : "T" >> `two_int_p` >> `two_int_p` >> `two_int_p`
     duration: `int_p` >> ":" >> `two_int_p` >> ":" >> `two_int_p`
     newline: \n
+    string: `printable_chars` >> *(`printable_chars`)
+    jsonstring : __ as per JSON format specification __
+    printable_chars : "a-zA-Z"

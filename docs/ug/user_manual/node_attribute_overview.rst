@@ -15,6 +15,141 @@ Node attribute overview
      - Use in trigger
      - Process/Control
      - Structural
+   * - :term:`aviso`
+     - ❎
+     - ❎
+     -
+     -
+     -
+     -
+     -
+     -
+   * - :term:`autocancel`
+     -
+     -
+     -
+     -
+     -
+     -
+     -
+     - ❎
+   * - :term:`clock`
+     -
+     -
+     -
+     -
+     - ❎
+     - ❎
+     -
+     -
+   * - :term:`complete`
+     -
+     - ❎
+     -
+     -
+     -
+     - N/A
+     -
+     -
+   * - :term:`cron`
+     - ❎
+     - ❎
+     -
+     -
+     -
+     -
+     -
+     -
+   * - :term:`date`
+     - ❎
+     - ❎
+     -
+     -
+     -
+     -
+     -
+     -
+   * - :term:`day`
+     -
+     - ❎
+     -
+     -
+     -
+     -
+     -
+     -
+   * - :term:`defstatus`
+     -
+     -
+     -
+     -
+     - ❎
+     -
+     -
+     -
+   * - :term:`event`
+     -
+     -
+     -
+     - ❎
+     -
+     - ❎
+     -
+     -
+   * - :term:`inlimit`
+     -
+     - ❎
+     -
+     -
+     -
+     -
+     -
+     -
+   * - :term:`label`
+     -
+     -
+     - ❎
+     - ❎
+     -
+     -
+     -
+     -
+   * - :term:`late`
+     -
+     -
+     - ❎
+     -
+     -
+     - ❎
+     -
+     -
+   * - :term:`limit`
+     -
+     - ❎
+     -
+     -
+     -
+     - ❎
+     -
+     -
+   * - :term:`meter`
+     -
+     -
+     -
+     - ❎
+     -
+     - ❎
+     -
+     -
+   * - :term:`mirror`
+     -
+     - ❎
+     -
+     -
+     -
+     -
+     -
+     -
    * - :term:`repeat`
      - ❎
      -  
@@ -22,15 +157,6 @@ Node attribute overview
      -
      -
      - ❎
-     -
-     -
-   * - :term:`cron`
-     - ❎
-     - ❎ 
-     - 
-     -
-     -
-     - 
      -
      -
    * - :term:`time` / :term:`today`
@@ -42,31 +168,13 @@ Node attribute overview
      - 
      -
      -
-   * - :term:`date`
-     - ❎
-     - ❎ 
-     - 
-     -
-     -
-     - 
-     -
-     -
-   * - :term:`day`
-     - 
-     - ❎ 
-     - 
-     -
-     -
-     - 
-     -
-     -
-   * - :term:`clock`
-     - 
-     -  
-     - 
+   * - :term:`trigger`
      -
      - ❎
-     - ❎
+     -
+     -
+     -
+     - N/A
      -
      -
    * - :term:`variable`
@@ -74,87 +182,6 @@ Node attribute overview
      -  
      - 
      - ❎
-     -
-     - ❎
-     -
-     -
-   * - :term:`defstatus`
-     - 
-     -  
-     - 
-     -
-     - ❎
-     - 
-     -
-     -
-   * - :term:`event`
-     - 
-     -  
-     - 
-     - ❎
-     -
-     - ❎
-     -
-     -
-   * - :term:`meter`
-     - 
-     -  
-     - 
-     - ❎
-     -
-     - ❎
-     -
-     -
-   * - :term:`label`
-     - 
-     -  
-     - ❎ 
-     - ❎
-     -
-     - 
-     -
-     -
-   * - :term:`trigger`
-     - 
-     - ❎
-     - 
-     -
-     -
-     - N/A
-     -
-     -
-   * - :term:`complete`
-     - 
-     - ❎
-     - 
-     -
-     -
-     - N/A
-     -
-     -
-   * - :term:`limit`
-     - 
-     - ❎
-     - 
-     -
-     -
-     - ❎
-     -
-     -
-   * - :term:`inlimit`
-     - 
-     - ❎
-     - 
-     -
-     -
-     - 
-     -
-     -
-   * - :term:`late`
-     - 
-     - 
-     - ❎
-     -
      -
      - ❎
      -
@@ -168,12 +195,3 @@ Node attribute overview
      - 
      - ❎
      -
-   * - :term:`autocancel`
-     - 
-     -
-     - 
-     -
-     -
-     - 
-     -
-     - ❎

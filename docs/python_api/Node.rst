@@ -200,6 +200,13 @@ Add a `autorestore` attribute. See :py:class:`ecflow.Autorestore`
 add_autorestore( (Node)arg1, (list)arg2) -> Node
 
 
+.. py:method:: Node.add_aviso( (Node)arg1, (AvisoAttr)arg2) -> Node :
+   :module: ecflow
+
+Adds an :term:`aviso` to a :term:`node`. See :py:class:`ecflow.Aviso`
+    
+
+
 .. py:method:: Node.add_complete( (Node)arg1, (str)arg2) -> Node :
    :module: ecflow
 
@@ -531,6 +538,13 @@ Add a :term:`meter`. See :py:class:`ecflow.Meter`
     
 
 add_meter( (Node)arg1, (str)arg2, (int)arg3, (int)arg4 [, (int)arg5]) -> Node
+
+
+.. py:method:: Node.add_mirror( (Node)arg1, (MirrorAttr)arg2) -> Node :
+   :module: ecflow
+
+Adds a :term:`mirror` to a :term:`node`. See :py:class:`ecflow.Mirror`
+    
 
 
 .. py:method:: Node.add_part_complete( (Node)arg1, (PartExpression)arg2) -> Node :
@@ -978,6 +992,12 @@ Usage:
               ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fail))
 
 
+.. py:property:: Node.avisos
+   :module: ecflow
+
+Returns a list of :term:`aviso`\ s
+
+
 .. py:method:: Node.change_complete( (Node)arg1, (str)arg2) -> None
    :module: ecflow
 
@@ -1290,6 +1310,12 @@ Returns a list of :term:`limit`\ s
    :module: ecflow
 
 Returns a list of :term:`meter`\ s
+
+
+.. py:property:: Node.mirrors
+   :module: ecflow
+
+Returns a list of :term:`mirror`\ s
 
 
 .. py:method:: Node.name( (Node)arg1) -> str

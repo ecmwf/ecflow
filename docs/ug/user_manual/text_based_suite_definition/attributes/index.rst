@@ -1,7 +1,7 @@
 .. _attributes:
 
-Attributes
-////////////
+Other Attributes
+////////////////
 
 This section describes commands that can be used to give attributes to
 nodes in a suite.
@@ -17,4 +17,3 @@ nodes in a suite.
    extern
    late
    repeat_for_loop
-
