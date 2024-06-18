@@ -10,6 +10,7 @@
 
 #include "Chrono.hpp"
 
+#include <algorithm>
 #include <array>
 #include <iomanip>
 #include <sstream>
