@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     cout << "ANode:: ...test_task_script_generator\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data/TaskScriptGenerator", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data/TaskScriptGenerator", "libs/node");
 
     std::string head = ecf_home + "/head.h";
     std::string tail = ecf_home + "/tail.h";
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
     cout << "ANode:: ...test_task_script_generator_with_dummy_tasks\n";
 
     // SET ECF_HOME
-    std::string ecf_home = File::test_data("ANode/test/data/TaskScriptGenerator", "ANode");
+    std::string ecf_home = File::test_data("libs/node/test/data/TaskScriptGenerator", "libs/node");
 
     std::string head = ecf_home + "/head.h";
     std::string tail = ecf_home + "/tail.h";

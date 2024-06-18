@@ -352,4 +352,21 @@ void to_json(ojson& j, const ecf::AutoArchiveAttr& a) {
     j["value"]        = value;
 }
 
+void to_json(ojson& j, const ecf::AvisoAttr& a) {
+    j["name"]     = a.name();
+    j["listener"] = a.listener();
+    j["url"]      = a.url();
+    j["schema"]   = a.schema();
+    j["polling"]  = a.polling();
+}
+
+void to_json(ojson& j, const ecf::MirrorAttr& a) {
+    j["name"]        = a.name();
+    j["remote_path"] = a.remote_path();
+    j["remote_host"] = a.remote_host();
+    j["remote_port"] = a.remote_port();
+    j["polling"]     = a.polling();
+    j["ssl"]         = a.ssl();
+}
+
 } // namespace ecf

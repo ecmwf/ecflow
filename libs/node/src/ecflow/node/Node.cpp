@@ -20,21 +20,25 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 #include "ecflow/node/AbstractObserver.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/ExprAstVisitor.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/Format.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
@@ -237,6 +241,11 @@ void Node::begin() {
     // Set the state without causing any side effects
     initState(0);
 
+    if (!mirrors_.empty()) {
+        // In case mirror attributes are available, the node state becomes UNKNOWN
+        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+    }
+
     clearTrigger();
     clearComplete();
 
@@ -279,6 +288,14 @@ void Node::begin() {
             date.reset();
         }
         markHybridTimeDependentsAsComplete();
+
+        for (auto& aviso : avisos_) {
+            aviso.reset();
+        }
+    }
+
+    for (auto& mirror : mirrors_) {
+        mirror.reset();
     }
 
     inLimitMgr_.reset(); // new to 5.0.0 clear inlimit.incremented() flag
@@ -294,7 +311,12 @@ void Node::requeue(Requeue_args& args) {
 #ifdef DEBUG_REQUEUE
     LOG(Log::DBG, "      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
-    /// Note: we don't reset verify attributes as they record state stat's
+    // Note: we don't reset verify attributes as they record state stat's
+
+    if (!mirrors_.empty()) {
+        // In case mirror attributes are available, the node state becomes UNKNOWN
+        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+    }
 
     // Set the state without causing any side effects
     initState(args.clear_suspended_in_child_nodes_, args.log_state_changes_);
@@ -389,6 +411,11 @@ void Node::reset_late_event_meters() {
 void Node::reset() {
     // Set the state without causing any side effects
     initState(1);
+
+    if (!mirrors_.empty()) {
+        // In case of mirror attributes, the node state becomes UNKNOWN
+        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+    }
 
     clearTrigger();
     clearComplete();
@@ -725,6 +752,11 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
         return false;
     }
 
+    if (!mirrors_.empty()) {
+        // In case mirror attributes are configured, the node is never free (i.e. will not be run)
+        return false;
+    }
+
     if (!timeDependenciesFree()) {
 #ifdef DEBUG_DEPENDENCIES
         const Calendar& calendar = suite()->calendar();
@@ -1045,11 +1077,9 @@ void Node::setStateOnly(NState::State newState,
 
     // Record state changes for verification
     if (misc_attrs_) {
-        size_t theSize = misc_attrs_->verifys_.size();
-        for (size_t i = 0; i < theSize; i++) {
-            if (misc_attrs_->verifys_[i].state() == newState) {
-                // cout << "Verify: calendar " << to_simple_string(calendar.date()) << "\n";
-                misc_attrs_->verifys_[i].incrementActual();
+        for (auto& verify : misc_attrs_->verifys_) {
+            if (verify.state() == newState) {
+                verify.incrementActual();
             }
         }
     }
@@ -1092,22 +1122,27 @@ DState::State Node::dstate() const {
 }
 
 bool Node::set_event(const std::string& event_name_or_number) {
-    for (Event& e : events_) {
-        if (e.name_or_number() == event_name_or_number) {
-            e.set_value(true);
-            return true;
-        }
+    auto found = ecf::algorithm::find_by(
+        events_, [&](const auto& item) { return item.name_or_number() == event_name_or_number; });
+
+    if (found == std::end(events_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(true);
+    return true;
 }
+
 bool Node::clear_event(const std::string& event_name_or_number) {
-    for (Event& e : events_) {
-        if (e.name_or_number() == event_name_or_number) {
-            e.set_value(false);
-            return true;
-        }
+    auto found = ecf::algorithm::find_by(
+        events_, [&](const auto& item) { return item.name_or_number() == event_name_or_number; });
+
+    if (found == std::end(events_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(false);
+    return true;
 }
 
 void Node::setRepeatToLastValue() {
@@ -1773,6 +1808,12 @@ void Node::print(std::string& os) const {
     for (const CronAttr& cron : crons_) {
         cron.print(os);
     }
+    for (const AvisoAttr& a : avisos_) {
+        ecf::format_as_defs(a, os);
+    }
+    for (const MirrorAttr& m : mirrors_) {
+        ecf::format_as_defs(m, os);
+    }
 
     if (auto_cancel_)
         auto_cancel_->print(os);
@@ -2341,6 +2382,20 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
                 why_found = true;
             }
         }
+        for (const auto& aviso : avisos_) {
+            postFix.clear();
+            if (aviso.why(postFix)) {
+                vec.push_back(prefix + postFix);
+                why_found = true;
+            }
+        }
+        for (const auto& mirror : mirrors_) {
+            postFix.clear();
+            if (mirror.why(postFix)) {
+                vec.push_back(prefix + postFix);
+                why_found = true;
+            }
+        }
     }
 
     // **************************************************************************************
@@ -2878,9 +2933,11 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, c_expr_, [this]() { return c_expr_.get(); }); // conditionally save
     CEREAL_OPTIONAL_NVP(ar, t_expr_, [this]() { return t_expr_.get(); }); // conditionally save
 
-    CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); }); // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); }); // conditionally save
-    CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); }); // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, meters_, [this]() { return !meters_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, events_, [this]() { return !events_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, labels_, [this]() { return !labels_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, avisos_, [this]() { return !avisos_.empty(); });   // conditionally save
+    CEREAL_OPTIONAL_NVP(ar, mirrors_, [this]() { return !mirrors_.empty(); }); // conditionally save
 
     CEREAL_OPTIONAL_NVP(ar, times_, [this]() { return !times_.empty(); });   // conditionally save
     CEREAL_OPTIONAL_NVP(ar, todays_, [this]() { return !todays_.empty(); }); // conditionally save

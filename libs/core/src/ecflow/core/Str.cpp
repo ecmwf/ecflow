@@ -355,6 +355,45 @@ void Str::split_using_string_view2(std::string_view strv, std::vector<std::strin
     }
 }
 
+std::vector<std::string_view> Str::tokenize_quotation(const std::string& s, std::string_view quotes) {
+
+    std::vector<std::string_view> tokens;
+
+    std::string levels;
+
+    const char* current = &s[0];
+    const char* start   = current;
+    while (*current != 0) {
+        if (*current == ' ' && levels.empty()) {
+            if (start != current) {
+                tokens.emplace_back(start, static_cast<size_t>(current - start));
+            }
+            start = current + 1;
+        }
+        else {
+            if (std::any_of(
+                    std::begin(quotes), std::end(quotes), [&current](char quote) { return *current == quote; })) {
+                if (!levels.empty() && (levels.back() == *current)) {
+                    levels.pop_back();
+                }
+                else {
+                    if (levels.empty()) {
+                        start = current;
+                    }
+                    levels.push_back(*current);
+                }
+            }
+        }
+        ++current;
+    }
+
+    if (start != current) {
+        tokens.emplace_back(start, static_cast<size_t>(current - start));
+    }
+
+    return tokens;
+}
+
 bool Str::get_token(std::string_view str, size_t pos, std::string& token, std::string_view delims) {
     //   Time for StringSplitter::get_token 250000 times = 1.457s wall, (1.460s user + 0.000s system = 1.460s) CPU
     //   (100.2%) Time for Str::get_token            250000 times = 0.566s wall, (0.560s user + 0.000s system = 0.560s)

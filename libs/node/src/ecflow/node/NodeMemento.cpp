@@ -41,6 +41,9 @@ void Node::clear() {
     events_.clear();
     labels_.clear();
 
+    avisos_.clear();
+    mirrors_.clear();
+
     repeat_.clear();
     vars_.clear();
     limits_.clear();
@@ -102,7 +105,12 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         for (const Label& l : labels_) {
             comp->add(std::make_shared<NodeLabelMemento>(l));
         }
-
+        for (const auto& a : avisos_) {
+            comp->add(std::make_shared<NodeAvisoMemento>(a));
+        }
+        for (const auto& m : mirrors_) {
+            comp->add(std::make_shared<NodeMirrorMemento>(m));
+        }
         for (const ecf::TodayAttr& attr : todays_) {
             comp->add(std::make_shared<NodeTodayMemento>(attr));
         }
@@ -158,6 +166,8 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         if (late_)
             comp->add(std::make_shared<NodeLateMemento>(*late_));
 
+        comp->add(std::make_shared<FlagMemento>(flag_));
+
         changes.add(comp);
         return;
     }
@@ -188,6 +198,20 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
             if (!comp.get())
                 comp = std::make_shared<CompoundMemento>(absNodePath());
             comp->add(std::make_shared<NodeLabelMemento>(l));
+        }
+    }
+    for (const auto& a : avisos_) {
+        if (a.state_change_no() > client_state_change_no) {
+            if (!comp.get())
+                comp = std::make_shared<CompoundMemento>(absNodePath());
+            comp->add(std::make_shared<NodeAvisoMemento>(a));
+        }
+    }
+    for (const auto& a : mirrors_) {
+        if (a.state_change_no() > client_state_change_no) {
+            if (!comp.get())
+                comp = std::make_shared<CompoundMemento>(absNodePath());
+            comp->add(std::make_shared<NodeMirrorMemento>(a));
         }
     }
 
@@ -408,6 +432,50 @@ void Node::set_memento(const NodeLabelMemento* memento, std::vector<ecf::Aspect:
         }
     }
     addLabel(memento->label_);
+}
+
+void Node::set_memento(const NodeAvisoMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
+
+#ifdef DEBUG_MEMENTO
+    std::cout << "Node::set_memento(const NodeAvisoMemento* memento) " << debugNodePath() << "\n";
+#endif
+
+    if (aspect_only) {
+        // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+        aspects.push_back(ecf::Aspect::AVISO);
+        return;
+    }
+
+    size_t theSize = avisos_.size();
+    for (size_t i = 0; i < theSize; i++) {
+        if (avisos_[i].name() == memento->aviso_.name()) {
+            avisos_[i] = memento->aviso_;
+            return;
+        }
+    }
+    addAviso(memento->aviso_);
+}
+
+void Node::set_memento(const NodeMirrorMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
+
+#ifdef DEBUG_MEMENTO
+    std::cout << "Node::set_memento(const NodeMirrorMemento* memento) " << debugNodePath() << "\n";
+#endif
+
+    if (aspect_only) {
+        // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+        aspects.push_back(ecf::Aspect::MIRROR);
+        return;
+    }
+
+    size_t theSize = mirrors_.size();
+    for (size_t i = 0; i < theSize; i++) {
+        if (mirrors_[i].name() == memento->mirror_.name()) {
+            mirrors_[i] = memento->mirror_;
+            return;
+        }
+    }
+    addMirror(memento->mirror_);
 }
 
 void Node::set_memento(const NodeQueueMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {

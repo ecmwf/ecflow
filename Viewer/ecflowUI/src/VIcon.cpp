@@ -139,6 +139,12 @@ public:
     bool show(VNode*) override;
 };
 
+class VRemoteErrorIcon : public VIcon {
+public:
+    explicit VRemoteErrorIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
 //==========================================================
 //
 // Create VIcon instances
@@ -162,6 +168,7 @@ static VRestoredIcon restoredIcon("restored");
 static VSlowJobCreationIcon slowJobCreationIcon("slow_job");
 static VNoLogIcon noLog("no_log");
 static VCheckpointErrorIcon noCheckptIcon("checkpt_err");
+static VRemoteErrorIcon remoteErrorIcon("remote_err");
 
 //==========================================================
 //
@@ -556,4 +563,12 @@ bool VCheckpointErrorIcon::show(VNode* n) {
         return false;
 
     return n->isFlagSet(ecf::Flag::CHECKPT_ERROR);
+}
+
+bool VRemoteErrorIcon::show(VNode* n) {
+    if (!n || n->isServer()) {
+        return false;
+    }
+
+    return n->isFlagSet(ecf::Flag::REMOTE_ERROR);
 }

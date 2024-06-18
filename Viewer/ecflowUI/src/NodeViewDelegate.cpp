@@ -84,6 +84,9 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent
         errPix_    = QPixmap(QPixmap::fromImage(img));
     }
 
+    avisoPixId_ = IconProvider::add(":/viewer/aviso.svg", "aviso");
+    mirrorPixId_ = IconProvider::add(":/viewer/remote.svg", "mirror");
+
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
     grad_.setStart(0, 0);
     grad_.setFinalStop(0, 1);
@@ -120,6 +123,8 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent
 
     attrRenderers_["meter"]       = &NodeViewDelegate::renderMeter;
     attrRenderers_["label"]       = &NodeViewDelegate::renderLabel;
+    attrRenderers_["aviso"]       = &NodeViewDelegate::renderAviso;
+    attrRenderers_["mirror"]      = &NodeViewDelegate::renderMirror;
     attrRenderers_["event"]       = &NodeViewDelegate::renderEvent;
     attrRenderers_["var"]         = &NodeViewDelegate::renderVar;
     attrRenderers_["genvar"]      = &NodeViewDelegate::renderGenvar;
@@ -631,6 +636,324 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
             }
         }
     }
+
+    // Draw name
+    painter->setPen(fontPen);
+    painter->setFont(nameFont);
+    painter->drawText(attrBox_->adjustTextRect(nameRect), Qt::AlignLeft | Qt::AlignVCenter, name);
+
+    // Draw value
+    painter->setPen(fontPen);
+    painter->setFont(valFont);
+
+    if (multiCnt == 0)
+        painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, val);
+    else {
+        painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, valFirst);
+        painter->drawText(valRestRect, Qt::AlignLeft | Qt::AlignVCenter, valRest);
+    }
+
+    if (selected && drawAttrSelectionRect_) {
+        QRect sr = option.rect;
+        sr.setWidth(rightPos - sr.x());
+        renderSelectionRect(painter, attrBox_->adjustSelectionRect(sr));
+    }
+
+    if (setClipRect) {
+        painter->restore();
+    }
+
+    size = QSize(totalWidth, labelHeight(multiCnt + 1));
+}
+
+void NodeViewDelegate::renderAviso(QPainter* painter,
+                                   QStringList data,
+                                   const QStyleOptionViewItem& option,
+                                   QSize& size) const {
+
+    int totalWidth = 0;
+    size           = QSize(totalWidth, attrBox_->fullHeight);
+
+    if (data.count() < 2)
+        return;
+
+    QString name = data.at(1); // + ":";
+    QString val;
+    if (data.count() > 2)
+        val = data.at(2);
+
+    bool selected = option.state & QStyle::State_Selected;
+
+    // The border rect (we will adjust its  width)
+    QRect contRect = option.rect.adjusted(attrBox_->leftMargin,
+                                          attrBox_->topMargin + attrBox_->topPadding,
+                                          0,
+                                          -attrBox_->bottomMargin - attrBox_->bottomPadding);
+
+    int currentRight = contRect.x();
+    int multiCnt     = val.count('\n');
+
+    QRect avisoRect;
+    QRect nameRect;
+    QRect valRect, valRestRect;
+
+    QFont nameFont = attrFont_;
+    nameFont.setBold(true);
+    QFont valFont = attrFont_;
+    QString valFirst, valRest;
+    QString full;
+
+    auto avisoPix = IconProvider::pixmapToHeight(avisoPixId_, contRect.height());
+    avisoRect     = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
+    avisoRect.setWidth(avisoPix.width());
+
+    if (multiCnt == 0) {
+        // The text rectangle
+        QFontMetrics fm(nameFont);
+        int nameWidth = ViewerUtil::textWidth(fm, name);
+        nameRect      = contRect;
+        nameRect.setX(avisoRect.x() + avisoRect.width() + attrBox_->spacing);
+        nameRect.setWidth(nameWidth);
+
+        // The value rectangle
+        fm           = QFontMetrics(valFont);
+        int valWidth = ViewerUtil::textWidth(fm, val);
+        valRect      = nameRect;
+        valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
+        valRect.setWidth(valWidth);
+
+        // Adjust the filled rect width
+        currentRight = valRect.x() + valRect.width();
+    }
+    else {
+        // The text rectangle
+        QFontMetrics fm(nameFont);
+        int nameWidth = ViewerUtil::textWidth(fm, name);
+        nameRect      = contRect;
+        nameRect.setX(avisoRect.x() + avisoRect.width() + attrBox_->spacing);
+        nameRect.setWidth(nameWidth);
+        nameRect.setHeight(attrBox_->height - attrBox_->topPadding - attrBox_->bottomPadding);
+
+        // The value rectangles
+        fm = QFontMetrics(valFont);
+
+        // First row comes after the name rect!
+        QStringList valLst = val.split("\n");
+        Q_ASSERT(valLst.count() > 0);
+        valFirst = valLst[0];
+
+        valRect = nameRect;
+        valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
+        valRect.setWidth(ViewerUtil::textWidth(fm, valFirst));
+
+        // The rest of the rows
+        valLst.takeFirst();
+        valRest       = valLst.join("\n");
+        QSize valSize = fm.size(0, valRest);
+
+        valRestRect = QRect(nameRect.x(), nameRect.y() + nameRect.height() + 2, valSize.width(), valSize.height());
+
+        currentRight = qMax(valRect.x() + valRect.width(), valRestRect.x() + valRestRect.width());
+
+        val = valFirst + " " + valRest;
+    }
+
+    // Define clipping
+    int rightPos           = currentRight + attrBox_->rightPadding + attrBox_->rightMargin;
+    totalWidth             = rightPos - option.rect.left();
+    const bool setClipRect = rightPos > option.rect.right();
+    if (setClipRect) {
+        painter->save();
+        painter->setClipRect(option.rect);
+    }
+
+    QPen fontPen(Qt::black);
+    LabelStyle* labelStyle = labelStyle_[DefaultLabel];
+    QList<LabelType> types;
+    types << ErrorLabel << WarningLabel << InfoLabel;
+    full = name + " " + val;
+    Q_FOREACH (LabelType t, types) {
+        if (labelStyle_[t]->enabled_) {
+            if (full.contains(labelStyle_[t]->regex_)) {
+                labelStyle = labelStyle_[t];
+                break;
+            }
+        }
+    }
+
+    if (labelStyle) {
+        if (labelStyle->enabled_) {
+            fontPen = labelStyle->fontPen_;
+            // draw bg
+            if (labelStyle->enabledBg_) {
+                QRect sr = option.rect;
+                sr.setWidth(rightPos - sr.x());
+                painter->fillRect(attrBox_->adjustSelectionRect(sr), labelStyle->bgBrush_);
+            }
+        }
+    }
+
+    // aviso pixmap
+    painter->drawPixmap(avisoRect, avisoPix);
+
+    // Draw name
+    painter->setPen(fontPen);
+    painter->setFont(nameFont);
+    painter->drawText(attrBox_->adjustTextRect(nameRect), Qt::AlignLeft | Qt::AlignVCenter, name);
+
+    // Draw value
+    painter->setPen(fontPen);
+    painter->setFont(valFont);
+
+    if (multiCnt == 0)
+        painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, val);
+    else {
+        painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, valFirst);
+        painter->drawText(valRestRect, Qt::AlignLeft | Qt::AlignVCenter, valRest);
+    }
+
+    if (selected && drawAttrSelectionRect_) {
+        QRect sr = option.rect;
+        sr.setWidth(rightPos - sr.x());
+        renderSelectionRect(painter, attrBox_->adjustSelectionRect(sr));
+    }
+
+    if (setClipRect) {
+        painter->restore();
+    }
+
+    size = QSize(totalWidth, labelHeight(multiCnt + 1));
+}
+
+void NodeViewDelegate::renderMirror(QPainter* painter,
+                                   QStringList data,
+                                   const QStyleOptionViewItem& option,
+                                   QSize& size) const {
+
+    int totalWidth = 0;
+    size           = QSize(totalWidth, attrBox_->fullHeight);
+
+    if (data.count() < 2)
+        return;
+
+    QString name = data.at(1); // + ":";
+    QString val;
+    if (data.count() > 2)
+        val = data.at(2);
+
+    bool selected = option.state & QStyle::State_Selected;
+
+    // The border rect (we will adjust its  width)
+    QRect contRect = option.rect.adjusted(attrBox_->leftMargin,
+                                          attrBox_->topMargin + attrBox_->topPadding,
+                                          0,
+                                          -attrBox_->bottomMargin - attrBox_->bottomPadding);
+
+    int currentRight = contRect.x();
+    int multiCnt     = val.count('\n');
+
+    QRect mirrorRect;
+    QRect nameRect;
+    QRect valRect, valRestRect;
+
+    QFont nameFont = attrFont_;
+    nameFont.setBold(true);
+    QFont valFont = attrFont_;
+    QString valFirst, valRest;
+    QString full;
+
+    auto avisoPix = IconProvider::pixmapToHeight(mirrorPixId_, contRect.height());
+    mirrorRect    = contRect.adjusted(attrBox_->leftPadding, 0, 0, 0);
+    mirrorRect.setWidth(avisoPix.width());
+
+    if (multiCnt == 0) {
+        // The text rectangle
+        QFontMetrics fm(nameFont);
+        int nameWidth = ViewerUtil::textWidth(fm, name);
+        nameRect      = contRect;
+        nameRect.setX(mirrorRect.x() + mirrorRect.width() + attrBox_->spacing);
+        nameRect.setWidth(nameWidth);
+
+        // The value rectangle
+        fm           = QFontMetrics(valFont);
+        int valWidth = ViewerUtil::textWidth(fm, val);
+        valRect      = nameRect;
+        valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
+        valRect.setWidth(valWidth);
+
+        // Adjust the filled rect width
+        currentRight = valRect.x() + valRect.width();
+    }
+    else {
+        // The text rectangle
+        QFontMetrics fm(nameFont);
+        int nameWidth = ViewerUtil::textWidth(fm, name);
+        nameRect      = contRect;
+        nameRect.setX(mirrorRect.x() + mirrorRect.width() + attrBox_->spacing);
+        nameRect.setWidth(nameWidth);
+        nameRect.setHeight(attrBox_->height - attrBox_->topPadding - attrBox_->bottomPadding);
+
+        // The value rectangles
+        fm = QFontMetrics(valFont);
+
+        // First row comes after the name rect!
+        QStringList valLst = val.split("\n");
+        Q_ASSERT(valLst.count() > 0);
+        valFirst = valLst[0];
+
+        valRect = nameRect;
+        valRect.setX(nameRect.x() + nameRect.width() + attrBox_->spacing);
+        valRect.setWidth(ViewerUtil::textWidth(fm, valFirst));
+
+        // The rest of the rows
+        valLst.takeFirst();
+        valRest       = valLst.join("\n");
+        QSize valSize = fm.size(0, valRest);
+
+        valRestRect = QRect(nameRect.x(), nameRect.y() + nameRect.height() + 2, valSize.width(), valSize.height());
+
+        currentRight = qMax(valRect.x() + valRect.width(), valRestRect.x() + valRestRect.width());
+
+        val = valFirst + " " + valRest;
+    }
+
+    // Define clipping
+    int rightPos           = currentRight + attrBox_->rightPadding + attrBox_->rightMargin;
+    totalWidth             = rightPos - option.rect.left();
+    const bool setClipRect = rightPos > option.rect.right();
+    if (setClipRect) {
+        painter->save();
+        painter->setClipRect(option.rect);
+    }
+
+    QPen fontPen(Qt::black);
+    LabelStyle* labelStyle = labelStyle_[DefaultLabel];
+    QList<LabelType> types;
+    types << ErrorLabel << WarningLabel << InfoLabel;
+    full = name + " " + val;
+    Q_FOREACH (LabelType t, types) {
+        if (labelStyle_[t]->enabled_) {
+            if (full.contains(labelStyle_[t]->regex_)) {
+                labelStyle = labelStyle_[t];
+                break;
+            }
+        }
+    }
+
+    if (labelStyle) {
+        if (labelStyle->enabled_) {
+            fontPen = labelStyle->fontPen_;
+            // draw bg
+            if (labelStyle->enabledBg_) {
+                QRect sr = option.rect;
+                sr.setWidth(rightPos - sr.x());
+                painter->fillRect(attrBox_->adjustSelectionRect(sr), labelStyle->bgBrush_);
+            }
+        }
+    }
+
+    // aviso pixmap
+    painter->drawPixmap(mirrorRect, avisoPix);
 
     // Draw name
     painter->setPen(fontPen);

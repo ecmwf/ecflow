@@ -215,6 +215,7 @@ set(viewer_srcs
   VAutoArchiveAttr.hpp
   VAutoCancelAttr.hpp
   VAutoRestoreAttr.hpp
+  VAvisoAttr.hpp
   VConfig.hpp
   VConfigLoader.hpp
   VDateAttr.hpp
@@ -235,6 +236,7 @@ set(viewer_srcs
   VLimitAttr.hpp
   VLimiterAttr.hpp
   VMeterAttr.hpp
+  VMirrorAttr.hpp
   VModelData.hpp
   VNState.hpp
   VNode.hpp
@@ -491,6 +493,7 @@ set(viewer_srcs
   VAutoArchiveAttr.cpp
   VAutoCancelAttr.cpp
   VAutoRestoreAttr.cpp
+  VAvisoAttr.cpp
   VConfig.cpp
   VConfigLoader.cpp
   VDateAttr.cpp
@@ -510,6 +513,7 @@ set(viewer_srcs
   VLimitAttr.cpp
   VLimiterAttr.cpp
   VMeterAttr.cpp
+  VMirrorAttr.cpp
   VModelData.cpp
   VNode.cpp
   VNodeList.cpp
@@ -811,9 +815,7 @@ ecbuild_add_executable(
     ${CMAKE_CURRENT_BINARY_DIR}
   LIBS
     viewer
-    libclient
-    base
-    node
+    ecflow_all
     Threads::Threads
     m
     dl

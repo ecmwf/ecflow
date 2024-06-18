@@ -22,8 +22,10 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
+#include "ecflow/node/Operations.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/service/Registry.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -51,6 +53,8 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
     // Support for emergency check pointing during system session.
     signals_.add(SIGTERM);
     signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler(); });
+
+    ecf::service::TheOneServer::set_server(this);
 
     // Update stats, this is returned via --stats command option
     stats().host_                    = serverEnv.hostPort().first;
@@ -248,6 +252,10 @@ void BaseServer::updateDefs(defs_ptr defs, bool force) {
 
     defs_->set_most_significant_state();
     LOG_ASSERT(defs_->server().jobSubmissionInterval() != 0, "");
+
+    if (serverState_ == SState::RUNNING) {
+        ecf::visit_all(*defs_, BootstrapDefs{});
+    }
 }
 
 void BaseServer::clear_defs() {
@@ -352,6 +360,8 @@ void BaseServer::halted() {
     // Added after discussion with Axel.
     checkPtSaver_.stop();
 
+    ecf::visit_all(*defs_, ShutdownDefs{});
+
     // Stop the task communication with server. Hence nodes can be stuck
     // in submitted/active states. Task based command will continue attempting,
     // communication with the server for up to 24hrs.
@@ -376,6 +386,8 @@ void BaseServer::restart() {
 
     traverser_.start();
     checkPtSaver_.start();
+
+    ecf::visit_all(*defs_, BootstrapDefs{});
 }
 
 void BaseServer::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,

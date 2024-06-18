@@ -18,12 +18,8 @@ ecbuild_add_library(
   PRIVATE_INCLUDES
     ../src
   PUBLIC_LIBS
-    libclient
+    ecflow_all
     libsimulator
-    base
-    node
-    attributes
-    core
     Python2::Python
     Boost::${ECFLOW_BOOST_PYTHON_COMPONENT}
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>

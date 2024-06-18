@@ -47,6 +47,46 @@
          * - :ref:`grammar`
            - :token:`autocancel`
 
+   aviso
+      An aviso is an attribute of a :term:`Node<node>` (typically a :term:`Task<task>`),
+      and creates a dependency on an external Aviso server.
+
+      A :term:`Node<node>` with an aviso attribute is held from executing until a
+      notification matching the configured listener is received. When a
+      matching notification is received, the node then allowed to execute
+      following a behaviour similar to :term:`trigger` or time dependency e.g.
+      :term:`cron`).
+
+      `Only one aviso attribute is allowed per node`, and each attribute is
+      defined by the following properties:
+
+        - :code:`name`, an identifier
+        - :code:`listener`, the configuration for the Aviso listener
+        - :code:`url`, the base location of the Aviso server
+        - :code:`schema`, the location of the Aviso schema used to evaluate the notifications
+        - :code:`polling`, the value (in seconds) used to periodically contact the Aviso server
+        - :code:`auth`, the location to the Aviso authentication credentials file
+
+      The value of the properties :code:`url`, :code:`schema`, :code:`polling`,
+      and :code:`auth` can be composed of :term:`Variables<variable>`. When
+      these properties are not provided, the following default values are used:
+
+        - :code:`%ECF_AVISO_URL%`, for :code:`url`
+        - :code:`%ECF_AVISO_SCHEMA%`, for :code:`schema`
+        - :code:`%ECF_AVISO_POLLING%`, for :code:`polling`
+        - :code:`%ECF_AVISO_AUTH%`, for :code:`auth`
+
+      .. important::
+
+         The variables :code:`ECF_AVISO_*` are not automatically provided at
+         server level, and must be defined at :term:`Suite<suite>` level by
+         the user.
+
+      Each aviso attribute implies that a background thread is spawned whenever
+      the associated :term:`node` is (re)queued. This background thread is
+      responsible for polling the Aviso server, and periodically processing the
+      latest notifications.
+
    check point 
       The check point file is like the :term:`suite definition`, but includes all the state information.
       
@@ -1317,7 +1357,49 @@
            - :token:`meter`
 
       Meters can be referenced in :term:`trigger` and :term:`complete expression` expressions.
-      
+
+   mirror
+      A mirror is an attribute of a :term:`Node<node>` (typically a :term:`Task<task>`),
+      and allows to synchronise the status of a node on a remote ecFlow server.
+
+      A :term:`Node<node>` with a mirror attribute will have its status periodically
+      synchronized with the :term:`status` of a node on a remote ecFlow server.
+      The synchronised status can be used to trigger the execution of local nodes.
+
+      .. note::
+
+        Synchronised tasks don't need to be provided with :code:`.ecf` files
+        on the local ecFlow server, as the execution of a :term:`Task<task>`
+        with a mirror attribute does not happen under the responsibility of the
+        local ecFlow server.
+
+        Operations to execute synchronised Tasks have been disabled from the :term:`ecflow_ui`.
+
+      `Only one mirror attribute is allowed per node`, and each attribute is
+      defined by the following properties:
+
+        - :code:`name`, an identifier
+        - :code:`remote_path`, the path of the node on the remote ecFlow server
+        - :code:`remote_host`, the remote ecFlow server host
+        - :code:`remote_port`, the remote ecFlow server port
+        - :code:`ssl`, to connect to the ecFlow server using SSL
+        - :code:`polling`, the value (in seconds) used to periodically contact the remote ecFlow server
+        - :code:`auth`, the location to the Mirror authentication credentials file
+
+      The value of the properties :code:`remote_host`, :code:`remote_port`, :code:`polling`,
+      and :code:`auth` can be composed of :term:`Variables<variable>`. When
+      these properties are not provided, the following default values are used:
+
+        - :code:`%ECF_MIRROR_REMOTE_HOST%`, for :code:`remote_host`
+        - :code:`%ECF_MIRROR_REMOTE_PORT%`, for :code:`remote_port`
+        - :code:`%ECF_MIRROR_REMOTE_POLLING%`, for :code:`polling`
+        - :code:`%ECF_MIRROR_REMOTE_AUTH%`, for :code:`auth`
+
+      Each mirror attribute implies that a background thread is spawned whenever
+      the ecFlow server is :term:`running<server states>`. This background thread is
+      responsible for polling the remote ecFlow server, and periodically
+      synchronise node status.
+
    node
       :term:`suite`, :term:`family` and :term:`task` form a hierarchy.
       Where a :term:`suite` serves as the root of the hierarchy. 

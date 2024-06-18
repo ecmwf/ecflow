@@ -8,61 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  src/ecflow/attribute/AutoArchiveAttr.hpp
-  src/ecflow/attribute/AutoCancelAttr.hpp
-  src/ecflow/attribute/ClockAttr.hpp
-  src/ecflow/attribute/CronAttr.hpp
-  src/ecflow/attribute/DateAttr.hpp
-  src/ecflow/attribute/DayAttr.hpp
-  src/ecflow/attribute/GenericAttr.hpp
-  src/ecflow/attribute/LateAttr.hpp
-  src/ecflow/attribute/NodeAttr.hpp
-  src/ecflow/attribute/QueueAttr.hpp
-  src/ecflow/attribute/RepeatAttr.hpp
-  src/ecflow/attribute/TimeAttr.hpp
-  src/ecflow/attribute/TodayAttr.hpp
-  src/ecflow/attribute/Variable.hpp
-  src/ecflow/attribute/VerifyAttr.hpp
-  src/ecflow/attribute/Zombie.hpp
-  src/ecflow/attribute/ZombieAttr.hpp
-  # Sources
-  src/ecflow/attribute/AutoArchiveAttr.cpp
-  src/ecflow/attribute/AutoCancelAttr.cpp
-  src/ecflow/attribute/ClockAttr.cpp
-  src/ecflow/attribute/CronAttr.cpp
-  src/ecflow/attribute/DateAttr.cpp
-  src/ecflow/attribute/DayAttr.cpp
-  src/ecflow/attribute/GenericAttr.cpp
-  src/ecflow/attribute/LateAttr.cpp
-  src/ecflow/attribute/NodeAttr.cpp
-  src/ecflow/attribute/QueueAttr.cpp
-  src/ecflow/attribute/RepeatAttr.cpp
-  src/ecflow/attribute/TimeAttr.cpp
-  src/ecflow/attribute/TodayAttr.cpp
-  src/ecflow/attribute/Variable.cpp
-  src/ecflow/attribute/VerifyAttr.cpp
-  src/ecflow/attribute/Zombie.cpp
-  src/ecflow/attribute/ZombieAttr.cpp
-)
-
-ecbuild_add_library(
-  TARGET
-    attributes
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-  PUBLIC_LIBS
-    core
-    Boost::date_time
-)
-target_clangformat(attributes)
-
-
 set(test_srcs
   # Sources
   test/TestAttributes_main.cpp
@@ -90,9 +35,10 @@ ecbuild_add_test(
     nightly
   SOURCES
     ${test_srcs}
+  INCLUDES
+    ../core/test
   LIBS
-    test_support
-    attributes
+    ecflow_all
   TEST_DEPENDS
     u_core
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)

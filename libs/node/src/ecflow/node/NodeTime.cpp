@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -48,6 +49,9 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
     }
     for (auto& cron : crons_) {
         cron.requeue(calendar, reset_next_time_slot);
+    }
+    for (auto& aviso : avisos_) {
+        aviso.start();
     }
 
     for (auto& date : dates_) {
@@ -597,6 +601,8 @@ bool Node::has_time_dependencies() const {
         return true;
     if (!days_.empty())
         return true;
+    if (!avisos_.empty())
+        return true;
     return false;
 }
 
@@ -634,6 +640,8 @@ bool Node::timeDependenciesFree() const {
         noOfTimeDependencies++;
     if (!crons_.empty())
         noOfTimeDependencies++;
+    if (!avisos_.empty()) // TODO: Not really time related! Should be moved to another member function
+        noOfTimeDependencies++;
 
     // if no time dependencies we are free
     if (noOfTimeDependencies == 0)
@@ -650,6 +658,7 @@ bool Node::timeDependenciesFree() const {
     bool oneTodayIsFree = false;
     bool oneTimeIsFree  = false;
     bool oneCronIsFree  = false;
+    bool oneAvisoIsFree = false;
 
     for (const auto& time : times_) {
         if (time.isFree(calendar)) {
@@ -681,6 +690,19 @@ bool Node::timeDependenciesFree() const {
                 return true;
             oneDayIsFree = true;
             break;
+        }
+    }
+    for (const auto& aviso : avisos_) {
+        if (aviso.isFree()) {
+            LOG(Log::DBG, "NodeTime: checking Aviso isFree: true, for " << aviso.path() << ":" << aviso.name());
+            if (noOfTimeDependencies == 1) {
+                return true;
+            }
+            oneAvisoIsFree = true;
+            break;
+        }
+        else {
+            LOG(Log::DBG, "NodeTime: checking Aviso isFree: false");
         }
     }
 
@@ -718,7 +740,7 @@ bool Node::timeDependenciesFree() const {
         }
     }
 
-    if (oneDateIsFree || oneDayIsFree || oneTodayIsFree || oneTimeIsFree || oneCronIsFree) {
+    if (oneDateIsFree || oneDayIsFree || oneTodayIsFree || oneTimeIsFree || oneCronIsFree || oneAvisoIsFree) {
         if (noOfTimeDependencies > 1) {
             // *When* we have multiple time dependencies of *different types* then the results
             // *MUST* be added for the node to be free.
@@ -731,6 +753,8 @@ bool Node::timeDependenciesFree() const {
             if (!times_.empty() && !oneTimeIsFree)
                 return false;
             if (!crons_.empty() && !oneCronIsFree)
+                return false;
+            if (!avisos_.empty() && !oneAvisoIsFree)
                 return false;
 
             // We will only get here, if we have a multiple time dependencies and they are free

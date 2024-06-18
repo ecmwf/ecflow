@@ -21,6 +21,7 @@
 #include "ecflow/node/parser/AutoArchiveParser.hpp"
 #include "ecflow/node/parser/AutoCancelParser.hpp"
 #include "ecflow/node/parser/AutoRestoreParser.hpp"
+#include "ecflow/node/parser/AvisoParser.hpp"
 #include "ecflow/node/parser/CalendarParser.hpp"
 #include "ecflow/node/parser/ClockParser.hpp"
 #include "ecflow/node/parser/CronParser.hpp"
@@ -37,6 +38,7 @@
 #include "ecflow/node/parser/LateParser.hpp"
 #include "ecflow/node/parser/LimitParser.hpp"
 #include "ecflow/node/parser/MeterParser.hpp"
+#include "ecflow/node/parser/MirrorParser.hpp"
 #include "ecflow/node/parser/QueueParser.hpp"
 #include "ecflow/node/parser/RepeatParser.hpp"
 #include "ecflow/node/parser/TimeParser.hpp"
@@ -83,6 +85,8 @@ public:
         addParser(new ZombieAttrParser(p));
         addParser(new QueueParser(p));
         addParser(new GenericParser(p));
+        addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -173,6 +177,8 @@ public:
         addParser(new QueueParser(p));
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
+        addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -270,6 +276,8 @@ public:
         addParser(new AutoArchiveParser(p));
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
+        addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
@@ -387,6 +395,8 @@ public:
         addParser(new AutoArchiveParser(p));
         addParser(new AutoRestoreParser(p));
         addParser(new GenericParser(p));
+        addParser(new AvisoParser(p));
+        addParser(new MirrorParser(p));
     }
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {

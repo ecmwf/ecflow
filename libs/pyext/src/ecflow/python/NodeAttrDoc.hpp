@@ -54,6 +54,8 @@ public:
     static const char* repeat_day_doc();
     static const char* cron_doc();
     static const char* clock_doc();
+    static const char* aviso_doc();
+    static const char* mirror_doc();
 };
 
 #endif /* ecflow_python_NodeAttrDoc_HPP */

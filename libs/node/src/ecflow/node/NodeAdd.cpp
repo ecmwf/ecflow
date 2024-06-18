@@ -15,9 +15,13 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Message.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
 
@@ -25,18 +29,18 @@ using namespace ecf;
 using namespace std;
 
 bool Node::update_variable(const std::string& name, const std::string& value) {
-    size_t theSize = vars_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (vars_[i].name() == name) {
-            // Variable already exist, *UPDATE* its value
-            vars_[i].set_value(value);
-            if (0 == Ecf::debug_level())
-                std::cerr << "Node::addVariable: Variable of name '" << name << "' already exist for node "
-                          << debugNodePath() << " updating with value '" << value << "'\n";
-            return true;
-        }
+    auto found = ecf::algorithm::find_by_name(vars_, name);
+
+    if (found == std::end(vars_)) {
+        return false;
     }
-    return false;
+
+    found->set_value(value);
+    if (0 == Ecf::debug_level()) {
+        std::cerr << "Node::addVariable: Variable of name '" << name << "' already exist for node " << debugNodePath()
+                  << " updating with value '" << value << "'\n";
+    }
+    return true;
 }
 
 void Node::addVariable(const Variable& v) {
@@ -294,6 +298,24 @@ void Node::addEvent(const Event& e, bool check) {
         }
     }
     events_.push_back(e);
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::addAviso(const AvisoAttr& a) {
+    if (!avisos_.empty()) {
+        throw std::runtime_error(
+            ecf::Message("Unable to add Aviso '", a.name(), "'. Only 1 Aviso allowed per node.").str());
+    }
+    avisos_.push_back(a);
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::addMirror(const MirrorAttr& m) {
+    if (!mirrors_.empty()) {
+        throw std::runtime_error(
+            ecf::Message("Unable to add Mirror '", m.name(), "'. Only 1 Mirror allowed per node.").str());
+    }
+    mirrors_.push_back(m);
     state_change_no_ = Ecf::incr_state_change_no();
 }
 

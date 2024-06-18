@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="60"
+   height="32"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   sodipodi:docname="aviso.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="18.75"
+     inkscape:cx="42.693333"
+     inkscape:cy="16.586667"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer3"
+     showgrid="true"
+     inkscape:snap-grids="false"
+     inkscape:window-width="1512"
+     inkscape:window-height="865"
+     inkscape:window-x="0"
+     inkscape:window-y="38"
+     inkscape:window-maximized="0"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2816"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="Apache License 2.0" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title />
+          </cc:Agent>
+        </dc:creator>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>ECMWF</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:language>en-GB</dc:language>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>ecFlowUI  icon</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:description>ecFlowUI icon</dc:description>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="circle"
+     style="display:inline">
+    <circle
+       style="fill:#333333;stroke:none;stroke-width:1.06667"
+       id="path1"
+       cx="16.360003"
+       cy="16.013336"
+       r="16" />
+    <path
+       style="fill:none;stroke-width:1.20903"
+       d="m 28.992712,11.829419 2.142512,4.471291 -1.740791,3.974483"
+       id="path3"
+       sodipodi:nodetypes="ccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:29.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman,  Bold';fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.26666;stroke-dasharray:none;stroke-opacity:1"
+       x="6.3222198"
+       y="24.065346"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         x="6.3222198"
+         y="24.065346"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:29.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman,  Bold';fill:#ffffff;stroke:#ffffff;stroke-width:1.26666">E</tspan></text>
+    <path
+       style="fill:#333333;stroke:none;stroke-width:0.498518"
+       d="m 37.747345,8.1911167 c 0,0 2.710014,2.6550333 2.786042,8.1035723 0.07603,5.448539 -3.024275,8.04272 -3.024275,8.04272 l -4.069113,0.0037 c 0,0 3.670537,-3.347927 3.654647,-8.200586 -0.01589,-4.852659 -3.162069,-7.988886 -3.162069,-7.988886 1.254703,-0.019912 2.5613,-0.00644 3.814768,0.039432 z"
+       id="path10"
+       sodipodi:nodetypes="czcczccc" />
+    <path
+       style="fill:#333333;stroke:none;stroke-width:0.579718"
+       d="m 45.587345,5.3281796 c 0,0 3.403347,3.3237301 3.479375,10.6917784 0.07603,7.36805 -3.717608,11.142822 -3.717608,11.142822 l -4.069113,0.005 c 0,0 4.150537,-4.527396 4.134647,-11.089636 -0.01589,-6.5622913 -3.482069,-10.7500723 -3.482069,-10.7500723 1.254703,-0.026927 2.4013,-0.062033 3.654768,-9.3e-6 z"
+       id="path2"
+       sodipodi:nodetypes="czcczccc" />
+    <path
+       style="fill:#333333;stroke:none;stroke-width:0.659713"
+       d="m 52.947345,1.871744 c 0,0 5.003347,4.521101 5.079375,14.062866 0.07603,9.541766 -5.317608,14.213361 -5.317608,14.213361 l -4.069113,0.0064 c 0,0 6.017204,-5.759872 6.001314,-14.258098 -0.01589,-8.4982932 -5.508736,-14.0247431 -5.508736,-14.0247431 1.254703,-0.034871 2.667967,-0.080335 3.921435,-1.2e-5 z"
+       id="path4"
+       sodipodi:nodetypes="czcczccc" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="item"
+     style="display:inline" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="top" />
+</svg>

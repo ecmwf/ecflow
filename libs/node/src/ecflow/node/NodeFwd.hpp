@@ -89,6 +89,8 @@ class ServerVariableMemento;
 class NodeEventMemento;
 class NodeMeterMemento;
 class NodeLabelMemento;
+class NodeAvisoMemento;
+class NodeMirrorMemento;
 class NodeTriggerMemento;
 class NodeCompleteMemento;
 class NodeRepeatMemento;

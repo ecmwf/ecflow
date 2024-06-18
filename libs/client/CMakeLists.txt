@@ -8,41 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  src/ecflow/client/ClientCmdCache.hpp
-  src/ecflow/client/ClientEnvironment.hpp
-  src/ecflow/client/ClientInvoker.hpp
-  src/ecflow/client/ClientOptions.hpp
-  src/ecflow/client/Help.hpp
-  src/ecflow/client/Rtt.hpp
-  src/ecflow/client/UrlCmd.hpp
-  # Sources
-  src/ecflow/client/ClientCmdCache.cpp
-  src/ecflow/client/Rtt.cpp
-  src/ecflow/client/ClientEnvironment.cpp
-  src/ecflow/client/ClientInvoker.cpp
-  src/ecflow/client/Help.cpp
-  src/ecflow/client/Rtt.cpp
-  src/ecflow/client/ClientOptions.cpp
-  src/ecflow/client/UrlCmd.cpp
-)
-
-ecbuild_add_library(
-  TARGET
-    libclient
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-  PUBLIC_LIBS
-    base
-    Threads::Threads
-)
-target_clangformat(libclient)
-
 # ========================================================================
 # EXE ecflow_client, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
@@ -52,7 +17,7 @@ ecbuild_add_executable(
   SOURCES
     src/ecflow/client/ClientMain.cpp
   LIBS
-    libclient
+    ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
 )
 target_clangformat(ecflow_client)
@@ -135,7 +100,7 @@ ecbuild_add_test(
     ../base/test
     ../node/test
   LIBS
-    libclient
+    ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
@@ -170,7 +135,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
     INCLUDES
       ../base/test
     LIBS
-      libclient
+      ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     DEPENDS
@@ -201,7 +166,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
     INCLUDES
       ../base/test
     LIBS
-      libclient
+      ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     DEPENDS

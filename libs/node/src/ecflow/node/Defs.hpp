@@ -36,6 +36,7 @@
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/node/ServerState.hpp"
+#include "ecflow/node/Suite.hpp"
 
 namespace cereal {
 class access;

@@ -45,6 +45,8 @@ public:
         LIMITER,
         VAR,
         GENVAR,
+        AVISO,
+        MIRROR,
         BADATTRIBUTE
     };
 

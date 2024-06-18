@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_node_flags) {
     std::string expected_flags =
         "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,killcmd_failed,statuscmd_failed,no_script,"
         "killed,status,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored,"
-        "threshold,sigterm,log_error,checkpt_error";
+        "threshold,sigterm,log_error,checkpt_error,remote_error";
 
     /// Set the flags
     std::vector<Flag::Type> flag_list = Flag::list();

@@ -57,6 +57,8 @@ namespace ecf {
 class Calendar;
 class NodeTreeVisitor;
 class LateAttr;
+class AvisoAttr;
+class MirrorAttr;
 } // namespace ecf
 
 class Node : public std::enable_shared_from_this<Node> {
@@ -70,6 +72,7 @@ public:
 
     Node(const Node& rhs);
     virtual ~Node();
+
     virtual bool check_defaults() const;
 
     // parse string and create suite || family || task || alias. Can return a NULL node_ptr() for errors
@@ -393,6 +396,12 @@ public:
     const std::vector<DayAttr>& days() const { return days_; }
     const std::vector<ecf::CronAttr>& crons() const { return crons_; }
 
+    std::vector<ecf::AvisoAttr>& avisos() { return avisos_; }
+    const std::vector<ecf::AvisoAttr>& avisos() const { return avisos_; }
+
+    std::vector<ecf::MirrorAttr>& mirrors() { return mirrors_; }
+    const std::vector<ecf::MirrorAttr>& mirrors() const { return mirrors_; }
+
     const std::vector<VerifyAttr>& verifys() const;
     const std::vector<ZombieAttr>& zombies() const;
     const std::vector<QueueAttr>& queues() const;
@@ -456,6 +465,8 @@ public:
     void addDate(const DateAttr&);
     void addDay(const DayAttr&);
     void addCron(const ecf::CronAttr&);
+    void addAviso(const ecf::AvisoAttr&);
+    void addMirror(const ecf::MirrorAttr&);
 
     void addLimit(const Limit&, bool check = true);       // will throw std::runtime_error if duplicate
     void addInLimit(const InLimit& l, bool check = true); // will throw std::runtime_error if duplicate
@@ -507,6 +518,8 @@ public:
     void deleteEvent(const std::string& name);
     void deleteMeter(const std::string& name);
     void deleteLabel(const std::string& name);
+    void deleteAviso(const std::string& name);
+    void deleteMirror(const std::string& name);
     void delete_queue(const std::string& name);
     void delete_generic(const std::string& name);
     void deleteTrigger();
@@ -529,6 +542,9 @@ public:
     void changeMeter(const std::string& name, const std::string& value);
     void changeMeter(const std::string& name, int value);
     void changeLabel(const std::string& name, const std::string& value);
+    void changeAviso(const std::string& name, const std::string& value);
+    void changeAviso(const std::string& name, const std::string& value, uint64_t revision);
+    void changeMirror(const std::string& name, const std::string& value);
     void changeTrigger(const std::string& expression);
     void changeComplete(const std::string& expression);
     void changeRepeat(const std::string& value);
@@ -557,6 +573,8 @@ public:
     void set_memento(const NodeEventMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeMeterMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeLabelMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
+    void set_memento(const NodeAvisoMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
+    void set_memento(const NodeMirrorMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeQueueMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeGenericMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const NodeQueueIndexMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
@@ -626,6 +644,8 @@ public:
     bool findLimit(const Limit&) const;
     bool findLabel(const std::string& name) const;
     const Label& find_label(const std::string& name) const;
+    bool findAviso(const std::string& name) const;
+    bool findMirror(const std::string& name) const;
     const QueueAttr& find_queue(const std::string& name) const;
     QueueAttr& findQueue(const std::string& name);
     const GenericAttr& find_generic(const std::string& name) const;
@@ -682,7 +702,7 @@ public:
     virtual void handleStateChange() = 0; // can end up changing state
 
     /// update change numbers to force sync
-    virtual void force_sync(){};
+    virtual void force_sync() {};
 
     /// check trigger expression have nodes and events,meter,repeat that resolve
     bool check_expressions(Ast*, const std::string& expr, bool trigger, std::string& errorMsg) const;
@@ -692,6 +712,9 @@ public:
     parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context);
 
     virtual boost::posix_time::time_duration sum_runtime() { return sc_rt_; }
+
+    void set_state_change_no(unsigned int x) { state_change_no_ = x; }
+    unsigned int state_change_no() const { return state_change_no_; }
 
 protected:
     void set_runtime(const boost::posix_time::time_duration& rt) { sc_rt_ = rt; }
@@ -837,6 +860,10 @@ private: /// For use by python interface,
     std::vector<Event>::const_iterator event_end() const { return events_.end(); }
     std::vector<Label>::const_iterator label_begin() const { return labels_.begin(); }
     std::vector<Label>::const_iterator label_end() const { return labels_.end(); }
+    std::vector<ecf::AvisoAttr>::const_iterator aviso_begin() const { return avisos_.begin(); }
+    std::vector<ecf::AvisoAttr>::const_iterator aviso_end() const { return avisos_.end(); }
+    std::vector<ecf::MirrorAttr>::const_iterator mirror_begin() const { return mirrors_.begin(); }
+    std::vector<ecf::MirrorAttr>::const_iterator mirror_end() const { return mirrors_.end(); }
     std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return times_.begin(); }
     std::vector<ecf::TimeAttr>::const_iterator time_end() const { return times_.end(); }
     std::vector<ecf::TodayAttr>::const_iterator today_begin() const { return todays_.begin(); }
@@ -880,6 +907,8 @@ private:
     std::vector<Meter> meters_;
     std::vector<Event> events_;
     std::vector<Label> labels_;
+    std::vector<ecf::AvisoAttr> avisos_;
+    std::vector<ecf::MirrorAttr> mirrors_;
 
     std::vector<ecf::TimeAttr> times_;
     std::vector<ecf::TodayAttr> todays_;

@@ -58,6 +58,12 @@
         },
         "queue" : {
             "label": "Queues"
+        },
+        "aviso" : {
+          "label" : "Avisos"
+        },
+        "mirror" : {
+          "label" : "Mirrors"
         }
-	}
+    }
 }

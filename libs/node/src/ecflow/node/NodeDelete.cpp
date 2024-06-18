@@ -14,9 +14,12 @@
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Stl.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
 
@@ -37,20 +40,18 @@ void Node::deleteTime(const std::string& name) {
 }
 
 void Node::delete_time(const ecf::TimeAttr& attr) {
-    size_t theSize = times_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (times_[i].structureEquals(attr)) {
-            times_.erase(times_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
+    auto found = ecf::algorithm::find_by(times_, [&](const auto& item) { return item.structureEquals(attr); });
+
+    if (found == std::end(times_)) {
+        throw std::runtime_error("Node::delete_time: Cannot find time attribute: ");
+    }
+
+    times_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::delete_time\n";
+    std::cout << "Node::delete_time\n";
 #endif
-            return;
-        }
-    }
-    throw std::runtime_error("Node::delete_time: Cannot find time attribute: ");
 }
 
 void Node::deleteToday(const std::string& name) {
@@ -68,19 +69,19 @@ void Node::deleteToday(const std::string& name) {
 }
 
 void Node::delete_today(const ecf::TodayAttr& attr) {
-    size_t theSize = todays_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (todays_[i].structureEquals(attr)) {
-            todays_.erase(todays_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::delete_today\n";
-#endif
-            return;
-        }
+    // Don't use '==' since that compares additional state like free_
+    auto found = ecf::algorithm::find_by(todays_, [&](const auto& item) { return item.structureEquals(attr); });
+
+    if (found == std::end(todays_)) {
+        throw std::runtime_error("Node::delete_today: Cannot find today attribute: " + attr.toString());
     }
-    throw std::runtime_error("Node::delete_today: Cannot find today attribute: " + attr.toString());
+
+    todays_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::delete_today\n";
+#endif
 }
 
 void Node::deleteDate(const std::string& name) {
@@ -98,18 +99,18 @@ void Node::deleteDate(const std::string& name) {
 }
 
 void Node::delete_date(const DateAttr& attr) {
-    for (size_t i = 0; i < dates_.size(); i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (attr.structureEquals(dates_[i])) {
-            dates_.erase(dates_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::delete_date\n";
-#endif
-            return;
-        }
+    // Don't use '==' since that compares additional state like free_
+    auto found = ecf::algorithm::find_by(dates_, [&](const auto& item) { return item.structureEquals(attr); });
+
+    if (found == std::end(dates_)) {
+        throw std::runtime_error("Node::delete_date: Cannot find date attribute: " + attr.toString());
     }
-    throw std::runtime_error("Node::delete_date: Cannot find date attribute: " + attr.toString());
+
+    dates_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::delete_date\n";
+#endif
 }
 
 void Node::deleteDay(const std::string& name) {
@@ -127,18 +128,18 @@ void Node::deleteDay(const std::string& name) {
 }
 
 void Node::delete_day(const DayAttr& attr) {
-    for (size_t i = 0; i < days_.size(); i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (attr.structureEquals(days_[i])) {
-            days_.erase(days_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::delete_day\n";
-#endif
-            return;
-        }
+    // Don't use '==' since that compares additional state like free_
+    auto found = ecf::algorithm::find_by(days_, [&](const auto& item) { return item.structureEquals(attr); });
+
+    if (found == std::end(days_)) {
+        throw std::runtime_error("Node::delete_day: Cannot find day attribute: " + attr.toString());
     }
-    throw std::runtime_error("Node::delete_day: Cannot find day attribute: " + attr.toString());
+
+    days_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::delete_day\n";
+#endif
 }
 
 void Node::deleteCron(const std::string& name) {
@@ -156,18 +157,18 @@ void Node::deleteCron(const std::string& name) {
 }
 
 void Node::delete_cron(const ecf::CronAttr& attr) {
-    for (size_t i = 0; i < crons_.size(); i++) {
-        // Dont use '==' since that compares additional state like free_
-        if (attr.structureEquals(crons_[i])) {
-            crons_.erase(crons_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::delete_cron\n";
-#endif
-            return;
-        }
+    // Don't use '==' since that compares additional state like free_
+    auto found = ecf::algorithm::find_by(crons_, [&](const auto& item) { return item.structureEquals(attr); });
+
+    if (found == std::end(crons_)) {
+        throw std::runtime_error("Node::delete_cron: Cannot find cron attribute: " + attr.toString());
     }
-    throw std::runtime_error("Node::delete_cron: Cannot find cron attribute: " + attr.toString());
+
+    crons_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::delete_cron\n";
+#endif
 }
 
 void Node::deleteVariable(const std::string& name) {
@@ -181,19 +182,17 @@ void Node::deleteVariable(const std::string& name) {
         return;
     }
 
-    size_t theSize = vars_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (vars_[i].name() == name) {
-            vars_.erase(vars_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
+    auto found = ecf::algorithm::find_by_name(vars_, name);
 
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::deleteVariable\n";
-#endif
-            return;
-        }
+    if (found == std::end(vars_)) {
+        throw std::runtime_error("Node::deleteVariable: Cannot find 'user' variable of name " + name);
     }
-    throw std::runtime_error("Node::deleteVariable: Cannot find 'user' variable of name " + name);
+
+    vars_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteVariable\n";
+#endif
 }
 
 void Node::delete_variable_no_error(const std::string& name) {
@@ -204,17 +203,14 @@ void Node::delete_variable_no_error(const std::string& name) {
         return;
     }
 
-    size_t theSize = vars_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (vars_[i].name() == name) {
-            vars_.erase(vars_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
+    auto found = ecf::algorithm::find_by_name(vars_, name);
 
+    if (found != std::end(vars_)) {
+        vars_.erase(found);
+        state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::delete_variable_no_error\n";
+        std::cout << "Node::delete_variable_no_error\n";
 #endif
-            return;
-        }
     }
 }
 
@@ -228,18 +224,17 @@ void Node::deleteEvent(const std::string& name) {
         return;
     }
 
-    size_t theSize = events_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (events_[i].name_or_number() == name) {
-            events_.erase(events_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::deleteEvent\n";
-#endif
-            return;
-        }
+    auto found = ecf::algorithm::find_by(events_, [&](const auto& item) { return item.name_or_number() == name; });
+
+    if (found == std::end(events_)) {
+        throw std::runtime_error("Node::deleteEvent: Cannot find event: " + name);
     }
-    throw std::runtime_error("Node::deleteEvent: Cannot find event: " + name);
+
+    events_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteEvent\n";
+#endif
 }
 
 void Node::deleteMeter(const std::string& name) {
@@ -252,18 +247,17 @@ void Node::deleteMeter(const std::string& name) {
         return;
     }
 
-    size_t theSize = meters_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (meters_[i].name() == name) {
-            meters_.erase(meters_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Expression::clearFree()\n";
-#endif
-            return;
-        }
+    auto found = ecf::algorithm::find_by_name(meters_, name);
+
+    if (found == std::end(meters_)) {
+        throw std::runtime_error("Node::deleteMeter: Cannot find meter: " + name);
     }
-    throw std::runtime_error("Node::deleteMeter: Cannot find meter: " + name);
+
+    meters_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Expression::clearFree()\n";
+#endif
 }
 
 void Node::deleteLabel(const std::string& name) {
@@ -276,18 +270,63 @@ void Node::deleteLabel(const std::string& name) {
         return;
     }
 
-    size_t theSize = labels_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (labels_[i].name() == name) {
-            labels_.erase(labels_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::deleteLabel\n";
-#endif
-            return;
-        }
+    auto found = ecf::algorithm::find_by_name(labels_, name);
+
+    if (found == std::end(labels_)) {
+        throw std::runtime_error("Node::deleteLabel: Cannot find label: " + name);
     }
-    throw std::runtime_error("Node::deleteLabel: Cannot find label: " + name);
+
+    labels_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteLabel\n";
+#endif
+}
+
+void Node::deleteAviso(const std::string& name) {
+    if (name.empty()) {
+        avisos_.clear();
+        state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+        std::cout << "Node::deleteAviso\n";
+#endif
+        return;
+    }
+
+    auto found = ecf::algorithm::find_by_name(avisos_, name);
+
+    if (found == std::end(avisos_)) {
+        throw std::runtime_error("Node::deleteAviso: Cannot find aviso: " + name);
+    }
+
+    avisos_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteAviso\n";
+#endif
+}
+
+void Node::deleteMirror(const std::string& name) {
+    if (name.empty()) {
+        mirrors_.clear();
+        state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+        std::cout << "Node::deleteAviso\n";
+#endif
+        return;
+    }
+
+    auto found = ecf::algorithm::find_by_name(mirrors_, name);
+
+    if (found == std::end(mirrors_)) {
+        throw std::runtime_error("Node::deleteMirror: Cannot find mirror: " + name);
+    }
+
+    mirrors_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteAviso\n";
+#endif
 }
 
 void Node::delete_queue(const std::string& name) {
@@ -346,18 +385,17 @@ void Node::deleteLimit(const std::string& name) {
         return;
     }
 
-    size_t theSize = limits_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (limits_[i]->name() == name) {
-            limits_.erase(limits_.begin() + i);
-            state_change_no_ = Ecf::incr_state_change_no();
-#ifdef DEBUG_STATE_CHANGE_NO
-            std::cout << "Node::deleteLimit\n";
-#endif
-            return;
-        }
+    auto found = ecf::algorithm::find_by_name(limits_, name);
+
+    if (found == std::end(limits_)) {
+        throw std::runtime_error("Node::deleteLimit: Cannot find limit: " + name);
     }
-    throw std::runtime_error("Node::deleteLimit: Cannot find limit: " + name);
+
+    limits_.erase(found);
+    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+    std::cout << "Node::deleteLimit\n";
+#endif
 }
 
 void Node::delete_limit_path(const std::string& name, const std::string& path) {
@@ -368,14 +406,13 @@ void Node::delete_limit_path(const std::string& name, const std::string& path) {
         throw std::runtime_error("Node::delete_limit_path: the limit path must be provided");
     }
 
-    size_t theSize = limits_.size();
-    for (size_t i = 0; i < theSize; i++) {
-        if (limits_[i]->name() == name) {
-            limits_[i]->delete_path(path); // will update state change no
-            return;
-        }
+    auto found = ecf::algorithm::find_by_name(limits_, name);
+
+    if (found == std::end(limits_)) {
+        throw std::runtime_error("Node::delete_limit_path: Cannot find limit: " + name);
     }
-    throw std::runtime_error("Node::delete_limit_path: Cannot find limit: " + name);
+
+    (*found)->delete_path(path);
 }
 
 void Node::deleteInlimit(const std::string& name) {

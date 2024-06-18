@@ -19,9 +19,11 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeContainer.hpp"
@@ -116,6 +118,17 @@ node_ptr add_label_1(node_ptr self, const Label& label) {
     self->addLabel(label);
     return self;
 }
+
+node_ptr add_aviso(node_ptr self, const ecf::AvisoAttr& attr) {
+    self->addAviso(attr);
+    return self;
+}
+
+node_ptr add_mirror(node_ptr self, const ecf::MirrorAttr& attr) {
+    self->addMirror(attr);
+    return self;
+}
+
 node_ptr add_limit(node_ptr self, const std::string& name, int limit) {
     self->addLimit(Limit(name, limit));
     return self;
@@ -564,6 +577,8 @@ void export_Node() {
         .def("add_variable", &NodeUtil::add_variable_dict)
         .def("add_label", &add_label, DefsDoc::add_label_doc())
         .def("add_label", &add_label_1)
+        .def("add_aviso", &add_aviso, DefsDoc::add_aviso_doc())
+        .def("add_mirror", &add_mirror, DefsDoc::add_mirror_doc())
         .def("add_limit", &add_limit, DefsDoc::add_limit_doc())
         .def("add_limit", &add_limit_1)
         .def("add_inlimit",
@@ -746,6 +761,8 @@ void export_Node() {
                       bp::range(&Node::variable_begin, &Node::variable_end),
                       "Returns a list of user defined `variable`_\\ s")
         .add_property("labels", bp::range(&Node::label_begin, &Node::label_end), "Returns a list of `label`_\\ s")
+        .add_property("avisos", bp::range(&Node::aviso_begin, &Node::aviso_end), "Returns a list of `aviso`_\\ s")
+        .add_property("mirrors", bp::range(&Node::mirror_begin, &Node::mirror_end), "Returns a list of `mirror`_\\ s")
         .add_property("limits", bp::range(&Node::limit_begin, &Node::limit_end), "Returns a list of `limit`_\\ s")
         .add_property(
             "inlimits", bp::range(&Node::inlimit_begin, &Node::inlimit_end), "Returns a list of `inlimit`_\\ s")

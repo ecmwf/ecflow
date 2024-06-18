@@ -131,6 +131,14 @@
                 "icon"  : {
                     "default" : "icon_checkpt_err.svg"
                 }
+            },
+            "remote_err" : {
+                "label" : "Remote error",
+                "tooltip" : "Error accessing remote resource",
+                "shortDesc" : "Error accessing remote resource",
+                "icon"  : {
+                  "default" : "icon_remote_err.svg"
             }
+        }
      }
 }

@@ -95,6 +95,7 @@ set(u_tests
   py_u_TestAddDeleteFunc
   py_u_TestAddNodeFunc
   py_u_TestAutoAddExtern
+  py_u_TestAviso
   py_u_TestCopy
   py_u_TestDefs
   py_u_TestDefsCheck
@@ -105,6 +106,7 @@ set(u_tests
   py_u_TestFlag
   py_u_TestGetAllTasks
   py_u_TestJobGeneration
+  py_u_TestMirror
   py_u_TestParent
   py_u_TestRemove
   py_u_TestRepeatArithmetic

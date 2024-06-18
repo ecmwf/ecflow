@@ -34,9 +34,7 @@ ecbuild_add_library(
   PUBLIC_INCLUDES
     src
   PUBLIC_LIBS
-    node
-    attributes
-    core
+    ecflow_all
 )
 target_clangformat(libsimulator)
 

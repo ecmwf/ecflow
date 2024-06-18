@@ -9,45 +9,6 @@
 #
 
 # ==============================================================================
-# ECFLOW UDP library
-
-set(LIB_TARGET libecflow_udp)
-
-set(${LIB_TARGET}_srcs
-  # Headers
-  src/ecflow/udp/ClientAPI.hpp
-  src/ecflow/udp/RequestHandler.hpp
-  src/ecflow/udp/Trace.hpp
-  src/ecflow/udp/UDPServer.hpp
-  src/ecflow/udp/UDPServerEnvironment.hpp
-  src/ecflow/udp/UDPServerOptions.hpp
-  # Sources
-  src/ecflow/udp/ClientAPI.cpp
-  src/ecflow/udp/RequestHandler.cpp
-  src/ecflow/udp/Trace.cpp
-  src/ecflow/udp/UDPServerEnvironment.cpp
-  src/ecflow/udp/UDPServerOptions.cpp
-)
-
-ecbuild_add_library(
-  TARGET
-    ${LIB_TARGET}
-  TYPE STATIC
-  NOINSTALL
-  SOURCES
-    ${${LIB_TARGET}_srcs}
-  PRIVATE_INCLUDES
-    src
-  PUBLIC_LIBS
-    libclient
-    nlohmann::json
-    Boost::boost
-    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    Threads::Threads
-)
-target_clangformat(${LIB_TARGET})
-
-# ==============================================================================
 # ECFLOW UDP server
 
 set(SERVER_TARGET ecflow_udp)
@@ -63,8 +24,7 @@ ecbuild_add_executable(
   INCLUDES
     src
   LIBS
-    ${LIB_TARGET}
-    core
+    ecflow_all
 )
 set_target_properties(${SERVER_TARGET} PROPERTIES
   INSTALL_RPATH ""
@@ -122,7 +82,7 @@ ecbuild_add_test(
     ${${TEST_TARGET}_srcs}
   LIBS
     ${LIB_TARGET}
-    libclient
+    ecflow_all
     Boost::boost
     Boost::unit_test_framework
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>

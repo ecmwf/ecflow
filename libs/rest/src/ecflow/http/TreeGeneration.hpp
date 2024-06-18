@@ -239,6 +239,13 @@ private:
         if (auto flag = node.get_flag(); flag.flag()) {
             array.emplace_back(publish_atribute(flag, "flag"));
         }
+
+        for (const auto& aviso : node.avisos()) {
+            array.emplace_back(publish_atribute(aviso, "aviso"));
+        }
+        for (const auto& mirror : node.mirrors()) {
+            array.emplace_back(publish_atribute(mirror, "mirror"));
+        }
     }
 
 private:

@@ -242,6 +242,14 @@ const char* DefsDoc::add_label_doc() {
            "  ecflow_client --label=Joe ninety\n";
 }
 
+const char* DefsDoc::add_aviso_doc() {
+    return "Adds an `aviso`_ to a `node`_. See :py:class:`ecflow.Aviso`\n";
+}
+
+const char* DefsDoc::add_mirror_doc() {
+    return "Adds a `mirror`_ to a `node`_. See :py:class:`ecflow.Mirror`\n";
+}
+
 const char* DefsDoc::add_limit_doc() {
     return "Adds a `limit`_ to a `node`_ for simple load management. See :py:class:`ecflow.Limit`\n\n"
            "Multiple limits can be added, however the limit name must be unique.\n"

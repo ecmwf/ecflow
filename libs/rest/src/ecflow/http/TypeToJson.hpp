@@ -30,11 +30,13 @@
 #include "ecflow/core/TimeSlot.hpp"
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/LimitFwd.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 
 /**
  * IMPORTANT
@@ -82,6 +84,8 @@ void to_json(ecf::http::ojson&, const ecf::AutoArchiveAttr*);
 void to_json(ecf::http::ojson&, const ecf::AutoArchiveAttr&);
 void to_json(ecf::http::ojson&, const ecf::AutoRestoreAttr*);
 void to_json(ecf::http::ojson&, const ecf::AutoRestoreAttr&);
+void to_json(ecf::http::ojson&, const ecf::AvisoAttr&);
+void to_json(ecf::http::ojson&, const ecf::MirrorAttr&);
 } // namespace ecf
 
 #endif /* ecflow_http_TypeToJson_HPP */

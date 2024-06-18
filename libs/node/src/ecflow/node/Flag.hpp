@@ -43,36 +43,92 @@ namespace ecf {
 
 class Flag {
 public:
+    using underlying_type_t = int;
+    static_assert(sizeof(underlying_type_t) >= 4, "Flag's underlying type must have at least 4 bytes");
+
     Flag() = default;
 
     /// The BYRULE is used to distinguish between tasks that have RUN and completed
     /// and those that have completed by complete expression.
     enum Type {
-        FORCE_ABORT                 = 0,  // Node* do not run when try_no > ECF_TRIES, and task aborted by user
-        USER_EDIT                   = 1,  // task
-        TASK_ABORTED                = 2,  // task*
-        EDIT_FAILED                 = 3,  // task*
-        JOBCMD_FAILED               = 4,  // task*
-        NO_SCRIPT                   = 5,  // task*
-        KILLED                      = 6,  // task* do not run when try_no > ECF_TRIES, and task killed by user
-        LATE                        = 7,  // Node attribute,
-        MESSAGE                     = 8,  // Node
-        BYRULE                      = 9,  // Node*, set if node is set to complete by complete trigger expression
-        QUEUELIMIT                  = 10, // Node                                   ( NOT USED currently)
-        WAIT                        = 11, // task*  set when waiting for trigger expression in client command
-        LOCKED                      = 12, // Server                                 ( NOT USED currently)
-        ZOMBIE                      = 13, // task*  Set/cleared but never queried by GUI
-        NO_REQUE_IF_SINGLE_TIME_DEP = 14, //
-        ARCHIVED                    = 15, // Container*
-        RESTORED       = 16, // Container*, Avoid re-archiving node that is restored, until it is re-queued again
-        THRESHOLD      = 17, // Job threshold exceeded.(slow disk,large includes/huge scripts,overloaded machine,server)
-        ECF_SIGTERM    = 18, // Record on defs that server received SIGTERM signal, main used in test
-        NOT_SET        = 19,
-        LOG_ERROR      = 20,   // Error in opening or writing to the log file
-        CHECKPT_ERROR  = 21,   // Error in saving checkpoint file
-        KILLCMD_FAILED = 22,   // task*
-        STATUSCMD_FAILED = 23, // task*
-        STATUS           = 24  // task*
+
+        // Node* do not run when try_no > ECF_TRIES, and task aborted by user
+        FORCE_ABORT = 0,
+
+        // task
+        USER_EDIT = 1,
+
+        // task*
+        TASK_ABORTED = 2,
+
+        // task*
+        EDIT_FAILED = 3,
+
+        // task*
+        JOBCMD_FAILED = 4,
+
+        // task*
+        NO_SCRIPT = 5,
+
+        // task* do not run when try_no > ECF_TRIES, and task killed by user
+        KILLED = 6,
+
+        // Node attribute,
+        LATE = 7,
+
+        // Node
+        MESSAGE = 8,
+
+        // Node*, set if node is set to complete by complete trigger expression
+        BYRULE = 9,
+
+        // Node                                   ( NOT USED currently)
+        QUEUELIMIT = 10,
+
+        // task*  set when waiting for trigger expression in client command
+        WAIT = 11,
+
+        // Server                                 ( NOT USED currently)
+        LOCKED = 12,
+
+        // task*  Set/cleared but never queried by GUI
+        ZOMBIE = 13,
+
+        //
+        NO_REQUE_IF_SINGLE_TIME_DEP = 14,
+
+        // Container
+        ARCHIVED = 15,
+
+        // Container, Avoid re-archiving node that is restored, until re-queued again
+        RESTORED = 16,
+
+        // Job threshold exceeded, slow disk, large includes/huge scripts,overloaded machine,server)
+        THRESHOLD = 17,
+
+        // Record on defs that server received SIGTERM signal, main used in test
+        ECF_SIGTERM = 18,
+
+        //
+        NOT_SET = 19,
+
+        // Error in opening or writing to the log file
+        LOG_ERROR = 20,
+
+        // Error in saving checkpoint file
+        CHECKPT_ERROR = 21,
+
+        // task*
+        KILLCMD_FAILED = 22,
+
+        // task*
+        STATUSCMD_FAILED = 23,
+
+        // task*
+        STATUS = 24,
+
+        // Error connecting to remote source
+        REMOTE_ERROR = 25
     };
 
     bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }
@@ -85,7 +141,7 @@ public:
 
     void reset();
     int flag() const { return flag_; }
-    void set_flag(int f) { flag_ = f; }
+    void set_flag(underlying_type_t f) { flag_ = f; }
     void set_flag(const std::string& flags); // these are comma separated
 
     /// returns a comma separated list of all flags set
@@ -97,11 +153,12 @@ public:
     static const char* enum_to_char_star(Flag::Type flag);
 
     /// Used to determine change in state relative to client
+    void set_state_change_no(unsigned int n) { state_change_no_ = n; }
     unsigned int state_change_no() const { return state_change_no_; }
 
     /// returns the list of all flag types
     static std::vector<Flag::Type> list();
-    static constexpr std::array<Flag::Type, 24> array();
+    static constexpr std::array<Flag::Type, 25> array();
 
     /// Converts from string to flag types.
     static Flag::Type string_to_flag_type(const std::string& s);
@@ -110,7 +167,7 @@ public:
     static void valid_flag_type(std::vector<std::string>& vec);
 
 private:
-    int flag_{0};
+    underlying_type_t flag_{0};
     unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
     friend class cereal::access;

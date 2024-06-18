@@ -15,20 +15,31 @@
 /// \brief Provides globals used by server for determining change
 ///
 
+#include <atomic>
 #include <string>
 
-// class Ecf: This class is used in the server to determine incremental changes
-//            to the data model. Each Node/attribute stores a state change no
-//            When ever there is a change, we increment local state change
-//            number with this global.
-// When making large scale changes, ie nodes added or deleted we use modify change no
-// Note: The client will need to at some point copy over the full defs
-//       at this point the state change no add modify number is also copied.
-//       The client passes these two number back to server, the server then
-//       uses these two numbers to determine what's changed.
-//
+/**
+ * This class holds *global data*, and is used in the server to determine incremental changes to the data model.
+ *
+ * This data is composed of two parts:
+ *  - `state_change_no_`: leads the number of node state changes on the currently loaded defs
+ *  - `modify_change_no_`: leads the number of structural changes to the currently loaded defs
+ *
+ * Each Node/Attribute stores a local `state_change_no_`, and whenever there is a change, this local number is
+ * assigned based on the incremented value of the `global state_change_no_`.
+ *
+ * When making large scale changes (e.g. adding or deleting nodes), we increment the global `modify_change_no_`.
+ *
+ * The synchronization strategy is such that when the client eventually copies over the full defs, the state_change_no_
+ * and modify_change_no_ are also copied. In future synchronization attempts, the client includes these two numbers in
+ * the sync request, and thus allows the server to determine what has changed.
+ */
+
 class Ecf {
 public:
+    using counter_t        = unsigned int;
+    using atomic_counter_t = std::atomic<counter_t>;
+
     // Disable default construction
     Ecf() = delete;
     // Disable copy (and move) semantics
@@ -36,14 +47,14 @@ public:
     const Ecf& operator=(const Ecf&) = delete;
 
     /// Increment and then return state change no
-    static unsigned int incr_state_change_no();
-    static unsigned int state_change_no() { return state_change_no_; }
-    static void set_state_change_no(unsigned int x) { state_change_no_ = x; }
+    static counter_t incr_state_change_no();
+    static counter_t state_change_no() { return state_change_no_; }
+    static void set_state_change_no(counter_t x) { state_change_no_ = x; }
 
     /// The modify_change_no_ is used for node addition and deletion and re-ordering
-    static unsigned int incr_modify_change_no();
-    static unsigned int modify_change_no() { return modify_change_no_; }
-    static void set_modify_change_no(unsigned int x) { modify_change_no_ = x; }
+    static counter_t incr_modify_change_no();
+    static counter_t modify_change_no() { return modify_change_no_; }
+    static void set_modify_change_no(counter_t x) { modify_change_no_ = x; }
 
     /// Returns true if we are on the server side.
     /// Only in server side do we increment state/modify numbers
@@ -80,8 +91,8 @@ private:
     static bool server_;
     static bool debug_equality_;
     static unsigned int debug_level_;
-    static unsigned int state_change_no_;
-    static unsigned int modify_change_no_;
+    static thread_local atomic_counter_t state_change_no_;
+    static thread_local atomic_counter_t modify_change_no_;
 };
 
 /// Make sure the Ecf number don't change

@@ -256,6 +256,8 @@ ojson get_node_attributes(const std::string& path) {
     j["autocancel"]  = node->get_autocancel();
     j["autoarchive"] = node->get_autoarchive();
     j["autorestore"] = node->get_autorestore();
+    j["avisos"]      = node->avisos();
+    j["mirrors"]     = node->mirrors();
 
     {
         // Collect 'normal' variables
@@ -612,6 +614,14 @@ ojson add_node_attribute(const httplib::Request& request) {
         std::string value_ = (value == "true" || value == "set") ? "set" : "clear";
         client->alter(path, "change", "event", name, value_);
     }
+    else if (type == "aviso") {
+        const std::string name = payload.at("name");
+        client->alter(path, "add", "aviso", name, value);
+    }
+    else if (type == "mirror") {
+        const std::string name = payload.at("name");
+        client->alter(path, "add", "mirror", name, value);
+    }
     else if (type == "cron") {
         add_attribute_to_path(ecf::CronAttr::create(value), request);
     }
@@ -728,6 +738,10 @@ ojson update_node_attribute_by_user(const httplib::Request& request) {
         const std::string old_value = json_type_to_string(payload.at("old_value"));
         client->alter(path, "delete", type, old_value);
         client->alter(path, "add", type, value);
+    }
+    else if (type == "aviso" || type == "mirror") {
+        const std::string value = json_type_to_string(payload.at("value"));
+        client->alter(path, "change", type, value);
     }
     else if (type == "autocancel") {
         const std::string value = json_type_to_string(payload.at("value"));

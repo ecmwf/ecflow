@@ -406,7 +406,7 @@ bool Defs::verification(std::string& errorMsg) const {
 suite_ptr Defs::add_suite(const std::string& name) {
     if (findSuite(name).get()) {
         std::stringstream ss;
-        ss << "Add Suite failed: A Suite of name '" << name << "' already exist";
+        ss << "Add Suite failed: A Suite of name '" << name << "' already exists";
         throw std::runtime_error(ss.str());
     }
     suite_ptr the_suite = Suite::create(name);
@@ -417,7 +417,7 @@ suite_ptr Defs::add_suite(const std::string& name) {
 void Defs::addSuite(const suite_ptr& s, size_t position) {
     if (findSuite(s->name()).get()) {
         std::stringstream ss;
-        ss << "Add Suite failed: A Suite of name '" << s->name() << "' already exist";
+        ss << "Add Suite failed: A Suite of name '" << s->name() << "' already exists";
         throw std::runtime_error(ss.str());
     }
     add_suite_only(s, position);
@@ -1511,7 +1511,7 @@ void Defs::restore_from_string(const std::string& str) {
     std::string errorMsg, warningMsg;
     if (!restore_from_string(str, errorMsg, warningMsg)) {
         std::stringstream e;
-        e << "Defs::defs_restore_from_string: " << errorMsg;
+        e << "Defs::restore_from_string: " << errorMsg;
         throw std::runtime_error(e.str());
     }
 }

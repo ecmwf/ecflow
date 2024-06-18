@@ -101,7 +101,7 @@
         {
             "menu"           : "Node",
             "name"           : "Suspend",
-            "visible_for"    : "not suspended and node",
+            "visible_for"    : "not suspended and node and (not has_mirror)",
             "command"        : "ecflow_client --suspend <full_name>",
             "status_tip"     : "__cmd__",
             "shortcut"       : "Ctrl+S"
@@ -110,7 +110,7 @@
         {
             "menu"           : "Node",
             "name"           : "Resume",
-            "visible_for"    : "suspended and node",
+            "visible_for"    : "suspended and node and (not has_mirror)",
             "command"        : "ecflow_client --resume <full_name>",
             "status_tip"     : "__cmd__",
             "shortcut"       : "Ctrl+R"
@@ -120,7 +120,7 @@
             "menu"           : "Node",
             "name"           : "Rerun",
             "visible_for"    : "task",
-            "enabled_for"    : "(not active) and (not submitted)",
+            "enabled_for"    : "(not active) and (not submitted) and (not has_mirror)",
             "command"        : "ecflow_client --force queued <full_name>",
             "status_tip"     : "__cmd__",
             "shortcut"       : "Ctrl+U"
@@ -130,7 +130,7 @@
             "menu"           : "Node",
             "name"           : "Set complete",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "submitted or active or unknown or queued or aborted or suspended",
+            "enabled_for"    : "(submitted or active or unknown or queued or aborted or suspended) and (not has_mirror)",
             "command"        : "ecflow_client --force=complete <full_name>",
             "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
@@ -143,7 +143,7 @@
             "menu"           : "Node",
             "name"           : "Set aborted",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "submitted or active or unknown or queued or complete or suspended",
+            "enabled_for"    : "(submitted or active or unknown or queued or complete or suspended) and (not has_mirror)",
             "command"        : "ecflow_client --force=aborted <full_name>",
             "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
@@ -156,7 +156,7 @@
             "menu"           : "Node",
             "name"           : "Execute",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "(not active) and (not submitted)",
+            "enabled_for"    : "(not active) and (not submitted) and (not has_mirror)",
             "command"        : "ecflow_client --run <full_name>",
             "status_tip"     : "__cmd__",
             "shortcut"       : "Ctrl+E"
@@ -166,7 +166,7 @@
             "menu"           : "Node",
             "name"           : "Requeue",
             "visible_for"    : "task or suite or family",
-            "enabled_for"    : "(not active) and (not submitted)",
+            "enabled_for"    : "(not active) and (not submitted) and (not has_mirror)",
             "command"        : "ecflow_client --requeue=force <full_name>",
             "warning"        : "This command can potentially lead to creating zombies when active nodes are present in the current subtree.",
             "question"       : "Confirm requeuing of <full_name>",
@@ -179,7 +179,7 @@
             "menu"           : "Node",
             "name"           : "Requeue aborted",
             "visible_for"    : "suite or family",
-            "enabled_for"    : "aborted or suspended",
+            "enabled_for"    : "aborted or suspended and (not has_mirror)",
             "command"        : "ecflow_client --requeue=abort <full_name>",
             "question"       : "Confirm requeuing of aborted tasks from <full_name>",           
             "question_control" : "menu.confirm.confirmRequeueAborted",

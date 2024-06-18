@@ -8,48 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  src/ecflow/server/BaseServer.hpp
-  src/ecflow/server/CheckPtSaver.hpp
-  src/ecflow/server/NodeTreeTraverser.hpp
-  src/ecflow/server/Server.hpp
-  src/ecflow/server/ServerEnvironment.hpp
-  src/ecflow/server/ServerOptions.hpp
-  src/ecflow/server/SslServer.hpp
-  src/ecflow/server/SslTcpServer.hpp
-  src/ecflow/server/TcpBaseServer.hpp
-  src/ecflow/server/TcpServer.hpp
-  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.hpp>
-  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.hpp>
-  # Sources
-  src/ecflow/server/BaseServer.cpp
-  src/ecflow/server/CheckPtSaver.cpp
-  src/ecflow/server/NodeTreeTraverser.cpp
-  src/ecflow/server/Server.cpp
-  src/ecflow/server/ServerEnvironment.cpp
-  src/ecflow/server/ServerOptions.cpp
-  src/ecflow/server/TcpBaseServer.cpp
-  src/ecflow/server/TcpServer.cpp
-  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslServer.cpp>
-  $<$<BOOL:${OPENSSL_FOUND}>:src/ecflow/server/SslTcpServer.cpp>
-)
-
-ecbuild_add_library(
-  TARGET
-    libserver
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-  PUBLIC_LIBS
-    base
-    Boost::boost # Boost header-only libraries must be available (namely asio)
-)
-target_clangformat(libserver)
-
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 
@@ -59,7 +17,7 @@ ecbuild_add_executable(
   SOURCES
     src/ecflow/server/ServerMain.cpp
   LIBS
-    libserver
+    ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
 )
@@ -105,7 +63,7 @@ ecbuild_add_test(
     test/TestServer_main.cpp # test entry point
     test/TestServer.cpp
   LIBS
-    libserver
+    ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
@@ -114,6 +72,29 @@ ecbuild_add_test(
 )
 
 target_clangformat(u_server CONDITION ENABLE_TESTS)
+
+# ================================================================================
+# TEST
+ecbuild_add_test(
+  TARGET
+    s_periodic_scheduler
+  LABELS
+    integration nightly
+  INCLUDES
+    src
+  SOURCES
+    test/TestPeriodicScheduler.cpp
+    test/TestPeriodicScheduler_main.cpp # test entry point
+  LIBS
+    ecflow_all
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    Threads::Threads
+  TEST_DEPENDS
+    u_base
+)
+
+target_clangformat(s_periodic_scheduler CONDITION ENABLE_TESTS)
 
 # ===================================================================
 # install

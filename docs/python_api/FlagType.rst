@@ -98,7 +98,7 @@ Flags store state associated with a node
 
 .. py:attribute:: FlagType.names
    :module: ecflow
-   :value: {'archived': ecflow.FlagType.archived, 'byrule': ecflow.FlagType.byrule, 'checkpt_error': ecflow.FlagType.checkpt_error, 'edit_failed': ecflow.FlagType.edit_failed, 'force_abort': ecflow.FlagType.force_abort, 'jobcmd_failed': ecflow.FlagType.jobcmd_failed, 'killcmd_failed': ecflow.FlagType.killcmd_failed, 'killed': ecflow.FlagType.killed, 'late': ecflow.FlagType.late, 'locked': ecflow.FlagType.locked, 'log_error': ecflow.FlagType.log_error, 'message': ecflow.FlagType.message, 'no_reque': ecflow.FlagType.no_reque, 'no_script': ecflow.FlagType.no_script, 'not_set': ecflow.FlagType.not_set, 'queuelimit': ecflow.FlagType.queuelimit, 'restored': ecflow.FlagType.restored, 'sigterm': ecflow.FlagType.sigterm, 'status': ecflow.FlagType.status, 'statuscmd_failed': ecflow.FlagType.statuscmd_failed, 'task_aborted': ecflow.FlagType.task_aborted, 'threshold': ecflow.FlagType.threshold, 'user_edit': ecflow.FlagType.user_edit, 'wait': ecflow.FlagType.wait, 'zombie': ecflow.FlagType.zombie}
+   :value: {'archived': ecflow.FlagType.archived, 'byrule': ecflow.FlagType.byrule, 'checkpt_error': ecflow.FlagType.checkpt_error, 'edit_failed': ecflow.FlagType.edit_failed, 'force_abort': ecflow.FlagType.force_abort, 'jobcmd_failed': ecflow.FlagType.jobcmd_failed, 'killcmd_failed': ecflow.FlagType.killcmd_failed, 'killed': ecflow.FlagType.killed, 'late': ecflow.FlagType.late, 'locked': ecflow.FlagType.locked, 'log_error': ecflow.FlagType.log_error, 'message': ecflow.FlagType.message, 'no_reque': ecflow.FlagType.no_reque, 'no_script': ecflow.FlagType.no_script, 'not_set': ecflow.FlagType.not_set, 'queuelimit': ecflow.FlagType.queuelimit, 'remote_error': ecflow.FlagType.remote_error, 'restored': ecflow.FlagType.restored, 'sigterm': ecflow.FlagType.sigterm, 'status': ecflow.FlagType.status, 'statuscmd_failed': ecflow.FlagType.statuscmd_failed, 'task_aborted': ecflow.FlagType.task_aborted, 'threshold': ecflow.FlagType.threshold, 'user_edit': ecflow.FlagType.user_edit, 'wait': ecflow.FlagType.wait, 'zombie': ecflow.FlagType.zombie}
 
 
 .. py:attribute:: FlagType.no_reque
@@ -119,6 +119,11 @@ Flags store state associated with a node
 .. py:attribute:: FlagType.queuelimit
    :module: ecflow
    :value: ecflow.FlagType.queuelimit
+
+
+.. py:attribute:: FlagType.remote_error
+   :module: ecflow
+   :value: ecflow.FlagType.remote_error
 
 
 .. py:attribute:: FlagType.restored
@@ -158,7 +163,7 @@ Flags store state associated with a node
 
 .. py:attribute:: FlagType.values
    :module: ecflow
-   :value: {0: ecflow.FlagType.force_abort, 1: ecflow.FlagType.user_edit, 2: ecflow.FlagType.task_aborted, 3: ecflow.FlagType.edit_failed, 4: ecflow.FlagType.jobcmd_failed, 5: ecflow.FlagType.no_script, 6: ecflow.FlagType.killed, 7: ecflow.FlagType.late, 8: ecflow.FlagType.message, 9: ecflow.FlagType.byrule, 10: ecflow.FlagType.queuelimit, 11: ecflow.FlagType.wait, 12: ecflow.FlagType.locked, 13: ecflow.FlagType.zombie, 14: ecflow.FlagType.no_reque, 15: ecflow.FlagType.archived, 16: ecflow.FlagType.restored, 17: ecflow.FlagType.threshold, 18: ecflow.FlagType.sigterm, 19: ecflow.FlagType.not_set, 20: ecflow.FlagType.log_error, 21: ecflow.FlagType.checkpt_error, 22: ecflow.FlagType.killcmd_failed, 23: ecflow.FlagType.statuscmd_failed, 24: ecflow.FlagType.status}
+   :value: {0: ecflow.FlagType.force_abort, 1: ecflow.FlagType.user_edit, 2: ecflow.FlagType.task_aborted, 3: ecflow.FlagType.edit_failed, 4: ecflow.FlagType.jobcmd_failed, 5: ecflow.FlagType.no_script, 6: ecflow.FlagType.killed, 7: ecflow.FlagType.late, 8: ecflow.FlagType.message, 9: ecflow.FlagType.byrule, 10: ecflow.FlagType.queuelimit, 11: ecflow.FlagType.wait, 12: ecflow.FlagType.locked, 13: ecflow.FlagType.zombie, 14: ecflow.FlagType.no_reque, 15: ecflow.FlagType.archived, 16: ecflow.FlagType.restored, 17: ecflow.FlagType.threshold, 18: ecflow.FlagType.sigterm, 19: ecflow.FlagType.not_set, 20: ecflow.FlagType.log_error, 21: ecflow.FlagType.checkpt_error, 22: ecflow.FlagType.killcmd_failed, 23: ecflow.FlagType.statuscmd_failed, 24: ecflow.FlagType.status, 25: ecflow.FlagType.remote_error}
 
 
 .. py:attribute:: FlagType.wait

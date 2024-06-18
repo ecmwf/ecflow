@@ -34,6 +34,7 @@ protected:
 
 public:
     ~Submittable() override;
+
     bool check_defaults() const override;
 
     /// Initialise the task. will set the state to NState::ACTIVE

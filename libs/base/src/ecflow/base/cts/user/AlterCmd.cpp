@@ -22,13 +22,19 @@
 #include "ecflow/core/Enumerate.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/exceptions/Exceptions.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/parser/AvisoParser.hpp"
+#include "ecflow/node/parser/MirrorParser.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -75,7 +81,9 @@ struct EnumTraits<AlterCmd::Delete_attr_type>
         std::make_pair(AlterCmd::DEL_ZOMBIE, "zombie"),
         std::make_pair(AlterCmd::DEL_LATE, "late"),
         std::make_pair(AlterCmd::DEL_QUEUE, "queue"),
-        std::make_pair(AlterCmd::DEL_GENERIC, "generic")
+        std::make_pair(AlterCmd::DEL_GENERIC, "generic"),
+        std::make_pair(AlterCmd::DEL_AVISO, "aviso"),
+        std::make_pair(AlterCmd::DEL_MIRROR, "mirror")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -99,7 +107,9 @@ struct EnumTraits<AlterCmd::Add_attr_type>
         std::make_pair(AlterCmd::ADD_LATE, "late"),
         std::make_pair(AlterCmd::ADD_LIMIT, "limit"),
         std::make_pair(AlterCmd::ADD_INLIMIT, "inlimit"),
-        std::make_pair(AlterCmd::ADD_LABEL, "label")
+        std::make_pair(AlterCmd::ADD_LABEL, "label"),
+        std::make_pair(AlterCmd::ADD_AVISO, "aviso"),
+        std::make_pair(AlterCmd::ADD_MIRROR, "mirror")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -130,7 +140,9 @@ struct EnumTraits<AlterCmd::Change_attr_type>
         std::make_pair(AlterCmd::DEFSTATUS, "defstatus"),
         std::make_pair(AlterCmd::LATE, "late"),
         std::make_pair(AlterCmd::TIME, "time"),
-        std::make_pair(AlterCmd::TODAY, "today")
+        std::make_pair(AlterCmd::TODAY, "today"),
+        std::make_pair(AlterCmd::AVISO, "aviso"),
+        std::make_pair(AlterCmd::MIRROR, "mirror")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -398,6 +410,12 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 case AlterCmd::DELETE_ATTR_ND:
                     break;
+                case AlterCmd::DEL_AVISO:
+                    node->deleteAviso(name_);
+                    break;
+                case AlterCmd::DEL_MIRROR:
+                    node->deleteMirror(name_);
+                    break;
                 default:
                     break;
             }
@@ -432,6 +450,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::LABEL:
                     node->changeLabel(name_, value_);
                     break;
+                case AlterCmd::AVISO:
+                    node->changeAviso(name_, value_);
+                    break;
                 case AlterCmd::TRIGGER:
                     node->changeTrigger(name_);
                     break; // expression must parse
@@ -461,6 +482,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 case AlterCmd::CHANGE_ATTR_ND:
                     break;
+                case AlterCmd::MIRROR:
+                    node->changeMirror(name_, value_);
+                    break;
                 default:
                     break;
             }
@@ -483,6 +507,16 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::ADD_DAY:
                     node->addDay(DayAttr::create(name_));
                     break;
+                case AlterCmd::ADD_AVISO: {
+                    auto aviso = AvisoParser::parse_aviso_line(value_, name_, node.get());
+                    node->addAviso(aviso);
+                    break;
+                }
+                case AlterCmd::ADD_MIRROR: {
+                    auto mirror = MirrorParser::parse_mirror_line(value_, name_, node.get());
+                    node->addMirror(mirror);
+                    break;
+                }
                 case AlterCmd::ADD_ZOMBIE:
                     node->addZombie(ZombieAttr::create(name_));
                     break;
@@ -575,15 +609,15 @@ const char* AlterCmd::desc() {
            "         one option must be specified\n"
            "arg2 = For delete:\n"
            "         [ variable | time | today | date  | day | cron | event | meter | late | generic | queue |\n"
-           "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
+           "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie | aviso | mirror ]\n"
            "       For change:\n"
            "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-           "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time | today "
-           "]\n"
+           "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time |\n"
+           "           today, aviso, mirror ]\n"
            "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
            "         the change to take effect fully.\n"
            "       For add:\n"
-           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
+           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror ]\n"
            "       For set_flag and clear_flag:\n"
            "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
            "           statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | \n"
@@ -592,13 +626,21 @@ const char* AlterCmd::desc() {
            "       For sort:\n"
            "         [ event | meter | label | variable| limit | all ]\n"
            "arg3 = name/value\n"
-           "       when changing, attributes like variable,meter,event,label,limits,late\n"
-           "       we expect arguments to be quoted. For sort this argument can be called 'recursive'\n"
            "arg4 = new_value\n"
-           "       specifies the new value only used for 'change'/'add'\n"
-           "       values with spaces must be quoted\n"
-           "arg5 = paths : At least one node path required.The paths must start with a leading '/' character\n\n"
-           "\nUsage:\n\n"
+           "arg5 = paths : At least one node path required.The paths must start with a leading '/' character\n"
+           "\n"
+           "When adding or updating attributes, such as variable, meter, event, label, limits, or late,\n"
+           "  the name (arg3) and value (arg4) must be quoted.\n"
+           "\n"
+           "When sorting attributes, 'recursive' can be used as the value (arg3)\n"
+           "\n"
+           "When adding or updating aviso and mirror attributes, the value (arg4) is expected to be a quoted list of\n"
+           "  configuration options. For example:\n"
+           "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n"
+           "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } }'\n"
+           "                  --url http://aviso/ --schema /path/to/schema --polling 60\"\n"
+           "\n"
+           "Usage:\n\n"
            "   ecflow_client --alter=add variable GLOBAL \"value\" /           # add server variable\n"
            "   ecflow_client --alter=add variable FRED \"value\" /path/to/node # add node variable\n"
            "   ecflow_client --alter=add time \"+00:20\" /path/to/node\n"
@@ -800,6 +842,25 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             value = options[3];
             break;
         }
+        case AlterCmd::ADD_AVISO: {
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: add: Expected 'add aviso <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+        case AlterCmd::ADD_MIRROR: {
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: add: Expected 'add mirror <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+
         case AlterCmd::ADD_LIMIT: {
             if (options.size() < 4) {
                 ss << "AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n"
@@ -852,6 +913,14 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         case AlterCmd::ADD_DAY:
             (void)DayAttr::create(name);
             break;
+        case AlterCmd::ADD_AVISO: {
+            AvisoParser::parse_aviso_line(value, name);
+            break;
+        }
+        case AlterCmd::ADD_MIRROR: {
+            MirrorParser::parse_mirror_line(value, name);
+            break;
+        }
         case AlterCmd::ADD_ZOMBIE:
             (void)ZombieAttr::create(name);
             break;
@@ -1038,6 +1107,18 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
                 if (emptyCron.structureEquals(parsedCron)) {
                     throw std::runtime_error("Delete cron Attribute failed. Check cron " + name);
                 }
+            }
+            break;
+        }
+        case AlterCmd::DEL_AVISO: {
+            if (!AvisoAttr::is_valid_name(name)) {
+                throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
+            }
+            break;
+        }
+        case AlterCmd::DEL_MIRROR: {
+            if (!MirrorAttr::is_valid_name(name)) {
+                throw ecf::InvalidArgument(ecf::Message("Invalid MirrorAttr name :", name_));
             }
             break;
         }
@@ -1281,6 +1362,30 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                 }
             }
             name = options[2];
+            break;
+        }
+
+        case AlterCmd::AVISO: {
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: change: Expected 'change aviso <name> <cfg> <path> [<path>] [...]."
+                   << "Incorrect number of arguments.\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            name  = options[2];
+            value = options[3];
+            break;
+        }
+
+        case AlterCmd::MIRROR: {
+            if (options.size() != 4 || paths.size() < 1) {
+                ss << "AlterCmd: change: Expected 'change mirror <name> <cfg> <path> [<path>] [...]."
+                   << "Incorrect number of arguments.\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            name  = options[2];
+            value = options[3];
             break;
         }
 
