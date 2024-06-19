@@ -30,7 +30,7 @@
 
         "attribute"  : {
             "type"  : "list",
-            "values" : "date|event|label|limit|limiter|meter|repeat|time|trigger|variable"
+            "values" : "date|event|label|limit|limiter|meter|repeat|time|trigger|variable|mirror|aviso"
         },
 
         "event" : {
@@ -55,6 +55,54 @@
             "label_value" : {
                 "type" : "string",
                 "label" : "Label value"
+            }
+        },
+        "mirror" : {
+            "mirror_name" : {
+                "type" : "string",
+                "label" : "Mirror name"
+            },
+            "mirror_remote_path" : {
+                "type" : "string",
+                "label" : "Mirror remote path"
+            },
+            "mirror_remote_host" : {
+                "type" : "string",
+                "label" : "Mirror remote host"
+            },
+            "mirror_remote_port" : {
+                "type" : "string",
+                "label" : "Mirror remote port"
+            },
+            "mirror_polling" : {
+                "type" : "string",
+                "label" : "Mirror polling"
+            }
+        },
+        "aviso" : {
+            "aviso_name" : {
+                "type" : "string",
+                "label" : "Aviso name"
+            },
+            "aviso_listener" : {
+                "type" : "string",
+                "label" : "Aviso listener"
+            },
+            "aviso_url" : {
+                "type" : "string",
+                "label" : "Aviso URL"
+            },
+            "aviso_schema" : {
+                "type" : "string",
+                "label" : "Aviso schema"
+            },
+            "aviso_polling" : {
+                "type" : "string",
+                "label" : "Aviso polling"
+            },
+            "aviso_auth" : {
+                "type" : "string",
+                "label" : "Aviso authentication"
             }
         },
         "meter" : {

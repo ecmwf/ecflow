@@ -84,6 +84,15 @@ char *nameof(char *name) {
   return s;
 }
 
+pid_t do_setsid(void) {
+#if defined(linux) || defined(__APPLE__) || defined(__MACH__) || defined(hpux) || defined(solaris) || defined(SGI) || \
+    defined(SVR4) || defined(AIX) || defined(SYG) || defined(alpha) || defined(__NVCOMPILER)
+    return setsid();
+#else
+    return setsid(0);
+#endif
+}
+
 int main(int argc, char** argv)
 {
   char *infile = NULL;             /* Temporary input file        */
@@ -183,11 +192,7 @@ int main(int argc, char** argv)
      for (n=3; n<65535 ;n++) fclose(n); */
 
   /* create a new session from the child process */
-#if defined(linux) || defined(__APPLE__) || defined(__MACH__) || defined(hpux) || defined(solaris) || defined(SGI) || defined(SVR4) || defined(AIX) || defined(SYG) || defined(alpha)
-  if( setsid() == -1 )
-#else
-  if( setsid(0) == -1 )
-#endif
+  if( do_setsid() == -1 )
   {
     perror("STANDALONE-SETSID");
     exit(1);

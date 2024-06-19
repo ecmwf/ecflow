@@ -319,7 +319,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode,
                 it == ecf::Aspect::LIMIT || it == ecf::Aspect::EXPR_TRIGGER || it == ecf::Aspect::EXPR_COMPLETE ||
                 it == ecf::Aspect::REPEAT || it == ecf::Aspect::REPEAT_INDEX || it == ecf::Aspect::NODE_VARIABLE ||
                 it == ecf::Aspect::LATE || it == ecf::Aspect::TODAY || it == ecf::Aspect::TIME ||
-                it == ecf::Aspect::DAY || it == ecf::Aspect::CRON || it == ecf::Aspect::DATE) {
+                it == ecf::Aspect::DAY || it == ecf::Aspect::CRON || it == ecf::Aspect::DATE ||
+                it == ecf::Aspect::AVISO || it == ecf::Aspect::MIRROR) {
                 if (node && node->isAttrInitialised()) {
                     Q_EMIT attributesChanged(this, node);
                 }

@@ -16,14 +16,15 @@ alter
             one option must be specified
    arg2 = For delete:
             [ variable | time | today | date  | day | cron | event | meter | late | generic | queue |
-              label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]
+              label | trigger | complete | repeat | limit | inlimit | limit_path | zombie | aviso | mirror ]
           For change:
             [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |
-              trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time | today ]
+              trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time |
+              today, aviso, mirror ]
             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for
             the change to take effect fully.
           For add:
-            [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]
+            [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror ]
           For set_flag and clear_flag:
             [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed 
               statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | 
@@ -32,13 +33,19 @@ alter
           For sort:
             [ event | meter | label | variable| limit | all ]
    arg3 = name/value
-          when changing, attributes like variable,meter,event,label,limits,late
-          we expect arguments to be quoted. For sort this argument can be called 'recursive'
    arg4 = new_value
-          specifies the new value only used for 'change'/'add'
-          values with spaces must be quoted
    arg5 = paths : At least one node path required.The paths must start with a leading '/' character
    
+   When adding or updating attributes, such as variable, meter, event, label, limits, or late,
+     the name (arg3) and value (arg4) must be quoted.
+   
+   When sorting attributes, 'recursive' can be used as the value (arg3)
+   
+   When adding or updating aviso and mirror attributes, the value (arg4) is expected to be a quoted list of
+     configuration options. For example:
+      * for aviso, "--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)"
+      * for mirror, "--listener '{ \"event\": \"mars\", \"request\": { \"class\": "od" } }'
+                     --url http://aviso/ --schema /path/to/schema --polling 60"
    
    Usage:
    

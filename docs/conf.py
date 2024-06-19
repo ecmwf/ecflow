@@ -93,7 +93,7 @@ rst_prolog = """
 
 
 def get_ecflow_version():
-    version = "5.12.4"
+    version = "5.13.0"
     ecflow_version = version.split(".")
     print("Extracted ecflow version '" + str(ecflow_version))
     return ecflow_version

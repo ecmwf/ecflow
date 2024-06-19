@@ -14,6 +14,7 @@
     <file alias="icon_archived.svg">../images/icon_archived.svg</file>
     <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>
     <file alias="icon_checkpt_err.svg">../images/icon_checkpt_err.svg</file>
+    <file alias="icon_remote_err.svg">../images/icon_no_access.svg</file>
     <file alias="icon_clock.svg">../images/icon_clock.svg</file>     
     <file alias="icon_clock_free.svg">../images/icon_clock_free.svg</file>
     <file alias="icon_complete.svg">../images/icon_complete.svg</file>
@@ -43,6 +44,7 @@
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
     <file alias="add_variable_column.svg">../images/add_variable_column.svg</file>    
     <file alias="attribute.svg">../images/attribute.svg</file>
+    <file alias="aviso.svg">../images/aviso.svg</file>
     <file alias="autoscroll.svg">../images/autoscroll.svg</file>
     <file alias="autoscroll_off.svg">../images/autoscroll_off.svg</file>
     <file alias="chain.svg">../images/chain.svg</file>
@@ -127,6 +129,7 @@
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="reload_green.svg">../images/reload_green.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
+    <file alias="remote.svg">../images/remote.svg</file>
     <file alias="remove.svg">../images/remove.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
     <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>

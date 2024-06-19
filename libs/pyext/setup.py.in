@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+from distutils.core import setup, Extension
+import os
+import sys
+import glob
+
+# ========================================================================
+# Usage:
+#   cd $WK; cd ecbuild/release/; sh -x ../../cmake.sh release; make ; make install
+#   calling 'sh -x ../../cmake.sh release' will generate setup.py from setup.py.in
+# Issues:
+#   Cannot test cmake install, since it will always install to 
+#     /usr/local/apps/python/current/lib/python2.7/site-packages/ecflow
+#
+# To test install manually, we can:
+#   python3 setup.py --help-commands # help
+#
+#   cd $WK/libs/pyext
+#   rm -rf build/                     # for a clean build
+#   python setup.py build_ext         # build C/C++ extensions (compile/link to build directory)
+#   python setup.py install --home=~
+#
+# See: http://docs.python.org/2/distutils/apiref.html?highlight=extension#distutils.core.Extension
+#
+# ==========================================================================
+# Permissions: The permission of configured file are wrong: 2 choices
+# o Make sure origin file, has the right permissions
+# o Copy file to different directory, and change the permissions
+#   since file(COPY) does rename files
+#   configure_file(setup.py.in ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/setup.py)
+#       now copy the temporary into the final destination, setting the permissions
+#   file(COPY ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/setup.py
+#     DESTINATION ${CMAKE_BINARY_DIR}
+#     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+#     GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+# ============================================================================
+        
+#=============================================================================
+# define the directories to search for include files
+# to get this to work, you will need to include the path
+# to your boost installation and  ecflow includes
+boost_root=os.getenv("BOOST_ROOT") 
+include_dirs = [ "@CMAKE_CURRENT_SOURCE_DIR@/../3rdparty/cereal/include",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/core/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/attribute/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/node/parser/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/node/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/base/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/base/src/cts",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/base/src/stc",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/simulator/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../libs/client/src",
+                 "@CMAKE_CURRENT_SOURCE_DIR@/src",
+                 boost_root,
+               ]
+
+# define the library directories to include any extra libraries that may be needed.
+# Give preference to release libs   
+boost_lib_dir = boost_root + "/stage/lib/"
+library_dirs = ['@CMAKE_BINARY_DIR@/libs/core',
+                '@CMAKE_BINARY_DIR@/libs/attribute/',
+                '@CMAKE_BINARY_DIR@/libs/node/',
+                '@CMAKE_BINARY_DIR@/libs/base/',
+                '@CMAKE_BINARY_DIR@/libs/simulator/',
+                '@CMAKE_BINARY_DIR@/libs/client/',
+                boost_lib_dir,
+               ]
+
+# define the libraries to link with this includes the boost lib
+libraries = [ 'core' , 'nodeattr', 'node', 'base', 'libsimu', 'libclient',
+              'boost_system',
+              'boost_filesystem',
+              'boost_program_options',
+              'boost_date_time', 
+              'boost_python36' ]
+
+# Using gcc-4.8 with boost 1.53 linux requires these flags
+extra_compile_args = ['-ftemplate-depth-512','-Wno-unused-variable','-Wno-deprecated-declarations','-Wno-unused-local-typedefs','-Wno-maybe-uninitialized' ]
+extra_link_args = []
+
+# create the extension and add it to the python distribution
+# o glob.glob(os.path.join('src', '*.cpp'))
+#   This expand the list of cpp files that need to be compiled
+#
+# The configuation below installs to:
+#   o /usr/local/apps/python/current/lib/python2.7/site-packages/ecflow
+#     when, "python setup.py install" is used:
+#   lib/python2.7/site-packages/ecflow/ecflow.so
+#                                     __init__.py               
+setup( name='ecflow', 
+       version='@ecflow_VERSION@', 
+       author      = 'ECMWF',
+       description = """ecflow Python interface""",
+       packages = [ 'ecflow' ],
+       url = 'https://confluence.ecmwf.int/display/ECFLOW/ecflow+home',
+       license = 'Apache',
+       package_dir={'ecflow': '@CMAKE_CURRENT_SOURCE_DIR@/ecflow'},
+       ext_modules=[ Extension( 
+                              'ecflow.ecflow', 
+                              glob.glob(os.path.join('@CMAKE_CURRENT_SOURCE_DIR@/src', '*.cpp')), 
+                              include_dirs=include_dirs, 
+                              library_dirs=library_dirs, 
+                              libraries=libraries,
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args
+                              )
+                    ],
+   )

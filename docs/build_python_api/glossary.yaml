@@ -1,6 +1,7 @@
 - active
 - aborted
 - autocancel
+- aviso
 - complete expression
 - check point
 - child command
@@ -25,6 +26,7 @@
 - late
 - limit
 - meter
+- mirror
 - node
 - pre-processing
 - queue

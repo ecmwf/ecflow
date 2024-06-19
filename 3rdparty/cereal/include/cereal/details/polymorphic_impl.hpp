@@ -186,7 +186,14 @@ namespace cereal
       template <class Derived> inline
       static const Derived * downcast( const void * dptr, std::type_info const & baseInfo )
       {
+#pragma GCC diagnostic push
+#if defined(__GNUC__) && (__GNUC__ >= 13)
+#pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
+        // Without the warning suppression, the following source line generates a warning in GNU GCC 13.x
+        // The warning is a false positive, reported as a GCC compiler regression: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107532
         auto const & mapping = lookup( baseInfo, typeid(Derived), [&](){ UNREGISTERED_POLYMORPHIC_CAST_EXCEPTION(save) } );
+#pragma GCC diagnostic pop
 
         for( auto const * dmap : mapping )
           dptr = dmap->downcast( dptr );
@@ -200,7 +207,15 @@ namespace cereal
       template <class Derived> inline
       static void * upcast( Derived * const dptr, std::type_info const & baseInfo )
       {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic push
+#if defined(__GNUC__) && (__GNUC__ >= 13)
+    #pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
+        // Without the warning suppression, the following source line generates a warning in GNU GCC 13.x
+        // The warning is a false positive, reported as a GCC compiler regression: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107532
         auto const & mapping = lookup( baseInfo, typeid(Derived), [&](){ UNREGISTERED_POLYMORPHIC_CAST_EXCEPTION(load) } );
+#pragma GCC diagnostic pop
 
         void * uptr = dptr;
         for( auto mIter = mapping.rbegin(), mEnd = mapping.rend(); mIter != mEnd; ++mIter )
@@ -213,7 +228,15 @@ namespace cereal
       template <class Derived> inline
       static std::shared_ptr<void> upcast( std::shared_ptr<Derived> const & dptr, std::type_info const & baseInfo )
       {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic push
+#if defined(__GNUC__) && (__GNUC__ >= 13)
+    #pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif
+        // Without the warning suppression, the following source line generates a warning in GNU GCC 13.x
+        // The warning is a false positive, reported as a GCC compiler regression: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107532
         auto const & mapping = lookup( baseInfo, typeid(Derived), [&](){ UNREGISTERED_POLYMORPHIC_CAST_EXCEPTION(load) } );
+#pragma GCC diagnostic pop
 
         std::shared_ptr<void> uptr = dptr;
         for( auto mIter = mapping.rbegin(), mEnd = mapping.rend(); mIter != mEnd; ++mIter )

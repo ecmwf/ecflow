@@ -56,3 +56,4 @@ suite-definition file easier. There are two ways of defining a suite.
    suite_definition_file_format/index.rst
    dependencies/index.rst
    attributes/index.rst
+   external/index.rst
