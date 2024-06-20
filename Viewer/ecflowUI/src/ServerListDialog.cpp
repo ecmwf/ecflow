@@ -202,6 +202,10 @@ bool ServerAddDialog::isSsl() const {
     return sslCb->isChecked();
 }
 
+bool ServerAddDialog::isHttp() const {
+    return httpCb->isChecked();
+}
+
 bool ServerAddDialog::addToView() const {
     return addToCurrentCb->isChecked();
 }
@@ -218,6 +222,7 @@ ServerEditDialog::ServerEditDialog(QString name,
                                    QString user,
                                    bool favourite,
                                    bool ssl,
+                                   bool http,
                                    QWidget* parent)
     : QDialog(parent),
       ServerDialogChecker(tr("Cannot modify server!")),
@@ -230,6 +235,7 @@ ServerEditDialog::ServerEditDialog(QString name,
     userEdit->setText(user);
     favCh->setChecked(favourite);
     sslCh->setChecked(ssl);
+    httpCh->setChecked(http);
 
 #ifndef ECF_OPENSSL
     sslMessageLabel->hide();
@@ -288,6 +294,10 @@ bool ServerEditDialog::isFavourite() const {
 
 bool ServerEditDialog::isSsl() const {
     return sslCh->isChecked();
+}
+
+bool ServerEditDialog::isHttp() const {
+    return httpCh->isChecked();
 }
 
 //======================================
@@ -438,6 +448,7 @@ void ServerListDialog::editItem(const QModelIndex& index) {
                            QString::fromStdString(item->user()),
                            item->isFavourite(),
                            item->isSsl(),
+                           item->isHttp(),
                            this);
 
         // The dialog checks the name, host and port!
@@ -450,7 +461,8 @@ void ServerListDialog::editItem(const QModelIndex& index) {
                                                  d.host().toStdString(),
                                                  d.port().toStdString(),
                                                  d.user().toStdString(),
-                                                 d.isSsl());
+                                                 d.isSsl(),
+                                                 d.isHttp());
 
             if (item) {
                 if (item->isFavourite() != d.isFavourite()) {
@@ -477,6 +489,7 @@ void ServerListDialog::duplicateItem(const QModelIndex& index) {
                            QString::fromStdString(item->user()),
                            item->isFavourite(),
                            item->isSsl(),
+                           item->isHttp(),
                            this);
 
         // The dialog checks the name, host and port!
@@ -488,6 +501,7 @@ void ServerListDialog::duplicateItem(const QModelIndex& index) {
                                         d.user().toStdString(),
                                         item->isFavourite(),
                                         item->isSsl(),
+                                        item->isHttp(),
                                         false);
             model_->dataChangeFinished();
         }
@@ -508,6 +522,7 @@ void ServerListDialog::addItem() {
                                                d.user().toStdString(),
                                                false,
                                                d.isSsl(),
+                                               d.isHttp(),
                                                false);
         }
         catch (std::exception& e) {
@@ -772,7 +787,7 @@ void ServerListModel::dataChangeFinished() {
 }
 
 int ServerListModel::columnCount(const QModelIndex& /*parent*/) const {
-    return 8;
+    return 9;
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const {
@@ -806,6 +821,8 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const {
                 return QString::fromStdString(item->user());
             case SslColumn:
                 return (item->isSsl()) ? "ssl" : "";
+            case HttpColumn:
+                return (item->isHttp()) ? "http" : "";
             case UseColumn: {
                 int n = item->useCnt();
                 if (n > 0)
@@ -892,6 +909,8 @@ QVariant ServerListModel::headerData(int section, Qt::Orientation ori, int role)
                 return tr("S");
             case SslColumn:
                 return tr("SSL");
+            case HttpColumn:
+                return tr("HTTP");
             case FavouriteColumn:
                 return tr("F");
             case UseColumn:
@@ -918,9 +937,11 @@ QVariant ServerListModel::headerData(int section, Qt::Orientation ori, int role)
                                          <br>The name, host and port of these server entries cannot be edited.");
             case SslColumn:
                 return tr("Indicates if a server uses SSL communication.");
+            case HttpColumn:
+                return tr("Indicates if a server uses HTTP communication.");
             case FavouriteColumn:
                 return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \
-    				                        are appearing in the server list under the <b>Servers menu</b> in the menubar");
+                           are appearing in the server list under the <b>Servers menu</b> in the menubar");
             case UseColumn:
                 return tr("Indicates the <b>number of tabs</b> where the server is loaded.");
             default:
