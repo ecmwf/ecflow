@@ -41,6 +41,7 @@ public:
     bool isFavourite() const { return favourite_; }
     bool isSystem() const { return system_; }
     bool isSsl() const { return ssl_; }
+    bool isHttp() const { return http_; }
 
     bool isUsed() const;
     int useCnt() const { return useCnt_; }
@@ -56,7 +57,8 @@ protected:
                const std::string& port,
                const std::string& user,
                bool favourite,
-               bool ssl);
+               bool ssl,
+               bool http);
     ~ServerItem();
 
     void name(const std::string& name) { name_ = name; }
@@ -67,6 +69,7 @@ protected:
     void setFavourite(bool b);
     void setSystem(bool b);
     void setSsl(bool b);
+    void setHttp(bool b);
     void setUser(const std::string&);
 
     void registerUsageBegin();
@@ -82,6 +85,7 @@ protected:
     bool favourite_{false};
     bool system_{false};
     bool ssl_{false};
+    bool http_{false};
     int useCnt_{0};
     ServerHandler* handler_{nullptr};
 
