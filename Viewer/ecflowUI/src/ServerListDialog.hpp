@@ -46,6 +46,7 @@ public:
                      QString user,
                      bool favourite,
                      bool ssl,
+                     bool http,
                      QWidget* parent = nullptr);
 
     QString name() const;
@@ -53,6 +54,7 @@ public:
     QString port() const;
     QString user() const;
     bool isSsl() const;
+    bool isHttp() const;
     bool isFavourite() const;
 
 public Q_SLOTS:
@@ -74,6 +76,7 @@ public:
     QString user() const;
     bool addToView() const;
     bool isSsl() const;
+    bool isHttp() const;
 
 public Q_SLOTS:
     void accept() override;
@@ -157,8 +160,9 @@ public:
         UserColumn      = 4,
         SystemColumn    = 5,
         SslColumn       = 6,
-        FavouriteColumn = 7,
-        UseColumn       = 8
+        HttpColumn      = 7,
+        FavouriteColumn = 8,
+        UseColumn       = 9
     };
     enum CustomItemRole { IconStatusRole = Qt::UserRole + 1 };
 
