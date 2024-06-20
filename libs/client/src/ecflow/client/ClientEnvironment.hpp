@@ -92,6 +92,7 @@ public:
 
     bool http() const { return http_; }
     void enable_http() { http_ = true; }
+    void disable_http() { http_ = false; }
 
 #ifdef ECF_OPENSSL
     /// return true if this is a ssl enabled server
