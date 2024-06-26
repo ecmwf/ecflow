@@ -2652,6 +2652,18 @@ size_t Node::position() const {
     return std::numeric_limits<std::size_t>::max();
 }
 
+std::vector<Variable> Node::get_all_generated_variables() const {
+    std::vector<Variable> all;
+    const Node* current = this;
+
+    while (current) {
+        current->gen_variables(all);
+        current = current->parent();
+    }
+
+    return all;
+}
+
 void Node::gen_variables(std::vector<Variable>& vec) const {
     repeat_.gen_variables(vec); // if repeat_ is empty vec is unchanged
 }

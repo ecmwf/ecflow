@@ -13,20 +13,30 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "ecflow/attribute/Variable.hpp"
 
 namespace ecf::service::mirror {
+
+struct MirrorData
+{
+    int state;
+    std::vector<Variable> regular_variables;
+    std::vector<Variable> generated_variables;
+};
 
 class MirrorClient {
 public:
     MirrorClient();
     ~MirrorClient();
 
-    int get_node_status(const std::string& remote_host,
-                        const std::string& remote_port,
-                        const std::string& node_path,
-                        bool ssl,
-                        const std::string& remote_username,
-                        const std::string& remote_password) const;
+    MirrorData get_node_status(const std::string& remote_host,
+                               const std::string& remote_port,
+                               const std::string& node_path,
+                               bool ssl,
+                               const std::string& remote_username,
+                               const std::string& remote_password) const;
 
 private:
     struct Impl;

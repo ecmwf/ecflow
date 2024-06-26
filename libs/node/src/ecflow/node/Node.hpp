@@ -443,6 +443,10 @@ public:
     /// retrieve _ALL_ children by hierarchically traversing down the node tree
     virtual void allChildren(std::vector<node_ptr>&) const {}
 
+    void replace_variables(const std::vector<Variable>& vars);
+
+    std::vector<Variable> get_all_generated_variables() const;
+
     // Add functions: ===============================================================
     void addVerify(const VerifyAttr&); // for testing and verification Can throw std::runtime_error
     void addVariable(const Variable&); // will update if duplicate

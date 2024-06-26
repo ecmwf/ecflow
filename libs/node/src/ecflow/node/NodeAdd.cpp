@@ -28,6 +28,11 @@
 using namespace ecf;
 using namespace std;
 
+void Node::replace_variables(const std::vector<Variable>& vars) {
+    state_change_no_ = Ecf::incr_state_change_no();
+    vars_ = vars;
+}
+
 bool Node::update_variable(const std::string& name, const std::string& value) {
     auto found = ecf::algorithm::find_by_name(vars_, name);
 
