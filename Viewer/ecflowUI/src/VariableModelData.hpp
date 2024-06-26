@@ -43,6 +43,7 @@ public:
     int indexOf(const std::string& varName, bool genVar) const;
     bool isGenVar(const std::string& varName) const;
     bool isGenVar(int index) const;
+    bool isMirrorVar(int index) const;
     bool isReadOnly(int index) const;
     bool isReadOnly(const std::string& varName) const;
     bool isShadowed(int index) const;

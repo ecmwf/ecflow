@@ -282,6 +282,10 @@ bool VariableModelData::isGenVar(int index) const {
     return (index >= static_cast<int>(vars_.size()));
 }
 
+bool VariableModelData::isMirrorVar(int index) const {
+    return info_->isNode() && !info_->node()->node()->mirrors().empty();
+}
+
 bool VariableModelData::isGenVar(const std::string& n) const {
     for (const auto& genVar : genVars_) {
         if (genVar.name() == n) {

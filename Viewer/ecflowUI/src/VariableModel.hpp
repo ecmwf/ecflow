@@ -35,7 +35,8 @@ public:
     enum CustomItemRole {
         ReadOnlyRole = Qt::UserRole + 1,
         GenVarRole   = Qt::UserRole + 2,
-        ShadowRole   = Qt::UserRole + 3
+        ShadowRole   = Qt::UserRole + 3,
+        MirrorRole   = Qt::UserRole + 4
     };
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -80,6 +81,7 @@ protected:
     static QColor varCol_;
     static QColor genVarCol_;
     static QColor shadowCol_;
+    static QColor mirrorCol_;
     static QColor blockBgCol_;
     static QColor blockFgCol_;
 };
