@@ -84,7 +84,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent
         errPix_    = QPixmap(QPixmap::fromImage(img));
     }
 
-    avisoPixId_ = IconProvider::add(":/viewer/aviso.svg", "aviso");
+    avisoPixId_  = IconProvider::add(":/viewer/aviso.svg", "aviso");
     mirrorPixId_ = IconProvider::add(":/viewer/remote.svg", "mirror");
 
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
@@ -387,7 +387,8 @@ void NodeViewDelegate::renderStatus(QPainter* painter,
 void NodeViewDelegate::renderMeter(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                   QSize& size,
+                                   [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -521,7 +522,8 @@ void NodeViewDelegate::renderMeter(QPainter* painter,
 void NodeViewDelegate::renderLabel(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                   QSize& size,
+                                   [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
 
@@ -669,7 +671,8 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
 void NodeViewDelegate::renderAviso(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                   QSize& size,
+                                   [[maybe_unused]] const QColor& fg) const {
 
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
@@ -826,9 +829,10 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
 }
 
 void NodeViewDelegate::renderMirror(QPainter* painter,
-                                   QStringList data,
-                                   const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                    QStringList data,
+                                    const QStyleOptionViewItem& option,
+                                    QSize& size,
+                                    [[maybe_unused]] const QColor& fg) const {
 
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
@@ -1073,7 +1077,8 @@ int NodeViewDelegate::labelHeight(int lineNum) const {
 void NodeViewDelegate::renderEvent(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                   QSize& size,
+                                   [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1201,21 +1206,24 @@ void NodeViewDelegate::renderVarCore(QPainter* painter,
 void NodeViewDelegate::renderVar(QPainter* painter,
                                  QStringList data,
                                  const QStyleOptionViewItem& option,
-                                 QSize& size) const {
-    renderVarCore(painter, data, option, size, Qt::black);
+                                 QSize& size,
+                                 const QColor& fg) const {
+    renderVarCore(painter, data, option, size, fg);
 }
 
 void NodeViewDelegate::renderGenvar(QPainter* painter,
                                     QStringList data,
                                     const QStyleOptionViewItem& option,
-                                    QSize& size) const {
+                                    QSize& size,
+                                    [[maybe_unused]] const QColor& fg) const {
     renderVarCore(painter, data, option, size, Qt::blue);
 }
 
 void NodeViewDelegate::renderLimit(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                   QSize& size,
+                                   [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1386,7 +1394,8 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
 void NodeViewDelegate::renderLimiter(QPainter* painter,
                                      QStringList data,
                                      const QStyleOptionViewItem& option,
-                                     QSize& size) const {
+                                     QSize& size,
+                                     [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1444,7 +1453,8 @@ void NodeViewDelegate::renderLimiter(QPainter* painter,
 void NodeViewDelegate::renderTrigger(QPainter* painter,
                                      QStringList data,
                                      const QStyleOptionViewItem& option,
-                                     QSize& size) const {
+                                     QSize& size,
+                                     const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1516,7 +1526,8 @@ void NodeViewDelegate::renderTrigger(QPainter* painter,
 void NodeViewDelegate::renderTime(QPainter* painter,
                                   QStringList data,
                                   const QStyleOptionViewItem& option,
-                                  QSize& size) const {
+                                  QSize& size,
+                                  [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1596,7 +1607,8 @@ void NodeViewDelegate::renderTime(QPainter* painter,
 void NodeViewDelegate::renderDate(QPainter* painter,
                                   QStringList data,
                                   const QStyleOptionViewItem& option,
-                                  QSize& size) const {
+                                  QSize& size,
+                                  [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1681,7 +1693,8 @@ void NodeViewDelegate::renderDate(QPainter* painter,
 void NodeViewDelegate::renderRepeat(QPainter* painter,
                                     QStringList data,
                                     const QStyleOptionViewItem& option,
-                                    QSize& size) const {
+                                    QSize& size,
+                                    [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1847,7 +1860,8 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
 void NodeViewDelegate::renderLate(QPainter* painter,
                                   QStringList data,
                                   const QStyleOptionViewItem& option,
-                                  QSize& size) const {
+                                  QSize& size,
+                                  [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1902,7 +1916,8 @@ void NodeViewDelegate::renderLate(QPainter* painter,
 void NodeViewDelegate::renderAutoArchive(QPainter* painter,
                                          QStringList data,
                                          const QStyleOptionViewItem& option,
-                                         QSize& size) const {
+                                         QSize& size,
+                                         const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -1957,7 +1972,8 @@ void NodeViewDelegate::renderAutoArchive(QPainter* painter,
 void NodeViewDelegate::renderAutoCancel(QPainter* painter,
                                         QStringList data,
                                         const QStyleOptionViewItem& option,
-                                        QSize& size) const {
+                                        QSize& size,
+                                        [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -2012,7 +2028,8 @@ void NodeViewDelegate::renderAutoCancel(QPainter* painter,
 void NodeViewDelegate::renderAutoRestore(QPainter* painter,
                                          QStringList data,
                                          const QStyleOptionViewItem& option,
-                                         QSize& size) const {
+                                         QSize& size,
+                                         const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
@@ -2067,7 +2084,8 @@ void NodeViewDelegate::renderAutoRestore(QPainter* painter,
 void NodeViewDelegate::renderQueue(QPainter* painter,
                                    QStringList data,
                                    const QStyleOptionViewItem& option,
-                                   QSize& size) const {
+                                   QSize& size,
+                                   [[maybe_unused]] const QColor& fg) const {
     int totalWidth = 0;
 
     size = QSize(totalWidth, attrBox_->fullHeight);
