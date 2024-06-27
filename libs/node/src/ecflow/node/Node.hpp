@@ -379,6 +379,13 @@ public:
     virtual bool hasAutoCancel() const { return (auto_cancel_) ? true : false; }
     virtual void invalidate_trigger_references() const;
 
+    ///
+    /// Checks if the current node is synchronised to (i.e. mirror of) a Node in an external ecFlow server.
+    ///
+    /// \return true, if this node is a mirror; otherwise, false
+    ///
+    bool isMirror() const { return !mirrors_.empty(); }
+
     // Access functions: ======================================================
     const std::string& name() const { return n_; }
     const Repeat& repeat() const { return repeat_; } // can be empty()
@@ -442,6 +449,10 @@ public:
 
     /// retrieve _ALL_ children by hierarchically traversing down the node tree
     virtual void allChildren(std::vector<node_ptr>&) const {}
+
+    void replace_variables(const std::vector<Variable>& vars);
+
+    std::vector<Variable> get_all_generated_variables() const;
 
     // Add functions: ===============================================================
     void addVerify(const VerifyAttr&); // for testing and verification Can throw std::runtime_error

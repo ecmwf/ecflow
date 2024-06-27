@@ -167,30 +167,100 @@ protected:
 
     typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter* painter,
                                                             QStringList data,
-                                                            const QStyleOptionViewItem& optio,
-                                                            QSize&) const;
+                                                            const QStyleOptionViewItem& option,
+                                                            QSize&,
+                                                            const QColor& foregroundColour) const;
 
-    virtual void renderMeter(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLabel(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderAviso(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderMirror(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderEvent(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderVar(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderGenvar(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLimit(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLimiter(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderTrigger(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderTime(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderDate(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderRepeat(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderLate(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void
-    renderAutoArchive(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void
-    renderAutoCancel(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void
-    renderAutoRestore(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
-    virtual void renderQueue(QPainter* painter, QStringList data, const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderMeter(QPainter* painter,
+                             QStringList data,
+                             const QStyleOptionViewItem& option,
+                             QSize&,
+                             const QColor& foregroundColour) const;
+    virtual void renderLabel(QPainter* painter,
+                             QStringList data,
+                             const QStyleOptionViewItem& option,
+                             QSize&,
+                             const QColor& foregroundColour) const;
+    virtual void renderAviso(QPainter* painter,
+                             QStringList data,
+                             const QStyleOptionViewItem& option,
+                             QSize&,
+                             const QColor& foregroundColour) const;
+    virtual void renderMirror(QPainter* painter,
+                              QStringList data,
+                              const QStyleOptionViewItem& option,
+                              QSize&,
+                              const QColor& foregroundColour) const;
+    virtual void renderEvent(QPainter* painter,
+                             QStringList data,
+                             const QStyleOptionViewItem& option,
+                             QSize&,
+                             const QColor& foregroundColour) const;
+    virtual void renderVar(QPainter* painter,
+                           QStringList data,
+                           const QStyleOptionViewItem& option,
+                           QSize&,
+                           const QColor& foregroundColour) const;
+    virtual void renderGenvar(QPainter* painter,
+                              QStringList data,
+                              const QStyleOptionViewItem& option,
+                              QSize&,
+                              const QColor& foregroundColour) const;
+    virtual void renderLimit(QPainter* painter,
+                             QStringList data,
+                             const QStyleOptionViewItem& option,
+                             QSize&,
+                             const QColor& foregroundColour) const;
+    virtual void renderLimiter(QPainter* painter,
+                               QStringList data,
+                               const QStyleOptionViewItem& option,
+                               QSize&,
+                               const QColor& foregroundColour) const;
+    virtual void renderTrigger(QPainter* painter,
+                               QStringList data,
+                               const QStyleOptionViewItem& option,
+                               QSize&,
+                               const QColor& foregroundColour) const;
+    virtual void renderTime(QPainter* painter,
+                            QStringList data,
+                            const QStyleOptionViewItem& option,
+                            QSize&,
+                            const QColor& foregroundColour) const;
+    virtual void renderDate(QPainter* painter,
+                            QStringList data,
+                            const QStyleOptionViewItem& option,
+                            QSize&,
+                            const QColor& foregroundColour) const;
+    virtual void renderRepeat(QPainter* painter,
+                              QStringList data,
+                              const QStyleOptionViewItem& option,
+                              QSize&,
+                              const QColor& foregroundColour) const;
+    virtual void renderLate(QPainter* painter,
+                            QStringList data,
+                            const QStyleOptionViewItem& option,
+                            QSize&,
+                            const QColor& foregroundColour) const;
+    virtual void renderAutoArchive(QPainter* painter,
+                                   QStringList data,
+                                   const QStyleOptionViewItem& option,
+                                   QSize&,
+                                   const QColor& foregroundColour) const;
+    virtual void renderAutoCancel(QPainter* painter,
+                                  QStringList data,
+                                  const QStyleOptionViewItem& option,
+                                  QSize&,
+                                  const QColor& foregroundColour) const;
+    virtual void renderAutoRestore(QPainter* painter,
+                                   QStringList data,
+                                   const QStyleOptionViewItem& option,
+                                   QSize&,
+                                   const QColor& foregroundColour) const;
+    virtual void renderQueue(QPainter* painter,
+                             QStringList data,
+                             const QStyleOptionViewItem& option,
+                             QSize&,
+                             const QColor& foregroundColour) const;
 
     void labelSize(QStringList data, int& totalWidth, int& totalHeight) const;
     int labelHeight(int) const;

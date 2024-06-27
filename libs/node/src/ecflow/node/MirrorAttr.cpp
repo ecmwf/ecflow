@@ -91,14 +91,23 @@ void MirrorAttr::mirror() {
 
         // Notifications found -- Node state to be updated or error to be reported
         std::visit(ecf::overload{[this](const service::mirror::MirrorNotification& notification) {
+                                     auto latest_state = static_cast<NState::State>(notification.data().state);
+
                                      SLOG(D,
                                           "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state "
-                                                                                          << notification.status());
-                                     auto latest_state = static_cast<NState::State>(notification.status());
-                                     reason_           = "";
+                                                                                          << latest_state);
+
+                                     reason_ = "";
                                      parent_->flag().clear(Flag::REMOTE_ERROR);
                                      parent_->flag().set_state_change_no(state_change_no_);
                                      parent_->setStateOnly(latest_state, true);
+
+                                     std::vector<Variable> all_variables = notification.data().regular_variables;
+                                     for (const auto& variable : notification.data().generated_variables) {
+                                         all_variables.push_back(variable);
+                                     }
+
+                                     parent_->replace_variables(all_variables);
                                  },
                                  [this](const service::mirror::MirrorError& error) {
                                      SLOG(D,

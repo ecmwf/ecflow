@@ -46,16 +46,16 @@ BOOST_AUTO_TEST_SUITE(T_MirrorNotification)
 BOOST_AUTO_TEST_CASE(can_create_parameterised_mirror_notification) {
     using namespace ecf::service::mirror;
 
-    MirrorNotification notification{"path", 1};
+    MirrorNotification notification{"path", MirrorData{1}};
 
     BOOST_CHECK_EQUAL(notification.path(), "path");
-    BOOST_CHECK_EQUAL(notification.status(), 1);
+    BOOST_CHECK_EQUAL(notification.data().state, 1);
 }
 
 BOOST_AUTO_TEST_CASE(can_print_mirror_notification) {
     using namespace ecf::service::mirror;
 
-    MirrorNotification notification{"path", 1};
+    MirrorNotification notification{"path", MirrorData{1}};
 
     std::ostringstream oss;
     oss << notification;
@@ -92,12 +92,12 @@ BOOST_AUTO_TEST_SUITE(T_MirrorError)
 BOOST_AUTO_TEST_CASE(can_create_mirror_response_with_notification) {
     using namespace ecf::service::mirror;
 
-    MirrorNotification notification{"path", 1};
+    MirrorNotification notification{"path", MirrorData{1}};
     MirrorResponse response = notification;
 
     BOOST_CHECK(std::holds_alternative<MirrorNotification>(response));
     BOOST_CHECK_EQUAL(std::get<MirrorNotification>(response).path(), "path");
-    BOOST_CHECK_EQUAL(std::get<MirrorNotification>(response).status(), 1);
+    BOOST_CHECK_EQUAL(std::get<MirrorNotification>(response).data().state, 1);
 }
 
 BOOST_AUTO_TEST_CASE(can_create_mirror_response_with_error) {
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(can_create_mirror_response_with_error) {
 BOOST_AUTO_TEST_CASE(can_print_mirror_response_with_notification) {
     using namespace ecf::service::mirror;
 
-    MirrorNotification notification{"path", 1};
+    MirrorNotification notification{"path", MirrorData{1}};
     MirrorResponse response = notification;
 
     std::ostringstream oss;

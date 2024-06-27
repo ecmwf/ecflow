@@ -422,11 +422,11 @@ void TreeNodeViewDelegate::paintIt(QPainter* painter,
         if (lst.count() > 0) {
             QMap<QString, AttributeRendererProc>::const_iterator it = attrRenderers_.find(lst.at(0));
             if (it != attrRenderers_.end()) {
+                auto fg = index.data(Qt::ForegroundRole).value<QColor>();
+
                 AttributeRendererProc a = it.value();
-                (this->*a)(painter, lst, vopt, size);
+                (this->*a)(painter, lst, vopt, size, fg);
             }
-            // if(width==0)
-            //     width=300;
         }
     }
 
