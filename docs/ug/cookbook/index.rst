@@ -37,5 +37,5 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
    native_python_task
    one_script_do_it_all
    python_client_for_fault_tolerance
-   how_to_mirror_a_remote_task_status
+   how_to_mirror_a_remote_task
    how_to_trigger_a_task_based_on_aviso_notification

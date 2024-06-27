@@ -12,7 +12,7 @@ a matching Aviso notification is processed.
 The deployment of this feature has the following requirements:
  - ecFlow 5.13+, to host the Aviso dependent task(s)
  - Aviso event listener schema
- - Authentication credentials, stored as JSON file
+ - (optional) Authentication credentials, stored as JSON file
 
 Setup the ecFlow Server
 ^^^^^^^^^^^^^^^^^^^^^^^
