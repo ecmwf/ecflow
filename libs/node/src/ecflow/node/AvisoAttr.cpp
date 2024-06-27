@@ -146,6 +146,16 @@ bool AvisoAttr::isFree() const {
     return is_free;
 }
 
+namespace {
+
+void ensure_resolved_variable(std::string_view value, std::string_view default_value, std::string_view msg) {
+    if (value.find(default_value) != std::string::npos) {
+        throw std::runtime_error(Message(msg, value).str());
+    }
+}
+
+} // namespace
+
 void AvisoAttr::start() const {
     LOG(Log::DBG, Message("AvisoAttr: subscribe Aviso attribute (name: ", name_, ", listener: ", listener_, ")"));
 
@@ -172,10 +182,23 @@ void AvisoAttr::start() const {
     if (aviso_polling.empty()) {
         throw std::runtime_error("AvisoAttr: invalid Aviso polling interval detected for " + aviso_path);
     }
-    auto polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
 
     std::string aviso_auth = auth_;
     parent_->variableSubstitution(aviso_auth);
+
+    ensure_resolved_variable(aviso_url, AvisoAttr::default_url, "AvisoAttr: failed to resolve Aviso URL: ");
+    ensure_resolved_variable(aviso_schema, AvisoAttr::default_schema, "AvisoAttr: failed to resolve Aviso schema: ");
+    ensure_resolved_variable(aviso_polling, AvisoAttr::default_polling, "AvisoAttr: failed to resolve Aviso polling: ");
+    ensure_resolved_variable(aviso_auth, AvisoAttr::default_auth, "AvisoAttr: failed to resolve Aviso auth: ");
+
+    std::uint32_t polling;
+    try {
+        polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
+    }
+    catch (boost::bad_lexical_cast& e) {
+        throw std::runtime_error(
+            Message("AvisoAttr: failed to convert polling; expected an integer, but found: ", aviso_polling).str());
+    }
 
     start_controller(aviso_path, aviso_listener, aviso_url, aviso_schema, polling, aviso_auth);
 }
