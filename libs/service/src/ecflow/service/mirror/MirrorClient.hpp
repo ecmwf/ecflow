@@ -15,15 +15,31 @@
 #include <string>
 #include <vector>
 
+#include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/attribute/Variable.hpp"
 
 namespace ecf::service::mirror {
 
 struct MirrorData
 {
+    MirrorData() : state{0}, regular_variables{}, generated_variables{}, labels{}, meters{}, events{} {}
+
+    explicit MirrorData(int state)
+        : state{state},
+          regular_variables{},
+          generated_variables{},
+          labels{},
+          meters{},
+          events{} {}
+
     int state;
+
     std::vector<Variable> regular_variables;
     std::vector<Variable> generated_variables;
+
+    std::vector<Label> labels;
+    std::vector<Meter> meters;
+    std::vector<Event> events;
 };
 
 class MirrorClient {

@@ -71,7 +71,12 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
                 Message("MirrorClient: Unable to find requested node (", node_path, ") in remote remote defs").str());
         }
 
-        MirrorData data{node->state()};
+        MirrorData data{};
+
+        // ** Node State
+        data.state = node->state();
+
+        // ** Node Variables
         data.regular_variables   = node->variables();
         data.generated_variables = node->get_all_generated_variables();
 
@@ -85,6 +90,13 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
                                       boost::algorithm::starts_with(variable.name(), "SUITE");
                            }),
             std::end(data.generated_variables));
+
+        // ** Node Labels
+        data.labels = node->labels();
+        // ** Node Meters
+        data.meters = node->meters();
+        // ** Node Events
+        data.events = node->events();
 
         SLOG(D, "MirrorClient: found node (" << node_path << "), with state " << data.state);
         return data;
