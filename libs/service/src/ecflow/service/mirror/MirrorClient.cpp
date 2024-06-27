@@ -10,6 +10,8 @@
 
 #include "ecflow/service/mirror/MirrorClient.hpp"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -72,6 +74,17 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
         MirrorData data{node->state()};
         data.regular_variables   = node->variables();
         data.generated_variables = node->get_all_generated_variables();
+
+        // Filter out the Definitions structural variables (SUITE, to avoid conflicts with "local" side definitions
+        data.generated_variables.erase(
+            std::remove_if(std::begin(data.generated_variables),
+                           std::end(data.generated_variables),
+                           [](const auto& variable) {
+                               return boost::algorithm::starts_with(variable.name(), "TASK") ||
+                                      boost::algorithm::starts_with(variable.name(), "FAMILY") ||
+                                      boost::algorithm::starts_with(variable.name(), "SUITE");
+                           }),
+            std::end(data.generated_variables));
 
         SLOG(D, "MirrorClient: found node (" << node_path << "), with state " << data.state);
         return data;
