@@ -821,7 +821,7 @@ bool NodeAttributeCondition::execute(VItem* item) {
             return !node->avisos().empty();
         }
         else if (nodeAttrName_ == "has_mirror") {
-            return !node->mirrors().empty();
+            return node->isMirror();
         }
     }
 

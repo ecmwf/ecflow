@@ -379,6 +379,13 @@ public:
     virtual bool hasAutoCancel() const { return (auto_cancel_) ? true : false; }
     virtual void invalidate_trigger_references() const;
 
+    ///
+    /// Checks if the current node is synchronised to (i.e. mirror of) a Node in an external ecFlow server.
+    ///
+    /// \return true, if this node is a mirror; otherwise, false
+    ///
+    bool isMirror() const { return !mirrors_.empty(); }
+
     // Access functions: ======================================================
     const std::string& name() const { return n_; }
     const Repeat& repeat() const { return repeat_; } // can be empty()

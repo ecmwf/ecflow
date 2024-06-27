@@ -283,7 +283,7 @@ bool VariableModelData::isGenVar(int index) const {
 }
 
 bool VariableModelData::isMirrorVar(int index) const {
-    return info_->isNode() && !info_->node()->node()->mirrors().empty();
+    return info_->isNode() && info_->node()->node()->isMirror();
 }
 
 bool VariableModelData::isGenVar(const std::string& n) const {
