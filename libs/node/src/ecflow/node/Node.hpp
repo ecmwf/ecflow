@@ -451,6 +451,9 @@ public:
     virtual void allChildren(std::vector<node_ptr>&) const {}
 
     void replace_variables(const std::vector<Variable>& vars);
+    void replace_labels(const std::vector<Label>& labels);
+    void replace_meters(const std::vector<Meter>& meters);
+    void replace_events(const std::vector<Event>& events);
 
     std::vector<Variable> get_all_generated_variables() const;
 
