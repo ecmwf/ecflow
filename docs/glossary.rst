@@ -1359,12 +1359,21 @@
       Meters can be referenced in :term:`trigger` and :term:`complete expression` expressions.
 
    mirror
-      A mirror is an attribute of a :term:`Node<node>` (typically a :term:`Task<task>`),
-      and allows to synchronise the status of a node on a remote ecFlow server.
+      A mirror is an attribute of a local :term:`Node<node>` (typically a :term:`Task<task>`),
+      and allows to synchronise with a node on a remote ecFlow server. The node synchronisation includes:
+
+        - Node status
+        - Variables (User, Generated and Inherited)
+        - Meters
+        - Lavels
+        - Events
+
+      Notice that all synchronized Variables, including generated and inherited, become user variables on the local
+      ecFlow server.
 
       A :term:`Node<node>` with a mirror attribute will have its status periodically
       synchronized with the :term:`status` of a node on a remote ecFlow server.
-      The synchronised status can be used to trigger the execution of local nodes.
+      The synchronised status and attributes can be used to trigger the execution of local nodes.
 
       .. note::
 

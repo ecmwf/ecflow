@@ -44,16 +44,16 @@ public:
  */
 class MirrorNotification {
 public:
-    MirrorNotification(std::string_view path, int status) : path_(path), status_(status) {}
+    MirrorNotification(std::string_view path, MirrorData data) : path_(path), data_(std::move(data)) {}
 
     const std::string& path() const { return path_; }
-    int status() const { return status_; }
+    const MirrorData data() const { return data_; }
 
     friend std::ostream& operator<<(std::ostream&, const MirrorNotification&);
 
 private:
     std::string path_;
-    int status_;
+    MirrorData data_;
 };
 
 /**

@@ -22,6 +22,7 @@ QColor VariableModel::varCol_ = QColor(40, 41, 42);
 // QColor VariableModel::genVarCol_=QColor(34,51,136);
 QColor VariableModel::genVarCol_  = QColor(0, 115, 48);
 QColor VariableModel::shadowCol_  = QColor(130, 130, 130);
+QColor VariableModel::mirrorCol_  = QColor(119, 153, 170);
 QColor VariableModel::blockBgCol_ = QColor(122, 122, 122);
 QColor VariableModel::blockFgCol_ = QColor(255, 255, 255);
 
@@ -93,7 +94,8 @@ QVariant VariableModel::data(const QModelIndex& index, int role) const {
     // Data lookup can be costly so we immediately return a default value for all
     // the cases where the default should be used.
     if (role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole && role != ReadOnlyRole &&
-        role != Qt::ToolTipRole && role != GenVarRole && role != Qt::FontRole && role != ShadowRole) {
+        role != Qt::ToolTipRole && role != GenVarRole && role != Qt::FontRole && role != ShadowRole &&
+        role != MirrorRole) {
         return {};
     }
 
@@ -141,6 +143,10 @@ QVariant VariableModel::data(const QModelIndex& index, int role) const {
                 return shadowCol_;
             }
 
+            if (d->isMirrorVar(row)) {
+                return mirrorCol_;
+            }
+
             // Generated variable
             if (d->isGenVar(row) && index.column() == 0)
                 return genVarCol_;
@@ -182,6 +188,10 @@ QVariant VariableModel::data(const QModelIndex& index, int role) const {
 
         else if (role == ShadowRole) {
             return (d->isShadowed(row)) ? true : false;
+        }
+
+        else if (role == MirrorRole) {
+            return d->isMirrorVar(row);
         }
 
         return {};
@@ -453,8 +463,7 @@ void VariableModel::slotDataChanged(int block) {
     QModelIndex blockIndex1 = index(block, 1);
 
 #ifdef UI_VARIABLEMODEL_DEBUG
-    UiLog().dbg() << " emit dataChanged:"
-                  << " " << blockIndex0 << " " << blockIndex1;
+    UiLog().dbg() << " emit dataChanged:" << " " << blockIndex0 << " " << blockIndex1;
 #endif
 
     // This will sort and filter the block

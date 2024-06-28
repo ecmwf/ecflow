@@ -338,6 +338,20 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role, VTree
     VNode* vnode = tnode->vnode();
     Q_ASSERT(vnode);
 
+    if (role == Qt::ForegroundRole) {
+        // In case the attribute is:
+        //  - a Variable;
+        //  - and, assigned to a Node that is synchronised to (i.e. a mirror of) a Node in an external ecFlow server;
+        // we customize the foreground colour.
+        if (VAttribute* a = vnode->attribute(index.row(), atts_);
+            a && a->type()->name() == "var" && vnode->node()->isMirror()) {
+            return QColor(119, 153, 170);
+        }
+        else {
+            return QColorConstants::Black;
+        }
+    }
+
     if (role == ConnectionRole) {
         return serverConnectId(vnode->server()->connectState()->state());
     }

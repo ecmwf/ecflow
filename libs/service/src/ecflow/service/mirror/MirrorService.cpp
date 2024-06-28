@@ -76,11 +76,11 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
 
             // Collect the latest remote status
             try {
-                auto latest_status =
+                auto data =
                     mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
 
-                SLOG(D, "MirrorService: Notifying remote node state: " << latest_status);
-                MirrorNotification notification{remote_path, latest_status};
+                SLOG(D, "MirrorService: Notifying remote node state: " << data.state);
+                MirrorNotification notification{remote_path, data};
                 notify_(notification);
             }
             catch (std::runtime_error& e) {

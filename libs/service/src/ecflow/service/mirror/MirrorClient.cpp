@@ -10,6 +10,8 @@
 
 #include "ecflow/service/mirror/MirrorClient.hpp"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -31,12 +33,12 @@ MirrorClient::MirrorClient() : impl_(std::make_unique<Impl>()) {
 
 MirrorClient::~MirrorClient() = default;
 
-int MirrorClient::get_node_status(const std::string& remote_host,
-                                  const std::string& remote_port,
-                                  const std::string& node_path,
-                                  bool ssl,
-                                  const std::string& remote_username,
-                                  const std::string& remote_password) const {
+MirrorData MirrorClient::get_node_status(const std::string& remote_host,
+                                         const std::string& remote_port,
+                                         const std::string& node_path,
+                                         bool ssl,
+                                         const std::string& remote_username,
+                                         const std::string& remote_password) const {
     SLOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
     SLOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
 
@@ -69,9 +71,35 @@ int MirrorClient::get_node_status(const std::string& remote_host,
                 Message("MirrorClient: Unable to find requested node (", node_path, ") in remote remote defs").str());
         }
 
-        auto state = node->state();
-        SLOG(D, "MirrorClient: found node (" << node_path << "), with state " << state);
-        return state;
+        MirrorData data{};
+
+        // ** Node State
+        data.state = node->state();
+
+        // ** Node Variables
+        data.regular_variables   = node->variables();
+        data.generated_variables = node->get_all_generated_variables();
+
+        // Filter out the Definitions structural variables (SUITE, to avoid conflicts with "local" side definitions
+        data.generated_variables.erase(
+            std::remove_if(std::begin(data.generated_variables),
+                           std::end(data.generated_variables),
+                           [](const auto& variable) {
+                               return boost::algorithm::starts_with(variable.name(), "TASK") ||
+                                      boost::algorithm::starts_with(variable.name(), "FAMILY") ||
+                                      boost::algorithm::starts_with(variable.name(), "SUITE");
+                           }),
+            std::end(data.generated_variables));
+
+        // ** Node Labels
+        data.labels = node->labels();
+        // ** Node Meters
+        data.meters = node->meters();
+        // ** Node Events
+        data.events = node->events();
+
+        SLOG(D, "MirrorClient: found node (" << node_path << "), with state " << data.state);
+        return data;
     }
     catch (std::exception& e) {
         throw std::runtime_error(Message("MirrorClient: failure to sync remote defs, due to: ", e.what()));
