@@ -41,6 +41,7 @@ VariableDelegate::VariableDelegate(QTreeView* parent) : QStyledItemDelegate(pare
     borderPen_         = QPen(QColor(230, 230, 230));
     genVarPixId_       = IconProvider::add(":/viewer/genvar.svg", "genvar");
     shadowGenVarPixId_ = IconProvider::add(":/viewer/genvar_shadow.svg", "genvar_shadow");
+    mirrorVarPixId_    = IconProvider::add(":/viewer/mirrorvar.svg", "mirrorvar");
 }
 
 void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
@@ -129,9 +130,12 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         bool hasLock = false;
         QPixmap lockPix;
         QRect lockRect;
-        bool hasGen = false;
+        bool hasGen    = false;
+        bool hasMirror = false;
         QPixmap genPix;
+        QPixmap mirrorPix;
         QRect genRect;
+        QRect mirrorRect;
 
         textRect.setLeft(option.rect.x() - 17);
         bool locked = index.data(VariableModel::ReadOnlyRole).toBool();
@@ -145,8 +149,7 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
                              lockPix.height());
         }
 
-        bool gen = index.data(VariableModel::GenVarRole).toBool();
-        if (gen && genVarPixId_ >= 0) {
+        if (bool gen = index.data(VariableModel::GenVarRole).toBool(); gen && genVarPixId_ >= 0) {
             int pixId = genVarPixId_;
             if (index.data(VariableModel::ShadowRole).toBool()) {
                 pixId = shadowGenVarPixId_;
@@ -161,6 +164,21 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
                                 genPix.height());
 
                 textRect.moveLeft(genRect.right() + 4);
+            }
+        }
+
+        if (bool mirror = index.data(VariableModel::MirrorRole).toBool(); mirror && mirrorVarPixId_ >= 0) {
+            int pixId = mirrorVarPixId_;
+            if (pixId >= 0) {
+                hasMirror = true;
+
+                mirrorPix  = IconProvider::pixmap(pixId, textRect.height() - 4);
+                mirrorRect = QRect(textRect.left(),
+                                   textRect.top() + (textRect.height() - mirrorPix.height()) / 2,
+                                   mirrorPix.width(),
+                                   mirrorPix.height());
+
+                textRect.moveLeft(mirrorRect.right() + 4);
             }
         }
 
@@ -186,6 +204,10 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
         if (hasGen)
             painter->drawPixmap(genRect, genPix);
+
+        if (hasMirror) {
+            painter->drawPixmap(mirrorRect, mirrorPix);
+        }
     }
     else if (index.column() == 0) {
         auto fg = index.data(Qt::ForegroundRole).value<QColor>();

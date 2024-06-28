@@ -1,10 +1,11 @@
-.. _how_to_mirror_a_remote_task_status:
+.. _how_to_mirror_a_remote_task:
 
-How to mirror a remote Task status?
------------------------------------
+How to mirror a remote Task?
+----------------------------
 
 The following instructions describe the necessary steps to use the ability to
-synchronise the status of a :term:`task` between a `remote` ecFlow server
+synchronise (i.e. :term:`mirror`) the status and attributes, such as variables,
+meters, labels and events, of a :term:`task` between a `remote` ecFlow server
 and a `local` ecFlow server. The `remote` server is responsible for actually
 executing the task, while the `local` server synchronizes the status of a
 particular task, in order to trigger the execution of dependent tasks.
@@ -12,7 +13,7 @@ particular task, in order to trigger the execution of dependent tasks.
 The deployment of this feature has the following requirements:
  - `local` ecFlow 5.13+, to host the dependent task(s)
  - `remote` ecFlow 5+, to host the remote task
- - Authentication credentials, stored as JSON file
+ - (optional) Authentication credentials, stored as JSON file
 
 Setup the ecFlow Server
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -55,11 +56,17 @@ at :term:`suite` level:
       edit ECF_MIRROR_REMOTE_AUTH '/path/to/mirror.auth'
       family f
         task Task
+          edit YMD placeholder
           mirror --name A --remote_path /s1/f1/t1 --remote_host %ECF_MIRROR_REMOTE_HOST% --remote_port %ECF_MIRROR_REMOTE_PORT% --polling %ECF_MIRROR_REMOTE_POLLING% --ssl
         task Dependent
-          trigger Task == complete
+          trigger Task == complete and /s/f/Task:VARIABLE >= 20000101
       endfamily
     endsuite
+
+  .. warning::
+
+     Variables that are referred in trigger expressions *must* be defined, as a placeholder
+     for variables that eventually get synchronised.
 
 Deploy the Suite with a `mirrored` Task
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

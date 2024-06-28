@@ -28,7 +28,7 @@ std::ostream& operator<<(std::ostream& os, const MirrorRequest& r) {
 /* MirrorNotification */
 
 std::ostream& operator<<(std::ostream& os, const MirrorNotification& n) {
-    os << "MirrorNotification{" << n.path() << ", " << n.status() << "}";
+    os << "MirrorNotification{" << n.path() << ", " << n.data().state << "}";
     return os;
 }
 

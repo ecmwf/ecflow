@@ -36,6 +36,7 @@ protected:
     QPixmap lockPix_;
     int genVarPixId_;
     int shadowGenVarPixId_;
+    int mirrorVarPixId_;
     QTreeView* view_;
 };
 

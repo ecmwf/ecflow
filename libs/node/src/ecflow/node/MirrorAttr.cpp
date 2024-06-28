@@ -91,14 +91,32 @@ void MirrorAttr::mirror() {
 
         // Notifications found -- Node state to be updated or error to be reported
         std::visit(ecf::overload{[this](const service::mirror::MirrorNotification& notification) {
+                                     auto latest_state = static_cast<NState::State>(notification.data().state);
+
                                      SLOG(D,
                                           "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state "
-                                                                                          << notification.status());
-                                     auto latest_state = static_cast<NState::State>(notification.status());
-                                     reason_           = "";
+                                                                                          << latest_state);
+
+                                     // ** Node State
+                                     reason_ = "";
                                      parent_->flag().clear(Flag::REMOTE_ERROR);
                                      parent_->flag().set_state_change_no(state_change_no_);
                                      parent_->setStateOnly(latest_state, true);
+
+                                     // ** Node Variables
+                                     std::vector<Variable> all_variables = notification.data().regular_variables;
+                                     for (const auto& variable : notification.data().generated_variables) {
+                                         all_variables.push_back(variable);
+                                     }
+
+                                     parent_->replace_variables(all_variables);
+
+                                     // ** Node Labels
+                                     parent_->replace_labels(notification.data().labels);
+                                     // ** Node Meters
+                                     parent_->replace_meters(notification.data().meters);
+                                     // ** Node Events
+                                     parent_->replace_events(notification.data().events);
                                  },
                                  [this](const service::mirror::MirrorError& error) {
                                      SLOG(D,
@@ -136,6 +154,16 @@ void MirrorAttr::mirror() {
     // No notifications, nothing to do...
 }
 
+namespace {
+
+void ensure_resolved_variable(std::string_view value, std::string_view default_value, std::string_view msg) {
+    if (value.find(default_value) != std::string::npos) {
+        throw std::runtime_error(Message(msg, value).str());
+    }
+}
+
+} // namespace
+
 void MirrorAttr::start_controller() const {
     if (controller_ == nullptr) {
         // Substitute variables in Mirror configuration
@@ -152,10 +180,31 @@ void MirrorAttr::start_controller() const {
              "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
                                                             << remote_host << ':' << remote_port << ")");
 
+        ensure_resolved_variable(remote_host,
+                                 MirrorAttr::default_remote_host,
+                                 "Unable to start mirror. Failed to resolve mirror remote host: ");
+        ensure_resolved_variable(remote_port,
+                                 MirrorAttr::default_remote_port,
+                                 "Unable to start mirror. Failed to resolve mirror remote port: ");
+        ensure_resolved_variable(
+            polling, MirrorAttr::default_polling, "Unable to start mirror. Failed to resolve mirror polling: ");
+        ensure_resolved_variable(
+            auth, MirrorAttr::default_remote_auth, "Unable to start mirror. Failed to resolve mirror remote auth: ");
+
+        std::uint32_t polling_value;
+        try {
+            polling_value = boost::lexical_cast<std::uint32_t>(polling);
+        }
+        catch (boost::bad_lexical_cast& e) {
+            throw std::runtime_error(
+                Message("Unable to start mirror. Failed to convert polling; expected an integer, but found: ", polling)
+                    .str());
+        }
+
         // Controller -- start up the Mirror controller, and configure the Mirror request
         controller_ = std::make_shared<controller_t>();
-        controller_->subscribe(ecf::service::mirror::MirrorRequest{
-            remote_path_, remote_host, remote_port, boost::lexical_cast<std::uint32_t>(polling), ssl_, auth});
+        controller_->subscribe(
+            ecf::service::mirror::MirrorRequest{remote_path_, remote_host, remote_port, polling_value, ssl_, auth});
         // Controller -- effectively start the Mirror process
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
         controller_->start();
