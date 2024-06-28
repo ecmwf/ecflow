@@ -6,6 +6,17 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.1
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-06-28
+
+General
+-------
+
+- **New Feature** enabled synchronisation of Node variables :jiraissue:`ECFLOW-1961`
+- **New Feature** enabled synchronisation of Node attributes (Meters, Labels and Events) :jiraissue:`ECFLOW-1963`
+- **Improvement** improved error messages handling unresolved variables :jiraissue:`ECFLOW-1962`
 
 Version 5.13.0
 ==============

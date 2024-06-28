@@ -24,8 +24,9 @@ endif()
 
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild /workspace/ecbuild) # Before project()
 
-# this will generate variables, see ACore/ecflow_version.h.in
-project( ecflow LANGUAGES CXX VERSION 5.13.0 )
+project( ecflow LANGUAGES CXX VERSION 5.13.1 )
+
+# Important: the project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
