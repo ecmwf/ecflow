@@ -348,7 +348,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role, VTree
             return QColor(119, 153, 170);
         }
         else {
-            return QColorConstants::Black;
+            return static_cast<QColor>(Qt::black);
         }
     }
 

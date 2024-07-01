@@ -6,6 +6,16 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.2
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-07-01
+
+General
+-------
+
+- **Fix** correct compilation issue when using Qt5 :jiraissue:`ECFLOW-1964`
+
 Version 5.13.1
 ==============
 
