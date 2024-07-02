@@ -1404,6 +1404,14 @@
         - :code:`%ECF_MIRROR_REMOTE_POLLING%`, for :code:`polling`
         - :code:`%ECF_MIRROR_REMOTE_AUTH%`, for :code:`auth`
 
+      The following fallback values are considered when the default value is
+      used but the variable is not actually defined:
+
+        - in case :code:`%ECF_MIRROR_REMOTE_PORT%` is not defined, the fallback value is :code:`3141`
+        - in case :code:`%ECF_MIRROR_REMOTE_POLLING%` is not defined, the fallback value is :code:`120` (seconds)
+        - in case :code:`%ECF_MIRROR_REMOTE_AUTH%` is not defined, the fallback value is :code:`""`
+          (empty string), which effectively disables Authentication
+
       Each mirror attribute implies that a background thread is spawned whenever
       the ecFlow server is :term:`running<server states>`. This background thread is
       responsible for polling the remote ecFlow server, and periodically
