@@ -1,9 +1,10 @@
 name: cd
 
 on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+  push
+  #push:
+  #  tags:
+  #    - '[0-9]+.[0-9]+.[0-9]+'
 
   # Trigger the workflow manually
   workflow_dispatch: ~
