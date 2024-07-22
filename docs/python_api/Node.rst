@@ -1131,7 +1131,7 @@ Find the :term:`event` on the node only. Returns a object
 .. py:method:: Node.find_gen_variable( (Node)arg1, (str)arg2) -> Variable :
    :module: ecflow
 
-Find generated variable on the node only.  Returns a object
+Find generated variable on the node only. Returns an object
 
 
 .. py:method:: Node.find_generic( (Node)arg1, (str)arg2) -> Generic :
@@ -1155,7 +1155,7 @@ Find the :term:`limit` on the node only. returns a limit ptr
 .. py:method:: Node.find_meter( (Node)arg1, (str)arg2) -> Meter :
    :module: ecflow
 
-Find the :term:`meter` on the node only. Returns a object
+Find the :term:`meter` on the node only. Returns an object
 
 
 .. py:method:: Node.find_node_up_the_tree( (Node)arg1, (str)arg2) -> Node :
@@ -1167,7 +1167,7 @@ Search immediate node, then up the node hierarchy
 .. py:method:: Node.find_parent_variable( (Node)arg1, (str)arg2) -> Variable :
    :module: ecflow
 
-Find user variable variable up the parent hierarchy.  Returns a object
+Find user variable variable up the parent hierarchy. Returns an object
 
 
 .. py:method:: Node.find_parent_variable_sub_value( (Node)arg1, (str)arg2) -> str :
@@ -1185,7 +1185,7 @@ Find the queue on the node only. Returns a queue object
 .. py:method:: Node.find_variable( (Node)arg1, (str)arg2) -> Variable :
    :module: ecflow
 
-Find user variable on the node only.  Returns a object
+Find user variable on the node only. Returns an object
 
 
 .. py:property:: Node.generics
@@ -1244,10 +1244,13 @@ Returns the state of node. This will include suspended state
 Return additional state associated with a node.
 
 
-.. py:method:: Node.get_generated_variables( (Node)arg1, (VariableList)arg2) -> None :
+.. py:method:: Node.get_generated_variables( (Node)arg1) -> list :
    :module: ecflow
 
-returns a list of generated variables. Use ecflow.VariableList as return argument
+Returns the list of generated variables.
+
+get_generated_variables( (Node)arg1, (VariableList)arg2) -> None :
+    Retrieves the list of generated variables. Pass in ecflow.VariableList as argument to hold variables.
 
 
 .. py:method:: Node.get_late( (Node)arg1) -> Late
