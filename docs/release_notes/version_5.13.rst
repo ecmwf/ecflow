@@ -6,6 +6,21 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.3
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-07-22
+
+General
+-------
+
+- **Fix** enable fallback option values for Mirror related variables :jiraissue:`ECFLOW-1966`
+
+Python
+------
+
+- **Fix** enable pythonic use of Node.get_generated_variables :jiraissue:`ECFLOW-1968`
+
 Version 5.13.2
 ==============
 
