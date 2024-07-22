@@ -82,6 +82,9 @@ void MirrorAttr::mirror() {
     SLOG(D, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
 
     start_controller();
+    if (!controller_) {
+        return; // Can't continue without a running controller...
+    }
 
     // Task associated with Attribute is free when any notification is found
     if (auto notifications = controller_->get_notifications(remote_path_); !notifications.empty()) {
@@ -154,51 +157,77 @@ void MirrorAttr::mirror() {
     // No notifications, nothing to do...
 }
 
-namespace {
+std::optional<std::string> MirrorAttr::resolve_cfg(const std::string& value, std::string_view default_value) const {
+    // Substitude variable in local value
+    std::string local = value;
+    parent_->variableSubstitution(local);
 
-void ensure_resolved_variable(std::string_view value, std::string_view default_value, std::string_view msg) {
-    if (value.find(default_value) != std::string::npos) {
-        throw std::runtime_error(Message(msg, value).str());
+    // Ensure substituted value is not default
+    if (local.find(default_value) != std::string::npos) {
+        return std::nullopt;
     }
+
+    return {local};
 }
 
-} // namespace
+std::string MirrorAttr::resolve_cfg(const std::string& value,
+                                    std::string_view default_value,
+                                    std::string_view fallback_value) const {
+    // Substitude variable in local value
+    std::string local = value;
+    parent_->variableSubstitution(local);
 
-void MirrorAttr::start_controller() const {
+    // Ensure substituted value is not default
+    if (local.find(default_value) != std::string::npos) {
+        return std::string{fallback_value};
+    }
+
+    return local;
+}
+
+void MirrorAttr::start_controller() {
     if (controller_ == nullptr) {
-        // Substitute variables in Mirror configuration
-        std::string remote_host = remote_host_;
-        parent_->variableSubstitution(remote_host);
-        std::string remote_port = remote_port_;
-        parent_->variableSubstitution(remote_port);
-        std::string polling = polling_;
-        parent_->variableSubstitution(polling);
-        std::string auth = auth_;
-        parent_->variableSubstitution(auth);
+
+        // Resolve variables in configuration
+        // In the case of the 'remote_host', we have to resolve the configuration
+        std::string remote_host;
+        if (auto found = resolve_cfg(remote_host_, default_remote_host); found) {
+            remote_host = found.value();
+        }
+        else {
+            // Update the 'local' state change number
+            state_change_no_ = Ecf::incr_state_change_no();
+
+            reason_ = Message("Unable to start mirror. Failed to resolve mirror remote host: ", remote_host_).str();
+            parent_->flag().set(Flag::REMOTE_ERROR);
+            parent_->flag().set_state_change_no(state_change_no_);
+            parent_->setStateOnly(NState::UNKNOWN, true);
+            return;
+        }
+        // For the remaining configuration, we use fallback values if the resolution fails
+        auto remote_port = resolve_cfg(remote_port_, default_remote_port, fallback_remote_port);
+        auto polling     = resolve_cfg(polling_, default_polling, fallback_polling);
+        auto auth        = resolve_cfg(auth_, default_remote_auth, fallback_remote_auth);
 
         SLOG(D,
              "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
                                                             << remote_host << ':' << remote_port << ")");
-
-        ensure_resolved_variable(remote_host,
-                                 MirrorAttr::default_remote_host,
-                                 "Unable to start mirror. Failed to resolve mirror remote host: ");
-        ensure_resolved_variable(remote_port,
-                                 MirrorAttr::default_remote_port,
-                                 "Unable to start mirror. Failed to resolve mirror remote port: ");
-        ensure_resolved_variable(
-            polling, MirrorAttr::default_polling, "Unable to start mirror. Failed to resolve mirror polling: ");
-        ensure_resolved_variable(
-            auth, MirrorAttr::default_remote_auth, "Unable to start mirror. Failed to resolve mirror remote auth: ");
 
         std::uint32_t polling_value;
         try {
             polling_value = boost::lexical_cast<std::uint32_t>(polling);
         }
         catch (boost::bad_lexical_cast& e) {
-            throw std::runtime_error(
-                Message("Unable to start mirror. Failed to convert polling; expected an integer, but found: ", polling)
-                    .str());
+            // Update the 'local' state change number
+            state_change_no_ = Ecf::incr_state_change_no();
+
+            reason_ =
+                Message("Unable to start mirror. Failed to use polling; expected an integer, but found: ", polling)
+                    .str();
+            parent_->flag().set(Flag::REMOTE_ERROR);
+            parent_->flag().set_state_change_no(state_change_no_);
+            parent_->setStateOnly(NState::UNKNOWN, true);
+            return;
         }
 
         // Controller -- start up the Mirror controller, and configure the Mirror request
@@ -211,7 +240,7 @@ void MirrorAttr::start_controller() const {
     }
 }
 
-void MirrorAttr::stop_controller() const {
+void MirrorAttr::stop_controller() {
     if (controller_ != nullptr) {
         SLOG(D,
              "MirrorAttr: finishing polling for Mirror attribute \"" << parent_->absNodePath() << ":" << name_

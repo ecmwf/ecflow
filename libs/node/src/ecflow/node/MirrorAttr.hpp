@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include "ecflow/core/Log.hpp"
@@ -47,10 +48,16 @@ public:
     using controller_t     = ecf::service::mirror::MirrorController;
     using controller_ptr_t = std::shared_ptr<controller_t>;
 
+    // Default values for the options, refer to expected ecFlow variables
     static constexpr const char* default_remote_host = "%ECF_MIRROR_REMOTE_HOST%";
     static constexpr const char* default_remote_port = "%ECF_MIRROR_REMOTE_PORT%";
     static constexpr const char* default_polling     = "%ECF_MIRROR_REMOTE_POLLING%";
     static constexpr const char* default_remote_auth = "%ECF_MIRROR_REMOTE_AUTH%";
+
+    // Fallback option values, used when the variables providing default values are not defined
+    static constexpr const char* fallback_remote_port = "3141";
+    static constexpr const char* fallback_polling     = "120";
+    static constexpr const char* fallback_remote_auth = "";
 
     static bool is_valid_name(const std::string& name);
 
@@ -110,8 +117,12 @@ public:
     friend void serialize(Archive& ar, MirrorAttr& aviso, std::uint32_t version);
 
 private:
-    void start_controller() const;
-    void stop_controller() const;
+    std::optional<std::string> resolve_cfg(const std::string& value, std::string_view default_value) const;
+    std::string
+    resolve_cfg(const std::string& value, std::string_view default_value, std::string_view fallback_value) const;
+
+    void start_controller();
+    void stop_controller();
 
     Node* parent_{nullptr}; // only ever used on the server side, to update parent Node state
     name_t name_;
@@ -123,12 +134,11 @@ private:
     auth_t auth_;
     reason_t reason_;
 
-    // The following are mutable as they are modified by the const method isFree()
-    mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
     // The controller is only instanciated when the Mirror is reset()
     // This allows the MirrorAttr have a copy-ctor and assignment operator
-    mutable controller_ptr_t controller_;
+    controller_ptr_t controller_;
 };
 
 bool operator==(const MirrorAttr& lhs, const MirrorAttr& rhs);

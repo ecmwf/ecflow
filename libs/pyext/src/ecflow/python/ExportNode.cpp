@@ -390,6 +390,20 @@ node_ptr add_defstatus1(node_ptr self, const Defstatus& ds) {
     return self;
 }
 
+bp::list generated_variables_using_python_list(node_ptr self) {
+    bp::list list;
+    std::vector<Variable> vec;
+    self->gen_variables(vec);
+    for (const auto& i : vec) {
+        list.append(i);
+    }
+    return list;
+}
+
+void generated_variables_using_variablelist(node_ptr self, std::vector<Variable>& vec) {
+    self->gen_variables(vec);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 static object do_rshift(node_ptr self, const bp::object& arg) {
@@ -677,28 +691,31 @@ void export_Node() {
         .def("has_time_dependencies", &Node::hasTimeDependencies)
         .def("update_generated_variables", &Node::update_generated_variables)
         .def("get_generated_variables",
-             &Node::gen_variables,
-             "returns a list of generated variables. Use ecflow.VariableList as return argument")
+             &generated_variables_using_python_list,
+             "Returns the list of generated variables.")
+        .def("get_generated_variables",
+             &generated_variables_using_variablelist,
+             "Retrieves the list of generated variables. Pass in ecflow.VariableList as argument to hold variables.")
         .def("is_suspended", &Node::isSuspended, "Returns true if the `node`_ is in a `suspended`_ state")
         .def("find_variable",
              &Node::findVariable,
              return_value_policy<copy_const_reference>(),
-             "Find user variable on the node only.  Returns a object")
+             "Find user variable on the node only. Returns an object")
         .def("find_gen_variable",
              &Node::findGenVariable,
              return_value_policy<copy_const_reference>(),
-             "Find generated variable on the node only.  Returns a object")
+             "Find generated variable on the node only. Returns an object")
         .def("find_parent_variable",
              &Node::find_parent_variable,
              return_value_policy<copy_const_reference>(),
-             "Find user variable variable up the parent hierarchy.  Returns a object")
+             "Find user variable variable up the parent hierarchy. Returns an object")
         .def("find_parent_variable_sub_value",
              &Node::find_parent_variable_sub_value,
              "Find user variable *up* node tree, then variable substitute the value, otherwise return empty string")
         .def("find_meter",
              &Node::findMeter,
              return_value_policy<copy_const_reference>(),
-             "Find the `meter`_ on the node only. Returns a object")
+             "Find the `meter`_ on the node only. Returns an object")
         .def("find_event",
              &Node::findEventByNameOrNumber,
              return_value_policy<copy_const_reference>(),
