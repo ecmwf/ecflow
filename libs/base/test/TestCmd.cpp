@@ -19,6 +19,7 @@
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -82,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_simple_cmd) {
     // should be re-submitted, until the task try number > ECF_TRIES
     {
         std::string varValue;
-        if (t1->findParentUserVariableValue(Str::ECF_TRIES(), varValue)) {
+        if (t1->findParentUserVariableValue(ecf::environment::ECF_TRIES, varValue)) {
             auto ecf_tries = ecf::convert_to<int>(varValue);
             while (true) {
                 TestHelper::invokeRequest(

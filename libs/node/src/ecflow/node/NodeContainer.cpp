@@ -19,6 +19,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
@@ -1135,7 +1136,7 @@ void NodeContainer::update_limits() {
 
 std::string NodeContainer::archive_path() const {
     std::string the_archive_path;
-    if (!findParentUserVariableValue(Str::ECF_HOME(), the_archive_path)) {
+    if (!findParentUserVariableValue(ecf::environment::ECF_HOME, the_archive_path)) {
         std::stringstream ss;
         ss << "NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath();
         throw std::runtime_error(ss.str());
@@ -1148,7 +1149,7 @@ std::string NodeContainer::archive_path() const {
     std::string port = Str::DEFAULT_PORT_NUMBER();
     Defs* the_defs   = defs();
     if (the_defs) {
-        port = the_defs->server().find_variable(Str::ECF_PORT());
+        port = the_defs->server().find_variable(ecf::environment::ECF_PORT);
         if (port.empty())
             port = Str::DEFAULT_PORT_NUMBER();
     }
@@ -1308,7 +1309,7 @@ void NodeContainer::remove_archived_files() {
     }
 
     std::string ecf_home;
-    if (!findParentUserVariableValue(Str::ECF_HOME(), ecf_home)) {
+    if (!findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home)) {
         return;
     }
 

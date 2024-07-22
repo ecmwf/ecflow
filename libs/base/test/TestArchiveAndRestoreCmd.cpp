@@ -16,6 +16,7 @@
 #include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
@@ -51,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_suite) {
     // We use Pid::unique_name, to allow multiple invocation of this test
     Defs theDefs;
     std::string ecf_home = File::test_data("libs/base/test", "libs/base");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_archive_and_restore_suite"));
     suite->add_family("f1")->add_task("t1");
     // cout << theDefs << "\n";
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_family) {
 
     Defs theDefs;
     std::string ecf_home = File::test_data("libs/base/test", "libs/base");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_archive_and_restore_family"));
     family_ptr f3   = suite->add_family("f1")->add_family("f2")->add_family("f3");
     f3->add_task("t1");
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
     Defs theDefs;
     {
         std::string ecf_home = File::test_data("libs/base/test", "libs/base");
-        theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+        theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
         suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_archive_and_restore_all"));
         family_ptr f1   = suite->add_family("f1");
         f1->add_task("t1");
@@ -244,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_overlap) {
 
     Defs theDefs;
     std::string ecf_home = File::test_data("libs/base/test", "libs/base");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_archive_and_restore_overlap"));
     std::string f1_abs_node_path;
     {
@@ -290,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_delete_suite) {
     // We use Pid::unique_name, to allow multiple invocation of this test
     Defs theDefs;
     std::string ecf_home = File::test_data("libs/base/test", "libs/base");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
     suite_ptr suite   = theDefs.add_suite(Pid::unique_name("test_archive_and_delete_suite"));
     family_ptr family = suite->add_family("f1");
     family->add_task("t1");
@@ -327,7 +328,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_errors) {
     // We use Pid::unique_name, to allow multiple invocation of this test
     Defs theDefs;
     std::string ecf_home = File::test_data("libs/base/test", "libs/base");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_archive_and_restore_errors"));
     family_ptr f1   = suite->add_family("f1");
     f1->add_task("t1");

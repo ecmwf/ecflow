@@ -36,9 +36,9 @@ const std::string API_HOST("localhost");
 const std::string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
 
 std::unique_ptr<Certificate> create_certificate() {
-    const char* cert_dir = getenv("ECF_API_CERT_DIRECTORY");
-    const std::string path_to_cert =
-        (cert_dir == nullptr) ? std::string(getenv("HOME")) + "/.ecflowrc/ssl/" : std::string(cert_dir);
+    auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
+
+    const std::string path_to_cert = (cert_dir) ? cert_dir.value() : ecf::environment::get("HOME") + "/.ecflowrc/ssl/";
 
     std::unique_ptr<Certificate> cert;
 
@@ -67,9 +67,10 @@ std::unique_ptr<TokenFile> create_token_file() {
 }
 
 void start_api_server() {
+    if (ecf::environment::has("NO_API_SERVER")) {
+        return; // terminate early, for debugging purposes
+    }
 
-    if (getenv("NO_API_SERVER") != nullptr)
-        return; // for debugging
     std::thread t([] {
         int argc     = 3;
         char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", NULL};
@@ -83,13 +84,16 @@ void start_api_server() {
 }
 
 std::unique_ptr<InvokeServer> start_ecflow_server() {
-    if (getenv("NO_ECFLOW_SERVER") != nullptr)
+    if (ecf::environment::has("NO_ECFLOW_SERVER")) {
         return nullptr;
+    }
 
     auto srv = std::make_unique<InvokeServer>();
 
-    BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << getenv("ECF_PORT"));
-    BOOST_TEST_MESSAGE("ecflow server at localhost:" << getenv("ECF_PORT"));
+    auto port = ecf::environment::get("ECF_PORT");
+    BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << port);
+    BOOST_TEST_MESSAGE("ecflow server at localhost:" << port);
+
     return srv;
 }
 

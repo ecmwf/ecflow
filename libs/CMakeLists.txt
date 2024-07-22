@@ -241,6 +241,8 @@ set(srcs
   core/src/ecflow/core/DurationTimer.hpp
   core/src/ecflow/core/Ecf.hpp
   core/src/ecflow/core/EcfPortLock.hpp
+  core/src/ecflow/core/Enumerate.hpp
+  core/src/ecflow/core/Environment.hpp
   core/src/ecflow/core/Extract.hpp
   core/src/ecflow/core/File.hpp
   core/src/ecflow/core/File_r.hpp

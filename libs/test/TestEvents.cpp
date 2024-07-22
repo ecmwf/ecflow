@@ -19,6 +19,7 @@
 #include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -152,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_event_and_query) {
                             << TestFixture::client().get_string());
 
     // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
-    if (!getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+    if (!ecf::environment::has("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
         BOOST_CHECK_MESSAGE(TestFixture::client().query("limit", suite->absNodePath(), "limit_x") == 0,
                             "query command failed " << TestFixture::client().errorMsg());
         BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "0",

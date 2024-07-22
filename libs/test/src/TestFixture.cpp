@@ -10,7 +10,6 @@
 
 #include "TestFixture.hpp"
 
-#include <cstdlib> // for getenv()
 #include <fstream> // for ofstream
 #include <iostream>
 
@@ -99,8 +98,9 @@ void TestFixture::init(const std::string& project_test_dir) {
     host_ = ClientEnvironment::hostSpecified();
     port_ = ClientEnvironment::portSpecified(); // returns ECF_PORT, otherwise Str::DEFAULT_PORT_NUMBER
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has("ECF_SSL")) {
         std::cout << "   Openssl enabled\n";
+    }
 #endif
     if (!host_.empty() && host_ != Str::LOCALHOST()) {
 
@@ -110,9 +110,9 @@ void TestFixture::init(const std::string& project_test_dir) {
 
         // Must use a file system accessible from the server. Use $SCRATCH
         // Duplicate test data, required to scratch area and reset ECF_HOME
-        char* scratchEnv = getenv("SCRATCH");
-        assert(scratchEnv != NULL);
-        std::string theSCRATCHArea(scratchEnv);
+        auto scratchEnv = ecf::environment::fetch("SCRATCH");
+        assert(scratchEnv);
+        std::string theSCRATCHArea(scratchEnv.value());
         assert(!theSCRATCHArea.empty());
 
         theSCRATCHArea += "/test_dir";
@@ -301,8 +301,9 @@ int TestFixture::job_submission_interval() {
 }
 
 std::string TestFixture::smshome() {
-    if (serverOnLocalMachine())
+    if (serverOnLocalMachine()) {
         return local_ecf_home();
+    }
     return scratchSmsHome_;
 }
 
@@ -311,22 +312,25 @@ bool TestFixture::serverOnLocalMachine() {
 }
 
 std::string TestFixture::theClientExePath() {
-    if (serverOnLocalMachine())
+    if (serverOnLocalMachine()) {
         return File::find_ecf_client_path();
+    }
 
-    char* client_path_p = getenv("ECF_CLIENT_EXE_PATH");
-    if (client_path_p == nullptr) {
-
+    if (auto client_path_p = ecf::environment::fetch("ECF_CLIENT_EXE_PATH"); client_path_p) {
+        return client_path_p.value();
+    }
+    else {
         // Try this before complaining
         std::string path = "/usr/local/apps/ecflow/current/bin/ecflow_client";
-        if (fs::exists(path))
+        if (fs::exists(path)) {
             return path;
+        }
 
         cout << "Please set ECF_CLIENT_EXE_PATH. This needs to be set to path to the client executable\n";
         cout << "The client must be the one that was built on the same platform as the server\n";
         assert(false);
+        return string(); // This is needed to silence compiler warnings about no return
     }
-    return string(client_path_p);
 }
 
 void TestFixture::clearLog() {
@@ -341,14 +345,16 @@ std::string TestFixture::pathToLogFile() {
         return host.ecf_log_file(port_);
     }
 
-    char* pathToRemoteLog_p = getenv("ECF_LOG");
-    if (pathToRemoteLog_p == nullptr) {
+    if (auto var = ecf::environment::fetch("ECF_LOG"); var) {
+        return var.value();
+    }
+    else {
         cout << "TestFixture::pathToLogFile(): assert failed\n";
         cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
         cout << "that can be seen by the client and server\n";
         assert(false);
+        return string(); // This is needed to silence compiler warnings about no return
     }
-    return std::string(pathToRemoteLog_p);
 }
 
 std::string TestFixture::local_ecf_home() {
@@ -379,8 +385,8 @@ std::string TestFixture::local_ecf_home() {
     std::string rel_path = "data/ECF_HOME_" + build_type + "_" + compiler;
 
     // Allow post-fix to be added, to allow test to run in parallel
-    if (const char* custom_postfix = getenv("TEST_ECF_HOME_POSTFIX"); custom_postfix) {
-        rel_path += custom_postfix;
+    if (auto custom_postfix = ecf::environment::fetch("TEST_ECF_HOME_POSTFIX"); custom_postfix) {
+        rel_path += custom_postfix.value();
     }
 
     std::string absolute_path = File::test_data_in_current_dir(rel_path);

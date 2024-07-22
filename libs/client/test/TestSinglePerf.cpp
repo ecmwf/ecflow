@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <cstdlib> // getenv
+#include <cstdlib>
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
@@ -350,7 +350,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
 BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
     ECF_NAME_THIS_TEST();
 
-    if (const char* ecf_ssl = getenv("ECF_SSL"); ecf_ssl) {
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load_threshold_ms       = 8000; // 4500;
         begin_threshold_ms      = 800;  // 400;
         sync_full_threshold_s   = 4.5;  // 2.6;
@@ -362,11 +362,11 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
         client_cmds_threshold_s = 950;  // 8.5;
     }
 
-    if (const char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR"); !ecf_test_defs_dir) {
+    if (auto ecf_test_defs_dir = ecf::environment::fetch("ECF_TEST_DEFS_DIR"); !ecf_test_defs_dir) {
         std::cout << "Ignoring test! Environment variable ECF_TEST_DEFS_DIR is not defined\n";
     }
-    else if (!fs::exists(ecf_test_defs_dir)) {
-        std::cout << "Ignoring test! Test definitions directory " << ecf_test_defs_dir << " does not exist\n";
+    else if (!fs::exists(ecf_test_defs_dir.value())) {
+        std::cout << "Ignoring test! Test definitions directory " << ecf_test_defs_dir.value() << " does not exist\n";
     }
     else {
         /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
@@ -375,7 +375,7 @@ BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
                               "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
         ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-        time_load_and_downloads(theClient, invokeServer.host(), invokeServer.port(), ecf_test_defs_dir);
+        time_load_and_downloads(theClient, invokeServer.host(), invokeServer.port(), ecf_test_defs_dir.value());
     }
 }
 

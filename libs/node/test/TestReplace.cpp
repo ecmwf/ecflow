@@ -12,6 +12,7 @@
 
 #include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -982,7 +983,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
     suite_ptr server_suite;
     {
         server_suite = serverDefs.add_suite("suite");
-        server_suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/../includes"));
+        server_suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
         server_suite->addVariable(Variable("SLEEPTIME", "1"));
         server_suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         family_ptr fam = server_suite->add_family("family");
@@ -1001,7 +1002,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
     std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
-    serverDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    serverDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files

@@ -15,6 +15,7 @@
 
 #include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -120,8 +121,8 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
-        suite->addVariable(Variable(Str::ECF_OUT(), "$ECF_HOME"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_OUT, "$ECF_HOME"));
         suite->addVariable(Variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
 
@@ -164,7 +165,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     theDefs.getAllTasks(theTasks);
 
     // Override ECF_HOME.   ECF_HOME is need to locate the ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are used in client scripts(sms) and used to locate the sms files

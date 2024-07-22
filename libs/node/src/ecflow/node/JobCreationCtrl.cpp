@@ -10,17 +10,22 @@
 
 #include "ecflow/node/JobCreationCtrl.hpp"
 
-#include <cstdlib> // for getenv()
 #include <iostream>
 #include <stdexcept>
 
+#include "ecflow/core/Environment.hpp"
+
 void JobCreationCtrl::generate_temp_dir() {
-    if (!getenv("TMPDIR"))
+    if (auto tmpdir = ecf::environment::fetch("TMPDIR"); tmpdir) {
+        tempDirForJobGeneration_ = tmpdir.value();
+        tempDirForJobGeneration_ += "/ecf_check_job_creation";
+        if (fs::exists(tempDirForJobGeneration_)) {
+            fs::remove_all(tempDirForJobGeneration_);
+        }
+        std::cout << "JobCreationCtrl::generate_temp_dir()  " << tempDirForJobGeneration_ << "\n";
+    }
+    else {
         throw std::runtime_error(
             "JobCreationCtrl::generate_temp_dir(), The environment variable TMPDIR is not defined");
-    tempDirForJobGeneration_ = getenv("TMPDIR");
-    tempDirForJobGeneration_ += "/ecf_check_job_creation";
-    if (fs::exists(tempDirForJobGeneration_))
-        fs::remove_all(tempDirForJobGeneration_);
-    std::cout << "JobCreationCtrl::generate_temp_dir()  " << tempDirForJobGeneration_ << "\n";
+    }
 }

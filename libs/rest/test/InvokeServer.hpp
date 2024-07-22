@@ -19,6 +19,7 @@
 #include "TestHelper.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/server/Server.hpp"
@@ -27,7 +28,8 @@
 class InvokeServer {
 public:
     InvokeServer() {
-        std::string port(getenv("ECF_PORT"));
+        std::string port;
+        ecf::environment::get(ecf::environment::ECF_PORT, port);
         /// Remove check pt and backup check pt file, else server will load it & remove log file
         ecf::Host h;
         fs::remove(h.ecf_checkpt_file(port));
@@ -58,7 +60,8 @@ public:
     }
 
     ~InvokeServer() {
-        std::string port(getenv("ECF_PORT"));
+        std::string port;
+        ecf::environment::get(ecf::environment::ECF_PORT, port);
 
         BOOST_TEST_MESSAGE("*****InvokeServer:: Closing server on port " << port);
         {

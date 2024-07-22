@@ -18,6 +18,7 @@
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
@@ -249,8 +250,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     int load = 125;
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load = 30;
+    }
 #endif
 
     {
@@ -290,10 +292,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
         cout << " Server handled " << load * 16 << " requests in boost_timer("
-             << boost_timer.format(3, Str::cpu_timer_format()) << ")"
-             << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
-             << " Chrono_timer(" << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count()
-             << " milli)" << endl;
+             << boost_timer.format(3, Str::cpu_timer_format()) << ")" << " DurationTimer("
+             << to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+             << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)" << endl;
     }
     {
         theClient.set_auto_sync(true);
@@ -326,10 +327,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
         cout << " Server handled " << load * 8 << " requests in boost_timer("
-             << boost_timer.format(3, Str::cpu_timer_format()) << ")"
-             << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
-             << " Chrono_timer(" << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count()
-             << " milli)"
+             << boost_timer.format(3, Str::cpu_timer_format()) << ")" << " DurationTimer("
+             << to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+             << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)"
              << " *with* AUTO SYNC" << endl;
     }
 }
@@ -370,8 +370,9 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
 
     int load = 125;
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load = 30;
+    }
 #endif
 
     for (int i = 0; i < load; i++) {
@@ -423,8 +424,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
 #endif
 
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load = 10;
+    }
 #endif
 
     boost::timer::cpu_timer

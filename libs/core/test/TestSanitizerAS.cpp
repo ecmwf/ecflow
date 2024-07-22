@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestNaming.hpp"
+#include "ecflow/core/Environment.hpp"
 
 using namespace boost;
 using namespace std;
@@ -28,7 +29,7 @@ static bool is_sanitizer_available() {
      * Unfortunatelly this approach does not work when using Boost 1.66 @ Rocky 8.6.
      */
 
-    bool is_available = ::getenv("ECF_TEST_SANITIZER_AS") != nullptr;
+    bool is_available = ecf::environment::has("ECF_TEST_SANITIZER_AS");
     return is_available;
 }
 

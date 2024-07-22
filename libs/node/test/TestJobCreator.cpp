@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestNaming.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -64,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     {
         suite_ptr suite = Suite::create("suite");
         family_ptr fam  = Family::create("family");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/../includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         fam->addTask(Task::create("t1"));
@@ -90,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 6, "Expected 6 tasks but found, " << theTasks.size());
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files

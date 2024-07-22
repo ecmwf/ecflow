@@ -11,9 +11,9 @@
 #include "ecflow/base/Openssl.hpp"
 
 #include <cassert>
-#include <cstdlib> // getenv
 #include <stdexcept>
 
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
@@ -80,9 +80,8 @@ void Openssl::enable(std::string host, const std::string& port) {
 }
 
 void Openssl::enable_if_defined(std::string host, const std::string& port) {
-    char* ecf_ssl = getenv("ECF_SSL");
-    if (ecf_ssl) {
-        std::string ecf_ssl_env = ecf_ssl;
+    if (auto ecf_ssl = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); ecf_ssl) {
+        std::string ecf_ssl_env = ecf_ssl.value();
 
         if (host == Str::LOCALHOST())
             host = Host().name();
@@ -161,9 +160,7 @@ std::string Openssl::get_password() const {
 }
 
 std::string Openssl::certificates_dir() const {
-    std::string home_path = getenv("HOME");
-    home_path += "/.ecflowrc/ssl/";
-    return home_path;
+    return ecf::environment::get<std::string>("HOME") + "/.ecflowrc/ssl/";
 }
 
 std::string Openssl::pem() const {

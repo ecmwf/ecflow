@@ -20,6 +20,7 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -39,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
     ECF_NAME_THIS_TEST();
 
     // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
-    if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+    if (ecf::environment::has("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
         std::cout << "\n    Disable test_init_add_variable for old server , re-enable when 5.2.0 is minimum version\n";
         return;
     }

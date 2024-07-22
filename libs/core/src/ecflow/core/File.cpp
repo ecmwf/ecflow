@@ -16,6 +16,7 @@
 #include <boost/filesystem.hpp>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Str.hpp"
@@ -54,7 +55,7 @@ const std::string& File::ECF_EXTN() {
 
 /// Search for the file, in $PATH return the first path that matches or an empty file, if not
 std::string File::which(const std::string& file) {
-    std::string env_paths = getenv("PATH");
+    std::string env_paths = ecf::environment::get<std::string>("PATH");
     if (!env_paths.empty()) {
         std::string path;
         std::vector<std::string> paths;
@@ -839,12 +840,12 @@ static std::string bjam_workspace_dir() {
         stem         = current_path.stem().string();
         count++;
         if (count == 100) {
-            char* workspace = getenv("WK");
-            if (workspace == NULL) {
+            auto workspace = ecf::environment::fetch("WK");
+            if (!workspace) {
                 throw std::runtime_error("File::bjam_workspace_dir() failed to find ecflow in a directory name, up the "
                                          "directory tree and WK undefined");
             }
-            std::string the_workspace_dir = workspace;
+            std::string the_workspace_dir = workspace.value();
             return the_workspace_dir;
         }
     }
@@ -983,9 +984,9 @@ std::string File::find_ecf_client_path() {
 
 std::string File::test_data(const std::string& rel_path, const std::string& dir) {
     std::string test_file;
-    char* work_space = getenv("WK"); // for ecbuild
-    if (work_space != nullptr) {
-        test_file = std::string(work_space);
+
+    if (auto workspace = ecf::environment::fetch("WK"); workspace) {
+        test_file = workspace.value();
         if (!rel_path.empty() && rel_path[0] != '/')
             test_file += "/";
         test_file += rel_path;

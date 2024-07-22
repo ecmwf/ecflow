@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <cstdlib> // for getenv
 #include <iostream>
 #include <stdexcept>
 
@@ -16,6 +15,7 @@
 
 #include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
@@ -29,6 +29,10 @@
 
 using namespace std;
 using namespace ecf;
+
+boost::test_tools::assertion_result is_testing_on_cray([[maybe_unused]] boost::unit_test::test_unit_id id) {
+    return ecf::environment::has("ECFLOW_CRAY_BATCH");
+}
 
 BOOST_AUTO_TEST_SUITE(U_Node)
 
@@ -70,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
     // is not found in ECF_INCLUDE we then look at ECF_HOME
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -86,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_simple_include_file"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -94,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -153,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
     ECF_NAME_THIS_TEST();
 
     // This tests for a regression where, *NOT* all the include file were processed.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -165,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
     // endsuite
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_ECFLOW_495"));
-    suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
     task_ptr task_t1 = suite->add_task("t1");
 
     // PrintStyle style(PrintStyle::STATE);
@@ -174,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -226,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
 BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     ECF_NAME_THIS_TEST();
 
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -242,7 +246,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ECF_SCRIPT_CMD_ECFLOW_427"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("body", "body"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
@@ -251,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -373,7 +377,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
     // is not found in ECF_INCLUDE we then look at ECF_HOME
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -393,7 +397,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_include_file"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         suite->addTask(task_t1);
@@ -402,7 +406,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -456,7 +460,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
     // The specific files are specified in ECF_INCLUDE with multiple paths
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -476,7 +480,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
     Defs theDefs;
     {
         suite->addVariable(
-            Variable(Str::ECF_INCLUDE(),
+            Variable(ecf::environment::ECF_INCLUDE,
                      "$ECF_HOME/empty_include1:$ECF_HOME/empty_include2:$ECF_HOME/includes:$ECF_HOME/includes2"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
@@ -484,7 +488,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -539,7 +543,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
     // In this case we expect to find bill.h in the same directory as the script
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -558,14 +562,14 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_include_ECFLOW_274"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -634,7 +638,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     // See File: libs/node/test/data/includes/used_variables.h
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -651,7 +655,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     Defs theDefs;
     {
         suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables"));
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("ESUITE", "suite");
         task_t1 = suite->add_family("f1")->add_task("t1");
     }
@@ -659,7 +663,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -706,7 +710,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
     // Those variable defined within comments and manuals that are not defined should be ignored
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -726,7 +730,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
     Defs theDefs;
     {
         suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_with_comments"));
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("ETASK", "suite");
         suite->add_variable("FRED", "fred");
         task_t1 = suite->add_family("f1")->add_task("t1");
@@ -734,7 +738,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -777,7 +781,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     // BUT we DO NOT define variable FRED, hence we expect failure
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -797,14 +801,14 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     Defs theDefs;
     {
         suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_errors"));
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("ETASK", "suite");
         task_t1 = suite->add_family("f1")->add_task("t1");
     }
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -838,7 +842,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -866,7 +870,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_file"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         for (const NameValueMap::value_type& p : expected_used_variables) {
@@ -877,7 +881,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     }
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -1033,7 +1037,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -1049,7 +1053,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_file_includenoop"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         suite->addTask(task_t1);
@@ -1058,7 +1062,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     // cout << theDefs << "\n";
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -1126,7 +1130,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -1146,7 +1150,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     suite_ptr suite = Suite::create(Pid::unique_name("test_ecf_file_override_ECF_JOB"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "1"));
         suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         suite->addTask(task_t1);
@@ -1155,7 +1159,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     // cout << theDefs << "\n";
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -1223,13 +1227,13 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
     // Create a defs file, where the task name mirrors the ecf files in the given directory
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite("suite"); // ** relies on name of suite, in SMSHOME/suite
-    suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/../includes"));
+    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
     family_ptr family = suite->add_family("family");
     task_ptr task_t1  = family->add_task("t1");
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -1299,7 +1303,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
 
     // test for recursive includes that are not recursive
 
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -1311,13 +1315,13 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     // endsuite
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite("ECFLOW_672");
-    suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/ECFLOW_672"));
+    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/ECFLOW_672"));
     task_ptr task_t1 = suite->add_task("t");
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -1353,7 +1357,7 @@ static void basic_test_template(const std::string& test_name,
                                 const std::string& ecf_micro = "",
                                 bool expect_success          = true) {
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
@@ -1369,7 +1373,7 @@ static void basic_test_template(const std::string& test_name,
     suite_ptr suite  = Suite::create(Pid::unique_name(test_name));
     Defs theDefs;
     {
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("simple", "simple");
         suite->add_variable("tail", "tail");
         if (!ecf_micro.empty())
@@ -1381,7 +1385,7 @@ static void basic_test_template(const std::string& test_name,
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files

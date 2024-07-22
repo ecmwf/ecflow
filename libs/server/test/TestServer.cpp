@@ -156,9 +156,9 @@ BOOST_AUTO_TEST_CASE(test_server) {
     // Hence the lock file is not always sufficient.
     // ECF_FREE_PORT should be unique among  gnu,clang,intel, etc
     std::string the_port1 = "3144";
-    char* test_ecf_port   = getenv("ECF_FREE_PORT"); // from metabuilder, allow parallel tests
-    if (test_ecf_port)
-        the_port1 = test_ecf_port;
+    if (auto port = ecf::environment::fetch("ECF_FREE_PORT"); port) { // from metabuilder, allow parallel tests
+        the_port1 = port.value();
+    }
     cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
 
     auto the_port = ecf::convert_to<int>(the_port1);

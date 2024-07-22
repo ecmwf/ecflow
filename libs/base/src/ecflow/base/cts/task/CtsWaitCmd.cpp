@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -128,7 +129,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
     /// This can be done via AlterCmd by adding a variable on the task,  ECF_PASS with value
     /// Submittable::FREE_JOBS_PASSWORD Note: this *does not* look for the variable up the node tree, only on the task.
     std::string ecf_pass_value;
-    if (submittable_->findVariableValue(Str::ECF_PASS(), ecf_pass_value)) {
+    if (submittable_->findVariableValue(ecf::environment::ECF_PASS, ecf_pass_value)) {
 
         if (ecf_pass_value == Submittable::FREE_JOBS_PASSWORD()) {
             submittable_->flag().clear(ecf::Flag::ZOMBIE);

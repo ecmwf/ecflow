@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestNaming.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Alias.hpp"
@@ -58,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_alias_create) {
         t->addEvent(event2);
         t->addLabel(label1);
         t->addLabel(label2);
-        s->add_variable(Str::ECF_HOME(), ecf_home);
+        s->add_variable(ecf::environment::ECF_HOME, ecf_home);
     }
 
     // Create .usr file content

@@ -15,6 +15,7 @@
 #include <unistd.h> // for gethostname
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 
 using namespace std;
@@ -67,11 +68,11 @@ std::string Host::ecf_lists_file(const std::string& port) const {
 }
 
 std::string Host::ecf_passwd_file(const std::string& port) const {
-    return prefix_host_and_port(port, Str::ECF_PASSWD());
+    return prefix_host_and_port(port, ecf::environment::ECF_PASSWD);
 }
 
 std::string Host::ecf_custom_passwd_file(const std::string& port) const {
-    return prefix_host_and_port(port, Str::ECF_CUSTOM_PASSWD());
+    return prefix_host_and_port(port, ecf::environment::ECF_CUSTOM_PASSWD);
 }
 
 std::string Host::prefix_host_and_port(const std::string& port, const std::string& file_name) const {

@@ -15,6 +15,7 @@
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
@@ -1219,7 +1220,7 @@ search_user_edit_variables(const std::string& name, std::string& value, const Na
 bool Node::variableSubstitution(std::string& cmd) const {
     char micro = '%';
     std::string micro_char;
-    findParentUserVariableValue(Str::ECF_MICRO(), micro_char);
+    findParentUserVariableValue(ecf::environment::ECF_MICRO, micro_char);
     if (!micro_char.empty() && micro_char.size() == 1) {
         micro = micro_char[0];
     }
@@ -1291,15 +1292,15 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitimately override these. ECFLOW-999
         bool generated_variable = false;
         if (percentVar.find("ECF_") == 0) {
-            if (percentVar.find(Str::ECF_HOST()) != std::string::npos)
+            if (percentVar.find(ecf::environment::ECF_HOST) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_PORT()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_PORT) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_TRYNO()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_TRYNO) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_NAME()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_NAME) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_PASS()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos)
                 generated_variable = true;
         }
 

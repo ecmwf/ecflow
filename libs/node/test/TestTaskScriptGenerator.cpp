@@ -16,6 +16,7 @@
 #include "MyDefsFixture.hpp"
 #include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -94,8 +95,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->add_variable(Str::ECF_INCLUDE(), ecf_home);
-        suite->add_variable(Str::ECF_HOME(), ecf_home);
+        suite->add_variable(ecf::environment::ECF_INCLUDE, ecf_home);
+        suite->add_variable(ecf::environment::ECF_HOME, ecf_home);
         suite->add_variable("SLEEP", "10");
         task_ptr t1 = suite->add_task("t1");
         t1->addEvent(Event("event1"));
@@ -186,8 +187,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->add_variable(Str::ECF_INCLUDE(), ecf_home);
-        suite->add_variable(Str::ECF_HOME(), ecf_home);
+        suite->add_variable(ecf::environment::ECF_INCLUDE, ecf_home);
+        suite->add_variable(ecf::environment::ECF_HOME, ecf_home);
         suite->add_variable("SLEEP", "10");
         family_ptr f1 = suite->add_family("f1");
         tasks_with_scripts.push_back(f1->add_task("t1"));

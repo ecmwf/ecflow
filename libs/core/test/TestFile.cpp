@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <cstdlib> // for getenv()
 #include <fstream> // for std::ofstream
 #include <iostream>
 #include <string>
@@ -16,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 
 // #define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
 #ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
     ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
-    if (getenv("ECFLOW_CRAY_BATCH")) {
+    if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
         ECF_TEST_DBG(<< "Test skipped until HPC team can  fix File::createMissingDirectories.(like mkdir -p)");
         return;
     }

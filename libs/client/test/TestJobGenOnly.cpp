@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "TestNaming.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -67,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_jobgenonly) {
     BOOST_REQUIRE_MESSAGE(theDefs.restore(defsFile, errorMsg, warningMsg), errorMsg);
 
     // Override ECF_HOME. ECF_HOME is needed to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     // provide definition of ECF_CLIENT. This should replace smsinit, smscomplete, smsevent,etc
     // with path to the ecf client

@@ -13,6 +13,7 @@
 #include <string>
 
 #include "ecflow/core/Child.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/http/BasicAuth.hpp"
 #include "ecflow/http/HttpServerException.hpp"
@@ -26,17 +27,17 @@
 
 namespace ecf::http {
 
-const char* const ECF_USER = getenv("ECF_USER");
-const char* const ECF_PASS = getenv("ECF_PASS");
+const auto ECF_USER = ecf::environment::fetch(ecf::environment::ECF_USER);
+const auto ECF_PASS = ecf::environment::fetch(ecf::environment::ECF_PASS);
 
 bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
 
 #ifdef ECF_OPENSSL
     auto auth_with_token = [&](const std::string& token) {
         if (TokenStorage::instance().verify(token)) {
-            if (ECF_USER != nullptr && ECF_PASS != nullptr) {
-                ci->set_user_name(std::string(ECF_USER));
-                ci->set_password(std::string(ECF_PASS));
+            if (ECF_USER && ECF_PASS) {
+                ci->set_user_name(ECF_USER.value());
+                ci->set_password(ECF_PASS.value());
             }
             return true;
         }

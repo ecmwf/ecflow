@@ -15,6 +15,7 @@
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"
@@ -41,8 +42,8 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),
-                                                      File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
+    theDefs.set_server().add_or_update_user_variables(
+        ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
     string s1_path;
     {
         ClockAttr clockAttr(true);
@@ -96,8 +97,8 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
     // before
     // ***               autorestore
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),
-                                                      File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
+    theDefs.set_server().add_or_update_user_variables(
+        ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
 
     std::vector<std::string> vec;
     {

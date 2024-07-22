@@ -22,6 +22,7 @@
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -642,7 +643,7 @@ static void create_and_start_test(const std::string& suite_name,
 BOOST_AUTO_TEST_CASE(enable_debug_for_ECF_TRY_NO_Greater_than_one) {
     BOOST_CHECK_MESSAGE(true, "dummy test");
 
-    if (getenv("ECF_DEBUG_ZOMBIES")) {
+    if (ecf::environment::has("ECF_DEBUG_ZOMBIES")) {
         ecf_debug_enabled = true;
         ECF_NAME_THIS_TEST();
     }

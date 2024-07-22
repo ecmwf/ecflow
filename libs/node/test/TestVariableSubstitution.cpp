@@ -15,6 +15,7 @@
 
 #include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -380,10 +381,10 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution_1) {
 
 static std::vector<std::string> required_server_variables() {
     std::vector<std::string> required_server_variables;
-    required_server_variables.push_back(Str::ECF_PORT());
-    required_server_variables.push_back(Str::ECF_HOST());
+    required_server_variables.push_back(ecf::environment::ECF_PORT);
+    required_server_variables.push_back(ecf::environment::ECF_HOST);
 
-    required_server_variables.push_back(Str::ECF_HOME());
+    required_server_variables.push_back(ecf::environment::ECF_HOME);
     required_server_variables.emplace_back("ECF_LOG");
     required_server_variables.emplace_back("ECF_CHECK");
     required_server_variables.emplace_back("ECF_CHECKOLD");
@@ -473,12 +474,12 @@ BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
 
     string value;
     value.clear();
-    t->findParentVariableValue(Str::ECF_JOBOUT(), value);
+    t->findParentVariableValue(ecf::environment::ECF_JOBOUT, value);
     BOOST_CHECK_MESSAGE(value == "/fred/bill/joe/suite/f/t.0",
                         "ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
 
     value.clear();
-    t1->findParentVariableValue(Str::ECF_JOBOUT(), value);
+    t1->findParentVariableValue(ecf::environment::ECF_JOBOUT, value);
     BOOST_CHECK_MESSAGE(value == "/fred/bill/joe2/suite/f1/t1.0",
                         "ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
 

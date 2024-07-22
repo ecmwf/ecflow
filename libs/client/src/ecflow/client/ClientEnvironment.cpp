@@ -10,13 +10,13 @@
 
 #include "ecflow/client/ClientEnvironment.hpp"
 
-#include <cstdlib> // for getenv()
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/PasswdFile.hpp"
@@ -223,18 +223,15 @@ std::string ClientEnvironment::toString() const {
 }
 
 std::string ClientEnvironment::hostSpecified() {
-    char* the_host = getenv(Str::ECF_HOST().c_str());
-    if (the_host)
-        return std::string(the_host);
-    return std::string();
+    std::string specified_host;
+    ecf::environment::get(ecf::environment::ECF_HOST, specified_host);
+    return specified_host;
 }
 
 std::string ClientEnvironment::portSpecified() {
-    char* theEnv = getenv(Str::ECF_PORT().c_str());
-    if (theEnv) {
-        return std::string(theEnv);
-    }
-    return Str::DEFAULT_PORT_NUMBER();
+    std::string specified_port = Str::DEFAULT_PORT_NUMBER();
+    ecf::environment::get(ecf::environment::ECF_PORT, specified_port);
+    return specified_port;
 }
 
 void ClientEnvironment::read_environment_variables() {
@@ -242,47 +239,37 @@ void ClientEnvironment::read_environment_variables() {
     std::cout << "ClientEnvironment::read_environment_variables()\n";
 #endif
 
-    if (getenv(Str::ECF_NAME().c_str()))
-        task_path_ = getenv(Str::ECF_NAME().c_str());
-    if (getenv(Str::ECF_PASS().c_str()))
-        jobs_password_ = getenv(Str::ECF_PASS().c_str());
-    if (getenv(Str::ECF_TRYNO().c_str()))
-        task_try_num_ = atoi(getenv(Str::ECF_TRYNO().c_str()));
-    if (getenv("ECF_HOSTFILE"))
-        host_file_ = getenv("ECF_HOSTFILE");
-    if (getenv(Str::ECF_RID().c_str()))
-        remote_id_ = getenv(Str::ECF_RID().c_str());
-    if (getenv("ECF_USER"))
-        user_name_ = getenv("ECF_USER");
+    ecf::environment::get(ecf::environment::ECF_NAME, task_path_);
 
-    if (getenv("ECF_TIMEOUT"))
-        timeout_ = atoi(getenv("ECF_TIMEOUT")); // host file timeout
-    if (timeout_ > MAX_TIMEOUT)
-        timeout_ = MAX_TIMEOUT;
-    if (timeout_ < MIN_TIMEOUT)
-        timeout_ = MIN_TIMEOUT;
+    ecf::environment::get(ecf::environment::ECF_PASS, jobs_password_);
 
-    if (getenv("ECF_ZOMBIE_TIMEOUT"))
-        zombie_timeout_ = atoi(getenv("ECF_ZOMBIE_TIMEOUT")); // time out for zombies
-    if (zombie_timeout_ > MAX_TIMEOUT)
-        zombie_timeout_ = MAX_TIMEOUT;
-    if (zombie_timeout_ < MIN_TIMEOUT)
-        zombie_timeout_ = MIN_TIMEOUT;
+    ecf::environment::get(ecf::environment::ECF_TRYNO, task_try_num_);
 
-    if (getenv("ECF_CONNECT_TIMEOUT"))
-        connect_timeout_ = atoi(getenv("ECF_CONNECT_TIMEOUT")); // for test only
+    ecf::environment::get("ECF_HOSTFILE", host_file_);
 
-    if (getenv("ECF_DENIED"))
-        denied_ = true;
-    if (getenv("NO_ECF"))
-        no_ecf_ = true;
-    if (getenv("ECF_DEBUG_CLIENT"))
-        debug_ = true;
+    ecf::environment::get(ecf::environment::ECF_RID, remote_id_);
 
-    char* debug_level = getenv("ECF_DEBUG_LEVEL");
-    if (debug_level) {
+    ecf::environment::get("ECF_USER", user_name_);
+
+    ecf::environment::get("ECF_TIMEOUT", timeout_);
+    timeout_ = timeout_ > MAX_TIMEOUT ? MAX_TIMEOUT : timeout_;
+    timeout_ = timeout_ < MIN_TIMEOUT ? MIN_TIMEOUT : timeout_;
+
+    ecf::environment::get("ECF_ZOMBIE_TIMEOUT", zombie_timeout_);
+    zombie_timeout_ = (zombie_timeout_ > MAX_TIMEOUT) ? MAX_TIMEOUT : zombie_timeout_;
+    zombie_timeout_ = (zombie_timeout_ < MIN_TIMEOUT) ? MIN_TIMEOUT : zombie_timeout_;
+
+    ecf::environment::get("ECF_CONNECT_TIMEOUT", connect_timeout_);
+
+    ecf::environment::get("ECF_DENIED", denied_);
+
+    ecf::environment::get("NO_ECF", no_ecf_);
+
+    ecf::environment::get("ECF_DEBUG_CLIENT", debug_);
+
+    if (auto var = ecf::environment::fetch("ECF_DEBUG_LEVEL"); var) {
         try {
-            Ecf::set_debug_level(ecf::convert_to<unsigned int>(debug_level));
+            Ecf::set_debug_level(ecf::convert_to<unsigned int>(var.value()));
         }
         catch (...) {
             throw std::runtime_error("The environment variable ECF_DEBUG_LEVEL must be an unsigned integer.");
@@ -297,8 +284,8 @@ void ClientEnvironment::read_environment_variables() {
         port = host_vec_[0].second; //  first entry is the config port
     }
 
-    if (getenv(Str::ECF_PORT().c_str())) {
-        port = getenv(Str::ECF_PORT().c_str());
+    if (auto var = ecf::environment::fetch(ecf::environment::ECF_PORT); var) {
+        port = var.value();
         host_vec_.clear(); // remove config settings, net effect is overriding
         host_vec_.emplace_back(host, port);
     }
@@ -394,9 +381,8 @@ const std::string& ClientEnvironment::get_password(const char* env, const std::s
         return passwd_;
     }
 
-    char* file = getenv(env);
-    if (file) {
-        std::string user_passwd_file = file;
+    if (auto file = ecf::environment::fetch(env); file) {
+        std::string user_passwd_file = file.value();
         // cout << "  ClientEnvironment::get_password() ECF_CUSTOM_PASSWD " << user_passwd_file  << "\n";
         if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
             // cout << "  ClientEnvironment::get_password() LOADING password file\n";

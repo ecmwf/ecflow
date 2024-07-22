@@ -20,6 +20,7 @@
 #include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
     TestClean clean_at_start_and_end;
 
     // When using ECF_SSL sync is to slow.
-    if (getenv("ECF_SSL")) {
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         cout << " ignore test undel ECF_SSL\n";
         return;
     }
@@ -142,8 +143,8 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         boost::posix_time::ptime sync_clock_suiteTime =
             TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
         ss << "   Sync clock suite time:" << to_simple_string(sync_clock_suiteTime) << " full_sync("
-           << TestFixture::client().server_reply().full_sync() << ")"
-           << " in_sync(" << TestFixture::client().server_reply().in_sync() << ") cal_count("
+           << TestFixture::client().server_reply().full_sync() << ")" << " in_sync("
+           << TestFixture::client().server_reply().in_sync() << ") cal_count("
            << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
         // suiteVec is now invalidated
@@ -152,8 +153,8 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         boost::posix_time::ptime sync_full_suiteTime =
             TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
         ss << "   Sync full suite time :" << to_simple_string(sync_full_suiteTime) << " full_sync("
-           << TestFixture::client().server_reply().full_sync() << ")"
-           << " in_sync(" << TestFixture::client().server_reply().in_sync() << ") cal_count("
+           << TestFixture::client().server_reply().full_sync() << ")" << " in_sync("
+           << TestFixture::client().server_reply().in_sync() << ") cal_count("
            << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
         BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,

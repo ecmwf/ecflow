@@ -18,6 +18,7 @@
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -959,15 +960,16 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
     { // free password
         TestStateChanged changed(s);
         std::string returnedValue;
-        BOOST_CHECK_MESSAGE(!task->findVariableValue(Str::ECF_PASS(), returnedValue),
+        BOOST_CHECK_MESSAGE(!task->findVariableValue(ecf::environment::ECF_PASS, returnedValue),
                             "Expected no variable of name ECF_PASS");
 
-        TestHelper::invokeRequest(
-            &defs,
-            Cmd_ptr(new AlterCmd(
-                task->absNodePath(), AlterCmd::ADD_VARIABLE, Str::ECF_PASS(), Submittable::FREE_JOBS_PASSWORD())));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(task->absNodePath(),
+                                                       AlterCmd::ADD_VARIABLE,
+                                                       ecf::environment::ECF_PASS,
+                                                       Submittable::FREE_JOBS_PASSWORD())));
 
-        BOOST_CHECK_MESSAGE(task->findVariableValue(Str::ECF_PASS(), returnedValue),
+        BOOST_CHECK_MESSAGE(task->findVariableValue(ecf::environment::ECF_PASS, returnedValue),
                             "Expected to find variable ECF_PASS on the task");
         BOOST_CHECK_MESSAGE(returnedValue == Submittable::FREE_JOBS_PASSWORD(),
                             "Expected variable value of name " << Submittable::FREE_JOBS_PASSWORD() << " but found "

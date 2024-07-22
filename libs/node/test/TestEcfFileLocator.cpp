@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestNaming.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
@@ -113,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
     //          task task
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_ecf_file_search"));
-    suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
     family_ptr f1 = suite->add_family("f1");
     family_ptr f2 = f1->add_family("f2");
     family_ptr f3 = f2->add_family("f3");
@@ -123,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home  = File::test_data("libs/node/test/data", "libs/node");
     std::string ecf_lists = File::test_data("libs/node/test/data", "libs/node");
-    suite->add_variable(Str::ECF_HOME(), ecf_home);
+    suite->add_variable(ecf::environment::ECF_HOME, ecf_home);
     // cerr << theDefs << "\n";
 
     /// begin , will cause creation of generated variables. The generated variables
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
 
         suite->deleteVariable("ECF_FILES_LOOKUP"); // cleanup
 
-        suite->add_variable(Str::ECF_FILES(), ecf_lists);
+        suite->add_variable(ecf::environment::ECF_FILES, ecf_lists);
         located_ecf_file(task,
                          EcfFile::ECF_SCRIPT,
                          EcfFile::PRUNE_ROOT,
@@ -170,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
 
         suite->deleteVariable("ECF_FILES_LOOKUP"); // cleanup
 
-        suite->add_variable(Str::ECF_FILES(), ecf_lists);
+        suite->add_variable(ecf::environment::ECF_FILES, ecf_lists);
         located_ecf_file(task, EcfFile::ECF_FILES, EcfFile::PRUNE_ROOT, __LINE__);
         suite->add_variable("ECF_FILES_LOOKUP", "prune_leaf"); // change look up method
         located_ecf_file(task, EcfFile::ECF_FILES, EcfFile::PRUNE_LEAF, __LINE__);
@@ -209,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
     }
     {
         // cout << "Test ECF_FILES at intermediate location, by prune_leaf\n";
-        suite->add_variable(Str::ECF_FILES(), ecf_lists);
+        suite->add_variable(ecf::environment::ECF_FILES, ecf_lists);
         Node* node = task.get();
         node       = node->parent();
         node       = node->parent();
@@ -283,7 +284,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");
@@ -299,16 +300,16 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     }
     {
         suite_ptr suite2 = theDefs.add_suite("suite2");
-        suite2->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
-        suite2->addVariable(Variable(Str::ECF_FILES(), "$ECF_HOME"));
+        suite2->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite2->addVariable(Variable(ecf::environment::ECF_FILES, "$ECF_HOME"));
         family_ptr fam = suite2->add_family("family");
-        fam->addVariable(Variable(Str::ECF_FETCH(), "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"));
+        fam->addVariable(Variable(ecf::environment::ECF_FETCH, "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"));
         fam->add_task("t2");
     }
     {
         suite_ptr suite = theDefs.add_suite("suite3");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
-        suite->addVariable(Variable(Str::ECF_FILES(), "$ECF_HOME"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_FILES, "$ECF_HOME"));
         family_ptr fam = suite->add_family("family");
         fam->addVariable(Variable("ECF_SCRIPT_CMD", "script_cmd -F %ECF_FILES% -I %ECF_INCLUDE%"));
         fam->add_task("t2");
@@ -321,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 8, "Expected 8 tasks but found, " << theTasks.size());
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), smshome);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -383,7 +384,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");
@@ -397,8 +398,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
 
     // ECF_HOME, a directory with no .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), smshome);
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_FILES(), ecf_files);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_FILES, ecf_files);
 
     //    cerr << theDefs << "\n";
 
@@ -450,7 +451,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/includes"));
+        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addVariable(Variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->addVariable(Variable("FAMILY", "family"));
@@ -465,8 +466,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
 
     // ECF_HOME, a directory with no .ecf files
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), smshome);
-    theDefs.set_server().add_or_update_user_variables(Str::ECF_FILES(), ecf_files);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
+    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_FILES, ecf_files);
 
     //    cerr << theDefs << "\n";
 

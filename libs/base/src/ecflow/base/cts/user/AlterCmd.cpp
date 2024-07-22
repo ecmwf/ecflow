@@ -20,6 +20,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Enumerate.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Message.hpp"
@@ -296,8 +297,8 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const {
     else if (change_attr_type_ == AlterCmd::VARIABLE || add_attr_type_ == AlterCmd::ADD_VARIABLE) {
 
         // ECFLOW-380: Some variable should be read only
-        if (name_ == Str::ECF_HOST() || name_ == Str::ECF_PORT() || name_ == "ECF_PID" || name_ == "ECF_VERSION" ||
-            name_ == "ECF_LISTS") {
+        if (name_ == ecf::environment::ECF_HOST || name_ == ecf::environment::ECF_PORT || name_ == "ECF_PID" ||
+            name_ == "ECF_VERSION" || name_ == "ECF_LISTS") {
             std::stringstream ss;
             ss << "AlterCmd:: Cannot add or change read only server variable " << name_;
             throw std::runtime_error(ss.str());

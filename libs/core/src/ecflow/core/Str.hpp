@@ -206,34 +206,7 @@ public:
     static const std::string& DEFAULT_PORT_NUMBER(); // "3141"
     static const std::string& LOCALHOST();
 
-    static const std::string& ECF_PORT();
-    static const std::string& ECF_RID();
-    static const std::string& ECF_TRYNO();
-    static const std::string& ECF_TRIES();
-    static const std::string& ECF_NAME();
-    static const std::string& ECF_HOST();
-    static const std::string& ECF_PASS();
-    static const std::string& ECF_JOB();
-    static const std::string& ECF_JOBOUT();
-    static const std::string& ECF_SCRIPT();
-    static const std::string& ECF_DUMMY_TASK();
-    static const std::string& ECF_NO_SCRIPT();
-    static const std::string& ECF_MICRO();
-    static const std::string& ECF_FILES();
-    static const std::string& ECF_FETCH();
-    static const std::string& ECF_KILL_CMD();
-    static const std::string& ECF_STATUS_CMD();
-
-    static const std::string& ECF_HOME();
-    static const std::string& ECF_INCLUDE();
-    static const std::string& ECF_JOB_CMD();
-    static const std::string& ECF_OUT();
-    static const std::string& ECF_EXTN();
-    static const std::string& ECF_LOG();
-
     static const std::string& WHITE_LIST_FILE();
-    static const std::string& ECF_PASSWD();
-    static const std::string& ECF_CUSTOM_PASSWD();
 
     static const char* cpu_timer_format() { return "%ws wall, (%us user + %ss system = %ts) CPU (%p%)"; }
 };

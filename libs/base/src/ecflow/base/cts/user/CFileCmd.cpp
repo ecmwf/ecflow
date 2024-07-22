@@ -18,6 +18,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Submittable.hpp"
@@ -174,7 +175,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 
             case CFileCmd::JOB: {
                 std::string ecf_job_file;
-                submittable->findParentVariableValue(Str::ECF_JOB(), ecf_job_file);
+                submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 if (!File::open(ecf_job_file, fileContents)) {
                     std::stringstream ss;
                     ss << "CFileCmd::doHandleRequest: Failed to open the job file('" << ecf_job_file << "') for task "
@@ -198,19 +199,19 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 // First try user variable, if defined this has priority ECFLOW-999
                 std::stringstream ss;
                 std::string user_jobout;
-                if (submittable->findParentUserVariableValue(Str::ECF_JOBOUT(), user_jobout)) {
+                if (submittable->findParentUserVariableValue(ecf::environment::ECF_JOBOUT, user_jobout)) {
                     if (File::open(user_jobout, fileContents))
                         break;
                     ss << "Failed to open user specified job-out(ECF_JOBOUT='" << user_jobout << "') ";
                 }
 
-                const Variable& ecf_jobout_gen_var = submittable->findGenVariable(Str::ECF_JOBOUT());
+                const Variable& ecf_jobout_gen_var = submittable->findGenVariable(ecf::environment::ECF_JOBOUT);
                 if (!File::open(ecf_jobout_gen_var.theValue(), fileContents)) {
 
                     // If that fails as a backup, look under ECF_HOME/ECF_NAME.ECF_TRYNO,   ECFLOW-177 preserve old SMS
                     // behaviour
                     std::string ecfhome_jobout;
-                    submittable->findParentUserVariableValue(Str::ECF_HOME(), ecfhome_jobout);
+                    submittable->findParentUserVariableValue(ecf::environment::ECF_HOME, ecfhome_jobout);
                     ecfhome_jobout += submittable->absNodePath();
                     ecfhome_jobout += ".";
                     ecfhome_jobout += submittable->tryNo();
@@ -239,7 +240,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 
             case CFileCmd::KILL: {
                 std::string ecf_job_file;
-                submittable->findParentVariableValue(Str::ECF_JOB(), ecf_job_file);
+                submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 std::string file = ecf_job_file + ".kill";
                 if (!File::open(file, fileContents)) {
                     std::stringstream ss;
@@ -252,7 +253,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 
             case CFileCmd::STAT: {
                 std::string ecf_job_file;
-                submittable->findParentVariableValue(Str::ECF_JOB(), ecf_job_file);
+                submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 std::string file = ecf_job_file + ".stat";
                 if (!File::open(file, fileContents)) {
                     std::stringstream ss;
@@ -275,7 +276,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 
             // First look for .man files in ECF_FILES and then ECF_HOME
             std::string ecf_files;
-            node->findParentUserVariableValue(Str::ECF_FILES(), ecf_files);
+            node->findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_files);
             if (!ecf_files.empty() && fs::is_directory(ecf_files)) {
 
                 std::string manFile = File::backwardSearch(ecf_files, node->absNodePath(), File::MAN_EXTN());
@@ -289,7 +290,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
             if (fileContents.empty()) {
                 // Try under ECF_HOME
                 std::string ecf_home;
-                node->findParentUserVariableValue(Str::ECF_HOME(), ecf_home);
+                node->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
                 if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
 
                     std::string manFile = File::backwardSearch(ecf_home, node->absNodePath(), File::MAN_EXTN());

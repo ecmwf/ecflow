@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 
 namespace ecf {
@@ -65,12 +66,8 @@ private:
     static std::string port_file(const std::string& the_port) {
         // We need the *SAME* location so that different process find the same file.
         // When going across compiler the root_build_dir is not sufficient
-        char* ecf_port_lock_dir = getenv("ECF_PORT_LOCK_DIR");
-        std::string path;
-        if (ecf_port_lock_dir)
-            path = ecf_port_lock_dir;
-        else
-            path = File::root_source_dir();
+        std::string path = File::root_source_dir();
+        ecf::environment::get("ECF_PORT_LOCK_DIR", path);
 
         path += "/";
         path += the_port;

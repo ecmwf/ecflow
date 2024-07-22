@@ -16,6 +16,7 @@
 #include "ZombieUtil.hpp"
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -53,7 +54,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
                                       bool fail_if_to_long) {
     /// return the number of zombies set to user action;
     bool ecf_debug_zombies = false;
-    if (getenv("ECF_DEBUG_ZOMBIES")) {
+    if (ecf::environment::has("ECF_DEBUG_ZOMBIES")) {
         ecf_debug_zombies = true;
         cout << "\n   do_zombie_user_action " << User::to_string(uc) << " expected_action_cnt " << expected_action_cnt
              << "\n";
