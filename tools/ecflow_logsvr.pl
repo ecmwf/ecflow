@@ -147,7 +147,7 @@ sub do_get {
 	{
 		syswrite($client,$buf,$size);
 	}
-        syswrite($client,"end of output");
+        syswrite($client,"/n");
 	close(IN);
 }
 
