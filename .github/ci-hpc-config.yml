@@ -4,6 +4,7 @@ build:
     - ninja
     - python3
     - qt
+    - cmake/new
   dependencies:
     - ecmwf/ecbuild@develop
   parallel: 64
