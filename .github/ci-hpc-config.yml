@@ -12,3 +12,35 @@ build:
     - -DENABLE_ALL_TESTS=ON
   ctest_options:
     - -L nightly
+
+gnu-12.2.0:
+  build:
+  modules:
+    - boost/1.81.0
+    - ninja
+    - python3/3.10.10-01
+    - qt
+    - cmake/new
+  dependencies:
+    - ecmwf/ecbuild@develop
+  parallel: 64
+  cmake_options:
+    - -DENABLE_ALL_TESTS=ON
+  ctest_options:
+    - -L nightly
+
+gnu-8.5.0:
+  build:
+  modules:
+    - boost/1.84.0
+    - ninja
+    - python3/3.11.8-01
+    - qt
+    - cmake/new
+  dependencies:
+    - ecmwf/ecbuild@develop
+  parallel: 64
+  cmake_options:
+    - -DENABLE_ALL_TESTS=ON
+  ctest_options:
+    - -L nightly
