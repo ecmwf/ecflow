@@ -4,6 +4,7 @@ build:
     - ninja
     - python3
     - qt
+    - cmake/new
   dependencies:
     - ecmwf/ecbuild@develop
   parallel: 64
@@ -17,8 +18,9 @@ gnu-12.2.0:
     modules:
       - boost/1.81.0
       - ninja
-      - python/3.10.10-01
+      - python3/3.10.10-01
       - qt
+      - cmake/new
     dependencies:
       - ecmwf/ecbuild@develop
     parallel: 64
@@ -34,6 +36,7 @@ gnu-8.5.0:
       - ninja
       - python3/3.11.8-01
       - qt
+      - cmake/new
     dependencies:
       - ecmwf/ecbuild@develop
     parallel: 64
