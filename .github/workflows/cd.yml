@@ -10,7 +10,7 @@ on:
 
 jobs:
   deploy:
-    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@add-skip_matrix_jobs-to-create-package
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
     with:
       skip_checks: true
     secrets: inherit
