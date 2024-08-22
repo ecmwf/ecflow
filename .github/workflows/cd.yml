@@ -13,4 +13,5 @@ jobs:
     uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@add-skip-to-create-package
     with:
       skip_checks: true
+      restrict_matrix_jobs: gnu@debian-11
     secrets: inherit
