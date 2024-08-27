@@ -13,5 +13,7 @@ jobs:
     uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@add-debian-12-to-create-package
     with:
       skip_checks: true
-      restrict_matrix_jobs: gnu@debian-11
+      restrict_matrix_jobs:
+        - gnu@debian-11
+        - gnu@debian-12
     secrets: inherit
