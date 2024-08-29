@@ -36,8 +36,8 @@ InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
 }
 
 InfoProvider::~InfoProvider() {
-    delete reply_;
     clearInternal();
+    delete reply_;
 }
 
 void InfoProvider::clearInternal() {
