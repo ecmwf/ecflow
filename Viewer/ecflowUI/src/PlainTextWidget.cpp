@@ -33,6 +33,10 @@ PlainTextWidget::PlainTextWidget(QWidget* /*parent*/) : ui_(new Ui::PlainTextWid
     connect(ui_->fontSizeDownTb, SIGNAL(clicked()), this, SLOT(slotFontSizeDown()));
 }
 
+PlainTextWidget::~PlainTextWidget() {
+    delete ui_;
+}
+
 void PlainTextWidget::setPlainText(QString t) {
     ui_->textEdit->setPlainText(t);
 }

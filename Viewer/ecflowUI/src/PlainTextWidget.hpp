@@ -22,7 +22,7 @@ class PlainTextWidget : public QWidget {
 
 public:
     explicit PlainTextWidget(QWidget* parent = nullptr);
-    ~PlainTextWidget() override = default;
+    ~PlainTextWidget() override;
 
     void setPlainText(QString);
     void setTitle(QString);

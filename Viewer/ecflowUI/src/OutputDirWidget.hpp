@@ -43,6 +43,7 @@ class OutputDirWidget : public QWidget {
 
 public:
     explicit OutputDirWidget(QWidget* parent);
+    ~OutputDirWidget() override;
 
     void clear();
     void load(VReply* reply, const std::string& joboutFile);

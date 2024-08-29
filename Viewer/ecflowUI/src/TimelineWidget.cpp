@@ -222,8 +222,8 @@ TimelineWidget::TimelineWidget(QWidget* /*parent*/)
 }
 
 TimelineWidget::~TimelineWidget() {
-    if (data_)
-        delete data_;
+    delete data_;
+    delete ui_;
 }
 
 // a complete clear
