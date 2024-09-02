@@ -22,7 +22,7 @@ connection::~connection() {
 #endif
 }
 
-connection::connection(boost::asio::io_service& io_service) : socket_(io_service) {
+connection::connection(boost::asio::io_context& io) : socket_(io) {
 #ifdef DEBUG_CONNECTION
     if (Ecf::server())
         std::cout << "SERVER: Connection::connection\n";

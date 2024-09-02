@@ -24,10 +24,10 @@ namespace internal_detail {
  */
 class BaseUDPConnection {
 public:
-    BaseUDPConnection(boost::asio::io_service& io_service,
+    BaseUDPConnection(boost::asio::io_context& io,
                       boost::asio::ip::udp::endpoint server_endpoint,
                       const std::string& request)
-        : socket_(io_service),
+        : socket_(io),
           server_endpoint_(std::move(server_endpoint)) {
         // Open socket connection
         socket_.open(boost::asio::ip::udp::v4());
@@ -74,13 +74,13 @@ public:
     BaseUDPClient(hostname_t host, port_t port) : host_{std::move(host)}, port_{std::move(port)} {}
 
     void send(const data_t& data) {
-        boost::asio::io_service io_service;
-        boost::asio::ip::udp::resolver resolver(io_service);
+        boost::asio::io_context io;
+        boost::asio::ip::udp::resolver resolver(io);
         boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), host_, port_);
         boost::asio::ip::udp::endpoint server_endpoint = *resolver.resolve(query);
 
-        internal_detail::BaseUDPConnection connection(io_service, server_endpoint, data);
-        io_service.run();
+        internal_detail::BaseUDPConnection connection(io, server_endpoint, data);
+        io.run();
     }
 
 private:

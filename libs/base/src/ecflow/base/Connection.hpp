@@ -45,7 +45,7 @@ class connection {
 public:
     ~connection();
 
-    explicit connection(boost::asio::io_service& io_service);
+    explicit connection(boost::asio::io_context& io);
     boost::asio::ip::tcp::socket& socket() { return socket_; }
     boost::asio::ip::tcp::socket& socket_ll() { return socket_; }
 

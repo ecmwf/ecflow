@@ -17,7 +17,7 @@
 class Server : public BaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit Server(boost::asio::io_service& io_service, ServerEnvironment&);
+    explicit Server(boost::asio::io_context& io, ServerEnvironment&);
     ~Server() override = default;
 
 private:

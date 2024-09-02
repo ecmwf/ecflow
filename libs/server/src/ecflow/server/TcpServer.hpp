@@ -18,7 +18,7 @@ class Server;
 class TcpServer : public TcpBaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit TcpServer(Server*, boost::asio::io_service& io_service, ServerEnvironment&);
+    explicit TcpServer(Server*, boost::asio::io_context& io, ServerEnvironment&);
     ~TcpServer() = default;
 
 private:

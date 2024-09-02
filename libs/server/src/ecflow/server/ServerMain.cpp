@@ -22,15 +22,15 @@ using namespace std;
 /// \brief The Server entrypoint
 ///
 
-int run_server(boost::asio::io_service& io_service, const ServerEnvironment& server_environment) {
+int run_server(boost::asio::io_context& io, const ServerEnvironment& server_environment) {
     for (;;) {
         try {
             /// Start the server
-            /// The io_service::run() call will block until all asynchronous operations
+            /// The io_context::run() call will block until all asynchronous operations
             /// have finished. While the server is running, there is always at least one
             /// asynchronous operation outstanding: the asynchronous accept call waiting
             /// for new incoming connections.
-            io_service.run();
+            io.run();
             if (server_environment.debug())
                 cout << "Normal exit from server\n";
             break;
@@ -69,19 +69,19 @@ int main(int argc, char* argv[]) {
             cout << "Server started: ------------------------------------------------>port:"
                  << server_environment.port() << endl;
 
-        boost::asio::io_service io_service;
+        boost::asio::io_context io;
 #ifdef ECF_OPENSSL
         if (server_environment.ssl()) {
-            SslServer theServer(io_service, server_environment); // This can throw exception, bind address in use.
-            return run_server(io_service, server_environment);
+            SslServer theServer(io, server_environment); // This can throw exception, bind address in use.
+            return run_server(io, server_environment);
         }
         else {
-            Server theServer(io_service, server_environment); // This can throw exception, bind address in use.
-            return run_server(io_service, server_environment);
+            Server theServer(io, server_environment); // This can throw exception, bind address in use.
+            return run_server(io, server_environment);
         }
 #else
-        Server theServer(io_service, server_environment); // This can throw exception, bind address in use.
-        return run_server(io_service, server_environment);
+        Server theServer(io, server_environment); // This can throw exception, bind address in use.
+        return run_server(io, server_environment);
 #endif
     }
     catch (ServerEnvironmentException& e) {

@@ -32,7 +32,7 @@ class BaseServer : public AbstractServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming
     /// connection.
-    explicit BaseServer(boost::asio::io_service& io_service, ServerEnvironment&);
+    explicit BaseServer(boost::asio::io_context& io, ServerEnvironment&);
     ~BaseServer() override;
 
     void handle_terminate();
@@ -88,8 +88,8 @@ public:
     void sigterm_signal_handler();
 
 protected:
-    /// The io_service used to perform asynchronous operations.
-    boost::asio::io_service& io_service_;
+    /// The io_context used to perform asynchronous operations.
+    boost::asio::io_context& io_;
 
     /// The signal_set is used to register for automatic check pointing
     boost::asio::signal_set signals_;

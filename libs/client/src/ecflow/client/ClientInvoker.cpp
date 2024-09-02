@@ -366,7 +366,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
             int no_of_tries = connection_attempts_;
             while (no_of_tries > 0) {
                 try {
-                    /// *** Each call to io_service.run(); is a *REQUEST* to the server ***
+                    /// *** Each call to io_context::run(); is a *REQUEST* to the server ***
                     /// *** Hence we *MUST* clear the server_reply before each call *******
                     /// *** Found during zombie test. i.e when blocking, we were responding to previous, reply, since
                     /// server_reply was not being reset *Note* server_reply_.client_handle_ is kept until the next call
@@ -392,13 +392,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                              << ")<<<" << endl;
                     }
 
-                    boost::asio::io_service io_service;
+                    boost::asio::io_context io;
 #ifdef ECF_OPENSSL
                     if (clientEnv_.ssl()) {
 
                         clientEnv_.openssl().init_for_client();
 
-                        SslClient theClient(io_service,
+                        SslClient theClient(io,
                                             clientEnv_.openssl().context(),
                                             cts_cmd,
                                             clientEnv_.host(),
@@ -406,12 +406,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                                             clientEnv_.connect_timeout());
                         {
     #ifdef DEBUG_PERF
-                            ecf::ScopedDurationTimer my_timer("   io_service.run()");
+                            ecf::ScopedDurationTimer my_timer("   io.run()");
     #endif
-                            io_service.run();
+                            io.run();
                         }
                         if (clientEnv_.debug())
-                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
 
                         /// Let see how the server responded if at all.
                         try {
@@ -429,15 +429,15 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     else {
 #endif
                         Client theClient(
-                            io_service, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
+                            io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
                         {
 #ifdef DEBUG_PERF
-                            ecf::ScopedDurationTimer my_timer("   io_service.run()");
+                            ecf::ScopedDurationTimer my_timer("   io.run()");
 #endif
-                            io_service.run();
+                            io.run();
                         }
                         if (clientEnv_.debug())
-                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
 
                         /// Let see how the server responded if at all.
                         try {
