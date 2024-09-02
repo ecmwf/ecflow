@@ -12,9 +12,9 @@
 
 #include "ecflow/server/ServerEnvironment.hpp"
 
-SslServer::SslServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : BaseServer(io_service, serverEnv),
-      server_(this, io_service, serverEnv) {
+SslServer::SslServer(boost::asio::io_context& io, ServerEnvironment& serverEnv)
+    : BaseServer(io, serverEnv),
+      server_(this, io, serverEnv) {
 }
 
 const std::string& SslServer::ssl() const {

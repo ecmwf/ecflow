@@ -30,7 +30,7 @@
 using namespace ecf;
 
 //-------------------------------------------------------------------------------------
-CheckPtSaver::CheckPtSaver(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment* serverEnv)
+CheckPtSaver::CheckPtSaver(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment* serverEnv)
     : server_(s),
       timer_(io, boost::posix_time::seconds(0)),
       firstTime_(true),
@@ -71,13 +71,13 @@ void CheckPtSaver::start() {
     if (firstTime_) {
         firstTime_ = false;
         timer_.expires_from_now(boost::posix_time::seconds(serverEnv_->checkPtInterval()));
-        timer_.async_wait(
-            server_->io_service_.wrap([this](const boost::system::error_code& error) { periodicSaveCheckPt(error); }));
+        timer_.async_wait(boost::asio::bind_executor(
+            server_->io_, [this](const boost::system::error_code& error) { periodicSaveCheckPt(error); }));
     }
 }
 
 void CheckPtSaver::stop() { // The server is stopped by cancelling all outstanding asynchronous
-                            // operations. Once all operations have finished the io_service::run() call
+                            // operations. Once all operations have finished the io_context::run() call
                             // will exit.
 #ifdef DEBUG_CHECKPT
     std::cout << "      CheckPtSaver::stop() check_mode: " << serverEnv_->check_mode_str()
@@ -174,8 +174,8 @@ void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error) {
 
     /// Appears that expires_from_now is more accurate then expires_at
     timer_.expires_from_now(boost::posix_time::seconds(serverEnv_->checkPtInterval()));
-    timer_.async_wait(
-        server_->io_service_.wrap([this](const boost::system::error_code& error) { periodicSaveCheckPt(error); }));
+    timer_.async_wait(boost::asio::bind_executor(
+        server_->io_, [this](const boost::system::error_code& error) { periodicSaveCheckPt(error); }));
 }
 
 void CheckPtSaver::doSave() const {
