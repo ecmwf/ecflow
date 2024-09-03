@@ -24,7 +24,7 @@ endif()
 
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild /workspace/ecbuild) # Before project()
 
-project( ecflow LANGUAGES CXX VERSION 5.13.3 )
+project( ecflow LANGUAGES CXX VERSION 5.13.4 )
 
 # Important: the project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
 
