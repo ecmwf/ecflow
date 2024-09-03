@@ -42,6 +42,7 @@ class ModelColumn : public QObject {
     Q_OBJECT
 public:
     explicit ModelColumn(const std::string& id);
+    ~ModelColumn() override;
 
     int count() const { return items_.size(); }
     int indexOf(QString) const;

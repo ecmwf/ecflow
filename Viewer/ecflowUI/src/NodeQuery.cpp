@@ -77,6 +77,7 @@ NodeQuery::NodeQuery(const std::string& name, bool ignoreMaxNum)
 
 NodeQuery::~NodeQuery() {
     qDeleteAll(options_);
+    qDeleteAll(attrGroup_);
 }
 
 NodeQuery* NodeQuery::clone() {

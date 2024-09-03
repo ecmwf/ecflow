@@ -86,7 +86,11 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter, QWidget* parent)
     WidgetNameProvider::nameChildren(this);
 }
 
-TreeNodeWidget::~TreeNodeWidget() = default;
+TreeNodeWidget::~TreeNodeWidget() {
+    delete stateFilterMenu_;
+    delete attrFilterMenu_;
+    delete iconFilterMenu_;
+}
 
 void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode) {
     if (view_ && viewLayoutMode_ == mode)

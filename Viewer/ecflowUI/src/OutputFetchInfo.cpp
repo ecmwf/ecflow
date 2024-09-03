@@ -45,6 +45,10 @@ OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent), ui_(new Ui:
     connect(bGroup_, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(buttonClicked(QAbstractButton*)));
 }
 
+OutputFetchInfo::~OutputFetchInfo() {
+    delete ui_;
+}
+
 void OutputFetchInfo::buttonClicked(QAbstractButton* b) {
     ui_->stackedWidget->setCurrentIndex((b == ui_->infoTb) ? 0 : 1);
 }

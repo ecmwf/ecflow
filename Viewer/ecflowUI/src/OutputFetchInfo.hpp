@@ -30,6 +30,8 @@ class OutputFetchInfo : public QWidget {
     Q_OBJECT
 public:
     explicit OutputFetchInfo(QWidget* parent);
+    ~OutputFetchInfo() override;
+
     void clearInfo();
     void setInfo(VReply*, VInfo_ptr info = nullptr);
     void setError(QString);

@@ -47,6 +47,7 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) : QWidget(parent), ui_(n
 
 TriggerGraphWidget::~TriggerGraphWidget() {
     clear();
+    delete ui_;
 }
 
 void TriggerGraphWidget::clear(bool keepConfig) {

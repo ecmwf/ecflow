@@ -20,16 +20,56 @@
 #include "VProperty.hpp"
 #include "VSettingsLoader.hpp"
 
-static std::map<std::string, ModelColumn*> defs;
+class ColumnDefinitions {
+public:
+    using storage_t = std::map<std::string, ModelColumn*>;
+
+    ColumnDefinitions(): storage_{} {}
+    ~ColumnDefinitions() {
+        for(auto item: storage_) {
+            delete item.second;
+        }
+    }
+
+    void insert(const std::string& k, ModelColumn* v) {
+        storage_[k] = v;
+    }
+
+    auto find(const std::string& k) const {
+        return storage_.find(k);
+    }
+
+    auto end() {
+        return storage_.end();
+    }
+
+    template <typename F>
+    void for_each(F&& f) {
+        for(auto item: storage_) {
+            f(item.first, item.second);
+        }
+    }
+
+private:
+    storage_t storage_;
+};
+
+static ColumnDefinitions defs;
 
 ModelColumn::ModelColumn(const std::string& id) : id_(id), diagStart_(-1), diagEnd_(-1) {
-    defs[id_] = this;
+    defs.insert(id_, this);
+}
+
+ModelColumn::~ModelColumn() {
+    for(auto && item: items_) {
+        delete item;
+    }
 }
 
 ModelColumn* ModelColumn::def(const std::string& id) {
-    auto it = defs.find(id);
-    if (it != defs.end())
+    if (auto it = defs.find(id); it != defs.end()) {
         return it->second;
+    }
     return nullptr;
 }
 
@@ -211,6 +251,9 @@ void ModelColumn::load(VProperty* group) {
     Q_ASSERT(group);
 
     auto* m = new ModelColumn(group->strName());
+    // Attention: Each ModelColumn object self-registers in `defs`!
+    //            This means that the newly created object will live until `defs` (with static allocation) is released.
+
     for (int i = 0; i < group->children().size(); i++) {
         VProperty* p = group->children().at(i);
         m->loadItem(p);
@@ -222,9 +265,7 @@ void ModelColumn::load(VProperty* group) {
 
 // Called via VSettingsLoader after the users settings are read
 void ModelColumn::loadSettings() {
-    for (auto& def : defs) {
-        def.second->loadUserSettings();
-    }
+    defs.for_each([](auto&& k, auto&& v){v->loadUserSettings();});
 }
 
 // Load user defined settings
