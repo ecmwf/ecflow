@@ -173,7 +173,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
                 // Server is acting like a client, Send MoveCmd to another server
                 // The source should end up being copied, when sent to remote server
                 ServerReply server_reply;
-                boost::asio::io_service io_service;
+                boost::asio::io_context io;
 #ifdef ECF_OPENSSL
                 if (!as->ssl().empty()) {
                     ecf::Openssl openssl;
@@ -181,8 +181,8 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
                         throw std::runtime_error("PlugCmd::doHandleRequest Could not enable ssl for " + as->ssl());
                     openssl.init_for_client();
 
-                    SslClient theClient(io_service, openssl.context(), cts_cmd, host, port);
-                    io_service.run();
+                    SslClient theClient(io, openssl.context(), cts_cmd, host, port);
+                    io.run();
                     theClient.handle_server_response(server_reply, false /* debug */);
                     if (server_reply.client_request_failed()) {
                         throw std::runtime_error(server_reply.error_msg());
@@ -190,8 +190,8 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
                 }
                 else {
 #endif
-                    Client theClient(io_service, cts_cmd, host, port);
-                    io_service.run();
+                    Client theClient(io, cts_cmd, host, port);
+                    io.run();
                     theClient.handle_server_response(server_reply, false /* debug */);
                     if (server_reply.client_request_failed()) {
                         throw std::runtime_error(server_reply.error_msg());

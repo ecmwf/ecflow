@@ -57,11 +57,11 @@ using boost::asio::ip::tcp;
 using namespace std;
 using namespace ecf;
 
-TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
+TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
     : server_(server),
-      io_service_(io_service),
+      io_(io),
       serverEnv_(serverEnv),
-      acceptor_(io_service) {
+      acceptor_(io) {
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::endpoint endpoint(serverEnv.tcp_protocol(), serverEnv.port());
     acceptor_.open(endpoint.protocol());
@@ -130,12 +130,12 @@ void TcpBaseServer::handle_terminate_request() {
 
 void TcpBaseServer::terminate() {
     // The server is terminated by cancelling all outstanding asynchronous
-    // operations. Once all operations have finished the io_service::run() call  will exit.
+    // operations. Once all operations have finished the io_context::run() call  will exit.
     if (serverEnv_.debug())
         cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
 
     // Post a call to the stop function so that Server::stop() is safe to call from any thread.
-    io_service_.post([this]() { handle_terminate(); });
+    io_.post([this]() { handle_terminate(); });
 }
 
 void TcpBaseServer::handle_terminate() {
@@ -148,6 +148,6 @@ void TcpBaseServer::handle_terminate() {
 
     acceptor_.close();
 
-    // Stop the io_service object's event processing loop. Will cause run to return immediately
-    io_service_.stop();
+    // Stop the io_context object's event processing loop. Will cause run to return immediately
+    io_.stop();
 }

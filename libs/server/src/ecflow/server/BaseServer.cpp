@@ -33,12 +33,12 @@ using namespace std;
 using namespace ecf;
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : io_service_(io_service),
-      signals_(io_service),
+BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv)
+    : io_(io),
+      signals_(io),
       defs_(Defs::create()), // ECFLOW-182
-      traverser_(this, io_service, serverEnv),
-      checkPtSaver_(this, io_service, &serverEnv),
+      traverser_(this, io, serverEnv),
+      checkPtSaver_(this, io, &serverEnv),
       serverState_(SState::HALTED),
       serverEnv_(serverEnv) {
     if (serverEnv_.debug())
@@ -498,9 +498,9 @@ bool BaseServer::debug() const {
 }
 
 void BaseServer::sigterm_signal_handler() {
-    if (io_service_.stopped()) {
+    if (io_.stopped()) {
         if (serverEnv_.debug())
-            cout << "-->BaseServer::sigterm_signal_handler(): io_service is stopped returning " << endl;
+            cout << "-->BaseServer::sigterm_signal_handler(): io_context has stopped returning " << endl;
         return;
     }
 

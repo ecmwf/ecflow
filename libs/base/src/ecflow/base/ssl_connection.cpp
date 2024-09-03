@@ -22,8 +22,8 @@ ssl_connection::~ssl_connection() {
 #endif
 }
 
-ssl_connection::ssl_connection(boost::asio::io_service& io_service, boost::asio::ssl::context& context)
-    : socket_(io_service, context) {
+ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context)
+    : socket_(io, context) {
 #ifdef DEBUG_CONNECTION
     if (Ecf::server())
         std::cout << "SERVER: ssl_connection::ssl_connection\n";

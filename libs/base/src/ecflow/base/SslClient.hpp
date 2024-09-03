@@ -26,7 +26,7 @@
 class SslClient {
 public:
     /// Constructor starts the asynchronous connect operation.
-    SslClient(boost::asio::io_service& io_service,
+    SslClient(boost::asio::io_context& io,
               boost::asio::ssl::context& context,
               Cmd_ptr cmd_ptr,
               const std::string& host,

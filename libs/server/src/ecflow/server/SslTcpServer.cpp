@@ -20,8 +20,8 @@ using boost::asio::ip::tcp;
 using namespace std;
 using namespace ecf;
 
-SslTcpServer::SslTcpServer(SslServer* server, boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : TcpBaseServer(server, io_service, serverEnv) {
+SslTcpServer::SslTcpServer(SslServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
+    : TcpBaseServer(server, io, serverEnv) {
     server_->stats().ECF_SSL_ = serverEnv.openssl().info();
 
     serverEnv.openssl().init_for_server();
@@ -34,7 +34,7 @@ void SslTcpServer::start_accept() {
         cout << "   SslTcpServer::start_accept()" << endl;
 
     ssl_connection_ptr new_conn =
-        std::make_shared<ssl_connection>(boost::ref(io_service_), boost::ref(serverEnv_.openssl().context()));
+        std::make_shared<ssl_connection>(boost::ref(io_), boost::ref(serverEnv_.openssl().context()));
 
     acceptor_.async_accept(new_conn->socket_ll(),
                            [this, new_conn](const boost::system::error_code& e) { handle_accept(e, new_conn); });
