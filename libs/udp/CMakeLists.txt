@@ -25,6 +25,9 @@ ecbuild_add_executable(
     src
   LIBS
     ecflow_all
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 set_target_properties(${SERVER_TARGET} PROPERTIES
   INSTALL_RPATH ""

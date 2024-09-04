@@ -246,6 +246,12 @@ void ClientEnvironment::read_environment_variables() {
 
     ecf::environment::get(ecf::environment::ECF_TRYNO, task_try_num_);
 
+    std::string host_protocol;
+    ecf::environment::get(ecf::environment::ECF_HOST_PROTOCOL, host_protocol);
+    if (host_protocol == "HTTP" || host_protocol == "HTTPS") {
+        http_ = true;
+    }
+
     ecf::environment::get("ECF_HOSTFILE", host_file_);
 
     ecf::environment::get(ecf::environment::ECF_RID, remote_id_);

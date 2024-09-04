@@ -480,6 +480,7 @@ set(srcs
   # Server -- Headers
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
+  server/src/ecflow/server/HttpServer.hpp
   server/src/ecflow/server/NodeTreeTraverser.hpp
   server/src/ecflow/server/PeriodicScheduler.hpp
   server/src/ecflow/server/Server.hpp
@@ -492,6 +493,7 @@ set(srcs
   # Server -- Sources
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
+  server/src/ecflow/server/HttpServer.cpp
   server/src/ecflow/server/NodeTreeTraverser.cpp
   server/src/ecflow/server/PeriodicScheduler.cpp
   server/src/ecflow/server/Server.cpp
@@ -570,8 +572,10 @@ ecbuild_add_library(
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
     Threads::Threads
-  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  PUBLIC_DEFINITIONS
     CMAKE
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(ecflow_all)
 

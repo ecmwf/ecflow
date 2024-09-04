@@ -11,6 +11,10 @@
 #ifndef ecflow_base_HttpClient_HPP
 #define ecflow_base_HttpClient_HPP
 
+#define CPPHTTPLIB_THREAD_POOL_COUNT 1
+#define CPPHTTPLIB_OPENSSL_SUPPORT 1
+#define CPPHTTPLIB_ZLIB_SUPPORT 1
+
 #include <httplib.h>
 
 #include "ecflow/base/ClientToServerRequest.hpp"
@@ -18,11 +22,7 @@
 #include "ecflow/base/ServerToClientResponse.hpp"
 
 ///
-/// \brief  This class acts as the client part. ( in client/server architecture)
-///
-/// \note The plug command can move a node to another server hence the server
-/// itself will NEED to ACT as a client. This is why client lives in Base and
-/// not the Client project
+/// \brief  This class acts as an HTTP client
 ///
 
 class HttpClient {
@@ -38,10 +38,14 @@ public:
     bool handle_server_response(ServerReply&, bool debug) const;
 
 private:
-    bool stopped_;
     std::string host_; /// the servers name
     std::string port_; /// the port on the server
     httplib::Client client_;
+
+    httplib::Response response_;
+    httplib::Error status_ = httplib::Error::Success;
+    std::string reason_    = "";
+
     ClientToServerRequest outbound_request_;  /// The request we will send to the server
     ServerToClientResponse inbound_response_; /// The response we get back from the server
 };
