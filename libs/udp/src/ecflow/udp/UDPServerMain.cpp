@@ -81,6 +81,10 @@ int main(int argc, char* argv[]) try {
         if (ecflow_port) {
             setenv("ECF_PORT", std::to_string(ecflow_port.value()).c_str(), 1);
         }
+        auto ecflow_http = options.has_http();
+        if (ecflow_http) {
+            setenv("ECF_HOST_PROTOCOL", "HTTPS", 1);
+        }
         // Avoid that the Client automatically uses environment passwords
         unsetenv("ECF_PASSWD");
         unsetenv("ECF_CUSTOM_PASSWD");

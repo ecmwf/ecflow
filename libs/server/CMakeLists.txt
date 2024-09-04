@@ -20,6 +20,9 @@ ecbuild_add_executable(
     ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(ecflow_server)
 
