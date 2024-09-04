@@ -21,6 +21,11 @@
 
 #include <cassert>
 #include <fstream>
+
+#define CPPHTTPLIB_THREAD_POOL_COUNT 1
+#define CPPHTTPLIB_OPENSSL_SUPPORT 1
+#define CPPHTTPLIB_ZLIB_SUPPORT 1
+
 #include <httplib.h>
 #include <iostream>
 #include <memory>
