@@ -18,8 +18,7 @@
 #include "ecflow/core/Converter.hpp"
 
 HttpClient::HttpClient(Cmd_ptr cmd_ptr, const std::string& host, const std::string& port, int timeout)
-    : stopped_(false),
-      host_(host),
+    : host_(host),
       port_(port),
       client_(host, ecf::convert_to<int>(port)) {
 
@@ -34,16 +33,29 @@ void HttpClient::run() {
     std::string outbound;
     ecf::save_as_string(outbound, outbound_request_);
 
-    auto result   = client_.Post("/v1/ecflow", outbound, "application/json");
-    auto response = result.value();
-
-    ecf::restore_from_string(response.body, inbound_response_);
-};
+    auto result = client_.Post("/v1/ecflow", outbound, "application/json");
+    if (result) {
+        auto response = result.value();
+        ecf::restore_from_string(response.body, inbound_response_);
+    }
+    else {
+        status_ = result.error();
+        reason_ = httplib::to_string(status_);
+    }
+}
 
 bool HttpClient::handle_server_response(ServerReply& server_reply, bool debug) const {
     if (debug) {
         std::cout << "  Client::handle_server_response" << std::endl;
     }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, ie. SServerLoadCmd
-    return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
+
+    if (status_ == httplib::Error::Success) {
+        return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
+    }
+    else {
+        std::stringstream ss;
+        ss << "HttpClient::handle_server_response: Error: " << status_ << " " << reason_;
+        throw std::runtime_error(ss.str());
+    }
 }

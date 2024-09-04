@@ -81,12 +81,6 @@ int run(BaseServer& server) {
     return run_boost_services(server.io_, server.serverEnv_);
 }
 
-int run(HttpServer& server) {
-    server.run();
-    return 0;
-}
-
-
 int main(int argc, char* argv[]) {
 
     try {

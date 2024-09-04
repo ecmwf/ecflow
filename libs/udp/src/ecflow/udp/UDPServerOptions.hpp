@@ -55,6 +55,8 @@ public:
     bool has_version() const { return get_option(OPTION_VERSION); }
     bool has_verbose() const { return get_option(OPTION_VERBOSE); }
 
+    bool has_http() const { return get_option(OPTION_ECFLOW_HTTP); }
+
     const po::options_description& get_description() const { return general; }
 
     static po::options_description create_options();
@@ -66,6 +68,7 @@ public:
     static inline const char* OPTION_PORT        = "port";
     static inline const char* OPTION_ECFLOW_HOST = "ecflow_host";
     static inline const char* OPTION_ECFLOW_PORT = "ecflow_port";
+    static inline const char* OPTION_ECFLOW_HTTP = "http";
 
 private:
     static void ensure_valid_options(const po::variables_map& variables);
