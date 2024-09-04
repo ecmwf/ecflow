@@ -28,7 +28,7 @@
 class Client {
 public:
     /// Constructor starts the asynchronous connect operation.
-    Client(boost::asio::io_service& io_service,
+    Client(boost::asio::io_context& io,
            Cmd_ptr cmd_ptr,
            const std::string& host,
            const std::string& port,

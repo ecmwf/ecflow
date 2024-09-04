@@ -18,7 +18,7 @@ class SslServer;
 class SslTcpServer : public TcpBaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit SslTcpServer(SslServer*, boost::asio::io_service& io_service, ServerEnvironment&);
+    explicit SslTcpServer(SslServer*, boost::asio::io_context& io, ServerEnvironment&);
     ~SslTcpServer() = default;
 
 private:

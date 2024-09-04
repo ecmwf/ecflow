@@ -31,6 +31,7 @@ public:
     explicit ChangeNotify(const std::string& id);
     ChangeNotify(const ChangeNotify&)            = delete;
     ChangeNotify& operator=(const ChangeNotify&) = delete;
+    ~ChangeNotify() override;
 
     const std::string& id() const { return id_; }
     VNodeList* data() const { return data_; }

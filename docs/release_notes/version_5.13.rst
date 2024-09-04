@@ -6,6 +6,17 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.4
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-09-04
+
+General
+-------
+
+- **Fix** eliminate memory leaks detected while using ecFlow UI :jiraissue:`ECFLOW-1969`
+- **Fix** modernise use of Boost.ASIO to build with Boost 1.86 :jiraissue:`ECFLOW-1973`
+
 Version 5.13.3
 ==============
 

@@ -370,6 +370,10 @@ OutputDirWidget::OutputDirWidget(QWidget* parent) : QWidget(parent), ui_(new Ui:
     transitionTo(new DirWidgetEmptyState(this, nullptr));
 }
 
+OutputDirWidget::~OutputDirWidget() {
+    delete ui_;
+}
+
 // must be called externally
 void OutputDirWidget::showIt(bool st) {
     if (st) {

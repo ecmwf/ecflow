@@ -169,7 +169,9 @@ LogLoadWidget::LogLoadWidget(QWidget* /*parent*/) : ui_(new Ui::LogLoadWidget) {
     slotExpandFileInfo(expandSt);
 }
 
-LogLoadWidget::~LogLoadWidget() = default;
+LogLoadWidget::~LogLoadWidget() {
+    delete ui_;
+}
 
 // void LogLoadWidget::initSplitter()
 //{

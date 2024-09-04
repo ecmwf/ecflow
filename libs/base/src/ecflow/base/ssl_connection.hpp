@@ -49,7 +49,7 @@ class ssl_connection {
 public:
     ~ssl_connection();
 
-    ssl_connection(boost::asio::io_service& io_service, boost::asio::ssl::context& context);
+    ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context);
     bool verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
 
     /// Get the underlying socket. Used for making a connection or for accepting

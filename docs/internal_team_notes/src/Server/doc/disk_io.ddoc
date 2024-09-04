@@ -79,7 +79,7 @@ instead of requiring a type (i.e. task must inherit from process), provides more
 class thread_pool
 {
 private:
-  boost::asio::io_service io_service_;
+  boost::asio::io_service io_;
   boost::asio::io_service::work work_;
   boost::thread_group threads_;
   std::size_t available_;
@@ -88,13 +88,13 @@ public:
 
   /// @brief Constructor.
   thread_pool( std::size_t pool_size )
-    : work_( io_service_ ),
+    : work_( io_ ),
       available_( pool_size )
   {
     for ( std::size_t i = 0; i < pool_size; ++i )
     {
       threads_.create_thread( boost::bind( &boost::asio::io_service::run,
-                                           &io_service_ ) );
+                                           &io_ ) );
     }
   }
 
@@ -102,7 +102,7 @@ public:
   ~thread_pool()
   {
     // Force all threads to return from io_service::run().
-    io_service_.stop();
+    io_.stop();
 
     // Suppress all exceptions.
     try
@@ -125,7 +125,7 @@ public:
     --available_;
 
     // Post a wrapped task into the queue.
-    io_service_.post( boost::bind( &thread_pool::wrap_task, this,
+    io_.post( boost::bind( &thread_pool::wrap_task, this,
                                    boost::function< void() >( task ) ) );
   }
 

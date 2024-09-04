@@ -29,7 +29,7 @@ class BaseServer;
 
 class CheckPtSaver {
 public:
-    CheckPtSaver(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment*);
+    CheckPtSaver(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment*);
     // Disable copy (and move) semantics
     CheckPtSaver(const CheckPtSaver&)                  = delete;
     const CheckPtSaver& operator=(const CheckPtSaver&) = delete;

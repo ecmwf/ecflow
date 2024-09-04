@@ -21,8 +21,8 @@ using boost::asio::ip::tcp;
 using namespace std;
 using namespace ecf;
 
-TcpServer::TcpServer(Server* server, boost::asio::io_service& io_service, ServerEnvironment& serverEnv)
-    : TcpBaseServer(server, io_service, serverEnv) {
+TcpServer::TcpServer(Server* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
+    : TcpBaseServer(server, io, serverEnv) {
     // timer_.stop(); // for timing of commands.
 
     start_accept();
@@ -31,7 +31,7 @@ TcpServer::TcpServer(Server* server, boost::asio::io_service& io_service, Server
 void TcpServer::start_accept() {
     if (serverEnv_.debug())
         cout << "   TcpServer::start_accept()" << endl;
-    connection_ptr new_conn = std::make_shared<connection>(boost::ref(io_service_));
+    connection_ptr new_conn = std::make_shared<connection>(boost::ref(io_));
     acceptor_.async_accept(new_conn->socket_ll(),
                            [this, new_conn](const boost::system::error_code& e) { handle_accept(e, new_conn); });
 }
