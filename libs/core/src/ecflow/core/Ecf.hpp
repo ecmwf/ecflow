@@ -16,6 +16,7 @@
 ///
 
 #include <atomic>
+#include <iostream>
 #include <string>
 
 /**
@@ -47,14 +48,32 @@ public:
     const Ecf& operator=(const Ecf&) = delete;
 
     /// Increment and then return state change no
-    static counter_t incr_state_change_no();
-    static counter_t state_change_no() { return state_change_no_; }
-    static void set_state_change_no(counter_t x) { state_change_no_ = x; }
+    static counter_t incr_state_change_no() {
+        if (server_) {
+            ++state_change_no_;
+        }
+        return state_change_no_;
+    }
+    static counter_t state_change_no() {
+        return state_change_no_;
+    }
+    static void set_state_change_no(counter_t x) {
+        state_change_no_ = x;
+    }
 
     /// The modify_change_no_ is used for node addition and deletion and re-ordering
-    static counter_t incr_modify_change_no();
-    static counter_t modify_change_no() { return modify_change_no_; }
-    static void set_modify_change_no(counter_t x) { modify_change_no_ = x; }
+    static counter_t incr_modify_change_no() {
+        if (server_) {
+            ++modify_change_no_;
+        }
+        return modify_change_no_;
+    }
+    static counter_t modify_change_no() {
+        return modify_change_no_;
+    }
+    static void set_modify_change_no(counter_t x) {
+        modify_change_no_ = x;
+    }
 
     /// Returns true if we are on the server side.
     /// Only in server side do we increment state/modify numbers
@@ -91,8 +110,8 @@ private:
     static bool server_;
     static bool debug_equality_;
     static unsigned int debug_level_;
-    static thread_local atomic_counter_t state_change_no_;
-    static thread_local atomic_counter_t modify_change_no_;
+    static atomic_counter_t state_change_no_;
+    static atomic_counter_t modify_change_no_;
 };
 
 /// Make sure the Ecf number don't change
