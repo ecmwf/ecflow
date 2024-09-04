@@ -84,7 +84,7 @@ void HttpServer::parse_args(int argc, char** argv) const {
         opts.no_ssl = true;
     }
     if (backend_http) {
-        opts.host_protocol = "http";
+        opts.host_protocol = "HTTPS";
     }
 
     setenv("ECF_HOST", opts.ecflow_host.c_str(), 1);

@@ -84,6 +84,15 @@
 
 #include "ecflow/base/HttpClient.hpp"
 
+#if defined(ADD)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define ADD ns_uop_add
+    #undef ADD
+#endif
+#if defined(STATUS)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define STATUS ns_o_status
+    #undef STATUS
+#endif
+
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
