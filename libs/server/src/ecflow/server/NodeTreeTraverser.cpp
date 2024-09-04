@@ -35,7 +35,7 @@ using namespace boost::posix_time;
 // Hence we poll every second, and check it against the minute boundary
 // ************************************************************************
 
-NodeTreeTraverser::NodeTreeTraverser(BaseServer* s, boost::asio::io_service& io, const ServerEnvironment& serverEnv)
+NodeTreeTraverser::NodeTreeTraverser(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment& serverEnv)
     : server_(s),
       serverEnv_(serverEnv),
       timer_(io, boost::posix_time::seconds(0)),
@@ -284,7 +284,8 @@ void NodeTreeTraverser::start_timer() {
     /// Appears that expires_from_now is more accurate then expires_at i.e timer_.expires_at( timer_.expires_at() +
     /// boost::posix_time::seconds( poll_at ) );
     timer_.expires_from_now(boost::posix_time::seconds(1));
-    timer_.async_wait(server_->io_service_.wrap([this](const boost::system::error_code& error) { traverse(error); }));
+    timer_.async_wait(
+        boost::asio::bind_executor(server_->io_, [this](const boost::system::error_code& error) { traverse(error); }));
 }
 
 void NodeTreeTraverser::traverse(const boost::system::error_code& error) {

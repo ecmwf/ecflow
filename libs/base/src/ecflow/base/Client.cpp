@@ -29,7 +29,7 @@
 /// If we do not have a timeout, it will hang indefinitely
 
 /// Constructor starts the asynchronous connect operation.
-Client::Client(boost::asio::io_service& io_service,
+Client::Client(boost::asio::io_context& io,
                Cmd_ptr cmd_ptr,
                const std::string& host,
                const std::string& port,
@@ -37,8 +37,8 @@ Client::Client(boost::asio::io_service& io_service,
     : stopped_(false),
       host_(host),
       port_(port),
-      connection_(io_service),
-      deadline_(io_service),
+      connection_(io),
+      deadline_(io),
       timeout_(timeout) {
     /// Avoid sending a NULL request to the server
     if (!cmd_ptr.get())
@@ -60,7 +60,7 @@ Client::Client(boost::asio::io_service& io_service,
 
     // Host name resolution is performed using a resolver, where host and service
     // names(or ports) are looked up and converted into one or more end points
-    boost::asio::ip::tcp::resolver resolver(io_service);
+    boost::asio::ip::tcp::resolver resolver(io);
     boost::asio::ip::tcp::resolver::query query(host_, port_);
     boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
@@ -299,7 +299,7 @@ void Client::handle_read(const boost::system::error_code& e) {
         throw std::runtime_error(ss.str());
     }
 
-    // Since we are not starting a new operation the io_service will run out of
+    // Since we are not starting a new operation the io_context will run out of
     // work to do and the Client will exit.
 }
 

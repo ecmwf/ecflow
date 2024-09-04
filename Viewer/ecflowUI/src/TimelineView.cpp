@@ -73,7 +73,9 @@ TimelineDelegate::TimelineDelegate(TimelineModel* model, QWidget* parent)
     updateSettings();
 }
 
-TimelineDelegate::~TimelineDelegate() = default;
+TimelineDelegate::~TimelineDelegate() {
+    delete prop_;
+}
 
 void TimelineDelegate::notifyChange(VProperty*) {
     updateSettings();

@@ -63,6 +63,12 @@ ChangeNotify::ChangeNotify(const std::string& id)
     items[id] = this;
 }
 
+ChangeNotify::~ChangeNotify() {
+    delete data_;
+    delete model_;
+    delete proxyModel_;
+}
+
 ChangeNotifyModel* ChangeNotify::model() const {
     return model_; // proxyModel_;
 }

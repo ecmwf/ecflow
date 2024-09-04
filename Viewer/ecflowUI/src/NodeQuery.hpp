@@ -33,6 +33,7 @@ public:
         : name_(name),
           types_(types),
           options_(options) {}
+    virtual ~NodeQueryAttrGroup() = default;
 
     QString name() const { return name_; }
     virtual bool hasType(VAttributeType* t) const { return types_.contains(t); }
@@ -41,14 +42,15 @@ public:
 
 protected:
     QString name_;
-    QList<VAttributeType*> types_;
-    QList<NodeQueryOption*> options_;
+    QList<VAttributeType*> types_; // This is a non-owning container
+    QList<NodeQueryOption*> options_; // This is a non-owning container 
 };
 
 class NodeQueryVarAttrGroup : public NodeQueryAttrGroup {
 public:
     NodeQueryVarAttrGroup(QString name, QList<VAttributeType*> types, QList<NodeQueryOption*> options)
         : NodeQueryAttrGroup(name, types, options) {}
+    ~NodeQueryVarAttrGroup() override = default;
 
     bool hasType(VAttributeType*) const override;
 };

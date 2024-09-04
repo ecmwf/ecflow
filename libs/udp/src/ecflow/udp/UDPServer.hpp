@@ -25,10 +25,10 @@ template <typename HANDLER>
 class BaseUdpServerConnection {
 public:
     BaseUdpServerConnection(HANDLER handler,
-                            boost::asio::io_service& io_service,
+                            boost::asio::io_context& io,
                             const boost::asio::ip::udp::endpoint& server_endpoint)
         : handler_{std::move(handler)},
-          socket_(io_service, server_endpoint),
+          socket_(io, server_endpoint),
           client_endpoint_{},
           buffer_{} {
         start();
@@ -78,16 +78,16 @@ template <typename HANDLER>
 class BaseUdpServer {
 public:
     BaseUdpServer(HANDLER handler, uint16_t port)
-        : io_service_{},
+        : io_{},
           server_endpoint_{boost::asio::ip::udp::v4(), port},
-          connection_{handler, io_service_, server_endpoint_} {}
+          connection_{handler, io_, server_endpoint_} {}
     BaseUdpServer(const BaseUdpServer&) = delete;
     BaseUdpServer(BaseUdpServer&&)      = delete;
 
-    void run() { io_service_.run(); }
+    void run() { io_.run(); }
 
 private:
-    boost::asio::io_service io_service_;
+    boost::asio::io_context io_;
     boost::asio::ip::udp::endpoint server_endpoint_;
     internal_detail::BaseUdpServerConnection<HANDLER> connection_;
 };

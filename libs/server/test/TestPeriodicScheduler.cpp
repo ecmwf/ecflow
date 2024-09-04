@@ -76,16 +76,16 @@ struct LongLasting
 BOOST_AUTO_TEST_CASE(test_periodic_scheduler_over_one_minute) {
     // Setup time collector
     Collector collector;
-    boost::asio::io_service io_service;
-    ecf::PeriodicScheduler scheduler(io_service, std::chrono::seconds(30), collector);
+    boost::asio::io_context io;
+    ecf::PeriodicScheduler scheduler(io, std::chrono::seconds(30), collector);
     scheduler.start();
 
     // Arrange time collector termination
-    ecf::Timer teardown(io_service);
+    ecf::Timer teardown(io);
     teardown.set([&scheduler](const boost::system::error_code& error) { scheduler.terminate(); }, std::chrono::seconds(62));
 
     // Run services
-    io_service.run();
+    io.run();
 
     BOOST_CHECK_EQUAL(collector.instants.size(), static_cast<size_t>(62));
 }
@@ -93,16 +93,16 @@ BOOST_AUTO_TEST_CASE(test_periodic_scheduler_over_one_minute) {
 BOOST_AUTO_TEST_CASE(test_periodic_scheduler_with_long_lasting_activity) {
     // Setup time collector
     LongLasting activity{std::chrono::milliseconds(2499)};
-    boost::asio::io_service io_service;
-    ecf::PeriodicScheduler scheduler(io_service, std::chrono::seconds(10), activity);
+    boost::asio::io_context io;
+    ecf::PeriodicScheduler scheduler(io, std::chrono::seconds(10), activity);
     scheduler.start();
 
     // Arrange time collector termination
-    ecf::Timer teardown(io_service);
+    ecf::Timer teardown(io);
     teardown.set([&scheduler](const boost::system::error_code& error) { scheduler.terminate(); }, std::chrono::seconds(60));
 
     // Run services
-    io_service.run();
+    io.run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

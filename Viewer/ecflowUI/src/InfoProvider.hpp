@@ -24,7 +24,9 @@ public:
     InfoProvider(InfoPresenter* owner, VTask::Type);
     ~InfoProvider() override;
     InfoProvider(const InfoProvider&)            = delete;
+    InfoProvider(InfoProvider&&)                 = delete;
     InfoProvider& operator=(const InfoProvider&) = delete;
+    InfoProvider& operator=(InfoProvider&&)      = delete;
 
     void info(VInfo_ptr);
     void command(VTask::Type);

@@ -21,6 +21,12 @@
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Submittable.hpp"
 
+InfoPresenter::~InfoPresenter() {
+    // The following takes care of deleting the provider used by this presenter.
+    // The provider is typically created in the ctor of derived class (e.g. WhyItemWidget)
+    delete infoProvider_;
+}
+
 InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
     : owner_(owner),
       reply_(new VReply(this)),
@@ -30,8 +36,8 @@ InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
 }
 
 InfoProvider::~InfoProvider() {
-    delete reply_;
     clearInternal();
+    delete reply_;
 }
 
 void InfoProvider::clearInternal() {

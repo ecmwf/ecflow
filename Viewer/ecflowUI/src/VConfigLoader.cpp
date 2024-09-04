@@ -11,14 +11,16 @@
 #include "VConfigLoader.hpp"
 
 #include <map>
+#include <memory>
 
 using Map = std::multimap<std::string, VConfigLoader*>;
 
-static Map* makers = nullptr;
+static std::unique_ptr<Map> makers = nullptr;
 
 VConfigLoader::VConfigLoader(const std::string& name) {
-    if (makers == nullptr)
-        makers = new Map();
+    if (!makers) {
+        makers = std::make_unique<Map>();
+    }
 
     makers->insert(Map::value_type(name, this));
 }

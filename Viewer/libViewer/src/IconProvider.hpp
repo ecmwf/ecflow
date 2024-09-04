@@ -45,6 +45,7 @@ protected:
 class IconProvider {
 public:
     IconProvider();
+    ~IconProvider();
 
     static int add(QString path, QString name);
 

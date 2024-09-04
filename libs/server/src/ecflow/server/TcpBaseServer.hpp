@@ -23,7 +23,7 @@ class ServerEnvironment;
 class TcpBaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit TcpBaseServer(BaseServer*, boost::asio::io_service& io_service, ServerEnvironment&);
+    explicit TcpBaseServer(BaseServer*, boost::asio::io_context& io, ServerEnvironment&);
     ~TcpBaseServer() = default;
 
     void handle_request();
@@ -60,7 +60,7 @@ public:
 
 protected:
     BaseServer* server_;
-    boost::asio::io_service& io_service_;
+    boost::asio::io_context& io_;
     ServerEnvironment& serverEnv_;
 
     /// The acceptor object used to accept incoming socket connections.

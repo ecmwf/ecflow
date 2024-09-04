@@ -108,6 +108,17 @@ QPixmap UnknownIconItem::unknown(int /*size*/) {
 
 IconProvider::IconProvider() = default;
 
+IconProvider::~IconProvider() {
+    // Important!
+    //
+    // The life time of the singleton instance 'iconProvider' is used to manage the life time of loaded Icons.
+    // This means that when the application closes, after main() has finished, the destruction of the instance clears the Icons.
+    //
+    for(auto icon : icons_) {
+        delete icon.second;
+    }
+}
+
 QString IconProvider::path(int id) {
     auto it = iconsById_.find(id);
     if (it != iconsById_.end())

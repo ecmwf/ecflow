@@ -15,6 +15,7 @@
 #include <iostream>
 
 #include <boost/asio.hpp>
+#include <boost/asio/bind_executor.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ecflow/core/Log.hpp"
@@ -23,7 +24,7 @@ namespace ecf {
 
 class Timer {
 public:
-    explicit Timer(boost::asio::io_service& io) : io_service_{io}, timer_{io_service_, boost::posix_time::seconds(0)} {}
+    explicit Timer(boost::asio::io_context& io) : io_{io}, timer_{io_, boost::posix_time::seconds(0)} {}
     Timer(const Timer&) = delete;
 
     Timer& operator=(const Timer&) = delete;
@@ -35,11 +36,11 @@ public:
         /// Appears that `expires_from_now` is more accurate `then expires_at`
         ///   i.e. timer_.expires_at( timer_.expires_at() + boost::posix_time::seconds( poll_at ) );
         timer_.expires_from_now(boost::posix_time::seconds(expiry.count()));
-        timer_.async_wait(io_service_.wrap(callback));
+        timer_.async_wait(boost::asio::bind_executor(io_, callback));
     }
 
 private:
-    boost::asio::io_service& io_service_;
+    boost::asio::io_context& io_;
     boost::asio::deadline_timer timer_;
 };
 
@@ -75,7 +76,7 @@ public:
 
 public:
     PeriodicScheduler(const PeriodicScheduler&) = delete;
-    PeriodicScheduler(boost::asio::io_service& io, std::chrono::seconds interval, TASK& activity)
+    PeriodicScheduler(boost::asio::io_context& io, std::chrono::seconds interval, TASK& activity)
         : timer_(io),
           last_execution_(),
           next_execution_(),
