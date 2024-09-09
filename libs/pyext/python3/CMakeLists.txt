@@ -118,7 +118,6 @@ endif()
 
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
 
-  message(STATUS "python install *LOCAL* +++ lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/ecflow +++++++")
   if( NOT INSTALL_PYTHON3_DIR )
     set(PYTHON_SITE "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages" )
   else()

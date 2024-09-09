@@ -15,30 +15,241 @@ set(DEPENDENCIES_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
 # =========================================================================================
 find_package(Threads REQUIRED)
 
+
 # =========================================================================================
 # Cereal
 # =========================================================================================
+ecbuild_info( "Locating Cereal" )
+
 set(CEREAL_DIR "${DEPENDENCIES_DIR}/cereal")
 find_package(Cereal REQUIRED)
+
+ecbuild_info( "Cereal details:" )
+ecbuild_info( " * Cereal_FOUND        : ${Cereal_FOUND}" )
+ecbuild_info( " * Cereal_INCLUDE_DIRS : ${Cereal_INCLUDE_DIRS}" )
+
+ecbuild_info( "Found Cereal at ${Cereal_INCLUDE_DIRS}" )
+
 
 # =========================================================================================
 # Json
 # =========================================================================================
+ecbuild_info( "Locating JSON" )
+
 set(JSON_DIR "${DEPENDENCIES_DIR}/json")
 find_package(Json REQUIRED)
+
+ecbuild_info( "JSON details:" )
+ecbuild_info( " * JSON_FOUND        : ${JSON_FOUND}" )
+ecbuild_info( " * JSON_INCLUDE_DIRS : ${JSON_INCLUDE_DIRS}" )
+
+ecbuild_info( "Found JSON at ${JSON_INCLUDE_DIRS}" )
+
 
 # =========================================================================================
 # Httplib
 # =========================================================================================
+ecbuild_info( "Locating Httplib" )
+
 set(HTTPLIB_DIR "${DEPENDENCIES_DIR}/cpp-httplib")
 find_package(Httplib REQUIRED)
+
+ecbuild_info( "Httplib details:" )
+ecbuild_info( " * HTTPLIB_FOUND        : ${HTTPLIB_FOUND}" )
+ecbuild_info( " * HTTPLIB_INCLUDE_DIRS : ${HTTPLIB_INCLUDE_DIRS}" )
+
+ecbuild_info( "Found Httplib at ${HTTPLIB_INCLUDE_DIRS}" )
+
 
 # =========================================================================================
 # zlib
 # =========================================================================================
 if (ENABLE_HTTP_COMPRESSION)
-  find_package(ZLIB)
-  if (NOT ZLIB_FOUND)
-    message(FATAL_ERROR "HTTP compression support requested, but zlib was not found")
-  endif ()
+  ecbuild_info( "Locating ZLIB" )
+
+  find_package(ZLIB REQUIRED)
+
+  ecbuild_info("ZLIB details:")
+  ecbuild_info(" * ZLIB_FOUND        : ${ZLIB_FOUND}")
+  ecbuild_info(" * ZLIB_INCLUDE_DIRS : ${ZLIB_INCLUDE_DIRS}")
+  ecbuild_info(" * ZLIB_LIBRARIES    : ${ZLIB_LIBRARIES}")
+
+  ecbuild_info( "Found ZLIB at ${ZLIB_INCLUDE_DIRS}" )
 endif ()
+
+
+# =========================================================================================
+# Python3
+# =========================================================================================
+if (ENABLE_PYTHON)
+
+  ecbuild_info( "Locating Python3" )
+
+  # The python must include the Development packages. As the headers in these packages is used by boost python.
+  find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
+  ecbuild_info( "Python3 details:" )
+  ecbuild_info( " * Python3_FOUND             : ${Python3_FOUND}" )
+  ecbuild_info( " * Python3_Interpreter_FOUND : ${Python3_Interpreter_FOUND}" )
+  ecbuild_info( " * Python3_EXECUTABLE        : ${Python3_EXECUTABLE}" )
+  ecbuild_info( " * Python3_STDLIB            : ${Python3_STDLIB} (Standard platform independent installation directory)" )
+  ecbuild_info( " * Python3_STDARCH           : ${Python3_STDARCH} (Standard platform dependent installation directory)" )
+  ecbuild_info( " * Python3_Development_FOUND : ${Python3_Development_FOUND}" )
+  ecbuild_info( " * Python3_INCLUDE_DIRS      : ${Python3_INCLUDE_DIRS}" )
+  ecbuild_info( " * Python3_LIBRARIES         : ${Python3_LIBRARIES}" )
+  ecbuild_info( " * Python3_LIBRARY_DIRS      : ${Python3_LIBRARY_DIRS}" )
+  ecbuild_info( " * Python3_VERSION           : ${Python3_VERSION}" )
+  ecbuild_info( " * Python3_VERSION_MAJOR     : ${Python3_VERSION_MAJOR}" )
+  ecbuild_info( " * Python3_VERSION_MINOR     : ${Python3_VERSION_MINOR}" )
+  ecbuild_info( " * Python3_VERSION_PATCH     : ${Python3_VERSION_PATCH}" )
+
+  # Set (deprecated) FindPython variables
+  # These need to be available, as they are used by `ecbuild_add_test(... TYPE PYTHON ...)`
+  set(PYTHONINTERP_FOUND "${Python3_Interpreter_FOUND}")
+  set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
+
+  ecbuild_info( "Found Python3 at ${Python3_INCLUDE_DIRS}" )
+
+endif()
+
+
+# =========================================================================================
+# Boost
+# =========================================================================================
+
+ecbuild_info( "Locating Boost" )
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
+  ecbuild_info( "Using BoostConfig.cmake to find Boost (CMake >= 3.30)" )
+  cmake_policy(SET CMP0167 NEW)
+else()
+  ecbuild_info( "Using FindBoost.cmake module to find Boost (CMake < 3.30)" )
+endif()
+
+# To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
+# See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
+if ( ENABLE_STATIC_BOOST_LIBS )
+  set(Boost_USE_STATIC_LIBS ON)
+  set(BOOST_TEST_DYN_LINK "")
+  ecbuild_info( "Using STATIC boost libraries : ${BOOST_TEST_DYN_LINK}" )
+else()
+  set(Boost_USE_STATIC_LIBS OFF)
+  set(BOOST_TEST_DYN_LINK "BOOST_TEST_DYN_LINK")
+  ecbuild_info( "Using SHARED boost libraries : ${BOOST_TEST_DYN_LINK}" )
+endif()
+
+set(Boost_USE_MULTITHREADED    ON)
+set(Boost_NO_SYSTEM_PATHS      ON)
+set(Boost_DETAILED_FAILURE_MSG ON)
+set(Boost_ARCHITECTURE         "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a, https://gitlab.kitware.com/cmake/cmake/issues/18908
+
+set(ECFLOW_BOOST_VERSION "1.66.0") # Boost 1.66.0 is the minimum version required (needed to support Rocky 8.6 on CI)
+
+find_package( Boost ${ECFLOW_BOOST_VERSION} QUIET REQUIRED) # This initial step allows to get a hold of Boost_VERSION_STRING
+
+if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
+  # Boost::system is header-only from 1.69.0
+  list(APPEND _boost_needed_libs system )
+endif ()
+
+list(APPEND _boost_needed_libs timer chrono filesystem program_options date_time )
+
+if (ENABLE_PYTHON)
+  # The following is used to find Boost.python library, as the library name changes with python version
+  if ( Boost_MINOR_VERSION GREATER 66 )
+    # cmake 3.15
+    # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
+    # INTERFACE_LIBRARY targets may only have whitelisted properties.
+    set(_python_base_version "${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+  else()
+    set(_python_base_version "${Python3_VERSION_MAJOR}")
+  endif()
+  set(ECFLOW_BOOST_PYTHON_COMPONENT "python${_python_base_version}")
+
+  list(APPEND _boost_needed_libs ${ECFLOW_BOOST_PYTHON_COMPONENT})
+endif()
+
+if(HAVE_TESTS) # HAVE_TESTS is defined if ecbuild ENABLE_TESTS is set, (by default this is set)
+  list(APPEND _boost_needed_libs unit_test_framework test_exec_monitor )
+endif()
+
+find_package( Boost ${ECFLOW_BOOST_VERSION} QUIET REQUIRED COMPONENTS ${_boost_needed_libs})
+
+ecbuild_info( " * Boost_FOUND                : ${Boost_FOUND}" )
+ecbuild_info( " * Boost_NO_BOOST_CMAKE       : ${Boost_NO_BOOST_CMAKE}" )
+ecbuild_info( " * Boost_USE_MULTITHREADED    : ${Boost_USE_MULTITHREADED}" )
+ecbuild_info( " * Boost_NO_SYSTEM_PATHS      : ${Boost_NO_SYSTEM_PATHS}" )
+ecbuild_info( " * Boost_DETAILED_FAILURE_MSG : ${Boost_DETAILED_FAILURE_MSG}" )
+ecbuild_info( " * Boost_MAJOR_VERSION        : ${Boost_MAJOR_VERSION}" )
+ecbuild_info( " * Boost_MINOR_VERSION        : ${Boost_MINOR_VERSION}" )
+ecbuild_info( " * Boost_SUBMINOR_VERSION     : ${Boost_SUBMINOR_VERSION}" )
+ecbuild_info( " * Boost_INCLUDE_DIRS         : ${Boost_INCLUDE_DIRS}" )
+ecbuild_info( " * Boost_LIBRARY_DIR_RELEASE  : ${Boost_LIBRARY_DIR_RELEASE}" )
+ecbuild_info( " * Boost Components" )
+foreach(_lib ${_boost_needed_libs})
+  string(TOUPPER "${_lib}" _lib_upper)
+
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
+    ecbuild_info( "   * ${_lib}, found ${Boost_${_lib_upper}_LIBRARY} @ ${Boost_${_lib_upper}_LIBRARY_RELEASE}" )
+  else()
+    ecbuild_info( "   * ${_lib}, found ${Boost_${_lib_upper}_LIBRARY_RELEASE}" )
+  endif()
+endforeach()
+
+ecbuild_info( "Found Boost at ${Boost_INCLUDE_DIR}" )
+if (ENABLE_PYTHON)
+  ecbuild_info( "Found Boost.Python at ${Boost_PYTHON${_python_base_version}_LIBRARY_RELEASE}" )
+endif()
+
+
+# =========================================================================================
+# OpenSSL
+# =========================================================================================
+
+if (ENABLE_SSL)
+  ecbuild_info( "Locating OpenSSL" )
+
+  find_package(OpenSSL REQUIRED)
+
+  add_definitions( -DECF_OPENSSL=1 )
+
+  ecbuild_info( "OpenSSL details:" )
+  ecbuild_info( " * OPENSSL_FOUND       : ${OpenSSL_FOUND}" )
+  ecbuild_info( " * OPENSSL_INCLUDE_DIR : ${OPENSSL_INCLUDE_DIR}" )
+  ecbuild_info( " * OpenSSL_LIBRARIES   : ${OPENSSL_LIBRARIES}" )
+  ecbuild_info( " * OPENSSL_VERSION     : ${OPENSSL_VERSION}" )
+
+  ecbuild_info( "Found OpenSSL at ${OPENSSL_INCLUDE_DIR}" )
+endif()
+
+
+# =========================================================================================
+# Doxygen
+# =========================================================================================
+ecbuild_info( "Locating Doxygen" )
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+  ecbuild_info( "Found Doxygen at ${DOXYGEN_EXECUTABLE}" )
+
+  # exclude some dirs not related to documentation
+  set( DOXYGEN_EXCLUDE_PATTERNS */bin/* */bdir/* */Debug/*  */test/*  */Doc/* */doc/* */samples/* SCRATCH tools build_scripts cereal )
+
+  set( DOXYGEN_SOURCE_BROWSER YES)
+  set( DOXYGEN_EXTRACT_PRIVATE YES)
+  set( DOXYGEN_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Doc/doxygen")
+
+  # this target will only be built if specifically asked to.
+  # run "make doxygen" to create the doxygen documentation
+  doxygen_add_docs(
+    doxygen
+    ${PROJECT_SOURCE_DIR}
+    COMMENT "Generate documentation for ecFlow"
+  )
+
+  # Add an install target to install the docs, *IF* the use has run 'make doxygen'
+  if (EXISTS ${DOXYGEN_OUTPUT_DIRECTORY})
+    install(DIRECTORY ${DOXYGEN_OUTPUT_DIRECTORY} DESTINATION ${CMAKE_INSTALL_DOCDIR})
+  endif()
+else ()
+  ecbuild_info("Doxygen need to be installed to generate the doxygen documentation")
+endif()

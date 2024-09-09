@@ -32,9 +32,7 @@
 #
 #
 
-if (HTTPLIB_DIR)
-  message(STATUS "Locating Httplib at ${HTTPLIB_DIR}")
-else ()
+if (NOT DEFINED HTTPLIB_DIR)
   message(FATAL_ERROR "Unable to find Httplib. Please provide HTTPLIB_LIB property.")
 endif ()
 

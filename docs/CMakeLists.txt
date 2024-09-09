@@ -12,8 +12,11 @@
 # Setup Sphinx
 #
 
+ecbuild_info("Locating Sphinx")
+
 find_package(Sphinx REQUIRED)
 
+ecbuild_info("Sphinx found at ${SPHINX_EXECUTABLE}")
 
 #
 # (Re-)generate ecFlow CLI documentation
@@ -45,8 +48,6 @@ add_custom_target(ecflow_client_docs DEPENDS generate_ecflow_client_docs)
 #
 # (Re-)generate ecFlow Python documentation
 #
-
-message(STATUS "***> ${SPHINX_EXECUTABLE}")
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/rst)
 add_custom_command(
