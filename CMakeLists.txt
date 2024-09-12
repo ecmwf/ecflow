@@ -50,93 +50,21 @@ ecbuild_info( "ecflow_SOURCE_DIR        : ${ecflow_SOURCE_DIR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_SERVER              "Build the server, can be switched off if just building UI" ON  )
-option( ENABLE_PYTHON              "enable python interface"         ON  )
-option( ENABLE_UI                  "Build ecFlowUI"                  ON  ) 
-option( ENABLE_STATIC_BOOST_LIBS   "Link with boost libs statically" ON  )
-option( ENABLE_ALL_TESTS           "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF ) 
-option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
-option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
-option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
-option( ENABLE_HTTP                "Enable HTTP server (experimental)" ON  )
-option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server" ON )
-option( ENABLE_UDP                 "Enable UDP server (experimental)" ON )
-option( ENABLE_DOCS                "Enable Documentation" OFF )
+option( ENABLE_SERVER              "Build the server (switch OFF to building UI only)"   ON )
+option( ENABLE_PYTHON              "Enable ecFlow Python3 support"                       ON )
+option( ENABLE_UI                  "Enable ecFlowUI"                                     ON )
+option( ENABLE_STATIC_BOOST_LIBS   "Use static Boost libs linkage"                       ON )
+option( ENABLE_ALL_TESTS           "Enable performance/migration/regression tests"       OFF )
+option( ENABLE_UI_BACKTRACE        "Enable printing ecFlowUI debug backtrace"            OFF )
+option( ENABLE_UI_USAGE_LOG        "Enable ecFlowUI usage logging"                       OFF )
+option( ENABLE_SSL                 "Enable SSL encrypted communication"                  ON )
+option( ENABLE_PYTHON_PTR_REGISTER "Enable compilers/Boost shared ptr auto registration" OFF )
+option( ENABLE_HTTP                "Enable Rest API/HTTP server"                         ON )
+option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server"           ON )
+option( ENABLE_UDP                 "Enable UDP server"                                   ON )
+option( ENABLE_DOCS                "Enable Documentation"                                OFF )
 
 include(Policies NO_POLICY_SCOPE)
-
-# =========================================================================================
-# Dependency: Qt
-# =========================================================================================
-# Qt for ecFlowUI.
-# Algorithm: we test for Qt6 - if it's there, then use it; otherwise look for Qt5.
-#            if we don't find that, then we cannot build ecFlowUI.
-# -----------------------------------------------------------------------------------------
-if(ENABLE_UI)
-
-  ecbuild_info("")
-  ecbuild_info("------------------------------ Qt start ---------------------------")
-  ecbuild_info("ecFlowUI is enabled - searching for Qt6/Qt5")
-  ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
-
-  find_package(Qt6Widgets)
-  if( Qt6Widgets_FOUND )
-    find_package(Qt6Core5Compat  REQUIRED)
-    find_package(Qt6Gui          REQUIRED)
-    find_package(Qt6Network      REQUIRED)
-    find_package(Qt6Svg          REQUIRED)
-    find_package(Qt6Charts)
-
-    ecbuild_debug("Qt6 version ${Qt6Widgets_VERSION_STRING} was found")
-    set(ECFLOW_QT_INCLUDE_DIR ${Qt6Core5Compat_INCLUDE_DIRS} ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Gui_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Svg_INCLUDE_DIRS})
-    set(ECFLOW_QT_LIBRARIES  ${Qt6Core5Compat_LIBRARIES} ${Qt6Widgets_LIBRARIES}    ${Qt6Gui_LIBRARIES}   ${Qt6Network_LIBRARIES} ${Qt6Svg_LIBRARIES})
-    set(ECFLOW_QT6 1)
-    add_definitions(-DECFLOW_QT6)
-
-    if(Qt6Charts_FOUND)
-      ecbuild_info("Qt6Charts was found - the server log viewer will be built")
-      list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt6Charts_INCLUDE_DIRS})
-      list(APPEND ECFLOW_QT_LIBRARIES  ${Qt6Charts_LIBRARIES})
-      set(ECFLOW_LOGVIEW 1)
-      add_definitions(-DECFLOW_LOGVIEW)
-    else()
-      ecbuild_info("Qt6Charts was not found - the server log viewer will not be built")
-    endif()
-  else()
-    find_package(Qt5Widgets)
-    if (Qt5Widgets_FOUND)
-      find_package(Qt5Gui          REQUIRED)
-      find_package(Qt5Network      REQUIRED)
-      find_package(Qt5Svg          REQUIRED)
-      find_package(Qt5Charts)
-
-      ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
-      set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS})
-      set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES} ${Qt5Svg_LIBRARIES})
-      set(ECFLOW_QT5 1)
-      add_definitions(-DECFLOW_QT5)
-
-      if(Qt5Charts_FOUND)
-        ecbuild_info("Qt5Charts was found - the server log viewer will be built")
-        list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt5Charts_INCLUDE_DIRS})
-        list(APPEND ECFLOW_QT_LIBRARIES  ${Qt5Charts_LIBRARIES})
-        set(ECFLOW_LOGVIEW 1)
-        add_definitions(-DECFLOW_LOGVIEW)
-      else()
-        ecbuild_info("Qt5Charts was not found - the server log viewer will not be built")
-      endif()
-    else()
-      ecbuild_critical("Qt5 Widgets, Network and Gui not found - these are required for ecFlowUI; or use -DENABLE_UI=OFF")
-    endif()
-  endif()
-
-  set(ECFLOW_QT 1)
-  add_definitions(-DQT_NO_KEYWORDS) # We need to disable keywords because there is a problem in using Qt and boost together.
-  ecbuild_info("------------------------------ Qt end----------------------------")
-  ecbuild_info("")
-
-endif()
 
 
 # sanity check - cannot set ENABLE_UI_BACKTRACE if UI is OFF

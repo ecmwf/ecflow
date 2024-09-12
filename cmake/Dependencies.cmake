@@ -224,6 +224,103 @@ endif()
 
 
 # =========================================================================================
+# Dependency: Qt
+# =========================================================================================
+
+if(ENABLE_UI)
+
+  # Qt is used for ecFlowUI only.
+  # Algorithm: we test for Qt6 - if it's there, then use it; otherwise look for Qt5.
+  #            if we don't find that, then we cannot build ecFlowUI.
+
+  ecbuild_info( "Locating Qt" )
+  ecbuild_info( "  note: searching for Qt6/Qt5 to support building ecFlowUI" )
+  ecbuild_info( "  note: to use a self-built Qt installation, try setting CMAKE_PREFIX_PATH" )
+
+  ecbuild_info( "Locating Qt6" )
+
+  # Attempt to find Qt6 required components
+
+  set(_qt6_required_components Widgets Gui Network Svg Core5Compat)
+  set(_qt6_optional_component Charts)
+
+  find_package(Qt6 COMPONENTS ${_qt6_required_components})
+
+  if( Qt6_FOUND )
+
+    # Attempt to find Qt6 optional components
+
+    find_package(Qt6${_qt6_optional_component})
+
+    ecbuild_info( " * Qt6_FOUND           : ${Qt6_FOUND}" )
+    ecbuild_info( " * Qt6_VERSION         : ${Qt6_VERSION}" )
+    ecbuild_info( " * Qt6 components" )
+    foreach (_lib ${_qt6_required_components} ${_qt6_optional_component})
+      if(Qt6${_lib}_FOUND)
+        ecbuild_info( "   * ${_lib}, found ${Qt6${_lib}_LIBRARIES}" )
+      endif()
+    endforeach()
+
+    if(Qt6Charts_FOUND)
+      ecbuild_info( "Qt6Charts was found - the server log viewer will be built" )
+
+      set(ECFLOW_LOGVIEW 1)
+      add_definitions(-DECFLOW_LOGVIEW)
+
+    else()
+      ecbuild_info( "Qt6Charts was not found - the server log viewer will not be built" )
+    endif()
+
+    ecbuild_info( "Found Qt6 at ${Qt6_DIR}" )
+
+  else()
+
+    ecbuild_info( "Locating Qt5" )
+
+    # Attempt to find Qt5 required components
+
+    set(_qt5_required_components Widgets Gui Network Svg)
+    set(_qt5_optional_component Charts)
+
+    find_package(Qt5 COMPONENTS ${_qt5_required_components})
+
+    if (Qt5_FOUND)
+
+      # Attempt to find Qt5 optional components
+
+      find_package(Qt5${_qt5_optional_component})
+
+      ecbuild_info( " * Qt5_FOUND           : ${Qt5_FOUND}" )
+      ecbuild_info( " * Qt5_VERSION         : ${Qt5_VERSION}" )
+      ecbuild_info( " * Qt5 components" )
+      foreach (_lib ${_qt5_required_components} ${_qt5_optional_components})
+        if(Qt5${_lib}_FOUND)
+          ecbuild_info( "   * ${_lib}, found ${Qt5${_lib}_LIBRARIES}" )
+        endif()
+      endforeach()
+
+      if(Qt5Charts_FOUND)
+        ecbuild_info( "  note: Qt5Charts was found - the server log viewer will be built" )
+
+        set(ECFLOW_LOGVIEW 1)
+        add_definitions(-DECFLOW_LOGVIEW)
+
+      else()
+        ecbuild_info( "  note: Qt5Charts was not found - the server log viewer will not be built" )
+      endif()
+
+      ecbuild_info( "Found Qt5 at ${Qt5_DIR}" )
+
+    else()
+      ecbuild_critical( "Qt5/6 not found - this is required for ecFlowUI; consider using -DENABLE_UI=OFF" )
+    endif()
+  endif()
+
+  add_definitions(-DQT_NO_KEYWORDS) # We need to disable keywords because there is a problem in using Qt and boost together.
+
+endif()
+
+# =========================================================================================
 # Doxygen
 # =========================================================================================
 ecbuild_info( "Locating Doxygen" )
@@ -251,5 +348,5 @@ if (DOXYGEN_FOUND)
     install(DIRECTORY ${DOXYGEN_OUTPUT_DIRECTORY} DESTINATION ${CMAKE_INSTALL_DOCDIR})
   endif()
 else ()
-  ecbuild_info("Doxygen need to be installed to generate the doxygen documentation")
+  ecbuild_info( "Doxygen need to be installed to generate the doxygen documentation" )
 endif()
