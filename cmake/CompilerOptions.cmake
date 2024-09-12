@@ -102,7 +102,7 @@ endif ()
 
 if (HAVE_COLOURED_OUTPUT)
   if ("${CMAKE_GENERATOR}" STREQUAL "Ninja" AND ENABLE_COLOURED_OUTPUT)
-    message(STATUS "Ninja generator detected! Ensuring GNU/Clang produce coloured output...")
+    ecbuild_info("Ninja generator detected! Ensuring GNU/Clang produce coloured output...")
     add_compile_options(
       $<$<CXX_COMPILER_ID:GNU>:-fdiagnostics-color=always>
       $<$<CXX_COMPILER_ID:Clang>:-fdiagnostics-color>

@@ -350,3 +350,15 @@ if (DOXYGEN_FOUND)
 else ()
   ecbuild_info( "Doxygen need to be installed to generate the doxygen documentation" )
 endif()
+
+# =========================================================================================
+# Clang-format
+# =========================================================================================
+ecbuild_info( "Locating Clang-format" )
+find_package(ClangFormat)
+if (CLANGFORMAT_FOUND)
+  ecbuild_info("Found Clang-Format at ${CLANGFORMAT_EXE} [${CLANGFORMAT_VERSION}]")
+else()
+  ecbuild_info("Clang-Format not found")
+  ecbuild_info("    WARNING: No formatting targets will be defined!")
+endif ()
