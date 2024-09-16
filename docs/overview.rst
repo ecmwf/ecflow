@@ -23,7 +23,7 @@ can be run on the same hardware.
 **ecFlow** submits :term:`task`\ s (jobs) and receives acknowledgments from
 the tasks when they change :term:`status` and when they send :term:`event`\ s,
 using :term:`child command`\s embedded in your scripts. ecFlow stores the
-relationships between tasks, and is able to submit tasks dependant on
+relationships between tasks, and is able to submit tasks dependent on
 :term:`trigger`\ s, such as when a given task changes its status, for example when
 it finishes. 
 
@@ -42,7 +42,7 @@ shared libraries
    This executable is the server. It is responsible for scheduling the
    jobs and responding to ecflow_client requests.
 
--  :ref:`ecflow.so <python_api>`: Python interface. This shared library provides the python API for creating the suite definition and communication with the server.
+-  :ref:`ecflow.so <python_api>`: Python interface. This shared library provides the :ref:`Python API <python_api>` for creating the suite definition and communication with the server.
 
 **ecFlow** runs as a server receiving requests from clients. CLI, GUI,
 and suite jobs are clients. Communication is based on TCP/IP. Note that
