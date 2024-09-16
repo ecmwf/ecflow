@@ -121,11 +121,7 @@ find_program(CLANGFORMAT_EXE
   /usr/local/opt/llvm/bin
   )
 
-if (NOT CLANGFORMAT_EXE)
-  message(STATUS "Clang-Format not found")
-  message(STATUS "    WARNING: No formatting targets will be defined!")
-else ()
+if (CLANGFORMAT_EXE)
   clangformat_get_version(CLANGFORMAT_VERSION)
-  message(STATUS "Clang-Format found at ${CLANGFORMAT_EXE} [${CLANGFORMAT_VERSION}]")
   set(CLANGFORMAT_FOUND ON)
 endif ()

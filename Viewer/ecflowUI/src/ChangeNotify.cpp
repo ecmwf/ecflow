@@ -24,10 +24,6 @@
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 
-// #ifdef ECFLOW_QT5
-// #include <QSoundEffect>
-// #endif
-
 #include <map>
 
 #include <QDebug>

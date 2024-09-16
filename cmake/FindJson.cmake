@@ -32,9 +32,7 @@
 #
 #
 
-if (JSON_DIR)
-  message(STATUS "Locating JSON at ${JSON_DIR}")
-else ()
+if (NOT DEFINED JSON_DIR)
   message(FATAL_ERROR "Unable to find JSON. Please provide JSON_DIR property.")
 endif ()
 

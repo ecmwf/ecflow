@@ -20,10 +20,6 @@
 #include "VProperty.hpp"
 #include "ecflow/core/Converter.hpp"
 
-// #ifdef ECFLOW_QT5
-// #include <QSoundEffect>
-// #endif
-
 #include <regex>
 
 #include "ecflow/core/Str.hpp"
@@ -37,13 +33,6 @@ Sound* Sound::instance_ = nullptr;
         if (system(soundCmd))
             UiLog().dbg() << "ChangeNotify:add() could not play sound alert";
 */
-// #ifdef ECFLOW_QT5
-//   QSoundEffect effect(dialog_);
-//   effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
-//   effect.setLoopCount(1);
-//   effect.setVolume(0.25f);
-//   effect.play();
-// #endif
 
 Sound::Sound() {
     sysDir_ = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "sounds");

@@ -33,9 +33,7 @@
 #
 #
 
-if (CEREAL_DIR)
-  message(STATUS "Locating Cereal at ${CEREAL_DIR}")
-else ()
+if (NOT DEFINED CEREAL_DIR)
   message(FATAL_ERROR "Unable to find Cereal. Please provide CEREAL_DIR property.")
 endif ()
 
@@ -44,7 +42,7 @@ endif ()
 # Search for include DIRs
 # -----------------------------------------------------------------------------
 
-find_path(CEREAL_INCLUDE_DIRS
+find_path(Cereal_INCLUDE_DIRS
   NAMES cereal/cereal.hpp
   PATHS ${CEREAL_DIR}/include)
 
@@ -56,7 +54,7 @@ find_path(CEREAL_INCLUDE_DIRS
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Cereal
   REQUIRED_VARS
-  CEREAL_INCLUDE_DIRS)
+  Cereal_INCLUDE_DIRS)
 
 #
 # -----------------------------------------------------------------------------
@@ -69,6 +67,6 @@ add_library(${NAME} INTERFACE IMPORTED GLOBAL)
 
 set_target_properties(${NAME}
   PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${CEREAL_INCLUDE_DIRS}")
+  INTERFACE_INCLUDE_DIRECTORIES "${Cereal_INCLUDE_DIRS}")
 
 add_library(cereal::cereal ALIAS cereal)

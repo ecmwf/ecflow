@@ -36,6 +36,22 @@ ecbuild_info( "CMAKE_CXX_COMPILER_ID      : ${CMAKE_CXX_COMPILER_ID}")
 ecbuild_info( "CMAKE_CXX_COMPILER_VERSION : ${CMAKE_CXX_COMPILER_VERSION}")
 
 
+ecbuild_info( "Selected built type: ${CMAKE_BUILD_TYPE}" )
+
+if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
+  # Tell C/C++ that we're doing a debug build
+  add_definitions( -DDEBUG )
+endif()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  #
+  # In case of using Clang, we increase the template depth to avoid the following error:
+  #   /usr/local/include/boost/type_traits/is_base_and_derived.hpp:226:42:
+  #           fatal error: recursive template instantiation exceeded maximum depth of 256
+  #
+  ecbuild_add_cxx_flags("-ftemplate-depth=1024")
+endif()
+
 if (HAVE_WARNINGS)
 
   ecbuild_add_c_flags(-Wall)
@@ -86,7 +102,7 @@ endif ()
 
 if (HAVE_COLOURED_OUTPUT)
   if ("${CMAKE_GENERATOR}" STREQUAL "Ninja" AND ENABLE_COLOURED_OUTPUT)
-    message(STATUS "Ninja generator detected! Ensuring GNU/Clang produce coloured output...")
+    ecbuild_info("Ninja generator detected! Ensuring GNU/Clang produce coloured output...")
     add_compile_options(
       $<$<CXX_COMPILER_ID:GNU>:-fdiagnostics-color=always>
       $<$<CXX_COMPILER_ID:Clang>:-fdiagnostics-color>
