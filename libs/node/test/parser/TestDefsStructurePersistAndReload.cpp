@@ -15,6 +15,7 @@
 
 #include "MyDefsFixture.hpp"
 #include "PersistHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 
 using namespace std;
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(T_DefsStructurePersisteAndReload)
 // Specifically written to test the parser.
 // Note: Aliases are *NOT* written in the defs file BUT are when in MIGRATE
 BOOST_AUTO_TEST_CASE(test_defs_structure_persistence_and_reload) {
-    cout << "AParser:: ...test_defs_structure_persistence_and_reload\n";
+    ECF_NAME_THIS_TEST();
 
     MyDefsFixture theDefsFixture;
     PersistHelper helper;
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_defs_structure_persistence_and_reload) {
 }
 
 BOOST_AUTO_TEST_CASE(test_defs_checkpt_persistence_and_reload) {
-    cout << "AParser:: ...test_defs_checkpt_persistence_and_reload\n";
+    ECF_NAME_THIS_TEST();
 
     MyDefsFixture theDefsFixture;
     PersistHelper helper;
@@ -76,7 +77,7 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_find_task_using_paths) {
-    cout << "AParser:: ...test_find_task_using_paths\n";
+    ECF_NAME_THIS_TEST();
 
     MyDefsFixture theDefsFixture;
 

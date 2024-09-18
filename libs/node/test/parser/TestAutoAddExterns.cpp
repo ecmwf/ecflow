@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -26,9 +27,8 @@ BOOST_AUTO_TEST_SUITE(T_AutoAddExterns)
 // Test that automatic add of externs
 BOOST_AUTO_TEST_CASE(test_auto_add_externs) {
     std::string path = File::test_data("libs/node/test/parser/data/single_defs/test_auto_add_extern.def", "parser");
-
     size_t mega_file_size = fs::file_size(path);
-    cout << "AParser:: ...test_auto_add_externs " << path << " file_size(" << mega_file_size << ")\n";
+    ECF_NAME_THIS_TEST(<< ", using file: " << path << " of size(" << mega_file_size << " MB)");
 
     Defs defs;
     std::string errorMsg, warningMsg;

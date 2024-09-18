@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
+#include "TestNaming.hpp"
 #include "TestSerialisation.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Migration)
 
 BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
-    cout << "ANode:: ...test_default_constructor_persistence\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name = File::test_data("libs/node/test/data/migration/", "libs/node");
 
@@ -62,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
 }
 
 BOOST_AUTO_TEST_CASE(test_compare_cereal_and_defs_checkpt_file) {
-    cout << "ANode:: ...test_compare_cereal_and_defs_checkpt_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name = File::test_data("libs/node/test/data/migration/", "libs/node");
 

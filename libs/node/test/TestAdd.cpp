@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -26,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Add)
 
 BOOST_AUTO_TEST_CASE(test_add) {
-    cout << "ANode:: ...test_add\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr defs = Defs::create();
     task_ptr t1   = Task::create("t1");
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_add) {
 }
 
 BOOST_AUTO_TEST_CASE(test_add_error) {
-    cout << "ANode:: ...test_add_error\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr defs = Defs::create();
     suite_ptr s1  = defs->add_suite("s1");
@@ -62,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_add_error) {
 }
 
 BOOST_AUTO_TEST_CASE(test_add_delete_time) {
-    cout << "ANode:: ...test_add_delete_time\n"; // ECFLOW-1260
+    ECF_NAME_THIS_TEST(); // ECFLOW-1260
 
     // Make sure that if we delete any time based attributes
     Defs defs;

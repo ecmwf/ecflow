@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 
 using namespace std;
@@ -31,7 +32,7 @@ static std::string dump(const std::vector<std::string>& vec) {
 }
 
 BOOST_AUTO_TEST_CASE(test_defs_history_parser) {
-    cout << "ANode:: ...test_defs_history_parser\n";
+    ECF_NAME_THIS_TEST();
 
     {
         string str1("MSG:[12:03:55 21.8.2013] --shutdown=yes :map");

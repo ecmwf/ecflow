@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -30,10 +31,11 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_TimeDependencies)
 
 // See ECFLOW-337
-// See ECFLOW-833. Also See Note: ACore/doc/TimeDependencies.ddoc
+// See ECFLOW-833. Also See Note: libs/core/doc/TimeDependencies.ddoc
 
 BOOST_AUTO_TEST_CASE(test_day_time_combination) {
-    cout << "ANode:: ...test_day_time_combination\n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  clock real 7.6.2015  # sunday
@@ -82,7 +84,8 @@ BOOST_AUTO_TEST_CASE(test_day_time_combination) {
 }
 
 BOOST_AUTO_TEST_CASE(test_date_time_combination) {
-    cout << "ANode:: ...test_date_time_combination\n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  clock real 7.6.2015  # sunday
@@ -130,7 +133,8 @@ BOOST_AUTO_TEST_CASE(test_date_time_combination) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_time_combination_in_hierarchy) {
-    cout << "ANode:: ...test_day_time_combination_in_hierarchy\n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  clock real 7.6.2015 # sunday
@@ -188,7 +192,8 @@ BOOST_AUTO_TEST_CASE(test_day_time_combination_in_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_day_combination_in_hierarchy) {
-    cout << "ANode:: ...test_time_day_combination_in_hierarchy\n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  clock real 7.6.2015 # sunday
@@ -245,7 +250,7 @@ BOOST_AUTO_TEST_CASE(test_time_day_combination_in_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_date_time_combination_in_hierarchy) {
-    cout << "ANode:: ...test_date_time_combination_in_hierarchy\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the suite, starting on a sunday
     // suite s1
@@ -305,7 +310,8 @@ BOOST_AUTO_TEST_CASE(test_date_time_combination_in_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_date_combination_in_hierarchy) {
-    cout << "ANode:: ...test_time_date_combination_in_hierarchy \n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  clock real 7.6.2015 # sunday
@@ -372,7 +378,8 @@ BOOST_AUTO_TEST_CASE(test_time_date_combination_in_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_impossible_day_combination) {
-    cout << "ANode:: ...test_impossible_day_combination\n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  clock real 4.8.2019 # sunday
@@ -424,7 +431,7 @@ BOOST_AUTO_TEST_CASE(test_impossible_day_combination) {
 }
 
 BOOST_AUTO_TEST_CASE(test_impossible_date_combination) {
-    cout << "ANode:: ...test_impossible_date_combination\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the suite, starting on a sunday
     // suite s1

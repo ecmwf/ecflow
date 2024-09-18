@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_EnvironmentSubstitution)
 
 BOOST_AUTO_TEST_CASE(test_environment_substitution) {
-    std::cout << "ANode:: ...test_environment_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     Suite* s = nullptr;

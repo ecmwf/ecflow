@@ -1329,7 +1329,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 
         // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been
         // begun. This can cause assert, because begin time attributes assumes that calendar has been initialised. This
-        // is not the case for client ASSERT failure: !c.suiteTime().is_special() at ../ACore/src/TimeSeries.cpp:526
+        // is not the case for client ASSERT failure: !c.suiteTime().is_special() at ../core/src/TimeSeries.cpp:526
         // init has not been called on calendar. TimeSeries::duration ECFLOW-1612
         if (begin_node)
             client_node_to_add->begin();
@@ -1405,7 +1405,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 
     // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been begun.
     // This can cause assert, because begin time attributes assumes that calendar has been initialised. This is not the
-    // case for client ASSERT failure: !c.suiteTime().is_special() at ../ACore/src/TimeSeries.cpp:526 init has not been
+    // case for client ASSERT failure: !c.suiteTime().is_special() at ../core/src/TimeSeries.cpp:526 init has not been
     // called on calendar. TimeSeries::duration ECFLOW-1612
     if (begin_node)
         client_node_to_add->begin();
@@ -1480,7 +1480,7 @@ void Defs::restore(const std::string& the_fileName) {
         return;
 
     /// *************************************************************************
-    /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+    /// The reason why Parser code moved to Node directory. Avoid cyclic loop
     /// *************************************************************************
     std::string errorMsg, warningMsg;
     if (!restore(the_fileName, errorMsg, warningMsg)) {
@@ -1506,7 +1506,7 @@ bool Defs::restore(const std::string& the_fileName, std::string& errorMsg, std::
 
 void Defs::restore_from_string(const std::string& str) {
     /// *************************************************************************
-    /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+    /// The reason why Parser code moved to Node directory. Avoid cyclic loop
     /// *************************************************************************
     std::string errorMsg, warningMsg;
     if (!restore_from_string(str, errorMsg, warningMsg)) {

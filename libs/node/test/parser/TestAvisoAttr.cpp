@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -24,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(U_Parser)
 BOOST_AUTO_TEST_SUITE(T_AvisoAttr)
 
 BOOST_AUTO_TEST_CASE(can_parse_aviso_attribute_on_task_with_default_parameters) {
-    std::cout << "..." << boost::unit_test::framework::current_test_unit().full_name() << std::endl;
+    ECF_NAME_THIS_TEST();
 
     using namespace ecf;
 
@@ -65,7 +66,7 @@ BOOST_AUTO_TEST_CASE(can_parse_aviso_attribute_on_task_with_default_parameters) 
 }
 
 BOOST_AUTO_TEST_CASE(can_parse_aviso_attribute_on_task_with_all_parameters) {
-    std::cout << "..." << boost::unit_test::framework::current_test_unit().full_name() << std::endl;
+    ECF_NAME_THIS_TEST();
 
     using namespace ecf;
 

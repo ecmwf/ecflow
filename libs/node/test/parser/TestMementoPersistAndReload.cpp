@@ -14,6 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "PersistHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Memento.hpp"
 
@@ -42,9 +43,10 @@ BOOST_AUTO_TEST_SUITE(U_Parser)
 BOOST_AUTO_TEST_SUITE(T_MementoPersistAndReload)
 
 BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
+    ECF_NAME_THIS_TEST();
+
     std::vector<ecf::Aspect::Type> aspects;
     bool aspect_only = false;
-    cout << "AParser:: ...test_memento_persist_and_reload\n";
     {
         Defs defs;
         suite_ptr suite = defs.add_suite("s1");

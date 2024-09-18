@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_NodeState)
 
 BOOST_AUTO_TEST_CASE(test_state_hierarchy) {
-    cout << "ANode:: ...test_state_hierarchy\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a defs file corresponding to:
     // suite s1

@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "TestSerialisation.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/Task.hpp"
@@ -25,7 +26,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_InLimit)
 
 BOOST_AUTO_TEST_CASE(test_inlimit_basics) {
-    cout << "ANode:: ...test_inlimit_basics \n";
+    ECF_NAME_THIS_TEST();
+
     {
         InLimit empty;
         InLimit empty2;
@@ -78,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test_inlimit_basics) {
 }
 
 BOOST_AUTO_TEST_CASE(test_inlimit_duplicates) {
-    cout << "ANode:: ...test_inlimit_duplicates \n";
+    ECF_NAME_THIS_TEST();
 
     InLimit inlim("fred", "/path/to/node", 1, true);
 
@@ -96,7 +98,8 @@ BOOST_AUTO_TEST_CASE(test_inlimit_duplicates) {
 // Globals used throughout the test
 static std::string fileName = "test_InLimit_serialisation.txt";
 BOOST_AUTO_TEST_CASE(test_InLimit_serialisation) {
-    cout << "ANode:: ...test_InLimit_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     {
         // save and restore the default constructor
         doSaveAndRestore<InLimit>(fileName);

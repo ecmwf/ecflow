@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -27,7 +28,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Zombies)
 
 BOOST_AUTO_TEST_CASE(test_zombies) {
-    cout << "ANode:: ...test_zombies\n";
+    ECF_NAME_THIS_TEST();
+
     Defs theDefs;
     suite_ptr s = theDefs.add_suite("s");
     task_ptr t  = s->add_family("f")->add_task("t");

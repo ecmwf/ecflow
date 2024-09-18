@@ -1,6 +1,6 @@
 
 %ecfmicro ^
-exe_time=`date +%s -r ACore/bin/^COMPILER_TEST_PATH:gcc^/u_acore`
+exe_time=`date +%s -r libs/core/bin/^COMPILER_TEST_PATH:gcc^/u_acore`
 ^ecfmicro %
 
 %manual

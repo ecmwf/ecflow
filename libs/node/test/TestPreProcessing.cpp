@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
@@ -188,7 +189,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_good_sms) {
-    cout << "ANode:: ...test_good_ecf\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/data/SMSHOME2/good", "libs/node");
 
@@ -197,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_good_sms) {
 }
 
 BOOST_AUTO_TEST_CASE(test_bad_sms) {
-    cout << "ANode:: ...test_bad_ecf\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/data/SMSHOME2/bad", "libs/node");
 

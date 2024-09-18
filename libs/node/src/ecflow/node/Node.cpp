@@ -1770,7 +1770,7 @@ void Node::print(std::string& os) const {
 
     if (PrintStyle::getStyle() == PrintStyle::STATE) {
         // Distinguish normal variable from generated, by adding a #
-        // This also allows it to be read in again and compared in the AParser/tests
+        // This also allows it to be read in again and compared in the libs/node/test/parser
         std::vector<Variable> gvec;
         gen_variables(gvec);
         for (const Variable& v : gvec) {

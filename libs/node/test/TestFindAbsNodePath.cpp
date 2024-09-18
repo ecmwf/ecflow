@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -26,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_FindAbsNodePath)
 
 BOOST_AUTO_TEST_CASE(test_find_abs_node_path) {
-    cout << "ANode:: ...test_find_abs_node_path\n";
+    ECF_NAME_THIS_TEST();
 
     size_t no_of_nodes = 0;
     size_t no_of_alias = 0;

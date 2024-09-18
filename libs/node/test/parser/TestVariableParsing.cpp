@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -25,8 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Parser)
 BOOST_AUTO_TEST_SUITE(T_VariableParsing)
 
 BOOST_AUTO_TEST_CASE(test_single_defs) {
-
-    cout << "AParser:: ...test_variable  \n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/parser/data/good_defs/edit/edit.def", "parser");
 

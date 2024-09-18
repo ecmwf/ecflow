@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/Str.hpp"
@@ -83,7 +84,8 @@ void create_ecf_file(const std::string& ecf_file_location) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
-    cout << "ANode:: ...test_ecf_file_search\n";
+    ECF_NAME_THIS_TEST();
+
     // Do test which fails first, i.e does not find the ecf file, then add variable ECF_FILES_LOOKUP(PRUNE_LEAF)
     // The test should then succeed
     // Note: Setting ECF_FILES_LOOKUP(PRUNE_LEAF) or ECF_FILES_LOOKUP(PRUNE_ROOT)/default affects the lookup for
@@ -238,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
-    cout << "ANode:: ...test_ecf_file_locator\n";
+    ECF_NAME_THIS_TEST();
 
     // SET ECF_HOME
     std::string smshome = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
@@ -356,7 +358,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
-    cout << "ANode:: ...test_ecf_file_locator_using_ECF_FILES\n";
+    ECF_NAME_THIS_TEST();
 
     // This test will check we can locate the ecf files in ECF_FILES directory
 
@@ -369,8 +371,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
     // Create a defs file corresponding to:
     // # Test the sms file can be found via ECF_SCRIPT
     // #
-    // edit ECF_HOME    ANode/test/data
-    // edit ECF_FILES   ANode/test/data/SMSHOME/suite/family
+    // edit ECF_HOME    libs/node/test/test/data
+    // edit ECF_FILES   libs/node/test/data/SMSHOME/suite/family
     // suite suite
     // edit ECF_INCLUDE $ECF_HOME/includes
     // edit SLEEPTIME 10
@@ -421,7 +423,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution) {
-    cout << "ANode:: ...test_ecf_file_locator_using_ECF_FILES_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     // ECFLOW-788
     // This test will check we can locate the ecf files in ECF_FILES directory
@@ -436,8 +438,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
     // Create a defs file corresponding to:
     // # Test the sms file can be found via ECF_SCRIPT
     // #
-    // edit ECF_HOME    ANode/test/data
-    // edit ECF_FILES   ANode/test/data/SMSHOME/suite/%FAMILY%   # test we variable substitute
+    // edit ECF_HOME    libs/node/test/data
+    // edit ECF_FILES   libs/node/test/data/SMSHOME/suite/%FAMILY%   # test we variable substitute
     // suite suite
     // edit ECF_INCLUDE $ECF_HOME/includes
     // edit SLEEPTIME 10

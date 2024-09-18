@@ -14,6 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "PersistHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -143,7 +144,7 @@ void test_defs(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_defs) {
-    cout << "AParser:: ...test_parsing_for_good_defs\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/parser/data/good_defs", "parser");
 
@@ -152,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_defs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_bad_defs) {
-    cout << "AParser:: ...test_parsing_for_bad_defs\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/parser/data/bad_defs", "parser");
 
@@ -161,7 +162,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_bad_defs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_defs_state) {
-    cout << "AParser:: ...test_parsing_for_good_defs_state\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/parser/data/good_defs_state", "parser");
 
@@ -220,7 +221,7 @@ void test_node_defs(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_node) {
-    cout << "AParser:: ...test_parsing_node\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/node/test/parser/data/good_node_defs", "parser");
 

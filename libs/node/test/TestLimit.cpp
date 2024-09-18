@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "TestSerialisation.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Limit)
 
 BOOST_AUTO_TEST_CASE(test_limit_basics) {
-    cout << "ANode:: ...test_limit_basics \n";
+    ECF_NAME_THIS_TEST();
 
     {
         Limit empty;
@@ -89,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_limit_basics) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limit_increment) {
-    cout << "ANode:: ...test_limit_increment\n";
+    ECF_NAME_THIS_TEST();
 
     Limit limit("name", 10);    // Limit of 10
     limit.increment(1, "path"); // consume 1 token
@@ -105,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_limit_increment) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limit_increment_2) {
-    cout << "ANode:: ...test_limit_increment_2\n";
+    ECF_NAME_THIS_TEST();
 
     Limit limit("name", 10); // Limit of 10
     for (int i = 0; i < 20; i++) {
@@ -118,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_limit_increment_2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limit_decrement) {
-    cout << "ANode:: ...test_limit_decrement\n";
+    ECF_NAME_THIS_TEST();
 
     Ecf::set_server(true); // needed to test state_change_numbers
 
@@ -171,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_limit_decrement) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limit_set_value) {
-    cout << "ANode:: ...test_limit_set_value\n";
+    ECF_NAME_THIS_TEST();
 
     Limit limit("name", 10);     // Limit of 10
     limit.increment(1, "path");  // consume 1 token
@@ -194,13 +195,14 @@ BOOST_AUTO_TEST_CASE(test_limit_set_value) {
 // Globals used throughout the test
 static std::string fileName = "testLimit.txt";
 BOOST_AUTO_TEST_CASE(test_LimitDefaultConstructor_serialisation) {
-    cout << "ANode:: ...test_LimitDefaultConstructor_serialisation \n";
+    ECF_NAME_THIS_TEST();
 
     doSaveAndRestore<Limit>(fileName);
 }
 
 BOOST_AUTO_TEST_CASE(test_Limit_serialisation) {
-    cout << "ANode:: ...test_Limit_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     Limit saved1("limitName", 100);
     doSaveAndRestore(fileName, saved1);
 

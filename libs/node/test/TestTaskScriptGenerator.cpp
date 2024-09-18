@@ -14,6 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
@@ -32,7 +33,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_TaskScriptGenerator)
 
 BOOST_AUTO_TEST_CASE(test_reset_after_job_generation_checking) {
-    cout << "ANode:: ...test_reset_after_job_generation_checking\n";
+    ECF_NAME_THIS_TEST();
+
     {
         Defs defs   = Defs();
         suite_ptr s = defs.add_suite("s");
@@ -68,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_reset_after_job_generation_checking) {
 }
 
 BOOST_AUTO_TEST_CASE(test_task_script_generator) {
-    cout << "ANode:: ...test_task_script_generator\n";
+    ECF_NAME_THIS_TEST();
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data/TaskScriptGenerator", "libs/node");
@@ -154,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
-    cout << "ANode:: ...test_task_script_generator_with_dummy_tasks\n";
+    ECF_NAME_THIS_TEST();
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data/TaskScriptGenerator", "libs/node");

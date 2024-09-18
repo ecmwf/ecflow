@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_ExprParser)
 
 BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
-    std::cout << "ANode:: ...test_expression_parser_basic\n";
+    ECF_NAME_THIS_TEST();
 
     using namespace std::string_literals;
 
@@ -113,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
 }
 
 BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
-    std::cout << "ANode:: ...test_expression_parser_basic_with_braces\n";
+    ECF_NAME_THIS_TEST();
 
     using namespace std::string_literals;
 
@@ -162,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
-    std::cout << "ANode:: ...test_parser_good_expressions\n";
+    ECF_NAME_THIS_TEST();
 
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
@@ -482,7 +483,7 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
 }
 
 BOOST_AUTO_TEST_CASE(test_trigger_functions) {
-    std::cout << "ANode:: ...test_trigger_functions\n";
+    ECF_NAME_THIS_TEST();
 
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
@@ -552,7 +553,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
 }
 
 BOOST_AUTO_TEST_CASE(test_date_to_julian_with_repeat_YMD) {
-    std::cout << "ANode:: ...test_date_to_julian_with_repeat_YMD\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite("s1");
@@ -580,7 +581,8 @@ BOOST_AUTO_TEST_CASE(test_date_to_julian_with_repeat_YMD) {
 }
 
 BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
-    std::cout << "ANode:: ...test_trigger_functions_with_boost_date\n";
+    ECF_NAME_THIS_TEST();
+
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
     // value.second = result of expected evaluation
@@ -648,7 +650,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
-    std::cout << "ANode:: ...test_trigger_expression_divide_by_zero\n";
+    ECF_NAME_THIS_TEST();
 
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
@@ -688,7 +690,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
-    std::cout << "ANode:: ...test_parser_bad_expressions\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector expressions = {"/s/f/t<flag>restored"s,
                                "a <= complete"s,
