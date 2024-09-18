@@ -15,6 +15,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/NState.hpp"
@@ -29,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_LateAttr)
 
 BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
-    cout << "ANattr:: ...test_late_attr_submitted\n";
+    ECF_NAME_THIS_TEST();
 
     // REF: ECFLOW-322
     Calendar calendar;
@@ -75,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
 }
 
 BOOST_AUTO_TEST_CASE(test_late_attr_active) {
-    cout << "ANattr:: ...test_late_attr_active\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
@@ -115,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_active) {
 }
 
 BOOST_AUTO_TEST_CASE(test_late_attr_complete_relative) {
-    cout << "ANattr:: ...test_late_attr_complete_relative\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
@@ -155,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_relative) {
 }
 
 BOOST_AUTO_TEST_CASE(test_late_attr_complete_real) {
-    cout << "ANattr:: ...test_late_attr_complete_real\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
@@ -196,7 +197,8 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_late_parsing) {
-    cout << "ANattr:: ...test_late_parsing\n";
+    ECF_NAME_THIS_TEST();
+
     TimeSlot start(10, 10);
     TimeSlot finish(23, 10);
     {
@@ -282,7 +284,8 @@ BOOST_AUTO_TEST_CASE(test_late_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_late_parsing_errors) {
-    cout << "ANattr:: ...test_late_parsing_errors\n";
+    ECF_NAME_THIS_TEST();
+
     BOOST_REQUIRE_THROW((void)LateAttr::create(""), std::runtime_error);
     BOOST_REQUIRE_THROW((void)LateAttr::create("late"), std::runtime_error);
     BOOST_REQUIRE_THROW((void)LateAttr::create("late 10:10"), std::runtime_error);

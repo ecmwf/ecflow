@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "TestSerialisation.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -42,7 +43,7 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_AttrSerialization)
 
 BOOST_AUTO_TEST_CASE(test_AttrDefaultConstructor_serialisation) {
-    cout << "ANattr:: ...test_AttrDefaultConstructor_serialisation \n";
+    ECF_NAME_THIS_TEST();
 
     doSaveAndRestore<VerifyAttr>(fileName);
     doSaveAndRestore<TodayAttr>(fileName);
@@ -69,13 +70,15 @@ BOOST_AUTO_TEST_CASE(test_AttrDefaultConstructor_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_VerifyAttr_serialisation) {
-    cout << "ANattr:: ...test_VerifyAttr_serialisation \n";
+    ECF_NAME_THIS_TEST();
+
     VerifyAttr saved(NState::COMPLETE, 10);
     doSaveAndRestore(fileName, saved);
 }
 
 BOOST_AUTO_TEST_CASE(test_TodayAttr_serialisation) {
-    cout << "ANattr:: ...test_TodayAttr_serialisation \n";
+    ECF_NAME_THIS_TEST();
+
     {
         TodayAttr saved(TimeSlot(10, 12));
         doSaveAndRestore(fileName, saved);
@@ -95,7 +98,8 @@ BOOST_AUTO_TEST_CASE(test_TodayAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_TimeAttr_serialisation) {
-    cout << "ANattr:: ...test_TimeAttr_serialisation \n";
+    ECF_NAME_THIS_TEST();
+
     {
         TimeAttr saved(TimeSlot(10, 12));
         doSaveAndRestore(fileName, saved);
@@ -111,7 +115,8 @@ BOOST_AUTO_TEST_CASE(test_TimeAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_RepeatAttr_serialisation) {
-    cout << "ANattr:: ...test_RepeatAttr_serialisation \n";
+    ECF_NAME_THIS_TEST();
+
     {
         RepeatDate saved("varname", 20101210, 20101230, 3);
         doSaveAndRestore(fileName, saved);
@@ -166,7 +171,8 @@ BOOST_AUTO_TEST_CASE(test_RepeatAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_LateAttr_serialisation) {
-    cout << "ANattr:: ...test_LateAttr_serialisation \n";
+    ECF_NAME_THIS_TEST();
+
     LateAttr saved;
     saved.addSubmitted(TimeSlot(10, 12));
     saved.addActive(TimeSlot(10, 12));
@@ -175,7 +181,8 @@ BOOST_AUTO_TEST_CASE(test_LateAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_DayAttr_serialisation) {
-    cout << "ANattr:: ...test_DayAttr_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     std::vector<DayAttr::Day_t> dvec;
     dvec.push_back(DayAttr::SUNDAY);
     dvec.push_back(DayAttr::MONDAY);
@@ -191,13 +198,15 @@ BOOST_AUTO_TEST_CASE(test_DayAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_DateAttr_serialisation) {
-    cout << "ANattr:: ...test_DateAttr_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     DateAttr saved(1, 1, 2010);
     doSaveAndRestore(fileName, saved);
 }
 
 BOOST_AUTO_TEST_CASE(test_CronAttr_serialisation) {
-    cout << "ANattr:: ...test_CronAttr_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     CronAttr saved;
     std::vector<int> weekDays;
     weekDays.push_back(1);
@@ -217,7 +226,8 @@ BOOST_AUTO_TEST_CASE(test_CronAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ClockAttr_serialisation) {
-    cout << "ANattr:: ...test_ClockAttr_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     {
         ClockAttr saved(false);
         saved.date(1, 1, 2009);
@@ -232,7 +242,8 @@ BOOST_AUTO_TEST_CASE(test_ClockAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_AutoCancelAttr_serialisation) {
-    cout << "ANattr:: ...test_AutoCancelAttr_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     {
         AutoCancelAttr saved(100);
         doSaveAndRestore(fileName, saved);
@@ -244,7 +255,8 @@ BOOST_AUTO_TEST_CASE(test_AutoCancelAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_AutoArchiveAttr_serialisation) {
-    cout << "ANattr:: ...test_AutoArchiveAttr_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     {
         AutoArchiveAttr saved(100);
         doSaveAndRestore(fileName, saved);
@@ -264,7 +276,8 @@ BOOST_AUTO_TEST_CASE(test_AutoArchiveAttr_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_Label_serialisation) {
-    cout << "ANattr:: ...test_Label_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     {
         Label saved("labelName", "some text");
         doSaveAndRestore(fileName, saved);
@@ -272,13 +285,15 @@ BOOST_AUTO_TEST_CASE(test_Label_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_Variable_serialisation) {
-    cout << "ANattr:: ...test_Variable_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     Variable saved("varname", "var value 123 12 =");
     doSaveAndRestore(fileName, saved);
 }
 
 BOOST_AUTO_TEST_CASE(test_Event_serialisation) {
-    cout << "ANattr:: ...test_Event_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     {
         Event saved(3);
         doSaveAndRestore(fileName, saved);
@@ -298,13 +313,15 @@ BOOST_AUTO_TEST_CASE(test_Event_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_Meter_serialisation) {
-    cout << "ANattr:: ...test_Meter_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     Meter saved("meter", 0, 20, 20);
     doSaveAndRestore(fileName, saved);
 }
 
 BOOST_AUTO_TEST_CASE(test_queue_serialisation) {
-    cout << "ANattr:: ...test_queue_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     std::vector<std::string> queue_items;
     queue_items.emplace_back("a");
     queue_items.emplace_back("b");
@@ -313,7 +330,8 @@ BOOST_AUTO_TEST_CASE(test_queue_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_generic_serialisation) {
-    cout << "ANattr:: ...test_generic_serialisation\n";
+    ECF_NAME_THIS_TEST();
+
     std::vector<std::string> queue_items;
     queue_items.emplace_back("a");
     queue_items.emplace_back("b");
@@ -322,7 +340,7 @@ BOOST_AUTO_TEST_CASE(test_generic_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_zombie_attr_serialisation) {
-    cout << "ANattr:: ...test_zombie_attr_serialisation\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 

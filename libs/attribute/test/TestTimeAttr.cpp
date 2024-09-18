@@ -15,6 +15,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/TimeAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
@@ -29,7 +30,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_TimeAttr)
 
 BOOST_AUTO_TEST_CASE(test_time_string_constrcutor) {
-    cout << "ANattr:: ...test_time_string_constrcutor\n";
+    ECF_NAME_THIS_TEST();
+
     {
         TimeAttr time("+00:30");
         BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 0 && time.time_series().start().minute() == 30 &&
@@ -60,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_time_string_constrcutor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_attr) {
-    cout << "ANattr:: ...test_time_attr\n";
+    ECF_NAME_THIS_TEST();
 
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
@@ -281,7 +283,7 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
-    cout << "ANattr:: ...test_time_once_free_stays_free\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
@@ -378,7 +380,7 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
-    cout << "ANattr:: ...test_time_attr_multiples\n";
+    ECF_NAME_THIS_TEST();
 
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue

@@ -11,6 +11,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "TestSerialisation.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
@@ -47,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(T_Migration)
 // backward compatibility.i.e future release can open file, created by an earlier release
 //
 BOOST_AUTO_TEST_CASE(test_migration_restore_def_con) {
-    cout << "ANattr:: ...test_migration_restore_def_con\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name =
         File::test_data("libs/attribute/test/data/migration/default_constructor_1_2_2/", "libs/attribute");
@@ -103,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_def_con) {
 }
 
 BOOST_AUTO_TEST_CASE(test_migration_restore) {
-    cout << "ANattr:: ...test_migration_restore\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name = File::test_data("libs/attribute/test/data/migration/1_2_2/", "libs/attribute");
     // BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
@@ -269,7 +270,8 @@ private:
 } // namespace version_new_data_member
 
 BOOST_AUTO_TEST_CASE(test_day_migration) {
-    cout << "ANattr:: ...test_day_migration\n";
+    ECF_NAME_THIS_TEST();
+
     // OLD -> NEW  i.e OLD SERVER --> NEW CLIENT
     {
         const version_old::DayAttr t = version_old::DayAttr();

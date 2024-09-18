@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/TodayAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
@@ -28,7 +29,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_TodayAttr)
 
 BOOST_AUTO_TEST_CASE(test_today_string_constrcutor) {
-    cout << "ANattr:: ...test_today_string_constrcutor\n";
+    ECF_NAME_THIS_TEST();
+
     {
         TodayAttr time("+00:30");
         BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 0 && time.time_series().start().minute() == 30 &&
@@ -59,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_today_string_constrcutor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_today_attr) {
-    cout << "ANattr:: ...test_today_attr\n";
+    ECF_NAME_THIS_TEST();
 
     // See TodayAttr.hpp for rules concerning isFree() and checkForReque()
     // test today attr isFree(), and checkForRequeue
