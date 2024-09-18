@@ -14,6 +14,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -30,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Calendar)
 
 BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
-    cout << "ACore:: ...test_calendar_default_ptime \n";
+    ECF_NAME_THIS_TEST();
 
     ptime time;
     BOOST_CHECK_MESSAGE(time.is_special(), "Default ptime is special");
@@ -41,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
-    cout << "ACore:: ...test_calendar_state_parsing\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
@@ -79,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_1) {
-    cout << "ACore:: ...test_calendar_1\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_1) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar) {
-    cout << "ACore:: ...test_calendar_basic\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
@@ -123,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_calendar) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
-    cout << "ACore:: ...test_calendar_time_series_relative\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -159,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
-    cout << "ACore:: ...test_calendar_time_series_relative_complex\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -225,7 +226,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
-    cout << "ACore:: ...test_calendar_time_series_real\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -258,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
-    cout << "ACore:: ...test_calendar_time_series_real_complex\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -323,7 +324,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
-    cout << "ACore:: ...test_calendar_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // The hybrid calendar should not change the suite date.
     // Test by updateing calendar by more than 24 hours
@@ -394,7 +395,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_changed_for_real) {
-    cout << "ACore:: ...test_day_changed_for_real\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -439,7 +440,7 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_changed_for_hybrid) {
-    cout << "ACore:: ...test_day_changed_for_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar
     Calendar calendar; // default clock is real
@@ -488,7 +489,7 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_julian) {
-    cout << "ACore:: ...test_calendar_julian\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2017, 1, 1), minutes(0)), Calendar::REAL);

@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "TestSerialisation.hpp"
 #include "ecflow/core/Filesystem.hpp"
 
@@ -78,7 +79,8 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Cereal)
 
 BOOST_AUTO_TEST_CASE(test_cereal_json) {
-    cout << "ACore:: ...test_cereal_json \n";
+    ECF_NAME_THIS_TEST();
+
     std::string path = "test_cereal_json";
     {
         std::ofstream os(path);
@@ -102,7 +104,8 @@ BOOST_AUTO_TEST_CASE(test_cereal_json) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cereal_json2) {
-    cout << "ACore:: ...test_cereal_json2\n";
+    ECF_NAME_THIS_TEST();
+
     MyTop m1;
     m1.set(10, 10, 10);
     std::string path = "test_cereal_json2";

@@ -19,6 +19,7 @@ ecbuild_add_library(
   TYPE INTERFACE
   SOURCES
     test/TestSerialisation.hpp
+    test/TestNaming.hpp
   PUBLIC_INCLUDES
     test
 )

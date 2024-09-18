@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
 
@@ -117,7 +118,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_CerealWithHierarchy)
 
 BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
-    cout << "ACore:: ...test_cereal_save_as_string_and_save_as_filename\n";
+    ECF_NAME_THIS_TEST();
 
     std::shared_ptr<BaseCmd> cmd = std::make_shared<Derived1>(10);
     CmdContainer originalCmd(cmd);

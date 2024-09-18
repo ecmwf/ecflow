@@ -16,6 +16,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
@@ -29,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Str)
 
 BOOST_AUTO_TEST_CASE(test_str) {
-    cout << "ACore:: ...test_str\n";
+    ECF_NAME_THIS_TEST();
 
     {
         std::string str;
@@ -213,7 +214,7 @@ static void check_splitters(const std::string& line, const std::vector<std::stri
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split) {
-    cout << "ACore:: ...test_str_split\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> expected;
 
@@ -308,7 +309,7 @@ BOOST_AUTO_TEST_CASE(test_str_split) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split_make_split_iterator) {
-    cout << "ACore:: ...test_str_split_make_split_iterator\n";
+    ECF_NAME_THIS_TEST();
 
     std::string line = "This is a string";
     std::vector<std::string> expected;
@@ -440,7 +441,7 @@ static void test_replace_all(std::string& testStr,
 }
 
 BOOST_AUTO_TEST_CASE(test_str_replace) {
-    cout << "ACore:: ...test_str_replace\n";
+    ECF_NAME_THIS_TEST();
 
     std::string testStr = "This is a string";
     test_replace(testStr, "This", "That", "That is a string");
@@ -466,7 +467,7 @@ BOOST_AUTO_TEST_CASE(test_str_replace) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_replace_all) {
-    cout << "ACore:: ...test_str_replace_all\n";
+    ECF_NAME_THIS_TEST();
 
     std::string testStr = "This is a string";
     test_replace_all(testStr, "This", "That", "That is a string");
@@ -488,7 +489,8 @@ BOOST_AUTO_TEST_CASE(test_str_replace_all) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_to_int) {
-    cout << "ACore:: ...test_str(to_int)\n";
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK_MESSAGE(Str::to_int("0") == 0, "Expected 0");
     BOOST_CHECK_MESSAGE(Str::to_int("1") == 1, "Expected 1");
     BOOST_CHECK_MESSAGE(Str::to_int("-0") == 0, "Expected 0");
@@ -504,7 +506,8 @@ BOOST_AUTO_TEST_CASE(test_str_to_int) {
 }
 
 BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
-    cout << "ACore:: ...test_extract_data_member_value\n";
+    ECF_NAME_THIS_TEST();
+
     std::string expected = "value";
     std::string actual;
     std::string str = "aa bb c fred:value";
@@ -540,7 +543,7 @@ std::string toString(const std::vector<std::string>& c) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_less_greater) {
-    cout << "ACore:: ...test_str_less_greater\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> expected;
     expected.emplace_back("a1");
@@ -663,6 +666,8 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
+    ECF_NAME_THIS_TEST();
+
     const size_t size = 200000000;
     std::vector<Fred> vec;
     vec.reserve(size);
@@ -763,7 +768,7 @@ static void method3(const std::string& str, std::vector<std::string>& stringRes,
 }
 
 BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
-    cout << "ACore:: ...test_string_to_int_conversion\n";
+    ECF_NAME_THIS_TEST();
 
     size_t the_size = 1000000;
     std::vector<std::string> stringTokens;
@@ -848,7 +853,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
 }
 
 BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
-    cout << "ACore:: ...test_int_to_str_perf\n";
+    ECF_NAME_THIS_TEST();
 
     // Lexical_cast is approx twice as fast as using streams
     // time for ostream = 0.97
@@ -877,7 +882,7 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_valid_name) {
-    cout << "ACore:: ...test_str_valid_name\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> valid;
     valid.emplace_back("a");

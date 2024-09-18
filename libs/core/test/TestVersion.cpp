@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
@@ -28,11 +29,11 @@ BOOST_AUTO_TEST_SUITE(T_Version)
 BOOST_AUTO_TEST_CASE(test_version) {
     std::string desc = Version::description();
     BOOST_CHECK_MESSAGE(!desc.empty(), "Expected version");
-    cout << "ACore:: ...test_version:" << desc << endl;
+    ECF_NAME_THIS_TEST(<< ", found version: " << desc);
 }
 
 BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
-    cout << "ACore:: ...test_version_against_cmake" << endl;
+    ECF_NAME_THIS_TEST();
 
     // Open the file CMakeList.txt
     std::string version_cmake_file = File::root_source_dir() + "/CMakeLists.txt";

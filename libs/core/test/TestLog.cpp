@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
@@ -38,7 +39,7 @@ static std::string getLogPath() {
 
 BOOST_AUTO_TEST_CASE(test_log) {
     std::string path = getLogPath();
-    cout << "ACore:: ...test_log " << path << "\n";
+    ECF_NAME_THIS_TEST(<< ", using log file:" << path);
 
     // delete the log file if it exists.
     fs::remove(path);
@@ -62,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_log) {
 }
 
 BOOST_AUTO_TEST_CASE(test_log_append) {
-    cout << "ACore:: ...test_log_append\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = getLogPath();
 
@@ -76,8 +77,7 @@ BOOST_AUTO_TEST_CASE(test_log_append) {
     // Load the log file into a vector, of strings, and test content
     std::vector<std::string> lines;
     BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(path, lines, true /*IGNORE EMPTY LINE AT THE END*/),
-                          "Failed to open log file"
-                              << " (" << strerror(errno) << ")");
+                          "Failed to open log file" << " (" << strerror(errno) << ")");
     BOOST_REQUIRE(lines.size() != 0);
     BOOST_CHECK_MESSAGE(lines.size() == 10, " Expected 10 lines in log, but found " << lines.size() << "\n");
     BOOST_CHECK_MESSAGE(lines[0].find("First Message") != string::npos,
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_log_append) {
 }
 
 BOOST_AUTO_TEST_CASE(test_log_path) {
-    cout << "ACore:: ...test_log_path\n";
+    ECF_NAME_THIS_TEST();
 
     Log::create("test_log_path.log");
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_log_path) {
 }
 
 BOOST_AUTO_TEST_CASE(test_log_new_path_errors) {
-    cout << "ACore:: ...test_log_new_path_errors\n";
+    ECF_NAME_THIS_TEST();
 
     // delete the log file if it exists.
     std::string path = getLogPath();
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_log_new_path_errors) {
 }
 
 BOOST_AUTO_TEST_CASE(test_log_new_path) {
-    cout << "ACore:: ...test_log_new_path\n";
+    ECF_NAME_THIS_TEST();
 
     // delete the log file if it exists.
     std::string path = getLogPath();
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_log_new_path) {
 }
 
 BOOST_AUTO_TEST_CASE(test_get_last_n_lines_from_log) {
-    cout << "ACore:: ...test_get_last_n_lines_from_log\n";
+    ECF_NAME_THIS_TEST();
 
     // delete the log file if it exists.
     std::string path = getLogPath();
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_get_last_n_lines_from_log) {
 }
 
 BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
-    cout << "ACore:: ...test_get_first_n_lines_from_log\n";
+    ECF_NAME_THIS_TEST();
 
     // delete the log file if it exists.
     std::string path = getLogPath();
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
 }
 
 BOOST_AUTO_TEST_CASE(test_get_log_timing) {
-    cout << "ACore:: ...test_get_log_timing: " << flush;
+    ECF_NAME_THIS_TEST();
 
     // *************************************************************************************
     // This test was used with *DIFFERENT* implementations for Log::instance()->contents(1)
@@ -375,7 +375,9 @@ BOOST_AUTO_TEST_CASE(test_get_log_timing) {
     // Explicitly destroy log. To keep valgrind happy
     Log::destroy();
 
+#if PRINT_TIMING_RESULTS
     cout << timer.duration() << "s\n" << flush;
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()

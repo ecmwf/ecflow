@@ -24,6 +24,7 @@
     #include "ecflow/core/Str.hpp"
 #endif
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/User.hpp"
@@ -37,8 +38,9 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_File)
 
 BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
+    ECF_NAME_THIS_TEST();
+
     // This is sanity test for splitFileIntoLines used extensively
-    cout << "ACore:: ...test_splitFileIntoLines\n";
 
     std::string path = File::test_data("libs/core/test/data/test_splitFileIntoLines.txt", "libs/core");
 
@@ -120,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_splitFileIntoLines) {
 }
 
 BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
-    cout << "ACore:: ...test_file_tokenizer\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/test_file_tokenizer.txt", "libs/core");
 
@@ -175,7 +177,7 @@ BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
 }
 
 BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
-    cout << "ACore:: ...test_file_backwardSearch\n";
+    ECF_NAME_THIS_TEST();
 
     std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
     std::string rootPath = File::test_data("libs/core/test/data", "libs/core");
@@ -246,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
 }
 
 BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
-    cout << "ACore:: ...test_file_forwardSearch user:" << ecf::User::login_name() << "\n";
+    ECF_NAME_THIS_TEST();
 
     std::string dir_path = "/dir0/dir1/dir2/dir3/dir4";
     std::string nodePath = dir_path + "/task";
@@ -326,14 +328,13 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
 }
 
 BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
-    cout << "ACore:: ...test_create_missing_directories";
+    ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
     std::string rootPath = File::test_data("libs/core/test/data", "libs/core");
@@ -403,7 +404,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 }
 
 BOOST_AUTO_TEST_CASE(test_get_last_lines_of_a_file) {
-    cout << "ACore:: ...test_get_last_lines_of_a_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/test_get_last_lines_of_a_file.txt", "libs/core");
     std::string last_100_lines;
@@ -496,7 +497,7 @@ BOOST_AUTO_TEST_CASE(test_get_last_lines_of_a_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_directory_traversal) {
-    cout << "ACore:: ...test_directory_traversal\n";
+    ECF_NAME_THIS_TEST();
 
     int regular_file = 0;
     //    int directory    = 0;
@@ -534,7 +535,8 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
 }
 
 BOOST_AUTO_TEST_CASE(test_get_all_files_by_extension) {
-    cout << "ACore:: ...test_get_all_files_by_extension\n";
+    ECF_NAME_THIS_TEST();
+
     {
         std::string rootPath = File::test_data("libs/core/test/data/badPasswdFiles", "libs/core");
         std::vector<fs::path> vec;

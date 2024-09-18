@@ -22,6 +22,7 @@
 
     #include <boost/timer/timer.hpp>
 
+    #include "TestNaming.hpp"
     #include "ecflow/core/File.hpp"
     #include "ecflow/core/Str.hpp"
     #include "ecflow/core/StringSplitter.hpp"
@@ -48,7 +49,8 @@ std::vector<std::string> split_using_getline(const std::string& s, char delimite
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split_perf) {
-    cout << "ACore:: ...test_str_split_perf\n";
+    ECF_NAME_THIS_TEST();
+
     //   Time for istreamstream 1000000 times = 2.59404
     //   Time for std::getline 1000000 times = 1.83148
     //   Time for boost::split 1000000 times = 1.18149
@@ -242,7 +244,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
-    cout << "ACore:: ...test_str_split_perf_with_file\n";
+    ECF_NAME_THIS_TEST();
+
     //   Time for istreamstream 2001774 times = 1.81123
     //   Time for std::getline 2001774 times = 2.89138
     //   Time for boost::split 2001774 times = 1.98556
@@ -412,7 +415,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
-    cout << "ACore:: ...test_str_get_token_perf\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> result;
     std::string line = "This is a long string that is going to be used to test the performance of splitting with "

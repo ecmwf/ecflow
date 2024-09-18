@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 
@@ -74,7 +75,7 @@ void test_white_list_files(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_white_list_files) {
-    cout << "ACore:: ...test_parsing_for_good_white_list_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles", "libs/core");
 
@@ -83,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_white_list_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_bad_white_list_files) {
-    cout << "ACore:: ...test_parsing_for_bad_white_list_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/badWhiteListFiles", "libs/core");
 
@@ -92,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_bad_white_list_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_default) {
-    cout << "ACore:: ...test_white_list_default\n";
+    ECF_NAME_THIS_TEST();
 
     WhiteListFile theFile;
 
@@ -116,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_default) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_empty_file) {
-    cout << "ACore:: ...test_white_list_empty_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/empty.lists", "libs/core");
 
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_empty_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list) {
-    cout << "ACore:: ...test_white_list\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/good1.lists", "libs/core");
 
@@ -267,7 +268,7 @@ BOOST_AUTO_TEST_CASE(test_white_list) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_read_access) {
-    cout << "ACore:: ...test_white_list_all_users_have_read_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/all_read_access.lists", "libs/core");
 
@@ -329,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_read_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_write_access) {
-    cout << "ACore:: ...test_white_list_all_users_have_write_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/all_write_access.lists", "libs/core");
 
@@ -376,7 +377,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_write_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_write_access) {
-    cout << "ACore:: ...test_white_list_all_path_users_have_write_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path =
         File::test_data("libs/core/test/data/goodWhiteListFiles/all_path_write_access.lists", "libs/core");
@@ -412,7 +413,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_write_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_read_access) {
-    cout << "ACore:: ...test_white_list_all_path_users_have_read_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path =
         File::test_data("libs/core/test/data/goodWhiteListFiles/all_path_read_access.lists", "libs/core");
@@ -448,7 +449,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_read_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
-    cout << "ACore:: ...test_white_list_path_access_list\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/path_access.lists", "libs/core");
 

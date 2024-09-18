@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/perf_timer.hpp"
 
@@ -29,15 +30,11 @@ static void func(int const count = 100000) {
 }
 
 BOOST_AUTO_TEST_CASE(test_perf_with_chrono) {
-    cout << "ACore:: ...test_perf_with_chrono\n";
+    ECF_NAME_THIS_TEST();
 
     // using namespace std::chrono_literals;
 
     auto t = perf_timer<>::duration(func, 100000);
-
-    std::cout << "   " << std::chrono::duration<double, std::micro>(t).count() << " micro" << std::endl;
-    std::cout << "   " << std::chrono::duration<double, std::milli>(t).count() << " milli" << std::endl;
-    std::cout << "   " << std::chrono::duration<double, std::nano>(t).count() << " nano" << std::endl;
 
     // This does not work, ie calling func with no arguments ?? with our hacked invoke, wait till c++ 17
     // auto t0= perf_timer<std::chrono::nanoseconds>::duration(func);
@@ -45,24 +42,32 @@ BOOST_AUTO_TEST_CASE(test_perf_with_chrono) {
     auto t1 = perf_timer<std::chrono::nanoseconds>::duration(func, 10);
     auto t2 = perf_timer<std::chrono::microseconds>::duration(func, 100);
     auto t3 = perf_timer<std::chrono::milliseconds>::duration(func, 100000);
+
+#if PRINT_TIMING_RESULTS
+    std::cout << "   " << std::chrono::duration<double, std::micro>(t).count() << " micro" << std::endl;
+    std::cout << "   " << std::chrono::duration<double, std::milli>(t).count() << " milli" << std::endl;
+    std::cout << "   " << std::chrono::duration<double, std::nano>(t).count() << " nano" << std::endl;
     std::cout << "   " << std::chrono::duration<double, std::milli>(t1 + t2 + t3).count() << " milli" << std::endl;
+#endif
+
     BOOST_CHECK_MESSAGE(true, "dummy to keep unit test happy");
 }
 
 BOOST_AUTO_TEST_CASE(test_chrono_timer) {
-    cout << "ACore:: ... test_chrono_timer\n";
+    ECF_NAME_THIS_TEST();
 
     // using namespace std::chrono_literals;
     {
         Timer<std::chrono::milliseconds> timer;
         func();
         timer.elapsed("   func with default args , milliseconds");
-        std::cout << "    " << std::chrono::duration<double, std::micro>(timer.elapsed()).count() << " micro"
-                  << std::endl;
-        std::cout << "    " << std::chrono::duration<double, std::milli>(timer.elapsed()).count() << " milli"
-                  << std::endl;
-        std::cout << "    " << std::chrono::duration<double, std::nano>(timer.elapsed()).count() << " nano"
-                  << std::endl;
+
+#if PRINT_TIMING_RESULTS
+        using namespace std::chrono;
+        std::cout << "    " << duration<double, std::micro>(timer.elapsed()).count() << " micro" << std::endl;
+        std::cout << "    " << duration<double, std::milli>(timer.elapsed()).count() << " milli" << std::endl;
+        std::cout << "    " << duration<double, std::nano>(timer.elapsed()).count() << " nano" << std::endl;
+#endif
     }
     {
         Timer<std::chrono::microseconds> timer;

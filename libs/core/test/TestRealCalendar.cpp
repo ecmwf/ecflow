@@ -14,6 +14,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 
@@ -27,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_RealCalendar)
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar) {
-    cout << "ACore:: ...test_REAL_calendar\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,
     boost::gregorian::date theDate(2009, 2, 10);
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar) {
 }
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_relative_complex) {
-    cout << "ACore:: ...test_REAL_calendar_time_series_relative_complex\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -141,7 +142,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_relative_complex) {
 }
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series) {
-    cout << "ACore:: ...test_REAL_calendar_time_series\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -175,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_complex) {
-    cout << "ACore:: ...test_REAL_calendar_time_series_complex\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -243,7 +244,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_complex) {
 }
 
 BOOST_AUTO_TEST_CASE(test_REAL_calendar_hybrid_date) {
-    cout << "ACore:: ...test_REAL_calendar_hybrid_date\n";
+    ECF_NAME_THIS_TEST();
 
     // The hybrid calendar should not change the suite date.
     // Test by updateing calendar by more than 24 hours
@@ -284,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_hybrid_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_REAL_day_changed) {
-    cout << "ACore:: ...test_REAL_day_changed \n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -312,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_REAL_day_changed) {
 }
 
 BOOST_AUTO_TEST_CASE(test_REAL_day_changed_for_hybrid) {
-    cout << "ACore:: ...test_REAL_day_changed_for_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;

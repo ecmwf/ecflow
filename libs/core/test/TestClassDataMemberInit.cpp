@@ -14,6 +14,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
+
 using namespace boost;
 using namespace std;
 
@@ -78,7 +80,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_ClassDataMemberInit)
 
 BOOST_AUTO_TEST_CASE(test_class_data_member_init) {
-    cout << "ACore:: ...test_class_data_member_init \n";
+    ECF_NAME_THIS_TEST();
 
     {
         MyType type("ABC");

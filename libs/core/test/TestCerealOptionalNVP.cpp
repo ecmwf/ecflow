@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
 
@@ -56,7 +57,8 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_CerealOptionalNVP)
 
 BOOST_AUTO_TEST_CASE(test_cereal_optional) {
-    cout << "ACore:: ...test_cereal_optional\n";
+    ECF_NAME_THIS_TEST();
+
     Base original;
     Base original1(true);
     std::string path = "test_cereal_optional";

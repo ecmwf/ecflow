@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -76,7 +77,7 @@ void test_passwd_files(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_passwd_files) {
-    cout << "ACore:: ...test_parsing_for_good_passwd_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodPasswdFiles", "libs/core");
 
@@ -85,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_passwd_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_bad_passwd_files) {
-    cout << "ACore:: ...test_parsing_for_bad_passwd_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/badPasswdFiles", "libs/core");
 
@@ -94,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_bad_passwd_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
-    cout << "ACore:: ...test_passwd_empty_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodPasswdFiles/empty.passwd", "libs/core");
 
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_passwd) {
-    cout << "ACore:: ...test_passwd\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodPasswdFiles/ecf.passwd", "libs/core");
 

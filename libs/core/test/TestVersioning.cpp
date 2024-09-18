@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
 
@@ -27,7 +28,8 @@ BOOST_AUTO_TEST_SUITE(T_Versioning)
 // Note: we simulate different release of class X, by using name spaces
 //       This is possible since the name space is not written.
 BOOST_AUTO_TEST_CASE(test_versioning) {
-    cout << "ACore:: ...test_versioning\n";
+    ECF_NAME_THIS_TEST();
+
     {
         // write out version 0; This will be reloaded with different version of X
         const version0::X t = version0::X(10);

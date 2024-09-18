@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
 
@@ -78,7 +79,7 @@ static void check(const std::string& line, const std::vector<std::string>& expec
 }
 
 BOOST_AUTO_TEST_CASE(test_StringSplitter) {
-    cout << "ACore:: ...test_StringSplitter\n";
+    ECF_NAME_THIS_TEST();
 
     std::string line = "This is a string please split me";
     std::vector<std::string> expected;
@@ -100,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_StringSplitter) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split_StringSplitter) {
-    cout << "ACore:: ...test_str_split_StringSplitter\n";
+    ECF_NAME_THIS_TEST();
 
     // If end is delimeter, then preserved as empty token
 
@@ -289,7 +290,7 @@ static void test_get_token(const std::string& line, const char* delims = " \t") 
 }
 
 BOOST_AUTO_TEST_CASE(test_StringSplitter_get_token) {
-    cout << "ACore:: ...test_StringSplitter_get_token \n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> test_data = {"This is a string",
                                           "a",

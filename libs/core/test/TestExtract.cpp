@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Extract.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Core)
@@ -19,6 +20,8 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Extract)
 
 BOOST_AUTO_TEST_CASE(can_extract_path_and_name) {
+    ECF_NAME_THIS_TEST();
+
     using namespace std::string_literals;
     {
         auto token = "/suite/family:obj"s;
@@ -47,6 +50,8 @@ BOOST_AUTO_TEST_CASE(can_extract_path_and_name) {
 }
 
 BOOST_AUTO_TEST_CASE(can_extract_second_token) {
+    ECF_NAME_THIS_TEST();
+
     using namespace std::string_literals;
     {
         auto token = "First:Second"s;
@@ -63,6 +68,8 @@ BOOST_AUTO_TEST_CASE(can_extract_second_token) {
 }
 
 BOOST_AUTO_TEST_CASE(can_extract_integer) {
+    ECF_NAME_THIS_TEST();
+
     using namespace std::string_literals;
     { BOOST_CHECK_THROW(Extract::theInt("", "error message"s), std::runtime_error); }
     { BOOST_CHECK_THROW(Extract::theInt("a", "error message"s), std::runtime_error); }
@@ -77,6 +84,8 @@ BOOST_AUTO_TEST_CASE(can_extract_integer) {
 }
 
 BOOST_AUTO_TEST_CASE(can_extract_optional_integer) {
+    ECF_NAME_THIS_TEST();
+
     using namespace std::string_literals;
     {
         auto tokens = std::vector{"repeat"s, "integer"s, "variable"s, "1"s, "2"s, "#a"s, "comment"s};
