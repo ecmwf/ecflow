@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/task/MeterCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
@@ -33,7 +34,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_ResolveDependencies)
 
 BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
-    cout << "Base:: ...test_resolve_dependencies\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_resolve_dependencies.log"); // will create log file, and destroy log and remove file at end of scope
 
@@ -154,7 +156,8 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
 }
 
 BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
-    cout << "Base:: ...test_trigger_after_delete\n";
+    ECF_NAME_THIS_TEST();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // Create the defs file
     //   suite suite1    # the limit we want delete

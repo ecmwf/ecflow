@@ -50,6 +50,7 @@ ecbuild_add_test(
     ecflow_all
     Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    test_support
   TEST_DEPENDS
     u_parser
 )

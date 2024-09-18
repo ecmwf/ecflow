@@ -14,6 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
@@ -33,7 +34,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_Cmd)
 
 BOOST_AUTO_TEST_CASE(test_simple_cmd) {
-    cout << "Base:: ...test_simple_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_simple_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     // Create the defs file. Note that the default ECF_TRIES = 3

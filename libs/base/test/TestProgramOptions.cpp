@@ -14,6 +14,8 @@
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
+
 using namespace std;
 namespace po = boost::program_options;
 
@@ -22,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_ProgramOptions)
 
 BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
-    cout << "Base:: ...test_program_options_implicit_value\n";
+    ECF_NAME_THIS_TEST();
 
     // Declare the supported options.
     po::options_description desc("Allowed options");
@@ -85,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
 }
 
 BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
-    cout << "Base:: ...test_program_options_multitoken\n";
+    ECF_NAME_THIS_TEST();
 
     // Declare the supported options.
     po::options_description desc("Allowed options");
@@ -112,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
 }
 
 BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
-    cout << "Base:: ...test_program_options_multitoken_with_negative_values\n";
+    ECF_NAME_THIS_TEST();
 
     // Declare the supported options.
     po::options_description desc("Allowed options");

@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -33,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_add_log3) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd_empty_server) {
-    cout << "Base:: ...test_client_handle_cmd_empty_server\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
     suite_names.reserve(5);
@@ -87,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_empty_server) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register_and_drop) {
-    cout << "Base:: ...test_client_handle_cmd_register_and_drop\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
@@ -120,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register_and_drop) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register__with_drop) {
-    cout << "Base:: ...test_client_handle_cmd_register_with_drop\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
@@ -164,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register__with_drop) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
-    cout << "Base:: ...test_client_handle_cmd_auto_add\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
@@ -222,7 +223,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd_add_remove) {
-    cout << "Base:: ...test_client_handle_cmd_add_remove\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
@@ -312,7 +313,7 @@ static bool check_ordering(Defs& defs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_handle_suite_ordering) {
-    cout << "Base:: ...test_client_handle_suite_ordering\n";
+    ECF_NAME_THIS_TEST();
     // ensure order of suites in a handle is the same as server suites
 
     std::vector<std::string> suite_names;

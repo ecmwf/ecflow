@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -50,7 +51,8 @@ static defs_ptr create_defs() {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_189) {
-    cout << "Base:: ...test_ECFLOW_189\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ECFLOW_189.log"); // will create log file, and destroy log and remove file at end of scope
 
     defs_ptr the_defs = create_defs();

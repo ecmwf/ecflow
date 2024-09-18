@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
@@ -33,7 +34,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_RequeueNodeCmd)
 
 BOOST_AUTO_TEST_CASE(test_requeue_with_suspend) {
-    cout << "Base:: ...test_requeue_with_suspend\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_requeue_with_suspend.log"); // will create log file, and destroy log and remove file at end of scope
 
@@ -75,7 +77,8 @@ BOOST_AUTO_TEST_CASE(test_requeue_with_suspend) {
 }
 
 BOOST_AUTO_TEST_CASE(test_requeue_family_clears_children_SUP_909) {
-    cout << "Base:: ...test_requeue_family_clears_children_SUP_909\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_requeue_family_clears_children_SUP_909.log"); // will create log file, and destroy log and
                                                                          // remove file at end of scope
 
@@ -121,7 +124,8 @@ BOOST_AUTO_TEST_CASE(test_requeue_family_clears_children_SUP_909) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_based_requeue_clears_children) {
-    cout << "Base:: ...test_repeat_based_requeue_clears_children\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_repeat_based_requeue_clears_children.log"); // will create log file, and destroy log and
                                                                        // remove file at end of scope
 
@@ -165,7 +169,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_based_requeue_clears_children) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecflow_359) {
-    cout << "Base:: ...test_ECFLOW-359\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ecflow_359.log"); // will create log file, and destroy log and remove file at end of scope
 
     //   suite s1
@@ -225,7 +230,8 @@ BOOST_AUTO_TEST_CASE(test_ecflow_359) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecflow_428) {
-    cout << "Base:: ...test_ECFLOW-428\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ecflow_428.log"); // will create log file, and destroy log and remove file at end of scope
 
     //   suite s1
@@ -272,7 +278,8 @@ BOOST_AUTO_TEST_CASE(test_ecflow_428) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_based_requeue_resets_relative_duration) {
-    cout << "Base:: ...test_repeat_based_requeue_resets_relative_duration\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_repeat_based_requeue_resets_relative_duration.log"); // will create log file, and destroy log
                                                                                 // and remove file at end of scope
 
@@ -320,7 +327,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_based_requeue_resets_relative_duration) {
 }
 
 BOOST_AUTO_TEST_CASE(test_reque_with_repeat_and_defstatus_complete) {
-    cout << "Base:: ...test_reque_with_repeat_and_defstatus_complete\n";
+    ECF_NAME_THIS_TEST();
 
     // This will test that when we have a family with a repeat AND defstatus complete
     // We ONLY log the state change complete in the log file when re-queuing

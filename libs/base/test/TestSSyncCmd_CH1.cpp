@@ -12,6 +12,7 @@
 
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/stc/SNewsCmd.hpp"
@@ -525,7 +526,8 @@ static bool s0_update_repeat(defs_ptr defs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ssync_using_handle) {
-    cout << "Base:: ...test_ssync_using_handle\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_ssync_using_handle.log"); // will create log file, and destroy log and remove file at end of scope
 
@@ -604,7 +606,8 @@ BOOST_AUTO_TEST_CASE(test_ssync_full_sync_using_handle) {
     /// local change numbers to be the same as the global change numbers
     /// This is important since the NewsCmd must be in *SYNC* with SYNCCmd
 
-    cout << "Base:: ...test_ssync_full_sync_using_handle\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ssync_full_sync_using_handle.log"); // will create log file, and destroy log and remove file
                                                                // at end of scope
 
@@ -618,10 +621,9 @@ BOOST_AUTO_TEST_CASE(test_ssync_full_sync_using_handle) {
     // Server & client should be the same, since we ignore change numbers in the comparison
     DebugEquality debug_equality; // only as affect in DEBUG build
     BOOST_CHECK_MESSAGE(*server_defs == *server_reply.client_defs(),
-                        "Starting point client and server defs should be the same"
-                            << "SERVER\n"
-                            << server_defs << "CLIENT\n"
-                            << server_reply.client_defs());
+                        "Starting point client and server defs should be the same" << "SERVER\n"
+                                                                                   << server_defs << "CLIENT\n"
+                                                                                   << server_reply.client_defs());
 
     /// register interest in **ALL** the suites
     std::vector<std::string> suite_names;
