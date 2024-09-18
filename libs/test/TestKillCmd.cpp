@@ -14,6 +14,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
@@ -45,16 +46,18 @@ static bool waitForTaskState(NState::State state, int max_time_to_wait);
 // test:: test the kill command. Create a task that runs a long time
 // The associated job is then killed. This should leave task in aborted state
 BOOST_AUTO_TEST_CASE(test_kill_cmd) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_kill_cmd " << flush;
     TestClean clean_at_start_and_end;
     BOOST_REQUIRE_MESSAGE(kill_cmd(true), " kill of task '/test_kill_cmd/family/t0' failed");
     cout << timer.duration() << "\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_hierarchical_kill_cmd) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_hierarchical_kill_cmd " << flush;
     TestClean clean_at_start_and_end;
     BOOST_REQUIRE_MESSAGE(kill_cmd(false), "kill of suite '/test_kill_cmd' failed");
     cout << timer.duration() << "\n";

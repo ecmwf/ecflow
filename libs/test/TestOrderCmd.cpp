@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
@@ -151,8 +152,9 @@ void test_ordering() {
 }
 
 BOOST_AUTO_TEST_CASE(test_change_order) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_change_order " << flush;
     TestClean clean_at_start_and_end;
 
     /// NOT: We *DONT* need to run the jobs for this TEST
@@ -187,8 +189,9 @@ BOOST_AUTO_TEST_CASE(test_change_order) {
 }
 
 BOOST_AUTO_TEST_CASE(test_handle_change_order) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_handle_change_order " << flush;
     TestClean clean_at_start_and_end;
 
     std::vector<std::string> str_a_b_c;

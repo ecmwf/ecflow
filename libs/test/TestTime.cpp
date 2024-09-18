@@ -17,6 +17,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -36,8 +37,9 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_Time)
 
 BOOST_AUTO_TEST_CASE(test_single_real_time) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_single_real_time " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
@@ -93,9 +95,10 @@ BOOST_AUTO_TEST_CASE(test_single_real_time) {
 }
 
 BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
+    ECF_NAME_THIS_TEST();
+
     // ECFLOW-833
     DurationTimer timer;
-    cout << "Test:: ...test_single_time_trigger " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
@@ -153,8 +156,9 @@ BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_time_multiple_single_slot " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS
@@ -206,8 +210,9 @@ BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_relative_time_series) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_time_relative_time_series " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS
@@ -252,8 +257,9 @@ BOOST_AUTO_TEST_CASE(test_time_relative_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_real_series) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_time_real_series " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS
@@ -309,8 +315,9 @@ BOOST_AUTO_TEST_CASE(test_time_real_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_single_real_time_near_midnight " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable
@@ -360,8 +367,9 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_time_real_series_near_midnight " << flush;
     int the_server_version = TestFixture::server_version();
     if (the_server_version == 403) {
         cout << " SKIPPING, This test does not work with 403, current server version is " << the_server_version << "\n";

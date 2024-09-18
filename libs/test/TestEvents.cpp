@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -36,8 +37,9 @@ BOOST_AUTO_TEST_SUITE(T_Events)
 // This test does not have any time dependencies in the def file.
 
 BOOST_AUTO_TEST_CASE(test_event_and_query) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_event_and_query " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

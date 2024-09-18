@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
@@ -42,8 +43,9 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_Handle)
 
 BOOST_AUTO_TEST_CASE(test_handle) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_handle " << flush;
     TestClean clean_at_start_and_end;
 
     Defs theDefs;
@@ -195,8 +197,9 @@ BOOST_AUTO_TEST_CASE(test_handle) {
 }
 
 BOOST_AUTO_TEST_CASE(test_handle_sync) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_handle_sync " << flush;
     TestClean clean_at_start_and_end;
 
     Defs theDefs;
@@ -333,8 +336,9 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
 }
 
 BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_handle_add_remove_add " << flush;
     TestClean clean_at_start_and_end;
 
     defs_ptr theDefs = Defs::create();

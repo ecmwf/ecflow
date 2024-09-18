@@ -128,13 +128,13 @@ BOOST_AUTO_TEST_CASE(test_stress) {
 // Be sure to comment out defstatus suspended in mega.def
 // BOOST_AUTO_TEST_CASE( test_mega_def )
 //{
+//   ECF_NAME_THIS_TEST();
+//
 //   DurationTimer timer;
 //
 //   // location to mega.def and left over log file
 //   std::string log_file = File::test_data("libs/node/parser/test/data/single_defs/mega.def_log","parser");
 //   std::string path = File::test_data("libs/node/parser/test/data/single_defs/mega.def","parser");
-//
-//   cout << "Test:: ..." << path << " log file: " << log_file << flush;
 //
 //   // Remove the log file.
 //   fs::remove(log_file);
@@ -156,8 +156,9 @@ BOOST_AUTO_TEST_CASE(test_stress) {
 // This is used to test with thousands of labels
 // BOOST_AUTO_TEST_CASE( test_large_client_labels_calls )
 //{
+//   ECF_NAME_THIS_TEST();
+//
 //   DurationTimer timer;
-//   cout << "Test:: ...test_large_client_labels_calls "<< flush;
 //   TestClean clean_at_start_and_end;
 //
 //   //# Note: we have to use relative paths, since these tests are relocatable
@@ -222,9 +223,9 @@ BOOST_AUTO_TEST_CASE(test_stress) {
 ///   5000               29                     800
 ///   6000               37                     900
 // void time_for_tasks(int tasks) {
+//    ECF_NAME_THIS_TEST();
 //
 //    std::string test_name = "test_stress_" + ecf::convert_to<std::string>(tasks);
-//    cout << "Test:: ..." << test_name  << flush;
 //
 //    Defs theDefs;
 //    {

@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -35,6 +36,8 @@ BOOST_AUTO_TEST_SUITE(T_InitAddVariable)
 // The data is created dynamically so that we can stress test the server
 // This test does not have any time dependencies in the def file.
 BOOST_AUTO_TEST_CASE(test_init_add_variable) {
+    ECF_NAME_THIS_TEST();
+
     // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
     if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
         std::cout << "\n    Disable test_init_add_variable for old server , re-enable when 5.2.0 is minimum version\n";
@@ -42,7 +45,6 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
     }
 
     DurationTimer timer;
-    cout << "Test:: ...test_init_add_variable " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable

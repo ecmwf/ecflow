@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ZombieUtil.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Child.hpp"
@@ -643,16 +644,17 @@ BOOST_AUTO_TEST_CASE(enable_debug_for_ECF_TRY_NO_Greater_than_one) {
 
     if (getenv("ECF_DEBUG_ZOMBIES")) {
         ecf_debug_enabled = true;
-        cout << "Test:: ... debug_enabled" << endl;
+        ECF_NAME_THIS_TEST();
     }
 }
 
 #ifdef DO_TEST1
 BOOST_AUTO_TEST_CASE(test_path_zombie_creation) {
+    ECF_NAME_THIS_TEST();
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    cout << "Test:: ...test_path_zombie_creation " << flush;
     if (ecf_debug_enabled)
         cout << "\n";
     TestClean clean_at_start_and_end;
@@ -694,10 +696,11 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation) {
 
 #ifdef DO_TEST2
 BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fob) {
+    ECF_NAME_THIS_TEST();
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    cout << "Test:: ...test_user_zombies_for_delete_fob " << flush;
     if (ecf_debug_enabled)
         cout << "\n";
     TestClean clean_at_start_and_end;
@@ -732,10 +735,11 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fob) {
 
 #ifdef DO_TEST3
 BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fail) {
+    ECF_NAME_THIS_TEST();
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    cout << "Test:: ...test_user_zombies_for_delete_fail " << flush;
     if (ecf_debug_enabled)
         cout << "\n";
     TestClean clean_at_start_and_end;
@@ -764,10 +768,11 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fail) {
 
 #ifdef DO_TEST4
 BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
+    ECF_NAME_THIS_TEST();
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    cout << "Test:: ...test_user_zombies_for_begin " << flush;
     if (ecf_debug_enabled)
         cout << "\n";
     TestClean clean_at_start_and_end;
@@ -808,11 +813,12 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
 
 #ifdef DO_TEST5
 BOOST_AUTO_TEST_CASE(test_zombies_attr) {
+    ECF_NAME_THIS_TEST();
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
     std::string suite_name = "test_zombies_attr";
-    cout << "Test:: ..." << suite_name << " " << flush;
     if (ecf_debug_enabled)
         cout << "\n";
     TestClean clean_at_start_and_end;
@@ -848,11 +854,12 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr) {
 
 #ifdef DO_TEST6
 BOOST_AUTO_TEST_CASE(test_user_zombies_for_adopt) {
+    ECF_NAME_THIS_TEST();
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
     std::string suite_name = "test_user_zombies_for_adopt";
-    cout << "Test:: ..." << suite_name << " " << flush;
     if (ecf_debug_enabled)
         cout << "\n";
     TestClean clean_at_start_and_end;
@@ -892,13 +899,12 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_adopt) {
 
 #ifdef DO_TEST7
 BOOST_AUTO_TEST_CASE(test_zombies_attr_for_adopt) {
+    std::string suite_name = "test_zombies_attr_for_adopt";
+    ECF_NAME_THIS_TEST(<< ", using suite: " << suite_name);
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    std::string suite_name = "test_zombies_attr_for_adopt";
-    cout << "Test:: ..." << suite_name << " " << flush;
-    if (ecf_debug_enabled)
-        cout << "\n";
     TestClean clean_at_start_and_end;
 
     // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -938,13 +944,12 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr_for_adopt) {
 
 #ifdef DO_TEST8
 BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_complete) {
+    std::string suite_name = "test_zombies_attr_for_adopt";
+    ECF_NAME_THIS_TEST(<< ", using suite: " << suite_name);
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    std::string suite_name = "test_user_zombie_creation_via_complete";
-    cout << "Test:: ..." << suite_name << " " << flush;
-    if (ecf_debug_enabled)
-        cout << "\n";
     TestClean clean_at_start_and_end;
 
     // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -965,13 +970,12 @@ BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_complete) {
 
 #ifdef DO_TEST9
 BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_abort) {
+    std::string suite_name = "test_user_zombie_creation_via_abort";
+    ECF_NAME_THIS_TEST(<< ", using suite: " << suite_name);
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    std::string suite_name = "test_user_zombie_creation_via_abort";
-    cout << "Test:: ..." << suite_name << " " << flush;
-    if (ecf_debug_enabled)
-        cout << "\n";
     TestClean clean_at_start_and_end;
 
     // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -992,13 +996,12 @@ BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_abort) {
 
 #ifdef DO_TEST10
 BOOST_AUTO_TEST_CASE(test_zombie_inheritance) {
+    std::string suite_name = "test_zombie_inheritance";
+    ECF_NAME_THIS_TEST(<< ", using suite: " << suite_name);
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    std::string suite_name = "test_zombie_inheritance";
-    cout << "Test:: ..." << suite_name << " " << flush;
-    if (ecf_debug_enabled)
-        cout << "\n";
     TestClean clean_at_start_and_end;
 
     // Add zombie attribute, make sure it inherited
@@ -1065,13 +1068,12 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait) {
 }
 
 BOOST_AUTO_TEST_CASE(test_zombie_kill) {
+    std::string suite_name = "test_zombie_kill";
+    ECF_NAME_THIS_TEST(<< ", using suite: " << suite_name);
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    std::string suite_name = "test_zombie_kill";
-    cout << "Test:: ..." << suite_name << " " << flush;
-    if (ecf_debug_enabled)
-        cout << "\n";
     TestClean clean_at_start_and_end;
 
     // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -1183,13 +1185,12 @@ static void remove_all_user_zombies() {
         dump_zombies();
 }
 BOOST_AUTO_TEST_CASE(test_ecf_zombie_type_creation) {
+    std::string suite_name = "test_ecf_zombie_type_creation";
+    ECF_NAME_THIS_TEST(<< ", using suite: " << suite_name);
+
     if (ecf_debug_enabled)
         std::cout << "\n\n=============================================================================\n";
     DurationTimer timer;
-    std::string suite_name = "test_ecf_zombie_type_creation";
-    cout << "Test:: ..." << suite_name << " " << flush;
-    if (ecf_debug_enabled)
-        cout << "\n";
     TestClean clean_at_start_and_end;
 
     // some systems are really quick, where tasks are already active, when we make them zombies, then the next

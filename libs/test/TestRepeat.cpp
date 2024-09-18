@@ -17,6 +17,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -41,8 +42,9 @@ BOOST_AUTO_TEST_SUITE(T_Repeat)
 // The data is created dynamically so that we can stress test the server
 // This test does not have any time dependencies in the def file.
 BOOST_AUTO_TEST_CASE(test_repeat_integer) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_repeat_integer " << flush;
     TestClean clean_at_start_and_end;
 
     // ********************************************************************************
@@ -95,8 +97,9 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_repeat_date " << flush;
     TestClean clean_at_start_and_end;
 
     // ********************************************************************************
@@ -132,8 +135,9 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_repeat_date_list " << flush;
     TestClean clean_at_start_and_end;
 
     // ********************************************************************************
@@ -169,8 +173,9 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_enumerator) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_repeat_enumerator " << flush;
     TestClean clean_at_start_and_end;
 
     // ********************************************************************************
@@ -211,8 +216,9 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_repeat_defstatus " << flush;
     TestClean clean_at_start_and_end;
 
     // TEST SHOULD COMPLETE STRAIGHT AWAY SINCE WE HAVE A DEFSTATUS COMPLETE
@@ -256,12 +262,13 @@ BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
 
 // #define DEBUG_ME 1
 BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
+    ECF_NAME_THIS_TEST();
+
     // Tests code:: Node::requeueOrSetMostSignificantStateUpNodeTree()
     // In *PARTICULAR* THE REQUE caused by the repeat, this ensures we clear NO_REQUE_IF_SINGLE_TIME_DEP
     // So that the effect of manual run/force complete are negated via automated re-queue caused by a REPEAT
 
     DurationTimer timer;
-    cout << "Test:: ...test_repeat_clears_user_edit " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable
