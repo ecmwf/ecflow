@@ -339,7 +339,7 @@ bool Gnuplot::extract_suite_path(const std::string& line,
         if (child_cmd) {
 
             // For labels ignore paths in the label part
-            // MSG:[14:55:04 17.10.2013] chd:label progress 'core/nodeattr/nodeAParser'
+            // MSG:[14:55:04 17.10.2013] chd:label progress 'core/nodeattr/node/parser'
             // /suite/build/cray/cray_gnu/build_release/test
             if (line.find("chd:label") != std::string::npos) {
                 size_t last_tick = line.rfind("'");

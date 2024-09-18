@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
         path += "/" + dir + ecf::convert_to<std::string>(i);
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/dir5
-    //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/dir5
+    //         or  libs/core/test/data/dir0/dir1/dir3/dir3/dir4/dir5
     BOOST_REQUIRE_MESSAGE(path == expected, " Error expected " << expected << " but found " << path);
 
     // Create the missing directories
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
             path += "/" + dir + ecf::convert_to<std::string>(i);
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/task
-    //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/task
+    //         or  libs/core/test/data/dir0/dir1/dir3/dir3/dir4/task
     BOOST_REQUIRE_MESSAGE(path == expected, " Error expected " << expected << " but found " << path);
 
     string combined_dir_path = rootPath + dir_path;
@@ -342,7 +342,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 
     std::string dir_remove = rootPath + "/dir0";
     {
-        // Test basics first, expect "ACore/test/data/dir0/dir1/dir2/dir3/dir4/dir5" to be created
+        // Test basics first, expect "libs/core/test/data/dir0/dir1/dir2/dir3/dir4/dir5" to be created
         BOOST_CHECK_MESSAGE(File::createMissingDirectories(expected),
                             expected << " expected directories to be created");
         BOOST_CHECK_MESSAGE(fs::exists(expected), expected << " directory not created");
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
         //      std::cout << "extension " << fs_path.extension()  << "\n";
     }
     {
-        // Test "ACore/test/data/dir0/dir1/dir2/dir3/dir4/dir5/fred.ecf" to be created
+        // Test "libs/core/test/data/dir0/dir1/dir2/dir3/dir4/dir5/fred.ecf" to be created
         std::string dir_with_file = expected + "/fred.ecf";
         BOOST_CHECK_MESSAGE(File::createMissingDirectories(dir_with_file),
                             "Expected '" << dir_with_file << "' to be created");

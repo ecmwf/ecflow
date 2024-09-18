@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(test_stress) {
 //   DurationTimer timer;
 //
 //   // location to mega.def and left over log file
-//   std::string log_file = File::test_data("ANode/parser/test/data/single_defs/mega.def_log","parser");
-//   std::string path = File::test_data("ANode/parser/test/data/single_defs/mega.def","parser");
+//   std::string log_file = File::test_data("libs/node/parser/test/data/single_defs/mega.def_log","parser");
+//   std::string path = File::test_data("libs/node/parser/test/data/single_defs/mega.def","parser");
 //
 //   cout << "Test:: ..." << path << " log file: " << log_file << flush;
 //

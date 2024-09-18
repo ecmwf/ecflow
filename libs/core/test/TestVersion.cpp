@@ -70,8 +70,9 @@ BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
                               << version_cmake_file);
     BOOST_REQUIRE_MESSAGE(
         Version::raw() == cmake_version,
-        "\n  Expected " << cmake_version << " but found " << Version::raw()
-                        << ", Please regenerate file $WK/ACore/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
+        "\n  Expected "
+            << cmake_version << " but found " << Version::raw()
+            << ", Please regenerate file $WK/libs/core/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

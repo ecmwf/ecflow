@@ -126,14 +126,14 @@ BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
 
     // SAVE as string and file
     {
-        BOOST_REQUIRE_NO_THROW(ecf::save("ACore.txt", originalCmd)); // save as filename
+        BOOST_REQUIRE_NO_THROW(ecf::save("core.txt", originalCmd)); // save as filename
         ecf::save_as_string(saved_cmd_as_string, originalCmd); // save as string, this is buggy forgets trailing '}'
     }
 
     // RESTORE from filename and string
     {
         CmdContainer restoredCmd;
-        BOOST_REQUIRE_NO_THROW(ecf::restore("ACore.txt", restoredCmd)); // restore from filename
+        BOOST_REQUIRE_NO_THROW(ecf::restore("core.txt", restoredCmd)); // restore from filename
         BOOST_REQUIRE_MESSAGE(restoredCmd == originalCmd,
                               "restoredCmd " << restoredCmd << "  originalCmd " << originalCmd);
     }
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
                               "restoredCmd " << restoredCmd << "  originalCmd " << originalCmd);
     }
 
-    fs::remove("ACore.txt");
+    fs::remove("core.txt");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
