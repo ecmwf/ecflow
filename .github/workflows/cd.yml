@@ -10,7 +10,9 @@ on:
 
 jobs:
   deploy:
-    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@create-packages-custom-config
     with:
       skip_checks: true
+      restrict_matrix_jobs: debian12
+      build_config: .github/cd-server-config.yml
     secrets: inherit
