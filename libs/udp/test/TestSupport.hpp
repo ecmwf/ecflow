@@ -46,7 +46,7 @@ public:
         BOOST_REQUIRE_MESSAGE(port_ > 0, "port is be larger than 0");
 
         server_ = SERVER::launch(host_, port_, std::forward<Args>(args)...);
-        std::cout << "   MOCK: " << SERVER::designation << " has been started!" << std::endl;
+        ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been started!");
     }
     BaseMockServer(const BaseMockServer&) = delete;
     BaseMockServer(BaseMockServer&&)      = delete;
@@ -54,7 +54,7 @@ public:
     ~BaseMockServer() {
         server_.terminate();
         SERVER::cleanup(host_, port_);
-        std::cout << "   MOCK: " << SERVER::designation << " has been terminated!" << std::endl;
+        ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been terminated!");
     }
 
     const hostname_t& host() const { return host_; }
@@ -86,7 +86,7 @@ public:
                 false, "load definitions, without throwing exception (but threw: " + std::string(e.what()) + ")");
         }
 
-        std::cout << "   MOCK: reference ecFlow suite has been loaded" << std::endl;
+        ECF_TEST_DBG(<< "   MOCK: reference ecFlow suite has been loaded");
     }
 
     Meter get_meter(const std::string& path, const std::string& name) const {
@@ -106,7 +106,7 @@ public:
 
 private:
     node_ptr get_node_at(const std::string& path) const {
-        std::cout << "   Creating ecflow_client connected to " << host() << ":" << port() << std::endl;
+        ECF_TEST_DBG(<< "   Creating ecflow_client connected to " << host() << ":" << port());
         ClientInvoker client(ecf::Str::LOCALHOST(), port());
 
         // load all definitions
@@ -144,7 +144,7 @@ public:
         invoke_command += std::to_string(port);
         invoke_command += " -d &";
 
-        std::cout << "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command << std::endl;
+        ECF_TEST_DBG(<< "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command);
 
         bp::child child(invoke_command);
 
@@ -195,7 +195,7 @@ public:
     }
 
     void send(const std::string& request) {
-        std::cout << "   MOCK: UDP Client sending request: " << request << std::endl;
+        ECF_TEST_DBG(<< "   MOCK: UDP Client sending request: " << request);
         sendRequest(port(), request);
     }
 
@@ -221,7 +221,7 @@ private:
 
     static void sendRequest(uint16_t port, const std::string& request) {
         const std::string host = "localhost";
-        std::cout << "   Creating ecflow_udp client connected to " << host << ":" << port << std::endl;
+        ECF_TEST_DBG(<< "   Creating ecflow_udp client connected to " << host << ":" << port);
         ecf::UDPClient client(host, std::to_string(port));
         client.send(request);
 
@@ -241,7 +241,7 @@ public:
         invoke_command += std::to_string(ecflow_port);
         invoke_command += " --verbose";
 
-        std::cout << "   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command << std::endl;
+        ECF_TEST_DBG(<< "   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command);
 
         bp::child server(invoke_command);
 
@@ -270,13 +270,13 @@ struct EnableServersFixture
 private:
     static MockServer::port_t get_ecflow_server_port() {
         MockServer::port_t selected_port = 3199;
-        std::cout << "   Attempting to use port: " << selected_port << std::endl;
+        ECF_TEST_DBG(<< "   Attempting to use port: " << selected_port);
         while (!EcfPortLock::is_free(selected_port)) {
-            std::cout << "   Selected port: " << selected_port << " is not available." << std::endl;
+            ECF_TEST_DBG(<< "   Selected port: " << selected_port << " is not available.");
             ++selected_port;
-            std::cout << "   Attempting to use port: " << selected_port << std::endl;
+            ECF_TEST_DBG(<< "   Attempting to use port: " << selected_port);
         }
-        std::cout << "   Found free port: " << selected_port << "\n";
+        ECF_TEST_DBG(<< "   Found free port: " << selected_port);
         return selected_port;
     }
     static MockServer::port_t get_ecflow_udp_port() { return 3198; }
