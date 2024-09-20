@@ -394,7 +394,6 @@ BOOST_AUTO_TEST_CASE(increment) {
         Repeat rep(RepeatDate("YMD", 20150514, 20150730, 7));
         while (rep.valid()) {
             rep.increment();
-            // cout << "YMD: " << rep.value() << "\n";
         }
         BOOST_CHECK_MESSAGE(rep.value() == 20150806, "expected 20150806 but found " << rep.value());
         BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20150730,
@@ -404,7 +403,6 @@ BOOST_AUTO_TEST_CASE(increment) {
         Repeat rep(RepeatDate("YMD", 20150730, 20150514, -7));
         while (rep.valid()) {
             rep.increment();
-            // cout << "YMD: " << rep.value() << "\n";
         }
         BOOST_CHECK_MESSAGE(rep.value() == 20150507, "expected 20150507 but found " << rep.value());
         BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20150514,

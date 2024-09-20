@@ -54,19 +54,14 @@ BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
     calendar.update(time_duration(minutes(1)));
 
     // set submitted state at 00:05:00
-    // cout << "start:" << to_simple_string(calendar.suiteTime()) << "\n";
     std::pair<NState, boost::posix_time::time_duration> state =
         std::make_pair(NState(NState::SUBMITTED), calendar.duration());
 
     // after four minutes in submitted state, we should be late
     for (int m = 1; m < 10; m++) {
         calendar.update(time_duration(minutes(1)));
-        // cout << "m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
 
         lateAttr.checkForLateness(state, calendar);
-        // if (lateAttr.isLate()) {
-        //    cout << "late at m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
-        // }
 
         if (m >= 4) {
             BOOST_CHECK_MESSAGE(lateAttr.isLate(),
@@ -94,19 +89,14 @@ BOOST_AUTO_TEST_CASE(test_late_attr_active) {
     lateAttr.addActive(ecf::TimeSlot(10, 0));
 
     // set submitted state at 00:00:00
-    // cout << "start:" << to_simple_string(calendar.suiteTime()) << "\n";
     std::pair<NState, boost::posix_time::time_duration> state =
         std::make_pair(NState(NState::SUBMITTED), calendar.duration());
 
     // after 10 hours we, if we are not active, we should be late
     for (int m = 1; m < 23; m++) {
         calendar.update(time_duration(hours(1)));
-        // cout << "m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
 
         lateAttr.checkForLateness(state, calendar);
-        //      if (lateAttr.isLate()) {
-        //         cout << "late at m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
-        //      }
 
         if (m >= 10) {
             BOOST_CHECK_MESSAGE(lateAttr.isLate(),
@@ -134,19 +124,14 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_relative) {
     lateAttr.addComplete(ecf::TimeSlot(0, 15), true);
 
     // set active state at 00:00:00
-    //   cout << "start:" << to_simple_string(calendar.suiteTime()) << "\n";
     std::pair<NState, boost::posix_time::time_duration> state =
         std::make_pair(NState(NState::ACTIVE), calendar.duration());
 
     // after 15 minutes relative, if we are not complete, we should be late
     for (int m = 1; m < 23; m++) {
         calendar.update(time_duration(minutes(1)));
-        //      cout << "m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
 
         lateAttr.checkForLateness(state, calendar);
-        //      if (lateAttr.isLate()) {
-        //         cout << "late at m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
-        //      }
 
         if (m >= 15) {
             BOOST_CHECK_MESSAGE(lateAttr.isLate(),
@@ -174,7 +159,6 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_real) {
     lateAttr.addComplete(ecf::TimeSlot(3, 0), false);
 
     // set active state at 00:00:00
-    //   cout << "start:" << to_simple_string(calendar.suiteTime()) << "\n";
     std::pair<NState, boost::posix_time::time_duration> state =
         std::make_pair(NState(NState::ACTIVE), calendar.duration());
 
@@ -182,12 +166,8 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_real) {
     for (int m = 1; m < 7; m++) {
 
         calendar.update(time_duration(hours(1)));
-        //      cout << "m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
 
         lateAttr.checkForLateness(state, calendar);
-        //      if (lateAttr.isLate()) {
-        //         cout << "late at m=" << m << " " << to_simple_string(calendar.suiteTime()) << "\n";
-        //      }
 
         if (m >= 3) {
             BOOST_CHECK_MESSAGE(lateAttr.isLate(),

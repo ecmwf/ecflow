@@ -51,8 +51,6 @@ BOOST_AUTO_TEST_CASE(test_day_attr) {
         // if (calendar.dayChanged())
         //     day_changed++;
 
-        // cout << " day_changed(" << day_changed << ") calendar.day_of_week() = " <<  calendar.day_of_week() << "\n";
-
         day.calendarChanged(calendar);
 
         if (day.date() < calendar.date()) {

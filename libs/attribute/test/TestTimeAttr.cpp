@@ -105,9 +105,6 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
     BOOST_CHECK_MESSAGE(timeSeries2_free_slots.size() == 5,
                         "Expected 5 free slots for " << timeSeries2.toString() << " but found "
                                                      << timeSeries_free_slots.size());
-    //   cout << "time " << timeSeries.toString() << " free slots:";
-    //   for(size_t i = 0; i < timeSeries_free_slots.size(); i++)  cout << timeSeries_free_slots[i] << " ";
-    //   cout << "\n";
 
     // follow normal process
     timeSeries.reset(calendar);
@@ -123,14 +120,11 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
             day_changed = calendar.dayChanged();
 
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        // cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);
         timeSeries3.calendarChanged(calendar);
         timeSeries4.calendarChanged(calendar);
-
-        // cout << to_simple_string(calendar.suiteTime()) << "\n";
 
         if (calendar.dayChanged()) {
             BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar, t1_min, t1_max),
@@ -305,7 +299,6 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        // cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);
@@ -408,7 +401,6 @@ BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        //      cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);

@@ -30,25 +30,25 @@ inline const char* typeName(void) {
         return STRINGIFY(T);           \
     }
 
-TYPE_STRING(std::ofstream);
-TYPE_STRING(std::string);
-TYPE_STRING(std::vector<int>);
-TYPE_STRING(std::vector<std::string>);
-TYPE_STRING(std::weak_ptr<int>);
-TYPE_STRING(std::nullptr_t);
-TYPE_STRING(std::unique_ptr<int>);
-TYPE_STRING(double);
-TYPE_STRING(long);
-TYPE_STRING(int);
-TYPE_STRING(unsigned int);
-TYPE_STRING(bool);
-TYPE_STRING(ecf::TimeSeries);
-TYPE_STRING(DayAttr);
+TYPE_STRING(std::ofstream)
+TYPE_STRING(std::string)
+TYPE_STRING(std::vector<int>)
+TYPE_STRING(std::vector<std::string>)
+TYPE_STRING(std::weak_ptr<int>)
+TYPE_STRING(std::nullptr_t)
+TYPE_STRING(std::unique_ptr<int>)
+TYPE_STRING(double)
+TYPE_STRING(long)
+TYPE_STRING(int)
+TYPE_STRING(unsigned int)
+TYPE_STRING(bool)
+TYPE_STRING(ecf::TimeSeries)
+TYPE_STRING(DayAttr)
 
 template <typename T>
 void inspect_size_of(T t = T{}) {
 #if PRINT_SIZEOF_RESULTS
-    std::cout << "   * sizeof(" << typeName<T>() << ") = " << sizeof(T) << "\n";
+    ECF_TEST_DBG(<< "   * sizeof(" << typeName<T>() << ") = " << sizeof(T));
 #endif
     BOOST_REQUIRE_EQUAL(sizeof(T), sizeof(T));
 }

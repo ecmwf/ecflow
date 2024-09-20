@@ -114,7 +114,6 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        //      cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);
