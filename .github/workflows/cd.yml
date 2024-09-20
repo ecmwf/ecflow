@@ -21,7 +21,7 @@ jobs:
     uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
     with:
       skip_checks: true
-      restrict_matrix_jobs: gnu@debian-12
+      restrict_matrix_jobs: gnu@rocky-8.6
       build_config: .github/cd-ui-config.yml
       cpack_options: -DCPACK_PACKAGE_NAME=ecflow-ui
     secrets: inherit
