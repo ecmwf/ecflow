@@ -12,6 +12,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
@@ -35,6 +36,8 @@ BOOST_AUTO_TEST_SUITE(T_ServerAndLifeCycle)
 // ************************************************************************************
 
 BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
+    ECF_NAME_THIS_TEST();
+
     // *******************************************************************************************
     // This test will *ONLY* work when testing with new server invocation, since it relies
     // on disabling job generation. Hence ignore test if ECF_HOST has been defined
@@ -42,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     std::string host = ClientEnvironment::hostSpecified();
     if (!host.empty()) {
         // Server allready started, since we cant disable job generation ignore this test
-        std::cout << "Client:: ...test_client_lifecycle, ignoring test when ECF_HOST specified..." << endl;
+        std::cout << "Ignoring test when ECF_HOST specified..." << endl;
         return;
     }
 

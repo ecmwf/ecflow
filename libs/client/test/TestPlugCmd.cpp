@@ -14,6 +14,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/PlugCmd.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
@@ -54,7 +55,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_PlugCmd)
 
 BOOST_AUTO_TEST_CASE(test_plug_cmd) {
-    cout << "Client:: ...test_plug_cmd" << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_plug_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     {
@@ -127,7 +129,8 @@ BOOST_AUTO_TEST_CASE(test_plug_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_plug_cmd_preserves_server_state) {
-    cout << "Client:: ...test_plug_cmd_preserves_server_state" << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_plug_cmd_preserves_server_state.log"); // will create log file, and destroy log and remove
                                                                   // file at end of scope
 
@@ -173,7 +176,8 @@ BOOST_AUTO_TEST_CASE(test_plug_cmd_preserves_server_state) {
 }
 
 BOOST_AUTO_TEST_CASE(test_plug_cmd_with_handles) {
-    cout << "Client:: ...test_plug_cmd_with_handles" << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_plug_cmd_with_handles.log"); // will create log file, and destroy log and remove file at end of scope
 
@@ -342,9 +346,9 @@ static void test_plug_on_multiple_server(const std::string& host1,
 }
 
 BOOST_AUTO_TEST_CASE(test_server_plug_cmd) {
-    if (ClientEnvironment::hostSpecified().empty()) {
+    ECF_NAME_THIS_TEST();
 
-        cout << "Client:: ...test_server_plug_cmd";
+    if (ClientEnvironment::hostSpecified().empty()) {
 
         // Invoke two servers. *which* will both terminate at the end of this scope
         // This will remove check pt and backup file before server start, to avoid the server from loading previous test
@@ -360,8 +364,6 @@ BOOST_AUTO_TEST_CASE(test_server_plug_cmd) {
             invokeServer1.host(), invokeServer1.port(), invokeServer2.host(), invokeServer2.port());
     }
     else {
-
-        cout << "Client:: ...test_server_plug_cmd";
 
         // Remote server all ready running, start one more additional server
         {

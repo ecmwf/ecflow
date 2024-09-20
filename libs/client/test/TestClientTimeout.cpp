@@ -16,6 +16,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Str.hpp"
@@ -37,6 +38,7 @@ BOOST_AUTO_TEST_SUITE(T_ClientTimeout)
 // After timeout, the socket is closed allowing the server to be restarted without getting the `address in use` error.
 //
 BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
+    ECF_NAME_THIS_TEST();
 
     //
     // Important: This test is disabled because ClientInvoker doesn't actually allow to set an overall timeout

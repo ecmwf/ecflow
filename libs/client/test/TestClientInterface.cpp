@@ -15,6 +15,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/CFileCmd.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Child.hpp"
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(T_ClientInterface)
 // This will test argument parsing.
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE(test_client_interface) {
-    std::cout << "Client:: ...test_client_interface" << endl;
+    ECF_NAME_THIS_TEST();
 
     ClientInvoker theClient;
     theClient.testInterface(); // stops submission to server
@@ -968,7 +969,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
-    std::cout << "Client:: ...test_client_interface_for_fail" << endl;
+    ECF_NAME_THIS_TEST();
 
     ClientInvoker theClient;
     theClient.testInterface(); // stops submission to server
@@ -1431,7 +1432,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_task_interface) {
-    std::cout << "Client:: ...test_client_task_interface" << endl;
+    ECF_NAME_THIS_TEST();
 
     ClientInvoker theClient;
     theClient.testInterface(); // stops submission to server
@@ -1496,7 +1497,7 @@ BOOST_AUTO_TEST_CASE(test_client_task_interface) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_task_interface_for_fail) {
-    std::cout << "Client:: ...test_client_task_interface_for_fail" << endl;
+    ECF_NAME_THIS_TEST();
 
     {
         ClientInvoker theClient;

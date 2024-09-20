@@ -14,6 +14,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
@@ -34,6 +35,8 @@ BOOST_AUTO_TEST_SUITE(T_WhiteListFile)
 // ************************************************************************************
 
 BOOST_AUTO_TEST_CASE(test_loading_of_white_list_file) {
+    ECF_NAME_THIS_TEST();
+
     Host the_host;
     std::string port = SCPort::next();
     std::string host = ClientEnvironment::hostSpecified();
@@ -98,6 +101,8 @@ BOOST_AUTO_TEST_CASE(test_loading_of_white_list_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_has_write_access_in_non_empty_whitelist) {
+    ECF_NAME_THIS_TEST();
+
     Host the_host;
     std::string host = ClientEnvironment::hostSpecified();
     if (host.empty()) {

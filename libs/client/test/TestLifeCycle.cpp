@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
 #include "ecflow/base/cts/task/EventCmd.hpp"
 #include "ecflow/base/cts/task/InitCmd.hpp"
@@ -34,7 +35,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_LifeCycle)
 
 BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
-    cout << "Client:: ...test_node_tree_lifecycle" << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_node_tree_lifecycle.log"); // will create log file, and destroy log and remove file at end of scope
 

@@ -12,6 +12,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PasswdFile.hpp"
@@ -56,6 +57,8 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_custom_user) {
+    ECF_NAME_THIS_TEST();
+
     Host the_host;
     std::string host        = ClientEnvironment::hostSpecified();
     std::string port        = SCPort::next();

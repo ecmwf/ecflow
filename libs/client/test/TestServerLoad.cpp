@@ -14,6 +14,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 
@@ -25,10 +26,12 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_ServerLoad)
 
 BOOST_AUTO_TEST_CASE(test_server_load) {
+    ECF_NAME_THIS_TEST();
+
     // Check if gnuplot is found on the path, on the RPM machines gnuplot not always installed
     std::string path_to_gnuplot = File::which("gnuplot");
     if (path_to_gnuplot.empty()) {
-        cout << "Client:: ...test_server_load -----> gnuplot not found on $PATH *IGNORING* test\n";
+        cout << "Ignoring test since GNUplot was not found on $PATH" << endl;
         return;
     }
 

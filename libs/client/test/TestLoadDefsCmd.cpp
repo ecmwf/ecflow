@@ -16,6 +16,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/LoadDefsCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -39,7 +40,8 @@ BOOST_AUTO_TEST_SUITE(T_LoadDefsCmd)
 // In the real server, we dont store, externs
 // *******************************************************************
 BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
-    cout << "Client:: ...test_load_defs_cmd_handleRequest" << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_load_defs_cmd_handleRequest.log"); // will create log file, and destroy log and remove file
                                                               // at end of scope
 
@@ -96,6 +98,8 @@ BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
 }
 
 BOOST_AUTO_TEST_CASE(test_load_defs_check_only) {
+    ECF_NAME_THIS_TEST();
+
     /// Test that when check only is called the definition is NOT loaded
     InvokeServer invokeServer("Client:: ...test_load_defs_check_only", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -131,6 +135,8 @@ BOOST_AUTO_TEST_CASE(test_load_defs_check_only) {
 }
 
 BOOST_AUTO_TEST_CASE(test_load_defs) {
+    ECF_NAME_THIS_TEST();
+
     /// Test that loading a defs a second time, with the same suite, throws a errors
     /// unless the -force option is used.
     InvokeServer invokeServer("Client:: ...test_load_defs", SCPort::next());

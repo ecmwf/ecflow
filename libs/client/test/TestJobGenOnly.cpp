@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -26,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(T_JobGenOnly)
 
 //  Tests the Job generation against the OLD sms
 BOOST_AUTO_TEST_CASE(test_jobgenonly) {
-    cout << "Client:: ...test_jobgenonly" << endl;
+    ECF_NAME_THIS_TEST();
 
     // Define paths to ECF_HOME and location of the defs file
 
