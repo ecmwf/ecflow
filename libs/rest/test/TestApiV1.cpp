@@ -231,40 +231,33 @@ bool check_for_element(const std::string& path,
         }
         else if (j.is_array() == false) {
             j = ojson::array({j});
-            std::cout << "json is " << j << std::endl;
+            ECF_TEST_DBG(<< "json is " << j);
         }
 
         for (const auto& x : j) {
-            // std::cout << x << std::endl;
             if (attr_name.empty() == false) {
                 // { "name": "foo", "value": "bar"}
-                // std::cout << "expecting: " << attr_name << "=" << value << " got: " << x["name"].get<std::string>()
-                // << "=" << json_type_to_string(x[key_name]) << std::endl;
-                if (attr_name == x["name"] && value == ecf::http::json_type_to_string(x[key_name]))
+                if (attr_name == x["name"] && value == ecf::http::json_type_to_string(x[key_name])) {
                     return true;
+                }
             }
             else if (key_name.empty() == false) {
                 // { "foo" : "bar" }
-                // std::cout << "expecting: " << key_name << "='" << value << " got: " << key_name << "='" <<
-                // json_type_to_string(x[key_name]) << "'" << std::endl;
-
-                if (ecf::http::json_type_to_string(x[key_name]) == value)
+                if (ecf::http::json_type_to_string(x[key_name]) == value) {
                     return true;
+                }
             }
             else {
                 // "bar"
-                // std::cout << "expecting: '" << value << "' got: '" << json_type_to_string(x) << "'" << std::endl;
-
-                if (value == ecf::http::json_type_to_string(x))
+                if (value == ecf::http::json_type_to_string(x)) {
                     return true;
+                }
             }
         }
     }
     catch (const std::exception& e) {
         BOOST_TEST_MESSAGE(e.what());
     }
-    // BOOST_TEST_MESSAGE("Attribute " << attr_name << " --> " << key_name << "=" << value << " at path " << path << "
-    // not found");
     return false;
 }
 
