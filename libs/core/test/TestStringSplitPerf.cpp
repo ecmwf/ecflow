@@ -18,7 +18,6 @@
 
 #ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
     #include <fstream>
-    #include <iostream>
 
     #include <boost/timer/timer.hpp>
 
@@ -27,7 +26,6 @@
     #include "ecflow/core/Str.hpp"
     #include "ecflow/core/StringSplitter.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost;
 #endif
@@ -62,9 +60,9 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
     std::string line = "This is a long string that is going to be used to test the performance of splitting with "
                        "different Implementations the fastest times wins ";
     size_t times     = 1000000;
-    cout << " This test will split a line " << times << " times: '" << line << "'\n";
+    ECF_TEST_DBG(<< " This test will split a line " << times << " times: '" << line);
 
-    string reconstructed;
+    std::string reconstructed;
     reconstructed.reserve(line.size());
 
     { // istreamstream    https://www.fluentcpp.com/2017/04/21/how-to-split-a-string-in-c/
@@ -79,8 +77,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for istreamstream " << times
-             << "                 times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for istreamstream " << times
+                     << "                 times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, "\n'" << line << "'\n'" << reconstructed << "'");
     }
 
@@ -94,8 +92,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for std::getline " << times
-             << "                  times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for std::getline " << times
+                     << "                  times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, "\n'" << line << "'\n'" << reconstructed << "'");
     }
 
@@ -113,8 +111,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for boost::split " << times
-             << "                  times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for boost::split " << times
+                     << "                  times = " << timer.format(3, Str::cpu_timer_format()));
         // BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'"); // add extra space
     }
 
@@ -131,8 +129,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for Str::split_orig " << times
-             << "               times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::split_orig " << times
+                     << "               times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, " error");
     }
     { // Str::split_orig1
@@ -148,8 +146,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for Str::split_orig1 " << times
-             << "              times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::split_orig1 " << times
+                     << "              times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, " error");
     }
     { // Str::split_using_string_view2
@@ -165,8 +163,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for Str::split_using_string_view2 " << times
-             << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::split_using_string_view2 " << times
+                     << " times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, " error");
     }
     { // Str::split_using_string_view
@@ -182,28 +180,26 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for Str::split_using_string_view " << times
-             << "  times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::split_using_string_view " << times
+                     << "  times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, " error");
     }
 
-    typedef boost::split_iterator<string::const_iterator> split_iter_t;
     { // boost::make_split_iterator
         boost::timer::cpu_timer timer;
         for (size_t i = 0; i < times; i++) {
 
-            split_iter_t tokens = Str::make_split_iterator(line);
+            auto tokens = Str::make_split_iterator(line);
 
             std::stringstream ss;
             for (; !tokens.eof(); ++tokens) {
-                boost::iterator_range<string::const_iterator> range = *tokens;
+                boost::iterator_range<std::string::const_iterator> range = *tokens;
                 ss << range << " ";
             }
             reconstructed = ss.str();
         }
-        cout << " Time for make_split_iterator::split " << times
-             << "    times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
-        // BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
+        ECF_TEST_DBG(<< " Time for make_split_iterator::split " << times
+                     << "    times = " << timer.format(3, Str::cpu_timer_format()));
     }
 
     { // std::string_view
@@ -218,8 +214,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for std::string_view " << times
-             << "            times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for std::string_view " << times
+                     << "            times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, "\n'" << line << "'\n'" << reconstructed << "'");
     }
 
@@ -237,8 +233,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
                 reconstructed += " ";
             }
         }
-        cout << " Time for std::string_view(2) " << times
-             << "         times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for std::string_view(2) " << times
+                     << "         times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(line == reconstructed, "\n'" << line << "'\n'" << reconstructed << "'");
     }
 }
@@ -257,7 +253,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
     // Now test performance of splitting with a big DEFS file
     char* ecf_test_defs_dir = getenv("ECF_TEST_DEFS_DIR");
     if (!ecf_test_defs_dir) {
-        std::cout << "Ingoring test, since directory defined by environment variable(ECF_TEST_DEFS_DIR) is missing";
+        ECF_TEST_DBG(<< "Igoring test, since directory defined by environment variable(ECF_TEST_DEFS_DIR) is missing");
         return;
     }
     std::string path = std::string(ecf_test_defs_dir) + "/vsms2.31415.def";
@@ -270,13 +266,13 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
     std::vector<std::string> file_contents;
     if (File::splitFileIntoLines(path, file_contents, true /* ignore empty lines*/)) {
 
-        cout << " This test will split each line in file " << path << "\n";
+        ECF_TEST_DBG(<< " This test will split each line in file " << path);
 
         std::vector<std::string> result;
         result.reserve(300);
 
         auto reconstruct_line = [](const std::vector<std::string>& result) {
-            string reconstructed;
+            std::string reconstructed;
             for (const auto& s : result) {
                 reconstructed += s;
                 reconstructed += " ";
@@ -291,16 +287,16 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
                                                  std::istream_iterator<std::string>());
                 reconstruct_line(result1);
             }
-            cout << " Time for istreamstream " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for istreamstream " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         { // std::getline
             boost::timer::cpu_timer timer;
             for (size_t i = 0; i < file_contents.size(); i++) {
                 reconstruct_line(split_using_getline(file_contents[i], ' '));
             }
-            cout << " Time for std::getline " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for std::getline " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         {
             boost::timer::cpu_timer timer;
@@ -312,8 +308,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 reconstruct_line(result);
             }
-            cout << " Time for boost::split " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for boost::split " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         {
             boost::timer::cpu_timer timer;
@@ -323,8 +319,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 reconstruct_line(result);
             }
-            cout << " Time for Str::split_orig " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for Str::split_orig " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         {
             boost::timer::cpu_timer timer;
@@ -334,8 +330,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 reconstruct_line(result);
             }
-            cout << " Time for Str::split_orig1 " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for Str::split_orig1 " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         {
             boost::timer::cpu_timer timer;
@@ -345,8 +341,8 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 reconstruct_line(result);
             }
-            cout << " Time for Str::split_using_string_view " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for Str::split_using_string_view " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         {
             boost::timer::cpu_timer timer;
@@ -356,25 +352,24 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 reconstruct_line(result);
             }
-            cout << " Time for Str::split_using_string_view2 " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for Str::split_using_string_view2 " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
         {
-            typedef boost::split_iterator<string::const_iterator> split_iter_t;
             boost::timer::cpu_timer timer;
             for (size_t i = 0; i < file_contents.size(); i++) {
 
                 std::stringstream ss;
-                split_iter_t tokens = Str::make_split_iterator(file_contents[i]);
+                auto tokens = Str::make_split_iterator(file_contents[i]);
 
                 for (; !tokens.eof(); ++tokens) {
-                    boost::iterator_range<string::const_iterator> range = *tokens;
+                    auto range = *tokens;
                     ss << range << " ";
                 }
-                string reconstructed = ss.str();
+                std::string reconstructed = ss.str();
             }
-            cout << " Time for boost::make_split_iterator " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for boost::make_split_iterator " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
 
         {
@@ -383,15 +378,15 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 StringSplitter string_splitter(file_contents[i]);
 
-                string reconstructed;
+                std::string reconstructed;
                 while (!string_splitter.finished()) {
                     std::string_view sv = string_splitter.next();
                     reconstructed += std::string(sv.begin(), sv.end());
                     reconstructed += " ";
                 }
             }
-            cout << " Time for std::string_view " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time for std::string_view " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
 
         {
@@ -401,15 +396,15 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
 
                 StringSplitter::split2(file_contents[i], result1);
 
-                string reconstructed;
+                std::string reconstructed;
                 for (const auto& s : result1) {
                     reconstructed += std::string(s.begin(), s.end());
                     reconstructed += " ";
                 }
                 result1.clear();
             }
-            cout << " Time std::string_view(2) " << file_contents.size()
-                 << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+            ECF_TEST_DBG(<< " Time std::string_view(2) " << file_contents.size()
+                         << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
     }
 }
@@ -421,7 +416,7 @@ BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
     std::string line = "This is a long string that is going to be used to test the performance of splitting with "
                        "different Implementations the fastest times wins ";
     size_t times     = 250000;
-    cout << " This test will split a line " << times << " times: '" << line << "'\n";
+    ECF_TEST_DBG(<< " This test will split a line " << times << " times: '" << line);
 
     Str::split_using_string_view(line, result);
     size_t result_size = result.size();
@@ -435,8 +430,8 @@ BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
                 (void)StringSplitter::get_token(line, r, token);
             }
         }
-        cout << " Time for StringSplitter::get_token " << times
-             << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for StringSplitter::get_token " << times
+                     << " times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(true, "Keep compiler happy");
     }
     {
@@ -447,8 +442,8 @@ BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
                 (void)Str::get_token(line, r, token);
             }
         }
-        cout << " Time for Str::get_token            " << times
-             << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::get_token            " << times
+                     << " times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(true, "Keep compiler happy");
     }
     {
@@ -459,8 +454,8 @@ BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
                 (void)Str::get_token2(line, r, token);
             }
         }
-        cout << " Time for Str::get_token2           " << times
-             << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::get_token2           " << times
+                     << " times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(true, "Keep compiler happy");
     }
     {
@@ -471,8 +466,8 @@ BOOST_AUTO_TEST_CASE(test_str_get_token_perf) {
                 (void)Str::get_token3(line, r, token);
             }
         }
-        cout << " Time for Str::get_token3           " << times
-             << " times = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< " Time for Str::get_token3           " << times
+                     << " times = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(true, "Keep compiler happy");
     }
 }

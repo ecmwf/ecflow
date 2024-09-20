@@ -8,8 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
-
 #include <boost/test/unit_test.hpp>
 
 #include "TestNaming.hpp"
@@ -18,7 +16,6 @@
 
 using namespace ecf;
 using namespace boost;
-using namespace std;
 
 class MyClass {
 public:

@@ -36,6 +36,7 @@ set(test_srcs
   test/TestChrono.cpp
   test/TestClassDataMemberInit.cpp
   test/TestCommandLine.cpp
+  test/TestConverter.cpp
   test/TestCore_main.cpp # contains main() function for test driver
   test/TestExtract.cpp
   test/TestFile.cpp

@@ -30,7 +30,6 @@
 #include "ecflow/core/User.hpp"
 
 using namespace boost;
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
@@ -167,8 +166,8 @@ BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
             BOOST_CHECK_MESSAGE(File::splitFileIntoLines(path, lines),
                                 " Failed to open file " << path << " (" << strerror(errno) << ")");
         }
-        cout << "Time for opening file " << openFileNTimes << " times = " << timer.format(3, Str::cpu_timer_format())
-             << "\n";
+        ECF_TEST_DBG(<< "Time for opening file " << openFileNTimes
+                     << " times = " << timer.format(3, Str::cpu_timer_format()));
     }
 #endif
 
@@ -198,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
     // Create a file in each of the directories. See Page 21 SMS User Guide.
     std::vector<std::string> fileContents;
     fileContents.emplace_back("something");
-    vector<std::string> nodePathTokens;
+    std::vector<std::string> nodePathTokens;
     NodePath::split(nodePath, nodePathTokens);
     while (nodePathTokens.size() > 0) {
 
@@ -210,7 +209,6 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
 
         combinedPath += File::ECF_EXTN(); // .ecf, .man , etc
 
-        // std::cout << "Creating file " << combinedPath << "\n";
         std::string errorMsg;
         BOOST_REQUIRE_MESSAGE(File::create(combinedPath, fileContents, errorMsg),
                               "Failed to create " << combinedPath << " because " << errorMsg);
@@ -227,7 +225,6 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
                               << nodePath);
         if (!theFile.empty()) {
             filesFound++;
-            //			std::cout << "About to remove file " << theFile << "\n";
             fs::remove(theFile); // remove it so we don't find it again.
         }
     }
@@ -267,23 +264,18 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
     //         or  libs/core/test/data/dir0/dir1/dir3/dir3/dir4/task
     BOOST_REQUIRE_MESSAGE(path == expected, " Error expected " << expected << " but found " << path);
 
-    string combined_dir_path = rootPath + dir_path;
-    // cout << " creating directories  : " << combined_dir_path  << "\n";
+    std::string combined_dir_path = rootPath + dir_path;
     BOOST_REQUIRE_MESSAGE(File::createDirectories(combined_dir_path), "Failed to create dirs" << combined_dir_path);
 
-    // cout << " Create a file(task.ecf) in each of the directories  nodePath: " << nodePath << "\n";
     std::vector<std::string> fileContents;
     fileContents.emplace_back("something");
-    vector<std::string> nodePathTokens;
+    std::vector<std::string> nodePathTokens;
     NodePath::split(nodePath, nodePathTokens);
     while (nodePathTokens.size() > 0) {
 
         std::string path = NodePath::createPath(nodePathTokens);
-        // cout << "   Reconstituted path  : " << path << " from nodePathTokens.size() " << nodePathTokens.size() <<
-        // "\n";
 
         std::string combinedPath = rootPath + path + File::ECF_EXTN(); // .ecf, .man , etc
-        // cout << "   Creating file       : " << combinedPath << "\n";
 
         std::string errorMsg;
         BOOST_REQUIRE_MESSAGE(File::create(combinedPath, fileContents, errorMsg),
@@ -300,14 +292,12 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
 
     // Now do a forward search for them:
     // Expect the following files to be found:
-    // test/data/dir0/dir1/dir2/dir3/dir4/task.ecf
-    // test/data/dir0/dir1/dir2/dir3/task.ecf
-    // test/data/dir0/dir1/dir2/task.ecf
-    // test/data/dir0/dir1/task.ecf
-    // test/data/dir0/task.ecf
-    // test/data/task.ecf
-    // cout << "rootPath: " << rootPath << "\n";
-    // cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
+    //   test/data/dir0/dir1/dir2/dir3/dir4/task.ecf
+    //   test/data/dir0/dir1/dir2/dir3/task.ecf
+    //   test/data/dir0/dir1/dir2/task.ecf
+    //   test/data/dir0/dir1/task.ecf
+    //   test/data/dir0/task.ecf
+    //   test/data/task.ecf
     int filesFound = 0;
     for (int i = 0; i < 6; i++) {
         BOOST_REQUIRE_MESSAGE(i >= 0, "Dummy to debug on macos");
@@ -317,7 +307,6 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
                               << nodePath);
         if (!theFile.empty()) {
             filesFound++;
-            // std::cout << "Found file at: " << theFile << "\n";
             fs::remove(theFile); // *remove* so we don't find it again
         }
     }
@@ -332,7 +321,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        ECF_TEST_DBG(<< "Test skipped until HPC team can  fix File::createMissingDirectories.(like mkdir -p)");
         return;
     }
 
@@ -349,16 +338,6 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 
         // remove the directory
         BOOST_CHECK_MESSAGE(File::removeDir(dir_remove), "Failed to remove dir " << dir_remove);
-
-        //      fs::path fs_path(expected);
-        //      std::cout << "parent path " << fs_path.parent_path() << "\n";
-        //      std::cout << "root path " << fs_path.root_path()  << "\n";
-        //      std::cout << "root name " << fs_path.root_name()  << "\n";
-        //      std::cout << "root directory " << fs_path.root_directory()  << "\n";
-        //      std::cout << "relative_path " << fs_path.relative_path()  << "\n";
-        //      std::cout << "filename " << fs_path.filename()  << "\n";
-        //      std::cout << "stem " << fs_path.stem()  << "\n";
-        //      std::cout << "extension " << fs_path.extension()  << "\n";
     }
     {
         // Test "libs/core/test/data/dir0/dir1/dir2/dir3/dir4/dir5/fred.ecf" to be created
@@ -369,16 +348,6 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 
         // remove the directory
         BOOST_CHECK_MESSAGE(File::removeDir(dir_remove), "Failed to remove dir " << dir_remove);
-
-        //      fs::path fs_path(dir_with_file);
-        //      std::cout << "parent path " << fs_path.parent_path() << "\n";
-        //      std::cout << "root path " << fs_path.root_path()  << "\n";
-        //      std::cout << "root name " << fs_path.root_name()  << "\n";
-        //      std::cout << "root directory " << fs_path.root_directory()  << "\n";
-        //      std::cout << "relative_path " << fs_path.relative_path()  << "\n";
-        //      std::cout << "filename " << fs_path.filename()  << "\n";
-        //      std::cout << "stem " << fs_path.stem()  << "\n";
-        //      std::cout << "extension " << fs_path.extension()  << "\n";
     }
 
     {
@@ -507,15 +476,6 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
     for (auto& entry : fs::directory_iterator(fs::current_path())) {
         if (is_regular_file(entry))
             regular_file++;
-        //        if (is_directory(entry))
-        //            directory++;
-        //        if (is_symlink(entry))
-        //            symlink++;
-        //        if (is_other(entry))
-        //            other++;
-        //      cout << "name.path()            " << entry.path() << "\n";
-        //      cout << "name.path().string()   " << entry.path().string() << "\n";
-        //      cout << "name.path().filename() " << entry.path().filename() << "\n";
         if (is_regular_file(entry)) {
             boost::uintmax_t entry_size = fs::file_size(entry);
             boost::uintmax_t path_size  = fs::file_size(entry.path());
@@ -524,13 +484,8 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
                                                                << path_size);
             BOOST_REQUIRE_MESSAGE(fs::last_write_time(entry) == fs::last_write_time(entry.path()),
                                   "Directory entry last write time, not the same as entry.path()");
-            //         cout << "file_size " << fs::file_size(entry) << "\n";
         }
     }
-    //   cout << "regular_file " << regular_file << "\n";
-    //   cout << "directory  " <<  directory << "\n";
-    //   cout << "symlink  " << symlink  << "\n";
-    //   cout << "other  " << other  << "\n";
     BOOST_REQUIRE_MESSAGE(regular_file > 0, "Expected some files in directory");
 }
 
@@ -541,14 +496,12 @@ BOOST_AUTO_TEST_CASE(test_get_all_files_by_extension) {
         std::string rootPath = File::test_data("libs/core/test/data/badPasswdFiles", "libs/core");
         std::vector<fs::path> vec;
         File::find_files_with_extn(rootPath, ".passwd", vec);
-        // for(auto& file: vec)  std::cout << file << "\n";
         BOOST_REQUIRE_MESSAGE(vec.size() == 6, "Expected 6 files in directory " << rootPath);
     }
     {
         std::string rootPath = File::test_data("libs/core/test/data/badWhiteListFiles", "libs/core");
         std::vector<fs::path> vec;
         File::find_files_with_extn(rootPath, ".lists", vec);
-        // for(auto& file: vec)  std::cout << file << "\n";
         BOOST_REQUIRE_MESSAGE(vec.size() == 7, "Expected 7 files in directory " << rootPath);
     }
 }

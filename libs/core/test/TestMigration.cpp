@@ -19,7 +19,6 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -44,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_cereal) {
 
     DebugEquality debug_equality; // only as affect in DEBUG build
 
-    string cereal_version = "_1_2_2_";
+    std::string cereal_version = "_1_2_2_";
 
 #ifdef UPDATE_TESTS
     doSave<TimeSlot>(file_name + "timeslot_default_constructor" + cereal_version);

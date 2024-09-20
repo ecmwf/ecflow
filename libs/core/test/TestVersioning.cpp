@@ -16,7 +16,6 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
 
-using namespace std;
 using namespace boost;
 
 BOOST_AUTO_TEST_SUITE(U_Core)

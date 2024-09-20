@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <string>
+#include <vector>
 
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
@@ -193,9 +193,6 @@ BOOST_AUTO_TEST_CASE(test_time_series_increment_real) {
         timeSeries2.calendarChanged(c);
         timeSeries3.calendarChanged(c);
 
-        //		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
-        //		    << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << "
-        // timeSeries3=" << timeSeries3.toString() << "\n";
         if (hour < timeSeries.start().hour()) {
             BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(c, t1_min, t1_max, cmd_context),
                                 " Time series " << timeSeries.toString() << " checkForRequeue should pass at "
@@ -302,9 +299,6 @@ BOOST_AUTO_TEST_CASE(test_time_series_requeueable_and_compute_next_time_slot) {
         timeSeries2.calendarChanged(c);
         timeSeries3.calendarChanged(c);
 
-        //    cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
-        //        << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << "
-        //        timeSeries3=" << timeSeries3.toString() << "\n";
         if (hour < timeSeries.start().hour()) {
             TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
             TimeSlot expected(10, 0);
@@ -473,8 +467,6 @@ BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
             calendar.update(minutes(1));
             timeSeries.calendarChanged(calendar);
             timeSeries2.calendarChanged(calendar);
-
-            // cout << to_simple_string(calendar.suiteTime()) << "\n";
 
             if (calendar.dayChanged()) {
                 BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar, t1_min, t1_max),

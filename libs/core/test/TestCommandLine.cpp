@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
+#include <string>
 
 #include <boost/test/unit_test.hpp>
 
@@ -17,7 +17,6 @@
 #include "ecflow/core/Converter.hpp"
 
 using namespace boost;
-using namespace std;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
@@ -30,7 +29,7 @@ static void doCheck(const std::vector<std::string>& theArgs) {
 
     for (size_t i = 0; i < cl.size(); i++) {
         const auto& arg = cl.tokens()[i];
-        BOOST_CHECK_MESSAGE(string(arg) == theArgs[i],
+        BOOST_CHECK_MESSAGE(std::string(arg) == theArgs[i],
                             "Mismatch in args expected " << theArgs[i] << " but found " << arg);
     }
 }
@@ -45,6 +44,8 @@ BOOST_AUTO_TEST_CASE(test_command_line_with_0_args) {
 BOOST_AUTO_TEST_CASE(test_command_line_with_1_arg) {
     ECF_NAME_THIS_TEST();
 
+    using namespace std::string_literals;
+
     std::vector theArgs = {"arg1"s};
     doCheck(theArgs);
 }
@@ -52,12 +53,16 @@ BOOST_AUTO_TEST_CASE(test_command_line_with_1_arg) {
 BOOST_AUTO_TEST_CASE(test_command_line_with_2_args) {
     ECF_NAME_THIS_TEST();
 
+    using namespace std::string_literals;
+
     std::vector theArgs = {"arg1"s, "arg2"s};
     doCheck(theArgs);
 }
 
 BOOST_AUTO_TEST_CASE(test_command_line_with_10_args) {
     ECF_NAME_THIS_TEST();
+
+    using namespace std::string_literals;
 
     std::vector<std::string> theArgs(10);
     for (int i = 0; i < 10; i++) {

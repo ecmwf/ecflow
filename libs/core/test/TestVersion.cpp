@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <string>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -18,7 +18,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost;
 

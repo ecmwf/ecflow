@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <iterator> // std::ostream_iterator
 #include <string>
 
@@ -29,11 +28,12 @@ static void checkPath(const std::vector<std::string>& expectedPath, const std::s
     NodePath::split(path, thePath);
     if (thePath != expectedPath) {
         BOOST_CHECK_MESSAGE(false, "Failed for " << path);
-        std::cout << "Expected '";
-        std::copy(expectedPath.begin(), expectedPath.end(), std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << "'\nbut found '";
-        std::copy(thePath.begin(), thePath.end(), std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << "'\n";
+        std::ostringstream oss;
+        oss << "Expected '";
+        std::copy(expectedPath.begin(), expectedPath.end(), std::ostream_iterator<std::string>(oss, " "));
+        oss << "'\nbut found '";
+        std::copy(thePath.begin(), thePath.end(), std::ostream_iterator<std::string>(oss, " "));
+        ECF_TEST_DBG(<< oss.str());
     }
 }
 
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
         thePath.clear();
         NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction", thePath);
     }
-    cout << "Timing for " << n << " NodePath is  " << timer.elapsed().wall << endl;
+    ECF_TEST_DBG(<< "Timing for " << n << " NodePath is  " << timer.elapsed().wall);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

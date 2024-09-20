@@ -9,7 +9,6 @@
  */
 
 #include <cstdio>
-#include <iostream>
 #include <pwd.h> /* getpwdid */
 #include <string>
 #include <unistd.h>
@@ -18,8 +17,6 @@
 #include <sys/types.h>
 
 #include "TestNaming.hpp"
-
-using namespace std;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 

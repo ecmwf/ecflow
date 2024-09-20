@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -25,26 +24,26 @@ class MyType {
 public:
     explicit MyType(std::string str) : mName(std::move(str)) {
 #ifdef DEBUG_ME
-        std::cout << "MyType::MyType " << mName << " my_int:" << my_int_ << '\n';
+        ECF_TEST_DBG("MyType::MyType " << mName << " my_int:" << my_int_);
 #endif
     }
 
     ~MyType() {
 #ifdef DEBUG_ME
-        std::cout << "MyType::~MyType " << mName << " my_int:" << my_int_ << '\n';
+        ECF_TEST_DBG("MyType::~MyType " << mName << " my_int:" << my_int_);
 #endif
     }
 
     MyType(const MyType& other) : mName(other.mName) {
 #ifdef DEBUG_ME
-        std::cout << "MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_ << '\n';
+        ECF_TEST_DBG(<< "MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_);
 #endif
     }
 
     MyType(MyType&& other) noexcept
         : mName(std::move(other.mName)) { // vector needs noexcept to call move copy constructor during resize.
 #ifdef DEBUG_ME
-        std::cout << "MyType::MyType(MyType&&) " << mName << " my_int:" << my_int_ << '\n';
+        ECF_TEST_DBG("MyType::MyType(MyType&&) " << mName << " my_int:" << my_int_);
 #endif
     }
 
@@ -52,7 +51,7 @@ public:
         if (this != &other)
             mName = other.mName;
 #ifdef DEBUG_ME
-        std::cout << "MyType::operator=(const MyType&) " << mName << " my_int:" << my_int_ << '\n';
+        ECF_TEST_DBG("MyType::operator=(const MyType&) " << mName << " my_int:" << my_int_);
 #endif
         return *this;
     }
@@ -61,7 +60,7 @@ public:
         if (this != &other)
             mName = std::move(other.mName);
 #ifdef DEBUG_ME
-        std::cout << "MyType::operator=(MyType&&) " << mName << " my_int:" << my_int_ << '\n';
+        ECF_TEST_DBG("MyType::operator=(MyType&&) " << mName << " my_int:" << my_int_);
 #endif
         return *this;
     }

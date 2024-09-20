@@ -8,7 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -16,7 +18,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost;
 
@@ -29,7 +30,6 @@ check(const std::string& line, const StringSplitter& string_splitter, const std:
     std::vector<std::string> result;
     while (!string_splitter.finished()) {
         std::string_view ref = string_splitter.next();
-        // std::cout << "ref:'" << ref << "'\n";
         result.emplace_back(ref.begin(), ref.end());
     }
     BOOST_CHECK_MESSAGE(result.size() == expected.size(),
@@ -37,17 +37,15 @@ check(const std::string& line, const StringSplitter& string_splitter, const std:
                                          << "'");
     BOOST_CHECK_MESSAGE(result == expected, "failed for '" << line << "'");
     if (result != expected) {
-        cout << "Line    :'" << line << "'\n";
-        cout << "Actual  :";
-        for (const string& t : result) {
-            cout << "'" << t << "'";
+        ECF_TEST_DBG(<< "Line    :'" << line);
+        ECF_TEST_DBG(<< "Actual  :");
+        for (const std::string& t : result) {
+            ECF_TEST_DBG(<< "   '" << t << "'");
         }
-        cout << "\n";
-        cout << "Expected:";
-        for (const string& t : expected) {
-            cout << "'" << t << "'";
+        ECF_TEST_DBG(<< "Expected:");
+        for (const std::string& t : expected) {
+            ECF_TEST_DBG(<< "'" << t << "'");
         }
-        cout << "\n";
     }
 }
 
@@ -64,17 +62,15 @@ static void check(const std::string& line, const std::vector<std::string>& expec
                                          << "'");
     BOOST_CHECK_MESSAGE(result == expected, "failed for '" << line << "'");
     if (result != expected) {
-        cout << "Line    :'" << line << "'\n";
-        cout << "Actual  :";
-        for (const string& t : result) {
-            cout << "'" << t << "'";
+        ECF_TEST_DBG(<< "Line    :'" << line);
+        ECF_TEST_DBG(<< "Actual  :");
+        for (const std::string& t : result) {
+            ECF_TEST_DBG(<< "   '" << t << "'");
         }
-        cout << "\n";
-        cout << "Expected:";
-        for (const string& t : expected) {
-            cout << "'" << t << "'";
+        ECF_TEST_DBG(<< "Expected:");
+        for (const std::string& t : expected) {
+            ECF_TEST_DBG(<< "'" << t << "'");
         }
-        cout << "\n";
     }
 }
 

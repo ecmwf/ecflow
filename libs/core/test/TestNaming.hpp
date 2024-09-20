@@ -12,6 +12,7 @@
 #define ecflow_core_TestNaming_HPP
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <string>
 
@@ -37,6 +38,16 @@ inline std::string name_this_test() {
 #define ECF_NAME_THIS_TEST(ARGS)                                             \
     do {                                                                     \
         std::cout << " * " << ecf::test::name_this_test() ARGS << std::endl; \
+    } while (0)
+
+#define ECF_TEST_DBG(ARGS)                      \
+    do {                                        \
+        std::cout << " +++ " ARGS << std::endl; \
+    } while (0)
+
+#define ECF_TEST_ERR(ARGS)                      \
+    do {                                        \
+        std::cerr << " +++ " ARGS << std::endl; \
     } while (0)
 
 #endif /* ecflow_core_TestNaming_HPP */
