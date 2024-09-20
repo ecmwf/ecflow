@@ -8,14 +8,15 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
+#include <string>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_ME 1
@@ -74,7 +75,7 @@ void test_white_list_files(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_white_list_files) {
-    cout << "ACore:: ...test_parsing_for_good_white_list_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles", "libs/core");
 
@@ -83,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_white_list_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_bad_white_list_files) {
-    cout << "ACore:: ...test_parsing_for_bad_white_list_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/badWhiteListFiles", "libs/core");
 
@@ -92,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_bad_white_list_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_default) {
-    cout << "ACore:: ...test_white_list_default\n";
+    ECF_NAME_THIS_TEST();
 
     WhiteListFile theFile;
 
@@ -102,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_default) {
                           "expected 0 users with write access but found " << theFile.write_access_size());
 
     // test random user
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
@@ -116,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_default) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_empty_file) {
-    cout << "ACore:: ...test_white_list_empty_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/empty.lists", "libs/core");
 
@@ -130,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_empty_file) {
                           "expected 0 users with write access but found " << theFile.write_access_size());
 
     // test random user
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_empty_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list) {
-    cout << "ACore:: ...test_white_list\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/good1.lists", "libs/core");
 
@@ -199,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_white_list) {
                                        << " users with write access but found " << theFile.write_access_size());
 
     // Users who have read access, to all including paths
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
@@ -216,7 +217,7 @@ BOOST_AUTO_TEST_CASE(test_white_list) {
     }
 
     // Users who have restricted read/write access to certain paths only.
-    vector<string> read_paths;
+    std::vector<std::string> read_paths;
     read_paths.emplace_back("/suite/read");
     read_paths.emplace_back("/suite/read/f1");
     read_paths.emplace_back("/suite/read/f1/t1");
@@ -235,7 +236,7 @@ BOOST_AUTO_TEST_CASE(test_white_list) {
                                 << *i << " with path '/suite/read_me' to NOT have read access to path /suite/read");
     }
 
-    vector<string> write_paths;
+    std::vector<std::string> write_paths;
     write_paths.emplace_back("/suite/write");
     write_paths.emplace_back("/suite/write/f1");
     write_paths.emplace_back("/suite/write/f1/t1");
@@ -267,7 +268,7 @@ BOOST_AUTO_TEST_CASE(test_white_list) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_read_access) {
-    cout << "ACore:: ...test_white_list_all_users_have_read_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/all_read_access.lists", "libs/core");
 
@@ -301,7 +302,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_read_access) {
                                        << " users with write access but found " << theFile.write_access_size());
 
     // Any user should have read access
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
@@ -329,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_read_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_write_access) {
-    cout << "ACore:: ...test_white_list_all_users_have_write_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/all_write_access.lists", "libs/core");
 
@@ -354,7 +355,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_write_access) {
     BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.read_access_size());
 
     // Any user should have read access
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
@@ -376,7 +377,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_write_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_write_access) {
-    cout << "ACore:: ...test_white_list_all_path_users_have_write_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path =
         File::test_data("libs/core/test/data/goodWhiteListFiles/all_path_write_access.lists", "libs/core");
@@ -392,11 +393,11 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_write_access) {
     BOOST_REQUIRE_MESSAGE(theFile.read_access_size() == 0, " expected 0  but found " << theFile.read_access_size());
     BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.write_access_size());
 
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
-    vector<string> paths1;
+    std::vector<std::string> paths1;
     paths1.emplace_back("/a");
     paths1.emplace_back("/b");
     // Any user should have read/write access
@@ -412,7 +413,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_write_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_read_access) {
-    cout << "ACore:: ...test_white_list_all_path_users_have_read_access\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path =
         File::test_data("libs/core/test/data/goodWhiteListFiles/all_path_read_access.lists", "libs/core");
@@ -429,11 +430,11 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_read_access) {
     BOOST_REQUIRE_MESSAGE(theFile.write_access_size() == 0, " expected 0  but found " << theFile.write_access_size());
 
     // When no write access specified all user have write access
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
-    vector<string> paths1;
+    std::vector<std::string> paths1;
     paths1.emplace_back("/a");
     paths1.emplace_back("/b");
     // Any user should have read/write access
@@ -448,7 +449,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_read_access) {
 }
 
 BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
-    cout << "ACore:: ...test_white_list_path_access_list\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodWhiteListFiles/path_access.lists", "libs/core");
 
@@ -495,11 +496,11 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
                           " expected 7  but found " << theFile.write_access_size() << theFile.dump_valid_users());
 
     // When no write access specified all user have write access
-    vector<string> paths;
+    std::vector<std::string> paths;
     paths.emplace_back("/a");
     paths.emplace_back("/b");
     paths.emplace_back("/c");
-    vector<string> partial_paths;
+    std::vector<std::string> partial_paths;
     partial_paths.emplace_back("/a");
     partial_paths.emplace_back("/b");
 
@@ -583,7 +584,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
     // test * user, * means all users
     //*  /x /y   # all user have read/write access  suites /x /y
     //-* /w /z   # all user have read access to suite /w /z
-    vector<string> single_pathx;
+    std::vector<std::string> single_pathx;
     single_pathx.emplace_back("/x");
     BOOST_REQUIRE_MESSAGE(theFile.verify_read_access("xxxx"),
                           "Expected *ALL* user to have read access" << theFile.dump_valid_users());
@@ -592,14 +593,14 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
     BOOST_REQUIRE_MESSAGE(theFile.verify_write_access("xxxx", single_pathx),
                           "Expected *ALL* user to have read/write access to /x" << theFile.dump_valid_users());
 
-    vector<string> single_pathw;
+    std::vector<std::string> single_pathw;
     single_pathw.emplace_back("/w");
     BOOST_REQUIRE_MESSAGE(theFile.verify_read_access("xxxx", single_pathw),
                           "Expected *ALL* user to have read access to /w" << theFile.dump_valid_users());
     BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("xxxx", single_pathw),
                           "Expected failure for write access to /w" << theFile.dump_valid_users());
 
-    vector<string> multiple_pathsxy;
+    std::vector<std::string> multiple_pathsxy;
     multiple_pathsxy.emplace_back("/x");
     multiple_pathsxy.emplace_back("/y");
     BOOST_REQUIRE_MESSAGE(theFile.verify_read_access("xxxx", multiple_pathsxy),
@@ -611,7 +612,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
 
     // single path failure
     //   user1 /a,/b,/c  # user1 has read write access to suite /a /b /c
-    vector<string> single_path_failure;
+    std::vector<std::string> single_path_failure;
     single_path_failure.emplace_back("/fail");
     BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1", "/fail"),
                           "Expected user to not have read access to /fail" << theFile.dump_valid_users());
@@ -624,7 +625,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
 
     // multi path failure
     //   user1 /a,/b,/c  # user1 has read write access to suite /a /b /c
-    vector<string> multiple_paths_failure;
+    std::vector<std::string> multiple_paths_failure;
     multiple_paths_failure.emplace_back("/a");
     multiple_paths_failure.emplace_back("/b");
     multiple_paths_failure.emplace_back("/fail");
@@ -669,7 +670,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
     BOOST_REQUIRE_MESSAGE(theFile.verify_read_access("user1"),
                           "Expected user1 to not have read access, EVEN if no paths specified, --news has no paths\n"
                               << theFile.dump_valid_users());
-    BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1", vector<string>()),
+    BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1", std::vector<std::string>()),
                           "Expected user to not have read access if no paths specified\n"
                               << theFile.dump_valid_users());
     BOOST_REQUIRE_MESSAGE(!theFile.verify_read_access("user1", ""),
@@ -681,7 +682,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
     BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1", ""),
                           "Expected user to not have read/write if no paths specified\n"
                               << theFile.dump_valid_users());
-    BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1", vector<string>()),
+    BOOST_REQUIRE_MESSAGE(!theFile.verify_write_access("user1", std::vector<std::string>()),
                           "Expected user to not have read/write if no paths specified\n"
                               << theFile.dump_valid_users());
 }

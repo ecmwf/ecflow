@@ -8,13 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <iterator> // std::ostream_iterator
 #include <string>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/NodePath.hpp"
 
 using namespace std;
@@ -28,16 +28,18 @@ static void checkPath(const std::vector<std::string>& expectedPath, const std::s
     NodePath::split(path, thePath);
     if (thePath != expectedPath) {
         BOOST_CHECK_MESSAGE(false, "Failed for " << path);
-        std::cout << "Expected '";
-        std::copy(expectedPath.begin(), expectedPath.end(), std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << "'\nbut found '";
-        std::copy(thePath.begin(), thePath.end(), std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << "'\n";
+        std::ostringstream oss;
+        oss << "Expected '";
+        std::copy(expectedPath.begin(), expectedPath.end(), std::ostream_iterator<std::string>(oss, " "));
+        oss << "'\nbut found '";
+        std::copy(thePath.begin(), thePath.end(), std::ostream_iterator<std::string>(oss, " "));
+        ECF_TEST_DBG(<< oss.str());
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_path_extractor_constructor) {
-    cout << "ACore:: ...test_path_extractor_constructor\n";
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK(true); // stop boost test from complaining about no checks
 
     std::vector<std::string> theExpectedPath;
@@ -49,7 +51,8 @@ BOOST_AUTO_TEST_CASE(test_path_extractor_constructor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_path_extractor) {
-    cout << "ACore:: ...test_path_extractor\n";
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK(true); // stop boost test from complaining about no checks
 
     std::vector<std::string> theExpectedPath;
@@ -62,7 +65,8 @@ BOOST_AUTO_TEST_CASE(test_path_extractor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_unix_path_extractor) {
-    cout << "ACore:: ...test_unix_path_extractor\n";
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK(true); // stop boost test from complaining about no checks
 
     // On Unix multiple '/' are treated as one.
@@ -79,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_unix_path_extractor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_extractHostPort) {
-    cout << "ACore:: ...test_extractHostPort\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path;
     std::string host;
@@ -120,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_extractHostPort) {
 }
 
 BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
-    cout << "ACore:: ...test_NodePath_perf \n";
+    ECF_NAME_THIS_TEST();
 
     // Timing using:
     //    StringSplitter : 6.35
@@ -136,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
         thePath.clear();
         NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction", thePath);
     }
-    cout << "Timing for " << n << " NodePath is  " << timer.elapsed().wall << endl;
+    ECF_TEST_DBG(<< "Timing for " << n << " NodePath is  " << timer.elapsed().wall);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -30,7 +31,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_RepeatWithTimeDependencies)
 
 BOOST_AUTO_TEST_CASE(test_repeat_day_time_combination_in_hierarchy) {
-    cout << "ANode:: ...test_repeat_day_time_combination_in_hierarchy \n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  family f
@@ -116,7 +118,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_day_time_combination_in_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_time_day_combination_in_hierarchy) {
-    cout << "ANode:: ...test_repeat_time_day_combination_in_hierarchy \n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     // suite s1
     //  family f
@@ -184,7 +187,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_time_day_combination_in_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_with_impossible_day_combination_in_hierarchy) {
-    cout << "ANode:: ...test_repeat_with_impossible_day_combination_in_hierarchy\n";
+    ECF_NAME_THIS_TEST();
+
     // Create the suite, starting on a sunday
     //   suite s1
     //     clock real 04.08.2019            # Sunday

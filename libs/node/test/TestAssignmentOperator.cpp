@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 
 using namespace std;
@@ -23,7 +24,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_AssignmentOperator)
 
 BOOST_AUTO_TEST_CASE(test_defs_assignment_operator) {
-    cout << "ANode:: ...test_defs_assignment_operator\n";
+    ECF_NAME_THIS_TEST();
+
     MyDefsFixture theDefsFixture;
 
     Defs defs;
@@ -45,7 +47,8 @@ BOOST_AUTO_TEST_CASE(test_defs_assignment_operator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
-    cout << "ANode:: ...test_suite_assignment_operator\n";
+    ECF_NAME_THIS_TEST();
+
     Suite empty("empty");
 
     Suite s1("s1");
@@ -105,7 +108,8 @@ BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_task_assignment_operator) {
-    cout << "ANode:: ...test_task_assignment_operator\n";
+    ECF_NAME_THIS_TEST();
+
     Task empty("empty");
 
     Task s1("s1");

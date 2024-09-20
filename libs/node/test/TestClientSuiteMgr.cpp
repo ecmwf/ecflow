@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -26,7 +27,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_ClientSuiteMgr)
 
 BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_user) {
-    cout << "ANode:: ...test_client_suite_mgr_remove_user\n";
+    ECF_NAME_THIS_TEST();
+
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_client_suite_mgr_remove_user");
@@ -78,7 +80,8 @@ BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_user) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_handle) {
-    cout << "ANode:: ...test_client_suite_mgr_remove_handle\n";
+    ECF_NAME_THIS_TEST();
+
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_client_suite_mgr_remove_handle");

@@ -9,7 +9,6 @@
  */
 
 #include <cstdio>
-#include <iostream>
 #include <pwd.h> /* getpwdid */
 #include <string>
 #include <unistd.h>
@@ -17,14 +16,14 @@
 #include <boost/test/unit_test.hpp>
 #include <sys/types.h>
 
-using namespace std;
+#include "TestNaming.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_GetUserDetails)
 
 BOOST_AUTO_TEST_CASE(test_get_user_details, *boost::unit_test::disabled()) {
-    cout << "ACore:: ...test_get_user_details\n";
+    ECF_NAME_THIS_TEST();
 
     /* Get the uid of the running processand use it to get a record from /etc/passwd */
     struct passwd* passwd = getpwuid(getuid());

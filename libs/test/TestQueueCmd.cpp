@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -35,8 +36,9 @@ BOOST_AUTO_TEST_SUITE(T_QueueCmd)
 // This test does not have any time dependencies in the def file.
 
 BOOST_AUTO_TEST_CASE(test_queue) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_queue " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

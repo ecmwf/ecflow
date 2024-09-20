@@ -16,6 +16,7 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/Rtt.hpp"
@@ -347,6 +348,8 @@ void time_load_and_downloads(ClientInvoker& theClient,
 }
 
 BOOST_AUTO_TEST_CASE(test_perf_for_large_defs) {
+    ECF_NAME_THIS_TEST();
+
     if (const char* ecf_ssl = getenv("ECF_SSL"); ecf_ssl) {
         load_threshold_ms       = 8000; // 4500;
         begin_threshold_ms      = 800;  // 400;

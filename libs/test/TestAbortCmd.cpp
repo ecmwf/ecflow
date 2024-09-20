@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -35,8 +36,9 @@ BOOST_AUTO_TEST_SUITE(T_AbortCmd)
 // is defined. Then providing its value is less the the task's try number
 // we should do an immediate job submission.
 BOOST_AUTO_TEST_CASE(test_abort_cmd) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_abort_cmd " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

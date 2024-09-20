@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Defs)
 
 BOOST_AUTO_TEST_CASE(test_defs_absorb) {
-    cout << "ANode:: ...test_defs_absorb\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a defs file corresponding to:
     // suite suite1
@@ -59,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb) {
 }
 
 BOOST_AUTO_TEST_CASE(test_defs_absorb_server_user_variables) {
-    cout << "ANode:: ...test_defs_absorb_server_user_variables\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     Defs otherDefs;
@@ -80,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb_server_user_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_1684) {
-    cout << "ANode:: ...test_ECFLOW_1684\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     defs.add_edit_history("/", "request");

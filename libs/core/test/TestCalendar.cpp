@@ -8,19 +8,18 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <string>
 
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -30,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Calendar)
 
 BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
-    cout << "ACore:: ...test_calendar_default_ptime \n";
+    ECF_NAME_THIS_TEST();
 
     ptime time;
     BOOST_CHECK_MESSAGE(time.is_special(), "Default ptime is special");
@@ -41,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
-    cout << "ACore:: ...test_calendar_state_parsing\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
@@ -79,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_1) {
-    cout << "ACore:: ...test_calendar_1\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
@@ -94,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_1) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar) {
-    cout << "ACore:: ...test_calendar_basic\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
@@ -123,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_calendar) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
-    cout << "ACore:: ...test_calendar_time_series_relative\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -146,7 +145,6 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
         calendar.update(time_duration(hours(1)));
         timeSeries.calendarChanged(calendar);
 
-        //		cerr << "hour = " << hour << " suiteTime " << to_simple_string(calendar.suiteTime()) << "\n";
         if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
             BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                 "Calendar should match relative time series at hour " << hour);
@@ -159,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
-    cout << "ACore:: ...test_calendar_time_series_relative_complex\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -197,12 +195,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
                                         << suiteTm.tm_hour << Str::COLON() << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
-                    cerr << "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                         << " timeSeries.start().hour() " << timeSeries.start().hour()
-                         << " timeSeries.start().minute() " << timeSeries.start().minute()
-                         << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                         << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                         << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15 << "\n";
+                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
             else {
@@ -212,12 +210,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {
-                    cerr << "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                         << " timeSeries.start().hour() " << timeSeries.start().hour()
-                         << " timeSeries.start().minute() " << timeSeries.start().minute()
-                         << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                         << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                         << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15 << "\n";
+                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
         }
@@ -225,7 +223,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
-    cout << "ACore:: ...test_calendar_time_series_real\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -247,7 +245,6 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
         // for testing this will need to be overriden below.
         calendar.update(time_duration(hours(1)));
 
-        // cerr << "hour = " << hour << " suiteTime " << to_simple_string(calendar.suiteTime())  << "\n";
         if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
             BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar), "Calendar should match time series at hour " << hour);
         }
@@ -258,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
-    cout << "ACore:: ...test_calendar_time_series_real_complex\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -295,12 +292,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
                                         << suiteTm.tm_hour << ":" << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
-                    cerr << "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                         << " timeSeries.start().hour() " << timeSeries.start().hour()
-                         << " timeSeries.start().minute() " << timeSeries.start().minute()
-                         << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                         << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                         << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15 << "\n";
+                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
             else {
@@ -310,12 +307,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {
-                    cerr << "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                         << " timeSeries.start().hour() " << timeSeries.start().hour()
-                         << " timeSeries.start().minute() " << timeSeries.start().minute()
-                         << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                         << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                         << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15 << "\n";
+                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
         }
@@ -323,7 +320,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
-    cout << "ACore:: ...test_calendar_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // The hybrid calendar should not change the suite date.
     // Test by updateing calendar by more than 24 hours
@@ -355,9 +352,6 @@ BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
         calendar.update(time_duration(hours(1)));
 
         ptime timeAfterUpdate = calendar.suiteTime();
-
-        //		cerr << "hour = " << hour << " timeBeforeUpdate " << to_simple_string(timeBeforeUpdate)
-        //		    << "   timeAfterUpdate = " << to_simple_string(timeAfterUpdate) <<  "\n";
 
         if (hour != 24 && hour != 48 && hour != 72) {
             time_period diff(timeBeforeUpdate, timeAfterUpdate);
@@ -394,7 +388,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_changed_for_real) {
-    cout << "ACore:: ...test_day_changed_for_real\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
@@ -439,7 +433,7 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_changed_for_hybrid) {
-    cout << "ACore:: ...test_day_changed_for_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // init the calendar
     Calendar calendar; // default clock is real
@@ -488,7 +482,7 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar_julian) {
-    cout << "ACore:: ...test_calendar_julian\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2017, 1, 1), minutes(0)), Calendar::REAL);

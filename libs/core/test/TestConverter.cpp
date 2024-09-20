@@ -8,11 +8,12 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
+#include <string>
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 
 /*
@@ -37,6 +38,8 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Converter)
 
 BOOST_AUTO_TEST_CASE(can_convert_from_numeric_to_string) {
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(0), "0");
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(123), "123");
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(123L), "123");
@@ -50,6 +53,8 @@ BOOST_AUTO_TEST_CASE(can_convert_from_numeric_to_string) {
 }
 
 BOOST_AUTO_TEST_CASE(can_convert_from_string_to_numeric) {
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK_EQUAL(ecf::convert_to<int>("-0"), 0);
     BOOST_CHECK_EQUAL(ecf::convert_to<int>("-123"), -123);
     BOOST_CHECK_EXCEPTION(ecf::convert_to<int>("s"), ecf::bad_conversion, [](const auto& e) { return true; });
@@ -72,12 +77,16 @@ BOOST_AUTO_TEST_CASE(can_convert_from_string_to_numeric) {
 }
 
 BOOST_AUTO_TEST_CASE(can_convert_from_boost_object_to_string) {
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(boost::gregorian::greg_day{23}), "23");
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(boost::gregorian::greg_month{2}), "Feb");
     BOOST_CHECK_EQUAL(ecf::convert_to<std::string>(boost::gregorian::greg_year{2000}), "2000");
 }
 
 BOOST_AUTO_TEST_CASE(can_use_custom_conversion_traits) {
+    ECF_NAME_THIS_TEST();
+
     // By compiling, the following expression confirms that a Widget can be converted to a Gizmo.
     ecf::convert_to<Gizmo>(Widget{});
 }

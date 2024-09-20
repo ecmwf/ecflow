@@ -12,6 +12,7 @@
 
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
@@ -231,7 +232,8 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ssync_cmd_test_order) {
-    cout << "Base:: ...test_ssync_cmd_test_order\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_ssync_cmd_test_order.log"); // will create log file, and destroy log and remove file at end of scope
 

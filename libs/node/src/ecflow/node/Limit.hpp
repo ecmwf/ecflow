@@ -12,7 +12,7 @@
 #define ecflow_node_Limit_HPP
 
 ///
-/// \note Limit was placed in the ANode category because inlimit can reference
+/// \note Limit was placed in the Node category because inlimit can reference
 /// Limit on *ANOTHER* suite. This presents a problem with incremental sync,
 /// since that requires access to a parent/suite, to mark the suite as changed.
 ///

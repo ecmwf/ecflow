@@ -15,6 +15,7 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/Rtt.hpp"
@@ -88,6 +89,8 @@ void do_test_migration(ClientInvoker& theClient,
 }
 
 BOOST_FIXTURE_TEST_CASE(test_migration, ArgsFixture) {
+    ECF_NAME_THIS_TEST();
+
     if (argc != 2) {
         std::cout << "Ignoring test! Since test directory is not provided\n";
     }

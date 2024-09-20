@@ -11,6 +11,9 @@
 #ifndef ecflow_core_TestSerialisation_HPP
 #define ecflow_core_TestSerialisation_HPP
 
+#include <exception>
+#include <string>
+
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Serialization.hpp"

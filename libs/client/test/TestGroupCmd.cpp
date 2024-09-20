@@ -14,6 +14,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Submittable.hpp"
@@ -27,6 +28,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_GroupCmd)
 
 BOOST_AUTO_TEST_CASE(test_group_cmd) {
+    ECF_NAME_THIS_TEST();
+
     // The previous test's has created/destroyed a server process
     // If two different process both try to use the same port number, you
     // get an "Address in use" error, even if one the process is dead. This is
@@ -47,6 +50,8 @@ BOOST_AUTO_TEST_CASE(test_group_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
+    ECF_NAME_THIS_TEST();
+
     /// *** This test is the same as in file TestServerAndLifeCyle.cpp only this time
     /// *** we use the group command where ever possible
     // This will remove check pt and backup file before server start, to avoid the server from loading previous test

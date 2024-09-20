@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_add_log4) {
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_restore_suite) {
-    cout << "Base:: ...test_archive_and_restore_suite\n";
+    ECF_NAME_THIS_TEST();
 
     // Please note: after archive we delete the children, hence any references to child refer to a different object
 
@@ -84,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_restore_family) {
-    cout << "Base:: ...test_archive_and_restore_family\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -130,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_family) {
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
-    cout << "Base:: ...test_archive_and_restore_all\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -233,7 +234,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_restore_overlap) {
-    cout << "Base:: ...test_archive_and_restore_overlap\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -276,7 +277,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_overlap) {
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_delete_suite) {
-    cout << "Base:: ...test_archive_and_delete_suite\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -315,7 +316,7 @@ BOOST_AUTO_TEST_CASE(test_archive_and_delete_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_archive_and_restore_errors) {
-    cout << "Base:: ...test_archive_and_restore_errors\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the defs file corresponding to the text below
     // suite suite

@@ -104,6 +104,7 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    test_support
   DEPENDS
     ecflow_server # the server is launched to support tests
   TEST_DEPENDS
@@ -138,6 +139,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      test_support
     DEPENDS
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
@@ -169,6 +171,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      test_support
     DEPENDS
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS

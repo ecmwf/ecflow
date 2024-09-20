@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
@@ -30,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(T_ClientEnvironment)
 // In particular test host file parsing
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
-    std::cout << "Client:: ...test_client_environment_host_file_parsing" << endl;
+    ECF_NAME_THIS_TEST();
 
     std::string good_host_file = File::test_data("libs/client/test/data/good_hostfile", "libs/client");
 
@@ -77,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
-    std::cout << "Client:: ...test_client_environment_host_file_defaults" << endl;
+    ECF_NAME_THIS_TEST();
 
     // When the HOST file does *NOT* indicate the port, it should be taken
     // from the config/environment.
@@ -133,7 +134,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_environment_empty_host_file) {
-    std::cout << "Client:: ...test_client_environment_empty_host_file" << endl;
+    ECF_NAME_THIS_TEST();
 
     std::string empty_host_file = File::test_data("libs/client/test/data/empty_hostfile", "libs/client");
 

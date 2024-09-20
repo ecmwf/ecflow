@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
@@ -74,13 +75,15 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_add_log5) {
+    ECF_NAME_THIS_TEST();
+
     // create once for all test below, then remove at the end
     Log::create("test_add_log5.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
-    cout << "Base:: ...test_alter_cmd_for_clock_type_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     // when a new clock is added, we should sync with the computer clock
@@ -117,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_real) {
-    cout << "Base:: ...test_alter_cmd_for_clock_type_real\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     // when a new clock is added, we should sync with the computer clock
@@ -153,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_sync) {
-    cout << "Base:: ...test_alter_cmd_for_clock_sync\n";
+    ECF_NAME_THIS_TEST();
 
     // Add a suite with a hybrid clock set to the past, on switch to real time, should have todays date
     // Since the clock exists on the suite, with another date, we must explicitly sync with computer
@@ -209,7 +212,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_sync) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_date) {
-    cout << "Base:: ...test_alter_cmd_for_clock_date\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     Defs defs;
@@ -256,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_gain) {
-    cout << "Base:: ...test_alter_cmd_for_clock_gain\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     Defs defs;
@@ -323,7 +326,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_gain) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd) {
-    cout << "Base:: ...test_alter_cmd\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s   = defs.add_suite("suite");
@@ -1131,7 +1134,7 @@ void add_sorted_attributes(Node* node) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_sort_attributes) {
-    cout << "Base:: ...test_alter_sort_attributes\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     defs.set_server().add_or_update_user_variables("z", "z");
@@ -1171,7 +1174,7 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_sort_attributes_for_task) {
-    cout << "Base:: ...test_alter_sort_attributes_for_task\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -1202,7 +1205,7 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes_for_task) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_errors) {
-    cout << "Base:: ...test_alter_cmd_errors\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");

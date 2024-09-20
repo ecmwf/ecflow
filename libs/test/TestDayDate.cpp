@@ -16,6 +16,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -33,9 +34,10 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_DayDate)
 
 BOOST_AUTO_TEST_CASE(test_day_at_midnight) {
+    ECF_NAME_THIS_TEST();
+
     // See ECFLOW-337 versus ECFLOW-1550
     DurationTimer timer;
-    cout << "Test:: ...test_day_at_midnight " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS
@@ -88,9 +90,10 @@ BOOST_AUTO_TEST_CASE(test_day_at_midnight) {
 }
 
 BOOST_AUTO_TEST_CASE(test_date_at_midnight) {
+    ECF_NAME_THIS_TEST();
+
     // See ECFLOW-337 versus ECFLOW-1550
     DurationTimer timer;
-    cout << "Test:: ...test_date_at_midnight " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable

@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Pid.hpp"
@@ -34,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_EcfFile)
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_with_bad_ECF_MICRO) {
-    cout << "ANode:: ...test_ecf_file_with_bad_ECF_MICRO\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -62,17 +63,17 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_with_bad_ECF_MICRO) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
+    ECF_NAME_THIS_TEST();
+
     // The specific files are specified in ECF_INCLUDE and common files
     // are specified in ECF_HOME. This test will ensure that if the file common.h
     // is not found in ECF_INCLUDE we then look at ECF_HOME
-    cout << "ANode:: ...test_ecf_simple_include_file";
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -149,13 +150,13 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
+    ECF_NAME_THIS_TEST();
+
     // This tests for a regression where, *NOT* all the include file were processed.
-    cout << "ANode:: ...test_ECFLOW_495";
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -223,12 +224,12 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
-    cout << "ANode:: ...test_ECF_SCRIPT_CMD_ECFLOW_427";
+    ECF_NAME_THIS_TEST();
+
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -365,17 +366,17 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
+    ECF_NAME_THIS_TEST();
+
     // The specific files are specified in ECF_INCLUDE and common files
     // are specified in ECF_HOME. This test will ensure that if the file common.h
     // is not found in ECF_INCLUDE we then look at ECF_HOME
-    cout << "ANode:: ...test_ecf_include_file";
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
@@ -450,15 +451,15 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
+    ECF_NAME_THIS_TEST();
+
     // The specific files are specified in ECF_INCLUDE with multiple paths
-    cout << "ANode:: ...test_ecf_include_multi_paths_ECFLOW_261";
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
@@ -491,7 +492,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
 
     // generate the ecf file;
     string header   = "%include <head.h>\n\n";
-    string body     = "%include <fred.h>\n\n"; // this is only defined in ANode/test/data/includes2
+    string body     = "%include <fred.h>\n\n"; // this is only defined in libs/node/test/data/includes2
     string tail     = "%include <tail.h>\n# ===================================";
     string ecf_file = header;
     ecf_file += body;
@@ -532,16 +533,16 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
+    ECF_NAME_THIS_TEST();
+
     // Test .ecf scripts with includes like %include "../bill.h"
     // In this case we expect to find bill.h in the same directory as the script
-    cout << "ANode:: ...test_ecf_include_ECFLOW_274";
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
@@ -625,18 +626,18 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
+    ECF_NAME_THIS_TEST();
+
     // Test that used variables are as expected
     // This should PRUNE the generated variables from the used variables list
     // Additionally it should NOT affect variables like ESUITE but should ignore generated variable SUITE
-    // See File: ANode/test/data/includes/used_variables.h
-    cout << "ANode:: ...test_ecf_simple_used_variables";
+    // See File: libs/node/test/data/includes/used_variables.h
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -694,21 +695,21 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
+    ECF_NAME_THIS_TEST();
+
     // Test that used variables are as expected
     // This should PRUNE the generated variables from the used variables list
     // Additionally it should NOT affect variables like ETASK but should ignore generated variable TASK
-    // See File: ANode/test/data/includes/used_variables_with_comments.h
+    // See File: libs/node/test/data/includes/used_variables_with_comments.h
     //
     // This WILL test that when we have user comment and manuals, we can still extract user variables
     // Those variable defined within comments and manuals that are not defined should be ignored
-    cout << "ANode:: ...test_ecf_simple_used_variables_with_comments";
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
@@ -769,17 +770,17 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
+    ECF_NAME_THIS_TEST();
+
     // Test that used variables are as expected
     // This is similar to test_ecf_simple_used_variables_with_comments
     // BUT we DO NOT define variable FRED, hence we expect failure
-    cout << "ANode:: ...test_ecf_simple_used_variables_errors";
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
@@ -834,14 +835,13 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file) {
-    cout << "ANode:: ...test_ecf_file";
+    ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
@@ -1030,14 +1030,13 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
-    cout << "ANode:: ...test_ecf_file_includenopp";
+    ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // This test is used to check that %includenopp are expanded only.
     // There should be NO variable substitution, or removal of comments/manual
@@ -1124,14 +1123,13 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
-    cout << "ANode:: ...test_ecf_file_override_ECF_JOB";
+    ECF_NAME_THIS_TEST();
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // This test is used to check that when user has added a variable ECF_JOB
     // to specify the location of the job file, we use that, in preference
@@ -1207,8 +1205,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
 }
 
 BOOST_AUTO_TEST_CASE(test_manual_files) {
+    ECF_NAME_THIS_TEST();
+
     // The specific files are specified in ECF_INCLUDE and common files are specified in ECF_HOME.
-    cout << "ANode:: ...test_manual_files\n";
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
@@ -1296,13 +1295,14 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
+    ECF_NAME_THIS_TEST();
+
     // test for recursive includes that are not recursive
-    cout << "ANode:: ...test_ECFLOW_672";
+
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // Create the defs file corresponding to the text below
     // suite ECFLOW_672
@@ -1352,13 +1352,11 @@ static void basic_test_template(const std::string& test_name,
                                 const std::string& expected_job_file_contents,
                                 const std::string& ecf_micro = "",
                                 bool expect_success          = true) {
-    cout << "ANode:: ..." << test_name;
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (getenv("ECFLOW_CRAY_BATCH")) {
         cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
-    cout << "\n";
 
     // Create the defs file corresponding to the text below
     // suite suite
@@ -1444,6 +1442,8 @@ static void basic_test_template(const std::string& test_name,
 }
 
 BOOST_AUTO_TEST_CASE(test_includeonce) {
+    ECF_NAME_THIS_TEST();
+
     // simplest test of include once, no hierarchy
     // generate the ecf file;
     string ecf_file = "%includeonce <simple_head.h>\n";
@@ -1459,6 +1459,8 @@ BOOST_AUTO_TEST_CASE(test_includeonce) {
 }
 
 BOOST_AUTO_TEST_CASE(test_includeonce_hierarchical) {
+    ECF_NAME_THIS_TEST();
+
     // Test the pre-processing is done depth first, ( < 4.1.1 it was done breadth first)
     // generate the ecf file;
     string ecf_file = "%includeonce <AA.h>\n";
@@ -1471,6 +1473,8 @@ BOOST_AUTO_TEST_CASE(test_includeonce_hierarchical) {
 }
 
 BOOST_AUTO_TEST_CASE(test_include_with_variables) {
+    ECF_NAME_THIS_TEST();
+
     // Test includes with variables %include <%head%.h> ECFLOW-765
 
     string ecf_file;
@@ -1484,6 +1488,8 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(test_include_with_variable_alternative) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include %FRED:<simple_head.h>%\n";
     ecf_file += "#body\n";
@@ -1495,6 +1501,8 @@ BOOST_AUTO_TEST_CASE(test_include_with_variable_alternative) {
 }
 
 BOOST_AUTO_TEST_CASE(test_include_with_variables_change_micro) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%ecfmicro &\n"; // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
     ecf_file += "&include <&simple&_head.h>\n";
@@ -1508,6 +1516,8 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables_change_micro) {
 }
 
 BOOST_AUTO_TEST_CASE(test_script_override_ecf_micro) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;             // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
     ecf_file += "$simple$\n";    // ECF_MICRO is set to $
     ecf_file += "$ecfmicro &\n"; // ecfmicro change from $ -> &
@@ -1522,6 +1532,8 @@ BOOST_AUTO_TEST_CASE(test_script_override_ecf_micro) {
 }
 
 BOOST_AUTO_TEST_CASE(test_mistyped_ecf_micro) {
+    ECF_NAME_THIS_TEST();
+
     // same test as above, but we have mistyped ecf_micro. Make sure we don't ignore this.
     string ecf_file;
     ecf_file += "$simple$\n";
@@ -1537,6 +1549,8 @@ BOOST_AUTO_TEST_CASE(test_mistyped_ecf_micro) {
 }
 
 BOOST_AUTO_TEST_CASE(test_include_with_variables_mismatched_micros) {
+    ECF_NAME_THIS_TEST();
+
     // generate the ecf file, where include file has missmatched ecf_micro
     string ecf_file;
     ecf_file += "%include <%simple%_head%.h>\n";
@@ -1553,6 +1567,8 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables_mismatched_micros) {
 }
 
 BOOST_AUTO_TEST_CASE(test_include_with_variable_not_defined) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include %simple_head.h%\n";
     ecf_file += "#body\n";
@@ -1568,6 +1584,8 @@ BOOST_AUTO_TEST_CASE(test_include_with_variable_not_defined) {
 }
 
 BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
@@ -1588,6 +1606,8 @@ BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents) {
 }
 
 BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents2) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
@@ -1602,6 +1622,8 @@ BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_comment_and_manual_removal) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
@@ -1619,6 +1641,8 @@ BOOST_AUTO_TEST_CASE(test_comment_and_manual_removal) {
 }
 
 BOOST_AUTO_TEST_CASE(test_unterminated_manual) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
@@ -1634,6 +1658,8 @@ BOOST_AUTO_TEST_CASE(test_unterminated_manual) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_micro_with_comments_ECFLOW_1686) {
+    ECF_NAME_THIS_TEST();
+
     string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "var=%XXXX:2 # fred%\n";
@@ -1647,6 +1673,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_micro_with_comments_ECFLOW_1686) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include_with_dollar) {
+    ECF_NAME_THIS_TEST();
+
     Defs d;
     suite_ptr s = d.add_suite("suite");                      // suite suite
     s->add_variable("CORE", "/path/to/core");                //   edit CORE /path/to/core
@@ -1662,6 +1690,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include_with_dollar) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include) {
+    ECF_NAME_THIS_TEST();
+
     Defs d;
     suite_ptr s = d.add_suite("suite");                       // suite suite
     s->add_variable("CORE", "/path/to/core");                 //   edit CORE /path/to/core
@@ -1677,6 +1707,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_single_ecf_include) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ecf_file_resolve_multiple_ecf_include) {
+    ECF_NAME_THIS_TEST();
+
     Defs d;
     suite_ptr s = d.add_suite("suite");                                   // suite suite
     s->add_variable("CORE", "/path/to/core");                             //   edit CORE /path/to/core

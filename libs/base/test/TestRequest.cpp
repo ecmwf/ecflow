@@ -12,6 +12,7 @@
 
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
@@ -442,7 +443,8 @@ static void test_persistence(const Defs& theFixtureDefs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_all_request_persistence_text) {
-    cout << "Base:: ...test_all_request_persistence_text\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_all_request_persistence_text.log"); // will create log file, and destroy log and remove file
                                                                // at end of scope
 
@@ -450,7 +452,8 @@ BOOST_AUTO_TEST_CASE(test_all_request_persistence_text) {
 }
 
 BOOST_AUTO_TEST_CASE(test_request_authenticate) {
-    cout << "Base:: ...test_request_authenticate\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_request_authenticate.log"); // will create log file, and destroy log and remove file at end of scope
 

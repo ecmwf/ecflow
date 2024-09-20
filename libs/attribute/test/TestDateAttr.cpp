@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
@@ -27,7 +28,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_DateAttr)
 
 BOOST_AUTO_TEST_CASE(test_date) {
-    cout << "ANattr:: ...test_date\n";
+    ECF_NAME_THIS_TEST();
+
     {
         DateAttr empty;
         DateAttr empty2;
@@ -79,8 +81,8 @@ static DateAttr print_and_parse_attr(DateAttr& date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_date_parsing) {
+    ECF_NAME_THIS_TEST();
 
-    cout << "ANattr:: ...test_date_parsing\n";
     {
         DateAttr date("12.12.2019");
         date.setFree();
@@ -107,7 +109,8 @@ BOOST_AUTO_TEST_CASE(test_date_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_date_errors) {
-    cout << "ANattr:: ...test_date_errors\n";
+    ECF_NAME_THIS_TEST();
+
     {
         BOOST_REQUIRE_THROW(DateAttr("-1.2.*"), std::runtime_error);
         BOOST_REQUIRE_THROW(DateAttr("32.2.*"), std::runtime_error);

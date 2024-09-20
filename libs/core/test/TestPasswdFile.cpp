@@ -12,11 +12,11 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_ME 1
@@ -32,7 +32,7 @@ void test_passwd_files(const std::string& directory, bool pass) {
     BOOST_CHECK(fs::is_directory(full_path));
 
 #if DEBUG_ME
-    std::cout << "...In directory: " << full_path.relative_path() << "\n";
+    ECF_TEST_DBG(<< "...In directory: " << full_path.relative_path());
 #endif
 
     fs::directory_iterator end_iter;
@@ -46,7 +46,7 @@ void test_passwd_files(const std::string& directory, bool pass) {
                 continue;
             }
 #if DEBUG_ME
-            std::cout << "......Parsing file " << relPath.string() << "\n";
+            ECF_TEST_DBG(<< "......Parsing file " << relPath.string());
 #endif
             PasswdFile theFile;
             std::string errorMsg;
@@ -65,18 +65,18 @@ void test_passwd_files(const std::string& directory, bool pass) {
                                                                   << errorMsg << "\n"
                                                                   << theFile.dump());
 #if DEBUG_ME
-                cout << "\n" << errorMsg << "\n";
+                ECF_TEST_DBG(<< errorMsg);
 #endif
             }
         }
         catch (const std::exception& ex) {
-            std::cout << dir_itr->path().filename() << " " << ex.what() << std::endl;
+            ECF_TEST_DBG(<< dir_itr->path().filename() << " " << ex.what());
         }
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_good_passwd_files) {
-    cout << "ACore:: ...test_parsing_for_good_passwd_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodPasswdFiles", "libs/core");
 
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_good_passwd_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_parsing_for_bad_passwd_files) {
-    cout << "ACore:: ...test_parsing_for_bad_passwd_files\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/badPasswdFiles", "libs/core");
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_parsing_for_bad_passwd_files) {
 }
 
 BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
-    cout << "ACore:: ...test_passwd_empty_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodPasswdFiles/empty.passwd", "libs/core");
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
     BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     BOOST_REQUIRE_MESSAGE(theFile.passwds().empty(), "expected empty file ");
-    BOOST_REQUIRE_MESSAGE(theFile.get_passwd("fred", "host", "port") == string(), "expected empty string");
+    BOOST_REQUIRE_MESSAGE(theFile.get_passwd("fred", "host", "port") == std::string(), "expected empty string");
     BOOST_REQUIRE_MESSAGE(theFile.authenticate("fred", ""),
                           "expected to authenticate. TEST CASE with empty password file");
     BOOST_REQUIRE_MESSAGE(!theFile.authenticate("fred", "passwd"), "expected not to authenticate");
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_passwd) {
-    cout << "ACore:: ...test_passwd\n";
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/core/test/data/goodPasswdFiles/ecf.passwd", "libs/core");
 

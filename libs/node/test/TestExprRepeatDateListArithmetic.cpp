@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -23,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_ExprRepeatDateListArithmetic)
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_list_arithmetic) {
-    cout << "ANode:: ... test_repeat_date_list_arithmetic\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     task_ptr t2, t1;
@@ -56,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list_arithmetic) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_list_arithmetic_add_to_end_of_month) {
-    cout << "ANode:: ...test_repeat_date_list_arithmetic_add_to_end_of_month \n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     task_ptr t2, t1;
@@ -136,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list_arithmetic_add_to_end_of_month) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_list_arithmetic_take_from_end_of_month) {
-    cout << "ANode:: ... test_repeat_date_list_arithmetic_take_from_end_of_month\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     task_ptr t2, t1;

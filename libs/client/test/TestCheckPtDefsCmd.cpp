@@ -15,6 +15,7 @@
 #include "InvokeServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
@@ -31,6 +32,8 @@ BOOST_AUTO_TEST_SUITE(T_CheckPtDefsCmd)
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 // ************************************************************************************
 BOOST_AUTO_TEST_CASE(test_check_pt_defs_cmd) {
+    ECF_NAME_THIS_TEST();
+
     // This will remove check pt and backup file before server start, to avoid the server from loading previous test
     // data
     InvokeServer invokeServer("Client:: ...test_check_pt_defs_cmd", SCPort::next());
@@ -191,6 +194,8 @@ BOOST_AUTO_TEST_CASE(test_check_pt_defs_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_restore_from_check_pt) {
+    ECF_NAME_THIS_TEST();
+
     InvokeServer invokeServer("Client:: ...test_restore_from_check_pt", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
@@ -230,10 +235,12 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt) {
 }
 
 BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
+    ECF_NAME_THIS_TEST();
+
     // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
     // the test will will invalid. hence ignore.
     if (!ClientEnvironment::hostSpecified().empty()) {
-        cout << "Client:: ...test_restore_from_check_pt_using_new_server: ignoring test when ECF_HOST specified\n";
+        cout << "Ignoring test when ECF_HOST specified\n";
         return;
     }
 
@@ -297,10 +304,12 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
 }
 
 BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
+    ECF_NAME_THIS_TEST();
+
     // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
     // the test will will invalid. hence ignore.
     if (!ClientEnvironment::hostSpecified().empty()) {
-        cout << "Client:: ...test_check_pt_edit_history: ignoring test when ECF_HOST specified\n";
+        cout << "Ignoring test when ECF_HOST specified\n";
         return;
     }
 

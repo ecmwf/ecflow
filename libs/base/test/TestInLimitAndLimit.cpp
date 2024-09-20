@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
@@ -42,7 +43,8 @@ BOOST_AUTO_TEST_CASE(test_add_log) {
 }
 
 BOOST_AUTO_TEST_CASE(test_add_limit) {
-    cout << "Base:: ...test_add_limit\n";
+    ECF_NAME_THIS_TEST();
+
     suite_ptr suite = Suite::create("suite");
     suite->addLimit(Limit("fast", 1)); // " Adding limit first time should be ok");
     BOOST_REQUIRE_THROW(suite->addLimit(Limit("fast", 1)),
@@ -59,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_add_limit) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limit_increment) {
-    cout << "Base:: ...test_limit_increment\n";
+    ECF_NAME_THIS_TEST();
 
     // Test than when a job is submitted multiple times, it should only consume 1 token
     //
@@ -146,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_limit_increment) {
 // This TEST is used to test limit and inLimit.
 // Both examples taken from the documentation
 BOOST_AUTO_TEST_CASE(test_limit) {
-    cout << "Base:: ...test_limit\n";
+    ECF_NAME_THIS_TEST();
 
     ///////////////////////////////////////////////////////////////////////////
     // Create the defs file
@@ -226,7 +228,8 @@ BOOST_AUTO_TEST_CASE(test_limit) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limit1) {
-    cout << "Base:: ...test_limit1\n";
+    ECF_NAME_THIS_TEST();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // Create the defs file
     //	suite suite
@@ -319,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_limit_references_after_delete) {
     /// In-limit have a reference to a limit. This limit can be on another node. If that node is deleted
     /// The limits are also deleted, hence we need to ensure in-limit reference to limits that are being
     /// deleted are cleared. Currently we use shared_ptr to achieve this
-    cout << "Base:: ...test_limit_references_after_delete\n";
+    ECF_NAME_THIS_TEST();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     //  Create the defs file
@@ -415,7 +418,7 @@ BOOST_AUTO_TEST_CASE(test_limit_references_after_delete) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limits_after_force_cmd) {
-    cout << "Base:: ...test_limits_after_force_cmd\n";
+    ECF_NAME_THIS_TEST();
 
     // Create the following defs
     // suite s1
@@ -528,7 +531,7 @@ BOOST_AUTO_TEST_CASE(test_limits_after_force_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limits_after_requeue_family_ECFLOW_196) {
-    cout << "Base:: ...test_limits_after_requeue_family_ECFLOW_196\n";
+    ECF_NAME_THIS_TEST();
 
     // This test is used to ensure that, requeue causes node to release tokens held by the Limits
 
@@ -648,7 +651,7 @@ BOOST_AUTO_TEST_CASE(test_limits_after_requeue_family_ECFLOW_196) {
 }
 
 BOOST_AUTO_TEST_CASE(test_limits_after_requeue_task_ECFLOW_196) {
-    cout << "Base:: ...test_limits_after_requeue_task_ECFLOW_196\n";
+    ECF_NAME_THIS_TEST();
 
     // This test is used to ensure that, requeue causes node to release tokens held by the Limits
 
@@ -766,7 +769,7 @@ BOOST_AUTO_TEST_CASE(test_limits_after_requeue_task_ECFLOW_196) {
 }
 
 BOOST_AUTO_TEST_CASE(test_inlimit_with_family_ECFLOW_878) {
-    cout << "Base:: ...test_inlimit_with_family_ECFLOW_878\n";
+    ECF_NAME_THIS_TEST();
 
     // This test places a limit on the families. Should ignore the tasks
     // With this test only 1 family can start at a time
@@ -988,7 +991,7 @@ BOOST_AUTO_TEST_CASE(test_inlimit_with_family_ECFLOW_878) {
 }
 
 BOOST_AUTO_TEST_CASE(test_inlimit_ECFLOW_878) {
-    cout << "Base:: ...test_inlimit_ECFLOW_878\n";
+    ECF_NAME_THIS_TEST();
 
     // This test places a limit on the families. Should ignore the tasks
     // With this test only 1 family can start at a time.
@@ -1188,7 +1191,7 @@ BOOST_AUTO_TEST_CASE(test_inlimit_ECFLOW_878) {
 }
 
 BOOST_AUTO_TEST_CASE(test_inlimit_submission_only) {
-    cout << "Base:: ...test_inlimit_submission_only \n";
+    ECF_NAME_THIS_TEST();
 
     // Create the following def. with inlimit -s, we limit submission
     // suite s0

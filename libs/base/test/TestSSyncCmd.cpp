@@ -13,6 +13,7 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
@@ -438,7 +439,8 @@ void set_defs_state(defs_ptr defs) {
 
 BOOST_AUTO_TEST_CASE(test_ssync_cmd) {
     // To DEBUG: enable the defines in Memento.hpp
-    cout << "Base:: ...test_ssync_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ssync_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     test_sync_scaffold(update_repeat, "update_repeat");

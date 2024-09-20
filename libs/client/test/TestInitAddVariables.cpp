@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
 #include "ecflow/base/cts/task/InitCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
@@ -30,7 +31,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_InitAddVariables)
 
 BOOST_AUTO_TEST_CASE(test_init_add_variables) {
-    cout << "Client:: ...test_init_add_variables " << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_init_add_variables.log"); // will create log file, and destroy log and remove file at end of scope
 

@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Alias.hpp"
@@ -36,7 +37,8 @@ static void test_invariants(Defs& the_defs, int line) {
 }
 
 BOOST_AUTO_TEST_CASE(test_order) {
-    cout << "ANode:: ...test_order\n";
+    ECF_NAME_THIS_TEST();
+
     std::vector<std::string> vec;
     vec.reserve(5);
     vec.emplace_back("a");
@@ -333,7 +335,8 @@ BOOST_AUTO_TEST_CASE(test_order) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alias_order) {
-    cout << "ANode:: ...test_alias_order\n";
+    ECF_NAME_THIS_TEST();
+
     task_ptr task;
     Defs theDefs;
     {
@@ -402,7 +405,8 @@ BOOST_AUTO_TEST_CASE(test_alias_order) {
 }
 
 BOOST_AUTO_TEST_CASE(test_order_by_runtime) {
-    cout << "ANode:: ...test_order_by_runtime\n";
+    ECF_NAME_THIS_TEST();
+
     Defs defs;
     {
         std::vector<string> vec{"3", "2", "1"};

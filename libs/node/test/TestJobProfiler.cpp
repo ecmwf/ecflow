@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
@@ -30,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_JobProfiler)
 
 BOOST_AUTO_TEST_CASE(test_job_profiler) {
-    cout << "ANode:: ...test_job_profiler\n";
+    ECF_NAME_THIS_TEST();
 
     // delete the log file if it exists.
     std::string log_path = File::test_data("libs/node/test/logfile.txt", "libs/node");

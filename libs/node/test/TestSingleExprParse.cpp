@@ -18,9 +18,11 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/ExprParser.hpp"
+
 using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -33,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_SingleExprParse)
 
 BOOST_AUTO_TEST_CASE(test_single_expression) {
-    std::cout << "ANode:: ...test_single_expression\n";
+    ECF_NAME_THIS_TEST();
 
     // Duplicate AST are held in a static map. Delete them, to avoid ASAN complaining
     ExprDuplicate reclaim_cloned_ast_memory;
@@ -91,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
 
 // BOOST_AUTO_TEST_CASE( test_expression_read_from_file )
 //{
-//    std::cout <<  "ANode:: ...test_expression_read_from_file\n";
+//    ECF_NAME_THIS_TEST();
 //
 //    std::string filename = "${ECF_TEST_DEFS_DIR}/triggers.list";
 //    std::ifstream the_file(filename.c_str(),std::ios_base::in);

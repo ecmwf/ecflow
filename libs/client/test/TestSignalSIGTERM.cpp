@@ -15,6 +15,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 
@@ -46,6 +47,8 @@ static void wait_for_sigterm_in_server(ClientInvoker& theClient) {
 // that a check point file is saved.
 // ************************************************************************************
 BOOST_AUTO_TEST_CASE(test_signal_SIGTERM) {
+    ECF_NAME_THIS_TEST();
+
     // This will remove check pt and backup file before server start, to avoid the server from loading previous test
     // data
     InvokeServer invokeServer("Client:: ...test_signal_SIGTERM", SCPort::next());

@@ -15,6 +15,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/TimeAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
@@ -29,7 +30,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_TimeAttr)
 
 BOOST_AUTO_TEST_CASE(test_time_string_constrcutor) {
-    cout << "ANattr:: ...test_time_string_constrcutor\n";
+    ECF_NAME_THIS_TEST();
+
     {
         TimeAttr time("+00:30");
         BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 0 && time.time_series().start().minute() == 30 &&
@@ -60,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_time_string_constrcutor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_attr) {
-    cout << "ANattr:: ...test_time_attr\n";
+    ECF_NAME_THIS_TEST();
 
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
@@ -103,9 +105,6 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
     BOOST_CHECK_MESSAGE(timeSeries2_free_slots.size() == 5,
                         "Expected 5 free slots for " << timeSeries2.toString() << " but found "
                                                      << timeSeries_free_slots.size());
-    //   cout << "time " << timeSeries.toString() << " free slots:";
-    //   for(size_t i = 0; i < timeSeries_free_slots.size(); i++)  cout << timeSeries_free_slots[i] << " ";
-    //   cout << "\n";
 
     // follow normal process
     timeSeries.reset(calendar);
@@ -121,14 +120,11 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
             day_changed = calendar.dayChanged();
 
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        // cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);
         timeSeries3.calendarChanged(calendar);
         timeSeries4.calendarChanged(calendar);
-
-        // cout << to_simple_string(calendar.suiteTime()) << "\n";
 
         if (calendar.dayChanged()) {
             BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar, t1_min, t1_max),
@@ -281,7 +277,7 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
-    cout << "ANattr:: ...test_time_once_free_stays_free\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
@@ -303,7 +299,6 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        // cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);
@@ -378,7 +373,7 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
-    cout << "ANattr:: ...test_time_attr_multiples\n";
+    ECF_NAME_THIS_TEST();
 
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
@@ -406,7 +401,6 @@ BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        //      cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);

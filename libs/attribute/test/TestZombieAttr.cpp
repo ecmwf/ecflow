@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/ZombieAttr.hpp"
 
 using namespace std;
@@ -22,7 +23,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_ZombieAttr)
 
 BOOST_AUTO_TEST_CASE(test_zombie_attr) {
-    cout << "ANattr:: ...test_zombie_attr\n";
+    ECF_NAME_THIS_TEST();
+
     {
         ZombieAttr ecf(ecf::Child::ECF, std::vector<ecf::Child::CmdType>(), ecf::User::FAIL);
         BOOST_CHECK_MESSAGE(ecf.zombie_lifetime() == ZombieAttr::default_ecf_zombie_life_time(),
@@ -82,7 +84,8 @@ BOOST_AUTO_TEST_CASE(test_zombie_attr) {
 }
 
 BOOST_AUTO_TEST_CASE(test_zombie_attr_parsing) {
-    cout << "ANattr:: ...test_zombie_attr_parsing\n";
+    ECF_NAME_THIS_TEST();
+
     {
         ZombieAttr zombie = ZombieAttr::create("user:fob::");
         BOOST_CHECK_MESSAGE(zombie.zombie_type() == ecf::Child::USER, "Type not as expected");

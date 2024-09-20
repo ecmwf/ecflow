@@ -199,7 +199,7 @@ void apply_listeners(httplib::Server& http_server) {
 
     http_server.set_logger([&format](const httplib::Request& req, const httplib::Response& res) {
         const std::string str = format(req, res);
-        // using std::cout crashes with many threads calling
+        // using iostream-based output crashes with many threads calling
         if (opts.verbose) {
             printf("%s\n", str.c_str());
         }

@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -33,7 +34,7 @@ static void findParentVariableValue(task_ptr t, const std::string& name, const s
 }
 
 BOOST_AUTO_TEST_CASE(test_variable_inheritance) {
-    std::cout << "ANode:: ...test_variable_inheritance\n";
+    ECF_NAME_THIS_TEST();
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
     task_ptr t;

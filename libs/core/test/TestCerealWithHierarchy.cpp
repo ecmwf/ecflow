@@ -10,12 +10,12 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
 using namespace boost;
-using namespace std;
 
 // ======================================================================================
 
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_CerealWithHierarchy)
 
 BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
-    cout << "ACore:: ...test_cereal_save_as_string_and_save_as_filename\n";
+    ECF_NAME_THIS_TEST();
 
     std::shared_ptr<BaseCmd> cmd = std::make_shared<Derived1>(10);
     CmdContainer originalCmd(cmd);
@@ -125,26 +125,25 @@ BOOST_AUTO_TEST_CASE(test_cereal_save_as_string_and_save_as_filename) {
 
     // SAVE as string and file
     {
-        BOOST_REQUIRE_NO_THROW(ecf::save("ACore.txt", originalCmd)); // save as filename
+        BOOST_REQUIRE_NO_THROW(ecf::save("core.txt", originalCmd)); // save as filename
         ecf::save_as_string(saved_cmd_as_string, originalCmd); // save as string, this is buggy forgets trailing '}'
     }
 
     // RESTORE from filename and string
     {
         CmdContainer restoredCmd;
-        BOOST_REQUIRE_NO_THROW(ecf::restore("ACore.txt", restoredCmd)); // restore from filename
+        BOOST_REQUIRE_NO_THROW(ecf::restore("core.txt", restoredCmd)); // restore from filename
         BOOST_REQUIRE_MESSAGE(restoredCmd == originalCmd,
                               "restoredCmd " << restoredCmd << "  originalCmd " << originalCmd);
     }
     {
-        // cout <<  saved_cmd_as_string << "\n";
         CmdContainer restoredCmd;
         ecf::restore_from_string(saved_cmd_as_string, restoredCmd); // restore form string fails, due to missing '}'
         BOOST_REQUIRE_MESSAGE(restoredCmd == originalCmd,
                               "restoredCmd " << restoredCmd << "  originalCmd " << originalCmd);
     }
 
-    fs::remove("ACore.txt");
+    fs::remove("core.txt");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

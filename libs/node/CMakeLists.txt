@@ -106,6 +106,7 @@ ecbuild_add_test(
   LIBS
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    test_support
   TEST_DEPENDS
     u_node
 )
@@ -130,6 +131,7 @@ if (ENABLE_ALL_TESTS)
     LIBS
       ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+      test_support
     TEST_DEPENDS
       u_anattr
   )
@@ -161,6 +163,7 @@ if (ENABLE_ALL_TESTS)
       ecflow_all
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       Boost::timer
+      test_support
   )
   target_clangformat(p_parser
     CONDITION ENABLE_TESTS

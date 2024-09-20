@@ -23,9 +23,9 @@ namespace ecf {
 // ********************************************************************
 // IMPORTANT:
 // The version number is extracted externally.
-//   see ACore/doc/extracting_version_number.ddoc
+//   see libs/core/doc/extracting_version_number.ddoc
 //
-//   See ACore/src/ecflow_version.h
+//   See libs/core/src/ecflow_version.h
 //   This file is generated when cmake is run, i.e.
 //     `sh -x $WK/cmake.sh debug`
 //

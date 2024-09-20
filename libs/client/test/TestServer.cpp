@@ -14,6 +14,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -38,6 +39,8 @@ BOOST_AUTO_TEST_SUITE(T_Server)
 // ************************************************************************************
 
 BOOST_AUTO_TEST_CASE(test_server_version) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_version:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -60,6 +63,8 @@ BOOST_AUTO_TEST_CASE(test_server_version) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_state_changes) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_state_changes:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -166,6 +171,8 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_state_changes_with_auto_sync:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -230,6 +237,8 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_stress_test) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_stress_test:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -326,6 +335,8 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
+    ECF_NAME_THIS_TEST();
+
     /// This is exactly the same test as above, but uses the group command
     /// This should be faster as the network traffic should be a lot less
     InvokeServer invokeServer("Client:: ...test_server_group_stress_test:", SCPort::next());
@@ -376,6 +387,8 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
+    ECF_NAME_THIS_TEST();
+
     /// More extensive stress test, using as many user based command as possible.
     ///
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)

@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/attribute/Variable.hpp"
 
 using namespace std;
@@ -22,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_Variable)
 
 BOOST_AUTO_TEST_CASE(test_multi_line_variable_values) {
-    cout << "ANattr:: ...test_multi_line_variable_values\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Variable var("name", "value");
@@ -50,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_multi_line_variable_values) {
 }
 
 BOOST_AUTO_TEST_CASE(test_variable_value) {
-    cout << "ANattr:: ...test_variable_value\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> values;
     values.emplace_back("sdsd");

@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -35,8 +36,9 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_Late)
 
 BOOST_AUTO_TEST_CASE(test_late) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_late " << flush;
     TestClean clean_at_start_and_end;
 
     /// This test will sleep longer than the job submission interval
@@ -82,9 +84,10 @@ BOOST_AUTO_TEST_CASE(test_late) {
 }
 
 BOOST_AUTO_TEST_CASE(test_late_hierarchically) {
+    ECF_NAME_THIS_TEST();
+
     // ECFLOW-610
     DurationTimer timer;
-    cout << "Test:: ...test_late_hierarchically " << flush;
     TestClean clean_at_start_and_end;
 
     /// This test will sleep longer than the job submission interval

@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -36,8 +37,9 @@ BOOST_AUTO_TEST_SUITE(T_Trigger)
 // The data is created dynamically so that we can stress test the server
 // This test does not have any time dependencies in the def file.
 BOOST_AUTO_TEST_CASE(test_triggers_and_meters) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_triggers_and_meters " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable
@@ -84,10 +86,11 @@ BOOST_AUTO_TEST_CASE(test_triggers_and_meters) {
 }
 
 BOOST_AUTO_TEST_CASE(test_triggers_with_limits) {
+    ECF_NAME_THIS_TEST();
+
     // One family is in the limits, another is without. Bit of hack
     // But shows use of limits in triggers
     DurationTimer timer;
-    cout << "Test:: ...test_triggers_with_limits " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable

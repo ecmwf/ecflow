@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_VariableSubstitutionDefs)
 
 BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
-    std::cout << "ANode:: ...test_defs_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     {
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_defs_variable_substitution_double_micro) {
-    std::cout << "ANode:: ...test_defs_variable_substitution_double_micro\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
 

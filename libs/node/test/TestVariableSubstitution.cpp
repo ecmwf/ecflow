@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
@@ -29,7 +30,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_VariableSubstitution)
 
 BOOST_AUTO_TEST_CASE(test_variable_substitution) {
-    std::cout << "ANode:: ...test_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -162,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_variable_substitution_double_micro) {
-    std::cout << "ANode:: ...test_variable_substitution_double_micro\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -205,7 +206,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution_double_micro) {
 }
 
 BOOST_AUTO_TEST_CASE(test_user_variable_substitution) {
-    std::cout << "ANode:: ...test_user_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -346,7 +347,7 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_user_variable_substitution_1) {
-    std::cout << "ANode:: ...test_user_variable_substitution_1\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -408,7 +409,7 @@ static std::vector<std::string> required_server_variables() {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
-    std::cout << "ANode:: ...test_server_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -442,9 +443,10 @@ BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
+    ECF_NAME_THIS_TEST();
+
     // test that if ECF_OUT is defined using %, then we perform variable substitution
     // test that if ECF_JOBOUT or ECF_JOB are specified, they take priority over the generated variables
-    std::cout << "ANode:: ...test_generated_variable_substitution\n";
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");

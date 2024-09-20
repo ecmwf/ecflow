@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/File.hpp"
 
@@ -23,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_Rtt)
 
 BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
-    cout << "Client:: ...test_client_invoker_round_trip_times" << endl;
+    ECF_NAME_THIS_TEST();
 
     std::string root_path = File::test_data("libs/client/test/data/", "libs/client");
 

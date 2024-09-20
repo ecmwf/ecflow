@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/LogCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
@@ -26,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_LogCmd)
 
 BOOST_AUTO_TEST_CASE(test_log_cmd) {
-    cout << "Base:: ...test_log_cmd\n";
+    ECF_NAME_THIS_TEST();
 
     {
         LogCmd log_cmd;

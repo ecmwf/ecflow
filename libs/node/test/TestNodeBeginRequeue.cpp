@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -23,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_NodeBeginRequeue)
 
 BOOST_AUTO_TEST_CASE(test_node_begin_requeue_hybrid) {
-    cout << "ANode:: ...test_node_begin_reque_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a suite with a *HYBRID* clock, and tasks with day,date and cron time attributes
     defs_ptr the_defs = Defs::create();

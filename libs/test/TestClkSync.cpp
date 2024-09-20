@@ -17,6 +17,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/PrintStyle.hpp"
@@ -35,6 +36,8 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_ClkSync)
 
 BOOST_AUTO_TEST_CASE(test_clk_sync) {
+    ECF_NAME_THIS_TEST();
+
     // This test is used to test sync'ing of the suite calendars
     // The default clock type is *real*. We will create a suite with a hybrid clock attribute
     // For the suite calendar, we do not persist the clock type(hybrid/real), since this can be
@@ -47,7 +50,6 @@ BOOST_AUTO_TEST_CASE(test_clk_sync) {
     // This is done in ServerTestHarness via invariant checking.
 
     DurationTimer timer;
-    cout << "Test:: ...test_clk_sync " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
@@ -80,8 +82,9 @@ BOOST_AUTO_TEST_CASE(test_clk_sync) {
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_suite_calendar_sync " << flush;
     TestClean clean_at_start_and_end;
 
     // When using ECF_SSL sync is to slow.

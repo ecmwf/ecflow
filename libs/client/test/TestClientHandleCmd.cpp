@@ -14,6 +14,7 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/System.hpp"
 
@@ -25,6 +26,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
 
 BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_client_handle_cmd ", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),

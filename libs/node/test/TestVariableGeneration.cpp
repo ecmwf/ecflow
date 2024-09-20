@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
@@ -39,7 +40,7 @@ static void findParentVariableValue(task_ptr t, const std::string& name, const s
 }
 
 BOOST_AUTO_TEST_CASE(test_generated_variables) {
-    std::cout << "ANode:: ...test_generated_variables\n";
+    ECF_NAME_THIS_TEST();
 
     task_ptr t;
 

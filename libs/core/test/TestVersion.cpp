@@ -8,16 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <string>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost;
 
@@ -28,11 +28,11 @@ BOOST_AUTO_TEST_SUITE(T_Version)
 BOOST_AUTO_TEST_CASE(test_version) {
     std::string desc = Version::description();
     BOOST_CHECK_MESSAGE(!desc.empty(), "Expected version");
-    cout << "ACore:: ...test_version:" << desc << endl;
+    ECF_NAME_THIS_TEST(<< ", found version: " << desc);
 }
 
 BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
-    cout << "ACore:: ...test_version_against_cmake" << endl;
+    ECF_NAME_THIS_TEST();
 
     // Open the file CMakeList.txt
     std::string version_cmake_file = File::root_source_dir() + "/CMakeLists.txt";
@@ -69,8 +69,9 @@ BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
                               << version_cmake_file);
     BOOST_REQUIRE_MESSAGE(
         Version::raw() == cmake_version,
-        "\n  Expected " << cmake_version << " but found " << Version::raw()
-                        << ", Please regenerate file $WK/ACore/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
+        "\n  Expected "
+            << cmake_version << " but found " << Version::raw()
+            << ", Please regenerate file $WK/libs/core/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -30,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_JobCreator)
 
 BOOST_AUTO_TEST_CASE(test_job_creator) {
-    cout << "ANode:: ...test_job_creator\n";
+    ECF_NAME_THIS_TEST();
 
     // SET SMSHOME
     std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");

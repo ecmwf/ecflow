@@ -14,6 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -32,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(U_Server)
 BOOST_AUTO_TEST_SUITE(T_ServerEnvironment)
 
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
-    cout << "Server:: ...test_server_environment_ecfinterval\n";
+    ECF_NAME_THIS_TEST();
 
     // ecflow server interval is valid for range [1-60]
     std::string port = Str::DEFAULT_PORT_NUMBER();
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_port) {
-    cout << "Server:: ...test_server_environment_port\n";
+    ECF_NAME_THIS_TEST();
 
     // The port numbers are divided into three ranges.\n";
     //  o the Well Known Ports, (require root permission)      0 -1023\n";
@@ -103,8 +104,9 @@ BOOST_AUTO_TEST_CASE(test_server_environment_port) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
+    ECF_NAME_THIS_TEST();
+
     // Regression test log file creation
-    cout << "Server:: ...test_server_environment_log_file\n";
 
     int argc     = 2;
     char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
@@ -138,8 +140,9 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_config_file) {
+    ECF_NAME_THIS_TEST();
+
     // Regression test to make sure the server environment variable don't get removed
-    cout << "Server:: ...test_server_config_file\n";
 
     int argc     = 1;
     char* argv[] = {const_cast<char*>("ServerEnvironment")};
@@ -280,8 +283,9 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
+    ECF_NAME_THIS_TEST();
+
     // Regression test to make sure the server environment variable don't get removed
-    cout << "Server:: ...test_server_environment_variables\n";
 
     int argc     = 2;
     char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
@@ -326,7 +330,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
-    cout << "Server:: ...test_server_profile_threshold_environment_variable\n";
+    ECF_NAME_THIS_TEST();
+
     int argc     = 1;
     char* argv[] = {const_cast<char*>("ServerEnvironment")};
     {

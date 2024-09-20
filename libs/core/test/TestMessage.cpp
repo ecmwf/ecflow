@@ -8,10 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
-
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/Message.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Core)
@@ -19,6 +18,8 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Message)
 
 BOOST_AUTO_TEST_CASE(test_message_can_create_from_various_arguments) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf;
     using namespace std::string_literals;
 
@@ -32,6 +33,8 @@ BOOST_AUTO_TEST_CASE(test_message_can_create_from_various_arguments) {
 }
 
 BOOST_AUTO_TEST_CASE(test_message_can_convert_to_string) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf;
     using namespace std::string_literals;
 
@@ -40,6 +43,8 @@ BOOST_AUTO_TEST_CASE(test_message_can_convert_to_string) {
 }
 
 BOOST_AUTO_TEST_CASE(test_message_can_stream) {
+    ECF_NAME_THIS_TEST();
+
     using namespace ecf;
     using namespace std::string_literals;
 

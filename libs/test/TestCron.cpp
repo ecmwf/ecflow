@@ -17,6 +17,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -69,8 +70,9 @@ static void wait_for_cron(int max_time_to_wait, const std::string& path) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cron_time_series) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_cron_time_series " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS

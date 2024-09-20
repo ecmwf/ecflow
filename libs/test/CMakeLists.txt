@@ -81,6 +81,7 @@ if (ENABLE_ALL_TESTS)
     LIBS
       libharness
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      test_support
     TEST_DEPENDS
       s_client
   )
@@ -98,6 +99,7 @@ if (ENABLE_ALL_TESTS)
     LIBS
       libharness
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      test_support
     TEST_DEPENDS
       s_test
   )

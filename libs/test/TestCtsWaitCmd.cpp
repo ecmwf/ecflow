@@ -16,6 +16,7 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
+#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -100,8 +101,9 @@ static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& p
 // In this case the job associated with task 'wait' should block until the expression evaluates
 // to true, which should be after the completion of all other tasks
 BOOST_AUTO_TEST_CASE(test_wait_cmd) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_wait_cmd " << flush;
     TestClean clean_at_start_and_end;
 
     Defs theDefs;
@@ -130,8 +132,9 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_wait_cmd_parse_fail " << flush;
 
     // This time we add a wait expression that
     // should fail to parse, and we should return an error
@@ -175,8 +178,9 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
 }
 
 BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_wait_cmd_non_existant_paths " << flush;
 
     // This time we add a wait expression that should fail
     // because the paths referenced in the expression don't exist
