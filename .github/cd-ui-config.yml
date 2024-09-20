@@ -5,7 +5,7 @@ cmake_options: >-
   -DENABLE_ALL_TESTS=ON -DENABLE_SSL=ON -DENABLE_SERVER=OFF -DENABLE_HTTP=OFF -DENABLE_UDP=OFF -DENABLE_PYTHON=OFF
   -DENABLE_UI=ON -DUI_SYSTEM_SERVERS_LIST=/ec/vol/ecflow_def/servers.list.all
 ctest_options: -L nightly -E s_test|s_zombies
-install_dir: ${{ runner.temp }}/install/ecflow-ui
+install_dir: "${{ runner.temp }}/install/ecflow-ui"
 dependencies: |
   ecmwf/ecbuild
 dependency_branch: develop
