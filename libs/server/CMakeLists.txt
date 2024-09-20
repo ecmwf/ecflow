@@ -47,7 +47,7 @@ SET_TARGET_PROPERTIES(ecflow_server
 # which point to directories outside the build tree to the install RPATH
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
-                          
+
 # ================================================================================                         
 # TEST
 ecbuild_add_test(
@@ -67,6 +67,7 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
+    test_support
   TEST_DEPENDS
     u_base
 )
@@ -90,6 +91,7 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
+    test_support
   TEST_DEPENDS
     u_base
 )

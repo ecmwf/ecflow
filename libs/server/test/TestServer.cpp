@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "TestNaming.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
@@ -149,7 +150,7 @@ void test_the_server(const std::string& port) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server) {
-    cout << "Server:: ...test_server\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
     // Hence the lock file is not always sufficient.
