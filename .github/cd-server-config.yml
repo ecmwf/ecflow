@@ -3,6 +3,7 @@ cmake_options: >-
   -DBoost_DEBUG=ON -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} -DENABLE_STATIC_BOOST_LIBS=OFF
   -DINSTALL_PYTHON3_DIR=lib/python3/dist-packages
   -DENABLE_ALL_TESTS=ON -DENABLE_SSL=ON -DENABLE_SERVER=ON -DENABLE_UI=OFF
+  -DCPACK_PACKAGE_NAME=ecflow
 ctest_options: -L nightly -E s_test|s_zombies
 dependencies: |
   ecmwf/ecbuild
