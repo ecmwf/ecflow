@@ -28,6 +28,9 @@ public:
     HttpListener(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& env);
 
     std::string ssl() const { return ""; }
+    BaseServer* server() const { return server_; }
+
+    void handle_terminate(bool terminate);
 
 private:
     void do_accept();

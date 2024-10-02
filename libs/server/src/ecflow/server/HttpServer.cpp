@@ -21,6 +21,8 @@ inline void log_error(char const* where, boost::beast::error_code ec) {
     LOG(Log::ERR, where << ": " << ec.message());
 }
 
+#define BOOST_VERSION 107800
+
 #if defined(BOOST_VERSION) && BOOST_VERSION > 108100
 
 // Return a response for the given request.
@@ -90,6 +92,7 @@ handle_request(boost::beast::http::request<Body, boost::beast::http::basic_field
         //                      << serverEnv_.port() << std::endl;
         //        }
         // TODO: Terminate the server!
+        std::terminate();
     }
 
     // Cache the size since we need it after the move
@@ -129,6 +132,7 @@ public:
     void do_read() {
         // Make the request empty before reading,
         // otherwise the operation behavior is undefined.
+        buffer_  = {};
         request_ = {};
 
         // Set the timeout.
@@ -257,14 +261,11 @@ void HttpListener::on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::
 
 #elif defined(BOOST_VERSION) && BOOST_VERSION >= 106600 && BOOST_VERSION <= 108100
 
-// Return a response for the given request.
-//
-// The concrete type of the response message (which depends on the
-// request), is type-erased in message_generator.
-template <class Body, class Allocator, class Send>
+template <class Body, class Allocator>
 void handle_request(const boost::beast::http::request<Body, boost::beast::http::basic_fields<Allocator>>& request,
-                    BaseServer* server,
-                    Send&& send) {
+                    boost::beast::http::response<boost::beast::http::string_body>& response,
+                    bool& is_terminate,
+                    BaseServer* server) {
     using response_t = boost::beast::http::response<boost::beast::http::string_body>;
 
     // Returns a bad request response
@@ -280,10 +281,9 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
 
     // Handle only POST requests
     if (request.method() != boost::beast::http::verb::post) {
-        send(bad_request("Unknown HTTP-method"));
+        response = bad_request("Unknown HTTP-method");
     }
 
-    // Buffers to hold request/response
     ClientToServerRequest inbound_request;
     ServerToClientResponse outbound_response;
 
@@ -292,6 +292,9 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
 
     // 2) Handle request, as per TcpBaseServer::handle_request()
     {
+        // Tag termination request, to be handled by the caller
+        is_terminate = inbound_request.terminateRequest();
+
         try {
             // Service the inbound request, handling the request will populate the outbound_response_
             // Note:: Handle request will first authenticate
@@ -314,65 +317,59 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
     // 4) Ship response
     boost::beast::http::string_body::value_type body = outbound;
 
-    if (inbound_request.terminateRequest()) {
-        //        if (serverEnv_.debug()) {
-        //            std::cout << "   <-- HttpServer::handle_terminate_request  exiting server via terminate() port "
-        //                      << serverEnv_.port() << std::endl;
-        //        }
-        // TODO: Terminate the server!
-    }
-
     // Cache the size since we need it after the move
     auto const size = body.size();
 
     // Respond to POST request
-    response_t response{std::piecewise_construct,
-                        std::make_tuple(std::move(body)),
-                        std::make_tuple(boost::beast::http::status::ok, request.version())};
+    response = response_t{std::piecewise_construct,
+                          std::make_tuple(std::move(body)),
+                          std::make_tuple(boost::beast::http::status::ok, request.version())};
     response.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
     response.set(boost::beast::http::field::content_type, "application/json");
     response.content_length(size);
     response.keep_alive(request.keep_alive());
-
-    send(std::move(response));
 }
 
 // Handles an HTTP server connection
 class HttpSession : public std::enable_shared_from_this<HttpSession> {
     boost::asio::ip::tcp::socket socket_;
-    boost::beast::flat_buffer buffer_;
-    boost::beast::http::request<boost::beast::http::string_body> request_;
-    BaseServer* server_;
+    boost::beast::flat_buffer buffer_{};
+    boost::beast::http::request<boost::beast::http::string_body> request_{};
+    bool is_terminate_{false};
+    boost::beast::http::response<boost::beast::http::string_body> response_{};
+    HttpListener* listener_;
+
+    friend class HttpListener;
 
 public:
     // Take ownership of the stream
-    HttpSession(boost::asio::ip::tcp::socket&& socket, BaseServer* server)
+    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpListener* listener)
         : socket_(std::move(socket)),
-          server_{server} {}
+          listener_{listener} {}
 
     // Start the asynchronous operation
     void run() {
-        boost::asio::dispatch(socket_.get_executor(), [this]() { do_read(); });
+        // clear the buffers used buy the session
+        buffer_   = {};
+        request_  = {};
+        response_ = {};
+
+        boost::asio::dispatch(socket_.get_executor(), [self = shared_from_this()]() { self->do_read(); });
     }
 
     void do_read() {
-        // Make the request empty before reading,
-        // otherwise the operation behavior is undefined.
-        request_ = {};
-
-        std::cout << "::0:: do_read" << std::endl;
-
         // Read a request
         boost::beast::http::async_read(
-            socket_, buffer_, request_, [this](boost::beast::error_code ec, std::size_t bytes_transferred) {
-                std::cout << "::0:: calling on_read (" << ec << ", " << bytes_transferred << ")" << std::endl;
-                on_read(ec, bytes_transferred);
+            socket_,
+            buffer_,
+            request_,
+            [self = shared_from_this()](boost::beast::error_code ec, std::size_t bytes_transferred) {
+                self->on_read(ec, bytes_transferred);
             });
     }
 
     void on_read(boost::beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
-
         // This means they closed the connection
         if (ec == boost::beast::http::error::end_of_stream) {
             return do_close();
@@ -382,36 +379,29 @@ public:
             return log_error("HttpSession::on_read", ec);
         }
 
+        // handle_request
+        handle_request(request_, response_, is_terminate_, listener_->server());
+
         // Send the response
-        handle_request(request_, server_, [this](boost::beast::http::response<boost::beast::http::string_body>&& msg) {
-            send_response(std::move(msg));
-        });
+        send_response();
     }
 
-    void send_response(boost::beast::http::response<boost::beast::http::string_body>&& response) {
-        bool keep_alive = response.keep_alive();
+    void send_response() {
+        bool keep_alive = response_.keep_alive();
 
         // Write the response
         boost::beast::http::async_write(
-            socket_, response, [this, keep_alive](boost::beast::error_code ec, std::size_t bytes_transferred) {
-                on_write(keep_alive, ec, bytes_transferred);
+            socket_,
+            response_,
+            [self = shared_from_this(), keep_alive](boost::beast::error_code ec, std::size_t bytes_transferred) {
+                self->on_write(keep_alive, ec, bytes_transferred);
             });
     }
 
     void on_write(bool keep_alive, boost::beast::error_code ec, [[maybe_unused]] std::size_t bytes_transferred) {
-
         if (ec) {
             return log_error("HttpSession::on_write", ec);
         }
-
-        if (!keep_alive) {
-            // This means we should close the connection, usually because
-            // the response indicated the "Connection: close" semantic.
-            return do_close();
-        }
-
-        // Read another request
-        // do_read();
 
         do_close();
     }
@@ -422,6 +412,9 @@ public:
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
 
         // At this point the connection is closed gracefully
+
+        // Handle terminate request
+        listener_->handle_terminate(is_terminate_);
     }
 };
 
@@ -464,6 +457,20 @@ HttpListener::HttpListener(BaseServer* server, boost::asio::io_context& io, Serv
     do_accept();
 }
 
+void HttpListener::handle_terminate(bool terminate) {
+    if (terminate) {
+        if (server_->debug()) {
+            std::cout << "   <-- HttpListener exiting server via terminate()" << std::endl;
+        }
+
+        io_.post([this]() {
+            server_->handle_terminate();
+            acceptor_.close();
+            io_.stop();
+        });
+    }
+}
+
 void HttpListener::do_accept() {
     // The new connection gets its own strand
     acceptor_.async_accept(io_, [this](boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
@@ -478,7 +485,7 @@ void HttpListener::on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::
     }
     else {
         // Create the session and run it
-        std::make_shared<HttpSession>(std::move(socket), server)->run();
+        std::make_shared<HttpSession>(std::move(socket), this)->run();
     }
 
     // Accept another connection
@@ -487,6 +494,6 @@ void HttpListener::on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::
 
 #else
 
-    #error "Unsupported boost version"
+    #error "Unsupported Boost version"
 
 #endif

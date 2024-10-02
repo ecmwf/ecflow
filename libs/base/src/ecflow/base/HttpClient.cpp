@@ -22,6 +22,8 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr, const std::string& host, const std::stri
       port_(port),
       client_(host, ecf::convert_to<int>(port)) {
 
+    client_.set_connection_timeout(std::chrono::seconds{timeout});
+
     if (!cmd_ptr.get()) {
         throw std::runtime_error("Client::Client: No request specified !");
     }
@@ -36,6 +38,7 @@ void HttpClient::run() {
     auto result = client_.Post("/v1/ecflow", outbound, "application/json");
     if (result) {
         auto response = result.value();
+        status_ = httplib::Error::Success;
         ecf::restore_from_string(response.body, inbound_response_);
     }
     else {
