@@ -28,7 +28,7 @@
 class HttpClient {
 public:
     /// Constructor starts the asynchronous connect operation.
-    HttpClient(Cmd_ptr cmd_ptr, const std::string& host, const std::string& port, int timout = 0);
+    HttpClient(Cmd_ptr cmd_ptr, const std::string& host, const std::string& port, int timout = 60);
 
     void run();
 
