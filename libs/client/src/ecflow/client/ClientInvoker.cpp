@@ -430,8 +430,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -450,8 +451,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         HttpClient theClient(cts_cmd, clientEnv_.host(), clientEnv_.port());
                         theClient.run();
 
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -476,8 +478,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
