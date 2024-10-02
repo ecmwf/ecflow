@@ -79,6 +79,23 @@ def cannot_have_multiple_mirrors_in_single_task():
     except RuntimeError as e:
         assert True
 
+def can_check_job_creation_with_mirror():
+    defs = ecf.Defs()
+
+    suite = ecf.Suite("s")
+    defs.add_suite(suite)
+
+    family = ecf.Family("f")
+    suite.add_family(family)
+
+    task = ecf.Task("t");
+    family.add_task(task)
+
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True, "auth")
+    task.add_mirror(mirror)
+
+    defs.check_job_creation()
+
 
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
@@ -87,5 +104,6 @@ if __name__ == "__main__":
     can_add_mirror_to_task()
     can_embed_mirror_into_task()
     cannot_have_multiple_mirrors_in_single_task()
+    can_check_job_creation_with_mirror()
 
     print("All tests pass")

@@ -88,7 +88,7 @@ bool AvisoAttr::why(std::string& theReasonWhy) const {
 void AvisoAttr::reset() {
     state_change_no_ = Ecf::incr_state_change_no();
 
-    if (parent_->state() == NState::QUEUED) {
+    if (parent_ && (parent_->state() == NState::QUEUED)) {
         start();
     }
 }

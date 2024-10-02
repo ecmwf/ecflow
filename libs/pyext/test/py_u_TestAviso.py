@@ -79,6 +79,24 @@ def cannot_have_multiple_avisos_in_single_task():
         assert True
 
 
+def can_check_job_creation_with_aviso():
+    defs = ecf.Defs()
+
+    suite = ecf.Suite("s")
+    defs.add_suite(suite)
+
+    family = ecf.Family("f")
+    suite.add_family(family)
+
+    task = ecf.Task("t")
+    family.add_task(task)
+
+    aviso = ecf.AvisoAttr("name", "listener", "url", "schema", "polling", "auth")
+    task.add_aviso(aviso)
+
+    defs.check_job_creation()
+
+
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
 
@@ -86,5 +104,6 @@ if __name__ == "__main__":
     can_add_aviso_to_task()
     can_embed_aviso_into_task()
     cannot_have_multiple_avisos_in_single_task()
+    can_check_job_creation_with_aviso()
 
     print("All tests pass")
