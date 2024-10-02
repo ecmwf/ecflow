@@ -75,8 +75,13 @@ void start_api_server() {
     }
 
     std::thread t([] {
+#if defined(ECF_TEST_HTTP_BACKEND)
+        int argc     = 4;
+        char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", (char*)"--http", NULL};
+#else
         int argc     = 3;
         char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", NULL};
+#endif
 
         HttpServer server(argc, argv);
         server.run();
@@ -91,7 +96,12 @@ std::unique_ptr<InvokeServer> start_ecflow_server() {
         return nullptr;
     }
 
-    auto srv = std::make_unique<InvokeServer>();
+    bool use_http_backend = false;
+#if defined(ECF_TEST_HTTP_BACKEND)
+    use_http_backend = true;
+#endif
+
+    auto srv = std::make_unique<InvokeServer>(use_http_backend);
 
     auto port = ecf::environment::get("ECF_PORT");
     BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << port);
