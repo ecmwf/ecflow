@@ -65,6 +65,25 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
+      s_test_http
+    LABELS
+      integration
+      nightly
+    SOURCES
+      ${test_srcs}
+    DEFINITIONS
+      ECFLOW_TEST_SERVER_HTTP
+    LIBS
+      libharness
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      test_support
+    TEST_DEPENDS
+      s_client
+  )
+  target_clangformat(s_test_http CONDITION ENABLE_TESTS)
+
+  ecbuild_add_test(
+    TARGET
       s_zombies
     LABELS
       integration
