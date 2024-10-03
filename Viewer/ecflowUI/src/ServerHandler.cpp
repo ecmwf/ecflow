@@ -56,12 +56,14 @@ ServerHandler::ServerHandler(const std::string& name,
                              const std::string& host,
                              const std::string& port,
                              const std::string& user,
-                             bool ssl)
+                             bool ssl,
+                             bool http)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
       ssl_(ssl),
+      http_(http),
       client_(nullptr),
       updating_(false),
       communicating_(false),
@@ -184,6 +186,8 @@ void ServerHandler::createClient(bool init) {
 
     bool ssl_enabled = false;
     std::string ssl_error;
+    bool http_enabled = false;
+    std::string http_error;
 
     if (client_) {
 #ifdef ECF_OPENSSL
@@ -203,6 +207,15 @@ void ServerHandler::createClient(bool init) {
             client_->disable_ssl();
         }
 #endif
+        if (http_) {
+            try {
+                client_->enable_http();
+                http_enabled = true;
+            }
+            catch (std::exception& e) {
+                http_error = std::string(e.what());
+            }
+        }
 
         if (!init || !user_.empty()) {
             try {
@@ -307,6 +320,17 @@ void ServerHandler::recreateClient() {
 void ServerHandler::setSsl(bool ssl) {
     if (ssl != ssl_) {
         ssl_ = ssl;
+
+        if (connectState_->state() != ConnectState::VersionIncompatible &&
+            connectState_->state() != ConnectState::FailedClient) {
+            recreateClient();
+        }
+    }
+}
+
+void ServerHandler::setHttp(bool http) {
+    if (http != http_) {
+        http_ = http;
 
         if (connectState_->state() != ConnectState::VersionIncompatible &&
             connectState_->state() != ConnectState::FailedClient) {
@@ -528,8 +552,9 @@ ServerHandler* ServerHandler::addServer(const std::string& name,
                                         const std::string& host,
                                         const std::string& port,
                                         const std::string& user,
-                                        bool ssl) {
-    auto* sh = new ServerHandler(name, host, port, user, ssl);
+                                        bool ssl,
+                                        bool http) {
+    auto* sh = new ServerHandler(name, host, port, user, ssl, http);
     return sh;
 }
 

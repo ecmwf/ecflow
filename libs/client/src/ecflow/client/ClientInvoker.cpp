@@ -82,6 +82,17 @@
     #define NEXT_HOST_POLL_PERIOD 30
 #endif
 
+#include "ecflow/base/HttpClient.hpp"
+
+#if defined(ADD)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define ADD ns_uop_add
+    #undef ADD
+#endif
+#if defined(STATUS)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define STATUS ns_o_status
+    #undef STATUS
+#endif
+
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
@@ -410,8 +421,30 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
+
+                        /// Let see how the server responded if at all.
+                        try {
+                            /// will return false if further action required
+                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                // The normal response.  RoundTriprecorder will record in rtt_
+                                return 0; // the normal exit path
+                            }
+                        }
+                        catch (std::exception& e) {
+                            server_reply_.set_error_msg(e.what());
+                            return 1;
+                        }
+                    }
+                    else if (clientEnv_.http()) {
+                        HttpClient theClient(cts_cmd, clientEnv_.host(), clientEnv_.port());
+                        theClient.run();
+
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -436,8 +469,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
