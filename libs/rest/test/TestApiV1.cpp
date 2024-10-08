@@ -475,6 +475,71 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree) {
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 }
 
+BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
+    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+
+    // (0) Clean up -- in case there is any left-over from passed/failed tests
+    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
+
+    // (1) Publish 'full_tree' suite
+
+    std::string suite_definition =
+        R"({"definition" : "suite full_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
+    handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
+    wait_until([] { return check_for_path("/v1/suites/full_suite/definition"); });
+
+    // (2) Retrieve 'full_suite' suite tree, explicitly requesting generated variables
+    {
+        auto result  = handle_response(request("get", "/v1/suites/full_suite/f/tree?content=full&gen_vars=true"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.contains("f"));
+        // Check family attributes
+        BOOST_REQUIRE(content["f"].contains("attributes"));
+        BOOST_REQUIRE(content["f"]["attributes"].size() == 2);
+        {
+            size_t count = 0;
+            for (const auto& attr : content["f"]["attributes"]) {
+                BOOST_REQUIRE(attr.contains("type"));
+                if (attr["type"] == "variable") {
+                    BOOST_REQUIRE(attr.contains("name"));
+                    BOOST_REQUIRE(attr.contains("value"));
+                    if (attr.contains("generated")) {
+                        BOOST_REQUIRE(attr["generated"] == true);
+                        ++count;
+                    }
+                }
+            }
+            BOOST_REQUIRE(count >= 2);
+        }
+        BOOST_REQUIRE(content["f"].contains("children"));
+        BOOST_REQUIRE(content["f"]["children"].contains("t"));
+        // Check task attributes
+        BOOST_REQUIRE(content["f"]["children"]["t"].contains("attributes"));
+        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 11);
+        {
+            size_t count = 0;
+            for (const auto& attr : content["f"]["children"]["t"]["attributes"]) {
+                BOOST_REQUIRE(attr.contains("type"));
+                if (attr["type"] == "variable") {
+                    BOOST_REQUIRE(attr.contains("name"));
+                    BOOST_REQUIRE(attr.contains("value"));
+                    if (attr.contains("generated")) {
+                        BOOST_REQUIRE(attr["generated"] == true);
+                        ++count;
+                    }
+                }
+            }
+            BOOST_REQUIRE(count >= 2);
+        }
+    }
+
+    // (4) Clean up
+    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
+}
+
 BOOST_AUTO_TEST_CASE(test_token_authentication) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
