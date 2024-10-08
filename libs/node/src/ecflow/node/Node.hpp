@@ -420,7 +420,8 @@ public:
     ecf::Flag& flag() { return flag_; }
     const ecf::Flag& get_flag() const { return flag_; }
 
-    virtual void gen_variables(std::vector<Variable>&) const;
+    [[deprecated]] virtual void gen_variables(std::vector<Variable>&) const;
+    std::vector<Variable> gen_variables() const;
     bool getLabelValue(const std::string& name, std::string& value) const;
     bool getLabelNewValue(const std::string& name, std::string& value) const;
 

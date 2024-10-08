@@ -129,8 +129,8 @@ ojson get_basic_node_tree(const std::string& path) {
     return tree.content();
 }
 
-ojson get_full_node_tree(const std::string& path, bool with_id) {
-    FullTree tree{with_id};
+ojson get_full_node_tree(const std::string& path, bool with_id, bool with_gen_vars) {
+    FullTree tree{with_id, with_gen_vars};
     DefsTreeVisitor(get_defs(), tree).visit_at(path);
     return tree.content();
 }
