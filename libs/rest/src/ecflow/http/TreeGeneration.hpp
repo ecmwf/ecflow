@@ -63,7 +63,11 @@ private:
 
 struct FullTree
 {
-    FullTree(bool with_id) : root_(ojson::object({})), stack_{&root_}, with_id_{with_id} {}
+    FullTree(bool with_id, bool with_gen_vars)
+        : root_(ojson::object({})),
+          stack_{&root_},
+          with_id_{with_id},
+          with_gen_vars_{with_gen_vars} {}
 
     void begin_visit(const Suite& suite) {
         ojson& parent_ = *stack_.back();
@@ -74,7 +78,7 @@ struct FullTree
             current["id"] = suite.absNodePath();
         }
         publish_state(suite, current);
-        publish_attributes(suite, current);
+        publish_attributes(suite, current, with_gen_vars_);
 
         ojson& children = current["children"] = ojson::object({});
         stack_.push_back(&children);
@@ -91,7 +95,7 @@ struct FullTree
             current["id"] = family.absNodePath();
         }
         publish_state(family, current);
-        publish_attributes(family, current);
+        publish_attributes(family, current, with_gen_vars_);
 
         ojson& children = current["children"] = ojson::object({});
         stack_.push_back(&children);
@@ -108,7 +112,7 @@ struct FullTree
             current["id"] = task.absNodePath();
         }
         publish_state(task, current);
-        publish_attributes(task, current);
+        publish_attributes(task, current, with_gen_vars_);
 
         ojson& children = current["aliases"] = ojson::object({});
         stack_.push_back(&children);
@@ -126,7 +130,7 @@ struct FullTree
             current["id"] = alias.absNodePath();
         }
         publish_state(alias, current);
-        publish_attributes(alias, current);
+        publish_attributes(alias, current, with_gen_vars_);
     }
 
     void end_visit(const Alias& alias [[maybe_unused]]) { stack_.pop_back(); }
@@ -141,15 +145,18 @@ private:
         state["default"] = DState::toString(node.dstate());
     }
 
-    template <typename T>
-    static ojson publish_atribute(const T& attr, std::string_view type) {
+    template <typename T, typename... P>
+    static ojson publish_atribute(const T& attr, std::string_view type, P... parameters) {
         auto j = ojson::object({});
         to_json(j, attr);
         j["type"] = type;
+        if constexpr (sizeof...(P) > 0) {
+            ((j[parameters.first] = parameters.second), ...);
+        }
         return j;
     }
 
-    static void publish_attributes(const Node& node, ojson& parent) {
+    static void publish_attributes(const Node& node, ojson& parent, bool with_gen_vars) {
         ojson& array = parent["attributes"] = ojson::array();
 
         for (const auto& attr : node.labels()) {
@@ -163,6 +170,11 @@ private:
         }
         for (const auto& attr : node.variables()) {
             array.emplace_back(publish_atribute(attr, "variable"));
+        }
+        if (with_gen_vars) {
+            for (const auto& attr : node.gen_variables()) {
+                array.emplace_back(publish_atribute(attr, "variable", std::make_pair("generated", true)));
+            }
         }
         for (const auto& attr : node.limits()) {
             array.emplace_back(publish_atribute(*attr, "limit"));
@@ -252,6 +264,7 @@ private:
     ojson root_;
     std::vector<ojson*> stack_;
     bool with_id_;
+    bool with_gen_vars_;
 };
 
 } // namespace ecf::http

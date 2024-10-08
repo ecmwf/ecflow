@@ -492,7 +492,12 @@ Obtain the tree of all Suites
    * - Description
      - **Read** a tree with all suites
    * - Parameters
-     - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`; :code:`with_id`, (optional), possible values: :code:`true`, :code:`false`
+     - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`
+
+       :code:`with_id`, (optional), possible values: :code:`true`, :code:`false`
+
+       :code:`gen_vars`, (optional), possible values: :code:`true`
+
    * - Payload
      - *empty*
    * - Response
@@ -513,7 +518,69 @@ When query parameter :code:`content` is not provided, or query parameter is :cod
       }
     }
 
-When query parameters :code:`content=full&with_id=true`, the full Suite tree is provided:
+When query parameter :code:`content=full` is used, the full Suite tree is provided:
+
+.. code:: json
+
+  {
+    "some_suite": {
+      "type": "suite",
+      "state": {
+        "node": "active",
+        "default": "complete"
+      },
+      "attributes": [
+        {
+          "name": "YMD",
+          "value": "20100114",
+          "const": false,
+          "type": "variable"
+        }
+      ],
+      "children": {
+        "some_family": {
+          "type": "family",
+          "state": {
+            "node": "active",
+            "default": "unknown"
+          },
+          "attributes": [],
+          "children": {
+            "some_task": {
+              "type": "task",
+              "state": {
+                "node": "active",
+                "default": "unknown"
+              },
+              "attributes": [
+                {
+                  "name": "some_label",
+                  "value": "value",
+                  "type": "label"
+                },
+                {
+                  "name": "some_meter",
+                  "min": 0,
+                  "max": 30,
+                  "value": 0,
+                  "type": "meter"
+                },
+                {
+                  "name": "some_event",
+                  "value": false,
+                  "initial_value": false,
+                  "type": "event"
+                }
+              ],
+              "aliases": {}
+            }
+          }
+        }
+      }
+    }
+  }
+
+When query parameters :code:`content=full&with_id=true` are used, the full Suite tree with ids is provided:
 
 .. code:: json
 
@@ -578,6 +645,9 @@ When query parameters :code:`content=full&with_id=true`, the full Suite tree is 
     }
   }
 
+When using the query parameter :code:`gen_vars=true` the generated variables are included in the :code:`attributes` section.
+Generated variables can be identified by a :code:`generate` attribute set to :code:`true`.
+
 Endpoint :code:`/v1/suites/{path}`
 ----------------------------------
 
@@ -621,71 +691,15 @@ Obtain the tree of a Node
      - **Read** a tree view of the node at :code:`/{path}`
    * - Parameters
      - :code:`content`, (optional), possible values: :code:`basic`, :code:`full`
+
+       :code:`with_id`, (optional), possible values: :code:`true`, :code:`false`
+
+       :code:`gen_vars`, (optional), possible values: :code:`true`
+
    * - Payload
      - *empty*
    * - Response
-     - :code:`{"b":{"c":""}}`, when parameter :code:`content` is not provided, or parameter :code:`content=basic`
-
-       :code:`{"b":{"state":{"node":"...","default":"..."},"children":{...},"attributes":[...]}`
-       when parameter :code:`content=full`
-
-Response with Node tree
-"""""""""""""""""""""""
-
-When query parameter :code:`content` is not provided, or query parameter is :code:`content=basic`, the basic Node tree is provided:
-
-.. code:: json
-
-    {
-      "family": {
-        "task": ""
-      }
-    }
-
-When query parameter :code:`content=full`, the full Node tree is provided:
-
-.. code:: json
-
-  {
-    "some_family": {
-      "type": "family",
-      "state": {
-        "node": "active",
-        "default": "unknown"
-      },
-      "attributes": [],
-      "children": {
-        "some_task": {
-          "type": "task",
-          "state": {
-            "node": "active",
-            "default": "unknown"
-          },
-          "attributes": [
-            {
-              "name": "some_label",
-              "value": "value",
-              "type": "label"
-            },
-            {
-              "name": "some_meter",
-              "min": 0,
-              "max": 30,
-              "value": 0,
-              "type": "meter"
-            },
-            {
-              "name": "some_event",
-              "value": false,
-              "initial_value": false,
-              "type": "event"
-            }
-          ],
-          "aliases": {}
-        }
-      }
-    }
-  }
+     - Same as `Suite tree <Response with Suite tree>`_
 
 Endpoint :code:`/v1/suites/{path}/definition`
 ---------------------------------------------
