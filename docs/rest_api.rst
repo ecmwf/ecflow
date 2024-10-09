@@ -501,7 +501,9 @@ Obtain the tree of all Suites
    * - Payload
      - *empty*
    * - Response
-     - See below for details.
+     - See :ref:`below <response with suite tree>` for details.
+
+.. _response with suite tree:
 
 Response with Suite tree
 """"""""""""""""""""""""
@@ -699,7 +701,7 @@ Obtain the tree of a Node
    * - Payload
      - *empty*
    * - Response
-     - Same as `Suite tree <Response with Suite tree>`_
+     - Same as :ref:`Suite tree <response with suite tree>`.
 
 Endpoint :code:`/v1/suites/{path}/definition`
 ---------------------------------------------
@@ -943,9 +945,85 @@ Obtain all Node attributes
    * - Payload
      - *empty*
    * - Response
-     - :code:`{"meters":[...],"variables":[...]}`
+     - See :ref:`below <response with node attributes>` for details
    * - Example
      - :code:`curl https://localhost:8080/v1/suites/path/to/node/attributes`
+
+.. _response with node attributes:
+
+Response with Node attributes
+"""""""""""""""""""""""""""""
+
+The response to a request for node attributes has the following JSON format.
+Notice how the node variables are separated from inherited variables.
+The inherited variables grouped by ancestor node, each identified by the node name and absolute path.
+
+.. code-block:: text
+
+  {
+    "path": "..."
+
+    "meters": [ { ... }, ... ],
+    "limits": [ { ... }, ... ],
+    "inlimits": [ { ... }, ... ],
+    "events": [ { ... }, ... ],
+    "labels": [ { ... }, ... ],
+    "dates": [ { ... }, ... ],
+    "days": [ { ... }, ... ],
+    "crons": [ { ... }, ... ],
+    "times": [ { ... }, ... ],
+    "todays": [ { ... }, ... ],
+    "repeat": { ... },
+    "trigger": { ... },
+    "complete": { ... },
+    "flag": { ... },
+    "late": { ... },
+    "zombies": [ { ... }, ... ],
+    "generics": [ { ... }, ... ],
+    "queues": [ { ... }, ... ],
+    "autocancel": { ... },
+    "autoarchive": { ... },
+    "autorestore": { ... },
+    "avisos": [ { ... }, ... ],
+    "mirrors" : [ { ... }, ... ],
+    "variables": [
+      {
+        "name": "..."
+        "value": "...",
+        "const": true|false
+      },
+      {
+        "name": "..."
+        "value": "...",
+        "generated": true        # only present if the variable is generated
+        "const": true|false
+      },
+      ...
+    ]
+    "inherited_variables": [
+      {
+        "name": "...<node-name>..."
+        "path": "...<node-path>...",
+        "variables: [
+          {
+            "name": "..."
+            "value": "...",
+            "type": "variable",
+            "const": true|false
+          },
+          {
+            "name": "..."
+            "value": "...",
+            "type": "variable",
+            "generated": true    # only present if the variable is generated
+            "const": true|false
+          },
+          ...
+        ]
+      },
+      ...
+    }
+  }
 
 Update a Node attribute
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1276,8 +1354,8 @@ Create a new Server attribute
    * - Response
      - :code:`{"message":"Attribute added successfully"}`
 
-Obtain a Server attribute
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Obtain all Server attributes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table::
    :stub-columns: 1
