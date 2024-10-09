@@ -1,0 +1,28 @@
+name: cd
+
+on:
+  push: ~
+  #push:
+  #  tags:
+  #    - '[0-9]+.[0-9]+.[0-9]+'
+  # Trigger the workflow manually
+  workflow_dispatch: ~
+
+jobs:
+  deploy-server:
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    with:
+      skip_checks: true
+      restrict_matrix_jobs: gnu@debian-12
+      build_config: .github/cd-server-config.yml
+    secrets: inherit
+
+  deploy-ui:
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    with:
+      skip_checks: true
+      restrict_matrix_jobs: gnu@rocky-8.6
+      #restrict_matrix_jobs: gnu@debian-12
+      build_config: .github/cd-ui-config.yml
+      #cpack_options: -DCPACK_PACKAGE_NAME=ecflow-ui
+    secrets: inherit
