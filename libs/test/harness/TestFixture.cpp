@@ -31,7 +31,7 @@ std::string rtt_filename = "rtt.dat";
 #else
 std::string rtt_filename = "rtt_d.dat";
 #endif
-std::string TestFixture::scratchSmsHome_ = "";
+std::unique_ptr<ScratchDir> TestFixture::scratch_dir_;
 std::string TestFixture::host_;
 std::string TestFixture::port_;
 std::string TestFixture::test_dir_;
@@ -40,14 +40,31 @@ std::string TestFixture::project_test_dir_ = "libs/test";
 using namespace std;
 using namespace ecf;
 
+namespace /* anonymous */ {
+
+bool is_external_server_running_remotelly(std::string_view host) {
+    return !host.empty() && host != Str::LOCALHOST();
+}
+
+bool is_external_server_running_locally(std::string_view host) {
+    return !host.empty() && host == Str::LOCALHOST();
+}
+
+bool is_local_server(std::string_view host) {
+    return host.empty() || host == Str::LOCALHOST();
+}
+
+} // namespace
+
 // ************************************************************************************************
 // For test purpose the server can be started:
-//  1/ By this test fixture
-//  2/ Externally but on the same machine. by defining env variable: export ECF_HOST=localhost
-//     WHY? To test for memory leak. (i.e. with valgrind)
-//  3/ Externally but on a different platform. by defining env variable: export ECF_HOST=itanium
-//     In this case we NEED to copy the test data, so that it is
-//     accessible by the client AND server
+//
+//  (1) Externally but on a different platform. by defining env variable: export ECF_HOST=itanium
+//      In this case we NEED to copy the test data, so that it is
+//      accessible by the client AND server
+//  (2) Externally but on the same machine. by defining env variable: export ECF_HOST=localhost
+//      WHY? To test for memory leak. (i.e. with valgrind)
+//  (3) By this test fixture
 //
 //  When invoking the server Externally _MUST_ use   .
 //     ./Server/bin/gcc.<version>/debug/server --ecfinterval=2
@@ -102,48 +119,54 @@ void TestFixture::init(const std::string& project_test_dir) {
         std::cout << "   Openssl enabled\n";
     }
 #endif
-    if (!host_.empty() && host_ != Str::LOCALHOST()) {
+    if (is_external_server_running_remotelly(host_)) {
+
+        // Option (1)
+        //
+        // Going to perform the tests using an external server, running on a remote machine.
+        // We require the external server file system to be mounted locally,
+        // and use the $SCRATCH environment variable to locate the mount point of the server data.
+        // This allows to deploy the necessary test data, reset ECF_HOME, and configure the server.
 
         client().set_host_port(host_, port_);
-        std::cout << "   EXTERNAL SERVER running on _ANOTHER_ PLATFORM, assuming " << host_ << ":" << port_
-                  << " copying test data ...\n";
 
-        // Must use a file system accessible from the server. Use $SCRATCH
-        // Duplicate test data, required to scratch area and reset ECF_HOME
-        auto scratchEnv = ecf::environment::fetch("SCRATCH");
-        assert(scratchEnv);
-        std::string theSCRATCHArea(scratchEnv.value());
-        assert(!theSCRATCHArea.empty());
+        std::cout << "   _EXTERNAL_ SERVER running on a _REMOTE_ platform";
+        std::cout << " (" << host_ << ":" << port_ << ").";
+        std::cout << " Copying test data ...\n";
 
-        theSCRATCHArea += "/test_dir";
-        test_dir_ = theSCRATCHArea; // test_dir_ needed in destructor
-        if (fs::exists(test_dir_)) {
-            fs::remove_all(test_dir_);
+        scratch_dir_ = std::make_unique<ScratchDir>();
+
+        if (const auto& d = scratch_dir_->test_dir(); fs::exists(d)) {
+            fs::remove_all(d);
         }
-        theSCRATCHArea += "/ECF_HOME";
-        scratchSmsHome_ = theSCRATCHArea;
 
-        BOOST_REQUIRE_MESSAGE(File::createDirectories(theSCRATCHArea),
+        BOOST_REQUIRE_MESSAGE(File::createDirectories(scratch_dir_->home_dir()),
                               "File::createDirectories(theSCRATCHArea) failed");
-        BOOST_REQUIRE_MESSAGE(fs::exists(theSCRATCHArea), "theSCRATCHArea does not exist");
+        BOOST_REQUIRE_MESSAGE(fs::exists(scratch_dir_->home_dir()), "theSCRATCHArea does not exist");
 
         // Ensure that local includes data exists. This needs to be copied to SCRATCH
         BOOST_REQUIRE_MESSAGE(fs::exists(includes()), "The includes dir does not exist does not exist");
 
         // Copy over the includes directory to the SCRATCH area.
-        std::string scratchIncludes = test_dir_ + "/";
+        std::string scratchIncludes = scratch_dir_->test_dir() + "/";
         std::string do_copy         = "cp -r " + includes() + " " + scratchIncludes;
-        if (system(do_copy.c_str()) != 0)
+        if (system(do_copy.c_str()) != 0) {
             assert(false);
+        }
 
         // clear log file
         clearLog();
     }
-    else if (!host_.empty() && host_ == Str::LOCALHOST()) {
+    else if (is_external_server_running_locally(host_)) {
+
+        // Option (2)
+        //
+        // Going to perform the tests using an external server, running on the local machine.
 
         client().set_host_port(host_, port_);
-        std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << client().host() << ":"
-                  << client().port() << "\n";
+
+        std::cout << "   _EXTERNAL_ SERVER running on the _LOCAL_ platform";
+        std::cout << " (" << client().host() << ":" << client().port() << ").\n";
 
         // Print the server stats before we start + checks if it is up and running::
         client().set_cli(true); // so server stats are written to standard out
@@ -166,10 +189,16 @@ void TestFixture::init(const std::string& project_test_dir) {
                 cout << "   Log file " << TestFixture::pathToLogFile() << " creation failed " << client().errorMsg()
                      << "\n";
         }
-        else
+        else {
             cout << "   Log file " << the_log_file << " already exists\n";
+        }
     }
     else {
+
+        // Option (3)
+        //
+        // Going to perform the tests using a server launched as part of the test setup.
+
         // For local host start by removing log file. Server invocation should create a new log file
         fs::remove(fs::path(pathToLogFile()));
         host_ = Str::LOCALHOST();
@@ -301,18 +330,14 @@ int TestFixture::job_submission_interval() {
 }
 
 std::string TestFixture::smshome() {
-    if (serverOnLocalMachine()) {
+    if (is_local_server(TestFixture::host_)) {
         return local_ecf_home();
     }
-    return scratchSmsHome_;
-}
-
-bool TestFixture::serverOnLocalMachine() {
-    return (host_.empty() || host_ == Str::LOCALHOST());
+    return scratch_dir_->home_dir();
 }
 
 std::string TestFixture::theClientExePath() {
-    if (serverOnLocalMachine()) {
+    if (is_local_server(TestFixture::host_)) {
         return File::find_ecf_client_path();
     }
 
@@ -340,7 +365,7 @@ void TestFixture::clearLog() {
 }
 
 std::string TestFixture::pathToLogFile() {
-    if (serverOnLocalMachine()) {
+    if (is_local_server(TestFixture::host_)) {
         Host host;
         return host.ecf_log_file(port_);
     }

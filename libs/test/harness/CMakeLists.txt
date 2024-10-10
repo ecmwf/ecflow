@@ -10,6 +10,7 @@
 
 set(srcs
   # Headers
+  ScratchDir.hpp
   ServerTestHarness.hpp
   TestFixture.hpp
   ZombieUtil.hpp
