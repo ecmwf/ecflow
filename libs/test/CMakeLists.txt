@@ -65,7 +65,7 @@ if (ENABLE_ALL_TESTS)
 
   ecbuild_add_test(
     TARGET
-      s_test_http
+      s_test_using_http_backend
     LABELS
       integration
       nightly
@@ -80,7 +80,7 @@ if (ENABLE_ALL_TESTS)
     TEST_DEPENDS
       s_client
   )
-  target_clangformat(s_test_http CONDITION ENABLE_TESTS)
+  target_clangformat(s_test_using_http_backend CONDITION ENABLE_TESTS)
 
   ecbuild_add_test(
     TARGET
