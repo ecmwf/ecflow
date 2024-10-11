@@ -155,8 +155,7 @@ void TestFixture::init(const std::string& project_test_dir) {
         client().set_host_port(host_, port_);
 
         std::cout << "   _EXTERNAL_ SERVER running on a _REMOTE_ platform";
-        std::cout << " (" << host_ << ":" << port_ << ").";
-        std::cout << " Copying test data ...\n";
+        std::cout << " (" << host_ << ":" << port_ << ").\n";
 
         scratch_dir_ = std::make_unique<ScratchDir>();
 
@@ -164,13 +163,20 @@ void TestFixture::init(const std::string& project_test_dir) {
             fs::remove_all(d);
         }
 
-        BOOST_REQUIRE_MESSAGE(File::createDirectories(scratch_dir_->home_dir()),
-                              "File::createDirectories(theSCRATCHArea) failed");
-        BOOST_REQUIRE_MESSAGE(fs::exists(scratch_dir_->home_dir()), "theSCRATCHArea does not exist");
+        {
+            auto success = File::createDirectories(scratch_dir_->home_dir());
+            BOOST_REQUIRE_MESSAGE(success, "Create the home directory inside the $SCRATCH");
+        }
+        {
+            auto success = fs::exists(scratch_dir_->home_dir());
+            BOOST_REQUIRE_MESSAGE(success, "The home directory inside the $SCRATCH exists");
+        }
+        { // Ensure that local includes data exists, before attempting to copy it into $SCRATCH
+            auto success = fs::exists(includes());
+            BOOST_REQUIRE_MESSAGE(success, "The includes directory exists");
+        }
 
-        // Ensure that local includes data exists. This needs to be copied to SCRATCH
-        BOOST_REQUIRE_MESSAGE(fs::exists(includes()), "The includes dir does not exist does not exist");
-
+        std::cout << " Copying test data ...\n";
         // Copy over the includes directory to the SCRATCH area.
         std::string scratchIncludes = scratch_dir_->test_dir() + "/";
         std::string do_copy         = "cp -r " + includes() + " " + scratchIncludes;
@@ -229,10 +235,16 @@ void TestFixture::init(const std::string& project_test_dir) {
         client().set_host_port(host_, port_);
 
         std::cout << "   _LOCAL_ SERVER running on the _LOCAL_ platform";
-        std::cout << " (" << host_ << ":" << port_ << ").";
+        std::cout << " (" << host_ << ":" << port_ << ").\n";
+
+        bool use_http = false;
+        if (auto found = ecf::environment::fetch("ECF_TEST_USING_HTTP"); found) {
+            use_http = found.value() == "1";
+            client().enable_http();
+            client().debug(true);
+        }
 
         // clang-format off
-        bool use_http = false;
         LocalServerLauncher{}
             .with_host(host_)
             .with_port(port_)
@@ -342,18 +354,22 @@ std::string TestFixture::smshome() {
 }
 
 std::string TestFixture::theClientExePath() {
-    if (is_local_server(TestFixture::host_)) {
-        return File::find_ecf_client_path();
+    std::string extra_options = "";
+    if (auto var = ecf::environment::fetch("ECF_TEST_USING_HTTP"); var) {
+        extra_options = " --http";
     }
 
-    if (auto client_path_p = ecf::environment::fetch("ECF_CLIENT_EXE_PATH"); client_path_p) {
-        return client_path_p.value();
+    if (is_local_server(TestFixture::host_)) {
+        return File::find_ecf_client_path() + extra_options;
+    }
+    else if (auto client_path_p = ecf::environment::fetch("ECF_CLIENT_EXE_PATH"); client_path_p) {
+        return client_path_p.value() + extra_options;
     }
     else {
         // Try this before complaining
         std::string path = "/usr/local/apps/ecflow/current/bin/ecflow_client";
         if (fs::exists(path)) {
-            return path;
+            return path + extra_options;
         }
 
         cout << "Please set ECF_CLIENT_EXE_PATH. This needs to be set to path to the client executable\n";
