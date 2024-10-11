@@ -77,6 +77,8 @@ if (ENABLE_ALL_TESTS)
       libharness
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
       test_support
+    ENVIRONMENT
+      ECF_TEST_USING_HTTP=1
     TEST_DEPENDS
       s_client
   )
