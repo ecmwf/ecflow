@@ -421,6 +421,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #ifdef ECF_OPENSSL
                     if (clientEnv_.ssl()) {
 
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (with SSL) <<<" << endl;
+                        }
+
                         clientEnv_.openssl().init_for_client();
 
                         SslClient theClient(io,
@@ -452,7 +456,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             return 1;
                         }
                     }
-                    else if (clientEnv_.http()) {
+                    else
+#endif
+                    if (clientEnv_.http()) {
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << endl;
+                        }
+
                         HttpClient theClient(cts_cmd, clientEnv_.host(), clientEnv_.port());
                         theClient.run();
 
@@ -474,7 +484,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         }
                     }
                     else {
-#endif
+
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<" << endl;
+                        }
+
+
                         Client theClient(
                             io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
                         {
