@@ -46,10 +46,6 @@ struct TestFixture
     TestFixture();
     ~TestFixture();
 
-    // Configure the server with the job submission interval.
-    // i.e for each 'n' seconds of job submission interval the calendar
-    // is typically incremented by 1 minute. Hence speeding up the
-    // time and thus the testing. See Calendar for further details
     static int job_submission_interval();
 
     /// The location of ECF home will vary. If client/server on same machines we

@@ -13,6 +13,7 @@
 #include <fstream> // for ofstream
 #include <iostream>
 
+#include "LocalServerLauncher.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
@@ -54,6 +55,30 @@ bool is_local_server(std::string_view host) {
     return host.empty() || host == Str::LOCALHOST();
 }
 
+std::string find_available_port(std::string port) {
+    auto current_port = ecf::convert_to<int>(port);
+
+    // The goal is to create a unique port number, allowing debug and release tests to run at the same time
+    // Since several serves might run on same machine, on different workspaces, checking lock file is not sufficient.
+    // We try to ensure the port is available by attempting to contact the server, before creating the lock file.
+
+    // (1) Search for port that isn't locked (i.e. for which there is no `.lock` file)
+    while (!EcfPortLock::is_free(current_port)) {
+        ++current_port;
+    }
+
+    // (2) Search for port that isn't in use (i.e. for which there is no server running)
+    auto selected_port = ClientInvoker::find_free_port(current_port, true /* show debug output */);
+
+    // (3) Create lock file for selected port
+    //     -- This attempts to prevent other tests from using the same port
+    //     -- However this solution is not totally foolproof, as multiple tests be running in parallel,
+    //        and find the same port to be free before the lock file is created
+    EcfPortLock::create(selected_port);
+
+    return selected_port;
+}
+
 } // namespace
 
 // ************************************************************************************************
@@ -93,7 +118,6 @@ void TestFixture::init(const std::string& project_test_dir) {
     auto test_dir                  = local_ecf_home();
     std::cout << "TestFixture::TestFixture() project_test_dir      :" << project_test_dir << "\n";
     std::cout << "TestFixture::TestFixture() local_ecf_home        :" << test_dir << "\n";
-    std::cout << "TestFixture::TestFixture() jobSubmissionInterval :" << job_submission_interval() << "\n";
     std::cout << "TestFixture::TestFixture() cwd                   :" << fs::current_path() << "\n";
 
     if (!fs::exists(test_dir)) {
@@ -199,37 +223,22 @@ void TestFixture::init(const std::string& project_test_dir) {
         //
         // Going to perform the tests using a server launched as part of the test setup.
 
-        // For local host start by removing log file. Server invocation should create a new log file
-        fs::remove(fs::path(pathToLogFile()));
+        // Update ClientInvoker with local host and port
         host_ = Str::LOCALHOST();
-
-        // Create a unique port number, allowing debug and release to run at the same time
-        // Note: linux64 and linux64intel, can run on same machine, on different workspace
-        // Hence the lock file is not sufficient. Hence, we will make a client server call.
-        cout << "Find free port to start server, starting with port " << port_ << "\n";
-        auto the_port = ecf::convert_to<int>(port_);
-        while (!EcfPortLock::is_free(the_port))
-            the_port++;
-        port_ = ClientInvoker::find_free_port(the_port, true /*show debug output */);
-        EcfPortLock::create(port_);
-
-        // host_ is empty update to localhost, **since** port may have changed, update ClientInvoker
+        port_ = find_available_port(port_);
         client().set_host_port(host_, port_);
 
-        // Remove the generated check point files, at start of test, otherwise server will load check point file
-        Host h;
-        fs::remove(h.ecf_checkpt_file(port_));
-        fs::remove(h.ecf_backup_checkpt_file(port_));
+        std::cout << "   _LOCAL_ SERVER running on the _LOCAL_ platform";
+        std::cout << " (" << host_ << ":" << port_ << ").";
 
-        std::string theServerInvokePath = File::find_ecf_server_path();
-        assert(!theServerInvokePath.empty());
-        theServerInvokePath += " --port=" + port_;
-        theServerInvokePath += " --ecfinterval=" + ecf::convert_to<std::string>(job_submission_interval());
-        theServerInvokePath += "&";
-        if (system(theServerInvokePath.c_str()) != 0)
-            assert(false); // " Server invoke failed "
-
-        std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\n";
+        // clang-format off
+        bool use_http = false;
+        LocalServerLauncher{}
+            .with_host(host_)
+            .with_port(port_)
+            .using_http(use_http)
+            .launch();
+        // clang-format on
     }
 
     /// Ping the server to see if its running
@@ -322,11 +331,7 @@ TestFixture::~TestFixture() {
 }
 
 int TestFixture::job_submission_interval() {
-    int jobSubmissionInterval = 3;
-#if defined(HPUX) || defined(_AIX)
-    jobSubmissionInterval += 3;
-#endif
-    return jobSubmissionInterval;
+    return LocalServerLauncher::job_submission_interval();
 }
 
 std::string TestFixture::smshome() {
