@@ -42,51 +42,53 @@ BOOST_AUTO_TEST_CASE(test_abort_cmd) {
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
-    // ECF_HOME variable is automatically added by the test harness.
-    // ECF_INCLUDE variable is automatically added by the test harness.
-    // SLEEPTIME variable is automatically added by the test harness.
-    // ECF_CLIENT_EXE_PATH variable is automatically added by the test harness.
-    //                     This is substituted in ecf includes
-    //                     Allows test to run without requiring installation
+    //
+    // The following variables are automatically added by the test harness:
+    //  * ECF_HOME
+    //  * ECF_INCLUDE
+    //  * SLEEPTIME
+    //  * ECF_CLIENT_EXE_PATH
+    //      n.b. This is substituted in .ecf includes and allows tests to run without requiring installation
+    //
 
-    // # Note: we have to use relative paths, since these tests are relocatable
-    // suite test_task_abort_cmd
-    //   edit ECF_TRIES '4'
-    //   family family0
-    //     task abort
-    //   endfamily
-    // endsuite
-    Defs theDefs;
-    {
-        suite_ptr suite = theDefs.add_suite("test_abort_cmd");
-        suite->addVariable(Variable("ECF_TRIES", "4"));
-        family_ptr fam0 = suite->add_family("family0");
-        task_ptr abort  = fam0->add_task("abort");
-        abort->addVerify(VerifyAttr(NState::ABORTED, 3));  // task should abort 3 times & succeed on 4th attempt
-        abort->addVerify(VerifyAttr(NState::COMPLETE, 1)); // task should complete 1 times
-    }
+    // clang-format off
+    std::string definition =
+        "suite test_task_abort_cmd\n"
+        "  edit ECF_TRIES '4'\n"
+        "  family family0\n"
+        "    task abort\n"
+        "    verify aborted:3\n"
+        "    verify complete:1\n"
+        "  endfamily\n"
+        "endsuite\n";
+    // clang-format on
+
+    Defs defs;
+    defs.restore_from_string(definition);
 
     // Create a custom ecf file for test_task_abort_cmd/family0/abort to invoke the child abort command
-    std::string templateEcfFile;
-    templateEcfFile += "%include <head.h>\n";
-    templateEcfFile += "\n";
-    templateEcfFile += "echo do some work\n";
-    templateEcfFile += "if [ %ECF_TRYNO% -le 3 ] ; then\n";
-    templateEcfFile += "   %ECF_CLIENT_EXE_PATH% --abort=\"expected abort at task try no %ECF_TRYNO%\"\n";
-    templateEcfFile += "   trap 0       # Remove all traps\n";
-    templateEcfFile += "   exit 0       # End the shell before child command complete\n";
-    templateEcfFile += "fi\n";
-    templateEcfFile += "\n";
-    templateEcfFile += "%include <tail.h>\n";
+    //
+
+    std::string templateEcfFile =
+        "%include <head.h>\n"
+        "\n"
+        "echo do some work\n"
+        "if [ %ECF_TRYNO% -le 3 ] ; then\n"
+        "   %ECF_CLIENT_EXE_PATH% --abort=\"expected abort at task try no %ECF_TRYNO%\"\n"
+        "   trap 0       # Remove all traps\n"
+        "   exit 0       # End the shell before child command complete\n"
+        "fi\n"
+        "\n"
+        "%include <tail.h>\n";
 
     // The test harness will create corresponding directory structure
     // Override the default ECF file, with our custom ECF_ file
     std::map<std::string, std::string> taskEcfFileMap;
-    taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs, "abort"), templateEcfFile));
+    taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(defs, "abort"), templateEcfFile));
 
     // Avoid standard verification since we expect to abort many times
     ServerTestHarness serverTestHarness;
-    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_abort_cmd.def"), taskEcfFileMap);
+    serverTestHarness.run(defs, ServerTestHarness::testDataDefsLocation("test_abort_cmd.def"), taskEcfFileMap);
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
