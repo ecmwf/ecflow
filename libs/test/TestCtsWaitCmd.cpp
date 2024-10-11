@@ -189,14 +189,15 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
 
     // Create a custom ecf file for test_wait_cmd/family0/wait to invoke the child wait command
     // NOTE: ../family1/FRED does not exist
-    std::string templateEcfFileForWait;
-    templateEcfFileForWait += "%include <head.h>\n";
-    templateEcfFileForWait += "\n";
-    templateEcfFileForWait += "echo do some work\n";
-    templateEcfFileForWait += "%ECF_CLIENT_EXE_PATH% --wait=\"../family1/FRED eq complete and ../family1/b eq complete "
-                              "and ../family2/aa eq complete and ../family2/bb eq complete\"\n";
-    templateEcfFileForWait += "\n";
-    templateEcfFileForWait += "%include <tail.h>\n";
+    // clang-format off
+    std::string templateEcfFileForWait =
+        "%include <head.h>\n"
+        "\n"
+        "echo do some work\n"
+        "%ECF_CLIENT_EXE_PATH% --wait=\"../family1/FRED eq complete and ../family1/b eq complete and ../family2/aa eq complete and ../family2/bb eq complete\"\n"
+        "\n"
+        "%include <tail.h>\n";
+    // clang-format on
 
     std::map<std::string, std::string> taskEcfFileMap;
     taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs, "wait"), templateEcfFileForWait));
