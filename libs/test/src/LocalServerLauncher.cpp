@@ -27,6 +27,7 @@ void LocalServerLauncher::launch() {
 
     // (2) Build the command to launch the server
     std::string cmd = ecf::File::find_ecf_server_path();
+    cmd += " -d";
     cmd += " --port " + port_;
     cmd += use_http_ ? " --http" : "";
     cmd += " --ecfinterval=" + ecf::convert_to<std::string>(submission_interval_);
