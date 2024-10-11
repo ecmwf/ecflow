@@ -10,11 +10,13 @@
 
 set(srcs
   # Headers
+  LocalServerLauncher.hpp
   ScratchDir.hpp
   ServerTestHarness.hpp
   TestFixture.hpp
   ZombieUtil.hpp
   # Sources
+  LocalServerLauncher.cpp
   ServerTestHarness.cpp
   TestFixture.cpp
   ZombieUtill.cpp
