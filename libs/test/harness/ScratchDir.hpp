@@ -12,10 +12,10 @@
 #define ecflow_test_harness_ScratchDir_HPP
 
 #include <cassert>
-#include <filesystem>
 #include <string>
 
 #include "ecflow/core/Environment.hpp"
+#include "ecflow/core/Filesystem.hpp"
 
 /**
  * This class is used to create a scratch directory for testing purposes.
@@ -58,8 +58,7 @@ private:
         return scratch;
     }
 
-    inline static void clear_scratch_test_dir(std::string_view test_dir) {
-        namespace fs = std::filesystem;
+    inline static void clear_scratch_test_dir(const std::string& test_dir) {
         if (fs::exists(test_dir)) {
             fs::remove_all(test_dir);
         }
