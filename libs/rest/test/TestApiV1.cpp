@@ -76,11 +76,11 @@ void start_api_server() {
 
     std::thread t([] {
 #if defined(ECF_TEST_HTTP_BACKEND)
-        int argc     = 4;
-        char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", (char*)"--http", NULL};
+        char* argv[] = {(char*)"ecflow_http", (char*)"-v", (char*)"--polling_interval", (char*)"1", (char*)"--port", (char*)"8081", (char*)"--http", NULL};
+        int argc     = 7;
 #else
-        int argc     = 3;
-        char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", NULL};
+        char* argv[] = {(char*)"ecflow_http", (char*)"-v", (char*)"--polling_interval", (char*)"1", (char*)"--port", (char*)"8080", NULL};
+        int argc     = 6;
 #endif
 
         HttpServer server(argc, argv);
@@ -121,7 +121,11 @@ struct SetupTest
             throw std::runtime_error("Failed to set signal mask");
         }
 
+#if defined(ECF_TEST_HTTP_BACKEND)
+        setenv("ECF_PORT", "3198", 0);
+#else
         setenv("ECF_PORT", "3199", 0);
+#endif
         setenv("ECF_HOST", "localhost", 1);
     }
     void setup() {
@@ -176,7 +180,11 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
+#if defined(ECF_TEST_HTTP_BACKEND)
+    httplib::SSLClient c(API_HOST, 8081);
+#else
     httplib::SSLClient c(API_HOST, 8080);
+#endif
 
     c.enable_server_certificate_verification(false);
     c.set_connection_timeout(3);
