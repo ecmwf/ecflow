@@ -60,23 +60,20 @@ std::string find_available_port(std::string port) {
 
     // The goal is to create a unique port number, allowing debug and release tests to run at the same time
     // Since several serves might run on same machine, on different workspaces, checking lock file is not sufficient.
-    // We try to ensure the port is available by attempting to contact the server, before creating the lock file.
+    // We try to ensure the port is available by attempting to contact the server to confirm that the lock has been performed.
 
     // (1) Search for port that isn't locked (i.e. for which there is no `.lock` file)
-    while (!EcfPortLock::is_free(current_port)) {
-        ++current_port;
+    for(int selected_port = EcfPortLock::try_next_port_lock(current_port, true); /* always advance */; selected_port = EcfPortLock::try_next_port_lock(selected_port, true)) {
+        if (ClientInvoker::is_free_port(selected_port, true)) {
+            // We found the free port that we wanted!
+            return ecf::convert_to<std::string>(selected_port);
+        } else {
+            // This port is in use (maybe by a server running on another workspace)
+            EcfPortLock::try_port_lock(selected_port);
+        }
     }
 
-    // (2) Search for port that isn't in use (i.e. for which there is no server running)
-    auto selected_port = ClientInvoker::find_free_port(current_port, true /* show debug output */);
-
-    // (3) Create lock file for selected port
-    //     -- This attempts to prevent other tests from using the same port
-    //     -- However this solution is not totally foolproof, as multiple tests be running in parallel,
-    //        and find the same port to be free before the lock file is created
-    EcfPortLock::create(selected_port);
-
-    return selected_port;
+    throw std::runtime_error("Unable to find an available port");
 }
 
 } // namespace
@@ -428,7 +425,9 @@ std::string TestFixture::local_ecf_home() {
     build_type = "release";
 #endif
 
-    std::string rel_path = "data/ECF_HOME_" + build_type + "_" + compiler;
+
+    auto pid = getpid();
+    std::string rel_path = "data/ECF_HOME__" + build_type + "__" + compiler + "__pid" + ecf::convert_to<std::string>(pid) + "__";
 
     // Allow post-fix to be added, to allow test to run in parallel
     if (auto custom_postfix = ecf::environment::fetch("TEST_ECF_HOME_POSTFIX"); custom_postfix) {
