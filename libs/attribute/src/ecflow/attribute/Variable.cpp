@@ -49,10 +49,12 @@ int Variable::value() const {
 }
 
 bool Variable::operator==(const Variable& rhs) const {
-    if (v_ != rhs.v_)
+    if (v_ != rhs.v_) {
         return false;
-    if (n_ != rhs.n_)
+    }
+    if (n_ != rhs.n_) {
         return false;
+    }
     return true;
 }
 

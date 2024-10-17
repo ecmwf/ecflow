@@ -82,6 +82,17 @@
     #define NEXT_HOST_POLL_PERIOD 30
 #endif
 
+#include "ecflow/base/HttpClient.hpp"
+
+#if defined(ADD)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define ADD ns_uop_add
+    #undef ADD
+#endif
+#if defined(STATUS)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define STATUS ns_o_status
+    #undef STATUS
+#endif
+
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
@@ -396,6 +407,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #ifdef ECF_OPENSSL
                     if (clientEnv_.ssl()) {
 
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (with SSL) <<<" << endl;
+                        }
+
                         clientEnv_.openssl().init_for_client();
 
                         SslClient theClient(io,
@@ -410,8 +425,36 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
+
+                        /// Let see how the server responded if at all.
+                        try {
+                            /// will return false if further action required
+                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                // The normal response.  RoundTriprecorder will record in rtt_
+                                return 0; // the normal exit path
+                            }
+                        }
+                        catch (std::exception& e) {
+                            server_reply_.set_error_msg(e.what());
+                            return 1;
+                        }
+                    }
+                    else
+#endif
+                    if (clientEnv_.http()) {
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << endl;
+                        }
+
+                        HttpClient theClient(cts_cmd, clientEnv_.host(), clientEnv_.port());
+                        theClient.run();
+
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -427,7 +470,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         }
                     }
                     else {
-#endif
+
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<" << endl;
+                        }
+
+
                         Client theClient(
                             io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
                         {
@@ -436,8 +484,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -1474,6 +1523,60 @@ std::string ClientInvoker::client_env_host_port() const {
     host_port += clientEnv_.port();
     return host_port;
 }
+
+bool ClientInvoker::is_free_port(int port, bool debug) {
+    // Ping failed, We need to distinguish between:
+    //    a/ Server does not exist : <FREE> port
+    //    b/ Address in use        : <BUSY> port on existing server
+    // Using server_version() but then get error messages
+    // ******** Until this is done we can't implement port hopping **********
+
+    if (debug) {
+        cout << "  ClientInvoker::is_free_port: checking port " << port << "\n";
+    }
+
+    ClientInvoker client;
+    client.set_retry_connection_period(1); // avoid long wait
+    client.set_connection_attempts(1);     // avoid long wait
+
+    const auto the_port = ecf::convert_to<std::string>(port);
+    try {
+        if (debug) {
+              cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << the_port << "'\n";
+        }
+        client.set_host_port(Str::LOCALHOST(), the_port);
+        client.pingServer();
+        if (debug) {
+            cout << "   Connected to server on port " << the_port << ". Returning FALSE\n";
+        }
+        return false;
+    }
+    catch (std::runtime_error& e) {
+        std::string msg = e.what();
+        if (debug) {
+            cout << "   " << msg;
+        }
+        if (msg.find("authentication failed") != std::string::npos) {
+            if (debug) {
+                cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used. Returning FALSE\n";
+            }
+            return false;
+        }
+        if (msg.find("invalid_argument") != std::string::npos) {
+            if (debug) {
+                cout << "   Mixing 4 and 5 series ?, hence port " << the_port << " is used. Returning FALSE\n";
+            }
+            return false;
+        }
+        else {
+            if (debug) {
+                cout << "   Found free port " << the_port << "\n";
+            }
+        }
+    }
+    return true;
+}
+
 
 std::string ClientInvoker::find_free_port(int seed_port_number, bool debug) {
     // Ping failed, We need to distinguish between:

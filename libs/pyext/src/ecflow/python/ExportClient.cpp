@@ -580,7 +580,9 @@ void export_Client() {
         .def("free_all_dep", &free_all_dep, ClientDoc::free_all_dep())
         .def("free_all_dep", &free_all_dep1)
         .def("ping", &ClientInvoker::pingServer, ClientDoc::ping())
-        .def("stats", &stats, stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
+        .def("stats",
+             &stats,
+             stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
         .def("stats_reset", &stats_reset, ClientDoc::stats_reset())
         .def("get_file",
              &get_file,
@@ -660,6 +662,10 @@ void export_Client() {
         .def("enable_ssl", &ClientInvoker::enable_ssl, ecf::Openssl::ssl_info())
         .def("disable_ssl", &ClientInvoker::disable_ssl, ecf::Openssl::ssl_info())
 #endif
+
+        .def("enable_http", &ClientInvoker::enable_http, "Enable HTTP communication")
+        .def("disable_http", &ClientInvoker::disable_http, "Disable HTTP communication")
+
         .def("zombie_get", &zombieGet, return_value_policy<copy_const_reference>())
         .def("zombie_fob", &ClientInvoker::zombieFobCli)
         .def("zombie_fail", &ClientInvoker::zombieFailCli)

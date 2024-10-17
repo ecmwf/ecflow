@@ -26,13 +26,15 @@ ServerItem::ServerItem(const std::string& name,
                        const std::string& port,
                        const std::string& user,
                        bool favourite,
-                       bool ssl)
+                       bool ssl,
+                       bool http)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
       favourite_(favourite),
-      ssl_(ssl) {
+      ssl_(ssl),
+      http_(http) {
 }
 
 ServerItem::~ServerItem() {
@@ -94,6 +96,15 @@ void ServerItem::setSsl(bool b) {
     // broadcastChanged();
 }
 
+void ServerItem::setHttp(bool b) {
+    if (http_ != b) {
+        http_ = b;
+        if (handler_)
+            handler_->setHttp(http_);
+    }
+    // broadcastChanged();
+}
+
 void ServerItem::setUser(const std::string& user) {
     if (user_ != user) {
         user_ = user;
@@ -114,7 +125,7 @@ std::string ServerItem::longName() const {
 
 void ServerItem::registerUsageBegin() {
     if (!handler_) {
-        handler_ = ServerHandler::addServer(name_, host_, port_, user_, ssl_);
+        handler_ = ServerHandler::addServer(name_, host_, port_, user_, ssl_, http_);
     }
     if (handler_)
         useCnt_++;
