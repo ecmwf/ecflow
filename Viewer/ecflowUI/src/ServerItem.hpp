@@ -42,6 +42,7 @@ public:
     bool isSystem() const { return system_; }
     bool isSsl() const { return ssl_; }
     bool isHttp() const { return http_; }
+    bool isHttps() const { return https_; }
 
     bool isUsed() const;
     int useCnt() const { return useCnt_; }
@@ -58,18 +59,25 @@ protected:
                const std::string& user,
                bool favourite,
                bool ssl,
-               bool http);
+               bool http,
+               bool https);
     ~ServerItem();
 
     void name(const std::string& name) { name_ = name; }
     void host(const std::string& host) { host_ = host; }
     void port(const std::string& port) { port_ = port; }
-    void
-    reset(const std::string& name, const std::string& host, const std::string& port, const std::string& user, bool ssl);
+    void reset(const std::string& name,
+               const std::string& host,
+               const std::string& port,
+               const std::string& user,
+               bool ssl,
+               bool http,
+               bool https);
     void setFavourite(bool b);
     void setSystem(bool b);
     void setSsl(bool b);
     void setHttp(bool b);
+    void setHttps(bool b);
     void setUser(const std::string&);
 
     void registerUsageBegin();
@@ -86,6 +94,7 @@ protected:
     bool system_{false};
     bool ssl_{false};
     bool http_{false};
+    bool https_{false};
     int useCnt_{0};
     ServerHandler* handler_{nullptr};
 
