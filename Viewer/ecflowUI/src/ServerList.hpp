@@ -132,6 +132,8 @@ public:
                     const std::string& user,
                     bool favorite,
                     bool ssl,
+                    bool http,
+                    bool https,
                     bool saveIt);
     void remove(ServerItem*);
     ServerItem* reset(ServerItem*,
@@ -139,7 +141,9 @@ public:
                       const std::string& host,
                       const std::string& port,
                       const std::string& user,
-                      bool ssl);
+                      bool ssl,
+                      bool http,
+                      bool https);
     void setFavourite(ServerItem*, bool);
 
     std::string uniqueName(const std::string&);

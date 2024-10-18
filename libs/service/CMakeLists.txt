@@ -81,6 +81,9 @@ ecbuild_add_test(
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::filesystem
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(u_service_aviso
   CONDITION ENABLE_TESTS
@@ -103,6 +106,10 @@ ecbuild_add_test(
   LIBS
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+
 )
 target_clangformat(u_service_mirror
   CONDITION ENABLE_TESTS

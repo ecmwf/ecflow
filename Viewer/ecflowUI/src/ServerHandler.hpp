@@ -59,8 +59,11 @@ public:
     const std::string& fullLongName() const { return fullLongName_; }
     const std::string& port() const { return port_; }
     bool isSsl() const { return ssl_; }
+    bool isHttp() const { return http_; }
     const std::string& user() { return user_; }
     void setSsl(bool);
+    void setHttp(bool);
+    void setHttps(bool);
     void setUser(const std::string& user);
 
     Activity activity() const { return activity_; }
@@ -118,7 +121,9 @@ public:
                                     const std::string& host,
                                     const std::string& port,
                                     const std::string& user,
-                                    bool ssl);
+                                    bool ssl,
+                                    bool http,
+                                    bool https);
     static void removeServer(ServerHandler*);
     static ServerHandler* findServer(const std::string& alias);
 
@@ -142,7 +147,9 @@ protected:
                   const std::string& host,
                   const std::string& port,
                   const std::string& user,
-                  bool ssl);
+                  bool ssl,
+                  bool http,
+                  bool https);
     ~ServerHandler() override;
     void logoutAndDelete();
     void queueLoggedOut();
@@ -167,6 +174,8 @@ protected:
     std::string port_;
     std::string user_;
     bool ssl_;
+    bool http_;
+    bool https_;
     ClientInvoker* client_;
     std::string longName_;
     std::string fullLongName_;

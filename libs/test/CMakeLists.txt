@@ -8,31 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  src/ServerTestHarness.hpp
-  src/TestFixture.hpp
-  src/ZombieUtil.hpp
-  # Sources
-  src/ServerTestHarness.cpp
-  src/TestFixture.cpp
-  src/ZombieUtill.cpp
-)
-
-ecbuild_add_library(
-  TARGET
-    libharness
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-    ../base/test
-  PUBLIC_LIBS
-    ecflow_all
-)
-target_clangformat(libharness)
+add_subdirectory(src)
 
 # =================================================================
 # test
@@ -86,6 +62,27 @@ if (ENABLE_ALL_TESTS)
       s_client
   )
   target_clangformat(s_test CONDITION ENABLE_TESTS)
+
+  ecbuild_add_test(
+    TARGET
+      s_test_using_http_backend
+    LABELS
+      integration
+      nightly
+    SOURCES
+      ${test_srcs}
+    DEFINITIONS
+      ECFLOW_TEST_SERVER_HTTP
+    LIBS
+      libharness
+      $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      test_support
+    ENVIRONMENT
+      ECF_TEST_USING_HTTP=1
+    TEST_DEPENDS
+      s_client
+  )
+  target_clangformat(s_test_using_http_backend CONDITION ENABLE_TESTS)
 
   ecbuild_add_test(
     TARGET
