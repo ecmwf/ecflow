@@ -198,16 +198,23 @@ QString ServerAddDialog::user() const {
     return userEdit->text();
 }
 
-bool ServerAddDialog::isSsl() const {
-    return sslCb->isChecked();
-}
-
-bool ServerAddDialog::isHttp() const {
-    return httpCb->isChecked();
-}
-
-bool ServerAddDialog::isHttps() const {
-    return httpsCb->isChecked();
+ecf::Protocol ServerAddDialog::protocol() const {
+    if (protocolPlain->isChecked()) {
+        return ecf::Protocol::Plain;
+    }
+    else if (protocolSsl->isChecked()) {
+        return ecf::Protocol::Ssl;
+    }
+    else if (protocolHttp->isChecked()) {
+        return ecf::Protocol::Http;
+    }
+    else if (protocolHttps->isChecked()) {
+        return ecf::Protocol::Https;
+    }
+    else {
+        // Unknown protocol values are assumed to be Plain
+        return ecf::Protocol::Plain;
+    }
 }
 
 bool ServerAddDialog::addToView() const {
@@ -225,9 +232,7 @@ ServerEditDialog::ServerEditDialog(QString name,
                                    QString port,
                                    QString user,
                                    bool favourite,
-                                   bool ssl,
-                                   bool http,
-                                   bool https,
+                                   ecf::Protocol protocol,
                                    QWidget* parent)
     : QDialog(parent),
       ServerDialogChecker(tr("Cannot modify server!")),
@@ -238,10 +243,14 @@ ServerEditDialog::ServerEditDialog(QString name,
     hostEdit->setText(host);
     portEdit->setText(port);
     userEdit->setText(user);
+
+    // n.b. since all protocol* widgets belong to the same radio button group, only one of the following will be checked
+    protocolPlain->setChecked(protocol == ecf::Protocol::Plain);
+    protocolSsl->setChecked(protocol == ecf::Protocol::Ssl);
+    protocolHttp->setChecked(protocol == ecf::Protocol::Http);
+    protocolHttps->setChecked(protocol == ecf::Protocol::Https);
+
     favCh->setChecked(favourite);
-    sslCh->setChecked(ssl);
-    httpCh->setChecked(http);
-    httpsCh->setChecked(https);
 
 #ifndef ECF_OPENSSL
     sslMessageLabel->hide();
@@ -298,16 +307,23 @@ bool ServerEditDialog::isFavourite() const {
     return favCh->isChecked();
 }
 
-bool ServerEditDialog::isSsl() const {
-    return sslCh->isChecked();
-}
-
-bool ServerEditDialog::isHttp() const {
-    return httpCh->isChecked();
-}
-
-bool ServerEditDialog::isHttps() const {
-    return httpsCh->isChecked();
+ecf::Protocol ServerEditDialog::protocol() const {
+    if (protocolPlain->isChecked()) {
+        return ecf::Protocol::Plain;
+    }
+    else if (protocolSsl->isChecked()) {
+        return ecf::Protocol::Ssl;
+    }
+    else if (protocolHttp->isChecked()) {
+        return ecf::Protocol::Http;
+    }
+    else if (protocolHttps->isChecked()) {
+        return ecf::Protocol::Https;
+    }
+    else {
+        // Unknown protocol values are assumed to be Plain
+        return ecf::Protocol::Plain;
+    }
 }
 
 //======================================
@@ -457,9 +473,7 @@ void ServerListDialog::editItem(const QModelIndex& index) {
                            QString::fromStdString(item->port()),
                            QString::fromStdString(item->user()),
                            item->isFavourite(),
-                           item->isSsl(),
-                           item->isHttp(),
-                           item->isHttps(),
+                           item->protocol(),
                            this);
 
         // The dialog checks the name, host and port!
@@ -472,9 +486,7 @@ void ServerListDialog::editItem(const QModelIndex& index) {
                                                  d.host().toStdString(),
                                                  d.port().toStdString(),
                                                  d.user().toStdString(),
-                                                 d.isSsl(),
-                                                 d.isHttp(),
-                                                 d.isHttps());
+                                                 d.protocol());
 
             if (item) {
                 if (item->isFavourite() != d.isFavourite()) {
@@ -500,9 +512,7 @@ void ServerListDialog::duplicateItem(const QModelIndex& index) {
                            QString::fromStdString(item->port()),
                            QString::fromStdString(item->user()),
                            item->isFavourite(),
-                           item->isSsl(),
-                           item->isHttp(),
-                           item->isHttps(),
+                           item->protocol(),
                            this);
 
         // The dialog checks the name, host and port!
@@ -513,9 +523,7 @@ void ServerListDialog::duplicateItem(const QModelIndex& index) {
                                         d.port().toStdString(),
                                         d.user().toStdString(),
                                         item->isFavourite(),
-                                        item->isSsl(),
-                                        item->isHttp(),
-                                        item->isHttps(),
+                                        item->protocol(),
                                         false);
             model_->dataChangeFinished();
         }
@@ -535,9 +543,7 @@ void ServerListDialog::addItem() {
                                                d.port().toStdString(),
                                                d.user().toStdString(),
                                                false,
-                                               d.isSsl(),
-                                               d.isHttp(),
-                                               d.isHttps(),
+                                               d.protocol(),
                                                false);
         }
         catch (std::exception& e) {
@@ -616,7 +622,7 @@ void ServerListDialog::setSslItem(const QModelIndex& index,bool b)
 void ServerListDialog::on_serverView_doubleClicked(const QModelIndex& index) {
     int col = index.column();
     if (col == ServerListModel::NameColumn || col == ServerListModel::HostColumn ||
-        col == ServerListModel::PortColumn || col == ServerListModel::SslColumn ||
+        col == ServerListModel::PortColumn || col == ServerListModel::ProtocolColumn ||
         col == ServerListModel::FavouriteColumn) {
         editItem(index);
     }
@@ -834,12 +840,8 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const {
                 return QString::fromStdString(item->port());
             case UserColumn:
                 return QString::fromStdString(item->user());
-            case SslColumn:
-                return (item->isSsl()) ? "ssl" : "";
-            case HttpColumn:
-                return (item->isHttp()) ? "http" : "";
-            case HttpsColumn:
-                return (item->isHttps()) ? "https" : "";
+            case ProtocolColumn:
+                return QString::fromStdString(ecf::to_ui_designation(item->protocol()));
             case UseColumn: {
                 int n = item->useCnt();
                 if (n > 0)
@@ -924,12 +926,8 @@ QVariant ServerListModel::headerData(int section, Qt::Orientation ori, int role)
                 return tr("Custom user");
             case SystemColumn:
                 return tr("S");
-            case SslColumn:
-                return tr("SSL");
-            case HttpColumn:
-                return tr("HTTP");
-            case HttpsColumn:
-                return tr("HTTPS");
+            case ProtocolColumn:
+                return tr("Protocol");
             case FavouriteColumn:
                 return tr("F");
             case UseColumn:
@@ -952,17 +950,13 @@ QVariant ServerListModel::headerData(int section, Qt::Orientation ori, int role)
             case UserColumn:
                 return tr("Custom user name");
             case SystemColumn:
-                return tr("Indicates if a server appears in the centrally maintained <b>system server list</b>. \
-                                         <br>The name, host and port of these server entries cannot be edited.");
-            case SslColumn:
-                return tr("Indicates if a server uses SSL communication.");
-            case HttpColumn:
-                return tr("Indicates if a server uses HTTP communication.");
-            case HttpsColumn:
-                return tr("Indicates if a server uses HTTPS communication.");
+                return tr("Indicates if a server appears in the centrally maintained <b>system server list</b>."
+                          "<br>The name, host and port of these server entries cannot be edited.");
+            case ProtocolColumn:
+                return tr("Indicates the protocol to use for communication with ecFlow server.");
             case FavouriteColumn:
-                return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \
-                           are appearing in the server list under the <b>Servers menu</b> in the menubar");
+                return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers"
+                          "are appearing in the server list under the <b>Servers menu</b> in the menubar");
             case UseColumn:
                 return tr("Indicates the <b>number of tabs</b> where the server is loaded.");
             default:

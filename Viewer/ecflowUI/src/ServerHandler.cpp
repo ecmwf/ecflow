@@ -56,16 +56,12 @@ ServerHandler::ServerHandler(const std::string& name,
                              const std::string& host,
                              const std::string& port,
                              const std::string& user,
-                             bool ssl,
-                             bool http,
-                             bool https)
+                             ecf::Protocol protocol)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
-      ssl_(ssl),
-      http_(http),
-      https_(https),
+      protocol_(protocol),
       client_(nullptr),
       updating_(false),
       communicating_(false),
@@ -188,12 +184,11 @@ void ServerHandler::createClient(bool init) {
 
     bool ssl_enabled = false;
     std::string ssl_error;
-//    bool http_enabled = false;
     std::string http_error;
 
     if (client_) {
 #ifdef ECF_OPENSSL
-        if (ssl_) {
+        if (isSsl()) {
             try {
                 client_->enable_ssl();
                 ssl_enabled = true;
@@ -209,20 +204,18 @@ void ServerHandler::createClient(bool init) {
             client_->disable_ssl();
         }
 #endif
-        if (http_) {
+        if (isHttp()) {
             try {
                 client_->enable_http();
-//                http_enabled = true;
             }
             catch (std::exception& e) {
                 http_error = std::string(e.what());
             }
         }
 
-        if (https_) {
+        if (isHttps()) {
             try {
                 client_->enable_https();
-//                http_enabled = true;
             }
             catch (std::exception& e) {
                 http_error = std::string(e.what());
@@ -274,7 +267,7 @@ void ServerHandler::createClient(bool init) {
         }
 
 #ifdef ECF_OPENSSL
-        if (ssl_ && !ssl_enabled) {
+        if (isSsl() && !ssl_enabled) {
             sslCertificateError(ssl_error);
             return;
         }
@@ -329,31 +322,9 @@ void ServerHandler::recreateClient() {
         createClient(false);
 }
 
-void ServerHandler::setSsl(bool ssl) {
-    if (ssl != ssl_) {
-        ssl_ = ssl;
-
-        if (connectState_->state() != ConnectState::VersionIncompatible &&
-            connectState_->state() != ConnectState::FailedClient) {
-            recreateClient();
-        }
-    }
-}
-
-void ServerHandler::setHttp(bool http) {
-    if (http != http_) {
-        http_ = http;
-
-        if (connectState_->state() != ConnectState::VersionIncompatible &&
-            connectState_->state() != ConnectState::FailedClient) {
-            recreateClient();
-        }
-    }
-}
-
-void ServerHandler::setHttps(bool https) {
-    if (https != https_) {
-        https_ = https;
+void ServerHandler::setProtocol(ecf::Protocol protocol) {
+    if (protocol != protocol_) {
+        protocol_ = protocol;
 
         if (connectState_->state() != ConnectState::VersionIncompatible &&
             connectState_->state() != ConnectState::FailedClient) {
@@ -575,10 +546,8 @@ ServerHandler* ServerHandler::addServer(const std::string& name,
                                         const std::string& host,
                                         const std::string& port,
                                         const std::string& user,
-                                        bool ssl,
-                                        bool http,
-                                        bool https) {
-    auto* sh = new ServerHandler(name, host, port, user, ssl, http, https);
+                                        ecf::Protocol protocol) {
+    auto* sh = new ServerHandler(name, host, port, user, protocol);
     return sh;
 }
 
@@ -1443,7 +1412,7 @@ void ServerHandler::sslIncompatibleServer(const std::string& msg) {
     connectState_->state(ConnectState::SslIncompatible);
     std::string errStr = "Cannot communicate to server.";
 #if ECF_OPENSSL
-    if (ssl_) {
+    if (isSsl()) {
         errStr += " Server is marked as SSL in the UI. Please check if the server is really SSL-enabled! Also check "
                   "settings in Manage servers dialogue!";
     }
@@ -1461,7 +1430,7 @@ void ServerHandler::sslIncompatibleServer(const std::string& msg) {
 
 void ServerHandler::sslCertificateError(const std::string& msg) {
 #if ECF_OPENSSL
-    assert(ssl_);
+    assert(isSsl());
     compatibility_ = Incompatible;
     stopRefreshTimer();
     comQueue_->disable();
