@@ -57,13 +57,15 @@ ServerHandler::ServerHandler(const std::string& name,
                              const std::string& port,
                              const std::string& user,
                              bool ssl,
-                             bool http)
+                             bool http,
+                             bool https)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
       ssl_(ssl),
       http_(http),
+      https_(https),
       client_(nullptr),
       updating_(false),
       communicating_(false),
@@ -186,7 +188,7 @@ void ServerHandler::createClient(bool init) {
 
     bool ssl_enabled = false;
     std::string ssl_error;
-    bool http_enabled = false;
+//    bool http_enabled = false;
     std::string http_error;
 
     if (client_) {
@@ -210,7 +212,17 @@ void ServerHandler::createClient(bool init) {
         if (http_) {
             try {
                 client_->enable_http();
-                http_enabled = true;
+//                http_enabled = true;
+            }
+            catch (std::exception& e) {
+                http_error = std::string(e.what());
+            }
+        }
+
+        if (https_) {
+            try {
+                client_->enable_https();
+//                http_enabled = true;
             }
             catch (std::exception& e) {
                 http_error = std::string(e.what());
@@ -331,6 +343,17 @@ void ServerHandler::setSsl(bool ssl) {
 void ServerHandler::setHttp(bool http) {
     if (http != http_) {
         http_ = http;
+
+        if (connectState_->state() != ConnectState::VersionIncompatible &&
+            connectState_->state() != ConnectState::FailedClient) {
+            recreateClient();
+        }
+    }
+}
+
+void ServerHandler::setHttps(bool https) {
+    if (https != https_) {
+        https_ = https;
 
         if (connectState_->state() != ConnectState::VersionIncompatible &&
             connectState_->state() != ConnectState::FailedClient) {
@@ -553,8 +576,9 @@ ServerHandler* ServerHandler::addServer(const std::string& name,
                                         const std::string& port,
                                         const std::string& user,
                                         bool ssl,
-                                        bool http) {
-    auto* sh = new ServerHandler(name, host, port, user, ssl, http);
+                                        bool http,
+                                        bool https) {
+    auto* sh = new ServerHandler(name, host, port, user, ssl, http, https);
     return sh;
 }
 

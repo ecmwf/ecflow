@@ -28,7 +28,11 @@
 class HttpClient {
 public:
     /// Constructor starts the asynchronous connect operation.
-    HttpClient(Cmd_ptr cmd_ptr, const std::string& host, const std::string& port, int timout = 60);
+    HttpClient(Cmd_ptr cmd_ptr,
+               const std::string& scheme,
+               const std::string& host,
+               const std::string& port,
+               int timeout = 60);
 
     void run();
 
@@ -38,8 +42,10 @@ public:
     bool handle_server_response(ServerReply&, bool debug) const;
 
 private:
+    std::string scheme_; /// the scheme to use
     std::string host_; /// the servers name
     std::string port_; /// the port on the server
+    std::string base_url_;
     httplib::Client client_;
 
     httplib::Response response_;

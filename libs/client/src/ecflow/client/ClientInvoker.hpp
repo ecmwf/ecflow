@@ -80,7 +80,7 @@ public:
 #endif
 
     void enable_http() { clientEnv_.enable_http(); }
-    void disable_http() { clientEnv_.disable_http(); }
+    void enable_https() { clientEnv_.enable_https(); }
 
     /// This will override the environment setting.
     /// In particular setting host explicitly will avoid cycling through server list,
