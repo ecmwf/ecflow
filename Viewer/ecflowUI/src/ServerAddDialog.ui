@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>294</width>
-    <height>315</height>
+    <height>358</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
    <item>
     <spacer name="verticalSpacer_2">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -85,57 +85,41 @@
       <widget class="QLineEdit" name="userEdit"/>
      </item>
      <item row="6" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="protocolLabel">
        <property name="text">
-        <string>Use &amp;SSL:</string>
-       </property>
-       <property name="buddy">
-        <cstring>sslCb</cstring>
+        <string>Protocol:</string>
        </property>
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QCheckBox" name="sslCb">
+      <widget class="QRadioButton" name="protocolPlain">
        <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Use &amp;HTTP:</string>
-       </property>
-       <property name="buddy">
-        <cstring>httpCb</cstring>
+        <string>TCP/IP</string>
        </property>
       </widget>
      </item>
      <item row="7" column="1">
-      <widget class="QCheckBox" name="httpCb">
+      <widget class="QRadioButton" name="protocolSsl">
        <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Use &amp;HTTPS:</string>
-       </property>
-       <property name="buddy">
-        <cstring>httpsCb</cstring>
+        <string>TCP/IP with SSL</string>
        </property>
       </widget>
      </item>
      <item row="8" column="1">
-      <widget class="QCheckBox" name="httpsCb">
+      <widget class="QRadioButton" name="protocolHttp">
        <property name="text">
-        <string/>
+        <string>HTTP</string>
        </property>
       </widget>
      </item>
      <item row="9" column="1">
+      <widget class="QRadioButton" name="protocolHttps">
+       <property name="text">
+        <string>HTTPS</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
       <widget class="MessageLabel" name="sslMessageLabel" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -144,22 +128,6 @@
         </sizepolicy>
        </property>
       </widget>
-     </item>
-     <item row="9" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>10</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -176,10 +144,10 @@
    <item>
     <spacer name="verticalSpacer_3">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Policy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -192,10 +160,10 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>
