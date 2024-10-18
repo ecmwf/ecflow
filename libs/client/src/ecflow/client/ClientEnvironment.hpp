@@ -91,8 +91,15 @@ public:
     void set_debug(bool flag);
 
     bool http() const { return http_; }
-    void enable_http() { http_ = true; }
-    void disable_http() { http_ = false; }
+    void enable_http() {
+        http_   = true;
+        scheme_ = "http";
+    }
+    void enable_https() {
+        http_   = true;
+        scheme_ = "https";
+    }
+    std::string scheme() const { return scheme_; }
 
 #ifdef ECF_OPENSSL
     /// return true if this is a ssl enabled server
@@ -103,7 +110,10 @@ public:
         ssl_.enable_if_defined(host(), port());
     } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
     void enable_ssl() { ssl_.enable(host(), port()); } // search server.crt first, then <host>.<port>.crt
-    void disable_ssl() { ssl_.disable(); }             // override environment setting for ECF_SSL
+    bool enable_ssl_no_throw() {
+        return ssl_.enable_no_throw(host(), port());
+    } // search server.crt first, then <host>.<port>.crt
+    void disable_ssl() { ssl_.disable(); } // override environment setting for ECF_SSL
 #endif
 
     // AbstractClientEnv functions:
@@ -171,6 +181,7 @@ private:
                          // immediately
     bool no_ecf_{false}; // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
     bool http_{false};
+    std::string scheme_{"http"}; // default is https
     bool debug_{false};          // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
     bool under_test_{false};     // Used in testing client interface
     bool host_file_read_{false}; // to ensure we read host file only once

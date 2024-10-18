@@ -368,6 +368,7 @@ ServerItem* ServerList::add(const std::string& name,
                             bool favourite,
                             bool ssl,
                             bool http,
+                            bool https,
                             bool saveIt) {
     std::string errStr;
     if (!checkItemToAdd(name, host, port, true, errStr)) {
@@ -375,7 +376,7 @@ ServerItem* ServerList::add(const std::string& name,
         return nullptr;
     }
 
-    auto* item = new ServerItem(name, host, port, user, favourite, ssl, http);
+    auto* item = new ServerItem(name, host, port, user, favourite, ssl, http, https);
 
     items_.push_back(item);
 
@@ -405,7 +406,8 @@ ServerItem* ServerList::reset(ServerItem* item,
                               const std::string& port,
                               const std::string& user,
                               bool ssl,
-                              bool http) {
+                              bool http,
+                              bool https) {
     auto it = std::find(items_.begin(), items_.end(), item);
     if (it != items_.end()) {
         // Check if there is an item with the same name. Names have to be unique!
@@ -416,14 +418,14 @@ ServerItem* ServerList::reset(ServerItem* item,
             items_.erase(it);
             broadcastChanged();
             delete item;
-            item = add(name, host, port, user, false, ssl, http, true);
+            item = add(name, host, port, user, false, ssl, http, https, true);
             save();
             broadcastChanged();
         }
         else {
             assert(host == item->host());
             assert(port == item->port());
-            item->reset(name, host, port, user, ssl);
+            item->reset(name, host, port, user, ssl, http, https);
             save();
             broadcastChanged();
         }
@@ -563,11 +565,16 @@ bool ServerList::load() {
             http = (sv[7] == "1") ? true : false;
         }
 
+        bool https = false;
+        if (sv.size() >= 9) {
+            https = (sv[8] == "1") ? true : false;
+        }
+
         if (sv.size() >= 3) {
             std::string name = sv[0], host = sv[1], port = sv[2];
             ServerItem* item = nullptr;
             try {
-                item = add(name, host, port, user, favourite, ssl, http, false);
+                item = add(name, host, port, user, favourite, ssl, http, https, false);
                 UI_ASSERT(item != nullptr, "name=" << name << " host=" << host << " port=" << port << " user=" << user);
                 item->setSystem(sys);
             }
@@ -606,15 +613,16 @@ void ServerList::save() {
     if (!out.good())
         return;
 
-    out << "#Name Host Port Favourite System Ssl user Http" << std::endl;
+    out << "#Name Host Port Favourite System Ssl user Http Https" << std::endl;
 
     for (auto& item : items_) {
-        std::string fav = (item->isFavourite()) ? "1" : "0";
-        std::string ssl = (item->isSsl()) ? "1" : "0";
+        std::string fav  = (item->isFavourite()) ? "1" : "0";
+        std::string ssl  = (item->isSsl()) ? "1" : "0";
         std::string http = (item->isHttp()) ? "1" : "0";
-        std::string sys = (item->isSystem()) ? "1" : "0";
+        std::string https = (item->isHttps()) ? "1" : "0";
+        std::string sys  = (item->isSystem()) ? "1" : "0";
         out << item->name() << "," << item->host() << "," << item->port() << "," << fav << "," << sys << "," << ssl
-            << "," << item->user() << "," << http << std::endl;
+            << "," << item->user() << "," << http << "," << https << std::endl;
     }
     out.close();
 }
@@ -670,7 +678,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
             changed          = true;
             std::string name = sysItem.name(), host = sysItem.host(), port = sysItem.port();
             try {
-                item = add(name, host, port, "", false, false, false, false);
+                item = add(name, host, port, "", false, false, false, false, false);
                 UI_ASSERT(item != nullptr, "name=" << name << " host=" << host << " port=" << port);
                 item->setSystem(true);
                 changeVec.push_back(
@@ -696,7 +704,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
             ServerListTmpItem localTmp(item);
             changeVec.push_back(new ServerListSyncChangeItem(sysItem, localTmp, ServerListSyncChangeItem::MatchChange));
 
-            item = reset(item, sysItem.name(), sysItem.host(), sysItem.port(), "", false, false);
+            item = reset(item, sysItem.name(), sysItem.host(), sysItem.port(), "", false, false, false);
             if (item) {
                 item->setSystem(true);
             }

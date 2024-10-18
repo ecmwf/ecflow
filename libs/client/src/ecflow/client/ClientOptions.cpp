@@ -81,6 +81,9 @@ ClientOptions::ClientOptions() {
     desc_->add_options()(
         "http",
         "Enables communication over HTTP between client/server.\n");
+    desc_->add_options()(
+        "https",
+        "Enables communication over HTTPS between client/server.\n");
     // clang-format on
 }
 
@@ -211,6 +214,11 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         if (env->debug())
             std::cout << "  http set via command line\n";
         env->enable_http();
+    }
+    if (vm.count("https")) {
+        if (env->debug())
+            std::cout << "  https set via command line\n";
+        env->enable_https();
     }
 
     // Defer the parsing of the command , to the command. This allows

@@ -118,7 +118,24 @@
        </property>
       </widget>
      </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Use &amp;HTTPS:</string>
+       </property>
+       <property name="buddy">
+        <cstring>httpsCb</cstring>
+       </property>
+      </widget>
+     </item>
      <item row="8" column="1">
+      <widget class="QCheckBox" name="httpsCb">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
       <widget class="MessageLabel" name="sslMessageLabel" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
