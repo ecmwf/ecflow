@@ -23,6 +23,7 @@
 #include "VReply.hpp"
 #include "VServerSettings.hpp"
 #include "VTask.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/node/Defs.hpp"
 
 class ClientInvoker;
@@ -30,7 +31,6 @@ class ServerReply;
 
 class ConnectState;
 class NodeObserver;
-class ServerHandler;
 class ServerComQueue;
 class ServerObserver;
 class ServerComObserver;
@@ -58,12 +58,12 @@ public:
     const std::string& longName() const { return longName_; }
     const std::string& fullLongName() const { return fullLongName_; }
     const std::string& port() const { return port_; }
-    bool isSsl() const { return ssl_; }
-    bool isHttp() const { return http_; }
+    bool isSsl() const { return protocol_ == ecf::Protocol::Ssl; }
+    bool isHttp() const { return protocol_ == ecf::Protocol::Http; }
+    bool isHttps() const { return protocol_ == ecf::Protocol::Https; }
+    ecf::Protocol protocol() const { return protocol_; }
     const std::string& user() { return user_; }
-    void setSsl(bool);
-    void setHttp(bool);
-    void setHttps(bool);
+    void setProtocol(ecf::Protocol protocol);
     void setUser(const std::string& user);
 
     Activity activity() const { return activity_; }
@@ -121,9 +121,7 @@ public:
                                     const std::string& host,
                                     const std::string& port,
                                     const std::string& user,
-                                    bool ssl,
-                                    bool http,
-                                    bool https);
+                                    ecf::Protocol protocol);
     static void removeServer(ServerHandler*);
     static ServerHandler* findServer(const std::string& alias);
 
@@ -147,9 +145,7 @@ protected:
                   const std::string& host,
                   const std::string& port,
                   const std::string& user,
-                  bool ssl,
-                  bool http,
-                  bool https);
+                  ecf::Protocol protocol);
     ~ServerHandler() override;
     void logoutAndDelete();
     void queueLoggedOut();
@@ -173,9 +169,7 @@ protected:
     std::string host_;
     std::string port_;
     std::string user_;
-    bool ssl_;
-    bool http_;
-    bool https_;
+    ecf::Protocol protocol_;
     ClientInvoker* client_;
     std::string longName_;
     std::string fullLongName_;
@@ -235,21 +229,21 @@ private:
 
     void setActivity(Activity activity);
 
-    typedef void (ServerObserver::*SoMethod)(ServerHandler*);
-    typedef void (ServerObserver::*SoMethodV1)(ServerHandler*, const VServerChange&);
-    typedef void (ServerObserver::*SoMethodV2)(ServerHandler*, const std::string&);
+    typedef void (ServerObserver::* SoMethod)(ServerHandler*);
+    typedef void (ServerObserver::* SoMethodV1)(ServerHandler*, const VServerChange&);
+    typedef void (ServerObserver::* SoMethodV2)(ServerHandler*, const std::string&);
     void broadcast(SoMethod);
     void broadcast(SoMethodV1, const VServerChange&);
     void broadcast(SoMethodV2, const std::string&);
 
-    typedef void (NodeObserver::*NoMethod)(const VNode*);
-    typedef void (NodeObserver::*NoMethodV1)(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&);
-    typedef void (NodeObserver::*NoMethodV2)(const VNode*, const VNodeChange&);
+    typedef void (NodeObserver::* NoMethod)(const VNode*);
+    typedef void (NodeObserver::* NoMethodV1)(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&);
+    typedef void (NodeObserver::* NoMethodV2)(const VNode*, const VNodeChange&);
     void broadcast(NoMethod, const VNode*);
     void broadcast(NoMethodV1, const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&);
     void broadcast(NoMethodV2, const VNode*, const VNodeChange&);
 
-    typedef void (ServerComObserver::*SocMethod)(ServerHandler*);
+    typedef void (ServerComObserver::* SocMethod)(ServerHandler*);
     void broadcast(SocMethod);
 
     void saveConf();

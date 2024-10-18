@@ -26,17 +26,13 @@ ServerItem::ServerItem(const std::string& name,
                        const std::string& port,
                        const std::string& user,
                        bool favourite,
-                       bool ssl,
-                       bool http,
-                       bool https)
+                       ecf::Protocol protocol)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
       favourite_(favourite),
-      ssl_(ssl),
-      http_(http),
-      https_(https) {
+      protocol_(protocol) {
 }
 
 ServerItem::~ServerItem() {
@@ -54,9 +50,7 @@ void ServerItem::reset(const std::string& name,
                        const std::string& host,
                        const std::string& port,
                        const std::string& user,
-                       bool ssl,
-                       bool http,
-                       bool https) {
+                       ecf::Protocol protocol) {
     if (name_ != name) {
         name_ = name;
         if (handler_) {
@@ -64,18 +58,13 @@ void ServerItem::reset(const std::string& name,
         }
     }
 
-    if (host == host_ && port == port_ && ssl) {
-        // TODO: these should be called together
-        setSsl(ssl);
-        setUser(user);
-    }
+    if (host == host_ && port == port_) {
 
-    else if (host == host_ && port == port_ && http) {
-        setHttp(http);
-    }
-
-    else if (host == host_ && port == port_ && https) {
-        setHttps(https);
+        setProtocol(protocol);
+        if (protocol == ecf::Protocol::Ssl) {
+            // TODO: these should be called together
+            setUser(user);
+        }
     }
 
     // host or port changed: full reload needed and this situation cannot
@@ -99,29 +88,11 @@ void ServerItem::setSystem(bool b) {
     // broadcastChanged();
 }
 
-void ServerItem::setSsl(bool b) {
-    if (ssl_ != b) {
-        ssl_ = b;
+void ServerItem::setProtocol(ecf::Protocol protocol) {
+    if (protocol_ != protocol) {
+        protocol_ = protocol;
         if (handler_)
-            handler_->setSsl(ssl_);
-    }
-    // broadcastChanged();
-}
-
-void ServerItem::setHttp(bool b) {
-    if (http_ != b) {
-        http_ = b;
-        if (handler_)
-            handler_->setHttp(http_);
-    }
-    // broadcastChanged();
-}
-
-void ServerItem::setHttps(bool b) {
-    if (https_ != b) {
-        https_ = b;
-        if (handler_)
-            handler_->setHttps(https_);
+            handler_->setProtocol(protocol_);
     }
     // broadcastChanged();
 }
@@ -146,7 +117,7 @@ std::string ServerItem::longName() const {
 
 void ServerItem::registerUsageBegin() {
     if (!handler_) {
-        handler_ = ServerHandler::addServer(name_, host_, port_, user_, ssl_, http_, https_);
+        handler_ = ServerHandler::addServer(name_, host_, port_, user_, protocol_);
     }
     if (handler_)
         useCnt_++;
