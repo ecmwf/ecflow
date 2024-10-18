@@ -64,12 +64,13 @@ set(srcs
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
   base/src/ecflow/base/HttpClient.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
+  base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerReply.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
   base/src/ecflow/base/Stats.hpp
   base/src/ecflow/base/WhyCmd.hpp
   base/src/ecflow/base/ZombieCtrl.hpp
-  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.hpp>
   base/src/ecflow/base/cts/ClientToServerCmd.hpp
@@ -143,9 +144,9 @@ set(srcs
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>
   base/src/ecflow/base/WhyCmd.cpp
   base/src/ecflow/base/ZombieCtrl.cpp
-  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.cpp>
   base/src/ecflow/base/cts/ClientToServerCmd.cpp
