@@ -47,6 +47,7 @@ public:
                      bool favourite,
                      bool ssl,
                      bool http,
+                     bool https,
                      QWidget* parent = nullptr);
 
     QString name() const;
@@ -55,6 +56,7 @@ public:
     QString user() const;
     bool isSsl() const;
     bool isHttp() const;
+    bool isHttps() const;
     bool isFavourite() const;
 
 public Q_SLOTS:
@@ -77,6 +79,7 @@ public:
     bool addToView() const;
     bool isSsl() const;
     bool isHttp() const;
+    bool isHttps() const;
 
 public Q_SLOTS:
     void accept() override;
@@ -161,8 +164,10 @@ public:
         SystemColumn    = 5,
         SslColumn       = 6,
         HttpColumn      = 7,
-        FavouriteColumn = 8,
-        UseColumn       = 9
+        HttpsColumn     = 8,
+        FavouriteColumn = 9,
+        UseColumn       = 10
+        // when updating the columns list, ensure to update the columnCount() method to refer to last enum entry
     };
     enum CustomItemRole { IconStatusRole = Qt::UserRole + 1 };
 
