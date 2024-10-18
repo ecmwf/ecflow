@@ -458,12 +458,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     }
                     else
 #endif
-                    if (clientEnv_.http()) {
+                        if (clientEnv_.http()) {
                         if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << endl;
                         }
 
-                        HttpClient theClient(cts_cmd, clientEnv_.host(), clientEnv_.port());
+                        HttpClient theClient(cts_cmd, clientEnv_.scheme(), clientEnv_.host(), clientEnv_.port());
                         theClient.run();
 
                         if (clientEnv_.debug()) {
@@ -486,9 +486,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     else {
 
                         if (clientEnv_.debug()) {
-                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<" << endl;
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<"
+                                 << endl;
                         }
-
 
                         Client theClient(
                             io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
@@ -1573,7 +1573,7 @@ bool ClientInvoker::is_free_port(int port, bool debug) {
     const auto the_port = ecf::convert_to<std::string>(port);
     try {
         if (debug) {
-              cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << the_port << "'\n";
+            cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << the_port << "'\n";
         }
         client.set_host_port(Str::LOCALHOST(), the_port);
         client.pingServer();
@@ -1589,7 +1589,8 @@ bool ClientInvoker::is_free_port(int port, bool debug) {
         }
         if (msg.find("authentication failed") != std::string::npos) {
             if (debug) {
-                cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used. Returning FALSE\n";
+                cout << "   Could not connect, due to authentication failure, hence port " << the_port
+                     << " is used. Returning FALSE\n";
             }
             return false;
         }
@@ -1607,7 +1608,6 @@ bool ClientInvoker::is_free_port(int port, bool debug) {
     }
     return true;
 }
-
 
 std::string ClientInvoker::find_free_port(int seed_port_number, bool debug) {
     // Ping failed, We need to distinguish between:

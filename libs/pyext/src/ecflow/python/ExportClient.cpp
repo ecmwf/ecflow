@@ -705,7 +705,7 @@ void export_Client() {
 #endif
 
         .def("enable_http", &ClientInvoker::enable_http, "Enable HTTP communication")
-        .def("disable_http", &ClientInvoker::disable_http, "Disable HTTP communication")
+        .def("enable_https", &ClientInvoker::enable_https, "Enable HTTPS communication")
 
         .def("zombie_get", &zombieGet, return_value_policy<copy_const_reference>())
         .def("zombie_fob", &ClientInvoker::zombieFobCli)

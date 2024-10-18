@@ -27,14 +27,16 @@ ServerItem::ServerItem(const std::string& name,
                        const std::string& user,
                        bool favourite,
                        bool ssl,
-                       bool http)
+                       bool http,
+                       bool https)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
       favourite_(favourite),
       ssl_(ssl),
-      http_(http) {
+      http_(http),
+      https_(https) {
 }
 
 ServerItem::~ServerItem() {
@@ -52,7 +54,9 @@ void ServerItem::reset(const std::string& name,
                        const std::string& host,
                        const std::string& port,
                        const std::string& user,
-                       bool ssl) {
+                       bool ssl,
+                       bool http,
+                       bool https) {
     if (name_ != name) {
         name_ = name;
         if (handler_) {
@@ -60,10 +64,18 @@ void ServerItem::reset(const std::string& name,
         }
     }
 
-    if (host == host_ && port == port_) {
+    if (host == host_ && port == port_ && ssl) {
         // TODO: these should be called together
         setSsl(ssl);
         setUser(user);
+    }
+
+    else if (host == host_ && port == port_ && http) {
+        setHttp(http);
+    }
+
+    else if (host == host_ && port == port_ && https) {
+        setHttps(https);
     }
 
     // host or port changed: full reload needed and this situation cannot
@@ -105,6 +117,15 @@ void ServerItem::setHttp(bool b) {
     // broadcastChanged();
 }
 
+void ServerItem::setHttps(bool b) {
+    if (https_ != b) {
+        https_ = b;
+        if (handler_)
+            handler_->setHttps(https_);
+    }
+    // broadcastChanged();
+}
+
 void ServerItem::setUser(const std::string& user) {
     if (user_ != user) {
         user_ = user;
@@ -125,7 +146,7 @@ std::string ServerItem::longName() const {
 
 void ServerItem::registerUsageBegin() {
     if (!handler_) {
-        handler_ = ServerHandler::addServer(name_, host_, port_, user_, ssl_, http_);
+        handler_ = ServerHandler::addServer(name_, host_, port_, user_, ssl_, http_, https_);
     }
     if (handler_)
         useCnt_++;
