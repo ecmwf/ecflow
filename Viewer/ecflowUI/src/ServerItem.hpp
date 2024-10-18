@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#include "ecflow/base/ServerProtocol.hpp"
+
 class ServerHandler;
 class ServerItem;
 
@@ -40,9 +42,10 @@ public:
     std::string longName() const;
     bool isFavourite() const { return favourite_; }
     bool isSystem() const { return system_; }
-    bool isSsl() const { return ssl_; }
-    bool isHttp() const { return http_; }
-    bool isHttps() const { return https_; }
+    ecf::Protocol protocol() const { return protocol_; }
+    bool isSsl() const { return protocol_ == ecf::Protocol::Ssl; }
+    bool isHttp() const { return protocol_ == ecf::Protocol::Http; }
+    bool isHttps() const { return protocol_ == ecf::Protocol::Https; }
 
     bool isUsed() const;
     int useCnt() const { return useCnt_; }
@@ -58,9 +61,7 @@ protected:
                const std::string& port,
                const std::string& user,
                bool favourite,
-               bool ssl,
-               bool http,
-               bool https);
+               ecf::Protocol protocol);
     ~ServerItem();
 
     void name(const std::string& name) { name_ = name; }
@@ -70,14 +71,10 @@ protected:
                const std::string& host,
                const std::string& port,
                const std::string& user,
-               bool ssl,
-               bool http,
-               bool https);
+               ecf::Protocol protocol);
     void setFavourite(bool b);
     void setSystem(bool b);
-    void setSsl(bool b);
-    void setHttp(bool b);
-    void setHttps(bool b);
+    void setProtocol(ecf::Protocol protocol);
     void setUser(const std::string&);
 
     void registerUsageBegin();
@@ -92,9 +89,7 @@ protected:
     std::string user_;
     bool favourite_{false};
     bool system_{false};
-    bool ssl_{false};
-    bool http_{false};
-    bool https_{false};
+    ecf::Protocol protocol_{ecf::Protocol::Plain};
     int useCnt_{0};
     ServerHandler* handler_{nullptr};
 
