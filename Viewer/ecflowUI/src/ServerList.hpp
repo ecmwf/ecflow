@@ -19,9 +19,10 @@
 #include "GenFileProvider.hpp"
 #include "PropertyMapper.hpp"
 #include "VProperty.hpp"
+#include "ecflow/base/ServerProtocol.hpp"
 
-class ServerItem;
 class ServerList;
+class ServerItem;
 class GenFileReceiver;
 
 class ServerListObserver {
@@ -131,9 +132,7 @@ public:
                     const std::string& port,
                     const std::string& user,
                     bool favorite,
-                    bool ssl,
-                    bool http,
-                    bool https,
+                    ecf::Protocol protocol,
                     bool saveIt);
     void remove(ServerItem*);
     ServerItem* reset(ServerItem*,
@@ -141,9 +140,7 @@ public:
                       const std::string& host,
                       const std::string& port,
                       const std::string& user,
-                      bool ssl,
-                      bool http,
-                      bool https);
+                      ecf::Protocol protocol);
     void setFavourite(ServerItem*, bool);
 
     std::string uniqueName(const std::string&);
