@@ -17,12 +17,27 @@
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Converter.hpp"
 
-HttpClient::HttpClient(Cmd_ptr cmd_ptr, const std::string& host, const std::string& port, int timeout)
-    : host_(host),
+static std::string make_scheme_host_port(const std::string& scheme, const std::string& host, const std::string& port) {
+    return scheme + "://" + host + ":" + port;
+};
+
+HttpClient::HttpClient(Cmd_ptr cmd_ptr,
+                       const std::string& scheme,
+                       const std::string& host,
+                       const std::string& port,
+                       int timeout)
+    : scheme_(scheme),
+      host_(host),
       port_(port),
-      client_(host, ecf::convert_to<int>(port)) {
+      base_url_(make_scheme_host_port(scheme, host, port)),
+      client_(base_url_) {
 
     client_.set_connection_timeout(std::chrono::seconds{timeout});
+
+    // Disable cert verification
+    if (scheme_ == "https") {
+        client_.enable_server_certificate_verification(false);
+    }
 
     if (!cmd_ptr.get()) {
         throw std::runtime_error("Client::Client: No request specified !");
@@ -38,7 +53,7 @@ void HttpClient::run() {
     auto result = client_.Post("/v1/ecflow", outbound, "application/json");
     if (result) {
         auto response = result.value();
-        status_ = httplib::Error::Success;
+        status_       = httplib::Error::Success;
         ecf::restore_from_string(response.body, inbound_response_);
     }
     else {
