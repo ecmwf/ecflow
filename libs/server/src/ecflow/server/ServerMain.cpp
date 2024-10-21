@@ -106,20 +106,20 @@ int main(int argc, char* argv[]) {
         // Launching Http server
         if (ecf::is_any_variation_of_http(server_environment.protocol())) {
             // On the server side, we actually only support HTTP
-            HttpServer theServer(io, server_environment);
+            BasicHttpServer theServer(io, server_environment);
             return run(theServer);
         }
 
         // Launching custom TCP/IP (SSL) server
         if constexpr (ECF_OPENSSL == 1) {
             if (server_environment.ssl()) {
-                SslServer theServer(io, server_environment); // This throws exception, if bind address in use
+                BasicSslServer theServer(io, server_environment); // This throws exception, if bind address in use
                 return run(theServer);
             }
         }
         
         // Launching custom TCP/IP (non-SSL) server
-        Server theServer(io, server_environment); // This throws exception, if bind address in use
+        BasicServer theServer(io, server_environment); // This throws exception, if bind address in use
         return run(theServer);
     }
     catch (ServerEnvironmentException& e) {
