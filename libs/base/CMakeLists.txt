@@ -8,10 +8,9 @@
 # nor does it submit to any jurisdiction.
 #
 
+add_subdirectory(test/harness)
+
 set(test_srcs
-  # Headers
-  test/MockServer.hpp
-  test/TestHelper.hpp
   # Sources
   test/TestAlterCmd.cpp
   test/TestArchiveAndRestoreCmd.cpp
@@ -50,7 +49,7 @@ ecbuild_add_test(
     ecflow_all
     Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    test_support
+    test_harness.base
   TEST_DEPENDS
     u_parser
 )

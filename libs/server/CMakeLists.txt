@@ -70,7 +70,7 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
-    test_support
+    test_harness.core
   TEST_DEPENDS
     u_base
 )
@@ -94,7 +94,7 @@ ecbuild_add_test(
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
-    test_support
+    test_harness.core
   TEST_DEPENDS
     u_base
 )

@@ -8,22 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-##
-## Notice: test_support is an INTERFACE-only test utility library.
-##
-
-ecbuild_add_library(
-  TARGET
-    test_support
-  NOINSTALL
-  TYPE INTERFACE
-  SOURCES
-    test/TestSerialisation.hpp
-    test/TestNaming.hpp
-  PUBLIC_INCLUDES
-    test
-)
-target_clangformat(test_support)
+add_subdirectory(test/harness)
 
 set(test_srcs
   # Headers
@@ -71,7 +56,7 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
-    test_support
+    test_harness.core
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
