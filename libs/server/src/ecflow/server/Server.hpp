@@ -41,8 +41,8 @@ private:
     U server_;
 };
 
-using Server     = DefaultServer<TcpServer>;
-using SslServer  = DefaultServer<SslTcpServer>;
-using HttpServer = DefaultServer<HttpListener>;
+using BasicServer     = DefaultServer<TcpServer>;
+using BasicSslServer  = DefaultServer<SslTcpServer>;
+using BasicHttpServer = DefaultServer<HttpServer>;
 
 #endif /* ecflow_server_Server_HPP */

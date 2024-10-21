@@ -103,13 +103,13 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
     boost::beast::http::response<boost::beast::http::string_body> response_{};
     bool is_terminate_{false};
     // The Http server that owns this session
-    HttpListener* owner_;
+    HttpServer* owner_;
 
-    friend class HttpListener;
+    friend class HttpServer;
 
 public:
     // Take ownership of the stream
-    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpListener* owner)
+    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpServer* owner)
         : socket_(std::move(socket)),
           owner_{owner} {}
 
@@ -183,7 +183,7 @@ public:
     }
 };
 
-HttpListener::HttpListener(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& env)
+HttpServer::HttpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& env)
     : server_{server},
       io_{io},
       acceptor_{io} {
@@ -194,38 +194,38 @@ HttpListener::HttpListener(BaseServer* server, boost::asio::io_context& io, Serv
     // Open the acceptor
     acceptor_.open(endpoint.protocol(), ec);
     if (ec) {
-        log_error("HttpListener::open", ec);
+        log_error("HttpServer::open", ec);
         return;
     }
 
     // Allow address reuse
     acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
     if (ec) {
-        log_error("HttpListener::set_option", ec);
+        log_error("HttpServer::set_option", ec);
         return;
     }
 
     // Bind to the server address
     acceptor_.bind(endpoint, ec);
     if (ec) {
-        log_error("HttpListener::bind", ec);
+        log_error("HttpServer::bind", ec);
         return;
     }
 
     // Start listening for connections
     acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
     if (ec) {
-        log_error("HttpListener::listen", ec);
+        log_error("HttpServer::listen", ec);
         return;
     }
 
     do_accept();
 }
 
-void HttpListener::handle_terminate(bool terminate) {
+void HttpServer::handle_terminate(bool terminate) {
     if (terminate) {
         if (server_->debug()) {
-            std::cout << "   <-- HttpListener exiting server via terminate()" << std::endl;
+            std::cout << "   <-- HttpServer exiting server via terminate()" << std::endl;
         }
 
         io_.post([this]() {
@@ -236,15 +236,15 @@ void HttpListener::handle_terminate(bool terminate) {
     }
 }
 
-void HttpListener::do_accept() {
+void HttpServer::do_accept() {
     acceptor_.async_accept(io_, [this](boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
         on_accept(ec, std::move(socket), this->server_);
     });
 }
 
-void HttpListener::on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket, BaseServer* server) {
+void HttpServer::on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket, BaseServer* server) {
     if (ec) {
-        log_error("HttpListener::on_accept", ec);
+        log_error("HttpServer::on_accept", ec);
         // Terminate the server
         return;
     }
