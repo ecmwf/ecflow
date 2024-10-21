@@ -108,7 +108,7 @@ public:
      */
     static void try_port_unlock(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
-        std::string the_file = port_file(the_file);
+        std::string the_file = port_file(the_port);
         fs::remove(the_file);
     }
 
