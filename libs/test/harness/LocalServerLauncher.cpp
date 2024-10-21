@@ -37,5 +37,5 @@ void LocalServerLauncher::launch() {
     int exit = system(cmd.c_str());
     assert(exit == 0);
 
-    std::cout << "   Local ecFlow server launched with command: '" << cmd << "'" << std::endl;
+    std::cout << "   Local ecFlow server launched with command: '" << cmd << "'. Exit code: " << exit << std::endl;
 }
