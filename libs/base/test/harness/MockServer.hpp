@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_test_MockServer_HPP
-#define ecflow_base_test_MockServer_HPP
+#ifndef ecflow_base_test_harness_MockServer_HPP
+#define ecflow_base_test_harness_MockServer_HPP
 
 #include <cassert>
 
@@ -158,4 +158,4 @@ private:
     ecf::SuiteChanged suiteChanged_;
 };
 
-#endif /* ecflow_base_test_MockServer_HPP */
+#endif /* ecflow_base_test_harness_MockServer_HPP */
