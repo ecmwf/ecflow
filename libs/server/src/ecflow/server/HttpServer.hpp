@@ -18,14 +18,22 @@
 
 #include "ecflow/server/BaseServer.hpp"
 
-class HttpListener : public std::enable_shared_from_this<HttpListener> {
+/**
+ * The HttpServer class accepts HTTP connections, which are dispatched to appropriate sessions that
+ * take care of receiving a Request, processing it using the BaseServer and sending back the Response.
+ *
+ * The current implementation is based on Boost.ASIO/Beast. This necessary because the trigerring
+ * mechanism to periodically traverse the BaseServer/Suite(s) is tightly coupled with Boost.ASIO.
+ */
+
+class HttpServer : public std::enable_shared_from_this<HttpServer> {
 private:
     BaseServer* server_;
     boost::asio::io_context& io_;
     boost::asio::ip::tcp::acceptor acceptor_;
 
 public:
-    HttpListener(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& env);
+    HttpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& env);
 
     std::string ssl() const { return ""; }
     BaseServer* server() const { return server_; }
