@@ -11,6 +11,9 @@
 #include <iostream>
 #include <string>
 
+#include "ecflow/base/ServerProtocol.hpp"
+#include "ecflow/core/Enumerate.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/udp/RequestHandler.hpp"
 #include "ecflow/udp/Trace.hpp"
@@ -76,18 +79,19 @@ int main(int argc, char* argv[]) try {
         auto ecflow_host = options.get_optional_option<std::string>(ecf::UDPServerOptions::OPTION_ECFLOW_HOST);
         auto ecflow_port = options.get_optional_option<size_t>(ecf::UDPServerOptions::OPTION_ECFLOW_PORT);
         if (ecflow_host) {
-            setenv("ECF_HOST", ecflow_host.value().c_str(), 1);
+            setenv(ecf::environment::ECF_HOST, ecflow_host.value().c_str(), 1);
         }
         if (ecflow_port) {
-            setenv("ECF_PORT", std::to_string(ecflow_port.value()).c_str(), 1);
+            setenv(ecf::environment::ECF_PORT, std::to_string(ecflow_port.value()).c_str(), 1);
         }
         auto ecflow_http = options.has_http();
         if (ecflow_http) {
-            setenv("ECF_HOST_PROTOCOL", "HTTPS", 1);
+            const std::string selected{ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Http).value()};
+            setenv(ecf::environment::ECF_HOST_PROTOCOL, selected.c_str(), 1);
         }
         // Avoid that the Client automatically uses environment passwords
-        unsetenv("ECF_PASSWD");
-        unsetenv("ECF_CUSTOM_PASSWD");
+        unsetenv(ecf::environment::ECF_PASSWD);
+        unsetenv(ecf::environment::ECF_CUSTOM_PASSWD);
 
         launch_server(options);
     }

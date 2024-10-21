@@ -16,6 +16,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Enumerate.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
@@ -246,10 +247,9 @@ void ClientEnvironment::read_environment_variables() {
 
     ecf::environment::get(ecf::environment::ECF_TRYNO, task_try_num_);
 
-    std::string host_protocol;
-    ecf::environment::get(ecf::environment::ECF_HOST_PROTOCOL, host_protocol);
-    if (host_protocol == "HTTP" || host_protocol == "HTTPS") {
-        http_ = true;
+    if (auto protocol = ecf::environment::fetch(ecf::environment::ECF_HOST_PROTOCOL); protocol) {
+        auto found = ecf::Enumerate<ecf::Protocol>::to_enum(protocol.value());
+        protocol_  = found ? found.value() : ecf::Protocol::Plain;
     }
 
     ecf::environment::get("ECF_HOSTFILE", host_file_);

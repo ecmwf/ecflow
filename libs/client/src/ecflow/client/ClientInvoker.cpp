@@ -458,12 +458,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     }
                     else
 #endif
-                        if (clientEnv_.http()) {
+                        if (ecf::is_any_variation_of_http(clientEnv_.protocol())) {
                         if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << endl;
                         }
 
-                        HttpClient theClient(cts_cmd, clientEnv_.scheme(), clientEnv_.host(), clientEnv_.port());
+                        const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
+                        HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
                         theClient.run();
 
                         if (clientEnv_.debug()) {
@@ -484,7 +485,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         }
                     }
                     else {
-
                         if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<"
                                  << endl;
