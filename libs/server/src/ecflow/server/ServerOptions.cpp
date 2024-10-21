@@ -142,7 +142,7 @@ ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env) {
         if (env->debug_) {
             cout << "ServerOptions:: Deploying HTTP Server\n";
         }
-        env->http_ = true;
+        env->protocol_ = ecf::Protocol::Http;
     }
 
     if (vm_.count("port")) {
