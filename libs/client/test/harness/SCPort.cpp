@@ -96,7 +96,145 @@ std::string SCPort::next_only(bool debug) {
     if (debug) {
         std::cout << " SCPort::next_only() seed_port(" << thePort_ << ")\n";
     }
-    return ClientInvoker::find_free_port(thePort_, debug);
+    return SCPort::find_free_port(thePort_, debug);
+}
+
+bool SCPort::is_free_port(int port, bool debug) {
+    // Ping failed, We need to distinguish between:
+    //    a/ Server does not exist : <FREE> port
+    //    b/ Address in use        : <BUSY> port on existing server
+    // Using server_version() but then get error messages
+    // ******** Until this is done we can't implement port hopping **********
+
+    if (debug) {
+        std::cout << "  ClientInvoker::is_free_port: checking port " << port << "\n";
+    }
+
+    ClientInvoker client;
+    client.set_retry_connection_period(1); // avoid long wait
+    client.set_connection_attempts(1);     // avoid long wait
+
+    const auto the_port = ecf::convert_to<std::string>(port);
+    try {
+        if (debug) {
+            std::cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << the_port << "'\n";
+        }
+        client.set_host_port(Str::LOCALHOST(), the_port);
+        client.pingServer();
+        if (debug) {
+            std::cout << "   Connected to server on port " << the_port << ". Returning FALSE\n";
+        }
+        return false;
+    }
+    catch (std::runtime_error& e) {
+        std::string msg = e.what();
+        if (debug) {
+            std::cout << "   " << msg;
+        }
+        if (msg.find("authentication failed") != std::string::npos) {
+            if (debug) {
+                std::cout << "   Could not connect, due to authentication failure, hence port " << the_port
+                          << " is used. Returning FALSE\n";
+            }
+            return false;
+        }
+        if (msg.find("invalid_argument") != std::string::npos) {
+            if (debug) {
+                std::cout << "   Mixing 4 and 5 series ?, hence port " << the_port << " is used. Returning FALSE\n";
+            }
+            return false;
+        }
+        else {
+            if (debug) {
+                std::cout << "   Found free port " << the_port << "\n";
+            }
+        }
+    }
+    return true;
+}
+
+std::string SCPort::find_free_port(int seed_port_number, bool debug) {
+    // Ping failed, We need to distinguish between:
+    //    a/ Server does not exist : <FREE> port
+    //    b/ Address in use        : <BUSY> port on existing server
+    // Using server_version() but then get error messages
+    // ******** Until this is done we can't implement port hopping **********
+
+    if (debug) {
+        std::cout << "  ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
+    }
+    int the_port = seed_port_number;
+    std::string free_port;
+    ClientInvoker client;
+    client.set_retry_connection_period(1); // avoid long wait
+    client.set_connection_attempts(1);     // avoid long wait
+    while (true) {
+        free_port = ecf::convert_to<std::string>(the_port);
+        try {
+            if (debug) {
+                std::cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << free_port << "'\n";
+            }
+            client.set_host_port(Str::LOCALHOST(), free_port);
+            client.pingServer();
+            if (debug) {
+                std::cout << "   Connected to server on port " << free_port << " trying next port\n";
+            }
+            the_port++;
+        }
+        catch (std::runtime_error& e) {
+            std::string error_msg = e.what();
+            if (debug) {
+                std::cout << "   " << error_msg;
+            }
+            if (error_msg.find("authentication failed") != std::string::npos) {
+                if (debug) {
+                    std::cout << "   Could not connect, due to authentication failure, hence port " << the_port
+                              << " is used, trying next port\n";
+                }
+                the_port++;
+                continue;
+            }
+            if (error_msg.find("invalid_argument") != std::string::npos) {
+                if (debug) {
+                    std::cout << "   Mixing 4 and 5 series ?, hence port " << the_port
+                              << " is used, trying next port\n";
+                }
+                the_port++;
+                continue;
+            }
+            else {
+                if (debug) {
+                    std::cout << "   Found free port " << free_port << "\n";
+                }
+                break;
+            }
+        }
+    }
+    return free_port;
+}
+
+std::string SCPort::find_available_port(const std::string& port) {
+    auto current_port = ecf::convert_to<int>(port);
+
+    // The goal is to create a unique port number, allowing debug and release tests to run at the same time
+    // Since several serves might run on same machine, on different workspaces, checking lock file is not sufficient.
+    // We try to ensure the port is available by attempting to contact the server to confirm that the lock has been
+    // performed.
+
+    // (1) Search for port that isn't locked (i.e. for which there is no `.lock` file)
+    for (int selected_port = EcfPortLock::try_next_port_lock(current_port, true); /* always advance */;
+         selected_port     = EcfPortLock::try_next_port_lock(selected_port, true)) {
+        if (SCPort::is_free_port(selected_port, true)) {
+            // We found the free port that we wanted!
+            return ecf::convert_to<std::string>(selected_port);
+        }
+        else {
+            // This port is in use (maybe by a server running on another workspace)
+            EcfPortLock::try_port_lock(selected_port);
+        }
+    }
+
+    throw std::runtime_error("Unable to find an available port");
 }
 
 } // namespace ecf

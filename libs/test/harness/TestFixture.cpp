@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "LocalServerLauncher.hpp"
+#include "SCPort.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
@@ -53,27 +54,6 @@ bool is_external_server_running_locally(std::string_view host) {
 
 bool is_local_server(std::string_view host) {
     return host.empty() || host == Str::LOCALHOST();
-}
-
-std::string find_available_port(std::string port) {
-    auto current_port = ecf::convert_to<int>(port);
-
-    // The goal is to create a unique port number, allowing debug and release tests to run at the same time
-    // Since several serves might run on same machine, on different workspaces, checking lock file is not sufficient.
-    // We try to ensure the port is available by attempting to contact the server to confirm that the lock has been performed.
-
-    // (1) Search for port that isn't locked (i.e. for which there is no `.lock` file)
-    for(int selected_port = EcfPortLock::try_next_port_lock(current_port, true); /* always advance */; selected_port = EcfPortLock::try_next_port_lock(selected_port, true)) {
-        if (ClientInvoker::is_free_port(selected_port, true)) {
-            // We found the free port that we wanted!
-            return ecf::convert_to<std::string>(selected_port);
-        } else {
-            // This port is in use (maybe by a server running on another workspace)
-            EcfPortLock::try_port_lock(selected_port);
-        }
-    }
-
-    throw std::runtime_error("Unable to find an available port");
 }
 
 } // namespace
@@ -228,7 +208,7 @@ void TestFixture::init(const std::string& project_test_dir) {
 
         // Update ClientInvoker with local host and port
         host_ = Str::LOCALHOST();
-        port_ = find_available_port(port_);
+        port_ = ecf::SCPort::find_available_port(port_);
         client().set_host_port(host_, port_);
 
         std::cout << "   _LOCAL_ SERVER running on the _LOCAL_ platform";
@@ -425,9 +405,9 @@ std::string TestFixture::local_ecf_home() {
     build_type = "release";
 #endif
 
-
     auto pid = getpid();
-    std::string rel_path = "data/ECF_HOME__" + build_type + "__" + compiler + "__pid" + ecf::convert_to<std::string>(pid) + "__";
+    std::string rel_path =
+        "data/ECF_HOME__" + build_type + "__" + compiler + "__pid" + ecf::convert_to<std::string>(pid) + "__";
 
     // Allow post-fix to be added, to allow test to run in parallel
     if (auto custom_postfix = ecf::environment::fetch("TEST_ECF_HOME_POSTFIX"); custom_postfix) {
