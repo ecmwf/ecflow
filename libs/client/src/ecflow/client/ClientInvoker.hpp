@@ -228,20 +228,6 @@ public:
     int news(defs_ptr& client_defs) const;
     int news_local() const;
 
-    /**
-     * Check if there is *no *ecFlow server running on the given port.
-     * 
-     * The check is performed by connecting to the port (on localhost) and issuing a ping request.
-     * 
-     * \returns false, if: (1) the server answers with a ping response;
-     *                     (2) the request is accepted, but fails due to failed authentication;
-     *                     (3) there is a mismatch communication protocol (4.x vs 5.x)
-     *          true, otherwise
-     */
-    static bool is_free_port(int port, bool debug = false);
-    // find free port on local host. Not 100% accurate, use in test
-    static std::string find_free_port(int seed_port_number, bool debug = false);
-
     bool wait_for_server_reply(int time_out = 60) const; // wait for server reply, returning false means timed out.
     bool wait_for_server_death(
         int time_out = 60) const; // wait for server reply, returning true means server died,false means timed out.

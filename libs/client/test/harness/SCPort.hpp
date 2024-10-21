@@ -29,6 +29,23 @@ public:
     /// make sure we have a unique port, each time next_only() is called;
     static std::string next_only(bool debug = false);
 
+    /**
+     * Check if there is *no* ecFlow server running on the given port.
+     *
+     * The check is performed by connecting to the port (on localhost) and issuing a ping request.
+     *
+     * \returns false, if: (1) the server answers with a ping response;
+     *                     (2) the request is accepted, but fails due to failed authentication;
+     *                     (3) there is a mismatch communication protocol (4.x vs 5.x)
+     *          true, otherwise
+     */
+    static bool is_free_port(int port, bool debug = false);
+
+    static std::string find_available_port(const std::string& port);
+
+    // find free port on local host. Not 100% accurate, use in test
+    [[deprecated]] static std::string find_free_port(int seed_port_number, bool debug = false);
+
 private:
     SCPort()  = delete;
     ~SCPort() = delete;
