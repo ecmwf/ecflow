@@ -104,7 +104,8 @@ int main(int argc, char* argv[]) {
         boost::asio::io_context io;
 
         // Launching Http server
-        if (server_environment.http()) {
+        if (ecf::is_any_variation_of_http(server_environment.protocol())) {
+            // On the server side, we actually only support HTTP
             HttpServer theServer(io, server_environment);
             return run(theServer);
         }
