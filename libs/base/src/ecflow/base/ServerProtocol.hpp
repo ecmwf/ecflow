@@ -76,6 +76,23 @@ static inline Protocol from_configuration_encoding(const std::string& encoding) 
     throw std::runtime_error("Invalid encoding");
 }
 
+static inline std::string scheme_for(Protocol protocol) {
+    switch (protocol) {
+        case Protocol::Http:
+            return "http";
+        case Protocol::Https:
+            return "https";
+        case Protocol::Plain:
+        case Protocol::Ssl:
+        default:
+            return "";
+    }
+}
+
+static inline bool is_any_variation_of_http(Protocol protocol) {
+    return protocol == Protocol::Http || protocol == Protocol::Https;
+}
+
 } // namespace ecf
 
 #endif /* ecflow_base_ServerProtocol_HPP */

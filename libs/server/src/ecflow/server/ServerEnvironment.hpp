@@ -25,6 +25,7 @@
 
 #include <boost/asio.hpp>
 
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/PasswdFile.hpp"
@@ -66,10 +67,13 @@ public:
     /// return true if ssl enable via command line, AND SSL libraries are found
     ecf::Openssl& openssl() { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
-    void enable_ssl() { ssl_.enable(serverHost_, the_port()); } // search server.crt first, then <host>.<port>.crt
+    void enable_ssl() {
+        protocol_ = ecf::Protocol::Ssl;
+        ssl_.enable(serverHost_, the_port());
+    } // search server.crt first, then <host>.<port>.crt
 #endif
 
-    bool http() const { return http_; }
+    ecf::Protocol protocol() const { return protocol_; }
 
     /// returns the server port. This has a default value defined in server_environment.cfg
     /// but can be overridden by the environment variable ECF_PORT
@@ -210,7 +214,7 @@ private:
     int submitJobsInterval_;
     int ecf_prune_node_log_;
     bool jobGeneration_; // used in debug/test mode only
-    bool http_;
+    ecf::Protocol protocol_;
     bool debug_;
     bool help_option_;
     bool version_option_;
