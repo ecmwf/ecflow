@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_core_TestNaming_HPP
-#define ecflow_core_TestNaming_HPP
+#ifndef ecflow_core_test_harness_TestNaming_HPP
+#define ecflow_core_test_harness_TestNaming_HPP
 
 #include <algorithm>
 #include <iomanip>
@@ -50,4 +50,4 @@ inline std::string name_this_test() {
         std::cerr << " +++ " ARGS << std::endl; \
     } while (0)
 
-#endif /* ecflow_core_TestNaming_HPP */
+#endif /* ecflow_core_test_harness_TestNaming_HPP */

@@ -8,31 +8,23 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  LocalServerLauncher.hpp
-  ScratchDir.hpp
-  ServerTestHarness.hpp
-  TestFixture.hpp
-  ZombieUtil.hpp
-  # Sources
-  LocalServerLauncher.cpp
-  ServerTestHarness.cpp
-  TestFixture.cpp
-  ZombieUtill.cpp
-)
-
 ecbuild_add_library(
   TARGET
-    libharness
+    test_harness.client
   NOINSTALL
-  TYPE STATIC
+  TYPE
+    STATIC
   SOURCES
-    ${srcs}
+    # Headers
+    InvokeServer.hpp
+    SCPort.hpp
+    # Sources
+    SCPort.cpp
   PUBLIC_INCLUDES
-    ./
-    ../../base/test
+    .
   PUBLIC_LIBS
-    ecflow_all
+    test_harness.base
 )
-target_clangformat(libharness)
+target_clangformat(test_harness.client
+  CONDITION ENABLE_TESTS
+)

@@ -8,7 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-add_subdirectory(src)
+add_subdirectory(harness)
 
 # =================================================================
 # test
@@ -55,9 +55,8 @@ if (ENABLE_ALL_TESTS)
     SOURCES
       ${test_srcs}
     LIBS
-      libharness
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     TEST_DEPENDS
       s_client
   )
@@ -74,9 +73,8 @@ if (ENABLE_ALL_TESTS)
     DEFINITIONS
       ECFLOW_TEST_SERVER_HTTP
     LIBS
-      libharness
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     ENVIRONMENT
       ECF_TEST_USING_HTTP=1
     TEST_DEPENDS
@@ -94,9 +92,8 @@ if (ENABLE_ALL_TESTS)
       TestZombies.cpp
       TestZombies_main.cpp # test entry point
     LIBS
-      libharness
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     TEST_DEPENDS
       s_test
   )
@@ -113,7 +110,7 @@ if (ENABLE_ALL_TESTS)
       TestSingle.cpp
       TestSingle_main.cpp # test entry point
     LIBS
-      libharness
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_client

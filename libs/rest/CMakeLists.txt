@@ -127,14 +127,12 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         integration nightly
       SOURCES
         ${test_srcs}
-      INCLUDES
-        ../base/test
       LIBS
         libhttp
         ecflow_all
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-        test_support
+        test_harness.base
       DEPENDS
         ecflow_server # the server is launched to support tests
         ecflow_http
@@ -153,8 +151,6 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         integration nightly
       SOURCES
         ${test_srcs}
-      INCLUDES
-        ../base/test
       DEFINITIONS
         ECF_TEST_HTTP_BACKEND
       LIBS
@@ -162,7 +158,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         ecflow_all
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-        test_support
+        test_harness.base
       DEPENDS
         ecflow_server # the server is launched to support tests
         ecflow_http
