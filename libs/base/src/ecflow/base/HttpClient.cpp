@@ -33,6 +33,8 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
       client_(base_url_) {
 
     client_.set_connection_timeout(std::chrono::seconds{timeout});
+    client_.set_read_timeout(std::chrono::seconds{timeout});
+    client_.set_write_timeout(std::chrono::seconds{timeout});
 
     // Disable cert verification
     if (scheme_ == "https") {
