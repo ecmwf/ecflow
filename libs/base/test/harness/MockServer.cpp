@@ -8,15 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/server/SslServer.hpp"
+#include "MockServer.hpp"
 
-#include "ecflow/server/ServerEnvironment.hpp"
-
-SslServer::SslServer(boost::asio::io_context& io, ServerEnvironment& serverEnv)
-    : BaseServer(io, serverEnv),
-      server_(this, io, serverEnv) {
-}
-
-const std::string& SslServer::ssl() const {
-    return serverEnv_.openssl().ssl();
+void MockServer::set_server_state(SState::State ss) {
+    serverState_    = ss;
+    stats().status_ = static_cast<int>(serverState_);
+    defs_->set_server().set_state(serverState_);
 }
