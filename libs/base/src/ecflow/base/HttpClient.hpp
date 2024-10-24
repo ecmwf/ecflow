@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2009- ECMWF.
  *
@@ -32,7 +33,7 @@ public:
                const std::string& scheme,
                const std::string& host,
                const std::string& port,
-               int timeout = 60);
+               int timeout = 120);
 
     void run();
 
