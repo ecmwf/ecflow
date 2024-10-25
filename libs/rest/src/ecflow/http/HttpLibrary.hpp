@@ -23,9 +23,15 @@
     #define CPPHTTPLIB_RECV_FLAGS MSG_NOSIGNAL
 #endif
 
-#ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
+#if defined(ECF_OPENSSL)
+    #include <openssl/ssl.h>
+    #if OPENSSL_VERSION_NUMBER < 0x1010100fL
+        #warning OpenSSL versions prior to 1.1.1 detected. Aviso ETCD HTTP client will be build without OpenSSL support!
+    #else
+        #define CPPHTTPLIB_OPENSSL_SUPPORT
+    #endif
 #endif
+
 #ifdef ECF_HTTP_COMPRESSION
     #define CPPHTTPLIB_ZLIB_SUPPORT
 #endif

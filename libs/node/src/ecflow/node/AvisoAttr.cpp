@@ -94,7 +94,6 @@ void AvisoAttr::reset() {
 }
 
 bool AvisoAttr::isFree() const {
-    SLOG(D, "AvisoAttr: check Aviso attribute (name: " << name_ << ", listener: " << listener_ << ") is free");
 
     if (controller_ == nullptr) {
         return false;
@@ -105,6 +104,7 @@ bool AvisoAttr::isFree() const {
 
     if (notifications.empty()) {
         // No notifications, nothing to do -- task continues to wait
+        SLOG(D, "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << "): no notifications found");
         return false;
     }
 
@@ -142,6 +142,8 @@ bool AvisoAttr::isFree() const {
         back);
 
     ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
+
+    SLOG(D, "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << ") " << std::string{(is_free ? "" : "no ")} + "notifications found");
 
     return is_free;
 }
