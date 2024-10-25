@@ -319,13 +319,46 @@ static std::shared_ptr<AvisoAttr> aviso_init_defaults_3(const std::string& name,
 
 static std::shared_ptr<MirrorAttr> mirror_init(const std::string& name,
                                                const std::string& path,
-                                               const std::string& host,
-                                               const std::string& port,
-                                               const std::string& polling,
-                                               bool ssl,
-                                               const std::string& auth) {
+                                               const std::string& host    = ecf::MirrorAttr::default_remote_host,
+                                               const std::string& port    = ecf::MirrorAttr::default_remote_port,
+                                               const std::string& polling = ecf::MirrorAttr::default_polling,
+                                               bool ssl                   = false,
+                                               const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
     auto attr = std::make_shared<MirrorAttr>(nullptr, name, path, host, port, polling, ssl, auth, "");
     return attr;
+}
+
+static std::shared_ptr<MirrorAttr> mirror_init_defaults_0(const std::string& name, const std::string& path) {
+    return mirror_init(name, path);
+}
+
+static std::shared_ptr<MirrorAttr>
+mirror_init_defaults_1(const std::string& name, const std::string& path, const std::string& host) {
+    return mirror_init(name, path, host);
+}
+
+static std::shared_ptr<MirrorAttr> mirror_init_defaults_2(const std::string& name,
+                                                          const std::string& path,
+                                                          const std::string& host,
+                                                          const std::string& port) {
+    return mirror_init(name, path, host, port);
+}
+
+static std::shared_ptr<MirrorAttr> mirror_init_defaults_3(const std::string& name,
+                                                          const std::string& path,
+                                                          const std::string& host,
+                                                          const std::string& port,
+                                                          const std::string& polling) {
+    return mirror_init(name, path, host, port, polling);
+}
+
+static std::shared_ptr<MirrorAttr> mirror_init_defaults_4(const std::string& name,
+                                                          const std::string& path,
+                                                          const std::string& host,
+                                                          const std::string& port,
+                                                          const std::string& polling,
+                                                          bool ssl) {
+    return mirror_init(name, path, host, port, polling, ssl);
 }
 
 void export_NodeAttr() {
@@ -969,8 +1002,8 @@ void export_NodeAttr() {
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
         .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer");
 
-    void (CronAttr::*add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
-    void (CronAttr::*add_time_series_2)(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) =
+    void (CronAttr::* add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
+    void (CronAttr::* add_time_series_2)(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) =
         &CronAttr::addTimeSeries;
     class_<CronAttr, std::shared_ptr<CronAttr>>("Cron", NodeAttrDoc::cron_doc())
         .def("__init__", raw_function(&cron_raw_constructor, 1)) // will call -> cron_init or cron_init1
@@ -1073,6 +1106,11 @@ void export_NodeAttr() {
 
     class_<MirrorAttr>("MirrorAttr", NodeAttrDoc::mirror_doc())
         .def("__init__", make_constructor(&mirror_init))
+        .def("__init__", make_constructor(&mirror_init_defaults_0))
+        .def("__init__", make_constructor(&mirror_init_defaults_1))
+        .def("__init__", make_constructor(&mirror_init_defaults_2))
+        .def("__init__", make_constructor(&mirror_init_defaults_3))
+        .def("__init__", make_constructor(&mirror_init_defaults_4))
         .def(self == self)                       // __eq__
         .def("__str__", &ecf::to_python_string)  // __str__
         .def("__copy__", copyObject<MirrorAttr>) // __copy__ uses copy constructor

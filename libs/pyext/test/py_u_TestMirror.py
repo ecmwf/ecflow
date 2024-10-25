@@ -26,6 +26,61 @@ def can_create_mirror_from_parameters():
     assert mirror.auth() == "auth"
 
 
+def can_create_mirror_from_default_parameters_0():
+    mirror = ecf.MirrorAttr("name", "r_path")
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.remote_host() == "%ECF_MIRROR_REMOTE_HOST%"
+    assert mirror.remote_port() == "%ECF_MIRROR_REMOTE_PORT%"
+    assert mirror.polling() == "%ECF_MIRROR_REMOTE_POLLING%"
+    assert mirror.ssl() == False
+    assert mirror.auth() == "%ECF_MIRROR_REMOTE_AUTH%"
+
+
+def can_create_mirror_from_default_parameters_1():
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host")
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.remote_host() == "r_host"
+    assert mirror.remote_port() == "%ECF_MIRROR_REMOTE_PORT%"
+    assert mirror.polling() == "%ECF_MIRROR_REMOTE_POLLING%"
+    assert mirror.ssl() == False
+    assert mirror.auth() == "%ECF_MIRROR_REMOTE_AUTH%"
+
+
+def can_create_mirror_from_default_parameters_2():
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port")
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.remote_host() == "r_host"
+    assert mirror.remote_port() == "r_port"
+    assert mirror.polling() == "%ECF_MIRROR_REMOTE_POLLING%"
+    assert mirror.ssl() == False
+    assert mirror.auth() == "%ECF_MIRROR_REMOTE_AUTH%"
+
+
+def can_create_mirror_from_default_parameters_3():
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling")
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.remote_host() == "r_host"
+    assert mirror.remote_port() == "r_port"
+    assert mirror.polling() == "polling"
+    assert mirror.ssl() == False
+    assert mirror.auth() == "%ECF_MIRROR_REMOTE_AUTH%"
+
+
+def can_create_mirror_from_default_parameters_4():
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True)
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.remote_host() == "r_host"
+    assert mirror.remote_port() == "r_port"
+    assert mirror.polling() == "polling"
+    assert mirror.ssl() == True
+    assert mirror.auth() == "%ECF_MIRROR_AUTH%"
+
+
 def can_add_mirror_to_task():
     suite = ecf.Suite("s1")
 
@@ -101,6 +156,10 @@ if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
 
     can_create_mirror_from_parameters()
+    can_create_mirror_from_default_parameters_0()
+    can_create_mirror_from_default_parameters_1()
+    can_create_mirror_from_default_parameters_2()
+    can_create_mirror_from_default_parameters_3()
     can_add_mirror_to_task()
     can_embed_mirror_into_task()
     cannot_have_multiple_mirrors_in_single_task()
