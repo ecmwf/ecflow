@@ -285,12 +285,36 @@ static job_creation_ctrl_ptr makeJobCreationCtrl() {
 
 static std::shared_ptr<AvisoAttr> aviso_init(const std::string& name,
                                              const std::string& listener,
-                                             const std::string& url,
-                                             const std::string& schema,
-                                             const std::string& polling,
-                                             const std::string& auth) {
+                                             const std::string& url     = AvisoAttr::default_url,
+                                             const std::string& schema  = AvisoAttr::default_schema,
+                                             const std::string& polling = AvisoAttr::default_polling,
+                                             const std::string& auth    = AvisoAttr::default_auth) {
     auto attr = std::make_shared<AvisoAttr>(nullptr, name, listener, url, schema, polling, 0, auth, "");
     return attr;
+}
+
+static std::shared_ptr<AvisoAttr> aviso_init_defaults_0(const std::string& name, const std::string& listener) {
+    return aviso_init(name, listener);
+}
+
+static std::shared_ptr<AvisoAttr>
+aviso_init_defaults_1(const std::string& name, const std::string& listener, const std::string& url) {
+    return aviso_init(name, listener, url);
+}
+
+static std::shared_ptr<AvisoAttr> aviso_init_defaults_2(const std::string& name,
+                                                        const std::string& listener,
+                                                        const std::string& url,
+                                                        const std::string& schema) {
+    return aviso_init(name, listener, url, schema);
+}
+
+static std::shared_ptr<AvisoAttr> aviso_init_defaults_3(const std::string& name,
+                                                        const std::string& listener,
+                                                        const std::string& url,
+                                                        const std::string& schema,
+                                                        const std::string& polling) {
+    return aviso_init(name, listener, url, schema, polling);
 }
 
 static std::shared_ptr<MirrorAttr> mirror_init(const std::string& name,
@@ -1018,6 +1042,10 @@ void export_NodeAttr() {
 
     class_<ecf::AvisoAttr>("AvisoAttr", NodeAttrDoc::aviso_doc())
         .def("__init__", make_constructor(&aviso_init))
+        .def("__init__", make_constructor(&aviso_init_defaults_0))
+        .def("__init__", make_constructor(&aviso_init_defaults_1))
+        .def("__init__", make_constructor(&aviso_init_defaults_2))
+        .def("__init__", make_constructor(&aviso_init_defaults_3))
         .def(self == self)                      // __eq__
         .def("__str__", &ecf::to_python_string) // __str__
         .def("__copy__", copyObject<AvisoAttr>) // __copy__ uses copy constructor
