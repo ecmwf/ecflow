@@ -69,7 +69,6 @@ public:
 #ifdef ECF_OPENSSL
     /// Override any ssl read from environment(ECF_SSL) or command line args(-ssl)
     void enable_ssl() { clientEnv_.enable_ssl(); }
-    bool enable_ssl_no_throw() { return clientEnv_.enable_ssl_no_throw(); }
     void disable_ssl() { clientEnv_.disable_ssl(); } // override environment setting for ECF_SSL
 #endif
 
