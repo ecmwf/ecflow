@@ -21,7 +21,7 @@ public:
     explicit SessionItem(const std::string&);
     virtual ~SessionItem();
 
-    void name(const std::string& name) { name_ = name; }
+    void name(const std::string& name);
     const std::string& name() const { return name_; }
 
     std::string sessionFile() const;

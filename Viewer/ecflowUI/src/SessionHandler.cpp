@@ -36,6 +36,13 @@ SessionItem::~SessionItem() {
     }
 }
 
+void SessionItem::name(const std::string& name) {
+    name_ = name;
+    // Since the name changes, we need to update the related directory paths
+    dirPath_ = SessionHandler::sessionDirName(name_);
+    qtPath_  = SessionHandler::sessionQtDirName(name_);
+}
+
 void SessionItem::checkDir() {
     dirPath_ = SessionHandler::sessionDirName(name_);
     DirectoryHandler::createDir(dirPath_);
