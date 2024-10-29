@@ -33,6 +33,8 @@ Usage:
    t2 = Task('t2')
    t2.add_aviso('name', '{...}', 'http://aviso.com', '60', '/path/to/auth')
 
+The parameters `url`, `schema`, `polling`, and `auth` are optional
+
 
 .. py:method:: AvisoAttr.auth( (AvisoAttr)arg1) -> str :
    :module: ecflow
