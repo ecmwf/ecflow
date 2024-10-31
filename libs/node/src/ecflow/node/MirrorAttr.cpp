@@ -160,6 +160,10 @@ void MirrorAttr::mirror() {
 std::optional<std::string> MirrorAttr::resolve_cfg(const std::string& value, std::string_view default_value) const {
     // Substitude variable in local value
     std::string local = value;
+    if(!parent_) {
+        return std::nullopt;
+    }
+
     parent_->variableSubstitution(local);
 
     // Ensure substituted value is not default
@@ -199,9 +203,11 @@ void MirrorAttr::start_controller() {
             state_change_no_ = Ecf::incr_state_change_no();
 
             reason_ = Message("Unable to start mirror. Failed to resolve mirror remote host: ", remote_host_).str();
-            parent_->flag().set(Flag::REMOTE_ERROR);
-            parent_->flag().set_state_change_no(state_change_no_);
-            parent_->setStateOnly(NState::UNKNOWN, true);
+            if (parent_) {
+                parent_->flag().set(Flag::REMOTE_ERROR);
+                parent_->flag().set_state_change_no(state_change_no_);
+                parent_->setStateOnly(NState::UNKNOWN, true);
+            }
             return;
         }
         // For the remaining configuration, we use fallback values if the resolution fails

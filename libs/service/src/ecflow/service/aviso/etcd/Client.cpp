@@ -42,7 +42,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
 
     if (!auth_token_.empty()) {
         SLOG(D, "EtcdClient: using authorization token");
-        headers.emplace("Authorization", "Bearer " + auth_token_);
+        headers.emplace("Authorization", "EmailKey " + auth_token_);
     }
 
     auto range = Range(key_prefix);

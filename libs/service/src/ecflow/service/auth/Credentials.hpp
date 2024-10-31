@@ -27,6 +27,7 @@ public:
 
     struct KeyCredentials
     {
+        std::string email;
         std::string key;
     };
 

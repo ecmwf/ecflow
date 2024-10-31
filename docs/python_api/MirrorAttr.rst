@@ -34,6 +34,8 @@ Usage:
    t2 = Task('t2')
    t2.add_aviso('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth')
 
+The parameters `remote_host`, `remote_port`, `polling`, `ssl`, and `auth` are optional
+
 
 .. py:method:: MirrorAttr.auth( (MirrorAttr)arg1) -> str :
    :module: ecflow

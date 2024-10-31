@@ -25,6 +25,78 @@ def can_create_aviso_from_parameters():
     assert aviso.auth() == "auth"
 
 
+def can_create_aviso_from_default_parameters_0():
+    suite = ecf.Suite("s1")
+
+    family = ecf.Family("f1")
+    suite.add_family(family)
+
+    task = ecf.Task("f1", ecf.AvisoAttr("name", "listener"))
+    assert len(list(task.avisos)) == 1
+
+    actual = list(task.avisos)[0]
+    assert actual.name() == "name"
+    assert actual.listener() == "listener"
+    assert actual.url() == "%ECF_AVISO_URL%"
+    assert actual.schema() == "%ECF_AVISO_SCHEMA%"
+    assert actual.polling() == "%ECF_AVISO_POLLING%"
+    assert actual.auth() == "%ECF_AVISO_AUTH%"
+
+
+def can_create_aviso_from_default_parameters_1():
+    suite = ecf.Suite("s1")
+
+    family = ecf.Family("f1")
+    suite.add_family(family)
+
+    task = ecf.Task("f1", ecf.AvisoAttr("name", "listener", "url"))
+    assert len(list(task.avisos)) == 1
+
+    actual = list(task.avisos)[0]
+    assert actual.name() == "name"
+    assert actual.listener() == "listener"
+    assert actual.url() == "url"
+    assert actual.schema() == "%ECF_AVISO_SCHEMA%"
+    assert actual.polling() == "%ECF_AVISO_POLLING%"
+    assert actual.auth() == "%ECF_AVISO_AUTH%"
+
+
+def can_create_aviso_from_default_parameters_2():
+    suite = ecf.Suite("s1")
+
+    family = ecf.Family("f1")
+    suite.add_family(family)
+
+    task = ecf.Task("f1", ecf.AvisoAttr("name", "listener", "url", "schema"))
+    assert len(list(task.avisos)) == 1
+
+    actual = list(task.avisos)[0]
+    assert actual.name() == "name"
+    assert actual.listener() == "listener"
+    assert actual.url() == "url"
+    assert actual.schema() == "schema"
+    assert actual.polling() == "%ECF_AVISO_POLLING%"
+    assert actual.auth() == "%ECF_AVISO_AUTH%"
+
+
+def can_create_aviso_from_default_parameters_3():
+    suite = ecf.Suite("s1")
+
+    family = ecf.Family("f1")
+    suite.add_family(family)
+
+    task = ecf.Task("f1", ecf.AvisoAttr("name", "listener", "url", "schema", "polling"))
+    assert len(list(task.avisos)) == 1
+
+    actual = list(task.avisos)[0]
+    assert actual.name() == "name"
+    assert actual.listener() == "listener"
+    assert actual.url() == "url"
+    assert actual.schema() == "schema"
+    assert actual.polling() == "polling"
+    assert actual.auth() == "%ECF_AVISO_AUTH%"
+
+
 def can_add_aviso_to_task():
     suite = ecf.Suite("s1")
 
@@ -79,12 +151,35 @@ def cannot_have_multiple_avisos_in_single_task():
         assert True
 
 
+def can_check_job_creation_with_aviso():
+    defs = ecf.Defs()
+
+    suite = ecf.Suite("s")
+    defs.add_suite(suite)
+
+    family = ecf.Family("f")
+    suite.add_family(family)
+
+    task = ecf.Task("t")
+    family.add_task(task)
+
+    aviso = ecf.AvisoAttr("name", "listener", "url", "schema", "polling", "auth")
+    task.add_aviso(aviso)
+
+    defs.check_job_creation()
+
+
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
 
     can_create_aviso_from_parameters()
+    can_create_aviso_from_default_parameters_0()
+    can_create_aviso_from_default_parameters_1()
+    can_create_aviso_from_default_parameters_2()
+    can_create_aviso_from_default_parameters_3()
     can_add_aviso_to_task()
     can_embed_aviso_into_task()
     cannot_have_multiple_avisos_in_single_task()
+    can_check_job_creation_with_aviso()
 
     print("All tests pass")
