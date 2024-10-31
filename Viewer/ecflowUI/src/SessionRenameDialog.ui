@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Add variable</string>
+   <string></string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -26,7 +26,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>New name:</string>
+      <string></string>
      </property>
     </widget>
    </item>

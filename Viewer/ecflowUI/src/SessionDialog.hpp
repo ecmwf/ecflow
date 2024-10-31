@@ -28,9 +28,7 @@ public:
     ~SessionDialog() override;
 
 public Q_SLOTS:
-    void on_saveButton__clicked();
-    void on_sessionNameEdit__textChanged();
-    void on_savedSessionsList__currentRowChanged(int currentRow);
+    void on_savedSessionsList__currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
     void on_cloneButton__clicked();
     void on_deleteButton__clicked();
     void on_renameButton__clicked();
@@ -39,7 +37,6 @@ public Q_SLOTS:
 private:
     // Ui::SaveSessionAsDialog *ui;
     void addSessionToTable(SessionItem* s);
-    bool validSaveName(const std::string& name);
     void refreshListOfSavedSessions();
     void setButtonsEnabledStatus();
     std::string selectedSessionName();
