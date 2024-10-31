@@ -26,6 +26,10 @@ The table below shows a list of generated variables.
      - Explanation
      - Example
    * - server
+     - ECF_MICRO
+     - The default preprocessor character used during variable substitution
+     - %
+   * - server
      - ECF_TRIES
      - The default number of tries for each task
      - 2
@@ -46,17 +50,45 @@ The table below shows a list of generated variables.
      - Command to be executed to send a job
      - %ECF_JOB% 1> %ECF_JOBOUT% 2>&1
    * - server
+     - ECF_KILL_CMD
+     - Command to be executed to kill a job
+     - kill -15 %ECF_RID%
+   * - server
+     - ECF_STATUS_CMD
+     - Command to be executed to retrieve the job status
+     - ps --pid %ECF_RID% -f > %ECF_JOB%.stat 2>&1
+   * - server
+     - ECF_URL_CMD
+     - Command to be executed to open job files in a browser
+     - ${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%
+   * - server
+     - ECF_URL_BASE
+     - The base prefix for the job URL
+     - https://confluence.ecmwf.int
+   * - server
+     - ECF_URL
+     - The stem suffix for the job URL
+     - display/ECFLOW/ecflow+home
+   * - server
      - ECF_LISTS
      - Name of the ecFlow white-list file
      - ecf.lists
    * - server
-     - ECF_PASS
+     - ECF_PASSWD
      - Default password string to replace the real password, when communicating with the server.
+     - DJP
+   * - server
+     - ECF_CUSTOM_PASSWD
+     - Default custom password string to replace the real password, when communicating with the server.
      - DJP
    * - server
      - ECF_LOG
      - Name of the ecFlow history, or log file
      - ecf.log
+   * - server
+     - ECF_INTERVAL
+     - The interval between check of time dependencies and job submission
+     - 60
    * - server
      - ECF_CHECK
      - Name of the checkpoint file
@@ -65,54 +97,70 @@ The table below shows a list of generated variables.
      - ECF_CHECKOLD
      - Name of the backup of the checkpoint file
      - ecf.check.b
-   * - Suite
+   * - server
+     - ECF_CHECKINTERVAL
+     - The interval, in seconds, between saving current state into the checkpoint file
+     - 120
+   * - server
+     - ECF_CHECKMODE
+     - The mode to perform checkpoint file saving
+     - CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS
+   * - suite
      - SUITE
      - The name of the suite
      - Backarc
-   * - server
+   * - suite
      - DATE
      - Date of the suite in format DD.MM.YYYY
      - 21.02.2012
-   * - server
+   * - suite
      - DAY
      - Full name of the weekday
      - Sunday
-   * - server
+   * - suite
      - DD
      - Day of the month, with two digits
      - 07
-   * - server
+   * - suite
      - DOW
      - Day Of the Week
      - 0
-   * - server
+   * - suite
      - DOY
      - Day Of the Year
      - 52
-   * - server
+   * - suite
      - MM
      - The month of the year, with two digits
      - 02
-   * - server
+   * - suite
      - MONTH
      - Full name of the month
      - February
-   * - server
+   * - suite
      - YYYY
      - A year with four digits
      - 2012
-   * - server
+   * - suite
      - ECF_DATE
      - Single date in format YYYYMMDD
      - 20120221
-   * - server
+   * - suite
+     - TIME
+     - Time of the suites clock, HHMM
+     - 2032
+   * - suite
      - ECF_TIME
      - Time of the suites clock, HH:MM
      - 20:32
-   * - server
+   * - suite
      - ECF_CLOCK
      - Composite weekday, month, Day Of the Week, Day Of Year
      - sunday:february:0:52
+   * - suite
+     - ECF_JULIAN
+     - Julian day
+     - 2455979
    * - family
      - FAMILY
      - The name of the family, (avoid using)

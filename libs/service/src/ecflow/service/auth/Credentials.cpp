@@ -42,7 +42,9 @@ std::optional<Credentials::UserCredentials> Credentials::user() const {
 
 std::optional<Credentials::KeyCredentials> Credentials::key() const {
     if (auto key = value("key"); key) {
-        return KeyCredentials{std::move(*key)};
+        if (auto email = value("email"); email) {
+            return KeyCredentials{std::move(*email), std::move(*key)};
+        }
     }
     return std::nullopt;
 }

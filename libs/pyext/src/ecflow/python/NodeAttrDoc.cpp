@@ -728,7 +728,9 @@ const char* NodeAttrDoc::aviso_doc() {
            "             AvisoAttr('name', '{...}', 'http://aviso.com', '60', '/path/to/auth'))\n"
            "\n"
            "   t2 = Task('t2')\n"
-           "   t2.add_aviso('name', '{...}', 'http://aviso.com', '60', '/path/to/auth')\n";
+           "   t2.add_aviso('name', '{...}', 'http://aviso.com', '60', '/path/to/auth')\n"
+           "\n"
+           "The parameters `url`, `schema`, `polling`, and `auth` are optional\n";
 }
 
 const char* NodeAttrDoc::mirror_doc() {
@@ -754,5 +756,7 @@ const char* NodeAttrDoc::mirror_doc() {
            "             MirrorAttr('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth'))\n"
            "\n"
            "   t2 = Task('t2')\n"
-           "   t2.add_aviso('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth')\n";
+           "   t2.add_aviso('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth')\n"
+           "\n"
+           "The parameters `remote_host`, `remote_port`, `polling`, `ssl`, and `auth` are optional\n";
 }

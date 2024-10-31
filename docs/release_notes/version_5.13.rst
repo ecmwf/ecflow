@@ -6,6 +6,33 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.5
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-10-31
+
+General
+-------
+
+- **Fix** correct the token used for Aviso authentication :jiraissue:`ECFLOW-1982`
+
+ecFlow UI
+---------
+
+- **Fix** correct the disabled/enabled status of Session dialog buttons :jiraissue:`ECFLOW-1980`
+
+ecFlow HTTP
+-----------
+
+- **Fix** reorganise :code:`inherited_variables` to allow repeated names of Node ancestors :jiraissue:`ECFLOW-1978`
+- **Fix** add missing inherited variables to response of endppoint :code:`.../tree` :jiraissue:`ECFLOW-1977`
+
+Python
+------
+
+- **Fix** correct :code:`check_job_creation()` crash on suite with Mirror/Aviso attribute :jiraissue:`ECFLOW-1976`
+- **Fix** allow default parameters in Aviso/Mirror attribute constructors :jiraissue:`ECFLOW-1981`
+
 Version 5.13.4
 ==============
 

@@ -2668,6 +2668,12 @@ void Node::gen_variables(std::vector<Variable>& vec) const {
     repeat_.gen_variables(vec); // if repeat_ is empty vec is unchanged
 }
 
+std::vector<Variable> Node::gen_variables() const {
+    std::vector<Variable> generated;
+    gen_variables(generated);
+    return generated;
+}
+
 const Variable& Node::findGenVariable(const std::string& name) const {
     return repeat_.find_gen_variable(name); // if repeat_ is empty find returns empty variable by ref
 }

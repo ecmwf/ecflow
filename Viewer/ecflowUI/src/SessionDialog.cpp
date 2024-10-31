@@ -30,18 +30,20 @@ SessionDialog::SessionDialog(QWidget* parent) : QDialog(parent) {
     // what was saved last time?
     std::string lastSessionName = SessionHandler::instance()->lastSessionName();
     int index                   = SessionHandler::instance()->indexFromName(lastSessionName);
-    if (index != -1)
+    if (index != -1) {
         savedSessionsList_->setCurrentItem(savedSessionsList_->topLevelItem(index)); // select this one in the table
+    }
 
-    if (SessionHandler::instance()->loadLastSessionAtStartup())
+    if (SessionHandler::instance()->loadLastSessionAtStartup()) {
         restoreLastSessionCb_->setCheckState(Qt::Checked);
-    else
+    }
+    else {
         restoreLastSessionCb_->setCheckState(Qt::Unchecked);
+    }
 
     newButton_->setVisible(false); // XXX TODO: enable New Session functionality
 
     // ensure the correct state of the Save button
-    on_sessionNameEdit__textChanged();
     setButtonsEnabledStatus();
 }
 
@@ -101,39 +103,7 @@ void SessionDialog::setButtonsEnabledStatus() {
         cloneButton_->setEnabled(true);
     }
 }
-
-bool SessionDialog::validSaveName(const std::string& /*name*/) {
-    /*
-            QString boxName(QObject::tr("Save session"));
-            // name empty?
-            if (name.empty())
-            {
-                    QMessageBox::critical(0,boxName, tr("Please enter a name for the session"));
-                    return false;
-            }
-
-
-            // is there already a session with this name?
-            bool sessionWithThisName = (SessionHandler::instance()->find(name) != NULL);
-
-            if (sessionWithThisName)
-            {
-                    QMessageBox::critical(0,boxName, tr("A session with that name already exists - please choose another
-       name")); return false;
-            }
-            else
-            {
-                    return true;
-            }*/
-    return true;
-}
-
-void SessionDialog::on_sessionNameEdit__textChanged() {
-    // only allow to save a non-empty session name
-    //	saveButton_->setEnabled(!sessionNameEdit_->text().isEmpty());
-}
-
-void SessionDialog::on_savedSessionsList__currentRowChanged(int /*currentRow*/) {
+void SessionDialog::on_savedSessionsList__currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous) {
     setButtonsEnabledStatus();
 }
 
@@ -142,6 +112,7 @@ void SessionDialog::on_cloneButton__clicked() {
     assert(!sessionName.empty()); // it should not be possible for the name to be empty
 
     SessionRenameDialog renameDialog;
+    renameDialog.setWindowTitle("Clone Session");
     renameDialog.exec();
 
     int result = renameDialog.result();
@@ -176,6 +147,7 @@ void SessionDialog::on_renameButton__clicked() {
     assert(item); // it should not be possible for the name to be empty
 
     SessionRenameDialog renameDialog;
+    renameDialog.setWindowTitle("Rename Session");
     renameDialog.exec();
 
     int result = renameDialog.result();
@@ -201,26 +173,4 @@ void SessionDialog::on_switchToButton__clicked() {
         SessionHandler::instance()->removeLastSessionName(); // no, so we can delete the file
 
     accept(); // close the dialogue and continue loading the main user interface
-}
-
-void SessionDialog::on_saveButton__clicked() {
-    /*
-            std::string name = sessionNameEdit_->text().toStdString();
-
-            if (validSaveName(name))
-            {
-                    SessionItem* newSession =
-       SessionHandler::instance()->copySession(SessionHandler::instance()->current(), name); if (newSession)
-                    {
-                            //SessionHandler::instance()->add(name);
-                            refreshListOfSavedSessions();
-                            SessionHandler::instance()->current(newSession);
-                            QMessageBox::information(0,tr("Session"), tr("Session saved"));
-                    }
-                    else
-                    {
-                            QMessageBox::critical(0,tr("Session"), tr("Failed to save session"));
-                    }
-                    close();
-            }*/
 }

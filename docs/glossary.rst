@@ -1,4 +1,3 @@
-
 .. index::
    single: Glossary
    
@@ -86,6 +85,18 @@
       the associated :term:`node` is (re)queued. This background thread is
       responsible for polling the Aviso server, and periodically processing the
       latest notifications.
+
+      The authentication credentials file is expected to be in JSON format, following the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_:
+
+        .. code-block:: json
+
+           {
+             "url" : "https://api.ecmwf.int/v1",
+             "key" : "<your-api-key>",
+             "email" : "<your-email>"
+           }
+
+      Only the fields :code:`url`, :code:`key`, and :code:`email` are required; any additional fields are ignored.
 
    check point 
       The check point file is like the :term:`suite definition`, but includes all the state information.
@@ -1416,6 +1427,17 @@
       the ecFlow server is :term:`running<server states>`. This background thread is
       responsible for polling the remote ecFlow server, and periodically
       synchronise node status.
+
+      The authentication credentials file is expected to be in JSON, according to the following format:
+
+        .. code-block:: json
+
+           {
+             "username" : "<your-username>",
+             "password" : "<your-password>",
+           }
+
+      Only the fields :code:`username`, and :code:`password` are required; any additional fields are ignored.
 
    node
       :term:`suite`, :term:`family` and :term:`task` form a hierarchy.

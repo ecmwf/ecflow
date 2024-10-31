@@ -129,8 +129,8 @@ ojson get_basic_node_tree(const std::string& path) {
     return tree.content();
 }
 
-ojson get_full_node_tree(const std::string& path, bool with_id) {
-    FullTree tree{with_id};
+ojson get_full_node_tree(const std::string& path, bool with_id, bool with_gen_vars) {
+    FullTree tree{with_id, with_gen_vars};
     DefsTreeVisitor(get_defs(), tree).visit_at(path);
     return tree.content();
 }
@@ -228,6 +228,24 @@ ojson get_server_attributes() {
     return j;
 }
 
+static ojson get_node_variables_array(const Node& node) {
+    auto container = ojson::array();
+    // Collect 'normal' variables
+    for (const auto& variable : node.variables()) {
+        ojson object;
+        to_json(object, variable);
+        container.push_back(object);
+    }
+    // ... and generated variables
+    for (const auto& variable : node.gen_variables()) {
+        ojson object;
+        to_json(object, variable);
+        object["generated"] = true;
+        container.push_back(object);
+    }
+    return container;
+}
+
 ojson get_node_attributes(const std::string& path) {
     ojson j;
 
@@ -237,7 +255,6 @@ ojson get_node_attributes(const std::string& path) {
     j["limits"]      = node->limits();
     j["inlimits"]    = node->inlimits();
     j["events"]      = node->events();
-    j["variables"]   = node->variables();
     j["labels"]      = node->labels();
     j["dates"]       = node->dates();
     j["days"]        = node->days();
@@ -259,30 +276,26 @@ ojson get_node_attributes(const std::string& path) {
     j["avisos"]      = node->avisos();
     j["mirrors"]     = node->mirrors();
 
+    j["variables"] = get_node_variables_array(*node);
+
     {
-        // Collect 'normal' variables
-        auto vars = node->variables();
-        // ... and generated variables
-        node->gen_variables(vars);
+        auto inherited = ojson::array();
 
-        j["variables"] = vars;
+        // Collect 'inherited' variables from parents
+        apply_to_parents(node->parent(), [&inherited](const Node* n) {
+            inherited.push_back(ojson::object(
+                {{"name", n->name()}, {"path", n->absNodePath()}, {"variables", get_node_variables_array(*n)}}));
+        });
+
+        // ... and from server
+        auto server_variables = get_defs()->server().server_variables();
+        auto user_variables   = get_defs()->server().user_variables();
+        server_variables.insert(server_variables.end(), user_variables.begin(), user_variables.end());
+
+        inherited.push_back(ojson::object({{"name", "server"}, {"path", "/"}, {"variables", server_variables}}));
+
+        j["inherited_variables"] = inherited;
     }
-
-    apply_to_parents(node->parent(), [&j](const Node* n) {
-        // Collect 'normal' variables
-        auto vars = n->variables();
-        // ... and generated variables
-        n->gen_variables(vars);
-
-        j["inherited_variables"][n->name()] = vars;
-    });
-
-    auto server_variables = get_defs()->server().server_variables();
-    auto user_variables   = get_defs()->server().user_variables();
-
-    server_variables.insert(server_variables.end(), user_variables.begin(), user_variables.end());
-
-    j["inherited_variables"]["server"] = server_variables;
 
     return j;
 }
