@@ -1,0 +1,26 @@
+name: experimental-ci
+
+on:
+  # Trigger the workflow on push to master or develop, except tag creation
+  push:
+    branches:
+      - 'feature/**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  github-ctx-dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+
+  experimental-ci:
+    if: ${{ github.repository_owner == 'ecmwf' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Some build step
+        run: echo "$GITHUB_CONTEXT"
