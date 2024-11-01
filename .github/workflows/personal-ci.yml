@@ -1,0 +1,42 @@
+name: personal-ci
+
+on:
+  # Trigger the workflow on push to master or develop, except tag creation
+  push:
+    branches:
+      - 'feature/**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  personal-ci-dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+
+  personal-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ecbuild
+        run: |
+          echo "Checkout ecbuild"
+
+      - name: Checkout ecflow
+        run: |
+          echo "Checkout ecflow"
+
+      - name: Configure ecflow
+        run: |
+          echo "Configure ecflow"
+
+      - name: Build ecflow
+        run: |
+          echo "Build ecflow"
+
+      - name: Test ecflow
+        run: |
+          echo "Test ecflow"

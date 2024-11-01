@@ -16,6 +16,7 @@ jobs:
   # Calls a reusable CI workflow to sync the current with a remote repository.
   #   It will correctly handle addition of any new and removal of existing Git objects.
   sync:
+    if: ${{ !github.event.repository.fork }}
     name: sync
     uses: ecmwf-actions/reusable-workflows/.github/workflows/sync.yml@v2
     secrets:
