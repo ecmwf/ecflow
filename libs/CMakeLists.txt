@@ -568,7 +568,7 @@ ecbuild_add_library(
     Boost::date_time
     Boost::program_options
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    $<$<NOT:$<BOOL:${APPLE}>>:crypt>
+    $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
     Threads::Threads
   DEFINITIONS
     CMAKE

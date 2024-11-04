@@ -224,6 +224,20 @@ endif()
 
 
 # =========================================================================================
+# Crypt
+# =========================================================================================
+ecbuild_info( "Locating Crypt" )
+
+find_package(Crypt)
+
+ecbuild_info( "Crypt details:" )
+ecbuild_info( " * Crypt_FOUND        : ${Crypt_FOUND}" )
+ecbuild_info( " * Crypt_INCLUDE_DIRS : ${Crypt_INCLUDE_DIRS}" )
+ecbuild_info( " * Crypt_LIBRARIES    : ${Crypt_LIBRARIES}" )
+
+ecbuild_info( "Found Crypt at ${Crypt_INCLUDE_DIRS}" )
+
+# =========================================================================================
 # Dependency: Qt
 # =========================================================================================
 
