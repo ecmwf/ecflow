@@ -32,8 +32,6 @@ SET_TARGET_PROPERTIES(ecflow_client
     INSTALL_RPATH ""
 )
 
-
-
 # use, i.e. don't skip the full RPATH for the build tree
 #SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -48,12 +46,11 @@ SET_TARGET_PROPERTIES(ecflow_client
 # which point to directories outside the build tree to the install RPATH
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
+add_subdirectory(test/harness)
 
 # ================================================================================                         
 # TEST
 set(test_srcs
-  # Headers
-  test/InvokeServer.hpp
   # Sources
   test/TestClient_main.cpp # test entry point
   test/TestClientEnvironment.cpp
@@ -68,10 +65,7 @@ set(test_srcs
 
 if (ENABLE_SERVER)
   list(APPEND test_srcs
-    # Headers
-    test/SCPort.hpp
     # Sources
-    test/SCPort.cpp
     test/TestClientTimeout.cpp
     test/TestClientHandleCmd.cpp
     test/TestCheckPtDefsCmd.cpp
@@ -101,10 +95,9 @@ ecbuild_add_test(
     ../node/test
   LIBS
     ecflow_all
-    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    test_support
+    test_harness.client
   DEPENDS
     ecflow_server # the server is launched to support tests
   TEST_DEPENDS
@@ -128,18 +121,15 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       manual # requires manual definition of env var ECF_TEST_DEFS_DIR
     SOURCES
       # Headers
-      test/SCPort.hpp
       # Sources
-      test/SCPort.cpp
       test/TestSinglePerf.cpp
       test/TestSinglePerf_main.cpp # test entry point
     INCLUDES
       ../base/test
     LIBS
       ecflow_all
-      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
+      test_harness.client
     DEPENDS
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
@@ -159,19 +149,15 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       migration
       manual # requires command line argument: m_test_migration <>
     SOURCES
-      # Headers
-      test/SCPort.hpp
       # Sources
-      test/SCPort.cpp
       test/TestMigration.cpp
       test/TestMigration_main.cpp # test entry point
     INCLUDES
       ../base/test
     LIBS
       ecflow_all
-      Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
+      test_harness.client
     DEPENDS
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS

@@ -289,7 +289,7 @@ void SessionHandler::setTemporarySessionIfReqested() {
             if (ServerList::instance()->find(alias, host, port) == nullptr) {
                 // no - add it, and make sure it's got a unique alias
                 std::string uniqueName = ServerList::instance()->uniqueName(alias);
-                ServerList::instance()->add(uniqueName, host, port, "", false, false, true);
+                ServerList::instance()->add(uniqueName, host, port, "", false, ecf::Protocol::Plain, true);
             }
         }
     }

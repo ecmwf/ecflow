@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_test_TestHelper_HPP
-#define ecflow_base_test_TestHelper_HPP
+#ifndef ecflow_base_test_harness_TestHelper_HPP
+#define ecflow_base_test_harness_TestHelper_HPP
 
 #include <boost/test/test_tools.hpp>
 
@@ -122,4 +122,4 @@ private:
     TestHelper() = default;
 };
 
-#endif /* ecflow_base_test_TestHelper_HPP */
+#endif /* ecflow_base_test_harness_TestHelper_HPP */

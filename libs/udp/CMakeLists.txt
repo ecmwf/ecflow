@@ -25,6 +25,9 @@ ecbuild_add_executable(
     src
   LIBS
     ecflow_all
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 set_target_properties(${SERVER_TARGET} PROPERTIES
   INSTALL_RPATH ""
@@ -86,7 +89,7 @@ ecbuild_add_test(
     Boost::boost
     Boost::unit_test_framework
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    test_support
+    test_harness.core
   DEPENDS
     ecflow_server # the server is launched to support tests
     ${SERVER_TARGET}

@@ -26,13 +26,13 @@ ServerItem::ServerItem(const std::string& name,
                        const std::string& port,
                        const std::string& user,
                        bool favourite,
-                       bool ssl)
+                       ecf::Protocol protocol)
     : name_(name),
       host_(host),
       port_(port),
       user_(user),
       favourite_(favourite),
-      ssl_(ssl) {
+      protocol_(protocol) {
 }
 
 ServerItem::~ServerItem() {
@@ -50,7 +50,7 @@ void ServerItem::reset(const std::string& name,
                        const std::string& host,
                        const std::string& port,
                        const std::string& user,
-                       bool ssl) {
+                       ecf::Protocol protocol) {
     if (name_ != name) {
         name_ = name;
         if (handler_) {
@@ -59,9 +59,12 @@ void ServerItem::reset(const std::string& name,
     }
 
     if (host == host_ && port == port_) {
-        // TODO: these should be called together
-        setSsl(ssl);
-        setUser(user);
+
+        setProtocol(protocol);
+        if (protocol == ecf::Protocol::Ssl) {
+            // TODO: these should be called together
+            setUser(user);
+        }
     }
 
     // host or port changed: full reload needed and this situation cannot
@@ -85,11 +88,11 @@ void ServerItem::setSystem(bool b) {
     // broadcastChanged();
 }
 
-void ServerItem::setSsl(bool b) {
-    if (ssl_ != b) {
-        ssl_ = b;
+void ServerItem::setProtocol(ecf::Protocol protocol) {
+    if (protocol_ != protocol) {
+        protocol_ = protocol;
         if (handler_)
-            handler_->setSsl(ssl_);
+            handler_->setProtocol(protocol_);
     }
     // broadcastChanged();
 }
@@ -114,7 +117,7 @@ std::string ServerItem::longName() const {
 
 void ServerItem::registerUsageBegin() {
     if (!handler_) {
-        handler_ = ServerHandler::addServer(name_, host_, port_, user_, ssl_);
+        handler_ = ServerHandler::addServer(name_, host_, port_, user_, protocol_);
     }
     if (handler_)
         useCnt_++;
