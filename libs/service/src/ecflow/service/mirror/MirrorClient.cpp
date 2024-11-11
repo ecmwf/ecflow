@@ -43,7 +43,6 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
     SLOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
 
     try {
-        impl_ = std::make_unique<Impl>();
         impl_->invoker_.set_host_port(remote_host, remote_port);
         if (ssl) {
             impl_->invoker_.enable_ssl();
