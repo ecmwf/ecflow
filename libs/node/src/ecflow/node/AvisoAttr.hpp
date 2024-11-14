@@ -56,6 +56,8 @@ public:
     static constexpr const char* default_polling = "%ECF_AVISO_POLLING%";
     static constexpr const char* default_auth    = "%ECF_AVISO_AUTH%";
 
+    static constexpr const char* reload_option_value = "reload";
+
     static bool is_valid_name(const std::string& name);
 
     /**
@@ -98,7 +100,18 @@ public:
 
     bool why(std::string& theReasonWhy) const;
 
+    /**
+     * Initialises the Aviso procedure, which effectively starts the background polling mechanism.
+     * Typically, called when traversing the tree -- does nothing if Aviso service is already set up.
+     */
     void reset();
+
+    /**
+     * Restarts the Aviso procedure, which effectively stops before restarting the background polling mechanism.
+     * Typicallly, called explicitly via Alter command -- forces the reinitialisation of the Aviso service,
+     * guaranteeing that parameters, given as ECF variables, are reevaluated.
+     */
+    void reload();
 
     [[nodiscard]] bool isFree() const;
 

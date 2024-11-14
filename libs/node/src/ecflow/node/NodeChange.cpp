@@ -172,7 +172,11 @@ void Node::changeAviso(const std::string& name, const std::string& value) {
         throw std::runtime_error("Node::changeAviso: Could not find aviso " + name);
     }
 
-    *found = AvisoParser::parse_aviso_line(value, name);
+    if (value == AvisoAttr::reload_option_value) {
+        found->reload();
+    } else {
+        *found = AvisoParser::parse_aviso_line(value, name);
+    }
 
     state_change_no_ = Ecf::incr_state_change_no();
 }

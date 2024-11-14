@@ -93,6 +93,14 @@ void AvisoAttr::reset() {
     }
 }
 
+void AvisoAttr::reload() {
+    if (controller_) {
+        state_change_no_ = Ecf::incr_state_change_no();
+        finish();
+        start();
+    }
+}
+
 bool AvisoAttr::isFree() const {
 
     if (controller_ == nullptr) {
