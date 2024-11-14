@@ -323,8 +323,9 @@ void BaseServer::shutdown() {
     /// RUNNING      yes               yes              yes            yes
     /// SHUTDOWN     yes               yes              no             yes
     /// HALTED       yes               no               no             no
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::shutdown. Stop Scheduling new jobs only" << endl;
+    }
 
     // Stop server from creating new jobs. Don't stop the checkPtSaver_ since
     // the jobs communication with server can still change state. Which we want
@@ -336,6 +337,9 @@ void BaseServer::shutdown() {
     // If we go from HALTED --> SHUTDOWN, then check pointing  needs to be enabled
     checkPtSaver_.start();
 
+    // Stop all Mirror/Aviso attributes (i.e. background threads are stopped)
+    ecf::visit_all(*defs_, ShutdownDefs{});
+
     // Will update defs as well to stop job scheduling
     set_server_state(SState::SHUTDOWN);
 }
@@ -345,10 +349,11 @@ void BaseServer::halted() {
     /// RUNNING      yes               yes              yes            yes
     /// SHUTDOWN     yes               yes              no             yes
     /// HALTED       yes               no               no             no
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. "
                 "Only accept user request"
              << endl;
+    }
 
     // Stop server from creating new jobs. i.e Job scheduling.
     traverser_.stop();
@@ -360,6 +365,7 @@ void BaseServer::halted() {
     // Added after discussion with Axel.
     checkPtSaver_.stop();
 
+    // Stop all Mirror/Aviso attributes (i.e. background threads are stopped)
     ecf::visit_all(*defs_, ShutdownDefs{});
 
     // Stop the task communication with server. Hence nodes can be stuck
@@ -374,8 +380,9 @@ void BaseServer::restart() {
     /// RUNNING      yes               yes              yes            yes
     /// SHUTDOWN     yes               yes              no             yes
     /// HALTED       yes               no               no             no
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         std::cout << "   BaseServer::restart" << endl;
+    }
 
     // The server state *MUST* be set, *before* traverser_.start(), since that can kick off job traversal.
     // Job Scheduling can only be done under RUNNING state, hence must be before traverser_.start();

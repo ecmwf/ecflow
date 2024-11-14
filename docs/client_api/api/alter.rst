@@ -20,7 +20,7 @@ alter
           For change:
             [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |
               trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time |
-              today, aviso, mirror ]
+              today | aviso | mirror ]
             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for
             the change to take effect fully.
           For add:
@@ -46,6 +46,9 @@ alter
       * for aviso, "--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)"
       * for mirror, "--listener '{ \"event\": \"mars\", \"request\": { \"class\": "od" } }'
                      --url http://aviso/ --schema /path/to/schema --polling 60"
+   
+   For both aviso and mirror, the special value "reload" can be used to force reloading the configuration.
+     n.b. This is typically useful after updating variables used to configure these kind of attributes.
    
    Usage:
    

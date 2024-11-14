@@ -35,6 +35,7 @@
 
 #include <fstream>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -121,6 +122,8 @@ private:
     std::unique_ptr<LogImpl> logImpl_;
     std::string fileName_;
     std::string log_error_;
+
+    mutable std::recursive_mutex mx_;
 };
 
 // Flush log on destruction

@@ -82,9 +82,15 @@
          the user.
 
       Each aviso attribute implies that a background thread is spawned whenever
-      the associated :term:`node` is (re)queued. This background thread is
-      responsible for polling the Aviso server, and periodically processing the
-      latest notifications.
+      the associated :term:`node` is (re)queued. This independent background thread,
+      responsible for polling the Aviso server and periodically processing the latest notifications,
+      uses the configuriguration available when the associated task is queued.
+
+      .. note::
+
+        If any variables provinding the configuration are updated, the Aviso configuration
+        can be reloaded (without unqueuing the Task) by issuing an Alter change command with
+        the value :code:`reload` to the relevant Aviso attribute.
 
       The authentication credentials file is expected to be in JSON format, following the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_:
 
@@ -1424,9 +1430,16 @@
           (empty string), which effectively disables Authentication
 
       Each mirror attribute implies that a background thread is spawned whenever
-      the ecFlow server is :term:`running<server states>`. This background thread is
-      responsible for polling the remote ecFlow server, and periodically
-      synchronise node status.
+      the ecFlow server is :term:`running<server states>` (i.e. when the server is shutdown or halted the
+      thread is terminated and the mirroring process is completely stopped).
+      This independent background thread, responsible for polling the remote ecFlow server and periodically
+      synchronise node status, uses the configuration available when the server is restarted.
+
+      .. note::
+
+        If any variables provinding the configuration are updated, the Mirror configuration can be
+        reloaded (without restarting the Server) by issuing an Alter change command with the value
+        :code:`reload` to the relevant attributes.
 
       The authentication credentials file is expected to be in JSON, according to the following format:
 
