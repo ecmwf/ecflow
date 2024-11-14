@@ -1,10 +1,17 @@
 name: cd
 
 on:
-  push: ~
-
   # Trigger the workflow manually
   workflow_dispatch: ~
+
+  push:
+    # Trigger the workflow when new tags are pushed
+    tags:
+      - '**'
+    # Trigger the workflow when the CD workflow/configuration is updated
+    paths:
+      - .github/cd-*.yml
+      - .github/workflows/cd.yml
 
 jobs:
   deploy-server:
