@@ -35,8 +35,9 @@ void Log::create(const std::string& filename) {
 }
 
 void Log::destroy() {
-    if (instance_)
+    if (instance_) {
         instance_->flush();
+    }
 
     delete instance_;
     instance_ = nullptr;
@@ -52,11 +53,9 @@ void Log::create_logimpl() {
 }
 
 bool Log::log(Log::LogType lt, const std::string& message) {
-    create_logimpl();
+    std::lock_guard lock(mx_);
 
-    //   if (!logImpl_->log_open_error().empty()) {
-    //      cerr << "Log::log: " << message << "\n";
-    //   }
+    create_logimpl();
 
     if (!logImpl_->log(lt, message)) {
         // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -70,11 +69,9 @@ bool Log::log(Log::LogType lt, const std::string& message) {
 }
 
 bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
-    create_logimpl();
+    std::lock_guard lock(mx_);
 
-    //   if (!logImpl_->log_open_error().empty()) {
-    //      cerr << "Log::log_no_newline : " << message << "\n";
-    //   }
+    create_logimpl();
 
     if (!logImpl_->log_no_newline(lt, message)) {
         // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -88,11 +85,9 @@ bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
 }
 
 bool Log::append(const std::string& message) {
-    create_logimpl();
+    std::lock_guard lock(mx_);
 
-    //   if (!logImpl_->log_open_error().empty()) {
-    //      cerr << "Log::append : " << message << "\n";
-    //   }
+    create_logimpl();
 
     if (!logImpl_->append(message)) {
         // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -106,26 +101,36 @@ bool Log::append(const std::string& message) {
 }
 
 void Log::cache_time_stamp() {
+    std::lock_guard lock(mx_);
+
     create_logimpl();
     logImpl_->create_time_stamp();
 }
 
 const std::string& Log::get_cached_time_stamp() const {
+    std::lock_guard lock(mx_);
+
     return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
 }
 
 void Log::flush() {
+    std::lock_guard lock(mx_);
+
     // will close ofstream and force data to be written to disk.
     // Forcing writing to physical medium can't be guaranteed though!
     logImpl_.reset();
 }
 
 void Log::flush_only() {
-    if (logImpl_)
+    std::lock_guard lock(mx_);
+
+    if (logImpl_) {
         logImpl_->flush();
+    }
 }
 
 void Log::clear() {
+    std::lock_guard lock(mx_);
     flush();
 
     // Open and truncate the file.
@@ -136,6 +141,8 @@ void Log::clear() {
 }
 
 void Log::new_path(const std::string& the_new_path) {
+    std::lock_guard lock(mx_);
+
     check_new_path(the_new_path);
 
     // flush and close log file
@@ -174,6 +181,8 @@ void Log::check_new_path(const std::string& new_path) {
 }
 
 std::string Log::path() const {
+    std::lock_guard lock(mx_);
+
     if (!fileName_.empty() && fileName_[0] == '/') {
         // Path is absolute return as is
         return fileName_;
@@ -185,6 +194,8 @@ std::string Log::path() const {
 }
 
 std::string Log::contents(int get_last_n_lines) {
+    std::lock_guard lock(mx_);
+
     if (get_last_n_lines == 0) {
         return string();
     }
@@ -200,6 +211,8 @@ std::string Log::contents(int get_last_n_lines) {
 }
 
 std::string Log::handle_write_failure() {
+    std::lock_guard lock(mx_);
+
     std::string msg = logImpl_->log_open_error();
     if (msg.empty()) {
         msg += "\nFailed to write to log file: ";
@@ -213,22 +226,20 @@ std::string Log::handle_write_failure() {
     logImpl_.reset();
     create_logimpl();
 
-    if (logImpl_->log_open_error().empty())
+    if (logImpl_->log_open_error().empty()) {
         msg += "\nAttempting to close/reopen log file.";
-    else
+    }
+    else {
         msg += "\nAttempting to close/reopen log file did not work!";
+    }
 
-    if (LogToCout::ok())
+    if (LogToCout::ok()) {
         Indentor::indent(cout) << msg << '\n';
+    }
     return msg;
 }
 
 bool log(Log::LogType lt, const std::string& message) {
-    // For debug of simulator enable this
-    //	if (LogToCout::ok()) {
-    //		Indentor::indent(cout) << message << '\n';
-    //	}
-
     if (Log::instance()) {
         return Log::instance()->log(lt, message);
     }
@@ -367,8 +378,9 @@ bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) 
 
     // XXX:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information]
     // XXX:[HH:MM:SS D.M.YYYY] --<user_cmd> [+additional information]
-    if (time_stamp_.empty() || lt == Log::ERR || lt == Log::WAR || lt == Log::DBG)
+    if (time_stamp_.empty() || lt == Log::ERR || lt == Log::WAR || lt == Log::DBG) {
         create_time_stamp();
+    }
 
     // re-use memory allocated to log_type_and_time_stamp_
     log_type_and_time_stamp_.clear();
@@ -377,8 +389,9 @@ bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) 
 
     if (message.find("\n") == std::string::npos) {
         file_ << log_type_and_time_stamp_ << message;
-        if (newline)
+        if (newline) {
             file_ << '\n';
+        }
     }
     else {
         // If message has \n then split into multiple lines
