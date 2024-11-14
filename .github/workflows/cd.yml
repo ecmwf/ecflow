@@ -1,0 +1,24 @@
+name: cd
+
+on:
+  push: ~
+
+  # Trigger the workflow manually
+  workflow_dispatch: ~
+
+jobs:
+  deploy-server:
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    with:
+      skip_checks: true
+      restrict_matrix_jobs: gnu@debian-12
+      build_config: .github/cd-server-config.yml
+    secrets: inherit
+
+  deploy-ui:
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    with:
+      skip_checks: true
+      restrict_matrix_jobs: gnu@rocky-8.6
+      build_config: .github/cd-ui-config.yml
+    secrets: inherit
