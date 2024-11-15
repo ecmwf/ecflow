@@ -65,8 +65,8 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
-    test_support
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_attributes

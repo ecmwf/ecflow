@@ -64,6 +64,7 @@ ecbuild_add_test(
     test/TestServer.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads

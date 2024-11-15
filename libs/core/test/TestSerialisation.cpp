@@ -8,12 +8,11 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "TestSerialisation.hpp"
-
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
 using namespace ecf;

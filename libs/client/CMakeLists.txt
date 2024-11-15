@@ -101,6 +101,7 @@ ecbuild_add_test(
     ../node/test
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>

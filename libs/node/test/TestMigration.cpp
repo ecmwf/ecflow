@@ -11,13 +11,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
-#include "TestSerialisation.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
 using namespace ecf;
