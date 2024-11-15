@@ -11,6 +11,8 @@
 #ifndef ecflow_client_ClientInvoker_HPP
 #define ecflow_client_ClientInvoker_HPP
 
+#include <optional>
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ecflow/base/Cmd.hpp"
@@ -41,6 +43,8 @@ public:
     ClientInvoker(bool GUI, const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, int port);
+
+    const ClientEnvironment& environment() const { return clientEnv_; }
 
     /// for debug allow the current client environment to be printed
     std::string to_string() const { return clientEnv_.toString(); }
@@ -395,7 +399,13 @@ public:
                            bool alias = false,
                            bool run   = true); // ecFlowview SUBMIT_FILE
 
+    std::optional<Cmd_ptr> get_cmd_from_args(const CommandLine& cl) const;
+
 private:
+    /**
+     * @return 1 when command is selected; 0 if no command is selected (e.g. --help)
+     * @throws std::runtime_error if the command could not be selected
+     */
     int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()

@@ -93,6 +93,7 @@ public:
 #ifdef ECF_OPENSSL
     /// return true if this is a ssl enabled server
     ecf::Openssl& openssl() { return ssl_; }
+    const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
     void enable_ssl_if_defined() {
         ssl_.enable_if_defined(host(), port());

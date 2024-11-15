@@ -59,6 +59,7 @@ ecbuild_add_test(
     src
   SOURCES
     test/TestCheckPtSaver.cpp
+    test/TestServerConfigurations.cpp
     test/TestServerEnvironment.cpp
     test/TestServer_main.cpp # test entry point
     test/TestServer.cpp

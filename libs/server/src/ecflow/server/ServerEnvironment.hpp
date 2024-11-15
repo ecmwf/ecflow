@@ -26,10 +26,10 @@
 #include <boost/asio.hpp>
 
 #include "ecflow/core/CheckPt.hpp"
+#include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
-
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif
@@ -44,8 +44,11 @@ public:
 
 class ServerEnvironment {
 public:
+    ServerEnvironment(const CommandLine& cl, const std::string& path_to_config_file = "server_environment.cfg");
+
     ServerEnvironment(int argc, char* argv[]);
-    ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file); // *only used in test*
+    ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file);
+
     // Disable copy (and move) semantics
     ServerEnvironment(const ServerEnvironment&)                  = delete;
     const ServerEnvironment& operator=(const ServerEnvironment&) = delete;
@@ -65,6 +68,7 @@ public:
 #ifdef ECF_OPENSSL
     /// return true if ssl enable via command line, AND SSL libraries are found
     ecf::Openssl& openssl() { return ssl_; }
+    const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
     void enable_ssl() { ssl_.enable(serverHost_, the_port()); } // search server.crt first, then <host>.<port>.crt
 #endif
@@ -187,7 +191,7 @@ public:
     static std::vector<std::string> expected_variables();
 
 private:
-    void init(int argc, char* argv[], const std::string& path_to_config_file);
+    void init(const CommandLine& cl, const std::string& path_to_config_file);
 
     ///  defaults are read from a config file
     void read_config_file(std::string& log_file_name, const std::string& path_to_config_file);

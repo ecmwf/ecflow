@@ -56,6 +56,7 @@ set(test_srcs
   test/InvokeServer.hpp
   # Sources
   test/TestClient_main.cpp # test entry point
+  test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp
   test/TestClientOptions.cpp
   test/TestClientInterface.cpp
