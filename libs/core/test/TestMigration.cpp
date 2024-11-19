@@ -10,13 +10,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestSerialisation.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/DState.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
 using namespace ecf;

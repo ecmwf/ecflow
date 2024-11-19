@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestSerialisation.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
 using namespace ecf;

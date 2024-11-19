@@ -23,7 +23,7 @@ using namespace std;
 using namespace ecf;
 namespace po = boost::program_options;
 
-ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env) {
+ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
     std::stringstream ss;
     ss << "\n" << Version::description() << "\nServer options";
     po::options_description desc(ss.str(), po::options_description::m_default_line_length + 80);
@@ -124,7 +124,14 @@ ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env) {
                 "version,v",
                 "Show ecflow version number,boost library version, compiler used and compilation date, then exit");
 
-    po::store(po::parse_command_line(argc, argv, desc), vm_);
+    // 1) Parse the CLI options
+    po::parsed_options parsed_options = po::command_line_parser(cl.tokens())
+                                            .options(desc)
+                                            .style(po::command_line_style::default_style)
+                                            .run();
+
+    // 2) Store the CLI options into the variable map
+    po::store(parsed_options, vm_);
     po::notify(vm_);
 
     if (vm_.count("help"))
@@ -164,6 +171,10 @@ ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env) {
         env->enable_ssl(); // search server.crt first, then <host>.<port>.crt
     }
 #endif
+}
+
+ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env)
+    : ServerOptions(CommandLine(argc, argv), env) {
 }
 
 bool ServerOptions::help_option() const {

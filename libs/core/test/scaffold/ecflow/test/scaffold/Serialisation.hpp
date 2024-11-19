@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_core_TestSerialisation_HPP
-#define ecflow_core_TestSerialisation_HPP
+#ifndef ecflow_core_scaffold_TestSerialisation_HPP
+#define ecflow_core_scaffold_TestSerialisation_HPP
 
 #include <boost/test/unit_test.hpp>
 
@@ -65,4 +65,4 @@ void doSaveAndRestore(const std::string& fileName) {
 
 } // namespace ecf
 
-#endif /* ecflow_core_TestSerialisation_HPP */
+#endif /* ecflow_core_scaffold_TestSerialisation_HPP */
