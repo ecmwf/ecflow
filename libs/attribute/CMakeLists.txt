@@ -19,6 +19,7 @@ set(test_srcs
   test/TestLateAttr.cpp
   test/TestMigration.cpp
   test/TestRepeat.cpp
+  test/TestRepeatRange.cpp
   test/TestSizeOf.cpp
   test/TestTimeAttr.cpp
   test/TestTodayAttr.cpp
