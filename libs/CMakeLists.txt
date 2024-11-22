@@ -28,6 +28,7 @@ set(srcs
   attribute/src/ecflow/attribute/NodeAttr.hpp
   attribute/src/ecflow/attribute/QueueAttr.hpp
   attribute/src/ecflow/attribute/RepeatAttr.hpp
+  attribute/src/ecflow/attribute/RepeatRange.hpp
   attribute/src/ecflow/attribute/TimeAttr.hpp
   attribute/src/ecflow/attribute/TodayAttr.hpp
   attribute/src/ecflow/attribute/Variable.hpp

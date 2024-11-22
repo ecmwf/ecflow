@@ -11,8 +11,8 @@
 #include "ecflow/core/Cal.hpp"
 
 long Cal::julian_to_date(long jdate) {
-    long x, y, d, m, e;
-    long day, month, year;
+    long x = 0, y = 0, d = 0, m = 0, e = 0;
+    long day = 0, month = 0, year = 0;
 
     x = 4 * jdate - 6884477;
     y = (x / 146097) * 100;
@@ -41,8 +41,9 @@ long Cal::julian_to_date(long jdate) {
 }
 
 long Cal::date_to_julian(long ddate) {
-    long m1, y1, a, b, c, d, j1;
-    long month, day, year;
+    long m1 = 0, y1 = 0, a = 0, b = 0, c = 0, d = 0, j1 = 0;
+
+    long month = 0, day = 0, year = 0;
 
     year = ddate / 10000;
     ddate %= 10000;
@@ -64,7 +65,7 @@ long Cal::date_to_julian(long ddate) {
     c  = (153 * m1 + 2) / 5 + day + 1721119;
     j1 = a + b + c;
 
-    return (j1);
+    return j1;
 }
 
 // int main(int ac, char** av){ int a=Cal::date_to_julian(20170219) % 7; printf("%d", a); return 0;}
