@@ -50,6 +50,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   #           fatal error: recursive template instantiation exceeded maximum depth of 256
   #
   ecbuild_add_cxx_flags("-ftemplate-depth=1024")
+
+  #
+  # In case of using Clang 18.1+ in Linux, we disable the following error (present in Boost headers):
+  #
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18.1 AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    ecbuild_add_cxx_flags("-Wno-enum-constexpr-conversion")
+  endif ()
 endif()
 
 if (HAVE_WARNINGS)
