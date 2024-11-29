@@ -132,9 +132,9 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       LIBS
         libhttp
         ecflow_all
+        test_scaffold
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-        test_support
       DEPENDS
         ecflow_server # the server is launched to support tests
         ecflow_http

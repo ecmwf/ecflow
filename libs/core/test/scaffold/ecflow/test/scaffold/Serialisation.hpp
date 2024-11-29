@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_core_TestSerialisation_HPP
-#define ecflow_core_TestSerialisation_HPP
+#ifndef ecflow_core_scaffold_Serialisation_HPP
+#define ecflow_core_scaffold_Serialisation_HPP
 
 #include <exception>
 #include <string>
@@ -68,4 +68,4 @@ void doSaveAndRestore(const std::string& fileName) {
 
 } // namespace ecf
 
-#endif /* ecflow_core_TestSerialisation_HPP */
+#endif /* ecflow_core_scaffold_Serialisation_HPP */

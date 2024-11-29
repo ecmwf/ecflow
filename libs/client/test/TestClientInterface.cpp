@@ -15,7 +15,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/CFileCmd.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Child.hpp"
@@ -25,6 +24,7 @@
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

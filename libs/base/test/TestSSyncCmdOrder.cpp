@@ -12,7 +12,6 @@
 
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/ClientHandleCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
 #include "ecflow/base/stc/SSyncCmd.hpp"
@@ -23,6 +22,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

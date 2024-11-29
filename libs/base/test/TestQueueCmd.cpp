@@ -14,7 +14,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/cts/task/QueueCmd.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -22,6 +21,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

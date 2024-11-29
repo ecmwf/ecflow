@@ -14,9 +14,9 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

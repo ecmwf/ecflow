@@ -6,6 +6,25 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.6
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2024-11-29
+
+General
+-------
+
+- **Improvement** enable explicit 'reload' of Mirror attribute configuration :jiraissue:`ECFLOW-1986`
+- **Improvement** enable automatic builds of rpm/deb packages :jiraissue:`ECFLOW-1967`
+- **Fix** correct replacement of nodes with Repeat DateTime attributes :jiraissue:`ECFLOW-1992`
+- **Fix** correct handling of :code:`ecflow_client` option :code:`--host` when searching for SSL certificate file :jiraissue:`ECFLOW-1985`
+- **Fix** correct build setup used on conda-forge with Python 3.13 :jiraissue:`ECFLOW-1987`
+
+ecFlow UI
+---------
+
+- **Improvement** enable Repeat DateTime attribute editor :jiraissue:`ECFLOW-1988`
+
 Version 5.13.5
 ==============
 

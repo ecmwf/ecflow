@@ -15,7 +15,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
@@ -25,6 +24,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

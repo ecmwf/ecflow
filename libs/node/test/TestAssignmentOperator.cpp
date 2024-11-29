@@ -13,8 +13,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "MyDefsFixture.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

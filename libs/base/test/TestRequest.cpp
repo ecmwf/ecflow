@@ -12,7 +12,6 @@
 
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
@@ -58,6 +57,7 @@
 #include "ecflow/base/stc/SSyncCmd.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -59,6 +59,8 @@ public:
     static constexpr const char* fallback_polling     = "120";
     static constexpr const char* fallback_remote_auth = "";
 
+    static constexpr const char* reload_option_value = "reload";
+
     static bool is_valid_name(const std::string& name);
 
     /**
@@ -104,8 +106,15 @@ public:
 
     /**
      * Initialises the Mirror procedure, which effectively starts the background polling mechanism.
+     * Typically, called when traversing the tree -- does nothing if Mirror service is already set up.
      */
     void reset();
+    /**
+     * Restarts the Mirror procedure, which effectively stops before restarting the background polling mechanism.
+     * Typicallly, called explicitly via Alter command -- forces the reinitialisation of the Mirror service,
+     * guaranteeing that parameters, given as ECF variables, are reevaluated.
+     */
+    void reload();
     void finish();
 
     /**

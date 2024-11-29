@@ -20,12 +20,24 @@
 #include "ecflow/service/Log.hpp"
 
 namespace ecf::service::mirror {
-/* MirrorClient */
+
+namespace {
+    std::string get_suite_name(const std::string& node_path) {
+        std::string trimmed = node_path.substr(1);
+        trimmed = trimmed.substr(0, trimmed.find('/'));
+        return trimmed;
+    }
+}
 
 struct MirrorClient::Impl
 {
-    std::shared_ptr<Defs> defs_;
     ClientInvoker invoker_;
+    bool initialized_ = false;
+
+    ~Impl() {
+        // Release Suite filter handle
+        invoker_.ch1_drop();
+    }
 };
 
 MirrorClient::MirrorClient() : impl_(std::make_unique<Impl>()) {
@@ -43,28 +55,34 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
     SLOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
 
     try {
-        impl_ = std::make_unique<Impl>();
-        impl_->invoker_.set_host_port(remote_host, remote_port);
-        if (ssl) {
-            impl_->invoker_.enable_ssl();
-        }
-        if (!remote_username.empty()) {
-            impl_->invoker_.set_user_name(remote_username);
-        }
-        if (!remote_password.empty()) {
-            // Extremely important: the password actually needs to be encrypted before being set in the invoker!
-            impl_->invoker_.set_password(PasswordEncryption::encrypt(remote_password, remote_username));
+        if (!impl_->initialized_) {
+            // Setup Access/Authentication
+            impl_->invoker_.set_host_port(remote_host, remote_port);
+            if (ssl) {
+                impl_->invoker_.enable_ssl();
+            }
+            if (!remote_username.empty()) {
+                impl_->invoker_.set_user_name(remote_username);
+            }
+            if (!remote_password.empty()) {
+                // Extremely important: the password actually needs to be encrypted before being set in the invoker!
+                impl_->invoker_.set_password(PasswordEncryption::encrypt(remote_password, remote_username));
+            }
+            // Setup Suite filter handle
+            auto selected_suite = get_suite_name(node_path);
+            impl_->invoker_.ch1_register(false, std::vector{selected_suite});
         }
 
         SLOG(D, "MirrorClient: retrieving the latest defs");
-        impl_->invoker_.sync(impl_->defs_);
+        impl_->invoker_.sync_local();
 
-        if (!impl_->defs_) {
+        auto defs = impl_->invoker_.defs();
+        if (!defs) {
             SLOG(E, "MirrorClient: unable to sync with remote defs");
             throw std::runtime_error("MirrorClient: Failed to sync with remote defs");
         }
 
-        auto node = impl_->defs_->findAbsNode(node_path);
+        auto node = defs->findAbsNode(node_path);
 
         if (!node) {
             throw std::runtime_error(

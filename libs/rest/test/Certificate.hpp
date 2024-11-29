@@ -23,7 +23,7 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
-#include "TestNaming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 class Certificate {
 public:

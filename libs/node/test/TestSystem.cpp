@@ -12,10 +12,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

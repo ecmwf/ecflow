@@ -20,6 +20,7 @@
 ///     a mechanism to stop this, when reset is called, via server this is disabled
 ///
 
+#include <cassert>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
@@ -28,6 +29,7 @@
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Chrono.hpp"
 
 /////////////////////////////////////////////////////////////////////////
@@ -319,6 +321,10 @@ public:
     int end() const override;
     int step() const override { return 1; }
     long value() const override; // return value at index   otherwise return 0
+    long value_at(size_t i) const {
+        assert(i < list_.size());
+        return list_[i];
+    };
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override;
     long last_valid_value_minus(int value) const override;
@@ -564,8 +570,7 @@ public:
     int start() const override { return 0; }
     int end() const override { return 0; }
     int step() const override { return step_; }
-    void increment() override { /* do nothing */
-    }
+    void increment() override { /* do nothing */ }
     long value() const override { return step_; }
     long index_or_value() const override { return step_; }
     long last_valid_value() const override { return step_; }
@@ -578,15 +583,11 @@ public:
     std::string next_value_as_string() const override { return std::string(); }
     std::string prev_value_as_string() const override { return std::string(); }
 
-    void setToLastValue() override { /* do nothing  ?? */
-    }
+    void setToLastValue() override { /* do nothing  ?? */ }
     void reset() override { valid_ = true; }
-    void change(const std::string& /*newValue*/) override { /* do nothing */
-    }
-    void changeValue(long /*newValue*/) override { /* do nothing */
-    }
-    void set_value(long /*newValue*/) override { /* do nothing */
-    }
+    void change(const std::string& /*newValue*/) override { /* do nothing */ }
+    void changeValue(long /*newValue*/) override { /* do nothing */ }
+    void set_value(long /*newValue*/) override { /* do nothing */ }
     void write(std::string&) const override;
     std::string dump() const override;
     bool isDay() const override { return true; }
@@ -705,6 +706,11 @@ public:
 
     /// Expose base for the GUI only, use with caution
     RepeatBase* repeatBase() const { return type_.get(); }
+
+    template <typename T>
+    const T& as() const {
+        return dynamic_cast<const T&>(*repeatBase());
+    }
 
 private:
     void write(std::string& ret) const {

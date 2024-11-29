@@ -83,10 +83,10 @@ ecbuild_add_test(
   LIBS
     ${LIB_TARGET}
     ecflow_all
+    test_scaffold
     Boost::boost
     Boost::unit_test_framework
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    test_support
   DEPENDS
     ecflow_server # the server is launched to support tests
     ${SERVER_TARGET}

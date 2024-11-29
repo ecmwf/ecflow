@@ -74,7 +74,16 @@ void MirrorAttr::reset() {
     start_controller();
 }
 
+void MirrorAttr::reload() {
+    if (controller_) {
+        state_change_no_ = Ecf::incr_state_change_no();
+        stop_controller();
+        start_controller();
+    }
+}
+
 void MirrorAttr::finish() {
+    state_change_no_ = Ecf::incr_state_change_no();
     stop_controller();
 }
 
@@ -160,7 +169,7 @@ void MirrorAttr::mirror() {
 std::optional<std::string> MirrorAttr::resolve_cfg(const std::string& value, std::string_view default_value) const {
     // Substitude variable in local value
     std::string local = value;
-    if(!parent_) {
+    if (!parent_) {
         return std::nullopt;
     }
 
@@ -190,7 +199,7 @@ std::string MirrorAttr::resolve_cfg(const std::string& value,
 }
 
 void MirrorAttr::start_controller() {
-    if (controller_ == nullptr) {
+    if (!controller_) {
 
         // Resolve variables in configuration
         // In the case of the 'remote_host', we have to resolve the configuration
@@ -217,7 +226,8 @@ void MirrorAttr::start_controller() {
 
         SLOG(D,
              "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
-                                                            << remote_host << ':' << remote_port << ")");
+                                                            << remote_host << ':' << remote_port
+                                                            << ") using polling: " << polling << " s");
 
         std::uint32_t polling_value;
         try {
@@ -247,7 +257,7 @@ void MirrorAttr::start_controller() {
 }
 
 void MirrorAttr::stop_controller() {
-    if (controller_ != nullptr) {
+    if (controller_) {
         SLOG(D,
              "MirrorAttr: finishing polling for Mirror attribute \"" << parent_->absNodePath() << ":" << name_
                                                                      << "\", from host: " << remote_host_

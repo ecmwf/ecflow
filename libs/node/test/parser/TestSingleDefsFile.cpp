@@ -18,7 +18,6 @@
 
 #include "PersistHelper.hpp"
 #include "TemporaryFile.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
@@ -32,6 +31,7 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

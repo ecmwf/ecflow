@@ -11,12 +11,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

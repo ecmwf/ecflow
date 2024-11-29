@@ -18,11 +18,11 @@
 
 #include "Certificate.hpp"
 #include "InvokeServer.hpp"
-#include "TestNaming.hpp"
 #include "TokenFile.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
 

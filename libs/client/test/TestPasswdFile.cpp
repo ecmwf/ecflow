@@ -12,10 +12,10 @@
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

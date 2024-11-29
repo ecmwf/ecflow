@@ -13,10 +13,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
-#include "TestSerialisation.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -13,8 +13,8 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 /*
  * The following dummy classes are defined to support test `can_use_custom_conversion_traits` and confirms that

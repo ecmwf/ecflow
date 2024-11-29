@@ -32,15 +32,16 @@ public:
 
 private:
     enum DataIndex {
-        TypeIndex      = 0,
-        SubtypeIndex   = 1,
-        NameIndex      = 2,
-        ValueIndex     = 3,
-        StartIndex     = 4,
-        EndIndex       = 5,
-        StepIndex      = 6,
-        AllValuesIndex = 7,
-        CurrentPosIdex = 8
+        TypeIndex       = 0,
+        SubtypeIndex    = 1,
+        NameIndex       = 2,
+        ValueIndex      = 3,
+        StartIndex      = 4,
+        EndIndex        = 5,
+        StepIndex       = 6,
+        AllValuesIndex  = 7,
+        CurrentPosIndex = 8,
+        ProgressIndex   = 9
     };
 };
 

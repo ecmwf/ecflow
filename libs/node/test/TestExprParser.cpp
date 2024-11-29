@@ -14,7 +14,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
@@ -22,6 +21,7 @@
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

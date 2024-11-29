@@ -173,7 +173,7 @@ public:
     {
         enum Requeue_t { REPEAT_INCREMENT = 1, TIME = 2, FULL = 3 };
         Requeue_args() = default;
-        explicit Requeue_args(Requeue_t r_t) : requeue_t(r_t){};
+        explicit Requeue_args(Requeue_t r_t) : requeue_t(r_t) {};
         Requeue_args(Requeue_t r_t,
                      bool resetRepeats,
                      int clear_suspended_in_child_nodes,

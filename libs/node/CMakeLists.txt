@@ -65,8 +65,8 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
-    test_support
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   TEST_DEPENDS
     u_attributes
@@ -105,8 +105,8 @@ ecbuild_add_test(
     test/parser
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    test_support
   TEST_DEPENDS
     u_node
 )
@@ -130,8 +130,8 @@ if (ENABLE_ALL_TESTS)
       ${test_srcs}
     LIBS
       ecflow_all
+      test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-      test_support
     TEST_DEPENDS
       u_anattr
   )
@@ -161,9 +161,9 @@ if (ENABLE_ALL_TESTS)
       ${test_srcs}
     LIBS
       ecflow_all
+      test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       Boost::timer
-      test_support
   )
   target_clangformat(p_parser
     CONDITION ENABLE_TESTS
@@ -194,6 +194,7 @@ if (ENABLE_ALL_TESTS)
       ${test_srcs}
     LIBS
       ecflow_all
+      test_scaffold
       Boost::boost # Boost header-only libraries must be available
       Boost::timer
   )
@@ -218,6 +219,7 @@ if (ENABLE_ALL_TESTS)
       ${test_srcs}
     LIBS
       ecflow_all
+      test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
   )
   target_clangformat(p_parser_only

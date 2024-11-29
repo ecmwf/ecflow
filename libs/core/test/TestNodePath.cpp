@@ -14,8 +14,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/NodePath.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 

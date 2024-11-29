@@ -24,10 +24,10 @@
     #include "ecflow/core/Str.hpp"
 #endif
 
-#include "TestNaming.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/User.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace boost;
 using namespace ecf;

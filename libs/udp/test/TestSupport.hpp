@@ -26,6 +26,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/udp/UDPClient.hpp"
 
 namespace bp = boost::process;

@@ -12,9 +12,8 @@
 #define ecflow_attribute_Variable_HPP
 
 #include <string>
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 namespace cereal {
 class access;

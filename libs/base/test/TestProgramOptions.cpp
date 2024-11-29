@@ -14,7 +14,7 @@
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 namespace po = boost::program_options;

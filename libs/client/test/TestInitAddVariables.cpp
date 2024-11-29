@@ -13,7 +13,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
 #include "ecflow/base/cts/task/InitCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
@@ -22,6 +21,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

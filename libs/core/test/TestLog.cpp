@@ -13,11 +13,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
 using namespace boost;
@@ -87,8 +87,7 @@ BOOST_AUTO_TEST_CASE(test_log_append) {
     // Load the log file into a vector, of strings, and test content
     std::vector<std::string> lines;
     BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(path, lines, true /*IGNORE EMPTY LINE AT THE END*/),
-                          "Failed to open log file"
-                              << " (" << strerror(errno) << ")");
+                          "Failed to open log file" << " (" << strerror(errno) << ")");
     BOOST_REQUIRE(lines.size() != 0);
     BOOST_CHECK_MESSAGE(lines.size() == 10, " Expected 10 lines in log, but found " << lines.size() << "\n");
     BOOST_CHECK_MESSAGE(lines[0].find("First Message") != std::string::npos,

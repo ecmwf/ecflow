@@ -10,7 +10,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
 #include "ecflow/base/cts/task/CtsWaitCmd.hpp"
@@ -27,6 +26,7 @@
 #include "ecflow/client/ClientOptions.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 ///
 /// \brief Tests the capabilities of ClientOptions

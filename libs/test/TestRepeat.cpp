@@ -17,7 +17,6 @@
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -28,6 +27,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;

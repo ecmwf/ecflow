@@ -11,7 +11,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
@@ -26,6 +25,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

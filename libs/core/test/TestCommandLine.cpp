@@ -12,9 +12,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace boost;
 

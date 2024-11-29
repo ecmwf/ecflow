@@ -14,7 +14,7 @@
 #include <ostream>
 #include <string>
 
-#include "TestNaming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 #include "nlohmann/json.hpp"
 
 class TokenFile {

@@ -9,21 +9,22 @@
 #
 
 ##
-## Notice: test_support is an INTERFACE-only test utility library.
+## Notice: test_scaffold is an INTERFACE-only test utility library.
 ##
 
 ecbuild_add_library(
   TARGET
-    test_support
+    test_scaffold
   NOINSTALL
   TYPE INTERFACE
   SOURCES
-    test/TestSerialisation.hpp
-    test/TestNaming.hpp
+    test/scaffold/ecflow/test/scaffold/Naming.hpp
+    test/scaffold/ecflow/test/scaffold/Provisioning.hpp
+    test/scaffold/ecflow/test/scaffold/Serialisation.hpp
   PUBLIC_INCLUDES
-    test
+    test/scaffold
 )
-target_clangformat(test_support)
+target_clangformat(test_scaffold)
 
 set(test_srcs
   # Headers
@@ -71,8 +72,8 @@ ecbuild_add_test(
   SOURCES
     ${test_srcs}
   LIBS
-    test_support
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
 )

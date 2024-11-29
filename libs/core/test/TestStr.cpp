@@ -15,10 +15,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
 using namespace boost;

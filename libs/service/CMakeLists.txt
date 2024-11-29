@@ -25,6 +25,7 @@ ecbuild_add_test(
     test/executor/TestPeriodicTaskExecutor.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_service_executor
@@ -51,6 +52,7 @@ ecbuild_add_test(
     test
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::filesystem
 )
@@ -79,6 +81,7 @@ ecbuild_add_test(
     test
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::filesystem
 )
@@ -102,6 +105,7 @@ ecbuild_add_test(
     test/mirror/TestMirrorService.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_service_mirror

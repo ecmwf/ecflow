@@ -35,6 +35,15 @@ ecbuild_info( "CMAKE_C_COMPILER_VERSION   : ${CMAKE_C_COMPILER_VERSION}")
 ecbuild_info( "CMAKE_CXX_COMPILER_ID      : ${CMAKE_CXX_COMPILER_ID}")
 ecbuild_info( "CMAKE_CXX_COMPILER_VERSION : ${CMAKE_CXX_COMPILER_VERSION}")
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  #
+  # In case of using Clang 18.1+ in Linux, we disable the following error (present in Boost headers):
+  #
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18.1 AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    ecbuild_add_cxx_flags("-Wno-enum-constexpr-conversion")
+  endif ()
+
+endif()
 
 ecbuild_info( "Selected built type: ${CMAKE_BUILD_TYPE}" )
 

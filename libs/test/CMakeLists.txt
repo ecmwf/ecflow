@@ -80,8 +80,8 @@ if (ENABLE_ALL_TESTS)
       ${test_srcs}
     LIBS
       libharness
+      test_scaffold
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     TEST_DEPENDS
       s_client
   )
@@ -98,8 +98,8 @@ if (ENABLE_ALL_TESTS)
       TestZombies_main.cpp # test entry point
     LIBS
       libharness
+      test_scaffold
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     TEST_DEPENDS
       s_test
   )
@@ -117,6 +117,7 @@ if (ENABLE_ALL_TESTS)
       TestSingle_main.cpp # test entry point
     LIBS
       libharness
+      test_scaffold
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_client

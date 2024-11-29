@@ -369,8 +369,65 @@ void RepeatDateEditor::apply() {
     CommandHandler::run(info_, cmd);
 }
 
+//================================================================
+//
+// RepeatDateTimeEditor
+//
+//================================================================
+
+RepeatDateTimeEditor::RepeatDateTimeEditor(VInfo_ptr info, QWidget* parent) : RepeatEditor(info, parent) {
+    // if(!repeat_)
+    //     return;
+
+    w_->hideRow(w_->valueSpin_);
+    w_->valueLe_->setText(oriVal_);
+
+    connect(w_->valueLe_, SIGNAL(textEdited(QString)), this, SLOT(slotValueEdited(QString)));
+
+    checkButtonStatus();
+}
+
+void RepeatDateTimeEditor::setValue(QString val) {
+    w_->valueLe_->setText(val);
+}
+
+void RepeatDateTimeEditor::slotValueEdited(QString txt) {
+    if (isListMode()) {
+        int row = modelData_.indexOf(txt);
+        if (row != -1) {
+            w_->valueView_->setCurrentIndex(model_->index(row, 0));
+        }
+        else {
+            w_->valueView_->clearSelection();
+            w_->valueView_->setCurrentIndex(QModelIndex());
+        }
+    }
+    checkButtonStatus();
+}
+
+void RepeatDateTimeEditor::resetValue() {
+    w_->valueLe_->setText(oriVal_);
+    slotValueEdited(oriVal_);
+    checkButtonStatus();
+}
+
+bool RepeatDateTimeEditor::isValueChanged() {
+    return (oriVal_ != w_->valueLe_->text());
+}
+
+void RepeatDateTimeEditor::apply() {
+    std::string val = w_->valueLe_->text().toStdString();
+    // std::string name=w_->nameLabel_->text().toStdString();
+
+    std::vector<std::string> cmd;
+    VAttribute::buildAlterCommand(cmd, "change", "repeat", val);
+    CommandHandler::run(info_, cmd);
+}
+
+
 static AttributeEditorMaker<RepeatIntEditor> makerStr1("repeat_integer");
 static AttributeEditorMaker<RepeatStringEditor> makerStr2("repeat_string");
 static AttributeEditorMaker<RepeatStringEditor> makerStr3("repeat_enumerated");
 static AttributeEditorMaker<RepeatDateEditor> makerStr4("repeat_date");
 static AttributeEditorMaker<RepeatStringEditor> makerStr5("repeat_datelist");
+static AttributeEditorMaker<RepeatDateTimeEditor> makerStr6("repeat_datetime");

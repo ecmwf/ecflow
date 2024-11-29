@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Chrono.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
 

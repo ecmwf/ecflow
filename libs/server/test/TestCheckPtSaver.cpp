@@ -13,8 +13,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/server/CheckPtSaver.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 /**
  * A self cleaning test file, useful to automate test data storage/cleanup, with automatic generation of file names.

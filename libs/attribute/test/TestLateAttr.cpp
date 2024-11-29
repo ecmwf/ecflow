@@ -15,10 +15,10 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/NState.hpp"
+#include "scaffold/ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -13,10 +13,10 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/attribute/RepeatAttr.hpp"
 #include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "scaffold/ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

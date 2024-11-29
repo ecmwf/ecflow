@@ -13,11 +13,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/attribute/DayAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "scaffold/ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

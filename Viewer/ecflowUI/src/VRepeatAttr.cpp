@@ -14,6 +14,8 @@
 
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "ecflow/attribute/RepeatRange.hpp"
+#include "ecflow/core/Cal.hpp"
 
 std::string VRepeatDateAttr::subType_("date");
 std::string VRepeatDateTimeAttr::subType_("datetime");
@@ -23,81 +25,12 @@ std::string VRepeatStringAttr::subType_("string");
 std::string VRepeatEnumAttr::subType_("enumerated");
 std::string VRepeatDayAttr::subType_("day");
 
-static long ecf_repeat_date_to_julian(long ddate);
-static long ecf_repeat_julian_to_date(long jdate);
-
-long ecf_repeat_julian_to_date(long jdate) {
-    long x = 0, y = 0, d = 0, m = 0, e = 0;
-    long day = 0, month = 0, year = 0;
-
-    x = 4 * jdate - 6884477;
-    y = (x / 146097) * 100;
-    e = x % 146097;
-    d = e / 4;
-
-    x = 4 * d + 3;
-    y = (x / 1461) + y;
-    e = x % 1461;
-    d = e / 4 + 1;
-
-    x = 5 * d - 3;
-    m = x / 153 + 1;
-    e = x % 153;
-    d = e / 5 + 1;
-
-    if (m < 11)
-        month = m + 2;
-    else
-        month = m - 10;
-
-    day  = d;
-    year = y + m / 11;
-
-    return year * 10000 + month * 100 + day;
-}
-
-long ecf_repeat_date_to_julian(long ddate) {
-    long m1 = 0, y1 = 0, a = 0, b = 0, c = 0, d = 0, j1 = 0;
-
-    long month = 0, day = 0, year = 0;
-
-    year = ddate / 10000;
-    ddate %= 10000;
-    month = ddate / 100;
-    ddate %= 100;
-    day = ddate;
-
-    if (false) {
-        a  = (14 - month) / 12;
-        y1 = year + 4800 - a;
-        m1 = month + 12 * a - 3;
-        j1 = day + (153 * m1 + 2) / 5 + 365 * y1 + y1 / 4 - y1 / 100 + y1 / 400 - 32045;
-        return j1 - 0.5;
-    }
-
-    if (month > 2) {
-        m1 = month - 3;
-        y1 = year;
-    }
-    else {
-        m1 = month + 9;
-        y1 = year - 1;
-    }
-    a  = 146097 * (y1 / 100) / 4;
-    d  = y1 % 100;
-    b  = 1461 * d / 4;
-    c  = (153 * m1 + 2) / 5 + day + 1721119;
-    j1 = a + b + c;
-
-    return j1;
-}
-
 //================================
 // VRepeatAttrType
 //================================
 
 VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat") {
-    dataCount_                       = 9;
+    dataCount_                       = 10;
     searchKeyToData_["repeat_name"]  = NameIndex;
     searchKeyToData_["repeat_value"] = ValueIndex;
     searchKeyToData_["name"]         = NameIndex;
@@ -118,6 +51,7 @@ QString VRepeatAttrType::toolTip(QStringList d) const {
             if (d[SubtypeIndex] == "integer" || d[SubtypeIndex] == "date") {
                 t += "<br><b>Step:</b> " + d[StepIndex];
             }
+            t += "<br><b>Complete: </b> " + d[ProgressIndex];
         }
         else {
             t += "<b>Step:</b> " + d[StepIndex];
@@ -159,10 +93,23 @@ void VRepeatAttrType::encode(const Repeat& r,
     // We try to avoid creating a VRepeat object everytime we are here
     // std::string type=VRepeat::type(r);
 
-    data << qName_ << QString::fromStdString(type) << QString::fromStdString(r.name())
-         << QString::fromStdString(r.valueAsString()) << ra->startValue() << ra->endValue()
-         << QString::fromStdString(ecf::Duration::format(ecf::Duration{std::chrono::seconds{r.step()}})) << allValues
-         << QString::number(ra->currentPosition());
+    data << qName_;
+    data << QString::fromStdString(type);              // TypeIndex
+    data << QString::fromStdString(r.name());          // SubtypeIndex
+    data << QString::fromStdString(r.valueAsString()); // NameIndex
+    data << ra->startValue();                          // StartIndex
+    data << ra->endValue();                            // EndIndex
+    if (type == "datetime") {
+        data << QString::fromStdString(
+            ecf::Duration::format(ecf::Duration{std::chrono::seconds{r.step()}})); // StepIndex
+    }
+    else {
+        data << QString::number(r.step()); // StepIndex
+    }
+    data << allValues;                              // AllValuesIndex
+    data << QString::number(ra->currentPosition()); // CurrentPosIndex
+    ecf::Limits limits = ecf::limits_of(r.repeatBase());
+    data << QString::number(limits.current) + " of " + QString::number(limits.end); // ProgressIndex
 }
 
 //=====================================================
@@ -248,8 +195,8 @@ int VRepeatDateAttr::endIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
         if (r.step() > 0) {
-            long jStart = ecf_repeat_date_to_julian(r.start());
-            long jEnd   = ecf_repeat_date_to_julian(r.end());
+            long jStart = Cal::date_to_julian(r.start());
+            long jEnd   = Cal::date_to_julian(r.end());
 
             int index = (jEnd - jStart) / r.step();
             long val  = jStart + index * r.step();
@@ -266,7 +213,7 @@ int VRepeatDateAttr::endIndex() const {
 int VRepeatDateAttr::currentIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        int cur = (ecf_repeat_date_to_julian(r.index_or_value()) - ecf_repeat_date_to_julian(r.start())) / r.step();
+        int cur         = (Cal::date_to_julian(r.index_or_value()) - Cal::date_to_julian(r.start())) / r.step();
         return cur;
     }
     return 0;
@@ -292,7 +239,7 @@ std::string VRepeatDateAttr::value(int index) const {
     std::stringstream ss;
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        ss << (ecf_repeat_julian_to_date(ecf_repeat_date_to_julian(r.start()) + index * r.step()));
+        ss << (Cal::julian_to_date(Cal::date_to_julian(r.start()) + index * r.step()));
     }
 
     return ss.str();
@@ -305,8 +252,7 @@ int VRepeatDateAttr::currentPosition() const {
             return -1;
         else if (r.value() == r.start())
             return 0;
-        else if (r.value() == r.end() ||
-                 ecf_repeat_date_to_julian(r.value()) + r.step() > ecf_repeat_date_to_julian(r.end()))
+        else if (r.value() == r.end() || Cal::date_to_julian(r.value()) + r.step() > Cal::date_to_julian(r.end()))
             return 2;
         else
             return 1;
@@ -323,49 +269,29 @@ int VRepeatDateAttr::currentPosition() const {
 
 int VRepeatDateTimeAttr::endIndex() const {
     if (node_ptr node = parent_->node()) {
-        const Repeat& r = node->repeat();
-        if (r.step() > 0) {
-            auto jStart = ecf::coerce_to_instant(r.start());
-            auto jEnd   = ecf::coerce_to_instant(r.end());
-
-            int index = (jEnd - jStart).as_seconds().count() / r.step();
-            auto val  = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
-            while (val > jEnd && index >= 1) {
-                index--;
-                val = jStart + ecf::Duration{std::chrono::seconds{index * r.step()}};
-            }
-            return index;
-        }
+        return ecf::make_range<RepeatDateTime>(node->repeat()).end();
     }
     return 0;
 }
 
 int VRepeatDateTimeAttr::currentIndex() const {
     if (node_ptr node = parent_->node()) {
-        const Repeat& r = node->repeat();
-        auto jStart     = ecf::coerce_to_instant(r.start());
-        auto jEnd       = ecf::coerce_to_instant(r.end());
-
-        int cur = (jEnd - jStart).as_seconds().count() / r.step();
-        return cur;
+        return ecf::make_range<RepeatDateTime>(node->repeat()).current_index();
     }
     return 0;
 }
 
 QString VRepeatDateTimeAttr::startValue() const {
     if (node_ptr node = parent_->node()) {
-        const Repeat& r = node->repeat();
-        std::string s   = ecf::Instant::format(ecf::coerce_to_instant(r.start()));
-        return QString::fromStdString(s);
+        return QString::fromStdString(
+            ecf::Instant::format(ecf::front(ecf::make_range<RepeatDateTime>(node->repeat()))));
     }
     return {};
 }
 
 QString VRepeatDateTimeAttr::endValue() const {
     if (node_ptr node = parent_->node()) {
-        const Repeat& r = node->repeat();
-        std::string s   = ecf::Instant::format(ecf::coerce_to_instant(r.end()));
-        return QString::fromStdString(s);
+        return QString::fromStdString(ecf::Instant::format(ecf::back(ecf::make_range<RepeatDateTime>(node->repeat()))));
     }
     return {};
 }
@@ -373,8 +299,7 @@ QString VRepeatDateTimeAttr::endValue() const {
 std::string VRepeatDateTimeAttr::value(int index) const {
     std::stringstream ss;
     if (node_ptr node = parent_->node()) {
-        const Repeat& r = node->repeat();
-        ss << ecf::Instant::format(ecf::coerce_to_instant(r.start() + index * r.step()));
+        ss << ecf::Instant::format(ecf::make_range<RepeatDateTime>(node->repeat()).current_value());
     }
     return ss.str();
 }
@@ -382,14 +307,19 @@ std::string VRepeatDateTimeAttr::value(int index) const {
 int VRepeatDateTimeAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (r.start() == r.end())
+        if (r.start() == r.end()) {
             return -1;
-        else if (r.value() == r.start())
+        }
+        else if (r.value() == r.start()) {
             return 0;
-        else if (r.value() == r.end() || ecf::coerce_to_instant(r.value() + r.step()) > ecf::coerce_to_instant(r.end()))
+        }
+        else if (r.value() == r.end() ||
+                 ecf::coerce_to_instant(r.value() + r.step()) > ecf::coerce_to_instant(r.end())) {
             return 2;
-        else
+        }
+        else {
             return 1;
+        }
     }
 
     return -1;

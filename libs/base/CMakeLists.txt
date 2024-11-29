@@ -48,9 +48,9 @@ ecbuild_add_test(
     ../node/test
   LIBS
     ecflow_all
+    test_scaffold
     Threads::Threads
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    test_support
   TEST_DEPENDS
     u_parser
 )

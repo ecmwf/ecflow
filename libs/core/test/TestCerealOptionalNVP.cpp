@@ -10,9 +10,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
 using namespace boost;
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_cereal_optional) {
         cereal::JSONOutputArchive oarchive(os); // Create an output archive
         oarchive(cereal::make_nvp("Base", original),
                  cereal::make_nvp("Base", original1)); // Write the data to the archive
-    }                                                  // archive goes out of scope, ensuring all contents are flushed
+    } // archive goes out of scope, ensuring all contents are flushed
 
     {
         BOOST_CHECK_MESSAGE(fs::exists(path), " Expected file to exist");

@@ -15,8 +15,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/server/PeriodicScheduler.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 std::ostream& operator<<(std::ostream& os, const std::chrono::system_clock::time_point& tp) {
     // Create time stamp

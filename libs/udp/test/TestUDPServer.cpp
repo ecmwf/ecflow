@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "TestSupport.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 namespace ut = boost::unit_test;
 

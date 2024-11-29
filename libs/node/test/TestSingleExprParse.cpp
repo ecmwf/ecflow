@@ -18,10 +18,10 @@
 #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
 
-#include "TestNaming.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/ExprParser.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

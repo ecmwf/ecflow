@@ -1699,7 +1699,7 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 9)
+    if (data.count() < 10)
         return;
 
     QString type = data.at(1);
@@ -1708,8 +1708,9 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
     QString step = data.at(6);
     QString pos  = data.at(8);
 
-    if (data.count() == 10)
-        name.prepend(data[9] + ":");
+    if (data.count() == 11) {
+        name.prepend(data[10] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 

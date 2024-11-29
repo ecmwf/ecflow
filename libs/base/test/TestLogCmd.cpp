@@ -11,13 +11,13 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/LogCmd.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace boost;
 using namespace std;

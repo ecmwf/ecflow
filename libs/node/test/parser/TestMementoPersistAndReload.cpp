@@ -14,9 +14,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "PersistHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Memento.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

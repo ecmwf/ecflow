@@ -13,7 +13,6 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "TestHelper.hpp"
-#include "TestNaming.hpp"
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/cts/user/OrderNodeCmd.hpp"
@@ -28,6 +27,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

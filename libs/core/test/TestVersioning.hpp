@@ -11,8 +11,8 @@
 #ifndef ecflow_core_test_TestVersioning_HPP
 #define ecflow_core_test_TestVersioning_HPP
 
-#include "TestSerialisation.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/test/scaffold/Serialisation.hpp"
 
 /// To simulate changing of data model over time, we will
 /// namespace's. The actual serialisation does not appears to

@@ -59,7 +59,7 @@ const int defaultSubmitJobsInterval = 60;
 // class ServerEnvironment:
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-ServerEnvironment::ServerEnvironment(int argc, char* argv[])
+ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& path_to_config_file)
     : serverHost_(host_name_.name()),
       serverPort_(0),
       checkPtInterval_(0),
@@ -74,33 +74,20 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[])
       tcp_protocol_(boost::asio::ip::tcp::v4()) {
     Ecf::set_server(true);
 
-    init(argc, argv, "server_environment.cfg");
-    if (debug_)
+    init(cl, path_to_config_file);
+    if (debug_) {
         std::cout << dump() << "\n";
+    }
 }
 
-// This is ONLY used in test
+ServerEnvironment::ServerEnvironment(int argc, char* argv[]) : ServerEnvironment(CommandLine(argc, argv)) {
+}
+
 ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file)
-    : serverHost_(host_name_.name()),
-      serverPort_(0),
-      checkPtInterval_(0),
-      checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
-      submitJobsInterval_(defaultSubmitJobsInterval),
-      ecf_prune_node_log_(0),
-      jobGeneration_(true),
-      debug_(false),
-      help_option_(false),
-      version_option_(false),
-      checkMode_(ecf::CheckPt::ON_TIME),
-      tcp_protocol_(boost::asio::ip::tcp::v4()) {
-    Ecf::set_server(true);
-
-    init(argc, argv, path_to_config_file);
-    if (debug_)
-        std::cout << dump() << "\n";
+    : ServerEnvironment(CommandLine(argc, argv), path_to_config_file) {
 }
 
-void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_config_file) {
+void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_config_file) {
     std::string log_file_name;
     try {
         read_config_file(log_file_name, path_to_config_file);
@@ -127,7 +114,7 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
     // std::cout << "PID = " << ecf_pid_ << "\n";
 
     // The options(argc/argv) must be read after the environment, since they override everything else
-    ServerOptions options(argc, argv, this);
+    ServerOptions options(cl, this);
     help_option_ = options.help_option();
     if (help_option_)
         return; // User is printing the help

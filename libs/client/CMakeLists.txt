@@ -56,6 +56,7 @@ set(test_srcs
   test/InvokeServer.hpp
   # Sources
   test/TestClient_main.cpp # test entry point
+  test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp
   test/TestClientOptions.cpp
   test/TestClientInterface.cpp
@@ -101,10 +102,10 @@ ecbuild_add_test(
     ../node/test
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    test_support
   DEPENDS
     ecflow_server # the server is launched to support tests
   TEST_DEPENDS
@@ -137,9 +138,9 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ../base/test
     LIBS
       ecflow_all
+      test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     DEPENDS
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS
@@ -169,9 +170,9 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ../base/test
     LIBS
       ecflow_all
+      test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-      test_support
     DEPENDS
       ecflow_server # the server is launched to support tests
     TEST_DEPENDS

@@ -12,12 +12,12 @@
 
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
-#include "TestNaming.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

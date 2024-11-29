@@ -1,0 +1,31 @@
+name: cd
+
+on:
+  # Trigger the workflow manually
+  workflow_dispatch: ~
+
+  push:
+    # Trigger the workflow when new tags are pushed
+    tags:
+      - '**'
+    # Trigger the workflow when the CD workflow/configuration is updated
+    paths:
+      - .github/cd-*.yml
+      - .github/workflows/cd.yml
+
+jobs:
+  deploy-server:
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    with:
+      skip_checks: true
+      restrict_matrix_jobs: gnu@debian-12
+      build_config: .github/cd-server-config.yml
+    secrets: inherit
+
+  deploy-ui:
+    uses: ecmwf-actions/reusable-workflows/.github/workflows/create-package.yml@v2
+    with:
+      skip_checks: true
+      restrict_matrix_jobs: gnu@rocky-8.6
+      build_config: .github/cd-ui-config.yml
+    secrets: inherit
