@@ -17,6 +17,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "ecflow/core/Serialization.hpp"
+
 namespace ecf {
 
 namespace {
@@ -236,5 +238,18 @@ bool operator>(const Duration& rhs, const Duration& lhs) {
 bool operator>=(const Duration& rhs, const Duration& lhs) {
     return !(rhs < lhs);
 }
+
+template <class Archive>
+void Instant::serialize(Archive& ar, std::uint32_t const version) {
+    ar(instant_);
+}
+
+template <class Archive>
+void Duration::serialize(Archive& ar, std::uint32_t const version) {
+    ar(duration_);
+}
+
+CEREAL_TEMPLATE_SPECIALIZE_V(Instant);
+CEREAL_TEMPLATE_SPECIALIZE_V(Duration);
 
 } // namespace ecf
