@@ -169,12 +169,13 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
     // When there is only one host:port in host_vec_, calling get_next_host() will always return host_vec_[0]
     host_file_read_ = true;
 
-#ifdef ECF_OPENSSL
-    // Must be done *AFTER* host and port set
-    // Avoid enabling SSL for the GUI, via environment, this must be done explicitly by the GUI
-    if (!gui_)
-        enable_ssl_if_defined();
-#endif
+    // Caution:
+    //
+    //   We don't (re)enable SSL immediatelly after setting host/port, as this might happen multiple times
+    //   during the execution (e.g. when loading environment variables, and later processing command line options).
+    //
+    //   It is up to the user of this class to enable SSL if needed.
+    //
 }
 
 bool ClientEnvironment::checkTaskPathAndPassword(std::string& errorMsg) const {
@@ -311,15 +312,6 @@ void ClientEnvironment::read_environment_variables() {
         host_vec_.clear(); // remove previous setting if any
         host_vec_.emplace_back(host, port);
     }
-
-#ifdef ECF_OPENSSL
-    // Note: This must be placed here for child commands, where we we typically only use environment variables
-    // Must be done last *AFTER* host and port set
-    // Can't use enable_sll(), since that calls host()/port() which use host_vec_, which may be empty
-    // Avoid enabling SSL for the GUI, via environment, this must be done explicitly by the GUI
-    if (!gui_)
-        ssl_.enable_if_defined(host, port);
-#endif
 }
 
 bool ClientEnvironment::parseHostsFile(std::string& errorMsg) {

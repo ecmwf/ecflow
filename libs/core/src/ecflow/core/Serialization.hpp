@@ -20,6 +20,7 @@
 #include <string>
 
 #include <cereal/archives/json.hpp>
+#include <cereal/types/chrono.hpp>
 #include <cereal/types/deque.hpp>
 #include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>

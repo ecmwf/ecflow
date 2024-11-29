@@ -59,11 +59,13 @@ ecbuild_add_test(
     src
   SOURCES
     test/TestCheckPtSaver.cpp
+    test/TestServerConfigurations.cpp
     test/TestServerEnvironment.cpp
     test/TestServer_main.cpp # test entry point
     test/TestServer.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads

@@ -42,3 +42,15 @@ if (ENABLE_HTTP_COMPRESSION)
     message(FATAL_ERROR "HTTP compression support requested, but zlib was not found")
   endif ()
 endif ()
+
+# =========================================================================================
+# Crypt
+# =========================================================================================
+ecbuild_info( "Locating Crypt" )
+
+find_package(Crypt)
+
+ecbuild_info( "Crypt details:" )
+ecbuild_info( " * Crypt_FOUND        : ${Crypt_FOUND}" )
+ecbuild_info( " * Crypt_INCLUDE_DIRS : ${Crypt_INCLUDE_DIRS}" )
+ecbuild_info( " * Crypt_LIBRARIES    : ${Crypt_LIBRARIES}" )

@@ -27,6 +27,7 @@ class RepeatEditorWidget : public QWidget, protected Ui::RepeatEditorWidget {
     friend class RepeatIntEditor;
     friend class RepeatStringEditor;
     friend class RepeatDateEditor;
+    friend class RepeatDateTimeEditor;
 
 public:
     explicit RepeatEditorWidget(QWidget* parent = nullptr);
@@ -94,6 +95,21 @@ class RepeatDateEditor : public RepeatEditor {
     Q_OBJECT
 public:
     RepeatDateEditor(VInfo_ptr, QWidget* parent = nullptr);
+
+protected Q_SLOTS:
+    void slotValueEdited(QString);
+
+protected:
+    void apply() override;
+    void setValue(QString val) override;
+    void resetValue() override;
+    bool isValueChanged() override;
+};
+
+class RepeatDateTimeEditor : public RepeatEditor {
+    Q_OBJECT
+public:
+    explicit RepeatDateTimeEditor(VInfo_ptr, QWidget* parent = nullptr);
 
 protected Q_SLOTS:
     void slotValueEdited(QString);

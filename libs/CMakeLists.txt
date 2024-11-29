@@ -28,6 +28,7 @@ set(srcs
   attribute/src/ecflow/attribute/NodeAttr.hpp
   attribute/src/ecflow/attribute/QueueAttr.hpp
   attribute/src/ecflow/attribute/RepeatAttr.hpp
+  attribute/src/ecflow/attribute/RepeatRange.hpp
   attribute/src/ecflow/attribute/TimeAttr.hpp
   attribute/src/ecflow/attribute/TodayAttr.hpp
   attribute/src/ecflow/attribute/Variable.hpp
@@ -566,7 +567,7 @@ ecbuild_add_library(
     Boost::date_time
     Boost::program_options
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    $<$<NOT:$<BOOL:${APPLE}>>:crypt>
+    $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
     Threads::Threads
   DEFINITIONS
     CMAKE

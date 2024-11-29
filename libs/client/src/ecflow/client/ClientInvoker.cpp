@@ -202,6 +202,14 @@ void ClientInvoker::set_connection_attempts(unsigned int attempts) {
         connection_attempts_ = 1;
 }
 
+std::optional<Cmd_ptr> ClientInvoker::get_cmd_from_args(const CommandLine& cl) const {
+    Cmd_ptr cts_cmd;
+    if (get_cmd_from_args(cl, cts_cmd) == 1) {
+        return std::nullopt;
+    }
+    return cts_cmd;
+}
+
 int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const {
     try {
         // read in program option, and construct the client to server commands from them.
@@ -267,8 +275,9 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     server_reply_.get_error_msg().clear();
 
     Cmd_ptr cts_cmd;
-    if (get_cmd_from_args(cl, cts_cmd) == 1)
+    if (get_cmd_from_args(cl, cts_cmd) == 1) {
         return 1;
+    }
     if (!cts_cmd)
         return 0; // For --help and --debug, --load defs check_only,  no command is created
 

@@ -161,9 +161,15 @@ std::string Openssl::get_password() const {
 }
 
 std::string Openssl::certificates_dir() const {
-    std::string home_path = getenv("HOME");
-    home_path += "/.ecflowrc/ssl/";
-    return home_path;
+    if (auto found = getenv("ECF_SSL_DIR"); found) {
+        // This is used for testing, to avoid using the default location
+        return found;
+    }
+    else {
+        std::string home_path = getenv("HOME");
+        home_path += "/.ecflowrc/ssl/";
+        return home_path;
+    }
 }
 
 std::string Openssl::pem() const {

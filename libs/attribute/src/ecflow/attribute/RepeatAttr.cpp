@@ -1779,6 +1779,7 @@ bool RepeatDay::operator==(const RepeatDay& rhs) const {
     }
     return true;
 }
+
 // =========================================================================================
 
 template <class Archive>
@@ -1840,6 +1841,7 @@ void Repeat::serialize(Archive& ar, std::uint32_t const version) {
 
 CEREAL_TEMPLATE_SPECIALIZE(RepeatBase);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDate);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDateTime);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDateList);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatInteger);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatEnumerated);
@@ -1848,6 +1850,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDay);
 CEREAL_TEMPLATE_SPECIALIZE_V(Repeat);
 
 CEREAL_REGISTER_TYPE(RepeatDate)
+CEREAL_REGISTER_TYPE(RepeatDateTime)
 CEREAL_REGISTER_TYPE(RepeatDateList)
 CEREAL_REGISTER_TYPE(RepeatInteger)
 CEREAL_REGISTER_TYPE(RepeatEnumerated)
