@@ -14,6 +14,10 @@
 #include <chrono>
 #include <string>
 
+namespace cereal {
+class access;
+}
+
 namespace ecf {
 
 class Instant;
@@ -47,6 +51,10 @@ public:
 
 private:
     instant_t instant_;
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 std::ostream& operator<<(std::ostream& o, const Instant& v);
@@ -76,6 +84,10 @@ public:
 
 private:
     duration_t duration_;
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
 };
 
 std::ostream& operator<<(std::ostream& o, const Duration& v);
