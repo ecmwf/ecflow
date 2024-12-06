@@ -68,7 +68,7 @@ foreach( test ${u_tests} )
       python nightly
     TYPE PYTHON
     ARGS
-      ${CMAKE_CURRENT_SOURCE_DIR}/../test/${test}.py
+      ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
     ENVIRONMENT
       "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
     TEST_DEPENDS
