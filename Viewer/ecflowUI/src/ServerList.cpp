@@ -366,7 +366,7 @@ ServerItem* ServerList::add(const std::string& name,
                             const std::string& port,
                             const std::string& user,
                             bool favourite,
-                            bool ssl,
+                            ecf::Protocol protocol,
                             bool saveIt) {
     std::string errStr;
     if (!checkItemToAdd(name, host, port, true, errStr)) {
@@ -374,7 +374,7 @@ ServerItem* ServerList::add(const std::string& name,
         return nullptr;
     }
 
-    auto* item = new ServerItem(name, host, port, user, favourite, ssl);
+    auto* item = new ServerItem(name, host, port, user, favourite, protocol);
 
     items_.push_back(item);
 
@@ -403,7 +403,7 @@ ServerItem* ServerList::reset(ServerItem* item,
                               const std::string& host,
                               const std::string& port,
                               const std::string& user,
-                              bool ssl) {
+                              ecf::Protocol protocol) {
     auto it = std::find(items_.begin(), items_.end(), item);
     if (it != items_.end()) {
         // Check if there is an item with the same name. Names have to be unique!
@@ -414,14 +414,14 @@ ServerItem* ServerList::reset(ServerItem* item,
             items_.erase(it);
             broadcastChanged();
             delete item;
-            item = add(name, host, port, user, false, ssl, true);
+            item = add(name, host, port, user, false, protocol, true);
             save();
             broadcastChanged();
         }
         else {
             assert(host == item->host());
             assert(port == item->port());
-            item->reset(name, host, port, user, ssl);
+            item->reset(name, host, port, user, protocol);
             save();
             broadcastChanged();
         }
@@ -548,9 +548,10 @@ bool ServerList::load() {
         if (sv.size() >= 5)
             sys = (sv[4] == "1") ? true : false;
 
-        bool ssl = false;
-        if (sv.size() >= 6)
-            ssl = (sv[5] == "1") ? true : false;
+        auto protocol = ecf::Protocol::Plain;
+        if (sv.size() >= 6) {
+            protocol = ecf::from_configuration_encoding(sv[5]);
+        }
 
         std::string user;
         if (sv.size() >= 7)
@@ -560,7 +561,7 @@ bool ServerList::load() {
             std::string name = sv[0], host = sv[1], port = sv[2];
             ServerItem* item = nullptr;
             try {
-                item = add(name, host, port, user, favourite, ssl, false);
+                item = add(name, host, port, user, favourite, protocol, false);
                 UI_ASSERT(item != nullptr, "name=" << name << " host=" << host << " port=" << port << " user=" << user);
                 item->setSystem(sys);
             }
@@ -599,14 +600,20 @@ void ServerList::save() {
     if (!out.good())
         return;
 
-    out << "#Name Host Port Favourite System Ssl user" << std::endl;
+    out << "# Name, Host, Port, Favourite, System, Protocol, User" << std::endl;
+    out << "# " << std::endl;
+    out << "# Protocol:" << std::endl;
+    ecf::for_each_protocol_ui_designation([&out](ecf::Protocol protocol, const char* designation) {
+        out << "#   " << static_cast<std::underlying_type_t<ecf::Protocol>>(protocol) << " == " << designation
+            << std::endl;
+    });
+    out << "# " << std::endl;
 
     for (auto& item : items_) {
         std::string fav = (item->isFavourite()) ? "1" : "0";
-        std::string ssl = (item->isSsl()) ? "1" : "0";
         std::string sys = (item->isSystem()) ? "1" : "0";
-        out << item->name() << "," << item->host() << "," << item->port() << "," << fav << "," << sys << "," << ssl
-            << "," << item->user() << std::endl;
+        out << item->name() << "," << item->host() << "," << item->port() << "," << fav << "," << sys << ","
+            << to_configuration_encoding(item->protocol()) << "," << item->user() << std::endl;
     }
     out.close();
 }
@@ -662,7 +669,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
             changed          = true;
             std::string name = sysItem.name(), host = sysItem.host(), port = sysItem.port();
             try {
-                item = add(name, host, port, "", false, false, false);
+                item = add(name, host, port, "", false, ecf::Protocol::Plain, false);
                 UI_ASSERT(item != nullptr, "name=" << name << " host=" << host << " port=" << port);
                 item->setSystem(true);
                 changeVec.push_back(
@@ -688,7 +695,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
             ServerListTmpItem localTmp(item);
             changeVec.push_back(new ServerListSyncChangeItem(sysItem, localTmp, ServerListSyncChangeItem::MatchChange));
 
-            item = reset(item, sysItem.name(), sysItem.host(), sysItem.port(), "", false);
+            item = reset(item, sysItem.name(), sysItem.host(), sysItem.port(), "", ecf::Protocol::Plain);
             if (item) {
                 item->setSystem(true);
             }

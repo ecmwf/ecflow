@@ -16,6 +16,7 @@
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif
+#include "ecflow/base/ServerProtocol.hpp"
 
 class ClientEnvironment final : public AbstractClientEnv {
 public:
@@ -90,16 +91,31 @@ public:
     // Used by python to enable debug of client api
     void set_debug(bool flag);
 
+    ecf::Protocol protocol() const { return protocol_; }
+    void enable_http() { protocol_ = ecf::Protocol::Http; }
+    void enable_https() { protocol_ = ecf::Protocol::Https; }
+
 #ifdef ECF_OPENSSL
     /// return true if this is a ssl enabled server
     ecf::Openssl& openssl() { return ssl_; }
     const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
     void enable_ssl_if_defined() {
+        protocol_ = ecf::Protocol::Ssl;
         ssl_.enable_if_defined(host(), port());
     } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
-    void enable_ssl() { ssl_.enable(host(), port()); } // search server.crt first, then <host>.<port>.crt
-    void disable_ssl() { ssl_.disable(); }             // override environment setting for ECF_SSL
+    void enable_ssl() {
+        protocol_ = ecf::Protocol::Ssl;
+        ssl_.enable(host(), port());
+    } // search server.crt first, then <host>.<port>.crt
+    bool enable_ssl_no_throw() {
+        protocol_ = ecf::Protocol::Ssl;
+        return ssl_.enable_no_throw(host(), port());
+    } // search server.crt first, then <host>.<port>.crt
+    void disable_ssl() {
+        protocol_ = ecf::Protocol::Plain;
+        ssl_.disable();
+    } // override environment setting for ECF_SSL
 #endif
 
     // AbstractClientEnv functions:
@@ -166,7 +182,8 @@ private:
     bool denied_{false}; // ECF_DENIED.If the server denies the communication, then the child command can be set to fail
                          // immediately
     bool no_ecf_{false}; // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
-    bool debug_{false};  // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
+    ecf::Protocol protocol_{ecf::Protocol::Plain};
+    bool debug_{false};          // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
     bool under_test_{false};     // Used in testing client interface
     bool host_file_read_{false}; // to ensure we read host file only once
     bool gui_{false};

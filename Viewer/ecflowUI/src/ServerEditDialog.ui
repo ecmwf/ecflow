@@ -89,23 +89,41 @@
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="sslLabel">
+      <widget class="QLabel" name="protocolLabel">
        <property name="text">
-        <string>Use &amp;SSL:</string>
-       </property>
-       <property name="buddy">
-        <cstring>sslCh</cstring>
+        <string>Protocol:</string>
        </property>
       </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QCheckBox" name="sslCh">
+      <widget class="QRadioButton" name="protocolPlain">
        <property name="text">
-        <string/>
+        <string>TCP/IP</string>
        </property>
       </widget>
      </item>
      <item row="6" column="1">
+      <widget class="QRadioButton" name="protocolSsl">
+       <property name="text">
+        <string>TCP/IP with SSL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QRadioButton" name="protocolHttp">
+       <property name="text">
+        <string>HTTP</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QRadioButton" name="protocolHttps">
+       <property name="text">
+        <string>HTTPS</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
       <widget class="MessageLabel" name="sslMessageLabel" native="true"/>
      </item>
     </layout>
