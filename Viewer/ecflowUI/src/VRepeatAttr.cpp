@@ -269,29 +269,43 @@ int VRepeatDateAttr::currentPosition() const {
 
 int VRepeatDateTimeAttr::endIndex() const {
     if (node_ptr node = parent_->node()) {
-        return ecf::make_range<RepeatDateTime>(node->repeat()).end();
+        auto& r  = node->repeat();
+        auto rng = ecf::make_range<RepeatDateTime>(r);
+        auto idx = rng.end();
+        idx = std::min(idx, rng.size() - 1); // ensure idx is within range [0, size-1]
+        return idx;
     }
     return 0;
 }
 
 int VRepeatDateTimeAttr::currentIndex() const {
     if (node_ptr node = parent_->node()) {
-        return ecf::make_range<RepeatDateTime>(node->repeat()).current_index();
+        auto& r  = node->repeat();
+        auto rng = ecf::make_range<RepeatDateTime>(r);
+        auto idx = rng.current_index();
+        return idx;
     }
     return 0;
 }
 
 QString VRepeatDateTimeAttr::startValue() const {
     if (node_ptr node = parent_->node()) {
-        return QString::fromStdString(
-            ecf::Instant::format(ecf::front(ecf::make_range<RepeatDateTime>(node->repeat()))));
+        auto& r  = node->repeat();
+        auto rng = ecf::make_range<RepeatDateTime>(r);
+        auto val = ecf::front(rng); // front(rng) returns the first value in the range;
+        auto fmt = ecf::Instant::format(val);
+        return QString::fromStdString(fmt);
     }
     return {};
 }
 
 QString VRepeatDateTimeAttr::endValue() const {
     if (node_ptr node = parent_->node()) {
-        return QString::fromStdString(ecf::Instant::format(ecf::back(ecf::make_range<RepeatDateTime>(node->repeat()))));
+        auto& r  = node->repeat();
+        auto rng = ecf::make_range<RepeatDateTime>(r);
+        auto val = ecf::back(rng); // back(rng) returns the last value in the range;
+        auto fmt = ecf::Instant::format(val);
+        return QString::fromStdString(fmt);
     }
     return {};
 }
@@ -299,14 +313,18 @@ QString VRepeatDateTimeAttr::endValue() const {
 std::string VRepeatDateTimeAttr::value(int index) const {
     std::stringstream ss;
     if (node_ptr node = parent_->node()) {
-        ss << ecf::Instant::format(ecf::make_range<RepeatDateTime>(node->repeat()).current_value());
+        auto& r  = node->repeat();
+        auto rng = ecf::make_range<RepeatDateTime>(r);
+        auto val = rng.at(index);
+        auto fmt = ecf::Instant::format(val);
+        ss << fmt;
     }
     return ss.str();
 }
 
 int VRepeatDateTimeAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
-        const Repeat& r = node->repeat();
+        auto& r = node->repeat();
         if (r.start() == r.end()) {
             return -1;
         }
