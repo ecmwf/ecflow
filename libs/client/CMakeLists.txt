@@ -103,6 +103,7 @@ ecbuild_add_test(
   LIBS
     ecflow_all
     test_scaffold
+    test_harness.base
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
@@ -139,6 +140,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
     LIBS
       ecflow_all
       test_scaffold
+      test_harness.base
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     DEPENDS
@@ -171,6 +173,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
     LIBS
       ecflow_all
       test_scaffold
+      test_harness.base
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     DEPENDS

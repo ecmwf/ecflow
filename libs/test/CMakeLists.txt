@@ -28,9 +28,9 @@ ecbuild_add_library(
     ${srcs}
   PUBLIC_INCLUDES
     src
-    ../base/test
   PUBLIC_LIBS
     ecflow_all
+    test_harness.base
 )
 target_clangformat(libharness)
 
