@@ -8,31 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(srcs
-  # Headers
-  src/ServerTestHarness.hpp
-  src/TestFixture.hpp
-  src/ZombieUtil.hpp
-  # Sources
-  src/ServerTestHarness.cpp
-  src/TestFixture.cpp
-  src/ZombieUtill.cpp
-)
-
-ecbuild_add_library(
-  TARGET
-    libharness
-  NOINSTALL
-  TYPE STATIC
-  SOURCES
-    ${srcs}
-  PUBLIC_INCLUDES
-    src
-  PUBLIC_LIBS
-    ecflow_all
-    test_harness.base
-)
-target_clangformat(libharness)
+add_subdirectory(harness)
 
 # =================================================================
 # test
@@ -79,8 +55,8 @@ if (ENABLE_ALL_TESTS)
     SOURCES
       ${test_srcs}
     LIBS
-      libharness
       test_scaffold
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_client
@@ -97,8 +73,8 @@ if (ENABLE_ALL_TESTS)
       TestZombies.cpp
       TestZombies_main.cpp # test entry point
     LIBS
-      libharness
       test_scaffold
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_test
@@ -116,8 +92,8 @@ if (ENABLE_ALL_TESTS)
       TestSingle.cpp
       TestSingle_main.cpp # test entry point
     LIBS
-      libharness
       test_scaffold
+      test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     TEST_DEPENDS
       s_client
