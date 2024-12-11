@@ -11,7 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/Variable.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 

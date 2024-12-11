@@ -18,7 +18,7 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/NState.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

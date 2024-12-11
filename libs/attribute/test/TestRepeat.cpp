@@ -16,7 +16,7 @@
 #include "ecflow/attribute/RepeatAttr.hpp"
 #include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

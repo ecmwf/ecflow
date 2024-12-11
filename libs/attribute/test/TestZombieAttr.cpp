@@ -13,7 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/ZombieAttr.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -127,12 +127,11 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         integration nightly
       SOURCES
         ${test_srcs}
-      INCLUDES
-        ../base/test
       LIBS
         libhttp
         ecflow_all
         test_scaffold
+        test_harness.base
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
       DEPENDS
