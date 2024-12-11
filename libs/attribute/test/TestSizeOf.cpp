@@ -15,7 +15,7 @@
 
 #include "ecflow/attribute/DayAttr.hpp"
 #include "ecflow/core/TimeSeries.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 #define STRINGIFY(x) #x
 

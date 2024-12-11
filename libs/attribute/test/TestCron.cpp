@@ -17,7 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;

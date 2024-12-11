@@ -36,14 +36,11 @@ ecbuild_add_test(
     nightly
   SOURCES
     ${test_srcs}
-  INCLUDES
-    ../core/test
   LIBS
     ecflow_all
     test_scaffold
   TEST_DEPENDS
     u_core
-    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_attributes
   CONDITION ENABLE_TESTS

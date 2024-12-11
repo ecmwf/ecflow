@@ -16,7 +16,7 @@
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
-#include "scaffold/ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
