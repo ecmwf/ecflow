@@ -233,6 +233,14 @@ void ClientSuiteMgr::suite_added_in_defs(suite_ptr suite) {
     }
 }
 
+void ClientSuiteMgr::suite_replaced_in_defs(suite_ptr suite) {
+    size_t client_suites_size = clientSuites_.size();
+    for (size_t i = 0; i < client_suites_size; i++) {
+        clientSuites_[i].suite_replaced_in_defs(suite);
+        clientSuites_[i].update_suite_order();
+    }
+}
+
 void ClientSuiteMgr::suite_deleted_in_defs(suite_ptr suite) {
     size_t client_suites_size = clientSuites_.size();
     for (size_t i = 0; i < client_suites_size; i++) {

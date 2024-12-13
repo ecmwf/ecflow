@@ -89,12 +89,15 @@ public:
     /// returns the list of suites associated with a handle, Used by ecFlowview
     void suites(unsigned int client_handle, std::vector<std::string>& names) const;
 
-    /// A suite is being added in the definition.
+    /// A suite has been added to the definition.
     /// If the suite was previously registered *UPDATE* its suite_ptr
     /// Otherwise if any ClientSuites registered for automatic inclusion of new suite, add them in
     void suite_added_in_defs(suite_ptr);
 
-    /// The suite is being deleted in the definition, reset the suite_ptr
+    /// A suite has been updated in the definition.
+    void suite_replaced_in_defs(suite_ptr);
+
+    /// The suite has been deleted from the definition, reset the suite_ptr
     /// Deleted suites STAY registered, until explicitly dropped.
     void suite_deleted_in_defs(suite_ptr);
 

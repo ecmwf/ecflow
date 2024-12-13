@@ -194,8 +194,9 @@ bool SuiteFilter::loadedSameAs(const std::vector<std::string>& loaded) const {
 
 bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded, bool checkDiff) {
     bool same = false;
-    if (checkDiff)
+    if (checkDiff) {
         same = loadedSameAs(loaded);
+    }
 
     if (!checkDiff || !same) {
         return adjustLoaded(loaded);
