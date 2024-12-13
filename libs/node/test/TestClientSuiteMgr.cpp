@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/File.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -20,6 +21,18 @@
 
 using namespace std;
 using namespace ecf;
+
+namespace {
+
+defs_ptr load_defs(const std::string& path) {
+    defs_ptr defs = std::make_shared<Defs>();
+    std::string errorMsg, warningMsg;
+    bool parse = defs->restore(path, errorMsg, warningMsg);
+    BOOST_CHECK(parse);
+    return defs;
+}
+
+} // namespace
 
 BOOST_AUTO_TEST_SUITE(U_Node)
 
@@ -132,6 +145,145 @@ BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_handle) {
     BOOST_CHECK_MESSAGE(mgr.clientSuites().size() == 0,
                         "Expected client suite of size 0 but found " << mgr.clientSuites().size());
     BOOST_CHECK_THROW(mgr.remove_client_suite(handle3), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(T_ClientSuiteMgr_SuiteReplacement)
+
+auto path   = File::test_data("libs/node/test/data/replace.txt", "libs/node");
+auto user   = std::string("someuser");
+auto suites = std::vector<std::string>{"aa", "bb"};
+
+std::string errormsg;
+
+BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_with_auto_add) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = load_defs(path);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+
+    auto handle = defs->client_suite_mgr().create_client_suite(true, suites, user);
+
+    { // access filtered suites, before replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+
+    { // replace suite
+        auto another = load_defs(path);
+        defs->replaceChild("/xx", another, true, false, errormsg);
+    }
+
+    { // access filtered suites, after replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_with_auto_add) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = load_defs(path);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+
+    auto handle = defs->client_suite_mgr().create_client_suite(true, suites, user);
+
+    { // access filtered suites, before replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+
+    { // replace suite
+        auto another = load_defs(path);
+        defs->replaceChild("/aa", another, true, false, errormsg);
+    }
+
+    { // access filtered suites, after replace
+        auto& mng     = defs->client_suite_mgr();
+        auto filtered = mng.create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_without_auto_add) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = load_defs(path);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+
+    auto handle = defs->client_suite_mgr().create_client_suite(false, suites, user);
+
+    { // access filtered suites, before replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+
+    { // replace suite
+        auto another = load_defs(path);
+        defs->replaceChild("/xx", another, true, false, errormsg);
+    }
+
+    { // access filtered suites, after replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_without_auto_add) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = load_defs(path);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+
+    auto handle = defs->client_suite_mgr().create_client_suite(false, suites, user);
+
+    { // access filtered suites, before replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+
+    { // replace suite
+        auto another = load_defs(path);
+        defs->replaceChild("/aa", another, true, false, errormsg);
+    }
+
+    { // access filtered suites, after replace
+        auto& mng     = defs->client_suite_mgr();
+        auto filtered = mng.create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_suite_filter_delete_and_add_filtered_suite_with_auto_add) {
+    ECF_NAME_THIS_TEST();
+
+    auto defs = load_defs(path);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+
+    auto handle = defs->client_suite_mgr().create_client_suite(true, suites, user);
+
+    { // access filtered suites, before replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+    }
+
+    { // delete suite
+        auto deleting = defs->findAbsNode("/xx");
+        defs->deleteChild(deleting.get());
+    }
+
+    { // add suite
+        auto local  = load_defs(path);
+        auto adding = local->findSuite("xx");
+        adding->set_defs(nullptr); // detach suite from 'local' defs, so it can be added to 'defs'
+        defs->addSuite(adding, 0);
+    }
+
+    { // access filtered suites, after replace
+        auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 3);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
