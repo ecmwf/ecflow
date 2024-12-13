@@ -105,6 +105,15 @@ void ClientSuites::suite_added_in_defs(suite_ptr suite) {
     }
 }
 
+void ClientSuites::suite_replaced_in_defs(suite_ptr suite) {
+    // *IF* and *ONLY IF* the suite was previously registered added, *UPDATE* its suite_ptr
+    auto i = find_suite(suite->name());
+    if (i != suites_.end()) {
+        // previously registered suite, update
+        add_suite(suite);
+    }
+}
+
 void ClientSuites::suite_deleted_in_defs(suite_ptr suite) {
     // Deleted suites are *NOT* automatically removed
     // They have to be moved explicitly by the user. Reset to weak ptr
@@ -136,9 +145,9 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const {
     if (suites_.size() == server_defs->suiteVec().size()) {
         size_t real_suite_count = 0;
         for (auto i = suites_.begin(); i != suites_end; ++i) {
-            suite_ptr suite = (*i).weak_suite_ptr_.lock();
-            if (suite.get())
+            if (suite_ptr suite = (*i).weak_suite_ptr_.lock(); suite.get()) {
                 real_suite_count++;
+            }
         }
         if (real_suite_count == server_defs->suiteVec().size()) {
 

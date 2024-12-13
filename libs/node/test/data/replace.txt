@@ -1,0 +1,15 @@
+suite aa
+  family f
+   	task t
+   endfamily
+endsuite
+suite bb
+  family f
+   	task t
+   endfamily
+endsuite
+suite xx
+  family f
+   	task t
+   endfamily
+endsuite

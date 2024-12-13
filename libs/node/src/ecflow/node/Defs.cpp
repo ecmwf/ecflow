@@ -409,9 +409,20 @@ suite_ptr Defs::add_suite(const std::string& name) {
         ss << "Add Suite failed: A Suite of name '" << name << "' already exists";
         throw std::runtime_error(ss.str());
     }
-    suite_ptr the_suite = Suite::create(name);
-    add_suite_only(the_suite, std::numeric_limits<std::size_t>::max());
-    return the_suite;
+    suite_ptr s = Suite::create(name);
+
+    if (s->defs()) {
+        std::stringstream ss;
+        ss << "Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
+        throw std::runtime_error(ss.str());
+    }
+
+    insert_suite(s, std::numeric_limits<std::size_t>::max());
+
+    Ecf::incr_modify_change_no();
+    client_suite_mgr_.suite_added_in_defs(s);
+
+    return s;
 }
 
 void Defs::addSuite(const suite_ptr& s, size_t position) {
@@ -420,15 +431,40 @@ void Defs::addSuite(const suite_ptr& s, size_t position) {
         ss << "Add Suite failed: A Suite of name '" << s->name() << "' already exists";
         throw std::runtime_error(ss.str());
     }
-    add_suite_only(s, position);
-}
 
-void Defs::add_suite_only(const suite_ptr& s, size_t position) {
     if (s->defs()) {
         std::stringstream ss;
-        ss << "Add Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
+        ss << "Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
         throw std::runtime_error(ss.str());
     }
+
+    insert_suite(s, position);
+
+    Ecf::incr_modify_change_no();
+    client_suite_mgr_.suite_added_in_defs(s);
+}
+
+void Defs::placeSuite(const suite_ptr& s, size_t position) {
+    if (findSuite(s->name()).get()) {
+        std::stringstream ss;
+        ss << "Place Suite failed: A Suite of name '" << s->name() << "' already exists";
+        throw std::runtime_error(ss.str());
+    }
+
+    if (s->defs()) {
+        std::stringstream ss;
+        ss << "Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
+        throw std::runtime_error(ss.str());
+    }
+
+    insert_suite(s, position);
+
+    Ecf::incr_modify_change_no();
+    client_suite_mgr_.suite_replaced_in_defs(s);
+}
+
+void Defs::insert_suite(const suite_ptr& s, size_t position) {
+    assert(!s->defs()); // the suite to be inserted should still not have an associated defs
 
     s->set_defs(this);
     if (position >= suiteVec_.size()) {
@@ -437,8 +473,6 @@ void Defs::add_suite_only(const suite_ptr& s, size_t position) {
     else {
         suiteVec_.insert(suiteVec_.begin() + position, s);
     }
-    Ecf::incr_modify_change_no();
-    client_suite_mgr_.suite_added_in_defs(s);
 }
 
 suite_ptr Defs::removeSuite(suite_ptr s) {
@@ -502,6 +536,17 @@ bool Defs::addChild(const node_ptr& child, size_t position) {
     // *** otherwise the reference counts will get messed up.
     // If the suite of the same exists, it is deleted first
     addSuite(std::dynamic_pointer_cast<Suite>(child), position);
+    return true;
+}
+
+bool Defs::placeChild(const node_ptr& child, size_t position) {
+    LOG_ASSERT(child.get(), "");
+    LOG_ASSERT(child->isSuite(), "");
+
+    // *** CANT construct shared_ptr from a raw pointer, must use dynamic_pointer_cast,
+    // *** otherwise the reference counts will get messed up.
+    // If the suite of the same exists, it is deleted first
+    placeSuite(std::dynamic_pointer_cast<Suite>(child), position);
     return true;
 }
 
@@ -1321,16 +1366,18 @@ node_ptr Defs::replaceChild(const std::string& path,
         // transfer ownership to the server
         bool addOk                  = false;
         node_ptr client_node_to_add = clientNode->remove();
-        if (parentNodeOnServer)
+        if (parentNodeOnServer) {
             addOk = parentNodeOnServer->addChild(client_node_to_add, child_pos);
-        else
-            addOk = addChild(client_node_to_add, child_pos);
+        }
+        else {
+            addOk = placeChild(client_node_to_add, child_pos); // this is the second part of replacing a suite!
+        }
         LOG_ASSERT(addOk, "");
 
-        // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been
-        // begun. This can cause assert, because begin time attributes assumes that calendar has been initialised. This
-        // is not the case for client ASSERT failure: !c.suiteTime().is_special() at ../core/src/TimeSeries.cpp:526
-        // init has not been called on calendar. TimeSeries::duration ECFLOW-1612
+        // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have
+        // been begun. This can cause assert, because begin time attributes assumes that calendar has been
+        // initialised. This is not the case for client ASSERT failure: !c.suiteTime().is_special() at
+        // ../core/src/TimeSeries.cpp:526 init has not been called on calendar. TimeSeries::duration ECFLOW-1612
         if (begin_node)
             client_node_to_add->begin();
 
@@ -1403,10 +1450,10 @@ node_ptr Defs::replaceChild(const std::string& path,
     bool addOk                  = server_parent->addChild(client_node_to_add, client_child_pos);
     LOG_ASSERT(addOk, "");
 
-    // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been begun.
-    // This can cause assert, because begin time attributes assumes that calendar has been initialised. This is not the
-    // case for client ASSERT failure: !c.suiteTime().is_special() at ../core/src/TimeSeries.cpp:526 init has not been
-    // called on calendar. TimeSeries::duration ECFLOW-1612
+    // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been
+    // begun. This can cause assert, because begin time attributes assumes that calendar has been initialised. This
+    // is not the case for client ASSERT failure: !c.suiteTime().is_special() at ../core/src/TimeSeries.cpp:526 init
+    // has not been called on calendar. TimeSeries::duration ECFLOW-1612
     if (begin_node)
         client_node_to_add->begin();
 
