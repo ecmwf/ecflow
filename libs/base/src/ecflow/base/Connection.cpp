@@ -15,34 +15,33 @@
 
 connection::~connection() {
 #ifdef DEBUG_CONNECTION
-    if (Ecf::server())
-        std::cout << "SERVER: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
-    else
-        std::cout << "CLIENT: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
+    auto is_socket_open = socket_.is_open();
+    auto location       = Ecf::server() ? "SERVER" : "CLIENT";
+    std::cout << location << ": Connection::~connection socket_.is_open() = " << is_socket_open << "\n\n";
 #endif
 }
 
 connection::connection(boost::asio::io_context& io) : socket_(io) {
 #ifdef DEBUG_CONNECTION
-    if (Ecf::server())
-        std::cout << "SERVER: Connection::connection\n";
-    else
-        std::cout << "CLIENT: Connection::connection\n";
+    auto location = Ecf::server() ? "SERVER" : "CLIENT";
+    std::cout << location << ": Connection::connection\n";
 #endif
 }
 
 void connection::log_error(const char* msg) {
     const char* in_context = ", in client";
-    if (Ecf::server())
+    if (Ecf::server()) {
         in_context = ", in server";
+    }
     ecf::LogToCout logToCout;
     LOG(ecf::Log::ERR, msg << in_context);
 }
 
 void connection::log_archive_error(const char* msg, const std::exception& ae, const std::string& data) {
     const char* in_context = ", in client";
-    if (Ecf::server())
+    if (Ecf::server()) {
         in_context = ", in server";
+    }
     ecf::LogToCout logToCout;
     LOG(ecf::Log::ERR, msg << ae.what() << in_context << " data:\n" << data);
 }
