@@ -83,12 +83,15 @@ public:
     void remove_suite(const std::string&);
     bool remove_suite(suite_ptr);
 
-    /// A new suite is being added in the definition.
+    /// A new suite has been added to the definition.
     /// If it was already registered update the suite ptr
     /// If auto add new suite enabled,register it
     void suite_added_in_defs(suite_ptr);
 
-    /// The suite is being deleted, update modify_change_no. So we do a full sync
+    /// A suite has been updated in the definition.
+    void suite_replaced_in_defs(suite_ptr);
+
+    /// The suite has been deleted, update modify_change_no. So we do a full sync
     /// RESETs suite ptr. Deleted suites are *NOT* automatically removed
     void suite_deleted_in_defs(suite_ptr);
 

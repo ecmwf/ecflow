@@ -144,6 +144,7 @@ public:
     /// Add a suite to the definition, will throw std::runtime_error if duplicate
     suite_ptr add_suite(const std::string& name);
     void addSuite(const suite_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
+    void placeSuite(const suite_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
     size_t child_position(const Node*) const;
 
     /// Externs refer to Nodes or, variable, events, meter, repeat, or generated variable
@@ -349,12 +350,45 @@ private:
     void write_state(std::string&) const;
     void collate_defs_changes_only(DefsDelta&) const;
     void setupDefaultEnv();
-    void add_suite_only(const suite_ptr&, size_t position);
+
+    /**
+     * @brief Insert a suite at the specified position in the suite vector of the Defs
+     *
+     * This function inserts the given suite at the requested position. If position is greater than the
+     * current size of the suites vector the given suite is added to the end of the vector, otherwise
+     * at the requested position and all all suites after the position will be shifted.
+     *
+     * Note: This function does not check if the suite already exists in the defs,
+     *       it is the responsibility of the caller to ensure this.
+     *
+     * @param position the position to insert the suite at
+     */
+    void insert_suite(const suite_ptr&, size_t position);
 
     /// Removes the suite, from defs returned as suite_ptr, asserts if suite does not exist
     suite_ptr removeSuite(suite_ptr);
     node_ptr removeChild(Node*);
+
+    /**
+     * @brief Add a new suite to the defs at the specified position in the suite vector of the Defs
+     *
+     * This function inserts the given suite at the requested position, and notifies ClientSuiteMgr of a new suite.
+     *
+     * @param position the position to insert the suite at
+     * @return true if the suite was successfully added, false otherwise
+     */
     bool addChild(const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
+
+    /**
+     * @brief Add a suite to the defs at the specified position in the suite vector of the Defs
+     *
+     * This function acts the 2nd part of the "remove/add" approach to implement ::replaceChild.
+     * It inserts the given suite at the requested position, but does *not* notify ClientSuiteMgr!
+     *
+     * @param position the position to insert the suite at
+     * @return true if the suite was successfully placed, false otherwise
+     */
+    bool placeChild(const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
     friend class Node;
 
     /// For use by python interface,
