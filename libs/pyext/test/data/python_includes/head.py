@@ -39,6 +39,8 @@ class Client(object):
         print ("Creating Client")
         self.ci = ecflow.Client()
         self.ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
+        if %ECF_USING_HTTP_BACKEND%:
+            self.ci.enable_http()
         self.ci.set_child_pid(os.getpid())
         self.ci.set_child_path("%ECF_NAME%")
         self.ci.set_child_password("%ECF_PASS%")

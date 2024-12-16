@@ -13,12 +13,13 @@
 
 #include "ecflow/base/Connection.hpp"
 #include "ecflow/server/TcpBaseServer.hpp"
-class Server;
+
+class BaseServer;
 
 class TcpServer : public TcpBaseServer {
 public:
     /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-    explicit TcpServer(Server*, boost::asio::io_context& io, ServerEnvironment&);
+    explicit TcpServer(BaseServer*, boost::asio::io_context& io, ServerEnvironment&);
     ~TcpServer() = default;
 
 private:
