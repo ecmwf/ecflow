@@ -13,6 +13,8 @@
 #include <stdexcept>
 
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -71,6 +73,14 @@ bool MoveCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t MoveCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t MoveCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void MoveCmd::print(std::string& os) const {

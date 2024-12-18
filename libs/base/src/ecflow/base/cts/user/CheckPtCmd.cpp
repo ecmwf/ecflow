@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -41,6 +43,14 @@ bool CheckPtCmd::equals(ClientToServerCmd* rhs) const {
     if (check_pt_save_time_alarm_ != the_rhs->check_pt_save_time_alarm())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t CheckPtCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CheckPtCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 bool CheckPtCmd::isWrite() const {
