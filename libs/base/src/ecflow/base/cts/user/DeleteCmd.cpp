@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -53,6 +55,14 @@ bool DeleteCmd::equals(ClientToServerCmd* rhs) const {
     if (force_ != the_rhs->force())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t DeleteCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t DeleteCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* DeleteCmd::theArg() const {
@@ -110,9 +120,9 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-bool DeleteCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool DeleteCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* theNodeToDelete) {
     vector<Task*> taskVec;

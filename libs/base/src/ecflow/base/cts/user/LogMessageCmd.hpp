@@ -25,6 +25,9 @@ public:
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+
     const char* theArg() const override { return arg(); }
     void addOption(boost::program_options::options_description& desc) const override;
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
