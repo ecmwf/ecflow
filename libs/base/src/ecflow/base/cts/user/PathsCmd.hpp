@@ -38,13 +38,16 @@ public:
     bool equals(ClientToServerCmd*) const override;
     bool isWrite() const override;
 
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+
     const char* theArg() const override;
     void addOption(boost::program_options::options_description& desc) const override;
     void create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const override;
 
 private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
-    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
     void cleanup() override { std::vector<std::string>().swap(paths_); } /// run in the server, after handlerequest
 
     void my_print(std::string& os, const std::vector<std::string>& paths) const;

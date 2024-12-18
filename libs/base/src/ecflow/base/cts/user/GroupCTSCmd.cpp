@@ -16,6 +16,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/ClientOptionsParser.hpp"
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
@@ -156,6 +158,13 @@ bool GroupCTSCmd::cmd_updates_defs() const {
     return false;
 }
 
+void GroupCTSCmd::set_identity(const ecf::Identity& identity) {
+    this->ClientToServerCmd::set_identity(identity);
+    for (auto subCmd : cmdVec_) {
+        subCmd->set_identity(identity);
+    }
+}
+
 bool GroupCTSCmd::get_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
         if (subCmd->get_cmd())
@@ -240,6 +249,14 @@ bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const {
     return UserCmd::equals(rhs);
 }
 
+ecf::authentication_t GroupCTSCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t GroupCTSCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
+}
+
 void GroupCTSCmd::addChild(Cmd_ptr childCmd) {
     assert(childCmd.get()); // Dont add NULL children
     cmdVec_.push_back(childCmd);
@@ -281,29 +298,29 @@ void GroupCTSCmd::cleanup() {
     }
 }
 
-bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const {
-    // Can only run Group cmd if all child commands authenticate
-    size_t cmd_vec_size = cmdVec_.size();
-    for (size_t i = 0; i < cmd_vec_size; i++) {
-        if (!cmdVec_[i]->authenticate(as, errorMsg)) {
-
-            // Log authentication failure:
-            std::string ss;
-            ss += "GroupCTSCmd::authenticate failed: for ";
-            cmdVec_[i]->print(ss);
-            std::stringstream stream;
-            stream << errorMsg;
-            ss += stream.str();
-            log(Log::ERR, ss); // will automatically add end of line
-
-#ifdef DEBUG_GROUP_CMD
-            std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
-#endif
-            return false;
-        }
-    }
-    return true;
-}
+// bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const {
+//     // Can only run Group cmd if all child commands authenticate
+//     size_t cmd_vec_size = cmdVec_.size();
+//     for (size_t i = 0; i < cmd_vec_size; i++) {
+//         if (!cmdVec_[i]->authenticate(as, errorMsg)) {
+//
+//             // Log authentication failure:
+//             std::string ss;
+//             ss += "GroupCTSCmd::authenticate failed: for ";
+//             cmdVec_[i]->print(ss);
+//             std::stringstream stream;
+//             stream << errorMsg;
+//             ss += stream.str();
+//             log(Log::ERR, ss); // will automatically add end of line
+//
+// #ifdef DEBUG_GROUP_CMD
+//             std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
+// #endif
+//             return false;
+//         }
+//     }
+//     return true;
+// }
 
 // in the server
 void GroupCTSCmd::set_client_handle(int client_handle) const {
@@ -332,13 +349,21 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
         cmdVec_[i]->print(ret);
         cout << ret << "\n"; // std::cout << "\n";
 #endif
+
+        std::cout << "  GroupCTSCmd::doHandleRequest calling [" << i << "]\n";
         // Let child know about Group command.
         // Only used by ClientHandleCmd and DeleteCmd to transfer client_handle to the sync cmd, in *this* group
         cmdVec_[i]->set_group_cmd(this);
 
         STC_Cmd_ptr theReturnCmd;
         try {
-            theReturnCmd = cmdVec_[i]->doHandleRequest(as);
+            auto& cmd = cmdVec_[i];
+
+            if (auto valid = cmd->check_preconditions(as, theReturnCmd); valid) {
+                // If command preconditions are valid, we just handle the request as usual
+                theReturnCmd = cmdVec_[i]->doHandleRequest(as);
+            }
+            // Otherwise, theReturnCmd has been set in the process of checking the precondictions
         }
         catch (std::exception& e) {
             cmdVec_[i]->cleanup(); // recover memory asap, important when cmd has a large number of paths.

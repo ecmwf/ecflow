@@ -19,13 +19,16 @@ public:
     OrderNodeCmd(const std::string& absNodepath, NOrder::Order op) : absNodepath_(absNodepath), option_(op) {}
     OrderNodeCmd() = default;
 
-    const std::string& absNodepath() const { return absNodepath_; }
+    const std::string& absNodePath() const { return absNodepath_; }
     NOrder::Order option() const { return option_; }
 
     bool isWrite() const override { return true; }
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
+
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
 
     const char* theArg() const override { return arg(); }
     void addOption(boost::program_options::options_description& desc) const override;
@@ -36,7 +39,7 @@ private:
     static const char* desc(); // The description of the argument as provided to user
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
-    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
 private:
     std::string absNodepath_;
