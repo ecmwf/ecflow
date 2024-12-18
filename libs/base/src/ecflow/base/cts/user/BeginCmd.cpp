@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -48,6 +50,14 @@ bool BeginCmd::equals(ClientToServerCmd* rhs) const {
     if (force_ != the_rhs->force())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t BeginCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t BeginCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {

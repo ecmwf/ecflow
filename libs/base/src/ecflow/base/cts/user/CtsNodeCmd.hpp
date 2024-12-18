@@ -40,6 +40,9 @@ public:
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+
     PrintStyle::Type_t show_style() const override;
 
     int timeout() const override;
@@ -54,7 +57,7 @@ public:
 
 private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
-    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
 private:
     Api api_{NO_CMD};
