@@ -14,6 +14,8 @@
 #include <stdexcept>
 
 #include "ecflow/base/AbstractClientEnv.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 using namespace ecf;
@@ -25,6 +27,14 @@ namespace po = boost::program_options;
 
 bool ShowCmd::equals(ClientToServerCmd* rhs) const {
     return (dynamic_cast<ShowCmd*>(rhs)) ? UserCmd::equals(rhs) : false;
+}
+
+ecf::authentication_t ShowCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ShowCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void ShowCmd::print(std::string& os) const {

@@ -57,6 +57,9 @@ public:
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
 
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+
     bool isWrite() const override;
     bool cmd_updates_defs() const override;
     bool terminate_cmd() const override { return api_ == TERMINATE_SERVER; }
