@@ -171,7 +171,7 @@
            - Change a :term:`label`
            - fob
 
-      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` ,:term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.                                         
+      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` , :term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.
        
       
    clock
