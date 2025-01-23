@@ -27,6 +27,10 @@
 
 class Client {
 public:
+    using resolver_t           = boost::asio::ip::tcp::resolver;
+    using endpoints_set_t      = resolver_t::results_type;
+    using endpoints_iterator_t = endpoints_set_t::iterator;
+
     /// Constructor starts the asynchronous connect operation.
     Client(boost::asio::io_context& io,
            Cmd_ptr cmd_ptr,
@@ -41,16 +45,16 @@ public:
     bool handle_server_response(ServerReply&, bool debug) const;
 
 private:
-    void start(boost::asio::ip::tcp::resolver::iterator);
+    void start(endpoints_iterator_t endpoint_iter);
     void stop();
     void check_deadline();
 
-    bool start_connect(boost::asio::ip::tcp::resolver::iterator);
+    bool start_connect(endpoints_iterator_t endpoint_iter);
     void start_write();
     void start_read();
 
     /// Handle completion of a connect operation.
-    void handle_connect(const boost::system::error_code& e, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
+    void handle_connect(const boost::system::error_code& e, endpoints_iterator_t endpoint_iter);
 
     /// Handle completion of a read operation.
     void handle_read(const boost::system::error_code& e);

@@ -135,7 +135,7 @@ void TcpBaseServer::terminate() {
         cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
 
     // Post a call to the stop function so that Server::stop() is safe to call from any thread.
-    io_.post([this]() { handle_terminate(); });
+    boost::asio::post(io_, [this]() { handle_terminate(); });
 }
 
 void TcpBaseServer::handle_terminate() {
