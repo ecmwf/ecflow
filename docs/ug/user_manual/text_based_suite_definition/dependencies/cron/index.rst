@@ -6,8 +6,15 @@ cron
 A :term:`cron` defines a time dependency for a :term:`node`, similar to :term:`time`,
 but one that will be repeated indefinitely.
 
-When a node with a :term:`cron` completes it is :term:`queued` immediately, meaning that the suite
-will never complete, and the output will not be not directly accessible through :term:`ecflow_ui`
+.. warning::
+
+    A suite holding a node with a :term:`cron` attribute will **never** reach status *complete*.
+
+    A node with a :term:`cron` attribute is immediately set to :term:`queued` after completion.
+    In practice, this means that nodes containing a :term:`cron` attribute, and enveloping suites,
+    do not reach status *complete*, and their output is not be directly accessible through :term:`ecflow_ui`.
+
+    It is **highly discouraged** to create completion :term:`triggers <trigger>` on nodes/suites containing :term:`cron` attributes.
 
 If the task aborts, the :term:`ecflow_server` will not schedule it again.
 
