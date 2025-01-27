@@ -1,5 +1,7 @@
 .. _rest_api:
 
+REST API
+////////
 
 ..
    This reStructured Text file uses the following convention:
@@ -9,10 +11,6 @@
      - for subsections
      ^ for subsubsections
      " for paragraphs
-
-
-REST API
-//////////////////////
 
 .. caution:: 
   ecFlow's REST API is experimental, and its details are subject to change. The documentation reflects its current operation.
