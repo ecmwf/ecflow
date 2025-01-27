@@ -1,0 +1,10 @@
+suite repeat_datetime
+  task t1
+    repeat datetime timestamp 20000101T000000 20000105T000000
+  task t2
+    repeat datetime timestamp 20000101T000000 20000105T000000 12
+  task t3
+    repeat datetime timestamp 20000101T000000 20000105T000000 12:00
+  task t4
+    repeat datetime timestamp 20000101T000000 20000105T000000 12:00:00
+endsuite

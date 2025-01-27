@@ -148,6 +148,7 @@ public:
     long last_valid_value_plus(int value) const override;
 
     void delta(int d) { delta_ = d; }
+    int delta() const { return delta_; }
     bool operator==(const RepeatDate& rhs) const;
     bool operator<(const RepeatDate& rhs) const { return name() < rhs.name(); }
 
@@ -338,6 +339,8 @@ public:
     std::string next_value_as_string() const override;
     std::string prev_value_as_string() const override;
 
+    const std::vector<int>& values() const { return list_; }
+
     void setToLastValue() override;
     void reset() override;
     void increment() override;
@@ -389,6 +392,7 @@ public:
     long value() const override { return value_; }
     long index_or_value() const override { return value_; }
     long last_valid_value() const override;
+    int delta() const { return delta_; }
 
     RepeatInteger* clone() const override { return new RepeatInteger(name_, start_, end_, delta_, value_); }
     bool compare(RepeatBase*) const override;
@@ -449,6 +453,8 @@ public:
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override;
 
+    const std::vector<std::string>& values() const { return theEnums_; }
+
     RepeatBase* clone() const override { return new RepeatEnumerated(name_, theEnums_, currentIndex_); }
     bool compare(RepeatBase*) const override;
     bool valid() const override { return (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theEnums_.size())); }
@@ -508,6 +514,8 @@ public:
     std::string value_as_string(int index) const override;
     std::string next_value_as_string() const override;
     std::string prev_value_as_string() const override;
+
+    const std::vector<std::string>& values() const { return theStrings_; }
 
     void setToLastValue() override;
     void reset() override;
