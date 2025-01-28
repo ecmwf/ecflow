@@ -228,7 +228,7 @@ void HttpServer::handle_terminate(bool terminate) {
             std::cout << "   <-- HttpServer exiting server via terminate()" << std::endl;
         }
 
-        io_.post([this]() {
+        boost::asio::post(io_, [this]() {
             server_->handle_terminate();
             acceptor_.close();
             io_.stop();
