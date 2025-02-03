@@ -456,6 +456,7 @@ public:
     void replace_meters(const std::vector<Meter>& meters);
     void replace_events(const std::vector<Event>& events);
 
+    std::vector<Variable> get_all_inherited_variables() const;
     std::vector<Variable> get_all_generated_variables() const;
 
     // Add functions: ===============================================================

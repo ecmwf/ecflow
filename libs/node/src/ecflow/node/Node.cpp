@@ -2652,6 +2652,24 @@ size_t Node::position() const {
     return std::numeric_limits<std::size_t>::max();
 }
 
+std::vector<Variable> Node::get_all_inherited_variables() const {
+    std::vector<Variable> all;
+    const Node* current = this->parent();
+
+    std::set<std::string> cache;
+    while (current) {
+        for (const Variable& var : current->variables()) {
+            if (auto found = std::find(std::begin(cache), std::end(cache), var.name()); found == std::end(cache)) {
+                cache.insert(var.name());
+                all.push_back(var);
+            }
+        }
+        current = current->parent();
+    }
+
+    return all;
+}
+
 std::vector<Variable> Node::get_all_generated_variables() const {
     std::vector<Variable> all;
     const Node* current = this;

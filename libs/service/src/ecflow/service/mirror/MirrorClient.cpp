@@ -96,6 +96,7 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
 
         // ** Node Variables
         data.regular_variables   = node->variables();
+        data.inherited_variables = node->get_all_inherited_variables();
         data.generated_variables = node->get_all_generated_variables();
 
         // Filter out the Definitions structural variables (SUITE, to avoid conflicts with "local" side definitions
