@@ -95,9 +95,9 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
         data.state = node->state();
 
         // ** Node Variables
-        data.regular_variables   = node->variables();
-        data.inherited_variables = node->get_all_inherited_variables();
-        data.generated_variables = node->get_all_generated_variables();
+        data.regular_variables   = ecf::variables(*node);
+        data.inherited_variables = ecf::inherited_variables(*node);
+        data.generated_variables = ecf::generated_variables(*node);
 
         // Filter out the Definitions structural variables (SUITE, to avoid conflicts with "local" side definitions
         data.generated_variables.erase(
