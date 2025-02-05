@@ -16,6 +16,9 @@ but one that will be repeated indefinitely.
 
     It is **highly discouraged** to create completion :term:`triggers <trigger>` on nodes/suites containing :term:`cron` attributes.
 
+Consider combining the cron attribute together with event and complete attributes to avoid the suite never completing
+-- see more about this usage pattern :ref:`here <cookbook-acquisition_task_pattern>`.
+
 If the task aborts, the :term:`ecflow_server` will not schedule it again.
 
 A :term:`cron` can be parameterised as follows:
