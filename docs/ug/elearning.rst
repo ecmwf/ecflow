@@ -3,4 +3,4 @@
 eLearning
 ================
 
-The ecFlow eLearning material is available `here <https://www.ecmwf.int/assets/elearning/ecflow/ecflow1/story_html5.html>`_.
+The ecFlow eLearning material is available `here <https://learning.ecmwf.int/course/view.php?id=35>`_.
