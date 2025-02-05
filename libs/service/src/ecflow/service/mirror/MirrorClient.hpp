@@ -22,11 +22,19 @@ namespace ecf::service::mirror {
 
 struct MirrorData
 {
-    MirrorData() : state{0}, regular_variables{}, generated_variables{}, labels{}, meters{}, events{} {}
+    MirrorData()
+        : state{0},
+          regular_variables{},
+          inherited_variables{},
+          generated_variables{},
+          labels{},
+          meters{},
+          events{} {}
 
     explicit MirrorData(int state)
         : state{state},
           regular_variables{},
+          inherited_variables{},
           generated_variables{},
           labels{},
           meters{},
@@ -35,6 +43,7 @@ struct MirrorData
     int state;
 
     std::vector<Variable> regular_variables;
+    std::vector<Variable> inherited_variables;
     std::vector<Variable> generated_variables;
 
     std::vector<Label> labels;
