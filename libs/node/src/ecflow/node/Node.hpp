@@ -173,7 +173,7 @@ public:
     {
         enum Requeue_t { REPEAT_INCREMENT = 1, TIME = 2, FULL = 3 };
         Requeue_args() = default;
-        explicit Requeue_args(Requeue_t r_t) : requeue_t(r_t){};
+        explicit Requeue_args(Requeue_t r_t) : requeue_t(r_t) {};
         Requeue_args(Requeue_t r_t,
                      bool resetRepeats,
                      int clear_suspended_in_child_nodes,
@@ -455,8 +455,6 @@ public:
     void replace_labels(const std::vector<Label>& labels);
     void replace_meters(const std::vector<Meter>& meters);
     void replace_events(const std::vector<Event>& events);
-
-    std::vector<Variable> get_all_generated_variables() const;
 
     // Add functions: ===============================================================
     void addVerify(const VerifyAttr&); // for testing and verification Can throw std::runtime_error
@@ -964,5 +962,35 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
+
+namespace ecf {
+
+/**
+ * Retrieve the set of (regular) variables of the given node.
+ *
+ * @param node The node being queried
+ * @return The set of variables
+ */
+inline const std::vector<Variable>& variables(const Node& node) {
+    return node.variables();
+}
+
+/**
+ * Retrieve the set of inherited variables of the given node.
+ *
+ * @param node The node being queried
+ * @return The set of variables
+ */
+std::vector<Variable> inherited_variables(const Node& node);
+
+/**
+ * Retrieve the set of generated (including inherited) variables of the given node.
+ *
+ * @param node The node being queried
+ * @return The set of variables
+ */
+std::vector<Variable> generated_variables(const Node& node);
+
+} // namespace ecf
 
 #endif /* ecflow_node_Node_HPP */

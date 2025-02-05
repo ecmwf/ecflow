@@ -2652,18 +2652,6 @@ size_t Node::position() const {
     return std::numeric_limits<std::size_t>::max();
 }
 
-std::vector<Variable> Node::get_all_generated_variables() const {
-    std::vector<Variable> all;
-    const Node* current = this;
-
-    while (current) {
-        current->gen_variables(all);
-        current = current->parent();
-    }
-
-    return all;
-}
-
 void Node::gen_variables(std::vector<Variable>& vec) const {
     repeat_.gen_variables(vec); // if repeat_ is empty vec is unchanged
 }
@@ -2938,6 +2926,39 @@ std::vector<GenericAttr>::const_iterator Node::generic_end() const {
         return misc_attrs_->generic_end();
     return generics_.end();
 }
+
+namespace ecf {
+std::vector<Variable> inherited_variables(const Node& node) {
+    std::vector<Variable> all;
+    const Node* current = &node;
+
+    std::set<std::string> cache;
+    while (current) {
+        for (const Variable& var : current->variables()) {
+            if (auto found = std::find(std::begin(cache), std::end(cache), var.name()); found == std::end(cache)) {
+                cache.insert(var.name());
+                all.push_back(var);
+            }
+        }
+        current = current->parent();
+    }
+
+    return all;
+}
+
+std::vector<Variable> generated_variables(const Node& node) {
+    std::vector<Variable> all;
+    const Node* current = &node;
+
+    while (current) {
+        current->gen_variables(all);
+        current = current->parent();
+    }
+
+    return all;
+}
+
+} // namespace ecf
 
 template <class Archive>
 void Node::serialize(Archive& ar, std::uint32_t const version) {
