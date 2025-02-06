@@ -60,14 +60,14 @@ SslClient::SslClient(boost::asio::io_context& io,
 
     // Host name resolution is performed using a resolver, where host and service
     // names(or ports) are looked up and converted into one or more end points
-    boost::asio::ip::tcp::resolver resolver(io);
-    boost::asio::ip::tcp::resolver::query query(host_, port_);
-    boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+    auto resolver           = resolver_t(io);
+    auto results            = resolver.resolve(host_, port_);
+    auto endpoints_iterator = results.begin();
 
     // The list of end points obtained could contain both IPv4 and IPv6 end points,
     // so a program may try each of them until it finds one that works.
     // This keeps the SslClient program independent of a specific IP version.
-    start(endpoint_iterator);
+    start(endpoints_iterator);
 }
 
 SslClient::~SslClient() {
@@ -82,9 +82,9 @@ SslClient::~SslClient() {
 // This function terminates all the actors to shut down the connection. It
 // may be called by the user of the client class, or by the class itself in
 // response to graceful termination or an unrecoverable error.
-void SslClient::start(boost::asio::ip::tcp::resolver::iterator endpoint_iter) {
+void SslClient::start(endpoints_iterator_t endpoints_iterator) {
     // Start the connect actor.
-    start_connect(endpoint_iter);
+    start_connect(endpoints_iterator);
 
     // Start the deadline actor. You will note that we're not setting any
     // particular deadline here. Instead, the connect and input actors will
@@ -92,8 +92,8 @@ void SslClient::start(boost::asio::ip::tcp::resolver::iterator endpoint_iter) {
     deadline_.async_wait([this](const boost::system::error_code&) { check_deadline(); });
 }
 
-bool SslClient::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iterator) {
-    if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator()) {
+bool SslClient::start_connect(endpoints_iterator_t endpoints_iterator) {
+    if (endpoints_iterator != endpoints_iterator_t()) {
 #ifdef DEBUG_CLIENT
         std::cout << "   SslClient::start_connect: Trying " << endpoint_iterator->endpoint() << "..." << std::endl;
 #endif
@@ -105,10 +105,10 @@ bool SslClient::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_
         // Set a deadline for the connect operation.
         deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
 
-        boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
+        boost::asio::ip::tcp::endpoint endpoint = *endpoints_iterator;
         connection_.socket_ll().async_connect(endpoint,
-                                              [this, endpoint_iterator](const boost::system::error_code& error) {
-                                                  this->handle_connect(error, endpoint_iterator);
+                                              [this, endpoints_iterator](const boost::system::error_code& error) {
+                                                  this->handle_connect(error, endpoints_iterator);
                                               });
     }
     else {
@@ -118,8 +118,7 @@ bool SslClient::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_
     return true;
 }
 
-void SslClient::handle_connect(const boost::system::error_code& e,
-                               boost::asio::ip::tcp::resolver::iterator endpoint_iterator) {
+void SslClient::handle_connect(const boost::system::error_code& e, endpoints_iterator_t endpoints_iterator) {
 #ifdef DEBUG_CLIENT
     std::cout << "   SslClient::handle_connect stopped_=" << stopped_ << std::endl;
 #endif
@@ -135,7 +134,7 @@ void SslClient::handle_connect(const boost::system::error_code& e,
         std::cout << "   SslClient::handle_connect: *Connect timeout*:  Trying next end point" << std::endl;
 #endif
         // Try the next available end point.
-        if (!start_connect(++endpoint_iterator)) {
+        if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points, An error occurred
             stop();
             std::stringstream ss;
@@ -160,7 +159,7 @@ void SslClient::handle_connect(const boost::system::error_code& e,
         connection_.socket_ll().close();
 
         // Try the next end point.
-        if (!start_connect(++endpoint_iterator)) {
+        if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points. An error occurred.
             stop();
             std::stringstream ss;

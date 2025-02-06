@@ -2000,7 +2000,9 @@
          
       - Generated variables: These are generated within the :term:`suite definition` node tree during :term:`job creation` and are available for use in the :term:`job file`.
          
-      Variables can be referenced in :term:`trigger` and :term:`complete expression`\ s . The value part of the variable should be convertible to an integer otherwise a default value of 0 is used.
+      Variables can be referenced in :term:`trigger` and :term:`complete expression`\ s . When used as part of a :term:`trigger` or :term:`complete expression`, the value of the
+      variable should be convertible to an integer (n.b. floating point values are allowed, but will be truncated).
+      It is important to notice that, when evaluating a :term:`trigger` or :term:`complete expression`, the default value 0 will be used for any variable with a non-numerical value.
       
       See also:
 

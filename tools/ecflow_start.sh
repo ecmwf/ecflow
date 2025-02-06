@@ -19,7 +19,7 @@
 ###        Will start the ecflow_server in the background, using user id
 ###        to make a unique port number.
 
-if [[ $(hostname) = a[a-d]?-*.bullx ]]; then
+if [[ $(hostname) = a[a-d]?-*.bullx && -z ${ECFLOW_ALLOW_LOCAL+x} ]]; then
     echo "To use an ecFlow server on the Atos HPC at ECMWF, please read instructions: https://confluence.ecmwf.int/display/UDOC/HPC2020%3A+Using+ecFlow"
     exit 0
 fi

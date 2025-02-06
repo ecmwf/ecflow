@@ -117,6 +117,9 @@ void MirrorAttr::mirror() {
 
                                      // ** Node Variables
                                      std::vector<Variable> all_variables = notification.data().regular_variables;
+                                     for (const auto& variable : notification.data().inherited_variables) {
+                                         all_variables.push_back(variable);
+                                     }
                                      for (const auto& variable : notification.data().generated_variables) {
                                          all_variables.push_back(variable);
                                      }

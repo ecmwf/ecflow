@@ -24,9 +24,11 @@ namespace internal_detail {
  */
 class BaseUDPConnection {
 public:
-    BaseUDPConnection(boost::asio::io_context& io,
-                      boost::asio::ip::udp::endpoint server_endpoint,
-                      const std::string& request)
+    using resolver_t      = boost::asio::ip::udp::resolver;
+    using endpoints_set_t = resolver_t::results_type;
+    using endpoint_t      = endpoints_set_t::endpoint_type;
+
+    BaseUDPConnection(boost::asio::io_context& io, endpoint_t server_endpoint, const std::string& request)
         : socket_(io),
           server_endpoint_(std::move(server_endpoint)) {
         // Open socket connection
@@ -70,14 +72,17 @@ public:
     using port_t     = std::string;
     using data_t     = std::string;
 
-public:
+    using resolver_t           = internal_detail::BaseUDPConnection::resolver_t;
+    using endpoints_set_t      = resolver_t::results_type;
+    using endpoints_iterator_t = endpoints_set_t::iterator;
+
     BaseUDPClient(hostname_t host, port_t port) : host_{std::move(host)}, port_{std::move(port)} {}
 
     void send(const data_t& data) {
         boost::asio::io_context io;
-        boost::asio::ip::udp::resolver resolver(io);
-        boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), host_, port_);
-        boost::asio::ip::udp::endpoint server_endpoint = *resolver.resolve(query);
+        auto resolver        = resolver_t(io);
+        auto results         = resolver.resolve(boost::asio::ip::udp::v4(), host_, port_);
+        auto server_endpoint = std::begin(results)->endpoint();
 
         internal_detail::BaseUDPConnection connection(io, server_endpoint, data);
         io.run();
