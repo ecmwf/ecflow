@@ -6,6 +6,30 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+
+Version 5.13.7
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2025-02-06
+
+General
+-------
+
+- **Improvement** allow requesting explicit execution of ecflow_start.sh :jiraissue:`ECFLOW-1991`
+- **Improvement** enable mirror of non-generated inherited variables :jiraissue:`ECFLOW-1999`
+- **Fix** replace use of deprecated functions to build with Boost 1.87 :jiraissue:`ECFLOW-1997`
+
+ecFlow UI
+---------
+
+- **Fix** correct handling of Repeat DateTime values :jiraissue:`ECFLOW-1993`
+- **Fix** correct selection in suite filter after Suite replacement :jiraissue:`ECFLOW-1994`
+
+Documentation
+-------------
+
+- **Improvement** clarify use of attributes date and cron :jiraissue:`ECFLOW-1996`
+
 Version 5.13.6
 ==============
 
