@@ -12,7 +12,7 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
 **Contents**
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
     
    intro
    print_all_states

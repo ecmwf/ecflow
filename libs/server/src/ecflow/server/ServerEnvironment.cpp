@@ -546,62 +546,30 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         // read the environment from the config file.
         // **** Port *must* be read before log file, and check pt files
         po::options_description config_file_options("Configuration");
-        config_file_options.add_options()(
-            "ECF_HOME", po::value<std::string>(&ecfHome_)->default_value("."), "ECF_HOME, the home for all ECF files")(
-            "ECF_PORT",
-            po::value<int>(&serverPort_)->default_value(3141),
-            "The port number. Clients must use same port.")(
-            "ECF_CHECK",
-            po::value<std::string>(&ecf_checkpt_file_)->default_value(Ecf::CHECKPT()),
-            "Check point file name")(
-            "ECF_CHECKOLD",
-            po::value<std::string>(&ecf_backup_checkpt_file_)->default_value(Ecf::BACKUP_CHECKPT()),
-            "Backup checkpoint file name")(
-            "ECF_LOG", po::value<std::string>(&log_file_name)->default_value(Ecf::LOG_FILE()), "Log file name")(
-            "ECF_CHECKINTERVAL",
-            po::value<int>(&checkPtInterval_)->default_value(CheckPt::default_interval()),
-            "The interval in seconds to save check point file")(
-            "ECF_INTERVAL",
-            po::value<int>(&submitJobsInterval_)->default_value(defaultSubmitJobsInterval),
-            "Check time dependencies and submit any jobs")(
-            "ECF_CHECKMODE",
-            po::value<std::string>(&theCheckMode),
-            "The check mode, must be one of CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS")(
-            "ECF_JOB_CMD",
-            po::value<std::string>(&ecf_cmd_)->default_value(Ecf::JOB_CMD()),
-            "Command to be executed to submit a job.")(
-            "ECF_KILL_CMD",
-            po::value<std::string>(&killCmd_)->default_value(Ecf::KILL_CMD()),
-            "Command to be executed to kill a job.")(
-            "ECF_STATUS_CMD",
-            po::value<std::string>(&statusCmd_)->default_value(Ecf::STATUS_CMD()),
-            "Command to be obtain the job status from server.")(
-            "ECF_CHECK_CMD",
-            po::value<std::string>(&checkCmd_)->default_value(Ecf::CHECK_CMD()),
-            "Command to be obtain the job status from client.")(
-            "ECF_URL_CMD",
-            po::value<std::string>(&urlCmd_)->default_value(Ecf::URL_CMD()),
-            "Command to be obtain url.")(
-            "ECF_URL_BASE", po::value<std::string>(&urlBase_)->default_value(Ecf::URL_BASE()), "Defines url base.")(
-            "ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")(
-            "ECF_MICRODEF",
-            po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()),
-            "Preprocessor character for variable substitution and including files")(
-            "ECF_LISTS",
-            po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()),
-            "Path name to file the list valid users and their access rights")(
-            "ECF_PASSWD",
-            po::value<std::string>(&ecf_passwd_file_)->default_value(ecf::environment::ECF_PASSWD),
-            "Path name to passwd file")(
-            "ECF_CUSTOM_PASSWD",
-            po::value<std::string>(&ecf_passwd_custom_file_)->default_value(ecf::environment::ECF_CUSTOM_PASSWD),
-            "Path name to custom passwd file, for user who don't use login name")(
-            "ECF_TASK_THRESHOLD",
-            po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),
-            "The defaults thresholds when profiling job generation")(
-            "ECF_PRUNE_NODE_LOG",
-            po::value<int>(&ecf_prune_node_log_)->default_value(30),
-            "Node log, older than 180 days automatically pruned when checkpoint file loaded");
+        // clang-format off
+        config_file_options.add_options()
+            ("ECF_HOME", po::value<std::string>(&ecfHome_)->default_value("."), "ECF_HOME, the home for all ECF files")
+            ("ECF_PORT", po::value<int>(&serverPort_)->default_value(3141), "The port number. Clients must use same port.")
+            ("ECF_CHECK", po::value<std::string>(&ecf_checkpt_file_)->default_value(Ecf::CHECKPT()), "Check point file name")
+            ("ECF_CHECKOLD", po::value<std::string>(&ecf_backup_checkpt_file_)->default_value(Ecf::BACKUP_CHECKPT()), "Backup checkpoint file name")
+            ("ECF_LOG", po::value<std::string>(&log_file_name)->default_value(Ecf::LOG_FILE()), "Log file name")
+            ("ECF_CHECKINTERVAL", po::value<int>(&checkPtInterval_)->default_value(CheckPt::default_interval()), "The interval in seconds to save check point file")
+            ("ECF_INTERVAL", po::value<int>(&submitJobsInterval_)->default_value(defaultSubmitJobsInterval), "Check time dependencies and submit any jobs")
+            ("ECF_CHECKMODE", po::value<std::string>(&theCheckMode), "The check mode, must be one of CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS")
+            ("ECF_JOB_CMD", po::value<std::string>(&ecf_cmd_)->default_value(Ecf::JOB_CMD()), "Command to be executed to submit a job.")
+            ("ECF_KILL_CMD", po::value<std::string>(&killCmd_)->default_value(Ecf::KILL_CMD()), "Command to be executed to kill a job.")
+            ("ECF_STATUS_CMD", po::value<std::string>(&statusCmd_)->default_value(Ecf::STATUS_CMD()), "Command to be obtain the job status from server.")
+            ("ECF_CHECK_CMD", po::value<std::string>(&checkCmd_)->default_value(Ecf::CHECK_CMD()), "Command to be obtain the job status from client.")
+            ("ECF_URL_CMD", po::value<std::string>(&urlCmd_)->default_value(Ecf::URL_CMD()), "Command to be obtain url.")
+            ("ECF_URL_BASE", po::value<std::string>(&urlBase_)->default_value(Ecf::URL_BASE()), "Defines url base.")
+            ("ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
+            ("ECF_MICRODEF", po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
+            ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
+            ("ECF_PASSWD", po::value<std::string>(&ecf_passwd_file_)->default_value(ecf::environment::ECF_PASSWD), "Path name to passwd file")
+            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&ecf_passwd_custom_file_)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
+            ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
+            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
+        // clang-format on
 
         ifstream ifs(path_to_config_file.c_str());
         if (!ifs) {
