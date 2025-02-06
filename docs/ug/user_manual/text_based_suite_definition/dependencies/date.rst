@@ -20,6 +20,8 @@ expressed with a wildcard \* to mean any valid value. For example,
     **Extreme care** is advised when creating completion :term:`triggers <trigger>` on nodes/suites
     containing :term:`date` attributes.
 
+Consider combining the date attribute together with event and complete attributes to avoid the suite never completing
+-- see more about this usage pattern :ref:`here <cookbook-acquisition_task_pattern>`.
 
 Currently, a range of values cannot be used to specify any of the three numeric fields in a date.
 See :ref:`text_based_def_day` for a way to specify the first seven days.
