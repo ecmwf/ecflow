@@ -8,68 +8,58 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_Permissions_HPP
-#define ecflow_base_Permissions_HPP
+#ifndef ecflow_server_AuthorisationService_HPP
+#define ecflow_server_AuthorisationService_HPP
 
-#include <memory>
-#include <regex>
-#include <string>
-
-#include "ecflow/base/Identity.hpp"
 #include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"
-
-class ClientToServerCmd;
 
 namespace ecf {
 
-class Permissions {
-    struct Impl;
-
+class AuthorisationService {
+public:
     static constexpr auto ROOT = "/";
 
-public:
-    using result_t = Result<Permissions>;
+    using result_t = Result<AuthorisationService>;
+    using path_t   = std::string;
+    using paths_t  = std::vector<std::string>;
 
-    using path_t  = std::string;
-    using paths_t = std::vector<std::string>;
+    AuthorisationService();
 
-    Permissions();
+    AuthorisationService(const AuthorisationService& rhs) = delete;
+    AuthorisationService(AuthorisationService&& rhs) noexcept;
 
-private:
-    Permissions(std::unique_ptr<Impl>&& impl);
+    AuthorisationService& operator=(const AuthorisationService& rhs) = delete;
+    AuthorisationService& operator=(AuthorisationService&& rhs) noexcept;
 
-public:
-    Permissions(const Permissions& rhs) = delete;
-    Permissions(Permissions&& rhs) noexcept;
-
-    Permissions& operator=(const Permissions& rhs) = delete;
-    Permissions& operator=(Permissions&& rhs) noexcept;
-
-    ~Permissions();
+    ~AuthorisationService();
 
     [[nodiscard]] bool good() const;
 
-    [[nodiscard]] bool authenticate(const Identity& identity) const {return true;};
+    [[nodiscard]] bool authenticate(const Identity& identity) const { return true; }
 
     /**
      * Verify if the identity is allowed to perform the action on the give paths.
      *
      * @param identity the identity performing the action
-     * @param path(s) the set of path(s) affected by the action
+     * @param paths the set of path(s) affected by the action
      * @param permission the required permission to perform the action
      * @return true if the identity is allowed to perform the action, false otherwise
      */
     [[nodiscard]] bool allows(const Identity& identity, const std::string& permission) const;
     [[nodiscard]] bool allows(const Identity& identity, const path_t& path, const std::string& permission) const;
-    [[nodiscard]] bool allows(const Identity& identity, const paths_t& paths, const std::string& permission) const;
+    [[nodiscard]] bool allows(const Identity& identity, const paths_t& paths, const path_t& permission) const;
 
     [[nodiscard]] static result_t load_permissions_from_file(const fs::path& cfg);
 
 private:
+    struct Impl;
     std::unique_ptr<Impl> impl_;
+
+    AuthorisationService(std::unique_ptr<Impl>&& impl);
 };
 
 } // namespace ecf
 
-#endif // ecflow_base_Perms_HPP
+#endif /* ecflow_server_AuthorisationService_HPP */
