@@ -100,15 +100,13 @@ using namespace boost::posix_time;
 namespace ecf {
 
 void cfg(const ClientEnvironment& env, HttpClient& client) {
-    std::string realm    = "realm";
-    std::string username = env.get_user_name();
-    std::string roles    = "admin;user";
-    std::string secret   = "jasdhfakshh";
 
-    client.set_x_realm(realm);
-    client.set_x_username(username);
-    client.set_x_roles(roles);
-    client.set_x_secret(secret);
+    // TODO: set the username and password based on configuration/environment information
+    std::string username = "user";
+    std::string password = "somesecret";
+
+    // client.set_authorization_basic("user", "somesecret");
+    client.set_autorization_bearer("abcdef01234567890123456789012345");
 }
 
 } // namespace ecf
