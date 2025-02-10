@@ -12,17 +12,15 @@
 #define ecflow_base_AbstractServer_HPP
 
 #include <atomic>
-#include <memory>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "ecflow/base/Permissions.hpp"
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/ZombieCtrl.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/SState.hpp"
-#include "ecflow/core/Str.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
+#include "ecflow/server/AuthorisationService.hpp"
 
 class Defs;
 
@@ -135,7 +133,8 @@ public:
     virtual ecf::AuthenticationService& authentication()             = 0;
     virtual const ecf::AuthenticationService& authentication() const = 0;
 
-    virtual const ecf::Permissions& permissions() const = 0;
+    virtual ecf::AuthorisationService& authorisation()             = 0;
+    virtual const ecf::AuthorisationService& authorisation() const = 0;
 
     /// Shutdown the server and let 'user' have exclusive lock on it.
     /// If the lock succeeds return true, (This will end up calling the shutdown()

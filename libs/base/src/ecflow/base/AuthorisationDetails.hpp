@@ -111,7 +111,7 @@ authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractS
     }
 
     const std::string permission = command.isWrite() ? "write" : "read";
-    if (base->permissions().allows(command.identity(), paths, permission)) {
+    if (base->authorisation().allows(command.identity(), paths, permission)) {
         return authorisation_t::success("Authorisation (user) granted");
     }
 
